@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="diagnostic-correction-schema">
+  <meta name="plan-title" content="Diagnostic Correction Schema — versioned, pulse-scoped channel corrections">
+  <meta name="plan-summary" content="A LinkML-authored schema describing every diagnostic correction the calibration programme produces — gains, offsets, drift rates, acquisition scale steps, pair states, exclusions — each scoped to a validity interval in pulse number or time, each carrying provenance and evidence. Instances are versioned YAML per machine; generated models validate them; the read path applies them in one fixed order. The measured MAST reality (19 stepping channels, obr05 flipping between gain states, obv03 stepping mid-life) is the design driver: corrections are functions of pulse range, never single constants.">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="M">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="general">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint" content="S6">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>Diagnostic Correction Schema | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <h2 id="s1">§1 — Why corrections need a schema, not constants</h2>
+  <p>The programme's own measurements broke the single-constant model three times over. The
+  MAST store carries 19 channels whose acquisition scale steps by exactly 1/2, 1/√2, √2 or 2
+  across shot blocks; obr05 flips between gain states 1.25 and 0.50 shot-to-shot; obv03 steps
+  from 1.01 to 0.586 mid-life; obr17 holds 0.50 for the machine's entire life. A correction is
+  therefore a <em>function of pulse range</em> (occasionally of time), with a kind, a value,
+  a validity interval, and evidence — and the current representation (in-code dictionaries
+  such as <code>PROMOTED_CHANNEL_SCALES</code>, a JSON block table, and prose in research
+  records) can express none of that uniformly, version none of it, and validate none of it.</p>
+  <p>One schema covers every correction class the ladder produces or will produce:</p>
+  <table>
+    <thead><tr><th>correction kind</th><th>value shape</th><th>measured example</th></tr></thead>
+    <tbody>
+      <tr><td><code>gain</code></td><td>scalar multiplier</td><td>obr17 = 0.5011, lifetime</td></tr>
+      <tr><td><code>acquisition_scale</code></td><td>scalar per shot block, ladder-quantised</td>
+      <td>the 19 stepping channels, 113 blocks</td></tr>
+      <tr><td><code>pair_state</code></td><td>enumerated gain state (both / single ×0.5 /
+      recovered ×1.5) per interval</td><td>obv03 steps 1.01 → 0.586; obr05 flips</td></tr>
+      <tr><td><code>offset</code></td><td>scalar (per pulse, from the quiet window)</td>
+      <td>pre-excitation baseline every fit already subtracts</td></tr>
+      <tr><td><code>drift_rate</code></td><td>slope, optionally curvature (integrator drift)</td>
+      <td>median |drift| 1e-5 to 1e-4 T/s from the noise cohort</td></tr>
+      <tr><td><code>exclusion</code></td><td>flag with cause</td><td>obv10 dead; obv11 withheld
+      (unstable on two independent routes)</td></tr>
+      <tr><td><code>convention</code></td><td>global factor with basis note</td>
+      <td>flux-loop 2π store/solver convention, measured</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="s2">§2 — Schema design</h2>
+  <ol>
+    <li><strong>Authoring language.</strong> LinkML is the recommended choice (decision below):
+    the schema is itself YAML, generates Pydantic models and JSON-Schema for free, carries
+    first-class enums, slot constraints and schema versioning, and matches the tooling already
+    used across the IMAS standard-names ecosystem. The fallback is hand-written Pydantic with
+    YAML instances — less machinery, no generated artefacts for other consumers.</li>
+    <li><strong>Core classes.</strong> <code>CorrectionSet</code> (machine, diagnostic system,
+    schema version, set version, generated-by) → <code>ChannelCorrection</code> (channel id,
+    kind, value, uncertainty) → <code>ValidityInterval</code> (pulse_start/pulse_end or
+    time_start/time_end; open-ended allowed; intervals within one channel+kind must not
+    overlap) → <code>Provenance</code> (method, evidence URI — research record or banked
+    array, fitted_at, fitted_by, corroborations). Ladder-quantised kinds carry their allowed
+    rungs so validation can reject a free-floating block scale.</li>
+    <li><strong>Application semantics are part of the schema.</strong> One documented, tested
+    order on the read path: offset → drift → acquisition scale → pair state → gain, with
+    convention factors applied at unit boundaries. A correction a consumer cannot order is a
+    correction that will be applied twice or not at all.</li>
+    <li><strong>Storage and versioning.</strong> Instances live in-repo under
+    <code>nova/calibrate/corrections/&lt;machine&gt;/</code>, one file per diagnostic system,
+    versioned by git plus an explicit monotonic set version; the artifact/registry pipeline
+    can later ship them alongside the machine description (the registry's semantic-identity
+    lesson applies — the set version is semantic, never a content hash alone).</li>
+    <li><strong>First instance: MAST.</strong> Encode everything already measured — the five
+    promoted scales, the withheld channel, the 113-block acquisition table, obr17's lifetime
+    gain with its three corroborations, the pair-failure channels with their measured
+    intervals, the flux-loop convention — and make the nova read path consume it end-to-end
+    (equivalence test against current behaviour, then delete the in-code constants).</li>
+  </ol>
+  <p>Done-when: schema authored and validated; models generated; the MAST instance file
+  round-trips through validation and reproduces current read-path behaviour to float equality
+  on the vacuum-floor bench; in-code correction constants deleted; schema documented for the
+  next machine.</p>
+
+  <section data-reckon="decisions" id="decisions" class="r-decisions">
+    <h2><span class="sec">§</span> Decisions</h2>
+    <div class="r-dec" data-key="schema-language" data-choice="" data-by="" data-when="">
+      <p class="r-dec-q">Schema authoring language?</p>
+      <p class="r-dec-opts">
+        <button class="r-opt" data-value="linkml">LinkML (recommended — generated models, JSON-Schema export, ecosystem fit)</button>
+        <button class="r-opt" data-value="pydantic-yaml">hand-written Pydantic + YAML instances</button>
+      </p>
+      <p class="r-dec-rat"></p>
+    </div>
+  </section>
+
+  <section data-reckon="followups" id="followups" class="r-followups">
+    <h2><span class="sec">§</span> Followups</h2>
+    <article class="r-fu" data-id="f-dcs-001" data-status="open"
+             data-capability-version="1.0" data-capability-class="general"
+             data-written-by="reckon-create" data-written-at="2026-08-07">
+      <h4 class="r-fu-title">Author the schema and the MAST instance; wire read-path consumption behind an equivalence test</h4>
+      <div class="r-fu-body"><p>Schema first, MAST instance second, consumption third — the
+      equivalence test against current behaviour gates the constant deletion.</p></div>
+      <pre class="r-fu-prompt">Project: nova
+Plan:    diagnostic-correction-schema (http://localhost:8765/nova/plans/diagnostic-correction-schema.html)
+Section: §2
+Capability: general
+Requirements: deep reasoning, strict verification
+
+Context
+  Diagnostic corrections are pulse-range-scoped functions, not constants
+  (19 stepping channels, obr05 flipping gain states, obv03 stepping
+  mid-life). One versioned schema must carry every correction kind with
+  validity intervals and provenance, and the read path must consume it.
+
+State to read
+  docs/plans/diagnostic-correction-schema.html (§1 kinds table, §2 design)
+  nova/imas/mast_fitted_parameters.py (PROMOTED_CHANNEL_SCALES and friends)
+  nova/imas/mast_block_scale.py + mast_block_scale.json (113 blocks)
+  docs/research/mast-misfit-source-localization.html (pair-failure class)
+
+Scope locks / constraints
+  Honour the schema-language decision if locked; otherwise implement the
+  recommended LinkML route. Non-overlapping validity intervals per
+  channel+kind enforced at validation. Read-path application order fixed
+  and tested: offset, drift, acquisition scale, pair state, gain.
+  Equivalence to current behaviour on the vacuum-floor bench (float
+  equality) BEFORE deleting any in-code constant.
+
+Done-when
+  1. Schema + generated models committed; MAST instance validates
+  2. Read path consumes the instance; equivalence test green; constants gone
+  3. Followup written into plan + this one resolved</pre>
+    </article>
+  </section>
+
+</main>
+</body>
+</html>

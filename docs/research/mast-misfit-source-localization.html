@@ -11,7 +11,7 @@
   <meta name="plan-status" content="reference">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-recorded-at" content="2026-08-07">
-  <meta name="plan-informs" content="mast-flux-loop-calibration,mast-misfit-toroidal-harmonics,mast-p4p5-circuit-provenance">
+  <meta name="plan-informs" content="mast-flux-loop-calibration,mast-misfit-toroidal-harmonics,mast-p4p5-circuit-provenance,nova-calibrate-package,diagnostic-correction-schema,vacuum-signature-extraction,coil-geometry-inversion">
   <title>MAST misfit source localization | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -379,6 +379,26 @@
     6.5×10⁻⁶ over 336 family-shot pairs, closing the "no source states what the difference is"
     block at <code>mast_solve_inputs.py:815-825</code>).</li>
   </ol>
+  <p>The programme was subsequently widened (2026-08-07, same sprint) from MAST-specific
+  source-closure to durable, machine-agnostic calibration infrastructure, on the observation
+  that everything above is portable physics: <strong><code>nova-calibrate-package</code></strong>
+  promotes the coupling/gain/inversion/localization machinery to a unit-tested
+  <code>nova/calibrate</code> package; <strong><code>diagnostic-correction-schema</code></strong>
+  gives every fitted correction a versioned, pulse-range-scoped representation (the measured
+  reality — 19 stepping channels, obr05 flipping gain states, obv03 stepping mid-life — makes
+  corrections functions of pulse range, never constants);
+  <strong><code>vacuum-signature-extraction</code></strong> harvests the vacuum windows every
+  pulse carries (pre-drive, vacuum-driven, post-pulse) for offsets, integrator drift and
+  closure, turning the whole 17,111-shot archive into a calibration instrument — Edlington
+  (2001, now retrieved to the untracked local path
+  <code>research/edlington-2001-mast-magnetic-diagnostics.pdf</code>)
+  records both the analogue integrators that make drift physical and MAST's own vacuum-shot
+  calibration practice; and <strong><code>coil-geometry-inversion</code></strong> solves coil
+  positions and shapes from vacuum measurements by autodiff — verified 2026-08-07: the traced
+  polygon Green's kernel returns exact geometry Jacobians (values to 8×10⁻¹², jacfwd against
+  finite differences at the FD floor, second derivatives finite, jacrev consistent;
+  <code>autograd_check.py</code> in the evidence cache), so the Kirk copper-in-case question
+  is answerable as a gradient optimisation.</p>
 
   <h2>Related records</h2>
   <ul>

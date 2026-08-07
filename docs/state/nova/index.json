@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-07T11:29:23",
+  "updated": "2026-08-07T17:21:42",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -179,12 +179,12 @@
       {
         "id": "S6",
         "status": "planned",
-        "theme": "Close the P4/P5 misfit source",
+        "theme": "Close the P4/P5 misfit source and promote the calibration machinery",
         "items": [
           {
             "slug": "mast-flux-loop-calibration",
-            "why_now": "The probe array's rank-10 cliff binds everything downstream; 26 loop channels in genuine webers are fittable against the exact vacuum flux and the fitting machinery already exists but discards its result.",
-            "done_when": "Per-loop gains promoted or excluded with cause; P4 loop positions reconciled; inversion re-run with loops and the identifiability delta reported; gate decision packet (obr17 + loops) delivered.",
+            "why_now": "Rank: 26 loop channels in genuine Wb are fittable against the exact vacuum flux; the fit exists but discards its result.",
+            "done_when": "Per-loop gains promoted or excluded with cause; P4 loop positions reconciled; inversion identifiability delta reported; gate decision packet delivered.",
             "capability": {
               "version": "1.0",
               "class": "general",
@@ -195,8 +195,8 @@
           },
           {
             "slug": "mast-misfit-toroidal-harmonics",
-            "why_now": "Single-filament maps explain only 43-60% of the surviving misfit and disagree on location between drive groups; a source-free harmonic representation with loop constraints is the honest contour map and the sharper localizer.",
-            "done_when": "Synthetic recovery validated; per-group misfit flux maps with confidence bands published; source fits ranked with implied currents; non-axisymmetric residue quantified.",
+            "why_now": "Filament maps explain 43-60% and disagree on location; the source-free harmonic map is the honest contour map and sharper localizer.",
+            "done_when": "Synthetic recovery validated; per-group misfit flux maps with confidence bands; source fits ranked; non-axisymmetric residue quantified.",
             "capability": {
               "version": "1.0",
               "class": "general",
@@ -208,8 +208,8 @@
           },
           {
             "slug": "mast-p4p5-circuit-provenance",
-            "why_now": "The description's own P4/P5 member asymmetry (17.3 mm, 3% footprint) is unexplained at exactly the coil the misfit localises to; the symmetry-elimination forward test is the cheapest decisive measurement in the programme.",
-            "done_when": "Symmetry test verdict with explained fractions; P4 geometry and loop provenance adjudicated with sources; supply/feeder findings recorded and candidates tested; pack-total channels unblocked with validation green.",
+            "why_now": "The description's own 17.3 mm / 3% P4 asymmetry is unexplained at the coil the misfit localises to; the symmetry test is the cheapest decisive measurement.",
+            "done_when": "Symmetry-test verdict with explained fractions; P4 geometry and loop provenance adjudicated; pack-total channels unblocked with validation green.",
             "capability": {
               "version": "1.0",
               "class": "general",
@@ -217,9 +217,59 @@
                 "verification": "strict"
               }
             }
+          },
+          {
+            "slug": "diagnostic-correction-schema",
+            "why_now": "Corrections are pulse-range functions (19 stepping channels; obr05 flips; obv03 steps mid-life) - constants cannot represent them.",
+            "done_when": "Schema + generated models landed; MAST instance reproduces read-path behaviour to float equality; in-code constants deleted.",
+            "capability": {
+              "version": "1.0",
+              "class": "general",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "nova-calibrate-package",
+            "why_now": "The calibration ladder is portable physics living as cache scripts and mast_-prefixed modules; the next machine should cost an adapter, not a re-derivation.",
+            "done_when": "nova/calibrate landed with synthetic-truth unit tests green; banked results reproduce through the package; constants served from schema documents.",
+            "capability": {
+              "version": "1.0",
+              "class": "general",
+              "requirements": {
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "vacuum-signature-extraction",
+            "why_now": "Every pulse carries vacuum windows; offsets, integrator drift and closure are extractable archive-wide, turning 17111 shots into a calibration instrument.",
+            "done_when": "Window classifier + instrument-term extraction tested; MAST sweep banked with drift series and transition catalogue; portability demonstrated on a non-MAST source.",
+            "capability": {
+              "version": "1.0",
+              "class": "general",
+              "requirements": {
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "coil-geometry-inversion",
+            "why_now": "Geometry Jacobians are verified exact through the traced kernel (jacfwd vs FD at the FD floor); the Kirk copper-in-case question is now a gradient optimisation.",
+            "done_when": "Kernel family refactored with autograd regressions; identifiability spectrum published; synthetic recovery ladder banked; MAST P4/P5 solve on both problem classes with verdict recorded.",
+            "capability": {
+              "version": "1.0",
+              "class": "general",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
           }
         ],
-        "description": "Follow-on from the misfit separation and source-localization records: recover the flux loops (per-loop gains; the 2-pi convention is already measured), build toroidal-harmonic contour maps of the surviving misfit with source localization, and resolve the P4/P5 provenance candidates - the description's own 17.3 mm / 3% member asymmetry first, then loop positions, supply/feeder topology, and the pack-total channel unblock."
+        "description": "Two arms. Source closure: recover the flux loops (per-loop gains; the 2-pi convention is measured), build toroidal-harmonic contour maps of the surviving misfit, and resolve the P4/P5 provenance candidates (the description's own 17.3 mm / 3% member asymmetry first). Infrastructure: promote the diagnostic-calibration ladder to a unit-tested machine-agnostic nova/calibrate package, give every correction a versioned pulse-range-scoped schema (LinkML candidate), harvest the vacuum windows every pulse carries (offsets, integrator drift, closure) across the whole archive, and solve coil positions and shapes from vacuum measurements by autodiff through the traced Green's kernels (geometry Jacobians verified exact 2026-08-07)."
       }
     ],
     "active_sprint_id": null,
@@ -268,6 +318,11 @@
         "when": "2026-08-07",
         "who": "reckon-sprint",
         "what": "S6 'Close the P4/P5 misfit source' proposed: flux-loop calibration, toroidal-harmonic misfit maps, P4/P5 provenance. Grounded in the new source-localization record (first misfit maps; differential-circuit hypothesis excluded as recorded superposition; description asymmetry and disjoint P4 loop sets surfaced by the data survey)."
+      },
+      {
+        "when": "2026-08-07",
+        "who": "reckon-sprint",
+        "what": "S6 widened with four infrastructure plans: diagnostic-correction-schema, nova-calibrate-package, vacuum-signature-extraction, coil-geometry-inversion. Grounding: Edlington 2001 retrieved in-repo (analogue integrators; 180-degree pair summing before integration; cans galvanically tied to vessel via supports and feeder-bar bellows); traced polygon Green's kernel verified autograd-able w.r.t. coil geometry (values 8e-12, jacfwd at the FD floor, jacrev consistent 1e-12)."
       }
     ],
     "blockers": [
@@ -300,6 +355,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 12
+    "_version": 14
   }
 }

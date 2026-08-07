@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="coil-geometry-inversion">
+  <meta name="plan-title" content="Coil Geometry Inversion — solve coil positions and shapes from vacuum measurements by autodiff">
+  <meta name="plan-summary" content="The traced polygon Green's kernel is verified autograd-able with respect to coil geometry (jacfwd against finite differences to 1e-6; values to 8e-12; second derivatives finite; jacrev consistent to 1e-12), so coil positions and shapes are solvable from vacuum measurements by gradient optimisation. Two problem classes: sensor-space (recorded currents fixed, optimise per-coil geometry against vacuum magnetics — the MAST case, seeded with Kirk's measured as-built offsets) and flux-map-space (currents fixed, match a plasma-subtracted flux map). First stage: audit and refactor the remaining kernel classes (ring filament, arc, line, closed-form polygon) to the traced dual-namespace pattern with a traceable section pack.">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="L">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="general">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint" content="S6">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>Coil Geometry Inversion | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <h2 id="s1">§1 — The substrate is verified; the problem is now an optimisation</h2>
+  <p>Kirk (arXiv:1312.6507) names coil positioning as MAST's dominant intrinsic error-field
+  source and records that the copper inside the P4/P5 cases was never surveyed. The misfit
+  programme localised a surviving vacuum residual beside the P4 coils. Between those two facts
+  sits an inverse problem: <em>solve for the coil geometry the vacuum measurements actually
+  imply</em>.</p>
+  <p>The substrate check ran on 2026-08-07
+  (<code>~/.cache/nova-mast/misfit-localization/autograd_check.py</code>). The biot operators
+  were written JAX-compliant for accelerator throughput, and that same property now delivers
+  derivatives: the traced polygon quadrature kernel
+  (<code>tiledassembly._traced_psi_gradient</code>, statically unrolled, branch-free)
+  reproduces the reference numpy kernel to 8×10⁻¹² and returns
+  <strong>exact geometry Jacobians</strong> — <code>jax.jacfwd</code> of (ψ, B_R, B_Z) with
+  respect to rigid section shifts and individual polygon vertices agrees with central finite
+  differences at the FD truncation floor (~10⁻⁶), second derivatives are finite
+  (Gauss–Newton and Newton both available), and <code>jacrev</code> agrees with
+  <code>jacfwd</code> to 10⁻¹². Two conditions attach, and they are §2.1's work: the
+  vertices → (edge, weight, norm) pack must run inside the trace (the numpy
+  <code>pack_section</code> needs a traceable twin — a 15-line transcription matched to
+  machine precision once the orientation convention was honoured: the counter-clockwise edge
+  sum yields −f(φ), so the kernel's sign is <em>minus</em> the shoelace sign), and only the
+  polygon quadrature path is verified — the other kernel classes need the same treatment.
+  For the record: the ambix <code>gs/polygon.py</code> kernel is an independent numpy
+  implementation using complex-step derivatives (exact, but target-side only and not
+  traceable); nova's dual-namespace stack is the substrate here.</p>
+
+  <h2 id="s2">§2 — Implementation</h2>
+  <ol>
+    <li><strong>Kernel differentiability audit and refactor.</strong> Inventory every biot
+    kernel class — polygon quadrature (verified), closed-form polygon
+    (<code>polygonanalytic.packed_analytic_greens</code>), ring filament
+    (<code>greens.py</code>), arc filament (<code>arcbandedcoupling</code>), line elements —
+    and bring each to the traced dual-namespace pattern with geometry as trace inputs:
+    <code>xp</code> namespace, static shapes, no value branching, plus a traceable
+    <code>pack_section</code> twin (fixed topology; the horizontal-edge zero-weight mask
+    computed as a static mask outside the trace). Each kernel gains an autograd regression
+    test in the style of the banked check: value parity with the numpy reference, jacfwd
+    against central differences, jacrev-jacfwd consistency. This stage is useful far beyond
+    this plan — it makes every nova coupling operator differentiable end-to-end.</li>
+    <li><strong>Geometry parametrisation.</strong> Per-coil parameter blocks at increasing
+    freedom: rigid (ΔR, ΔZ), scale, tilt/shear, per-vertex freedom for the pack outline, and
+    the discrete chamfer-side state for the 23-turn lattice (branch comparison, not a
+    continuous parameter). Priors and bounds from metrology where it exists (Kirk Table 1
+    offsets; the description's own 17.3 mm / 3% P4 asymmetry as a hypothesis, not a
+    constraint).</li>
+    <li><strong>Problem class A — sensor-space (the MAST case).</strong> Recorded currents
+    fixed; minimise the weighted misfit between measured vacuum couplings and modelled
+    couplings over geometry parameters, per coil and jointly. The banked signed couplings
+    (<code>couplings.npz</code>, 41 rows) are the immediate targets; calibrated flux loops
+    join when <code>mast-flux-loop-calibration</code> lands. Identifiability first: the
+    geometry-Jacobian singular spectrum at the real sensor set decides how many geometry
+    modes the array resolves (the current-space answer was rank 10 of 13 — the geometry-space
+    answer bounds what any fit may claim), and regularisation follows from it.</li>
+    <li><strong>Problem class B — flux-map-space.</strong> Given fixed coil currents and a
+    target flux map with the plasma contribution subtracted (an equilibrium-reconstruction
+    by-product, or the toroidal-harmonic misfit maps), solve the coil set's geometry to match
+    the map on its grid. Same machinery, different data functional — this is the form any
+    machine with a trusted reconstruction can consume without raw sensor access.</li>
+    <li><strong>Validation ladder, then MAST.</strong> Synthetic recovery throughout: perturb
+    a known geometry, generate exact data (with realistic noise from the measured floors),
+    recover, report bias and resolution limits per parameter class. Then the MAST
+    application: P4/P5 members first (seeded from Kirk's offsets), scored against the
+    surviving-misfit patterns, cross-checked against the provenance plan's linear symmetry
+    scan (which this generalises), with the verdict — geometry correction found and
+    quantified, or bounded as unresolvable at this array — recorded in a research note and,
+    if found, delivered as a machine-description correction through the established
+    registry route.</li>
+  </ol>
+  <p>Done-when: kernel family audited and refactored with autograd regression tests green;
+  identifiability spectrum for MAST geometry modes published; synthetic recovery ladder
+  banked; MAST P4/P5 solve completed on both problem classes with confidence bounds; verdict
+  recorded and any geometry correction handed to the registry.</p>
+
+  <section data-reckon="decisions" id="decisions" class="r-decisions">
+    <h2><span class="sec">§</span> Decisions</h2>
+    <div class="r-dec" data-key="optimiser" data-choice="" data-by="" data-when="">
+      <p class="r-dec-q">Optimiser for the geometry solve?</p>
+      <p class="r-dec-opts">
+        <button class="r-opt" data-value="gauss-newton">Gauss–Newton / Levenberg–Marquardt on jacfwd (recommended — small parameter count, exact Jacobians)</button>
+        <button class="r-opt" data-value="lbfgs">L-BFGS on jacrev gradients</button>
+      </p>
+      <p class="r-dec-rat"></p>
+    </div>
+  </section>
+
+  <section data-reckon="followups" id="followups" class="r-followups">
+    <h2><span class="sec">§</span> Followups</h2>
+    <article class="r-fu" data-id="f-cgi-001" data-status="open"
+             data-capability-version="1.0" data-capability-class="general"
+             data-written-by="reckon-create" data-written-at="2026-08-07">
+      <h4 class="r-fu-title">Kernel differentiability audit: refactor ring/arc/line/closed-form kernels to the traced pattern with autograd regression tests</h4>
+      <div class="r-fu-body"><p>§2.1 in full: the polygon quadrature path is verified; bring
+      the remaining kernel classes to the same standard and pin each with the three-part
+      autograd regression (value parity, jacfwd-vs-FD, jacrev-vs-jacfwd).</p></div>
+      <pre class="r-fu-prompt">Project: nova
+Plan:    coil-geometry-inversion (http://localhost:8765/nova/plans/coil-geometry-inversion.html)
+Section: §2.1
+Capability: general
+Requirements: deep reasoning, strict verification
+
+Context
+  The traced polygon quadrature kernel is verified autograd-able w.r.t.
+  geometry (banked check: values 8e-12, jacfwd vs FD ~1e-6, jacrev
+  consistent). The remaining kernel classes (ring filament greens.py, arc
+  arcbandedcoupling, line elements, closed-form polygonanalytic) need the
+  same dual-namespace traced treatment plus a traceable pack_section twin.
+
+State to read
+  ~/.cache/nova-mast/misfit-localization/autograd_check.py + .log (the
+  verification pattern to replicate per kernel)
+  nova/biot/tiledassembly.py (_traced_psi_gradient — the reference style)
+  nova/biot/polygon.py (pack_section; orientation sign: CCW edge sum
+  yields -f(phi), kernel sign is MINUS the shoelace sign)
+  nova/biot/greens.py, nova/biot/arcbandedcoupling.py,
+  nova/biot/polygonanalytic.py, nova/biot/completeelliptic.py (xp pattern)
+
+Scope locks / constraints
+  Geometry enters as trace inputs, never baked constants. Static shapes,
+  no value branching inside traces; locally-constant masks computed
+  outside. Every refactored kernel keeps its numpy path and value parity
+  with it (regression-pinned). JAX_PLATFORMS=cpu on login nodes; heavy
+  sweeps on SLURM debug (time <= 01:00:00). Run the full VALIDATION lane
+  before commit if any existing kernel path changed.
+
+Done-when
+  1. Audit table (kernel class -> trace status -> action) recorded in plan
+  2. Refactors landed with three-part autograd regression tests green
+  3. Followup written into plan + this one resolved</pre>
+    </article>
+  </section>
+
+</main>
+</body>
+</html>

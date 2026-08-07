@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="nova-calibrate-package">
+  <meta name="plan-title" content="Nova Calibrate Package — promote the diagnostic-calibration machinery to tested, machine-agnostic functionality">
+  <meta name="plan-summary" content="The MAST misfit programme built a working calibration toolkit as cache scripts and mast_-prefixed modules: signed coupling regression, per-channel gain fits, free current inversion with identifiability, source-localization scans, differential tests, scale-step detection, and noise-floor measurement. Promote it to a unit-tested nova/calibrate package with machine-agnostic kernels and per-machine adapters, so the next machine gets the whole ladder for the cost of an adapter.">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="L">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="general">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint" content="S6">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-depends-on" content="diagnostic-correction-schema">
+  <title>Nova Calibrate Package | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <h2 id="s1">§1 — What exists, and why it must stop being scripts</h2>
+  <p>The vacuum-floor and misfit programmes produced a complete diagnostic-calibration ladder
+  that is demonstrably machine-portable physics — nothing in a through-origin gain fit, a
+  free current inversion, or a filament localization scan is MAST-specific — yet it lives as
+  one-shot scripts under <code>~/.cache/nova-mast/</code> and as <code>mast_</code>-prefixed
+  modules inside <code>nova.imas</code>. Every future machine (and every future MAST session)
+  re-derives the machinery or copies it. Edlington (2001) makes the case sharper: MAST's own
+  commissioning calibrated its Rogowski system from designed vacuum shots with a matrix solve —
+  the approach is standard practice; what is missing is a durable, tested implementation.</p>
+  <p>The migration inventory, by capability rather than by file:</p>
+  <table>
+    <thead><tr><th>capability</th><th>current home</th><th>target module</th></tr></thead>
+    <tbody>
+      <tr><td>Vacuum residual + signed coupling regression (joint drive fit, pair merging,
+      condition guard)</td>
+      <td><code>misfit-localization/misfit_couplings.py</code>, parts of
+      <code>mast_vacuum_cohort</code></td>
+      <td><code>nova/calibrate/coupling.py</code></td></tr>
+      <tr><td>Per-channel gain and offset fits (field and flux targets, through-origin,
+      pooled verdicts)</td>
+      <td><code>mast_probe_calibration.py</code>, <code>mast_flux_loop_adjudication.py</code></td>
+      <td><code>nova/calibrate/gain.py</code></td></tr>
+      <tr><td>Free current inversion, truncation ladder, identifiability spectrum</td>
+      <td><code>misfit-hunt/inversion.py</code></td>
+      <td><code>nova/calibrate/inversion.py</code></td></tr>
+      <tr><td>Source-localization scan (span projection, filament scoring)</td>
+      <td><code>misfit-localization/misfit_localize2.py</code></td>
+      <td><code>nova/calibrate/localize.py</code></td></tr>
+      <tr><td>Differential / partialled regressor tests (Frisch–Waugh)</td>
+      <td><code>misfit-localization/pair_differential_test.py</code></td>
+      <td><code>nova/calibrate/partial.py</code></td></tr>
+      <tr><td>Acquisition scale-step detection and block tables</td>
+      <td><code>mast_block_scale.py</code>, <code>mast_acquisition_scale.py</code></td>
+      <td><code>nova/calibrate/scale_step.py</code></td></tr>
+      <tr><td>Noise floor, drift ramp, quiet-window statistics</td>
+      <td><code>mast_sensor_noise.py</code></td>
+      <td><code>nova/calibrate/noise.py</code> (extended by
+      <code>vacuum-signature-extraction</code>)</td></tr>
+      <tr><td>Pair-failure detection (0.5/1.5 gain states, mid-life steps, shot-to-shot
+      flips)</td>
+      <td>nowhere — measured ad hoc in the 2026-08-07 survey</td>
+      <td><code>nova/calibrate/pair_state.py</code></td></tr>
+      <tr><td>Correction storage and read-path application</td>
+      <td><code>mast_fitted_parameters.py</code> constants,
+      scattered read-path division</td>
+      <td><code>nova/calibrate/corrections.py</code> (consumes
+      <code>diagnostic-correction-schema</code>)</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="s2">§2 — Architecture</h2>
+  <ol>
+    <li><strong>Machine-agnostic kernels.</strong> <code>nova/calibrate/</code> holds numerics
+    only: every function takes arrays and channel metadata (positions, axes, response columns),
+    never a store path or shot number. The existing signatures are already close — the
+    couplings recompute needed only probe poses, a response matrix and drive waveforms.</li>
+    <li><strong>Per-machine adapters stay in <code>nova.imas</code>.</strong> Store readers,
+    cohort selection, channel naming and drive maps remain machine code
+    (<code>mast_vacuum_cohort</code> and friends), now thinned to adapters that feed the
+    kernels. The MAST modules are the first adapter, not the pattern.</li>
+    <li><strong>Corrections flow through the schema.</strong> All fitted quantities — gains,
+    offsets, drift rates, scale steps, pair states, exclusions — are emitted and consumed as
+    <code>diagnostic-correction-schema</code> documents, replacing in-code constants like
+    <code>PROMOTED_CHANNEL_SCALES</code>. Read-path application order is fixed and tested:
+    offset, drift, scale step, gain.</li>
+    <li><strong>Naming discipline.</strong> Modules and functions named by mechanism
+    (<code>gain.through_origin_fit</code>, <code>inversion.identifiability</code>), never by
+    campaign, machine, or investigation.</li>
+  </ol>
+
+  <h2 id="s3">§3 — Test strategy</h2>
+  <ol>
+    <li><strong>Unit lane is synthetic and store-free.</strong> Every kernel is tested against
+    manufactured truth: a known filament field through the analytic loop formulas (already
+    validated against the polygon kernel), synthetic drive waveforms with injected gain errors,
+    scale steps at exact rungs (1/2, 1/√2, √2, 2), drift ramps, and pair-failure state
+    sequences. Recovery to stated tolerance is the assertion. <code>uv run pytest
+    tests/calibrate/</code> runs with no data mounts.</li>
+    <li><strong>Regression pins from the banked record.</strong> The MAST results this
+    machinery already produced become fixture-pinned regression tests on small extracted
+    arrays committed with the tests (couplings for a handful of channels, the obr17 gain, one
+    identifiability spectrum) — the numbers in the research records must keep reproducing.</li>
+    <li><strong>Store-backed integration tests are opt-in</strong> behind the existing
+    data-availability flags, mirroring the norma-corpus pattern; they never gate the default
+    suite.</li>
+  </ol>
+  <p>Done-when: <code>nova/calibrate/</code> exists with the nine modules above migrated or
+  implemented, <code>tests/calibrate/</code> mirrors it with synthetic-truth unit tests
+  passing in the default lane, the cache scripts' results reproduce through the package
+  (regression pins green), MAST adapters consume the kernels with no behaviour change to the
+  vacuum-floor gate, and the correction constants are served from schema documents.</p>
+
+  <section data-reckon="decisions" id="decisions" class="r-decisions">
+    <h2><span class="sec">§</span> Decisions</h2>
+    <div class="r-dec" data-key="adapter-boundary" data-choice="" data-by="" data-when="">
+      <p class="r-dec-q">Where exactly does the adapter boundary sit — kernels take response
+      matrices only (adapters build them), or kernels may also accept a geometry registry and
+      build their own responses?</p>
+      <p class="r-dec-opts">
+        <button class="r-opt" data-value="arrays-only">arrays-only kernels (adapters build responses)</button>
+        <button class="r-opt" data-value="registry-aware">registry-aware kernels</button>
+      </p>
+      <p class="r-dec-rat"></p>
+    </div>
+  </section>
+
+  <section data-reckon="followups" id="followups" class="r-followups">
+    <h2><span class="sec">§</span> Followups</h2>
+    <article class="r-fu" data-id="f-ncp-001" data-status="open"
+             data-capability-version="1.0" data-capability-class="general"
+             data-written-by="reckon-create" data-written-at="2026-08-07">
+      <h4 class="r-fu-title">Scaffold nova/calibrate and migrate the first two kernels with synthetic-truth tests</h4>
+      <div class="r-fu-body"><p>Package skeleton, then <code>coupling.py</code> and
+      <code>gain.py</code> migrated from the banked scripts with full unit coverage — the
+      pattern the remaining kernels follow.</p></div>
+      <pre class="r-fu-prompt">Project: nova
+Plan:    nova-calibrate-package (http://localhost:8765/nova/plans/nova-calibrate-package.html)
+Section: §1–§3 (first migration slice)
+Capability: general
+Requirements: strict verification
+
+Context
+  The MAST misfit programme's calibration machinery lives as cache scripts
+  and mast_-prefixed modules. Promote the first two capabilities (signed
+  coupling regression; per-channel gain/offset fits) into a new
+  nova/calibrate package with machine-agnostic signatures and
+  synthetic-truth unit tests.
+
+State to read
+  docs/plans/nova-calibrate-package.html §1 table (migration inventory)
+  ~/.cache/nova-mast/misfit-localization/misfit_couplings.py
+  nova/imas/mast_probe_calibration.py, nova/imas/mast_flux_loop_adjudication.py
+  nova/imas/mast_vacuum_cohort.py (adapter side, do not migrate store logic)
+
+Scope locks / constraints
+  Kernels take arrays + channel metadata only — no store paths, no shot
+  numbers. Tests are store-free synthetic truth (analytic filament fields,
+  injected gain errors, exact scale rungs). Name by mechanism, never by
+  machine or campaign. uv run pytest tests/calibrate/ green in the default
+  lane. Follow nova commit conventions (uv run git commit, staged paths).
+
+Done-when
+  1. nova/calibrate/{__init__,coupling,gain}.py landed with docstrings
+  2. tests/calibrate/ synthetic-truth suite green, no data mounts
+  3. Followup written into plan + this one resolved</pre>
+    </article>
+  </section>
+
+</main>
+</body>
+</html>

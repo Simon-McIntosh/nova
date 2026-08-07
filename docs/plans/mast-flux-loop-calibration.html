@@ -80,7 +80,12 @@
     will not stabilise across shots or blocks stay excluded, with cause recorded. Corroborate
     every promoted gain against the archive's independent forward prediction
     (<code>efm/silop_c</code>) — the route that confirmed obr17 at the probes — since no
-    upstream fit exists (the archive EFIT never weighted a loop).</li>
+    upstream fit exists (the archive EFIT never weighted a loop). Emit every promoted gain,
+    exclusion and the confirmed convention as <code>diagnostic-correction-schema</code>
+    records once the schema lands, and note that loop channels are integrated signals — the
+    per-pulse drift and integrator-closure terms from
+    <code>vacuum-signature-extraction</code> apply to loops with more force than to
+    anything else.</li>
     <li><strong>Inclusion and re-measurement.</strong> Admit calibrated loops to the free current
     inversion and recompute the identifiability spectrum — report the new rank and whether
     P2/P3/P6 wiring becomes answerable. Recompute the P4/P5 surviving-misfit patterns with loop

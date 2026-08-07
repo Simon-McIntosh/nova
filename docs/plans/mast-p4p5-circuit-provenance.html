@@ -72,7 +72,10 @@
     correction removes the survivor (fault found: description geometry) or the explained
     fraction caps well below one (the survivor needs current the coils do not carry). The
     difference field of a displaced member is not a filament, so this closes the gap the
-    single-filament scan left open.</li>
+    single-filament scan left open. This linear scan is also the seed case of
+    <code>coil-geometry-inversion</code>, which generalises it to a gradient solve over
+    continuous geometry freedom once the kernel autograd refactor lands — run the scan
+    first, hand its verdict and best variants to the inversion as starting points.</li>
     <li><strong>P4 winding provenance.</strong> Trace where the described P4/P5 geometry came
     from (registry provenance, catalog-geometry records) and reconcile against the as-operated
     evidence: the archive's loop positions, EFIT's coil table (938-element fcoil set), and any
@@ -90,11 +93,21 @@
     published P4 member current difference is 1.5% (transducers say 0.06%). Named but
     unrouted: the "P3/4/5 link board" (the only feeder-hardware fact in the public record),
     the toroidally-localised P4 "coil tail", and joggles — coil feeds are an explicitly named
-    error-field source. Remaining actions: retrieve Edlington, Martin &amp; Pinfold, Rev. Sci.
-    Instrum. 72, 421 (2001) via institutional library (paywalled; the original MAST magnetics
-    paper, likely holding as-built probe tables); test any establishable conductor geometry
-    against the localization maps and obr10's differential signature (+290 nT/At on P5 pair
-    member-difference). Note for any MAST-U cross-check: P4 was physically repositioned during
+    error-field source. Edlington, Martin &amp; Pinfold, Rev. Sci. Instrum. 72, 421 (2001) is now RETRIEVED
+    (local working tree at <code>research/edlington-2001-mast-magnetic-diagnostics.pdf</code>;
+    kept untracked by the existing ignore rule — the repository is public and the paper is
+    paywalled) and adds
+    four hardware facts: pickup signals from coils 180° apart are <em>summed before
+    integration and digitisation</em> (the hardware basis of the pair-failure gain class);
+    the PF coil cans are electrically connected to the vessel <em>both</em> through their
+    mechanical supports <em>and</em> through the vacuum-bellows connections of the feeder
+    bars at vessel ports — a named galvanic network joining cases, vessel and feeders;
+    MAST's own commissioning calibrated from designed vacuum shots (P2-plate compensation
+    coefficients; the plasma-Rogowski matrix solve over eight vacuum shots, data taken at
+    the end of long flat-tops so induced currents decay); and the P2 coil pack carries an
+    eight-turn compensating winding that early operation left unused. Remaining action: test
+    any establishable conductor geometry against the localization maps and obr10's
+    differential signature (+290 nT/At on P5 pair member-difference). Note for any MAST-U cross-check: P4 was physically repositioned during
     MAST-U assembly (−2.2 mm x, +3.2 mm y, sub-mrad tilts), so MAST-era positions are the
     pre-adjustment ones.</li>
     <li><strong>Case-current identity fix.</strong> Replace the block at

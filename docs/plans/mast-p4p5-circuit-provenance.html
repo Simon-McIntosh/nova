@@ -20,8 +20,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-07">
-<meta name="plan-version" content="3">
-<meta name="plan-impl" content="0.25">
+<meta name="plan-version" content="8">
+<meta name="plan-impl" content="0.75">
 </head>
 <body>
 <main class="plan-doc">
@@ -34,19 +34,29 @@
   turned up four concrete provenance facts that now need engineering resolution rather than more
   regression:</p>
   <ol>
-    <li><strong>The description is not up-down symmetric where the machine should be.</strong>
-    P4 lower's centroid sits at z = −1.1268 m against P4 upper's +1.1095 m — 17.3 mm apart in
-    |z| — and P4 upper's footprint is 3% larger (0.159 × 0.158 m vs 0.154 × 0.154 m); P5 differs
-    by 12.9 mm. A symmetric residual proportional to P4/P5 drives is exactly what an erroneous
-    asymmetry in the <em>description</em> of a symmetric machine would produce, and it would also
-    explain the 26.5% P4 pair split in the free inversion. This is the cheapest candidate to
-    eliminate and must go first.</li>
-    <li><strong>The described and measured P4 flux loops are almost disjoint.</strong> The
-    description carries four P4-upper loop positions; the archive publishes data for P4-lower
-    channels (<code>fl_p4l_1</code>, <code>fl_p4l_4</code>) whose positions the description has
-    nothing near, and <code>fl_p4u_1..3</code> never appear in 400 sampled shots. The one coil
-    the misfit localises to is the one coil whose diagnostic description disagrees with the
-    archive.</li>
+    <li><strong>The description's asymmetry — premise corrected and adjudicated (2026-08-07).</strong>
+    This item's original figures (P4 lower 17.3 mm further out, z = −1.1268 vs +1.1095) were an
+    arithmetic artifact: the mean of the outline WKB's <em>closed</em> exterior ring, whose
+    double-counted start vertex biases the two members in opposite directions. The area
+    centroids of the same registry polygons give the honest reading: P4 <em>upper</em> 4.6 mm
+    further from the midplane, P5 upper 8.7 mm. Adjudication
+    (<a href="/nova/research/mast-p4p5-provenance-note.html">provenance note</a>): placement
+    asymmetry is consistent with as-built — Kirk's Table 1 Hall-probe fit (which senses the
+    copper, unlike the case-only metrology) moves both members of each pair +z, upper further
+    out in both pairs, at 9.6/13.6 mm — the description if anything understates it; no
+    correction warranted. The +5.1% P4-upper footprint reduces to one described parameter
+    (27 mm vs 26 mm main-row column pitch) — a described-geometry artifact, immaterial to the
+    misfit (§2.1 measured footprint equalisation at +0.1% of the survivor).</li>
+    <li><strong>The P4-lower flux-loop positions are a copy — mechanism named (2026-08-07).</strong>
+    Level-2 <code>magnetics/flux_loop</code> entries 20–23 (<code>FL_P4L_1..4</code>) are
+    bit-identical to entries 12–15 (<code>FL_P3L_1..4</code>) on every shot sampled — the
+    described P4-lower positions are a copied block, 0.37–0.44 m from where efm's
+    <code>silop</code> rows 36–39 put the real loops (near-mirrors of the described P4-upper
+    set). The archive's <code>fl_p4l_1</code>/<code>fl_p4l_4</code> publish on 383/383 readable
+    shots and are correctly refused by the 15 mm join. Every other loop family agrees to
+    ≤ 6.0 mm. The correction belongs in the level-2 read of the registry recovery; details and
+    the per-channel join accounting feed <code>mast-flux-loop-calibration</code>
+    (<a href="/nova/research/mast-p4p5-provenance-note.html">provenance note</a>).</li>
     <li><strong>No supply, feeder, busbar or lead exists in any description on this host.</strong>
     <code>pf_active.supply</code> is empty (blocking the store's <code>efps_current</code>);
     EFIT's own 101-circuit model has nothing near P4/P5 beyond six vessel elements at
@@ -80,16 +90,20 @@
     the provenance trace. Record:
     <a href="/nova/research/mast-p4p5-symmetry-verdict.html">symmetry verdict</a>
     (commit <code>01421e3e</code>, merged <code>af4c2324</code>).</li>
-    <li><strong>P4 winding provenance.</strong> Trace where the described P4/P5 geometry came
-    from (registry provenance, catalog-geometry records) and reconcile against the as-operated
-    evidence: the archive's loop positions, EFIT's coil table (938-element fcoil set), and any
-    published as-built drawings. Adjudicate the 17.3 mm / 3% asymmetry: real machine feature,
-    described-geometry error, or digitisation artefact. Anchor source: arXiv:1312.6507 names
-    P4/P5 as MAST's dominant intrinsic error-field source from manufacturing distortion,
-    reports a factor ~3 vacuum model-versus-measurement gap there, confirms 23 turns per
-    member, and states the metrology survey determined only the coil <em>case</em> position,
-    "not the copper turns of the coil inside the case" — so copper-in-case offsets belong in
-    the §2.1 scan variants alongside centroid and footprint changes.</li>
+    <li class="section-landed"><span class="badge badge-shipped">✓ landed 2026-08-07</span>
+    <strong>P4 winding provenance — adjudicated, no correction warranted.</strong> Both
+    asymmetry readings trace to the SAME source (the registry outlines) under two arithmetics:
+    the plan's original 17.3 mm was the closed-ring vertex-mean artifact (reproduces the old
+    figures to five decimals; nothing else on this host carries them); the honest area
+    centroids give P4 upper 4.6 mm / P5 upper 8.7 mm further out. EFIT's 938-element fcoil set
+    is NOT an independent source — its circuits 8–11 reproduce the level-2 winding cells digit
+    for digit. Placement: consistent with as-built (Kirk Table 1 is a Hall-probe fit sensing
+    the copper — dz 2.9/6.6/0.6/13.1 mm, both members +z, upper further out in both pairs,
+    9.6/13.6 mm — the description understates if anything). Footprint +5.1%: described-geometry
+    artifact reducing to one parameter (27 vs 26 mm main-row column pitch), immaterial (+0.1%
+    of the survivor at gain 126). Record:
+    <a href="/nova/research/mast-p4p5-provenance-note.html">provenance note</a>
+    (commits <code>0c02dcbd</code>/<code>9fbcffba</code>, merged <code>da95fdc7</code>).</li>
     <li><strong>Supply and feeder topology — the 2026-08-07 web survey's answers and
     remainders.</strong> Settled: every upper/lower pair is series on one supply except P6
     (anti-series, the vertical-control actuator — never differential P4/P5); five
@@ -123,10 +137,20 @@
     coupling substrate live. Note for any MAST-U cross-check: P4 was physically repositioned during
     MAST-U assembly (−2.2 mm x, +3.2 mm y, sub-mrad tilts), so MAST-era positions are the
     pre-adjustment ones.</li>
-    <li><strong>Case-current identity fix.</strong> Replace the block at
-    <code>mast_solve_inputs.py:815-825</code> with the measured identity, documented as
-    mechanism (the pack total is the coil plus its case), with the 336-pair evidence banked
-    beside the change and validation re-run.</li>
+    <li class="section-landed"><span class="badge badge-shipped">✓ landed 2026-08-07 (qualified)</span>
+    <strong>Case-current identity — confirmed and stated as mechanism; channels explained, not
+    served.</strong> Identity re-verified at scale: 4,578 coil-set/shot pairs over 763 shots,
+    worst residual 1.09e-07 of the summed terms (float32 eps); P2 set-level identity also holds
+    (1,526 pairs, worst 8.8e-06). <code>mast_solve_inputs.py</code> now states the mechanism
+    (the pack total is the coil plus its case), names both terms per row, derives qualifying
+    sets from the drive map, and adds <code>pack_total_channels</code>/<code>pack_total_residuals</code>
+    with six tests (two store-gated). Deliberate deviation from the original done-when: the six
+    pack-total channels stay blocked rather than served — the total spans two containers
+    (pf_active coil + pf_passive case) and the induced case term makes it no fixed multiple of
+    either (ratio ±10–74%; the best fixed factor leaves 1.0–12.1% of peak), so a drive-map
+    weight would fabricate a column. No excitation channel is now refused as <em>unexplained</em>;
+    serving the six needs a two-channel source-map row (owner call). Suite 4,176/0 at base.
+    Commit <code>81928526</code>, merged <code>da95fdc7</code>.</li>
   </ol>
   <p>Done-when: the symmetry test has a quantitative verdict (explained fraction per variant
   with confidence bounds); the P4 geometry provenance is adjudicated with sources named; supply
@@ -185,9 +209,9 @@ Done-when
      explained fractions and figures
   2. Verdict prose: geometry error confirmed / excluded / partial
   3. Followup written into plan + this one resolved</pre>
-    <p class="r-fu-outcome">Section 2.1 landed - commit 01421e3e (merged af4c2324). Verdict: geometry error EXCLUDED as the survivor's source. Symmetrising variants explain <=3% and mostly worsen the fit; translation matches are 5-probe near-field artifacts (far-field fraction 0.01-0.03, sign-flipped gains); >=85% of surviving power (>=95% of stable P4-lower) needs current the coils do not carry. Robust partial: described 23-cell lattice removes 15.0% [0.8,15.3] of P5-lower surviving power at gain 1.28; disputed 5-turn row resolves to the described max-|z| side (flip costs -24.7%). Premise correction: registry hulls put P4 upper 4.6 mm further out (not lower, not 17.3 mm). Record: docs/research/mast-p4p5-symmetry-verdict.html. Decision geometry-correction-site stays open (no geometry change promoted).</p>
+    <p class="r-fu-outcome">Section 2.1 landed - commit 01421e3e (merged af4c2324). Verdict: geometry error EXCLUDED as the survivor's source. Symmetrising variants explain &lt;=3% and mostly worsen the fit; translation matches are 5-probe near-field artifacts (far-field fraction 0.01-0.03, sign-flipped gains); &gt;=85% of surviving power (&gt;=95% of stable P4-lower) needs current the coils do not carry. Robust partial: described 23-cell lattice removes 15.0% [0.8,15.3] of P5-lower surviving power at gain 1.28; disputed 5-turn row resolves to the described max-|z| side (flip costs -24.7%). Premise correction: registry hulls put P4 upper 4.6 mm further out (not lower, not 17.3 mm). Record: docs/research/mast-p4p5-symmetry-verdict.html. Decision geometry-correction-site stays open (no geometry change promoted).</p>
     </article>
-<article class="r-fu" data-id="f-pcp-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-07" data-recommends-skill="/reckon-ship mast-p4p5-circuit-provenance §2.2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-pcp-002" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-07" data-recommends-skill="/reckon-ship mast-p4p5-circuit-provenance §2.2" data-resolved-at="2026-08-07T20:20:02+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Adjudicate P4 geometry/loop provenance (section 2.2) and unblock the pack-total channels (section 2.4)</h4>
     <div class="r-fu-body">The symmetry scan excluded a described-geometry error and corrected the asymmetry premise (registry hulls: P4 upper 4.6 mm further out, area +5.1%, P5 +8.7 mm - not the 17.3 mm lower-out reading in section 1). Trace where the described P4/P5 geometry and the plan's earlier figures each came from, reconcile the archive loop positions and EFIT fcoil table, and replace the mast_solve_inputs pack-total block with the measured case-current identity (336-pair evidence), suite green.</div>
     <pre class="r-fu-prompt">Project: nova
@@ -220,6 +244,37 @@ Done-when
      6.5e-6 across 336 pairs), documented as mechanism; six channels
      unblocked; full default suite green before commit
   4. Findings appended to the verdict record or a provenance note;
+     followup written into plan + this one resolved</pre>
+    <p class="r-fu-outcome">Sections 2.2 and 2.4 landed (commits 81928526, 0c02dcbd, 9fbcffba; merged da95fdc7). Provenance adjudicated: both asymmetry readings are the registry outlines under two arithmetics - the 17.3 mm was a closed-ring vertex-mean artifact; area centroids give P4 upper 4.6 mm / P5 upper 8.7 mm, consistent with as-built per Kirk Table 1 (a Hall-probe fit sensing the copper; same sign, larger magnitude); footprint +5.1% is one described pitch parameter, immaterial; NO geometry correction warranted. Loop mechanism found: level-2 FL_P4L_1..4 positions are a bit-identical copy of FL_P3L_1..4 (0.37-0.44 m off; efm silop has the real ones); correction belongs in the level-2 read of the registry recovery; feeds mast-flux-loop-calibration. Pack-total identity confirmed at scale (4578 pairs, worst 1.09e-7 of summed terms) and stated as mechanism; QUALIFIED deviation: six channels explained but not served (induced case term refuses a fixed factor at 1.0-12.1% of peak; serving needs a two-channel source-map row - owner call). Suite 4176/0 at base; integrated-main verification queued.</p>
+    </article>
+<article class="r-fu" data-id="f-pcp-003" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-07" data-recommends-skill="/reckon-ship mast-p4p5-circuit-provenance §2.3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Close section 2.3: test establishable feeder/conductor geometries against the localization maps; sweep the small handbacks</h4>
+    <div class="r-fu-body">Remaining scope: test any establishable conductor geometry (the P3/4/5 link board, the P4 coil tail, joggles) against the localization maps and obr10's +290 nT/At differential signature; the n=0/even-n leakage bound rides with the harmonics plan. Small handbacks from the landed nodes: p2l/p2u block-reason wording weakened by the measured set-level identity (archive publishes p2il/p2ol coil channels separately; the unsourced interconnection still stands); mast_channel_drive.py docstring undercounts the current-channel kinds by one; owner decisions pending - serve the six pack-total channels via a two-channel source-map row or leave explained-but-blocked, and the geometry-correction-site decision (moot for placement per the adjudication, live only if the level-2 loop-copy fix routes through the artifact).</div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    mast-p4p5-circuit-provenance (docs/plans/mast-p4p5-circuit-provenance.html)
+Section: §2.3 remainder + handbacks
+Capability: general
+Requirements: strict verification
+
+Context
+  §2.1/§2.2/§2.4 are landed: geometry error excluded, provenance
+  adjudicated (no correction warranted), pack-total identity stated as
+  mechanism. Remaining: the feeder/conductor hunt (§2.3) - test
+  establishable geometries against the banked localization maps and
+  obr10&#x27;s differential signature - plus small handbacks.
+
+State to read
+  docs/research/mast-p4p5-provenance-note.html
+  docs/research/mast-p4p5-symmetry-verdict.html (&gt;=85% needs non-coil current)
+  docs/research/mast-misfit-source-localization.html (maps, obr10)
+  research/edlington-2001-mast-magnetic-diagnostics.pdf (feeder-bar bellows,
+  pair summing)
+
+Done-when
+  1. Candidate conductor geometries enumerated with sources; each tested
+     in the forward model against the surviving patterns
+  2. Handbacks swept: p2 block-reason wording, mast_channel_drive docstring
+  3. Owner decisions surfaced (pack-total serving; correction site);
      followup written into plan + this one resolved</pre>
     </article>
 </section>

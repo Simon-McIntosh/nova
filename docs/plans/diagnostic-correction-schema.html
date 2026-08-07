@@ -21,7 +21,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-07">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="4">
+<meta name="plan-impl" content="0.6">
 </head>
 <body>
 <main class="plan-doc">
@@ -92,6 +93,21 @@
     intervals, the flux-loop convention — and make the nova read path consume it end-to-end
     (equivalence test against current behaviour, then delete the in-code constants).</li>
   </ol>
+  <p class="landed-summary"><span class="badge badge-shipped">✓ landed 2026-08-07</span>
+  Schema, generated models, and the MAST instance are in
+  (commits <code>798d9438</code> + <code>c479abeb</code>, merged <code>e3c551cb</code>):
+  LinkML source at <code>nova/calibrate/schema/diagnostic_correction.yaml</code> with committed
+  Pydantic models and JSON-Schema export (byte-for-byte regeneration test, toolchain in the
+  optional <code>schema</code> extra); reader-level validation rejects overlapping intervals
+  and off-ladder quantised values. The MAST instance
+  (<code>nova/calibrate/corrections/mast/magnetics.yaml</code>) encodes the five promoted
+  gains with their unrounded ratios, the withheld obv11 gain with its refusing gate, the
+  113-block acquisition table (five off-ladder blocks refused rather than rounded), three
+  pair states (obv03 as bracketed eras; obr05 as two candidate states with no value), two
+  exclusions, three quality states, and the measured flux convention.
+  <code>tests/calibrate/</code>: 59 passed, 2 generation-parity tests proven with the extra
+  installed. Read-path consumption, the float-equality equivalence bench, and constant
+  deletion remain open below.</p>
   <p>Done-when: schema authored and validated; models generated; the MAST instance file
   round-trips through validation and reproduces current read-path behaviour to float equality
   on the vacuum-floor bench; in-code correction constants deleted; schema documented for the
@@ -111,7 +127,7 @@
 
   <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-dcs-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-07" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-dcs-001" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-07" data-recommends-skill="" data-resolved-at="2026-08-07T16:51:51+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Author the schema and the MAST instance; wire read-path consumption behind an equivalence test</h4>
     <div class="r-fu-body"><p>Schema first, MAST instance second, consumption third — the
       equivalence test against current behaviour gates the constant deletion.</p></div>
@@ -145,6 +161,39 @@ Done-when
   1. Schema + generated models committed; MAST instance validates
   2. Read path consumes the instance; equivalence test green; constants gone
   3. Followup written into plan + this one resolved</pre>
+    <p class="r-fu-outcome">Schema + generated models + MAST instance landed (commits 798d9438, c479abeb; merged e3c551cb). LinkML schema with all eight correction kinds, ordered application semantics as schema enum ranks, provenance with corroborations; committed Pydantic/JSON-Schema artifacts with byte-parity regeneration test; reader rejects overlapping intervals and off-ladder rungs. MAST instance: 5 promoted gains, obv11 withheld, 113-block table (5 off-ladder blocks refused), 3 pair states, 2 exclusions, 3 quality states, flux convention. tests/calibrate 59 passed; full-suite failures are worktree-extras environment only (imas-standard-names extras absent), not regressions. Read-path consumption + float-equality equivalence + constant deletion queued as the follow-on node.</p>
+    </article>
+<article class="r-fu" data-id="f-dcs-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-07" data-recommends-skill="/reckon-ship diagnostic-correction-schema §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Wire read-path consumption of the MAST correction set behind a float-equality equivalence test, then delete the in-code constants</h4>
+    <div class="r-fu-body">The schema and MAST instance are landed and validated. Remaining: the nova read path consumes nova/calibrate/corrections/mast/magnetics.yaml through the generated models (order: offset, drift, acquisition scale, pair state, gain), proves float equality against current behaviour on the vacuum-floor bench, then deletes PROMOTED_CHANNEL_SCALES and the other in-code constants. Gated on nova/calibrate/corrections.py application engine from the calibrate-package migration.</div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    diagnostic-correction-schema (docs/plans/diagnostic-correction-schema.html)
+Section: §2 item 5 remainder - read-path consumption, equivalence, constant deletion
+Capability: general
+Requirements: strict verification
+
+Context
+  Schema, generated models and the validated MAST instance are landed
+  (nova/calibrate/schema/, nova/calibrate/corrections/mast/magnetics.yaml).
+  The nova read path still serves corrections from in-code constants
+  (nova/imas/mast_fitted_parameters.py PROMOTED_CHANNEL_SCALES and friends,
+  nova/imas/mast_block_scale.py + JSON table). Replace the source of truth
+  with the schema documents WITHOUT changing behaviour.
+
+State to read
+  nova/calibrate/correction_set.py + correction_model.py (reader + models)
+  nova/calibrate/corrections/mast/magnetics.yaml (the instance)
+  nova/imas/mast_fitted_parameters.py, nova/imas/mast_block_scale.py
+  The vacuum-floor bench path used by the committed artifact arm
+
+Done-when
+  1. Read path consumes the instance in the fixed order (offset, drift,
+     acquisition scale, pair state, gain)
+  2. Equivalence test green: float equality against pre-change behaviour
+     on the vacuum-floor bench BEFORE constants are deleted
+  3. In-code constants deleted; full default suite green (sync worktree
+     with --all-extras so store-gated lanes run)
+  4. Followup written into plan + this one resolved</pre>
     </article>
 </section>
 

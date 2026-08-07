@@ -47,6 +47,12 @@ from nova.imas.mast_block_scale import (
     CorrectionSetScales,
     promoted_block_scales,
 )
+from nova.imas.mast_corrections import (
+    acquisition_off_ladder_channels,
+    acquisition_stepping_channels,
+    promoted_channel_scales,
+    withheld_channel_scales,
+)
 
 BANK = Path(__file__).parent / "data" / "banked_block_scales.json"
 """The block table the read path served before the correction document existed."""
@@ -63,7 +69,25 @@ REFUSED_BLOCKS = {
 }
 """The five blocks whose step is not a ladder rung, and the ratio each measured."""
 
-PROMOTED_GAINS = ("obr17", "obv04", "obr05", "obv05", "ccbv35")
+RETIRED_GAINS = {
+    "obr17": 0.5011,
+    "obv04": 0.8571,
+    "obr05": 1.1043,
+    "obv05": 0.9449,
+    "ccbv35": 0.9474,
+}
+"""The promoted scales as the record module carried them before the document did."""
+
+RETIRED_WITHHELD = ("obv11",)
+"""The refused scale as that module carried it."""
+
+RETIRED_STEPPING = 19
+"""Channels it recorded as stepping, and the count the document must still give."""
+
+RETIRED_OFF_LADDER = 5
+"""Blocks it recorded as off the ladder, likewise."""
+
+PROMOTED_GAINS = tuple(RETIRED_GAINS)
 """Channels the document carries a promoted sensor gain for."""
 
 PAIR_STATE_CHANNELS = ("obv03", "obr05")
@@ -278,6 +302,22 @@ def test_the_read_path_divides_by_no_promoted_gain(served):
         )
         assert whole.multiplier == pytest.approx(drawn.multiplier * gains[channel])
         assert served.correction(channel, 14100).scale == drawn.multiplier
+
+
+def test_the_document_serves_the_numbers_the_record_module_carried(served):
+    """The four quantities that were literals in nova.imas, now read from here.
+
+    Float equality on the gains: each is the four-decimal constant the adjudication
+    promoted, and the document carries the unrounded ratio separately, so a reader
+    that started serving the ratio would move five channels in the fourth decimal
+    without failing anything that checks the document alone.
+    """
+
+    assert promoted_channel_scales() == RETIRED_GAINS
+    assert withheld_channel_scales() == RETIRED_WITHHELD
+    assert acquisition_stepping_channels() == RETIRED_STEPPING
+    assert acquisition_off_ladder_channels() == RETIRED_OFF_LADDER
+    assert acquisition_stepping_channels() == len(served.stepping)
 
 
 def test_obr17_reads_its_rung_and_not_its_half(banked, served):

@@ -40,6 +40,11 @@ from nova.imas.machine_evidence import (
     SourceReference,
     Uncertainty,
 )
+from nova.imas.mast_corrections import (
+    acquisition_off_ladder_channels,
+    acquisition_stepping_channels,
+    promoted_channel_scales,
+)
 from nova.imas.mast_seed_parameters import catalog_source
 
 VACUUM_COHORT_STORE = "/work/projects/imas_gpu/mast/level1/shots"
@@ -645,36 +650,6 @@ targets, and the per-channel number is what says the shift is not hiding inside
 one sensor.
 """
 
-ACQUISITION_STEPPING_CHANNELS = 19
-"""Probe channels recorded at more than one scale across the archive.
-
-Of seventy-six with a measurable history.  A single calibration number cannot
-describe them: fitted across a step it returns an average of two discrete states
-weighted by shot count, which describes no shot and moves when the shot selection
-moves.  Sixteen of them were handed a single gain by an independent route that did
-not resolve the blocks, spanning up to a factor of 4.2 -- which is why the ledger
-below promotes five channels and not thirty.
-
-What describes them instead is a record per block:
-:mod:`~nova.imas.mast_block_scale` carries, for each of these channels, the runs of
-shots it held one setting over and which rung of the declared ladder that setting
-was, and the read path divides that rung out.  So the quantity these channels lack
-is specifically a *static* per-channel scale, not a calibration record.  Five of
-them additionally hold one block whose step does not land on the ladder
-(:data:`ACQUISITION_OFF_LADDER_CHANNELS`); a read inside such a block is refused
-rather than rounded onto a rung, and comes back exactly as published with its
-warrant saying so.
-"""
-
-ACQUISITION_OFF_LADDER_CHANNELS = 5
-"""Stepping channels holding one block whose step is not a ladder rung.
-
-Five blocks of a hundred and thirteen, one channel each.  A step off the ladder is
-not evidence of a range setting, so no factor is divided out there and the block is
-read as published and flagged -- rounding it onto the nearest rung would assert a
-setting the ladder does not support and silently move the channel by the difference.
-"""
-
 ACQUISITION_STEP_COUNT = (37, 29)
 """Scale changes found, and how many landed on the declared ladder.
 
@@ -692,31 +667,6 @@ geometry or turn count moves every channel that reads a shot, because they all r
 the same currents through the same model; the archive shows five channels moving by
 a factor of two while fifty hold at unity on the same two shots.  That cannot come
 from anything upstream of the individual signal paths.
-"""
-
-PROMOTED_CHANNEL_SCALES = {
-    "obr17": 0.5011,
-    "obv04": 0.8571,
-    "obr05": 1.1043,
-    "obv05": 0.9449,
-    "ccbv35": 0.9474,
-}
-"""Steady channels whose calibration scale is off unity and corroborated.
-
-Each is steady across every shot it appears on, off unity by more than five
-percent, agreed to within three percent by an independent route that shares no
-estimator and no shot selection with this one, and confirmed on both halves of its
-own shots taken in shot order.  ``obr17`` is a factor of two, and it is the same
-channel whose coupling to the error-field circuit is fifty times its neighbours' --
-two independent symptoms of one faulty signal path.
-"""
-
-WITHHELD_CHANNEL_SCALES = ("obv11",)
-"""Steady channels off unity that the promotion gates refused.
-
-Its two routes disagree by 7.4 percent and its own two halves read 0.869 and 1.065,
-so whatever it is doing is not one scale.  Recorded because a refusal with a reason
-is worth more than a silence.
 """
 
 PROBE_VERDICT_COUNTS = {"field_shape": 64, "inseparable": 12, "not_tested": 1}
@@ -1351,7 +1301,7 @@ def sensor_adjudication_records(
 
     scales = ", ".join(
         f"{channel} {value:.4f}"
-        for channel, value in sorted(PROMOTED_CHANNEL_SCALES.items())
+        for channel, value in sorted(promoted_channel_scales().items())
     )
     stepping, total = ACQUISITION_STEP_COUNT
     held, boundaries = ACQUISITION_CONCURRENCY
@@ -1391,12 +1341,12 @@ def sensor_adjudication_records(
             first_shot=first_shot,
             last_shot=last_shot,
             statement=(
-                f"{ACQUISITION_STEPPING_CHANNELS} channels were recorded at more than "
-                "one scale, so no single static calibration number describes them; "
-                "each is described per block of shots and the setting divided out "
-                f"where the channel is read, except in the "
-                f"{ACQUISITION_OFF_LADDER_CHANNELS} blocks whose step is not a ladder "
-                "rung, which are read as published"
+                f"{acquisition_stepping_channels()} channels were recorded at more "
+                "than one scale, so no single static calibration number describes "
+                "them; each is described per block of shots and the setting divided "
+                "out where the channel is read, except in the "
+                f"{acquisition_off_ladder_channels()} blocks whose step is not a "
+                "ladder rung, which are read as published"
             ),
             assumptions=(
                 f"{stepping} scale changes were found and {total} land on a ladder of "

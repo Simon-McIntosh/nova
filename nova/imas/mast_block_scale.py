@@ -61,13 +61,13 @@ from nova.calibrate.correction_model import (
     CorrectionSet,
     CorrectionStatus,
 )
-from nova.calibrate.correction_set import read_correction_set
 from nova.calibrate.corrections import build_chain
 from nova.imas.mast_acquisition_scale import (
     LADDER_TOLERANCE,
     ChannelScaleHistory,
     nearest_rung,
 )
+from nova.imas.mast_corrections import mast_corrections
 
 MEASURED = "measured"
 """The shot itself carries a scale measurement inside a block."""
@@ -855,12 +855,6 @@ two winding-pack widths from every excited coil so that the ratio is a statement
 about the channel and not about the near field of one coil.
 """
 
-PROMOTED_MACHINE = "mast"
-"""Machine whose correction document the promoted settings are read from."""
-
-PROMOTED_SYSTEM = "magnetics"
-"""Diagnostic system within that document these settings belong to."""
-
 
 @cache
 def promoted_block_scales() -> CorrectionSetScales:
@@ -873,9 +867,7 @@ def promoted_block_scales() -> CorrectionSetScales:
     A missing document is an error rather than an empty set.  Silently reading the
     raw archive would make the correction vanish without a symptom, so the absence
     has to be louder than the presence -- which is what
-    :func:`~nova.calibrate.correction_set.read_correction_set` raises on.
+    :func:`~nova.imas.mast_corrections.mast_corrections` raises on.
     """
 
-    return CorrectionSetScales.create(
-        read_correction_set(PROMOTED_MACHINE, PROMOTED_SYSTEM)
-    )
+    return CorrectionSetScales.create(mast_corrections())

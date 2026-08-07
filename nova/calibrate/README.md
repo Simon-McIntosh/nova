@@ -1,5 +1,12 @@
 # Diagnostic corrections
 
+This file covers the storage side of the package: the schema a correction is written
+against, the artefacts generated from it, and where instances live. The measurement
+side — `coupling.py`, `gain.py`, `inversion.py`, `localize.py`, and the
+`corrections.py` engine that applies what they establish — is oriented in the package
+docstring in `__init__.py`, and each module's own docstring says what it guards
+against and why.
+
 `schema/diagnostic_correction.yaml` is the authored source. `correction_model.py`
 and `schema/diagnostic_correction.schema.json` are generated from it and committed
 so that reading a document needs neither the LinkML toolchain nor a build step —

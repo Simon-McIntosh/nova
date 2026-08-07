@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="mast-p4p5-circuit-provenance">
+  <meta name="plan-title" content="P4/P5 Circuit and Geometry Provenance">
+  <meta name="plan-summary" content="Eliminate or confirm the named P4/P5 candidates against engineering provenance: the description's own up-down asymmetry (17.3 mm at P4, 3% footprint), the almost-disjoint described-vs-measured P4 flux-loop sets, the absent supply/feeder topology, and the case-current identity — delivering tested geometry corrections or candidate conductors to the forward model.">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="M">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="general">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint" content="S6">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>P4/P5 Circuit and Geometry Provenance | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <h2 id="s1">§1 — What provenance must decide</h2>
+  <p>The magnetics have said everything they can: a P4/P5-local, up-down symmetric,
+  level-following field survives every current freedom the described geometry allows, and the
+  <a href="/nova/research/mast-misfit-source-localization.html">localization maps</a> put its
+  preferred sources beside the P4 coils at feeder-scale currents. The 2026-08-07 data survey
+  turned up four concrete provenance facts that now need engineering resolution rather than more
+  regression:</p>
+  <ol>
+    <li><strong>The description is not up-down symmetric where the machine should be.</strong>
+    P4 lower's centroid sits at z = −1.1268 m against P4 upper's +1.1095 m — 17.3 mm apart in
+    |z| — and P4 upper's footprint is 3% larger (0.159 × 0.158 m vs 0.154 × 0.154 m); P5 differs
+    by 12.9 mm. A symmetric residual proportional to P4/P5 drives is exactly what an erroneous
+    asymmetry in the <em>description</em> of a symmetric machine would produce, and it would also
+    explain the 26.5% P4 pair split in the free inversion. This is the cheapest candidate to
+    eliminate and must go first.</li>
+    <li><strong>The described and measured P4 flux loops are almost disjoint.</strong> The
+    description carries four P4-upper loop positions; the archive publishes data for P4-lower
+    channels (<code>fl_p4l_1</code>, <code>fl_p4l_4</code>) whose positions the description has
+    nothing near, and <code>fl_p4u_1..3</code> never appear in 400 sampled shots. The one coil
+    the misfit localises to is the one coil whose diagnostic description disagrees with the
+    archive.</li>
+    <li><strong>No supply, feeder, busbar or lead exists in any description on this host.</strong>
+    <code>pf_active.supply</code> is empty (blocking the store's <code>efps_current</code>);
+    EFIT's own 101-circuit model has nothing near P4/P5 beyond six vessel elements at
+    r = 2.01 m flagged obsolete; a prior search for power-supply documents returned nothing.
+    External sources (UKAEA publications, MAST design papers, FAIR-MAST metadata) are the
+    remaining route.</li>
+    <li><strong>The case-current identity closes a solve-input gap.</strong>
+    <code>pXY_current = pXY_coil_current + pXY_case_current</code> holds exactly (worst relative
+    deviation 6.5×10⁻⁶ across 336 family-shot pairs), while
+    <code>nova/imas/mast_solve_inputs.py:815-825</code> still blocks the six pack-total channels
+    as unexplained. Unblocking them with the measured identity adds six validated channels to
+    the drive map.</li>
+  </ol>
+
+  <h2 id="s2">§2 — Implementation</h2>
+  <ol>
+    <li><strong>Symmetry elimination test (first, decisive, cheap).</strong> Forward-model the
+    sustained P4/P5 cohort under controlled geometry variants — mirrored members
+    (upper := reflected lower), symmetrised centroids, equalised footprints, and per-member
+    (dz, dr, scale) scans — and score each variant against the banked surviving-misfit patterns
+    (<code>~/.cache/nova-mast/misfit-localization/couplings.npz</code>). Either a geometry
+    correction removes the survivor (fault found: description geometry) or the explained
+    fraction caps well below one (the survivor needs current the coils do not carry). The
+    difference field of a displaced member is not a filament, so this closes the gap the
+    single-filament scan left open.</li>
+    <li><strong>P4 winding provenance.</strong> Trace where the described P4/P5 geometry came
+    from (registry provenance, catalog-geometry records) and reconcile against the as-operated
+    evidence: the archive's loop positions, EFIT's coil table (938-element fcoil set), and any
+    published as-built drawings. Adjudicate the 17.3 mm / 3% asymmetry: real machine feature,
+    described-geometry error, or digitisation artefact.</li>
+    <li><strong>Supply and feeder topology from external sources.</strong> Collect published
+    MAST engineering descriptions of the P4/P5 supplies, feeder routing and earthing (design
+    papers, SOFT/SOFE proceedings, UKAEA reports, FAIR-MAST channel metadata); deliver whatever
+    conductor geometry can be established as candidate machine-description entries, and test
+    each candidate's field pattern against the localization maps and obr10's differential
+    signature (+290 nT/At on P5 pair member-difference).</li>
+    <li><strong>Case-current identity fix.</strong> Replace the block at
+    <code>mast_solve_inputs.py:815-825</code> with the measured identity, documented as
+    mechanism (the pack total is the coil plus its case), with the 336-pair evidence banked
+    beside the change and validation re-run.</li>
+  </ol>
+  <p>Done-when: the symmetry test has a quantitative verdict (explained fraction per variant
+  with confidence bounds); the P4 geometry provenance is adjudicated with sources named; supply
+  topology findings are recorded with citations and candidate conductors tested in the forward
+  model; the pack-total channels are unblocked with validation green; a research record collapses
+  the outcome.</p>
+
+  <section data-reckon="decisions" id="decisions" class="r-decisions">
+    <h2><span class="sec">§</span> Decisions</h2>
+    <div class="r-dec" data-key="geometry-correction-site" data-choice="" data-by="" data-when="">
+      <p class="r-dec-q">If the symmetry test names a described-geometry error, where does the
+      correction land — the machine-description artifact (new semantic revision) or a nova-side
+      fitted-parameter overlay?</p>
+      <p class="r-dec-opts">
+        <button class="r-opt" data-value="artifact-revision">artifact revision (fleet-wide, versioned)</button>
+        <button class="r-opt" data-value="fitted-overlay">fitted-parameter overlay (nova-local, faster)</button>
+      </p>
+      <p class="r-dec-rat"></p>
+    </div>
+  </section>
+
+  <section data-reckon="followups" id="followups" class="r-followups">
+    <h2><span class="sec">§</span> Followups</h2>
+    <article class="r-fu" data-id="f-pcp-001" data-status="open"
+             data-capability-version="1.0" data-capability-class="general"
+             data-written-by="reckon-create" data-written-at="2026-08-07">
+      <h4 class="r-fu-title">Implement §2.1 — the P4/P5 symmetry elimination test</h4>
+      <div class="r-fu-body"><p>The single cheapest decisive measurement in the programme: does
+      symmetrising (or scanning) the P4/P5 member geometry reproduce the stable surviving-misfit
+      pattern? Runs entirely on banked couplings plus the existing forward model.</p></div>
+      <pre class="r-fu-prompt">Project: nova
+Plan:    mast-p4p5-circuit-provenance (http://localhost:8765/nova/mast-p4p5-circuit-provenance.html)
+Section: §2.1
+Capability: general
+Requirements: strict verification
+
+Context
+  The MAST description's P4 members differ by 17.3 mm in |z| centroid and 3%
+  in footprint while published identical; the vacuum misfit is up-down
+  symmetric, linear in P4/P5 drives, and localises beside the P4 coils. A
+  described-geometry error is the cheapest candidate and must be eliminated
+  or confirmed before conductor hunts continue.
+
+State to read
+  docs/research/mast-misfit-source-localization.html (targets and maps)
+  ~/.cache/nova-mast/misfit-localization/couplings.npz (surviving patterns)
+  nova/imas/mast_vacuum_response.py (forward model to re-drive with variants)
+  nova/catalog/mast_geometry.py (geometry registry access)
+
+Scope locks / constraints
+  Score geometry variants against the SURVIVING (described-span-removed)
+  misfit per drive group, P4 lower first (split-half cosine +0.92). Report
+  explained fraction with bootstrap bounds. Do not promote any geometry
+  change in this followup — measurement only, decision comes after.
+
+Done-when
+  1. Variant scan banked (mirrored, symmetrised, dz/dr/scale scans) with
+     explained fractions and figures
+  2. Verdict prose: geometry error confirmed / excluded / partial
+  3. Followup written into plan + this one resolved</pre>
+    </article>
+  </section>
+
+</main>
+</body>
+</html>

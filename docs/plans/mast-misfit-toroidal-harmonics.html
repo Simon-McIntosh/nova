@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="mast-misfit-toroidal-harmonics">
+  <meta name="plan-title" content="Toroidal-Harmonic Misfit Maps and Source Localization">
+  <meta name="plan-summary" content="Expand the surviving vacuum misfit in toroidal harmonics constrained by probes and calibrated flux loops, producing honest contour maps of the misfit flux and localising the missing conductor by interior/exterior expansion mismatch and multi-filament fits.">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="L">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="general">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint" content="S6">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-depends-on" content="mast-flux-loop-calibration">
+  <title>Toroidal-Harmonic Misfit Maps | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <h2 id="s1">§1 — From projections to honest maps</h2>
+  <p>The <a href="/nova/research/mast-misfit-source-localization.html">localization record</a>
+  produced the first misfit maps, but they are source-model projections: a single filament
+  explains 43–60% of the surviving power and its best location disagrees between drive groups. The
+  honest map is source-free: in the vacuum region the misfit field satisfies the homogeneous
+  Grad–Shafranov equation, so the misfit flux admits an exact expansion in toroidal harmonics
+  (half-integer Legendre functions about the machine's focal circle). Fitting interior and
+  exterior expansions to the measured misfit — probe projections plus calibrated loop fluxes —
+  yields contour maps of the misfit flux valid wherever no unmodelled current flows, and the
+  places where the two expansions cannot be reconciled are precisely where the unmodelled current
+  is.</p>
+  <p>Three products, per drive group (P4 lower first — its pattern reproduces at split-half
+  cosine +0.92): the misfit flux contour map with confidence bounds, the enclosed-current
+  localization (expansion-mismatch regions plus multi-filament and extended-path fits scored
+  against the harmonic representation), and the non-axisymmetric residue — the fraction of the
+  misfit no axisymmetric expansion reaches, which bounds what a 3D busbar run must explain and
+  feeds <code>mast-nonaxisymmetric-physics</code>.</p>
+
+  <h2 id="s2">§2 — Implementation</h2>
+  <ol>
+    <li><strong>Basis.</strong> Toroidal-harmonic flux basis (P and Q half-integer Legendre) with
+    the conditioning discipline the polynomial work established — orthogonalised on the fit
+    window, degree chosen by held-out probes, never raw monomial-style contraction. Verify
+    against the polygon Green's kernel on synthetic filaments (place a known filament, fit the
+    expansion, recover flux to stated tolerance and location by mismatch).</li>
+    <li><strong>Constraint sets.</strong> Per drive group: the banked signed couplings
+    (<code>~/.cache/nova-mast/misfit-localization/couplings.npz</code>) as B-projections at 77
+    probes, plus calibrated loop fluxes from <code>mast-flux-loop-calibration</code>, with
+    per-channel noise weights from the sensor-floor record replacing the uniform pooling of the
+    first pass.</li>
+    <li><strong>Maps.</strong> Interior expansion (regular at the axis) fitted to the
+    centre-column band, exterior expansion to the outboard band; contour the reconciled flux and
+    its disagreement. Bootstrap over shots for confidence bands.</li>
+    <li><strong>Source fits.</strong> Multi-filament (2–4 rings, symmetric pairs allowed but not
+    imposed) and extended-path (line-current segments closing through the machine) models scored
+    against the harmonic maps; report explained fraction, implied currents in supply-current
+    units, and the residue after the best source.</li>
+    <li><strong>Verdict.</strong> Either a localised source region with implied current and
+    candidate identity (handed to <code>mast-p4p5-circuit-provenance</code> for engineering
+    confirmation), or a measured statement that the survivor is non-axisymmetric or distributed
+    beyond the array's resolving power — with the resolution limit quantified by the synthetic
+    recovery tests.</li>
+  </ol>
+  <p>Done-when: synthetic recovery validated; per-group misfit flux maps with confidence bands
+  published as figures; source fits scored and ranked; non-axisymmetric residue quantified; a
+  research record collapses the findings and hands named candidates onward.</p>
+
+  <section data-reckon="decisions" id="decisions" class="r-decisions">
+    <h2><span class="sec">§</span> Decisions</h2>
+    <div class="r-dec" data-key="probes-only-start" data-choice="" data-by="" data-when="">
+      <p class="r-dec-q">Start the harmonic fits on probes alone before the loop calibration
+      lands, accepting a re-run, or wait for loops so every map is final?</p>
+      <p class="r-dec-opts">
+        <button class="r-opt" data-value="probes-first">probes first, re-run with loops</button>
+        <button class="r-opt" data-value="wait-for-loops">wait for calibrated loops</button>
+      </p>
+      <p class="r-dec-rat"></p>
+    </div>
+  </section>
+
+  <section data-reckon="followups" id="followups" class="r-followups">
+    <h2><span class="sec">§</span> Followups</h2>
+    <article class="r-fu" data-id="f-mth-001" data-status="open"
+             data-capability-version="1.0" data-capability-class="general"
+             data-written-by="reckon-create" data-written-at="2026-08-07">
+      <h4 class="r-fu-title">Implement §2.1 — harmonic basis with synthetic-filament recovery validation</h4>
+      <div class="r-fu-body"><p>The basis and its validation harness are independent of the loop
+      calibration and can start immediately; every later product depends on the recovery test
+      passing.</p></div>
+      <pre class="r-fu-prompt">Project: nova
+Plan:    mast-misfit-toroidal-harmonics (http://localhost:8765/nova/mast-misfit-toroidal-harmonics.html)
+Section: §2.1
+Capability: general
+Requirements: deep reasoning, strict verification
+
+Context
+  The surviving P4/P5 vacuum misfit needs a source-free representation.
+  Toroidal harmonics give exact vacuum flux maps; interior/exterior expansion
+  mismatch localises enclosed current. The basis must be validated by
+  synthetic recovery before any real data is fitted.
+
+State to read
+  docs/research/mast-misfit-source-localization.html (targets, first maps)
+  ~/.cache/nova-mast/misfit-localization/ (couplings, probe poses, response)
+  nova/biot/ (polygon Green's kernel for synthetic truth)
+  Memory: polynomial-basis-conditioning (orthogonalise on the fit window;
+  monomial-style contraction loses four decades by degree six)
+
+Scope locks / constraints
+  Half-integer Legendre (toroidal harmonic) basis; degree by held-out probes.
+  Synthetic tests: known filament placed, expansion fitted at the real 77
+  probe poses/axes, flux recovered to stated tolerance, location recovered by
+  interior/exterior mismatch. Report the resolution limit of the array.
+
+Done-when
+  1. Basis module + tests committed (nova conventions, uv run pytest green)
+  2. Synthetic recovery report banked with figures
+  3. Followup written into plan + this one resolved</pre>
+    </article>
+  </section>
+
+</main>
+</body>
+</html>

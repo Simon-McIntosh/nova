@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-05T17:49:43",
+  "updated": "2026-08-07T11:29:23",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -175,6 +175,51 @@
         "starts": "2026-09-05",
         "ends": "2026-09-19",
         "description": "Run the GPU catalog only after reconstruction, machine descriptions and MAST 3D/passive physics pass their evidence gates."
+      },
+      {
+        "id": "S6",
+        "status": "planned",
+        "theme": "Close the P4/P5 misfit source",
+        "items": [
+          {
+            "slug": "mast-flux-loop-calibration",
+            "why_now": "The probe array's rank-10 cliff binds everything downstream; 26 loop channels in genuine webers are fittable against the exact vacuum flux and the fitting machinery already exists but discards its result.",
+            "done_when": "Per-loop gains promoted or excluded with cause; P4 loop positions reconciled; inversion re-run with loops and the identifiability delta reported; gate decision packet (obr17 + loops) delivered.",
+            "capability": {
+              "version": "1.0",
+              "class": "general",
+              "requirements": {
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "mast-misfit-toroidal-harmonics",
+            "why_now": "Single-filament maps explain only 43-60% of the surviving misfit and disagree on location between drive groups; a source-free harmonic representation with loop constraints is the honest contour map and the sharper localizer.",
+            "done_when": "Synthetic recovery validated; per-group misfit flux maps with confidence bands published; source fits ranked with implied currents; non-axisymmetric residue quantified.",
+            "capability": {
+              "version": "1.0",
+              "class": "general",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "mast-p4p5-circuit-provenance",
+            "why_now": "The description's own P4/P5 member asymmetry (17.3 mm, 3% footprint) is unexplained at exactly the coil the misfit localises to; the symmetry-elimination forward test is the cheapest decisive measurement in the programme.",
+            "done_when": "Symmetry test verdict with explained fractions; P4 geometry and loop provenance adjudicated with sources; supply/feeder findings recorded and candidates tested; pack-total channels unblocked with validation green.",
+            "capability": {
+              "version": "1.0",
+              "class": "general",
+              "requirements": {
+                "verification": "strict"
+              }
+            }
+          }
+        ],
+        "description": "Follow-on from the misfit separation and source-localization records: recover the flux loops (per-loop gains; the 2-pi convention is already measured), build toroidal-harmonic contour maps of the surviving misfit with source localization, and resolve the P4/P5 provenance candidates - the description's own 17.3 mm / 3% member asymmetry first, then loop positions, supply/feeder topology, and the pack-total channel unblock."
       }
     ],
     "active_sprint_id": null,
@@ -218,6 +263,11 @@
         "when": "2026-08-05",
         "who": "reckon-ship",
         "what": "S5 closed: 18 worker nodes across nova and imas-ambix (two-worker cap held throughout). Geometry corrections, solve-input maps, and the full vacuum-floor ladder executed; the ladder closed on its honest-failure branch (+0.023 sigma above the incumbent, qualified cutover status stands) with the gap decomposed onto six channels at 91-253x their measured noise floors. The acquisition-scale discovery (19 stepping channels) and the committed artifact-arm bench path are the sprint's durable infrastructure gains."
+      },
+      {
+        "when": "2026-08-07",
+        "who": "reckon-sprint",
+        "what": "S6 'Close the P4/P5 misfit source' proposed: flux-loop calibration, toroidal-harmonic misfit maps, P4/P5 provenance. Grounded in the new source-localization record (first misfit maps; differential-circuit hypothesis excluded as recorded superposition; description asymmetry and disjoint P4 loop sets surfaced by the data survey)."
       }
     ],
     "blockers": [
@@ -250,6 +300,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 11
+    "_version": 12
   }
 }

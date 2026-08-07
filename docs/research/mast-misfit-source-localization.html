@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="mast-misfit-source-localization">
+  <meta name="plan-title" content="First source-localization maps of the P4/P5 vacuum misfit — filament scans, the differential-circuit test, and the flux-loop route">
+  <meta name="plan-summary" content="The surviving misfit is mapped for the first time: per-drive-group signed couplings recomputed from 40 sustained shots give a stable spatial pattern (split-half cosine +0.92 on P4 lower), single-filament scans localise the P4 upper and P5 lower survivors beside the P4 coils at feeder-scale currents of 0.1 to 1.0 times the supply, and the recorded member-current difference is measured and cleared as a driver (at most 1.2% of the partialled residual, except obr10 at 16-40% on P5 pair shots). Flux loops are the highest-leverage unused constraint: their calibration is fittable against the exact vacuum flux, and their inclusion adds rank the probe array lacks.">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-recorded-at" content="2026-08-07">
+  <meta name="plan-informs" content="mast-flux-loop-calibration,mast-misfit-toroidal-harmonics,mast-p4p5-circuit-provenance">
+  <title>MAST misfit source localization | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <header>
+    <span class="badge badge-active">recorded 2026-08-07</span>
+    <h1>Mapping the misfit: where the missing conductor can and cannot be</h1>
+    <p>The <a href="/nova/research/mast-vacuum-misfit-separation.html">separation record</a> ended
+    with two named faults and three named targets. This session turns the second fault — the
+    P4/P5-local field the description cannot produce — into <em>maps</em>: the signed misfit at
+    every probe per ampere-turn of each P4/P5 drive, the poloidal-plane score of every candidate
+    single-conductor location against that misfit, and the first contour maps of the misfit flux
+    itself. It also puts two of the user-raised hypotheses to direct measurement: the
+    differential-circuit reading of the P4 pair asymmetry, and the recoverability of the discarded
+    flux loops.</p>
+    <p>Every number below is reproducible from the banked scripts and arrays under
+    <code>~/.cache/nova-mast/misfit-localization/</code>; the per-shot couplings were recomputed
+    from the level-1 store with the acquisition block scales divided out on the read path, and the
+    known obr17 gain fault is excluded from every source fit.</p>
+  </header>
+
+  <section class="quick-status">
+    <h2>What this session established</h2>
+    <table>
+      <thead><tr><th>question</th><th>answer</th><th>measurement</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Is the surviving misfit a stable field pattern?</td>
+          <td><strong>Yes on P4 lower</strong> — the strongest and most repeatable target.</td>
+          <td>Split-half cosine +0.92 over 13 independent shot rows; coupling 41.7 nT per
+          ampere-turn RMS ≈ 6.7 mT at the largest P4 lower drive, matching the separation
+          record's surviving amplitude.</td>
+        </tr>
+        <tr>
+          <td>Where could a single unmodelled conductor sit?</td>
+          <td>Beside the P4 coils for two of four drive groups; the centre column or outside the
+          outboard wall for the others. No single location serves all four.</td>
+          <td>Filament scans peak at (1.57, +0.71) for P4 upper and (1.45, −1.20) for P5 lower —
+          both adjacent to a P4 coil — at 43% of surviving power each.</td>
+        </tr>
+        <tr>
+          <td>How big is the implied current?</td>
+          <td><strong>Feeder-scale, not turn-scale</strong>: 0.10× to 1.00× the supply current.</td>
+          <td>Best-fit gains +4.4 to +43.3 mA per ampere-turn; 1/23 At⁻¹ = 43.5 mA/At is exactly
+          one supply current, and the P5 upper fit lands on 1.00× at the centre column.</td>
+        </tr>
+        <tr>
+          <td>Does the recorded member-current difference drive the misfit?</td>
+          <td><strong>No</strong> — the differential-circuit hypothesis is excluded as recorded
+          current superposition; one channel keeps a genuine differential signature.</td>
+          <td>Member currents are independently measured (correlation 0.99995–0.999999, differences
+          0.25–0.62% of the sum); the difference waveform explains ≤1.2% of the partialled residual
+          on average — but 16–40% of obr10's on the P5 pair shots, at a consistent +290 nT/At.</td>
+        </tr>
+        <tr>
+          <td>Can the flux loops be recovered?</td>
+          <td><strong>Yes — and the 2π question is already settled.</strong> The store publishes
+          total webers; what is missing is per-loop gains, and the fitting machinery already
+          exists but discards its result.</td>
+          <td>29 <code>fl_*</code> channels in Wb (0.15–1.5 Wb on plasma; <code>silop_dphi</code>
+          = 2π for all 46 reconstruction loops), 26 landing on described positions;
+          <code>MEASURED_FLUX_CONVENTION = 13</code> was set by measuring the fitted-to-
+          reconstructed flux ratio at 2π (<code>mast_solve_inputs.py:98-109</code>); the per-loop
+          scale fit exists at <code>mast_flux_loop_adjudication.py:588-672</code>.</td>
+        </tr>
+        <tr>
+          <td>Is the description itself symmetric where the machine should be?</td>
+          <td><strong>No — a new, cheap-to-test candidate.</strong> The described P4 members
+          differ by 17.3 mm in |z| centroid and 3% in footprint; P5 by 12.9 mm.</td>
+          <td>p4_lower centroid z = −1.1268 m vs p4_upper +1.1095 m; footprints 0.154² vs
+          0.159 × 0.158 m; both published at 23 turns. An erroneous asymmetry in the description
+          of a symmetric machine produces exactly a symmetric, P4/P5-linear residual — and would
+          feed the 26.5% P4 inversion split.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <h2>Method — clean signed couplings, not reused coefficients</h2>
+  <p>The separation record's attribution coefficients were fitted jointly per family, which splits
+  unstably when two members are driven in proportion. Here each shot's residual is regressed
+  jointly on every <em>substantially active</em> ampere-turn waveform (span above 2000 ampere-turns
+  and 5% of the largest span), with the two members of a driven pair merged into one pair-sum
+  regressor whenever their waveforms correlate above 0.98, and the whole shot discarded when the
+  regressor matrix conditions worse than 30. That guard matters: every P4 symmetric-pair shot in
+  the archive drives P3 and the solenoid in near-proportion to P4 and fails it (conditions
+  100–211), which is why the P4 pair column is absent below and why flux loops and pulsed shots
+  are needed to close that gap. The result is 41 (shot, group) coupling rows over 40 shots:
+  13 for P4 lower, 12 for P5 lower, 7 each for P4 upper and P5 upper, 2 for the P5 pair.</p>
+  <p>For each group the per-channel couplings pool as medians, and the pooled vector splits into
+  the part the described thirteen-coil column space can absorb and the <strong>surviving
+  part</strong> orthogonal to every described column — the free-inversion survivor of the
+  separation record, now carried as a signed spatial pattern. The surviving share is 55–84% of
+  coupling power depending on group, and obr17 is excluded throughout as an established
+  instrument fault.</p>
+
+  <h2>The surviving pattern is coherent across the whole array</h2>
+  <figure>
+    <img src="/nova/figures/mast-misfit-localization/surviving_pattern.svg"
+         alt="Arrows along each probe's sensitive axis showing the signed surviving misfit for the P4 lower, P5 upper and P5 pair drive groups"
+         style="max-width:100%;height:auto">
+    <figcaption>The surviving misfit drawn along each probe's sensitive axis — red positive, blue
+    negative, length proportional to magnitude, obr17 omitted. The pattern is machine-wide and
+    sign-coherent, not confined to the outboard band: on P4 lower drives the largest carriers per
+    ampere-turn are centre-column channels (<code>ccbv22</code> at −244, <code>obr18</code> at
+    −152 nT/At), ahead of the outboard verticals the record has focused on. Evidence:
+    <code>localization2.npz</code>, <code>couplings.npz</code>.</figcaption>
+  </figure>
+  <p>Split-half stability separates signal from pooling noise: P4 lower's surviving pattern
+  reproduces at cosine +0.92 between disjoint shot halves, P5 lower at +0.54, the upper groups at
+  +0.32 to +0.42 on half the rows. The strongest cross-group agreements are P4 lower with P5 lower
+  (+0.60) and with P5 upper (+0.63) — consistent with one source region coupled to several drives —
+  while P4 upper's weaker pattern correlates with nothing, a caution against over-reading it.</p>
+
+  <h2>Localization: the maps, and what they exclude</h2>
+  <figure>
+    <img src="/nova/figures/mast-misfit-localization/filament_localization.svg"
+         alt="Five poloidal-plane maps scoring a single circular filament at each location by the share of the surviving misfit it explains, one per drive group"
+         style="max-width:100%;height:auto">
+    <figcaption>The score of a single unmodelled axisymmetric conductor at each point of the
+    poloidal plane, per drive group: the fraction of the surviving misfit its (described-span-
+    removed) field pattern explains. Orange circles mark the peaks; titles give the implied
+    filament current both in mA per ampere-turn and as a multiple of the supply current
+    (23 turns ⇒ 43.5 mA/At equals one supply current). Evidence:
+    <code>localization2.npz</code>.</figcaption>
+  </figure>
+  <p>Four readings, in decreasing order of confidence:</p>
+  <ol>
+    <li><strong>The P4 coil region is implicated twice, independently.</strong> P4 upper's
+    survivor localises at (1.57, +0.71), immediately inboard-below the P4 upper winding; P5
+    lower's at (1.45, −1.20), immediately below the P4 lower winding. Neither drive is a P4
+    drive — a conductor near the P4 coils that responds to P5 currents cannot be inductive (the
+    residual follows level, not rate) but is exactly what a shared supply return, a feeder loop,
+    or a resistive structural path near P4 would produce.</li>
+    <li><strong>The implied currents are feeder-scale.</strong> Every rank-converged peak sits
+    between 0.10× and 1.00× the supply current — far above any turn-count error (one turn is
+    0.043×… of the coil's own drive only) and far below the pair-sum edge artefact. The P5 upper
+    fit wants precisely 1.00× the supply current at the centre column, where a supply conductor
+    run would sit.</li>
+    <li><strong>No single axisymmetric filament explains everything.</strong> Peaks explain
+    43–60% of surviving power and disagree on location between groups. Either the source is
+    extended (a current path, not a ring), several sources exist, or part of the survivor is
+    non-axisymmetric (a busbar run) — which only the planned toroidal-harmonic and
+    non-axisymmetric fits can separate.</li>
+    <li><strong>The P5 pair map runs off the grid.</strong> Its 79% peak sits at the scan boundary
+    (R = 2.4 m, outside the vessel) at an unphysical −5.8× supply current: the two-shot pair
+    pattern prefers a broad far field over any interior ring. More pair statistics (or loops)
+    are required before reading it.</li>
+  </ol>
+
+  <figure>
+    <img src="/nova/figures/mast-misfit-localization/misfit_flux_map.svg"
+         alt="Poloidal flux contour maps of the best-fitting source for the P4 lower group and the P5 pair group"
+         style="max-width:100%;height:auto">
+    <figcaption>First contour maps of the misfit: the poloidal flux of the best-fitting source per
+    driven ampere-turn, for the strongest single-member group (P4 lower) and the pair group. These
+    are source-model projections of the misfit, not interpolations of it — the honest
+    contour map of the misfit itself needs the flux loops (direct ψ measurements) and the
+    toroidal-harmonic expansion queued in <code>mast-misfit-toroidal-harmonics</code>. Evidence:
+    <code>localization2.npz</code>, script <code>misfit_figures.py</code>.</figcaption>
+  </figure>
+
+  <h2>The differential-circuit hypothesis, tested</h2>
+  <p>The hypothesis: P4/P5 serve vertical-field and position control, so shape- and
+  position-controller demands could superpose and the two members of a pair could carry different
+  currents than the record states — a differential circuit. Three measurements bound it:</p>
+  <ol>
+    <li><strong>The member currents are independently measured.</strong> On every symmetric-pair
+    shot the two recorded member traces correlate at 0.99995–0.999999 but are <em>not</em> copies:
+    their difference spans 0.25–0.62% of the pair sum. The data survey confirmed the metrology
+    end-to-end: separate transducers per member agreeing to 0.06% on P4 and 0.09% on P5
+    (least-squares upper/lower ratios 0.999463 and 1.000163 on shot 21978), against the P6
+    anti-series pair reading −0.27 — proof the measurement resolves a genuine differential when
+    one exists. The described circuits are series pairs on a single supply
+    (connections −1/+1, no extra nodes), and <code>pf_active.supply</code> is empty. Any
+    controller superposition that reaches the coils is already in the recorded member
+    currents the forward model consumes.</li>
+    <li><strong>The recorded difference does not drive the misfit.</strong> Partialling the pair
+    sum and every other active drive out of both sides (Frisch–Waugh) and regressing each
+    channel's residual on the member difference explains 0.2–1.2% of residual power on average
+    per shot. The separation record's free inversion says the same thing more strongly: member
+    currents solved freely per time sample still cannot remove the surviving field.</li>
+    <li><strong>Except obr10.</strong> On both fully-scored P5 pair shots the member difference
+    explains 16% and 40% of obr10's partialled residual at a consistent +279/+293 nT/At (and
+    3–6% with the same sign on the P4 pair shots for obr04/obr10). obr10 is one of the six
+    misfit carriers. A small genuinely-differential current path — or one member's slight
+    misplacement making the pair's near-cancellation imperfect exactly at obr10's position —
+    survives as a secondary, localised signature.</li>
+  </ol>
+  <p>Verdict: <strong>as a driver of the main misfit, recorded-current superposition is excluded;
+  as engineering context it stands</strong>. What remains open is precisely the part the record
+  cannot see: current taking a path that is not the described winding — which is the missing-
+  conductor lead again, now with obr10's differential signature as an additional constraint any
+  candidate circuit must reproduce.</p>
+
+  <h2>The flux loops are recoverable, and they are the missing rank</h2>
+  <p>The separation record excluded flux loops because their absolute gain was not established. The
+  data survey narrowed that worry considerably. The store publishes 29 <code>fl_*</code> channels
+  in genuine total webers (0.15–1.5 Wb on a plasma shot; the reconstruction's own
+  <code>silop_dphi</code> is 2π for all 46 loops, so every loop is toroidally complete), and the
+  2π convention question was <em>already settled by measurement</em> —
+  <code>MEASURED_FLUX_CONVENTION = 13</code> was set because the ratio of a loop's fitted flux to
+  the reconstructed flux at its own position measures 2π
+  (<code>nova/imas/mast_solve_inputs.py:98-109</code>). What is genuinely unestablished is a
+  <em>per-loop</em> gain — and the fitting machinery already exists at
+  <code>nova/imas/mast_flux_loop_adjudication.py:588-672</code>, fitting each channel's scale
+  against a Biot–Savart loop response and currently <em>discarding the result</em>. The
+  calibration plan is therefore consumption, not invention: promote stable fitted gains with the
+  probe-scale evidence discipline, sweep loop channels for the acquisition block-scale steps
+  first, and keep unstable loops excluded with cause.</p>
+  <p>Three structural facts bound the fit. The description carries 80 loops (44 closed, 36 saddle)
+  with generic index names, no store channel names, and every calibration field empty; 26 of the
+  29 data-carrying channels land on a described position, and the archive's reconstruction
+  validation names 7 loop positions the description cannot reach — <code>fl_p4l_1..4</code>,
+  <code>fl_p5l_3</code>, <code>fl_p6u_1..2</code>. At P4 the two sets are almost disjoint: the
+  description covers four P4-<em>upper</em> positions (three of which never carry data in 400
+  sampled shots) while the archive publishes P4-<em>lower</em> channels the description has
+  nothing near — at exactly the coil the misfit localises to. And the archive's own EFIT gave
+  every flux loop zero weight in every sampled shot (and zero weight to all 38 outboard probes),
+  so no upstream reconstruction ever cross-checked these channels — obr17 and obv14 were never
+  used by the machine's own fits, which is how a P4/P5-local description error could survive
+  unnoticed for the machine's whole life.</p>
+  <p>The payoff is rank. The probe array resolves ten of thirteen coil directions and cannot
+  separate a coil from its own case; flux loops sample the poloidal flux — a different functional
+  of the source distribution with different geometric leverage — and directly constrain the misfit
+  flux map that the contour programme needs. Loop inclusion upgrades three things at once: the
+  current inversion (P2/P3/P6 wiring may become answerable), the source localization (ψ constraints
+  between the probe bands), and the gate (more channels scoring the description). Whether it also
+  changes the artifact-vs-incumbent comparison is a gate-owner question, same as obr17.</p>
+
+  <h2>Driver assessment — all candidates</h2>
+  <table>
+    <thead><tr><th>candidate</th><th>status after this session</th><th>evidence</th></tr></thead>
+    <tbody>
+      <tr><td>P4 member geometry / internal current distribution</td>
+      <td><strong>open — strengthened, now with a named test</strong></td>
+      <td>Two non-P4 drive groups localise beside the P4 coils; the 26.5% P4 inversion split
+      stands; obr10's differential signature adds a member-asymmetry constraint; and the
+      description itself carries an unexplained 17.3 mm / 3% P4 member asymmetry (12.9 mm at P5)
+      that a symmetry-elimination forward test can confirm or clear directly.</td></tr>
+      <tr><td>Feeder / busbar / supply-return conductor near P4/P5</td>
+      <td><strong>open — quantified, but unnamed in every source</strong></td>
+      <td>Implied currents 0.10–1.00× supply; P5 upper wants exactly 1.00× at the centre column;
+      level-following excludes induction, so the path must be galvanic. No feeder, busbar, lead
+      or joint geometry exists in any description on this host; EFIT's far richer 101-circuit
+      model has nothing near P4/P5 either — and still misses the outboard array by 20–24%, the
+      same order as nova's 21-column model.</td></tr>
+      <tr><td>Differential member currents as recorded (control superposition)</td>
+      <td><strong>excluded as main driver</strong></td>
+      <td>Members independently measured; difference explains ≤1.2% mean; free inversion already
+      absorbs member-level currents.</td></tr>
+      <tr><td>A genuinely differential unrecorded path</td>
+      <td><strong>open — secondary</strong></td>
+      <td>obr10: 16–40% of partialled residual on P5 pair shots at consistent sign.</td></tr>
+      <tr><td>obr17 gain 0.50</td><td><strong>closed as instrument fault; decision pending</strong></td>
+      <td>Now corroborated by a third, fully independent route: per-probe gains fitted against the
+      archive EFIT's own forward field give obr17 = 0.5023 ± 0.0007 (nova's promoted value
+      0.5011 — 0.25% agreement from a route sharing no estimator, geometry, or shot selection),
+      flat across P4-lower, P5-lower, P5-upper and plasma excitations while 36 of 38 equally
+      unfitted outboard channels sit within ~10% of unity. Excluded from all source fits
+      here.</td></tr>
+      <tr><td>Flux-loop convention / calibration</td>
+      <td><strong>fixable — highest-leverage next measurement</strong></td>
+      <td>Exact vacuum flux available per loop; fit is the sensor-adjudication machinery re-run
+      on loops.</td></tr>
+      <tr><td>Inductive / eddy / rate mechanisms, wiring polarity, antisymmetric source,
+      error-field circuits, winding lattice, acquisition range, sensor pose</td>
+      <td><strong>excluded previously — unchanged</strong></td>
+      <td>Separation record; nothing here reopens them.</td></tr>
+      <tr><td>Non-axisymmetric conductor (3D busbar run)</td>
+      <td><strong>open — untested</strong></td>
+      <td>All fits here are axisymmetric; a toroidally-localised conductor aliases into the n=0
+      fits. Joins the <code>mast-nonaxisymmetric-physics</code> plan's scope.</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Caveats that bound every number above</h2>
+  <ul>
+    <li>Channels pool with uniform weight; no per-channel noise whitening is applied. The
+    surviving shares and split-half cosines are robust to this, the exact peak locations less so.</li>
+    <li>The upper groups pool 7 rows each and the P5 pair only 2 — their maps are indicative, not
+    evidential. P4 lower (13 rows, +0.92 split-half) is the only pattern to build on alone.</li>
+    <li>The filament scan removes the described-span component of each candidate column, so a
+    conductor whose field pattern the coil set can nearly reproduce scores near zero everywhere —
+    the maps localise only what is <em>visible</em> in the surviving misfit.</li>
+    <li>A single filament is the simplest source model; 40–57% unexplained surviving power says
+    the truth is extended, multiple, or non-axisymmetric.</li>
+    <li>All statements about "the supply current" use the published 23 turns; if the turns are
+    wrong the mA/At numbers stand but their supply-current multiples rescale.</li>
+    <li>Consumers joining the archive EFIT tables to the description: efm's outboard probe blocks
+    run in the <em>opposite order</em> to the description's (efm indices 40–58 are obv, 59–77 are
+    obr; the description names 40–58 obr and 59–77 obv). Positions pair correctly, so nothing
+    moves in space — but raw index-order joins silently swap radial for axial across all 38
+    outboard channels. Join through the level-2 <code>sensor_map</code>, never by index.</li>
+  </ul>
+
+  <h2>What happens next — the S6 programme</h2>
+  <ol>
+    <li><strong><code>mast-flux-loop-calibration</code></strong> — fit per-loop gains against the
+    exact vacuum flux, adjudicate the 2π convention, and admit calibrated loops to the inversion
+    and the gate. Unlocks rank for everything else.</li>
+    <li><strong><code>mast-misfit-toroidal-harmonics</code></strong> — expand the misfit (probes +
+    calibrated loops) in toroidal harmonics to produce honest contour maps of the misfit flux, and
+    localise sources by interior/exterior expansion mismatch plus multi-filament fits; quantify
+    what stays non-axisymmetric.</li>
+    <li><strong><code>mast-p4p5-circuit-provenance</code></strong> — the symmetry-elimination
+    test first (forward-model mirrored/symmetrised/scanned P4/P5 member geometry against the
+    banked surviving patterns — the cheapest decisive measurement in the programme), then P4
+    winding and loop-position provenance, the external supply/feeder documentation hunt, and the
+    pack-total channel unblock (the survey measured
+    <code>pXY_current = pXY_coil_current + pXY_case_current</code> exactly, worst deviation
+    6.5×10⁻⁶ over 336 family-shot pairs, closing the "no source states what the difference is"
+    block at <code>mast_solve_inputs.py:815-825</code>).</li>
+  </ol>
+
+  <h2>Related records</h2>
+  <ul>
+    <li><a href="/nova/research/mast-vacuum-misfit-separation.html">Vacuum misfit separation</a> —
+    the two-fault record this continues; its free inversion, parity and exclusion tables are
+    assumed throughout.</li>
+    <li><a href="/nova/research/mast-sensor-adjudication-landed.html">Sensor adjudication</a> — the
+    per-channel scale machinery the flux-loop calibration will re-run on loops.</li>
+    <li><a href="/nova/research/mast-block-scale-normalisation-landed.html">Block-scale
+    normalisation</a> — the read-path correction all couplings here inherit.</li>
+    <li><a href="/nova/research/mast-vacuum-floor-closure-landed.html">Vacuum-floor ladder
+    closure</a> — the six-channel decomposition and cutover framing.</li>
+  </ul>
+
+  <p>Substrate: 17111-shot store at <code>/work/projects/imas_gpu/mast/level1/shots</code>;
+  geometry from the machine-geometry registry at shot 21978; forward model
+  <code>nova.imas.mast_vacuum_response</code> over the polygon Green's kernel. Scripts, arrays and
+  logs: <code>~/.cache/nova-mast/misfit-localization/</code> (couplings recompute, localization
+  scan, differential test, figure generation).</p>
+
+</main>
+</body>
+</html>

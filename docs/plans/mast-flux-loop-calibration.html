@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="mast-flux-loop-calibration">
+  <meta name="plan-title" content="MAST Flux-Loop Calibration and Inclusion">
+  <meta name="plan-summary" content="Fit every MAST flux loop's gain against the exact vacuum flux, adjudicate the suspected 2-pi store convention, and admit calibrated loops to the current inversion, the misfit maps, and the residual gate — recovering the rank the probe array lacks.">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="M">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="general">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint" content="S6">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>MAST Flux-Loop Calibration and Inclusion | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <h2 id="s1">§1 — Why the loops, and why now</h2>
+  <p>The flux loops were excluded from every MAST vacuum fit because their absolute gain is not
+  established: a factor of 2π between the store convention (Wb versus Wb/rad) and the kernel
+  convention could not be ruled out, and one unknown row gain corrupts every inverted current.
+  Meanwhile the probe array's identifiability cliff — rank 10 over 13 coil directions, coil and
+  case inseparable — is the binding constraint on the whole misfit programme: P2/P3/P6 wiring is
+  unanswerable, the P4 pair shots are unusable (their drives run collinear with P3 and the
+  solenoid), and the source-localization maps of
+  <a href="/nova/research/mast-misfit-source-localization.html">the localization record</a> rest
+  on probes alone.</p>
+  <p>The exclusion is fixable by the same logic the vacuum programme runs on: for plasma-free
+  shots the exact flux at every loop position follows from the described Green's kernel and the
+  recorded currents. The 2026-08-07 data survey found the ground already half-prepared. The store
+  publishes 29 <code>fl_*</code> channels in genuine total webers (0.15–1.5 Wb on plasma;
+  <code>silop_dphi</code> = 2π on all 46 reconstruction loops), the 2π convention was already
+  settled by measurement (<code>MEASURED_FLUX_CONVENTION = 13</code>,
+  <code>nova/imas/mast_solve_inputs.py:98-109</code>), and a per-loop scale fit already exists at
+  <code>nova/imas/mast_flux_loop_adjudication.py:588-672</code> — it fits each channel against a
+  Biot–Savart loop response and currently <em>discards the result</em>. This plan is therefore
+  consumption and validation, not invention. Known bounds: 26 of the 29 data-carrying channels
+  land on a described loop position; the description's 80 loops carry generic names, four
+  duplicated P3 positions, and empty calibration fields; at P4 the described (upper) and measured
+  (lower) loop sets are almost disjoint, and <code>fl_p4u_1..3</code> never carry data — so the
+  loop-position reconciliation at P4 is in scope, not an afterthought. And the archive's own
+  EFIT gave every loop zero weight in every sampled shot, so a fitted gain has no upstream
+  cross-check: its evidence must stand alone.</p>
+
+  <h2 id="s2">§2 — Implementation</h2>
+  <ol>
+    <li><strong>Loop inventory and position reconciliation.</strong> Join the 29 store channels
+    to the description's 80 loops; resolve the 7 unreachable reconstruction-loop positions
+    (<code>fl_p4l_1..4</code>, <code>fl_p5l_3</code>, <code>fl_p6u_1..2</code>) against the
+    archive EFIT loop table, and decide per loop: adopt the archive position, add the missing
+    described loop, or exclude with cause. P4 first — the misfit localises there and the sets
+    are almost disjoint there.</li>
+    <li><strong>Forward flux columns.</strong> Extend the vacuum response model to flux targets:
+    per-family flux per ampere-turn at each loop position from the polygon Green's kernel (the
+    flux maps already exist gridded; loops need exact point evaluations).</li>
+    <li><strong>Per-loop gain fits.</strong> Re-run and this time consume the adjudication fit
+    (<code>mast_flux_loop_adjudication.py:588-672</code>): through-origin regression of each
+    loop's measured signal on the described flux over the sustained cohort, with the
+    pre-excitation offset removed and loop channels swept for acquisition block-scale steps
+    (the probe channels stepped by 1/2, 1/√2, √2, 2 across shot blocks) before any static gain
+    is promoted.</li>
+    <li><strong>Convention confirmation and promotion.</strong> Confirm the measured 2π
+    convention holds per loop (a residual global cluster off unity reads a store-wide factor);
+    promote stable per-loop gains with the probe-scale evidence discipline; loops whose gain
+    will not stabilise across shots or blocks stay excluded, with cause recorded. Note the
+    absence of any upstream cross-check — the archive EFIT never weighted a loop.</li>
+    <li><strong>Inclusion and re-measurement.</strong> Admit calibrated loops to the free current
+    inversion and recompute the identifiability spectrum — report the new rank and whether
+    P2/P3/P6 wiring becomes answerable. Recompute the P4/P5 surviving-misfit patterns with loop
+    constraints and hand them to <code>mast-misfit-toroidal-harmonics</code>.</li>
+    <li><strong>Gate decision packet.</strong> One document for the gate owner covering both
+    calibration-consumption questions: scoring obr17 through its fitted 0.5011 gain, and scoring
+    the calibrated loops at all. Both are physically correct and both move the
+    artifact-vs-incumbent comparison; the decision is the owner's, the evidence is ours.</li>
+  </ol>
+  <p>Done-when: loop gains fitted and banked with per-loop verdicts; convention factor named with
+  evidence; inversion re-run with loops and the identifiability delta reported; localization
+  constraint sets regenerated; gate decision packet delivered. All numbers reproducible from
+  banked scripts under <code>~/.cache/nova-mast/</code>.</p>
+
+  <section data-reckon="decisions" id="decisions" class="r-decisions">
+    <h2><span class="sec">§</span> Decisions</h2>
+    <div class="r-dec" data-key="convention-correction-site" data-choice="" data-by="" data-when="">
+      <p class="r-dec-q">Where is the flux-loop convention factor corrected — divided out on the
+      nova read path, or fixed in the machine-description artifact so every consumer inherits it?</p>
+      <p class="r-dec-opts">
+        <button class="r-opt" data-value="read-path">read path (nova-local, fast)</button>
+        <button class="r-opt" data-value="artifact">machine-description artifact (fleet-wide)</button>
+      </p>
+      <p class="r-dec-rat"></p>
+    </div>
+  </section>
+
+  <section data-reckon="followups" id="followups" class="r-followups">
+    <h2><span class="sec">§</span> Followups</h2>
+    <article class="r-fu" data-id="f-flc-001" data-status="open"
+             data-capability-version="1.0" data-capability-class="general"
+             data-written-by="reckon-create" data-written-at="2026-08-07">
+      <h4 class="r-fu-title">Implement §2.1–§2.4 — loop inventory, flux columns, gain fits, convention verdict</h4>
+      <div class="r-fu-body"><p>First shippable slice: everything up to the convention verdict,
+      no inversion re-run yet. The localization record documents the method precedent (per-channel
+      scale fits) and the store facts.</p></div>
+      <pre class="r-fu-prompt">Project: nova
+Plan:    mast-flux-loop-calibration (http://localhost:8765/nova/mast-flux-loop-calibration.html)
+Section: §2.1–§2.4
+Capability: general
+Requirements: strict verification
+
+Context
+  Flux loops were excluded from all MAST vacuum fits for an unestablished
+  absolute gain (possible 2-pi store convention). Vacuum shots give the exact
+  flux at every loop, so the gains are directly fittable. This unlocks rank
+  the probe array lacks (10 of 13 coil directions).
+
+State to read
+  docs/research/mast-misfit-source-localization.html (method + store facts)
+  docs/research/mast-vacuum-misfit-separation.html (exclusion rationale, caveats)
+  nova/imas/mast_vacuum_response.py (response model to extend to flux targets)
+  nova/imas/mast_vacuum_cohort.py (read path, block scales, cohort classes)
+  ~/.cache/nova-mast/misfit-localization/ (banked couplings and scripts)
+
+Scope locks / constraints
+  Use imas-python for any IDS read (dd version from the artifact); never h5py.
+  Loop channels must be swept for acquisition block-scale steps before any
+  static gain is promoted. Loops that will not stabilise stay excluded with
+  cause. Heavy sweeps run on SLURM debug partitions (time <= 01:00:00).
+
+Done-when
+  1. Loop inventory + per-loop gain fits banked under ~/.cache/nova-mast/
+  2. Convention verdict (2-pi or not) named with evidence
+  3. Followup written into plan + this one resolved</pre>
+    </article>
+  </section>
+
+</main>
+</body>
+</html>

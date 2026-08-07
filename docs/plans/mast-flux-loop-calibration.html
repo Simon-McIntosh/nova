@@ -57,10 +57,14 @@
   <ol>
     <li><strong>Loop inventory and position reconciliation.</strong> Join the 29 store channels
     to the description's 80 loops; resolve the 7 unreachable reconstruction-loop positions
-    (<code>fl_p4l_1..4</code>, <code>fl_p5l_3</code>, <code>fl_p6u_1..2</code>) against the
-    archive EFIT loop table, and decide per loop: adopt the archive position, add the missing
-    described loop, or exclude with cause. P4 first — the misfit localises there and the sets
-    are almost disjoint there.</li>
+    (<code>fl_p4l_1..4</code>, <code>fl_p5l_3</code>, <code>fl_p6u_1..2</code>) and decide per
+    loop: adopt a validated archive position, add the missing described loop, or exclude with
+    cause. The archive EFIT table is NOT trustworthy at exactly the critical spot: its four
+    P4L loop coordinates are a verbatim copy of P3L's and they alone fail the 2π
+    fitted-to-reconstructed self-test (16–23× instead of 6.28) — so P4L positions need an
+    independent source, and the 2π ratio doubles as a per-loop position-validity check for
+    every adopted position. P4 first — the misfit localises there and the sets are almost
+    disjoint there.</li>
     <li><strong>Forward flux columns.</strong> Extend the vacuum response model to flux targets:
     per-family flux per ampere-turn at each loop position from the polygon Green's kernel (the
     flux maps already exist gridded; loops need exact point evaluations).</li>
@@ -81,10 +85,16 @@
     inversion and recompute the identifiability spectrum — report the new rank and whether
     P2/P3/P6 wiring becomes answerable. Recompute the P4/P5 surviving-misfit patterns with loop
     constraints and hand them to <code>mast-misfit-toroidal-harmonics</code>.</li>
-    <li><strong>Gate decision packet.</strong> One document for the gate owner covering both
-    calibration-consumption questions: scoring obr17 through its fitted 0.5011 gain, and scoring
-    the calibrated loops at all. Both are physically correct and both move the
-    artifact-vs-incumbent comparison; the decision is the owner's, the evidence is ours.</li>
+    <li><strong>Gate decision packet.</strong> One document for the gate owner covering the
+    calibration-consumption questions: scoring obr17 through its fitted 0.5011 gain (its
+    mechanism is now published — MAST pickup channels are averaged 180°-apart coil pairs, and
+    a failed member halves the signal), scoring the calibrated loops at all, and how to treat
+    the pair-failure channel class the same mechanism predicts: obv03 steps 1.01 → 0.586
+    mid-life, obr05 flips between 1.25 and 0.50 shot-to-shot (the promoted static 1.1043 is
+    the wrong model for it), obr18 sits at 1.22. Per-era or per-shot-block gains, not single
+    static scales, are the correct calibration model for that class. All physically correct,
+    all move the artifact-vs-incumbent comparison; the decision is the owner's, the evidence
+    is ours.</li>
   </ol>
   <p>Done-when: loop gains fitted and banked with per-loop verdicts; convention factor named with
   evidence; inversion re-run with loops and the identifiability delta reported; localization

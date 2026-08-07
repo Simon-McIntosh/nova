@@ -62,8 +62,12 @@
   <ol>
     <li><strong>Symmetry elimination test (first, decisive, cheap).</strong> Forward-model the
     sustained P4/P5 cohort under controlled geometry variants — mirrored members
-    (upper := reflected lower), symmetrised centroids, equalised footprints, and per-member
-    (dz, dr, scale) scans — and score each variant against the banked surviving-misfit patterns
+    (upper := reflected lower), symmetrised centroids, equalised footprints, per-member
+    (dz, dr, scale) scans seeded with Kirk's measured as-built offsets (arXiv:1312.6507
+    Table 1: δz 2.9 / 6.6 / 0.6 / 13.1 mm for P4U/P4L/P5U/P5L plus tilt and ellipticity), and
+    the 5-turn partial row flipped between the pack's |Z| extremes (EFIT-MAST and FreeGSNKE
+    disagree on which side it sits) — and score each variant against the banked
+    surviving-misfit patterns
     (<code>~/.cache/nova-mast/misfit-localization/couplings.npz</code>). Either a geometry
     correction removes the survivor (fault found: description geometry) or the explained
     fraction caps well below one (the survivor needs current the coils do not carry). The
@@ -79,12 +83,20 @@
     member, and states the metrology survey determined only the coil <em>case</em> position,
     "not the copper turns of the coil inside the case" — so copper-in-case offsets belong in
     the §2.1 scan variants alongside centroid and footprint changes.</li>
-    <li><strong>Supply and feeder topology from external sources.</strong> Collect published
-    MAST engineering descriptions of the P4/P5 supplies, feeder routing and earthing (design
-    papers, SOFT/SOFE proceedings, UKAEA reports, FAIR-MAST channel metadata); deliver whatever
-    conductor geometry can be established as candidate machine-description entries, and test
-    each candidate's field pattern against the localization maps and obr10's differential
-    signature (+290 nT/At on P5 pair member-difference).</li>
+    <li><strong>Supply and feeder topology — the 2026-08-07 web survey's answers and
+    remainders.</strong> Settled: every upper/lower pair is series on one supply except P6
+    (anti-series, the vertical-control actuator — never differential P4/P5); five
+    coil-voltage channels exist (one each for P1/P2/P4/P5 plus the P6 fast amplifier); the
+    published P4 member current difference is 1.5% (transducers say 0.06%). Named but
+    unrouted: the "P3/4/5 link board" (the only feeder-hardware fact in the public record),
+    the toroidally-localised P4 "coil tail", and joggles — coil feeds are an explicitly named
+    error-field source. Remaining actions: retrieve Edlington, Martin &amp; Pinfold, Rev. Sci.
+    Instrum. 72, 421 (2001) via institutional library (paywalled; the original MAST magnetics
+    paper, likely holding as-built probe tables); test any establishable conductor geometry
+    against the localization maps and obr10's differential signature (+290 nT/At on P5 pair
+    member-difference). Note for any MAST-U cross-check: P4 was physically repositioned during
+    MAST-U assembly (−2.2 mm x, +3.2 mm y, sub-mrad tilts), so MAST-era positions are the
+    pre-adjustment ones.</li>
     <li><strong>Case-current identity fix.</strong> Replace the block at
     <code>mast_solve_inputs.py:815-825</code> with the measured identity, documented as
     mechanism (the pack total is the coil plus its case), with the 336-pair evidence banked

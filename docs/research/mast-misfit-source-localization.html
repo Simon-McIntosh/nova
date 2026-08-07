@@ -204,6 +204,15 @@
     misplacement making the pair's near-cancellation imperfect exactly at obr10's position —
     survives as a secondary, localised signature.</li>
   </ol>
+  <p>The published record now closes the circuit-topology half outright. Every MAST upper/lower
+  PF pair is wired in series on one supply <em>except P6, whose anti-series connection is the
+  vertical-position-control actuator</em> (Pentland et al., arXiv:2407.12432; Anand et al.,
+  Nucl. Fusion 64 086051) — vertical control was never a differential P4/P5 function, and no
+  vernier, tap, or asymmetric feed on P4/P5 appears anywhere in the open literature. Kirk's
+  bench measurements put the real P4 member current difference at 1.5%; our transducers say
+  0.06%. The 26.5% split the free inversion reports is therefore not a current asymmetry — it
+  is the inversion absorbing an unmodelled field into the nearest available column, which is
+  the geometry lead restated.</p>
   <p>Verdict: <strong>as a driver of the main misfit, recorded-current superposition is excluded;
   as engineering context it stands</strong>. What remains open is precisely the part the record
   cannot see: current taking a path that is not the described winding — which is the missing-
@@ -232,7 +241,11 @@
   <code>fl_p5l_3</code>, <code>fl_p6u_1..2</code>. At P4 the two sets are almost disjoint: the
   description covers four P4-<em>upper</em> positions (three of which never carry data in 400
   sampled shots) while the archive publishes P4-<em>lower</em> channels the description has
-  nothing near — at exactly the coil the misfit localises to. And the archive's own EFIT gave
+  nothing near — at exactly the coil the misfit localises to. And the archive's own P4L loop
+  coordinates cannot be trusted either: in the EFIT description they are a verbatim copy of
+  P3L's, and they are the only loops failing the 2π self-test (ratio 16–23× instead of 6.28) —
+  so the reconciliation must establish the P4L positions from an independent source, and the
+  fitted-to-reconstructed 2π ratio doubles as a per-loop position-validity check. And the archive's own EFIT gave
   every flux loop zero weight in every sampled shot (and zero weight to all 38 outboard probes),
   so no upstream reconstruction ever cross-checked these channels — obr17 and obv14 were never
   used by the machine's own fits, which is how a P4/P5-local description error could survive
@@ -258,9 +271,18 @@
       corroboration (arXiv:1312.6507): P4/P5 are MAST's dominant intrinsic error-field source
       from manufacturing distortion, the vacuum model disagreed with measurement by a factor
       ~3 there, the metrology survey determined only the coil <em>case</em> position — "not the
-      copper turns of the coil inside the case" — and 23 turns per member is confirmed. The
-      unmeasured copper-in-case position is precisely the geometric freedom the survivor points
-      at.</td></tr>
+      copper turns of the coil inside the case" — and 23 turns per member is confirmed (a
+      notional 6×4 winding with the missing turn "distributed through the coil" via joggles,
+      plus a toroidally-localised coil tail). Kirk's Hall-probe fits give measured as-built
+      member offsets — δz of 2.9 mm (P4U), 6.6 mm (P4L), 0.6 mm (P5U) and 13.1 mm (P5L), with
+      per-member tilt, ellipticity and higher moments — and fitted currents 2.7–7.0%
+      <em>above</em> the nominal drive, so the nominal-geometry 23-turn model understates the
+      real field. Kirk subtracts the n = 0 component throughout, so the published error-field
+      work never examined the axisymmetric part this record chases. One more discrete
+      candidate: the 23-turn lattice's 5-turn partial row sits on opposite sides in EFIT-MAST
+      versus FreeGSNKE MAST-U — a flipped chamfer is exactly an up-down-symmetric,
+      level-following, shape-changing error. The unmeasured copper-in-case position is
+      precisely the geometric freedom the survivor points at.</td></tr>
       <tr><td>Coil-case currents as the source</td>
       <td><strong>excluded by measurement</strong></td>
       <td>The separation record could not separate a coil from its own case at the array; the
@@ -269,7 +291,8 @@
       0.001–0.066 against I), reverse sign between ramp-up and ramp-down while the coil current
       holds one sign, decay with 15–146 ms constants, and their ampere-turn fraction collapses
       from ~2% on the ramps to 0.01–0.35% at flat-top — one to two orders too small and not
-      linear in the drive at fixed current.</td></tr>
+      linear in the drive at fixed current. Carry the ramp caveat: at ~2% transiently, a fit
+      window that includes ramp phases sees a real case contribution there.</td></tr>
       <tr><td>Feeder / busbar / supply-return conductor near P4/P5</td>
       <td><strong>open — quantified, but unnamed in every source</strong></td>
       <td>Implied currents 0.10–1.00× supply; P5 upper wants exactly 1.00× at the centre column;
@@ -284,13 +307,18 @@
       <tr><td>A genuinely differential unrecorded path</td>
       <td><strong>open — secondary</strong></td>
       <td>obr10: 16–40% of partialled residual on P5 pair shots at consistent sign.</td></tr>
-      <tr><td>obr17 gain 0.50</td><td><strong>closed as instrument fault; decision pending</strong></td>
-      <td>Now corroborated by a third, fully independent route: per-probe gains fitted against the
-      archive EFIT's own forward field give obr17 = 0.5023 ± 0.0007 (nova's promoted value
-      0.5011 — 0.25% agreement from a route sharing no estimator, geometry, or shot selection),
-      flat across P4-lower, P5-lower, P5-upper and plasma excitations while 36 of 38 equally
-      unfitted outboard channels sit within ~10% of unity. Excluded from all source fits
-      here.</td></tr>
+      <tr><td>obr17 gain 0.50</td><td><strong>closed — mechanism now published and named</strong></td>
+      <td>Every MAST equilibrium pickup channel is two coils 180° apart toroidally whose signals
+      are averaged before recording; when one member fails the recorded signal halves
+      (von Nessi et al., Phys. Plasmas 19, 012506 (2012), which also notes rescaling was manual
+      with "no quantifiable algorithm"). obr17 measures 0.488–0.514 against the archive's own
+      forward field across shots 15000–30420 — a lifetime-constant half, so a frozen
+      calibration constant rather than a mid-life failure. Third-route corroboration
+      0.5023 ± 0.0007 against nova's promoted 0.5011. The same mechanism predicts a
+      channel class, and the archive shows it: obv03 steps 1.01 → 0.586 mid-life, obr05
+      flips between 1.25 and 0.50 shot-to-shot (nova's promoted static 1.1043 is the wrong
+      model for a flipping channel), obr18 sits at 1.22, obv10 is dead. Per-era gains, not
+      static scales, are the correct calibration model for pair-failure channels.</td></tr>
       <tr><td>Flux-loop convention / calibration</td>
       <td><strong>fixable — highest-leverage next measurement</strong></td>
       <td>Exact vacuum flux available per loop; fit is the sensor-adjudication machinery re-run
@@ -324,6 +352,10 @@
     obr; the description names 40–58 obr and 59–77 obv). Positions pair correctly, so nothing
     moves in space — but raw index-order joins silently swap radial for axial across all 38
     outboard channels. Join through the level-2 <code>sensor_map</code>, never by index.</li>
+    <li>The solenoid drive weight in use, 344.66 effective turns, is supported by no open
+    source: EFIT-MAST carries 328 (656 filaments × 0.5) stable across shots, FreeGSNKE MAST-U
+    uses 324. Against 328 the free inversion's solenoid ratio reads 0.93 rather than 0.885 —
+    still unconverged at this array, but the 344.66 needs its own provenance trail.</li>
   </ul>
 
   <h2>What happens next — the S6 programme</h2>
@@ -337,8 +369,11 @@
     what stays non-axisymmetric.</li>
     <li><strong><code>mast-p4p5-circuit-provenance</code></strong> — the symmetry-elimination
     test first (forward-model mirrored/symmetrised/scanned P4/P5 member geometry against the
-    banked surviving patterns — the cheapest decisive measurement in the programme), then P4
-    winding and loop-position provenance, the external supply/feeder documentation hunt, and the
+    banked surviving patterns — the cheapest decisive measurement in the programme, now with
+    Kirk's Table-1 as-built offsets and the chamfer-side flip as measured priors), then P4
+    winding and loop-position provenance (including retrieving Edlington, Martin &amp; Pinfold,
+    Rev. Sci. Instrum. 72, 421 (2001) — the original MAST magnetics paper, paywalled, the
+    highest-value unretrieved document), the external supply/feeder documentation hunt, and the
     pack-total channel unblock (the survey measured
     <code>pXY_current = pXY_coil_current + pXY_case_current</code> exactly, worst deviation
     6.5×10⁻⁶ over 336 family-shot pairs, closing the "no source states what the difference is"

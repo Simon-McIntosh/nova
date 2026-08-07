@@ -62,6 +62,19 @@
     imposed) and extended-path (line-current segments closing through the machine) models scored
     against the harmonic maps; report explained fraction, implied currents in supply-current
     units, and the residue after the best source.</li>
+    <li><strong>Toroidal sensitivity accounting.</strong> The n=0 fits above must carry an
+    explicit statement of what each sensor class can see. Healthy MAST pickup channels are
+    180°-summed pairs, so all odd-n content cancels by construction (the error-field
+    correction coils, odd-n by design, are doubly excluded — parity plus the measured
+    R² &lt; 0.0005) while <em>even</em> n (2, 4, …) from any toroidally-localised conductor
+    leaks into the "axisymmetric" reading; toroidally-closed flux loops see exactly n=0 and
+    nothing else; the 36 saddle loops are the only n-resolving set. Deliver the leakage
+    bound: for plausible localised sources (a feeder run, the P4 coil tail), the even-n
+    fraction that a summed pair reports against the true n=0 — and screen the pair-failure
+    channels (obr17 class), which are single coils and regain full odd-n sensitivity,
+    against the correction-coil and feeder odd-n content specifically. Cross-machine flux-loop
+    versus probe disagreement per drive group is the practical asymmetry detector the user
+    hypothesis predicts.</li>
     <li><strong>Verdict.</strong> Either a localised source region with implied current and
     candidate identity (handed to <code>mast-p4p5-circuit-provenance</code> for engineering
     confirmation), or a measured statement that the survivor is non-axisymmetric or distributed

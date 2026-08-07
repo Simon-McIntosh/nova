@@ -20,6 +20,8 @@
   <title>Diagnostic Correction Schema | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-07">
+<meta name="plan-version" content="1">
 </head>
 <body>
 <main class="plan-doc">
@@ -48,6 +50,13 @@
       <td>median |drift| 1e-5 to 1e-4 T/s from the noise cohort</td></tr>
       <tr><td><code>exclusion</code></td><td>flag with cause</td><td>obv10 dead; obv11 withheld
       (unstable on two independent routes)</td></tr>
+      <tr><td><code>quality</code></td><td>enumerated status (good / suspect / corrupted /
+      dead) on a channel <em>or a named channel set</em>, with cause and evidence</td>
+      <td>the centre-column outlier: one sensor mid-CS-stack (ccbv22) carries the largest
+      surviving misfit per ampere-turn on P4-lower drives (−244 nT/At, 6.6× the array RMS) —
+      an outlier against its own neighbours that no fitted gain explains; consumers need a
+      machine-readable "treat with suspicion" state distinct from outright exclusion, and
+      set-level scope covers a whole array or digitiser group failing together</td></tr>
       <tr><td><code>convention</code></td><td>global factor with basis note</td>
       <td>flux-loop 2π store/solver convention, measured</td></tr>
     </tbody>
@@ -61,8 +70,9 @@
     used across the IMAS standard-names ecosystem. The fallback is hand-written Pydantic with
     YAML instances — less machinery, no generated artefacts for other consumers.</li>
     <li><strong>Core classes.</strong> <code>CorrectionSet</code> (machine, diagnostic system,
-    schema version, set version, generated-by) → <code>ChannelCorrection</code> (channel id,
-    kind, value, uncertainty) → <code>ValidityInterval</code> (pulse_start/pulse_end or
+    schema version, set version, generated-by) → <code>ChannelCorrection</code> (channel id
+    <em>or named channel-group id</em> for set-scoped quality states, kind, value,
+    uncertainty) → <code>ValidityInterval</code> (pulse_start/pulse_end or
     time_start/time_end; open-ended allowed; intervals within one channel+kind must not
     overlap) → <code>Provenance</code> (method, evidence URI — research record or banked
     array, fitted_at, fitted_by, corroborations). Ladder-quantised kinds carry their allowed
@@ -88,26 +98,24 @@
   next machine.</p>
 
   <section data-reckon="decisions" id="decisions" class="r-decisions">
-    <h2><span class="sec">§</span> Decisions</h2>
-    <div class="r-dec" data-key="schema-language" data-choice="" data-by="" data-when="">
-      <p class="r-dec-q">Schema authoring language?</p>
-      <p class="r-dec-opts">
-        <button class="r-opt" data-value="linkml">LinkML (recommended — generated models, JSON-Schema export, ecosystem fit)</button>
-        <button class="r-opt" data-value="pydantic-yaml">hand-written Pydantic + YAML instances</button>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="schema-language" data-choice="linkml" data-by="Simon McIntosh" data-when="2026-08-07T15:39:18+00:00">
+    <p class="r-dec-q">Schema authoring language?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="linkml">LinkML (recommended — generated models, JSON-Schema export, ecosystem fit)</button>
+      <button class="r-opt" data-value="pydantic-yaml">hand-written Pydantic + YAML instances</button>
       </p>
-      <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Owner decision 2026-08-07: LinkML. Schema-as-YAML with generated Pydantic and JSON-Schema, first-class enums and versioning, and ecosystem fit with the IMAS standard-names tooling. Plain Pydantic+YAML remains the documented fallback if LinkML tooling friction exceeds its value in practice.</p>
     </div>
-  </section>
+</section>
 
   <section data-reckon="followups" id="followups" class="r-followups">
-    <h2><span class="sec">§</span> Followups</h2>
-    <article class="r-fu" data-id="f-dcs-001" data-status="open"
-             data-capability-version="1.0" data-capability-class="general"
-             data-written-by="reckon-create" data-written-at="2026-08-07">
-      <h4 class="r-fu-title">Author the schema and the MAST instance; wire read-path consumption behind an equivalence test</h4>
-      <div class="r-fu-body"><p>Schema first, MAST instance second, consumption third — the
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-dcs-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-07" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Author the schema and the MAST instance; wire read-path consumption behind an equivalence test</h4>
+    <div class="r-fu-body"><p>Schema first, MAST instance second, consumption third — the
       equivalence test against current behaviour gates the constant deletion.</p></div>
-      <pre class="r-fu-prompt">Project: nova
+    <pre class="r-fu-prompt">Project: nova
 Plan:    diagnostic-correction-schema (http://localhost:8765/nova/plans/diagnostic-correction-schema.html)
 Section: §2
 Capability: general
@@ -138,7 +146,7 @@ Done-when
   2. Read path consumes the instance; equivalence test green; constants gone
   3. Followup written into plan + this one resolved</pre>
     </article>
-  </section>
+</section>
 
 </main>
 </body>

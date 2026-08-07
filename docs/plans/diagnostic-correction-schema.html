@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="diagnostic-correction-schema">
   <meta name="plan-title" content="Diagnostic Correction Schema — versioned, pulse-scoped channel corrections">
   <meta name="plan-summary" content="A LinkML-authored schema describing every diagnostic correction the calibration programme produces — gains, offsets, drift rates, acquisition scale steps, pair states, exclusions — each scoped to a validity interval in pulse number or time, each carrying provenance and evidence. Instances are versioned YAML per machine; generated models validate them; the read path applies them in one fixed order. The measured MAST reality (19 stepping channels, obr05 flipping between gain states, obv03 stepping mid-life) is the design driver: corrections are functions of pulse range, never single constants.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="M">
   <meta name="plan-capability-version" content="1.0">
@@ -21,8 +21,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-07">
-<meta name="plan-version" content="4">
-<meta name="plan-impl" content="0.6">
+<meta name="plan-version" content="6">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
 <main class="plan-doc">
@@ -106,8 +106,18 @@
   pair states (obv03 as bracketed eras; obr05 as two candidate states with no value), two
   exclusions, three quality states, and the measured flux convention.
   <code>tests/calibrate/</code>: 59 passed, 2 generation-parity tests proven with the extra
-  installed. Read-path consumption, the float-equality equivalence bench, and constant
-  deletion remain open below.</p>
+  installed.</p>
+  <p class="landed-summary"><span class="badge badge-shipped">✓ landed 2026-08-07 — read-path
+  cutover</span> The read path now serves from the correction document (merge
+  <code>4f37803a</code>): equivalence proven by 3,395 float-equal (<code>==</code>) reads over
+  all 76 channels × every block endpoint/interior/boundary/gap, zero mismatches, then
+  <code>PROMOTED_CHANNEL_SCALES</code> and three sibling constants deleted (served by
+  <code>nova/imas/mast_corrections.py</code>) and the 4,394-line JSON block table removed
+  (frozen as a test bank). Full suite 4,170 passed / 0 failed. Behavioural edge held, not
+  decided: the five promoted gains were <em>never</em> applied on the read path — the reader is
+  scoped to acquisition scales (pinned by test) so promoting gains into the arithmetic stays a
+  separate evidenced decision; the flux 2π likewise stays a convention digit to avoid
+  double-application. Engine read cost 1.2 ms/shot (76 channels) — no caching needed.</p>
   <p>Done-when: schema authored and validated; models generated; the MAST instance file
   round-trips through validation and reproduces current read-path behaviour to float equality
   on the vacuum-floor bench; in-code correction constants deleted; schema documented for the
@@ -163,7 +173,7 @@ Done-when
   3. Followup written into plan + this one resolved</pre>
     <p class="r-fu-outcome">Schema + generated models + MAST instance landed (commits 798d9438, c479abeb; merged e3c551cb). LinkML schema with all eight correction kinds, ordered application semantics as schema enum ranks, provenance with corroborations; committed Pydantic/JSON-Schema artifacts with byte-parity regeneration test; reader rejects overlapping intervals and off-ladder rungs. MAST instance: 5 promoted gains, obv11 withheld, 113-block table (5 off-ladder blocks refused), 3 pair states, 2 exclusions, 3 quality states, flux convention. tests/calibrate 59 passed; full-suite failures are worktree-extras environment only (imas-standard-names extras absent), not regressions. Read-path consumption + float-equality equivalence + constant deletion queued as the follow-on node.</p>
     </article>
-<article class="r-fu" data-id="f-dcs-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-07" data-recommends-skill="/reckon-ship diagnostic-correction-schema §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-dcs-002" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-07" data-recommends-skill="/reckon-ship diagnostic-correction-schema §2" data-resolved-at="2026-08-07T19:29:46+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Wire read-path consumption of the MAST correction set behind a float-equality equivalence test, then delete the in-code constants</h4>
     <div class="r-fu-body">The schema and MAST instance are landed and validated. Remaining: the nova read path consumes nova/calibrate/corrections/mast/magnetics.yaml through the generated models (order: offset, drift, acquisition scale, pair state, gain), proves float equality against current behaviour on the vacuum-floor bench, then deletes PROMOTED_CHANNEL_SCALES and the other in-code constants. Gated on nova/calibrate/corrections.py application engine from the calibrate-package migration.</div>
     <pre class="r-fu-prompt">Project: nova
@@ -194,6 +204,36 @@ Done-when
   3. In-code constants deleted; full default suite green (sync worktree
      with --all-extras so store-gated lanes run)
   4. Followup written into plan + this one resolved</pre>
+    <p class="r-fu-outcome">Read-path cutover landed (merge 4f37803a; commits 84719e86, c6bd321a, 4c1e32f4, aaee7705). Equivalence exact: 3395 reads over 76 channels x every block endpoint/interior/boundary/gap, zero mismatches, float ==; five refused off-ladder blocks byte-identical to prior behaviour. Constants deleted or thinned to document-backed loaders; JSON block table removed (banked under tests/calibrate/data/). Full suite 4170/0. Behavioural edges held: promoted gains never applied on read path (reader scoped to acquisition_scale, test-pinned); flux 2pi stays a convention digit. Workflow gap queued: the acquisition sweep still promotes to JSON, needs a route into the YAML document.</p>
+    </article>
+<article class="r-fu" data-id="f-dcs-003" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-07" data-recommends-skill="/reckon-ship diagnostic-correction-schema" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Route the acquisition sweep&#x27;s promotion into the correction document, and decide whether the five promoted gains enter the applied chain</h4>
+    <div class="r-fu-body">Two items the cutover surfaced. (1) nova/scripts/mast_acquisition_sweep.py still writes a JSON table via --promote-to; re-measuring blocks now needs a promotion route into nova/calibrate/corrections/mast/magnetics.yaml (set-version bump, provenance stamped). (2) The five promoted gains (obr17 0.5011, obv04, obr05, obv05, ccbv35) are recorded but never applied on the read path; promoting them into the arithmetic rescales downstream fits and is an owner decision with its own evidence, pinned today by test_the_read_path_divides_by_no_promoted_gain.</div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    diagnostic-correction-schema (docs/plans/diagnostic-correction-schema.html)
+Section: post-ship followup - sweep promotion route + gain-application decision
+Capability: general
+Requirements: strict verification
+
+Context
+  The read path serves from the correction document (merge 4f37803a).
+  Remaining: (1) the acquisition sweep&#x27;s --promote-to still emits the old
+  JSON table shape; give it a route that appends/updates rows in the MAST
+  YAML document with a set-version bump and provenance. (2) OWNER DECISION
+  FIRST: whether the five promoted gains enter the applied chain - do not
+  implement application without that lock; if locked, wire kinds=(...,gain)
+  behind a re-run of the vacuum-floor bench quantifying the shift.
+
+State to read
+  nova/scripts/mast_acquisition_sweep.py (--promote-to path)
+  nova/imas/mast_corrections.py + nova/calibrate/corrections.py (kinds filter)
+  tests/calibrate/test_read_path_equivalence.py (the gain-hold pin)
+
+Done-when
+  1. Sweep promotes into the document (validated, versioned, provenance)
+  2. Gain-application decision surfaced to the owner; implemented only if
+     locked, with the bench shift quantified
+  3. Followup written into plan + this one resolved</pre>
     </article>
 </section>
 

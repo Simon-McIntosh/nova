@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="mast-flux-loop-gain-fits">
+  <meta name="plan-title" content="MAST flux loops carry no unknown gain — the 2-pi question answered, the copied P4-lower block restored, and the join lifted from 39 to 43 channels">
+  <meta name="plan-summary" content="The convention that kept the flux loops out of every MAST vacuum fit does not exist: the store's recorded flux and the polygon kernel's computed flux are both the total flux through the loop contour in weber, and the fitted ratio is 0.96 rather than 6.28 or 0.159 on all 28 channels that publish data across 306 sustained plasma-free pulses. No loop carries a per-channel gain either. The channels scatter about their own set median with a standard deviation of 1.9%, and the six that sit furthest out are not singled out by the archive's independent forward prediction, which places them within 0.6% of its own set — so what separates them is the description's forward model, not the instrument. Two channels do step: fl_cc04 and fl_p2u_4 split into six and three acquisition blocks spanning factors of 2.6 and 3.3, exactly the range-setting fault the probe channels carry, and they are withheld. Separately, the level-2 catalog's four FL_P4L loop positions were the FL_P3L block verbatim; a flux loop is a fixture on a coil, and every one of the 44 named loops is nearest the coil its own name identifies except those four, which sit 17 times further from P4 lower than from P3 lower. Restoring them from the reconstruction's own table lifts the position join from 39 of 46 channels to 43 and removes four duplicated described positions.">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-recorded-at" content="2026-08-08">
+  <meta name="plan-evidence-for" content="mast-flux-loop-calibration">
+  <meta name="plan-informs" content="mast-misfit-toroidal-harmonics">
+  <meta name="plan-verdict" content="The flux loops are admissible. The 2-pi convention is measured and absent — the fitted ratio is 0.96, three-quarters of an order from either rival convention — so no factor is applied at either candidate site and the open decision about where to apply one has nothing to apply. Eighteen of 28 channels are admitted as published; ten are withheld, two for acquisition-block steps and eight for a departure only the description route sees. Zero gains promote. The four FL_P4L positions are restored at the level-2 read, validated by a falsification the wrong positions cannot survive: one scale fits every pulse at the restored position and the copied position needs scales from 0.44 to 2.72 across pulses that drove four different coils. What remains unexplained is a 3.8% common deficit between the described flux and every loop, which the archive's own model does not carry and which the measured coil-case currents do not account for.">
+  <title>MAST flux-loop gain fits | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <header>
+    <span class="badge badge-active">recorded 2026-08-08</span>
+    <h1>The flux loops carry no unknown gain</h1>
+    <p>Every MAST vacuum fit so far has excluded the flux loops, because a factor of 2&pi;
+    between the store's convention and the kernel's could not be ruled out and one unknown row
+    gain corrupts every inverted current. That exclusion cost the programme the rank the probe
+    array lacks &mdash; ten identified directions over thirteen coils, with coil and case
+    inseparable. This record removes the exclusion. The convention question is answered by
+    measurement rather than by reading a unit string, and the answer is that there is no factor
+    to place. The stronger result sits behind it: no <em>individual</em> loop carries a gain
+    either, so admitting the loops does not require calibrating them first.</p>
+    <p>A second finding was necessary before any of it could be measured at the P4 loops. The
+    level-2 catalog's four <code>FL_P4L</code> positions are the <code>FL_P3L</code> block
+    verbatim, so the two P4-lower channels that publish on every shot reached no described
+    sensor. The repair needed no tolerance and no fit: <strong>a flux loop is a fixture wound
+    onto a coil, so the coil it sits nearest is the coil its name identifies</strong>, and that
+    relation holds for all 44 named level-2 loops and all 46 reconstruction rows with exactly
+    four exceptions.</p>
+  </header>
+
+  <section class="quick-status">
+    <h2>Headline numbers</h2>
+    <table>
+      <thead><tr><th>question</th><th>answer</th><th>measurement</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Is there a 2&pi; between the store and the kernel?</td>
+          <td><strong>No. The ratio is 0.96, not 6.28 and not 0.159.</strong></td>
+          <td>Through-origin slope of each loop's recorded flux on the described flux, over
+          306 sustained plasma-free pulses and 7&nbsp;063 admissible per-pulse fits. Set
+          median 0.9622; the two rival conventions sit a factor 6.5 away in either
+          direction. Both quantities are the total flux through the loop contour in weber.</td>
+        </tr>
+        <tr>
+          <td>Does any loop carry a per-channel gain?</td>
+          <td><strong>None promotes.</strong></td>
+          <td>The steady channels scatter about their own set median with a standard
+          deviation of 0.019 and a worst case of 0.044. The archive's independent forward
+          prediction places those same channels within 0.019 of <em>its</em> set, so no
+          channel is singled out by both routes.</td>
+        </tr>
+        <tr>
+          <td>Do the loop channels step like the probe channels?</td>
+          <td><strong>Two do, and are withheld.</strong></td>
+          <td><code>fl_cc04</code> splits into six acquisition blocks spanning a factor
+          2.627, <code>fl_p2u_4</code> into three spanning 3.275. The other 26 hold one
+          block across the whole cohort.</td>
+        </tr>
+        <tr>
+          <td>Where are the four P4-lower loops?</td>
+          <td><strong>(1.5984, &minus;1.0444), (1.5984, &minus;1.0694),
+          (1.4005, &minus;1.1594), (1.4005, &minus;1.1440).</strong></td>
+          <td>The reconstruction rows whose nearest coil is P4 lower, 21&ndash;23&nbsp;mm
+          from it, reached by no other described loop. The published coordinates stand 17
+          times further from P4 lower than from P3 lower.</td>
+        </tr>
+        <tr>
+          <td>What is the position repair worth?</td>
+          <td><strong>Four channels, and four duplicate positions removed.</strong></td>
+          <td>The join serves 43 of 46 reconstruction channels against 39, and 43 of the 44
+          described loops are now reached by exactly one channel each.</td>
+        </tr>
+        <tr>
+          <td>What is left unexplained?</td>
+          <td><strong>A 3.8% common deficit against the described flux.</strong></td>
+          <td>Every loop reads 0.9622 of what the described windings predict while the
+          archive's own 938-filament model reads 1.0074 of its own. It is common to the set,
+          so it belongs to the forward model rather than to the instrument; it does not
+          track the measured coil-case currents.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <h2>The copied block, and the relation that catches it</h2>
+  <p>The level-2 catalog names its 44 flux loops in <code>flux_loop_geometry_channel</code> and
+  gives each a position. Entries 20&ndash;23, <code>FL_P4L_1</code> through
+  <code>FL_P4L_4</code>, hold the four <code>FL_P3L</code> coordinates bit for bit. Which of the
+  two blocks is the copy is not a matter of preference, and it needs no threshold to decide:
+  the shared coordinates sit 15&ndash;22&nbsp;mm from the P3-lower winding pack and
+  260&ndash;388&nbsp;mm from P4 lower, so they are P3 lower's.</p>
+  <p>Stated as a rule the code can apply, <strong>a loop is nearest the coil its own name
+  identifies</strong>. Measured on the catalog, every one of the 44 named loops satisfies it
+  except the four, and the margin is not marginal: the correctly mounted loops stand at most
+  0.209 of their own-coil distance to the nearest <em>other</em> coil, while the copied block
+  stands at 17.0 &mdash; a factor of 81 with nothing in between. The same test independently
+  identifies the two reconstruction rows sitting 17&nbsp;mm from P6 upper, which the level-2
+  catalog describes no loop for at all.</p>
+
+  <figure>
+    <img src="/nova/figures/flux-loop-calibration/loop-reconciliation.png"
+         alt="Left: poloidal cross-section of the MAST poloidal field coils with the 44 described flux loops marked and four arrows running from the published FL_P4L positions beside P3 lower to their restored positions beside P4 lower. Centre: the same region magnified, showing the four published positions on the P3-lower coil and the four restored positions on the P4-lower coil. Right: horizontal log bar chart of each loop's distance to its own coil divided by its distance to the nearest other coil, with forty loops below 0.21 and the four FL_P4L loops at 17."
+         style="max-width:100%;height:auto">
+    <figcaption>Left and centre: the four <code>FL_P4L</code> loops as published (open
+    circles, on P3 lower) and restored (filled, on P4 lower). Right: the discriminator, which
+    is a comparison between two coils rather than a distance threshold &mdash; every loop but
+    four is closer to the coil it is named for than to any other coil, and the four are 81
+    times worse than the worst of the rest. Evidence:
+    <code>~/.cache/nova-mast/flux-loop-calibration/loop_gains.json</code>.</figcaption>
+  </figure>
+
+  <p>The repair is served from the reconstruction's own loop table and only where the
+  identification is unique: the free rows nearest the named coil must number exactly what the
+  block does, or the block stays as published and the join refuses the channel. A replacement
+  that is not identified is a sensor pose invented rather than recovered, and a refused channel
+  is the better failure.</p>
+
+  <h3>The join, before and after</h3>
+  <table>
+    <thead><tr><th>channels</th><th>before</th><th>after</th><th>what changed</th></tr></thead>
+    <tbody>
+      <tr><td>served by the position join</td><td>39 of 46</td><td><strong>43 of 46</strong></td>
+      <td>all four <code>fl_p4l_*</code>, of which <code>fl_p4l_1</code> and
+      <code>fl_p4l_4</code> publish data on every shot</td></tr>
+      <tr><td>described loops reached</td><td>39 of 44</td><td><strong>43 of 44</strong></td>
+      <td>the four duplicated positions are gone; only <code>FL_P5L_3</code>'s described
+      position is unreached</td></tr>
+      <tr><td>described positions carrying two loops</td><td>4</td><td><strong>0</strong></td>
+      <td>eight loops no longer occupy four points</td></tr>
+    </tbody>
+  </table>
+  <p>Three channels remain refused, each with its cause derived rather than listed.
+  <code>fl_p5l_3</code>: the reconstruction places it 75&nbsp;mm from the nearest of the four
+  loops the description carries on P5 lower. The description's (1.5458, &minus;0.5322) is
+  consistent with its own P5-upper mirror and with its P5L_4 radius, while the reconstruction's
+  (1.7463, &minus;0.5322) repeats the radius of its own rows 1 and 2 &mdash; a copy-down inside
+  the reconstruction's table rather than the description's. The channel publishes no data, so
+  nothing is lost by the refusal and no fit can arbitrate it. <code>fl_p6u_1</code> and
+  <code>fl_p6u_2</code>: the level-2 catalog describes no P6-upper loop at all. Adding one
+  would be a different act from restoring a block whose coordinates are provably a copy, so it
+  is left to the description's owner; <code>fl_p6u_1</code>'s gain is measured below at its
+  reconstruction position and marked as not described.</p>
+
+  <h2>The convention, measured</h2>
+  <p>A flux loop links the total flux through its own contour in weber, while a
+  reconstruction's flux function is per radian. Those two differ in exactly the digit that says
+  whether the 2&pi; is inside the quantity, which is why the question could not be settled by
+  reading a unit string. It is settled by fitting: one scale per channel per pulse, the
+  pre-excitation offset removed on the pulse itself, the prediction built from the described
+  winding outlines through the same polygon Green's kernel and the same area weighting the
+  probe response uses.</p>
+  <p>The fitted scale is <strong>0.9622</strong>. A store in weber against a kernel per radian
+  would give 6.2832 and the reciprocal case 0.1592. The measurement is three-quarters of an
+  order from either, on all 28 channels, on every pulse. <strong>There is no convention factor
+  to place</strong>, which is what <code>MEASURED_FLUX_CONVENTION</code> already asserted and
+  what this now confirms end to end.</p>
+
+  <figure>
+    <img src="/nova/figures/flux-loop-calibration/loop-gain-fits.png"
+         alt="Left: per-channel pooled gain for 28 flux loop channels with error bars, filled circles against the described flux clustering near 0.96 and open diamonds against the archive's forward flux clustering near 1.007, with horizontal reference lines at both set medians and a two percent band. Right: the same 28 gains on a logarithmic axis with reference lines at 1, 2 pi and 1 over 2 pi, every point sitting on the unity line."
+         style="max-width:100%;height:auto">
+    <figcaption>Left: every channel against both forward models. The two routes disagree
+    about the loops as a whole by 4.5%, so what is comparable is each channel's departure from
+    its own route's set median, not the absolute gains. Grey points are withheld. Right: the
+    same numbers against the three candidate conventions &mdash; the question is not close.
+    Evidence: <code>loop_verdicts.json</code>.</figcaption>
+  </figure>
+
+  <h2>Per-channel verdicts</h2>
+  <p>A gain is a property of a channel only when it differs from what every other channel
+  does. A factor the whole set carries is a property of whatever predicts them all, and
+  dividing it out one channel at a time would write the forward model's residual into the data
+  as a calibration. Every departure below is therefore measured against each route's own set
+  median, and a promotion requires both routes to separate the same channel by the same
+  amount &mdash; the discipline that promoted <code>obr17</code> at the probes.</p>
+  <table>
+    <thead><tr><th>disposition</th><th>channels</th><th>cause</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>admitted</strong> (18)</td>
+        <td><code>fl_cc01</code>, <code>fl_cc02</code>, <code>fl_cc03</code>,
+        <code>fl_cc05</code>, <code>fl_cc07</code>, <code>fl_cc09</code>,
+        <code>fl_cc10</code>, <code>fl_p2l_4</code>, <code>fl_p3u_1</code>,
+        <code>fl_p3u_4</code>, <code>fl_p4l_1</code>, <code>fl_p4l_4</code>,
+        <code>fl_p4u_4</code>, <code>fl_p5l_4</code>, <code>fl_p5u_1</code>,
+        <code>fl_p5u_4</code>, <code>fl_p6l_1</code>, <code>fl_p6u_1</code></td>
+        <td>within 2% of what the loops read as a set, on one acquisition block, over
+        78&ndash;303 pulses each. No correction warranted; admit as published.</td>
+      </tr>
+      <tr>
+        <td><strong>promoted</strong> (0)</td>
+        <td>&mdash;</td>
+        <td>No channel is separated from the set by both routes.</td>
+      </tr>
+      <tr>
+        <td><strong>withheld</strong>, acquisition step (2)</td>
+        <td><code>fl_cc04</code>, <code>fl_p2u_4</code></td>
+        <td>Six blocks spanning 2.627 and three spanning 3.275. A single number averaged
+        across such a step describes no pulse in either block &mdash; the same fault the
+        probe range settings carry.</td>
+      </tr>
+      <tr>
+        <td><strong>withheld</strong>, one route only (8)</td>
+        <td><code>fl_p2l_1</code>, <code>fl_p2l_3</code>, <code>fl_p2u_1</code>,
+        <code>fl_p2u_2</code>, <code>fl_p2u_3</code>, <code>fl_p3l_1</code>,
+        <code>fl_p3l_4</code>, <code>fl_p5l_1</code></td>
+        <td>Stand 2.0&ndash;4.5% from the set on this route while the archive's forward
+        prediction places them 0.2&ndash;1.9% from its own. Six of the eight are P2 loops and
+        one is <code>fl_p3l_1</code>, which reads with them &mdash; a family-shaped pattern,
+        which is what a description error looks like and not what a per-channel gain looks
+        like.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Two things the fits falsify</h2>
+  <p><strong>The restored positions, against the copied ones.</strong> A gain absorbs any
+  constant error, so no single pulse can refute a position &mdash; a wrong one merely fits a
+  different scale. What a wrong position cannot do is fit the <em>same</em> scale to every
+  pulse, because the flux it gets wrong depends on which coil is driven. Over the cohort the
+  restored positions take 0.9642 &plusmn; 0.0383 while the copied ones take 1.7805 &plusmn;
+  0.3859 and range from 0.439 to 2.723. On four single-coil pulses driving four different
+  coils the copied positions need 1.55, 0.45, 1.74 and 1.61 while the restored ones need 0.97,
+  1.00, 0.98 and 0.97. The archive's own forward prediction, computed at its own P4-lower
+  positions, reproduces <code>fl_p4l_1</code> to 0.4%.</p>
+  <p><strong>The near-field screen the probes need, the loops do not.</strong> A probe within
+  two winding-pack widths of an excited coil is dropped from that pulse, because a uniform
+  current density over an outline misrepresents how the turns are stacked inside it. Flux is
+  far more forgiving than field: 5&nbsp;386 of the admissible fits sit inside that cut, at
+  standoffs down to 0.13 pack widths, and they return 0.9588 &plusmn; 0.0331 against
+  0.9728 &plusmn; 0.1163 for the 1&nbsp;677 outside it. The near-field fits are the
+  <em>tighter</em> of the two, so no standoff screen is applied to the loops and the reason is
+  measured rather than assumed.</p>
+
+  <figure>
+    <img src="/nova/figures/flux-loop-calibration/loop-position-check.png"
+         alt="Left: strip plot on a logarithmic axis of the per-pulse fitted scale for fl_p4l_1 and fl_p4l_4 at two candidate positions, the restored position forming a tight band at 1.0 and the copied position scattering between 0.4 and 2.7. Right: scatter of every admissible per-pulse gain against the loop's standoff from the nearest excited coil in pack widths, showing no degradation inside the two-pack-width cut a field probe requires."
+         style="max-width:100%;height:auto">
+    <figcaption>Left: one scale per pulse at each candidate position. The restored position
+    needs one number; the copied position needs a different number for every coil that was
+    driven, which is exactly what a position error does and what a gain cannot absorb. Right:
+    the gain against standoff, with the probes' two-pack-width cut marked. Nothing degrades
+    inside it.</figcaption>
+  </figure>
+
+  <h2>What is left, and what it is not</h2>
+  <p>Every loop reads 0.9622 of the described flux while the archive's own model reads 1.0074
+  of its own &mdash; a 4.5% disagreement between the two forward models, carried by the set
+  rather than by any channel. Two candidate explanations are tested and one is excluded.</p>
+  <ul>
+    <li><strong>Induced coil-case current is not it.</strong> The described prediction carries
+    the windings and nothing else, while the archive's 101-circuit model carries the cases and
+    the vessel, and an induced current opposes the coil that drove it &mdash; so the deficit
+    should grow with the case current the store measured on the same pulse. It does not. Over
+    304 pulses the six carrying case current below 2% of their coil read 0.951, no higher than
+    the 298 above 10%, which read 0.959.</li>
+    <li><strong>A per-channel calibration is not it either</strong>, which is the point of the
+    verdict table: the departure is common, and what is left after removing it is 1.9%.</li>
+    <li><strong>What remains</strong> is a term in the described forward model &mdash; turn
+    counts, winding cross-section, or a conductor the description does not carry. It is
+    family-shaped at P2, where six loops sit 3.4&ndash;4.5% above the set on this route and
+    within 0.6% on the archive's. That is a handoff to the misfit programme rather than a
+    calibration question, and it does not block admitting the loops: it is absorbed by the same
+    forward model that already predicts the probes.</li>
+  </ul>
+
+  <h2>What this hands on</h2>
+  <ul>
+    <li><strong>To the inversion:</strong> 18 loop channels are admissible as published, with
+    no gain applied and no convention factor. Seventeen of them reach a described sensor;
+    <code>fl_p6u_1</code> is measurable but not describable until the catalog carries a
+    P6-upper loop.</li>
+    <li><strong>To the open decision on where a convention factor is corrected:</strong> there
+    is no factor. The read path and the machine-description artifact would each apply 1.0, so
+    the decision has nothing to apply and can be closed by evidence rather than by choosing a
+    site. Nothing in this node implements either option.</li>
+    <li><strong>To the description's owner:</strong> the packaged registry is deliberately
+    <em>not</em> regenerated here. The read fix lands in
+    <code>nova/catalog/mast_geometry.py</code> and every number above is measured against a
+    freshly built snapshot, but regenerating <code>mast_geometry.json</code> changes the
+    machine's physical identity, which propagates to the published artifact tag and to every
+    consumer that resolves through it. That cutover wants its own node, as the last one had.
+    Until it runs, the production solve-input map still joins 39 channels.</li>
+    <li><strong>To the correction ladder:</strong> the verdicts are banked as schema-shaped
+    records at
+    <code>~/.cache/nova-mast/flux-loop-calibration/loop_corrections.yaml</code> &mdash; one
+    convention record, 28 gain records (18 recorded, 10 withheld) and three exclusions &mdash;
+    rather than merged into <code>nova/calibrate/corrections/mast/magnetics.yaml</code>, whose
+    <code>set_version</code> is a coordinated bump.</li>
+  </ul>
+
+  <h2>Caveats</h2>
+  <ul>
+    <li>The cohort is the 306 sustained plasma-free pulses of the calibration cohort, sampled
+    at every fourth acquisition sample. 7&nbsp;063 of 7&nbsp;283 per-pulse fits clear the
+    shape-agreement floor; the 220 that do not are pulses on which a loop saw nothing it could
+    distinguish.</li>
+    <li>The turn multipliers entering the prediction are the archive's published integers where
+    it states them and the vacuum response fit's own multiplier otherwise, with unity for the
+    two channels the archive publishes as ampere turns. The solenoid's multiplier is the
+    fitted one and is the least well determined of the thirteen.</li>
+    <li>Loop positions are read at the described loop where the join serves one and at the
+    reconstruction's own position otherwise. The two differ by up to 9&nbsp;mm on the served
+    channels, which is second order for a gain and is not separated here.</li>
+    <li>The archive's forward prediction is <code>efm/silop_c</code> on the reconstruction's
+    own coarse clock, a couple of hundred slices per pulse against the acquisition's tens of
+    thousands. It is an independent route, not a more accurate one.</li>
+    <li>Whether <code>fl_p5l_3</code>'s described position or the reconstruction's is right is
+    argued from each table's internal consistency, not measured &mdash; the channel publishes
+    no data on any sampled shot, so no fit can arbitrate it.</li>
+  </ul>
+
+  <h2>Reproduction</h2>
+  <p>Scripts and banked arrays under
+  <code>~/.cache/nova-mast/flux-loop-calibration/</code>:
+  <code>loop_gains.py</code> &rarr; <code>loop_gains.json</code> + <code>loop_gains.log</code>
+  (per-pulse fits at the restored and at the copied positions, the archive ratios, the join
+  accounting and the targets), <code>loop_verdicts.py</code> &rarr;
+  <code>loop_verdicts.json</code> (the pooling, the block sweep and the per-channel
+  dispositions, recomputed from the banked fits without touching the store),
+  <code>case_association.py</code> &rarr; <code>case_association.json</code> (the coil-case
+  test), <code>loop_corrections.py</code> &rarr; <code>loop_corrections.yaml</code> (the
+  schema-shaped records) and <code>loop_figures.py</code> &rarr; the three PNGs in
+  <code>docs/figures/flux-loop-calibration/</code>. Sources: the level-1 store and level-2
+  catalog at <code>/work/projects/imas_gpu/mast/level{1,2}/shots</code>, representative shot
+  11766. The relation, the restored positions and the join accounting are pinned in
+  <code>tests/test_mast_flux_loop_positions.py</code>; the convention, the falsification and
+  the verdict criteria in <code>tests/test_mast_flux_loop_gains.py</code>.</p>
+
+  <h2>Related records</h2>
+  <ul>
+    <li><a href="/nova/research/mast-p4p5-provenance-note.html">P4/P5 provenance note</a> &mdash;
+    found the duplicated <code>FL_P4L</code> block and handed it here with the replacement
+    positions.</li>
+    <li><a href="/nova/research/mast-misfit-source-localization.html">Misfit source
+    localization</a> &mdash; the per-channel scale method this follows, and the
+    <code>efm/silop_c</code> corroboration route.</li>
+    <li><a href="/nova/research/mast-vacuum-misfit-separation.html">Vacuum misfit
+    separation</a> &mdash; the exclusion this record lifts, and the rank cliff it was blocking.</li>
+    <li><a href="/nova/research/mast-block-scale-normalisation-landed.html">Block-scale
+    normalisation</a> &mdash; the acquisition-ladder machinery the two stepping loop channels
+    were found with.</li>
+    <li><a href="/nova/plans/mast-flux-loop-calibration.html">Flux-loop calibration</a> &mdash;
+    the owning plan.</li>
+  </ul>
+
+</main>
+</body>
+</html>

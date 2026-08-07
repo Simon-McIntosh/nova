@@ -229,14 +229,17 @@ def _resolved_value(
     resolution: Mapping[tuple[str, CorrectionKind], float] | None,
     channel: str,
 ) -> tuple[float, bool]:
-    """Return the value to apply and whether the caller supplied it."""
+    """Return the value to apply and whether the caller supplied it.
+
+    Resolution keys are matched on the kind rather than looked up, so a caller may key
+    by the enumerated member or by the string the schema spells it with and get the
+    same answer either way.
+    """
 
     kind = CorrectionKind(correction.kind)
-    supplied = (resolution or {}).get((channel, kind))
-    if supplied is None and resolution:
-        supplied = resolution.get((channel, kind.value))  # type: ignore[call-overload]
-    if supplied is not None:
-        return float(supplied), True
+    for (named, key), supplied in (resolution or {}).items():
+        if named == channel and CorrectionKind(key) is kind:
+            return float(supplied), True
     if correction.value is not None:
         return float(correction.value), False
     candidates = list(correction.candidate_values or ())

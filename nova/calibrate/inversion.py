@@ -127,19 +127,21 @@ class CurrentSolution:
 
 
 def whiten(
-    design: np.ndarray, floors: Sequence[float] | Mapping[str, float], **kwargs
+    design: np.ndarray,
+    floors: Sequence[float] | Mapping[str, float],
+    *,
+    rows: Sequence[str] | None = None,
 ) -> np.ndarray:
     """Scale each sensor row by the inverse of its own measured noise floor.
 
     A sensor with no measured floor is given zero weight rather than unit weight: an
     unmeasured floor is not a good one, and admitting the row at unity would let the
-    least-characterised sensor in the array set the solve.  Passing ``rows`` names the
-    channels when the floors arrive as a mapping.
+    least-characterised sensor in the array set the solve.  ``rows`` names the channels
+    in design order, and is required when the floors arrive as a mapping.
     """
 
     matrix = np.asarray(design, dtype=float)
     if isinstance(floors, Mapping):
-        rows = kwargs.pop("rows", None)
         if rows is None:
             raise InversionError(
                 "floors given as a mapping need the row channel names to be ordered "
@@ -150,8 +152,6 @@ def whiten(
         )
     else:
         values = np.asarray(floors, dtype=float)
-    if kwargs:
-        raise InversionError(f"unexpected arguments {sorted(kwargs)}")
     if values.size != matrix.shape[0]:
         raise InversionError(
             f"{values.size} floors against a design of {matrix.shape[0]} rows"

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-07T17:21:42",
+  "updated": "2026-08-07T22:29:11",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -178,7 +178,7 @@
       },
       {
         "id": "S6",
-        "status": "planned",
+        "status": "active",
         "theme": "Close the P4/P5 misfit source and promote the calibration machinery",
         "items": [
           {
@@ -272,7 +272,7 @@
         "description": "Two arms. Source closure: recover the flux loops (per-loop gains; the 2-pi convention is measured), build toroidal-harmonic contour maps of the surviving misfit, and resolve the P4/P5 provenance candidates (the description's own 17.3 mm / 3% member asymmetry first). Infrastructure: promote the diagnostic-calibration ladder to a unit-tested machine-agnostic nova/calibrate package, give every correction a versioned pulse-range-scoped schema (LinkML candidate), harvest the vacuum windows every pulse carries (offsets, integrator drift, closure) across the whole archive, and solve coil positions and shapes from vacuum measurements by autodiff through the traced Green's kernels (geometry Jacobians verified exact 2026-08-07)."
       }
     ],
-    "active_sprint_id": null,
+    "active_sprint_id": "S6",
     "timeline": [
       {
         "when": "2026-07-29",
@@ -323,6 +323,16 @@
         "when": "2026-08-07",
         "who": "reckon-sprint",
         "what": "S6 widened with four infrastructure plans: diagnostic-correction-schema, nova-calibrate-package, vacuum-signature-extraction, coil-geometry-inversion. Grounding: Edlington 2001 retrieved in-repo (analogue integrators; 180-degree pair summing before integration; cans galvanically tied to vessel via supports and feeder-bar bellows); traced polygon Green's kernel verified autograd-able w.r.t. coil geometry (values 8e-12, jacfwd at the FD floor, jacrev consistent 1e-12)."
+      },
+      {
+        "when": "2026-08-07",
+        "who": "reckon-ship",
+        "what": "S6 started (Session A of two): diagnostic-correction-schema implementation and the P4/P5 symmetry-elimination scan dispatched as the first two-worker wave; nova-calibrate-package migration and the coil-geometry-inversion kernel autograd audit queued behind them; read-path equivalence with constant deletion and provenance geometry/pack-total work queued third. Flux loops, toroidal harmonics, vacuum-signature extraction and inversion beyond the kernel audit are Session B."
+      },
+      {
+        "when": "2026-08-07",
+        "who": "reckon-ship",
+        "what": "S6 Session A executed: 8 worker nodes, two-worker cap held, all commits merged to main. diagnostic-correction-schema SHIPPED (LinkML schema + generated models + MAST instance; read-path cutover proven by 3395 float-equal reads before four constants and the 4394-line JSON table were deleted; promoted gains held OUT of the arithmetic, test-pinned). nova-calibrate-package first slice (5 of 9 capabilities, arrays-only kernels, synthetic-truth lane, banked pins). coil-geometry-inversion kernel audit landed: eight kernel classes geometry-traceable with three-part autograd regressions; two elliptic derivative repairs (forward-mode NaN; Carlson degenerate slope 3e-9 to 3e-15). mast-p4p5-circuit-provenance: symmetry verdict = geometry error EXCLUDED (at least 85 percent of surviving power needs current the coils do not carry; 23-cell lattice removes 15 percent on P5-lower; 5-turn row resolves to described side); provenance adjudicated - the 17.3 mm asymmetry was a closed-ring vertex-mean artifact, centroids consistent with as-built per Kirk Table 1, NO correction warranted; FL_P4L loop positions found to be a bit-copy of FL_P3L (feeds flux-loop calibration); pack-total identity confirmed at 4578 pairs and stated as mechanism (six channels explained, serving needs a two-channel source-map row - owner call). Evidence backfill: all eleven landed records carry plan-evidence-for. Records: mast-p4p5-symmetry-verdict, mast-p4p5-provenance-note, calibration-foundations-landed (all docs/research/*.html). Session B remains: flux loops, toroidal harmonics, vacuum-signature extraction, inversion geometry solve, p4p5 feeder hunt."
       }
     ],
     "blockers": [
@@ -355,6 +365,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 14
+    "_version": 16
   }
 }

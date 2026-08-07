@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="calibration-foundations-landed">
+  <meta name="plan-title" content="Calibration foundations — schema, package, and differentiable kernels landed">
+  <meta name="plan-summary" content="Three infrastructure strands landed together: a LinkML diagnostic-correction schema with its first MAST instance (128 records over 78 channels — 113 acquisition blocks, 5 promoted gains, 1 withheld, 5 off-ladder blocks REFUSED rather than rounded) whose read-path cutover was gated on 3,395 float-equal reads before a single constant was deleted; the first slice of a machine-agnostic nova/calibrate package (5 of 9 capabilities, arrays-only kernels, 180-test store-free lane in 5.4 s); and the whole biot coupling family made differentiable with respect to source geometry (8 kernel classes, three-part autograd regressions, two elliptic derivative repairs taking a slope from 3e-9 to 3e-15). Integration gate on the merged union: 4,178 passed / 0 failed / 103 skipped in 966 s.">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-recorded-at" content="2026-08-07">
+  <meta name="plan-evidence-for" content="diagnostic-correction-schema,nova-calibrate-package,coil-geometry-inversion">
+  <title>Calibration foundations landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <h1>Calibration foundations — what the session built, and what it measured</h1>
+
+  <p>Three strands landed on 2026-08-07, and they are one thing: the MAST misfit
+  programme's findings stop being prose and in-code constants, and become a validated
+  document, a tested package, and a differentiable forward model. Each strand is
+  recorded against its own plan —
+  <a href="/nova/plans/diagnostic-correction-schema.html">diagnostic-correction-schema</a>
+  (shipped), <a href="/nova/plans/nova-calibrate-package.html">nova-calibrate-package</a>
+  (first slice, 55%), and
+  <a href="/nova/plans/coil-geometry-inversion.html">coil-geometry-inversion</a> §2.1 —
+  and this page is the single place where all three are visible at once.</p>
+
+  <table>
+    <thead><tr><th>strand</th><th>headline</th><th>merge</th></tr></thead>
+    <tbody>
+      <tr><td>Diagnostic correction schema + MAST instance</td>
+      <td>128 records over 78 channels; read-path cutover proven by 3,395 float-equal
+      reads before any constant was deleted</td>
+      <td><code>e3c551cb</code>, <code>4f37803a</code></td></tr>
+      <tr><td><code>nova/calibrate</code> package</td>
+      <td>5 of 9 capabilities migrated to arrays-only kernels; 180-test store-free lane
+      in 5.4 s; banked pins reproduce the published record through the package</td>
+      <td><code>623ae5cf</code></td></tr>
+      <tr><td>Differentiable coupling kernels</td>
+      <td>8 kernel classes traced in their source geometry, each pinned three ways;
+      two elliptic derivative repairs</td>
+      <td><code>42dd1816</code></td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Integration gate on the merged union: 4,178 passed / 0 failed / 103 skipped
+  in 966 s</strong> (full default suite, all extras).</p>
+
+  <hr>
+
+  <h2>Strand 1 — corrections become a document</h2>
+
+  <p>Commits <code>798d9438</code> + <code>c479abeb</code> (schema and instance, merged
+  <code>e3c551cb</code>); <code>84719e86</code>, <code>c6bd321a</code>,
+  <code>4c1e32f4</code>, <code>aaee7705</code> (read-path cutover, merged
+  <code>4f37803a</code>).</p>
+
+  <p>The design driver is a measurement, not a preference: the MAST store carries 19
+  channels whose acquisition scale steps between shot blocks, obr05 flips gain state
+  shot-to-shot, and obv03 steps mid-life. <em>A correction is a function of pulse
+  range.</em> An in-code dictionary cannot express that, cannot version it, and cannot
+  validate it. The schema is authored as LinkML at
+  <code>nova/calibrate/schema/diagnostic_correction.yaml</code>; the Pydantic models
+  (<code>nova/calibrate/correction_model.py</code>) and the JSON-Schema export are
+  generated <em>and committed</em>, so reading a document needs only <code>pydantic</code>
+  and <code>pyyaml</code> — the LinkML toolchain sits in an optional <code>schema</code>
+  extra and is pinned by a byte-for-byte regeneration test that fires whenever the extra
+  is installed.</p>
+
+  <p>Eight correction kinds (<code>gain</code>, <code>acquisition_scale</code>,
+  <code>pair_state</code>, <code>offset</code>, <code>drift_rate</code>,
+  <code>exclusion</code>, <code>quality</code>, <code>convention</code>) and five
+  statuses (<code>promoted</code>, <code>recorded</code>, <code>withheld</code>,
+  <code>refused</code>, <code>superseded</code>). The application order is not
+  documentation — it is an enum with ranks the engine sorts on: offset (1) → drift (2)
+  → acquisition scale (3) → pair state (4) → gain (5), with convention (6) applied at
+  the unit boundary and never inside the per-channel chain. Validation rejects two
+  faults a well-shaped document can still carry: intervals overlapping within one
+  channel-kind-status, and a quantised value landing off its declared ladder.</p>
+
+  <h3>The MAST instance</h3>
+
+  <p><code>nova/calibrate/corrections/mast/magnetics.yaml</code>, 2,588 lines, 128
+  records over 78 channels. Counted from the file itself: 113 acquisition blocks over 76
+  channels (108 promoted, <strong>5 refused</strong>), 5 promoted gains with their
+  unrounded pooled ratios beside the four-decimal constants the read path uses, 1
+  withheld gain (obv11) carrying the gate that refused it, 3 pair states, 2 exclusions,
+  3 quality states, and 1 measured flux-loop convention. The declared ladder is
+  {0.25, 1/2, 1/√2, 1, √2, 2, 4} at tolerance 0.08 — declared as a hypothesis before any
+  step was classified, and confirmed by the histogram: of 37 steps found, 29 land on a
+  rung.</p>
+
+  <figure>
+    <img src="/nova/figures/calibration-foundations/correction-instance-map.png"
+         alt="Upper panel: 113 acquisition blocks drawn as horizontal bars over 76 MAST
+         channels against pulse number, coloured by ladder rung, with five off-ladder
+         blocks hatched in red. Lower panel: the fifteen non-acquisition records — five
+         promoted gains, one withheld, three pair states, two exclusions, three quality
+         states and one convention — filled where the read path applies them and hatched
+         where they are carried but not applied."
+         style="max-width:100%">
+    <figcaption>The instance is the schema's argument. Every bar is a validity interval:
+    a channel's correction is a step function of pulse number, and most channels change
+    at least once over the machine's life. Grey is the reference rung; the coloured
+    minority are the real range changes; the five red-hatched blocks miss every rung by
+    more than the ladder tolerance and are therefore <em>refused</em> — read exactly as
+    published and flagged, because rounding one onto the nearest rung would assert a
+    setting the ladder does not support and move the channel by the difference. Drawn
+    directly from the committed YAML.</figcaption>
+  </figure>
+
+  <h3>What a record looks like</h3>
+
+  <p>Three excerpts from the instance, abridged for length — the <code>method</code>
+  prose and the <code>measured_pulses</code> lists are elided, and each shows a different
+  thing the schema is for. First, obr17's lifetime gain: the value, the unrounded
+  measurement beside it, and four independent corroborations, one of them a published
+  instrument description that predicts the <em>mechanism</em> (a factor of two, not an
+  arbitrary gain):</p>
+
+<pre><code>- channel: obr17
+  kind: gain
+  status: promoted
+  value: 0.5011
+  measured_value: 0.5011125727424951
+  uncertainty: {lower: 0.5011, upper: 0.5037}
+  provenance:
+    statement: promoted scale 0.5011, supported interval [0.5011, 0.5037],
+      independent-route gap 0.5%
+    corroborations:
+    - value: 0.5023
+      statement: a third route, sharing neither estimator nor reference with the
+        two the promotion gate used, returns 0.5023 +/- 0.0007
+    - statement: the same ratio measured pulse by pulse spans 0.488 to 0.514 across
+        pulses 15000 to 30420 without trend, so the half is a frozen calibration
+        state for the machine's life rather than a mid-life failure
+    - ...                        # a fourth: 1.1238e-07 T/A on a deliberately
+                                 # non-axisymmetric excitation, tracking the current
+                                 # rather than its derivative -- a shared conductor
+    - method: published instrument description
+      evidence_uri: von Nessi et al., Phys. Plasmas 19, 012506 (2012)
+      statement: every MAST equilibrium pickup is two coils 180 degrees apart
+        toroidally whose signals are averaged before recording, so a channel whose
+        recorded amplitude is exactly half has lost one member</code></pre>
+
+  <p>Second, one of the five refused acquisition blocks. There is no <code>value</code>
+  key at all — the measurement is carried, the correction is not:</p>
+
+<pre><code>- channel: obr18
+  kind: acquisition_scale
+  status: refused
+  measured_value: 0.6836652336349689
+  ladder: acquisition_range
+  validity:
+  - {pulse_start: 11884, pulse_end: 11887, measured_pulses: [11884, 11885, 11887]}
+  notes: 'the block''s factor relative to this channel''s reference block misses
+    every rung by more than the ladder tolerance, so it is not a range setting: the
+    pulses in this block are read exactly as published and flagged'</code></pre>
+
+  <p>Third, obv03's mid-life step recorded as two bracketed eras. The switch pulse is
+  <em>not</em> named, because no pulse between 19258 and 19995 was read:</p>
+
+<pre><code>- channel: obv03
+  kind: pair_state
+  status: recorded
+  value: 0.586
+  state: single_member
+  validity:
+  - pulse_start: 19995
+    pulse_end: 24965
+    notes: the switch is bracketed between pulses 19258 and 19995 -- no pulse in
+      between was read, so the era boundary is a bracket and naming a single switch
+      pulse would assert more than was measured
+  provenance:
+    statement: the channel steps from 1.01 to 0.586 mid-life, a factor of 0.580 --
+      one member of the averaged pickup pair lost
+    corroborations:
+    - value: 0.5182984917648246
+      statement: the far-field route measures the same step independently at
+        0.518 / 0.886 = 0.585, against 0.586 / 1.01 = 0.580 here</code></pre>
+
+  <p>obr05 is the fourth shape worth naming: it flips between 1.25 and 0.50 pulse to
+  pulse, so it is stored as <code>state: indeterminate</code> with
+  <code>candidate_values: [1.25, 0.5]</code> and <em>no value</em>. A mean of the two
+  describes no pulse; a consumer needs the size of what is unresolved, not an average
+  of it. The application engine refuses to serve a channel in that state rather than
+  guessing.</p>
+
+  <h3>The cutover, and the order it happened in</h3>
+
+  <p>Equivalence came <em>before</em> deletion, not after. The document-served read path
+  was compared against the in-code constants by <strong>3,395 float-equal
+  (<code>==</code>) reads</strong> over all 76 channels at every block endpoint,
+  interior, boundary and gap: <strong>zero mismatches</strong>, including the five
+  refused blocks reading byte-identically to prior behaviour. Only then were
+  <code>PROMOTED_CHANNEL_SCALES</code> and three sibling constants deleted (served now
+  by <code>nova/imas/mast_corrections.py</code>) and the 4,394-line JSON block table
+  removed, frozen as <code>tests/calibrate/data/banked_block_scales.json</code> so the
+  comparison stays runnable. Engine read cost is 1.2 ms/shot for 76 channels against
+  0.1 ms for the raw table — a 12× multiple on a number small enough that no caching
+  was added.</p>
+
+  <h3>Two behavioural edges held, not decided</h3>
+
+  <p>This is the most important honesty in the record, and it is easy to misread the
+  cutover without it. <strong>The five promoted gains were never applied on the read
+  path</strong> — not before this work and not after it. They existed as constants that
+  fed an evidence string; they now exist as document records with far better provenance,
+  and they are <em>still</em> not divided out. The reader is deliberately scoped to
+  acquisition scales, and that scope is pinned by
+  <code>test_the_read_path_divides_by_no_promoted_gain</code> in
+  <code>tests/calibrate/test_read_path_equivalence.py</code>. Promoting them into the
+  arithmetic rescales every downstream fit and is an owner decision with its own
+  evidence, queued as an open followup on the schema plan. Likewise the flux-loop 2π
+  stays a convention digit applied at the unit boundary rather than entering the
+  per-channel chain, so it cannot be applied twice. A cutover that had quietly changed
+  behaviour while claiming equivalence would have been worse than no cutover.</p>
+
+  <hr>
+
+  <h2>Strand 2 — the machinery becomes a package</h2>
+
+  <p>Commits <code>f4226b55</code>..<code>5f78bc3e</code>, merged <code>623ae5cf</code>.
+  Nothing in a through-origin gain fit, a free-current inversion, or a filament
+  localization scan is MAST-specific, yet all of it lived as one-shot cache scripts and
+  <code>mast_</code>-prefixed modules. Five of the nine capabilities are now in
+  <code>nova/calibrate/</code> with arrays-only signatures — the kernels never see a
+  store path or a shot number.</p>
+
+  <table>
+    <thead><tr><th>capability</th><th>previous home</th><th>module</th>
+    <th>tests</th><th>state</th></tr></thead>
+    <tbody>
+      <tr><td>Correction storage and read-path application</td>
+      <td><code>mast_fitted_parameters.py</code> constants; scattered read-path
+      division</td>
+      <td><code>corrections.py</code> (469 lines) + <code>correction_set.py</code>,
+      <code>correction_model.py</code></td>
+      <td><code>test_corrections</code> 21, <code>test_correction_set</code> 38,
+      <code>test_correction_instances</code> 20,
+      <code>test_read_path_equivalence</code> 22</td>
+      <td>landed</td></tr>
+      <tr><td>Vacuum residual + signed coupling regression (joint drive fit, pair
+      merging, condition guard)</td>
+      <td><code>misfit-localization/misfit_couplings.py</code>, parts of
+      <code>mast_vacuum_cohort</code></td>
+      <td><code>coupling.py</code> (353 lines)</td>
+      <td><code>test_coupling</code> 15</td>
+      <td>landed</td></tr>
+      <tr><td>Per-channel gain and offset fits (field and flux targets, through-origin,
+      pooled verdicts)</td>
+      <td><code>mast_probe_calibration.py</code>,
+      <code>mast_flux_loop_adjudication.py</code></td>
+      <td><code>gain.py</code> (605 lines)</td>
+      <td><code>test_gain</code> 17</td>
+      <td>landed</td></tr>
+      <tr><td>Free current inversion, truncation ladder, identifiability spectrum</td>
+      <td><code>misfit-hunt/inversion.py</code></td>
+      <td><code>inversion.py</code> (356 lines)</td>
+      <td><code>test_inversion</code> 16</td>
+      <td>landed</td></tr>
+      <tr><td>Source-localization scan (span projection, filament scoring)</td>
+      <td><code>misfit-localization/misfit_localize2.py</code></td>
+      <td><code>localize.py</code> (264 lines)</td>
+      <td><code>test_localize</code> 15</td>
+      <td>landed</td></tr>
+      <tr><td>Differential / partialled regressor tests (Frisch–Waugh)</td>
+      <td><code>misfit-localization/pair_differential_test.py</code></td>
+      <td><code>partial.py</code></td>
+      <td>—</td>
+      <td>queued</td></tr>
+      <tr><td>Acquisition scale-step detection and block tables</td>
+      <td><code>mast_block_scale.py</code>, <code>mast_acquisition_scale.py</code></td>
+      <td><code>scale_step.py</code></td>
+      <td>—</td>
+      <td>queued</td></tr>
+      <tr><td>Noise floor, drift ramp, quiet-window statistics</td>
+      <td><code>mast_sensor_noise.py</code></td>
+      <td><code>noise.py</code></td>
+      <td>—</td>
+      <td>queued</td></tr>
+      <tr><td>Pair-failure detection (0.5/1.5 gain states, mid-life steps,
+      shot-to-shot flips)</td>
+      <td>nowhere — measured ad hoc in the 2026-08-07 survey</td>
+      <td><code>pair_state.py</code></td>
+      <td>—</td>
+      <td>queued</td></tr>
+    </tbody>
+  </table>
+
+  <p>Adapter thinning — the <code>mast_</code> modules feeding the kernels rather than
+  duplicating them — travels with the four queued modules as the next followup on
+  <a href="/nova/plans/nova-calibrate-package.html">nova-calibrate-package</a>.</p>
+
+  <figure>
+    <img src="/nova/figures/calibration-foundations/calibrate-package-flow.png"
+         alt="Flow diagram: machine adapters in nova.imas on the left feed arrays into
+         the nova/calibrate kernels in the middle; the kernels emit to and consume from
+         the correction document on the right, which the read path serves at 1.2 ms per
+         shot. Landed modules are shown filled, the four queued modules greyed."
+         style="max-width:100%">
+    <figcaption>The boundary that makes the package portable: adapters own store paths,
+    shot numbers, channel naming and drive maps; kernels see arrays only; corrections
+    move between them as schema documents. The next machine gets the whole ladder for
+    the cost of an adapter.</figcaption>
+  </figure>
+
+  <p>The unit lane is synthetic truth and store-free — analytic filament fields,
+  injected gain errors, exact ladder rungs, drift ramps, pair-state sequences — and runs
+  in the default suite with no data mounts: <strong>180 passed, 2 skipped, 5.4 s</strong>
+  (the 2 skips are the generation-parity tests, which need the optional
+  <code>schema</code> extra; they pass with it installed). At the first migration slice
+  the lane was 160 tests in 5.75 s; the read-path cutover added the rest.</p>
+
+  <p>Separately, the numbers in the published research records must keep reproducing
+  <em>through the package</em>, so three of them are banked as fixtures and pinned in
+  <code>tests/calibrate/test_banked_reproduction.py</code> (15 tests): a couplings
+  fixture (<code>banked_couplings.npz</code>, 22.9 kB), the obr17 gain at 0.5011, and one
+  identifiability spectrum. That is what stops a refactor from silently invalidating a
+  landed record.</p>
+
+  <hr>
+
+  <h2>Strand 3 — the forward model becomes differentiable</h2>
+
+  <p>Commits <code>bf8f9bcb</code> + <code>dcc3a62a</code>, merged <code>42dd1816</code>;
+  regression suite at <code>tests/test_biotgeometryautograd.py</code>. The biot operators
+  were written JAX-compliant for accelerator throughput. That property now pays a second
+  time: it yields exact derivatives with respect to <em>source</em> geometry. Only the
+  polygon quadrature path was verified before this work; the audit brought the whole
+  family, and each class carries a three-part regression — value against the host numpy
+  kernel, <code>jacfwd</code> against central finite differences, and
+  <code>jacrev</code> against <code>jacfwd</code>.</p>
+
+  <table>
+    <thead><tr><th>kernel class</th><th>state before</th><th>action</th>
+    <th>pinned tolerances</th></tr></thead>
+    <tbody>
+      <tr><td>Polygon section pack</td>
+      <td>untraceable — a boolean in-place mask</td>
+      <td><code>traced_pack_section</code> with a static <code>horizontal_edges</code>
+      mask computed outside the trace</td>
+      <td>edges and weights bit-identical; norm 1e-15</td></tr>
+      <tr><td>Polygon quadrature</td>
+      <td>kernel traced, but driven from an untraced pack</td>
+      <td>driven from the traced pack, so vertices are trace inputs</td>
+      <td>value 1e-10; jacfwd-FD 1e-6 (rigid shift and single vertex);
+      jacrev 1e-10</td></tr>
+      <tr><td>Ring filament</td>
+      <td>opaque Cephes <code>ellipkm1</code>/<code>ellipe</code>; the source was a
+      Python float</td>
+      <td><code>traced_filament_greens</code> on a complement-native complete pair</td>
+      <td>value 1e-12; jacfwd-FD 1e-6; jacrev 1e-11; on-axis Jacobians finite</td></tr>
+      <tr><td>Rectangular finite section</td>
+      <td>host-only</td>
+      <td><code>traced_corner_fields</code> / <code>traced_cylinder_greens</code> on the
+      descriptor (a, z0, da, dz)</td>
+      <td>value 1e-11; jacfwd 3e-6; jacrev 1e-7</td></tr>
+      <tr><td>Zeta integral</td>
+      <td>per-element rule selection and a scatter — both untraceable</td>
+      <td><code>traced_zeta</code>, tanh-sinh unconditionally</td>
+      <td>1e-13 against the routed host rule in both regimes</td></tr>
+      <tr><td>Arc filament</td>
+      <td>host-only; scalar azimuths</td>
+      <td><code>traced_arc_filament_greens</code> — position and both azimuths are
+      trace inputs</td>
+      <td>value 1e-13; jacfwd 1e-6; jacrev 1e-12</td></tr>
+      <tr><td>Closed-form polygon, full turn</td>
+      <td>no geometry pin at all</td>
+      <td>driven from the traced pack</td>
+      <td>value 1e-9; jacfwd 1e-5; jacrev 1e-8</td></tr>
+      <tr><td>Closed-form finite arc</td>
+      <td>as above, plus azimuths</td>
+      <td>as above, with both azimuths as trace inputs</td>
+      <td>value 1e-9; jacfwd 1e-5; VJP–JVP 1e-8</td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <img src="/nova/figures/calibration-foundations/autograd-tolerances.png"
+         alt="Horizontal bar chart on a logarithmic axis: for each of eight kernel
+         classes, the pinned value tolerance, the jacfwd-versus-finite-difference
+         tolerance, and the jacrev-versus-jacfwd tolerance. Value tolerances sit between
+         1e-15 and 1e-9; forward-mode tolerances cluster in a shaded band near 1e-6;
+         reverse-mode tolerances sit between 1e-12 and 1e-7."
+         style="max-width:100%">
+    <figcaption>The shaded band is the finite-difference truncation floor, not a kernel
+    limitation — where the reference is a central difference, ~1e-6 is as tight as the
+    comparison can be made. Where both sides are exact (<code>jacrev</code> against
+    <code>jacfwd</code>) the agreement runs three to six decades tighter. The two
+    value-only rows are kernels with no free geometry argument of their own; they are
+    differentiated through the callers that drive them.</figcaption>
+  </figure>
+
+  <h3>Two elliptic derivative repairs — and why one of them was nearly missed</h3>
+
+  <p>The third kind's forward mode returned NaN on the unreflected side; the fix holds
+  the root argument at one where no reflection is wanted.</p>
+
+  <p>The second is the instructive one. Carlson's degenerate form lost the
+  <code>eps</code>/pole ratio in its slope on the direct side: <strong>both autodiff
+  modes were wrong by ~3e-9 while the value kept every digit</strong>. The
+  <code>jacfwd</code>–<code>jacrev</code> cross-check agreed to 4e-10 — and that
+  agreement was <em>mutual error</em>, because both modes differentiate the same
+  defective expression. Two exact modes agreeing is not evidence of correctness when they
+  share an implementation. The reference had to be differentiated under the integral
+  sign rather than differenced. The repair is an even series in v² below ratio 0.1:
+  slope error 3e-9 → <strong>3e-15 uniformly over poles from 1e-12 to 1e12</strong>,
+  value unchanged at 8e-16, cost +5.4% and only on the arc path. One limitation is
+  recorded rather than hidden: where the pole equals the complement exactly, the slope is
+  finite but 1.2e-2 relative — pre-existing, and documented by its own test.</p>
+
+  <p>Cost of the lane: the fast autograd lane is 30 s over 8 tests. Three closed-form
+  section traces carry the <code>slow</code> marker and are deselected by default; the
+  finite-arc trace is op-count-bound at ~284 s, profiled rather than assumed — the
+  reverse pass alone is 63 s with a single cotangent, so grid size is not the lever.</p>
+
+  <p><strong>What this unlocks.</strong> Every nova coupling operator is now
+  differentiable end-to-end with respect to source geometry. That is the substrate the
+  geometry inversion needs (coil-geometry-inversion §2.2 onward: parameter blocks, then
+  the identifiability spectrum at the real MAST sensor set), and it is the route into the
+  Sophelio Fusion Equilibrium Challenge's flux-map problem class — recovering a machine's
+  coil positions from published flux maps and currents alone, developed against MAST
+  where our registry geometry is the known truth.</p>
+
+  <hr>
+
+  <h2>Where it all lives</h2>
+
+  <table>
+    <thead><tr><th>artifact</th><th>path</th></tr></thead>
+    <tbody>
+      <tr><td>Schema (authored)</td>
+      <td><code>nova/calibrate/schema/diagnostic_correction.yaml</code></td></tr>
+      <tr><td>Generated models and JSON-Schema (committed)</td>
+      <td><code>nova/calibrate/correction_model.py</code>,
+      <code>nova/calibrate/schema/diagnostic_correction.schema.json</code></td></tr>
+      <tr><td>MAST instance</td>
+      <td><code>nova/calibrate/corrections/mast/magnetics.yaml</code></td></tr>
+      <tr><td>Reader, validator, application engine</td>
+      <td><code>nova/calibrate/correction_set.py</code>,
+      <code>nova/calibrate/corrections.py</code></td></tr>
+      <tr><td>Kernels</td>
+      <td><code>nova/calibrate/{coupling,gain,inversion,localize}.py</code></td></tr>
+      <tr><td>MAST read-path adapter</td>
+      <td><code>nova/imas/mast_corrections.py</code></td></tr>
+      <tr><td>Calibration test lane</td>
+      <td><code>tests/calibrate/</code> (182 collected: 180 pass, 2 extra-gated)</td></tr>
+      <tr><td>Banked fixtures</td>
+      <td><code>tests/calibrate/data/banked_couplings.npz</code>,
+      <code>tests/calibrate/data/banked_block_scales.json</code></td></tr>
+      <tr><td>Autograd regressions</td>
+      <td><code>tests/test_biotgeometryautograd.py</code></td></tr>
+      <tr><td>Package orientation</td>
+      <td><code>nova/calibrate/README.md</code> (storage side),
+      <code>nova/calibrate/__init__.py</code> (measurement side)</td></tr>
+    </tbody>
+  </table>
+
+  <p>Open decisions and followups stay on the plans, not here: the gain-application
+  decision and the acquisition sweep's promotion route
+  (<a href="/nova/plans/diagnostic-correction-schema.html">diagnostic-correction-schema</a>),
+  the four remaining kernels plus adapter thinning and the adapter-boundary decision
+  (<a href="/nova/plans/nova-calibrate-package.html">nova-calibrate-package</a>), and the
+  parametrisation, identifiability spectrum and optimiser choice
+  (<a href="/nova/plans/coil-geometry-inversion.html">coil-geometry-inversion</a>).</p>
+
+</main>
+</body>
+</html>

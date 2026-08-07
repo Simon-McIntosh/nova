@@ -20,7 +20,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-07">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="3">
+<meta name="plan-impl" content="0.25">
 </head>
 <body>
 <main class="plan-doc">
@@ -62,22 +63,23 @@
 
   <h2 id="s2">§2 — Implementation</h2>
   <ol>
-    <li><strong>Symmetry elimination test (first, decisive, cheap).</strong> Forward-model the
-    sustained P4/P5 cohort under controlled geometry variants — mirrored members
-    (upper := reflected lower), symmetrised centroids, equalised footprints, per-member
-    (dz, dr, scale) scans seeded with Kirk's measured as-built offsets (arXiv:1312.6507
-    Table 1: δz 2.9 / 6.6 / 0.6 / 13.1 mm for P4U/P4L/P5U/P5L plus tilt and ellipticity), and
-    the 5-turn partial row flipped between the pack's |Z| extremes (EFIT-MAST and FreeGSNKE
-    disagree on which side it sits) — and score each variant against the banked
-    surviving-misfit patterns
-    (<code>~/.cache/nova-mast/misfit-localization/couplings.npz</code>). Either a geometry
-    correction removes the survivor (fault found: description geometry) or the explained
-    fraction caps well below one (the survivor needs current the coils do not carry). The
-    difference field of a displaced member is not a filament, so this closes the gap the
-    single-filament scan left open. This linear scan is also the seed case of
-    <code>coil-geometry-inversion</code>, which generalises it to a gradient solve over
-    continuous geometry freedom once the kernel autograd refactor lands — run the scan
-    first, hand its verdict and best variants to the inversion as starting points.</li>
+    <li class="section-landed"><span class="badge badge-shipped">✓ landed 2026-08-07</span>
+    <strong>Symmetry elimination test — geometry error EXCLUDED as the survivor's source.</strong>
+    Full enumerated scan (mirrored / symmetrised / equalised members, per-member dz/dr/scale
+    grids to ±25 mm seeded at Kirk Table-1, both 5-turn partial-row branches) scored against
+    the banked survivors after span removal and refit: symmetrising corrections explain ≤3%
+    and mostly worsen the fit; every apparent translation match is a 5-probe near-field
+    artifact (far-field explained fraction collapses to 0.01–0.03 with sign-flipped gains).
+    ≥85% of surviving power — ≥95% of the stable P4-lower pattern — needs current the coils
+    do not carry. Robust partial: the described 23-cell lattice (vs the uniform hull smear)
+    removes 15.0% [0.8, 15.3] of P5-lower surviving power at gain 1.28 (11.4% on P4-upper),
+    and the disputed 5-turn row resolves to the described max-|z| side (flipping it costs
+    −24.7%). Premise correction for §2.2: the registry hulls place P4 <em>upper</em> 4.6 mm
+    further from the midplane (not lower, and not 17.3 mm), footprint area +5.1%, P5 +8.7 mm —
+    the plan's −1.1268/+1.1095 reading came from a different source and needs reconciling in
+    the provenance trace. Record:
+    <a href="/nova/research/mast-p4p5-symmetry-verdict.html">symmetry verdict</a>
+    (commit <code>01421e3e</code>, merged <code>af4c2324</code>).</li>
     <li><strong>P4 winding provenance.</strong> Trace where the described P4/P5 geometry came
     from (registry provenance, catalog-geometry records) and reconcile against the as-operated
     evidence: the archive's loop positions, EFIT's coil table (938-element fcoil set), and any
@@ -148,7 +150,7 @@
 
   <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-pcp-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-07" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-pcp-001" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-07" data-recommends-skill="" data-resolved-at="2026-08-07T16:45:36+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Implement §2.1 — the P4/P5 symmetry elimination test</h4>
     <div class="r-fu-body"><p>The single cheapest decisive measurement in the programme: does
       symmetrising (or scanning) the P4/P5 member geometry reproduce the stable surviving-misfit
@@ -183,6 +185,42 @@ Done-when
      explained fractions and figures
   2. Verdict prose: geometry error confirmed / excluded / partial
   3. Followup written into plan + this one resolved</pre>
+    <p class="r-fu-outcome">Section 2.1 landed - commit 01421e3e (merged af4c2324). Verdict: geometry error EXCLUDED as the survivor's source. Symmetrising variants explain <=3% and mostly worsen the fit; translation matches are 5-probe near-field artifacts (far-field fraction 0.01-0.03, sign-flipped gains); >=85% of surviving power (>=95% of stable P4-lower) needs current the coils do not carry. Robust partial: described 23-cell lattice removes 15.0% [0.8,15.3] of P5-lower surviving power at gain 1.28; disputed 5-turn row resolves to the described max-|z| side (flip costs -24.7%). Premise correction: registry hulls put P4 upper 4.6 mm further out (not lower, not 17.3 mm). Record: docs/research/mast-p4p5-symmetry-verdict.html. Decision geometry-correction-site stays open (no geometry change promoted).</p>
+    </article>
+<article class="r-fu" data-id="f-pcp-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-07" data-recommends-skill="/reckon-ship mast-p4p5-circuit-provenance §2.2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Adjudicate P4 geometry/loop provenance (section 2.2) and unblock the pack-total channels (section 2.4)</h4>
+    <div class="r-fu-body">The symmetry scan excluded a described-geometry error and corrected the asymmetry premise (registry hulls: P4 upper 4.6 mm further out, area +5.1%, P5 +8.7 mm - not the 17.3 mm lower-out reading in section 1). Trace where the described P4/P5 geometry and the plan's earlier figures each came from, reconcile the archive loop positions and EFIT fcoil table, and replace the mast_solve_inputs pack-total block with the measured case-current identity (336-pair evidence), suite green.</div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    mast-p4p5-circuit-provenance (docs/plans/mast-p4p5-circuit-provenance.html)
+Section: §2.2 (geometry/loop provenance) + §2.4 (pack-total unblock)
+Capability: general
+Requirements: strict verification
+
+Context
+  §2.1 excluded a described-geometry error as the survivor source and
+  corrected the premise: the registry hulls place P4 UPPER 4.6 mm further
+  from the midplane (footprint area +5.1%; P5 +8.7 mm), not the plan §1
+  reading of P4 lower 17.3 mm further out (z -1.1268 vs +1.1095) - the two
+  readings came from different sources and both must be traced.
+
+State to read
+  docs/research/mast-p4p5-symmetry-verdict.html (verdict + premise correction)
+  docs/plans/mast-p4p5-circuit-provenance.html §1 items 1-2, §2 items 2 and 4
+  nova/catalog/mast_geometry.py (registry access; physical digest ca06c8f64481114f)
+  nova/imas/mast_solve_inputs.py lines ~815-825 (the pack-total block)
+
+Done-when
+  1. Provenance of BOTH P4 geometry readings traced with sources named;
+     the 4.6 mm / +5.1% registry asymmetry adjudicated (real feature,
+     description error, or digitisation artifact) with evidence
+  2. Described-vs-measured P4 flux-loop disjointness documented with
+     archive channel names and positions
+  3. mast_solve_inputs pack-total block replaced by the measured identity
+     (pXY_current = pXY_coil_current + pXY_case_current, worst deviation
+     6.5e-6 across 336 pairs), documented as mechanism; six channels
+     unblocked; full default suite green before commit
+  4. Findings appended to the verdict record or a provenance note;
+     followup written into plan + this one resolved</pre>
     </article>
 </section>
 

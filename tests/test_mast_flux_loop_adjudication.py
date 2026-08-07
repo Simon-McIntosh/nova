@@ -29,7 +29,6 @@ from nova.imas.mast_flux_loop_adjudication import (
     MIRROR_TOLERANCE,
     SEPARATION_MARGIN,
     CandidateFit,
-    LoopAdjudicationError,
     LoopComparison,
     LoopDisposition,
     LoopShotResidual,
@@ -41,6 +40,7 @@ from nova.imas.mast_flux_loop_adjudication import (
     mirror_pairs,
 )
 from nova.imas.mast_solve_inputs import reconstruction_loop_rows
+from nova.imas.mast_vacuum_response import ResponseError
 
 REPRESENTATIVE_SHOT = 11766
 """Registry selection the loop tables are read from."""
@@ -309,7 +309,12 @@ def test_moving_a_loop_changes_the_flux_it_links(geometry):
 
 
 def test_a_component_without_a_cross_section_cannot_be_coupled(geometry):
-    """A degenerate outline is an error, never a silently skipped column."""
+    """A degenerate outline is an error, never a silently skipped column.
+
+    The refusal comes from the shared kernel rather than from this module, which
+    is the point of routing both sensor kinds through one coupling: a coil that
+    cannot be coupled to a probe cannot be coupled to a loop either.
+    """
 
     import shapely
 
@@ -318,7 +323,7 @@ def test_a_component_without_a_cross_section_cannot_be_coupled(geometry):
     empty["active_components"]["sol"] = shapely.Polygon(
         [(1.0, 0.0), (1.0, 0.0), (1.0, 0.0)]
     ).wkb.hex()
-    with pytest.raises(LoopAdjudicationError, match="no cross-section"):
+    with pytest.raises(ResponseError, match="no cross-section"):
         loop_flux_response(empty, np.asarray([[0.4450, 1.5780]], dtype=float))
 
 

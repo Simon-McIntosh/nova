@@ -43,9 +43,8 @@ from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
 import numpy as np
-import shapely
 
-from nova.biot.polygon import polygon_greens
+from nova.catalog.mast_geometry import loop_mount, position_mounts
 from nova.imas.mast_solve_inputs import (
     LOOP_POSITION_TOLERANCE,
     SolveInputError,
@@ -54,6 +53,7 @@ from nova.imas.mast_solve_inputs import (
     reconstruction_loop_rows,
 )
 from nova.imas.mast_vacuum_cohort import FIELD_GROUP, SHOT_STORE
+from nova.imas.mast_vacuum_response import loop_response_matrix
 
 MIRROR_TOLERANCE = 1.0e-6
 """Metres two loops may miss being exact reflections of each other by.
@@ -150,33 +150,153 @@ def loop_flux_response(
     """Return the flux each active coil links through a loop at each position.
 
     Row per position, column per active component in sorted order, in webers per
-    ampere-turn.  A family resolved into several outlines carries its turns in
-    proportion to section area, matching how the probe response is built, so the
-    two routes cannot disagree about what a coil is.
+    ampere-turn.  The columns come from the same kernel and the same area
+    weighting the probe response is built with, so the two routes cannot disagree
+    about what a coil is.
     """
 
-    families = sorted(geometry["active_components"])
-    radius = np.asarray(positions[:, 0], dtype=float)
-    height = np.asarray(positions[:, 1], dtype=float)
-    response = np.zeros((positions.shape[0], len(families)), dtype=float)
-    for column, family in enumerate(families):
-        outline = shapely.from_wkb(bytes.fromhex(geometry["active_components"][family]))
-        parts = getattr(outline, "geoms", None)
-        polygons = (outline,) if parts is None else tuple(parts)
-        vertices = [
-            np.asarray(polygon.exterior.coords, dtype=float)[:-1]
-            for polygon in polygons
-        ]
-        areas = np.asarray(
-            [abs(shapely.Polygon(part).area) for part in vertices], dtype=float
+    return loop_response_matrix(
+        geometry, positions, families=sorted(geometry["active_components"])
+    )
+
+
+@dataclass(frozen=True, order=True)
+class ChannelJoin:
+    """Whether one flux-loop channel reaches a described sensor, and why not.
+
+    ``separation`` is how far the reconstruction places the channel from the
+    nearest described loop, and ``described_on_mount`` how many loops the
+    description carries on the coil the channel is mounted on.  Those two
+    separate the only refusals that occur: a channel the description has no
+    sensor for at all, and a channel whose two sources place it further apart
+    than the catalogs agree to anywhere else.
+    """
+
+    channel: str
+    mount: str
+    described_index: int | None
+    separation: float
+    described_on_mount: int
+
+    @property
+    def served(self) -> bool:
+        """Return whether this channel reaches a described loop."""
+
+        return self.described_index is not None
+
+    @property
+    def cause(self) -> str:
+        """Return why the join refused this channel, empty when it did not."""
+
+        if self.served:
+            return ""
+        if self.described_on_mount == 0:
+            return (
+                f"the description carries no flux loop on {self.mount}, which "
+                f"{self.channel} is mounted on"
+            )
+        return (
+            f"the reconstruction places {self.channel} "
+            f"{self.separation * 1e3:.0f} mm from the nearest of the "
+            f"{self.described_on_mount} loops the description carries on "
+            f"{self.mount}"
         )
-        total = float(areas.sum())
-        if total <= 0.0:
-            raise LoopAdjudicationError(f"component {family!r} has no cross-section")
-        for part, area in zip(vertices, areas, strict=True):
-            flux, _, _ = polygon_greens(radius, height, part)
-            response[:, column] += (area / total) * flux
-    return response
+
+    def as_dict(self) -> dict[str, Any]:
+        """Return the canonical JSON representation."""
+
+        return {
+            "cause": self.cause,
+            "channel": self.channel,
+            "described_index": self.described_index,
+            "described_on_mount": self.described_on_mount,
+            "mount": self.mount,
+            "separation": self.separation,
+            "served": self.served,
+        }
+
+
+def join_accounting(
+    geometry: Mapping[str, Any],
+    positions: np.ndarray,
+    *,
+    tolerance: float = LOOP_POSITION_TOLERANCE,
+) -> tuple[ChannelJoin, ...]:
+    """Account for every flux-loop channel against the described loop set.
+
+    One row per reconstruction channel, served or refused, because the count of
+    channels a description can receive is the measurable consequence of a
+    position correction and a count with no denominator states nothing.  The
+    refusals are separated by the coil each channel is mounted on rather than by
+    a list, so a description that gains or loses a loop moves the accounting
+    without anything here being rewritten.
+    """
+
+    described = described_loop_positions(geometry)
+    outlines = geometry["active_components"]
+    described_mounts = position_mounts(described, outlines)
+    rows = reconstruction_loop_rows()
+    targets = _claimed_targets(described, positions, rows, tolerance)
+
+    accounting = []
+    for channel, row in sorted(rows.items()):
+        mount = loop_mount(channel.upper())
+        if row >= positions.shape[0]:
+            separation = math.inf
+        else:
+            separation = float(
+                np.hypot(
+                    described[:, 0] - positions[row, 0],
+                    described[:, 1] - positions[row, 1],
+                ).min()
+            )
+        accounting.append(
+            ChannelJoin(
+                channel=channel,
+                mount=mount,
+                described_index=targets.get(channel),
+                separation=separation,
+                described_on_mount=sum(one == mount for one in described_mounts),
+            )
+        )
+    return tuple(accounting)
+
+
+def _claimed_targets(
+    described: np.ndarray,
+    positions: np.ndarray,
+    rows: Mapping[str, int],
+    tolerance: float,
+) -> dict[str, int]:
+    """Assign each channel a described loop, nearest first and never twice.
+
+    Two loops of a pair sit fifteen millimetres apart, so a many-to-one match
+    would put two channels on one sensor and every per-loop statement made
+    through it would be about an arbitrary member of the pair.
+    """
+
+    candidates = []
+    for channel, row in rows.items():
+        if row >= positions.shape[0]:
+            continue
+        distance = np.hypot(
+            described[:, 0] - positions[row, 0], described[:, 1] - positions[row, 1]
+        )
+        candidates.append((float(distance.min()), channel, distance))
+    assigned: dict[str, int] = {}
+    taken: set[int] = set()
+    for nearest, channel, distance in sorted(candidates, key=lambda row: row[0]):
+        if nearest > tolerance:
+            continue
+        for index in np.argsort(distance):
+            if distance[index] > tolerance:
+                break
+            if int(index) in taken:
+                continue
+            assigned[channel] = int(index)
+            taken.add(int(index))
+            break
+    return assigned
 
 
 @dataclass(frozen=True, order=True)

@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="research">
   <meta name="plan-slug" content="mast-p4p5-provenance-note">
   <meta name="plan-title" content="P4/P5 provenance — both asymmetry readings traced, the P4-lower loop block is a copy, the pack total is the coil plus its case">
-  <meta name="plan-summary" content="The two circulating readings of the P4 up-down asymmetry come from one source and two arithmetics on it: the registry outline's area centroid puts the upper member 4.6 mm further out, while the mean of the same outline's closed coordinate ring — which counts the ring's start vertex twice, and the two members start on opposite corners — puts the lower member 17.2 mm further out. Only the first is a centroid. The placement asymmetry itself (3.9 mm at P4, 8.7 mm at P5) sits inside the measured as-built envelope and the magnetics prefer it; the +5.1% P4 footprint difference reduces to one number, a 27 mm turn pitch on P4 upper where the other three members carry 26 mm, and is a model artifact. Separately: the level-2 catalog's four FL_P4L loop positions are the FL_P3L block verbatim on every shot sampled, which is why the two P4-lower channels that publish data on every shot reach no described loop. And the six pack-total current channels equal their coil channel plus their case channel to 1.09e-07 of the summed terms over 4578 pairs — a 32-bit float's own resolution.">
+  <meta name="plan-summary" content="The two circulating readings of the P4 up-down asymmetry come from one source and two arithmetics on it: the registry outline's area centroid puts the upper member 4.6 mm further out, while the mean of the same outline's closed coordinate ring — which counts the ring's start vertex twice, and the two members start on opposite corners — puts the lower member 17.2 mm further out. Only the first is a centroid. The placement asymmetry itself (3.9 mm at P4, 8.7 mm at P5) is matched in size and direction by Kirk's Hall-probe fit to the copper of these same coils, and the magnetics prefer it; the +5.1% P4 footprint difference reduces to one number, a 27 mm turn pitch on P4 upper where the other three members carry 26 mm, and is a model artifact. Separately: the level-2 catalog's four FL_P4L loop positions are the FL_P3L block verbatim on every shot sampled, which is why the two P4-lower channels that publish data on every shot reach no described loop. And the six pack-total current channels equal their coil channel plus their case channel to 1.09e-07 of the summed terms over 4578 pairs — a 32-bit float's own resolution.">
   <meta name="plan-status" content="reference">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-recorded-at" content="2026-08-07">
@@ -40,10 +40,12 @@
     real centroids.</strong></p>
     <p><strong>The placement asymmetry is not adjudicable as an error, and the footprint
     difference is.</strong> P5's two members carry byte-identical winding lattices offset
-    8.7 mm in |z|; P4's main block is offset 3.2 mm. Those magnitudes sit inside the as-built
-    case offsets Kirk measured (2.9 / 6.6 / 0.6 / 13.1 mm), they are five-decimal survey-like
-    numbers, and the symmetry scan already measured that the data prefers them to a mirrored
-    geometry. The +5.1% P4 footprint difference is a different animal: it reduces to one
+    8.7 mm in |z|; P4's main block is offset 3.2 mm. Kirk's Hall-probe fit to these same
+    coils — a magnetic measurement of the copper, not the mechanical survey, which never saw
+    inside the case — finds z-shifts of 2.9 / 6.6 / 0.6 / 13.1 mm, implying up-down
+    differences of the same order and, on the natural reading of its sign convention, the
+    same direction. The symmetry scan already measured that the data prefers the described
+    asymmetry to a mirrored geometry. The +5.1% P4 footprint difference is a different animal: it reduces to one
     parameter — a 27 mm main-row turn pitch on P4 upper where P4 lower, P5 lower and P5 upper
     all carry 26 mm — with conductor size, turn count, row pitch and chamfer side identical
     on all four and both packs centred on the same radius. That is a per-member digitisation
@@ -88,10 +90,12 @@
           <td>Is the registry asymmetry real?</td>
           <td><strong>Placement: consistent with as-built, leave it.
           Footprint: model artifact.</strong></td>
-          <td>P5's members are the same lattice displaced 8.68 mm; P4's differ by one
-          parameter — 27 vs 26 mm main-row pitch — with 23 turns, 24×37 mm conductor,
-          38 mm row pitch and max-|z| chamfer identical on all four, both centred on
-          r = 1.500000. Stable on every level-2 shot sampled (29 of 29, 11766–28770).</td>
+          <td>P5's members are the same lattice displaced 8.68 mm, and Kirk's magnetic fit
+          to the copper gives z-shifts implying 9.6 mm (P4) and 13.6 mm (P5) in the same
+          direction. P4's members differ additionally by one shape parameter — 27 vs 26 mm
+          main-row pitch — with 23 turns, 24×37 mm conductor, 38 mm row pitch and max-|z|
+          chamfer identical on all four, both centred on r = 1.500000. Stable on every
+          level-2 shot sampled (29 of 29, 11766–28770).</td>
         </tr>
         <tr>
           <td>Why are the described and published P4 loops disjoint?</td>
@@ -188,17 +192,35 @@
   coil-case circuits sit at exactly ±1.100000 and ±0.500000 — round nominal values — while the copper
   carries five-decimal ones; the case model is nominal and the winding model is not, which
   is the opposite of what a metrology-driven asymmetry would look like.</p>
-  <p>The placement asymmetry does not fall to the same argument. P5's members are the same
-  lattice moved 8.68 mm; P4's main block is moved 3.18 mm with the cross-over split adding
-  the rest. Those are inside the envelope of Kirk's Table-1 as-built case offsets
-  (2.9 mm at P4 upper, 6.6 mm at P4 lower, 0.6 mm at P5 upper, 13.1 mm at P5 lower — an
-  up-down difference of up to 9.5 mm at P4 and 13.7 mm at P5), and the
-  <a href="/nova/research/mast-p4p5-symmetry-verdict.html">symmetry scan</a> measured that
-  the P4 upper survivor prefers the described asymmetry to a mirrored geometry by −0.64 of
-  its power. <strong>Verdict: no correction is warranted at the placement, the footprint
-  difference is a model artifact worth recording but not worth chasing</strong> — the same
-  scan measured footprint equalisation at +0.1% of the survivor, and only at a gain 126×
-  the variant's own amplitude.</p>
+  <p>The placement asymmetry does not fall to the same argument — it survives it, and Kirk's
+  own numbers point the same way. P5's members are the same lattice moved 8.68 mm; P4's main
+  block is moved 3.18 mm with the cross-over split adding the rest. Kirk's Table 1 gives
+  z-shifts of 2.941 mm (P4 upper), 6.638 mm (P4 lower), 0.562 mm (P5 upper) and 13.07 mm
+  (P5 lower), and — this matters for what they can be compared with — those are <em>not</em>
+  the mechanical survey. The mechanical measurement used a clamp ring and gauges referenced
+  to the vessel end plates and, in the paper's own words, "only allowed a determination of
+  the position of the coil case, not the copper turns of the coil inside the case". Table 1
+  instead comes from a twelve-parameter least-squares fit to radial and vertical fields
+  measured by Hall probes at twenty-four toroidal angles: <strong>it senses the copper, which
+  is what the described winding cells claim to be.</strong> Taking the shifts in the machine
+  frame, as their companion x and y shifts plainly are, both members of each pair move in
+  +z, so the upper member ends further from the midplane in both pairs — the same sign the
+  description carries, at 9.6 mm against the described 4.6 mm at P4 and 13.6 mm against 8.7 mm
+  at P5. If instead the shifts were meant per-coil outward, the implied differences are
+  3.7 mm and 12.5 mm with the opposite sign; either way an independent magnetic measurement
+  of these coils finds up-down differences of the same order as the description's.</p>
+  <p>The same table also argues the other half of the verdict. The coil-shape parameters
+  Kirk fits are ellipticity (1.8–3.8 mm), banana bowing (2.2–4.9 mm), wobble (0.7–1.7 mm)
+  and tilt — all non-axisymmetric distortions of the coil ring. Nothing in the published
+  as-built characterisation of these very coils corresponds to one member's winding pack
+  being 5 mm wider than its twin's, and the mechanical survey that might have seen such a
+  thing never looked inside the case. <strong>Verdict: no correction is warranted at the
+  placement — the described asymmetry is if anything understated — and the footprint
+  difference is a model artifact worth recording but not worth chasing.</strong> The
+  <a href="/nova/research/mast-p4p5-symmetry-verdict.html">symmetry scan</a> already measured
+  both halves from the data: the P4 upper survivor prefers the described asymmetry to a
+  mirrored geometry by −0.64 of its power, and footprint equalisation removes +0.1% of the
+  survivor, at a gain 126× the variant's own amplitude.</p>
 
   <h2>The P4 flux loops: a duplicated block, not a mystery</h2>
   <p>The level-2 catalog names each of its 44 described loops in
@@ -325,13 +347,15 @@
 
   <h2>Caveats</h2>
   <ul>
-    <li>The as-built comparison rests on Kirk's Table 1 as quoted in the owning plan; the
-    paper itself is not held locally, so the envelope argument is only as good as that
-    quotation. The argument it supports is a negative one — the placement asymmetry cannot
-    be called an error — which does not turn on the exact millimetres.</li>
+    <li>Kirk's Table 1 was read from the paper itself (retrieved during this work, banked at
+    <code>~/.cache/nova-mast/p4p5-provenance/kirk-2013-mast-intrinsic-error-fields.pdf</code>
+    — the repository is public and the paper is not ours to commit). The sign convention of
+    its z-shifts is not stated in the text; both readings are given above and the
+    order-of-magnitude agreement holds under either.</li>
     <li>Whether the 26 mm or the 27 mm turn pitch is the true one is not settled here. Three
     members against one is a majority, not a drawing, and no winding drawing was available on
-    this host to arbitrate.</li>
+    this host to arbitrate. What is settled is that the two cannot both describe identically
+    manufactured coils.</li>
     <li>The loop comparison uses the reconstruction setup at one shot and the archive channel
     census at a stride of 40 over the store (383 readable shots of 428 sampled). The
     duplicated-block check ran on 29 level-2 shots spanning 11766–28770.</li>

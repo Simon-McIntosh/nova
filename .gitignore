@@ -174,3 +174,6 @@ venv.bak/
 .dmypy.json
 dmypy.json
 nova/_version.py
+
+# Reference papers and literature (local only)
+/research/

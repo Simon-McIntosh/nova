@@ -2,7 +2,7 @@
 
 The catalog fixes the conductors, the vacuum cohort fixes their turn counts, and
 neither says how the archive's current channels reach them.  That last step is
-where a forward operator is silently lost, because the store publishes three
+where a forward operator is silently lost, because the store publishes four
 kinds of current channel side by side and they are not interchangeable.
 
 ``sol_current`` feeds the solenoid, which is wired as two parallel circuits, so
@@ -14,7 +14,10 @@ multiplies it by ``turns_with_sign`` as well squares the turn count.
 ``<coil>_feed_current`` is the current in one conductor of the same coil, so
 there the turn count is exactly the right multiplier.  The two channels differ by
 a factor between eight and twenty-three depending on the coil, and nothing in the
-name distinguishes them.
+name distinguishes them.  ``<coil>_current`` is the fourth and reaches no
+conductor at all: it is the pack total, the coil's ampere turns summed with the
+current its own case carries, and the two terms it decomposes into live in
+different containers of the description, so it carries a weight for neither.
 
 The coil cases are the other half.  Eight of the ten case groups have a measured
 current channel of their own, so those conductors are driven rather than induced,

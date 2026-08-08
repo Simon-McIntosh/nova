@@ -62,6 +62,13 @@ from nova.imas.mast_solve_inputs import (
     unmapped_current_blocked,
 )
 from nova.io.cocos import IP_LIKE, ONE_LIKE, PSI_LIKE
+from nova.utilities.importmanager import mark_import
+
+with mark_import(
+    "imas-standard-names", "imas-standard-names-catalog"
+) as _needs_standard_names:
+    import imas_standard_names  # noqa: F401
+    import imas_standard_names_catalog  # noqa: F401
 
 FORWARD_SHOTS = (11766, 15000, 24000, 28000)
 """Pilot shots running the plasma current positive and the toroidal field negative."""
@@ -534,6 +541,50 @@ def test_a_set_level_channel_names_the_conductors_it_spans(description, publishe
     assert "interconnection" in blocked["p2l_current"].unmet
 
 
+def test_a_set_level_channel_names_the_rows_that_already_carry_it(published_map):
+    """A refusal that rests on redundancy has to name what makes it redundant.
+
+    The set total is not unexplained: each pack publishes its own already-multiplied
+    channel, which the map serves, and the set publishes its case, which is refused
+    for the separate reason that the dictionary holds one current per passive loop.
+    Naming all three is what separates this refusal from one nobody has looked into.
+    """
+
+    blocked = {row.source_channel: row for row in published_map.blocked}
+    served = {row.source_channel for row in published_map.signals}
+    for prefix, side in (("p2l", "lower"), ("p2u", "upper")):
+        reason = blocked[f"{prefix}_current"].reason
+        packs = (f"p2i{side[0]}_coil_current", f"p2o{side[0]}_coil_current")
+        case = f"{prefix}_case_current"
+        for term in (*packs, case):
+            assert term in reason, (prefix, term)
+        assert set(packs) <= served
+        assert case in blocked and case not in served
+
+
+@_needs_store
+@pytest.mark.parametrize("shot", (FORWARD_SHOTS[1], REVERSED_SHOTS[0]))
+def test_a_set_total_is_its_two_packs_plus_its_case_to_the_last_bit(shot):
+    """The redundancy the refusal rests on is measured, not assumed."""
+
+    import zarr
+
+    group = zarr.open_group(f"{SHOT_STORE}/{shot}.zarr", mode="r")[CURRENT_GROUP]
+    for prefix, side in (("p2l", "lower"), ("p2u", "upper")):
+        names = (
+            f"{prefix}_current",
+            f"p2i{side[0]}_coil_current",
+            f"p2o{side[0]}_coil_current",
+            f"{prefix}_case_current",
+        )
+        traces = [np.asarray(group[name][...], dtype=float) for name in names]
+        finite = np.all([np.isfinite(trace) for trace in traces], axis=0)
+        total, inner, outer, case = (trace[finite] for trace in traces)
+        scale = sum(float(np.max(np.abs(term))) for term in (inner, outer, case))
+        residual = float(np.max(np.abs(total - inner - outer - case))) / scale
+        assert residual < PACK_TOTAL_TOLERANCE, (prefix, residual)
+
+
 @_needs_store
 def test_the_loop_join_is_a_property_of_the_configuration(description):
     """The join must not depend on which shot's measured positions it was taken from."""
@@ -608,6 +659,7 @@ def test_each_probe_channel_reads_the_sensor_it_is_mapped_to(
 
 
 @_needs_store
+@_needs_standard_names
 @pytest.mark.parametrize("shot", (FORWARD_SHOTS[1], REVERSED_SHOTS[0]))
 def test_a_shot_round_trips_through_the_description(
     shot, description, published_map, tmp_path
@@ -624,6 +676,7 @@ def test_a_shot_round_trips_through_the_description(
 
 
 @_needs_store
+@_needs_standard_names
 def test_both_field_polarities_reach_the_description_unflipped(
     description, published_map, tmp_path
 ):
@@ -652,6 +705,7 @@ def test_both_field_polarities_reach_the_description_unflipped(
 
 
 @_needs_store
+@_needs_standard_names
 def test_a_coil_publishing_two_channels_measures_its_own_turn_count(
     description, published_map, tmp_path
 ):
@@ -675,6 +729,7 @@ def test_a_coil_publishing_two_channels_measures_its_own_turn_count(
 
 
 @_needs_store
+@_needs_standard_names
 def test_a_channel_off_its_own_clock_is_refused_rather_than_aligned(published_map):
     """Aligning a channel to a clock it does not fit moves every sample in time."""
 

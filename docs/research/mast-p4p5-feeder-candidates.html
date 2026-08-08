@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="mast-p4p5-feeder-candidates">
+  <meta name="plan-title" content="Every conductor the machine description can place, tested against the surviving P4/P5 misfit — and the two amplitude limits that leave nothing standing">
+  <meta name="plan-summary" content="A feeder is testable against an axisymmetric array only through the toroidal part of its route, which reduces every candidate to rings carrying a fraction of the supply current at positions the registry states. One hundred and five such candidates were scored against the banked surviving misfit and, for the first time, against flux-loop couplings computed the same way on the eighteen channels the gain fits admitted. Two limits bound each one: a conductor in series carries at most one supply current, and the loops sit twenty millimetres from the winding packs where a conductor at the pack stops being degenerate with the coil's own column. Eight candidates clear both, none of them on P4 lower — the only target whose pattern reproduces between disjoint shot halves — where every site explaining more than a tenth of the survivor needs 3.6 to 369 supply currents and is three to nine times louder at the loops than everything the loops leave unexplained. The member-difference signature is measured properly for the first time and is not what it was named: it is machine-wide, largest on the centre column, reproducible in shape between the two shots that resolve it but not in scale, and obr10 is one of its smallest channels rather than its carrier.">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-recorded-at" content="2026-08-08">
+  <meta name="plan-evidence-for" content="mast-p4p5-circuit-provenance">
+  <meta name="plan-informs" content="mast-nonaxisymmetric-physics,mast-misfit-toroidal-harmonics,mast-flux-loop-calibration">
+  <meta name="plan-verdict" content="No conductor geometry the machine description can place reaches the surviving misfit. On P4 lower, the one target with a reproducible pattern, nothing survives at all: the eleven sites that explain a tenth or more each need 3.6 to 369 supply currents and each runs 2.7 to 8.7 times louder at the flux loops than everything the loops leave unexplained. Eight of one hundred and five candidates clear both amplitude limits, five of them beside P5 lower, and the best explains 14.4% of that group's survivor at 0.98 supply currents in a conductor at the pack outboard face. The array cannot do better than this because it cannot localise: the region explaining half of what the best ring explains spans 1.5 to 2.3 m in radius, so beside P4 is not a location. The member-difference signature is real and machine-wide with the centre column its largest carrier, but its coefficient per unit difference changes by 1.92 between two shots of equal difference span, so it is not a linear response to the member difference at all, and no established site reproduces it under 107 supply currents — it belongs to the non-axisymmetric programme, and obr10 is not its carrier.">
+  <title>MAST P4/P5 feeder candidates | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <header>
+    <span class="badge badge-active">recorded 2026-08-08</span>
+    <h1>The conductor hunt, and the two limits that end it</h1>
+    <p>The symmetry test excluded a described-geometry error and left one lead standing: current
+    taking a path the description does not carry. The
+    <a href="/nova/research/mast-misfit-source-localization.html">localization maps</a> put that
+    path beside the P4 coils at feeder-scale currents, and the published record named three pieces
+    of hardware that could be it — a link board serving P3, P4 and P5, a toroidally localised P4
+    coil tail, and the joggles that distribute the winding's missing turn. This record tests them,
+    together with every other conductor position the machine description can state, and finds that
+    the lead does not close.</p>
+    <p>Two things make the test sharper than the filament scan it follows. The first is a
+    restriction that costs nothing and buys everything: <strong>only the toroidal part of a
+    conductor's route has any axisymmetric signature at all</strong>, so a feeder is not an
+    arbitrary curve to be fitted but a set of rings at stated places carrying a stated current.
+    The second is a measurement that did not exist a day ago. The flux loops were admitted as
+    published, so the same coupling method the probes use can be run on them — and a loop bolted
+    to a winding pack sees a conductor at that pack, which the probe array cannot.</p>
+  </header>
+
+  <section class="quick-status">
+    <h2>Headline numbers</h2>
+    <table>
+      <thead><tr><th>question</th><th>answer</th><th>measurement</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Does any placeable conductor reach the survivor on the strongest target?</td>
+          <td><strong>No. Nothing on P4 lower survives either limit.</strong></td>
+          <td>Of 21 sites scored against the P4-lower survivor, the 11 explaining 10% or more
+          need between 3.6 and 369 supply currents, and each is 2.7 to 8.7 times louder at the
+          flux loops than everything the loops leave unexplained. The two sites the loops do
+          permit explain 0.5% and 0.1%.</td>
+        </tr>
+        <tr>
+          <td>Does anything survive both limits anywhere?</td>
+          <td><strong>Eight of 105, and the best explains 14.4%.</strong></td>
+          <td>A conductor at the P5-lower pack outboard face carrying 0.98 supply currents
+          explains 14.4% [1.9, 15.2] of that group's survivor at a fifth of the loops'
+          unexplained content. Five of the eight sit beside P5 lower.</td>
+        </tr>
+        <tr>
+          <td>Is the survivor one conductor seen by several drives?</td>
+          <td><strong>No.</strong> With each drive given equal weight the leading common pattern
+          holds under half the shape.</td>
+          <td>Singular spectrum of the four single-member surviving patterns, rows normalised:
+          0.468, 0.247, 0.191, 0.093. Unnormalised it reads 0.807, but that is P4 lower's
+          amplitude rather than agreement.</td>
+        </tr>
+        <tr>
+          <td>How well can the array localise a ring at all?</td>
+          <td><strong>It cannot.</strong> The half-peak region spans most of the poloidal
+          plane.</td>
+          <td>1.53&nbsp;m radially and 1.16&nbsp;m axially on P4 lower; on P5 lower it is
+          2.25&nbsp;m radially, which is the entire scan width, and 2.25&nbsp;m axially.
+          "Beside P4" names a peak, not a location.</td>
+        </tr>
+        <tr>
+          <td>What is obr10's differential signature?</td>
+          <td><strong>Not obr10's.</strong> It is machine-wide, largest on the centre column,
+          and obr10 is one of its smallest channels.</td>
+          <td>Pooled P5 member-difference coupling 1&nbsp;501&nbsp;nT/At, 813 surviving; centre-column
+          channels reach &minus;3&nbsp;000&nbsp;nT/At while obr10 sits at +286. What singled obr10
+          out was the share of its own residual, which measures how quiet obr10 is.</td>
+        </tr>
+        <tr>
+          <td>Can a conductor produce it?</td>
+          <td><strong>No established site under 107 supply currents.</strong></td>
+          <td>The best site reaches 45% of the pattern at 147 supply currents; nothing placeable
+          explains more than 3.7% below ten. The regressor is well conditioned (89&ndash;100% of
+          the difference survives partialling), so this is not an artefact of collinearity.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <h2>What an axisymmetric array can and cannot be told about a feeder</h2>
+  <p>A feeder bar runs radially out from a coil, turns, and leaves through a vessel port. Averaged
+  over the toroidal angle, its radial and vertical legs become a <em>radial current sheet</em>,
+  whose magnetic field is purely toroidal. No poloidal pickup coil reads a toroidal field and no
+  flux loop links one. What survives the average is only the part of the route that runs
+  <em>toroidally</em>, and a toroidal run subtending an angle carries that fraction of a turn.</p>
+  <p><strong>Every feeder therefore reduces, for this array, to a small number of rings carrying a
+  fraction of the supply current at the radius and height of each toroidal run.</strong> That is
+  not a modelling convenience; it is the reason a full three-dimensional route inversion belongs to
+  the non-axisymmetric programme and cannot be attempted here. It also fixes the amplitude scale
+  once and for all: <strong>a conductor in series with a winding carries the supply current
+  exactly once</strong>, so the toroidal fraction of its route cannot exceed one turn of it. One
+  supply current is the ceiling, and on P4 and P5 one supply current is 23 ampere turns.</p>
+
+  <h2>The candidates, and where each position comes from</h2>
+  <p>Positions are read from the geometry registry so that a candidate is a place the machine has.
+  Eleven single-ring sites and two two-ring routes are built for each of the four members, plus
+  seven structures every drive can reach — 105 scored candidates in all.</p>
+  <table>
+    <thead><tr><th>candidate</th><th>where the position comes from</th><th>rings</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Coil tail</strong> — the toroidally localised P4 tail, and the joggles that
+      distribute the winding's missing 24th turn (Kirk, arXiv:1312.6507)</td>
+      <td>The winding-pack outline: its four faces and its interior.</td>
+      <td>One, at the pack.</td></tr>
+      <tr><td><strong>Case-bound conductor</strong> — anything running inside the stainless can
+      that holds the winding</td>
+      <td>The coil-case outline nearest each pack.</td>
+      <td>One, at the case wall.</td></tr>
+      <tr><td><strong>Galvanic case-to-vessel return</strong> — the coil cans are connected to the
+      vessel <em>both</em> through their mechanical supports <em>and</em> through the vacuum-bellows
+      connection of the feeder bars at vessel ports (Edlington, Martin &amp; Pinfold, Rev. Sci.
+      Instrum. <strong>72</strong>, 421 (2001))</td>
+      <td>Case outboard wall out to the vessel wall at the port band.</td>
+      <td>Two, opposed.</td></tr>
+      <tr><td><strong>Feeder run to a vessel port</strong> — the current feeds come through
+      bellows connections at diagnostic ports (same paper)</td>
+      <td>Pack outboard face to the vessel wall at the port band. The port heights are the
+      registry's own saddle-loop bands, because the three rectangular loops per sector are
+      attached <em>around</em> those diagnostic ports.</td>
+      <td>Two, opposed.</td></tr>
+      <tr><td><strong>Vessel-wall return</strong></td>
+      <td>The vessel cylinder at R = 2.010&nbsp;m, at the coil's own height and at the port band.</td>
+      <td>One.</td></tr>
+      <tr><td><strong>Centre column and end plates</strong> — included because the unconstrained
+      scan prefers the centre column for two drive groups</td>
+      <td>The Inconel centre tube, the centre rod ground, and the two vessel end plates.</td>
+      <td>One.</td></tr>
+      <tr><td><strong>The P3/4/5 link board</strong> — the only feeder-hardware fact in the public
+      record</td>
+      <td><em>No position is stated in any source on this host.</em> It is bounded rather than
+      sited, by the unconstrained ring scan below.</td>
+      <td>&mdash;</td></tr>
+    </tbody>
+  </table>
+  <p>The three port bands the saddle loops mark sit at z from &minus;1.66 to &minus;0.86, &minus;0.40
+  to +0.40, and +0.86 to +1.66, at twelve sectors each spanning 20&deg;. The lower and upper bands
+  bracket the P4 members; the middle band sits inboard of P5 in height. That the
+  <em>n</em>-resolving sensors are mounted around the penetrations the feeder bars pass through is
+  the single most useful geometric fact this record turned up, and it is a handoff rather than a
+  result: it is what makes a saddle-loop inversion the right instrument for the route.</p>
+
+  <figure>
+    <img src="/nova/figures/p4p5-feeders/candidate-sites.png"
+         alt="Left: poloidal cross-section of MAST with the winding packs, coil cases, vessel wall, port bands and flux loops drawn, every scored candidate site marked with a cross, the eight surviving candidates ringed in their drive-group colour, and the free-ring optimum for each drive group marked with a star. Right: horizontal bar chart of the radial and axial extent of the region explaining at least half of what the best ring explains, per drive group, with the scan width marked."
+         style="max-width:100%;height:auto">
+    <figcaption>Left: the candidate sites (crosses), the eight surviving both amplitude limits
+    (rings), the eighteen admitted flux loops (small squares) and the best unconstrained ring per
+    drive group (stars). The stars sit where no conductor is. Right: how large the region is that
+    explains at least half of what the best ring explains — for three of five groups it is the
+    entire scan. Evidence: <code>feeder_scores.json</code>.</figcaption>
+  </figure>
+
+  <h2>The flux loops, run the same way as the probes</h2>
+  <p>The probe couplings were computed by regressing each channel's vacuum residual jointly on
+  every substantially active ampere-turn waveform and keeping the coefficient on the P4/P5
+  regressor. That method is re-run here on the eighteen loop channels the gain fits
+  <a href="/nova/research/mast-flux-loop-gain-fits.html">admitted as published</a>, over the same
+  shots, with the same conditioning guard. It returns 41 (shot, group) rows — the same 13, 12, 7, 7
+  and 2 rows per group the probes have, because the guard accepts the same shots.</p>
+  <p>What the loops measure is a residual of 1&ndash;9% of the described column, negative on almost
+  every channel, which is the common deficit the gain fits already reported and attributed to the
+  forward model rather than to the instrument. That deficit is proportional to the driven column,
+  so it is exactly what a bound has to be blind to: the driven family's column is projected out of
+  both the measurement and the candidate, and only that column, because removing all thirteen from
+  eighteen channels would leave fewer dimensions than a fit needs.</p>
+  <p>The bound is then read directly. For each candidate, the amplitude at which its predicted loop
+  signal would equal <em>everything the loops leave unexplained</em> is the most current that could
+  have been there without the loops seeing it. Where the probes want more than that, the candidate
+  is excluded by measurement.</p>
+  <p>This is where the near-pack degeneracy breaks. A ring inside a winding pack is almost exactly
+  what the coil's own column already is, so the probe array cannot see it at all: the fit needs
+  &minus;369 supply currents at the P4-lower winding interior precisely because what is left after
+  the described span is removed is nearly nothing. The loops, twenty millimetres away, permit only
+  52 there — and 1.07 at the pack's outboard face, where the probes want 9.35.</p>
+
+  <h2>The result: two limits, and what clears them</h2>
+  <figure>
+    <img src="/nova/figures/p4p5-feeders/candidate-amplitudes.png"
+         alt="Left: scatter of explained share against the supply currents each candidate must carry, on a logarithmic current axis, with bootstrap error bars and the region below one supply current shaded. Right: the same explained shares against each candidate's loop signal divided by everything the loops leave unexplained, with the region below one shaded."
+         style="max-width:100%;height:auto">
+    <figcaption>Left: what each site explains against what it must carry. Every candidate
+    explaining more than a fifth of any survivor sits to the right of the one-supply line. Right:
+    the same shares against the loop bound; the P4-lower points (dark) sit past it. Error bars are
+    2.5&ndash;97.5 percentiles over 2 000 resamples of the shot rows.</figcaption>
+  </figure>
+  <p><strong>P4 lower is the case that matters and it comes out empty.</strong> It is the only
+  target whose surviving pattern reproduces between disjoint shot halves (cosine +0.92 over 13
+  rows); the other groups pool 7 rows or 2. Of its 21 sites, eleven explain 10% or more, and those
+  eleven need 3.6 to 369 supply currents while running 2.7 to 8.7 times louder at the loops than
+  everything the loops leave unexplained. The two sites the loops are relaxed about, the pack's
+  lower face and the case's
+  lower wall, explain 0.5% and 0.1%. There is no conductor position in the description that both
+  reproduces the stable survivor and could carry the current doing so.</p>
+  <p>Eight candidates clear both limits with a bootstrap lower bound away from zero, and five sit
+  beside P5 lower:</p>
+  <table>
+    <thead><tr><th>drive group</th><th>site</th><th>share explained</th><th>supply currents</th>
+    <th>loop bound used</th></tr></thead>
+    <tbody>
+      <tr><td>p5_lower</td><td>pack outboard face</td><td><strong>14.4%</strong> [1.9, 15.2]</td>
+      <td>&minus;0.98</td><td>0.20&times;</td></tr>
+      <tr><td>p5_lower</td><td>case outboard wall</td><td>13.9% [1.9, 14.6]</td><td>&minus;0.82</td>
+      <td>0.20&times;</td></tr>
+      <tr><td>p5_lower</td><td>pack inboard face</td><td>11.3% [1.2, 12.7]</td><td>+0.80</td>
+      <td>0.23&times;</td></tr>
+      <tr><td>p5_lower</td><td>case inboard wall</td><td>10.3% [1.0, 11.8]</td><td>+0.66</td>
+      <td>0.21&times;</td></tr>
+      <tr><td>p5_lower</td><td>vessel wall at coil height</td><td>8.4% [1.3, 8.8]</td>
+      <td>&minus;0.31</td><td>0.16&times;</td></tr>
+      <tr><td>p5_pair</td><td>case lower wall</td><td>2.8%</td><td>&minus;0.65</td><td>0.04&times;</td></tr>
+      <tr><td>p5_pair</td><td>centre rod ground, midplane</td><td>1.9%</td><td>&minus;0.10</td>
+      <td>0.01&times;</td></tr>
+      <tr><td>p5_pair</td><td>centre rod ground, z = +1.10</td><td>1.1%</td><td>+0.15</td>
+      <td>0.01&times;</td></tr>
+    </tbody>
+  </table>
+  <p>Two P4-upper sites — the vessel wall at the coil's height, which is also its port band — clear
+  both limits at 18.9% and &minus;0.56 supply currents, and are left out of the table because
+  their bootstrap lower bound is 0.6%: on seven pooled rows they are not distinguishable from
+  nothing. They are the one entry that would repay more shots.</p>
+  <p>The ranking that follows is therefore short. <strong>A conductor at the P5-lower pack face
+  carrying about one supply current</strong> is the only candidate that is simultaneously placeable,
+  admissible in amplitude, quiet enough for the loops, and bounded away from zero — and it accounts
+  for a seventh of one drive group's survivor, on the group whose split-half agreement is +0.54.
+  Nothing supports it as <em>the</em> source, and the P4-lower null is the stronger statement.</p>
+
+  <h2>Why the array cannot do better: the resolution limit</h2>
+  <p>The unconstrained ring scan is the ceiling on this whole candidate class, and it also measures
+  how little a peak means. Scanning 181 radii by 257 heights, the best single ring explains 60.6%
+  of the P4-lower survivor at R = 0.19, z = &minus;0.15, on the centre column; 46.6% of P4 upper at
+  (1.575, +0.694) and 43.3% of P5 lower at (1.450, &minus;1.200), reproducing the two peaks the
+  localization record reported beside the P4 coils.</p>
+  <p>But the region explaining at least half of that peak spans <strong>1.53&nbsp;m in radius and
+  1.16&nbsp;m in height for P4 lower, and for P5 lower it fills the scan radially at 2.25&nbsp;m
+  while spanning 2.25&nbsp;m in height</strong>. A single ring is a smooth, slowly varying field pattern, and the described column
+  space absorbs everything that distinguishes one such pattern from another over most of the plane.
+  <strong>"Beside the P4 coils" is a peak, not a location</strong>, and no amount of further
+  axisymmetric filament fitting will sharpen it. This is the resolution limit that ends the hunt
+  in this direction, and it is why the remaining leverage is the flux loops' different geometric
+  functional and the saddle loops' toroidal resolution rather than more probe fits.</p>
+
+  <h2>The differential signature, measured rather than sampled</h2>
+  <p>The localization record reported that the P5 member-current difference explains 16% and 40% of
+  obr10's partialled residual at a consistent +279 and +293&nbsp;nT/At, and handed that on as a
+  constraint any candidate circuit must reproduce. It reported the five strongest channels only.
+  Fitting the whole array changes the reading.</p>
+  <figure>
+    <img src="/nova/figures/p4p5-feeders/differential-signature.png"
+         alt="Top: bar chart of the pooled member-difference coupling at every probe channel in nanotesla per ampere turn, with the two contributing shots overplotted as markers, obr10 highlighted in red at plus 286 and the centre-column channels reaching minus 3000. Bottom: horizontal logarithmic bar chart of the supply currents each established site must carry to reproduce the differential pattern, all above one hundred, annotated with the share each explains."
+         style="max-width:100%;height:auto">
+    <figcaption>Top: the member-difference coupling over the whole array, pooled and per shot.
+    The signature is machine-wide and its largest carriers are centre-column channels; obr10 (red)
+    is among the smallest. Bottom: what a conductor at each established site would have to carry to
+    produce it. Evidence: <code>differential_scores.json</code>.</figcaption>
+  </figure>
+  <ul>
+    <li><strong>It is not an artefact of a nearly-collinear regressor.</strong> The member
+    difference spans 0.25&ndash;0.62% of the pair sum, which is the first thing to suspect, but
+    89&ndash;100% of it survives partialling out the sum and every other active drive. The
+    coefficients are honestly determined.</li>
+    <li><strong>On P5 it reproduces in shape and not in scale, and the failure to reproduce in
+    scale is itself decisive.</strong> The two shots agree at cosine +0.952 raw and +0.89 after the
+    described span is removed, and the per-channel ratio between them is a tight 1.92 (interquartile
+    1.68 to 2.09) — one pattern, scaled. But their difference spans are 958 and 954 ampere turns,
+    so the coefficient <em>per ampere turn of difference</em> is not a property of the machine.
+    A conductor fed by one member of a series pair would give the same coefficient on both shots by
+    construction. Whatever produces this pattern is not responding linearly to the member
+    difference; the difference regressor is reading something that merely travels with it.</li>
+    <li><strong>On P4 it does not reproduce at all.</strong> The three P4 shots give pairwise
+    cosines of &minus;0.78, &minus;0.95 and +0.77 — the pooled P4 difference pattern means nothing,
+    even though obr10 itself reads a consistent +102, +110, +113&nbsp;nT/At across them.</li>
+    <li><strong>obr10 is not its carrier.</strong> Pooled over P5 the coupling reaches
+    &minus;3&nbsp;000&nbsp;nT/At on centre-column channels against obr10's +286. What singled obr10
+    out in the earlier reading was the share of its <em>own</em> partialled residual, which is a
+    statement about how quiet obr10 is, not about how loud the signature is there.</li>
+    <li><strong>It is its own pattern, not the level survivor leaking.</strong> Cosines against the
+    level survivors are &minus;0.29, &minus;0.19, +0.40 and +0.02.</li>
+    <li><strong>No placeable conductor produces it.</strong> The best site reaches 45% at 147
+    supply currents; the best below ten supply currents explains 3.7%. Two orders of magnitude is
+    not a modelling gap.</li>
+  </ul>
+  <p>The differential signature therefore stands as a real, reproducible spatial pattern and moves
+  out of the conductor question entirely — twice over, once because no placeable geometry reaches
+  it below two orders of magnitude in current, and once because its amplitude per unit difference
+  is not a constant, which no series conductor can arrange. Its shape — largest on the centre
+  column, sign-flipping between the inboard and outboard bands — is what the toroidal-harmonic and
+  non-axisymmetric programmes are built to read, and the factor of 1.92 between two shots with equal
+  difference spans is the sharpest single clue in it.</p>
+
+  <h2>What the instruments already exclude, without any fit</h2>
+  <p>Edlington, Martin &amp; Pinfold describe the magnetics hardware, and two of their facts settle
+  candidate classes outright.</p>
+  <ul>
+    <li><strong>The coil-case path is watched.</strong> Every PF case Rogowski sits in a machined
+    groove in a frame around the coil case, so what it links is the total toroidal current threading
+    that frame; the paper states that induced case currents are obtained by subtracting the feeder
+    bar current from it. That is the pack-total identity the solve-input map now carries as
+    mechanism — the identity is the instrument's definition, not a coincidence. It also means a
+    galvanic current diverted through a coil case would be <em>measured</em>, and the measurement
+    says it is 0.01&ndash;0.35% of the coil at flat-top and rate-like rather than level-like. The
+    case path is excluded by the instrument that was built to watch it.</li>
+    <li><strong>The P4/P5 feed path is the one nobody watched.</strong> Halo-current detectors sit
+    around each of the six support legs of the P2 and P3 coils, and the paper says the bellows feeds
+    for <em>those</em> coils are monitored too. P4 and P5 have no such monitor. The one galvanic
+    route this record cannot bound with a dedicated instrument is precisely the one at the coils the
+    misfit points to — which is a reason the question stayed open for the machine's life, and a
+    reason the answer will not come from the archive's own current channels.</li>
+  </ul>
+
+  <h2>Verdict</h2>
+  <p><strong>No conductor geometry that the machine description can place reaches the surviving
+  misfit.</strong> On P4 lower, the only target with a reproducible pattern, nothing clears both
+  limits: what explains needs current no conductor carries, and what could carry the current
+  explains nothing. Eight of 105 candidates clear both limits elsewhere, the best being a conductor
+  at the P5-lower pack outboard face at 0.98 supply currents explaining 14.4% [1.9, 15.2] — a
+  partial account of one group, not a source.</p>
+  <p>The reason is measured rather than argued: <strong>the array cannot localise a ring to better
+  than one and a half to two and a quarter metres</strong>, so a candidate hunt conducted with
+  axisymmetric filaments against this probe set has reached its resolution. The two instruments that
+  are not limited this way are the flux loops, which are used here for the first time and which do
+  the work of excluding every near-pack candidate, and the 36 saddle loops, which are mounted around
+  the very ports the feeder bars penetrate and have not been touched.</p>
+
+  <h2>Caveats</h2>
+  <ul>
+    <li>The P4-upper, P5-upper and P5-pair groups pool 7, 7 and 2 shot rows. Their bootstrap
+    intervals are correspondingly wide — several reach from under 1% to over 50% — and the two-row
+    pair group's interval is not a confidence statement at all, since resampling two rows mostly
+    returns those two rows. P4 lower (13 rows) is the only group to build on alone.</li>
+    <li>The loop bound compares a candidate against everything the loops leave unexplained after the
+    driven column is removed. That is a bound on a candidate acting alone; two candidates whose loop
+    signals cancel are not excluded by it.</li>
+    <li>The pair group is scored against the sites belonging to P5 lower and against the structures
+    every drive can reach, because a pair drive has no single member to hang a coil-local site on.
+    A conductor fed by the pair from the upper member's side is therefore represented only by its
+    mirror.</li>
+    <li>Candidate rings are placed at outline bounds and centroids. A conductor a few centimetres
+    from where its outline puts it changes the loop prediction more than the probe prediction,
+    because the loops are the near-field instrument — the same proximity that gives them their
+    leverage.</li>
+    <li>Only the axisymmetric content of any route is tested. A conductor whose toroidal runs
+    cancel in the <em>n</em> = 0 average is invisible to everything here and is not excluded by
+    anything in this record.</li>
+    <li>The unconstrained scan removes the described-span component of every candidate column, so a
+    conductor the coil set can nearly reproduce scores near zero wherever it sits. The maps and the
+    ceiling bound what is <em>visible</em> in the survivor.</li>
+    <li>The member-difference result rests on two usable P5 shots and three P4 shots. The P5 shape
+    agreement is a single pairwise cosine.</li>
+  </ul>
+
+  <h2>Reproduction</h2>
+  <p>Scripts and banked arrays under <code>~/.cache/nova-mast/p4p5-feeders/</code>:
+  <code>loop_couplings.py</code> &rarr; <code>loop_couplings.npz</code> (per-shot flux-loop
+  couplings on the 18 admitted channels, the probe method unchanged),
+  <code>feeder_models.py</code> &rarr; <code>feeder_scores.json</code> (the site catalogue, the
+  rank test, the two amplitude limits, the bootstrap, and the free-ring ceiling with its half-peak
+  extents), <code>feeder_differential.py</code> &rarr; <code>differential_scores.json</code> (the
+  full member-difference coupling, its conditioning, its shot-to-shot agreement, and the candidate
+  scores against it) and <code>feeder_figures.py</code> &rarr; the three figures in
+  <code>docs/figures/p4p5-feeders/</code>. Inputs: the banked probe couplings and localization at
+  <code>~/.cache/nova-mast/misfit-localization/</code>, the loop verdicts at
+  <code>~/.cache/nova-mast/flux-loop-calibration/loop_verdicts.json</code>, the level-1 store at
+  <code>/work/projects/imas_gpu/mast/level1/shots</code>, and the geometry registry at shot 21978
+  with the flux loops placed. Hardware facts: Edlington, Martin &amp; Pinfold, Rev. Sci. Instrum.
+  <strong>72</strong>, 421 (2001), retrieved to an untracked local path; Kirk et al.,
+  arXiv:1312.6507.</p>
+  <p>Both candidate kernels are checked against the forward model rather than trusted
+  (<code>kernel_check.py</code>). A single ring at a winding's centroid must reproduce that
+  winding's own polygon-kernel column per ampere turn wherever the finite cross-section stops
+  mattering, and it does: over all four members the ratio is 0.9995 to 1.0000 at every one of the
+  eighteen loops, and 0.9995 to 1.0000 at the 54 to 68 probes standing more than 0.8&nbsp;m off,
+  with interquartile widths under 0.0013. The amplitudes quoted throughout are therefore turns of
+  the supply current in the candidate's toroidal run, on the scale the drive map uses.</p>
+
+  <h2>What this hands on</h2>
+  <ul>
+    <li><strong>To the non-axisymmetric programme:</strong> the feeder route question in full, with
+    a geometric handle it did not have — the three saddle-loop bands are mounted around the
+    diagnostic ports the feeder bars pass through, at twelve sectors of 20&deg; each, so the
+    sensors that resolve toroidal structure surround the penetrations in question. The
+    member-difference pattern goes with it: real, machine-wide, centre-column dominated, and
+    unreachable by any axisymmetric conductor under 107 supply currents.</li>
+    <li><strong>To the harmonics programme:</strong> the resolution limit is now quantified, so the
+    value of loop and saddle constraints can be stated against a number rather than an
+    expectation.</li>
+    <li><strong>To the localization record:</strong> two corrections. Its P4-member asymmetry row
+    still carries the retracted 17.3&nbsp;mm reading; and its obr10 differential row names obr10 as
+    the carrier of a signature that is machine-wide and largest elsewhere.</li>
+    <li><strong>To the flux-loop programme:</strong> the loop couplings are banked per drive group
+    and are a second use for the admitted channels beyond the inversion — they are the near-field
+    instrument for any conductor question at a winding pack.</li>
+    <li><strong>To whoever owns the loop-position republication:</strong> every loop number in this
+    record is computed with the P4-lower block restored, because the two channels that publish on
+    every shot are P4 lower's and the published coordinates put them beside P3 lower. The packaged
+    registry still serves the copied positions by default, so a consumer reproducing this bound
+    from the published payload would compute it at the wrong place for the two loops nearest the
+    coils in question. That is a second consumer for the repair, alongside the join count.</li>
+  </ul>
+
+  <h2>Related records</h2>
+  <ul>
+    <li><a href="/nova/research/mast-p4p5-symmetry-verdict.html">Symmetry verdict</a> — excluded the
+    described-geometry error and left this lead standing.</li>
+    <li><a href="/nova/research/mast-p4p5-provenance-note.html">Provenance note</a> — adjudicated
+    the geometry and loop provenance behind these positions.</li>
+    <li><a href="/nova/research/mast-misfit-source-localization.html">Misfit source
+    localization</a> — the couplings, the surviving patterns and the differential test this
+    extends.</li>
+    <li><a href="/nova/research/mast-flux-loop-gain-fits.html">Flux-loop gain fits</a> — admitted
+    the eighteen channels this record measures with.</li>
+    <li><a href="/nova/plans/mast-p4p5-circuit-provenance.html">P4/P5 circuit and geometry
+    provenance</a> — the owning plan.</li>
+  </ul>
+
+</main>
+</body>
+</html>

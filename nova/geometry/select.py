@@ -104,7 +104,23 @@ def wall_index(psi_wall):
 
 @njit(cache=True)
 def wall_flux(x_wall, z_wall, psi_wall, polarity=1):
-    """Return sub-panel wall flux coordinates and value."""
+    """Return sub-panel wall flux coordinates and value.
+
+    The traced peer :func:`nova.jax.select.wall_flux` computes the same
+    sub-panel fit on device; the two are separate backends of one algorithm,
+    not copies, and their return conventions DIFFER -- do not swap one for the
+    other without adapting the call:
+
+    * this one returns a 3-TUPLE ``(x, z, psi)`` and defaults ``polarity`` to
+      1; the traced one returns a 4-element ARRAY ``[x, z, psi, null_type]``
+      and requires ``polarity``;
+    * a zero polarity -- no plasma current, so no wall-limit point exists --
+      returns ``(0, 0, 0)`` here and all-NaN there. ``(0, 0, 0)`` is a
+      well-formed coordinate and flux, so a caller cannot tell it from a real
+      result; the traced convention is the safer one, and moving to it would
+      change what :meth:`nova.biot.limiter.Limiter.update_wall` publishes at
+      zero plasma current.
+    """
     if polarity == 0:  # zero plasma current
         return 0, 0, 0
     index, roll = wall_index(polarity * psi_wall)

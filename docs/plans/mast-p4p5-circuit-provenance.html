@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-08">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="11">
 <meta name="plan-impl" content="1.0">
 </head>
 <body>
@@ -157,9 +157,19 @@
     <p class="r-dec-q">If the symmetry test names a described-geometry error, where does the
       correction land — the machine-description artifact (new semantic revision) or a nova-side
       fitted-parameter overlay?</p>
+    <p class="r-dec-ctx">2026-08-08: LIVE rather than moot, with a second consumer. The feeder-candidates record computes every flux-loop bound with place_loops=True because the packaged registry still serves the copied P4-lower positions by default — a consumer reproducing the bound from the published payload computes it at the wrong place for the two loops nearest the coils in question. That is a second consumer for the queued republication (mast-flux-loop-calibration f-flc-003), alongside the 39→43 join count, and it strengthens the artifact-revision option.</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="artifact-revision">artifact revision (fleet-wide, versioned)</button>
       <button class="r-opt" data-value="fitted-overlay">fitted-parameter overlay (nova-local, faster)</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="pack-total-serving" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Serve the pack-total current channels through a two-channel source-map row, or leave them explained-but-blocked?</p>
+    <p class="r-dec-ctx">Wider than the six pack totals: the two p2 set totals now refuse on the same measured principle but decompose into THREE terms (two pack coil channels + one shared case channel), so a two-channel row would serve the six and still leave the set channels blocked — whatever shape is chosen should be checked against both. The case term&#x27;s container split (pf_active coil vs pf_passive case) is the same obstruction the case_current refusal documents, so this decision touches three refusal families at once. Hardware context (Edlington 2001): the PF case Rogowski sits in a frame around the coil case and links coil + case by construction — the pack-total identity is that instrument&#x27;s definition, and a galvanic case shunt would be measured (it reads 0.01–0.35% and rate-like, excluding the case path).</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="two-channel-row">two-channel source-map row (serves the six; set totals need a three-term shape)</button>
+      <button class="r-opt" data-value="explained-but-blocked">explained-but-blocked (status quo; no fabricated column)</button>
       </p>
     <p class="r-dec-rat"></p>
     </div>

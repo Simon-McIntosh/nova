@@ -1,7 +1,5 @@
 import tempfile
 
-import unittest.mock
-
 import numpy as np
 import pytest
 
@@ -317,11 +315,10 @@ def test_separatrix_no_plasma_psi():
 
 
 def test_biotdata_numpy():
-    with unittest.mock.patch.dict("os.environ", dict(XPU="numpy")):
-        coilset = CoilSet(dplasma=-3)
-        coilset.firstwall.insert(3, -0.5, 0.95, 0.95)
-        coilset.grid.solve(10, 0.05)
-        assert isinstance(coilset.grid.operator["Psi"].source_target, np.ndarray)
+    coilset = CoilSet(dplasma=-3)
+    coilset.firstwall.insert(3, -0.5, 0.95, 0.95)
+    coilset.grid.solve(10, 0.05)
+    assert isinstance(coilset.grid.operator["Psi"].source_target, np.ndarray)
 
 
 def test_biot_link_dataarray_dataset():

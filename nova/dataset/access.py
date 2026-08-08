@@ -9,16 +9,11 @@ Created on Thu Jan 25 11:13:16 2024
 import jax
 import jax.numpy as jnp
 
-from jax import config
-
 import numpy as np
 
 from nova import xarray
 
 import matplotlib.pyplot as plt
-
-
-config.update("jax_debug_nans", True)
 
 
 x, dx = jnp.linspace(0, 12, 35, retstep=True)

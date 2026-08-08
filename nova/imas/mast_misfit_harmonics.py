@@ -221,7 +221,8 @@ def pooled_noise(sample: np.ndarray, floor: np.ndarray) -> tuple[np.ndarray, ...
     # A channel whose shots agree to the last bit reports no scatter, which is a
     # count artefact rather than a perfect measurement; fall back to the set's
     # own median scatter so it cannot dominate the whitened solve.
-    typical = float(np.nanmedian(spread[live & (spread > 0.0)])) if live.any() else 0.0
+    measured = spread[live & np.isfinite(spread) & (spread > 0.0)]
+    typical = float(np.median(measured)) if measured.size else 0.0
     spread = np.where(np.isfinite(spread) & (spread > 0.0), spread, typical)
     error = MEDIAN_EFFICIENCY * spread / np.sqrt(np.maximum(count, 1))
     return value, np.maximum(error, floor / np.sqrt(np.maximum(count, 1))), count

@@ -482,6 +482,44 @@ def test_profile_shapes_vanish_at_the_edge_in_both_arms():
     assert np.all(monomial[:-1] > 0.0)  # the non-negative arm is sign-definite
 
 
+@pytest.mark.parametrize("nonneg", [True, False])
+@pytest.mark.parametrize("n_terms", [0, 1, 2, 3, 4, 5])
+def test_the_two_profile_ladders_are_one_family(nonneg, n_terms):
+    """The host and traced ladders must not drift apart.
+
+    The two are written differently on purpose -- the host arm calls
+    ``numpy.polynomial.legendre.legval`` for each degree, the traced arm walks
+    Bonnet's recurrence so it stays a fixed-shape differentiable reduction -- so
+    nothing but a test holds them to the same family. Coefficients fitted
+    against one and evaluated against the other would otherwise be silently
+    wrong by the difference.
+    """
+    jnp = pytest.importorskip("jax.numpy")
+    from nova.transport.current_diffusion import _profile_shapes_jax
+
+    psi_n = np.linspace(0.0, 1.0, 33)
+    host = profile_shapes(psi_n, n_terms, nonneg=nonneg)
+    traced = np.asarray(
+        _profile_shapes_jax(jnp.asarray(psi_n), n_terms, nonnegative=nonneg)
+    )
+    assert host.shape == traced.shape == (psi_n.size, n_terms)
+    np.testing.assert_allclose(traced, host, rtol=1e-12, atol=1e-13)
+
+
+@pytest.mark.parametrize("nonneg", [True, False])
+def test_both_ladders_clip_outside_the_unit_interval(nonneg):
+    """Off-interval flux is clipped identically, not extrapolated."""
+    jnp = pytest.importorskip("jax.numpy")
+    from nova.transport.current_diffusion import _profile_shapes_jax
+
+    psi_n = np.array([-0.5, -0.1, 0.0, 0.5, 1.0, 1.4])
+    host = profile_shapes(psi_n, 4, nonneg=nonneg)
+    traced = np.asarray(_profile_shapes_jax(jnp.asarray(psi_n), 4, nonnegative=nonneg))
+    np.testing.assert_allclose(traced, host, rtol=1e-12, atol=1e-13)
+    np.testing.assert_allclose(host[0], host[2])  # clipped to the axis value
+    np.testing.assert_allclose(host[-1], host[-2])  # clipped to the edge value
+
+
 def test_a_degenerate_projection_returns_none_rather_than_a_guess():
     geometry = _circular_geometry()
     images = basis_projection_images(

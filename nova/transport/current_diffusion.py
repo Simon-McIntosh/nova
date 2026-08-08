@@ -995,6 +995,11 @@ def profile_shapes(psi_n: np.ndarray, n_terms: int, *, nonneg: bool) -> np.ndarr
     ``(psi_n.size, n_terms)``.
     """
     normalised = np.clip(np.asarray(psi_n, dtype=np.float64), 0.0, 1.0)
+    if n_terms == 0:
+        # an empty ladder is a well-formed request -- a channel may carry no
+        # free coefficients -- so it returns the empty basis the projection
+        # expects rather than failing to stack nothing
+        return np.empty((*normalised.shape, 0), dtype=np.float64)
     if nonneg:
         return np.column_stack(
             [

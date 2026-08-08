@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="nova-jax-hygiene-s2-landed">
+  <meta name="plan-title" content="JAX Surface Hygiene — Landed Record">
+  <meta name="plan-summary" content="All five hygiene items landed across ten commits; three real defects surfaced and were fixed; the greens host retirement was gated on measurement and refused">
+  <meta name="plan-status" content="shipped">
+  <meta name="plan-evidence-for" content="nova-jax-hygiene">
+  <meta name="plan-verifies" content="nova-jax-hygiene#s2">
+  <meta name="plan-informs" content="nova-jax-dissolution">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>JAX Surface Hygiene — Landed Record | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — What shipped</h2>
+
+    <p>All five work items landed across ten commits
+    (<code>28035f70</code>…<code>0f553ebb</code>). The sweep was scoped as
+    hygiene, and most of it was; but writing the parity tests the plan asked for
+    surfaced <strong>three real defects</strong>, each of which returned a wrong
+    answer rather than an error, and each of which existed because two
+    implementations of one thing sat in two files.</p>
+
+    <table>
+      <thead>
+        <tr><th>Item</th><th>Outcome</th><th>Commits</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1 — delete the dead files</td>
+          <td>5 modules deleted with a zero-importer census proved per file. One listed file was <strong>kept</strong> — see §3.</td>
+          <td><code>28035f70</code>, <code>0d2f6c9b</code>, <code>0ff1df0d</code></td>
+        </tr>
+        <tr>
+          <td>2 — centralize the JAX globals</td>
+          <td><code>nova/jax/config.py</code> owns <code>jax_enable_x64</code>; 19 independent sites became one idempotent helper.</td>
+          <td><code>c7788bd8</code></td>
+        </tr>
+        <tr>
+          <td>3 — move the misfiled numpy modules</td>
+          <td><code>wall_mask.py</code> and <code>equilibrium_labels.py</code> → <code>nova/equilibrium/</code>. Every remaining module in <code>nova/jax/</code> references jax.</td>
+          <td><code>c7788bd8</code></td>
+        </tr>
+        <tr>
+          <td>4 — collapse duplicate math</td>
+          <td>Bernstein, <code>_dilate4</code> and the biquadratic null fit single-homed. The four greens hosts were <strong>kept</strong> on measurement — see §4.</td>
+          <td><code>0e714030</code>, <code>ed33cf3a</code>, <code>0f553ebb</code></td>
+        </tr>
+        <tr>
+          <td>5 — pin the live divergences</td>
+          <td>Legendre ladder parity to 1e-12; Force index made loud on both operators; <code>select</code> return conventions documented on both sides.</td>
+          <td><code>b31e198d</code>, <code>e4ec7a0c</code>, <code>3eb8f50e</code></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 id="s2">§2 — The three defects the parity work found</h2>
+
+    <p>None of these was the hygiene the plan set out to do. Each was found by
+    writing a test that drove two implementations of one thing and compared them.</p>
+
+    <ul>
+      <li><strong>A silently absent Force index.</strong> The numpy operator took
+      the index from its caller; the jitted one read an index variable off the
+      dataset and, on <code>KeyError</code>, <em>passed</em> — leaving a Force
+      operator with no index. Indexing with a missing index inserts an axis
+      rather than selecting a gain, so the interaction came back a plausible
+      shape and a wrong value. Both now take the caller's index and raise on
+      absence. (<code>e4ec7a0c</code>)</li>
+
+      <li><strong>An empty profile ladder that raised on one arm.</strong> The
+      traced ladder returned a well-formed <code>(n, 0)</code> basis at zero
+      terms; the host arm tried to column-stack nothing and raised. A channel
+      carrying no free coefficients is a valid request. (<code>b31e198d</code>)</li>
+
+      <li><strong>A missing degenerate-fit guard.</strong> The biquadratic
+      stationary point divides by the Hessian determinant, which a planar cluster
+      drives to zero. One copy floored it and the other did not, so the same
+      degenerate cluster returned a finite coordinate through one path and
+      <code>±inf</code> through the other — and an <code>inf</code> rides a
+      vmapped batch into every gradient that touches it. (<code>ed33cf3a</code>)</li>
+    </ul>
+
+    <p>The same commit removed a <code>-11</code> sentinel from
+    <code>null_type</code>'s default branch. That branch is unreachable: selecting
+    it needs <code>4AB − E² &gt; atol &gt; 0</code>, which forces
+    <code>AB &gt; 0</code>, so <code>A</code> and <code>B</code> share a sign and
+    an earlier condition has already fired. Its only reader was a checker nothing
+    called, which also tested for a <code>−10</code> the function never returns.</p>
+
+    <h2 id="s3">§3 — One listed deletion was refused</h2>
+
+    <p><code>nova/jax/fieldnull.py</code> was listed for deletion as a
+    "class-for-class copy of <code>nova/biot/fieldnull.py</code>". That premise was
+    wrong. <code>biot</code> defines <code>DataNull</code>/<code>FieldNull</code>
+    (numpy, njit, PointLoop); the jax file defines a different
+    <code>FieldNull</code> whose <code>stencil</code> property builds the
+    hexagonal neighbour patch and flattens it with
+    <code>ravel_multi_index</code> — a construction that existed nowhere else in
+    the package. It has zero live importers, so it reads as dead; but
+    <code>boundary-push-port-audit</code> names it as the original the boundary
+    accelerator would generalise instead of building.</p>
+
+    <p>Resolved on owner direction: the construction moved OUT of the jax
+    directory to <code>nova/geometry/hexstencil.py</code>, is now tested in its
+    own right, and both former copies read it. The research doc's citation was
+    repointed at the new home.</p>
+
+    <p>The owner also corrected the geometry as stated. The stencil is a
+    <strong>six-point</strong> hexagonal ring; the array is seven columns wide
+    because the centre cell is prepended to it. The code says so in both other
+    homes — <code>biot/fieldnull.py</code> comments <code>use 6-point
+    stencil</code> over exactly those six offsets, and
+    <code>PlasmaGrid.tessellate</code> keeps exactly-six-neighbour vertices before
+    prepending the centre column. "Seven-point" was the packed array width, not
+    the stencil.</p>
+
+    <h2 id="s4">§4 — The greens retirement was gated, measured, and refused</h2>
+
+    <p>Item 4 proposed retiring four legacy scipy host kernels whose
+    <code>xp</code>-threaded twins already run under numpy, gated on a
+    cost/accuracy check at the call sites. Measured
+    (<code>benchmarks/greens_elliptic_route.py</code>), the hosts stay.</p>
+
+    <p><strong>The decisive finding is semantic, not performance.</strong> Off the
+    filament the two routes agree to round-off — 2e-15 of the regime's own scale
+    for the point form, 2e-12 for the four-corner section rule, over targets from
+    a nanometre off the filament to the far side of the machine. They part in
+    exactly one place, and it is not a tie: <em>on</em> the filament the host
+    returns the divergence <code>inf</code>, while the Bulirsch descent returns the
+    first kind's finite part, which arrives as a small <strong>negative</strong>
+    flux. An infinity is testable; a plausible-looking negative number is the one
+    wrong answer a caller cannot detect.</p>
+
+    <p><strong>Cost confirms it.</strong> The descent is what makes a twin
+    differentiable — fixed trip count, no data-dependent branch — and for the
+    first two kinds it runs 6–50× the Cephes pair per element, putting the
+    filament twin at 1.9–3.9× the host over 64–65536 targets. Only those two
+    kinds are a choice: scipy carries no complete third kind, so the corner
+    antiderivative already takes all three from the descent on both routes, and
+    its twin costs only 1.2–1.6×.</p>
+
+    <p><strong>A third finding bounds both routes.</strong> Neither rescues the
+    small-<code>k²</code> bracket: <code>K − E</code> is a difference of two
+    numbers both near <code>π/2</code> whose value is of order <code>k²</code>, so
+    both stand at 1e-3 of the field scale by <code>k² ~ 1e-9</code>. That is the
+    arrangement, not the special function — the fix would be to split the pole off
+    the bracket, and it applies wherever either route is used.</p>
+
+    <h2 id="s5">§5 — Before and after</h2>
+
+    <figure>
+      <svg viewBox="0 0 860 250" role="img" style="max-width:100%;height:auto;font-family:system-ui">
+        <text x="430" y="20" text-anchor="middle" font-size="14" font-weight="600" fill="#111">Module census across the sweep</text>
+
+        <text x="120" y="52" font-size="13" font-weight="600" fill="#111">deleted (zero importers)</text>
+        <g font-size="12" fill="#111">
+          <text x="130" y="72">nova/jax/gap.py</text>
+          <text x="130" y="90">nova/jax/plasmaloc.py</text>
+          <text x="130" y="108">nova/field/jax_bspline.py</text>
+          <text x="130" y="126">nova/field/jaxopt_linalg.py</text>
+          <text x="130" y="144">nova/utilities/xpu.py</text>
+        </g>
+        <rect x="120" y="58" width="250" height="96" fill="none" stroke="#b00" stroke-width="1"/>
+
+        <text x="450" y="52" font-size="13" font-weight="600" fill="#111">rehomed out of nova/jax/</text>
+        <g font-size="12" fill="#111">
+          <text x="460" y="72">wall_mask.py → nova/equilibrium/</text>
+          <text x="460" y="90">equilibrium_labels.py → nova/equilibrium/labels.py</text>
+          <text x="460" y="108">hex stencil → nova/geometry/hexstencil.py</text>
+        </g>
+        <rect x="450" y="58" width="380" height="60" fill="none" stroke="#b60" stroke-width="1"/>
+
+        <text x="450" y="140" font-size="13" font-weight="600" fill="#111">added</text>
+        <g font-size="12" fill="#111">
+          <text x="460" y="160">nova/jax/config.py — the one jax_enable_x64 owner</text>
+        </g>
+        <rect x="450" y="146" width="380" height="24" fill="none" stroke="#0a6" stroke-width="1"/>
+
+        <line x1="120" y1="196" x2="830" y2="196" stroke="#333" stroke-width="1"/>
+        <g font-size="12" fill="#111">
+          <text x="130" y="216">nova/jax/ before: 16 modules, two of them pure numpy</text>
+          <text x="130" y="236">nova/jax/ after: 14 modules, every one referencing jax</text>
+        </g>
+      </svg>
+      <figcaption>Five deletions, three relocations and one addition. The directory
+      shrank by two while gaining <code>config.py</code> and the accelerator's
+      <code>fixed_point.py</code>; what changed is that nothing in it is numpy-only
+      any more.</figcaption>
+    </figure>
+
+    <h2 id="s6">§6 — Verification</h2>
+
+    <p>No suite regressed at any point. Counts recorded as each change landed:
+    1172 passed on the config sweep (the widest, covering every relocated
+    <code>jax_enable_x64</code> site); 103 on the null/topology stack; 72 on
+    wall-flux; 58 on force and coilset; 28 on current diffusion; 23 on greens; 20
+    on the operators; 18 slow connectivity/topology. Ruff finished at 34 findings
+    against a 36 baseline, the two removed being dead imports this sweep
+    eliminated; no finding sits on a line authored here.</p>
+
+    <h2 id="s7">§7 — What this leaves</h2>
+
+    <p>Two items were deliberately not taken, both recorded rather than silently
+    dropped:</p>
+
+    <ul>
+      <li><strong>The <code>wall_flux</code> convention split.</strong> The serial
+      path returns a 3-tuple with <code>(0, 0, 0)</code> at zero polarity; the
+      traced path returns a 4-element array with all-NaN. NaN is the safer
+      convention — <code>(0, 0, 0)</code> is a well-formed coordinate and flux a
+      caller cannot distinguish from a real result — but adopting it changes what
+      <code>Limiter.update_wall</code> publishes at zero plasma current. Two
+      callers; documented on both sides pending a validated change.</li>
+
+      <li><strong>The organising fault behind the misfiling.</strong>
+      <code>nova/jax/</code> is the package's only technology-organised directory
+      and holds a subset of the traced code rather than the whole of it, which is
+      what let two numpy modules drift in. That is now
+      <code>nova-jax-dissolution</code>, with the single-file and traced-default
+      decisions already locked.</li>
+    </ul>
+
+  </main>
+</body>
+</html>

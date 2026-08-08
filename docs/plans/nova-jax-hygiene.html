@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="nova-jax-hygiene">
   <meta name="plan-title" content="Nova JAX Surface Hygiene">
   <meta name="plan-summary" content="Remove the apparent numpy/JAX variant proliferation: delete dead copies, centralize the scattered jax global-config calls, move misfiled numpy modules out of nova/jax/, collapse duplicate math, and pin the two live behavioural divergences — no backend switch">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="mid">
   <meta name="plan-effort" content="S">
   <meta name="plan-capability-version" content="1.0">
@@ -20,7 +20,8 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-modified" content="2026-08-08">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -74,47 +75,28 @@
       core and four small hygiene defects.</figcaption>
     </figure>
 
-    <h2 id="s2">§2 — Work items</h2>
-    <ol>
-      <li><strong>Delete the dead files</strong> (zero-importer proof per file before each
-      deletion): <code>nova/jax/plasmaloc.py</code> (byte-identical to
-      <code>nova/frame/plasmaloc.py</code>, zero jax content), <code>nova/jax/fieldnull.py</code>
-      (class-for-class copy of <code>nova/biot/fieldnull.py</code>; only reference is commented
-      out), <code>nova/jax/gap.py</code> (runs an IMAS query at import),
-      <code>nova/field/jaxopt_linalg.py</code>, <code>nova/field/jax_bspline.py</code> (third
-      Bernstein-binomial copy), <code>nova/utilities/xpu.py</code> (env-driven CUPY/numpy switch
-      with zero callers; binds at import so the env patch in
-      <code>tests/test_coilset.py:320</code> does nothing — remove that patch too), and the
-      import-time <code>jax_debug_nans</code> global set in
-      <code>nova/dataset/access.py:21</code>.</li>
-      <li><strong>Centralize JAX global config.</strong> One helper owns
-      <code>jax_enable_x64</code> (today set independently at 9 sites in
-      <code>nova/</code> plus 10 in tests) and any debug flags; modules call the helper, tests
-      stop re-stating it. This is the defect that made the surface feel unmanaged.</li>
-      <li><strong>Move the misfiled numpy modules</strong> out of <code>nova/jax/</code>:
-      <code>wall_mask.py</code> (375 lines of pure-numpy geometry) and
-      <code>equilibrium_labels.py</code> (constants) to homes named by content.</li>
-      <li><strong>Collapse duplicate math on merit.</strong> Retire the four legacy scipy host
-      functions in <code>nova/biot/greens.py</code> (:103, :136, :245, :479) whose
-      <code>traced_*</code> twins already run under numpy via <code>xp</code> — gate on a
-      cost/accuracy check of <code>scipy.special.ellipkm1/ellipe</code> vs the Bulirsch route at
-      the call sites. Deduplicate the biquadratic-null math copied into
-      <code>nova/jax/stencil_nulls.py:62-116</code> (and its verbatim <code>_dilate4</code>) back
-      onto <code>nova/jax/select.py</code> / <code>flux_surface_connectivity.py</code>; collapse
-      the remaining Bernstein-binomial copy onto <code>nova/linalg/basis.py</code>.</li>
-      <li><strong>Pin the live divergences.</strong> <code>nova/jax/operate.py</code> vs
-      <code>nova/biot/operate.py</code> differ in where <code>source_plasma_index</code> is read
-      and in the <code>dataset["index"]</code> fallback (affects the Force classname) — decide
-      the correct behaviour once and pin both with a shared test.
-      <code>nova/transport/current_diffusion.py</code> carries a numpy <code>legval</code>
-      profile-shape path and a hand-rolled JAX Legendre recurrence on different call sites — add
-      a parity test so they cannot drift. Document the numba/JAX select pair as the intended
-      three-backend reality (align the <code>wall_flux</code> return conventions if cheap;
-      otherwise state the difference in both docstrings).</li>
-    </ol>
-    <p><em>Done-when:</em> the dead files are gone with zero-importer proof recorded; one config
-    helper owns the JAX globals; <code>nova/jax/</code> contains only JAX code; the duplicate
-    math has a single home each; divergence parity tests green; full suite green.</p>
+    <section id="s2" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-08</span>
+        <h2>§2 — Work items</h2>
+      </header>
+      <p class="landed-summary">
+        All five items landed in ten commits (<code>28035f70</code>…<code>0f553ebb</code>).
+        5 dead modules deleted with per-file zero-importer proof; 19 <code>jax_enable_x64</code>
+        sites collapsed onto <code>nova/jax/config.py</code>; the two numpy modules rehomed so
+        <code>nova/jax/</code> holds only jax-referencing code (16 modules → 14); Bernstein,
+        <code>_dilate4</code> and the biquadratic fit single-homed.
+        The parity work found <strong>three real defects</strong>, each returning a wrong answer
+        rather than an error: a silently-absent Force index, an empty profile ladder that raised
+        on one arm, and a missing degenerate-fit guard that let <code>±inf</code> into vmapped
+        gradients. Two listed items were refused on evidence — <code>nova/jax/fieldnull.py</code>
+        is not a copy (its hex-stencil construction moved to
+        <code>nova/geometry/hexstencil.py</code> instead), and the four greens hosts were KEPT:
+        measured, the traced twins cost 1.9–3.9× and return a small negative flux where the host
+        returns the divergence <code>inf</code>. No suite regressed; ruff 34 against a 36 baseline.
+        Full record: <a href="archive/nova-jax-hygiene-s2-landed.html">§2 landed</a>.
+      </p>
+    </section>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -137,7 +119,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-njh-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-08" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-njh-001" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-08" data-recommends-skill="" data-resolved-at="2026-08-08T21:55:41+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Execute the hygiene sweep (§2 items 1–5)</h4>
     <div class="r-fu-body"><p>Deletions front-load the value: most of the apparent variant
         proliferation is six dead files and nine scattered config calls. Zero-importer proof
@@ -176,6 +158,42 @@ Done-when
   2. nova/jax/ holds only JAX code; duplicate math single-homed.
   3. Divergence parity tests added and green; full suite green; followup
      resolved with the before/after file census.</pre>
+    <p class="r-fu-outcome">All five items landed, commits 28035f70..0f553ebb. Census: nova/jax 16 modules -> 14, every remaining one referencing jax; 5 dead modules deleted (jax/gap, jax/plasmaloc, field/jax_bspline, field/jaxopt_linalg, utilities/xpu) with per-file zero-importer proof; wall_mask + equilibrium_labels rehomed to nova/equilibrium; nova/jax/config.py added as the single jax_enable_x64 owner, collapsing 10 sites in nova and 9 in tests. Duplicate math single-homed: Bernstein (by deletion), _dilate4, the biquadratic null fit. THREE REAL DEFECTS found by the parity work, each returning a wrong answer rather than an error: a Force operator left with no index by a silent except-KeyError (e4ec7a0c); an empty profile ladder that raised on the host arm and returned a clean (n,0) basis on the traced arm (b31e198d); a missing degenerate-fit guard letting +-inf into vmapped gradients (ed33cf3a). TWO LISTED ITEMS REFUSED ON EVIDENCE: nova/jax/fieldnull.py is not a class-for-class copy -- its hex-stencil construction was unique and moved to nova/geometry/hexstencil.py per owner direction (the stencil is 6-point; the 7th column is the prepended centre); and the four greens hosts were KEPT after measurement -- the traced twins run 1.9-3.9x and return a small negative flux where the host returns the divergence inf, which is the wrong answer a caller cannot detect. No suite regressed (1172/103/72/58/28/23/20/18 passed across the affected lanes); ruff 34 against a 36 baseline. Record: docs/plans/archive/nova-jax-hygiene-s2-landed.html</p>
+    </article>
+<article class="r-fu" data-id="f-njh-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-08" data-recommends-skill="/reckon-ship nova-jax-hygiene" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Adopt the NaN wall_flux convention, or keep the serial sentinel deliberately</h4>
+    <div class="r-fu-body"><p>The sweep documented rather than aligned the one convention split it found. The serial <code>wall_flux</code> returns <code>(0, 0, 0)</code> at zero polarity, the traced one all-NaN. NaN is the safer answer &mdash; <code>(0, 0, 0)</code> is a well-formed coordinate and flux a caller cannot distinguish from a real result &mdash; but adopting it changes what <code>Limiter.update_wall</code> publishes at zero plasma current, so it needs validating rather than doing in passing. Two callers.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    nova-jax-hygiene (http://127.0.0.1:8765/nova/nova-jax-hygiene.html)
+Section: the wall_flux convention left open by the sweep
+Capability: general
+Requirements: strict verification
+
+Context
+  The hygiene sweep single-homed the duplicate math and pinned the live
+  divergences, but left one convention split documented rather than aligned
+  because changing it moves a published value. Both docstrings now state the
+  difference; this closes it one way or the other.
+
+State to read  (CODE)
+  nova/geometry/select.py   wall_flux -- serial, 3-tuple, (0,0,0) at zero polarity
+  nova/jax/select.py        wall_flux -- traced, 4-array, all-NaN at zero polarity
+  nova/biot/limiter.py:56   update_wall, the consumer that would change
+  tests/test_wallflux.py, tests/test_fieldnull.py
+
+Scope locks / constraints
+  Only two callers exist; the mechanical change is small. The question is what
+  Limiter.update_wall should publish when there is no plasma current and so no
+  wall-limit point. Establish what consumes w_psi/w_point downstream before
+  changing it -- a NaN propagating into a plotting or control path is the risk.
+  Do not change the traced convention: NaN is the honest answer there.
+
+Done-when
+  1. Either the serial path adopts the NaN convention with its consumers
+     verified, or the split is recorded as deliberate with the reason stated
+     in both docstrings.
+  2. A test pins whichever convention is chosen at zero polarity on both paths.
+  3. Full suite green; followup resolved.</pre>
     </article>
 </section>
   </main>

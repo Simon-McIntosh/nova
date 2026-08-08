@@ -723,34 +723,52 @@ def resample_maps(
     draw that leaves a channel with fewer than two live shots drops the channel,
     which is the same rule the pooling uses.
     """
+    maps = []
+    for drawn in resample_shots(constraint, draws=draws, seed=seed):
+        if drawn.rows < len(basis.labels):
+            continue
+        fit = fit_jointly(basis, drawn, significance=significance)
+        maps.append(flux_map(basis, fit.coefficients, grid_r, grid_z))
+    if not maps:
+        raise MisfitMapError(f"{constraint.group}: every resampling draw was refused")
+    return np.stack(maps)
+
+
+def resample_shots(constraint: ConstraintSet, *, draws: int = 200, seed: int = 0):
+    """Yield constraint sets re-pooled from shots drawn with replacement.
+
+    Shots are the independent unit, not channels: every channel of one shot
+    shares that shot's drive waveform, its window and its baseline, so resampling
+    channels would understate the spread by however much those are correlated.
+    A draw that leaves a channel with fewer than two live shots drops the
+    channel, which is the rule the first pooling used.
+    """
     generator = np.random.default_rng(seed)
     count = constraint.sample.shape[0]
     if count < 2:
         raise MisfitMapError(f"{constraint.group}: {count} shot rows cannot resample")
     floor = constraint.noise * np.sqrt(count)
-    maps = []
     for _ in range(int(draws)):
         rows = generator.integers(0, count, count)
-        drawn = constraint.sample[rows]
-        value, error, live = pooled_noise(drawn, floor)
+        value, error, live = pooled_noise(constraint.sample[rows], floor)
         keep = (live >= 2) & np.isfinite(value) & (error > 0.0)
-        if keep.sum() < len(basis.labels):
+        if not keep.any():
             continue
-        design = np.column_stack(
-            [
-                harmonic_design(basis, constraint.select(keep)),
-                constraint.described[keep],
-            ]
+        drawn = constraint.select(keep)
+        yield ConstraintSet(
+            group=drawn.group,
+            channel=drawn.channel,
+            r=drawn.r,
+            z=drawn.z,
+            radial_cosine=drawn.radial_cosine,
+            axial_sine=drawn.axial_sine,
+            reads_flux=drawn.reads_flux,
+            value=value[keep],
+            noise=error[keep],
+            described=drawn.described,
+            sample=drawn.sample,
+            shots=drawn.shots,
         )
-        solution = th.solve_equilibrated(
-            design, value[keep], weight=1.0 / error[keep], significance=significance
-        )
-        maps.append(
-            flux_map(basis, solution.coefficients[: len(basis.labels)], grid_r, grid_z)
-        )
-    if not maps:
-        raise MisfitMapError(f"{constraint.group}: every resampling draw was refused")
-    return np.stack(maps)
 
 
 def family_contrast(
@@ -897,6 +915,7 @@ __all__ = [
     "pooled_noise",
     "SourceRead",
     "resample_maps",
+    "resample_shots",
     "rows_converge",
     "select_degree",
     "supported_mask",

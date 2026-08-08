@@ -890,19 +890,27 @@ def unmapped_current_blocked(machine: DescribedMachine) -> tuple[BlockedSignal, 
             if conductors
             else "separate conductors,"
         )
+        served = tuple(
+            drive.channel
+            for drive in machine.drives.drives
+            if drive.conductor in conductors and drive.channel.endswith("_coil_current")
+        )
+        terms = ", ".join((*served, f"{prefix}_case_current"))
         blocked.append(
             BlockedSignal(
                 source_group=CURRENT_GROUP,
                 source_channel=f"{prefix}_current",
                 target_path="pf_active/coil/current/data",
                 reason=(
-                    "this channel reports the ampere turns of a coil set the "
-                    f"description carries as {carried} and no source states how the "
-                    "set's excitation divides between them"
+                    "this channel is the set total for a coil set the description "
+                    f"carries as {carried}: it equals {terms} sample for sample, so "
+                    "what it measures is already accounted for channel by channel "
+                    "and no one conductor carries the sum"
                 ),
                 unmet=(
                     "the interconnection of the two packs of this coil set is not "
-                    "sourced"
+                    "sourced, so no described conductor carries what this channel "
+                    "measures"
                 ),
             )
         )

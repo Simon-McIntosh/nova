@@ -7,13 +7,13 @@
   <meta name="reckon-type" content="research">
   <meta name="plan-slug" content="mast-p4p5-feeder-candidates">
   <meta name="plan-title" content="Every conductor the machine description can place, tested against the surviving P4/P5 misfit — and the two amplitude limits that leave nothing standing">
-  <meta name="plan-summary" content="A feeder is testable against an axisymmetric array only through the toroidal part of its route, which reduces every candidate to rings carrying a fraction of the supply current at positions the registry states. One hundred and five such candidates were scored against the banked surviving misfit and, for the first time, against flux-loop couplings computed the same way on the eighteen channels the gain fits admitted. Two limits bound each one: a conductor in series carries at most one supply current, and the loops sit twenty millimetres from the winding packs where a conductor at the pack stops being degenerate with the coil's own column. Eight candidates clear both, none of them on P4 lower — the only target whose pattern reproduces between disjoint shot halves — where every site explaining more than a tenth of the survivor needs 3.6 to 369 supply currents and is three to nine times louder at the loops than everything the loops leave unexplained. The member-difference signature is measured properly for the first time and is not what it was named: it is machine-wide, largest on the centre column, reproducible in shape between the two shots that resolve it, and obr10 is one of its smallest channels rather than its carrier.">
+  <meta name="plan-summary" content="A feeder is testable against an axisymmetric array only through the toroidal part of its route, which reduces every candidate to rings carrying a fraction of the supply current at positions the registry states. One hundred and five such candidates were scored against the banked surviving misfit and, for the first time, against flux-loop couplings computed the same way on the eighteen channels the gain fits admitted. Two limits bound each one: a conductor in series carries at most one supply current, and the loops sit twenty millimetres from the winding packs where a conductor at the pack stops being degenerate with the coil's own column. Eight candidates clear both, none of them on P4 lower — the only target whose pattern reproduces between disjoint shot halves — where every site explaining more than a tenth of the survivor needs 3.6 to 369 supply currents and is three to nine times louder at the loops than everything the loops leave unexplained. The member-difference signature is measured properly for the first time and is not what it was named: it is machine-wide, largest on the centre column, reproducible in shape between the two shots that resolve it but not in scale, and obr10 is one of its smallest channels rather than its carrier.">
   <meta name="plan-status" content="reference">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-recorded-at" content="2026-08-08">
   <meta name="plan-evidence-for" content="mast-p4p5-circuit-provenance">
   <meta name="plan-informs" content="mast-nonaxisymmetric-physics,mast-misfit-toroidal-harmonics,mast-flux-loop-calibration">
-  <meta name="plan-verdict" content="No conductor geometry the machine description can place reaches the surviving misfit. On P4 lower, the one target with a reproducible pattern, nothing survives at all: the sites that explain a tenth or more need 3.6 to 369 supply currents and the flux loops permit at most 1.1 to 2.8 there. Eight of one hundred and five candidates clear both amplitude limits, five of them beside P5 lower, and the best explains 14.4% of that group's survivor at 0.98 supply currents in a conductor at the pack outboard face. The array cannot do better than this because it cannot localise: the region explaining half of what the best ring explains spans 1.5 to 2.3 m in radius, so beside P4 is not a location. The member-difference signature is real, reproducible in shape and not in scale, machine-wide with the centre column its largest carrier, and no established site reproduces it under 107 supply currents — it belongs to the non-axisymmetric programme, and obr10 is not its carrier.">
+  <meta name="plan-verdict" content="No conductor geometry the machine description can place reaches the surviving misfit. On P4 lower, the one target with a reproducible pattern, nothing survives at all: the sites that explain a tenth or more need 3.6 to 369 supply currents and the flux loops permit at most 1.1 to 2.8 there. Eight of one hundred and five candidates clear both amplitude limits, five of them beside P5 lower, and the best explains 14.4% of that group's survivor at 0.98 supply currents in a conductor at the pack outboard face. The array cannot do better than this because it cannot localise: the region explaining half of what the best ring explains spans 1.5 to 2.3 m in radius, so beside P4 is not a location. The member-difference signature is real and machine-wide with the centre column its largest carrier, but its coefficient per unit difference changes by 1.92 between two shots of equal difference span, so it is not a linear response to the member difference at all, and no established site reproduces it under 107 supply currents — it belongs to the non-axisymmetric programme, and obr10 is not its carrier.">
   <title>MAST P4/P5 feeder candidates | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -276,9 +276,14 @@
     difference spans 0.25&ndash;0.62% of the pair sum, which is the first thing to suspect, but
     89&ndash;100% of it survives partialling out the sum and every other active drive. The
     coefficients are honestly determined.</li>
-    <li><strong>On P5 it reproduces in shape and not in scale.</strong> The two shots that resolve
-    it agree at cosine +0.89 after the described span is removed, while differing by about a factor
-    of two in amplitude. Two shots is thin, and the amplitude disagreement is unexplained.</li>
+    <li><strong>On P5 it reproduces in shape and not in scale, and the failure to reproduce in
+    scale is itself decisive.</strong> The two shots agree at cosine +0.952 raw and +0.89 after the
+    described span is removed, and the per-channel ratio between them is a tight 1.92 (interquartile
+    1.68 to 2.09) — one pattern, scaled. But their difference spans are 958 and 954 ampere turns,
+    so the coefficient <em>per ampere turn of difference</em> is not a property of the machine.
+    A conductor fed by one member of a series pair would give the same coefficient on both shots by
+    construction. Whatever produces this pattern is not responding linearly to the member
+    difference; the difference regressor is reading something that merely travels with it.</li>
     <li><strong>On P4 it does not reproduce at all.</strong> The three P4 shots give pairwise
     cosines of &minus;0.78, &minus;0.95 and +0.77 — the pooled P4 difference pattern means nothing,
     even though obr10 itself reads a consistent +102, +110, +113&nbsp;nT/At across them.</li>
@@ -292,10 +297,13 @@
     supply currents; the best below ten supply currents explains 3.7%. Two orders of magnitude is
     not a modelling gap.</li>
   </ul>
-  <p>The differential signature therefore stands as a real measurement and moves out of the
-  axisymmetric conductor question entirely. Its shape — largest on the centre column, sign-flipping
-  between the inboard and outboard bands — is what the toroidal-harmonic and non-axisymmetric
-  programmes are built to read.</p>
+  <p>The differential signature therefore stands as a real, reproducible spatial pattern and moves
+  out of the conductor question entirely — twice over, once because no placeable geometry reaches
+  it below two orders of magnitude in current, and once because its amplitude per unit difference
+  is not a constant, which no series conductor can arrange. Its shape — largest on the centre
+  column, sign-flipping between the inboard and outboard bands — is what the toroidal-harmonic and
+  non-axisymmetric programmes are built to read, and the factor of 1.92 between two shots with equal
+  difference spans is the sharpest single clue in it.</p>
 
   <h2>What the instruments already exclude, without any fit</h2>
   <p>Edlington, Martin &amp; Pinfold describe the magnetics hardware, and two of their facts settle

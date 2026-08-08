@@ -88,8 +88,9 @@
 
     <h2 id="s3">§3 — The hex stencil runs the other way</h2>
     <p>The 6-point hexagonal stationary-point variant does not need building: <strong>nova already
-    has it, and it is the original.</strong> <code>nova/jax/fieldnull.py:57</code> builds a
-    7-point centre-plus-6-ring patch (the axial hex neighbourhood);
+    has it, and it is the original.</strong> <code>nova/geometry/hexstencil.py</code> builds the
+    axial hex neighbourhood as a 6-point ring with the centre cell prepended, so the row is
+    7 columns wide (<code>nova/jax/fieldnull.py</code> reads it);
     <code>nova/biot/plasmagrid.py:113</code> Delaunay-tessellates the hex filament centroids,
     keeps exactly-6-neighbour vertices, angle-sorts them into closed rings, and writes an
     <code>(n,7)</code> stencil; <code>nova/jax/null.py:87</code> already categorizes on it

@@ -3,6 +3,7 @@
 import numpy as np
 import pytest
 
+from nova.geometry.hexstencil import hex_stencil
 from nova.utilities.importmanager import skip_import
 
 with skip_import("jax"):
@@ -19,18 +20,16 @@ def _structured_grid(nx, nz, xlim=(0.5, 1.5), zlim=(-0.6, 0.6)):
     z = np.linspace(*zlim, nz)
     x2d, z2d = np.meshgrid(x, z, indexing="ij")
     coordinate = np.c_[x2d.ravel(), z2d.ravel()]
-    patch = np.array([(0, 0), (-1, 0), (0, -1), (1, -1), (1, 0), (0, 1), (-1, 1)])
-    stencil = np.ravel_multi_index(
-        np.indices((nx - 2, nz - 2)).reshape(2, -1, 1) + 1 + patch.T[:, np.newaxis],
-        (nx, nz),
-    )
+    stencil = hex_stencil((nx, nz))
     return coordinate, stencil, coordinate[stencil]
 
 
 def _flux_field(coordinate, xo=1.0, zo=0.0, xs=1.0, zs=-0.4, amp=1.0):
     """Return an analytic flux map with an o-point (max) and a saddle."""
     x, z = coordinate[:, 0], coordinate[:, 1]
-    return -amp * ((x - xo) ** 2 + (z - zo) ** 2) + 0.3 * ((x - xs) ** 2 - (z - zs) ** 2)
+    return -amp * ((x - xo) ** 2 + (z - zo) ** 2) + 0.3 * (
+        (x - xs) ** 2 - (z - zs) ** 2
+    )
 
 
 @pytest.fixture(scope="module")
@@ -77,7 +76,9 @@ def test_batched_update_matches_per_slice(topology):
 
     for i in range(len(scales)):
         norm_i, ionize_i = topo.update(psi_batch[i], polarity)
-        assert np.allclose(np.asarray(batch_norm[i]), np.asarray(norm_i), equal_nan=True)
+        assert np.allclose(
+            np.asarray(batch_norm[i]), np.asarray(norm_i), equal_nan=True
+        )
         assert np.array_equal(np.asarray(batch_ionize[i]), np.asarray(ionize_i))
 
 

@@ -9,6 +9,7 @@ import numpy as np
 import xarray
 
 from nova.biot.array import Array
+from nova.geometry.hexstencil import hex_stencil
 from nova.graphics.plot import Axes
 from nova.jax.null import Null2D
 from nova.jax.target import Target
@@ -54,15 +55,7 @@ class FieldNull(Array):
         """Return grid stencil."""
         if "stencil" in self.data:
             return self.data["stencil"].data
-        patch = np.array([(0, 0), (-1, 0), (0, -1), (1, -1), (1, 0), (0, 1), (-1, 1)])
-        return np.ravel_multi_index(
-            np.indices((self.data.sizes["x"] - 2, self.data.sizes["z"] - 2)).reshape(
-                2, -1, 1
-            )
-            + 1
-            + patch.T[:, np.newaxis],
-            (self.data.sizes["x"], self.data.sizes["z"]),
-        )
+        return hex_stencil((self.data.sizes["x"], self.data.sizes["z"]))
 
     @cached_property
     def coordinate_stencil(self):

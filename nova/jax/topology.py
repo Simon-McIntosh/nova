@@ -90,9 +90,11 @@ class Topology(Pytree):
         # o-point and w-point heights
         o_height = data_o[1]
         w_height = data_w[1]
-        # adjust x-point bounds
+        # A wall contact vertically beyond the x-point band lies in the
+        # private-flux shadow of a null, so it cannot bind the plasma; a side
+        # with no x-point beyond the axis casts no shadow (bound at infinity).
         x_height_min = jnp.where(x_height_min > o_height, -jnp.inf, x_height_min)
-        x_height_min = jnp.where(x_height_max > o_height, jnp.inf, x_height_max)
+        x_height_max = jnp.where(x_height_max < o_height, jnp.inf, x_height_max)
         # asses plasma operational mode
         mode_index = jax.lax.cond(
             polarity < 0,

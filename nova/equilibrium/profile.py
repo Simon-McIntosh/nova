@@ -28,6 +28,7 @@ from scipy.constants import mu_0
 from nova.biot.greens import hybrid_greens
 from nova.equilibrium.measurement import Magnetics
 from nova.jax.connectivity_boundary import boundary_read_smooth_jax
+from nova.jax.stencil_nulls import magnetic_axis_subgrid
 
 jax.config.update("jax_enable_x64", True)
 
@@ -168,6 +169,12 @@ class ReconstructProfile:
     :meth:`pack_source_currents` and :meth:`pack_coefficients` provide strict
     named host adapters; the numerical methods receive their packed arrays so
     their traced signatures remain fixed-shape.
+
+    ``relaxation`` damps the flux update; ``profile_relaxation`` independently
+    damps the least-squares COEFFICIENT update.  An undamped jump from the
+    seed shape to the LSQ optimum can move the boundary read far enough in
+    one sweep that the iteration escapes into the outboard-corner attractor;
+    slow profile morphing keeps the fixed point on the confined branch.
     """
 
     grid_r: np.ndarray
@@ -186,6 +193,7 @@ class ReconstructProfile:
     priors: tuple[ProfilePrior, ...] = ()
     iterations: int = 8
     relaxation: float = 0.6
+    profile_relaxation: float = 1.0
     ridge: float = 1.0e-10
     topology_temperature: float = 1.0e-3
     topology_levels: int = 48
@@ -222,6 +230,8 @@ class ReconstructProfile:
             raise ValueError("iterations must be at least one")
         if not 0.0 <= self.relaxation <= 1.0:
             raise ValueError("relaxation must be in [0, 1]")
+        if not 0.0 < self.profile_relaxation <= 1.0:
+            raise ValueError("profile_relaxation must be in (0, 1]")
         if self.ridge < 0.0:
             raise ValueError("ridge must be non-negative")
         if self.topology_temperature <= 0.0:
@@ -490,12 +500,26 @@ class ReconstructProfile:
         residual = jnp.max(jnp.abs(flux - previous_flux)) / jnp.maximum(
             jnp.max(jnp.abs(flux)), 1.0e-30
         )
+        # the reported axis is the sub-grid O-point of the SOLVED flux; the
+        # static seed only pins the topology read's flood basin (and stands in
+        # when no in-wall O-point exists)
+        null = magnetic_axis_subgrid(
+            flux.reshape(self.grid_z.size, self.grid_r.size),
+            self.grid_r,
+            self.grid_z,
+            self.inside_limiter,
+        )
+        axis = jnp.where(
+            null["found"],
+            jnp.stack([null["r"], null["z"]]),
+            jnp.asarray(self.axis_seed),
+        )
         return ProfileResult(
             flux=flux,
             cell_current=cell_current,
             coefficients=coefficients,
             residual=residual,
-            axis=jnp.asarray(self.axis_seed),
+            axis=axis,
             boundary_flux=topology["psi_bnd"],
             core_weight=topology["core_weight"],
         )
@@ -529,26 +553,72 @@ class ReconstructProfile:
         mask: jax.Array,
         initial_flux: jax.Array,
     ) -> ProfileResult:
-        """Alternate named-profile least squares with the boundary-push map."""
+        """Alternate named-profile least squares with the boundary-push map.
 
-        def sweep(flux, _):
+        With ``profile_relaxation < 1`` the fitted coefficients are blended
+        into the carried coefficient state before mapping, so the profile
+        morphs slowly between sweeps while the flux keeps its own relaxation.
+        The first sweep always takes the full fit (there is no prior shape to
+        damp toward).
+        """
+
+        def sweep(carry, index):
+            flux, carried = carry
             basis, _topology = self._profile_basis(flux)
-            coefficients = self._least_squares_coefficients(
+            fitted = self._least_squares_coefficients(
                 basis, source_current, plasma_current, measured, scale, mask
             )
+            blend = jnp.where(index == 0, 1.0, self.profile_relaxation)
+            coefficients = blend * fitted + (1.0 - blend) * carried
             mapped = self.source_to_grid @ source_current + self.plasma_to_grid @ (
                 basis @ coefficients
             )
             updated = self.relaxation * mapped + (1.0 - self.relaxation) * flux
-            return updated, (flux, coefficients)
+            return (updated, coefficients), flux
 
-        flux, history = jax.lax.scan(sweep, initial_flux, None, length=self.iterations)
-        previous_flux, _previous_coefficients = history
+        (flux, carried), previous_flux = jax.lax.scan(
+            sweep,
+            (initial_flux, jnp.zeros(self.degrees.number)),
+            jnp.arange(self.iterations),
+        )
         basis, topology = self._profile_basis(flux)
-        coefficients = self._least_squares_coefficients(
+        fitted = self._least_squares_coefficients(
             basis, source_current, plasma_current, measured, scale, mask
         )
+        coefficients = (
+            self.profile_relaxation * fitted + (1.0 - self.profile_relaxation) * carried
+        )
         return self._result(flux, previous_flux[-1], basis, coefficients, topology)
+
+    def least_squares_map(
+        self,
+        source_current: jax.Array,
+        plasma_current: jax.Array,
+        measured: jax.Array,
+        scale: jax.Array,
+        mask: jax.Array,
+    ):
+        """Return the un-relaxed reconstruction sweep map ``flux -> g(flux)``.
+
+        The map refits the profile coefficients at every evaluation (the
+        implicit inner fit) and returns the mapped flux, so its fixed points
+        are the force-balanced reconstructions the Picard path approaches.
+        Drive it with :mod:`nova.jax.fixed_point` (``picard`` / ``anderson``
+        / ``newton_krylov``); the axis seed pins the topology read's flood
+        basin, guarding the accelerated iteration against the map's other
+        attractors.
+        """
+
+        def sweep_map(flux: jax.Array) -> jax.Array:
+            basis, _topology = self._profile_basis(flux)
+            coefficients = self._least_squares_coefficients(
+                basis, source_current, plasma_current, measured, scale, mask
+            )
+            return self.source_to_grid @ source_current + self.plasma_to_grid @ (
+                basis @ coefficients
+            )
+
+        return sweep_map
 
     def least_squares_batch(
         self,

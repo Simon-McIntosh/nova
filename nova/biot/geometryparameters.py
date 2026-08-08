@@ -27,7 +27,10 @@ assumed to be the identity.
 
 Tilt is the rotation's GENERATOR rather than a finite rotation.  At the
 linearisation point the two agree to first order, which is what a Jacobian is;
-keeping the map linear is what makes the metric unambiguous.
+keeping the map linear is what makes the metric unambiguous.  The four
+non-rigid affine generators are taken about the pack's vertex mean, which fixes
+each one individually without changing what the set spans -- moving the centre
+only pours some rigid displacement into them, and the rigid pair is in the set.
 
 WHY THE JACOBIAN IS NOT TAKEN AT THE PACK'S OWN CONFIGURATION.  The polygon
 kernel integrates each section edge in z: the edge is parametrised

@@ -43,6 +43,7 @@ import jax
 import jax.numpy as jnp
 
 from nova.jax.config import enable_x64
+from nova.jax.flux_surface_connectivity import _dilate4
 
 enable_x64()
 
@@ -136,15 +137,6 @@ _RING = (
 def _shift(field, dz, dr):
     """``out[i, j] = field[i + dz, j + dr]`` (roll; border handled by the caller)."""
     return jnp.roll(field, shift=(-dz, -dr), axis=(0, 1))
-
-
-def _dilate4(mask):
-    """4-neighbour boolean dilation, non-wrapping (border does not fold)."""
-    up = jnp.zeros_like(mask).at[1:, :].set(mask[:-1, :])
-    dn = jnp.zeros_like(mask).at[:-1, :].set(mask[1:, :])
-    lt = jnp.zeros_like(mask).at[:, 1:].set(mask[:, :-1])
-    rt = jnp.zeros_like(mask).at[:, :-1].set(mask[:, 1:])
-    return mask | up | dn | lt | rt
 
 
 @jax.jit

@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="spine-boundary-accelerator">
+  <meta name="plan-title" content="Spine Boundary Push and Solve Acceleration">
+  <meta name="plan-summary" content="Make the differentiable LCFS boundary push the pinned, accelerated core of the nova spine: re-bank the unported behaviour tests, promote the exact-tangent Newton-Krylov and Anderson machinery into the package, remove the topology-read wall, and generalise the stationary-point stencil to nova&#x27;s native hex rings">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="L">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint" content="S7">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-blocks" content="spine-efit-parity">
+  <title>Spine Boundary Push and Solve Acceleration | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-08">
+<meta name="plan-supersedes" content="imas-ambix:batched-newton-accelerator">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Objective</h2>
+    <p><strong>Nova owns all physics solves; this plan makes the differentiable boundary push its
+    pinned, accelerated core.</strong> The smooth LCFS discovery developed in ambix — identify the
+    o-point, push a contour outward until it binds at the first x-point or the wall, one code path
+    with no limited/diverted branch, continuous through the marginal transition by construction —
+    already lives in nova code-identically (<code>nova/jax/connectivity_boundary.py</code> +
+    <code>stencil_nulls.py</code> + <code>flux_surface_connectivity.py</code>; audit:
+    <a href="/nova/boundary-push-port-audit.html">boundary-push-port-audit</a>). What did not port
+    is what makes it trustworthy and fast: the behaviour tests that pin x-vs-wall termination and
+    switch continuity, the exact-tangent Newton–Krylov that converts 6× more slices than
+    production Picard, the safeguarded Anderson mixer, the profile-damping guard, and the
+    topology-read cost removals that the batched corpus engine was stalled on. This plan lands
+    all of it in nova and retires the ambix accelerator plan
+    (supersedes <code>imas-ambix:batched-newton-accelerator</code>).</p>
+
+    <figure>
+      <svg viewBox="0 0 880 330" role="img" style="max-width:100%;height:auto;font-family:system-ui">
+        <text x="440" y="20" text-anchor="middle" font-size="14" font-weight="600" fill="#111">The accelerated solve loop this plan completes</text>
+        <!-- boxes -->
+        <rect x="20" y="60" width="180" height="66" fill="none" stroke="#555" stroke-width="1"/>
+        <text x="110" y="85" text-anchor="middle" font-size="12" fill="#111">stationary points</text>
+        <text x="110" y="101" text-anchor="middle" font-size="10.5" fill="#555">ring sign changes + subnull</text>
+        <text x="110" y="116" text-anchor="middle" font-size="10.5" fill="#b60">→ stencil-generalised (hex)</text>
+        <rect x="240" y="60" width="200" height="66" fill="none" stroke="#0a6" stroke-width="1.5"/>
+        <text x="340" y="85" text-anchor="middle" font-size="12" fill="#111">boundary push</text>
+        <text x="340" y="101" text-anchor="middle" font-size="10.5" fill="#555">level sweep → x-point / wall</text>
+        <text x="340" y="116" text-anchor="middle" font-size="10.5" fill="#555">softmin bind + sigmoid core, τ=1e-3</text>
+        <rect x="480" y="60" width="180" height="66" fill="none" stroke="#555" stroke-width="1"/>
+        <text x="570" y="85" text-anchor="middle" font-size="12" fill="#111">GS residual</text>
+        <text x="570" y="101" text-anchor="middle" font-size="10.5" fill="#555">forward_operator.residual</text>
+        <text x="570" y="116" text-anchor="middle" font-size="10.5" fill="#555">differentiable, vmap-able</text>
+        <rect x="700" y="60" width="160" height="66" fill="none" stroke="#b60" stroke-width="1.5"/>
+        <text x="780" y="85" text-anchor="middle" font-size="12" fill="#111">accelerator</text>
+        <text x="780" y="101" text-anchor="middle" font-size="10.5" fill="#555">exact-tangent NK (GMRES)</text>
+        <text x="780" y="116" text-anchor="middle" font-size="10.5" fill="#555">Anderson / Picard safeguards</text>
+        <!-- arrows -->
+        <line x1="200" y1="93" x2="238" y2="93" stroke="#111" stroke-width="1"/><polygon points="238,93 230,89 230,97" fill="#111"/>
+        <line x1="440" y1="93" x2="478" y2="93" stroke="#111" stroke-width="1"/><polygon points="478,93 470,89 470,97" fill="#111"/>
+        <line x1="660" y1="93" x2="698" y2="93" stroke="#111" stroke-width="1"/><polygon points="698,93 690,89 690,97" fill="#111"/>
+        <path d="M 780 126 L 780 160 L 340 160 L 340 128" fill="none" stroke="#111" stroke-width="1"/>
+        <polygon points="340,128 336,136 344,136" fill="#111"/>
+        <text x="560" y="153" text-anchor="middle" font-size="10.5" fill="#555">fixed-point iteration (vmaps over slices unchanged)</text>
+        <!-- measured bars -->
+        <text x="440" y="205" text-anchor="middle" font-size="12.5" font-weight="600" fill="#111">Measured conversion at a 40-evaluation budget (48 cold-seed slices, smooth read)</text>
+        <g font-size="11.5" fill="#111">
+          <text x="215" y="235" text-anchor="end">exact-tangent NK</text>
+          <rect x="225" y="224" width="372" height="14" fill="#0a6" fill-opacity="0.15" stroke="#0a6" stroke-width="1"/>
+          <text x="604" y="235" fill="#0a6">62% · median residual 3.4e-5 (30× under tol)</text>
+          <text x="215" y="262" text-anchor="end">Picard (smooth map)</text>
+          <rect x="225" y="251" width="114" height="14" fill="none" stroke="#555" stroke-width="1"/>
+          <text x="346" y="262" fill="#555">19% — Anderson ties it exactly</text>
+          <text x="215" y="289" text-anchor="end">Picard (production)</text>
+          <rect x="225" y="278" width="60" height="14" fill="none" stroke="#555" stroke-width="1"/>
+          <text x="292" y="289" fill="#555">10%</text>
+        </g>
+        <text x="440" y="318" text-anchor="middle" font-size="10.5" fill="#555">The remaining wall is the read: ~99.7% of every map evaluation, with a ≥5× removal path (§2 item 3).</text>
+      </svg>
+      <figcaption>The loop and the evidence. Green: the ported kernel. Amber: what this plan adds —
+      the stencil generalisation and the promoted accelerator. Bars: the ambix cold-seed probe that
+      the accelerator-primary decision weighs.</figcaption>
+    </figure>
+
+    <h2 id="s2">§2 — Work items</h2>
+    <ol>
+      <li><strong>Pin the behaviour.</strong> Re-bank the unported assertion classes against
+      synthetic truth (nova has no host contour reader; the ambix synthetic gate reproduced
+      interpolated wall tangency to 1e-15): x-point-termination and wall-termination of the push;
+      limited↔diverted continuity through the marginal transition
+      (<code>max_rel_step &lt; 0.05</code>, classify-first steps &gt;3× larger); the Lipschitz
+      smooth-weight bound (1e-4·span ψ ripple moves core weight &lt;0.8 max / &lt;0.01 mean);
+      no-flip-on-topology-switch for emitted x-slot labels; and first-ever coverage of
+      <code>Topology.boundary</code> / <code>x_mask</code> / <code>psi_lcfs</code>
+      (<code>nova/jax/topology.py</code>) — the x-vs-wall selector is currently asserted by no
+      test in the repo.</li>
+      <li><strong>Promote the accelerators into the package.</strong> The exact-tangent
+      Jacobian-free Newton–Krylov (<code>jax.linearize</code> tangents + fixed-shape batched
+      GMRES) moves from the ambix probe script into nova as the batched inner solver driving
+      <code>forward_operator.residual</code> / <code>ReconstructProfile</code>; the safeguarded
+      Anderson mixer (Walker–Ni type-II, ridge-regularised, step-capped, Picard fallback) ports as
+      the fallback option; a current-centroid pin guards NK's basin (the smooth map has multiple
+      fixed points). Add the profile-damping parameter to the LSQ path (undamped coefficient jumps
+      can escape to the outboard-corner attractor — the guard ambix needed and nova lacks) and fix
+      <code>ProfileResult.axis</code> returning the static seed instead of the solved axis. Lock
+      the two carried decisions (below) on the re-measured budget ladder.</li>
+      <li><strong>Remove the read wall.</strong> The topology read is ~99.7% of every map
+      evaluation. Three removals, each with a read-equivalence check: warm-started binding search
+      (bracket around the previous sweep's level; cold sweep only on first evaluation or bracket
+      miss), dilate-by-doubling flood fill (~log₂(nr+nz) steps to the same fixed point), and a
+      coarser iteration-resolution read with the calibrated τ=10⁻³ full-resolution read at emit
+      only.</li>
+      <li><strong>Hex-native stationary points.</strong> Generalise
+      <code>stencil_nulls.ring_sign_changes</code> from its hardcoded 8-ring raster roll to a
+      stencil-array parameter, consuming the angle-sorted 6-neighbour rings nova's hex plasma mesh
+      already writes (<code>nova/biot/plasmagrid.py</code> <code>(n,7)</code> stencil;
+      <code>nova/jax/null.py</code> already categorizes on it). The sign-change count is
+      ring-length-independent; check the conditioning of the exactly-determined 6-coefficient
+      sub-null fit on the 7-point cluster before switching any default. The raster path stays.</li>
+      <li><strong>Coupled profile state.</strong> Lift the rich profile coefficients into the
+      Newton state (smooth softplus non-negativity, ridge+prior rows inside the Jacobian) so
+      under-constrained higher-order fits stop thrashing between sweeps — the mechanism the
+      profile-state decision selects.</li>
+    </ol>
+    <p><em>Done-when:</em> behaviour pins green including the marginal-transition and
+    x-vs-wall gates; NK/Anderson/Picard re-measured on the fast read with both decisions locked;
+    read-equivalence checks recorded for all three removals with the measured speedup; hex
+    stencil path tested with conditioning recorded; full suite green. Throughput laddering on
+    H200 hardware belongs to <code>mast-catalog-gpu-solve</code>, not here.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="accelerator-primary" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Which convergence accelerator is adopted as the batched inner solver?
+        Carried from the superseded ambix plan. Evidence so far: exact-tangent NK converts 62% of
+        cold slices at a 40-evaluation budget vs 19% smooth-Picard and 10% production-Picard, with
+        every operation a Green&#x27;s-GEMM column or tiny dense solve; Anderson ties Picard exactly on
+        both maps in both studies. Lock after the §2 item-2 re-measurement on the fast read.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="nk-jvp">exact-tangent NK primary, safeguarded fallback</button>
+      <button class="r-opt" data-value="anderson">safeguarded Anderson primary</button>
+      <button class="r-opt" data-value="picard">relaxed Picard (status quo)</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="profile-state" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">How do the rich-profile coefficients enter the Newton iteration —
+        lifted into a coupled KKT state (nonneg + prior rows inside the Jacobian), or held as an
+        inner implicit fit with damping only?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="coupled-kkt-state">coupled KKT Newton state</button>
+      <button class="r-opt" data-value="implicit-fit">implicit inner fit + damping</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-sba-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-08" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Land the behaviour pins and the promoted accelerator (§2 items 1–2)</h4>
+    <div class="r-fu-body"><p>First rung: the kernel is trustworthy only once its termination
+        and continuity behaviours are pinned in nova, and the accelerator measurement needs those
+        pins as its correctness floor. Then promote NK + Anderson + the profile-damping guard and
+        lock both decisions on the re-measured ladder.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    spine-boundary-accelerator (http://127.0.0.1:8765/nova/spine-boundary-accelerator.html)
+Section: §2 items 1-2
+Capability: orchestrator
+Requirements: deep reasoning, strict verification
+
+Context
+  The boundary-push kernel is code-identical with its ambix donor but its
+  behaviour pins, accelerators and damping guard never ported (audit:
+  docs/research/boundary-push-port-audit.html). This rung pins behaviour
+  against synthetic truth, promotes the exact-tangent NK from the ambix probe
+  script into the package, ports the Anderson mixer as fallback, and fixes the
+  two ReconstructProfile defects.
+
+State to read
+  nova/jax/connectivity_boundary.py, topology.py, stencil_nulls.py
+  nova/equilibrium/profile.py (:498 axis-seed defect; :503-545 Picard/LSQ)
+  nova/equilibrium/forward_operator.py (the differentiable residual to drive)
+  ~/Code/imas-ambix/scripts/tau_map_accelerator_probe.py:275-460 (NK runner +
+  in-graph Anderson donors, READ-ONLY)
+  ~/Code/imas-ambix/imas_ambix/latent/gs_solve.py:2011-2100 (_AndersonMixer),
+  :2497-2508 (the profile damping guard) — READ-ONLY
+  ~/Code/imas-ambix/tests/latent/test_connectivity_boundary.py:178,192,219;
+  test_topology.py:170,191; test_lcfs_legclip.py:33;
+  test_gs_solve_smooth_topology.py:89; tests/test_equilibrium_labels.py:144
+  (the assertion classes to re-bank; synthetic-truth references replace the
+  host reader nova does not carry)
+
+Scope locks / constraints
+  Ambix is READ-ONLY. No torch. Fixed-shape, vmap-safe, leading batch axis
+  (spine convention). A current-centroid pin guards NK&#x27;s basin. Mechanism
+  names only; no plan labels in source. Tests via the file-capture method.
+
+Done-when
+  1. Termination, continuity, Lipschitz, no-flip and Topology.boundary pins
+     green in nova.
+  2. NK + Anderson package symbols driving forward_operator.residual /
+     ReconstructProfile; profile damping + solved-axis fixes landed;
+     NK/Anderson/Picard ladder re-measured and both plan decisions locked
+     with the measurement recorded.
+  3. Full suite green; followup for §2 items 3-5 written; this one resolved.</pre>
+    </article>
+</section>
+  </main>
+</body>
+</html>

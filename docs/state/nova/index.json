@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-08T18:00:47",
+  "updated": "2026-08-08T18:42:47",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -159,22 +159,11 @@
       {
         "id": "S4",
         "status": "planned",
-        "theme": "H200 production catalog",
-        "items": [
-          {
-            "slug": "mast-catalog-gpu-solve",
-            "why_now": "The validated production substrate is ready for campaign-scale GPU execution and label-store release.",
-            "done_when": "H200 solve meets science, provenance and throughput gates; versioned label store and optional IMAS egress are published.",
-            "capability": {
-              "version": "1.0",
-              "class": "orchestrator",
-              "requirements": {}
-            }
-          }
-        ],
+        "theme": "Relocated to S8 - H200 production catalog",
+        "items": [],
         "starts": "2026-09-05",
         "ends": "2026-09-19",
-        "description": "Run the GPU catalog only after reconstruction, machine descriptions and MAST 3D/passive physics pass their evidence gates."
+        "description": "Relocated: the H200 catalog item moved to S8 so the sprint sequence respects the spine-proof gate (S7 spine parity and the S6 corrected-read guarantee precede the production run). This slot intentionally holds no items."
       },
       {
         "id": "S6",
@@ -283,6 +272,74 @@
           }
         ],
         "description": "Two arms. Source closure: recover the flux loops (per-loop gains; the 2-pi convention is measured), build toroidal-harmonic contour maps of the surviving misfit, and resolve the P4/P5 provenance candidates (the description's own 17.3 mm / 3% member asymmetry first). Infrastructure: promote the diagnostic-calibration ladder to a unit-tested machine-agnostic nova/calibrate package, give every correction a versioned pulse-range-scoped schema (LinkML candidate), harvest the vacuum windows every pulse carries (offsets, integrator drift, closure) across the whole archive, and solve coil positions and shapes from vacuum measurements by autodiff through the traced Green's kernels (geometry Jacobians verified exact 2026-08-07)."
+      },
+      {
+        "id": "S7",
+        "status": "planned",
+        "theme": "Prove the physics spine against EFIT",
+        "items": [
+          {
+            "slug": "spine-boundary-accelerator",
+            "why_now": "The boundary-push kernel is code-identical in nova but its behaviour pins, both accelerators and the profile-damping guard never ported; the batched corpus objective stalled in ambix on exactly this work and nova owns all physics solves.",
+            "done_when": "Termination/continuity/Lipschitz/no-flip pins green; NK+Anderson promoted with both decisions locked on a re-measured ladder; three read-wall removals equivalence-checked with speedup recorded; hex stencil generalisation tested.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "spine-efit-parity",
+            "why_now": "No assembled-chain demonstration exists: measured magnetics in, GS-balanced flux maps out, scored against firewalled EFIT \u2014 the proof required before the ML-assisted step and before the GPU catalog.",
+            "done_when": "Frozen six-shot gate plus pre-registered held-out extension scored against pre-registered tolerances; CurrentDiffusion flux-ledger consistency recorded; verdict written and the GPU catalog unblocked or explicitly held.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "nova-jax-hygiene",
+            "why_now": "The boundary and accelerator work lands into the same nova/jax surface the audit found cluttered; the sweep (dead copies incl. the stale fieldnull/plasmaloc twins, centralized jax config, misfiled numpy modules) is cheap and clears the ground first.",
+            "done_when": "Dead files deleted with zero-importer proof; one helper owns the jax globals; nova/jax holds only JAX code; duplicate math single-homed; divergence parity tests green.",
+            "capability": {
+              "version": "1.0",
+              "class": "general",
+              "requirements": {
+                "verification": "strict"
+              }
+            }
+          }
+        ],
+        "starts": "2026-08-10",
+        "ends": "2026-08-28",
+        "description": "Make the differentiable boundary push the pinned, accelerated core of the spine, then prove the assembled chain \u2014 corrected reads, moment seed, accelerated ReconstructProfile, topology labels, CurrentDiffusion flux-ledger consistency \u2014 reconstructs MAST equilibria comparably to the firewalled EFIT referee. The parity verdict is the gate the GPU catalog stands on: a catalog of fast wrong equilibria is worthless. Carries the capability recovered from the superseded ambix batched-newton-accelerator plan (exact-tangent NK 62% conversion vs Picard 10/19%; read-wall removals; coupled-KKT profile state) into nova, which owns all physics solves."
+      },
+      {
+        "id": "S8",
+        "status": "planned",
+        "theme": "H200 production catalog",
+        "items": [
+          {
+            "slug": "mast-catalog-gpu-solve",
+            "why_now": "The validated production substrate is ready for campaign-scale GPU execution and label-store release.",
+            "done_when": "H200 solve meets science, provenance and throughput gates; versioned label store and optional IMAS egress are published.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
+          }
+        ],
+        "starts": "2026-09-01",
+        "ends": "2026-09-19",
+        "description": "Run the GPU catalog only after the spine parity verdict (S7) and the corrected-read guarantee (S6) land. Relocated from the S4 slot so the sprint sequence respects the spine-proof gate."
       }
     ],
     "active_sprint_id": "S6",
@@ -351,6 +408,11 @@
         "when": "2026-08-08",
         "who": "reckon-ship",
         "what": "Owner decisions locked from the library/read-path audits: ambix provider split by tier (JAX owns the spine, latent physics-by-content migrates onto it, torch confined to the ML training tier \u2014 no thin-wrapper layer); nova biot response is a hygiene sweep with NO backend switch (numerics already single-source via the xp namespace; new plan nova-jax-hygiene); the five promoted gains ENTER the applied chain behind a single-door corrected reader (new plan mast-corrected-read-layer added to S6, blocks mast-catalog-gpu-solve); \u00a74 artifact wiring proceeds with packaged pinned digest + env override, machine selection first."
+      },
+      {
+        "when": "2026-08-08",
+        "who": "reckon-sprint",
+        "what": "Spine-proof gate inserted ahead of the GPU catalog on owner direction. Nova owns all physics solves: the differentiable boundary-push capability maturing in ambix ports into nova (ambix batched-newton-accelerator superseded by nova spine-boundary-accelerator), and an EFIT-comparable assembled-chain reconstruction (spine-efit-parity, firewalled efm referee) must pass before the catalog run. New sprint S7 carries both plans; the catalog item moved from the S4 slot to S8 to keep the sprint sequence dependency-consistent. Port audit banked as boundary-push-port-audit: kernel byte-identical, 43 behaviour tests and both accelerators unported, hex stencil machinery already native to nova."
       }
     ],
     "blockers": [
@@ -383,6 +445,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 17
+    "_version": 21
   }
 }

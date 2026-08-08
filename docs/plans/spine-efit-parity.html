@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="spine-efit-parity">
+  <meta name="plan-title"     content="Spine Reconstruction Parity vs EFIT">
+  <meta name="plan-summary"   content="Prove the nova physics spine reconstructs MAST equilibria comparably to the existing EFIT solutions — GS-balanced flux maps through the accelerated boundary-push solve plus 1D current-diffusion consistency, on corrected reads, scored against the firewalled EFIT referee — before any ML-assisted step and before the GPU catalog run">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort"    content="L">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint"    content="S7">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-depends-on" content="spine-boundary-accelerator,mast-corrected-read-layer">
+  <meta name="plan-blocks"    content="mast-catalog-gpu-solve">
+  <title>Spine Reconstruction Parity vs EFIT | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Objective</h2>
+    <p><strong>Before the ML-assisted step and before the GPU catalog run, the spine must prove it
+    reconstructs equilibria in a way comparable to the existing EFIT solutions.</strong> The
+    solver family is ported (ReconstructMoment / ReconstructProfile / topology labels /
+    CurrentDiffusion with its TORAX cross-check at 0.4% RMS), the boundary push is being pinned
+    and accelerated (<code>spine-boundary-accelerator</code>), and the corrected read layer
+    guarantees the measured inputs (<code>mast-corrected-read-layer</code>). What has never been
+    demonstrated is the assembled chain: measured magnetics in, GS-balanced flux maps out, scored
+    against the firewalled EFIT referee on real MAST shots. This plan is that demonstration — the
+    match-then-exceed gate the GPU catalog's throughput ladder stands on. A catalog of fast wrong
+    equilibria is worthless; parity comes first.</p>
+
+    <figure>
+      <svg viewBox="0 0 880 300" role="img" style="max-width:100%;height:auto;font-family:system-ui">
+        <text x="440" y="20" text-anchor="middle" font-size="14" font-weight="600" fill="#111">The parity chain: corrected measurements → spine reconstruction → firewalled referee</text>
+        <rect x="20" y="55" width="180" height="72" fill="none" stroke="#0a6" stroke-width="1.2"/>
+        <text x="110" y="80" text-anchor="middle" font-size="12" fill="#111">corrected reads</text>
+        <text x="110" y="96" text-anchor="middle" font-size="10.5" fill="#555">single door, full promoted</text>
+        <text x="110" y="111" text-anchor="middle" font-size="10.5" fill="#555">chain (scales, gains, drops)</text>
+        <rect x="245" y="55" width="185" height="72" fill="none" stroke="#555" stroke-width="1"/>
+        <text x="337" y="76" text-anchor="middle" font-size="12" fill="#111">seed + solve</text>
+        <text x="337" y="92" text-anchor="middle" font-size="10.5" fill="#555">ReconstructMoment centroid seed</text>
+        <text x="337" y="107" text-anchor="middle" font-size="10.5" fill="#555">ReconstructProfile, accelerated</text>
+        <text x="337" y="122" text-anchor="middle" font-size="10.5" fill="#555">boundary push, soft priors</text>
+        <rect x="475" y="55" width="175" height="72" fill="none" stroke="#555" stroke-width="1"/>
+        <text x="562" y="80" text-anchor="middle" font-size="12" fill="#111">labels + transport</text>
+        <text x="562" y="96" text-anchor="middle" font-size="10.5" fill="#555">axis, x-points, LCFS, masks</text>
+        <text x="562" y="111" text-anchor="middle" font-size="10.5" fill="#555">CurrentDiffusion consistency</text>
+        <rect x="695" y="55" width="165" height="72" fill="none" stroke="#b60" stroke-width="1.5"/>
+        <text x="777" y="80" text-anchor="middle" font-size="12" fill="#111">EFIT referee</text>
+        <text x="777" y="96" text-anchor="middle" font-size="10.5" fill="#555">efm catalog, firewalled —</text>
+        <text x="777" y="111" text-anchor="middle" font-size="10.5" fill="#555">scored against, never fitted</text>
+        <line x1="200" y1="91" x2="243" y2="91" stroke="#111" stroke-width="1"/><polygon points="243,91 235,87 235,95" fill="#111"/>
+        <line x1="430" y1="91" x2="473" y2="91" stroke="#111" stroke-width="1"/><polygon points="473,91 465,87 465,95" fill="#111"/>
+        <line x1="650" y1="91" x2="693" y2="91" stroke="#111" stroke-width="1"/><polygon points="693,91 685,87 685,95" fill="#111"/>
+        <g font-size="11.5" fill="#111">
+          <text x="440" y="170" text-anchor="middle" font-size="12.5" font-weight="600">Scored per slice, tolerances pre-registered before the first scored run</text>
+          <text x="120" y="200" text-anchor="end">geometry</text>
+          <text x="135" y="200">magnetic-axis position · LCFS distance · x-point position · limited/diverted class</text>
+          <text x="120" y="226" text-anchor="end">physics</text>
+          <text x="135" y="226">profile residual · whitened raw-magnetics residual (scored against the machine, not the referee)</text>
+          <text x="120" y="252" text-anchor="end">solve health</text>
+          <text x="135" y="252">convergence and confinement fractions · iteration counts · throughput</text>
+          <text x="120" y="278" text-anchor="end">temporal</text>
+          <text x="135" y="278">CurrentDiffusion flux-ledger consistency across the shot (the 1D transport spine rides the same solve)</text>
+        </g>
+      </svg>
+      <figcaption>The assembled chain and its scorecard. The raw-magnetics residual is the one
+      metric measured against the machine rather than another solve — the cutover-parity lesson
+      that a referee carrying its own fitted calibration structurally favours the incumbent is
+      carried into the tolerance registration.</figcaption>
+    </figure>
+
+    <h2 id="s2">§2 — Design</h2>
+    <ul>
+      <li><strong>Shot set:</strong> the frozen six-shot benchmark set
+      {21978, 21983, 21985, 21986, 21989, 22086} with all prescribed slices as the registered
+      gate, plus a held-out extension stratified across campaigns and both field polarities
+      (drawn once, pre-registered, never re-drawn) to show the result is not tuned to the six.</li>
+      <li><strong>Referee discipline:</strong> EFIT (the efm catalog) is firewalled — scored
+      against, never fitted to, never used to seed. Tolerances are pre-registered from measured
+      spreads before the first scored run (the spine_bench precedent: 15 registered tolerances;
+      reproduction metrics on change budgets, solve-health at exact fractions, the raw-magnetics
+      residual measured from both ends). The cross-source budget mechanism from the cutover
+      adjudication applies where the comparison crosses geometry sources.</li>
+      <li><strong>Inputs:</strong> solve inputs load through the corrected read layer only —
+      acquisition scales, promoted gains, exclusions and dispositions applied by construction;
+      machine geometry from the content-addressed MAST artifact.</li>
+      <li><strong>Transport consistency:</strong> CurrentDiffusion runs the shot's flux ledger on
+      the reconstructed equilibria — the 1D ψ-transport spine and the GS solve must tell one
+      story (flux consumption, li/βp separation) within registered bands; this is the temporal
+      leg the per-slice metrics cannot see.</li>
+      <li><strong>Batch form:</strong> the scored solve runs the same fixed-shape, vmap-safe path
+      the GPU catalog will batch — parity proven on the eager path alone would not transfer.</li>
+    </ul>
+
+    <h2 id="s3">§3 — Work items</h2>
+    <ol>
+      <li><strong>Assemble the chain</strong> behind one entry point: corrected reads → moment
+      seed → accelerated profile solve → topology labels, with the per-slice scorecard emitted
+      beside the solve.</li>
+      <li><strong>Register the tolerances</strong> from measured spreads (committed stamps,
+      substrate-swap floors, sensor-displacement pricing) before the first scored run; document
+      each bound's basis.</li>
+      <li><strong>Run the gate:</strong> the frozen six + the held-out extension; bank the
+      per-shot, per-slice scorecard with figures (flux-map overlays, boundary distance
+      distributions, residual decompositions per channel group).</li>
+      <li><strong>Transport leg:</strong> CurrentDiffusion flux-ledger consistency on the gated
+      shots; verdict recorded per shot.</li>
+      <li><strong>Adjudicate:</strong> pass/fail per registered tolerance; a qualified verdict
+      states exactly which metric failed, by how much, and what mechanism explains it — the
+      honest-negative discipline is in force.</li>
+    </ol>
+    <p><em>Done-when:</em> the assembled spine chain scores the full gate with every metric
+    adjudicated against its pre-registered tolerance; the scorecard record lands with figures;
+    the verdict (parity / qualified / fail with mechanism) is written into this plan and the GPU
+    catalog plan is unblocked or explicitly held.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="parity-bar" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">What bar unblocks the GPU catalog: parity on every registered metric,
+        or parity on geometry/solve-health with a qualified allowance on the raw-magnetics
+        residual (where the referee's own fitted calibration gives it a structural edge)?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="all-metrics">every registered metric</button>
+          <button class="r-opt" data-value="qualified-magnetics">geometry + health strict; magnetics under the cross-source budget</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-sep-001" data-status="open"
+               data-capability-version="1.0" data-capability-class="orchestrator"
+               data-capability-reasoning="deep" data-capability-verification="strict"
+               data-written-by="reckon-create" data-written-at="2026-08-08">
+        <h4 class="r-fu-title">Assemble the scored chain and register the tolerances (§3 items 1–2)</h4>
+        <div class="r-fu-body"><p>Runnable once the boundary-accelerator behaviour pins and the
+        corrected-read door land: one entry point from corrected measurements to scored
+        reconstruction, with every tolerance pre-registered from measured spreads before the
+        first scored run.</p></div>
+        <pre class="r-fu-prompt">Project: nova
+Plan:    spine-efit-parity (http://127.0.0.1:8765/nova/spine-efit-parity.html)
+Section: §3 items 1-2
+Capability: orchestrator
+Requirements: deep reasoning, strict verification
+
+Context
+  The solver family, boundary push and corrected reads are landed by the
+  prerequisite plans; this rung assembles them into one scored chain and
+  registers the parity tolerances before anything is scored.
+
+State to read
+  nova/equilibrium/{moment,profile,forward_operator}.py, nova/jax topology
+  stack, nova/transport/current_diffusion.py
+  nova/imas/mast_solve_inputs.py + the corrected-read door
+  ~/Code/imas-ambix/imas_ambix/spine_bench/{parity,shots}.py (tolerance
+  registration precedent, frozen shot set, budget classes) — READ-ONLY
+  docs/research/mast-cutover-parity-evidence.html (the incumbent-calibration
+  asymmetry lesson; the measured bounds the tolerances draw on)
+
+Scope locks / constraints
+  EFIT (efm) is firewalled: scored against, never fitted or seeded from.
+  Tolerances registered BEFORE the first scored run, each with its measured
+  basis documented. Solve runs the fixed-shape vmap-safe path. Corrected
+  reads only. Figures required in the scorecard record. Ambix READ-ONLY.
+
+Done-when
+  1. One entry point emits reconstruction + per-slice scorecard on a pilot
+     shot end-to-end.
+  2. Full tolerance set registered with documented bases; held-out extension
+     drawn once and pre-registered.
+  3. Suite green; followup for the gate run (§3 items 3-5) written; this one
+     resolved.</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

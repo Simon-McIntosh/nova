@@ -4,20 +4,23 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="nova">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="nova-jax-hygiene">
-  <meta name="plan-title"     content="Nova JAX Surface Hygiene">
-  <meta name="plan-summary"   content="Remove the apparent numpy/JAX variant proliferation: delete dead copies, centralize the scattered jax global-config calls, move misfiled numpy modules out of nova/jax/, collapse duplicate math, and pin the two live behavioural divergences — no backend switch">
-  <meta name="plan-status"    content="active">
-  <meta name="plan-roi"       content="mid">
-  <meta name="plan-effort"    content="S">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="nova-jax-hygiene">
+  <meta name="plan-title" content="Nova JAX Surface Hygiene">
+  <meta name="plan-summary" content="Remove the apparent numpy/JAX variant proliferation: delete dead copies, centralize the scattered jax global-config calls, move misfiled numpy modules out of nova/jax/, collapse duplicate math, and pin the two live behavioural divergences — no backend switch">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="mid">
+  <meta name="plan-effort" content="S">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="general">
   <meta name="plan-capability-verification" content="strict">
-  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-owner" content="Simon McIntosh">
   <title>Nova JAX Surface Hygiene | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-sprint" content="S7">
+<meta name="plan-modified" content="2026-08-08">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -114,36 +117,32 @@
     math has a single home each; divergence parity tests green; full suite green.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="backend-switch" data-choice="hygiene-only"
-           data-by="Simon McIntosh" data-when="2026-08-08T15:50:00+00:00">
-        <p class="r-dec-q">Should nova gain a numpy|jax backend selection setting (pyproject
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="backend-switch" data-choice="hygiene-only" data-by="Simon McIntosh" data-when="2026-08-08T15:50:00+00:00">
+    <p class="r-dec-q">Should nova gain a numpy|jax backend selection setting (pyproject
         and/or environment variable), or is the cleanup alone the right response?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="hygiene-only">hygiene sweep only — callers keep choosing routes explicitly</button>
-          <button class="r-opt" data-value="env-var-switch">hygiene + NOVA_BACKEND env var</button>
-          <button class="r-opt" data-value="pyproject-and-env">hygiene + [tool.nova] table + env override</button>
-        </p>
-        <p class="r-dec-rat">User selection 2026-08-08 on the audit evidence: no backend switch.
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="hygiene-only">hygiene sweep only — callers keep choosing routes explicitly</button>
+      <button class="r-opt" data-value="env-var-switch">hygiene + NOVA_BACKEND env var</button>
+      <button class="r-opt" data-value="pyproject-and-env">hygiene + [tool.nova] table + env override</button>
+      </p>
+    <p class="r-dec-rat">User selection 2026-08-08 on the audit evidence: no backend switch.
         The numerics are already single-source through the xp namespace parameter; the genuinely
         JAX-only code cannot run under numpy; and the largest live pair is a numba-vs-JAX axis a
         two-value flag cannot describe. Callers keep choosing routes explicitly (the
         tiledassembly backend= parameter and the operate.py fallback stand as-is). Revisit only
         if a concrete consumer needs process-wide route selection.</p>
-      </div>
-    </section>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-njh-001" data-status="open"
-               data-capability-version="1.0" data-capability-class="general"
-               data-capability-verification="strict"
-               data-written-by="reckon-create" data-written-at="2026-08-08">
-        <h4 class="r-fu-title">Execute the hygiene sweep (§2 items 1–5)</h4>
-        <div class="r-fu-body"><p>Deletions front-load the value: most of the apparent variant
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-njh-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-08" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Execute the hygiene sweep (§2 items 1–5)</h4>
+    <div class="r-fu-body"><p>Deletions front-load the value: most of the apparent variant
         proliferation is six dead files and nine scattered config calls. Zero-importer proof
         before every deletion; parity tests pin the two live divergences.</p></div>
-        <pre class="r-fu-prompt">Project: nova
+    <pre class="r-fu-prompt">Project: nova
 Plan:    nova-jax-hygiene (http://127.0.0.1:8765/nova/nova-jax-hygiene.html)
 Section: §2 items 1–5
 Capability: general
@@ -177,8 +176,8 @@ Done-when
   2. nova/jax/ holds only JAX code; duplicate math single-homed.
   3. Divergence parity tests added and green; full suite green; followup
      resolved with the before/after file census.</pre>
-      </article>
-    </section>
+    </article>
+</section>
   </main>
 </body>
 </html>

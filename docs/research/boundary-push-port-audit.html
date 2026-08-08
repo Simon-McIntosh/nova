@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"  content="nova">
+  <meta name="reckon-type"   content="research">
+  <meta name="plan-slug"     content="boundary-push-port-audit">
+  <meta name="plan-title"    content="Boundary-Push Port Audit — what survived the ambix→nova cutover">
+  <meta name="plan-summary"  content="Line-level audit of the differentiable LCFS boundary-push / topology-switch capability across both repos: the kernel is byte-identical in nova; the behaviour pins, both accelerators, and the profile-damping guard did not port">
+  <meta name="plan-informs"  content="spine-boundary-accelerator,spine-efit-parity">
+  <title>Boundary-Push Port Audit | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Verdict</h2>
+    <p><strong>Nothing of the boundary-push kernel was lost in the port.</strong> The three modules
+    implementing the differentiable read — <code>connectivity_boundary.py</code> (965 lines:
+    monotone valid→invalid level sweep, softmin binding, retracted-gate sigmoid core weight),
+    <code>flux_surface_connectivity.py</code> (254: fixed-iteration flood fill),
+    <code>stencil_nulls.py</code> (291: ring sign-change classification + biquadratic sub-null
+    refinement) — are <strong>code-identical</strong> between
+    <code>imas_ambix/latent/</code> and <code>nova/jax/</code>; every differing line is a
+    docstring rewrite or import-path change. <code>wall_mask.py</code> ported complete and gained
+    one public symbol. Neither side has diverged in physics since the port.</p>
+    <p>What did <em>not</em> port is everything around the kernel:</p>
+    <ul>
+      <li><strong>The behaviour pins.</strong> 43 ambix test functions have no nova counterpart,
+      clustered on the load-bearing behaviours: x-point-vs-wall termination of the push (6 ambix
+      tests, 0 nova), limited↔diverted continuity through the marginal transition (3 vs 0 — incl.
+      <code>test_continuous_through_marginal_transition</code>, which asserts
+      <code>max_rel_step &lt; 0.05</code> across a genuine topology switch and that a
+      classify-first read steps &gt;3× larger), the Lipschitz smooth-weight bound, and the
+      no-flip-on-topology-switch label test. Independent of the port, nova's
+      <code>Topology.boundary</code> (<code>nova/jax/topology.py:82</code>) — the actual
+      x-point-versus-wall selector with its mode-index <code>lax.cond</code> — is asserted by no
+      test in the repo.</li>
+      <li><strong>Both accelerators.</strong> The exact-tangent Jacobian-free Newton–Krylov
+      (<code>jax.linearize</code> tangents + fixed-shape batched GMRES) exists only inside an
+      ambix probe script (<code>scripts/tau_map_accelerator_probe.py:358</code>) and was never a
+      package symbol on either side. Anderson mixing has zero occurrences anywhere in nova (three
+      implementations in ambix; the library-grade one is <code>_AndersonMixer</code>,
+      <code>gs_solve.py:2011</code> — Walker–Ni type-II, depth 6, ridge-regularised, three
+      safeguards costing no extra map evaluation). Nova's only Newton–Krylov is
+      <code>scipy.optimize.newton_krylov</code> on the eager path — finite-difference, not
+      jittable.</li>
+      <li><strong>The profile-damping guard.</strong> Ambix's <code>solve_equilibrium_lsq</code>
+      carries a second mixing parameter (<code>gs_solve.py:2497-2508</code>) added because an
+      undamped jump to the LSQ optimum can move the boundary read far enough in one sweep to
+      escape into the outboard-corner attractor. Nova's <code>ReconstructProfile</code> LSQ jumps
+      to its optimum every sweep undamped — <strong>that failure mode is unguarded</strong> — and
+      its solve loop is fixed-count relaxed Picard under <code>lax.scan</code> (8 iterations,
+      single relaxation 0.6, no convergence test consulted). One latent defect found:
+      <code>ProfileResult.axis</code> returns the static seed, not the solved axis
+      (<code>profile.py:498</code>).</li>
+      <li><strong>The host reference reader.</strong> <code>latent/topology.py</code> (919 lines,
+      contourpy/ndimage) stayed in ambix; several unported tests use it as the reference, so nova
+      re-banks against synthetic truth instead (the ambix synthetic gate reproduced interpolated
+      wall tangency to 1e-15).</li>
+    </ul>
+
+    <h2 id="s2">§2 — The accelerator evidence chain (three ambix plans)</h2>
+    <p>The measured trail that the nova work inherits, in causal order:</p>
+    <ol>
+      <li><strong>greens-filament-solver</strong> (shipped): the ≥3× CPU throughput gate closed as
+      an honest negative with the cause localised — the hard-threshold host topology read makes
+      the free-boundary map non-differentiable; NK erratic on it, Anderson ~1.3× on well-posed
+      slices only.</li>
+      <li><strong>differentiable-solve-accelerator</strong> (shipped): the smooth connectivity
+      read fixed <em>convergence</em> (10 of 14 limit-cycling slices turned monotone; synthetic
+      wall tangency to 1e-15) but not CPU <em>throughput</em> (the smooth read costs 2.63× the
+      hard read's wall; net 0.5–0.95×). NK on the smooth map hit 2e-12 residuals but could
+      converge to the wrong basin without a current-centroid pin.</li>
+      <li><strong>batched-newton-accelerator</strong> (active at 0.17, now superseded into nova):
+      on 48 cold-seed slices at a shared 40-evaluation budget, exact-tangent NK converts
+      <strong>62%</strong> (median final residual 3.4e-5, 30× under tolerance) vs 19% for
+      smooth-map Picard and 10% for production relaxed Picard; <strong>Anderson ties Picard
+      exactly on both maps</strong> — the acceleration is entirely the exact tangent. Every NK
+      operation is a Green's-GEMM column or a tiny fixed-shape dense solve, so the scheme vmaps
+      unchanged. The remaining wall is the read itself: at B=512 the topology read is ~99.7% of
+      every map evaluation, with a ≥5× removal path (warm-started binding search, dilate-by-doubling
+      log-depth flood, coarser iteration-resolution read with the calibrated τ=10⁻³ full-resolution
+      read at emit). τ locked at a single 1e-3 operating point (continuation bought one slice).
+      §3–§7 of that plan are verified unbuilt on both sides.</li>
+    </ol>
+
+    <h2 id="s3">§3 — The hex stencil runs the other way</h2>
+    <p>The 6-point hexagonal stationary-point variant does not need building: <strong>nova already
+    has it, and it is the original.</strong> <code>nova/jax/fieldnull.py:57</code> builds a
+    7-point centre-plus-6-ring patch (the axial hex neighbourhood);
+    <code>nova/biot/plasmagrid.py:113</code> Delaunay-tessellates the hex filament centroids,
+    keeps exactly-6-neighbour vertices, angle-sorts them into closed rings, and writes an
+    <code>(n,7)</code> stencil; <code>nova/jax/null.py:87</code> already categorizes on it
+    ("1d hexagonal grid"). Ambix's <code>stencil_nulls.py</code> — whose docstring says it mirrors
+    <code>nova.jax.select</code> — is the rectangular-raster <em>specialisation</em> of that
+    machinery. The work is one generalisation: <code>ring_sign_changes</code> hardcodes an 8-ring
+    of <code>jnp.roll</code> shifts on a <code>(nz,nr)</code> raster; parameterising it on a
+    stencil array makes it a strict superset (the sign-change count is ring-length-independent;
+    the 6-coefficient biquadratic fit over a 7-point cluster is exactly determined — conditioning
+    to be checked, vs over-determined on the 3×3 raster block).</p>
+
+    <h2 id="s4">§4 — Acceleration substrate already in nova</h2>
+    <p><code>nova/equilibrium/forward_operator.py</code> exposes a differentiable, vmap-able
+    <code>residual</code> built to be root-found; its only current caller is a dev script
+    (<code>nova/biot/boundary.py</code>, optimistix Newton, runs at import with hard-coded
+    arguments). The differentiable substrate the NK accelerator needs exists in the package and
+    is unused — the port is a promotion, not an invention.</p>
+  </main>
+</body>
+</html>

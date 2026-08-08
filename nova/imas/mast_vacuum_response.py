@@ -223,6 +223,78 @@ def coil_response_matrix(
     return response
 
 
+def loop_response_matrix(
+    geometry: Mapping[str, Any],
+    positions: np.ndarray,
+    *,
+    families: Sequence[str] | None = None,
+) -> np.ndarray:
+    """Flux each coil links through a toroidal loop at each position [Wb/(A.turn)].
+
+    A flux loop is closed round the machine axis, so what it links is the total
+    poloidal flux through its own contour and no orientation enters -- which is
+    the whole difference from :func:`coil_response_matrix`, where a probe reads
+    one component along an axis the registry cannot state.  Everything else is
+    shared: the same polygon kernel, the same area weighting across a family's
+    parts, the same column order.  The kernel returns the flux directly as its
+    first output, so a loop column is an exact point evaluation rather than an
+    interpolation off a gridded map.
+    """
+
+    sections = coil_sections(geometry)
+    order = _order(families)
+    missing = [family for family in order if family not in sections]
+    if missing:
+        raise ResponseError(f"registry carries no active component {missing}")
+    points = np.asarray(positions, dtype=float).reshape(-1, 2)
+    radius = np.ascontiguousarray(points[:, 0])
+    height = np.ascontiguousarray(points[:, 1])
+    if np.any(radius <= 0.0):
+        raise ResponseError("a toroidal loop must sit at positive radius")
+
+    response = np.zeros((points.shape[0], len(order)), dtype=float)
+    for column, family in enumerate(order):
+        parts = sections[family]
+        areas = np.asarray(
+            [abs(shapely.Polygon(vertices).area) for vertices in parts], dtype=float
+        )
+        total = float(areas.sum())
+        if total <= 0.0:
+            raise ResponseError(f"active component {family!r} has no cross-section")
+        for vertices, area in zip(parts, areas, strict=True):
+            flux, _, _ = polygon_greens(radius, height, vertices)
+            response[:, column] += (area / total) * flux
+    return response
+
+
+def target_standoff(
+    geometry: Mapping[str, Any],
+    positions: np.ndarray,
+    *,
+    families: Sequence[str] | None = None,
+) -> np.ndarray:
+    """Distance from each position to each coil, in that coil's pack widths."""
+
+    sections = coil_sections(geometry)
+    order = _order(families)
+    points = np.asarray(positions, dtype=float).reshape(-1, 2)
+    standoff = np.zeros((points.shape[0], len(order)), dtype=float)
+    for column, family in enumerate(order):
+        polygons = [shapely.Polygon(vertices) for vertices in sections[family]]
+        bounds = np.asarray([polygon.bounds for polygon in polygons], dtype=float)
+        width = float(
+            np.max(np.minimum(bounds[:, 2] - bounds[:, 0], bounds[:, 3] - bounds[:, 1]))
+        )
+        if width <= 0.0:
+            raise ResponseError(f"active component {family!r} has no extent")
+        for row, (r, z) in enumerate(points):
+            point = shapely.Point(r, z)
+            standoff[row, column] = (
+                min(point.distance(polygon) for polygon in polygons) / width
+            )
+    return standoff
+
+
 def probe_standoff(
     geometry: Mapping[str, Any],
     targets: Sequence[ProbeTarget],
@@ -242,23 +314,8 @@ def probe_standoff(
     positive cut.
     """
 
-    sections = coil_sections(geometry)
-    order = _order(families)
-    standoff = np.zeros((len(targets), len(order)), dtype=float)
-    for column, family in enumerate(order):
-        polygons = [shapely.Polygon(vertices) for vertices in sections[family]]
-        bounds = np.asarray([polygon.bounds for polygon in polygons], dtype=float)
-        width = float(
-            np.max(np.minimum(bounds[:, 2] - bounds[:, 0], bounds[:, 3] - bounds[:, 1]))
-        )
-        if width <= 0.0:
-            raise ResponseError(f"active component {family!r} has no extent")
-        for row, target in enumerate(targets):
-            point = shapely.Point(target.r, target.z)
-            standoff[row, column] = (
-                min(point.distance(polygon) for polygon in polygons) / width
-            )
-    return standoff
+    positions = np.asarray([[target.r, target.z] for target in targets], dtype=float)
+    return target_standoff(geometry, positions.reshape(-1, 2), families=families)
 
 
 def _order(families: Sequence[str] | None) -> tuple[str, ...]:

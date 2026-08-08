@@ -18,11 +18,12 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Mapping, Sequence
 
 import numpy as np
 import shapely
@@ -141,6 +142,17 @@ _L1_SETUP_KEYS = (
     "limiterr",
     "limiterz",
 )
+
+_LOOP_NAME_PATTERN = re.compile(r"^FL_(?:CC0?(\d+)|(P\d)([UL])_(\d+))$")
+
+_COMPONENT_MOUNT_PATTERN = re.compile(r"^(p\d)_(?:.*_)?(upper|lower)$")
+
+CENTRE_COLUMN_MOUNT = "sol"
+"""Active component the centre-column loops encircle.
+
+They are named for the column rather than for a coil, and the only conductor
+inside them is the solenoid, so that is the coil they are mounted on.
+"""
 
 
 @dataclass(frozen=True)
@@ -802,7 +814,220 @@ def _source_angles_to_radians(values: Any) -> np.ndarray:
     return np.deg2rad(np.asarray(values, dtype=float))
 
 
-def _magnetics_payload(level1: zarr.Group, level2: zarr.Group) -> dict[str, Any]:
+def _parse_loop_name(name: str) -> tuple[str, int]:
+    """Split a catalog flux-loop name into the coil it is mounted on and its number."""
+
+    match = _LOOP_NAME_PATTERN.match(str(name))
+    if match is None:
+        raise ValueError(f"unrecognised flux-loop name {name!r}")
+    if match[1] is not None:
+        return CENTRE_COLUMN_MOUNT, int(match[1])
+    side = "upper" if match[3] == "U" else "lower"
+    return f"{match[2].lower()}_{side}", int(match[4])
+
+
+def loop_mount(name: str) -> str:
+    """Return the coil a flux loop's own name says it is mounted on."""
+
+    return _parse_loop_name(name)[0]
+
+
+def component_mount(component: str) -> str:
+    """Return the coil set an active component belongs to.
+
+    A loop encircles a coil set rather than one winding pack, so the two packs of
+    a P2 half share a mounting: a loop around P2 upper links both of them and
+    cannot be said to sit on either alone.
+    """
+
+    match = _COMPONENT_MOUNT_PATTERN.match(component)
+    return component if match is None else f"{match[1]}_{match[2]}"
+
+
+@dataclass(frozen=True)
+class LoopPlacement:
+    """Where one named flux loop is served, and where the catalog published it.
+
+    ``mount`` is the coil the loop's name identifies and ``published_mount`` the
+    coil the published coordinates actually sit nearest.  The two differing is the
+    whole signal: a fixture is on the coil it is named for, so a loop beside a
+    different coil is carrying a position that is not its own.  Both travel with
+    the row because a refusal has to be able to name what was wrong.
+    """
+
+    name: str
+    mount: str
+    published_mount: str
+    published_r: float
+    published_z: float
+    r: float
+    z: float
+    restored: bool
+
+    def as_dict(self) -> dict[str, Any]:
+        """Return the canonical JSON representation."""
+
+        return {
+            "mount": self.mount,
+            "name": self.name,
+            "published_mount": self.published_mount,
+            "published_r": self.published_r,
+            "published_z": self.published_z,
+            "r": self.r,
+            "restored": self.restored,
+            "z": self.z,
+        }
+
+
+def _mount_outlines(outlines: Mapping[str, str]) -> dict[str, list[Any]]:
+    """Group the active outlines by the coil set a loop would be mounted on."""
+
+    grouped: dict[str, list[Any]] = {}
+    for component, wkb_hex in sorted(outlines.items()):
+        geometry = shapely.from_wkb(bytes.fromhex(wkb_hex))
+        grouped.setdefault(component_mount(component), []).append(geometry)
+    return grouped
+
+
+def _nearest_mount(r: float, z: float, grouped: Mapping[str, list[Any]]) -> str:
+    """Return the coil set a point sits nearest, or nothing when none is described."""
+
+    point = shapely.Point(float(r), float(z))
+    ranked = sorted(
+        (min(geometry.distance(point) for geometry in group), mount)
+        for mount, group in grouped.items()
+    )
+    return ranked[0][1] if ranked else ""
+
+
+def position_mounts(
+    positions: np.ndarray,
+    outlines: Mapping[str, str],
+) -> tuple[str, ...]:
+    """Return the coil set each position in the poloidal plane sits nearest."""
+
+    grouped = _mount_outlines(outlines)
+    points = np.asarray(positions, dtype=float).reshape(-1, 2)
+    return tuple(_nearest_mount(r, z, grouped) for r, z in points)
+
+
+def placed_loop_positions(
+    names: Sequence[str],
+    radius: np.ndarray,
+    height: np.ndarray,
+    outlines: Mapping[str, str],
+    reconstruction: np.ndarray,
+) -> tuple[LoopPlacement, ...]:
+    """Serve each named loop from the coil it is named for, restoring copied blocks.
+
+    A flux loop is a fixture wound onto a coil, so the coil it sits nearest is the
+    coil its name identifies.  That relation holds for every loop in both of the
+    archive's tables but one block, and it needs no tolerance to apply: a block
+    whose coordinates were transcribed from another block is not displaced by
+    millimetres, it is beside a different coil entirely.
+
+    A block that fails the relation is served from the reconstruction's own loop
+    table instead, which carries the same loops at positions of its own.  The rows
+    it may be served from are the ones sitting nearest the coil the block is named
+    for and not already occupied by a loop the relation accepts; the count has to
+    match the block exactly.  Anything else -- no free row, too many, a coil the
+    catalog does not describe -- leaves the block exactly as published, because a
+    replacement that is not identified is a sensor pose invented rather than
+    recovered, and the position join refusing a channel is the better failure.
+    """
+
+    grouped = _mount_outlines(outlines)
+    rows = [_parse_loop_name(name) for name in names]
+    published = [
+        _nearest_mount(radius[index], height[index], grouped)
+        for index in range(len(names))
+    ]
+    settled = [mount == published[index] for index, (mount, _) in enumerate(rows)]
+
+    table = np.asarray(reconstruction, dtype=float).reshape(-1, 2)
+    occupied = set()
+    for index, ok in enumerate(settled):
+        if ok and table.size:
+            distance = np.hypot(
+                table[:, 0] - radius[index], table[:, 1] - height[index]
+            )
+            occupied.add(int(np.argmin(distance)))
+    free: dict[str, list[int]] = {}
+    for row in range(table.shape[0]):
+        if row in occupied:
+            continue
+        mount = _nearest_mount(table[row, 0], table[row, 1], grouped)
+        free.setdefault(mount, []).append(row)
+
+    replacement: dict[int, int] = {}
+    unsettled: dict[str, list[int]] = {}
+    for index, ok in enumerate(settled):
+        if not ok:
+            unsettled.setdefault(rows[index][0], []).append(index)
+    for mount, members in unsettled.items():
+        candidates = free.get(mount, [])
+        if len(candidates) != len(members):
+            continue
+        order = sorted(members, key=lambda index: rows[index][1])
+        replacement.update(zip(order, candidates, strict=True))
+
+    placements = []
+    for index, name in enumerate(names):
+        row = replacement.get(index)
+        served = (
+            (float(radius[index]), float(height[index]))
+            if row is None
+            else (float(table[row, 0]), float(table[row, 1]))
+        )
+        placements.append(
+            LoopPlacement(
+                name=str(name),
+                mount=rows[index][0],
+                published_mount=published[index],
+                published_r=float(radius[index]),
+                published_z=float(height[index]),
+                r=served[0],
+                z=served[1],
+                restored=row is not None,
+            )
+        )
+    return tuple(placements)
+
+
+def shot_loop_placements(
+    shot: int,
+    level1_root: Path = DEFAULT_LEVEL1_ROOT,
+    level2_root: Path = DEFAULT_LEVEL2_ROOT,
+) -> tuple[LoopPlacement, ...]:
+    """Return one shot's loop placements, both tables read from the catalogs."""
+
+    level1 = zarr.open_group(str(level1_root / f"{shot}.zarr"), mode="r")
+    level2 = zarr.open_group(str(level2_root / f"{shot}.zarr"), mode="r")
+    magnetics = level2["magnetics"]
+    return placed_loop_positions(
+        [str(name) for name in _array(magnetics, "flux_loop_geometry_channel")],
+        _array(magnetics, "flux_loop_r").astype(float),
+        _array(magnetics, "flux_loop_z").astype(float),
+        _active_payload(level2["pf_active"]),
+        _reconstruction_loops(level1["efm"]),
+    )
+
+
+def _reconstruction_loops(efm: zarr.Group) -> np.ndarray:
+    """Return the reconstruction's own loop table, or nothing where it is absent."""
+
+    if "silop_r" not in efm or "silop_z" not in efm:
+        return np.zeros((0, 2), dtype=float)
+    return np.column_stack(
+        [_array(efm, "silop_r").astype(float), _array(efm, "silop_z").astype(float)]
+    )
+
+
+def _magnetics_payload(
+    level1: zarr.Group,
+    level2: zarr.Group,
+    outlines: Mapping[str, str] | None,
+) -> dict[str, Any]:
     efm = level1["efm"]
     probes: list[dict[str, Any]] = []
     for family in ("ccbv", "obr", "obv"):
@@ -843,6 +1068,16 @@ def _magnetics_payload(level1: zarr.Group, level2: zarr.Group) -> dict[str, Any]
 
     loop_r = _array(level2, "flux_loop_r").astype(float)
     loop_z = _array(level2, "flux_loop_z").astype(float)
+    if outlines is not None:
+        placements = placed_loop_positions(
+            [str(name) for name in _array(level2, "flux_loop_geometry_channel")],
+            loop_r,
+            loop_z,
+            outlines,
+            _reconstruction_loops(efm),
+        )
+        loop_r = np.asarray([row.r for row in placements], dtype=float)
+        loop_z = np.asarray([row.z for row in placements], dtype=float)
     if "silop_dphi" in efm:
         loop_span = _nearest_values(
             loop_r,
@@ -936,14 +1171,33 @@ def physical_snapshot(
     shot: int,
     level1_root: Path = DEFAULT_LEVEL1_ROOT,
     level2_root: Path = DEFAULT_LEVEL2_ROOT,
+    *,
+    place_loops: bool = False,
 ) -> dict[str, Any]:
-    """Build the canonical physical geometry payload for a complete shot."""
+    """Build the canonical physical geometry payload for a complete shot.
+
+    ``place_loops`` serves each flux loop from the coil its own name identifies
+    rather than from the coordinates the level-2 catalog published, which repairs
+    the block whose coordinates were transcribed from another block -- see
+    :func:`placed_loop_positions`.
+
+    It is off by default, and the default is the whole point.  This payload's hash
+    is the identity consumers select a machine by and pin by value, so the reader
+    and the packaged file have to remain one statement about the machine: a reader
+    that quietly built a different payload would make the next census report a
+    hardware reconfiguration that never happened.  Moving the loops therefore
+    moves the identity, which is a republication rather than a bug fix, and it
+    happens when the packaged file is regenerated with it.  Until then the
+    correction is available to whatever measures against it and absent from what
+    is published.
+    """
 
     level1 = zarr.open_group(str(level1_root / f"{shot}.zarr"), mode="r")
     level2 = zarr.open_group(str(level2_root / f"{shot}.zarr"), mode="r")
     wall = level2["wall"]
+    active = _active_payload(level2["pf_active"])
     payload: dict[str, Any] = {
-        "active_components": _active_payload(level2["pf_active"]),
+        "active_components": active,
         "passive_components": _passive_payload(level2["pf_passive"]),
         "limiter": canonical_cycle(
             np.column_stack(
@@ -953,7 +1207,9 @@ def physical_snapshot(
                 ]
             )
         ),
-        "magnetics": _magnetics_payload(level1, level2["magnetics"]),
+        "magnetics": _magnetics_payload(
+            level1, level2["magnetics"], active if place_loops else None
+        ),
         "soft_x_ray_chords": _xray_payload(level2),
     }
     return payload

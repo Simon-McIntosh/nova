@@ -24,8 +24,12 @@ does not predict onto the drives that could have produced it;
 rates; :mod:`nova.calibrate.inversion` solves the sensors for the currents and
 reports which current combinations they cannot resolve at all;
 :mod:`nova.calibrate.localize` asks where a surviving residual came from by scanning
-candidate sources over the poloidal plane; and :mod:`nova.calibrate.corrections`
-applies what those fits established, in the order the schema fixes.
+candidate sources over the poloidal plane; :mod:`nova.calibrate.windows` splits a
+pulse into the intervals whose field is known without solving anything;
+:mod:`nova.calibrate.instrument` measures what a channel reads across those
+intervals and whether its integrator returns to the baseline it left; and
+:mod:`nova.calibrate.corrections` applies what those fits established, in the order
+the schema fixes.
 
 Every module here is numerics over arrays.  A kernel takes samples, sensor positions
 and axes, and a response matrix, and never a store path, a pulse number or a channel
@@ -41,6 +45,8 @@ __all__: list[str] = [
     "corrections",
     "coupling",
     "gain",
+    "instrument",
     "inversion",
     "localize",
+    "windows",
 ]

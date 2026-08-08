@@ -364,6 +364,36 @@ def document(corrections) -> CorrectionSet:
     )
 
 
+def test_terms_naming_no_pulse_and_given_no_span_state_no_interval_to_hold_over():
+    """A correction has to say when it holds, and neither source said.
+
+    Terms fitted without a pulse label carry no span of their own, so emitting them
+    against no stated span would produce a record valid everywhere on the strength
+    of windows that named nowhere.
+    """
+
+    unlabelled = pool_instrument_terms(
+        [
+            InstrumentTerms(
+                channel="p01",
+                offset=1.0e-3,
+                drift_rate=0.0,
+                drift_curvature=0.0,
+                reference_time=0.0,
+                scatter=FLOOR,
+                start=0.0,
+                stop=1.0,
+                sample_count=500,
+            )
+        ]
+    )
+    with pytest.raises(InstrumentError, match="no named pulse"):
+        instrument_corrections(unlabelled, provenance=evidenced(), unit="T")
+    assert instrument_corrections(
+        unlabelled, provenance=evidenced(), unit="T", pulse_start=1, pulse_end=99
+    )
+
+
 def test_the_terms_emit_as_offset_and_drift_rate_records_the_reader_accepts():
     pooled = pool_instrument_terms(measured_pulses())
     records = instrument_corrections(pooled, provenance=evidenced(), unit="T")

@@ -105,11 +105,14 @@ class PulseWindow:
     start_index: int
     stop_index: int
     guarded: bool = False
-    """Whether a settling guard removed this window's leading samples.
+    """Whether a settling guard was applied to this window and cleared it.
 
-    A window that follows a disturbance and was not guarded still carries the
-    passive current that disturbance induced, so the flag is what separates an
-    interval that is instrument-only from one that merely looks it.
+    True whether the guard removed leading samples or the window already began
+    past it; both mean the interval is clear of the last disturbance by the
+    settling time.  False means no disturbance preceded the window at all, or the
+    caller asked for no guard -- and in the second case an interval that follows a
+    disturbance still carries the passive current it induced, so the flag is what
+    separates a window that is instrument-only from one that merely looks it.
     """
 
     @property

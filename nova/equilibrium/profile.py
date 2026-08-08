@@ -568,12 +568,18 @@ class ReconstructProfile:
             fitted = self._least_squares_coefficients(
                 basis, source_current, plasma_current, measured, scale, mask
             )
+            # fixed-shape degradation: a sweep whose topology read fails (the
+            # fit comes back non-finite) keeps the previous coefficients and
+            # flux instead of poisoning the whole scan with NaN — the read can
+            # recover on a later sweep
+            fitted = jnp.where(jnp.all(jnp.isfinite(fitted)), fitted, carried)
             blend = jnp.where(index == 0, 1.0, self.profile_relaxation)
             coefficients = blend * fitted + (1.0 - blend) * carried
             mapped = self.source_to_grid @ source_current + self.plasma_to_grid @ (
                 basis @ coefficients
             )
             updated = self.relaxation * mapped + (1.0 - self.relaxation) * flux
+            updated = jnp.where(jnp.all(jnp.isfinite(updated)), updated, flux)
             return (updated, coefficients), flux
 
         (flux, carried), previous_flux = jax.lax.scan(
@@ -585,6 +591,7 @@ class ReconstructProfile:
         fitted = self._least_squares_coefficients(
             basis, source_current, plasma_current, measured, scale, mask
         )
+        fitted = jnp.where(jnp.all(jnp.isfinite(fitted)), fitted, carried)
         coefficients = (
             self.profile_relaxation * fitted + (1.0 - self.profile_relaxation) * carried
         )

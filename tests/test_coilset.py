@@ -394,9 +394,11 @@ def test_field_attrs():
 
 @pytest.mark.parametrize("section", ["c", "d", "disc", "dsk", "circle"])
 def test_coil_insert_dict(section):
+    """Every alias of the round section resolves to the same section and element."""
     coilset = CoilSet()
     coilset.coil.insert({section: (3, 4, 0.05, 0.05)})
-    assert coilset.subframe.segment.iloc[0] == "circle"
+    assert coilset.subframe.section.iloc[0] == "polygon"
+    assert coilset.subframe.segment.iloc[0] == "polysection"
 
 
 if __name__ == "__main__":

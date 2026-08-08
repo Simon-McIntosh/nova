@@ -102,13 +102,21 @@
   two blocks is the copy is not a matter of preference, and it needs no threshold to decide:
   the shared coordinates sit 15&ndash;22&nbsp;mm from the P3-lower winding pack and
   260&ndash;388&nbsp;mm from P4 lower, so they are P3 lower's.</p>
-  <p>Stated as a rule the code can apply, <strong>a loop is nearest the coil its own name
-  identifies</strong>. Measured on the catalog, every one of the 44 named loops satisfies it
-  except the four, and the margin is not marginal: the correctly mounted loops stand at most
-  0.209 of their own-coil distance to the nearest <em>other</em> coil, while the copied block
-  stands at 17.0 &mdash; a factor of 81 with nothing in between. The same test independently
-  identifies the two reconstruction rows sitting 17&nbsp;mm from P6 upper, which the level-2
-  catalog describes no loop for at all.</p>
+  <p>In absolute distance the fault shows up as a no-man's-land. Of the 34 coil-mounted loops,
+  22 sit within 27&nbsp;mm of their own winding pack, and the eight P2 loops &mdash; fixtures
+  further out from a divertor coil rather than beside a pack face &mdash; sit between 58 and
+  110&nbsp;mm. The four <code>FL_P4L</code> entries sit at 260, 260, 388 and 388&nbsp;mm.
+  <strong>Nothing at all occurs between 110 and 260&nbsp;mm.</strong></p>
+  <p>The code does not use that gap, because a threshold placed inside it would still be a
+  number chosen rather than a comparison made, and its margin is only a factor of 2.4. What it
+  uses needs no threshold: <strong>a loop is nearest the coil its own name identifies</strong>.
+  Every one of the 44 named loops satisfies that and so does every one of the 46 reconstruction
+  rows, the four <code>FL_P4L</code> entries excepted. As a ratio the separation is far wider
+  than the absolute one: the correctly mounted loops stand at most 0.209 of their own-coil
+  distance to the nearest <em>other</em> coil, while the copied block stands at 17.0 &mdash; a
+  factor of 81, again with nothing in between. The same test independently identifies the two
+  reconstruction rows sitting 17&nbsp;mm from P6 upper, which the level-2 catalog describes no
+  loop for at all.</p>
 
   <figure>
     <img src="/nova/figures/flux-loop-calibration/loop-reconciliation.png"
@@ -287,13 +295,17 @@
     is no factor. The read path and the machine-description artifact would each apply 1.0, so
     the decision has nothing to apply and can be closed by evidence rather than by choosing a
     site. Nothing in this node implements either option.</li>
-    <li><strong>To the description's owner:</strong> the packaged registry is deliberately
-    <em>not</em> regenerated here. The read fix lands in
-    <code>nova/catalog/mast_geometry.py</code> and every number above is measured against a
-    freshly built snapshot, but regenerating <code>mast_geometry.json</code> changes the
-    machine's physical identity, which propagates to the published artifact tag and to every
-    consumer that resolves through it. That cutover wants its own node, as the last one had.
-    Until it runs, the production solve-input map still joins 39 channels.</li>
+    <li><strong>To the description's owner:</strong> the repair is landed and tested but
+    deliberately not published. <code>physical_snapshot</code> serves the loops as the level-2
+    catalog printed them unless asked for <code>place_loops</code>, which every measurement
+    above asks for and the packaged registry does not. That default is not caution, it is the
+    invariant the repo already holds: this payload's hash is the identity consumers pin by
+    value, so a reader that quietly built a different payload would make the next census read a
+    hardware reconfiguration out of archived sources that cannot change. Regenerating
+    <code>mast_geometry.json</code> moves that identity and propagates to the published
+    artifact tag and to every consumer resolving through it, so it is a republication with its
+    own node, as the last digest change had. Until it runs the production solve-input map still
+    joins 39 channels, and flipping the default is the one-word part of that node.</li>
     <li><strong>To the correction ladder:</strong> the verdicts are banked as schema-shaped
     records at
     <code>~/.cache/nova-mast/flux-loop-calibration/loop_corrections.yaml</code> &mdash; one

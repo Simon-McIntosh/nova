@@ -28,6 +28,8 @@ from nova.catalog.mast_geometry import (
     LoopPlacement,
     component_mount,
     loop_mount,
+    MachineGeometryRegistry,
+    physical_digest,
     physical_snapshot,
     placed_loop_positions,
     shot_loop_placements,
@@ -148,7 +150,7 @@ def test_every_other_loop_is_served_exactly_as_the_catalog_published_it(shot):
 def test_the_repair_removes_the_duplicated_described_positions():
     """Eight loops on four points is what a copied block looks like in the payload."""
 
-    snapshot = physical_snapshot(REPRESENTATIVE_SHOT)
+    snapshot = physical_snapshot(REPRESENTATIVE_SHOT, place_loops=True)
     positions = [(row[0], row[1]) for row in snapshot["magnetics"]["flux_loops"]]
 
     assert len(positions) == 44
@@ -163,7 +165,7 @@ def accounting():
     """Return every channel's join against the repaired description."""
 
     return join_accounting(
-        physical_snapshot(REPRESENTATIVE_SHOT),
+        physical_snapshot(REPRESENTATIVE_SHOT, place_loops=True),
         reconstruction_loop_positions(REPRESENTATIVE_SHOT),
     )
 
@@ -318,3 +320,24 @@ def test_a_catalog_with_no_active_component_places_nothing_by_proximity():
 
     assert placements[0].published_mount == ""
     assert not placements[0].restored
+
+
+@_needs_store
+def test_the_published_snapshot_still_reproduces_the_packaged_registry():
+    """Identity is pinned by value, so the reader and the file are one statement.
+
+    Placing the loops moves the payload's hash, which is the number consumers
+    select a machine by.  Moving it silently would make the next census read a
+    hardware reconfiguration out of archived sources that cannot change, so the
+    correction stays off the published read until the packaged file is
+    regenerated with it.
+    """
+
+    published = physical_snapshot(REPRESENTATIVE_SHOT)
+    placed = physical_snapshot(REPRESENTATIVE_SHOT, place_loops=True)
+
+    assert published["magnetics"]["flux_loops"] != placed["magnetics"]["flux_loops"]
+    assert physical_digest(published) != physical_digest(placed)
+    assert physical_digest(published) == next(
+        iter(MachineGeometryRegistry.default().configurations)
+    )

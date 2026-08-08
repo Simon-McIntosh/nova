@@ -60,7 +60,7 @@ _needs_store = pytest.mark.skipif(
 def geometry():
     """Return the repaired physical description the loops are coupled through."""
 
-    return physical_snapshot(REPRESENTATIVE_SHOT)
+    return physical_snapshot(REPRESENTATIVE_SHOT, place_loops=True)
 
 
 @pytest.fixture(scope="module")

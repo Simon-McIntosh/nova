@@ -1026,7 +1026,7 @@ def _reconstruction_loops(efm: zarr.Group) -> np.ndarray:
 def _magnetics_payload(
     level1: zarr.Group,
     level2: zarr.Group,
-    outlines: Mapping[str, str],
+    outlines: Mapping[str, str] | None,
 ) -> dict[str, Any]:
     efm = level1["efm"]
     probes: list[dict[str, Any]] = []
@@ -1066,15 +1066,18 @@ def _magnetics_payload(
                 }
             )
 
-    placements = placed_loop_positions(
-        [str(name) for name in _array(level2, "flux_loop_geometry_channel")],
-        _array(level2, "flux_loop_r").astype(float),
-        _array(level2, "flux_loop_z").astype(float),
-        outlines,
-        _reconstruction_loops(efm),
-    )
-    loop_r = np.asarray([row.r for row in placements], dtype=float)
-    loop_z = np.asarray([row.z for row in placements], dtype=float)
+    loop_r = _array(level2, "flux_loop_r").astype(float)
+    loop_z = _array(level2, "flux_loop_z").astype(float)
+    if outlines is not None:
+        placements = placed_loop_positions(
+            [str(name) for name in _array(level2, "flux_loop_geometry_channel")],
+            loop_r,
+            loop_z,
+            outlines,
+            _reconstruction_loops(efm),
+        )
+        loop_r = np.asarray([row.r for row in placements], dtype=float)
+        loop_z = np.asarray([row.z for row in placements], dtype=float)
     if "silop_dphi" in efm:
         loop_span = _nearest_values(
             loop_r,
@@ -1168,8 +1171,26 @@ def physical_snapshot(
     shot: int,
     level1_root: Path = DEFAULT_LEVEL1_ROOT,
     level2_root: Path = DEFAULT_LEVEL2_ROOT,
+    *,
+    place_loops: bool = False,
 ) -> dict[str, Any]:
-    """Build the canonical physical geometry payload for a complete shot."""
+    """Build the canonical physical geometry payload for a complete shot.
+
+    ``place_loops`` serves each flux loop from the coil its own name identifies
+    rather than from the coordinates the level-2 catalog published, which repairs
+    the block whose coordinates were transcribed from another block -- see
+    :func:`placed_loop_positions`.
+
+    It is off by default, and the default is the whole point.  This payload's hash
+    is the identity consumers select a machine by and pin by value, so the reader
+    and the packaged file have to remain one statement about the machine: a reader
+    that quietly built a different payload would make the next census report a
+    hardware reconfiguration that never happened.  Moving the loops therefore
+    moves the identity, which is a republication rather than a bug fix, and it
+    happens when the packaged file is regenerated with it.  Until then the
+    correction is available to whatever measures against it and absent from what
+    is published.
+    """
 
     level1 = zarr.open_group(str(level1_root / f"{shot}.zarr"), mode="r")
     level2 = zarr.open_group(str(level2_root / f"{shot}.zarr"), mode="r")
@@ -1186,7 +1207,9 @@ def physical_snapshot(
                 ]
             )
         ),
-        "magnetics": _magnetics_payload(level1, level2["magnetics"], active),
+        "magnetics": _magnetics_payload(
+            level1, level2["magnetics"], active if place_loops else None
+        ),
         "soft_x_ray_chords": _xray_payload(level2),
     }
     return payload

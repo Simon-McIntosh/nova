@@ -42,6 +42,7 @@ from __future__ import annotations
 import jax
 import jax.numpy as jnp
 
+from nova.jax import select
 from nova.jax.config import enable_x64
 from nova.jax.flux_surface_connectivity import _dilate4
 
@@ -55,50 +56,8 @@ __all__ = [
 ]
 
 # ---------------------------------------------------------------------------
-# biquadratic null refinement (mirrors nova.jax.select — pure, differentiable)
+# biquadratic null refinement (the fit itself lives in nova.jax.select)
 # ---------------------------------------------------------------------------
-
-
-@jax.jit
-def _quadratic_surface(r, z, psi):
-    """Least-squares biquadratic coefficients [a, b, c, d, e, f] for ψ(R, Z).
-
-    ψ ≈ a·R² + b·Z² + c·R + d·Z + e·R·Z + f, fitted over a cluster of points.
-    """
-    amat = jnp.column_stack((r**2, z**2, r, z, r * z, jnp.ones_like(r)))
-    return jnp.linalg.lstsq(amat, psi)[0]
-
-
-@jax.jit
-def _null_coordinate(coef):
-    """Stationary point (∇ψ = 0) of the biquadratic surface."""
-    a, b, c, d, e, _f = coef
-    root = 4 * a * b - e**2
-    root = jnp.where(jnp.abs(root) < 1e-30, jnp.sign(root) * 1e-30 + 1e-30, root)
-    r0 = (e * d - 2 * b * c) / root
-    z0 = (e * c - 2 * a * d) / root
-    return r0, z0
-
-
-@jax.jit
-def _null_value(coef, r0, z0):
-    """Flux of the biquadratic surface at (r0, z0)."""
-    return jnp.array([r0**2, z0**2, r0, z0, r0 * z0, 1.0]) @ coef
-
-
-@jax.jit
-def _null_type(coef, atol=1e-12):
-    """Null type from the Hessian: 0 saddle (X), ±1 extremum (O), NaN degenerate."""
-    a, b, _c, _d, e, _f = coef
-    root = 4 * a * b - e**2
-    condlist = [
-        jnp.abs(root) < atol,
-        root < 0,
-        (a > 0) & (b > 0),
-        (a < 0) & (b < 0),
-    ]
-    choicelist = [jnp.nan, 0.0, -1.0, 1.0]
-    return jnp.select(condlist, choicelist, default=jnp.nan)
 
 
 @jax.jit
@@ -107,11 +66,15 @@ def subnull(r_cluster, z_cluster, psi_cluster):
 
     ``type`` is 0 for a saddle (X-point), ±1 for an extremum (O-point), NaN for a
     degenerate/planar fit.  Fully differentiable in ``psi_cluster``.
+
+    Takes the cluster as three arrays rather than the stacked ``(3, N)`` block
+    :func:`nova.jax.select.subnull` reads, because the stencil classifier gathers
+    the three columns separately; the fit itself is that module's.
     """
-    coef = _quadratic_surface(r_cluster, z_cluster, psi_cluster)
-    r0, z0 = _null_coordinate(coef)
-    psi0 = _null_value(coef, r0, z0)
-    ntype = _null_type(coef)
+    coef = select.quadratic_surface(r_cluster, z_cluster, psi_cluster)
+    r0, z0 = select.null_coordinate(coef)
+    psi0 = select.null(coef, (r0, z0))
+    ntype = select.null_type(coef)
     return jnp.array([r0, z0, psi0, ntype])
 
 

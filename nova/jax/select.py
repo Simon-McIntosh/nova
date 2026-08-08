@@ -147,12 +147,13 @@ def quadratic_surface(x_cluster, z_cluster, psi_cluster):
     return coefficients
 
 
-def _check_ntype(ntype):
-    """Raise null type errors."""
-    if ntype == -10:
-        raise ValueError("Plane surface")
-    if ntype == -11:
-        raise ValueError("Coefficients form a degenerate surface.")
+#: floor on the Hessian determinant of the fitted surface. A degenerate (planar)
+#: cluster drives it to zero and the stationary point is the ratio it divides,
+#: so an unguarded fit returns +-inf there -- which a vmapped reduction then
+#: carries into every gradient that touches the batch. The null is reported as
+#: degenerate through the type either way, so the coordinate is discarded; the
+#: floor only keeps it finite on the way out.
+_ROOT_FLOOR = 1e-30
 
 
 @jax.jit
@@ -165,11 +166,12 @@ def null_type(coefficients, atol=1e-12):
             :math:`A>0` and :math:`B>0`
         - 1: maximum
             :math:`A<0` and :math:`B<0`
+        - NaN: degenerate, :math:`|4AB - E^2| < atol` (a planar cluster)
 
-    Raises
-    ------
-    ValueError
-        degenerate surface
+    The four conditions are exhaustive, so the default is never selected:
+    reaching it needs :math:`4AB - E^2 > atol > 0`, which forces
+    :math:`AB > E^2/4 \\ge 0`, so ``A`` and ``B`` share a sign and one of the
+    last two conditions has already fired.
     """
     root = 4 * coefficients[0] * coefficients[1] - coefficients[4] ** 2
     condlist = [
@@ -178,12 +180,12 @@ def null_type(coefficients, atol=1e-12):
         (coefficients[0] > 0) & (coefficients[1] > 0),
         (coefficients[0] < 0) & (coefficients[1] < 0),
     ]
-    choicelist = [jnp.nan, 0, -1, 1]
-    return jax.numpy.select(condlist, choicelist, default=-11)
+    choicelist = [jnp.nan, 0.0, -1.0, 1.0]
+    return jax.numpy.select(condlist, choicelist, default=jnp.nan)
 
 
 @jax.jit
-def null_coordinate(coefficients, cluster=None):
+def null_coordinate(coefficients):
     """
     Return null coodinates in 2D plane.
 
@@ -194,26 +196,20 @@ def null_coordinate(coefficients, cluster=None):
     z_coordinate: float
         subgrid field null z_coordinate
 
-    Raises
-    ------
-    ValueError
-        subgrid coordinate outside cluster
+    A degenerate cluster is reported through :func:`null_type` rather than here;
+    the determinant is floored at :data:`_ROOT_FLOOR` so the coordinate stays
+    finite and the batch it rides in keeps differentiable.
     """
     root = 4 * coefficients[0] * coefficients[1] - coefficients[4] ** 2
+    root = jnp.where(
+        jnp.abs(root) < _ROOT_FLOOR, jnp.sign(root) * _ROOT_FLOOR + _ROOT_FLOOR, root
+    )
     x_coordinate = (
         coefficients[4] * coefficients[3] - 2 * coefficients[1] * coefficients[2]
     ) / root
     z_coordinate = (
         coefficients[4] * coefficients[2] - 2 * coefficients[0] * coefficients[3]
     ) / root
-    """    # TODO reimplement error checking with jax callbacks
-    if cluster is not None:
-        for i, coord in enumerate([x_coordinate, z_coordinate]):
-            maximum, minimum = jnp.max(cluster[i]), jnp.min(cluster[i])
-            delta = maximum - minimum
-            # assert coord >= minimum - 2 * delta
-            # assert coord <= maximum + 2 * delta
-    """
     return x_coordinate, z_coordinate
 
 
@@ -246,6 +242,6 @@ def subnull(cluster):
     """
     coef = quadratic_surface(*cluster)
     ntype = null_type(coef)
-    coords = null_coordinate(coef, cluster[:2])
+    coords = null_coordinate(coef)
     psi = null(coef, coords)
     return jnp.r_[coords, psi, ntype]

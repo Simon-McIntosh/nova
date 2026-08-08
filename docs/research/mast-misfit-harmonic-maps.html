@@ -7,13 +7,13 @@
   <meta name="reckon-type" content="research">
   <meta name="plan-slug" content="mast-misfit-harmonic-maps">
   <meta name="plan-title" content="Harmonic maps of the MAST vacuum misfit — the flux the array determines, the two localisers that fail, and the one that puts the P4-lower survivor below its own winding">
-  <meta name="plan-summary" content="Per drive group the surviving P4/P5 vacuum misfit is expanded in toroidal harmonics against 91-93 constraint rows — 74-76 signed probe field projections plus 17 admitted flux loops, whitened by per-channel noise — with the thirteen described coil currents carried as free unknowns rather than projected out. The enclosed family beats the external one decisively on the lower groups (0.863 against 0.412 of whitened power on P4 lower, over 0.342 for the coil columns alone) and not at all on the upper ones. Projecting the coil span out first, the shortcut the basis section warned about, costs between a tenth and everything: 0.783 falls to 0.033 on P5 upper. Withholding the flux loops does not degrade the fit but destroys it where the loops sit, missing by 3x to 40195x what predicting zero would cost, so the loops are a requirement rather than an improvement; neither sensor band alone predicts the other either. Two localisers fail and are recorded as failures: the difference between the two families' flux maps peaks beside whatever focal circle it is given, reaching 13.9 resampling sigma at every placement, and the single-source read does not converge. What works is the family contrast scanned over focal-circle placement, which puts the P4-lower survivor below the P4 lower winding — bounded above at Z = -0.95, unbounded in radius across the whole 0.60-2.40 m scan — a resolution that independently reproduces the 1.5-2.3 m bound the conductor hunt reached by a different route.">
+  <meta name="plan-summary" content="Per drive group the surviving P4/P5 vacuum misfit is expanded in toroidal harmonics against 91-93 constraint rows — 74-76 signed probe field projections plus 17 admitted flux loops, whitened by per-channel noise — with the thirteen described coil currents carried as free unknowns rather than projected out. The enclosed family beats the external one decisively on the lower groups (0.863 against 0.412 of whitened power on P4 lower, over 0.342 for the coil columns alone) and not at all on the upper ones. Projecting the coil span out first, the shortcut the basis section warned about, costs between a tenth and everything: 0.783 falls to 0.033 on P5 upper. Withholding the flux loops does not degrade the fit but destroys it where the loops sit, missing by 3x to 40195x what predicting zero would cost, so the loops are a requirement rather than an improvement; neither sensor band alone predicts the other either. Two localisers fail and are recorded as failures: the difference between the two families' flux maps peaks beside whatever focal circle it is given — tracking it to a median of 0.10-0.23 m over six placements spanning the machine, while reading as a confident 13.9-sigma find at the placement used — and the single-source read does not converge. What works is the family contrast scanned over focal-circle placement, which puts the P4-lower survivor below the P4 lower winding — bounded above at Z = -0.95, unbounded in radius across the whole 0.60-2.40 m scan — a resolution that independently reproduces the 1.5-2.3 m bound the conductor hunt reached by a different route.">
   <meta name="plan-status" content="reference">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-recorded-at" content="2026-08-08">
   <meta name="plan-evidence-for" content="mast-misfit-toroidal-harmonics">
   <meta name="plan-informs" content="mast-nonaxisymmetric-physics">
-  <meta name="plan-verdict" content="The maps land and the localisation does not close. Reconciled misfit flux is published per drive group on a 205x205 grid with a shot-resampling band, and the band covers most of the bracketed plane for three of the four groups — P4 lower is determined over about two-thirds of it, P5 upper over almost none. The joint fit against the raw coupling is vindicated on real data at every group, and the calibrated flux loops are established as load-bearing rather than optional. The strongest survivor is placed below the P4 lower winding and excluded from the upper half and the centre column, but its radius is unresolved across the entire scan, and after the best axisymmetric expansion 7.5 to 28.8 sigma of whitened residual remains — a lower bound on what a non-axisymmetric account must carry. One filament does not fit the coefficient sequence, so the multi-filament and extended-path fits are still to be scored.">
+  <meta name="plan-verdict" content="The maps land and the localisation does not close. Reconciled misfit flux is published per drive group on a 205x205 grid with a shot-resampling band, and the fraction of that plane the band leaves standing runs from 80% on P4 lower through 68% and 59% on P5 lower and P4 upper to nothing at all on P5 upper. The joint fit against the raw coupling is vindicated on real data at every group, and the calibrated flux loops are established as load-bearing rather than optional. The strongest survivor is placed below the P4 lower winding and excluded from the upper half and the centre column, but its radius is unresolved across the entire scan, and after the best axisymmetric expansion 7.5 to 28.8 sigma of whitened residual remains — a lower bound on what a non-axisymmetric account must carry. One filament does not fit the coefficient sequence, so the multi-filament and extended-path fits are still to be scored.">
   <title>MAST misfit harmonic maps | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -81,8 +81,9 @@
         <td>Does the interior/exterior <em>map difference</em> localise the source?</td>
         <td><strong>No. It localises the focal circle.</strong></td>
         <td>Swept over six placements spanning the machine, the peak of the difference follows
-        the circle it was given to a median of 0.10&ndash;0.23 m. It reaches 13.9 resampling
-        sigma wherever it is put.</td>
+        the circle it was given to a median of 0.10&ndash;0.23 m &mdash; and at the placement
+        actually used it reads as a confident find, 13.9 resampling sigma with 34% of the
+        supported plane above three.</td>
       </tr>
       <tr>
         <td>What does localise?</td>
@@ -150,8 +151,9 @@
     jointly with the thirteen described coil currents &mdash; on a 205&times;205 grid, shown only
     where the sensor set brackets the point in focal distance. Hatching marks where the
     shot-resampling band reaches the signal, so the unhatched area is what the measurement
-    actually determines: about two-thirds of the bracketed plane for P4 lower, and almost none of
-    it for P5 upper. The green cross is the focal circle; the tight dipole around it is the
+    actually determines: 80% of the bracketed plane for P4 lower, 68% for P5 lower, 59% for
+    P4 upper and none of it for P5 upper, whose degree-one expansion carries no structure the
+    band does not swallow. The green cross is the focal circle; the tight dipole around it is the
     expansion's own singular set, not a located source, which is precisely the trap the next
     figure closes.</figcaption>
   </figure>
@@ -187,8 +189,9 @@
   that would have read as a find. It is an artefact. The two families differ most next to their
   own singular sets, and the inner family's singular set <em>is</em> the focal circle, so the
   peak is a property of where the expansion was centred. Moving the circle moves the peak with
-  it, and no placement anywhere in the machine fails to produce a double-digit-sigma
-  &ldquo;detection&rdquo;.</p>
+  it. What the sweep establishes is that the peak's <em>position</em> carries no information
+  about the machine; its significance was measured only at the placement used, where it is
+  high.</p>
 
   <p>This is worth recording rather than quietly dropping. The failure mode is not that the
   measurement was too noisy; it is that a quantity with an obvious physical reading &mdash; where
@@ -279,8 +282,8 @@
   the single-source read does not converge, so the multi-filament and extended-path fits are
   still to be scored; and the reconciled maps are published on a grid with a band, which is the
   form the flux-map problem class of <code>coil-geometry-inversion</code> can consume
-  directly &mdash; with the caveat, now measured, that for three of four drive groups the band
-  covers most of the plane.</p>
+  directly &mdash; with the caveat, now measured, that the determined fraction runs from 80%
+  on P4 lower down to nothing at all on P5 upper.</p>
 
   <p class="note">One defect found in passing and not fixed here, being outside this node's write
   scope: <code>ring_legendre_first</code> and <code>ring_legendre_second</code> raise

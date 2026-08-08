@@ -17,8 +17,8 @@
   <title>Physics Spine Adoption | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-04">
-<meta name="plan-version" content="28">
+<meta name="plan-modified" content="2026-08-08">
+<meta name="plan-version" content="30">
 <meta name="plan-impl" content="0.97">
 <meta name="plan-sprint" content="S5">
 <meta name="plan-capability-version" content="1.0">
@@ -214,8 +214,13 @@ nova/transport/current_diffusion.py  CurrentDiffusion      (ambix current_diffus
       <code>develop</code> until a 2.0 tag exists; plan the pin flip to a release range). Note
       ambix python floor vs nova's ≥3.14 — reconcile in the same commit.</li>
       <li><strong>Tokenizer seam:</strong> the single ML→physics seam (tokenizer reading geometry
-      features) re-points at the nova package API; torch decoders remain in ambix as thin wrappers
-      over spine math.</li>
+      features) re-points at the nova package API. <strong>Provider split locked 2026-08-08</strong>
+      (decision <code>ambix-provider-split</code>): JAX owns the spine; torch stays confined to the
+      ML training tier (worldmodel / camdyn / tokenizer training — a bespoke DDP stack with live
+      torch checkpoints and zero nova contact), and every physics-by-content latent module (patch
+      basis, structure residual, current diffusion …) migrates onto the spine's numpy/JAX API and
+      drops torch. There is no permanent thin-wrapper layer: after migration, torch wraps no
+      physics.</li>
       <li><strong>Consumers:</strong> statespace/eval/spine_bench re-point at
       <code>nova.equilibrium</code>/<code>nova.circuit</code>/<code>nova.transport</code>;
       <code>spine_bench</code> numbers must match pre-split baselines (the regression gate for the
@@ -350,6 +355,26 @@ nova/transport/current_diffusion.py  CurrentDiffusion      (ambix current_diffus
 <div class="r-dec" data-key="parity-budget-scope" data-choice="cross-source budget for source cutovers" data-by="Simon McIntosh" data-when="2026-08-04T10:07:24+00:00">
     <p class="r-dec-q">parity-budget-scope</p>
     <p class="r-dec-rat">Owner adjudication 2026-08-04 on the attribution evidence (docs/research/mast-cutover-parity-evidence.html): the registered 1% magnetics-residual budget derives from cross-substrate spread within ONE geometry source and stays in force for substrate changes; SOURCE-cutover comparisons are scored against a second budget derived by mechanism from the pair&#x27;s measured driven-column disagreement propagated through the metric, with a pre-stated margin policy — never tuned to the observed value. Basis: the excess is not localisable to a fixable geometry item, is 88% vacuum-term, and the benchmark structurally favours the incumbent (efm path carries a calibration fitted against the scored magnetics while the artifact path runs on source fidelity alone). Changes if: a future source pair&#x27;s honestly-derived bound still fails, or the queued registry corrections and solenoid stratum re-fit materially shrink the measured column disagreement.</p>
+    </div>
+<div class="r-dec" data-key="ambix-provider-split" data-choice="split-by-tier-migrate-latent" data-by="Simon McIntosh" data-when="2026-08-08T15:45:00+00:00">
+    <p class="r-dec-q">Array/autodiff provider strategy for imas-ambix — coalesce on JAX, or keep torch, and in what role?</p>
+    <p class="r-dec-ctx">Census 2026-08-08: 180 torch files vs 12 jax files in ambix; the ML tier is a bespoke single-node DDP training stack (NCCL drain/watchdog machinery, GPFS loader fix) with 8.3 TB + 164 GB of live torch checkpoints across five architectures; exactly one file repo-wide imports both torch and jax, and zero files import both torch and nova. Of the twelve physics-adjacent latent modules, five are small single-process MLPs, two are parameter-free nn.Modules (gradient plumbing over fixed matmuls), three are pure math — torch by convenience.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="split-by-tier-migrate-latent">JAX owns spine; latent physics migrates onto it; torch confined to ML training tier</button>
+      <button class="r-opt" data-value="jax-only-ambix">rewrite the ML tier in JAX (~57k lines + checkpoint transcoders)</button>
+      <button class="r-opt" data-value="thin-wrapper-status-quo">keep the &#x27;torch decoders wrap spine math&#x27; framing</button>
+      </p>
+    <p class="r-dec-rat">User selection 2026-08-08: torch and JAX are not equivalent in role here. JAX owns the physics spine and every physics-by-content latent module migrates onto the spine&#x27;s numpy/JAX API and drops torch; torch stays confined to the ML training tier, which never touches nova. No permanent thin-wrapper layer exists after migration — the physics the wrappers would have wrapped will have left. A JAX-only ambix would cost ~57k lines of proven distributed-training code plus per-architecture weight transcoders to rescue 8.5 TB of checkpoints, for zero physics benefit. The ambix scoping-review figure label (&#x27;torch decoders (wrap spine math)&#x27;) is to be redrawn as &#x27;torch training stack (no physics)&#x27;.</p>
+    </div>
+<div class="r-dec" data-key="artifact-resolution" data-choice="packaged-digest-env-override-machine-first" data-by="Simon McIntosh" data-when="2026-08-08T15:45:00+00:00">
+    <p class="r-dec-q">Default machine-artifact resolution semantics and the first physical-identity product consumer (f-psa-artifact-wiring)</p>
+    <p class="r-dec-ctx">The donor census proved the importer-migration ladder has no first rung: MachineArtifactGeometryReader requires hand-set AMBIX_MACHINE_ARTIFACT_CACHE/DIGEST env vars, no product consumer reaches the artifact path, and nothing outside gs/ selects physical identity.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="packaged-digest-env-override-machine-first">packaged pinned digest + env override; machine selection cuts over first</button>
+      <button class="r-opt" data-value="environment-only">cache location and digest always from environment/config</button>
+      <button class="r-opt" data-value="packaged-default-statespace-first">same resolution; statespace consumer first</button>
+      </p>
+    <p class="r-dec-rat">User selection 2026-08-08: ambix ships a pinned digest and a resolvable cache location as the in-repo default so tests run without hand-set env vars; AMBIX_MACHINE_ARTIFACT_* environment variables override. Machine selection is the first product consumer routed through physical identity — it is the identity selector every other consumer keys off. SetupSignature stays a dual-read: compute caches remain signature-keyed because two representation aliases carry different filament counts under one physical digest.</p>
     </div>
 </section>
 

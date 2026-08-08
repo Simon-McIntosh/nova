@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-07T22:29:11",
+  "updated": "2026-08-08T18:00:47",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -267,6 +267,19 @@
                 "verification": "strict"
               }
             }
+          },
+          {
+            "slug": "mast-corrected-read-layer",
+            "why_now": "The correction engine and document are shipped but the guarantee is not: only acquisition_scale is wired, application is opt-out, and 9+ direct zarr doors bypass the layer; the GPU catalog's ingest must inherit corrected reads by construction.",
+            "done_when": "Every sensor read passes through the read_shot_waveforms door with a guard test enforcing it; the full promoted chain applies in stage order with the gains' vacuum-floor shift banked; the acquisition sweep promotes into the YAML document; raw access exists only as the explicit named object.",
+            "capability": {
+              "version": "1.0",
+              "class": "general",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
           }
         ],
         "description": "Two arms. Source closure: recover the flux loops (per-loop gains; the 2-pi convention is measured), build toroidal-harmonic contour maps of the surviving misfit, and resolve the P4/P5 provenance candidates (the description's own 17.3 mm / 3% member asymmetry first). Infrastructure: promote the diagnostic-calibration ladder to a unit-tested machine-agnostic nova/calibrate package, give every correction a versioned pulse-range-scoped schema (LinkML candidate), harvest the vacuum windows every pulse carries (offsets, integrator drift, closure) across the whole archive, and solve coil positions and shapes from vacuum measurements by autodiff through the traced Green's kernels (geometry Jacobians verified exact 2026-08-07)."
@@ -333,6 +346,11 @@
         "when": "2026-08-07",
         "who": "reckon-ship",
         "what": "S6 Session A executed: 8 worker nodes, two-worker cap held, all commits merged to main. diagnostic-correction-schema SHIPPED (LinkML schema + generated models + MAST instance; read-path cutover proven by 3395 float-equal reads before four constants and the 4394-line JSON table were deleted; promoted gains held OUT of the arithmetic, test-pinned). nova-calibrate-package first slice (5 of 9 capabilities, arrays-only kernels, synthetic-truth lane, banked pins). coil-geometry-inversion kernel audit landed: eight kernel classes geometry-traceable with three-part autograd regressions; two elliptic derivative repairs (forward-mode NaN; Carlson degenerate slope 3e-9 to 3e-15). mast-p4p5-circuit-provenance: symmetry verdict = geometry error EXCLUDED (at least 85 percent of surviving power needs current the coils do not carry; 23-cell lattice removes 15 percent on P5-lower; 5-turn row resolves to described side); provenance adjudicated - the 17.3 mm asymmetry was a closed-ring vertex-mean artifact, centroids consistent with as-built per Kirk Table 1, NO correction warranted; FL_P4L loop positions found to be a bit-copy of FL_P3L (feeds flux-loop calibration); pack-total identity confirmed at 4578 pairs and stated as mechanism (six channels explained, serving needs a two-channel source-map row - owner call). Evidence backfill: all eleven landed records carry plan-evidence-for. Records: mast-p4p5-symmetry-verdict, mast-p4p5-provenance-note, calibration-foundations-landed (all docs/research/*.html). Session B remains: flux loops, toroidal harmonics, vacuum-signature extraction, inversion geometry solve, p4p5 feeder hunt."
+      },
+      {
+        "when": "2026-08-08",
+        "who": "reckon-ship",
+        "what": "Owner decisions locked from the library/read-path audits: ambix provider split by tier (JAX owns the spine, latent physics-by-content migrates onto it, torch confined to the ML training tier \u2014 no thin-wrapper layer); nova biot response is a hygiene sweep with NO backend switch (numerics already single-source via the xp namespace; new plan nova-jax-hygiene); the five promoted gains ENTER the applied chain behind a single-door corrected reader (new plan mast-corrected-read-layer added to S6, blocks mast-catalog-gpu-solve); \u00a74 artifact wiring proceeds with packaged pinned digest + env override, machine selection first."
       }
     ],
     "blockers": [
@@ -365,6 +383,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 16
+    "_version": 17
   }
 }

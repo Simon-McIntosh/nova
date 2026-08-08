@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="nova-jax-hygiene">
+  <meta name="plan-title"     content="Nova JAX Surface Hygiene">
+  <meta name="plan-summary"   content="Remove the apparent numpy/JAX variant proliferation: delete dead copies, centralize the scattered jax global-config calls, move misfiled numpy modules out of nova/jax/, collapse duplicate math, and pin the two live behavioural divergences — no backend switch">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-roi"       content="mid">
+  <meta name="plan-effort"    content="S">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="general">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <title>Nova JAX Surface Hygiene | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Finding: the variants are not a backend problem</h2>
+    <p>An audit (2026-08-08) of the suspected "traceable variant" proliferation across
+    <code>nova/biot</code>, <code>nova/jax</code> and the spine packages found that the biot
+    numerics are <strong>already single-source</strong>: 34 signature sites across ~14 modules
+    (~6,750 lines) thread an <code>xp</code> array-namespace parameter, and the hard blocker was
+    already solved properly — <code>nova/biot/completeelliptic.py</code> implements the Bulirsch
+    <code>cel</code> descent with a fixed trip count precisely so one implementation runs under
+    both numpy and JAX (its docstring states the contract: no convergence test, no data-dependent
+    branch). No <code>TraceableFoo</code>/<code>FooJax</code> class pairs exist; the token
+    <code>traceable</code> appears in two files repo-wide.</p>
+    <p>What reads as proliferation is five distinct hygiene defects. A global
+    <code>backend = numpy|jax</code> setting would fix almost none of them — ~3,300 lines of
+    genuinely JAX-only code (lax.scan Picard sweeps, static-shape gathers) cannot run under
+    numpy, and the largest live pair (<code>nova/geometry/select.py</code> numba vs
+    <code>nova/jax/select.py</code>) is a <em>three</em>-backend axis a two-value flag cannot
+    describe. The decision below locks the response: hygiene sweep, no switch.</p>
+
+    <figure>
+      <svg viewBox="0 0 880 300" role="img" style="max-width:100%;height:auto;font-family:system-ui">
+        <text x="440" y="20" text-anchor="middle" font-size="14" font-weight="600" fill="#111">What the audit actually found (lines of code by disposition)</text>
+        <!-- rows: label, bar, note -->
+        <g font-size="12" fill="#111">
+          <text x="250" y="58" text-anchor="end">single-source via xp (done)</text>
+          <rect x="265" y="46" width="440" height="16" fill="none" stroke="#0a6" stroke-width="1.2"/>
+          <text x="712" y="58" font-size="11" fill="#555">~6,750 — leave alone</text>
+          <text x="250" y="90" text-anchor="end">JAX-only, untranslatable</text>
+          <rect x="265" y="78" width="215" height="16" fill="none" stroke="#555" stroke-width="1"/>
+          <text x="488" y="90" font-size="11" fill="#555">~3,300 — no switch applies</text>
+          <text x="250" y="122" text-anchor="end">dead files</text>
+          <rect x="265" y="110" width="46" height="16" fill="#b00" fill-opacity="0.15" stroke="#b00" stroke-width="1"/>
+          <text x="318" y="122" font-size="11" fill="#b00">~700 — delete (§2.1)</text>
+          <text x="250" y="154" text-anchor="end">numba↔JAX pair (select)</text>
+          <rect x="265" y="142" width="32" height="16" fill="none" stroke="#555" stroke-width="1"/>
+          <text x="304" y="154" font-size="11" fill="#555">~490 — three-backend reality; document, align conventions</text>
+          <text x="250" y="186" text-anchor="end">legacy scipy hosts + copies</text>
+          <rect x="265" y="174" width="24" height="16" fill="#b60" fill-opacity="0.15" stroke="#b60" stroke-width="1"/>
+          <text x="296" y="186" font-size="11" fill="#b60">~350 — collapse on merit (§2.4)</text>
+          <text x="250" y="218" text-anchor="end">scattered jax.config calls</text>
+          <rect x="265" y="206" width="10" height="16" fill="#b60" fill-opacity="0.15" stroke="#b60" stroke-width="1"/>
+          <text x="282" y="218" font-size="11" fill="#b60">9 sites + import-time debug_nans — centralize (§2.2)</text>
+          <text x="250" y="250" text-anchor="end">numpy filed under nova/jax/</text>
+          <rect x="265" y="238" width="26" height="16" fill="#b60" fill-opacity="0.15" stroke="#b60" stroke-width="1"/>
+          <text x="298" y="250" font-size="11" fill="#b60">~400 — move (§2.3): the directory name IS the misleading signal</text>
+        </g>
+        <text x="440" y="285" text-anchor="middle" font-size="11" fill="#555">Bar length ∝ lines. The green bar needs nothing; the work is the four small amber/red bars.</text>
+      </svg>
+      <figcaption>The apparent variant proliferation decomposes into a large healthy single-source
+      core and four small hygiene defects.</figcaption>
+    </figure>
+
+    <h2 id="s2">§2 — Work items</h2>
+    <ol>
+      <li><strong>Delete the dead files</strong> (zero-importer proof per file before each
+      deletion): <code>nova/jax/plasmaloc.py</code> (byte-identical to
+      <code>nova/frame/plasmaloc.py</code>, zero jax content), <code>nova/jax/fieldnull.py</code>
+      (class-for-class copy of <code>nova/biot/fieldnull.py</code>; only reference is commented
+      out), <code>nova/jax/gap.py</code> (runs an IMAS query at import),
+      <code>nova/field/jaxopt_linalg.py</code>, <code>nova/field/jax_bspline.py</code> (third
+      Bernstein-binomial copy), <code>nova/utilities/xpu.py</code> (env-driven CUPY/numpy switch
+      with zero callers; binds at import so the env patch in
+      <code>tests/test_coilset.py:320</code> does nothing — remove that patch too), and the
+      import-time <code>jax_debug_nans</code> global set in
+      <code>nova/dataset/access.py:21</code>.</li>
+      <li><strong>Centralize JAX global config.</strong> One helper owns
+      <code>jax_enable_x64</code> (today set independently at 9 sites in
+      <code>nova/</code> plus 10 in tests) and any debug flags; modules call the helper, tests
+      stop re-stating it. This is the defect that made the surface feel unmanaged.</li>
+      <li><strong>Move the misfiled numpy modules</strong> out of <code>nova/jax/</code>:
+      <code>wall_mask.py</code> (375 lines of pure-numpy geometry) and
+      <code>equilibrium_labels.py</code> (constants) to homes named by content.</li>
+      <li><strong>Collapse duplicate math on merit.</strong> Retire the four legacy scipy host
+      functions in <code>nova/biot/greens.py</code> (:103, :136, :245, :479) whose
+      <code>traced_*</code> twins already run under numpy via <code>xp</code> — gate on a
+      cost/accuracy check of <code>scipy.special.ellipkm1/ellipe</code> vs the Bulirsch route at
+      the call sites. Deduplicate the biquadratic-null math copied into
+      <code>nova/jax/stencil_nulls.py:62-116</code> (and its verbatim <code>_dilate4</code>) back
+      onto <code>nova/jax/select.py</code> / <code>flux_surface_connectivity.py</code>; collapse
+      the remaining Bernstein-binomial copy onto <code>nova/linalg/basis.py</code>.</li>
+      <li><strong>Pin the live divergences.</strong> <code>nova/jax/operate.py</code> vs
+      <code>nova/biot/operate.py</code> differ in where <code>source_plasma_index</code> is read
+      and in the <code>dataset["index"]</code> fallback (affects the Force classname) — decide
+      the correct behaviour once and pin both with a shared test.
+      <code>nova/transport/current_diffusion.py</code> carries a numpy <code>legval</code>
+      profile-shape path and a hand-rolled JAX Legendre recurrence on different call sites — add
+      a parity test so they cannot drift. Document the numba/JAX select pair as the intended
+      three-backend reality (align the <code>wall_flux</code> return conventions if cheap;
+      otherwise state the difference in both docstrings).</li>
+    </ol>
+    <p><em>Done-when:</em> the dead files are gone with zero-importer proof recorded; one config
+    helper owns the JAX globals; <code>nova/jax/</code> contains only JAX code; the duplicate
+    math has a single home each; divergence parity tests green; full suite green.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="backend-switch" data-choice="hygiene-only"
+           data-by="Simon McIntosh" data-when="2026-08-08T15:50:00+00:00">
+        <p class="r-dec-q">Should nova gain a numpy|jax backend selection setting (pyproject
+        and/or environment variable), or is the cleanup alone the right response?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="hygiene-only">hygiene sweep only — callers keep choosing routes explicitly</button>
+          <button class="r-opt" data-value="env-var-switch">hygiene + NOVA_BACKEND env var</button>
+          <button class="r-opt" data-value="pyproject-and-env">hygiene + [tool.nova] table + env override</button>
+        </p>
+        <p class="r-dec-rat">User selection 2026-08-08 on the audit evidence: no backend switch.
+        The numerics are already single-source through the xp namespace parameter; the genuinely
+        JAX-only code cannot run under numpy; and the largest live pair is a numba-vs-JAX axis a
+        two-value flag cannot describe. Callers keep choosing routes explicitly (the
+        tiledassembly backend= parameter and the operate.py fallback stand as-is). Revisit only
+        if a concrete consumer needs process-wide route selection.</p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-njh-001" data-status="open"
+               data-capability-version="1.0" data-capability-class="general"
+               data-capability-verification="strict"
+               data-written-by="reckon-create" data-written-at="2026-08-08">
+        <h4 class="r-fu-title">Execute the hygiene sweep (§2 items 1–5)</h4>
+        <div class="r-fu-body"><p>Deletions front-load the value: most of the apparent variant
+        proliferation is six dead files and nine scattered config calls. Zero-importer proof
+        before every deletion; parity tests pin the two live divergences.</p></div>
+        <pre class="r-fu-prompt">Project: nova
+Plan:    nova-jax-hygiene (http://127.0.0.1:8765/nova/nova-jax-hygiene.html)
+Section: §2 items 1–5
+Capability: general
+Requirements: strict verification
+
+Context
+  Audit 2026-08-08 found the biot numerics already single-source via the xp
+  namespace parameter; the apparent variant proliferation is dead copies,
+  scattered jax.config calls, misfiled numpy modules, duplicate math, and two
+  live behavioural divergences. No backend switch (locked decision).
+
+State to read
+  nova/biot/completeelliptic.py:37-41 (the xp contract)
+  nova/biot/greens.py (four legacy scipy hosts vs traced_* twins)
+  nova/jax/ (dead: plasmaloc.py, fieldnull.py, gap.py; misfiled: wall_mask.py,
+  equilibrium_labels.py; copies: stencil_nulls.py:62-116)
+  nova/field/jax_bspline.py, nova/field/jaxopt_linalg.py, nova/utilities/xpu.py,
+  nova/dataset/access.py:21 (deletions)
+  nova/jax/operate.py vs nova/biot/operate.py (divergences to pin)
+  nova/transport/current_diffusion.py:198 vs :987 (Legendre drift risk)
+
+Scope locks / constraints
+  Zero-importer census proof immediately before EVERY deletion (imports, script
+  refs, dynamic import strings). The deliberate three-way recurrence pin in
+  nova/circuit/propagate.py is NOT a defect — do not touch. greens.py host
+  retirement is gated on a recorded cost/accuracy check at the call sites.
+  Full suite green after each coherent commit; push incrementally.
+
+Done-when
+  1. Dead files deleted with per-file proof; one helper owns jax_enable_x64.
+  2. nova/jax/ holds only JAX code; duplicate math single-homed.
+  3. Divergence parity tests added and green; full suite green; followup
+     resolved with the before/after file census.</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

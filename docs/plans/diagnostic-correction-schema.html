@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-08">
-<meta name="plan-version" content="7">
+<meta name="plan-version" content="9">
 <meta name="plan-impl" content="1.0">
 </head>
 <body>
@@ -133,6 +133,16 @@
       </p>
     <p class="r-dec-rat">Owner decision 2026-08-07: LinkML. Schema-as-YAML with generated Pydantic and JSON-Schema, first-class enums and versioning, and ecosystem fit with the IMAS standard-names tooling. Plain Pydantic+YAML remains the documented fallback if LinkML tooling friction exceeds its value in practice.</p>
     </div>
+<div class="r-dec" data-key="promoted-gains-applied" data-choice="apply-full-promoted-chain" data-by="Simon McIntosh" data-when="2026-08-08T15:50:00+00:00">
+    <p class="r-dec-q">Do the five promoted gains (obr17 0.5011, obv04 0.8571, obr05 1.1043, obv05 0.9449, ccbv35 0.9474) enter the applied read-path chain?</p>
+    <p class="r-dec-ctx">The schema defines status &#x27;promoted&#x27; as measured, corroborated, AND applied by the read path, yet the MAST wiring draws kinds=(acquisition_scale,) alone and test_the_read_path_divides_by_no_promoted_gain pins the gains OUT of the chain — five records claim a status whose own definition nothing satisfies.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="apply-full-promoted-chain">apply every promoted kind in schema stage order; re-run the vacuum-floor bench to quantify the shift</button>
+      <button class="r-opt" data-value="demote-to-recorded">keep gains out of the arithmetic and demote their status so the enum stops lying</button>
+      <button class="r-opt" data-value="defer">leave the contradiction pinned</button>
+      </p>
+    <p class="r-dec-rat">User selection 2026-08-08: the read path applies ALL promoted kinds in schema ApplicationStage order — including the five gains — behind a single-door corrected reader (read_shot_waveforms becomes the only entry to the sensor store; direct zarr reads are deleted; raw access survives as one explicit named object). The vacuum-floor bench is re-run to quantify the downstream shift before the pinning test flips. Refused/unmeasured channels stay untouched (never divided by 1.0) with disposition reporting. Implementation is owned by the corrected-read-layer plan, wired as a prerequisite of mast-catalog-gpu-solve.</p>
+    </div>
 </section>
 
   <section data-reckon="followups" id="followups" class="r-followups">
@@ -206,7 +216,7 @@ Done-when
   4. Followup written into plan + this one resolved</pre>
     <p class="r-fu-outcome">Read-path cutover landed (merge 4f37803a; commits 84719e86, c6bd321a, 4c1e32f4, aaee7705). Equivalence exact: 3395 reads over 76 channels x every block endpoint/interior/boundary/gap, zero mismatches, float ==; five refused off-ladder blocks byte-identical to prior behaviour. Constants deleted or thinned to document-backed loaders; JSON block table removed (banked under tests/calibrate/data/). Full suite 4170/0. Behavioural edges held: promoted gains never applied on read path (reader scoped to acquisition_scale, test-pinned); flux 2pi stays a convention digit. Workflow gap queued: the acquisition sweep still promotes to JSON, needs a route into the YAML document.</p>
     </article>
-<article class="r-fu" data-id="f-dcs-003" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-07" data-recommends-skill="/reckon-ship diagnostic-correction-schema" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-dcs-003" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-07" data-recommends-skill="/reckon-ship diagnostic-correction-schema" data-resolved-at="2026-08-08T15:59:22+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Route the acquisition sweep&#x27;s promotion into the correction document, and decide whether the five promoted gains enter the applied chain</h4>
     <div class="r-fu-body">Two items the cutover surfaced. (1) nova/scripts/mast_acquisition_sweep.py still writes a JSON table via --promote-to; re-measuring blocks now needs a promotion route into nova/calibrate/corrections/mast/magnetics.yaml (set-version bump, provenance stamped). (2) The five promoted gains (obr17 0.5011, obv04, obr05, obv05, ccbv35) are recorded but never applied on the read path; promoting them into the arithmetic rescales downstream fits and is an owner decision with its own evidence, pinned today by test_the_read_path_divides_by_no_promoted_gain.</div>
     <pre class="r-fu-prompt">Project: nova
@@ -234,6 +244,7 @@ Done-when
   2. Gain-application decision surfaced to the owner; implemented only if
      locked, with the bench shift quantified
   3. Followup written into plan + this one resolved</pre>
+    <p class="r-fu-outcome">Owner decision locked 2026-08-08 (decision promoted-gains-applied): the five promoted gains ENTER the applied chain — the read path applies every promoted kind in ApplicationStage order behind a single-door corrected reader, with the vacuum-floor bench re-run to quantify the shift before the pinning test flips. Both items (the sweep's promotion route into magnetics.yaml, and gain application) are now owned by the mast-corrected-read-layer plan §3, which blocks mast-catalog-gpu-solve.</p>
     </article>
 <article class="r-fu" data-id="f-dcs-004" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-08" data-recommends-skill="/reckon-edit diagnostic-correction-schema" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Give drift curvature its own schema slot</h4>

@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="mast-corrected-read-layer">
+  <meta name="plan-title"     content="MAST Corrected Read Layer">
+  <meta name="plan-summary"   content="Every sensor read passes through the correction chain: one door into the MAST field store, the full promoted correction set applied in schema stage order at read time, on-disk data untouched, raw access surviving only as one explicit named object">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort"    content="M">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="general">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint"    content="S6">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-depends-on" content="diagnostic-correction-schema">
+  <meta name="plan-blocks"    content="mast-catalog-gpu-solve">
+  <title>MAST Corrected Read Layer | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Objective</h2>
+    <p><strong>Make corrected reads a property of the architecture, not a habit of the
+    caller.</strong> The diagnostic-correction machinery is landed and proven: the LinkML schema,
+    the MAST instance (128 corrections over 76 probe channels), and the application engine in
+    <code>nova/calibrate/corrections.py</code> all shipped, and the acquisition-scale cutover was
+    proven float-equal on 3,395 reads before the legacy table was deleted. But the goal the
+    machinery exists for — <em>transforms always robustly applied, without changing on-disk
+    data</em> — fails today for three independent reasons, none of them performance
+    (the engine costs ~0.9&nbsp;ms/shot after a one-time ~117&nbsp;ms document load):</p>
+    <ol>
+      <li><strong>Only one correction kind is wired.</strong> The MAST read path draws
+      <code>kinds=(acquisition_scale,)</code> alone
+      (<code>nova/imas/mast_block_scale.py:762</code>). The five promoted gains, the pair states,
+      and the exclusions in the same document change nothing on any read — and
+      <code>test_the_read_path_divides_by_no_promoted_gain</code> pins the gains <em>out</em>,
+      contradicting the schema's own definition of <code>promoted</code> ("measured, corroborated,
+      and applied by the read path").</li>
+      <li><strong>Application is opt-out.</strong> The three correcting functions each take a
+      <code>block_scale</code> keyword that silently disables correction when handed a bare
+      table.</li>
+      <li><strong>Nine-plus direct zarr doors bypass the layer.</strong> Worst case,
+      <code>nova/imas/mast_flux_loop_adjudication.py</code> calls the corrected reader and then
+      re-opens the same group raw four times (lines 807, 919, 1051, 1120). Today those channels
+      carry no correction so the numbers agree — promote one flux-loop gain and the four sites
+      silently serve raw data.</li>
+    </ol>
+    <p>This plan is routing and enforcement, not new machinery — and it is the data-side
+    prerequisite of <code>mast-catalog-gpu-solve</code>, whose ingest stage must stream
+    <em>corrected</em> solve inputs.</p>
+
+    <h2 id="s2">§2 — Design: one door, full chain, explicit raw</h2>
+    <figure>
+      <svg viewBox="0 0 880 320" role="img" style="max-width:100%;height:auto;font-family:system-ui">
+        <text x="440" y="22" text-anchor="middle" font-size="14" font-weight="600" fill="#111">Single-door corrected read architecture</text>
+        <!-- store -->
+        <rect x="20" y="120" width="170" height="70" fill="none" stroke="#555" stroke-width="1"/>
+        <text x="105" y="147" text-anchor="middle" font-size="12.5" fill="#111">MAST L1 zarr store</text>
+        <text x="105" y="164" text-anchor="middle" font-size="10.5" fill="#555">amc · amb · amm · efm</text>
+        <text x="105" y="180" text-anchor="middle" font-size="10.5" fill="#555">(never modified)</text>
+        <!-- door -->
+        <rect x="250" y="105" width="200" height="100" fill="none" stroke="#0a6" stroke-width="1.5"/>
+        <text x="350" y="130" text-anchor="middle" font-size="12.5" font-weight="600" fill="#111">read_shot_waveforms</text>
+        <text x="350" y="147" text-anchor="middle" font-size="10.5" fill="#555">the only entry to amb</text>
+        <text x="350" y="166" text-anchor="middle" font-size="10.5" fill="#111">correction chain, stage order:</text>
+        <text x="350" y="182" text-anchor="middle" font-size="10.5" fill="#555">offset → drift → acq_scale →</text>
+        <text x="350" y="196" text-anchor="middle" font-size="10.5" fill="#555">pair_state → gain → convention</text>
+        <!-- document -->
+        <rect x="250" y="240" width="200" height="56" fill="none" stroke="#555" stroke-width="1"/>
+        <text x="350" y="262" text-anchor="middle" font-size="11.5" fill="#111">corrections/mast/magnetics.yaml</text>
+        <text x="350" y="279" text-anchor="middle" font-size="10.5" fill="#555">indexed by (channel, kind) at load</text>
+        <line x1="350" y1="240" x2="350" y2="205" stroke="#555" stroke-width="1"/>
+        <!-- consumers -->
+        <rect x="520" y="60" width="180" height="44" fill="none" stroke="#555" stroke-width="1"/>
+        <text x="610" y="79" text-anchor="middle" font-size="11.5" fill="#111">vacuum cohort · solve inputs</text>
+        <text x="610" y="95" text-anchor="middle" font-size="10.5" fill="#555">error-field screen · flux loops</text>
+        <rect x="520" y="130" width="180" height="44" fill="none" stroke="#555" stroke-width="1"/>
+        <text x="610" y="149" text-anchor="middle" font-size="11.5" fill="#111">gpu-solve ingest shards</text>
+        <text x="610" y="165" text-anchor="middle" font-size="10.5" fill="#555">corrected by construction</text>
+        <rect x="520" y="200" width="180" height="44" fill="none" stroke="#b60" stroke-width="1"/>
+        <text x="610" y="219" text-anchor="middle" font-size="11.5" fill="#111">RawArchiveReader</text>
+        <text x="610" y="235" text-anchor="middle" font-size="10.5" fill="#555">explicit, named, opt-in</text>
+        <!-- arrows -->
+        <line x1="190" y1="155" x2="248" y2="155" stroke="#111" stroke-width="1"/>
+        <polygon points="248,155 240,151 240,159" fill="#111"/>
+        <line x1="450" y1="130" x2="518" y2="90" stroke="#111" stroke-width="1"/>
+        <polygon points="518,90 509,90 512,97" fill="#111"/>
+        <line x1="450" y1="155" x2="518" y2="152" stroke="#111" stroke-width="1"/>
+        <polygon points="518,152 510,148 510,156" fill="#111"/>
+        <line x1="190" y1="185" x2="518" y2="222" stroke="#b60" stroke-width="1" stroke-dasharray="4 3"/>
+        <polygon points="518,222 509,219 510,226" fill="#b60"/>
+        <!-- deleted doors -->
+        <text x="105" y="230" text-anchor="middle" font-size="10.5" fill="#b00">9+ direct zarr.open_group sites</text>
+        <text x="105" y="245" text-anchor="middle" font-size="10.5" fill="#b00">deleted (flux-loop adjudication ×4,</text>
+        <text x="105" y="260" text-anchor="middle" font-size="10.5" fill="#b00">solve inputs ×5, screen ×3, survey ×1)</text>
+      </svg>
+      <figcaption>All sensor reads funnel through <code>read_shot_waveforms</code>, which applies
+      the full promoted chain in schema <code>ApplicationStage</code> order. Raw access survives
+      as one explicit named object (dashed) — never as a silent default or a second door.</figcaption>
+    </figure>
+    <ul>
+      <li><strong>Single door:</strong> <code>read_shot_waveforms</code>
+      (<code>nova/imas/mast_vacuum_cohort.py:911</code>) is already the funnel for time base,
+      drives, plasma current, probe channels, provenance and window masking, and already returns
+      <code>scale_corrections</code> beside the data. Every other <code>zarr.open_group</code>
+      site on the sensor groups is deleted and re-routed through it.</li>
+      <li><strong>Full promoted chain:</strong> widen the chain from
+      <code>kinds=(acquisition_scale,)</code> to every promoted kind in
+      <code>ApplicationStage</code> order (the order is a schema property mirrored by
+      <code>APPLICATION_ORDER</code> with an agreement test). The five gains enter the arithmetic
+      per the locked <code>promoted-gains-applied</code> decision in
+      diagnostic-correction-schema; the vacuum-floor bench re-runs to quantify the shift before
+      the pinning test flips.</li>
+      <li><strong>Disposition semantics preserved:</strong> refused and unmeasured channels come
+      back untouched — never divided by 1.0 — and the
+      MEASURED / BRACKETED / REFUSED / UNMEASURED disposition (plus
+      <code>CorrectionChain.extrapolated</code>) states whether a correction happened. Exclusions
+      and <code>indeterminate</code> channels keep their refuse-unless-resolved contract.</li>
+      <li><strong>Raw stays explicit:</strong> the read-as-published path survives as one named
+      object (the pattern <code>mast_acquisition_sweep.py</code> already uses), so calibration
+      tooling that must see the archive raw says so in its own name — no silent
+      <code>None</code>-default kwarg.</li>
+      <li><strong>Performant on the hot path:</strong> index the document by
+      <code>(channel, kind)</code> once at load. Today's chain build is a linear scan over all
+      128 corrections per channel (~9,700 record visits per shot); a full-archive sweep of
+      17,000 shots costs ~16&nbsp;s of pure chain building that the index collapses to
+      near-constant per channel. On-disk data is never rewritten; correction is a pure function
+      of (document version, channel, pulse, time).</li>
+    </ul>
+
+    <h2 id="s3">§3 — Work items</h2>
+    <ol>
+      <li><strong>Index + widen the chain.</strong> (channel, kind) index at document load;
+      chain widened to all promoted kinds in stage order behind
+      <code>CorrectionSetScales</code>' successor; vacuum-floor bench re-run recorded with the
+      before/after shift; <code>test_the_read_path_divides_by_no_promoted_gain</code> replaced by
+      a test asserting the full promoted chain IS applied (the equivalence-first cutover
+      discipline from the schema plan applies: prove, then flip).</li>
+      <li><strong>Close the doors.</strong> Delete the direct sensor-group reads in
+      <code>mast_flux_loop_adjudication.py</code> (4), <code>mast_solve_inputs.py</code> (5
+      uncorrected), <code>mast_error_field_screen.py</code> (3), and the
+      <code>survey_shot</code> path; route each through the single door; introduce the explicit
+      raw reader object and migrate <code>mast_acquisition_sweep.py</code> onto it. A guard test
+      greps/imports for sensor-group <code>zarr.open_group</code> outside the door module so a
+      new bypass fails CI.</li>
+      <li><strong>Promotion route.</strong> <code>mast_acquisition_sweep.py --promote-to</code>
+      writes into <code>nova/calibrate/corrections/mast/magnetics.yaml</code> (set-version bump,
+      provenance stamped) instead of a JSON table — the first half of the schema plan's
+      f-dcs-003.</li>
+      <li><strong>Corrected ingest seam.</strong> Expose the corrected read as the documented
+      input contract for <code>mast-catalog-gpu-solve</code>'s solve-ready shard staging
+      (kB/slice: coil currents, sensor signals, Ip), so the GPU catalog inherits corrections by
+      construction.</li>
+    </ol>
+    <p><em>Done-when:</em> every sensor read in the repo passes through the door (guard test
+    enforcing it); the full promoted chain applies with the gains' downstream shift quantified
+    and banked; the sweep promotes into the document; raw access exists only as the named
+    explicit object; full suite green.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="read-guarantee" data-choice="single-door-full-chain"
+           data-by="Simon McIntosh" data-when="2026-08-08T15:50:00+00:00">
+        <p class="r-dec-q">How is the corrected-read guarantee built, and do the five promoted
+        gains enter the applied chain?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="single-door-full-chain">single door + full promoted chain (gains applied)</button>
+          <button class="r-opt" data-value="single-door-scales-only">single door, scales only (demote gains)</button>
+          <button class="r-opt" data-value="defer-to-calibrate-package">defer to nova-calibrate-package</button>
+        </p>
+        <p class="r-dec-rat">User selection 2026-08-08: make read_shot_waveforms the only entry
+        to the sensor store, apply ALL promoted kinds in schema stage order — including the five
+        gains, re-running the vacuum-floor bench to quantify the shift — index the document by
+        (channel, kind), and keep raw access as one explicit named object. Mirrors the
+        promoted-gains-applied lock in diagnostic-correction-schema.</p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-mcrl-001" data-status="open"
+               data-capability-version="1.0" data-capability-class="general"
+               data-capability-reasoning="deep" data-capability-verification="strict"
+               data-written-by="reckon-create" data-written-at="2026-08-08">
+        <h4 class="r-fu-title">Land the single-door corrected reader (§3 items 1–2)</h4>
+        <div class="r-fu-body"><p>The engine and document are shipped; this rung wires the
+        guarantee: (channel, kind) index, full promoted chain in stage order with the
+        vacuum-floor bench shift banked, direct zarr doors deleted behind the
+        read_shot_waveforms funnel, raw access as one explicit named object, and a guard test
+        that fails on any new bypass.</p></div>
+        <pre class="r-fu-prompt">Project: nova
+Plan:    mast-corrected-read-layer (http://127.0.0.1:8765/nova/mast-corrected-read-layer.html)
+Section: §3 items 1–2
+Capability: general
+Requirements: deep reasoning, strict verification
+
+Context
+  The correction engine (nova/calibrate/corrections.py) and MAST document
+  (nova/calibrate/corrections/mast/magnetics.yaml) are shipped and proven;
+  the read path applies only acquisition_scale and 9+ direct zarr reads
+  bypass the layer. This rung converts applied-by-default into
+  applied-by-construction.
+
+State to read
+  nova/calibrate/corrections.py + correction_set.py (engine, APPLICATION_ORDER)
+  nova/imas/mast_block_scale.py:658-770 (CorrectionSetScales; the kinds narrowing)
+  nova/imas/mast_vacuum_cohort.py:911 (read_shot_waveforms, the door)
+  nova/imas/mast_flux_loop_adjudication.py:807,919,1051,1120 (doors to delete)
+  nova/imas/mast_solve_inputs.py, mast_error_field_screen.py (remaining doors)
+  tests/calibrate/test_read_path_equivalence.py (cutover bench + the pinning test)
+
+Scope locks / constraints
+  On-disk zarr is never modified. Refused/unmeasured channels return untouched
+  (never x1.0) with disposition reporting. Equivalence-first cutover: prove the
+  widened chain on the bench BEFORE flipping test_the_read_path_divides_by_no_
+  promoted_gain. Re-run the vacuum-floor bench and bank the before/after shift
+  as evidence. Raw access survives as ONE explicit named object.
+
+Done-when
+  1. (channel, kind) index at load; full promoted chain applied in stage order.
+  2. Zero sensor-group zarr.open_group sites outside the door module; guard
+     test enforcing it; explicit raw reader object in place.
+  3. Vacuum-floor bench shift recorded; full suite green; followup for §3
+     items 3-4 written; this followup resolved.</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

@@ -11,6 +11,16 @@ from nova.biot.data import Data
 from nova.frame.framesetloc import ArrayLocIndexer
 
 
+# stated here rather than imported so the numpy operator stands alone when the
+# jax extra is absent; the jitted operator raises the same condition.
+MISSING_FORCE_INDEX = (
+    "A Force operator scales its interaction by the source current at index, "
+    "so the index is required: none was passed and the dataset carries no "
+    "index variable. Indexing with a missing index inserts an axis instead of "
+    "selecting a gain, which returns a silently wrong result."
+)
+
+
 @dataclass
 class NumpyOperator:
     """Fast array opperations for Biot Data arrays."""
@@ -25,8 +35,12 @@ class NumpyOperator:
         """Extract matrix, plasma_matrices, and plasma indicies from dataset."""
         attr = list(dataset.data_vars)[0]
         self.source_target = dataset[attr].data
+        # attrs, not attribute access: a data_var or coord of the same name
+        # would shadow the dataset attribute it resolves to.
         self.source_plasma_index = dataset.attrs["source_plasma_index"]
         self.target_plasma_index = dataset.attrs["target_plasma_index"]
+        if self.classname == "Force" and np.asarray(self.index).size == 0:
+            raise ValueError(MISSING_FORCE_INDEX)
         if source_plasma := self.source_plasma_index != -1:
             self.plasma_target = dataset[f"{attr}_"].data
         if target_plasma := self.target_plasma_index != -1:
@@ -158,7 +172,7 @@ class Operate(Data):
         if isinstance(self.attrs, str):
             self.attrs = [self.attrs]
         self.index = self.data.get("index", xarray.DataArray([])).data
-        self.classname = self.data.classname
+        self.classname = self.data.attrs["classname"]
         self.number = self.data.sizes["target"]
         for attr in np.array(self.attrs):
             attrs = [

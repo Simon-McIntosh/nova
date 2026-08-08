@@ -12,6 +12,14 @@ from nova.frame.framesetloc import ArrayLocIndexer
 from nova.jax.tree_util import Pytree
 
 
+MISSING_FORCE_INDEX = (
+    "A Force operator scales its interaction by the source current at index, "
+    "so the index is required: none was passed and the dataset carries no "
+    "index variable. Indexing with a missing index inserts an axis instead of "
+    "selecting a gain, which returns a silently wrong result."
+)
+
+
 class MatrixData(NamedTuple):
     """EM coupling data for jax backed computations."""
 
@@ -46,7 +54,9 @@ class Operator(Pytree):
         """Return source-target interaction."""
         result = source_target @ source_current
         if self.classname == "Force":
-            return source_current[self.matrix_data.force_index] * result
+            if (force_index := self.matrix_data.force_index) is None:
+                raise ValueError(MISSING_FORCE_INDEX)
+            return source_current[force_index] * result
         return result
 
     @jax.jit
@@ -92,27 +102,49 @@ class Operators:
     """Generate EM coupling matricies."""
 
     data: xarray.Dataset = field(repr=False)
+    index: np.ndarray | None = None
+
+    def force_index(self, classname: str) -> jnp.ndarray | None:
+        """Return the source-current index a Force operator applies as a gain.
+
+        Only the Force interaction reads an index, so every other classname
+        returns None. The caller's index takes precedence; when none is passed
+        the index is read from the dataset. An absent index raises rather than
+        leaving a Force operator to index with None.
+        """
+        if classname != "Force":
+            return None
+        index = self.index
+        if index is None:
+            index = self.data.get("index", xarray.DataArray([])).data
+        if np.asarray(index).size == 0:
+            raise ValueError(MISSING_FORCE_INDEX)
+        return jnp.asarray(index)
 
     def __getitem__(self, attr: str) -> Operator:
         """Retrun jax Operator instance."""
+        # attrs, not attribute access: a data_var or coord of the same name
+        # would shadow the dataset attribute it resolves to.
+        source_plasma_index = self.data.attrs["source_plasma_index"]
+        target_plasma_index = self.data.attrs["target_plasma_index"]
+        classname = self.data.attrs["classname"]
+
         plasma_dataset = {}
-        if source_plasma := self.data.source_plasma_index != -1:
+        if source_plasma := source_plasma_index != -1:
             plasma_dataset["plasma_target"] = jnp.array(self.data[f"{attr}_"])
-        if target_plasma := self.data.target_plasma_index != -1:
+        if target_plasma := target_plasma_index != -1:
             plasma_dataset["source_plasma"] = jnp.array(self.data[f"_{attr}"])
         if source_plasma and target_plasma:
             plasma_dataset["plasma_plasma"] = jnp.array(self.data[f"_{attr}_"])
-        try:
-            plasma_dataset["force_index"] = jnp.array(self.data["index"])
-        except KeyError:
-            pass
+        if (force_index := self.force_index(classname)) is not None:
+            plasma_dataset["force_index"] = force_index
 
         return Operator(
             jnp.array(self.data[attr]),
             MatrixData(**plasma_dataset),
-            self.data.source_plasma_index,
-            self.data.target_plasma_index,
-            self.data.classname,
+            source_plasma_index,
+            target_plasma_index,
+            classname,
         )
 
 
@@ -138,7 +170,9 @@ class BiotOperator:
     def __post_init__(self, dataset):
         """Build the jitted operator and link the mutable source-target."""
         attr = list(dataset.data_vars)[0]
-        self._operator = Operators(dataset)[attr]
+        # the caller's index is the Force gain, so the jitted and the numpy
+        # operator scale by the same array rather than by separate lookups.
+        self._operator = Operators(dataset, self.index)[attr]
         self.source_plasma_index = self._operator.source_plasma_index
         self.target_plasma_index = self._operator.target_plasma_index
         # source_target stays a live view into the dataset array so a plasma-turn

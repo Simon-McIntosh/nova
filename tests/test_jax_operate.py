@@ -23,6 +23,18 @@ def cached_plasmagrid():
     return coilset.plasmagrid
 
 
+@pytest.fixture(scope="module")
+def cached_force():
+    """Return a solved CoilSet force instance carrying a Force operator."""
+    from nova.frame.coilset import CoilSet
+
+    coilset = CoilSet(dcoil=-5, tcoil="hex")
+    coilset.coil.insert(8, 0, 0.75, 0.75, Ic=5e6)
+    coilset.coil.insert(6, 1.2, 0.5, 0.5, Ic=3e6)
+    coilset.force.solve(-2)
+    return coilset.force
+
+
 def test_jitted_evaluate_matches_numpy(cached_plasmagrid):
     """Jitted source-target evaluate agrees with the numpy operator."""
     pg = cached_plasmagrid
@@ -173,6 +185,103 @@ def test_numpy_fallback_is_drop_in(cached_plasmagrid):
     assert np.allclose(
         jitted.source_target, cached_plasmagrid.data["Psi"].data, atol=1e-12
     )
+
+
+def test_force_index_gain_agrees_across_implementations(cached_force):
+    """Both implementations scale a Force interaction by the same indexed gain."""
+    numpy_operator, jitted = _numpy_and_jitted(cached_force, "Fr")
+    index = np.asarray(cached_force.index)
+    source_current = np.asarray(cached_force.saloc["Ic"])
+    reference = source_current[index] * (numpy_operator.source_target @ source_current)
+
+    assert reference.shape == index.shape
+    assert np.allclose(numpy_operator.evaluate(), reference, rtol=1e-10)
+    # the jitted path evaluates in single precision
+    assert np.allclose(jitted.evaluate(), reference, rtol=1e-6)
+
+
+def test_force_index_is_wired_only_for_the_force_interaction(
+    cached_force, cached_plasmagrid
+):
+    """Only the classname that reads an index gain is given one."""
+    assert Operators(cached_force.data)["Fr"].matrix_data.force_index is not None
+    assert Operators(cached_plasmagrid.data)["Psi"].matrix_data.force_index is None
+
+
+def _force_dataset_without_index(force, attr="Fr"):
+    """Return a Force coupling subset stripped of its index variable."""
+    names = [
+        name
+        for name in (attr, f"_{attr}", f"{attr}_", f"_{attr}_")
+        if name in force.data
+    ]
+    dataset = force.data[names]
+    assert "index" in dataset  # the stripping below is otherwise vacuous
+    return dataset.drop_vars("index")
+
+
+@pytest.mark.parametrize("operator_class", ["numpy", "jitted"])
+def test_force_without_an_index_raises(cached_force, operator_class):
+    """A Force operator built without its index gain fails loudly."""
+    from nova.biot.operate import NumpyOperator
+
+    dataset = _force_dataset_without_index(cached_force)
+    build = {"numpy": NumpyOperator, "jitted": BiotOperator}[operator_class]
+    with pytest.raises(ValueError, match="Force operator"):
+        build(
+            cached_force.aloc,
+            cached_force.saloc,
+            "Force",
+            np.array([]),
+            dataset,
+        )
+
+
+def test_force_dataset_lookup_without_an_index_raises(cached_force):
+    """The dataset-sourced index is required too, not silently skipped."""
+    dataset = _force_dataset_without_index(cached_force)
+    with pytest.raises(ValueError, match="Force operator"):
+        Operators(dataset)["Fr"]
+
+
+def test_force_gain_is_not_a_silent_axis_insertion():
+    """Indexing with a missing gain would insert an axis, so it must raise.
+
+    A square source-target matrix broadcasts against the inserted axis, which
+    returns a full-length current as the gain instead of the indexed one.
+    """
+    rng = np.random.default_rng(2)
+    source_target = rng.standard_normal((4, 4))
+    source_current = rng.standard_normal(4)
+
+    operator = Operator(jnp.asarray(source_target), MatrixData(), classname="Force")
+    with pytest.raises(ValueError, match="Force operator"):
+        operator.evaluate(operator.source_target, jnp.asarray(source_current))
+
+
+@pytest.mark.parametrize(
+    "index_name", ["source_plasma_index", "target_plasma_index", "classname"]
+)
+def test_plasma_indices_read_the_dataset_attributes(cached_plasmagrid, index_name):
+    """A variable of the same name must not shadow the dataset attribute."""
+    from nova.biot.operate import NumpyOperator
+
+    pg = cached_plasmagrid
+    names = [name for name in ("Psi", "_Psi", "Psi_", "_Psi_") if name in pg.data]
+    decoy = "Force" if index_name == "classname" else -99
+    dataset = pg.data[names].assign_coords({index_name: decoy})
+    # attribute access resolves the decoy variable, plain attrs the true value
+    assert np.asarray(getattr(dataset, index_name)) == decoy
+    expected = pg.data.attrs[index_name]
+    assert expected != decoy
+
+    args = (pg.aloc, pg.saloc, pg.classname, pg.index, dataset)
+    numpy_operator, jitted = NumpyOperator(*args), BiotOperator(*args)
+    for operator in (numpy_operator, jitted):
+        if index_name != "classname":
+            assert getattr(operator, index_name) == expected
+    assert jitted._operator.classname == pg.data.attrs["classname"]
+    assert np.allclose(numpy_operator.evaluate(), jitted.evaluate(), atol=1e-10)
 
 
 def test_version_counter_gates_reevaluation():

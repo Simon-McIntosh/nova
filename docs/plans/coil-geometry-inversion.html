@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-08">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 <meta name="plan-impl" content="0.4">
 </head>
 <body>
@@ -85,10 +85,19 @@
     (P4 upper) marginalised, tilt/dilation unresolvable (15–180 mm). The near-field probe cut
     costs ×3.2–17.3 in best-mode resolution — the geometry information lives in the near
     probes, so the solve keeps them and drives the 23-cell lattice rather than excluding them
-    for the hull-smear trap. The 18 admitted flux loops buy essentially nothing for geometry
-    (0.2–2.3% of the probes' whitened signal; 63–87 vs 1,630–18,500 per channel) — the
-    inverse of their value to the harmonics fit, where they attack the coil-span rank
-    deficiency. Banked: <code>~/.cache/nova-mast/geometry-identifiability/</code>.</li>
+    for the hull-smear trap — any spectrum quoted without that cut is not evidence. The 18
+    admitted flux loops carry 20–290× less geometry signal per channel than a probe (flux is
+    a smoother functional of pack shape than field); they buy two extra affine modes inside
+    10 mm and lift the degenerate tilt/dilation directions up to 40× by breaking the
+    geometry/current degeneracy — worth having, changes no verdict. Marginalising the 13
+    described current freedoms costs roughly half the resolved modes and is the honest bound
+    a solve may claim. The discrete chamfer branch is decisively discriminable on every
+    member (57–621 noise units) — settled, not a freedom to solve. Standing kernel
+    constraint for any solve: a zero-weight flat edge carries no derivative, so tilt/shear
+    Jacobians are taken at mirrored small tilts and averaged
+    (<code>FLAT_EDGE_TILT</code>, regression-pinned) — bypassing it silently corrupts
+    tilt/shear gradients 5–26×. Banked:
+    <code>~/.cache/nova-mast/geometry-identifiability/</code>.</li>
     <li><strong>Problem class A — sensor-space (the MAST case).</strong> Recorded currents
     fixed; minimise the weighted misfit between measured vacuum couplings and modelled
     couplings over geometry parameters, per coil and jointly. The banked signed couplings

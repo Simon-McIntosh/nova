@@ -12,7 +12,12 @@ These run on plain numpy arrays with no frame machinery.  They pin:
   quotients is what separates a discontinuity from the field's own slope;
 * far-field agreement of the finite-area rectangle kernel with the point
   circular-loop kernel;
-* psi<->B consistency of the point-loop kernel (Jackson forms).
+* psi<->B consistency of the point-loop kernel (Jackson forms);
+* agreement of each kernel's numpy form with its ``xp``-threaded twin driven
+  under numpy -- the two reach the complete elliptic integrals and the ``zeta``
+  quadrature by different routines, so the pin is what keeps the trace and the
+  host one physics, and it carries the ``k^2 -> 1`` corner and the exact place
+  the two conventions genuinely part.
 """
 
 from __future__ import annotations
@@ -26,6 +31,9 @@ from nova.biot.greens import (
     cylinder_greens,
     greens_bz_br,
     greens_psi,
+    traced_corner_fields,
+    traced_cylinder_greens,
+    traced_filament_greens,
 )
 from nova.biot.zeta import zeta
 
@@ -806,3 +814,139 @@ def test_one_ulp_off_the_filament_is_finite_at_every_ring_radius():
         # the flux of a loop against itself one ulp away is 2 mu0 a log(8a/d)-ish:
         # bounded by the ring's own scale rather than by a floor
         assert 1e-5 < psi[0] / radius < 1e-3
+
+
+# --- the two routes to the same kernel --------------------------------
+
+_TWIN_RING = (6.2, 0.0)
+_TWIN_SECTION = (6.2, 0.0, 0.1, 0.08)
+
+
+def _spiral(offsets):
+    """Return targets at the given distances from the ring point, one per angle.
+
+    A spiral rather than a radial line: the two field brackets cancel
+    differently above the ring, beside it and in its own plane, so a radial
+    sweep would report one of the three and call it the kernel.
+    """
+    angle = np.linspace(0.0, 8.0 * np.pi, offsets.size)
+    radius = _TWIN_RING[0] + offsets * np.cos(angle)
+    return radius, _TWIN_RING[1] + offsets * np.sin(angle)
+
+
+def _set_deviation(one, other):
+    """Return the largest ``|one - other|`` over the largest magnitude in the set.
+
+    Set-normalised, not element-wise: ``B_Z`` changes sign inside a wide sweep
+    and ``B_R`` is identically zero in the ring's own plane, so an element-wise
+    ratio measures where the zero sits rather than what the two routes did.
+    """
+    one, other = np.asarray(one, dtype=float), np.asarray(other, dtype=float)
+    scale = np.abs(other).max()
+    return 0.0 if scale == 0.0 else float((np.abs(one - other) / scale).max())
+
+
+def test_the_point_filament_routes_agree_including_the_coincident_limit():
+    """Cephes and the Bulirsch descent give the same filament, to round-off.
+
+    The two forms of the point loop reach ``K`` and ``E`` by different routines
+    -- ``scipy.special.ellipkm1``/``ellipe`` against the complement-native
+    descent -- and this pins that the choice is a COST one and not a physics
+    one, so neither can be tuned without the other noticing.
+
+    The corner that decides it is ``k^2 -> 1``, a nanometre off a 6.2 m ring,
+    where the complement runs to 1e-20 and the first kind grows like
+    ``-log k'``: it is the configuration a self-coupling read and a plasma cell
+    landing on a conductor both reach, and the one where a route that formed the
+    parameter instead would have nothing left.
+    """
+    for offsets in (
+        np.geomspace(1e-9, 1e-2, 400),  # k^2 -> 1: complement 1e-20 to 1e-6
+        np.geomspace(1e-2, 1.0, 400),  # the hand-over band of a section kernel
+        np.geomspace(1.0, 5.0, 400),  # diagnostic loops, the far side
+    ):
+        target_r, target_z = _spiral(offsets)
+        host_psi = greens_psi(target_r, target_z, *_TWIN_RING)
+        host_bz, host_br = greens_bz_br(target_r, target_z, *_TWIN_RING)
+        psi, br, bz = traced_filament_greens(np, target_r, target_z, *_TWIN_RING)
+        assert _set_deviation(psi, host_psi) < 1e-14
+        assert _set_deviation(bz, host_bz) < 1e-14
+        assert _set_deviation(br, host_br) < 1e-14
+
+
+def test_the_point_filament_routes_agree_in_the_ring_plane():
+    """The plane where both field brackets cancel hardest and ``B_R`` vanishes."""
+    target_r = _TWIN_RING[0] + np.geomspace(1e-6, 12.0, 400)
+    target_z = np.full(target_r.shape, _TWIN_RING[1])
+    host_psi = greens_psi(target_r, target_z, *_TWIN_RING)
+    host_bz, host_br = greens_bz_br(target_r, target_z, *_TWIN_RING)
+    psi, br, bz = traced_filament_greens(np, target_r, target_z, *_TWIN_RING)
+    assert _set_deviation(psi, host_psi) < 1e-14
+    assert _set_deviation(bz, host_bz) < 1e-14
+    np.testing.assert_array_equal(br, host_br)
+
+
+def test_the_two_routes_part_only_on_the_filament_itself():
+    """One ulp off, they agree; ON it, the divergence and the finite part differ.
+
+    The descent returns the first kind's FINITE PART at a zero complement, which
+    the section reduction needs -- its total weight on the divergence is zero --
+    and which for a bare loop arrives as a small NEGATIVE flux.  The point form
+    returns the divergence instead.  Both conventions are defensible and they
+    are not interchangeable: an infinity is checkable and a plausible negative
+    number is not, so this pins which form carries which rather than letting one
+    be quietly conformed to the other.
+    """
+    for radius in (0.9, 1.0, 6.2, 12.0):
+        adjacent = np.array([np.nextafter(radius, np.inf)])
+        level = np.array([0.0])
+        host_psi = greens_psi(adjacent, level, radius, 0.0)
+        host_bz, _ = greens_bz_br(adjacent, level, radius, 0.0)
+        psi, _, bz = traced_filament_greens(np, adjacent, level, radius, 0.0)
+        assert abs(psi[0] - host_psi[0]) < 1e-14 * abs(host_psi[0])
+        assert abs(bz[0] - host_bz[0]) < 1e-14 * abs(host_bz[0])
+
+        on_source = np.array([radius])
+        with np.errstate(divide="ignore", invalid="ignore"):
+            assert greens_psi(on_source, level, radius, 0.0)[0] == np.inf
+            finite_part = traced_filament_greens(np, on_source, level, radius, 0.0)[0]
+        assert np.isfinite(finite_part[0]) and finite_part[0] < 0.0
+
+
+def test_the_rectangular_section_routes_agree_through_the_quadrature_switch():
+    """The two section forms differ only in the ``zeta`` rule, and not in the answer.
+
+    Both reach all three complete kinds through the same descent, so what is
+    pinned here is the quadrature: the host routes each element between a
+    48-node Gauss-Legendre rule and a 177-node tanh-sinh one, the traced form
+    takes tanh-sinh throughout.  ``corner_plane`` sweeps a target through a
+    corner's own level and so crosses the switch, which is the only place the
+    two rules can disagree; the four-corner combination differences four corner
+    values against each other, so it is carried alongside the bare corner
+    antiderivative in case that cancellation amplifies a per-corner difference.
+    """
+    a, z0, da, dz = _TWIN_SECTION
+    grid = np.meshgrid(
+        np.linspace(a - 0.4 * da, a + 0.4 * da, 20),
+        np.linspace(z0 - 0.4 * dz, z0 + 0.4 * dz, 20),
+    )
+    gap = np.geomspace(1.0, 1e-9, 200)
+    regimes = {
+        "inside": tuple(axis.ravel() for axis in grid),
+        "corner_plane": (
+            np.full(2 * gap.size, a + 0.3 * da),
+            z0 + dz / 2.0 + np.concatenate([gap, -gap]) * da,
+        ),
+        "near": _spiral(np.geomspace(0.6 * da, 4.0 * da, 400)),
+        "standoff": _spiral(np.geomspace(1.0, 5.0, 400)),
+    }
+    for target_r, target_z in regimes.values():
+        host = cylinder_greens(target_r, target_z, a, z0, da, dz)
+        traced = traced_cylinder_greens(np, target_r, target_z, a, z0, da, dz)
+        for one, other in zip(traced, host):
+            assert _set_deviation(one, other) < 2e-12
+
+        stacks = _corner_stacks(a, z0, da, dz, target_r, target_z)
+        host_corner = corner_fields(*stacks)
+        for one, other in zip(traced_corner_fields(np, *stacks), host_corner):
+            assert _set_deviation(one, other) < 1e-14

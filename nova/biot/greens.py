@@ -39,6 +39,50 @@ total conductor current:
 
 with A the cross-section area.  The far-field limit of ``cylinder_greens``
 matches the point-filament ``greens_psi``/``greens_bz_br`` (pinned by test).
+
+Why each kernel keeps a host form beside its ``xp``-threaded twin
+(:func:`traced_filament_greens`, :func:`traced_corner_fields`,
+:func:`traced_cylinder_greens`).  The twins run under numpy as readily as under
+a tracer, so the question of whether the host forms earn their place is a
+measurable one; measured (``benchmarks/greens_elliptic_route.py``), they do, on
+cost and on one point of semantics.  The pairs differ in exactly two places,
+and both differences are what being traceable costs:
+
+* the point filament takes ``K`` and ``E`` from Cephes
+  (``scipy.special.ellipkm1``/``ellipe``) where the twin takes them from the
+  Bulirsch descent of :mod:`nova.biot.completeelliptic`.  The descent is what
+  makes the twin differentiable -- fixed trip count, no data-dependent branch --
+  and for those two kinds it costs 6 to 50 times the Cephes pair per element.
+  Only the first two kinds are a choice: scipy carries no complete THIRD kind,
+  and the Carlson forms it does carry lose the arrangement the section reduction
+  needs (see :mod:`nova.biot.completeelliptic`), so the corner antiderivative
+  below takes all three kinds from the descent on BOTH routes -- which is why
+  this cost difference is the point form's alone.  End to end the filament twin
+  runs 1.9 to 3.9 times the host over 64 to 65536 targets;
+* the section kernels route ``zeta`` per element between a 48-node
+  Gauss-Legendre rule and a 177-node tanh-sinh one, where the twin takes
+  tanh-sinh unconditionally because a trace would otherwise evaluate both rules
+  and discard one.  Against adaptive quadrature both rules sit on round-off
+  across the whole switch, so the routing buys its 2.3 to 5.8 times cheaper
+  quadrature for nothing; the section twin runs 1.2 to 1.6 times the host.
+
+Off the filament the two routes agree to round-off -- 2e-15 of the regime's own
+scale for the point form and 2e-12 for the four-corner section rule, over
+targets from a nanometre off the filament out to the far side of the machine,
+pinned by ``tests/test_biotgreens.py``.  The one place they part is a target ON
+the filament, and it is not a tie: the host returns the divergence, ``inf``,
+while the descent returns the first kind's FINITE PART, which arrives as a small
+NEGATIVE flux.  A caller can test for an infinity; a plausible-looking negative
+number is the one wrong answer it cannot detect, so the point form keeps the
+divergence and the finite-part convention stays where the reduction that needs
+it -- the section corner, whose total weight on the divergence is zero -- is.
+
+Neither route rescues the small-``k^2`` bracket.  ``K - E`` is a difference of
+two numbers both near ``pi/2`` whose value is of order ``k^2``, so a target near
+the axis or many ring radii away loses digits at a rate set by the arrangement
+and not by where ``K`` and ``E`` came from: both routes stand at 1e-3 of the
+field scale by ``k^2 ~ 1e-9``, together, and the fix would be to split the pole
+off the bracket rather than to change the special function.
 """
 
 from __future__ import annotations

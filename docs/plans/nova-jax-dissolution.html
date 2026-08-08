@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="nova-jax-dissolution">
+  <meta name="plan-title" content="Dissolve the JAX Directory into the Domain Packages">
+  <meta name="plan-summary" content="nova/jax is the package&#x27;s only technology-organised directory and holds a subset of its JAX code; file each module by domain, pair each numpy implementation with its traced peer in one file, and make the traced path the default">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="mid">
+  <meta name="plan-effort" content="L">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-sprint" content="S7">
+  <meta name="plan-depends-on" content="nova-jax-hygiene">
+  <title>Dissolve the JAX Directory into the Domain Packages | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-08">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Finding: the directory does not hold nova's JAX code</h2>
+
+    <p>The hygiene audit (2026-08-08) established that the bulk of nova's JAX-traced
+    physics compute is <strong>not</strong> in <code>nova/jax/</code>. Roughly 6,750 lines
+    across ~14 modules in <code>nova/biot/</code> thread an <code>xp</code> array-namespace
+    parameter and run under both numpy and JAX; further traced compute lives in
+    <code>nova/equilibrium/profile.py</code>, <code>nova/transport/current_diffusion.py</code>,
+    <code>nova/biot/tiledassembly.py</code> and <code>nova/circuit/propagate.py</code>.
+    <code>nova/jax/</code> holds thirteen modules that happen to be JAX-<em>only</em>. The
+    directory name therefore promises a completeness it does not deliver.</p>
+
+    <p>That gap is not cosmetic — it actively attracts misfiled code. Two pure-numpy
+    modules had drifted in and were moved out during the hygiene sweep:
+    <code>wall_mask.py</code> (375 lines of numpy raster geometry, now
+    <code>nova/equilibrium/wall_mask.py</code>) and <code>equilibrium_labels.py</code>
+    (constants, now <code>nova/equilibrium/labels.py</code>). A directory named after a
+    library collects whatever sits near that library's stack, regardless of what it does.</p>
+
+    <p><code>nova/jax/</code> is also the package's <strong>only</strong> technology-organised
+    directory. Every other one — <code>biot</code>, <code>equilibrium</code>,
+    <code>transport</code>, <code>geometry</code>, <code>frame</code>, <code>circuit</code>,
+    <code>linalg</code> — is filed by what the code does. Filing by what it imports splits
+    four domain concepts across a seam, so a reader looking for "the operator" or "the
+    field-null code" finds half of it:</p>
+
+    <table>
+      <thead>
+        <tr><th>Concept</th><th>Domain half</th><th>Traced half</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>field nulls</td><td><code>nova/biot/fieldnull.py</code></td><td><code>nova/jax/fieldnull.py</code></td></tr>
+        <tr><td>biot operator</td><td><code>nova/biot/operate.py</code></td><td><code>nova/jax/operate.py</code></td></tr>
+        <tr><td>null selection</td><td><code>nova/geometry/select.py</code> (numba)</td><td><code>nova/jax/select.py</code></td></tr>
+        <tr><td>polynomial basis</td><td><code>nova/linalg/basis.py</code> (scipy)</td><td><code>nova/jax/basis.py</code></td></tr>
+      </tbody>
+    </table>
+
+    <p>The consumer census settles the direction. Eleven of thirteen modules are imported
+    from a domain package, and none of the thirteen is consumed by <code>nova/jax/</code>
+    as a coherent unit. Only two — <code>config.py</code> (the
+    <code>jax_enable_x64</code> owner) and <code>tree_util.py</code> (pytree registration)
+    — are genuine library support with no domain at all.</p>
+
+    <figure>
+      <svg viewBox="0 0 900 430" role="img" style="max-width:100%;height:auto;font-family:system-ui">
+        <text x="450" y="20" text-anchor="middle" font-size="14" font-weight="600" fill="#111">Where each module in nova/jax/ is consumed from</text>
+
+        <text x="150" y="52" text-anchor="middle" font-size="13" font-weight="600" fill="#111">nova/jax/ today</text>
+        <text x="640" y="52" text-anchor="middle" font-size="13" font-weight="600" fill="#111">consuming package → target home</text>
+
+        <!-- equilibrium group -->
+        <rect x="470" y="64" width="380" height="112" fill="none" stroke="#333" stroke-width="1"/>
+        <text x="480" y="80" font-size="12" font-weight="600" fill="#111">nova/equilibrium/</text>
+        <g font-size="12" fill="#111">
+          <text x="490" y="98">connectivity_boundary</text>
+          <text x="490" y="115">flux_surface_connectivity</text>
+          <text x="490" y="132">stencil_nulls</text>
+          <text x="490" y="149">fixed_point</text>
+          <text x="490" y="166">topology</text>
+        </g>
+
+        <!-- biot group -->
+        <rect x="470" y="188" width="380" height="95" fill="none" stroke="#333" stroke-width="1"/>
+        <text x="480" y="204" font-size="12" font-weight="600" fill="#111">nova/biot/</text>
+        <g font-size="12" fill="#111">
+          <text x="490" y="222">null</text>
+          <text x="490" y="239">target</text>
+          <text x="490" y="256">operate<tspan fill="#555" font-size="11">  — pairs with biot/operate.py</tspan></text>
+          <text x="490" y="273">fieldnull<tspan fill="#555" font-size="11">  — pairs with biot/fieldnull.py</tspan></text>
+        </g>
+
+        <!-- geometry / linalg -->
+        <rect x="470" y="295" width="380" height="58" fill="none" stroke="#333" stroke-width="1"/>
+        <text x="480" y="311" font-size="12" font-weight="600" fill="#111">nova/geometry/ · nova/linalg/</text>
+        <g font-size="12" fill="#111">
+          <text x="490" y="329">select<tspan fill="#555" font-size="11">  — pairs with geometry/select.py (numba)</tspan></text>
+          <text x="490" y="346">basis<tspan fill="#555" font-size="11">  — pairs with linalg/basis.py (scipy)</tspan></text>
+        </g>
+
+        <!-- stays -->
+        <rect x="470" y="365" width="380" height="52" fill="none" stroke="#0a6" stroke-width="1.4"/>
+        <text x="480" y="381" font-size="12" font-weight="600" fill="#0a6">stays — library support, no domain</text>
+        <g font-size="12" fill="#111">
+          <text x="490" y="399">config<tspan fill="#555" font-size="11">  (jax_enable_x64 owner)</tspan></text>
+          <text x="490" y="412">tree_util<tspan fill="#555" font-size="11">  (pytree registration)</tspan></text>
+        </g>
+
+        <!-- left column -->
+        <rect x="40" y="64" width="220" height="353" fill="none" stroke="#333" stroke-width="1"/>
+        <g font-size="12" fill="#111">
+          <text x="55" y="88">connectivity_boundary</text>
+          <text x="55" y="110">flux_surface_connectivity</text>
+          <text x="55" y="132">stencil_nulls</text>
+          <text x="55" y="154">fixed_point</text>
+          <text x="55" y="176">topology</text>
+          <text x="55" y="204">null</text>
+          <text x="55" y="226">target</text>
+          <text x="55" y="248">operate</text>
+          <text x="55" y="270">fieldnull</text>
+          <text x="55" y="298">select</text>
+          <text x="55" y="320">basis</text>
+          <text x="55" y="378" fill="#0a6">config</text>
+          <text x="55" y="400" fill="#0a6">tree_util</text>
+        </g>
+
+        <!-- arrows -->
+        <g stroke="#555" stroke-width="1" fill="none">
+          <path d="M262 120 L468 120"/>
+          <path d="M262 235 L468 235"/>
+          <path d="M262 320 L468 322"/>
+        </g>
+        <g stroke="#0a6" stroke-width="1.2" fill="none">
+          <path d="M262 389 L468 389"/>
+        </g>
+      </svg>
+      <figcaption>Eleven of thirteen modules are consumed from a domain package and belong
+      there; only the two marked in green are library support with no domain. Four of the
+      eleven are the traced half of a pair whose other half already lives in the
+      destination.</figcaption>
+    </figure>
+
+    <h2 id="s2">§2 — Target shape</h2>
+
+    <p>Each module moves to the package that consumes it, and the traced implementation is
+    stored <strong>in the same file</strong> as its numpy or numba peer rather than in a
+    parallel module. Where a concept already has both halves — the operator, the field
+    nulls, null selection, the polynomial basis — the move is a merge into one file, not a
+    relocation of two.</p>
+
+    <p>The traced path becomes the <strong>default</strong>. nova is aimed at GPU compute
+    and at derivative-based coil fitting, and JAX is what supplies both; the numpy and
+    numba implementations stay as the checking reference and the legacy route, reachable
+    explicitly rather than by default. That inverts today's arrangement, where the numpy
+    implementation is the one a caller reaches first and the traced one is the alternative
+    selected at <code>nova/biot/operate.py:84</code>.</p>
+
+    <p>Keeping both implementations in one file is also what makes the pair testable as a
+    pair. This sweep has already found three divergences that existed precisely because the
+    two halves sat in different files: the Force index that was read from the caller on one
+    side and silently from the dataset on the other; the degenerate-fit guard present in one
+    biquadratic copy and absent from the other; and the <code>wall_flux</code> zero-polarity
+    answer, which is <code>NaN</code> on the traced side and <code>(0, 0, 0)</code> on the
+    serial one. Co-location does not prevent divergence by itself, but it puts the two
+    implementations and their parity test in front of the same reader.</p>
+
+    <h2 id="s3">§3 — The naming question this turns on</h2>
+
+    <p>Two modules cannot both be <code>nova/geometry/select.py</code>, so the technology
+    seam has to surface somewhere. With both implementations in one file the seam moves
+    inside the module, and the question becomes what to call the two entry points — not what
+    to call two files. The repository's naming rules forbid version-flavoured names
+    (<code>select_v2</code>, <code>jax_select</code> as a filename), so the distinguishing
+    token must name the mechanism: the traced/device implementation against the serial/host
+    one.</p>
+
+    <p>This has to be settled before any module moves, because it fixes the public import
+    path every downstream caller will use. It is the plan's first decision.</p>
+
+    <h2 id="s4">§4 — Sequencing and blast radius</h2>
+
+    <p>Thirteen modules, rewiring roughly twenty-five importing files. The work must land
+    after <code>nova-jax-hygiene</code> closes, because that sweep is still moving code
+    between these same files, and after the accelerator promotion settled in
+    <code>nova/jax/fixed_point.py</code> and <code>nova/jax/topology.py</code>.</p>
+
+    <p>Sequence: lock the naming convention; convert one pair end-to-end as the pattern
+    (the biot operator is the best candidate — it already has both halves, a parity test,
+    and a single consumer); review that pattern before repeating it; then convert the
+    remaining pairs and move the unpaired modules; retire the directory to the two support
+    modules last.</p>
+
+    <p>Each conversion keeps the numerics identical and is proved by the existing suites
+    plus the pair's own parity test. No conversion may change a physical quantity — if one
+    does, that is a divergence to report, not a threshold to adjust.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="file-layout" data-choice="single-file" data-by="Simon McIntosh" data-when="2026-08-08T22:10:00+00:00">
+    <p class="r-dec-q">Should the traced and serial implementations of a concept live in
+        one file or stay as paired modules?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="single-file">one file per concept, both implementations inside</button>
+      <button class="r-opt" data-value="paired-modules">paired modules in the same package</button>
+      </p>
+    <p class="r-dec-rat">Owner decision 2026-08-08: both implementations stored in a
+        single file. The split across files is what let three divergences accumulate
+        unnoticed in this sweep alone — the Force index lookup, the degenerate-fit guard, and
+        the wall_flux zero-polarity return. One file puts the pair and its parity test in
+        front of the same reader.</p>
+    </div>
+<div class="r-dec" data-key="default-path" data-choice="traced-default" data-by="Simon McIntosh" data-when="2026-08-08T22:10:00+00:00">
+    <p class="r-dec-q">Which implementation should a caller reach by default?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="traced-default">the traced path; serial kept for checking and legacy</button>
+      <button class="r-opt" data-value="serial-default">the serial path, as today</button>
+      </p>
+    <p class="r-dec-rat">Owner decision 2026-08-08: the traced path is the default. nova
+        is aimed at GPU compute and derivative-based coil fitting, and JAX supplies both. The
+        numpy and numba implementations remain as the checking reference and the legacy
+        route, reached explicitly. This inverts today&#x27;s arrangement, where the traced
+        operator is the alternative selected at nova/biot/operate.py:84.</p>
+    </div>
+<div class="r-dec" data-key="entry-point-naming" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">What names distinguish the two implementations inside one module,
+        given the repository forbids version-flavoured names and the default is now the
+        traced one?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="plain-default-suffixed-reference">plain name = traced default; the serial peer carries the distinguishing token</button>
+      <button class="r-opt" data-value="both-explicit">both carry an explicit mechanism token; no bare name</button>
+      <button class="r-opt" data-value="dispatch-parameter">one public name dispatching on an explicit backend argument</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-njd-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-08" data-recommends-skill="/reckon-ship nova-jax-dissolution §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Lock the entry-point naming, then convert the biot operator as the pattern</h4>
+    <div class="r-fu-body"><p>Nothing moves until the naming convention is settled: it fixes the public import path every downstream caller will use. Once locked, convert one pair end-to-end and review that pattern before repeating it across the remaining twelve modules.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    nova-jax-dissolution (http://127.0.0.1:8765/nova/nova-jax-dissolution.html)
+Section: §3 then §4
+Capability: orchestrator
+Requirements: deep reasoning, strict verification
+
+Context
+  nova/jax is the package&#x27;s only technology-organised directory and holds only a
+  subset of nova&#x27;s traced code; the bulk of JAX-traced physics lives in nova/biot
+  behind the xp namespace parameter. Eleven of its thirteen modules are consumed
+  from a domain package. The hygiene sweep already moved the two pure-numpy
+  modules out and single-homed the shared math, so the ground is clear.
+
+State to read  (CODE, not the plan)
+  nova/jax/                     the thirteen modules and their consumers
+  nova/biot/operate.py          the numpy operator and the selection at :84
+  nova/jax/operate.py           the traced peer, and tests/test_jax_operate.py
+  nova/geometry/select.py       serial half of the select pair (numba)
+  nova/jax/select.py            traced half, and the documented return-convention split
+  nova/linalg/basis.py          scipy half of the basis pair
+  nova/jax/basis.py             traced half
+
+Scope locks / constraints  (non-decision)
+  Numerics must not change. Any conversion that moves a physical quantity is a
+  divergence to REPORT, never a threshold to adjust.
+  nova/jax/config.py and nova/jax/tree_util.py are library support and STAY.
+  Land only after nova-jax-hygiene closes.
+  Convert ONE pair end-to-end first and stop for review before repeating it.
+
+Done-when
+  1. The entry-point naming decision is locked with its rationale.
+  2. The biot operator pair is one file, traced default, serial reachable
+     explicitly, parity test green, all consumers rewired.
+  3. Full suite green; the pattern is written up for the remaining modules;
+     followup written and this one resolved.</pre>
+    </article>
+</section>
+
+  </main>
+</body>
+</html>

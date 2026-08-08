@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="physics-spine-adoption">
   <meta name="plan-title" content="Physics Spine Adoption — solver nomenclature + ambix model ports">
   <meta name="plan-summary" content="Nova becomes the home of the full physics spine (equilibrium, circuits, transport): apply the locked problem×representation solver nomenclature, port the remaining ambix physics models as nova-style dataclasses on native nova types (torch current diffusion → JAX), and rewire imas-ambix to consume the spine as a dependency">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
   <meta name="plan-owner" content="Simon McIntosh">
@@ -18,8 +18,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-08">
-<meta name="plan-version" content="30">
-<meta name="plan-impl" content="0.97">
+<meta name="plan-version" content="32">
+<meta name="plan-impl" content="1.0">
 <meta name="plan-sprint" content="S5">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -242,6 +242,21 @@ nova/transport/current_diffusion.py  CurrentDiffusion      (ambix current_diffus
     no default artifact resolution). Next rung is a design step, not a migration. Full record:
     <a href="archive/physics-spine-adoption-donor-census-landed.html">§4 donor census landed</a>.</p>
 
+    <h3>Artifact wiring — the ladder's first rung <span class="badge badge-shipped">✓ landed 2026-08-08</span></h3>
+    <p class="landed-summary">
+    Default artifact resolution + the first production caller selecting by physical identity
+    landed on imas-ambix <code>27c84fd..f7dce37</code> (merge <code>c0d5821</code>): env override
+    → durable cache → node-local staging → author (2.6 s), GPFS-safe publish;
+    <code>ArtifactMachineSelector</code> refuses a description not stating the shot's digest;
+    dual-read preserved. Frozen six-shot gate <strong>PASS 15/15 (SAME_SOURCE), every
+    deterministic metric float-equal</strong>; zero env-var-only skips remain (342 focused tests
+    green). Measured amendment: the pin is <code>semantic_identity</code>
+    (<code>18c75c194937</code>) — manifest digests move between identical authoring runs.
+    The 42-file table-source tranche + three measured blockers hand to
+    <code>imas-ambix:nova-physics-consumer-integration</code>. Full record:
+    <a href="archive/physics-spine-adoption-artifact-wiring-landed.html">§4 artifact wiring
+    landed</a>. <strong>Plan shipped — impl 1.0.</strong></p>
+
     <h2 id="s5">§5 — Style contract for ported code</h2>
     <ul>
       <li><strong>Dataclasses:</strong> frozen config dataclasses + small stateful solver classes,
@@ -374,7 +389,7 @@ nova/transport/current_diffusion.py  CurrentDiffusion      (ambix current_diffus
       <button class="r-opt" data-value="environment-only">cache location and digest always from environment/config</button>
       <button class="r-opt" data-value="packaged-default-statespace-first">same resolution; statespace consumer first</button>
       </p>
-    <p class="r-dec-rat">User selection 2026-08-08: ambix ships a pinned digest and a resolvable cache location as the in-repo default so tests run without hand-set env vars; AMBIX_MACHINE_ARTIFACT_* environment variables override. Machine selection is the first product consumer routed through physical identity — it is the identity selector every other consumer keys off. SetupSignature stays a dual-read: compute caches remain signature-keyed because two representation aliases carry different filament counts under one physical digest.</p>
+    <p class="r-dec-rat">User selection 2026-08-08: ambix ships a pinned identity and a resolvable cache location as the in-repo default so tests run without hand-set env vars; AMBIX_MACHINE_ARTIFACT_* environment variables override the default. Machine selection is the first product consumer routed through physical identity - it is the identity selector every other consumer keys off. SetupSignature stays a dual-read: compute caches remain signature-keyed because two representation aliases carry different filament counts under one physical digest. AMENDED on measurement (2026-08-08, artifact-wiring node): the pinned address is MachineArtifactManifest.semantic_identity() (sha256:18c75c194937...), not a manifest digest - authoring identical semantics twice publishes different manifest digests because the IDS containers carry library write metadata, so a file digest names one materialization on one filesystem and can never satisfy a fresh machine. Semantic identity reproduces exactly across authoring runs and re-authoring costs 2.6 s, making resolution a step rather than an error.</p>
     </div>
 </section>
 
@@ -691,7 +706,7 @@ Done when
 - Each migrated tranche is suite-green with its gate recorded; each retirement carries zero-import proof; no dead figure boxes or orphaned artifacts remain.</pre>
     <p class="r-fu-outcome">Ladder re-scoped on measurement — no migratable rung exists. AST census: six of eight mid-tier donors are physics kernels, not machine-description sources; circuits.py is the live case-circuit authority (efm tables carry empty circuit_drives by design); geometry.py splits 54 reader / 16 substrate / 7 both and artifact_geometry itself imports its substrate. Production has no route to the artifact path: 0 product importers of artifact_geometry, no identity selection outside gs/, no default artifact resolution (the after-path stamp addresses its table via read_efm_geometry). Residues shipped: imas-ambix ae728ad..8d7784d (stack map redrawn, orphaned imas_geometry_iter.json deleted with three citation sites unrotted, docstring scrub + one false classifier caveat fixed); gs 224/15, statespace 201 green. Record: docs/archive/physics-spine-adoption-donor-census-landed.html</p>
     </article>
-<article class="r-fu" data-id="f-psa-artifact-wiring" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-04 18:00" data-recommends-skill="/reckon-ship physics-spine-adoption §4" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-psa-artifact-wiring" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="autonomous" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-04 18:00" data-recommends-skill="/reckon-ship physics-spine-adoption §4" data-resolved-at="2026-08-08T17:04:08+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Wire default artifact resolution and physical-identity selection into one product consumer</h4>
     <div class="r-fu-body"><p>The donor census showed every importer count is load-bearing until production can reach the artifact path at all: artifact_geometry has zero product importers, machine_identity is only imported inside gs/, and MachineArtifactGeometryReader has no default cache/digest resolution. The next rung is a design step — give ambix a default artifact resolution (cache location + digest selection semantics) and route one product consumer (machine selection / tokenizer / statespace) through physical identity, so the migration ladder acquires its first real rung. Only then do the reader half of geometry.py and circuits.py become migratable.</p></div>
     <pre class="r-fu-prompt">Projects: nova (read-only) and authorized imas-ambix
@@ -718,6 +733,7 @@ Work
 
 Done-when
   - The artifact reader has &gt;= 1 production caller with identity selection, suite-green with the gate recorded; the ladder&#x27;s next tranche is enumerated from a re-run census; no env-var-only test skips remain on the wired path.</pre>
+    <p class="r-fu-outcome">Landed on imas-ambix 27c84fd..f7dce37 (merge c0d5821). Default artifact resolution (env override -&gt; durable cache -&gt; node-local staging -&gt; author in 2.6 s; GPFS-safe copy+fsync+rename publish, racing writers detected) plus the first production caller selecting by physical identity (ArtifactMachineSelector refuses a description not stating the shot's digest; dual-read preserved: selection by physical digest, computation by signature key). Frozen six-shot gate PASS 15/15 under SAME_SOURCE with every deterministic metric float-equal, throughput +4.8%/+4.0%. Zero env-var-only skips remain; 342 focused tests green; 54 re-verified at the merge tip. Measured amendment: a manifest digest cannot be pinned (IDS write metadata moves it between identical authoring runs) - the package pins semantic_identity 18c75c194937 instead. Census: artifact_geometry importers 0 -&gt; 2; the 42-file table-source tranche and its three measured blockers hand to imas-ambix:nova-physics-consumer-integration. Record: docs/archive/physics-spine-adoption-artifact-wiring-landed.html</p>
     </article>
 </section>
 

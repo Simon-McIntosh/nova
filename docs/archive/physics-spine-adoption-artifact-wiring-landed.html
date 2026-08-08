@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"  content="nova">
+  <meta name="reckon-type"   content="evidence">
+  <meta name="plan-slug"     content="physics-spine-adoption-artifact-wiring-landed">
+  <meta name="plan-title"    content="§4 landed — identity-resolved machine description with a float-equal six-shot gate">
+  <meta name="plan-evidence-for" content="physics-spine-adoption">
+  <meta name="plan-verifies" content="physics-spine-adoption#s4">
+  <title>§4 artifact wiring landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — What landed</h2>
+    <p>The §4 close-out rung: ambix gained a <strong>default machine-artifact resolution</strong>
+    and its <strong>first production caller selecting by physical identity</strong> — the two
+    components the donor census proved missing. Landed on imas-ambix
+    <code>27c84fd..f7dce37</code>, merged at <code>c0d5821</code>; 54 focused resolution/geometry
+    tests re-verified green at the merge tip; full gs+spine_bench focused lane 342 passed /
+    0 skipped / 0 failed (21 previously env-var-skipped tests now run — zero env-var-only skips
+    remain on the wired path).</p>
+    <ul>
+      <li><strong><code>gs/artifact_resolution.py</code>:</strong> resolution order environment
+      override → durable cache (<code>${XDG_CACHE_HOME:-~/.cache}/imas-ambix/machine-artifact</code>)
+      → node-local staging → author it (2.6 s). Cold path verified with no cache anywhere
+      (route=authored, 4.6 s, identity matches the pin); warm path 0.0 s. GPFS-safe publish
+      re-verified live: <code>RENAME_NOREPLACE</code> is EINVAL(22) on /home, so authoring lands
+      node-local and mirrors into the durable root by copy + fsync + plain rename, with racing
+      writers detected (ENOTEMPTY) rather than clobbered; every durable object is re-verified
+      through nova's own resolver, never trusted because we wrote it.</li>
+      <li><strong><code>gs/machine_selection.py</code>:</strong>
+      <code>ArtifactMachineSelector.select(shot)</code> — the shot resolves through the nova
+      registry to a physical digest, and a description not stating that digest is
+      <em>refused</em>. The dual-read contract is preserved and asserted: selection key = physical
+      digest; computation key = <code>table.signature.key</code>, untouched, still addressing
+      every compute cache.</li>
+      <li><strong>Production caller:</strong> <code>spine_bench/machine_artifact_arm.py</code>
+      runs with zero environment (verified route=cached, signature
+      <code>mp78-fl80-fc70-lim37-9ebbfb93e1ea67f7</code>).</li>
+    </ul>
+
+    <h2 id="s2">§2 — The measured amendment: the pin is semantic identity, not a file digest</h2>
+    <p>The locked <code>artifact-resolution</code> decision said "packaged pinned digest". The
+    node measured that a <strong>manifest digest cannot be pinned</strong>: the artifact's IDS
+    containers carry library write metadata, so authoring identical semantics twice publishes
+    different manifest digests (two runs: <code>b41c076e…</code> vs <code>889cbc2a…</code> —
+    every file the same size, every file hash different). What both runs reproduce exactly is
+    <code>MachineArtifactManifest.semantic_identity()</code> —
+    <code>sha256:18c75c19493714108fc71f88a55cc775836218e489e073f43942fd007d937bdc</code> —
+    covering the DD pin, physical + registry identity, shot extent and per-field provenance,
+    excluding the file table. <strong>That is what the package pins</strong>; a local
+    materialization's digest is an address on one filesystem, never an identity. The decision's
+    intent (in-repo pin, resolvable location, env-overridable, no hand-set env vars in tests) is
+    honoured on the only address that can carry it. Recorded as an amendment to the decision
+    rationale. One deliberate policy reversal rode along, explicitly owner-visible: the seam test
+    <code>test_an_unnamed_artifact_refuses_to_build_a_source</code> became
+    <code>…_still_names_a_machine</code> — "refusing beats defaulting" was correct while the only
+    default was a filesystem path; the semantic pin removes the unstated default that rule
+    guarded against.</p>
+
+    <h2 id="s3">§3 — The gate: 15/15 PASS, float-equal</h2>
+    <p>Frozen six-shot benchmark {21978, 21983, 21985, 21986, 21989, 22086}, both gated arms,
+    all slices, SLURM job 1242642 on the same host as the before-stamp, 19m45s. Budget class
+    <strong>SAME_SOURCE</strong> — both stamps read one description (semantic
+    <code>18c75c194937</code>, physical <code>ca06c8f64481114f</code>, 21 driven columns
+    identical); only the code path locating the description moved, so the cross-source band
+    would score slack this change cannot need. Result: <strong>every deterministic metric equal
+    to the last printed digit</strong> on both arms — including both whitened magnetics
+    residuals (0.763210492 / 0.763139891) — with throughput +4.8%/+4.0% (node scatter, inside
+    the 25% budget). Stamps: before
+    <code>…-09e0555384-…-machine-artifact-18c75c194937.yaml</code>, after
+    <code>…-ef27a73544-…-machine-artifact-18c75c194937.yaml</code> (committed). Gate comparison
+    and run logs: <code>~/.cache/ambix-artifact-wiring/</code>.</p>
+
+    <h2 id="s4">§4 — The migration ladder's first rung is open; the tranches are measured</h2>
+    <p>Census re-run at the merge tip (python 3.14 — the 3.11 login python silently skips
+    PEP 758 files and undercounts): <code>artifact_geometry</code> importers 0 → 2, the census's
+    headline zero cleared. Next tranche, with blockers measured rather than guessed:</p>
+    <ol>
+      <li><strong>table-source, 42 files</strong> (39 excluding tests) — all but three take
+      <code>build_table_for_shot</code> alone, a one-line substitution shape.</li>
+      <li><strong>Three hard blockers:</strong> (a) the pinned description carries NaN turns on
+      the P6 pair (<code>require_resolved_turns()</code> raises — a <em>nova-side</em> sourcing
+      dependency); (b) the artifact signature (<code>fc70</code>) differs from the campaign
+      signature (<code>fc938</code>) under one physical digest, so every efm-keyed compute cache
+      and checkpoint rebuilds — real cost to schedule, not stumble into; (c)
+      <code>circuits.py</code> needs no port: the artifact table declares 21 circuit_drives +
+      13 active_circuits from its own evidence-ledgered drive map, so migrated consumers bypass
+      it — retirement is a consequence of the tranche.</li>
+      <li><strong>Not migratable by design:</strong> the efm-vs-source consistency script (it
+      compares against the thing migration removes) and the two addressing-only files
+      (acquisition facts a description cannot supply).</li>
+    </ol>
+    <p>The tranche execution is ambix consumer work and is handed to
+    <code>imas-ambix:nova-physics-consumer-integration</code> (sprint S17), which now has its
+    first real rung.</p>
+  </main>
+</body>
+</html>

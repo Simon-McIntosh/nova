@@ -59,7 +59,9 @@ with skip_import("jax"):
     import jax
     import jax.numpy as jnp
 
-    jax.config.update("jax_enable_x64", True)
+    from nova.jax.config import enable_x64
+
+    enable_x64()
 
 _TWO_PI = 2.0 * np.pi
 _16PI3 = 16.0 * np.pi**3

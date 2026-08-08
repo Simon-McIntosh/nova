@@ -40,6 +40,7 @@ import scipy.integrate
 import scipy.special
 
 from nova.biot.completeelliptic import TRIPS, complete_kind, complete_pole
+from nova.jax.config import enable_x64
 
 EPS = float(np.finfo(np.float64).eps)
 LONG_PI = np.longdouble("3.14159265358979323846264338327950288")
@@ -323,7 +324,7 @@ def test_the_trip_count_is_bounded_by_the_argument_range_in_both_directions():
 def traced_namespace():
     """Return ``jax.numpy`` with float64 on, or skip."""
     jax = pytest.importorskip("jax")
-    jax.config.update("jax_enable_x64", True)
+    enable_x64()
     import jax.numpy as jnp
 
     return jax, jnp

@@ -59,6 +59,7 @@ from scipy.special import elliprf, elliprj
 from nova.biot import incompleteelliptic
 from nova.biot.completeelliptic import complete_kind, complete_pole
 from nova.biot.incompleteelliptic import TRIPS, incomplete_kind, incomplete_pole
+from nova.jax.config import enable_x64
 
 LONG_PI = np.longdouble("3.14159265358979323846264338327950288")
 
@@ -311,7 +312,7 @@ def test_the_trip_count_is_bounded_by_the_argument_range_in_both_directions():
 def traced_namespace():
     """Return ``jax.numpy`` and a jit, or skip where jax is not installed."""
     jax = pytest.importorskip("jax")
-    jax.config.update("jax_enable_x64", True)
+    enable_x64()
     return jax, jax.numpy
 
 

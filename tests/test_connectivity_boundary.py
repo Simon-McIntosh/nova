@@ -39,8 +39,8 @@ with skip_import("jax"):
     from nova.jax import connectivity_boundary as cb
     from nova.jax.stencil_nulls import xpoint_candidates
 
-from nova.jax.equilibrium_labels import LCFS_ANGLES
-from nova.jax.wall_mask import inside_polygon as _inside_polygon
+from nova.equilibrium.labels import LCFS_ANGLES
+from nova.equilibrium.wall_mask import inside_polygon as _inside_polygon
 
 
 def _limited_field(nr=81, nz=101):

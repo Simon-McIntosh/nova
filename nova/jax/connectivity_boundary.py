@@ -72,12 +72,10 @@ from nova.jax.stencil_nulls import (
     magnetic_axis_subgrid,
     xpoint_candidates,
 )
-from nova.jax.equilibrium_labels import N_XPOINT_SLOTS
-from nova.jax.equilibrium_labels import LCFS_ANGLES
+from nova.equilibrium.labels import LCFS_ANGLES, N_XPOINT_SLOTS
+from nova.jax.config import enable_x64
 
-# fp64 is mandatory: the boundary flux is a small difference of grid fluxes and
-# the radii are read as sub-grid crossings — enable it before any array is traced.
-jax.config.update("jax_enable_x64", True)
+enable_x64()
 
 #: the evaluator's 8 fixed poloidal query angles as a device array (default
 #: `angles` — a module singleton so the jitted signature has no call in defaults)

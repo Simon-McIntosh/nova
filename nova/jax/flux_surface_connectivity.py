@@ -52,9 +52,9 @@ from functools import partial
 import jax
 import jax.numpy as jnp
 
-# fp64 is mandatory for the flux-surface metrics (the diffusion coefficient is a
-# ratio of small volume differences); enable it before any array is traced.
-jax.config.update("jax_enable_x64", True)
+from nova.jax.config import enable_x64
+
+enable_x64()
 
 _SQRT2 = 2.0**0.5
 

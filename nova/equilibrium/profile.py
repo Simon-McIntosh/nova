@@ -27,10 +27,11 @@ from scipy.constants import mu_0
 
 from nova.biot.greens import hybrid_greens
 from nova.equilibrium.measurement import Magnetics
+from nova.jax.config import enable_x64
 from nova.jax.connectivity_boundary import boundary_read_smooth_jax
 from nova.jax.stencil_nulls import magnetic_axis_subgrid
 
-jax.config.update("jax_enable_x64", True)
+enable_x64()
 
 
 class ProfileResult(NamedTuple):

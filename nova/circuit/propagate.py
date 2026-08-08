@@ -35,7 +35,9 @@ with skip_import("jax"):
     import jax
     import jax.numpy as jnp
 
-    jax.config.update("jax_enable_x64", True)
+    from nova.jax.config import enable_x64
+
+    enable_x64()
 
 #: floor on a step interval [s] -- a repeated sample must not divide by zero
 MIN_STEP = 1e-6

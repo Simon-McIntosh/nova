@@ -630,7 +630,7 @@ class ReconstructMoment:
         """Return the boundary polygon of a push-out read about a centre."""
         if read is None:
             return None
-        from nova.jax.equilibrium_labels import LCFS_ANGLES
+        from nova.equilibrium.labels import LCFS_ANGLES
 
         radius = np.asarray(read.radii, dtype=np.float64)
         angle = np.asarray(LCFS_ANGLES, dtype=np.float64)

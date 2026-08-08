@@ -27,6 +27,7 @@ import pytest
 from scipy.special import elliprf, elliprj
 
 from nova.biot.symmetricelliptic import TRIPS, _elementary, symmetric_kinds
+from nova.jax.config import enable_x64
 
 # The arguments the incomplete third kind forms: ``x`` is the amplitude's squared
 # cosine, ``y`` the modulus radical there, ``z`` one, and the pole argument the
@@ -312,7 +313,7 @@ def test_the_trip_count_is_bounded_by_the_argument_range_in_both_directions():
 def test_the_traced_path_is_the_same_code_and_agrees_to_a_few_ulp():
     """One implementation, numpy on the host and a compiled kernel on a device."""
     jax = pytest.importorskip("jax")
-    jax.config.update("jax_enable_x64", True)
+    enable_x64()
     jnp = jax.numpy
     complements = np.array([1e-300, 1e-40, 1e-12, 1e-3, 0.4])
     poles = np.array([1e-30, 1e-8, 1e-2, 0.5, 1.0])

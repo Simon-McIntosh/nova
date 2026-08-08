@@ -25,6 +25,7 @@ import pytest
 from numpy.polynomial.legendre import leggauss
 
 from nova.biot.arcamplitude import ArcLimit, arc_limits, fold
+from nova.jax.config import enable_x64
 
 QUARTER = 0.5 * np.pi
 
@@ -206,7 +207,7 @@ def test_the_two_ends_carry_opposite_assembly_weights():
 def test_the_fold_traces_and_batches():
     """No branch on a value anywhere in it, which is why an arc can be tiled."""
     jax = pytest.importorskip("jax")
-    jax.config.update("jax_enable_x64", True)
+    enable_x64()
     jnp = jax.numpy
     azimuth = np.linspace(-3.0, 3.0, 17)
 

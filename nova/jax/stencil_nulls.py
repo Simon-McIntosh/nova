@@ -42,9 +42,9 @@ from __future__ import annotations
 import jax
 import jax.numpy as jnp
 
-# fp64 is mandatory: the saddle flux is a small difference of grid fluxes and the
-# positions are sub-grid — enable it before any array is traced.
-jax.config.update("jax_enable_x64", True)
+from nova.jax.config import enable_x64
+
+enable_x64()
 
 __all__ = [
     "ring_sign_changes",

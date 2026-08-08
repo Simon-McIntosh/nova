@@ -600,7 +600,9 @@ def _warm_evaluator(
     import jax
     import jax.numpy as jnp
 
-    jax.config.update("jax_enable_x64", True)
+    from nova.jax.config import enable_x64
+
+    enable_x64()
     compilation_cache()
 
     phi, wts = _phi_rule(plan.n_panels, plan.n_nodes)
@@ -703,7 +705,9 @@ def _warm_arc_evaluator(
     import jax
     import jax.numpy as jnp
 
-    jax.config.update("jax_enable_x64", True)
+    from nova.jax.config import enable_x64
+
+    enable_x64()
     compilation_cache()
 
     rows, columns = _device_blocks(plan, devices)

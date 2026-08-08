@@ -20,8 +20,8 @@ from __future__ import annotations
 
 import numpy as np
 
-from nova.jax import wall_mask as wm
-from nova.jax.wall_mask import inside_polygon as _inside_polygon
+from nova.equilibrium import wall_mask as wm
+from nova.equilibrium.wall_mask import inside_polygon as _inside_polygon
 
 
 def _grid(nr=81, nz=101, r=(0.2, 1.8), z=(-1.1, 1.1)):

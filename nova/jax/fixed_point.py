@@ -40,7 +40,9 @@ from typing import NamedTuple
 import jax
 import jax.numpy as jnp
 
-jax.config.update("jax_enable_x64", True)
+from nova.jax.config import enable_x64
+
+enable_x64()
 
 __all__ = ["FixedPointResult", "anderson", "newton_krylov", "picard"]
 

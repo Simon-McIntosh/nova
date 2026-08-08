@@ -41,6 +41,7 @@ from nova.biot.zeta import (
     zeta,
     zeta_midpoint,
 )
+from nova.jax.config import enable_x64
 
 HALF = np.pi / 2.0
 
@@ -286,7 +287,7 @@ def test_batched_path_matches_the_numpy_rule():
     element, so the two agree to the gate rather than to the last bit.
     """
     jax = pytest.importorskip("jax")
-    jax.config.update("jax_enable_x64", True)
+    enable_x64()
     from nova.biot.zeta import Zeta
 
     rs, gamma, alpha, want = _scan(CASES + APPROACH_CASES)

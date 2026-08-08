@@ -45,7 +45,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
-logger = logging.getLogger("nova.jax.wall_mask")
+logger = logging.getLogger("nova.equilibrium.wall_mask")
 
 __all__ = [
     "WallUnit",

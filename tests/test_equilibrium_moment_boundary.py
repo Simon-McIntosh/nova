@@ -24,7 +24,7 @@ from nova.equilibrium.moment import (
 from nova.utilities.importmanager import skip_import
 
 with skip_import("jax"):
-    from nova.jax.wall_mask import inside_polygon
+    from nova.equilibrium.wall_mask import inside_polygon
 
 LIMITER_R = np.array([0.25, 1.55, 1.55, 0.25, 0.25])
 LIMITER_Z = np.array([-1.05, -1.05, 1.05, 1.05, -1.05])

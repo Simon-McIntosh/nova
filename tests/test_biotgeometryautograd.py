@@ -63,8 +63,9 @@ from nova.biot.zeta import traced_zeta, zeta
 jax = pytest.importorskip("jax")
 
 import jax.numpy as jnp  # noqa: E402
+from nova.jax.config import enable_x64  # noqa: E402
 
-jax.config.update("jax_enable_x64", True)
+enable_x64()
 
 # A pentagon with no horizontal edges (every edge carries weight one, so the
 # pack is smooth in every vertex) and a trapezoid whose one horizontal edge

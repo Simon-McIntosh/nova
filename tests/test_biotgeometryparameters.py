@@ -41,8 +41,9 @@ from nova.biot.polygon import polygon_greens
 jax = pytest.importorskip("jax")
 
 import jax.numpy as jnp  # noqa: E402
+from nova.jax.config import enable_x64  # noqa: E402
 
-jax.config.update("jax_enable_x64", True)
+enable_x64()
 
 # Three axis-aligned turns of a winding pack: every section carries two edges of
 # constant z, which is the configuration the traced pack cannot differentiate in

@@ -4,7 +4,6 @@ import logging
 from timer import timer
 
 import argparse
-import jax
 import jax.numpy as jnp
 import numpy as np
 import optimistix as optx
@@ -12,12 +11,13 @@ import optimistix as optx
 from nova.equilibrium.forward import ForwardProfile
 from nova.equilibrium.forward_operator import ForwardFluxOperator
 from nova.imas.operate import Operate
+from nova.jax.config import enable_x64
 
 logger = logging.getLogger()
 logging.basicConfig(level=logging.INFO, force=True)
 
 timer.set_level(logging.INFO)
-jax.config.update("jax_enable_x64", True)
+enable_x64()
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--dirname", default=".nova", help="set cache dir")

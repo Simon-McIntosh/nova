@@ -47,6 +47,7 @@ from nova.biot.incompletemoments import (
     harmonic_moments,
     sn_pole_moment,
 )
+from nova.jax.config import enable_x64
 
 # Held as the amplitude's distance BELOW a quarter turn, which is the arc's own
 # half-separation from one of its ends, and the quantity the accuracy depends on.
@@ -308,7 +309,7 @@ def test_the_source_term_is_what_the_partial_range_adds():
 def test_the_traced_path_is_the_same_code_and_agrees_to_a_few_ulp():
     """One implementation, numpy on the host and a compiled kernel on a device."""
     jax = pytest.importorskip("jax")
-    jax.config.update("jax_enable_x64", True)
+    enable_x64()
     jnp = jax.numpy
     co_amplitude = 0.4
     complements = np.array([0.9, 1e-2, 1e-6, 1e-16])

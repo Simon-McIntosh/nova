@@ -20,9 +20,9 @@
   <title>Coil Geometry Inversion | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-07">
-<meta name="plan-version" content="4">
-<meta name="plan-impl" content="0.2">
+<meta name="plan-modified" content="2026-08-08">
+<meta name="plan-version" content="6">
+<meta name="plan-impl" content="0.4">
 </head>
 <body>
 <main class="plan-doc">
@@ -73,12 +73,22 @@
     marker (finite-arc trace is op-count-bound at ~284 s — measured, not reducible by
     grid size). Recorded limitation: at pole == complement exactly the slope is finite
     but 1.2e-02 relative (pre-existing, test-documented). Full default suite green.</li>
-    <li><strong>Geometry parametrisation.</strong> Per-coil parameter blocks at increasing
-    freedom: rigid (ΔR, ΔZ), scale, tilt/shear, per-vertex freedom for the pack outline, and
-    the discrete chamfer-side state for the 23-turn lattice (branch comparison, not a
-    continuous parameter). Priors and bounds from metrology where it exists (Kirk Table 1
-    offsets; the description's own 17.3 mm / 3% P4 asymmetry as a hypothesis, not a
-    constraint).</li>
+    <li class="section-landed"><span class="badge badge-shipped">✓ landed 2026-08-08</span>
+    <strong>Geometry parametrisation — landed with the identifiability spectrum §2.3
+    demanded first.</strong> <code>nova/biot/geometryparameters.py</code>: per-coil blocks
+    (rigid ΔR/ΔZ, affine scale/stretch/shear/tilt/dilation, per-vertex, discrete chamfer
+    branch), Jacobians pinned jacfwd-vs-FD and jacrev-vs-jacfwd (30 tests). Spectrum at the
+    real array (merge <code>b4521803</code>, figures
+    <code>docs/figures/geometry-identifiability/</code>): the resolvable set is rigid+affine —
+    rigid conditioning O(1), affine O(10³), per-vertex hopeless (free corners 10⁸, free turns
+    10¹³ — freeze them). Leading modes are rigid_z/rigid_r at 54 µm (P5 lower) to 2.2 mm
+    (P4 upper) marginalised, tilt/dilation unresolvable (15–180 mm). The near-field probe cut
+    costs ×3.2–17.3 in best-mode resolution — the geometry information lives in the near
+    probes, so the solve keeps them and drives the 23-cell lattice rather than excluding them
+    for the hull-smear trap. The 18 admitted flux loops buy essentially nothing for geometry
+    (0.2–2.3% of the probes' whitened signal; 63–87 vs 1,630–18,500 per channel) — the
+    inverse of their value to the harmonics fit, where they attack the coil-span rank
+    deficiency. Banked: <code>~/.cache/nova-mast/geometry-identifiability/</code>.</li>
     <li><strong>Problem class A — sensor-space (the MAST case).</strong> Recorded currents
     fixed; minimise the weighted misfit between measured vacuum couplings and modelled
     couplings over geometry parameters, per coil and jointly. The banked signed couplings
@@ -174,9 +184,9 @@ Done-when
   3. Followup written into plan + this one resolved</pre>
     <p class="r-fu-outcome">Section 2.1 landed (commits bf8f9bcb + dcc3a62a, merged 42dd1816). Eight kernel classes geometry-traceable with three-part autograd regressions: traced pack, polygon quadrature (vertex Jacobians), ring filament, rectangular section, arc filament, traced zeta, closed-form full turn and finite arc. Two elliptic derivative repairs: third-kind forward-mode NaN on the unreflected side fixed (root argument held at one); Carlson degenerate slope series in v-squared below ratio 0.1 (slope 3e-9 to 3e-15, value unchanged 8e-16, +5.4% arc-path cost). Fast lane 30 s, three section traces slow-marked. Limitation recorded: pole == complement slope 1.2e-2 relative (pre-existing). Full default suite green; every nova coupling operator now differentiable end-to-end w.r.t. source geometry.</p>
     </article>
-<article class="r-fu" data-id="f-cgi-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-07" data-recommends-skill="/reckon-ship coil-geometry-inversion §2.2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-cgi-002" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-07" data-recommends-skill="/reckon-ship coil-geometry-inversion §2.2" data-resolved-at="2026-08-08T08:46:34+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Geometry parametrisation and identifiability spectrum (sections 2.2-2.3), then the synthetic recovery ladder</h4>
-    <div class="r-fu-body">The kernel family is traceable with exact geometry Jacobians. Next: per-coil parameter blocks (rigid, scale, tilt/shear, per-vertex, discrete chamfer branch), then the geometry-Jacobian singular spectrum at the real MAST sensor set. Seeds from the symmetry verdict: exclude or deweight near-field probes (<2 pack widths - the +-25 mm basin is a 5-channel near-field trap); drive the described 23-cell lattice, not the hull smear (11-15% at gain ~1); banked difference-field grids in ~/.cache/nova-mast/misfit-localization/symmetry_scan.npz are ready linearisation points; any solve that finds a P4L displacement explaining the p4_lower survivor has found the near-field trap. Optimiser decision (Gauss-Newton vs L-BFGS) still open for the owner.</div>
+    <div class="r-fu-body">The kernel family is traceable with exact geometry Jacobians. Next: per-coil parameter blocks (rigid, scale, tilt/shear, per-vertex, discrete chamfer branch), then the geometry-Jacobian singular spectrum at the real MAST sensor set. Seeds from the symmetry verdict: exclude or deweight near-field probes (&lt;2 pack widths - the +-25 mm basin is a 5-channel near-field trap); drive the described 23-cell lattice, not the hull smear (11-15% at gain ~1); banked difference-field grids in ~/.cache/nova-mast/misfit-localization/symmetry_scan.npz are ready linearisation points; any solve that finds a P4L displacement explaining the p4_lower survivor has found the near-field trap. Optimiser decision (Gauss-Newton vs L-BFGS) still open for the owner.</div>
     <pre class="r-fu-prompt">Project: nova
 Plan:    coil-geometry-inversion (docs/plans/coil-geometry-inversion.html)
 Section: §2.2 (geometry parametrisation) + §2.3 (identifiability first)
@@ -202,6 +212,39 @@ Done-when
      chamfer branch) with synthetic Jacobian tests
   2. Identifiability spectrum at the MAST array published with figures
      (near-field exclusion sensitivity shown)
+  3. Followup written into plan + this one resolved</pre>
+    <p class="r-fu-outcome">§2.2 + the §2.3 identifiability-first slice landed - merge b4521803 (commits 7c39ea23, 84ea50ea). Parameter blocks with pinned Jacobians (30 tests); spectrum at the real array published with figures. Verdict: solve rigid+affine only (rigid cond O(1), affine O(1e3); per-vertex freeze - free corners 1e8, free turns 1e13); leading modes rigid_z/rigid_r at 54 um (p5_lower) to 2.2 mm (p4_upper) marginalised; tilt/dilation unresolvable. Near-field cut costs x3.2-17.3 - keep near probes, drive the 23-cell lattice. Loops buy ~nothing for geometry (0.2-2.3% of probes' whitened signal) - the geometry solve is probe-carried, opposite to the harmonics fit. Fast lane 4260 passed at the 5-failure env baseline. Optimiser evidence for the owner: small parameter count + exact jacfwd + benign conditioning on the resolvable set favours Gauss-Newton/LM; decision stays open.</p>
+    </article>
+<article class="r-fu" data-id="f-cgi-003" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-08" data-recommends-skill="/reckon-ship coil-geometry-inversion §2.3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Run the sensor-space P4/P5 solve on the resolvable modes, inside the synthetic recovery ladder (§2.3 completion + §2.5 start)</h4>
+    <div class="r-fu-body">The spectrum fixes the solve's shape: rigid+affine per coil (per-vertex frozen), near-field probes kept with the 23-cell lattice driven, loops optional (they carry ~no geometry signal). Synthetic recovery first - perturb known geometry, exact data + measured floors, recover, report bias per mode - then the MAST P4/P5 solve seeded from Kirk Table 1, scored against the surviving-misfit patterns and cross-checked against the symmetry scan (which it generalises). Optimiser decision still the owner's; the spectrum's conditioning evidence favours Gauss-Newton/LM on jacfwd.</div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    coil-geometry-inversion (docs/plans/coil-geometry-inversion.html)
+Section: §2.3 sensor-space solve + §2.5 synthetic recovery ladder
+Capability: general
+Requirements: deep reasoning, strict verification
+
+Context
+  The identifiability spectrum is published (merge b4521803): solve
+  rigid+affine per coil, freeze per-vertex, keep near-field probes with the
+  23-cell lattice driven, loops optional. Resolution floors: rigid modes
+  54 um (p5_lower) to 2.2 mm (p4_upper) marginalised.
+
+State to read
+  docs/plans/coil-geometry-inversion.html (§2.3, §2.5; optimiser decision
+  open - surface, do not resolve)
+  nova/biot/geometryparameters.py + tests/test_biotgeometryparameters.py
+  ~/.cache/nova-mast/geometry-identifiability/ (spectrum, compositions)
+  ~/.cache/nova-mast/misfit-localization/ (couplings.npz, survivors,
+  symmetry_scan.npz)
+  docs/research/mast-p4p5-symmetry-verdict.html (near-field trap context)
+
+Done-when
+  1. Synthetic recovery ladder banked: bias and resolution per mode class at
+     the measured floors, figures committed
+  2. MAST P4/P5 sensor-space solve run (Kirk-seeded), scored against the
+     surviving patterns; verdict recorded - geometry correction found and
+     quantified, or bounded unresolvable at this array
   3. Followup written into plan + this one resolved</pre>
     </article>
 </section>

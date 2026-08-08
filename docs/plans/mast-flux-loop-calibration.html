@@ -20,7 +20,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-08">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="3">
+<meta name="plan-impl" content="0.67">
 </head>
 <body>
 <main class="plan-doc">
@@ -57,37 +58,43 @@
 
   <h2 id="s2">§2 — Implementation</h2>
   <ol>
-    <li><strong>Loop inventory and position reconciliation.</strong> Join the 29 store channels
-    to the description's 80 loops; resolve the 7 unreachable reconstruction-loop positions
-    (<code>fl_p4l_1..4</code>, <code>fl_p5l_3</code>, <code>fl_p6u_1..2</code>) and decide per
-    loop: adopt a validated archive position, add the missing described loop, or exclude with
-    cause. The archive EFIT table is NOT trustworthy at exactly the critical spot: its four
-    P4L loop coordinates are a verbatim copy of P3L's and they alone fail the 2π
-    fitted-to-reconstructed self-test (16–23× instead of 6.28) — so P4L positions need an
-    independent source, and the 2π ratio doubles as a per-loop position-validity check for
-    every adopted position. P4 first — the misfit localises there and the sets are almost
-    disjoint there.</li>
-    <li><strong>Forward flux columns.</strong> Extend the vacuum response model to flux targets:
-    per-family flux per ampere-turn at each loop position from the polygon Green's kernel (the
-    flux maps already exist gridded; loops need exact point evaluations).</li>
-    <li><strong>Per-loop gain fits.</strong> Re-run and this time consume the adjudication fit
-    (<code>mast_flux_loop_adjudication.py:588-672</code>): through-origin regression of each
-    loop's measured signal on the described flux over the sustained cohort, with the
-    pre-excitation offset removed and loop channels swept for acquisition block-scale steps
-    (the probe channels stepped by 1/2, 1/√2, √2, 2 across shot blocks) before any static gain
-    is promoted.</li>
-    <li><strong>Convention confirmation and promotion.</strong> Confirm the measured 2π
-    convention holds per loop (a residual global cluster off unity reads a store-wide factor);
-    promote stable per-loop gains with the probe-scale evidence discipline; loops whose gain
-    will not stabilise across shots or blocks stay excluded, with cause recorded. Corroborate
-    every promoted gain against the archive's independent forward prediction
-    (<code>efm/silop_c</code>) — the route that confirmed obr17 at the probes — since no
-    upstream fit exists (the archive EFIT never weighted a loop). Emit every promoted gain,
-    exclusion and the confirmed convention as <code>diagnostic-correction-schema</code>
-    records once the schema lands, and note that loop channels are integrated signals — the
-    per-pulse drift and integrator-closure terms from
-    <code>vacuum-signature-extraction</code> apply to loops with more force than to
-    anything else.</li>
+    <li class="section-landed"><span class="badge badge-shipped">✓ landed 2026-08-08</span>
+    <strong>Loop inventory and position reconciliation — the copied block restored behind a
+    flag.</strong> Every one of the 44 named loops is nearest the coil its own name identifies
+    except the four FL_P4L entries (17× further from P4 lower than from P3 lower); restoring
+    them from the reconstruction's own table lifts the join from 39/46 to 43/46 and removes
+    four duplicated described positions. The restored positions are falsified against the
+    copied ones by cross-pulse gain consistency: restored 0.9642 ± 0.0383, copied
+    1.7805 ± 0.3859 (0.44–2.72 across single-coil pulses). <code>physical_snapshot</code>
+    serves the catalog as printed unless asked for <code>place_loops</code> — the packaged
+    registry's payload hash is the identity consumers pin, so the default flip rides the
+    queued republication node. <code>fl_p6u_1</code> is measurable but not describable (no
+    P6-upper loop in the catalog). Merge <code>2b4026c3</code>; record:
+    <a href="/nova/research/mast-flux-loop-gain-fits.html">flux-loop gain fits</a>.</li>
+    <li class="section-landed"><span class="badge badge-shipped">✓ landed 2026-08-08</span>
+    <strong>Forward flux columns.</strong> Exact per-family flux per ampere-turn at every loop
+    position from the polygon Green's kernel, landed in the vacuum response model
+    (merge <code>2b4026c3</code>).</li>
+    <li class="section-landed"><span class="badge badge-shipped">✓ landed 2026-08-08</span>
+    <strong>Per-loop gain fits — consumed at scale.</strong> 7,283 through-origin fits over
+    306 sustained plasma-free pulses; 18 of 28 data-carrying channels admitted, 10 excluded
+    with cause; the block-scale sweep found two genuine steppers (<code>fl_cc04</code> six
+    blocks spanning ×2.6, <code>fl_p2u_4</code> three blocks spanning ×3.3 — the probe
+    range-setting fault class), both withheld. No loop standoff screen is needed and the
+    reason is measured: 5,386 near-field fits sit TIGHTER than the far field
+    (0.9588 ± 0.0331 vs 0.9728 ± 0.1163) — flux forgives what field does not.</li>
+    <li class="section-landed"><span class="badge badge-shipped">✓ landed 2026-08-08</span>
+    <strong>Convention verdict — the factor does not exist.</strong> Store flux and kernel
+    flux are both the total flux through the loop contour in weber: the fitted ratio is 0.96,
+    not 6.28 or 0.159, on all 28 channels; the set scatters 1.9% about its own median, and the
+    archive's independent forward prediction (<code>efm/silop_c</code>) places the apparent
+    outliers within 0.6% of its own set — the departure is the description's forward model,
+    not the instrument. The 18 admitted channels enter AS PUBLISHED (gain 1.0, no factor).
+    Verdicts banked as schema-shaped records
+    (<code>~/.cache/nova-mast/flux-loop-calibration/loop_corrections.yaml</code>: 1 convention,
+    28 gain, 3 exclusions); the merge into
+    <code>nova/calibrate/corrections/mast/magnetics.yaml</code> is a coordinated
+    <code>set_version</code> bump, queued with §2.5.</li>
     <li><strong>Inclusion and re-measurement.</strong> Admit calibrated loops to the free current
     inversion and recompute the identifiability spectrum — report the new rank and whether
     P2/P3/P6 wiring becomes answerable. Recompute the P4/P5 surviving-misfit patterns with loop
@@ -110,20 +117,20 @@
 
   <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="convention-correction-site" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="convention-correction-site" data-choice="no-factor-exists" data-by="reckon-ship" data-when="2026-08-08T07:45:33+00:00">
     <p class="r-dec-q">Where is the flux-loop convention factor corrected — divided out on the
       nova read path, or fixed in the machine-description artifact so every consumer inherits it?</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="read-path">read path (nova-local, fast)</button>
       <button class="r-opt" data-value="artifact">machine-description artifact (fleet-wide)</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Closed by measurement rather than by choosing a site: the store and the kernel already share one convention - both are the total flux through the loop contour in weber (fitted ratio 0.96 on all 28 data-carrying channels, not 6.28 or 0.159) - so there is no factor for either site to apply. Evidence: docs/research/mast-flux-loop-gain-fits.html.</p>
     </div>
 </section>
 
   <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-flc-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-07" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-flc-001" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-07" data-recommends-skill="" data-resolved-at="2026-08-08T07:45:33+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Implement §2.1–§2.4 — loop inventory, flux columns, gain fits, convention verdict</h4>
     <div class="r-fu-body"><p>First shippable slice: everything up to the convention verdict,
       no inversion re-run yet. The localization record documents the method precedent (per-channel
@@ -157,6 +164,65 @@ Done-when
   1. Loop inventory + per-loop gain fits banked under ~/.cache/nova-mast/
   2. Convention verdict (2-pi or not) named with evidence
   3. Followup written into plan + this one resolved</pre>
+    <p class="r-fu-outcome">§2.1-§2.4 landed - merge 2b4026c3 (commits 23aa90ea, 336ae77b, 476cc0da, 184f4442). The exclusion premise is dissolved: no 2π convention exists - store and kernel both carry total webers; fitted ratio 0.96 on all 28 data-carrying channels over 306 plasma-free pulses (7,283 fits). 18 channels admitted AS PUBLISHED (gain 1.0, no factor), 10 excluded with cause (two genuine block-steppers fl_cc04 ×2.6 / fl_p2u_4 ×3.3 withheld); set scatter 1.9%; apparent outliers are the described forward model, not the instrument (silop_c places them within 0.6% of its own set). FL_P4L copied block restored behind place_loops: join 39/46 → 43/46, falsified against the copy by cross-pulse gain consistency (0.9642±0.0383 vs 1.7805±0.3859). Packaged registry deliberately unchanged - republication queued. No loop standoff screen needed (near-field flux fits tighter than far field). Fast lane 4186 passed / 0 failed. Record: docs/research/mast-flux-loop-gain-fits.html.</p>
+    </article>
+<article class="r-fu" data-id="f-flc-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-08" data-recommends-skill="/reckon-ship mast-flux-loop-calibration §2.5" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Admit the 18 loops to the inversion and deliver the gate decision packet (§2.5-§2.6)</h4>
+    <div class="r-fu-body">18 loop channels are admissible as published (no gain, no convention factor); 17 reach a described sensor and fl_p6u_1 is measurable but not describable. Re-run the free current inversion with loops, report the identifiability delta (current-space rank was 10 of 13 on probes alone) and whether P2/P3/P6 wiring becomes answerable; regenerate the P4/P5 surviving-misfit constraint sets for the harmonics plan (its §2.2 default is the joint harmonics+coil-currents fit). Merge the banked schema-shaped records (1 convention, 28 gain, 3 exclusions in loop_corrections.yaml) into nova/calibrate/corrections/mast/magnetics.yaml under a coordinated set_version bump. Draft the gate decision packet (obr17 0.5011; pair-failure class obv03/obr05/obr18 per-era gains; loop scoring) - the decisions stay the owner's.</div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    mast-flux-loop-calibration (docs/plans/mast-flux-loop-calibration.html)
+Section: §2.5 (inclusion and re-measurement) + §2.6 (gate decision packet)
+Capability: general
+Requirements: strict verification
+
+Context
+  18 loop channels are admissible AS PUBLISHED (no gain, no convention
+  factor); 17 reach a described sensor. The inversion&#x27;s current-space rank
+  was 10 of 13 on probes alone. Admit the loops, recompute identifiability,
+  report whether P2/P3/P6 wiring becomes answerable, and regenerate the
+  P4/P5 surviving-misfit constraint sets for the harmonics plan.
+
+State to read
+  docs/research/mast-flux-loop-gain-fits.html (verdicts, falsifications)
+  ~/.cache/nova-mast/flux-loop-calibration/ (loop_verdicts.json,
+  loop_corrections.yaml)
+  nova/imas/mast_flux_loop_adjudication.py (admission API)
+  ~/.cache/nova-mast/misfit-localization/ (constraint-set precedent)
+
+Done-when
+  1. Inversion re-run with loops; identifiability delta reported with figures
+  2. Constraint sets regenerated and handed to mast-misfit-toroidal-harmonics
+  3. Gate decision packet drafted; owner decisions surfaced, not resolved
+  4. Banked records merged into nova/calibrate/corrections/mast/magnetics.yaml
+     under a coordinated set_version bump; read-path tests green
+  5. Followup written into plan + this one resolved</pre>
+    </article>
+<article class="r-fu" data-id="f-flc-003" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-08" data-recommends-skill="/reckon-ship mast-flux-loop-calibration" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Republish the registry with the restored P4-lower loop positions (digest cutover, owner-involved)</h4>
+    <div class="r-fu-body">The level-2 read fix is landed and tested behind place_loops with the packaged default deliberately unchanged - the payload hash is the identity consumers pin. The republication node regenerates mast_geometry.json, flips the place_loops default (the one-word part), updates the five digest/join-pin test files (test_mast_catalog_geometry, test_mast_provisional_ids, test_mast_seed_parameters, test_mast_vacuum_refinement, test_mast_solve_inputs join 39→43), republishes the OCI artifact tag under the new physical digest, and bumps the imas-ambix MAST_PHYSICAL_DIGEST pin. Outward-facing: needs owner authorisation (precedent: the 76cf833561e602a7 → ca06c8f64481114f cutover ran as its own node). Until it runs, the production solve-input map joins 39 channels.</div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    mast-flux-loop-calibration (docs/plans/mast-flux-loop-calibration.html)
+Section: registry republication (digest cutover)
+Capability: orchestrator
+Requirements: strict verification; owner authorisation for the outward-facing
+  republication (OCI artifact tag + imas-ambix pin)
+
+Context
+  The restored FL_P4L positions are landed behind
+  physical_snapshot(place_loops=...) with the packaged registry unchanged.
+  Publishing them is a machine-identity change (digest cutover).
+
+State to read
+  docs/research/mast-flux-loop-gain-fits.html (What this hands on)
+  nova/catalog/mast_geometry.py (place_loops; regeneration entry point)
+
+Done-when
+  1. mast_geometry.json regenerated; place_loops default flipped
+  2. Digest/join pins updated in the five named test files (join 39 → 43);
+     full default suite green
+  3. OCI artifact republished under the new physical digest; imas-ambix
+     MAST_PHYSICAL_DIGEST pin bumped in coordination with that repo
+  4. Followup written into plan + this one resolved</pre>
     </article>
 </section>
 

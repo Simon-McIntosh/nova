@@ -23,11 +23,20 @@ have the most of them, so the bar is an absolute current the caller states.
 An interval that follows a disturbance is not the instrument alone.  Vessel and case
 currents induced by the drives, and by the plasma's termination, decay on their own
 time constants and go on producing field into the quiet that follows.  Every window
-whose predecessor was driven or carried plasma therefore starts late, by a settling
-time the caller builds from a measured decay time and the number of time constants
-it wants gone.  A window whose predecessor was itself quiet is not delayed: a quiet
-interval induces nothing, and clipping there would cost real samples to guard against
-a disturbance that never happened.
+after a disturbance therefore starts late, by a settling time the caller builds from
+a measured decay time and the number of time constants it wants gone.  A window with
+no disturbance anywhere before it is not delayed: nothing has been induced yet, and
+clipping there would cost real samples to guard against something that never
+happened.
+
+The guard is measured from the last interval observed to be a disturbance, not from
+whatever immediately precedes the window.  The two differ whenever the record has a
+gap in it, and both ways of confusing them are wrong.  A gap between a drive and the
+quiet after it does not reset the decay -- the current has been falling since the
+drive stopped, and losing sight of it for a moment does not change that.  A gap
+before anything was ever driven is not evidence that something was: the interval
+before a record is unobserved whether or not its first sample digitised, and reading
+one unrecorded sample as a disturbance costs the pre-pulse window the whole guard.
 
 A gap in the record is not a quiet interval.  Samples that are not finite say nothing
 about what the machine was doing, so they break a window rather than joining it, and
@@ -302,7 +311,7 @@ def classify_pulse(
 
     windows: list[PulseWindow] = []
     rejected: list[RejectedWindow] = []
-    previous = _QUIET
+    disturbance_end: float | None = None
     for label, start, stop in _runs(labels):
         span = (float(axis[start]), float(axis[stop - 1]))
         if label == _GAP:
@@ -311,23 +320,24 @@ def classify_pulse(
                     None, *span, "the record is not finite over this interval"
                 )
             )
-            previous = label
             continue
         kind = _KIND[label]
-        guarded = settling > 0.0 and previous != _QUIET
+        origin = disturbance_end
+        if label in (_DRIVEN, _PLASMA):
+            disturbance_end = float(axis[stop]) if stop < samples else span[1]
+        guarded = settling > 0.0 and origin is not None
         first = start
         if guarded:
-            admitted = np.flatnonzero(axis[start:stop] >= span[0] + settling)
+            admitted = np.flatnonzero(axis[start:stop] >= origin + settling)
             if admitted.size == 0:
                 rejected.append(
                     RejectedWindow(
                         kind,
                         *span,
-                        f"passive current induced before it is still decaying "
-                        f"{settling:.4g} s in, which is past the interval's end",
+                        f"passive current induced at {origin:.4g} s is still decaying "
+                        f"{settling:.4g} s later, which is past the interval's end",
                     )
                 )
-                previous = label
                 continue
             first = start + int(admitted[0])
         if stop - first < minimum_samples:
@@ -339,7 +349,6 @@ def classify_pulse(
                     f"{stop - first} samples is under the floor of {minimum_samples}",
                 )
             )
-            previous = label
             continue
         windows.append(
             PulseWindow(
@@ -351,7 +360,6 @@ def classify_pulse(
                 guarded=guarded,
             )
         )
-        previous = label
 
     return PulseTimeline(
         windows=tuple(windows),

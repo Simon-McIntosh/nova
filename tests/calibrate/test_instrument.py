@@ -64,6 +64,7 @@ def quiet_pulse(
     step: float = 0.0,
     floor: float = FLOOR,
     seed: int = 3,
+    drive_start: float = 1.0,
 ):
     """Return a record whose channel carries a known walk through a known pulse.
 
@@ -81,7 +82,7 @@ def quiet_pulse(
 
     time = np.arange(int(5.0 * SAMPLE_RATE), dtype=float) / SAMPLE_RATE
     drive = np.zeros(time.size)
-    driving = (time >= 1.0) & (time < 1.5)
+    driving = (time >= drive_start) & (time < 1.5)
     drive[driving] = 3.0e3
     walk = offset + rate * time + 0.5 * curvature * time**2
     generator = np.random.default_rng(seed)
@@ -175,7 +176,32 @@ def test_an_integrator_returning_to_a_different_zero_does_not_close():
     )
     assert not defect.closes
     assert defect.defect == pytest.approx(injected, rel=0.05)
-    assert defect.defect_in_scatter > 20.0
+    assert defect.significance > 20.0
+
+
+def test_a_defect_is_scored_against_the_extrapolation_and_not_the_sample_noise():
+    """A short window extrapolated a long way misses by its own fitted rate error.
+
+    This is the plasma shot's shape, and it is not a rare one: the conductors start
+    ramping tens of milliseconds into the record, so the pre-pulse instrument window
+    is short, while the post-pulse window sits more than a second later.  The rate
+    such a window fits is uncertain, that uncertainty enters the prediction
+    multiplied by the gap, and scoring the difference against the channel's sample
+    scatter alone reports the lever arm as accumulated integrator error.  Measured
+    on one archive pulse it called 65 of 73 channels non-closing on a machine that
+    had done nothing to them.
+    """
+
+    time, drive, signal = quiet_pulse(rate=2.0e-5, step=0.0, drive_start=0.02)
+    lead, tail = quiet_windows(time, drive)
+    assert lead.sample_count < 150
+    defect = closure_defect(
+        fit_instrument_terms(time, signal, lead, channel="p01", reference_time=0.0),
+        fit_instrument_terms(time, signal, tail, channel="p01", reference_time=0.0),
+    )
+    assert defect.extrapolation_error > 10.0 * defect.scatter
+    assert defect.closes
+    assert abs(defect.defect) > 3.0 * defect.scatter
 
 
 def test_a_curved_walk_is_not_a_non_closure_however_large_the_linear_defect():
@@ -233,7 +259,7 @@ def test_a_channel_with_no_scatter_makes_any_defect_infinitely_significant():
     """
 
     defect = closure_defect(flat_terms(0.0, 0.0, 1.0), flat_terms(1.0e-4, 1.5, 5.0))
-    assert math.isinf(defect.defect_in_scatter)
+    assert math.isinf(defect.significance)
     assert not defect.closes
     assert closure_defect(flat_terms(0.0, 0.0, 1.0), flat_terms(0.0, 1.5, 5.0)).closes
 

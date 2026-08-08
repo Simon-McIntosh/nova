@@ -190,6 +190,44 @@ def test_the_settling_guard_delays_a_window_that_follows_a_disturbance():
     assert tail.start == pytest.approx(0.35 + 0.146, abs=1.0 / SAMPLE_RATE)
 
 
+def test_a_gap_before_any_disturbance_does_not_start_the_settling_guard():
+    """Every record has an unobserved past, and the first sample does not change it.
+
+    A record whose opening sample failed to digitise is not evidence that something
+    was driven before it: the interval before any record is unobserved whether or not
+    its first sample is finite, and only one of those two cases can be allowed to
+    cost the pre-pulse window.  On a real archive shot this was the whole of it -- one
+    unrecorded sample at the head of the record turned a 216 ms guard on the only
+    interval where nothing had ever been energised, and discarded it entirely.
+    """
+
+    time, drive, plasma = stepped_record()
+    drive[0] = np.nan
+    timeline = classify(time, drive, plasma, decay_time=0.146, settling_periods=1.0)
+    lead = timeline.windows[0]
+    assert lead.kind is WindowKind.quiet
+    assert not lead.guarded
+    assert lead.start == pytest.approx(1.0 / SAMPLE_RATE)
+    assert lead.sample_count > 400
+
+
+def test_a_gap_after_a_disturbance_does_not_cancel_the_guard_it_started():
+    """Passive current decays from the disturbance, not from the last gap.
+
+    An unobserved interval between a drive and the quiet that follows it neither
+    starts a guard nor stops one: the induced current has been decaying since the
+    drive stopped, and losing sight of it for a moment does not reset that.
+    """
+
+    time, drive, plasma = stepped_record()
+    drive[(time >= 0.345) & (time < 0.355)] = np.nan
+    timeline = classify(time, drive, plasma, decay_time=0.146, settling_periods=1.0)
+    tail = timeline.trailing_quiet
+    assert tail is not None
+    assert tail.guarded
+    assert tail.start == pytest.approx(0.345 + 0.146, abs=2.0 / SAMPLE_RATE)
+
+
 def test_a_quiet_predecessor_induces_nothing_so_the_guard_does_not_run():
     """The guard is against decaying passive current, not against elapsed time.
 

@@ -30,10 +30,20 @@ measurement that no per-window offset subtraction removes.  Two extrapolations a
 carried rather than one, because a genuinely curved walk misses a linear
 extrapolation by half its curvature times the gap squared -- a miss that grows with
 the pulse length and looks exactly like accumulated integrator error to a consumer
-who only has the linear number.  The defect is scored against the two windows'
-combined scatter and not against the standard error of their means: the samples
-inside a window are correlated, so a per-sample error would shrink by two orders of
-magnitude and report every channel as failing to close.
+who only has the linear number.
+
+What the defect is scored against matters as much as the defect.  The two windows'
+combined sample scatter is the obvious yardstick and it is not sufficient on its
+own: a prediction carried across the pulse also inherits the leading window's rate
+error multiplied by the gap, and a pre-pulse window of a few tens of milliseconds
+extrapolated across more than a second misses its own target by far more than the
+noise.  Measured on one archive pulse, scoring against scatter alone called
+sixty-five of seventy-three channels non-closing on a machine that had done nothing
+to them.  The two contributions are added in quadrature and reported separately, so
+a channel that needs a longer window is distinguishable from one that needs an
+explanation.  Neither is the standard error of a window mean: the samples inside a
+window are correlated, so that error shrinks by two orders of magnitude and would
+report every channel as defective.
 
 The terms leave here as ``diagnostic-correction-schema`` records of the offset and
 drift_rate kinds, which is where a consumer reads them from.  The schema carries no
@@ -71,12 +81,11 @@ arrangement of three noise draws, which is worse than no curvature at all becaus
 it comes with the same dataclass as a measured one.
 """
 
-MAXIMUM_CLOSURE_DEFECT = 3.0
-"""Multiples of the combined scatter a defect may reach and still be closure.
+MAXIMUM_CLOSURE_SIGNIFICANCE = 3.0
+"""Multiples of the prediction's own uncertainty a defect may reach and still close.
 
-The channel's own floor is the only yardstick available on a single pulse, and
-three of them is the usual bar for calling an excursion something other than the
-noise that produced it.
+Three of them is the usual bar for calling an excursion something other than what
+produced the numbers either side of it.
 """
 
 
@@ -93,6 +102,13 @@ class InstrumentTerms:
     instant and ``drift_curvature`` is the second derivative, constant across the
     window.  ``scatter`` is what is left once the walk is removed, which is the
     channel's floor rather than its variability.
+
+    ``rate_fit_error`` is the formal standard error of the rate from this window's
+    own least squares, and it is not a reproducibility bound: the samples inside a
+    window are correlated, so it understates how far the rate would move on the next
+    pulse, and pooling across pulses is what measures that.  It is carried for the
+    one job it is right for -- propagating the rate's uncertainty across a gap, where
+    no across-pulse number exists because the gap belongs to this pulse alone.
     """
 
     channel: str
@@ -104,6 +120,7 @@ class InstrumentTerms:
     start: float
     stop: float
     sample_count: int
+    rate_fit_error: float = 0.0
     pulse: int | None = None
 
     @property
@@ -136,6 +153,15 @@ class ClosureDefect:
     straight line and ``curved_defect`` carries its curvature along too.  Both are
     reported because the difference between them is the part of the miss the walk's
     own shape explains, and only the remainder is accumulated error.
+
+    ``uncertainty`` is what the defect is scored against, and it is not the sample
+    scatter alone.  A prediction carried across the pulse inherits the leading
+    window's rate error multiplied by the gap, so a short window extrapolated a long
+    way misses its own target by an amount that has nothing to do with the
+    instrument.  Both parts are kept separate -- ``scatter`` for the two windows'
+    combined floor, ``extrapolation_error`` for the lever arm -- because which of
+    them dominates says whether a channel needs a longer window or a real
+    explanation.
     """
 
     channel: str
@@ -143,13 +169,15 @@ class ClosureDefect:
     curved_defect: float
     gap: float
     scatter: float
-    defect_in_scatter: float
+    extrapolation_error: float
+    uncertainty: float
+    significance: float
 
     @property
     def closes(self) -> bool:
-        """Return whether the channel came back inside its own floor."""
+        """Return whether the channel came back inside what its fit can resolve."""
 
-        return self.defect_in_scatter <= MAXIMUM_CLOSURE_DEFECT
+        return self.significance <= MAXIMUM_CLOSURE_SIGNIFICANCE
 
 
 @dataclass(frozen=True)
@@ -219,8 +247,9 @@ def fit_instrument_terms(
     clock, level = clock[keep], level[keep]
     start, stop = float(clock[0]), float(clock[-1])
     centre = 0.5 * (start + stop)
-    coefficients = np.polynomial.polynomial.polyfit(clock - centre, level, 2)
-    residual = level - np.polynomial.polynomial.polyval(clock - centre, coefficients)
+    local = clock - centre
+    coefficients = np.polynomial.polynomial.polyfit(local, level, 2)
+    residual = level - np.polynomial.polynomial.polyval(local, coefficients)
     reference = start if reference_time is None else float(reference_time)
     shift = centre - reference
     constant, linear, quadratic = (float(row) for row in coefficients)
@@ -234,8 +263,30 @@ def fit_instrument_terms(
         start=start,
         stop=stop,
         sample_count=admitted,
+        rate_fit_error=_rate_fit_error(local, residual),
         pulse=pulse,
     )
+
+
+def _rate_fit_error(local: np.ndarray, residual: np.ndarray) -> float:
+    """Return the least-squares standard error of the rate about the window centre.
+
+    Taken about the centre because that is where the fit was formed and where the
+    rate is least entangled with the other two coefficients; a caller wanting the
+    rate elsewhere carries the curvature's own uncertainty over the lever arm too,
+    which is the extrapolation this number exists to price.
+    """
+
+    samples = local.size
+    if samples <= 3:
+        return math.inf
+    design = np.column_stack([np.ones(samples), local, local**2])
+    try:
+        covariance = np.linalg.inv(design.T @ design)
+    except np.linalg.LinAlgError:
+        return math.inf
+    variance = float(residual @ residual) / (samples - 3)
+    return float(math.sqrt(max(0.0, variance * float(covariance[1, 1]))))
 
 
 def closure_defect(
@@ -271,17 +322,21 @@ def closure_defect(
     observed = trailing.level(moment)
     defect = observed - straight
     scatter = float(math.hypot(leading.scatter, trailing.scatter))
-    if scatter <= 0.0:
+    lever = abs(leading.rate_fit_error * gap)
+    uncertainty = float(math.hypot(scatter, lever))
+    if uncertainty <= 0.0:
         significance = 0.0 if defect == 0.0 else math.inf
     else:
-        significance = abs(defect) / scatter
+        significance = abs(defect) / uncertainty
     return ClosureDefect(
         channel=leading.channel,
         defect=defect,
         curved_defect=observed - curved,
         gap=gap,
         scatter=scatter,
-        defect_in_scatter=significance,
+        extrapolation_error=lever,
+        uncertainty=uncertainty,
+        significance=significance,
     )
 
 

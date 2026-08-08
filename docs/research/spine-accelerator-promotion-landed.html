@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="spine-accelerator-promotion-landed">
+  <meta name="plan-title" content="Boundary-push pins and the promoted accelerators — landed">
+  <meta name="plan-summary" content="Per-stage record: the unported behaviour pins re-banked against synthetic truth (finding and fixing a latent x-vs-wall selector defect), the exact-tangent Newton-Krylov and safeguarded Anderson promoted as nova.jax.fixed_point package symbols driving ReconstructProfile, the profile-damping and solved-axis fixes, and the re-measured budget ladder that locked nk-jvp and implicit-fit.">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-evidence-for" content="spine-boundary-accelerator">
+  <meta name="plan-verifies" content="spine-boundary-accelerator#s2">
+  <title>Boundary-push pins + promoted accelerators | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <h1>Boundary-push pins and the promoted accelerators — landed</h1>
+  <p>Landed 2026-08-08 in three commits: <code>a6a8dfc8</code> (behaviour pins + the
+  <code>Topology.boundary</code> selector fix), <code>68be04a0</code>
+  (<code>nova.jax.fixed_point</code> + the <code>ReconstructProfile</code> seam and guards),
+  <code>68e0dd5f</code> (the budget-ladder measurement + the fixed-shape degradation branch).
+  §2 items 1–2 of <a href="/nova/spine-boundary-accelerator.html">spine-boundary-accelerator</a>
+  are complete; both carried decisions are locked on the re-measured ladder.</p>
+
+  <h2 id="s1">§1 — The behaviour pins, and the defect they caught</h2>
+  <p>The five unported assertion classes are re-banked in nova against synthetic truth
+  (nova carries no host contour reader; every reference is an analytic field, an exact
+  wall-node flux, or a Newton-refined saddle):</p>
+  <table>
+    <thead><tr><th>Pin</th><th>Reference</th><th>Measured</th><th>Gate</th></tr></thead>
+    <tbody>
+      <tr><td>wall termination</td><td>exact interpolated wall tangency (analytic node flux
+        through the <code>wall_psi</code> GEMM path)</td><td>4.7e-17 of span</td><td>&lt; 1e-12</td></tr>
+      <tr><td>x-point termination</td><td>Newton-refined saddle of the two-Gaussian field</td>
+        <td>flux 2.9e-6 of span; position 1.2e-5 m</td><td>&lt; 1e-4; &lt; 1e-3 m</td></tr>
+      <tr><td>marginal continuity</td><td>classify-first comparator (innermost in-vessel X flux,
+        else tangency) on a 31-step limited→diverted sweep</td>
+        <td>connectivity step 0.0050; classify-first 0.0771 (15×)</td>
+        <td>&lt; 0.05; &gt; 3×</td></tr>
+      <tr><td>Lipschitz smooth weight</td><td>1e-4·span ψ ripple at τ=1e-3</td>
+        <td>max 0.014, mean 1.5e-5</td><td>&lt; 0.8; &lt; 0.01</td></tr>
+      <tr><td>no-flip X-set</td><td>17-step null-imbalance sweep across the binding switch</td>
+        <td>0 mid-band slots of 34; R/Z masks coupled</td><td>real null heights only</td></tr>
+    </tbody>
+  </table>
+  <p><strong>The first-ever coverage of <code>Topology.boundary</code> caught a live defect.</strong>
+  The selector's vertical shadow bounds were typo'd (<code>nova/jax/topology.py</code> assigned
+  <code>x_height_min</code> twice, the second time from <code>x_height_max</code> with inverted
+  values), so <em>any</em> finite x-point stole the binding from a confined-most wall tangency —
+  a limited plasma beside an in-grid saddle could never bind at the wall. The shadow rule is
+  restored (a wall contact vertically beyond the x-point band lies in a null's private-flux
+  shadow; a side with no null beyond the axis casts no shadow) and pinned six ways in
+  <code>tests/test_topology_boundary.py</code>, with the ionization mask and LCFS flux covered
+  alongside.</p>
+
+  <h2 id="s2">§2 — The promoted accelerators</h2>
+  <p><code>nova/jax/fixed_point.py</code> carries the three batched inner solvers as package
+  symbols with one result contract and one per-map-evaluation residual trace (NaN in Newton
+  tangent slots), so budget ladders compare fairly. All are jit/vmap-safe with fixed shapes:</p>
+  <ul>
+    <li><strong>picard</strong> — relaxed iteration (the status-quo reference);</li>
+    <li><strong>anderson</strong> — Walker–Ni type-II mixing: ridge-regularised history solve,
+      warmup delay, restart on residual growth, the accepted move <em>rescaled</em> to a cap
+      against the plain relaxed step (the library-grade mixer's semantics — the probe script's
+      reject-on-cap degenerates to Picard on strong contractions), non-finite fallback;</li>
+    <li><strong>newton_krylov</strong> — exact-tangent Jacobian-free NK: one
+      <code>jax.linearize</code> per step, fixed-shape batched GMRES on (I−J)s=f with no early
+      exit, relaxed-step fallback and cap; 2+m map evaluations per step.</li>
+  </ul>
+  <p><code>ReconstructProfile</code> gains the seam and the two donor guards:
+  <code>least_squares_map</code> exposes the un-relaxed sweep map for external drivers (the
+  axis seed pins the flood basin — the current-centroid pin);
+  <code>profile_relaxation</code> independently damps the least-squares coefficient update;
+  the scan carries the fixed-shape degradation branch (a sweep whose topology read fails keeps
+  the previous coefficients and flux instead of absorbing into NaN); and
+  <code>ProfileResult.axis</code> now reports the sub-grid O-point of the solved flux instead
+  of the static seed.</p>
+
+  <h2 id="s3">§3 — The re-measured ladder and the two locks</h2>
+  <figure>
+    <img src="/nova/figures/spine-boundary-accelerator/fixed-point-ladder.png"
+         alt="Median residual vs shared evaluation budget for the three schemes, and cold-seed conversion at 10/20/40 evaluations"
+         style="max-width:100%">
+    <figcaption>18 cold-seed slices (benign, shallow-well and rich-profile families) with
+    self-consistent synthetic magnetics on a 17×17 machine built through the canonical Green
+    kernels. Left: median relative residual at each measured evaluation. Right: conversion at
+    the 1e-3 tolerance. Data: <code>docs/figures/spine-boundary-accelerator/fixed_point_ladder.json</code>;
+    harness: <code>benchmarks/fixed_point_ladder.py</code>.</figcaption>
+  </figure>
+  <p>At the shared 40-evaluation budget every well-posed slice converts under all three schemes
+  — this synthetic family does not reproduce ambix's hard cold-seed conversion gap — but the
+  residual depth separates decisively: <strong>Anderson 3.9e-14 and NK 5.9e-14 median versus
+  Picard 6.7e-10</strong>, four decades at equal cost. On the rich-profile (2,2) slices with
+  consistent data NK converges deepest (6.9e-7 at 40 evaluations; 7.2e-11 as the 72-evaluation
+  bootstrap driver, where plain Picard limit-cycles). The two unconverted slices carry bootstrap
+  data that never became self-consistent and defeat all three schemes identically — a
+  data-consistency failure, not a scheme failure.</p>
+  <p><strong>accelerator-primary → nk-jvp.</strong> The nova re-measurement shows NK at or
+  beyond Anderson everywhere it matters and never worse than tolerance-relevant margins; the
+  carried ambix evidence (62% vs 19%/10% cold-slice conversion on real diverted maps, where
+  Anderson tied Picard) supplies the hard-map discrimination this synthetic family cannot.
+  Anderson and Picard stand as the safeguarded fallback ladder.</p>
+  <p><strong>profile-state → implicit-fit.</strong> NK converges the implicit-fit map everywhere
+  the data is self-consistent, including the under-constrained rich family, so the coefficients
+  never need to enter the Newton state; damping plus the degradation branch hold the confined
+  branch. The §2 item-5 coupled-KKT lift is retired unless MAST catalog solves surface
+  coefficient thrash the damping cannot hold. The damping comparison itself came out
+  protective-only on this family (undamped runs converge faster and nothing escapes to the
+  outboard corner synthetically) — the escape evidence remains ambix's held-out measurement,
+  and the parameter defaults to 1.0 (off).</p>
+
+  <h2 id="s4">§4 — What's next</h2>
+  <p>§2 items 3–4 (tracked as <code>f-sba-002</code>): remove the read wall — ~99.7% of every
+  map evaluation, with warm-started binding search, dilate-by-doubling flood and a coarser
+  iteration-resolution read, each behind a read-equivalence check — then generalise
+  <code>ring_sign_changes</code> onto nova's hex stencil rings. The behaviour pins landed here
+  are the equivalence floor those removals are measured against.</p>
+
+</main>
+</body>
+</html>

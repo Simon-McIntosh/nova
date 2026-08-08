@@ -23,7 +23,8 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-08">
 <meta name="plan-supersedes" content="imas-ambix:batched-newton-accelerator">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
+<meta name="plan-impl" content="0.5">
 </head>
 <body>
   <main class="plan-doc">
@@ -89,28 +90,28 @@
       the accelerator-primary decision weighs.</figcaption>
     </figure>
 
-    <h2 id="s2">§2 — Work items</h2>
+    <h2 id="s2">§2 — Work items <span class="badge badge-shipped">items 1–2 ✓ landed 2026-08-08</span></h2>
+    <p class="landed-summary"><strong>Items 1–2 landed</strong> (commits <code>a6a8dfc8</code>,
+    <code>68be04a0</code>, <code>68e0dd5f</code>): the five behaviour pins re-banked against
+    synthetic truth (wall tangency to 5e-17 of span, saddle flux to 3e-6, transition continuity
+    0.005 vs classify-first 0.077, Lipschitz max 0.014, zero mid-band X-slot flips) — and the
+    first-ever <code>Topology.boundary</code> coverage caught a live defect (any finite x-point
+    stole the binding from a confined-most wall tangency; shadow rule fixed).
+    <code>nova.jax.fixed_point</code> carries NK / Anderson / Picard as package symbols driving
+    <code>ReconstructProfile.least_squares_map</code>; damping, degradation branch and
+    solved-axis fixes landed. Ladder re-measured (18 slices, budget 40): NK/Anderson median
+    6e-14 vs Picard 7e-10; <strong>accelerator-primary → nk-jvp; profile-state → implicit-fit</strong>
+    (item 5 retired). Full record:
+    <a href="/nova/spine-accelerator-promotion-landed.html">spine-accelerator-promotion-landed</a>.</p>
     <ol>
-      <li><strong>Pin the behaviour.</strong> Re-bank the unported assertion classes against
-      synthetic truth (nova has no host contour reader; the ambix synthetic gate reproduced
-      interpolated wall tangency to 1e-15): x-point-termination and wall-termination of the push;
-      limited↔diverted continuity through the marginal transition
-      (<code>max_rel_step &lt; 0.05</code>, classify-first steps &gt;3× larger); the Lipschitz
-      smooth-weight bound (1e-4·span ψ ripple moves core weight &lt;0.8 max / &lt;0.01 mean);
-      no-flip-on-topology-switch for emitted x-slot labels; and first-ever coverage of
-      <code>Topology.boundary</code> / <code>x_mask</code> / <code>psi_lcfs</code>
-      (<code>nova/jax/topology.py</code>) — the x-vs-wall selector is currently asserted by no
-      test in the repo.</li>
-      <li><strong>Promote the accelerators into the package.</strong> The exact-tangent
-      Jacobian-free Newton–Krylov (<code>jax.linearize</code> tangents + fixed-shape batched
-      GMRES) moves from the ambix probe script into nova as the batched inner solver driving
-      <code>forward_operator.residual</code> / <code>ReconstructProfile</code>; the safeguarded
-      Anderson mixer (Walker–Ni type-II, ridge-regularised, step-capped, Picard fallback) ports as
-      the fallback option; a current-centroid pin guards NK's basin (the smooth map has multiple
-      fixed points). Add the profile-damping parameter to the LSQ path (undamped coefficient jumps
-      can escape to the outboard-corner attractor — the guard ambix needed and nova lacks) and fix
-      <code>ProfileResult.axis</code> returning the static seed instead of the solved axis. Lock
-      the two carried decisions (below) on the re-measured budget ladder.</li>
+      <li><span class="badge badge-shipped">✓</span> <strong>Pin the behaviour.</strong> Landed —
+      see the summary card and the
+      <a href="/nova/spine-accelerator-promotion-landed.html">landed record</a> for the measured
+      floors behind each gate.</li>
+      <li><span class="badge badge-shipped">✓</span> <strong>Promote the accelerators into the
+      package.</strong> Landed — NK + Anderson + guards in <code>nova/jax/fixed_point.py</code> and
+      <code>ReconstructProfile</code>; both carried decisions locked on the re-measured ladder
+      (below).</li>
       <li><strong>Remove the read wall.</strong> The topology read is ~99.7% of every map
       evaluation. Three removals, each with a read-equivalence check: warm-started binding search
       (bracket around the previous sweep's level; cold sweep only on first evaluation or bracket
@@ -124,10 +125,11 @@
       <code>nova/jax/null.py</code> already categorizes on it). The sign-change count is
       ring-length-independent; check the conditioning of the exactly-determined 6-coefficient
       sub-null fit on the 7-point cluster before switching any default. The raster path stays.</li>
-      <li><strong>Coupled profile state.</strong> Lift the rich profile coefficients into the
-      Newton state (smooth softplus non-negativity, ridge+prior rows inside the Jacobian) so
-      under-constrained higher-order fits stop thrashing between sweeps — the mechanism the
-      profile-state decision selects.</li>
+      <li><strong>Coupled profile state — retired.</strong> The profile-state decision locked
+      <em>implicit-fit</em>: the exact-tangent NK converges the implicit-fit map everywhere the
+      data is self-consistent (rich (2,2) family included), so the coefficients never enter the
+      Newton state; damping plus the fixed-shape degradation branch hold the confined branch.
+      Reopen only if MAST catalog solves surface coefficient thrash the damping cannot hold.</li>
     </ol>
     <p><em>Done-when:</em> behaviour pins green including the marginal-transition and
     x-vs-wall gates; NK/Anderson/Picard re-measured on the fast read with both decisions locked;
@@ -137,34 +139,34 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="accelerator-primary" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="accelerator-primary" data-choice="nk-jvp" data-by="reckon-ship" data-when="2026-08-08T18:04:17+00:00">
     <p class="r-dec-q">Which convergence accelerator is adopted as the batched inner solver?
         Carried from the superseded ambix plan. Evidence so far: exact-tangent NK converts 62% of
         cold slices at a 40-evaluation budget vs 19% smooth-Picard and 10% production-Picard, with
         every operation a Green&#x27;s-GEMM column or tiny dense solve; Anderson ties Picard exactly on
         both maps in both studies. Lock after the §2 item-2 re-measurement on the fast read.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="nk-jvp">exact-tangent NK primary, safeguarded fallback</button>
+      <button class="r-opt chosen" data-value="nk-jvp">exact-tangent NK primary, safeguarded fallback</button>
       <button class="r-opt" data-value="anderson">safeguarded Anderson primary</button>
       <button class="r-opt" data-value="picard">relaxed Picard (status quo)</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Re-measured on nova&#x27;s reconstruction sweep map (benchmarks/fixed_point_ladder.py: 18 cold-seed slices with self-consistent synthetic magnetics, shared 40-evaluation budget). Every well-posed slice converts under all three schemes, with exact-tangent NK and safeguarded Anderson reaching a median residual near 6e-14 - four decades under relaxed Picard&#x27;s 7e-10 - and NK converging the consistent rich-profile slices deepest (7e-7 at 40 evaluations, 7e-11 as the bootstrap driver, where Picard stalls near 2e-4). Combined with the carried ambix cold-seed evidence (62% conversion vs 19% smooth-Picard and 10% production-Picard on real slices; Anderson tied Picard there), the exact-tangent NK is the batched inner solver; the safeguarded Anderson mixer and relaxed Picard stand as the fallback ladder. All three are nova.jax.fixed_point package symbols sharing one per-evaluation residual trace.</p>
     </div>
-<div class="r-dec" data-key="profile-state" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="profile-state" data-choice="implicit-fit" data-by="reckon-ship" data-when="2026-08-08T18:04:17+00:00">
     <p class="r-dec-q">How do the rich-profile coefficients enter the Newton iteration —
         lifted into a coupled KKT state (nonneg + prior rows inside the Jacobian), or held as an
         inner implicit fit with damping only?</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="coupled-kkt-state">coupled KKT Newton state</button>
-      <button class="r-opt" data-value="implicit-fit">implicit inner fit + damping</button>
+      <button class="r-opt chosen" data-value="implicit-fit">implicit inner fit + damping</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">The exact-tangent NK converges the implicit-fit map everywhere the data is self-consistent, including the rich (2,2)-degree family (6.9e-7 at 40 evaluations; 7.2e-11 driving the bootstrap), so the profile coefficients never need to enter the Newton state for convergence. The guards are the profile_relaxation damping parameter (independent coefficient morphing) plus the donor fixed-shape degradation branch (a sweep whose read fails keeps the previous coefficients and flux). The two failing ladder slices carry bootstrap data that never became self-consistent and defeat all three schemes equally - a data-consistency problem, not a state-lift problem. The coupled-KKT lift (section 2 item 5) is retired unless MAST catalog solves surface coefficient thrash the damping cannot hold.</p>
     </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-sba-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-08" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-sba-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-08" data-recommends-skill="" data-resolved-at="2026-08-08T18:04:17+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Land the behaviour pins and the promoted accelerator (§2 items 1–2)</h4>
     <div class="r-fu-body"><p>First rung: the kernel is trustworthy only once its termination
         and continuity behaviours are pinned in nova, and the accelerator measurement needs those
@@ -211,6 +213,60 @@ Done-when
      NK/Anderson/Picard ladder re-measured and both plan decisions locked
      with the measurement recorded.
   3. Full suite green; followup for §2 items 3-5 written; this one resolved.</pre>
+    <p class="r-fu-outcome">Landed in a6a8dfc8 (behaviour pins + Topology.boundary shadow-rule fix), 68be04a0 (nova.jax.fixed_point NK/Anderson/Picard + least_squares_map seam + profile_relaxation + solved-axis fix), 68e0dd5f (budget ladder + fixed-shape degradation branch). Pins: exact wall tangency to 5e-17 of span, saddle flux to 3e-6, transition continuity 0.005 vs classify-first 0.077, Lipschitz max 0.014, zero mid-band X-slot flips; Topology.boundary latent defect found and fixed (any finite x-point stole the binding from a confined-most wall tangency). Ladder: NK/Anderson median 6e-14 vs Picard 7e-10 at 40 evaluations; both decisions locked (nk-jvp; implicit-fit, retiring the item-5 KKT lift).</p>
+    </article>
+<article class="r-fu" data-id="f-sba-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-08" data-recommends-skill="/reckon-ship spine-boundary-accelerator §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Remove the read wall and generalise the stencil (§2 items 3-4)</h4>
+    <div class="r-fu-body"><p>The accelerators are in and pinned; the remaining wall is the topology read itself (~99.7% of every map evaluation). Land the three read-cost removals with read-equivalence checks, then parameterise ring_sign_changes on a stencil array for nova's hex rings. Item 5 (coupled KKT state) is retired by the implicit-fit decision.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    spine-boundary-accelerator (http://127.0.0.1:8765/nova/spine-boundary-accelerator.html)
+Section: §2 items 3-4
+Capability: orchestrator
+Requirements: deep reasoning, strict verification
+
+Context
+  The exact-tangent NK is the locked batched inner solver (accelerator-primary
+  = nk-jvp) and the behaviour pins are green, so read-equivalence is testable:
+  the topology read is ~99.7% of every map evaluation and carries a &gt;=5x
+  removal path measured in ambix.
+
+Work
+  Item 3 - three read-cost removals, each landed with a read-equivalence
+  check against the current read and the measured speedup recorded:
+  (a) warm-started binding search - bracket around the previous sweep&#x27;s
+      level, cold sweep only on first evaluation or bracket miss;
+  (b) dilate-by-doubling flood fill (~log2(nr+nz) steps to the same fixed
+      point) replacing the nr+nz fixed-iteration fill;
+  (c) coarser iteration-resolution read with the calibrated tau=1e-3
+      full-resolution read at emit only.
+  Item 4 - generalise nova/jax/stencil_nulls.ring_sign_changes from the
+  hardcoded 8-ring raster roll to a stencil-array parameter consuming the
+  angle-sorted 6-neighbour rings from nova/biot/plasmagrid.py ((n,7)
+  stencil; nova/jax/null.py already categorizes on it). Check the
+  conditioning of the exactly-determined 6-coefficient sub-null fit on the
+  7-point cluster before switching any default; the raster path stays.
+
+State to read
+  nova/jax/connectivity_boundary.py (_read_ingredients level sweep, flood)
+  nova/jax/flux_surface_connectivity.py (fixed-iteration flood fill)
+  nova/jax/stencil_nulls.py, nova/jax/null.py, nova/biot/plasmagrid.py
+  benchmarks/fixed_point_ladder.py (the budget-ladder harness to extend
+  with wall-clock timing once the read is fast)
+  tests/test_connectivity_boundary.py, tests/test_topology_boundary.py
+  (the pins that must stay green through every removal)
+
+Scope locks / constraints
+  Fixed-shape, jit/vmap-safe; no torch; mechanism names only, no plan
+  labels in source. Read-equivalence first, speed second: no removal lands
+  without its equivalence check. Tests via the file-capture method.
+
+Done-when
+  1. All three removals landed with read-equivalence checks green and the
+     measured per-evaluation speedup recorded in the plan.
+  2. ring_sign_changes takes a stencil array; hex-ring path tested with the
+     7-point sub-null conditioning recorded; raster default unchanged.
+  3. Full suite green; behaviour pins untouched; followup resolved and the
+     plan collapsed for items 3-4.</pre>
     </article>
 </section>
   </main>

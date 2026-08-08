@@ -20,8 +20,8 @@
   <title>Diagnostic Correction Schema | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-07">
-<meta name="plan-version" content="6">
+<meta name="plan-modified" content="2026-08-08">
+<meta name="plan-version" content="7">
 <meta name="plan-impl" content="1.0">
 </head>
 <body>
@@ -234,6 +234,31 @@ Done-when
   2. Gain-application decision surfaced to the owner; implemented only if
      locked, with the bench shift quantified
   3. Followup written into plan + this one resolved</pre>
+    </article>
+<article class="r-fu" data-id="f-dcs-004" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-08" data-recommends-skill="/reckon-edit diagnostic-correction-schema" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Give drift curvature its own schema slot</h4>
+    <div class="r-fu-body">The instrument-term extraction (vacuum-signature-extraction §2.2, merge e59d976a) measures integrator drift curvature to 1e-3 relative, but the schema's drift_rate kind declares an optional curvature term with NO SLOT, so the value currently travels in the record's notes with its own units. Folding it into the slope would report a number that is the slope at no instant. Add the slot (or a drift kind with slope+curvature fields) and migrate the notes-borne values when the archive sweep starts emitting at scale.</div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    diagnostic-correction-schema (docs/plans/diagnostic-correction-schema.html)
+Section: schema evolution - drift curvature slot
+Capability: general
+Requirements: strict verification
+
+Context
+  nova/calibrate/instrument.py measures drift curvature (integrator
+  second-order walk) to 1e-3 relative; the drift_rate correction kind has no
+  field for it, so it rides in notes. The archive sweep
+  (vacuum-signature-extraction §2.4) will emit these at scale.
+
+State to read
+  nova/calibrate/schema/ (the LinkML source and generated models)
+  nova/calibrate/instrument.py (what is measured and its units)
+  tests/calibrate/test_instrument.py (emission-path tests)
+
+Done-when
+  1. Curvature carried in a typed slot with units; generated models regreen
+  2. Notes-borne values migrated or a migration path documented
+  3. Read-path float-equality tests stay green; followup resolved</pre>
     </article>
 </section>
 

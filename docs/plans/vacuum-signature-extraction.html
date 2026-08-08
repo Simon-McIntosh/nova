@@ -21,7 +21,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-08">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="3">
+<meta name="plan-impl" content="0.4">
 </head>
 <body>
 <main class="plan-doc">
@@ -45,19 +46,31 @@
 
   <h2 id="s2">§2 — Implementation</h2>
   <ol>
-    <li><strong>Window discovery.</strong> A machine-agnostic routine that classifies each
-    pulse's timeline into instrument-quiet (no drives), vacuum-driven (drives, no plasma), and
-    plasma intervals, from recorded currents and a plasma-presence signal (Ip channel or its
-    absence). Adapters supply channel maps; the classifier is shared. Post-pulse windows carry
-    a passive-decay guard: exclude the first N × (longest measured case/vessel L/R time) or
-    fit the decay explicitly.</li>
-    <li><strong>Instrument terms per (pulse, channel).</strong> From the instrument-quiet
-    windows: offset, drift rate, drift curvature (integrator second-order walk), and — where
-    both pre- and post-pulse windows exist — the closure test: does the integrator return to
-    its extrapolated baseline after the pulse? A non-closing channel is flagged; the closure
-    defect measures accumulated integrator error, exactly the quantity that corrupts flux
-    loops and long-pulse reconstructions. All terms emitted as
-    <code>diagnostic-correction-schema</code> records (offset and drift_rate kinds).</li>
+    <li class="section-landed"><span class="badge badge-shipped">✓ landed 2026-08-08</span>
+    <strong>Window discovery — landed.</strong> <code>nova/calibrate/windows.py</code>,
+    arrays + adapter callbacks, 20 tests. The settling guard runs from the last
+    <em>observed</em> disturbance (a 0.13 ms recording gap neither starts nor cancels one —
+    the archive found this, manufactured signals did not). Demo verdicts: a designed vacuum
+    shot yields quiet/driven/quiet/quiet with 75/75 channels fitted; a plasma shot's pre-pulse
+    quiet window is only 18 ms; an undriven shot is ONE whole-record quiet window handled
+    without inventing a closure it cannot test. Two adapter facts §2.4 inherits (in the
+    README): classify with the machine's labelling threshold (1 kA — the 200 A modelling bar
+    shreds an undriven record into 200+ unusable fragments), and the guard budget is a
+    per-pulse measurement (three nominal τ = 216 ms leaves 3,648 post-pulse samples; three
+    fitted τ = 650 ms leaves 137). Merge <code>e59d976a</code>.</li>
+    <li class="section-landed"><span class="badge badge-shipped">✓ landed 2026-08-08</span>
+    <strong>Instrument terms per (pulse, channel) — landed.</strong>
+    <code>nova/calibrate/instrument.py</code>, 21 tests; synthetic-truth recovery pinned at
+    offset 1e-5 T, drift rate 10%, curvature 1e-3, injected non-closure 5%. Closure is scored
+    against scatter AND the fit's rate standard error carried over the extrapolation lever in
+    quadrature — scatter alone falsely condemned 65/73 channels on an 18 ms window
+    extrapolated 1.26 s (now 67/73 close; the six real candidates are led by ccbv14 at
+    9.7σ). Emission path works: 154 records over 77 channels validate and round-trip through
+    <code>apply_corrections</code> to flatten quiet windows below 1e-7 T; emitted as
+    <code>recorded</code>, not <code>promoted</code> (3 pulses bound nothing about the
+    machine's life). Drift curvature travels in notes — the schema gives it no slot (queued
+    with the schema plan). Demo banked at
+    <code>~/.cache/nova-mast/vacuum-signatures/</code>. Merge <code>e59d976a</code>.</li>
     <li><strong>Opportunistic gain checks.</strong> In vacuum-driven windows, the exact
     solution per channel follows from the described Green's columns and the recorded currents —
     a per-pulse mini gain fit. Pooled over the archive, these detect scale steps and
@@ -82,7 +95,7 @@
 
   <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-vse-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-07" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-vse-001" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-07" data-recommends-skill="" data-resolved-at="2026-08-08T08:13:11+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Implement the window classifier and instrument-term extraction with synthetic-truth tests</h4>
     <div class="r-fu-body"><p>The §2.1–§2.2 core: pulse timeline classification and per-window
       offset/drift/closure extraction, unit-tested on manufactured signals before any archive
@@ -117,6 +130,36 @@ Done-when
   2. Demonstration notebook/script on 3 MAST pulses (one designed vacuum
      shot, one plasma shot pre/post windows, one degenerate case)
   3. Followup written into plan + this one resolved</pre>
+    <p class="r-fu-outcome">§2.1-§2.2 landed - merge e59d976a (commits adb7cb70, b60d87c8, a943c516). Classifier + instrument terms in nova/calibrate (arrays+adapters, 41 new tests; targeted lane 221 passed; fast lane 4206 passed at the known 5-failure env baseline). Synthetic recovery pinned: offset 1e-5 T, drift rate 10%, curvature 1e-3, non-closure 5%. 3-pulse demo banked: 75/75, 73/73, 69/69 channels fitted; degenerate undriven shot handled. Closure scored with rate standard error over the extrapolation lever (65/73 false condemnations → 67/73 close; six real candidates led by ccbv14 9.7σ). Emission path proven: 154 records validate and flatten quiet windows below 1e-7 T via apply_corrections; emitted as recorded, not promoted. Two archive-found guard/scoring faults fixed with tests; two adapter facts recorded for the sweep (1 kA labelling threshold; guard budget 216 ms affordable / 650 ms not).</p>
+    </article>
+<article class="r-fu" data-id="f-vse-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-08" data-recommends-skill="/reckon-ship vacuum-signature-extraction §2.3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Opportunistic gain checks and the archive sweep (§2.3-§2.4)</h4>
+    <div class="r-fu-body">The classifier and terms are landed and the demo measured the guard budget per pulse. Next: per-pulse mini gain fits in vacuum-driven windows against the described Green's columns (§2.3), then the SLURM-chunked archive sweep (§2.4) producing the per-pulse signature store, per-channel drift/offset series, and the transition catalogue (the block table's 37 switch points and obv03's mid-life step become measured transitions with pulse-number precision). Inherit the two adapter facts from the README: labelling threshold 1 kA, and the guard width is a per-pulse affordability measurement. Portability proof (§2.5) remains after the sweep.</div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    vacuum-signature-extraction (docs/plans/vacuum-signature-extraction.html)
+Section: §2.3 (opportunistic gain checks) + §2.4 (archive sweep)
+Capability: general
+Requirements: strict verification
+
+Context
+  Classifier + instrument terms landed (merge e59d976a); 3-pulse demo banked
+  at ~/.cache/nova-mast/vacuum-signatures/. Build the per-pulse gain checks
+  against the described Green&#x27;s columns, then sweep the 17,111-shot archive
+  chunked under the one-hour SLURM debug wall.
+
+State to read
+  docs/plans/vacuum-signature-extraction.html (§2.3-§2.4)
+  nova/calibrate/windows.py + instrument.py + README.md (adapter facts:
+  1 kA labelling threshold; guard budget is per-pulse)
+  ~/.cache/nova-mast/vacuum-signatures/ (demo adapter, the sweep&#x27;s seed)
+  nova/imas/mast_vacuum_response.py (described Green&#x27;s columns)
+
+Done-when
+  1. Per-pulse gain-check kernel landed with synthetic-truth tests
+  2. Archive sweep banked: signature store, drift/offset series, transition
+     catalogue with pulse-number precision; summary figures committed
+  3. Corrections emitted in schema form; findings in a research note
+  4. Followup written into plan + this one resolved</pre>
     </article>
 </section>
 

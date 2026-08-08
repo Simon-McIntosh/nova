@@ -890,12 +890,12 @@ def unmapped_current_blocked(machine: DescribedMachine) -> tuple[BlockedSignal, 
             if conductors
             else "separate conductors,"
         )
-        served = tuple(
+        pack_channels = tuple(
             drive.channel
             for drive in machine.drives.drives
             if drive.conductor in conductors and drive.channel.endswith("_coil_current")
         )
-        terms = ", ".join((*served, f"{prefix}_case_current"))
+        terms = ", ".join((*pack_channels, f"{prefix}_case_current"))
         blocked.append(
             BlockedSignal(
                 source_group=CURRENT_GROUP,

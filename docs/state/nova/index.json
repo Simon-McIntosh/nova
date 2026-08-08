@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-08T18:42:47",
+  "updated": "2026-08-08T23:50:12",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -315,6 +315,19 @@
                 "verification": "strict"
               }
             }
+          },
+          {
+            "slug": "nova-jax-dissolution",
+            "why_now": "The hygiene sweep clears the ground but leaves the organising fault: nova/jax is the package's only technology-organised directory and holds a subset of the traced code, which is what let the numpy modules drift in. Two owner decisions are already locked (one file per concept, traced path default), so the pattern conversion can start as soon as the sweep closes.",
+            "done_when": "Entry-point naming locked; the biot operator pair converted end-to-end as the reviewed pattern with parity green and consumers rewired; remaining pairs merged and unpaired modules rehomed; the directory reduced to its two library-support modules.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
           }
         ],
         "starts": "2026-08-10",
@@ -445,6 +458,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 21
+    "_version": 22
   }
 }

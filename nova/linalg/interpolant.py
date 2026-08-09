@@ -1,4 +1,4 @@
-"""Manage 1D basis functions."""
+"""Manage one-dimensional interpolants."""
 
 import abc
 from dataclasses import dataclass, field

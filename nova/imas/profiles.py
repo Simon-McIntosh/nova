@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from functools import cached_property
 from typing import Callable, ClassVar
 
-# import jax.numpy as jnp
 import numpy as np
 
 # from scipy.interpolate import griddata, interp1d, RBFInterpolator, RectBivariateSpline
@@ -19,8 +18,6 @@ from nova.imas.equilibrium import Equilibrium, EquilibriumData
 from nova.imas.getslice import GetSlice
 from nova.imas.pf_passive import PF_Passive
 from nova.imas.pf_active import PF_Active
-
-# from nova.jax.basis import Interp
 
 
 @dataclass
@@ -61,7 +58,6 @@ class Profile(Flux, Equilibrium, GetSlice, CoilData):
         """Retrun flux function interpolant for attr."""
         if attr in ["p_prime", "ff_prime"]:
             return self._interp1d(self.data.psi_norm, self[attr])
-            # return Interp(jnp.array(self.data.psi_norm)) / jnp.array(self[attr])
         return super().fluxfunctions(attr)
 
     @property

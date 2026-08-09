@@ -29,6 +29,7 @@ class Cylinder(Matrix):
     def __post_init__(self):
         """Stack section corners against targets."""
         super().__post_init__()
+        self._validate_source_geometry()
         self.rs = np.stack(
             [
                 self.source("x") + delta / 2 * self.source("dx")
@@ -45,6 +46,13 @@ class Cylinder(Matrix):
         )
         self.r = np.stack([self.target("r") for _ in range(4)], axis=-1)
         self.z = np.stack([self.target("z") for _ in range(4)], axis=-1)
+
+    def _validate_source_geometry(self):
+        """Reject source sections without finite positive dimensions and area."""
+        for attr in ("dx", "dz", "area"):
+            values = np.asarray(self.source[attr], dtype=float)
+            if np.any(~np.isfinite(values) | (values <= 0.0)):
+                raise ValueError(f"cylinder source {attr} must be finite and positive")
 
     @cached_property
     def _corners(self):

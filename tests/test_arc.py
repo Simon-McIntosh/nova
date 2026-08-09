@@ -60,5 +60,34 @@ def test_coordinate_transform_local_axis(source):
     assert np.allclose(source.space._rotate_to_local(source.axis)[1], [0, 0, 1])
 
 
+@pytest.mark.parametrize("local_radius", [0.0, np.nan])
+def test_arc_rejects_nonpositive_or_nonfinite_source_radius(source, local_radius):
+    index = source.index[0]
+    source.loc[index, "x1"] = source.loc[index, "x0"] + local_radius
+    source.loc[index, "y1"] = source.loc[index, "y0"]
+    source.loc[index, "z1"] = source.loc[index, "z0"]
+    target = Target({"x": [2.0], "z": [-0.3]})
+    with pytest.raises(ValueError, match="radius must be finite and positive"):
+        Arc(source, target)
+
+
+@pytest.mark.parametrize("dl", [0.0, -1.0, np.nan, np.inf])
+def test_arc_rejects_nonpositive_or_nonfinite_dl(source, dl):
+    source.loc[source.index[0], "dl"] = dl
+    target = Target({"x": [2.0], "z": [-0.3]})
+    with pytest.raises(ValueError, match="dl must be finite and positive"):
+        Arc(source, target)
+
+
+def test_arc_rejects_coincident_stored_endpoints(source):
+    index = source.index[0]
+    source.loc[index, ["x2", "y2", "z2"]] = source.loc[
+        index, ["x1", "y1", "z1"]
+    ].to_numpy()
+    target = Target({"x": [2.0], "z": [-0.3]})
+    with pytest.raises(ValueError, match="coincident endpoints.*ambiguous topology"):
+        Arc(source, target)
+
+
 if __name__ == "__main__":
     pytest.main([__file__])

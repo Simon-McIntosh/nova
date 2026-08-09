@@ -11,6 +11,7 @@ function stay one and the same kernel.
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
 from nova.biot.biotframe import Source, Target
 from nova.biot.cylinder import Cylinder
@@ -21,10 +22,10 @@ _TR = np.array([1.3, 1.1, 0.7, 1.6, 0.95])
 _TZ = np.array([0.3, 0.4, -0.2, 0.0, 0.1])
 
 
-def _ring_source(a=0.9, z0=0.1):
+def _ring_source(a=0.9, z0=0.1, da=0.1, dz=0.1):
     """Return a single rectangular-section ring Source and its frame geometry."""
     source = Source(
-        {"x": [a], "z": [z0], "dx": 0.1, "dz": 0.1},
+        {"x": [a], "z": [z0], "dx": da, "dz": dz},
         segment="cylinder",
         section="rectangle",
         nturn=1,
@@ -72,3 +73,46 @@ def test_solve_assembly_matches_greens():
         dz = float(source["dz"][col])
         psi_g, _, _ = cylinder_greens(_TR, _TZ, a, z0, da, dz)
         np.testing.assert_allclose(psi[:, col], psi_g, rtol=1e-9)
+
+
+@pytest.mark.parametrize(
+    ("attr", "value"),
+    [
+        ("area", 0.0),
+        ("area", -1.0),
+        ("area", np.nan),
+        ("area", np.inf),
+        ("dx", 0.0),
+        ("dx", -1.0),
+        ("dx", np.nan),
+        ("dx", np.inf),
+        ("dz", 0.0),
+        ("dz", -1.0),
+        ("dz", np.nan),
+        ("dz", np.inf),
+    ],
+)
+def test_cylinder_rejects_invalid_section_geometry(attr, value):
+    source, _ = _ring_source()
+    source.loc[:, attr] = value
+    target = Target({"x": [1.3], "z": [0.3]}, available=[])
+    with pytest.raises(ValueError, match=rf"{attr} must be finite and positive"):
+        Cylinder(source, target, turns=[False, False], reduce=[False, False])
+
+
+@pytest.mark.parametrize(
+    ("da", "dz", "target_r", "target_z"),
+    [
+        (0.1, 0.1, 0.95, 0.1),
+        (0.1, 0.1, 0.95, 0.15),
+        (1e-6, 2e-6, 4.0, 3.0),
+    ],
+    ids=["section-face", "section-corner", "thin-section-far-field"],
+)
+def test_cylinder_is_finite_on_section_boundaries_and_scale_separation(
+    da, dz, target_r, target_z
+):
+    source, _ = _ring_source(da=da, dz=dz)
+    target = Target({"x": [target_r], "z": [target_z]}, available=[])
+    kernel = Cylinder(source, target, turns=[False, False], reduce=[False, False])
+    assert np.all(np.isfinite([kernel.Psi, kernel.Br, kernel.Bz]))

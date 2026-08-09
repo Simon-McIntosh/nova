@@ -116,7 +116,7 @@ from typing import ClassVar
 import numpy as np
 
 from nova.biot.matrix import Matrix
-from nova.biot.polybow import section_area, section_corners
+from nova.biot.polybow import section_area, section_corners, signed_section_area
 
 _ROWS = ("A_z", "B_x", "B_y")
 """The rows the reduction forms, in the segment's own local cartesian frame.
@@ -159,8 +159,7 @@ def _oriented_loop(vertices: np.ndarray) -> np.ndarray:
     edge = np.roll(corners, -1, axis=0) - corners
     length = np.linalg.norm(edge, axis=1)
     corners = corners[length > 0.0]
-    rolled = np.roll(corners, -1, axis=0)
-    signed = float(np.sum(corners[:, 0] * rolled[:, 1] - rolled[:, 0] * corners[:, 1]))
+    signed = signed_section_area(corners)
     return corners if signed > 0 else corners[::-1].copy()
 
 

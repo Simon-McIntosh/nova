@@ -81,6 +81,21 @@ class Arc(Constants, Matrix):
         self.zs = self("source", "z1")
         self.r = np.linalg.norm([self("target", "x"), self("target", "y")], axis=0)
         self.z = self("target", "z")
+        self._validate_source_geometry()
+
+    def _validate_source_geometry(self):
+        """Reject source geometry that has no unambiguous finite arc."""
+        if np.any(~np.isfinite(self.rs) | (self.rs <= 0.0)):
+            raise ValueError("arc source radius must be finite and positive")
+        dl = np.asarray(self["dl"], dtype=float)
+        if np.any(~np.isfinite(dl) | (dl <= 0.0)):
+            raise ValueError("arc source dl must be finite and positive")
+        coincident = np.all(
+            np.asarray(self.source.start_point) == np.asarray(self.source.end_point),
+            axis=1,
+        )
+        if np.any(coincident):
+            raise ValueError("arc source coincident endpoints have ambiguous topology")
 
     @cached_property
     def phi(self):
@@ -200,7 +215,24 @@ class Arc(Constants, Matrix):
     # @coefficent
     def B2(self):
         """Return B2 coefficient."""
-        return self.rs**2 + self.r**2 - 2 * self.r * self.rs * np.cos(self.Phi)
+        return (
+            self.rs - self.r
+        ) ** 2 + 4 * self.rs * self.r * self.half_phi_sine_squared
+
+    @property
+    def half_phi_sine_squared(self):
+        """Return sin(Phi / 2)^2 without subtracting a near-unit cosine."""
+        return np.sin(self.Phi / 2) ** 2
+
+    @property
+    def radial_projection_gap(self):
+        """Return rs - r cos(Phi) from the radial gap and a positive term."""
+        return (self.rs - self.r) + 2 * self.r * self.half_phi_sine_squared
+
+    @property
+    def radial_square_gap(self):
+        """Return rs^2 - r^2 with the square difference factored."""
+        return (self.rs - self.r) * (self.rs + self.r)
 
     @property
     # @coefficent
@@ -218,7 +250,7 @@ class Arc(Constants, Matrix):
     # @coefficent
     def beta_1(self):
         """Return beta 1 coefficient."""
-        return (self.rs - self.r * np.cos(self.Phi)) / np.sqrt(self.G2)
+        return self.radial_projection_gap / np.sqrt(self.G2)
 
     @property
     # @coefficent
@@ -232,7 +264,7 @@ class Arc(Constants, Matrix):
         """Return beta 3 coefficient."""
         return (
             self.gamma
-            * (self.rs - self.r * np.cos(self.Phi))
+            * self.radial_projection_gap
             / (self.r * np.sin(self.Phi) * np.sqrt(self.D2))
         )
 
@@ -269,10 +301,7 @@ class Arc(Constants, Matrix):
             / 6
             * np.arcsinh(self.beta_2)
             * np.sin(2 * self.theta)
-            * (
-                2 * self.r**2 * np.sin(2 * self.theta) ** 2
-                + 3 * (self.rs**2 - self.r**2)
-            )
+            * (2 * self.r**2 * np.sin(2 * self.theta) ** 2 + 3 * self.radial_square_gap)
             - 1
             / 4
             * self.gamma

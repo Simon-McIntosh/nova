@@ -22,7 +22,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-09">
-<meta name="plan-version" content="39">
+<meta name="plan-version" content="40">
 <meta name="plan-impl" content="0.7777777777777778">
 </head>
 <body>
@@ -954,6 +954,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="_top" data-id="c-njd-fixed-point-throughput" data-who="reckon-ship" data-when="2026-08-09">
     <div class="r-comment-body"><p><strong>Fixed-point GPU qualification:</strong> all three generic solvers first beat one-core CPU at batch 8. At batch 4,096, Picard, Anderson, and Newton–Krylov reached 5,733, 5,680, and 9,346 fields/s, or 37.34–39.40× CPU; CPU/H200 disagreement stayed within 2.01e-13. Sequential <code>lax.map</code> was 31.66× slower than fused <code>vmap</code>, and host-visible residual reads lost 13–31% throughput. The family still has zero production imports, so it will relocate intact but cannot serve as evidence for the catalog target; the real Optimistix/ReconstructProfile solve and archive path remain unmeasured.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-njd-null-relocation" data-who="reckon-ship" data-when="2026-08-09">
+    <div class="r-comment-body"><p><strong>Null/topology relocation:</strong> the zero-caller traced <code>FieldNull</code> wrapper and the four technology-organised routes were removed without shims. Fixed-shape <code>Null1D</code>/<code>Null2D</code> now live in <code>nova.biot.null</code>, the matrix evaluator is <code>nova.biot.target.FluxTarget</code>, and <code>Topology</code> is in <code>nova.equilibrium.topology</code>. Independent verification found zero executable retired imports, preserved numerical bodies and static capacities, and confirmed the optional-JAX boundary; 100 focused tests passed in 96.11 s. Integrated at <code>b1e1e530</code>.</p></div>
 </div>
 </section>
 </main>

@@ -32,9 +32,8 @@ Method (a fixed-shape reduction over the whole grid — no host round-trip, no
   X-candidates is handled by the static-count idiom (``jnp.where(size=K)`` +
   NaN-pad), so shapes never depend on the data.
 
-The biquadratic null refinement mirrors the field-null algorithm in
-``nova.jax.select``; the small pure functions are reproduced here so this read
-carries no cross-module dependency and stays a self-contained device kernel.
+The biquadratic null refinement uses the canonical three-array contract in
+``nova.jax.select`` so stencil and field-null callers share one traced fit.
 """
 
 from __future__ import annotations
@@ -50,32 +49,9 @@ enable_x64()
 
 __all__ = [
     "ring_sign_changes",
-    "subnull",
     "magnetic_axis_subgrid",
     "xpoint_candidates",
 ]
-
-# ---------------------------------------------------------------------------
-# biquadratic null refinement (the fit itself lives in nova.jax.select)
-# ---------------------------------------------------------------------------
-
-
-@jax.jit
-def subnull(r_cluster, z_cluster, psi_cluster):
-    """Sub-grid null (R, Z, ψ, type) from a cluster of (R, Z, ψ) samples.
-
-    ``type`` is 0 for a saddle (X-point), ±1 for an extremum (O-point), NaN for a
-    degenerate/planar fit.  Fully differentiable in ``psi_cluster``.
-
-    Takes the cluster as three arrays rather than the stacked ``(3, N)`` block
-    :func:`nova.jax.select.subnull` reads, because the stencil classifier gathers
-    the three columns separately; the fit itself is that module's.
-    """
-    coef = select.quadratic_surface(r_cluster, z_cluster, psi_cluster)
-    r0, z0 = select.null_coordinate(coef)
-    psi0 = select.null(coef, (r0, z0))
-    ntype = select.null_type(coef)
-    return jnp.array([r0, z0, psi0, ntype])
 
 
 # ---------------------------------------------------------------------------
@@ -135,7 +111,7 @@ def _refine_at(psi, rg, zg, ia, ja):
     r_c = rg[cols]
     z_c = zg[rows]
     psi_c = psi[rows, cols]
-    return subnull(r_c, z_c, psi_c)
+    return select.subnull(r_c, z_c, psi_c)
 
 
 # ---------------------------------------------------------------------------

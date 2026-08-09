@@ -105,25 +105,9 @@ def wall_cluster(index, roll, value):
 
 @jax.jit
 def wall_flux(x_wall, z_wall, psi_wall, polarity):
-    """Return sub-panel wall flux coordinates, value and null type.
+    """Return ``[x, z, psi, null_type]`` for the wall-flux extremum.
 
-    The serial peer :func:`nova.geometry.select.wall_flux` computes the same
-    sub-panel fit; the two are separate backends of one algorithm, not copies,
-    and their return conventions DIFFER -- do not swap one for the other
-    without adapting the call:
-
-    * this one returns a 4-element ARRAY ``[x, z, psi, null_type]`` and takes
-      ``polarity`` positionally; the serial one returns a 3-TUPLE ``(x, z,
-      psi)`` with ``polarity=1`` defaulted and no type;
-    * a zero polarity -- no plasma current, so no wall-limit point exists --
-      returns all-NaN here and ``(0, 0, 0)`` there. NaN is the honest answer:
-      ``(0, 0, 0)`` is a well-formed coordinate and flux, so a caller cannot
-      tell it from a real result.
-
-    The split is a backend difference the shapes force: this path is a
-    fixed-shape reduction with no data-dependent branch, so it cannot return a
-    different arity for the zero-polarity case and folds it into a NaN select
-    instead.
+    Zero polarity means no wall-limit point exists, so all four values are NaN.
     """
     index, roll = wall_index(polarity * psi_wall)
     x_cluster = wall_cluster(index, roll, x_wall)
@@ -251,15 +235,9 @@ def null(coef, coords):
 
 
 @jax.jit
-def subnull(cluster):
-    """Return subgrid null coordinates, value, and type.
-
-    Parameters
-    ----------
-    cluster: jnp.ndarray (3, N)
-        Cluster coordinates and flux values [x, z, psi].
-    """
-    coef = quadratic_surface(*cluster)
+def subnull(x_cluster, z_cluster, psi_cluster):
+    """Return subgrid null ``[x, z, psi, type]`` from three sample arrays."""
+    coef = quadratic_surface(x_cluster, z_cluster, psi_cluster)
     ntype = null_type(coef)
     coords = null_coordinate(coef)
     psi = null(coef, coords)

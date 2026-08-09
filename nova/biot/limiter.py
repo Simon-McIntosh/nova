@@ -51,9 +51,8 @@ class Limiter(Plot, Array):
         return self.data_w["psi"]
 
     def update_wall(self, psi, polarity):
-        """Update calculation of field nulls."""
-        # x_coord, z_coord, psi, _ = self.null(psi, polarity)
-        x_coord, z_coord, psi = select.wall_flux(self["x"], self["z"], psi, polarity)
+        """Publish the wall-limit point and flux."""
+        x_coord, z_coord, psi, _ = select.wall_flux(self["x"], self["z"], psi, polarity)
         self.data_w = dict(psi=psi, point=(x_coord, z_coord))
 
     def plot(self, axes=None):

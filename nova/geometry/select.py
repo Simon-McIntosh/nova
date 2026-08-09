@@ -5,6 +5,11 @@ import numpy as np
 from nova import njit
 
 
+# A planar fit has no unique stationary point, but returning finite coordinates
+# lets callers carry the sample until ``null_type`` marks it degenerate.
+_ROOT_FLOOR = 1e-30
+
+
 @njit(cache=True)
 def bisect(vector, value):
     """Return the bisect left index, assuming vector is sorted.
@@ -104,25 +109,12 @@ def wall_index(psi_wall):
 
 @njit(cache=True)
 def wall_flux(x_wall, z_wall, psi_wall, polarity=1):
-    """Return sub-panel wall flux coordinates and value.
+    """Return ``[x, z, psi, null_type]`` for the wall-flux extremum.
 
-    The traced peer :func:`nova.jax.select.wall_flux` computes the same
-    sub-panel fit on device; the two are separate backends of one algorithm,
-    not copies, and their return conventions DIFFER -- do not swap one for the
-    other without adapting the call:
-
-    * this one returns a 3-TUPLE ``(x, z, psi)`` and defaults ``polarity`` to
-      1; the traced one returns a 4-element ARRAY ``[x, z, psi, null_type]``
-      and requires ``polarity``;
-    * a zero polarity -- no plasma current, so no wall-limit point exists --
-      returns ``(0, 0, 0)`` here and all-NaN there. ``(0, 0, 0)`` is a
-      well-formed coordinate and flux, so a caller cannot tell it from a real
-      result; the traced convention is the safer one, and moving to it would
-      change what :meth:`nova.biot.limiter.Limiter.update_wall` publishes at
-      zero plasma current.
+    Zero polarity means no wall-limit point exists, so all four values are NaN.
     """
-    if polarity == 0:  # zero plasma current
-        return 0, 0, 0
+    if polarity == 0:
+        return np.full(4, np.nan)
     index, roll = wall_index(polarity * psi_wall)
     if roll != 0:
         x_wall = np.roll(x_wall, roll)
@@ -138,7 +130,13 @@ def wall_flux(x_wall, z_wall, psi_wall, polarity=1):
     x_coordinate, z_coordinate = wall_coordinate(
         w_coordinate, x_cluster, z_cluster, w_cluster
     )
-    return x_coordinate, z_coordinate, psi
+    if coef[0] > 0:
+        ntype = -1.0
+    elif coef[0] < 0:
+        ntype = 1.0
+    else:
+        ntype = np.nan
+    return np.array([x_coordinate, z_coordinate, psi, ntype])
 
 
 @njit(cache=True)
@@ -168,28 +166,24 @@ def quadratic_surface(x_cluster, z_cluster, psi_cluster):
 def null_type(coefficients, atol=1e-12):
     """Return null type.
 
-        - 0: saddle
-            :math:`4AB - E^2 < 0`
-        - -1: minimum
-            :math:`A>0` and :math:`B>0`
-        - 1: maximum
-            :math:`A<0` and :math:`B<0`
-
-    Raises
-    ------
-    ValueError
-        degenerate surface
+    - 0: saddle
+        :math:`4AB - E^2 < 0`
+    - -1: minimum
+        :math:`A>0` and :math:`B>0`
+    - 1: maximum
+        :math:`A<0` and :math:`B<0`
+    - NaN: degenerate quadratic
     """
     root = 4 * coefficients[0] * coefficients[1] - coefficients[4] ** 2
     if abs(root) < atol:
-        raise ValueError("Plane surface")
+        return np.nan
     if root < 0:
         return 0
     if coefficients[0] > 0 and coefficients[1] > 0:
         return -1
     if coefficients[0] < 0 and coefficients[1] < 0:
         return 1
-    raise ValueError("Coefficients form a degenerate surface.")
+    return np.nan
 
 
 @njit(cache=True)
@@ -210,6 +204,8 @@ def null_coordinate(coefficients, cluster=None):
         subgrid coordinate outside cluster
     """
     root = 4 * coefficients[0] * coefficients[1] - coefficients[4] ** 2
+    if abs(root) < _ROOT_FLOOR:
+        root = np.sign(root) * _ROOT_FLOOR + _ROOT_FLOOR
     x_coordinate = (
         coefficients[4] * coefficients[3] - 2 * coefficients[1] * coefficients[2]
     ) / root
@@ -244,9 +240,9 @@ def null(coef, coords):
 
 
 def subnull(x_cluster, z_cluster, psi_cluster):
-    """Return subgrid null coordinates, value, and type."""
+    """Return subgrid null ``[x, z, psi, type]``."""
     coef = quadratic_surface(x_cluster, z_cluster, psi_cluster)
     _type = null_type(coef)
     coords = null_coordinate(coef, (x_cluster, z_cluster))
     psi = null(coef, coords)
-    return coords, psi, _type
+    return np.array([coords[0], coords[1], psi, _type])

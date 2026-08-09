@@ -1,23 +1,19 @@
-"""Field-null categorisation on the jax select/null stack.
-
-The serial numba field-null finder is superseded by the vmap-safe jax stack
-(``nova.jax.select`` and ``nova.jax.null``); these tests exercise the jax
-implementations of quadratic-surface fitting, null typing, sub-grid null
-interpolation on both the 2D grid stencil and the 1D wall loop.
-"""
+"""Agreement contract for host and traced field-null categorisation."""
 
 from itertools import product
 
 import numpy as np
 import pytest
 
+from nova.biot.fieldnull import DataNull
+from nova.geometry import select as host_select
 from nova.utilities.importmanager import skip_import
 from nova.jax.config import enable_x64
 
 with skip_import("jax"):
     import jax.numpy as jnp
 
-    from nova.jax import select
+    from nova.jax import select as traced_select
 
     enable_x64()
 
@@ -51,26 +47,50 @@ def quadratic_surface(x, z, null_type: int, xo=2, zo=2):
 def test_quadratic_coefficents(null_type: int):
     x, z = meshgrid()
     psi = quadratic_surface(x, z, null_type)
-    coef = np.asarray(
-        select.quadratic_surface(jnp.array(x), jnp.array(z), jnp.array(psi))
+    host_coef = host_select.quadratic_surface(x, z, psi)
+    traced_coef = np.asarray(
+        traced_select.quadratic_surface(jnp.array(x), jnp.array(z), jnp.array(psi))
     )
-    assert np.allclose(psi, coefficient_matrix(x, z) @ coef)
+    assert np.allclose(psi, coefficient_matrix(x, z) @ host_coef)
+    assert np.allclose(psi, coefficient_matrix(x, z) @ traced_coef)
+    assert np.allclose(host_coef, traced_coef)
 
 
 @pytest.mark.parametrize("null_type", [-1, 0, 1])
 def test_quadratic_null_type(null_type: int):
     x, z = meshgrid()
     psi = quadratic_surface(x, z, null_type)
-    coef = select.quadratic_surface(jnp.array(x), jnp.array(z), jnp.array(psi))
-    assert int(select.null_type(coef)) == null_type
+    host_coef = host_select.quadratic_surface(x, z, psi)
+    traced_coef = traced_select.quadratic_surface(
+        jnp.array(x), jnp.array(z), jnp.array(psi)
+    )
+    assert int(host_select.null_type(host_coef)) == null_type
+    assert int(traced_select.null_type(traced_coef)) == null_type
 
 
 def test_quadratic_plane_surface():
-    """A plane surface has a degenerate second-order form (null_type is nan)."""
+    """A plane has a degenerate quadratic form reported as NaN by both routes."""
     x, z = meshgrid()
     psi = quadratic_surface(x, z, 2)
-    coef = select.quadratic_surface(jnp.array(x), jnp.array(z), jnp.array(psi))
-    assert np.isnan(float(select.null_type(coef)))
+    host_coef = host_select.quadratic_surface(x, z, psi)
+    traced_coef = traced_select.quadratic_surface(
+        jnp.array(x), jnp.array(z), jnp.array(psi)
+    )
+    assert np.isnan(host_select.null_type(host_coef))
+    assert np.isnan(float(traced_select.null_type(traced_coef)))
+
+
+def test_plane_null_coordinate_uses_finite_determinant_sentinel():
+    """The shared determinant sentinel keeps discarded planar coordinates finite."""
+    coefficients = np.array([0.0, 0.0, 1.0, 1.0, 0.0, 1.0])
+    host_coordinate = np.asarray(host_select.null_coordinate(coefficients))
+    traced_coordinate = np.asarray(
+        traced_select.null_coordinate(jnp.asarray(coefficients))
+    )
+
+    assert np.all(np.isfinite(host_coordinate))
+    assert np.all(np.isfinite(traced_coordinate))
+    assert np.allclose(host_coordinate, traced_coordinate)
 
 
 @pytest.mark.parametrize(
@@ -80,9 +100,15 @@ def test_quadratic_plane_surface():
 def test_quadratic_coordinate(null_type, coordinate):
     x, z = meshgrid()
     psi = quadratic_surface(x, z, null_type, *coordinate)
-    coef = select.quadratic_surface(jnp.array(x), jnp.array(z), jnp.array(psi))
-    null_coordinate = np.asarray(select.null_coordinate(coef))
-    assert np.allclose(null_coordinate, coordinate)
+    host_coef = host_select.quadratic_surface(x, z, psi)
+    traced_coef = traced_select.quadratic_surface(
+        jnp.array(x), jnp.array(z), jnp.array(psi)
+    )
+    host_coordinate = np.asarray(host_select.null_coordinate(host_coef, (x, z)))
+    traced_coordinate = np.asarray(traced_select.null_coordinate(traced_coef))
+    assert np.allclose(host_coordinate, coordinate)
+    assert np.allclose(traced_coordinate, coordinate)
+    assert np.allclose(host_coordinate, traced_coordinate)
 
 
 @pytest.mark.parametrize(
@@ -91,36 +117,60 @@ def test_quadratic_coordinate(null_type, coordinate):
 def test_subnull(null_type, coordinate):
     x, z = meshgrid()
     psi = quadratic_surface(x, z, null_type, *coordinate)
-    cluster = jnp.array(np.c_[x, z, psi].T)  # (3, N): [x; z; psi]
-    null_coords_psi_type = np.asarray(select.subnull(cluster))
-    assert np.allclose(null_coords_psi_type[:2], coordinate)
-    assert np.isclose(null_coords_psi_type[2], 0)
-    assert int(null_coords_psi_type[3]) == null_type
+    host_result = host_select.subnull(x, z, psi)
+    traced_result = np.asarray(
+        traced_select.subnull(jnp.array(x), jnp.array(z), jnp.array(psi))
+    )
+    assert host_result.shape == (4,)
+    assert traced_result.shape == (4,)
+    assert np.allclose(host_result, traced_result)
+    assert np.allclose(traced_result[:2], coordinate)
+    assert np.isclose(traced_result[2], 0)
+    assert int(traced_result[3]) == null_type
+
+
+def test_host_null_store_consumes_flat_subnull_results():
+    """Adaptive host filtering retains point, flux, and type from flat results."""
+    stored = DataNull._unique([np.array([1.5, -0.2, 3.4, 0.0])])
+
+    assert np.allclose(stored["points"], [[1.5, -0.2]])
+    assert np.allclose(stored["psi"], [3.4])
+    assert np.allclose(stored["null_type"], [0.0])
 
 
 @pytest.mark.parametrize("polarity", [1, -1])
 def test_wall_flux(polarity):
-    """The 1D wall-loop finder locates the extreme-flux panel on the loop."""
+    """Both wall-loop routes locate and classify the extreme-flux panel."""
     theta = np.linspace(0, 2 * np.pi, 48, endpoint=False)
     x = 1.0 + 0.4 * np.cos(theta)
     z = 0.4 * np.sin(theta)
     # flux extremum on the loop sits at the outboard vertex (theta = 0)
     psi = polarity * -((x - 1.4) ** 2 + z**2)
-    out = np.asarray(
-        select.wall_flux(jnp.array(x), jnp.array(z), jnp.array(psi), polarity)
+    host_result = host_select.wall_flux(x, z, psi, polarity)
+    traced_result = np.asarray(
+        traced_select.wall_flux(jnp.array(x), jnp.array(z), jnp.array(psi), polarity)
     )
-    assert np.allclose(out[:2], [1.4, 0.0], atol=1e-6)
-    assert np.isfinite(out[2])
+    assert host_result.shape == (4,)
+    assert traced_result.shape == (4,)
+    assert np.allclose(host_result, traced_result, atol=1e-6)
+    assert np.allclose(traced_result[:2], [1.4, 0.0], atol=1e-6)
+    assert np.isfinite(traced_result[2])
 
 
 def test_wall_flux_zero_polarity_is_nan():
-    """A zero polarity marks the wall null as undefined (all nan)."""
+    """A zero polarity has the same fixed-shape NaN sentinel on both routes."""
     theta = np.linspace(0, 2 * np.pi, 24, endpoint=False)
     x = 1.0 + 0.4 * np.cos(theta)
     z = 0.4 * np.sin(theta)
     psi = -((x - 1.4) ** 2 + z**2)
-    out = np.asarray(select.wall_flux(jnp.array(x), jnp.array(z), jnp.array(psi), 0))
-    assert np.all(np.isnan(out))
+    host_result = host_select.wall_flux(x, z, psi, 0)
+    traced_result = np.asarray(
+        traced_select.wall_flux(jnp.array(x), jnp.array(z), jnp.array(psi), 0)
+    )
+    assert host_result.shape == (4,)
+    assert traced_result.shape == (4,)
+    assert np.all(np.isnan(host_result))
+    assert np.all(np.isnan(traced_result))
 
 
 if __name__ == "__main__":

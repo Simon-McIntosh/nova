@@ -1,0 +1,532 @@
+{
+  "schema_version": 1,
+  "title": "Canonical JAX route dispositions",
+  "assembled_on": "2026-08-09",
+  "integrated_base": "c3afd5a14a405f24ebf118fb9806a5ee9bc4ed2d",
+  "status": "PASS",
+  "scope": "Measured route ownership and semantic disposition; no implementation change is authorized by this artifact.",
+  "verification": {
+    "raw_source_artifacts_parsed": true,
+    "artifact_source_hashes_and_revisions_verified": true,
+    "environment_fields_verified": true,
+    "headline_numbers_cross_checked": true,
+    "benchmarks_rerun": false,
+    "test_suites_rerun": false
+  },
+  "disposition_legend": {
+    "KEEP BOTH": "Two live routes have distinct required execution or semantic contracts.",
+    "COLLAPSE": "Converge duplicate arithmetic or signatures into one shared contract.",
+    "DELETE": "Remove the named duplicate or adapter while retaining the live implementation.",
+    "RELOCATE": "Move the single implementation to its owning equilibrium domain without inventing a peer."
+  },
+  "verdict_counts": {
+    "KEEP BOTH": 8,
+    "COLLAPSE": 4,
+    "DELETE": 4,
+    "RELOCATE": 4,
+    "total": 20
+  },
+  "sources": [
+    {
+      "group": "select",
+      "artifact": "docs/figures/jax-dissolution/select_route.json",
+      "measured_head": "abb5f0131b5b0765be1cecd929d268306c23a65f"
+    },
+    {
+      "group": "null stack",
+      "artifact": "docs/figures/jax-dissolution/null_stack_route.json",
+      "measured_head": "ee5503fabcddd75c6dcd62ba456f6770c4d78d99"
+    },
+    {
+      "group": "fixed point",
+      "artifact": "docs/figures/jax-dissolution/fixed_point_route.json",
+      "measured_head": "0f2ae46ac71b5cf9dbe79c7cb861773ed1d47ced"
+    },
+    {
+      "group": "stencil nulls",
+      "artifact": "docs/figures/jax-dissolution/stencil_null_route.json",
+      "measured_head": "3fa13b4a75dde5e9b981a6f8c936ad30bbf67e76"
+    },
+    {
+      "group": "connectivity",
+      "artifact": "docs/figures/jax-dissolution/connectivity_route.json",
+      "measured_head": "4af8d31fe81afca54cafa4f75578eb9efc9936cb"
+    }
+  ],
+  "routes": [
+    {
+      "group": "select",
+      "item": "select module",
+      "symbols": [
+        "nova.geometry.select",
+        "nova.jax.select"
+      ],
+      "canonical_verdict": "KEEP BOTH",
+      "disposition": "KEEP BOTH",
+      "decision": "Retain the JAX-free eager host route and the traced device/autodiff route.",
+      "headline_evidence": {
+        "fp32_surface_class_mismatches_cpu": "12/18",
+        "fp32_surface_class_mismatches_gpu": "12/18",
+        "fp64_surface_class_mismatches_cpu": "0/18",
+        "fp64_surface_class_mismatches_gpu": "0/18",
+        "fp64_gpu_max_surface_component_error": 1.0856454624175171e-11
+      },
+      "semantic_qualification": "Enable JAX fp64 before the first select trace; retaining the eager host boundary keeps this path JAX-free.",
+      "source_artifact": "docs/figures/jax-dissolution/select_route.json",
+      "measured_head": "abb5f0131b5b0765be1cecd929d268306c23a65f"
+    },
+    {
+      "group": "select",
+      "item": "bisect",
+      "symbols": [
+        "bisect"
+      ],
+      "canonical_verdict": "DELETE ONE",
+      "disposition": "DELETE",
+      "decision": "Delete the traced duplicate and retain Python-compatible host bisection.",
+      "headline_evidence": {
+        "cpu_traced_over_host": [
+          17.694603903559127,
+          18.436654366543667
+        ],
+        "gpu_traced_over_host": [
+          471.9547244094488,
+          873.741127348643
+        ],
+        "traced_external_callers": 0,
+        "host_external_callers": 2
+      },
+      "semantic_qualification": "Agreement was exact against the Python standard-library reference in measured regimes.",
+      "source_artifact": "docs/figures/jax-dissolution/select_route.json",
+      "measured_head": "abb5f0131b5b0765be1cecd929d268306c23a65f"
+    },
+    {
+      "group": "select",
+      "item": "right and vector bisection",
+      "symbols": [
+        "bisect_right",
+        "bisect_2d"
+      ],
+      "canonical_verdict": "DELETE ONE",
+      "disposition": "DELETE",
+      "decision": "Delete the traced copies; retain the live host routes.",
+      "headline_evidence": {
+        "traced_external_callers": 0,
+        "bisect_right_traceable": false,
+        "bisect_2d_nonempty_calls_succeed": false
+      },
+      "semantic_qualification": "The traced routes are not usable replacements: one cannot trace and the other mutates an immutable array.",
+      "source_artifact": "docs/figures/jax-dissolution/select_route.json",
+      "measured_head": "abb5f0131b5b0765be1cecd929d268306c23a65f"
+    },
+    {
+      "group": "select",
+      "item": "namespace-identical wall arithmetic",
+      "symbols": [
+        "length_2d",
+        "wall_length",
+        "wall_coordinate"
+      ],
+      "canonical_verdict": "COLLAPSE",
+      "disposition": "COLLAPSE",
+      "decision": "Use one namespace-threaded arithmetic body.",
+      "headline_evidence": {
+        "implementation_difference": "array namespace only"
+      },
+      "semantic_qualification": "Preserve and document each backend's native zero-division behavior.",
+      "source_artifact": "docs/figures/jax-dissolution/select_route.json",
+      "measured_head": "abb5f0131b5b0765be1cecd929d268306c23a65f"
+    },
+    {
+      "group": "select",
+      "item": "wall fitting and selection",
+      "symbols": [
+        "quadratic_wall",
+        "wall_index",
+        "wall_flux"
+      ],
+      "canonical_verdict": "KEEP BOTH",
+      "disposition": "KEEP BOTH",
+      "decision": "Retain host branching/fitting and fixed-shape traced selection.",
+      "headline_evidence": {
+        "cpu_traced_over_host_fp64": [
+          4.8193629505448445,
+          10.760655737704917
+        ],
+        "gpu_traced_over_host_fp64": [
+          87.98764441591786,
+          118.85018893087353
+        ]
+      },
+      "semantic_qualification": "The routes differ in mutation, least-squares interface, NaN handling, and fixed-shape device execution.",
+      "source_artifact": "docs/figures/jax-dissolution/select_route.json",
+      "measured_head": "abb5f0131b5b0765be1cecd929d268306c23a65f"
+    },
+    {
+      "group": "select",
+      "item": "quadratic surface fit",
+      "symbols": [
+        "quadratic_surface"
+      ],
+      "canonical_verdict": "KEEP BOTH",
+      "disposition": "KEEP BOTH",
+      "decision": "Retain the host and traced fit routes.",
+      "headline_evidence": {
+        "host_numeric_contract": "float64 promotion with explicit gelsd rcond",
+        "traced_numeric_contract": "JAX precision and device semantics"
+      },
+      "semantic_qualification": "The numerical interfaces are intentionally different even after fp64 is enabled.",
+      "source_artifact": "docs/figures/jax-dissolution/select_route.json",
+      "measured_head": "abb5f0131b5b0765be1cecd929d268306c23a65f"
+    },
+    {
+      "group": "select",
+      "item": "converged surface arithmetic",
+      "symbols": [
+        "null_type",
+        "null_coordinate",
+        "null"
+      ],
+      "canonical_verdict": "COLLAPSE",
+      "disposition": "COLLAPSE",
+      "decision": "Converge to one namespace-threaded arithmetic body after semantic policy is fixed.",
+      "headline_evidence": {
+        "fp64_cpu_max_surface_component_error": 2.299826995511012e-13,
+        "fp64_gpu_max_surface_component_error": 1.0856454624175171e-11
+      },
+      "semantic_qualification": "Do not collapse until the NaN sentinel and determinant-floor behavior are locked.",
+      "source_artifact": "docs/figures/jax-dissolution/select_route.json",
+      "measured_head": "abb5f0131b5b0765be1cecd929d268306c23a65f"
+    },
+    {
+      "group": "select",
+      "item": "subnull composite",
+      "symbols": [
+        "subnull"
+      ],
+      "canonical_verdict": "KEEP BOTH",
+      "disposition": "KEEP BOTH",
+      "decision": "Retain scalar/loop host and vmap/device composites; converge only their public contract.",
+      "headline_evidence": {
+        "cpu_traced_over_host_fp64": [
+          0.14238969568667506,
+          1.1143566861401168
+        ],
+        "gpu_traced_over_host_fp64": [
+          0.13878802767001125,
+          35.411023487056404
+        ]
+      },
+      "semantic_qualification": "The fit routes and execution regimes differ despite a shared signature and flat result.",
+      "source_artifact": "docs/figures/jax-dissolution/select_route.json",
+      "measured_head": "abb5f0131b5b0765be1cecd929d268306c23a65f"
+    },
+    {
+      "group": "select",
+      "item": "subnull signature",
+      "symbols": [
+        "subnull(r_cluster, z_cluster, psi_cluster)"
+      ],
+      "canonical_verdict": "COLLAPSE",
+      "disposition": "COLLAPSE",
+      "decision": "Adopt three coordinate arrays returning [r, z, psi, type].",
+      "headline_evidence": {
+        "gpu_three_array_over_stacked_fp64": [
+          0.7096458316515807,
+          1.3302394316295894
+        ],
+        "maximum_absolute_signature_difference": 0.0
+      },
+      "semantic_qualification": "Keep the flat four-value result required by vmap and fixed-slot padding.",
+      "source_artifact": "docs/figures/jax-dissolution/select_route.json",
+      "measured_head": "abb5f0131b5b0765be1cecd929d268306c23a65f"
+    },
+    {
+      "group": "null stack",
+      "item": "fieldnull",
+      "symbols": [
+        "nova.jax.fieldnull.FieldNull",
+        "nova.biot.fieldnull.FieldNull"
+      ],
+      "canonical_verdict": "DELETE ONE",
+      "disposition": "DELETE",
+      "decision": "Delete the zero-caller traced wrapper; retain the host class and live Null/Target kernels.",
+      "headline_evidence": {
+        "traced_over_host_cpu_warm": "0.09-0.19x",
+        "host_over_traced_accelerator_warm": "4.27e-04-2.21e-02x",
+        "traced_production_importers": 0,
+        "host_production_importers": 2,
+        "maximum_route_coordinate_deviation": 0.00031215076267037686
+      },
+      "semantic_qualification": "The measured run used JAX fp32; retain host adaptive collections, stateful filtering, and the JAX-free boundary.",
+      "source_artifact": "docs/figures/jax-dissolution/null_stack_route.json",
+      "measured_head": "ee5503fabcddd75c6dcd62ba456f6770c4d78d99"
+    },
+    {
+      "group": "null stack",
+      "item": "null",
+      "symbols": [
+        "Null2D",
+        "host null categorization"
+      ],
+      "canonical_verdict": "KEEP BOTH",
+      "disposition": "KEEP BOTH",
+      "decision": "Retain the fixed-size differentiable kernel and adaptive host behavior.",
+      "headline_evidence": {
+        "production_importers": 4,
+        "autodiff_gradient_nonzero_entries": 7,
+        "traced_over_host_cpu_categorize": "3.09-7.30x",
+        "host_over_traced_accelerator_categorize": "2.73e-04-3.90e-04x"
+      },
+      "semantic_qualification": "These are complementary interfaces, not duplicate classes; the measured timing and accuracy regime was fp32.",
+      "source_artifact": "docs/figures/jax-dissolution/null_stack_route.json",
+      "measured_head": "ee5503fabcddd75c6dcd62ba456f6770c4d78d99"
+    },
+    {
+      "group": "null stack",
+      "item": "target",
+      "symbols": [
+        "nova.jax.target.Target",
+        "host geometry Target"
+      ],
+      "canonical_verdict": "KEEP BOTH",
+      "disposition": "KEEP BOTH",
+      "decision": "Retain the traced matrix evaluator and the distinct host geometry container.",
+      "headline_evidence": {
+        "production_importers": 3,
+        "maximum_traced_scaled_error": 2.029703970398091e-07,
+        "traced_over_numpy_cpu_warm": "0.38-5.01x",
+        "numpy_over_traced_accelerator_warm": "0.06-5.58x"
+      },
+      "semantic_qualification": "The same token does not imply the same API; timing and accuracy were measured with JAX fp32.",
+      "source_artifact": "docs/figures/jax-dissolution/null_stack_route.json",
+      "measured_head": "ee5503fabcddd75c6dcd62ba456f6770c4d78d99"
+    },
+    {
+      "group": "null stack",
+      "item": "topology",
+      "symbols": [
+        "nova.jax.topology.Topology",
+        "host plasma topology behavior"
+      ],
+      "canonical_verdict": "KEEP BOTH",
+      "disposition": "KEEP BOTH",
+      "decision": "Retain pure fixed-shape traced topology and mutable adaptive host topology.",
+      "headline_evidence": {
+        "production_importers": 1,
+        "maximum_route_normalized_deviation": 0.0006326737796117777,
+        "traced_over_host_cpu_single": "1.06-2.05x",
+        "host_over_traced_accelerator_single": "5.95e-04-1.53e-02x",
+        "host_over_traced_accelerator_batch5": "3.17e-03-7.79e-02x"
+      },
+      "semantic_qualification": "State, failure, and batching contracts differ; timing and accuracy were measured with JAX fp32.",
+      "source_artifact": "docs/figures/jax-dissolution/null_stack_route.json",
+      "measured_head": "ee5503fabcddd75c6dcd62ba456f6770c4d78d99"
+    },
+    {
+      "group": "fixed point",
+      "item": "fixed_point solver family",
+      "symbols": [
+        "picard",
+        "anderson",
+        "newton_krylov"
+      ],
+      "canonical_verdict": "RELOCATE",
+      "reported_verdict": "NOT_A_PAIR",
+      "disposition": "RELOCATE",
+      "decision": "Move the one JAX-native solver family to nova/equilibrium/fixed_point.py; retain all three algorithms.",
+      "headline_evidence": {
+        "production_import_count": 0,
+        "host_peer": false,
+        "gpu_speedup_range": [
+          0.09607548005668755,
+          0.7948132794230969
+        ],
+        "worst_cpu_gpu_relative_sup": 1.895938176840495e-13,
+        "worst_oracle_relative_sup": {
+          "cpu": 3.3116392810225292e-06,
+          "gpu": 3.3116392396930834e-06
+        },
+        "cpu_residual_ranges": {
+          "picard": [
+            9.60957001936833e-07,
+            3.293526273341825e-06
+          ],
+          "anderson": [
+            3.7849319197205036e-12,
+            4.5110287764164734e-12
+          ],
+          "newton_krylov": [
+            3.706051747271688e-14,
+            6.871521963672079e-14
+          ]
+        }
+      },
+      "semantic_qualification": "Do not fabricate a host peer. CPU was faster in every measured steady regime; compile cost was recorded separately.",
+      "source_artifact": "docs/figures/jax-dissolution/fixed_point_route.json",
+      "measured_head": "0f2ae46ac71b5cf9dbe79c7cb861773ed1d47ced"
+    },
+    {
+      "group": "stencil nulls",
+      "item": "ring_sign_changes",
+      "symbols": [
+        "rectangular ring_sign_changes",
+        "hexagonal ring_sign_changes"
+      ],
+      "canonical_verdict": "KEEP BOTH",
+      "disposition": "KEEP BOTH",
+      "decision": "Keep both geometry contracts and relocate the rectangular routine with connectivity.",
+      "headline_evidence": {
+        "rectangular_reference_min_exact_fraction": 1.0,
+        "rectangular_saddles": 99,
+        "hexagonal_saddles": 50,
+        "saddle_mask_difference_fraction": 0.013168503090567052,
+        "rectangular_extrema": 64,
+        "hexagonal_extrema": 64
+      },
+      "semantic_qualification": "The saddle neighborhoods are physically distinct; matching extremum counts do not make the geometries interchangeable.",
+      "source_artifact": "docs/figures/jax-dissolution/stencil_null_route.json",
+      "measured_head": "3fa13b4a75dde5e9b981a6f8c936ad30bbf67e76"
+    },
+    {
+      "group": "stencil nulls",
+      "item": "subnull",
+      "symbols": [
+        "three-array subnull",
+        "stacked subnull adapter"
+      ],
+      "canonical_verdict": "COLLAPSE",
+      "disposition": "COLLAPSE",
+      "decision": "Use the traced three-array signature, adapt the stacked caller, and delete the stencil adapter.",
+      "headline_evidence": {
+        "maximum_absolute_signature_difference": 0.0,
+        "cpu_steady_us": {
+          "three_array": 16.0648,
+          "stacked": 16.2309
+        },
+        "gpu_steady_us": {
+          "three_array": 503.446,
+          "stacked": 466.302
+        }
+      },
+      "semantic_qualification": "The performance comparison spans parity; exact signature equivalence, not speed, decides the collapse.",
+      "source_artifact": "docs/figures/jax-dissolution/stencil_null_route.json",
+      "measured_head": "3fa13b4a75dde5e9b981a6f8c936ad30bbf67e76"
+    },
+    {
+      "group": "stencil nulls",
+      "item": "magnetic_axis_subgrid",
+      "symbols": [
+        "magnetic_axis_subgrid"
+      ],
+      "canonical_verdict": "RELOCATE",
+      "reported_verdict": "SINGLE-IMPLEMENTATION RELOCATION",
+      "disposition": "RELOCATE",
+      "decision": "Move the single routine intact to equilibrium connectivity.",
+      "headline_evidence": {
+        "gaussian_axis_max_position_error": 0.0005627731263816964,
+        "degenerate_plateau_axis_found": true,
+        "cpu_largest_grid_steady_us": 237.80995979905128,
+        "gpu_largest_grid_steady_us": 838.8387504965067
+      },
+      "semantic_qualification": "Reject a degenerate plateau before publishing found; the measured implementation currently reports found=true.",
+      "source_artifact": "docs/figures/jax-dissolution/stencil_null_route.json",
+      "measured_head": "3fa13b4a75dde5e9b981a6f8c936ad30bbf67e76"
+    },
+    {
+      "group": "stencil nulls",
+      "item": "xpoint_candidates",
+      "symbols": [
+        "xpoint_candidates"
+      ],
+      "canonical_verdict": "RELOCATE",
+      "reported_verdict": "SINGLE-IMPLEMENTATION RELOCATION",
+      "disposition": "RELOCATE",
+      "decision": "Move the single routine intact to equilibrium connectivity and preserve fixed output slots.",
+      "headline_evidence": {
+        "gaussian_xpoint_max_position_error": 0.0005627722777972188,
+        "overflow_raw_rectangular_saddles": 99,
+        "fixed_slots": 8,
+        "returned_valid": 8,
+        "overflow_reported": false,
+        "cpu_largest_grid_steady_us": 392.0644521713257,
+        "gpu_largest_grid_steady_us": 307.99885280430317
+      },
+      "semantic_qualification": "Expose candidate overflow, or prove the upstream mask bounds the candidate count, before relying on silent truncation.",
+      "source_artifact": "docs/figures/jax-dissolution/stencil_null_route.json",
+      "measured_head": "3fa13b4a75dde5e9b981a6f8c936ad30bbf67e76"
+    },
+    {
+      "group": "connectivity",
+      "item": "connectivity_boundary",
+      "symbols": [
+        "boundary_read",
+        "boundary_read_jax",
+        "boundary_read_smooth",
+        "boundary_read_smooth_jax"
+      ],
+      "canonical_verdict": "RELOCATE",
+      "reported_verdict": "SINGLE IMPLEMENTATION RELOCATION",
+      "disposition": "RELOCATE",
+      "decision": "Move the single traced implementation and its host adapters to nova/equilibrium/connectivity_boundary.py.",
+      "headline_evidence": {
+        "host_direct_core_cell_difference": 0,
+        "diverted_boundary_flux_relative_error": 2.8610964201234726e-06,
+        "diverted_saddle_position_error_m": 1.247807383097932e-05,
+        "limited_radius_max_abs_m": 0.00046911865766863237,
+        "limited_radius_rmse_m": 0.0004282205801334063,
+        "host_over_direct_cpu_range": [
+          0.9924929630423047,
+          1.0578451166126566
+        ],
+        "host_over_direct_gpu_range": [
+          1.177780625775758,
+          1.443338565511687
+        ]
+      },
+      "semantic_qualification": "Host entries are adapters, not arithmetic peers; retain both hard exact-topology and smooth differentiable kernels.",
+      "source_artifact": "docs/figures/jax-dissolution/connectivity_route.json",
+      "measured_head": "4af8d31fe81afca54cafa4f75578eb9efc9936cb"
+    },
+    {
+      "group": "connectivity",
+      "item": "flux_surface_connectivity",
+      "symbols": [
+        "flood_fill_core",
+        "flux_surface_bins",
+        "flux_surface_bins_jax"
+      ],
+      "canonical_verdict": "DELETE ONE",
+      "disposition": "DELETE",
+      "decision": "Delete zero-caller flux_surface_bins; relocate flood_fill_core and flux_surface_bins_jax to nova/equilibrium/flux_surface_connectivity.py.",
+      "headline_evidence": {
+        "flux_surface_bins_external_callers": 0,
+        "flood_mask_mismatched_cells": 0,
+        "disconnected_pocket_excluded": true,
+        "connectivity_core_cell_difference": 0,
+        "connectivity_well_posed": true,
+        "analytic_interior_max_relative": {
+          "dv_dpn": 0.010456142673752684,
+          "grad2_r2": 0.005970033889833078,
+          "inv_r": 7.993605777301127e-15,
+          "inv_r2": 0.0002052954959961414
+        },
+        "analytic_all_levels_max_relative": {
+          "dv_dpn": 0.22549606843862688,
+          "grad2_r2": 0.1494101764088981
+        },
+        "host_over_direct_cpu_range": [
+          1.110768822002803,
+          1.268414489623526
+        ],
+        "host_over_direct_gpu_range": [
+          2.132961193120041,
+          3.49918180047867
+        ]
+      },
+      "semantic_qualification": "Endpoint derivative errors are materially larger than interior errors; preserve the exact flood invariant and document endpoint behavior.",
+      "source_artifact": "docs/figures/jax-dissolution/connectivity_route.json",
+      "measured_head": "4af8d31fe81afca54cafa4f75578eb9efc9936cb"
+    }
+  ]
+}

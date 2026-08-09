@@ -72,10 +72,11 @@ targets from a nanometre off the filament out to the far side of the machine,
 pinned by ``tests/test_biotgreens.py``.  On the filament both routes expose the
 physical singularity: ``psi = inf`` and both field components are ``nan``.
 
-The three loop-specific elliptic combinations use their power series for
-``k^2 <= 1e-2``.  Factoring the leading power before Horner evaluation avoids
+The three loop-specific elliptic combinations use their power series through
+``k^2 = 1e-2`` and a value-and-slope preserving transition to the direct form by
+``k^2 = 2e-2``.  Factoring the leading power before Horner evaluation avoids
 subtracting nearly equal complete integrals near the axis and in the far field,
-while leaving the accurate complete-integral algorithms unchanged.
+while the transition avoids an artificial jump at the numerical route boundary.
 """
 
 from __future__ import annotations
@@ -90,6 +91,7 @@ MU0 = 4.0e-7 * np.pi
 """Vacuum permeability [T.m/A]."""
 
 _ELLIPTIC_SERIES_LIMIT = 1.0e-2
+_ELLIPTIC_DIRECT_LIMIT = 2.0e-2
 
 # Coefficients are in descending order for Horner evaluation.  The polynomials
 # multiply pi/2 and respectively m, m^2 and m^2.  Their exact dyadic forms are
@@ -145,7 +147,8 @@ def _filament_elliptic_combinations(xp, parameter, complement, first, second):
     selection so traced values and tangents never evaluate an invalid denominator.
     """
     use_series = parameter <= _ELLIPTIC_SERIES_LIMIT
-    series_parameter = xp.where(use_series, parameter, 0.0)
+    use_direct = parameter >= _ELLIPTIC_DIRECT_LIMIT
+    series_parameter = xp.where(use_direct, 0.0, parameter)
     direct_parameter = xp.where(use_series, 0.0, parameter)
     direct_complement = xp.where(use_series, 1.0, complement)
     direct_first = xp.where(use_series, 1.0, first)
@@ -176,10 +179,22 @@ def _filament_elliptic_combinations(xp, parameter, complement, first, second):
         * squared_parameter
         * _horner_polynomial(xp, series_parameter, _RADIAL_FIELD_ELLIPTIC_HORNER)
     )
+    transition = (parameter - _ELLIPTIC_SERIES_LIMIT) / (
+        _ELLIPTIC_DIRECT_LIMIT - _ELLIPTIC_SERIES_LIMIT
+    )
+    transition = xp.where(use_series, 0.0, xp.where(use_direct, 1.0, transition))
+    blend = transition * transition * (3.0 - 2.0 * transition)
+
+    def select(series_value, direct_value):
+        mixed = series_value + blend * (direct_value - series_value)
+        return xp.where(
+            use_series, series_value, xp.where(use_direct, direct_value, mixed)
+        )
+
     return (
-        xp.where(use_series, series_first_minus_second, first_minus_second),
-        xp.where(use_series, series_flux, flux),
-        xp.where(use_series, series_radial, radial),
+        select(series_first_minus_second, first_minus_second),
+        select(series_flux, flux),
+        select(series_radial, radial),
     )
 
 

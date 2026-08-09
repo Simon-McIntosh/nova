@@ -30,6 +30,7 @@ import scipy.special
 
 from nova.biot.completeelliptic import complete_kind, complete_pole
 from nova.biot.greens import (
+    _ELLIPTIC_DIRECT_LIMIT,
     _ELLIPTIC_SERIES_LIMIT,
     _filament_elliptic_combinations,
     MU0,
@@ -342,6 +343,51 @@ def test_small_parameter_elliptic_combinations_match_a_high_precision_arbiter():
     np.testing.assert_allclose(got, expected, rtol=3e-16, atol=0.0)
 
 
+def test_elliptic_series_transition_has_no_artificial_boundary_jump():
+    """Adjacent values at the series boundary move only by the analytic slope."""
+    parameter = np.array(
+        [
+            np.nextafter(_ELLIPTIC_SERIES_LIMIT, 0.0),
+            _ELLIPTIC_SERIES_LIMIT,
+            np.nextafter(_ELLIPTIC_SERIES_LIMIT, np.inf),
+        ]
+    )
+    first = scipy.special.ellipk(parameter)
+    second = scipy.special.ellipe(parameter)
+    got = np.array(
+        _filament_elliptic_combinations(np, parameter, 1.0 - parameter, first, second)
+    ).T
+    expected = np.array([_decimal_elliptic_combinations(value) for value in parameter])
+    np.testing.assert_allclose(got, expected, rtol=4e-16, atol=0.0)
+    observed_step = got[2] - got[0]
+    expected_step = expected[2] - expected[0]
+    roundoff = 4.0 * np.spacing(np.abs(got[1]))
+    assert np.all(np.abs(observed_step - expected_step) <= roundoff)
+
+    direct_parameter = np.array(
+        [
+            np.nextafter(_ELLIPTIC_DIRECT_LIMIT, 0.0),
+            _ELLIPTIC_DIRECT_LIMIT,
+            np.nextafter(_ELLIPTIC_DIRECT_LIMIT, np.inf),
+        ]
+    )
+    first = scipy.special.ellipk(direct_parameter)
+    second = scipy.special.ellipe(direct_parameter)
+    direct = np.array(
+        _filament_elliptic_combinations(
+            np,
+            direct_parameter,
+            1.0 - direct_parameter,
+            first,
+            second,
+        )
+    ).T
+    direct_expected = np.array(
+        [_decimal_elliptic_combinations(value) for value in direct_parameter]
+    )
+    np.testing.assert_allclose(direct, direct_expected, rtol=2e-12, atol=0.0)
+
+
 def test_small_parameter_point_filament_matches_a_high_precision_arbiter():
     """Psi and both field components keep their scale in the far regime."""
     requested = np.array([1e-16, 1e-12, 1.2e-9, 3.67e-9, 3.67e-8, 1e-6, 0.009])
@@ -423,10 +469,10 @@ def test_small_parameter_branch_has_traced_value_and_tangent_continuity():
         _ELLIPTIC_SERIES_LIMIT + distance, derivative=True
     )
     np.testing.assert_allclose(
-        np.asarray(lower_tangent), lower_expected, rtol=3e-6, atol=1e-14
+        np.asarray(lower_tangent), lower_expected, rtol=5e-10, atol=1e-14
     )
     np.testing.assert_allclose(
-        np.asarray(upper_tangent), upper_expected, rtol=3e-6, atol=1e-14
+        np.asarray(upper_tangent), upper_expected, rtol=5e-10, atol=1e-14
     )
 
 

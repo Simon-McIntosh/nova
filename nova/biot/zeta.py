@@ -49,7 +49,7 @@ import numpy as np
 
 from nova.jax.config import Precision, resolve_precision
 
-GAUSS_ORDER = 48
+GAUSS_ORDER = 56
 """Gauss-Legendre node count of the default rule (<=1e-12 for gamma >= 0.2 r)."""
 
 TANH_SINH_HALF_COUNT = 88

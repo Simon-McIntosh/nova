@@ -184,7 +184,14 @@ def _labelled_component(mask: np.ndarray, seed: tuple[int, int]) -> np.ndarray:
     return (labels == seed_label) if seed_label else np.zeros_like(mask, dtype=bool)
 
 
-def _boundary_arguments(nr: int, nz: int):
+def _boundary_arguments(
+    nr: int,
+    nz: int,
+    *,
+    n_levels: int = PROFILE_LEVELS,
+    n_bisect: int = PROFILE_BISECTIONS,
+    n_ray: int = PROFILE_RAYS,
+):
     """Device-resident arguments shared by direct and adapter timing."""
     psi, grid, wall_r, wall_z, wall_psi = _limited_field(nr, nz)
     args = (
@@ -194,9 +201,9 @@ def _boundary_arguments(nr: int, nz: int):
         jnp.asarray(grid.inside_limiter),
         jnp.asarray(1.0),
         jnp.asarray(0.0),
-        PROFILE_LEVELS,
-        PROFILE_BISECTIONS,
-        PROFILE_RAYS,
+        n_levels,
+        n_bisect,
+        n_ray,
         jnp.asarray(np.asarray(LCFS_ANGLES)),
         jnp.asarray(0.999),
         jnp.asarray(wall_r),
@@ -319,6 +326,51 @@ def _boundary_cost(nr: int, nz: int) -> tuple[dict[str, Any], dict[str, Any]]:
         "host_over_direct": host_seconds / steady_seconds,
     }
     return cost, parity
+
+
+def _moment_boundary_cost() -> dict[str, Any]:
+    """Measure the hard adapter with the current-moment caller's live defaults."""
+    nr, nz = 49, 65
+    n_levels, n_bisect, n_ray = 96, 18, 512
+    psi, grid, wall_psi, args = _boundary_arguments(
+        nr,
+        nz,
+        n_levels=n_levels,
+        n_bisect=n_bisect,
+        n_ray=n_ray,
+    )
+
+    def direct_call():
+        return boundary.boundary_read_jax(*args)
+
+    compile_seconds, _ = _seconds(direct_call)
+    steady_seconds, samples, _ = _steady(direct_call)
+
+    def host_call():
+        return boundary.boundary_read(
+            psi,
+            grid,
+            (1.0, 0.0),
+            n_levels=n_levels,
+            n_bisect=n_bisect,
+            n_ray=n_ray,
+            wall_psi=wall_psi,
+        )
+
+    host_seconds, host_samples, _ = _steady(host_call)
+    return {
+        "grid": f"{nr}x{nz}",
+        "cells": nr * nz,
+        "boundary_levels": n_levels,
+        "boundary_bisections": n_bisect,
+        "boundary_rays": n_ray,
+        "compile_execute_ms": 1e3 * compile_seconds,
+        "steady_ms": 1e3 * steady_seconds,
+        "steady_samples_ms": [1e3 * sample for sample in samples],
+        "host_adapter_ms": 1e3 * host_seconds,
+        "host_adapter_samples_ms": [1e3 * sample for sample in host_samples],
+        "host_over_direct": host_seconds / steady_seconds,
+    }
 
 
 def _smooth_cost(nr: int = 65, nz: int = 97) -> tuple[dict[str, Any], dict[str, Any]]:
@@ -856,6 +908,16 @@ def measure(label: str) -> dict[str, Any]:
     }
 
 
+def measure_moment(label: str) -> dict[str, Any]:
+    """Run only the current-moment hard-boundary production regime."""
+    return {
+        "schema": "nova.connectivity-route-benchmark.1",
+        "environment": _environment(label),
+        "caller": "nova/equilibrium/moment.py:625",
+        "measurement": _moment_boundary_cost(),
+    }
+
+
 def _nice(value: float) -> str:
     """Compact millisecond label for the SVG."""
     if value >= 1000:
@@ -873,19 +935,21 @@ def _polyline(
     width: float,
     height: float,
     colour: str,
+    x_bounds: tuple[float, float],
+    y_bounds: tuple[float, float],
 ) -> tuple[str, list[tuple[float, float]]]:
     """Return an SVG polyline and its points on logarithmic axes."""
     x_values = np.asarray([row["cells"] for row in rows], dtype=float)
     y_values = np.asarray([row[key] for row in rows], dtype=float)
     x_log = np.log10(x_values)
     y_log = np.log10(y_values)
-    x_span = max(float(np.ptp(x_log)), 1.0)
-    y_min = float(np.min(y_log))
-    y_max = float(np.max(y_log))
+    x_min, x_max = x_bounds
+    y_min, y_max = y_bounds
+    x_span = max(x_max - x_min, 1.0e-12)
     y_span = max(y_max - y_min, 0.35)
     points = [
         (
-            left + width * (float(x) - float(x_log.min())) / x_span,
+            left + width * (float(x) - x_min) / x_span,
             top + height * (1.0 - (float(y) - y_min) / y_span),
         )
         for x, y in zip(x_log, y_log)
@@ -908,11 +972,40 @@ def _svg_panel(
     """One direct-versus-adapter cost panel."""
     width, height = 350.0, 145.0
     rows = report["measurements"][module]["cost"]
+    x_log = np.log10(np.asarray([row["cells"] for row in rows], dtype=float))
+    y_log = np.log10(
+        np.asarray(
+            [
+                value
+                for row in rows
+                for value in (row["steady_ms"], row["host_adapter_ms"])
+            ],
+            dtype=float,
+        )
+    )
+    x_bounds = (float(np.min(x_log)), float(np.max(x_log)))
+    y_bounds = (float(np.min(y_log)), float(np.max(y_log)))
     direct, direct_points = _polyline(
-        rows, "steady_ms", left, top + 24, width, height, "#1f77b4"
+        rows,
+        "steady_ms",
+        left,
+        top + 24,
+        width,
+        height,
+        "#1f77b4",
+        x_bounds,
+        y_bounds,
     )
     host, host_points = _polyline(
-        rows, "host_adapter_ms", left, top + 24, width, height, "#d95f02"
+        rows,
+        "host_adapter_ms",
+        left,
+        top + 24,
+        width,
+        height,
+        "#d95f02",
+        x_bounds,
+        y_bounds,
     )
     elements = [
         f'<text x="{left:.0f}" y="{top:.0f}" class="panel-title">{html.escape(title)}</text>',
@@ -922,6 +1015,11 @@ def _svg_panel(
     ]
     for row, (x, y) in zip(rows, direct_points):
         elements.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="3.5" fill="#1f77b4"/>')
+        label_y = min(y + 13.0, top + 24.0 + height - 5.0)
+        elements.append(
+            f'<text x="{x - 5:.1f}" y="{label_y:.1f}" text-anchor="end" class="tick">'
+            f"{_nice(row['steady_ms'])}</text>"
+        )
         elements.append(
             f'<text x="{x:.1f}" y="{top + 186:.1f}" text-anchor="middle" class="tick">{row["grid"]}</text>'
         )
@@ -991,15 +1089,34 @@ def render_svg(reports: list[dict[str, Any]]) -> str:
 </svg>'''
 
 
-def combine(inputs: list[Path], output: Path, figure: Path) -> None:
+def combine(
+    inputs: list[Path],
+    moment_inputs: list[Path],
+    output: Path,
+    figure: Path,
+) -> None:
     """Combine immutable backend captures and write the review artifacts."""
     reports = [json.loads(path.read_text()) for path in inputs]
+    moment_reports = [json.loads(path.read_text()) for path in moment_inputs]
     combined = {
         "schema": "nova.connectivity-route-benchmark.1",
         "campaigns": reports,
         "verdicts": reports[0]["verdicts"],
         "symbol_inventory": reports[0]["symbol_inventory"],
         "reachability": reports[0]["reachability"],
+        "regime_provenance": {
+            "49x65": "current-moment boundary reconstruction grid",
+            "65x97": "flux-surface connectivity reference grid",
+            "101x141": "diverted connectivity boundary reference grid",
+            "boundary_profile_statics": (
+                "48 levels, 12 bisections, and 128 rays from ReconstructProfile"
+            ),
+            "boundary_moment_statics": (
+                "96 levels, 18 bisections, and 512 rays from the hard adapter defaults"
+            ),
+            "surface_statics": "28 bins from flux_surface_geometry_jax",
+        },
+        "moment_boundary_campaigns": moment_reports,
         "interpretation": {
             "pair_status": (
                 "Neither module is an implementation pair. Both are one traced "
@@ -1029,8 +1146,14 @@ def main() -> None:
     measure_parser = subparsers.add_parser("measure")
     measure_parser.add_argument("--label", required=True)
     measure_parser.add_argument("--output", required=True, type=Path)
+    moment_parser = subparsers.add_parser("moment")
+    moment_parser.add_argument("--label", required=True)
+    moment_parser.add_argument("--output", required=True, type=Path)
     combine_parser = subparsers.add_parser("combine")
     combine_parser.add_argument("--input", action="append", required=True, type=Path)
+    combine_parser.add_argument(
+        "--moment-input", action="append", required=True, type=Path
+    )
     combine_parser.add_argument("--output", required=True, type=Path)
     combine_parser.add_argument("--figure", required=True, type=Path)
     args = parser.parse_args()
@@ -1039,8 +1162,12 @@ def main() -> None:
         result = measure(args.label)
         args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
         print(json.dumps(result, indent=2, sort_keys=True))
+    elif args.command == "moment":
+        result = measure_moment(args.label)
+        args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
+        print(json.dumps(result, indent=2, sort_keys=True))
     else:
-        combine(args.input, args.output, args.figure)
+        combine(args.input, args.moment_input, args.output, args.figure)
 
 
 if __name__ == "__main__":

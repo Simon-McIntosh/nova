@@ -1,0 +1,211 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 980" role="img">
+<title>Field-null stack route measurements</title>
+<desc>Warm evaluation cost by problem size and module verdict summary.</desc>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<g font-family="system-ui, sans-serif" fill="#111111">
+<text x="40" y="38" font-size="24" font-weight="700">Field-null and topology route measurements</text>
+<text x="40" y="62" font-size="13" fill="#555">Minimum of seven synchronized calls; inputs resident on device; log-log axes</text>
+<rect x="45" y="95" width="550" height="285" rx="4" fill="#fafafa" stroke="#cccccc"/>
+<text x="61" y="120" font-size="16" font-weight="650">Full field-null evaluation</text>
+<line x1="109" y1="344" x2="584" y2="344" stroke="#777"/>
+<line x1="109" y1="139" x2="109" y2="344" stroke="#777"/>
+<text x="346.5" y="374" text-anchor="middle" font-size="11">nodes</text>
+<text x="64" y="241.5" transform="rotate(-90 64 241.5)" text-anchor="middle" font-size="11">warm time [microseconds]</text>
+<line x1="109" y1="344.0" x2="584" y2="344.0" stroke="#e4e4e4"/>
+<text x="102" y="348.0" text-anchor="end" font-size="10">1e1</text>
+<line x1="109" y1="303.0" x2="584" y2="303.0" stroke="#e4e4e4"/>
+<text x="102" y="307.0" text-anchor="end" font-size="10">1e2</text>
+<line x1="109" y1="262.0" x2="584" y2="262.0" stroke="#e4e4e4"/>
+<text x="102" y="266.0" text-anchor="end" font-size="10">1e3</text>
+<line x1="109" y1="221.0" x2="584" y2="221.0" stroke="#e4e4e4"/>
+<text x="102" y="225.0" text-anchor="end" font-size="10">1e4</text>
+<line x1="109" y1="180.0" x2="584" y2="180.0" stroke="#e4e4e4"/>
+<text x="102" y="184.0" text-anchor="end" font-size="10">1e5</text>
+<line x1="109" y1="139.0" x2="584" y2="139.0" stroke="#e4e4e4"/>
+<text x="102" y="143.0" text-anchor="end" font-size="10">1e6</text>
+<line x1="109.0" y1="344" x2="109.0" y2="348" stroke="#777"/>
+<text x="109.0" y="359" text-anchor="middle" font-size="9">289</text>
+<line x1="264.5" y1="344" x2="264.5" y2="348" stroke="#777"/>
+<text x="264.5" y="359" text-anchor="middle" font-size="9">1089</text>
+<line x1="423.3" y1="344" x2="423.3" y2="348" stroke="#777"/>
+<text x="423.3" y="359" text-anchor="middle" font-size="9">4225</text>
+<line x1="584.0" y1="344" x2="584.0" y2="348" stroke="#777"/>
+<text x="584.0" y="359" text-anchor="middle" font-size="9">16641</text>
+<polyline points="109.0,283.9 264.5,282.9 423.3,279.9 584.0,271.4" fill="none" stroke="#555555" stroke-width="2"/>
+<circle cx="109.0" cy="283.9" r="3" fill="#555555"/>
+<circle cx="264.5" cy="282.9" r="3" fill="#555555"/>
+<circle cx="423.3" cy="279.9" r="3" fill="#555555"/>
+<circle cx="584.0" cy="271.4" r="3" fill="#555555"/>
+<polyline points="109.0,316.9 264.5,315.1 423.3,316.2 584.0,315.2" fill="none" stroke="#0066aa" stroke-width="2"/>
+<circle cx="109.0" cy="316.9" r="3" fill="#0066aa"/>
+<circle cx="264.5" cy="315.1" r="3" fill="#0066aa"/>
+<circle cx="423.3" cy="316.2" r="3" fill="#0066aa"/>
+<circle cx="584.0" cy="315.2" r="3" fill="#0066aa"/>
+<polyline points="109.0,216.0 264.5,190.5 423.3,165.3 584.0,140.3" fill="none" stroke="#d55e00" stroke-width="2"/>
+<circle cx="109.0" cy="216.0" r="3" fill="#d55e00"/>
+<circle cx="264.5" cy="190.5" r="3" fill="#d55e00"/>
+<circle cx="423.3" cy="165.3" r="3" fill="#d55e00"/>
+<circle cx="584.0" cy="140.3" r="3" fill="#d55e00"/>
+<line x1="117" y1="154" x2="137" y2="154" stroke="#555555" stroke-width="2"/>
+<text x="144" y="158" font-size="10">Host CPU</text>
+<line x1="117" y1="171" x2="137" y2="171" stroke="#0066aa" stroke-width="2"/>
+<text x="144" y="175" font-size="10">Traced CPU</text>
+<line x1="117" y1="188" x2="137" y2="188" stroke="#d55e00" stroke-width="2"/>
+<text x="144" y="192" font-size="10">Traced accelerator</text>
+<rect x="620" y="95" width="550" height="285" rx="4" fill="#fafafa" stroke="#cccccc"/>
+<text x="636" y="120" font-size="16" font-weight="650">Null categorisation</text>
+<line x1="684" y1="344" x2="1159" y2="344" stroke="#777"/>
+<line x1="684" y1="139" x2="684" y2="344" stroke="#777"/>
+<text x="921.5" y="374" text-anchor="middle" font-size="11">nodes</text>
+<text x="639" y="241.5" transform="rotate(-90 639 241.5)" text-anchor="middle" font-size="11">warm time [microseconds]</text>
+<line x1="684" y1="344.0" x2="1159" y2="344.0" stroke="#e4e4e4"/>
+<text x="677" y="348.0" text-anchor="end" font-size="10">1e0</text>
+<line x1="684" y1="309.8" x2="1159" y2="309.8" stroke="#e4e4e4"/>
+<text x="677" y="313.8" text-anchor="end" font-size="10">1e1</text>
+<line x1="684" y1="275.7" x2="1159" y2="275.7" stroke="#e4e4e4"/>
+<text x="677" y="279.7" text-anchor="end" font-size="10">1e2</text>
+<line x1="684" y1="241.5" x2="1159" y2="241.5" stroke="#e4e4e4"/>
+<text x="677" y="245.5" text-anchor="end" font-size="10">1e3</text>
+<line x1="684" y1="207.3" x2="1159" y2="207.3" stroke="#e4e4e4"/>
+<text x="677" y="211.3" text-anchor="end" font-size="10">1e4</text>
+<line x1="684" y1="173.2" x2="1159" y2="173.2" stroke="#e4e4e4"/>
+<text x="677" y="177.2" text-anchor="end" font-size="10">1e5</text>
+<line x1="684" y1="139.0" x2="1159" y2="139.0" stroke="#e4e4e4"/>
+<text x="677" y="143.0" text-anchor="end" font-size="10">1e6</text>
+<line x1="684.0" y1="344" x2="684.0" y2="348" stroke="#777"/>
+<text x="684.0" y="359" text-anchor="middle" font-size="9">289</text>
+<line x1="839.5" y1="344" x2="839.5" y2="348" stroke="#777"/>
+<text x="839.5" y="359" text-anchor="middle" font-size="9">1089</text>
+<line x1="998.3" y1="344" x2="998.3" y2="348" stroke="#777"/>
+<text x="998.3" y="359" text-anchor="middle" font-size="9">4225</text>
+<line x1="1159.0" y1="344" x2="1159.0" y2="348" stroke="#777"/>
+<text x="1159.0" y="359" text-anchor="middle" font-size="9">16641</text>
+<polyline points="684.0,319.3 839.5,301.3 998.3,281.6 1159.0,261.9" fill="none" stroke="#555555" stroke-width="2"/>
+<circle cx="684.0" cy="319.3" r="3" fill="#555555"/>
+<circle cx="839.5" cy="301.3" r="3" fill="#555555"/>
+<circle cx="998.3" cy="281.6" r="3" fill="#555555"/>
+<circle cx="1159.0" cy="261.9" r="3" fill="#555555"/>
+<polyline points="684.0,289.8 839.5,279.9 998.3,264.3 1159.0,245.1" fill="none" stroke="#0066aa" stroke-width="2"/>
+<circle cx="684.0" cy="289.8" r="3" fill="#0066aa"/>
+<circle cx="839.5" cy="279.9" r="3" fill="#0066aa"/>
+<circle cx="998.3" cy="264.3" r="3" fill="#0066aa"/>
+<circle cx="1159.0" cy="245.1" r="3" fill="#0066aa"/>
+<polyline points="684.0,202.8 839.5,181.7 998.3,160.9 1159.0,140.1" fill="none" stroke="#d55e00" stroke-width="2"/>
+<circle cx="684.0" cy="202.8" r="3" fill="#d55e00"/>
+<circle cx="839.5" cy="181.7" r="3" fill="#d55e00"/>
+<circle cx="998.3" cy="160.9" r="3" fill="#d55e00"/>
+<circle cx="1159.0" cy="140.1" r="3" fill="#d55e00"/>
+<line x1="692" y1="154" x2="712" y2="154" stroke="#555555" stroke-width="2"/>
+<text x="719" y="158" font-size="10">Host CPU</text>
+<line x1="692" y1="171" x2="712" y2="171" stroke="#0066aa" stroke-width="2"/>
+<text x="719" y="175" font-size="10">Traced CPU</text>
+<line x1="692" y1="188" x2="712" y2="188" stroke="#d55e00" stroke-width="2"/>
+<text x="719" y="192" font-size="10">Traced accelerator</text>
+<rect x="45" y="405" width="550" height="285" rx="4" fill="#fafafa" stroke="#cccccc"/>
+<text x="61" y="430" font-size="16" font-weight="650">Target matrix evaluation</text>
+<line x1="109" y1="654" x2="584" y2="654" stroke="#777"/>
+<line x1="109" y1="449" x2="109" y2="654" stroke="#777"/>
+<text x="346.5" y="684" text-anchor="middle" font-size="11">nodes</text>
+<text x="64" y="551.5" transform="rotate(-90 64 551.5)" text-anchor="middle" font-size="11">warm time [microseconds]</text>
+<line x1="109" y1="654.0" x2="584" y2="654.0" stroke="#e4e4e4"/>
+<text x="102" y="658.0" text-anchor="end" font-size="10">1e0</text>
+<line x1="109" y1="585.7" x2="584" y2="585.7" stroke="#e4e4e4"/>
+<text x="102" y="589.7" text-anchor="end" font-size="10">1e1</text>
+<line x1="109" y1="517.3" x2="584" y2="517.3" stroke="#e4e4e4"/>
+<text x="102" y="521.3" text-anchor="end" font-size="10">1e2</text>
+<line x1="109" y1="449.0" x2="584" y2="449.0" stroke="#e4e4e4"/>
+<text x="102" y="453.0" text-anchor="end" font-size="10">1e3</text>
+<line x1="109.0" y1="654" x2="109.0" y2="658" stroke="#777"/>
+<text x="109.0" y="669" text-anchor="middle" font-size="9">256</text>
+<line x1="267.3" y1="654" x2="267.3" y2="658" stroke="#777"/>
+<text x="267.3" y="669" text-anchor="middle" font-size="9">1024</text>
+<line x1="425.7" y1="654" x2="425.7" y2="658" stroke="#777"/>
+<text x="425.7" y="669" text-anchor="middle" font-size="9">4096</text>
+<line x1="584.0" y1="654" x2="584.0" y2="658" stroke="#777"/>
+<text x="584.0" y="669" text-anchor="middle" font-size="9">16384</text>
+<polyline points="109.0,604.1 267.3,567.1 425.7,509.4 584.0,468.8" fill="none" stroke="#555555" stroke-width="2"/>
+<circle cx="109.0" cy="604.1" r="3" fill="#555555"/>
+<circle cx="267.3" cy="567.1" r="3" fill="#555555"/>
+<circle cx="425.7" cy="509.4" r="3" fill="#555555"/>
+<circle cx="584.0" cy="468.8" r="3" fill="#555555"/>
+<polyline points="109.0,556.3 267.3,555.7 425.7,527.2 584.0,497.6" fill="none" stroke="#0066aa" stroke-width="2"/>
+<circle cx="109.0" cy="556.3" r="3" fill="#0066aa"/>
+<circle cx="267.3" cy="555.7" r="3" fill="#0066aa"/>
+<circle cx="425.7" cy="527.2" r="3" fill="#0066aa"/>
+<circle cx="584.0" cy="497.6" r="3" fill="#0066aa"/>
+<polyline points="109.0,518.4 267.3,519.8 425.7,516.8 584.0,519.8" fill="none" stroke="#d55e00" stroke-width="2"/>
+<circle cx="109.0" cy="518.4" r="3" fill="#d55e00"/>
+<circle cx="267.3" cy="519.8" r="3" fill="#d55e00"/>
+<circle cx="425.7" cy="516.8" r="3" fill="#d55e00"/>
+<circle cx="584.0" cy="519.8" r="3" fill="#d55e00"/>
+<line x1="117" y1="464" x2="137" y2="464" stroke="#555555" stroke-width="2"/>
+<text x="144" y="468" font-size="10">Host CPU</text>
+<line x1="117" y1="481" x2="137" y2="481" stroke="#0066aa" stroke-width="2"/>
+<text x="144" y="485" font-size="10">Traced CPU</text>
+<line x1="117" y1="498" x2="137" y2="498" stroke="#d55e00" stroke-width="2"/>
+<text x="144" y="502" font-size="10">Traced accelerator</text>
+<rect x="620" y="405" width="550" height="285" rx="4" fill="#fafafa" stroke="#cccccc"/>
+<text x="636" y="430" font-size="16" font-weight="650">Topology update, one map</text>
+<line x1="684" y1="654" x2="1159" y2="654" stroke="#777"/>
+<line x1="684" y1="449" x2="684" y2="654" stroke="#777"/>
+<text x="921.5" y="684" text-anchor="middle" font-size="11">nodes</text>
+<text x="639" y="551.5" transform="rotate(-90 639 551.5)" text-anchor="middle" font-size="11">warm time [microseconds]</text>
+<line x1="684" y1="654.0" x2="1159" y2="654.0" stroke="#e4e4e4"/>
+<text x="677" y="658.0" text-anchor="end" font-size="10">1e2</text>
+<line x1="684" y1="602.8" x2="1159" y2="602.8" stroke="#e4e4e4"/>
+<text x="677" y="606.8" text-anchor="end" font-size="10">1e3</text>
+<line x1="684" y1="551.5" x2="1159" y2="551.5" stroke="#e4e4e4"/>
+<text x="677" y="555.5" text-anchor="end" font-size="10">1e4</text>
+<line x1="684" y1="500.2" x2="1159" y2="500.2" stroke="#e4e4e4"/>
+<text x="677" y="504.2" text-anchor="end" font-size="10">1e5</text>
+<line x1="684" y1="449.0" x2="1159" y2="449.0" stroke="#e4e4e4"/>
+<text x="677" y="453.0" text-anchor="end" font-size="10">1e6</text>
+<line x1="684.0" y1="654" x2="684.0" y2="658" stroke="#777"/>
+<text x="684.0" y="669" text-anchor="middle" font-size="9">289</text>
+<line x1="839.5" y1="654" x2="839.5" y2="658" stroke="#777"/>
+<text x="839.5" y="669" text-anchor="middle" font-size="9">1089</text>
+<line x1="998.3" y1="654" x2="998.3" y2="658" stroke="#777"/>
+<text x="998.3" y="669" text-anchor="middle" font-size="9">4225</text>
+<line x1="1159.0" y1="654" x2="1159.0" y2="658" stroke="#777"/>
+<text x="1159.0" y="669" text-anchor="middle" font-size="9">16641</text>
+<polyline points="684.0,635.7 839.5,634.3 998.3,628.9 1159.0,615.7" fill="none" stroke="#555555" stroke-width="2"/>
+<circle cx="684.0" cy="635.7" r="3" fill="#555555"/>
+<circle cx="839.5" cy="634.3" r="3" fill="#555555"/>
+<circle cx="998.3" cy="628.9" r="3" fill="#555555"/>
+<circle cx="1159.0" cy="615.7" r="3" fill="#555555"/>
+<polyline points="684.0,634.4 839.5,630.2 998.3,619.8 1159.0,599.8" fill="none" stroke="#0066aa" stroke-width="2"/>
+<circle cx="684.0" cy="634.4" r="3" fill="#0066aa"/>
+<circle cx="839.5" cy="630.2" r="3" fill="#0066aa"/>
+<circle cx="998.3" cy="619.8" r="3" fill="#0066aa"/>
+<circle cx="1159.0" cy="599.8" r="3" fill="#0066aa"/>
+<polyline points="684.0,542.6 839.5,512.5 998.3,481.4 1159.0,450.4" fill="none" stroke="#d55e00" stroke-width="2"/>
+<circle cx="684.0" cy="542.6" r="3" fill="#d55e00"/>
+<circle cx="839.5" cy="512.5" r="3" fill="#d55e00"/>
+<circle cx="998.3" cy="481.4" r="3" fill="#d55e00"/>
+<circle cx="1159.0" cy="450.4" r="3" fill="#d55e00"/>
+<line x1="692" y1="464" x2="712" y2="464" stroke="#555555" stroke-width="2"/>
+<text x="719" y="468" font-size="10">Host CPU</text>
+<line x1="692" y1="481" x2="712" y2="481" stroke="#0066aa" stroke-width="2"/>
+<text x="719" y="485" font-size="10">Traced CPU</text>
+<line x1="692" y1="498" x2="712" y2="498" stroke="#d55e00" stroke-width="2"/>
+<text x="719" y="502" font-size="10">Traced accelerator</text>
+<rect x="45" y="730" width="1125" height="210" rx="4" fill="#f7f7f7" stroke="#bbbbbb"/>
+<text x="65" y="758" font-size="17" font-weight="700">Verdicts</text>
+<text x="65" y="790" font-size="13" font-weight="650">fieldnull</text>
+<rect x="165" y="773" width="110" height="23" rx="3" fill="#b2182b"/>
+<text x="220" y="790" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">DELETE ONE</text>
+<text x="295" y="790" font-size="11" fill="#333">CPU traced/host 0.09-0.19x; CPU host/accelerator 4.27e-04-2.21e-02x; 0 traced importers</text>
+<text x="65" y="825" font-size="13" font-weight="650">null</text>
+<rect x="165" y="808" width="110" height="23" rx="3" fill="#2166ac"/>
+<text x="220" y="825" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">KEEP BOTH</text>
+<text x="295" y="825" font-size="11" fill="#333">CPU traced/host 3.09-7.30x; CPU host/accelerator 2.73e-04-3.90e-04x; 7 nonzero gradient entries</text>
+<text x="65" y="860" font-size="13" font-weight="650">target</text>
+<rect x="165" y="843" width="110" height="23" rx="3" fill="#2166ac"/>
+<text x="220" y="860" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">KEEP BOTH</text>
+<text x="295" y="860" font-size="11" fill="#333">CPU traced/NumPy 0.38-5.01x; NumPy/accelerator 0.06-5.58x; max error 2.03e-07</text>
+<text x="65" y="895" font-size="13" font-weight="650">topology</text>
+<rect x="165" y="878" width="110" height="23" rx="3" fill="#2166ac"/>
+<text x="220" y="895" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">KEEP BOTH</text>
+<text x="295" y="895" font-size="11" fill="#333">CPU traced/host 1.06-2.05x; CPU host/accelerator 5.95e-04-1.53e-02x; batch 5 3.17e-03-7.79e-02x</text>
+</g>
+</svg>

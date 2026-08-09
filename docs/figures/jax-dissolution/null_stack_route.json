@@ -1,0 +1,1519 @@
+{
+  "api_contracts": {
+    "fieldnull": {
+      "differences": [
+        "host takes subgrid and optional loop controls; traced takes maxsize",
+        "host mutates dictionaries; traced mutates two device-array attributes",
+        "host rows have x, z and psi; traced rows also carry null type",
+        "host point counts are lengths; traced counts scan NaN padding",
+        "host is eager float64; traced follows JAX device precision"
+      ],
+      "host_features": [
+        "structured and unstructured xarray state",
+        "optional loop filtering",
+        "plot adapter"
+      ],
+      "host_result": "mutable dictionaries with adaptive-length arrays",
+      "host_signature": "(data: xarray.core.dataset.Dataset = <factory>, array_attrs: list[str] = <factory>, subgrid: bool = True, loop: numpy.ndarray | None = None) -> None",
+      "shared_component": "nova.geometry.hexstencil.hex_stencil",
+      "traced_features": [
+        "cached Null2D and Target construction",
+        "device arrays",
+        "fixed-size output"
+      ],
+      "traced_result": "two fixed (maxsize, 4) device arrays padded by NaN",
+      "traced_signature": "(data: xarray.core.dataset.Dataset = <factory>, array_attrs: list[str] = <factory>, maxsize: int = 5) -> None"
+    },
+    "null": {
+      "host_location": "categorisation and adaptive interpolation in nova.biot.fieldnull",
+      "semantic_split": [
+        "fixed size versus adaptive length",
+        "NaN padding versus absent rows",
+        "traceable selection versus Python control flow",
+        "Null1D returns four values; host wall selection returns three",
+        "zero wall polarity is all NaN traced and all zero host",
+        "degenerate surface type is NaN traced and raises host",
+        "traced stationary coordinates floor a degenerate determinant"
+      ],
+      "traced_signatures": {
+        "Null1D": "(coordinate: jax.Array) -> None",
+        "Null2D": "(coordinate: jax.Array, stencil: jax.Array, coordinate_stencil: jax.Array, maxsize: int = 5) -> None"
+      }
+    },
+    "target": {
+      "common_interface": false,
+      "differences": [
+        "traced construction takes two coupling matrices and a null kernel",
+        "host construction takes coordinate data and reduction metadata",
+        "traced exposes external and internal matrix products",
+        "host exposes geometry columns and source-target shape bookkeeping",
+        "traced is a pytree; host is a mutable pandas-derived frame"
+      ],
+      "host_same_token_role": "store target geometry and reduction metadata",
+      "traced_role": "evaluate source-target and plasma-target coupling matrices",
+      "traced_signature": "(source_target: jax.Array, plasma_target: jax.Array, null: nova.jax.null.Null1D | nova.jax.null.Null2D) -> None"
+    },
+    "topology": {
+      "host_role": "stateful behavior distributed across PlasmaGrid and Plasma",
+      "semantic_split": [
+        "sentinel values versus topology exceptions",
+        "fixed arrays versus adaptive null collections",
+        "functional return versus mutation of plasma state",
+        "update_batch has no host-class counterpart",
+        "traced precision follows JAX device policy; host remains float64"
+      ],
+      "traced_role": "pure fixed-shape normalization, boundary selection and ionization",
+      "traced_signature": "(grid: nova.jax.null.Null2D, wall: nova.jax.null.Null1D) -> None"
+    }
+  },
+  "benchmark": "null_stack_route",
+  "generated_at": "2026-08-09T07:19:06.429963+00:00",
+  "method": {
+    "accuracy_references": {
+      "fieldnull": "analytic quartic with two minima and one saddle",
+      "target": "extended-precision matrix products",
+      "topology": "analytic wall-limited Gaussian anchors"
+    },
+    "repeats": 7,
+    "transfer_policy": "inputs resident on device before warm timing",
+    "warm_statistic": "minimum synchronized wall time"
+  },
+  "reachability": {
+    "fieldnull": {
+      "production_importers": [],
+      "test_importers": []
+    },
+    "host_fieldnull": {
+      "production_importers": [
+        "nova/biot/grid.py",
+        "nova/imas/flux.py"
+      ],
+      "test_importers": []
+    },
+    "null": {
+      "production_importers": [
+        "nova/biot/limiter.py",
+        "nova/jax/fieldnull.py",
+        "nova/jax/target.py",
+        "nova/jax/topology.py"
+      ],
+      "test_importers": [
+        "tests/test_jax_topology.py",
+        "tests/test_topology_boundary.py"
+      ]
+    },
+    "target": {
+      "production_importers": [
+        "nova/biot/limiter.py",
+        "nova/equilibrium/forward_operator.py",
+        "nova/jax/fieldnull.py"
+      ],
+      "test_importers": []
+    },
+    "topology": {
+      "production_importers": [
+        "nova/equilibrium/forward_operator.py"
+      ],
+      "test_importers": [
+        "tests/test_jax_topology.py",
+        "tests/test_topology_boundary.py"
+      ]
+    }
+  },
+  "runs": {
+    "cpu": {
+      "api_contracts": {
+        "fieldnull": {
+          "host_features": [
+            "structured and unstructured xarray state",
+            "optional loop filtering",
+            "plot adapter"
+          ],
+          "host_result": "mutable dictionaries with adaptive-length arrays",
+          "host_signature": "(data: xarray.core.dataset.Dataset = <factory>, array_attrs: list[str] = <factory>, subgrid: bool = True, loop: numpy.ndarray | None = None) -> None",
+          "shared_component": "nova.geometry.hexstencil.hex_stencil",
+          "traced_features": [
+            "cached Null2D and Target construction",
+            "device arrays",
+            "fixed-size output"
+          ],
+          "traced_result": "two fixed (maxsize, 4) device arrays padded by NaN",
+          "traced_signature": "(data: xarray.core.dataset.Dataset = <factory>, array_attrs: list[str] = <factory>, maxsize: int = 5) -> None"
+        },
+        "null": {
+          "host_location": "categorisation and adaptive interpolation in nova.biot.fieldnull",
+          "semantic_split": [
+            "fixed size versus adaptive length",
+            "NaN padding versus absent rows",
+            "traceable selection versus Python control flow"
+          ],
+          "traced_signatures": {
+            "Null1D": "(coordinate: jax.Array) -> None",
+            "Null2D": "(coordinate: jax.Array, stencil: jax.Array, coordinate_stencil: jax.Array, maxsize: int = 5) -> None"
+          }
+        },
+        "target": {
+          "common_interface": false,
+          "host_same_token_role": "store target geometry and reduction metadata",
+          "traced_role": "evaluate source-target and plasma-target coupling matrices",
+          "traced_signature": "(source_target: jax.Array, plasma_target: jax.Array, null: nova.jax.null.Null1D | nova.jax.null.Null2D) -> None"
+        },
+        "topology": {
+          "host_role": "stateful behavior distributed across PlasmaGrid and Plasma",
+          "semantic_split": [
+            "sentinel values versus topology exceptions",
+            "fixed arrays versus adaptive null collections",
+            "functional return versus mutation of plasma state"
+          ],
+          "traced_role": "pure fixed-shape normalization, boundary selection and ionization",
+          "traced_signature": "(grid: nova.jax.null.Null2D, wall: nova.jax.null.Null1D) -> None"
+        }
+      },
+      "autodiff": {
+        "null": {
+          "all_finite": true,
+          "device": "cpu:0",
+          "gradient_norm": 2.9456663131713867,
+          "nonzero_entries": 7,
+          "quantity": "x coordinate of the first saddle"
+        },
+        "target": {
+          "all_finite": true,
+          "device": "cpu:0",
+          "quantity": "external flux directional derivative",
+          "scaled_error_against_matrix_product": 1.1469329960743359e-07
+        },
+        "topology": {
+          "all_finite": true,
+          "device": "cpu:0",
+          "nonzero_entries": 289,
+          "quantity": "normalized flux directional derivative",
+          "tangent_norm": 0.026467010378837585
+        }
+      },
+      "benchmark": "null_stack_route",
+      "environment": {
+        "device_kinds": [
+          "cpu"
+        ],
+        "devices": [
+          "cpu:0"
+        ],
+        "hostname": "98dci4-clu-3142.iter.org",
+        "jax": "0.11.0",
+        "jax_enable_x64": false,
+        "jax_platform": "cpu",
+        "numpy": "2.4.6",
+        "omp_num_threads": "1",
+        "openblas_num_threads": "1",
+        "platform": "Linux-5.14.0-284.25.1.el9_2.x86_64-x86_64-with-glibc2.34",
+        "python": "3.14.2",
+        "scipy": "1.17.1",
+        "xarray": "2025.6.1"
+      },
+      "generated_at": "2026-08-09T07:13:08.514557+00:00",
+      "measurements": {
+        "fieldnull": [
+          {
+            "accuracy": {
+              "expected_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_dtype": "float64",
+              "host_max_coordinate_error": 0.020000000000000018,
+              "host_max_flux_error": 0.0003960396039615066,
+              "host_types_match": true,
+              "route_max_coordinate_deviation": 0.00019856284868336973,
+              "traced_count": {
+                "o": 2,
+                "x": 1
+              },
+              "traced_dtype": "float32",
+              "traced_max_coordinate_error": 0.019801557065723476,
+              "traced_max_flux_error": 0.00039690732955932617,
+              "traced_types_match": true
+            },
+            "host_construction_us": 145.5899327993393,
+            "host_first_ms": 620.8170540630817,
+            "host_warm_us": 292.54332184791565,
+            "layout": "structured",
+            "nodes": 289,
+            "size": 17,
+            "traced_construction_us": 54687.4925494194,
+            "traced_first_ms": 299.9131605029106,
+            "traced_warm_us": 45.78940570354462
+          },
+          {
+            "accuracy": {
+              "expected_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_dtype": "float64",
+              "host_max_coordinate_error": 0.020000000000000018,
+              "host_max_flux_error": 0.0003960396039608405,
+              "host_types_match": true,
+              "route_max_coordinate_deviation": 0.00019856284868336973,
+              "traced_count": {
+                "o": 2,
+                "x": 1
+              },
+              "traced_dtype": "float32",
+              "traced_max_coordinate_error": 0.019801557065723476,
+              "traced_max_flux_error": 0.00039690732955932617,
+              "traced_types_match": true
+            },
+            "host_construction_us": 93.70408952236176,
+            "host_first_ms": 13.719320297241211,
+            "host_warm_us": 239.08540606498718,
+            "layout": "unstructured",
+            "nodes": 289,
+            "size": 17,
+            "traced_construction_us": 9927.68257856369,
+            "traced_first_ms": 0.11763721704483032,
+            "traced_warm_us": 44.52839493751526
+          },
+          {
+            "accuracy": {
+              "expected_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_dtype": "float64",
+              "host_max_coordinate_error": 0.0050000000000000044,
+              "host_max_flux_error": 2.493765586042418e-05,
+              "host_types_match": true,
+              "route_max_coordinate_deviation": 1.2881947031924754e-05,
+              "traced_count": {
+                "o": 2,
+                "x": 1
+              },
+              "traced_dtype": "float32",
+              "traced_max_coordinate_error": 0.004987478256246767,
+              "traced_max_flux_error": 2.5570392608642578e-05,
+              "traced_types_match": true
+            },
+            "host_construction_us": 122.34039604663849,
+            "host_first_ms": 0.57179294526577,
+            "host_warm_us": 309.00537967681885,
+            "layout": "structured",
+            "nodes": 1089,
+            "size": 33,
+            "traced_construction_us": 49479.300156235695,
+            "traced_first_ms": 221.86466120183468,
+            "traced_warm_us": 50.70120096206665
+          },
+          {
+            "accuracy": {
+              "expected_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_dtype": "float64",
+              "host_max_coordinate_error": 0.0050000000000000044,
+              "host_max_flux_error": 2.493765586242258e-05,
+              "host_types_match": true,
+              "route_max_coordinate_deviation": 1.2881947031924754e-05,
+              "traced_count": {
+                "o": 2,
+                "x": 1
+              },
+              "traced_dtype": "float32",
+              "traced_max_coordinate_error": 0.004987478256246767,
+              "traced_max_flux_error": 2.5570392608642578e-05,
+              "traced_types_match": true
+            },
+            "host_construction_us": 84.78760719299316,
+            "host_first_ms": 0.37132948637008667,
+            "host_warm_us": 245.45006453990936,
+            "layout": "unstructured",
+            "nodes": 1089,
+            "size": 33,
+            "traced_construction_us": 10691.54404103756,
+            "traced_first_ms": 0.12423098087310791,
+            "traced_warm_us": 45.474618673324585
+          },
+          {
+            "accuracy": {
+              "expected_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_dtype": "float64",
+              "host_max_coordinate_error": 0.0010000000000000009,
+              "host_max_flux_error": 1.5615240478439318e-06,
+              "host_types_match": true,
+              "route_max_coordinate_deviation": 0.0002493135125525312,
+              "traced_count": {
+                "o": 2,
+                "x": 1
+              },
+              "traced_dtype": "float32",
+              "traced_max_coordinate_error": 0.0012493133860347677,
+              "traced_max_flux_error": 1.4901161193847656e-06,
+              "traced_types_match": true
+            },
+            "host_construction_us": 100.08364915847778,
+            "host_first_ms": 0.5825106054544449,
+            "host_warm_us": 366.3245588541031,
+            "layout": "structured",
+            "nodes": 4225,
+            "size": 65,
+            "traced_construction_us": 49108.18673670292,
+            "traced_first_ms": 222.19832614064217,
+            "traced_warm_us": 47.62038588523865
+          },
+          {
+            "accuracy": {
+              "expected_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_dtype": "float64",
+              "host_max_coordinate_error": 0.0010000000000000009,
+              "host_max_flux_error": 1.5615240485100657e-06,
+              "host_types_match": true,
+              "route_max_coordinate_deviation": 0.0002493135125525312,
+              "traced_count": {
+                "o": 2,
+                "x": 1
+              },
+              "traced_dtype": "float32",
+              "traced_max_coordinate_error": 0.0012493133860347677,
+              "traced_max_flux_error": 1.4901161193847656e-06,
+              "traced_types_match": true
+            },
+            "host_construction_us": 92.61071681976318,
+            "host_first_ms": 0.4067514091730118,
+            "host_warm_us": 283.88574719429016,
+            "layout": "unstructured",
+            "nodes": 4225,
+            "size": 65,
+            "traced_construction_us": 11115.15611410141,
+            "traced_first_ms": 0.11779554188251495,
+            "traced_warm_us": 47.732144594192505
+          },
+          {
+            "accuracy": {
+              "expected_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_dtype": "float64",
+              "host_max_coordinate_error": 0.0,
+              "host_max_flux_error": 9.764099340170418e-08,
+              "host_types_match": true,
+              "route_max_coordinate_deviation": 0.00031215076267037686,
+              "traced_count": {
+                "o": 2,
+                "x": 1
+              },
+              "traced_dtype": "float32",
+              "traced_max_coordinate_error": 0.00031215076267037686,
+              "traced_max_flux_error": 6.556510925292969e-07,
+              "traced_types_match": true
+            },
+            "host_construction_us": 101.07457637786865,
+            "host_first_ms": 0.8262582123279572,
+            "host_warm_us": 589.2124027013779,
+            "layout": "structured",
+            "nodes": 16641,
+            "size": 129,
+            "traced_construction_us": 52615.51029980183,
+            "traced_first_ms": 235.35349033772945,
+            "traced_warm_us": 50.475820899009705
+          },
+          {
+            "accuracy": {
+              "expected_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_dtype": "float64",
+              "host_max_coordinate_error": 0.0,
+              "host_max_flux_error": 9.764099540010562e-08,
+              "host_types_match": true,
+              "route_max_coordinate_deviation": 0.00031215076267037686,
+              "traced_count": {
+                "o": 2,
+                "x": 1
+              },
+              "traced_dtype": "float32",
+              "traced_max_coordinate_error": 0.00031215076267037686,
+              "traced_max_flux_error": 6.556510925292969e-07,
+              "traced_types_match": true
+            },
+            "host_construction_us": 86.47143840789795,
+            "host_first_ms": 0.5302485078573227,
+            "host_warm_us": 408.2433879375458,
+            "layout": "unstructured",
+            "nodes": 16641,
+            "size": 129,
+            "traced_construction_us": 13285.500928759575,
+            "traced_first_ms": 0.1087728887796402,
+            "traced_warm_us": 43.54491829872131
+          }
+        ],
+        "null": [
+          {
+            "host_count": {
+              "o": 2,
+              "x": 1
+            },
+            "host_first_ms": 0.012371689081192017,
+            "host_warm_us": 5.282461643218994,
+            "nodes": 289,
+            "size": 17,
+            "traced_count": {
+              "o": 2,
+              "x": 1
+            },
+            "traced_first_ms": 108.59395563602448,
+            "traced_warm_us": 38.584694266319275
+          },
+          {
+            "host_count": {
+              "o": 2,
+              "x": 1
+            },
+            "host_first_ms": 0.02481602132320404,
+            "host_warm_us": 17.726793885231018,
+            "nodes": 1089,
+            "size": 33,
+            "traced_count": {
+              "o": 2,
+              "x": 1
+            },
+            "traced_first_ms": 109.38737727701664,
+            "traced_warm_us": 75.16331970691681
+          },
+          {
+            "host_count": {
+              "o": 2,
+              "x": 1
+            },
+            "host_first_ms": 0.08172355592250824,
+            "host_warm_us": 67.10551679134369,
+            "nodes": 4225,
+            "size": 65,
+            "traced_count": {
+              "o": 2,
+              "x": 1
+            },
+            "traced_first_ms": 117.16839484870434,
+            "traced_warm_us": 215.10012447834015
+          },
+          {
+            "host_count": {
+              "o": 2,
+              "x": 1
+            },
+            "host_first_ms": 0.3010723739862442,
+            "host_warm_us": 253.64570319652557,
+            "nodes": 16641,
+            "size": 129,
+            "traced_count": {
+              "o": 2,
+              "x": 1
+            },
+            "traced_first_ms": 128.61299887299538,
+            "traced_warm_us": 782.9274982213974
+          }
+        ],
+        "target": [
+          {
+            "host_construction_us": 0.0,
+            "host_dtype": "float64",
+            "host_external_error": 2.1938460060195248e-16,
+            "host_first_ms": 0.06005540490150452,
+            "host_internal_error": 3.7467343411850445e-16,
+            "host_warm_us": 5.370005965232849,
+            "nodes": 256,
+            "plasma_columns": 64,
+            "source_columns": 32,
+            "traced_construction_us": 35.57465970516205,
+            "traced_dtype": "float32",
+            "traced_external_error": 1.0302254599021464e-07,
+            "traced_first_ms": 41.5996890515089,
+            "traced_internal_error": 1.7010530407285364e-07,
+            "traced_warm_us": 26.911497116088867
+          },
+          {
+            "host_construction_us": 0.0,
+            "host_dtype": "float64",
+            "host_external_error": 2.7507851414689253e-16,
+            "host_first_ms": 0.05519762635231018,
+            "host_internal_error": 2.415600229100173e-16,
+            "host_warm_us": 18.717721104621887,
+            "nodes": 1024,
+            "plasma_columns": 64,
+            "source_columns": 32,
+            "traced_construction_us": 75.02362132072449,
+            "traced_dtype": "float32",
+            "traced_external_error": 1.7424623959353762e-07,
+            "traced_first_ms": 41.41497611999512,
+            "traced_internal_error": 1.0229845618934689e-07,
+            "traced_warm_us": 27.427449822425842
+          },
+          {
+            "host_construction_us": 0.0,
+            "host_dtype": "float64",
+            "host_external_error": 2.8352707439517416e-16,
+            "host_first_ms": 0.15207752585411072,
+            "host_internal_error": 2.6917042019804074e-16,
+            "host_warm_us": 130.57701289653778,
+            "nodes": 4096,
+            "plasma_columns": 64,
+            "source_columns": 32,
+            "traced_construction_us": 640.6549364328384,
+            "traced_dtype": "float32",
+            "traced_external_error": 1.742461344450808e-07,
+            "traced_first_ms": 41.52682237327099,
+            "traced_internal_error": 1.0580087057354585e-07,
+            "traced_warm_us": 71.59635424613953
+          },
+          {
+            "host_construction_us": 0.0,
+            "host_dtype": "float64",
+            "host_external_error": 3.7235287064991524e-16,
+            "host_first_ms": 0.7477737963199615,
+            "host_internal_error": 3.373915989534891e-16,
+            "host_warm_us": 512.4881863594055,
+            "nodes": 16384,
+            "plasma_columns": 64,
+            "source_columns": 32,
+            "traced_construction_us": 2413.9247834682465,
+            "traced_dtype": "float32",
+            "traced_external_error": 1.7424613384580876e-07,
+            "traced_first_ms": 42.17413254082203,
+            "traced_internal_error": 1.2611336991504874e-07,
+            "traced_warm_us": 194.76376473903656
+          }
+        ],
+        "topology": [
+          {
+            "batch": 1,
+            "host_dtype": "float64",
+            "host_first_ms": 17.5540242344141,
+            "host_ionize_mismatch": 0.0,
+            "host_normalized_error": 0.0012882928509785983,
+            "host_warm_us": 227.486714720726,
+            "nodes": 289,
+            "route_ionize_mismatch": 0.0,
+            "route_normalized_deviation": 0.0006225930773015576,
+            "size": 17,
+            "traced_dtype": "float32",
+            "traced_first_ms": 480.7823374867439,
+            "traced_ionize_mismatch": 0.0,
+            "traced_normalized_error": 0.0010626160634602552,
+            "traced_warm_us": 241.01883172988892
+          },
+          {
+            "batch": 5,
+            "host_first_ms": 1.3170503079891205,
+            "host_warm_us": 1129.230484366417,
+            "nodes": 289,
+            "size": 17,
+            "traced_first_ms": 603.7912145256996,
+            "traced_warm_us": 905.5398404598236
+          },
+          {
+            "batch": 1,
+            "host_dtype": "float64",
+            "host_first_ms": 0.4838835448026657,
+            "host_ionize_mismatch": 0.0,
+            "host_normalized_error": 0.0003037943273933473,
+            "host_warm_us": 242.57786571979523,
+            "nodes": 1089,
+            "route_ionize_mismatch": 0.0,
+            "route_normalized_deviation": 4.536167516714342e-05,
+            "size": 33,
+            "traced_dtype": "float32",
+            "traced_first_ms": 498.84958378970623,
+            "traced_ionize_mismatch": 0.0,
+            "traced_normalized_error": 0.0002873141869940827,
+            "traced_warm_us": 291.51514172554016
+          },
+          {
+            "batch": 5,
+            "host_first_ms": 1.406751573085785,
+            "host_warm_us": 1232.961192727089,
+            "nodes": 1089,
+            "size": 33,
+            "traced_first_ms": 557.9957868903875,
+            "traced_warm_us": 1960.0652158260345
+          },
+          {
+            "batch": 1,
+            "host_dtype": "float64",
+            "host_first_ms": 0.4466939717531204,
+            "host_ionize_mismatch": 0.0,
+            "host_normalized_error": 7.5999146757316e-05,
+            "host_warm_us": 308.77068638801575,
+            "nodes": 4225,
+            "route_ionize_mismatch": 0.0,
+            "route_normalized_deviation": 3.5148919533440846e-06,
+            "size": 65,
+            "traced_dtype": "float32",
+            "traced_first_ms": 440.59557653963566,
+            "traced_ionize_mismatch": 0.0,
+            "traced_normalized_error": 7.463800828281488e-05,
+            "traced_warm_us": 464.40400183200836
+          },
+          {
+            "batch": 5,
+            "host_first_ms": 1.728033646941185,
+            "host_warm_us": 1551.7212450504303,
+            "nodes": 4225,
+            "size": 65,
+            "traced_first_ms": 584.4705887138844,
+            "traced_warm_us": 5005.646497011185
+          },
+          {
+            "batch": 1,
+            "host_dtype": "float64",
+            "host_first_ms": 0.7517319172620773,
+            "host_ionize_mismatch": 0.0,
+            "host_normalized_error": 1.9155526608504425e-05,
+            "host_warm_us": 557.9013377428055,
+            "nodes": 16641,
+            "route_ionize_mismatch": 0.0,
+            "route_normalized_deviation": 4.1763382797569414e-06,
+            "size": 129,
+            "traced_dtype": "float32",
+            "traced_first_ms": 486.44926585257053,
+            "traced_ionize_mismatch": 0.0,
+            "traced_normalized_error": 2.0659220519635582e-05,
+            "traced_warm_us": 1143.3158069849014
+          },
+          {
+            "batch": 5,
+            "host_first_ms": 2.9871687293052673,
+            "host_warm_us": 2847.9956090450287,
+            "nodes": 16641,
+            "size": 129,
+            "traced_first_ms": 581.4043153077364,
+            "traced_warm_us": 16062.503680586815
+          }
+        ]
+      },
+      "profile": "full",
+      "reachability": {
+        "fieldnull": {
+          "production_importers": [],
+          "test_importers": []
+        },
+        "host_fieldnull": {
+          "production_importers": [
+            "nova/biot/grid.py",
+            "nova/imas/flux.py"
+          ],
+          "test_importers": []
+        },
+        "null": {
+          "production_importers": [
+            "nova/biot/limiter.py",
+            "nova/jax/fieldnull.py",
+            "nova/jax/target.py",
+            "nova/jax/topology.py"
+          ],
+          "test_importers": [
+            "tests/test_jax_topology.py",
+            "tests/test_topology_boundary.py"
+          ]
+        },
+        "target": {
+          "production_importers": [
+            "nova/biot/limiter.py",
+            "nova/equilibrium/forward_operator.py",
+            "nova/jax/fieldnull.py"
+          ],
+          "test_importers": []
+        },
+        "topology": {
+          "production_importers": [
+            "nova/equilibrium/forward_operator.py"
+          ],
+          "test_importers": [
+            "tests/test_jax_topology.py",
+            "tests/test_topology_boundary.py"
+          ]
+        }
+      },
+      "schema_version": 1,
+      "source": {
+        "git_commit": "274112bc1c86fb0c0d2744901701f92a26b06f0c",
+        "root": "/home/ITER/mcintos/Code/nova",
+        "sha256": {
+          "nova/biot/fieldnull.py": "56d6c16bebe2e6e34411fd858184044e1e65c828fd12627bd05317c732f4ff95",
+          "nova/geometry/hexstencil.py": "f529e34db51b336c59ec49475a28882e7f50c08615e83b71bcaea1c73dd0c576",
+          "nova/geometry/select.py": "901416796e8a9a0a01842bbf6a93e4823a5871a9cd9bf020c108dd6686da1267",
+          "nova/jax/fieldnull.py": "7c0056fd4a6cdc3e9bfd48b9d4cf6a40afeae0f866e3f877e6d101714540e972",
+          "nova/jax/null.py": "161bad2d420db28b8a229a4fac05dcd7467eaf0bc05c577b25def488a08b8b6b",
+          "nova/jax/target.py": "2c7786e00cda3985cd77981e41807080e1667415228b7470ea91aeee4e7f9631",
+          "nova/jax/topology.py": "07329ab650682be0c71ae8c47af9e6ebd87b20da2b39f9a2bb84509ba028423b"
+        }
+      }
+    },
+    "gpu": {
+      "api_contracts": {
+        "fieldnull": {
+          "host_features": [
+            "structured and unstructured xarray state",
+            "optional loop filtering",
+            "plot adapter"
+          ],
+          "host_result": "mutable dictionaries with adaptive-length arrays",
+          "host_signature": "(data: xarray.core.dataset.Dataset = <factory>, array_attrs: list[str] = <factory>, subgrid: bool = True, loop: numpy.ndarray | None = None) -> None",
+          "shared_component": "nova.geometry.hexstencil.hex_stencil",
+          "traced_features": [
+            "cached Null2D and Target construction",
+            "device arrays",
+            "fixed-size output"
+          ],
+          "traced_result": "two fixed (maxsize, 4) device arrays padded by NaN",
+          "traced_signature": "(data: xarray.core.dataset.Dataset = <factory>, array_attrs: list[str] = <factory>, maxsize: int = 5) -> None"
+        },
+        "null": {
+          "host_location": "categorisation and adaptive interpolation in nova.biot.fieldnull",
+          "semantic_split": [
+            "fixed size versus adaptive length",
+            "NaN padding versus absent rows",
+            "traceable selection versus Python control flow"
+          ],
+          "traced_signatures": {
+            "Null1D": "(coordinate: jax.Array) -> None",
+            "Null2D": "(coordinate: jax.Array, stencil: jax.Array, coordinate_stencil: jax.Array, maxsize: int = 5) -> None"
+          }
+        },
+        "target": {
+          "common_interface": false,
+          "host_same_token_role": "store target geometry and reduction metadata",
+          "traced_role": "evaluate source-target and plasma-target coupling matrices",
+          "traced_signature": "(source_target: jax.Array, plasma_target: jax.Array, null: nova.jax.null.Null1D | nova.jax.null.Null2D) -> None"
+        },
+        "topology": {
+          "host_role": "stateful behavior distributed across PlasmaGrid and Plasma",
+          "semantic_split": [
+            "sentinel values versus topology exceptions",
+            "fixed arrays versus adaptive null collections",
+            "functional return versus mutation of plasma state"
+          ],
+          "traced_role": "pure fixed-shape normalization, boundary selection and ionization",
+          "traced_signature": "(grid: nova.jax.null.Null2D, wall: nova.jax.null.Null1D) -> None"
+        }
+      },
+      "autodiff": {
+        "null": {
+          "all_finite": true,
+          "device": "cuda:0",
+          "gradient_norm": 2.945664644241333,
+          "nonzero_entries": 7,
+          "quantity": "x coordinate of the first saddle"
+        },
+        "target": {
+          "all_finite": true,
+          "device": "cuda:0",
+          "quantity": "external flux directional derivative",
+          "scaled_error_against_matrix_product": 9.172815175573609e-08
+        },
+        "topology": {
+          "all_finite": true,
+          "device": "cuda:0",
+          "nonzero_entries": 289,
+          "quantity": "normalized flux directional derivative",
+          "tangent_norm": 0.02646661549806595
+        }
+      },
+      "benchmark": "null_stack_route",
+      "environment": {
+        "device_kinds": [
+          "NVIDIA H200 NVL"
+        ],
+        "devices": [
+          "cuda:0"
+        ],
+        "hostname": "98dci4-gpu-0003.iter.org",
+        "jax": "0.11.0",
+        "jax_enable_x64": false,
+        "jax_platform": "gpu",
+        "numpy": "2.4.6",
+        "omp_num_threads": "1",
+        "openblas_num_threads": "1",
+        "platform": "Linux-6.12.0-124.11.1.el10_1.x86_64-x86_64-with-glibc2.39",
+        "python": "3.14.2",
+        "scipy": "1.17.1",
+        "xarray": "2025.6.1"
+      },
+      "generated_at": "2026-08-09T07:16:02.948388+00:00",
+      "measurements": {
+        "fieldnull": [
+          {
+            "accuracy": {
+              "expected_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_dtype": "float64",
+              "host_max_coordinate_error": 0.020000000000000018,
+              "host_max_flux_error": 0.0003960396039615066,
+              "host_types_match": true,
+              "route_max_coordinate_deviation": 0.00019767249478699678,
+              "traced_count": {
+                "o": 2,
+                "x": 1
+              },
+              "traced_dtype": "float32",
+              "traced_max_coordinate_error": 0.01980304718017578,
+              "traced_max_flux_error": 0.00039637088775634766,
+              "traced_types_match": true
+            },
+            "host_construction_us": 279.734842479229,
+            "host_first_ms": 791.2660040892661,
+            "host_warm_us": 149.1941511631012,
+            "layout": "structured",
+            "nodes": 289,
+            "size": 17,
+            "traced_construction_us": 176044.8501445353,
+            "traced_first_ms": 421.5040192939341,
+            "traced_warm_us": 13229.488860815763
+          },
+          {
+            "accuracy": {
+              "expected_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_dtype": "float64",
+              "host_max_coordinate_error": 0.020000000000000018,
+              "host_max_flux_error": 0.0003960396039608405,
+              "host_types_match": true,
+              "route_max_coordinate_deviation": 0.00019767249478699678,
+              "traced_count": {
+                "o": 2,
+                "x": 1
+              },
+              "traced_dtype": "float32",
+              "traced_max_coordinate_error": 0.01980304718017578,
+              "traced_max_flux_error": 0.00039637088775634766,
+              "traced_types_match": true
+            },
+            "host_construction_us": 80.71772754192352,
+            "host_first_ms": 16.910908743739128,
+            "host_warm_us": 113.1230965256691,
+            "layout": "unstructured",
+            "nodes": 289,
+            "size": 17,
+            "traced_construction_us": 14599.80709478259,
+            "traced_first_ms": 13.565019704401493,
+            "traced_warm_us": 13282.572850584984
+          },
+          {
+            "accuracy": {
+              "expected_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_dtype": "float64",
+              "host_max_coordinate_error": 0.0050000000000000044,
+              "host_max_flux_error": 2.493765586042418e-05,
+              "host_types_match": true,
+              "route_max_coordinate_deviation": 1.284398491562109e-05,
+              "traced_count": {
+                "o": 2,
+                "x": 1
+              },
+              "traced_dtype": "float32",
+              "traced_max_coordinate_error": 0.0049880743673648914,
+              "traced_max_flux_error": 2.5272369384765625e-05,
+              "traced_types_match": true
+            },
+            "host_construction_us": 112.20015585422516,
+            "host_first_ms": 0.4628426395356655,
+            "host_warm_us": 157.281756401062,
+            "layout": "structured",
+            "nodes": 1089,
+            "size": 33,
+            "traced_construction_us": 82850.62294453382,
+            "traced_first_ms": 278.74244237318635,
+            "traced_warm_us": 55446.206126362085
+          },
+          {
+            "accuracy": {
+              "expected_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_dtype": "float64",
+              "host_max_coordinate_error": 0.0050000000000000044,
+              "host_max_flux_error": 2.493765586242258e-05,
+              "host_types_match": true,
+              "route_max_coordinate_deviation": 1.284398491562109e-05,
+              "traced_count": {
+                "o": 2,
+                "x": 1
+              },
+              "traced_dtype": "float32",
+              "traced_max_coordinate_error": 0.0049880743673648914,
+              "traced_max_flux_error": 2.5272369384765625e-05,
+              "traced_types_match": true
+            },
+            "host_construction_us": 78.9891928434372,
+            "host_first_ms": 0.30972063541412354,
+            "host_warm_us": 119.37879025936127,
+            "layout": "unstructured",
+            "nodes": 1089,
+            "size": 33,
+            "traced_construction_us": 26188.866700977087,
+            "traced_first_ms": 55.9513121843338,
+            "traced_warm_us": 55751.79634615779
+          },
+          {
+            "accuracy": {
+              "expected_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_dtype": "float64",
+              "host_max_coordinate_error": 0.0010000000000000009,
+              "host_max_flux_error": 1.5615240478439318e-06,
+              "host_types_match": true,
+              "route_max_coordinate_deviation": 0.0002486002013579519,
+              "traced_count": {
+                "o": 2,
+                "x": 1
+              },
+              "traced_dtype": "float32",
+              "traced_max_coordinate_error": 0.001248598517388588,
+              "traced_max_flux_error": 1.1920928955078125e-06,
+              "traced_types_match": true
+            },
+            "host_construction_us": 100.90461000800133,
+            "host_first_ms": 0.47327810898423195,
+            "host_warm_us": 190.4889941215515,
+            "layout": "structured",
+            "nodes": 4225,
+            "size": 65,
+            "traced_construction_us": 82798.26026409864,
+            "traced_first_ms": 464.6410308778286,
+            "traced_warm_us": 228188.54404613376
+          },
+          {
+            "accuracy": {
+              "expected_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_dtype": "float64",
+              "host_max_coordinate_error": 0.0010000000000000009,
+              "host_max_flux_error": 1.5615240485100657e-06,
+              "host_types_match": true,
+              "route_max_coordinate_deviation": 0.0002486002013579519,
+              "traced_count": {
+                "o": 2,
+                "x": 1
+              },
+              "traced_dtype": "float32",
+              "traced_max_coordinate_error": 0.001248598517388588,
+              "traced_max_flux_error": 1.1920928955078125e-06,
+              "traced_types_match": true
+            },
+            "host_construction_us": 75.63317194581032,
+            "host_first_ms": 0.33884914591908455,
+            "host_warm_us": 132.7390782535076,
+            "layout": "unstructured",
+            "nodes": 4225,
+            "size": 65,
+            "traced_construction_us": 26498.551946133375,
+            "traced_first_ms": 241.24426813796163,
+            "traced_warm_us": 230676.3487868011
+          },
+          {
+            "accuracy": {
+              "expected_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_dtype": "float64",
+              "host_max_coordinate_error": 0.0,
+              "host_max_flux_error": 9.764099340170418e-08,
+              "host_types_match": true,
+              "route_max_coordinate_deviation": 0.00031161472829965777,
+              "traced_count": {
+                "o": 2,
+                "x": 1
+              },
+              "traced_dtype": "float32",
+              "traced_max_coordinate_error": 0.00031161472829965777,
+              "traced_max_flux_error": 5.960464477539062e-07,
+              "traced_types_match": true
+            },
+            "host_construction_us": 108.99081826210022,
+            "host_first_ms": 0.6198477931320667,
+            "host_warm_us": 321.15401700139046,
+            "layout": "structured",
+            "nodes": 16641,
+            "size": 129,
+            "traced_construction_us": 85628.37913632393,
+            "traced_first_ms": 1222.1018662676215,
+            "traced_warm_us": 927431.2909692526
+          },
+          {
+            "accuracy": {
+              "expected_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_count": {
+                "o": 2,
+                "x": 1
+              },
+              "host_dtype": "float64",
+              "host_max_coordinate_error": 0.0,
+              "host_max_flux_error": 9.764099540010562e-08,
+              "host_types_match": true,
+              "route_max_coordinate_deviation": 0.00031161472829965777,
+              "traced_count": {
+                "o": 2,
+                "x": 1
+              },
+              "traced_dtype": "float32",
+              "traced_max_coordinate_error": 0.00031161472829965777,
+              "traced_max_flux_error": 5.960464477539062e-07,
+              "traced_types_match": true
+            },
+            "host_construction_us": 202.09001377224922,
+            "host_first_ms": 0.6346739828586578,
+            "host_warm_us": 224.54001009464264,
+            "layout": "unstructured",
+            "nodes": 16641,
+            "size": 129,
+            "traced_construction_us": 38043.69503632188,
+            "traced_first_ms": 966.3467528298497,
+            "traced_warm_us": 956961.4338688552
+          }
+        ],
+        "null": [
+          {
+            "host_count": {
+              "o": 2,
+              "x": 1
+            },
+            "host_first_ms": 0.012244097888469696,
+            "host_warm_us": 2.8940849006175995,
+            "nodes": 289,
+            "size": 17,
+            "traced_count": {
+              "o": 2,
+              "x": 1
+            },
+            "traced_first_ms": 180.81644317135215,
+            "traced_warm_us": 13557.660859078169
+          },
+          {
+            "host_count": {
+              "o": 2,
+              "x": 1
+            },
+            "host_first_ms": 0.0224970281124115,
+            "host_warm_us": 10.54396852850914,
+            "nodes": 1089,
+            "size": 33,
+            "traced_count": {
+              "o": 2,
+              "x": 1
+            },
+            "traced_first_ms": 180.53757213056087,
+            "traced_warm_us": 56259.671691805124
+          },
+          {
+            "host_count": {
+              "o": 2,
+              "x": 1
+            },
+            "host_first_ms": 0.05358224734663963,
+            "host_warm_us": 41.53978079557419,
+            "nodes": 4225,
+            "size": 65,
+            "traced_count": {
+              "o": 2,
+              "x": 1
+            },
+            "traced_first_ms": 376.99537025764585,
+            "traced_warm_us": 229106.9021448493
+          },
+          {
+            "host_count": {
+              "o": 2,
+              "x": 1
+            },
+            "host_first_ms": 0.1975521445274353,
+            "host_warm_us": 161.6189256310463,
+            "nodes": 16641,
+            "size": 129,
+            "traced_count": {
+              "o": 2,
+              "x": 1
+            },
+            "traced_first_ms": 1113.6647942475975,
+            "traced_warm_us": 929989.084135741
+          }
+        ],
+        "target": [
+          {
+            "host_construction_us": 0.0,
+            "host_dtype": "float64",
+            "host_external_error": 2.1938460060195248e-16,
+            "host_first_ms": 0.29380759224295616,
+            "host_internal_error": 3.7467343411850445e-16,
+            "host_warm_us": 3.638211637735367,
+            "nodes": 256,
+            "plasma_columns": 64,
+            "source_columns": 32,
+            "traced_construction_us": 57.21906200051308,
+            "traced_dtype": "float32",
+            "traced_external_error": 9.507013118226237e-08,
+            "traced_first_ms": 138.74120824038982,
+            "traced_internal_error": 1.9706128818211902e-07,
+            "traced_warm_us": 96.51901200413704
+          },
+          {
+            "host_construction_us": 0.0,
+            "host_dtype": "float64",
+            "host_external_error": 2.7507851414689253e-16,
+            "host_first_ms": 0.02587307244539261,
+            "host_internal_error": 2.415600229100173e-16,
+            "host_warm_us": 9.861774742603302,
+            "nodes": 1024,
+            "plasma_columns": 64,
+            "source_columns": 32,
+            "traced_construction_us": 29.040034860372543,
+            "traced_dtype": "float32",
+            "traced_external_error": 1.280306204244391e-07,
+            "traced_first_ms": 143.08706019073725,
+            "traced_internal_error": 9.811893814231906e-08,
+            "traced_warm_us": 91.88614785671234
+          },
+          {
+            "host_construction_us": 0.0,
+            "host_dtype": "float64",
+            "host_external_error": 2.8352707439517416e-16,
+            "host_first_ms": 0.12532109394669533,
+            "host_internal_error": 2.6917042019804074e-16,
+            "host_warm_us": 97.76093065738678,
+            "nodes": 4096,
+            "plasma_columns": 64,
+            "source_columns": 32,
+            "traced_construction_us": 21.63788303732872,
+            "traced_dtype": "float32",
+            "traced_external_error": 1.2315682666886306e-07,
+            "traced_first_ms": 151.93138178437948,
+            "traced_internal_error": 1.01538321868477e-07,
+            "traced_warm_us": 101.80706158280373
+          },
+          {
+            "host_construction_us": 0.0,
+            "host_dtype": "float64",
+            "host_external_error": 3.7235287064991524e-16,
+            "host_first_ms": 0.5317889153957367,
+            "host_internal_error": 3.373915989534891e-16,
+            "host_warm_us": 438.3400082588196,
+            "nodes": 16384,
+            "plasma_columns": 64,
+            "source_columns": 32,
+            "traced_construction_us": 28.67588773369789,
+            "traced_dtype": "float32",
+            "traced_external_error": 2.029703970398091e-07,
+            "traced_first_ms": 162.75687934830785,
+            "traced_internal_error": 1.1480692834305552e-07,
+            "traced_warm_us": 91.88801050186157
+          }
+        ],
+        "topology": [
+          {
+            "batch": 1,
+            "host_dtype": "float64",
+            "host_first_ms": 18.699240405112505,
+            "host_ionize_mismatch": 0.0,
+            "host_normalized_error": 0.0012882928509785983,
+            "host_warm_us": 114.8921437561512,
+            "nodes": 289,
+            "route_ionize_mismatch": 0.0,
+            "route_normalized_deviation": 0.0006326737796117777,
+            "size": 17,
+            "traced_dtype": "float32",
+            "traced_first_ms": 578.6649533547461,
+            "traced_ionize_mismatch": 0.0,
+            "traced_normalized_error": 0.0010589361481174624,
+            "traced_warm_us": 14888.992067426443
+          },
+          {
+            "batch": 5,
+            "host_first_ms": 0.9045531041920185,
+            "host_warm_us": 544.5671267807484,
+            "nodes": 289,
+            "size": 17,
+            "traced_first_ms": 678.3656370826066,
+            "traced_warm_us": 14488.066080957651
+          },
+          {
+            "batch": 1,
+            "host_dtype": "float64",
+            "host_first_ms": 0.44168392196297646,
+            "host_ionize_mismatch": 0.0,
+            "host_normalized_error": 0.0003037943273933473,
+            "host_warm_us": 123.24610725045204,
+            "nodes": 1089,
+            "route_ionize_mismatch": 0.0,
+            "route_normalized_deviation": 3.767958459181702e-05,
+            "size": 33,
+            "traced_dtype": "float32",
+            "traced_first_ms": 601.2542210519314,
+            "traced_ionize_mismatch": 0.0,
+            "traced_normalized_error": 0.00028994058705842935,
+            "traced_warm_us": 57553.93812432885
+          },
+          {
+            "batch": 5,
+            "host_first_ms": 1.0829917155206203,
+            "host_warm_us": 592.9190665483475,
+            "nodes": 1089,
+            "size": 33,
+            "traced_first_ms": 674.1957683116198,
+            "traced_warm_us": 55027.23529934883
+          },
+          {
+            "batch": 1,
+            "host_dtype": "float64",
+            "host_first_ms": 0.48509566113352776,
+            "host_ionize_mismatch": 0.0,
+            "host_normalized_error": 7.5999146757316e-05,
+            "host_warm_us": 172.7868802845478,
+            "nodes": 4225,
+            "route_ionize_mismatch": 0.0,
+            "route_normalized_deviation": 3.993879380397818e-06,
+            "size": 65,
+            "traced_dtype": "float32",
+            "traced_first_ms": 727.7223858982325,
+            "traced_ionize_mismatch": 0.0,
+            "traced_normalized_error": 7.455048055715037e-05,
+            "traced_warm_us": 233262.2013054788
+          },
+          {
+            "batch": 5,
+            "host_first_ms": 1.2144637294113636,
+            "host_warm_us": 768.992118537426,
+            "nodes": 4225,
+            "size": 65,
+            "traced_first_ms": 861.3110380247235,
+            "traced_warm_us": 222440.5980668962
+          },
+          {
+            "batch": 1,
+            "host_dtype": "float64",
+            "host_first_ms": 0.6782128475606441,
+            "host_ionize_mismatch": 0.0,
+            "host_normalized_error": 1.9155526608504425e-05,
+            "host_warm_us": 303.14596369862556,
+            "nodes": 16641,
+            "route_ionize_mismatch": 0.0,
+            "route_normalized_deviation": 4.961921666809194e-06,
+            "size": 129,
+            "traced_dtype": "float32",
+            "traced_first_ms": 1537.3443108983338,
+            "traced_ionize_mismatch": 0.0,
+            "traced_normalized_error": 1.7366637750166597e-05,
+            "traced_warm_us": 938020.2549509704
+          },
+          {
+            "batch": 5,
+            "host_first_ms": 2.067727968096733,
+            "host_warm_us": 1529.2838215827942,
+            "nodes": 16641,
+            "size": 129,
+            "traced_first_ms": 1541.1251871846616,
+            "traced_warm_us": 898419.5278026164
+          }
+        ]
+      },
+      "profile": "full",
+      "reachability": {
+        "fieldnull": {
+          "production_importers": [],
+          "test_importers": []
+        },
+        "host_fieldnull": {
+          "production_importers": [
+            "nova/biot/grid.py",
+            "nova/imas/flux.py"
+          ],
+          "test_importers": []
+        },
+        "null": {
+          "production_importers": [
+            "nova/biot/limiter.py",
+            "nova/jax/fieldnull.py",
+            "nova/jax/target.py",
+            "nova/jax/topology.py"
+          ],
+          "test_importers": [
+            "tests/test_jax_topology.py",
+            "tests/test_topology_boundary.py"
+          ]
+        },
+        "target": {
+          "production_importers": [
+            "nova/biot/limiter.py",
+            "nova/equilibrium/forward_operator.py",
+            "nova/jax/fieldnull.py"
+          ],
+          "test_importers": []
+        },
+        "topology": {
+          "production_importers": [
+            "nova/equilibrium/forward_operator.py"
+          ],
+          "test_importers": [
+            "tests/test_jax_topology.py",
+            "tests/test_topology_boundary.py"
+          ]
+        }
+      },
+      "schema_version": 1,
+      "source": {
+        "git_commit": "274112bc1c86fb0c0d2744901701f92a26b06f0c",
+        "root": "/home/ITER/mcintos/Code/nova",
+        "sha256": {
+          "nova/biot/fieldnull.py": "56d6c16bebe2e6e34411fd858184044e1e65c828fd12627bd05317c732f4ff95",
+          "nova/geometry/hexstencil.py": "f529e34db51b336c59ec49475a28882e7f50c08615e83b71bcaea1c73dd0c576",
+          "nova/geometry/select.py": "901416796e8a9a0a01842bbf6a93e4823a5871a9cd9bf020c108dd6686da1267",
+          "nova/jax/fieldnull.py": "7c0056fd4a6cdc3e9bfd48b9d4cf6a40afeae0f866e3f877e6d101714540e972",
+          "nova/jax/null.py": "161bad2d420db28b8a229a4fac05dcd7467eaf0bc05c577b25def488a08b8b6b",
+          "nova/jax/target.py": "2c7786e00cda3985cd77981e41807080e1667415228b7470ea91aeee4e7f9631",
+          "nova/jax/topology.py": "07329ab650682be0c71ae8c47af9e6ebd87b20da2b39f9a2bb84509ba028423b"
+        }
+      }
+    }
+  },
+  "schema_version": 1,
+  "source": {
+    "git_commit": "274112bc1c86fb0c0d2744901701f92a26b06f0c",
+    "root": "/home/ITER/mcintos/Code/nova",
+    "sha256": {
+      "nova/biot/fieldnull.py": "56d6c16bebe2e6e34411fd858184044e1e65c828fd12627bd05317c732f4ff95",
+      "nova/geometry/hexstencil.py": "f529e34db51b336c59ec49475a28882e7f50c08615e83b71bcaea1c73dd0c576",
+      "nova/geometry/select.py": "901416796e8a9a0a01842bbf6a93e4823a5871a9cd9bf020c108dd6686da1267",
+      "nova/jax/fieldnull.py": "7c0056fd4a6cdc3e9bfd48b9d4cf6a40afeae0f866e3f877e6d101714540e972",
+      "nova/jax/null.py": "161bad2d420db28b8a229a4fac05dcd7467eaf0bc05c577b25def488a08b8b6b",
+      "nova/jax/target.py": "2c7786e00cda3985cd77981e41807080e1667415228b7470ea91aeee4e7f9631",
+      "nova/jax/topology.py": "07329ab650682be0c71ae8c47af9e6ebd87b20da2b39f9a2bb84509ba028423b"
+    }
+  },
+  "verdicts": {
+    "fieldnull": {
+      "delete": "nova.jax.fieldnull.FieldNull wrapper",
+      "numbers": {
+        "host_over_traced_accelerator_warm": "4.27e-04-2.21e-02x",
+        "host_production_importers": 2,
+        "max_route_coordinate_deviation": 0.00031215076267037686,
+        "traced_over_host_cpu_warm": "0.09-0.19x",
+        "traced_production_importers": 0
+      },
+      "reason": "The wrapper has no external importer and adds only xarray-to-fixed-array adaptation around live Null2D/Target kernels. The host class remains a live stateful adapter with loop filtering and adaptive results. Hex-stencil construction is already single-homed.",
+      "retain": "nova.biot.fieldnull.FieldNull and the live Null/Target kernels",
+      "verdict": "DELETE ONE"
+    },
+    "null": {
+      "numbers": {
+        "autodiff_gradient_nonzero_entries": 7,
+        "host_over_traced_accelerator_categorize": "2.73e-04-3.90e-04x",
+        "production_importers": 4,
+        "traced_over_host_cpu_categorize": "3.09-7.30x"
+      },
+      "reason": "This is not a class pair. The traced fixed-size kernel supplies device execution and local derivatives; the host path supplies adaptive collections, state mutation and loop filtering. Both are live and neither interface can replace the other.",
+      "verdict": "KEEP BOTH"
+    },
+    "target": {
+      "numbers": {
+        "max_traced_scaled_error": 2.029703970398091e-07,
+        "numpy_over_traced_accelerator_warm": "0.06-5.58x",
+        "production_importers": 3,
+        "traced_over_numpy_cpu_warm": "0.38-5.01x"
+      },
+      "reason": "The same-token host class is a geometry container, not a matrix evaluator. The traced Target is live in the differentiable forward operator and exposes correct device-linear derivatives; there is no duplicate body to collapse.",
+      "verdict": "KEEP BOTH"
+    },
+    "topology": {
+      "numbers": {
+        "host_over_traced_accelerator_batch5": "3.17e-03-7.79e-02x",
+        "host_over_traced_accelerator_single": "5.95e-04-1.53e-02x",
+        "max_route_normalized_deviation": 0.0006326737796117777,
+        "production_importers": 1,
+        "traced_over_host_cpu_single": "1.06-2.05x"
+      },
+      "reason": "The traced class is the pure fixed-shape topology inside the live forward operator; the host behavior is distributed across mutable plasma objects and uses adaptive null collections. Their scalar formulas agree, but their state, failure and batching contracts do not.",
+      "verdict": "KEEP BOTH"
+    }
+  }
+}

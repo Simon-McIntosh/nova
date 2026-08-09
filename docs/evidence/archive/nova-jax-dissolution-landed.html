@@ -61,6 +61,14 @@
   </tbody></table>
   <p>The <a href="/nova/figures/jax-dissolution/fixed_point_gpu_throughput.json">batched throughput JSON</a> and <code>benchmarks/fixed_point_gpu_throughput.py</code> were integrated at <code>7deff826</code>.</p>
 
+  <h3>Fixed-point domain relocation</h3>
+  <p><code>nova.jax.fixed_point</code> moved byte-identically to <code>nova.equilibrium.fixed_point</code> without a compatibility shim. The public <code>FixedPointResult</code>, <code>picard</code>, <code>anderson</code>, and <code>newton_krylov</code> symbols were retained unchanged; the solver SHA-256 before and after the move is <code>261dcded38e8dae43f77a758f65d3d81721a7f7b73f0cbeb0b5b9a5db45e4c29</code>.</p>
+  <table><thead><tr><th>Check</th><th>Landed evidence</th><th>Qualification</th></tr></thead><tbody>
+    <tr><td>Reachability</td><td>Zero production importers remain; five test and benchmark consumers were rewired.</td><td>The family remains an opt-in equilibrium seam and does not prove MAST catalog throughput.</td></tr>
+    <tr><td>Independent verdict</td><td><strong>QUALIFIED PASS</strong>: 12 slow-inclusive focused tests passed in 59.42 s on <code>sun_debug</code>.</td><td>The later canonical-environment import probe was valid. Ruff receipt output was not separately preserved, and the preliminary missing-JAX probe used an unreliable exit sentinel.</td></tr>
+    <tr><td>Integration</td><td>Worker commit <code>ee90f562</code>; main integration <code>58cccee3</code>.</td><td>The numerical body is a 100% similarity rename.</td></tr>
+  </tbody></table>
+
   <h2 id="s5">Operator, precision, and optional-import boundary</h2>
   <p><code>HostOperator</code>, functional <code>Coupling</code>, and <code>TracedOperator</code> now live together in <code>nova/biot/operate.py</code>. The bare <code>Operator</code> remains selection-only, and <code>nova/jax/operate.py</code> was deleted without a shim.</p>
   <figure><svg viewBox="0 0 820 190" role="img" style="max-width:100%;height:auto;font-family:system-ui">
@@ -158,5 +166,5 @@
   <p>The relocation was integrated at <code>b1e1e530</code>. Historical benchmark provenance remains explicit: retired wrapper rows are unavailable rather than carrying a fabricated post-deletion timing.</p>
 
   <h2>What is next</h2>
-  <p>Finish the fixed-point, connectivity, and select domain relocations licensed by the measured matrix, then run complete slow-inclusive validation and retire the technology-organised namespace. This cumulative record will receive those implementation and closure results.</p>
+  <p>Finish the connectivity and select domain relocations licensed by the measured matrix, then run complete slow-inclusive validation and retire the technology-organised namespace. This cumulative record will receive those implementation and closure results.</p>
 </main></body></html>

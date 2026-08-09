@@ -104,6 +104,17 @@
   </tbody></table>
   <p>The <a href="/nova/figures/jax-dissolution/fieldnull_precision_audit.json">precision JSON</a> and <code>benchmarks/fieldnull_precision_audit.py</code> were integrated at <code>1c03c684</code>. The production repair remains open until this normalized contract and device-resident batched throughput are implemented and independently verified.</p>
 
+  <h3>H200 latency, throughput, and catalog boundary</h3>
+  <p>The documented GPU slowdowns are real for scalar calls but do not describe bulk capacity. On a 65×129 fp32 field, the current composed route was 1.526× slower than one CPU core at batch 1 and 17.389× faster at batch 128. A score-ranked fixed-metadata cost model reached 631,684 fields/s at batch 2,048 and 841,100 fields/s at batch 524,288 while using 66.396 GB, or 58.97% of visible HBM.</p>
+  <table><thead><tr><th>Boundary</th><th>Measured result</th><th>Repair implication</th></tr></thead><tbody>
+    <tr><td>Single-field latency</td><td>Current composed fp32: 1,194 H200 fields/s versus 1,821 CPU fields/s.</td><td>Do not dispatch one field at a time.</td></tr>
+    <tr><td>Bulk resident compute</td><td>Current batch 128: 99,253 H200 versus 5,708 CPU fields/s; ranked batch 2,048: 631,684 fields/s.</td><td>Use one outer jit/vmap over shape-bucketed batches with padded tails.</td></tr>
+    <tr><td>Transfer-inclusive batch 2,048</td><td>114,106 fields/s; transfer and dispatch consumed 81.94% of wall time.</td><td>Keep null detection, connectivity, reconstruction, and fixed-slot results resident; overlap pinned decode/copies.</td></tr>
+    <tr><td>Compile keys</td><td>New shape or dtype cost 475–518 ms; cached repeats 0.29–1.02 ms.</td><td>Bound grid, dtype, batch, topology, and solver-shape buckets; do not recompile within a tranche.</td></tr>
+    <tr><td>One-hour catalog target</td><td>4.5 TB/hour requires 1.25 GB/s aggregate input, about 156 MB/s per H200 under ideal eight-way sharding.</td><td>FieldNull compute is not the demonstrated bottleneck, but the archive connector, exact slice census, decompression, preprocessing, overlap, solve, and writeback remain unmeasured.</td></tr>
+  </tbody></table>
+  <p>The <a href="/nova/figures/jax-dissolution/fieldnull_gpu_throughput.json">throughput JSON</a> and <code>benchmarks/fieldnull_gpu_throughput.py</code> were integrated at <code>b84ac53a</code>. The production candidate must still replace placeholder confidence/index values with the measured native-degree, persistence, tri-state, and overflow semantics before its throughput is scientifically licensed.</p>
+
   <h2>What is next</h2>
   <p>Complete the weak-null/noise, reduced-precision, and GPU-throughput audits; implement their combined detector and batch-path repair; then execute only the relocations, collapses, and deletions licensed by the measured matrix. This cumulative record will receive the repair, conversion, and closure evidence.</p>
 </main></body></html>

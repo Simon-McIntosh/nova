@@ -6,7 +6,7 @@
   <meta name="plan-slug" content="nova-jax-dissolution-landed">
   <meta name="plan-title" content="JAX Domain Dissolution — Cumulative Evidence">
   <meta name="plan-summary" content="Cumulative implementation, measurement, precision, optional-import, and concept-split evidence for dissolving Nova's technology-organised JAX package">
-  <meta name="plan-status" content="shipped"><meta name="plan-evidence-for" content="nova-jax-dissolution"><meta name="plan-verifies" content="nova-jax-dissolution#s4,nova-jax-dissolution#s5,nova-jax-dissolution#s6,nova-jax-dissolution#s9,nova-jax-dissolution#s10"><meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-status" content="shipped"><meta name="plan-evidence-for" content="nova-jax-dissolution"><meta name="plan-verifies" content="nova-jax-dissolution#s4,nova-jax-dissolution#s5,nova-jax-dissolution#s6,nova-jax-dissolution#s7,nova-jax-dissolution#s9,nova-jax-dissolution#s10,nova-jax-dissolution#s11"><meta name="plan-owner" content="Simon McIntosh">
   <title>JAX Domain Dissolution — Cumulative Evidence | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css"><link rel="stylesheet" href="/_shared/dashboard.css">
 </head>
@@ -81,6 +81,17 @@
     <tr><td>Domain split</td><td>Forward operator and tests rewired; no stale <code>nova.jax.basis</code> imports or shim remain.</td><td><code>efde9b97</code></td></tr>
     <tr><td>Independent verification</td><td>16 passed in 30.02 s; Ruff, diff, naming, pytree registration, and JAX-free <code>nova.linalg</code> import checks passed.</td><td><code>66240aaf</code></td></tr>
   </tbody></table>
+
+  <h2 id="fieldnull-candidate-audit">Field-null topology and noise audit</h2>
+  <p>The reported 99 is a raster representation count, not 99 physical nulls. On the exact smooth 61×61 field, 49 independently derived strict-interior saddles produced 99 raw vertex hits: 49 physical clusters plus 50 duplicate vertex representations, with no extra continuous stationary point. A further 15 torus saddles lie on the boundary excluded by the open-domain contract.</p>
+  <table><thead><tr><th>Question</th><th>Measured answer</th><th>Production obligation</th></tr></thead><tbody>
+    <tr><td>Are the 99 hits noise?</td><td>49 genuine interior saddles, 50 duplicates, 0 extra continuous saddles.</td><td>Dedupe same-root evidence while preserving the summed signed topological index.</td></tr>
+    <tr><td>Does fixed capacity lose physics?</td><td>The eight slots represent only 7/49 physical saddles and silently omit 91 raw hits.</td><td>Rank on device and return the exact candidate count, overflow, and best discarded score.</td></tr>
+    <tr><td>Can noise be stepped over?</td><td>Across 640 noise-only fields, 72,090 native candidates produced 0 automatically resolved false positives at score 0.85894; uncertain candidates remained unresolved.</td><td>Use resolved, unresolved, and absent states; confidence may defer a candidate but must not erase native topological evidence.</td></tr>
+    <tr><td>Are weak nulls retained?</td><td>Across all tested families, generation recall reached 1.0 from cell SNR 0.4 and resolved recall reached 1.0 from SNR 1.6.</td><td>Native gradient degree decides candidate existence; scale survival, covariance-normalized robustness, Hessian consistency, and prominence rank confidence.</td></tr>
+    <tr><td>Do CPU and H200 disagree?</td><td>Masks and counts were bitwise equal; maximum refined-coordinate difference was 1.716e-13.</td><td>Preserve the discrete metadata exactly and differentiate only the local refinement while identity is fixed.</td></tr>
+  </tbody></table>
+  <p>The 3,040-field bank had zero dedupe-index or domain-index conservation failures. Rectangular eight-neighbour and native hexagonal six-neighbour adapters remain distinct geometry contracts; shared ranking and result infrastructure must not collapse their neighbourhood definitions. The committed <a href="/nova/figures/jax-dissolution/fieldnull_candidate_audit.json">JSON audit</a> and reproducible <code>benchmarks/fieldnull_candidate_audit.py</code> were integrated at <code>9abb6613</code>. The production repair remains open until normalized fp32 localization and device-resident batched throughput meet their measured gates.</p>
 
   <h2>What is next</h2>
   <p>Complete the weak-null/noise, reduced-precision, and GPU-throughput audits; implement their combined detector and batch-path repair; then execute only the relocations, collapses, and deletions licensed by the measured matrix. This cumulative record will receive the repair, conversion, and closure evidence.</p>

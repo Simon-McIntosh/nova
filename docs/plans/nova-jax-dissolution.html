@@ -22,7 +22,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-09">
-<meta name="plan-version" content="35">
+<meta name="plan-version" content="36">
 <meta name="plan-impl" content="0.7777777777777778">
 </head>
 <body>
@@ -942,6 +942,9 @@ Done-when
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s4" data-id="c-njd-precision-audit" data-who="reckon-ship" data-when="2026-08-09">
     <div class="r-comment-body"><p><strong>Measurement qualification:</strong> the fp64 result is a workaround that proved the clean failure was conditioning-sensitive, not the final GPU policy. Followup f-njd-007 now requires a centered, nondimensional fp32 formulation and scale-relative classification. Likewise, 99 was a raw periodic-grid candidate count, not a count of unique physical nulls; analytic clustering and weak-null/noise persistence must settle the detector before relocation.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-njd-topology-audit" data-who="reckon-ship" data-when="2026-08-09">
+    <div class="r-comment-body"><p><strong>Field-null topology audit:</strong> the exact smooth 61×61 field contains 49 genuine strict-interior saddles. The legacy mask reports 99 vertex hits because 50 are duplicate representations; it produces no extra continuous stationary points. The fixed eight slots represent only 7/49 saddles and silently omit 91 raw hits. Across 640 noise-only fields, 72,090 native candidates yielded zero automatically resolved false positives at the measured score while uncertain candidates remained unresolved; generation recall reached 1.0 from cell SNR 0.4 and resolved recall from SNR 1.6. The production repair therefore uses native gradient degree for candidate existence, three-state resolution, index-preserving dedupe, and explicit ranked overflow.</p></div>
 </div>
 </section>
 </main>

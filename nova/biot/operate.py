@@ -48,16 +48,6 @@ class NumpyOperator:
         if source_plasma and target_plasma:
             self.plasma_plasma = dataset[f"_{attr}_"].data
 
-        """
-        #  perform svd order reduction
-        self.svd_rank = min([len(plasma_s), svd_rank])
-
-        # TODO fix svd_rank == -1 bug - crop plasma_U
-        self.plasma_U = plasma_U.copy()#[:, :self.svd_rank].copy()
-        self.plasma_s = plasma_s.copy()#[:self.svd_rank].copy()
-        self.plasma_V = plasma_V.copy()#[:self.svd_rank, :].copy()
-        """
-
     def evaluate(self):
         """Return interaction."""
         result = self.source_target @ self.saloc["Ic"]
@@ -72,13 +62,6 @@ class NumpyOperator:
 
     def update_turns(self, svd=True):
         """Update plasma turns."""
-        """
-        if svd:
-            self.matrix[:, self.plasma_index] = self.plasma_U @ \
-                (self.plasma_s * (self.plasma_V @ self.plasma_nturn))
-            return
-        print('svd == -1')
-        """
         plasma_nturn = self.plasma_nturn
         if update_source := self.source_plasma_index != -1:
             self.source_target[:, self.source_plasma_index] = (

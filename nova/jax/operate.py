@@ -40,15 +40,6 @@ class Operator(Pytree):
     target_plasma_index: int = -1
     classname: str = ""
 
-    @property
-    def target(self):
-        """Return target attributes."""
-        return (
-            self.source_target,
-            self.matrix_data.plasma_target,
-            self.source_plasma_index,
-        )
-
     @jax.jit
     def evaluate(self, source_target, source_current):
         """Return source-target interaction."""
@@ -58,12 +49,6 @@ class Operator(Pytree):
                 raise ValueError(MISSING_FORCE_INDEX)
             return source_current[force_index] * result
         return result
-
-    @jax.jit
-    def evaluate_external(self, source_current):
-        """Return source-target interaction excluding plasma."""
-        source_current = source_current.at[self.source_plasma_index].set(0.0)
-        return self.evaluate(self.source_target, source_current)
 
     @jax.jit
     def update_plasma_turns(self, plasma_nturn):

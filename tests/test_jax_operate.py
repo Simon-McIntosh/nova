@@ -18,6 +18,61 @@ with skip_import("jax"):
     )
 
 
+_TRACED_PSI_REFERENCE = np.array(
+    [
+        69.84432,
+        105.53119,
+        68.23457,
+        47.513386,
+        120.24757,
+        96.30779,
+        162.61769,
+        139.7402,
+        207.53981,
+        193.97694,
+        234.07397,
+        159.52002,
+        200.81287,
+        230.37115,
+        209.96411,
+        112.27056,
+        67.493256,
+        67.67515,
+        155.65189,
+        102.412636,
+        177.70634,
+        175.74684,
+        130.90895,
+        145.61192,
+        91.33887,
+        110.671364,
+    ],
+    dtype=np.float32,
+)
+_TRACED_PSI_RELATIVE_BOUND = 5.667e-8
+
+
+def test_traced_psi_precision_is_pinned_when_x64_is_enabled():
+    """The selected operator retains its measured fp32 result under global fp64."""
+    from nova.frame.coilset import CoilSet
+    from nova.jax.config import enable_x64
+
+    assert enable_x64()
+    coilset = CoilSet(dcoil=-5, dplasma=-15, tcoil="hex", tplasma="hex")
+    coilset.firstwall.insert(dict(o=[5, 1, 5]), Ic=15e6)
+    coilset.coil.insert(8, 0, 0.75, 0.75, Ic=5e6)
+    coilset.plasmagrid.solve()
+    psi = np.asarray(coilset.plasmagrid.psi)
+
+    assert psi.dtype == np.dtype(np.float32)
+    np.testing.assert_allclose(
+        psi,
+        _TRACED_PSI_REFERENCE,
+        rtol=_TRACED_PSI_RELATIVE_BOUND,
+        atol=0,
+    )
+
+
 @pytest.fixture(scope="module")
 def cached_plasmagrid():
     """Return a solved CoilSet plasmagrid carrying a cached operator."""

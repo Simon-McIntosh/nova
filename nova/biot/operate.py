@@ -175,7 +175,7 @@ else:
                 index = self.data.get("index", xarray.DataArray([])).data
             if np.asarray(index).size == 0:
                 raise ValueError(MISSING_FORCE_INDEX)
-            return jnp.asarray(index)
+            return jnp.asarray(index, dtype=jnp.int32)
 
         def __getitem__(self, attr: str) -> Coupling:
             """Retrun traced Coupling instance."""
@@ -187,16 +187,22 @@ else:
 
             plasma_dataset = {}
             if source_plasma := source_plasma_index != -1:
-                plasma_dataset["plasma_target"] = jnp.array(self.data[f"{attr}_"])
+                plasma_dataset["plasma_target"] = jnp.array(
+                    self.data[f"{attr}_"], dtype=jnp.float32
+                )
             if target_plasma := target_plasma_index != -1:
-                plasma_dataset["source_plasma"] = jnp.array(self.data[f"_{attr}"])
+                plasma_dataset["source_plasma"] = jnp.array(
+                    self.data[f"_{attr}"], dtype=jnp.float32
+                )
             if source_plasma and target_plasma:
-                plasma_dataset["plasma_plasma"] = jnp.array(self.data[f"_{attr}_"])
+                plasma_dataset["plasma_plasma"] = jnp.array(
+                    self.data[f"_{attr}_"], dtype=jnp.float32
+                )
             if (force_index := self.force_index(classname)) is not None:
                 plasma_dataset["force_index"] = force_index
 
             return Coupling(
-                jnp.array(self.data[attr]),
+                jnp.array(self.data[attr], dtype=jnp.float32),
                 MatrixData(**plasma_dataset),
                 source_plasma_index,
                 target_plasma_index,
@@ -236,9 +242,9 @@ else:
 
         def evaluate(self):
             """Return the source-target interaction for the current currents."""
-            source_current = jnp.asarray(self.saloc["Ic"])
+            source_current = jnp.asarray(self.saloc["Ic"], dtype=jnp.float32)
             result = self._operator.evaluate(
-                jnp.asarray(self.source_target), source_current
+                jnp.asarray(self.source_target, dtype=jnp.float32), source_current
             )
             return np.asarray(result)
 
@@ -249,7 +255,7 @@ else:
 
         def update_turns(self, svd=True):
             """Re-derive the plasma row/column in the live matrix."""
-            plasma_nturn = jnp.asarray(self.plasma_nturn)
+            plasma_nturn = jnp.asarray(self.plasma_nturn, dtype=jnp.float32)
             updated = np.asarray(self._operator.update_plasma_turns(plasma_nturn))
             self.source_target[...] = updated
 

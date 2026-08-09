@@ -96,6 +96,6 @@
 <rect x="40" y="620" width="960" height="120" rx="8" fill="#eef8f4" stroke="#7ab89f"/>
 <text x="62" y="650" class="verdict">connectivity_boundary — SINGLE IMPLEMENTATION RELOCATION</text>
 <text x="62" y="672" class="summary">Host entries prepare and materialise the traced kernels; hard exact topology and smooth differentiability remain intentional semantic routes.</text>
-<text x="62" y="702" class="verdict">flux_surface_connectivity — SINGLE IMPLEMENTATION RELOCATION</text>
-<text x="62" y="724" class="summary">The host entry calls the same fixed-shape kernel and adds only conversion plus ill-posed-result filtering.</text>
+<text x="62" y="702" class="verdict">flux_surface_connectivity — DELETE ONE, THEN RELOCATE</text>
+<text x="62" y="724" class="summary">Delete unused flux_surface_bins; retain and relocate the fixed-shape kernel and its shared flood primitive.</text>
 </svg>

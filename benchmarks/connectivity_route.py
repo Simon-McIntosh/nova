@@ -867,8 +867,12 @@ def measure(label: str) -> dict[str, Any]:
             },
             {
                 "current": "flux_surface_bins",
-                "mechanism_name": "host_flux_surface_bins",
-                "reason": "host materialisation and ill-posed-result filtering",
+                "mechanism_name": None,
+                "disposition": "delete",
+                "reason": (
+                    "zero callers outside its defining module; exact parity with the "
+                    "traced kernel plus host materialisation overhead"
+                ),
             },
             {
                 "current": "assemble_flux_surface_geometry_jax",
@@ -897,11 +901,15 @@ def measure(label: str) -> dict[str, Any]:
                 "target": "nova/equilibrium/connectivity_boundary.py",
             },
             "flux_surface_connectivity": {
-                "verdict": "SINGLE IMPLEMENTATION RELOCATION",
+                "verdict": "DELETE ONE",
                 "basis": (
-                    "the host entry invokes flux_surface_bins_jax and materialises its "
-                    "outputs; no second arithmetic body exists"
+                    "delete the unused flux_surface_bins host adapter: it has zero "
+                    "callers outside its defining module, invokes the traced kernel "
+                    "exactly, and adds materialisation overhead. Relocate the remaining "
+                    "single implementation"
                 ),
+                "delete": "flux_surface_bins",
+                "relocate": ["flood_fill_core", "flux_surface_bins_jax"],
                 "target": "nova/equilibrium/flux_surface_connectivity.py",
             },
         },
@@ -1084,8 +1092,8 @@ def render_svg(reports: list[dict[str, Any]]) -> str:
 <rect x="40" y="{summary_y}" width="960" height="120" rx="8" fill="#eef8f4" stroke="#7ab89f"/>
 <text x="62" y="{summary_y + 30}" class="verdict">connectivity_boundary — SINGLE IMPLEMENTATION RELOCATION</text>
 <text x="62" y="{summary_y + 52}" class="summary">Host entries prepare and materialise the traced kernels; hard exact topology and smooth differentiability remain intentional semantic routes.</text>
-<text x="62" y="{summary_y + 82}" class="verdict">flux_surface_connectivity — SINGLE IMPLEMENTATION RELOCATION</text>
-<text x="62" y="{summary_y + 104}" class="summary">The host entry calls the same fixed-shape kernel and adds only conversion plus ill-posed-result filtering.</text>
+<text x="62" y="{summary_y + 82}" class="verdict">flux_surface_connectivity — DELETE ONE, THEN RELOCATE</text>
+<text x="62" y="{summary_y + 104}" class="summary">Delete unused flux_surface_bins; retain and relocate the fixed-shape kernel and its shared flood primitive.</text>
 </svg>'''
 
 
@@ -1098,12 +1106,45 @@ def combine(
     """Combine immutable backend captures and write the review artifacts."""
     reports = [json.loads(path.read_text()) for path in inputs]
     moment_reports = [json.loads(path.read_text()) for path in moment_inputs]
+    verdicts = dict(reports[0]["verdicts"])
+    verdicts["flux_surface_connectivity"] = {
+        "verdict": "DELETE ONE",
+        "basis": (
+            "delete the unused flux_surface_bins host adapter: it has zero callers "
+            "outside its defining module, invokes the traced kernel exactly, and adds "
+            "materialisation overhead. Relocate the remaining single implementation"
+        ),
+        "delete": "flux_surface_bins",
+        "relocate": ["flood_fill_core", "flux_surface_bins_jax"],
+        "target": "nova/equilibrium/flux_surface_connectivity.py",
+    }
+    symbol_inventory = [dict(item) for item in reports[0]["symbol_inventory"]]
+    for item in symbol_inventory:
+        if item["current"] == "flux_surface_bins":
+            item.update(
+                mechanism_name=None,
+                disposition="delete",
+                reason=(
+                    "zero callers outside its defining module; exact parity with the "
+                    "traced kernel plus host materialisation overhead"
+                ),
+            )
+    for report in reports:
+        report["verdicts"] = verdicts
+        report["symbol_inventory"] = symbol_inventory
     combined = {
         "schema": "nova.connectivity-route-benchmark.1",
         "campaigns": reports,
-        "verdicts": reports[0]["verdicts"],
-        "symbol_inventory": reports[0]["symbol_inventory"],
+        "verdicts": verdicts,
+        "symbol_inventory": symbol_inventory,
         "reachability": reports[0]["reachability"],
+        "reachability_summary": {
+            "boundary_read": ["nova/equilibrium/moment.py:625"],
+            "boundary_read_smooth_jax": ["nova/equilibrium/profile.py:399"],
+            "flood_fill_core": ["nova/transport/current_diffusion.py:263"],
+            "flux_surface_bins_jax": ["nova/transport/current_diffusion.py:610"],
+            "flux_surface_bins": [],
+        },
         "regime_provenance": {
             "49x65": "current-moment boundary reconstruction grid",
             "65x97": "flux-surface connectivity reference grid",
@@ -1130,6 +1171,10 @@ def combine(
             "adapter_semantics": (
                 "Host timings include array conversion, device launch, blocking transfer, "
                 "and result materialisation; direct timings start device-resident."
+            ),
+            "flux_surface_disposition": (
+                "Delete the zero-caller host adapter, then relocate the remaining "
+                "single traced implementation and shared flood primitive."
             ),
         },
     }

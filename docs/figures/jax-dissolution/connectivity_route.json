@@ -602,8 +602,9 @@
         },
         {
           "current": "flux_surface_bins",
-          "mechanism_name": "host_flux_surface_bins",
-          "reason": "host materialisation and ill-posed-result filtering"
+          "disposition": "delete",
+          "mechanism_name": null,
+          "reason": "zero callers outside its defining module; exact parity with the traced kernel plus host materialisation overhead"
         },
         {
           "current": "assemble_flux_surface_geometry_jax",
@@ -628,9 +629,14 @@
           "verdict": "SINGLE IMPLEMENTATION RELOCATION"
         },
         "flux_surface_connectivity": {
-          "basis": "the host entry invokes flux_surface_bins_jax and materialises its outputs; no second arithmetic body exists",
+          "basis": "delete the unused flux_surface_bins host adapter: it has zero callers outside its defining module, invokes the traced kernel exactly, and adds materialisation overhead. Relocate the remaining single implementation",
+          "delete": "flux_surface_bins",
+          "relocate": [
+            "flood_fill_core",
+            "flux_surface_bins_jax"
+          ],
           "target": "nova/equilibrium/flux_surface_connectivity.py",
-          "verdict": "SINGLE IMPLEMENTATION RELOCATION"
+          "verdict": "DELETE ONE"
         }
       }
     },
@@ -1236,8 +1242,9 @@
         },
         {
           "current": "flux_surface_bins",
-          "mechanism_name": "host_flux_surface_bins",
-          "reason": "host materialisation and ill-posed-result filtering"
+          "disposition": "delete",
+          "mechanism_name": null,
+          "reason": "zero callers outside its defining module; exact parity with the traced kernel plus host materialisation overhead"
         },
         {
           "current": "assemble_flux_surface_geometry_jax",
@@ -1262,9 +1269,14 @@
           "verdict": "SINGLE IMPLEMENTATION RELOCATION"
         },
         "flux_surface_connectivity": {
-          "basis": "the host entry invokes flux_surface_bins_jax and materialises its outputs; no second arithmetic body exists",
+          "basis": "delete the unused flux_surface_bins host adapter: it has zero callers outside its defining module, invokes the traced kernel exactly, and adds materialisation overhead. Relocate the remaining single implementation",
+          "delete": "flux_surface_bins",
+          "relocate": [
+            "flood_fill_core",
+            "flux_surface_bins_jax"
+          ],
           "target": "nova/equilibrium/flux_surface_connectivity.py",
-          "verdict": "SINGLE IMPLEMENTATION RELOCATION"
+          "verdict": "DELETE ONE"
         }
       }
     }
@@ -1272,6 +1284,7 @@
   "interpretation": {
     "adapter_semantics": "Host timings include array conversion, device launch, blocking transfer, and result materialisation; direct timings start device-resident.",
     "boundary_semantics": "Keep the hard kernel as the exact topology reference and the smooth kernel as the differentiable solve route; they are not candidates for arithmetic collapse.",
+    "flux_surface_disposition": "Delete the zero-caller host adapter, then relocate the remaining single traced implementation and shared flood primitive.",
     "pair_status": "Neither module is an implementation pair. Both are one traced implementation plus host adapters."
   },
   "moment_boundary_campaigns": [
@@ -1482,6 +1495,21 @@
       "tests/test_flux_surface_geometry.py:160"
     ]
   },
+  "reachability_summary": {
+    "boundary_read": [
+      "nova/equilibrium/moment.py:625"
+    ],
+    "boundary_read_smooth_jax": [
+      "nova/equilibrium/profile.py:399"
+    ],
+    "flood_fill_core": [
+      "nova/transport/current_diffusion.py:263"
+    ],
+    "flux_surface_bins": [],
+    "flux_surface_bins_jax": [
+      "nova/transport/current_diffusion.py:610"
+    ]
+  },
   "regime_provenance": {
     "101x141": "diverted connectivity boundary reference grid",
     "49x65": "current-moment boundary reconstruction grid",
@@ -1524,8 +1552,9 @@
     },
     {
       "current": "flux_surface_bins",
-      "mechanism_name": "host_flux_surface_bins",
-      "reason": "host materialisation and ill-posed-result filtering"
+      "disposition": "delete",
+      "mechanism_name": null,
+      "reason": "zero callers outside its defining module; exact parity with the traced kernel plus host materialisation overhead"
     },
     {
       "current": "assemble_flux_surface_geometry_jax",
@@ -1550,9 +1579,14 @@
       "verdict": "SINGLE IMPLEMENTATION RELOCATION"
     },
     "flux_surface_connectivity": {
-      "basis": "the host entry invokes flux_surface_bins_jax and materialises its outputs; no second arithmetic body exists",
+      "basis": "delete the unused flux_surface_bins host adapter: it has zero callers outside its defining module, invokes the traced kernel exactly, and adds materialisation overhead. Relocate the remaining single implementation",
+      "delete": "flux_surface_bins",
+      "relocate": [
+        "flood_fill_core",
+        "flux_surface_bins_jax"
+      ],
       "target": "nova/equilibrium/flux_surface_connectivity.py",
-      "verdict": "SINGLE IMPLEMENTATION RELOCATION"
+      "verdict": "DELETE ONE"
     }
   }
 }

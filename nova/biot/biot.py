@@ -21,6 +21,7 @@ from nova.biot.data import Data
 from nova.biot.flux import Flux
 from nova.database.netcdf import netCDF
 from nova.frame.frameset import FrameSet, frame_factory
+from nova.jax.config import Precision
 
 Nbiot = int | float | str | None
 
@@ -31,13 +32,14 @@ class BiotBase(FrameSet):
 
     force_attrs: list[str] = field(default_factory=lambda: ["Fr", "Fz", "Fc"])
     field_attrs: list[str] = field(default_factory=lambda: ["Br", "Bz", "Psi"])
+    precision: Precision | str = Precision.AUTOMATIC
     _biot_attrs: dict[str, list[str] | Nbiot] = field(
         init=False, default_factory=dict, repr=False
     )
 
     def __post_init__(self):
         """Append biot attrs."""
-        self.append_biot_attrs(["field_attrs", "force_attrs"])
+        self.append_biot_attrs(["field_attrs", "force_attrs", "precision"])
         super().__post_init__()
 
     def append_biot_attrs(self, attrs: list[str]):
@@ -47,12 +49,12 @@ class BiotBase(FrameSet):
     @property
     def field_kwargs(self):
         """Return field kwargs."""
-        return {"attrs": self.field_attrs}
+        return {"attrs": self.field_attrs, "precision": self.precision}
 
     @property
     def force_kwargs(self):
         """Return force kwargs."""
-        return {"attrs": self.force_attrs}
+        return {"attrs": self.force_attrs, "precision": self.precision}
 
     @property
     def biot_methods(self):

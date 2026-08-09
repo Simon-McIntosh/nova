@@ -45,8 +45,12 @@ def resolve_precision(
     automatic: Precision,
 ) -> Precision:
     """Resolve one solver's requested precision against its automatic policy."""
-    configure_dtypes()
     choice = Precision(requested)
+    try:
+        configure_dtypes()
+    except ModuleNotFoundError as error:
+        if error.name != "jax":
+            raise
     if choice is Precision.AUTOMATIC:
         return automatic
     return choice

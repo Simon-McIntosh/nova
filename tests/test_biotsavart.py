@@ -305,7 +305,7 @@ def test_coil_segment(section):
     assert (
         coilset.subframe.segment.iloc[0]
         == {
-            "disc": "circle",
+            "disc": "polysection",
             "rectangle": "cylinder",
         }[section]
     )
@@ -719,9 +719,8 @@ def axisymmetric_shell(**shell):
 def element_rows(instance, coilset):
     """Return ``(A_phi / mu_0, Br, Bz)`` from an element's own float64 operators.
 
-    Contracted here rather than read off ``instance.ay`` because the reduced field
-    arrays are stored single precision, which floors any comparison at 1e-06
-    relative -- three decades above where the axisymmetric element actually sits.
+    Contract the coupling rows directly so each element is compared before the
+    higher-level source reduction combines it with the other element.
     """
     current = np.asarray(coilset.sloc["Ic"], dtype=float)
     return np.stack(
@@ -888,13 +887,11 @@ def test_a_hollow_square_carries_four_thirds_the_inscribed_moment():
     as its enclosing square returns the SQUARE's moment for both profiles and the
     ratio collapses to 1, which is what the ratio has to be resolved against.
 
-    Section size and standoff are both pinned by that resolution, from opposite
-    sides.  The operator store is single precision, so an excess of 3e-05 -- what a
-    2 cm section gives -- carries barely two digits and the ratio scatters by several
-    percent; a WIDER section lifts the excess clear of that floor.  But the next
-    multipole enters as the section's own moment over the squared standoff, so a wide
-    section must be read from further out: at a fifth of a metre it costs 66% at 0.3 m
-    of standoff and 0.3% beyond 1.5 m.  The window below is where neither term
+    Section size and standoff are pinned by competing resolution limits.  The
+    section must be wide enough that subtracting the reference ring leaves a stable
+    moment, while the next multipole grows with the section's own moment over the
+    squared standoff.  At a fifth of a metre that term costs 66% at 0.3 m of
+    standoff and 0.3% beyond 1.5 m.  The window below is where neither term
     dominates, and the 64-gon's moment differs from its circle's by about the same
     1.6e-03 as its area does.
     """

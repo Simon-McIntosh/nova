@@ -16,8 +16,11 @@ sys.modules['jax'] = None
 
 import nova.biot.grid
 from nova.biot.operate import HostOperator, Operator
+from nova.frame.coilset import CoilSet
+from nova.jax.config import Precision
 
 assert Operator is HostOperator
+assert CoilSet().point.precision is Precision.DOUBLE
 """
     result = subprocess.run(
         [sys.executable, "-c", script],

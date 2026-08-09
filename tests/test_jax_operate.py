@@ -49,16 +49,22 @@ _TRACED_PSI_REFERENCE = np.array(
     ],
     dtype=np.float32,
 )
-_TRACED_PSI_RELATIVE_BOUND = 5.667e-8
+_TRACED_PSI_RELATIVE_BOUND = 2 * np.finfo(np.float32).eps
 
 
-def test_traced_psi_precision_stays_fp32_under_explicit_dtype_policy():
-    """The selected operator retains its measured fp32 result with fp64 available."""
+def test_explicit_single_precision_retains_the_measured_psi_result():
+    """Explicit fp32 stays within two rounding units on CPU and GPU."""
     from nova.frame.coilset import CoilSet
-    from nova.jax.config import configure_dtypes
+    from nova.jax.config import Precision, configure_dtypes
 
     configure_dtypes()
-    coilset = CoilSet(dcoil=-5, dplasma=-15, tcoil="hex", tplasma="hex")
+    coilset = CoilSet(
+        dcoil=-5,
+        dplasma=-15,
+        tcoil="hex",
+        tplasma="hex",
+        precision=Precision.SINGLE,
+    )
     coilset.firstwall.insert(dict(o=[5, 1, 5]), Ic=15e6)
     coilset.coil.insert(8, 0, 0.75, 0.75, Ic=5e6)
     coilset.plasmagrid.solve()
@@ -83,6 +89,12 @@ def cached_plasmagrid():
     coilset.coil.insert(8, 0, 0.75, 0.75, Ic=5e6)
     coilset.plasmagrid.solve()
     return coilset.plasmagrid
+
+
+def test_automatic_biot_precision_is_double(cached_plasmagrid):
+    """General Biot operators resolve automatic precision to fp64."""
+    assert cached_plasmagrid.precision == "float64"
+    assert np.asarray(cached_plasmagrid.psi).dtype == np.dtype(np.float64)
 
 
 @pytest.fixture(scope="module")
@@ -116,7 +128,7 @@ def test_traced_update_turns_matches_selected_adapter(cached_plasmagrid):
     """The pure traced turn update agrees with the selected traced adapter."""
     pg = cached_plasmagrid
     selected_operator = pg.operator["Psi"]
-    plasma_nturn = jnp.asarray(selected_operator.plasma_nturn, dtype=jnp.float32)
+    plasma_nturn = jnp.asarray(selected_operator.plasma_nturn, dtype=jnp.float64)
 
     coupling = Operators(pg.data)["Psi"]
     traced_source_target = np.asarray(coupling.update_plasma_turns(plasma_nturn))
@@ -266,8 +278,7 @@ def test_force_index_gain_agrees_across_implementations(cached_force):
 
     assert reference.shape == index.shape
     assert np.allclose(host_operator.evaluate(), reference, rtol=1e-10)
-    # the traced path evaluates in single precision
-    assert np.allclose(traced.evaluate(), reference, rtol=1e-6)
+    assert np.allclose(traced.evaluate(), reference, rtol=1e-10)
 
 
 def test_force_index_is_wired_only_for_the_force_interaction(

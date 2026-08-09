@@ -11,6 +11,7 @@ import xarray
 
 from nova.biot.data import Data
 from nova.frame.framesetloc import ArrayLocIndexer
+from nova.jax.config import Precision, resolve_precision
 
 
 # Defined outside the optional traced block so the host operator remains usable
@@ -32,6 +33,7 @@ class HostOperator:
     classname: str
     index: np.ndarray
     dataset: InitVar[xarray.Dataset]
+    precision: Precision | str = Precision.AUTOMATIC
 
     def __post_init__(self, dataset):
         """Extract matrix, plasma_matrices, and plasma indicies from dataset."""
@@ -159,6 +161,16 @@ else:
 
         data: xarray.Dataset = field(repr=False)
         index: np.ndarray | None = None
+        precision: Precision | str = Precision.AUTOMATIC
+
+        def __post_init__(self):
+            """Resolve the coupling dtype before its arrays are constructed."""
+            self.precision = resolve_precision(self.precision, Precision.DOUBLE)
+
+        @property
+        def dtype(self):
+            """Return the selected traced-array dtype."""
+            return jnp.float32 if self.precision is Precision.SINGLE else jnp.float64
 
         def force_index(self, classname: str) -> jnp.ndarray | None:
             """Return the source-current index a Force operator applies as a gain.
@@ -188,21 +200,21 @@ else:
             plasma_dataset = {}
             if source_plasma := source_plasma_index != -1:
                 plasma_dataset["plasma_target"] = jnp.array(
-                    self.data[f"{attr}_"], dtype=jnp.float32
+                    self.data[f"{attr}_"], dtype=self.dtype
                 )
             if target_plasma := target_plasma_index != -1:
                 plasma_dataset["source_plasma"] = jnp.array(
-                    self.data[f"_{attr}"], dtype=jnp.float32
+                    self.data[f"_{attr}"], dtype=self.dtype
                 )
             if source_plasma and target_plasma:
                 plasma_dataset["plasma_plasma"] = jnp.array(
-                    self.data[f"_{attr}_"], dtype=jnp.float32
+                    self.data[f"_{attr}_"], dtype=self.dtype
                 )
             if (force_index := self.force_index(classname)) is not None:
                 plasma_dataset["force_index"] = force_index
 
             return Coupling(
-                jnp.array(self.data[attr], dtype=jnp.float32),
+                jnp.array(self.data[attr], dtype=self.dtype),
                 MatrixData(**plasma_dataset),
                 source_plasma_index,
                 target_plasma_index,
@@ -227,13 +239,18 @@ else:
         classname: str
         index: np.ndarray
         dataset: InitVar[xarray.Dataset]
+        precision: Precision | str = Precision.AUTOMATIC
 
         def __post_init__(self, dataset):
             """Build the traced operator and link the mutable source-target."""
+            self.precision = resolve_precision(self.precision, Precision.DOUBLE)
+            self.dtype = (
+                jnp.float32 if self.precision is Precision.SINGLE else jnp.float64
+            )
             attr = list(dataset.data_vars)[0]
             # the caller's index is the Force gain, so the traced and host
             # operators scale by the same array rather than by separate lookups.
-            self._operator = Operators(dataset, self.index)[attr]
+            self._operator = Operators(dataset, self.index, self.precision)[attr]
             self.source_plasma_index = self._operator.source_plasma_index
             self.target_plasma_index = self._operator.target_plasma_index
             # source_target stays a live view into the dataset array so a plasma-turn
@@ -242,9 +259,9 @@ else:
 
         def evaluate(self):
             """Return the source-target interaction for the current currents."""
-            source_current = jnp.asarray(self.saloc["Ic"], dtype=jnp.float32)
+            source_current = jnp.asarray(self.saloc["Ic"], dtype=self.dtype)
             result = self._operator.evaluate(
-                jnp.asarray(self.source_target, dtype=jnp.float32), source_current
+                jnp.asarray(self.source_target, dtype=self.dtype), source_current
             )
             return np.asarray(result)
 
@@ -255,7 +272,7 @@ else:
 
         def update_turns(self, svd=True):
             """Re-derive the plasma row/column in the live matrix."""
-            plasma_nturn = jnp.asarray(self.plasma_nturn, dtype=jnp.float32)
+            plasma_nturn = jnp.asarray(self.plasma_nturn, dtype=self.dtype)
             updated = np.asarray(self._operator.update_plasma_turns(plasma_nturn))
             self.source_target[...] = updated
 
@@ -272,6 +289,15 @@ class Operate(Data):
     operator: dict[str, Operator] = field(init=False, default_factory=dict, repr=False)
     array: dict = field(init=False, repr=False, default_factory=dict)
     _attrs: list[str] = field(init=False, repr=False, default_factory=list)
+    precision: Precision | str = Precision.AUTOMATIC
+
+    def __post_init__(self):
+        """Resolve this operator's compute dtype before loading its arrays."""
+        self.precision = resolve_precision(self.precision, Precision.DOUBLE)
+        self.compute_dtype = (
+            np.float32 if self.precision is Precision.SINGLE else np.float64
+        )
+        super().__post_init__()
 
     @property
     def rank(self):
@@ -344,7 +370,12 @@ class Operate(Data):
             ]
             dataset = self.data[attrs]
             self.operator[attr] = Operator(
-                self.aloc, self.saloc, self.classname, self.index, dataset
+                self.aloc,
+                self.saloc,
+                self.classname,
+                self.index,
+                dataset,
+                self.precision,
             )
         self.load_derived()
         self.load_version()
@@ -373,9 +404,13 @@ class Operate(Data):
                     continue
                 match attr:
                     case "bp" if self.classname == "Field":
-                        self.array[attr] = np.zeros(self.data.sizes["index"])
+                        self.array[attr] = np.zeros(
+                            self.data.sizes["index"], dtype=self.compute_dtype
+                        )
                     case str():
-                        self.array[attr] = np.zeros(self.data.sizes[self.domain(attr)])
+                        self.array[attr] = np.zeros(
+                            self.data.sizes[self.domain(attr)], dtype=self.compute_dtype
+                        )
                     case _:
                         raise TypeError(f"type(attr) {type(attr)} is not str")
                 if len(shape := self.shapes[self.domain(attr)]) == 1:

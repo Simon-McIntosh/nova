@@ -106,7 +106,9 @@ class Null2D(NullBase):
         def subnull(carry, cluster):
             carry += 1
             return carry, jnp.where(
-                carry <= number, select.subnull(cluster.T), jnp.nan * jnp.ones(4)
+                carry <= number,
+                select.subnull(cluster[:, 0], cluster[:, 1], cluster[:, 2]),
+                jnp.nan * jnp.ones(4),
             )
 
         return jax.lax.scan(subnull, 0, cluster)[1]

@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 from shapely.geometry import Point
 
+from nova.biot.limiter import Limiter
 from nova.geometry import select
 from nova.graphics.plot import Plot
 
@@ -50,7 +51,7 @@ def test_quadratic_coefficents(null_type: int):
 
 
 @pytest.mark.parametrize(
-    "null_type,null_position", product([-1, 1], [0.1, 3.3, 11, 26.7])
+    "null_type,null_position", list(product([-1, 1], [0.1, 3.3, 11, 26.7]))
 )
 def test_wall_length(null_type, null_position):
     w_coordinate = select.length_2d(*meshwall())
@@ -60,7 +61,7 @@ def test_wall_length(null_type, null_position):
 
 
 @pytest.mark.parametrize(
-    "null_type,null_position", product([-1, 1], [0, 0.1, 3.3, 11, 26.7])
+    "null_type,null_position", list(product([-1, 1], [0, 0.1, 3.3, 11, 26.7]))
 )
 def test_wall_coordinate(null_type, null_position, plot=False):
     x_cluster, z_cluster = meshwall()
@@ -86,7 +87,7 @@ def test_wall_coordinate(null_type, null_position, plot=False):
 
 @pytest.mark.parametrize(
     "null_type,null_position,null_flux",
-    product([-1, 1], [0, 5.5, 30.6], [0, 3.76, -12.3]),
+    list(product([-1, 1], [0, 5.5, 30.6], [0, 3.76, -12.3])),
 )
 def test_wall_flux(null_type, null_position, null_flux):
     x_cluster, z_cluster = meshwall()
@@ -97,8 +98,31 @@ def test_wall_flux(null_type, null_position, null_flux):
     )
     psi_cluster = quadratic_surface(x_cluster, z_cluster, null_type, *null_coordinate)
     psi_cluster += null_flux
-    psi = select.wall_flux(x_cluster, z_cluster, psi_cluster, null_type)[2]
-    assert np.isclose(psi, null_flux, atol=0.01 * np.max(abs(psi_cluster)))
+    result = select.wall_flux(x_cluster, z_cluster, psi_cluster, null_type)
+    assert result.shape == (4,)
+    assert result[3] == null_type
+    assert np.isclose(result[2], null_flux, atol=0.01 * np.max(abs(psi_cluster)))
+
+
+def test_wall_flux_zero_polarity_returns_four_nan_values():
+    """A missing wall-limit point has the same fixed-shape sentinel as traced code."""
+    x_wall, z_wall = meshwall()
+    result = select.wall_flux(x_wall, z_wall, np.zeros_like(x_wall), 0)
+
+    assert result.shape == (4,)
+    assert np.all(np.isnan(result))
+
+
+def test_limiter_zero_current_publishes_nan_wall_state():
+    """Zero plasma current publishes no wall point or wall flux."""
+    x_wall, z_wall = meshwall()
+    limiter = Limiter()
+    limiter.array.update(x=x_wall, z=z_wall)
+
+    limiter.update_wall(np.zeros_like(x_wall), 0)
+
+    assert np.isnan(limiter.w_psi)
+    assert np.all(np.isnan(limiter.w_point))
 
 
 if __name__ == "__main__":

@@ -78,9 +78,9 @@ class DataNull(Plot, Array):
     @staticmethod
     def _unique(nulls, decimals=3):
         """Return unique field nulls."""
-        points = np.array([null[0] for null in nulls])
-        psi = np.array([null[1] for null in nulls])
-        null_type = np.array([null[2] for null in nulls])
+        points = np.array([null[:2] for null in nulls])
+        psi = np.array([null[2] for null in nulls])
+        null_type = np.array([null[3] for null in nulls])
         points, index = np.unique(points.round(decimals), axis=0, return_index=True)
         return {"points": points, "psi": psi[index], "null_type": null_type[index]}
 

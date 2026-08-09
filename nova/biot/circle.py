@@ -180,7 +180,7 @@ from typing import ClassVar
 import numpy as np
 
 from nova.biot.constants import Constants
-from nova.biot.greens import section_centroid
+from nova.biot.greens import section_centroid, traced_filament_greens
 from nova.biot.matrix import Matrix
 from nova.biot.polygonanalytic import polygon_analytic_greens
 from nova.biot.sectionaverage import section_nodes
@@ -206,6 +206,21 @@ def _sections(frame) -> list[np.ndarray] | None:
     if any(not hasattr(entry, "points") for entry in poly):
         return None
     return [_polygon(entry) for entry in poly]
+
+
+def _inside_closed_band(
+    distance: np.ndarray, radius: float, scale: float
+) -> np.ndarray:
+    """Return pairs inside a physically closed standoff band.
+
+    Touching equal sections sit exactly on the averaging boundary. Independent
+    centroid arithmetic can move the two directions of that pair by a few ulps, so
+    include a roundoff-sized guard rather than making reciprocity depend on polygon
+    vertex order.
+    """
+    boundary = scale * radius
+    tolerance = 8.0 * np.finfo(np.float64).eps * np.maximum(distance, boundary)
+    return distance <= boundary + tolerance
 
 
 @dataclass
@@ -254,51 +269,22 @@ class Circle(Constants, Matrix):
         self.data["r"] = np.linalg.norm([self["x"], self["y"]], axis=0)
         for attr in ["rs", "zs", "r", "z"]:
             setattr(self, attr, self.data[attr])
+        source_radius = np.asarray(self.source["rms"], dtype=np.float64)
+        if not np.all(np.isfinite(source_radius) & (source_radius > 0.0)):
+            raise ValueError("circle sources require a finite positive radius")
 
-    @cached_property
-    def _filament(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Return ``(psi, Br, Bz)`` per ampere from the point filament ring.
-
-        Evaluated on every pair, including the ones a finite section then claims, so
-        the divergence a coincident target drives the modulus complement to is
-        allowed to appear and is overwritten rather than avoided. The vertical row
-        takes its second-kind weight from
-        :attr:`nova.biot.constants.Constants.axial_weight`, the arrangement that
-        does not form ``2 r - b k^2`` as a difference.
-        """
-        with np.errstate(divide="ignore", invalid="ignore"):
-            aphi = (
-                1
-                / (2 * np.pi)
-                * self.a
-                / self.r
-                * ((1 - self.k2 / 2) * self.K - self.E)
-            )
-            psi = 2 * np.pi * self.mu_0 * self.r * aphi
-            br = (
-                self.mu_0
-                / (2 * np.pi)
-                * self.gamma
-                * (self.K - (2 - self.k2) / (2 * self.ck2) * self.E)
-                / (self.a * self.r)
-            )
-            bz = (
-                self.mu_0
-                / (2 * np.pi)
-                * (self.r * self.K - self.axial_weight / (2 * self.ck2) * self.E)
-                / (self.a * self.r)
-            )
-        return psi, br, bz
+    @staticmethod
+    def point_greens(target_r, target_z, source_r, source_z):
+        """Return canonical point-filament rows for already-partitioned pairs."""
+        return traced_filament_greens(np, target_r, target_z, source_r, source_z)
 
     @cached_property
     def _coupling(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Return ``(psi, Br, Bz)`` per ampere, shape ``(target, source)``.
 
-        The filament on every pair, then the finite section on the pairs the bands
-        claim. A pair inside ``average_band`` is a double integral, one inside
-        ``section_band`` alone is a single integral, and no pair is both: the two
-        sets are disjoint by construction, so a pair is evaluated by exactly one
-        treatment.
+        Point, axis, single-integral and double-integral pairs are partitioned before
+        any kernel is evaluated. A pair inside ``average_band`` is a double integral,
+        one inside ``section_band`` alone is a single integral, and no pair is both.
 
         The source column's own polygon is handed the point targets and every
         target-section quadrature node in ONE kernel call. The closed form holds its
@@ -308,23 +294,51 @@ class Circle(Constants, Matrix):
         :mod:`tests.test_biotcircle` holds the diagonal this produces against
         :func:`nova.biot.sectionaverage.averaged_greens` so the two cannot drift.
         """
-        coupling = tuple(value.copy() for value in self._filament)
+        coupling = tuple(np.empty(self.shape, dtype=np.float64) for _ in range(3))
         source = _sections(self.source)
-        if source is None:
-            return coupling
         target = _sections(self.target)
-        for column, vertices in enumerate(source):
-            centre = section_centroid(vertices)
-            radius = float(np.max(np.hypot(*(vertices - centre).T)))
+        for column in range(self.shape[1]):
             target_r = self.r[:, column]
             target_z = self.z[:, column]
-            distance = np.hypot(target_r - centre[0], target_z - centre[1])
-            inside = distance < self.section_band * radius
-            averaged = (
-                inside & (distance < self.average_band * radius)
-                if target is not None
-                else np.zeros(inside.shape, dtype=bool)
-            )
+            vertices = None if source is None else source[column]
+            if vertices is None:
+                inside = np.zeros(target_r.shape, dtype=bool)
+                averaged = np.zeros(target_r.shape, dtype=bool)
+            else:
+                centre = section_centroid(vertices)
+                radius = float(np.max(np.hypot(*(vertices - centre).T)))
+                distance = np.hypot(target_r - centre[0], target_z - centre[1])
+                inside = _inside_closed_band(distance, radius, self.section_band)
+                averaged = (
+                    inside & _inside_closed_band(distance, radius, self.average_band)
+                    if target is not None
+                    else np.zeros(inside.shape, dtype=bool)
+                )
+
+            axis = target_r == 0.0
+            ordinary = ~inside & ~axis
+            if ordinary.any():
+                evaluated = self.point_greens(
+                    target_r[ordinary],
+                    target_z[ordinary],
+                    self.rs[ordinary, column],
+                    self.zs[ordinary, column],
+                )
+                for value, got in zip(coupling, evaluated, strict=True):
+                    value[ordinary, column] = got
+
+            axis_point = axis & ~inside
+            if axis_point.any():
+                source_r = self.rs[axis_point, column]
+                dz = target_z[axis_point] - self.zs[axis_point, column]
+                coupling[0][axis_point, column] = 0.0
+                coupling[1][axis_point, column] = 0.0
+                coupling[2][axis_point, column] = (
+                    self.mu_0 * source_r**2 / (2.0 * (source_r**2 + dz**2) ** 1.5)
+                )
+
+            if vertices is None or not inside.any():
+                continue
             rows = np.flatnonzero(inside & ~averaged)
             section = [section_nodes(target[row]) for row in np.flatnonzero(averaged)]
             node = [target_r[rows], *(point[:, 0] for point, _ in section)]
@@ -334,13 +348,16 @@ class Circle(Constants, Matrix):
             evaluated = polygon_analytic_greens(
                 np.concatenate(node), np.concatenate(height), vertices
             )
-            for value, got in zip(coupling, evaluated):
+            for value, got in zip(coupling, evaluated, strict=True):
                 value[rows, column] = got[: rows.size]
                 start = rows.size
                 for row, (_, weight) in zip(np.flatnonzero(averaged), section):
                     stop = start + weight.size
                     value[row, column] = weight @ got[start:stop] / weight.sum()
                     start = stop
+            finite_axis = axis & inside
+            coupling[0][finite_axis, column] = 0.0
+            coupling[1][finite_axis, column] = 0.0
         return coupling
 
     @cached_property
@@ -351,7 +368,14 @@ class Circle(Constants, Matrix):
     @cached_property
     def Aphi(self):
         """Return the toroidal vector potential array [Wb/(m.A)]."""
-        return self.Psi / (2 * np.pi * self.mu_0 * self.r)
+        potential = np.zeros_like(self.Psi)
+        np.divide(
+            self.Psi,
+            2 * np.pi * self.mu_0 * self.r,
+            out=potential,
+            where=self.r != 0.0,
+        )
+        return potential
 
     @cached_property
     def Br(self):

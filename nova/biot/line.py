@@ -24,6 +24,25 @@ class Line(Matrix):
 
     attrs: dict[str, str] = field(default_factory=lambda: {"dl": "dl"})
 
+    def __post_init__(self):
+        """Validate that every source represents a finite, nonzero segment."""
+        super().__post_init__()
+        start = np.column_stack(
+            [
+                np.asarray(self.source[f"{coordinate}1"], dtype=np.float64)
+                for coordinate in "xyz"
+            ]
+        )
+        end = np.column_stack(
+            [
+                np.asarray(self.source[f"{coordinate}2"], dtype=np.float64)
+                for coordinate in "xyz"
+            ]
+        )
+        length = np.linalg.norm(end - start, axis=1)
+        if not np.all(np.isfinite(length) & (length > 0.0)):
+            raise ValueError("line segments require a finite positive length")
+
     @cached_property
     def phi(self):
         """Return global target toroidal angle."""
@@ -66,18 +85,64 @@ class Line(Matrix):
 
     @property
     def _Az_hat(self):
-        """Return stacked local z-coord vector potential intergration coefficents."""
-        return np.arcsinh(self.wi / self.a2)
+        """Return the stable definite local vector-potential coefficient."""
+        radius = self.a2[0]
+        first, second = self.wi
+        first_distance, second_distance = self.ri
+        exterior_axis = (radius == 0.0) & (first * second > 0.0)
+        singular_axis = (radius == 0.0) & ~exterior_axis
+        ordinary = radius != 0.0
+
+        difference = np.empty(self.shape, dtype=np.float64)
+        difference[ordinary] = 2.0 * np.arctanh(
+            (second[ordinary] - first[ordinary])
+            / (first_distance[ordinary] + second_distance[ordinary])
+        )
+        difference[exterior_axis] = np.sign(first[exterior_axis]) * np.log(
+            np.abs(second[exterior_axis] / first[exterior_axis])
+        )
+        difference[singular_axis] = np.inf
+        return np.stack([np.zeros(self.shape), difference])
 
     @property
     def _Bx_hat(self):
-        """Return stacked local x-coord magnetic field intergration coefficents."""
-        return self.wi / (self.ri * self.a2**2) * self.v2
+        """Return the stable definite local x-field coefficient."""
+        return np.stack([np.zeros(self.shape), self.v2[0] * self._field_coefficient])
 
     @property
     def _By_hat(self):
-        """Return stacked local y-coord magnetic field intergration coefficents."""
-        return self.wi / (self.ri * self.a2**2) * -self.u2
+        """Return the stable definite local y-field coefficient."""
+        return np.stack([np.zeros(self.shape), -self.u2[0] * self._field_coefficient])
+
+    @cached_property
+    def _field_coefficient(self):
+        """Return the endpoint field bracket with its exterior-axis limit."""
+        radius = self.a2[0]
+        first, second = self.wi
+        first_distance, second_distance = self.ri
+        same_sign = first * second > 0.0
+        singular_axis = (radius == 0.0) & ~same_sign
+        literal = ~same_sign & ~singular_axis
+
+        coefficient = np.empty(self.shape, dtype=np.float64)
+        coefficient[same_sign] = (
+            (second[same_sign] - first[same_sign])
+            * (second[same_sign] + first[same_sign])
+            / (
+                first_distance[same_sign]
+                * second_distance[same_sign]
+                * (
+                    second[same_sign] * first_distance[same_sign]
+                    + first[same_sign] * second_distance[same_sign]
+                )
+            )
+        )
+        coefficient[literal] = (
+            second[literal] / second_distance[literal]
+            - first[literal] / first_distance[literal]
+        ) / radius[literal] ** 2
+        coefficient[singular_axis] = np.nan
+        return coefficient
 
     @property
     def _Bz_hat(self):

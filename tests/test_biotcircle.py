@@ -65,6 +65,49 @@ def test_the_element_uses_the_geometry_it_was_handed(coilset):
     assert np.array_equal(biot.r, np.tile(np.asarray(frame.x), (len(frame), 1)).T)
 
 
+def test_axis_and_finite_section_pairs_are_partitioned_before_the_filament(monkeypatch):
+    """Only ordinary exterior pairs enter the point-filament kernel."""
+    coilset = CoilSet(dcoil=-1)
+    coilset.coil.insert(1.7, 0.2, 0.12, 0.18, nturn=1, section="rectangle")
+    frame = coilset.subframe
+    source_r = float(np.asarray(frame.rms)[0])
+    source_z = float(np.asarray(frame.z)[0])
+    target = Target(
+        {
+            "x": [0.0, source_r, source_r + 3.0],
+            "z": [-0.4, source_z, source_z + 0.7],
+        }
+    )
+    called = []
+    point_greens = Circle.point_greens
+
+    def guarded(target_r, target_z, ring_r, ring_z):
+        assert np.all(np.asarray(target_r) != 0.0)
+        assert np.all(np.hypot(target_r - ring_r, target_z - ring_z) > 0.2)
+        called.append(np.asarray(target_r).size)
+        return point_greens(target_r, target_z, ring_r, ring_z)
+
+    monkeypatch.setattr(Circle, "point_greens", staticmethod(guarded))
+    with np.errstate(divide="raise", invalid="raise", over="raise"):
+        biot = Circle(frame, target, reduce=[False, False])
+        psi = np.asarray(biot.Psi)[:, 0]
+        br = np.asarray(biot.Br)[:, 0]
+        bz = np.asarray(biot.Bz)[:, 0]
+        aphi = np.asarray(biot.Aphi)[:, 0]
+
+    expected_axis_bz = (
+        Circle.mu_0
+        * source_r**2
+        / (2.0 * (source_r**2 + (-0.4 - source_z) ** 2) ** 1.5)
+    )
+    assert called == [1]
+    assert psi[0] == 0.0
+    assert br[0] == 0.0
+    assert aphi[0] == 0.0
+    assert bz[0] == pytest.approx(expected_axis_bz, rel=2e-16)
+    assert np.all(np.isfinite([psi[1], br[1], bz[1], aphi[1]]))
+
+
 @pytest.mark.parametrize("case", ["coilset", "cells"])
 def test_an_all_to_all_matrix_has_no_divergent_entry(case, request):
     """Every entry of a source-is-target matrix is finite, the diagonal included.

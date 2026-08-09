@@ -8,6 +8,26 @@ from typing import ClassVar
 import numpy as np
 
 from nova.biot.matrix import Matrix
+from nova.biot.polybow import section_corners
+from nova.geometry.section import is_axis_aligned_rectangle
+
+
+def _bounded_asinh_product(scale, numerator, denominator):
+    """Return ``scale * asinh(numerator / denominator)`` at its zero limit."""
+    scale, numerator, denominator = np.broadcast_arrays(scale, numerator, denominator)
+    result = np.zeros(scale.shape, dtype=np.result_type(scale, numerator, denominator))
+    active = (scale != 0.0) & (denominator != 0.0)
+    result[active] = scale[active] * np.arcsinh(numerator[active] / denominator[active])
+    return result
+
+
+def _bounded_atan_product(scale, numerator, denominator):
+    """Return ``scale * atan(numerator / denominator)`` at its zero limit."""
+    scale, numerator, denominator = np.broadcast_arrays(scale, numerator, denominator)
+    result = np.zeros(scale.shape, dtype=np.result_type(scale, numerator, denominator))
+    active = (scale != 0.0) & (denominator != 0.0)
+    result[active] = scale[active] * np.arctan(numerator[active] / denominator[active])
+    return result
 
 
 @dataclass
@@ -27,6 +47,16 @@ class Beam(Matrix):
     def __post_init__(self):
         """Load intergration constants."""
         super().__post_init__()
+        area = np.asarray(self.source("area"), dtype=np.float64)
+        width = np.asarray(self.source("width"), dtype=np.float64)
+        height = np.asarray(self.source("height"), dtype=np.float64)
+        for name, values in (("area", area), ("width", width), ("height", height)):
+            if not np.all(np.isfinite(values) & (values > 0.0)):
+                raise ValueError(f"beam sources require finite positive {name}")
+        if "poly" in self.source.columns:
+            for poly in np.asarray(self.source["poly"], dtype=object):
+                if not is_axis_aligned_rectangle(section_corners(poly)):
+                    raise ValueError("beam sources require an axis-aligned rectangle")
         self.xs = np.stack(
             [
                 self("source", "x2") + delta / 2 * self.source("width")
@@ -75,9 +105,13 @@ class Beam(Matrix):
         return np.sqrt(self.wk**2 + self.ui**2)
 
     @cached_property
+    def distance(self):
+        """Return the distance from every target to every source corner."""
+        return np.sqrt(self.ui**2 + self.vj**2 + self.wk**2)
+
+    @cached_property
     def theta(self) -> dict[str, np.ndarray]:
         """Return theta coefficents 1-6."""
-        r = np.sqrt(self.ui**2 + self.vj**2 + self.wk**2)
         return dict(
             zip(
                 np.arange(1, 7),
@@ -85,9 +119,9 @@ class Beam(Matrix):
                     self.wk / self.alpha,
                     self.ui / self.beta,
                     self.vj / self.gamma,
-                    self.vj * self.wk / (self.ui * r),
-                    self.wk * self.ui / (self.vj * r),
-                    self.ui * self.vj / (self.wk * r),
+                    self.vj * self.wk / (self.ui * self.distance),
+                    self.wk * self.ui / (self.vj * self.distance),
+                    self.ui * self.vj / (self.wk * self.distance),
                 ],
             )
         )
@@ -109,14 +143,20 @@ class Beam(Matrix):
     def _Az_hat(self):
         """Return stacked local z-coord vector potential intergration coefficents."""
         return (
-            self.ui * self.vj * np.arcsinh(self.theta[1])
-            + self.vj * self.wk * np.arcsinh(self.theta[2])
-            + self.wk * self.ui * np.arcsinh(self.theta[3])
+            _bounded_asinh_product(self.ui * self.vj, self.wk, self.alpha)
+            + _bounded_asinh_product(self.vj * self.wk, self.ui, self.beta)
+            + _bounded_asinh_product(self.wk * self.ui, self.vj, self.gamma)
             - 0.5
             * (
-                self.ui**2 * np.arctan(self.theta[4])
-                + self.vj**2 * np.arctan(self.theta[5])
-                + self.wk**2 * np.arctan(self.theta[6])
+                _bounded_atan_product(
+                    self.ui**2, self.vj * self.wk, self.ui * self.distance
+                )
+                + _bounded_atan_product(
+                    self.vj**2, self.wk * self.ui, self.vj * self.distance
+                )
+                + _bounded_atan_product(
+                    self.wk**2, self.ui * self.vj, self.wk * self.distance
+                )
             )
         )
 
@@ -124,18 +164,18 @@ class Beam(Matrix):
     def _Bx_hat(self):
         """Return stacked local x-coord magnetic field intergration coefficents."""
         return (
-            -self.ui * np.arcsinh(self.theta[1])
-            - self.wk * np.arcsinh(self.theta[2])
-            + self.vj * np.arctan(self.theta[5])
+            -_bounded_asinh_product(self.ui, self.wk, self.alpha)
+            - _bounded_asinh_product(self.wk, self.ui, self.beta)
+            + _bounded_atan_product(self.vj, self.wk * self.ui, self.vj * self.distance)
         )
 
     @property
     def _By_hat(self):
         """Return stacked local y-coord magnetic field intergration coefficents."""
         return (
-            self.vj * np.arcsinh(self.theta[1])
-            + self.wk * np.arcsinh(self.theta[3])
-            - self.ui * np.arctan(self.theta[4])
+            _bounded_asinh_product(self.vj, self.wk, self.alpha)
+            + _bounded_asinh_product(self.wk, self.vj, self.gamma)
+            - _bounded_atan_product(self.ui, self.vj * self.wk, self.ui * self.distance)
         )
 
     @property

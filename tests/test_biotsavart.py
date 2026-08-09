@@ -7,10 +7,11 @@ import pytest
 import scipy.special
 
 
-from nova.biot.biotframe import BiotFrame
+from nova.biot.biotframe import BiotFrame, Source, Target
 from nova.biot.circle import Circle
 from nova.biot.constants import Constants
 from nova.biot.grid import Grid
+from nova.biot.line import Line
 from nova.biot.matrix import Matrix
 from nova.biot.point import Point
 from nova.biot.solve import Solve
@@ -418,17 +419,98 @@ def test_3d_line_arc(rng_sead, current):
         assert np.allclose(getattr(coilset.point, attr.lower()), 0, atol=1e-6)
 
 
-@pytest.mark.skip("pending development of singularity skip methods")
-def test_line_singularity():
-    segment_number = 30
-    x = np.linspace(0, 5, segment_number)
-    points = np.stack([x, np.zeros_like(x), np.zeros_like(x)], axis=-1)
-    coilset = CoilSet(field_attrs=["Bx", "By", "Bz"])
-    coilset.winding.insert(points, {"c": (0, 0, 0.25)}, Ic=1)
-    coilset.point.solve(np.c_[[0, 0, 0], [0, 0.25 / 2, 0], [0, 0.25, 0]].T)
-    assert coilset.point.bz[0] < coilset.point.bz[1]
-    assert coilset.point.bz[0] < coilset.point.bz[2]
-    assert coilset.point.bz[2] < coilset.point.bz[1]
+def _line_element(start, end, targets):
+    """Return a Line element on an authored segment and target cloud."""
+    source = Source(
+        PolyLine(np.array([start, end], dtype=float), minimum_arc_nodes=3).path_geometry
+    )
+    targets = np.atleast_2d(np.asarray(targets, dtype=float))
+    target = Target(dict(zip("xyz", targets.T, strict=True)))
+    return Line(source, target, turns=[False, False], reduce=[False, False])
+
+
+def test_line_exterior_axis_has_the_finite_logarithmic_limit():
+    """Exterior collinear targets have finite potential and exactly zero field."""
+    line = _line_element([0, 0, -1], [0, 0, 1], [[0, 0, 3], [0, 0, -4]])
+    with np.errstate(divide="raise", invalid="raise", over="raise"):
+        potential = line._intergrate(line._Az_hat)[:, 0]
+        field_x = line._intergrate(line._Bx_hat)[:, 0]
+        field_y = line._intergrate(line._By_hat)[:, 0]
+    expected = np.array([np.log(2.0), np.log(5.0 / 3.0)]) / (4.0 * np.pi)
+    np.testing.assert_allclose(potential, expected, rtol=2e-16, atol=0.0)
+    np.testing.assert_array_equal(field_x, 0.0)
+    np.testing.assert_array_equal(field_y, 0.0)
+
+
+def test_line_interior_and_endpoint_targets_keep_the_filament_singularity():
+    """A target on the material line is not assigned an artificial standoff."""
+    line = _line_element([0, 0, -1], [0, 0, 1], [[0, 0, 0], [0, 0, -1], [0, 0, 1]])
+    with np.errstate(divide="raise", invalid="raise", over="raise"):
+        potential = line._intergrate(line._Az_hat)[:, 0]
+        field_x = line._intergrate(line._Bx_hat)[:, 0]
+        field_y = line._intergrate(line._By_hat)[:, 0]
+    assert np.all(np.isinf(potential))
+    assert np.all(np.isnan(field_x))
+    assert np.all(np.isnan(field_y))
+
+
+@pytest.mark.parametrize(
+    "centre,direction,length,target",
+    [
+        ([12.0, -7.0, 3.0], [1.0, 2.0, -1.0], 2.5, [14.0, -9.0, 5.0]),
+        ([100.0, -200.0, 300.0], [0.0, 0.0, 1.0], 2e-5, [1000.0, 200.0, 300.0]),
+    ],
+)
+def test_line_short_far_and_rotated_geometry_matches_direct_quadrature(
+    centre, direction, length, target
+):
+    """Stable endpoint reductions agree with a direct smooth line integral."""
+    centre = np.asarray(centre, dtype=np.longdouble)
+    direction = np.asarray(direction, dtype=np.longdouble)
+    direction /= np.linalg.norm(direction)
+    target = np.asarray(target, dtype=np.longdouble)
+    start = centre - 0.5 * np.longdouble(length) * direction
+    end = centre + 0.5 * np.longdouble(length) * direction
+    line = _line_element(start, end, target)
+
+    start = np.asarray(start, dtype=np.float64).astype(np.longdouble)
+    end = np.asarray(end, dtype=np.float64).astype(np.longdouble)
+    target = np.asarray(target, dtype=np.float64).astype(np.longdouble)
+    centre = 0.5 * (start + end)
+    displacement_along_line = end - start
+    length = np.linalg.norm(displacement_along_line)
+    direction = displacement_along_line / length
+
+    node, weight = np.polynomial.legendre.leggauss(96)
+    node = node.astype(np.longdouble)
+    weight = weight.astype(np.longdouble)
+    source = centre + 0.5 * length * node[:, None] * direction
+    displacement = target - source
+    distance = np.linalg.norm(displacement, axis=1)
+    differential = 0.5 * length * weight
+    expected_a = direction * np.sum(differential / distance) / (4.0 * np.pi)
+    expected_b = (
+        np.longdouble(Matrix.mu_0)
+        * np.sum(
+            differential[:, None]
+            * np.cross(direction, displacement)
+            / distance[:, None] ** 3,
+            axis=0,
+        )
+        / (4.0 * np.pi)
+    )
+    np.testing.assert_allclose(
+        np.asarray(line.Avector[:, 0], dtype=np.longdouble),
+        expected_a[None],
+        rtol=2e-10,
+        atol=1e-24,
+    )
+    np.testing.assert_allclose(
+        np.asarray(line.Bvector[:, 0], dtype=np.longdouble),
+        expected_b[None],
+        rtol=2e-9,
+        atol=1e-30,
+    )
 
 
 def test_multifilament_3d_vector():

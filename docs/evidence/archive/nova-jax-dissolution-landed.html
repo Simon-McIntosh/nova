@@ -25,7 +25,7 @@
     <tr><td>Null stack</td><td><code>FieldNull</code></td><td>Delete traced wrapper</td><td>Zero importers; retain the live host adapter and shared kernels.</td></tr>
     <tr><td>Null stack</td><td><code>Null</code>, <code>Target</code>, <code>Topology</code></td><td>Keep both</td><td>Contracts differ. Target crosses over near 4,096 rows and is 2.63× CPU / 5.58× H200 faster at 16,384 rows; maximum scaled error was 2.03e-7.</td></tr>
     <tr><td>Fixed point</td><td>Picard, Anderson, Newton–Krylov</td><td>Relocate intact</td><td>There is no host peer or production importer. Small batches underfill the H200; fused batch 4,096 reached 37.34–39.40× one-core CPU with CPU/GPU disagreement at most 2.01e-13.</td></tr>
-    <tr><td>Stencil</td><td><code>ring_sign_changes</code></td><td>Keep both contracts</td><td>Rectangular and hex neighbourhoods produced 99 versus 50 raw candidate vertices on the same smooth periodic field. These are not yet established as unique physical nulls; analytic clustering and weak-null/noise rejection are under audit.</td></tr>
+    <tr><td>Stencil</td><td><code>ring_sign_changes</code></td><td>Keep both contracts</td><td>Rectangular and hex neighbourhoods are distinct geometries. The rectangular field's 99 raw vertex hits represent 49 genuine interior saddles plus 50 duplicate representations, not 99 physical nulls.</td></tr>
     <tr><td>Stencil</td><td><code>subnull</code> adapter</td><td>Collapse</td><td>The duplicate adapter is signature-only.</td></tr>
     <tr><td>Stencil</td><td><code>magnetic_axis_subgrid</code></td><td>Relocate</td><td>Single implementation; reject flat plateaux before publishing <code>found</code>.</td></tr>
     <tr><td>Stencil</td><td><code>xpoint_candidates</code></td><td>Relocate</td><td>Single implementation; expose overflow because 99 raw candidates silently truncated to eight slots. The repair must distinguish unique persistent nulls from duplicate/noise candidates before compaction.</td></tr>
@@ -35,9 +35,9 @@
 
   <h2>Accuracy and policy findings</h2>
   <ul>
-    <li>Global fp64 is the measured workaround, not the final select policy: direct fp32 imports misclassified 12 of 18 ITER-scale analytic surfaces, while fp64 classified all 18 correctly. A centered, nondimensional fp32 formulation and scale-relative classification are under audit for the GPU path.</li>
+    <li>Global fp64 was a diagnostic workaround, not the final select policy: direct fp32 imports misclassified 12 of 18 ITER-scale analytic surfaces, while exact index-native normalized fp32 produced zero wrong classes and at most 0.01143-cell error in the clean resolved matrix.</li>
     <li>The select behaviour change landed before arithmetic collapse: four-value wall results, all-NaN at zero polarity, NaN plane classification, a sign-preserving nonzero determinant sentinel, and the three-array <code>subnull</code> signature.</li>
-    <li>Stencil relocation must repair plateau acceptance and surface fixed-slot overflow rather than carry the measured defects into the domain package.</li>
+    <li>Stencil relocation must reject flat plateaux, preserve unresolved weak evidence, deduplicate same-root cells, and surface exact count/overflow metadata rather than carry the measured defects into the domain package.</li>
     <li>JAX-free eager boundaries remain required while namespaces consolidate.</li>
   </ul>
 

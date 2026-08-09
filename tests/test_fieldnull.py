@@ -1,6 +1,8 @@
 """Agreement contract for host and traced field-null categorisation."""
 
 from itertools import product
+import subprocess
+import sys
 
 import numpy as np
 import pytest
@@ -16,6 +18,27 @@ with skip_import("jax"):
     from nova.jax import select as traced_select
 
     enable_x64()
+
+
+def test_host_fieldnull_consumers_import_without_jax():
+    """Eager field-null, grid, and IMAS flux imports do not require JAX."""
+    script = """
+import importlib
+import sys
+
+sys.modules['jax'] = None
+
+for name in ('nova.biot.fieldnull', 'nova.biot.grid', 'nova.imas.flux'):
+    importlib.import_module(name)
+"""
+    result = subprocess.run(
+        [sys.executable, "-c", script],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
 
 
 def meshgrid():

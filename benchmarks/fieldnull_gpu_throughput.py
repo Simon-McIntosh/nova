@@ -51,7 +51,7 @@ import numpy as np
 
 from nova.geometry.hexstencil import hex_stencil
 from nova.jax.flux_surface_connectivity import _dilate4
-from nova.jax.null import Null2D
+from nova.biot.null import Null2D
 from nova.jax.stencil_nulls import (
     _refine_at,
     magnetic_axis_subgrid,
@@ -669,7 +669,7 @@ def _source_hashes() -> dict[str, str]:
     """Hash the benchmark and every production kernel it exercises."""
     paths = {
         "benchmarks/fieldnull_gpu_throughput.py": Path(__file__),
-        "nova/jax/null.py": ROOT / "nova/jax/null.py",
+        "nova/biot/null.py": ROOT / "nova/biot/null.py",
         "nova/jax/select.py": ROOT / "nova/jax/select.py",
         "nova/jax/stencil_nulls.py": ROOT / "nova/jax/stencil_nulls.py",
         "nova/jax/fixed_point.py": ROOT / "nova/jax/fixed_point.py",

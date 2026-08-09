@@ -4,16 +4,16 @@ The four modules examined here do not form four symmetric class pairs.
 
 ``fieldnull``
     The host class is a stateful xarray/plot adapter used by the eager grid and
-    IMAS readers.  The traced class is an unreferenced convenience wrapper
-    around the live ``Null2D`` and ``Target`` kernels.  Their shared structured
-    hex-stencil construction already lives in :mod:`nova.geometry.hexstencil`.
+    IMAS readers.  The fixed-array convenience wrapper was unreferenced and is
+    retired; its recorded measurements remain in the committed artifact.  The
+    live ``Null2D`` and ``FluxTarget`` kernels are measured directly.
 ``null``
     ``Null1D`` and ``Null2D`` are fixed-shape differentiable kernels.  The host
     comparison is the categorisation and adaptive-length interpolation inside
     :class:`nova.biot.fieldnull.FieldNull`, not a class-compatible peer.
 ``target``
-    The traced target evaluates coupling matrices.  The class with the same
-    token in :mod:`nova.biot.biotframe` is a geometry table, so matrix products
+    ``FluxTarget`` evaluates coupling matrices.  The distinct
+    :class:`nova.biot.biotframe.Target` is a geometry table, so matrix products
     are compared with NumPy and extended precision rather than pretending the
     two classes implement one interface.
 ``topology``
@@ -23,7 +23,8 @@ The four modules examined here do not form four symmetric class pairs.
 
 One process measures one JAX platform because platform selection happens before
 JAX initialises.  Capture CPU and accelerator runs separately, then merge them
-into the committed JSON and SVG::
+into the committed JSON and SVG.  A current capture leaves retired-wrapper
+rows empty; the historical JSON retains their original source provenance::
 
     JAX_PLATFORMS=cpu uv run python benchmarks/null_stack_route.py measure \
         --output /tmp/null_stack_cpu.json
@@ -68,12 +69,11 @@ import scipy
 import xarray as xr
 
 from nova.biot.fieldnull import FieldNull as HostFieldNull
+from nova.biot.null import Null1D, Null2D
+from nova.biot.target import FluxTarget
+from nova.equilibrium.topology import Topology
 from nova.geometry import select as host_select
 from nova.geometry.hexstencil import hex_stencil
-from nova.jax.fieldnull import FieldNull as TracedFieldNull
-from nova.jax.null import Null1D, Null2D
-from nova.jax.target import Target
-from nova.jax.topology import Topology
 
 REPEATS = 7
 FULL_GRID_SIZES = (17, 33, 65, 129)
@@ -86,10 +86,21 @@ ROOT = Path(
     os.environ.get("NOVA_BENCH_SOURCE_ROOT", Path(__file__).resolve().parents[1])
 ).resolve()
 MODULE_PATHS = {
-    "fieldnull": ROOT / "nova/jax/fieldnull.py",
-    "null": ROOT / "nova/jax/null.py",
-    "target": ROOT / "nova/jax/target.py",
-    "topology": ROOT / "nova/jax/topology.py",
+    "null": ROOT / "nova/biot/null.py",
+    "target": ROOT / "nova/biot/target.py",
+    "topology": ROOT / "nova/equilibrium/topology.py",
+}
+MODULE_IMPORTS = {
+    "null": "nova.biot.null",
+    "target": "nova.biot.target",
+    "topology": "nova.equilibrium.topology",
+}
+RETIRED_FIELDNULL_ROUTE = {
+    "status": "retired",
+    "removed_symbol": "nova.jax.fieldnull.FieldNull",
+    "source_artifact": "docs/figures/jax-dissolution/null_stack_route.json",
+    "measured_head": "ee5503fabcddd75c6dcd62ba456f6770c4d78d99",
+    "source_sha256": "7c0056fd4a6cdc3e9bfd48b9d4cf6a40afeae0f866e3f877e6d101714540e972",
 }
 
 
@@ -177,8 +188,8 @@ def _scaled_max_error(value: np.ndarray, truth: np.ndarray) -> float:
 
 
 def _source_reachability() -> dict[str, Any]:
-    """Return importers of each traced module from the current Python tree."""
-    imports: dict[str, list[str]] = {name: [] for name in MODULE_PATHS}
+    """Return importers of each fixed-shape module from the current Python tree."""
+    imports: dict[str, list[str]] = {name: [] for name in MODULE_IMPORTS}
     for path in sorted((*ROOT.glob("nova/**/*.py"), *ROOT.glob("tests/**/*.py"))):
         try:
             tree = ast.parse(path.read_text())
@@ -190,8 +201,7 @@ def _source_reachability() -> dict[str, Any]:
                 imported.add(node.module)
             elif isinstance(node, ast.Import):
                 imported.update(alias.name for alias in node.names)
-        for name in imports:
-            module = f"nova.jax.{name}"
+        for name, module in MODULE_IMPORTS.items():
             if any(
                 item == module or item.startswith(f"{module}.") for item in imported
             ):
@@ -206,6 +216,11 @@ def _source_reachability() -> dict[str, Any]:
             ],
             "test_importers": [path for path in paths if path.startswith("tests/")],
         }
+    result["fieldnull"] = {
+        "production_importers": [],
+        "test_importers": [],
+        "availability": RETIRED_FIELDNULL_ROUTE,
+    }
     result["host_fieldnull"] = {
         "production_importers": [
             "nova/biot/grid.py",
@@ -221,7 +236,11 @@ def _api_contracts() -> dict[str, Any]:
     return {
         "fieldnull": {
             "host_signature": str(inspect.signature(HostFieldNull)),
-            "traced_signature": str(inspect.signature(TracedFieldNull)),
+            "fixed_wrapper_signature": (
+                "(data: xarray.core.dataset.Dataset = <factory>, "
+                "array_attrs: list[str] = <factory>, maxsize: int = 5) -> None"
+            ),
+            "availability": RETIRED_FIELDNULL_ROUTE,
             "host_result": "mutable dictionaries with adaptive-length arrays",
             "traced_result": "two fixed (maxsize, 4) device arrays padded by NaN",
             "host_features": [
@@ -230,7 +249,7 @@ def _api_contracts() -> dict[str, Any]:
                 "plot adapter",
             ],
             "traced_features": [
-                "cached Null2D and Target construction",
+                "cached Null2D and FluxTarget construction",
                 "device arrays",
                 "fixed-size output",
             ],
@@ -260,7 +279,7 @@ def _api_contracts() -> dict[str, Any]:
             ],
         },
         "target": {
-            "traced_signature": str(inspect.signature(Target)),
+            "traced_signature": str(inspect.signature(FluxTarget)),
             "traced_role": "evaluate source-target and plasma-target coupling matrices",
             "host_same_token_role": "store target geometry and reduction metadata",
             "common_interface": False,
@@ -336,85 +355,10 @@ def _host_fieldnull(data: xr.Dataset) -> HostFieldNull:
     return result
 
 
-def _traced_fieldnull(data: xr.Dataset) -> TracedFieldNull:
-    """Construct a traced wrapper and materialize its cached null kernel."""
-    result = TracedFieldNull(data=data, maxsize=MAX_NULLS)
-    result.load_arrays()
-    _block(result.null.coordinate)
-    return result
-
-
-def _finite_rows(values: Any) -> np.ndarray:
-    """Return finite fixed-size null rows as host arrays."""
-    values = np.asarray(values)
-    return values[np.isfinite(values[:, 0])]
-
-
-def _null_accuracy(host: HostFieldNull, traced: TracedFieldNull) -> dict[str, Any]:
-    """Compare both routes with the analytic stationary points."""
-    host_rows = np.r_[
-        np.c_[host.data_o["points"], host.data_o["psi"], host.data_o["null_type"]],
-        np.c_[host.data_x["points"], host.data_x["psi"], host.data_x["null_type"]],
-    ]
-    traced_rows = np.r_[_finite_rows(traced.data_o), _finite_rows(traced.data_x)]
-    truth = np.array(
-        [
-            [-1.0, 0.0, -0.25, -1.0],
-            [1.0, 0.0, -0.25, -1.0],
-            [0.0, 0.0, 0.0, 0.0],
-        ]
-    )
-
-    def errors(rows: np.ndarray) -> tuple[float, float, bool]:
-        point_errors = []
-        flux_errors = []
-        types_match = True
-        for expected in truth:
-            compatible = rows[rows[:, 3] == expected[3]]
-            if not len(compatible):
-                return math.inf, math.inf, False
-            index = int(
-                np.argmin(np.linalg.norm(compatible[:, :2] - expected[:2], axis=1))
-            )
-            point_errors.append(
-                float(np.linalg.norm(compatible[index, :2] - expected[:2]))
-            )
-            flux_errors.append(abs(float(compatible[index, 2] - expected[2])))
-            types_match &= compatible[index, 3] == expected[3]
-        return max(point_errors), max(flux_errors), bool(types_match)
-
-    host_point, host_flux, host_types = errors(host_rows)
-    traced_point, traced_flux, traced_types = errors(traced_rows)
-    route_point = 0.0
-    for row in host_rows:
-        compatible = traced_rows[traced_rows[:, 3] == row[3]]
-        route_point = max(
-            route_point,
-            float(np.min(np.linalg.norm(compatible[:, :2] - row[:2], axis=1))),
-        )
-    return {
-        "expected_count": {"o": 2, "x": 1},
-        "host_count": {"o": int(host.o_point_number), "x": int(host.x_point_number)},
-        "traced_count": {
-            "o": int(len(_finite_rows(traced.data_o))),
-            "x": int(len(_finite_rows(traced.data_x))),
-        },
-        "host_max_coordinate_error": host_point,
-        "traced_max_coordinate_error": traced_point,
-        "host_max_flux_error": host_flux,
-        "traced_max_flux_error": traced_flux,
-        "host_types_match": host_types,
-        "traced_types_match": traced_types,
-        "route_max_coordinate_deviation": route_point,
-        "host_dtype": str(host_rows.dtype),
-        "traced_dtype": str(traced_rows.dtype),
-    }
-
-
 def _measure_null_routes(
     grid_sizes: tuple[int, ...],
 ) -> tuple[list[dict], list[dict], dict]:
-    """Measure wrapper evaluation and the categorisation kernels."""
+    """Measure live categorisation kernels; the retired wrapper has no rows."""
     fieldnull_rows: list[dict] = []
     null_rows: list[dict] = []
     smallest_autodiff: dict[str, Any] = {}
@@ -422,35 +366,6 @@ def _measure_null_routes(
         case = _null_case(size)
         psi_flat = case.psi2d.ravel()
         psi_device = jnp.asarray(psi_flat)
-
-        for layout, data, host_psi in (
-            ("structured", case.structured, case.psi2d),
-            ("unstructured", case.unstructured, psi_flat),
-        ):
-            host_construct, host = _once(lambda data=data: _host_fieldnull(data))
-            traced_construct, traced = _once(
-                lambda data=data: _traced_fieldnull(data), True
-            )
-
-            host_first, _ = _once(lambda: host.update_null(host_psi))
-            traced_first, _ = _once(lambda: traced.update_null(psi_device), True)
-            host_warm = _fastest(lambda: host.update_null(host_psi))
-            traced_warm = _fastest(lambda: traced.update_null(psi_device), True)
-
-            fieldnull_rows.append(
-                {
-                    "size": size,
-                    "nodes": size * size,
-                    "layout": layout,
-                    "host_construction_us": 1e6 * host_construct,
-                    "traced_construction_us": 1e6 * traced_construct,
-                    "host_first_ms": 1e3 * host_first,
-                    "traced_first_ms": 1e3 * traced_first,
-                    "host_warm_us": 1e6 * host_warm,
-                    "traced_warm_us": 1e6 * traced_warm,
-                    "accuracy": _null_accuracy(host, traced),
-                }
-            )
 
         host = _host_fieldnull(case.structured)
         host_first, host_result = _once(lambda: host.categorize_2d(case.psi2d))
@@ -525,7 +440,7 @@ def _measure_target(target_sizes: tuple[int, ...]) -> tuple[list[dict], dict]:
         external_device = jnp.asarray(external_current)
         plasma_current_device = jnp.asarray(plasma_current)
         construction, target = _once(
-            lambda: Target(source_device, plasma_device, wall), sync=True
+            lambda: FluxTarget(source_device, plasma_device, wall), sync=True
         )
 
         def traced_call():
@@ -876,7 +791,9 @@ def _synthesis(cpu: dict, gpu: dict | None) -> dict[str, Any]:
         "fieldnull": {
             "verdict": "DELETE ONE",
             "delete": "nova.jax.fieldnull.FieldNull wrapper",
-            "retain": "nova.biot.fieldnull.FieldNull and the live Null/Target kernels",
+            "retain": (
+                "nova.biot.fieldnull.FieldNull and the live Null/FluxTarget kernels"
+            ),
             "numbers": {
                 "traced_over_host_cpu_warm": _ratio_text(fieldnull_cpu),
                 "host_over_traced_accelerator_warm": _ratio_text(
@@ -889,12 +806,13 @@ def _synthesis(cpu: dict, gpu: dict | None) -> dict[str, Any]:
                     reachability["host_fieldnull"]["production_importers"]
                 ),
                 "max_route_coordinate_deviation": max(
-                    row["route_max_coordinate_deviation"] for row in accuracy
+                    (row["route_max_coordinate_deviation"] for row in accuracy),
+                    default=None,
                 ),
             },
             "reason": (
                 "The wrapper has no external importer and adds only xarray-to-fixed-array "
-                "adaptation around live Null2D/Target kernels. The host class remains a "
+                "adaptation around live Null2D/FluxTarget kernels. The host class remains a "
                 "live stateful adapter with loop filtering and adaptive results. Hex-stencil "
                 "construction is already single-homed."
             ),
@@ -937,7 +855,7 @@ def _synthesis(cpu: dict, gpu: dict | None) -> dict[str, Any]:
             },
             "reason": (
                 "The same-token host class is a geometry container, not a matrix evaluator. "
-                "The traced Target is live in the differentiable forward operator and exposes "
+                "FluxTarget is live in the differentiable forward operator and exposes "
                 "correct device-linear derivatives; there is no duplicate body to collapse."
             ),
         },
@@ -976,7 +894,7 @@ def _svg_document(report: dict[str, Any]) -> str:
     panels = [
         ("fieldnull", "Full field-null evaluation", "nodes", None),
         ("null", "Null categorisation", "nodes", None),
-        ("target", "Target matrix evaluation", "nodes", None),
+        ("target", "FluxTarget matrix evaluation", "nodes", None),
         ("topology", "Topology update, one map", "nodes", 1),
     ]
     colors = {
@@ -1019,6 +937,20 @@ def _svg_document(report: dict[str, Any]) -> str:
         all_points = [
             point for values in series.values() for point in values if point[1] > 0
         ]
+        parts.extend(
+            [
+                f'<rect x="{x0}" y="{y0}" width="550" height="285" rx="4" fill="#fafafa" stroke="#cccccc"/>',
+                f'<text x="{x0 + 16}" y="{y0 + 25}" font-size="16" font-weight="650">{title}</text>',
+            ]
+        )
+        if not all_points:
+            parts.extend(
+                [
+                    f'<text x="{x0 + 275}" y="{y0 + 132}" text-anchor="middle" font-size="14" fill="#555">Route retired from current source</text>',
+                    f'<text x="{x0 + 275}" y="{y0 + 156}" text-anchor="middle" font-size="11" fill="#777">Recorded measurements retain their original provenance.</text>',
+                ]
+            )
+            continue
         min_x = min(point[0] for point in all_points)
         max_x = max(point[0] for point in all_points)
         min_y = min(point[1] for point in all_points)
@@ -1040,8 +972,6 @@ def _svg_document(report: dict[str, Any]) -> str:
 
         parts.extend(
             [
-                f'<rect x="{x0}" y="{y0}" width="550" height="285" rx="4" fill="#fafafa" stroke="#cccccc"/>',
-                f'<text x="{x0 + 16}" y="{y0 + 25}" font-size="16" font-weight="650">{title}</text>',
                 f'<line x1="{plot_x}" y1="{plot_y + plot_h}" x2="{plot_x + plot_w}" y2="{plot_y + plot_h}" stroke="#777"/>',
                 f'<line x1="{plot_x}" y1="{plot_y}" x2="{plot_x}" y2="{plot_y + plot_h}" stroke="#777"/>',
                 f'<text x="{plot_x + plot_w / 2}" y="{plot_y + plot_h + 30}" text-anchor="middle" font-size="11">nodes</text>',

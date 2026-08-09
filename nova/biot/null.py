@@ -1,4 +1,4 @@
-"""Group fieldnull categorization algorithms."""
+"""Fixed-shape field-null categorization kernels."""
 
 from dataclasses import dataclass, field
 import jax

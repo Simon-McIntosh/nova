@@ -6,7 +6,7 @@ import jax
 import jax.numpy as jnp
 
 from nova.graphics.plot import Plot2D
-from nova.jax.null import Null1D, Null2D
+from nova.biot.null import Null1D, Null2D
 from nova.jax.tree_util import Pytree
 
 

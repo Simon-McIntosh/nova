@@ -15,9 +15,9 @@ import jax
 import jax.numpy as jnp
 from scipy.constants import mu_0
 
+from nova.biot.target import FluxTarget
+from nova.equilibrium.topology import Topology
 from nova.jax.tree_util import Pytree
-from nova.jax.target import Target
-from nova.jax.topology import Topology
 from nova.linalg.interpolant import Basis
 
 
@@ -37,8 +37,8 @@ class ForwardFluxOperator(Pytree):
     total poloidal fluxes, :math:`\\Phi = 2 \\pi R A_\\phi` in Wb.
     """
 
-    grid: Target
-    wall: Target
+    grid: FluxTarget
+    wall: FluxTarget
     p_prime: Basis
     ff_prime: Basis
     current: jnp.ndarray = field(repr=False)

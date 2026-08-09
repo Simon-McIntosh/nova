@@ -19,8 +19,8 @@ from nova.utilities.importmanager import skip_import
 with skip_import("jax"):
     import jax.numpy as jnp
 
-    from nova.jax.null import Null1D, Null2D
-    from nova.jax.topology import Topology
+    from nova.biot.null import Null1D, Null2D
+    from nova.equilibrium.topology import Topology
 
 
 def _raster_nulls(nx=41, nz=51, r_lim=(0.6, 1.4), z_lim=(-0.6, 0.6)):

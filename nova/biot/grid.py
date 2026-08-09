@@ -19,8 +19,6 @@ from nova.frame.framelink import FrameLink
 from nova.geometry.pointloop import PointLoop
 from nova.graphics.line import Chart
 
-# from nova.jax.fieldnull import FieldNull
-
 
 @dataclass
 class GridCoord:

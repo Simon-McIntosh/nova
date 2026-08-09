@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova"><meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="nova-jax-dissolution-s4-landed">
+  <meta name="plan-title" content="JAX Route Measurements — Landed Record">
+  <meta name="plan-summary" content="CPU and H200 measurements classify the remaining JAX routes as keep, collapse, delete, or relocate, with an independent audit of arithmetic, provenance, call sites, and artifacts">
+  <meta name="plan-status" content="shipped"><meta name="plan-evidence-for" content="nova-jax-dissolution"><meta name="plan-verifies" content="nova-jax-dissolution#s4"><meta name="plan-owner" content="Simon McIntosh">
+  <title>JAX Route Measurements — Landed Record | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css"><link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+  <h2>Outcome</h2>
+  <p>Every remaining route was measured on CPU and NVIDIA H200 over caller-shaped regimes, compared with an independent analytic, SciPy, or NumPy reference, and audited independently. The gate licenses selective dissolution: true semantic or execution twins remain together under explicit mechanism names; identical arithmetic collapses; dead adapters disappear; single implementations relocate intact.</p>
+
+  <figure>
+    <img src="/nova/figures/jax-dissolution/route_verdicts.svg" alt="Summary of keep, collapse, delete, and relocate verdicts for the measured JAX routes">
+    <figcaption>The canonical verdict matrix. Each disposition follows measured cost, accuracy, reachability, and semantic evidence rather than directory membership.</figcaption>
+  </figure>
+
+  <h2>Canonical verdict matrix</h2>
+  <table><thead><tr><th>Area</th><th>Routine or concept</th><th>Verdict</th><th>Decisive evidence or obligation</th></tr></thead><tbody>
+    <tr><td>Select</td><td>Module boundary</td><td>Keep both</td><td>Host is JAX-free; traced supplies batching and autodiff.</td></tr>
+    <tr><td>Select</td><td><code>bisect</code>, <code>bisect_right</code>, <code>bisect_2d</code></td><td>Delete traced</td><td>Zero callers; traced <code>bisect</code> was 17.7–18.4× host on CPU and 472–874× on H200; <code>bisect_2d</code> mutates an immutable array.</td></tr>
+    <tr><td>Select</td><td><code>length_2d</code>, <code>wall_length</code>, <code>wall_coordinate</code></td><td>Collapse</td><td>Identical arithmetic can be shared.</td></tr>
+    <tr><td>Select</td><td>Wall fit/selection and quadratic surface fit</td><td>Keep both</td><td>Distinct host and traced execution contracts remain useful.</td></tr>
+    <tr><td>Select</td><td><code>null_type</code>, <code>null_coordinate</code>, <code>null</code></td><td>Conditional collapse</td><td>Collapse after the locked NaN-sentinel and determinant-floor semantics land.</td></tr>
+    <tr><td>Select</td><td><code>subnull</code></td><td>Keep both bodies; collapse signature</td><td>Canonical form is three coordinate arrays to one flat four-value array; stacked and three-array outputs matched exactly.</td></tr>
+    <tr><td>Null stack</td><td><code>FieldNull</code></td><td>Delete traced wrapper</td><td>Zero importers; retain the live host adapter and shared kernels.</td></tr>
+    <tr><td>Null stack</td><td><code>Null</code>, <code>Target</code>, <code>Topology</code></td><td>Keep both</td><td>Contracts differ. Target crosses over near 4,096 rows and is 2.63× CPU / 5.58× H200 faster at 16,384 rows; maximum scaled error was 2.03e-7.</td></tr>
+    <tr><td>Fixed point</td><td>Picard, Anderson, Newton–Krylov</td><td>Relocate intact</td><td>There is no host peer. H200 speedup was 0.096–0.795×; CPU/GPU states agreed within 1.90e-13.</td></tr>
+    <tr><td>Stencil</td><td><code>ring_sign_changes</code></td><td>Keep both contracts</td><td>Rectangular and hex neighbourhoods found 99 versus 50 saddles on the same smooth field.</td></tr>
+    <tr><td>Stencil</td><td><code>subnull</code> adapter</td><td>Collapse</td><td>The duplicate adapter is signature-only.</td></tr>
+    <tr><td>Stencil</td><td><code>magnetic_axis_subgrid</code></td><td>Relocate</td><td>Single implementation; reject flat plateaux before publishing <code>found</code>.</td></tr>
+    <tr><td>Stencil</td><td><code>xpoint_candidates</code></td><td>Relocate</td><td>Single implementation; expose overflow because 99 candidates silently truncated to eight slots.</td></tr>
+    <tr><td>Connectivity</td><td>Boundary reads</td><td>Relocate</td><td>Single traced implementation with host adapters; preserve distinct hard and smooth semantics. H200 was 3.36× faster at 101×141 and 6.53× per slice for a four-slice batch.</td></tr>
+    <tr><td>Connectivity</td><td>Flux-surface connectivity</td><td>Delete host adapter; relocate kernels</td><td>Independent masks matched exactly; host materialisation added 1.11–1.27× CPU and 2.13–3.50× H200 cost.</td></tr>
+  </tbody></table>
+
+  <h2>Accuracy and policy findings</h2>
+  <ul>
+    <li>Select must call <code>enable_x64()</code> before its first trace: direct fp32 imports misclassified 12 of 18 ITER-scale analytic surfaces, while fp64 classified all 18 correctly.</li>
+    <li>The select behaviour change must land before arithmetic collapse: four-value wall results, all-NaN at zero polarity, NaN plane classification, a <code>1e-30</code> determinant floor, and the three-array <code>subnull</code> signature.</li>
+    <li>Stencil relocation must repair plateau acceptance and surface fixed-slot overflow rather than carry the measured defects into the domain package.</li>
+    <li>JAX-free eager boundaries remain required while namespaces consolidate.</li>
+  </ul>
+
+  <h2>Evidence</h2>
+  <table><thead><tr><th>Bundle</th><th>Artifact</th><th>Verification</th></tr></thead><tbody>
+    <tr><td>Select</td><td><a href="/nova/figures/jax-dissolution/select_route.svg">figure</a> · <a href="/nova/figures/jax-dissolution/select_route.json">JSON</a></td><td>Corrected head <code>abb5f013</code>; whitespace-only repair rendered pixel-identically.</td></tr>
+    <tr><td>Null stack</td><td><a href="/nova/figures/jax-dissolution/null_stack_route.svg">figure</a> · <a href="/nova/figures/jax-dissolution/null_stack_route.json">JSON</a></td><td>Head <code>ee5503fa</code>; source hashes and assembly logs audited.</td></tr>
+    <tr><td>Fixed point</td><td><a href="/nova/figures/jax-dissolution/fixed_point_route.svg">figure</a> · <a href="/nova/figures/jax-dissolution/fixed_point_route.json">JSON</a></td><td>Corrected head <code>0f2ae46a</code>; raw CPU/GPU partials exactly match the committed record.</td></tr>
+    <tr><td>Stencil</td><td><a href="/nova/figures/jax-dissolution/stencil_null_route.svg">figure</a> · <a href="/nova/figures/jax-dissolution/stencil_null_route.json">JSON</a></td><td>Head <code>3fa13b4a</code>; 19 scoped tests passed in 54.14 s.</td></tr>
+    <tr><td>Connectivity</td><td><a href="/nova/figures/jax-dissolution/connectivity_route.svg">figure</a> · <a href="/nova/figures/jax-dissolution/connectivity_route.json">JSON</a></td><td>Head <code>4af8d31f</code>; 14 scoped tests passed in 34.77 s.</td></tr>
+  </tbody></table>
+  <p>Independent audit also confirmed Ruff, cache-isolated compilation, SVG XML, full-range diff checks, call-site census, timing synchronization, and independent references across all five bundles. The evidence wave is integrated and pushed at <code>c3afd5a1</code>.</p>
+
+  <h2>What is next</h2>
+  <p>Land the select return-policy change on its own commit, then execute only the relocations, collapses, and deletions licensed above.</p>
+</main></body></html>

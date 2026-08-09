@@ -22,8 +22,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-09">
-<meta name="plan-version" content="15">
-<meta name="plan-impl" content="0.5555555555555556">
+<meta name="plan-version" content="18">
+<meta name="plan-impl" content="0.6666666666666666">
 </head>
 <body>
   <main class="plan-doc">
@@ -260,7 +260,18 @@ except ImportError:  # jax extra absent
     rule and is <strong>kept as-is</strong>. Their host peers gain the
     <code>host_</code> prefix as each is touched, so one convention holds package-wide.</p>
 
-    <h2 id="s4">§4 — Measure before merge</h2>
+    <section id="s4" class="section-landed">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-09</span><h2>§4 — Measure before merge</h2></header>
+      <p class="landed-summary">
+        Measured every remaining route on CPU and H200 and independently audited the arithmetic,
+        provenance, call-site census, and artifacts. The verdicts license selective keep, collapse,
+        delete, and relocate actions; direct fp32 select tracing misclassified 12/18 analytic surfaces,
+        while fp64 classified 18/18 correctly.
+        Full record: <a href="archive/nova-jax-dissolution-s4-landed.html">§4 landed</a>;
+        summary figure: <a href="/nova/figures/jax-dissolution/route_verdicts.svg">route dispositions</a>
+        (evidence integrated at <code>c3afd5a1</code>).
+      </p>
+      <details><summary>Measurement method and gate rationale</summary>
 
     <p>The plan as first written assumed all thirteen modules want the same treatment. They
     do not, and the tree already contains three distinct arrangements — only one of which is
@@ -344,6 +355,9 @@ except ImportError:  # jax extra absent
 
     <p>A pair may not be merged on the assumption that both halves are wanted. The
     measurement is the deliverable that licenses the merge.</p>
+
+      </details>
+    </section>
 
     <section id="s5" class="section-landed">
       <header><span class="badge badge-shipped">✓ landed 2026-08-09</span><h2>§5 — The pattern conversion: the biot operator</h2></header>
@@ -731,7 +745,7 @@ Done-when
   6. Commit SHAs, test output, and the before/after dtype evidence returned.</pre>
     <p class="r-fu-outcome">§5, §6, §10, and the operator portion of §8 landed — dd293ea9, 6fd21575, d2fc5bb6, and 44119ae5 integrated by 35f51707. Operators are colocated under HostOperator/Coupling/TracedOperator with selection-only Operator; the traced path remains order-independent fp32 with a byte-identical 26-value reference and zero maximum regression; unreachable operator code is removed; and the JAX-free import/broken-JAX boundary is executable. Independent verification: 103 passed in 36.22 s; the warning regression passed with FutureWarning promoted to error.</p>
     </article>
-<article class="r-fu" data-id="f-njd-003" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship" data-written-at="2026-08-09" data-recommends-skill="/reckon-ship nova-jax-dissolution §4" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-njd-003" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship" data-written-at="2026-08-09" data-recommends-skill="/reckon-ship nova-jax-dissolution §4" data-resolved-at="2026-08-09T08:02:47+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Measure every remaining pair and record collapse / keep / delete with its numbers</h4>
     <div class="r-fu-body"><p>The gate that licenses the remaining conversions. Eleven pairs have never been benchmarked against each other, and the plan will not merge any of them on the assumption that both halves are wanted. This is a single reviewable artifact and it determines how much of the rest of the plan exists — a pair that collapses to one xp-threaded body needs no naming decision and no merge at all.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -796,6 +810,7 @@ Done-when
   4. The plan&#x27;s §4 records the verdict table; pairs verdicted COLLAPSE or DELETE
      are struck from the conversion list with their reason.
   5. Commit SHAs, benchmark output paths, and the verdict table returned.</pre>
+    <p class="r-fu-outcome">§4 landed — five CPU/H200 measurement bundles plus a canonical summary JSON/SVG are integrated by c3afd5a1 and the route-summary merge. Independent verification passed arithmetic, provenance, call-site census, source hashes, synchronized timing, XML, Ruff, compilation, and diff checks. The licensed actions are recorded in docs/plans/archive/nova-jax-dissolution-s4-landed.html; select requires fp64 before first trace, and stencil relocation must repair plateau acceptance and candidate overflow.</p>
     </article>
 <article class="r-fu" data-id="f-njd-004" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-09" data-recommends-skill="/reckon-ship nova-jax-dissolution §7" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Converge the select return conventions onto the traced one, with a zero-current test</h4>
@@ -892,6 +907,29 @@ Done-when
   4. Suite green in the slow lane (-m &quot;slow or not slow&quot;).
   5. Commit SHAs and test output returned.</pre>
     <p class="r-fu-outcome">§9 landed — efde9b97 integrated by 66240aaf; interpolant hierarchy moved to nova/linalg/interpolant.py, design matrices remained independent, and independent verification passed 16 tests in 30.02 s with JAX-free import, Ruff, diff, and naming checks clean.</p>
+    </article>
+<article class="r-fu" data-id="f-njd-006" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-09" data-recommends-skill="/reckon-ship nova-jax-dissolution §11" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Execute every licensed domain conversion and retire dependency-named entry points</h4>
+    <div class="r-fu-body"><p>After the select return policy lands, execute the measured dispositions: delete dead wrappers and adapters, colocate measured twins under mechanism names, relocate single implementations into their consuming domain, repair the two stencil defects exposed by measurement, and leave nova/jax containing only config.py and tree_util.py.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan: nova-jax-dissolution
+Section: §11 — remaining verdict-driven conversions and namespace retirement
+Capability: orchestrator
+Requirements: deep reasoning, strict verification, elevated risk
+
+Inputs
+  Read docs/figures/jax-dissolution/route_verdicts.json and the five raw measurement JSON artifacts. Treat that canonical matrix as the conversion license: do not preserve a route marked DELETE, invent a peer for a relocation, or collapse a pair marked KEEP BOTH.
+
+Required work
+  1. After the §7 select policy commit, colocate the live select routes in geometry/select.py, delete the dead traced bisect family, collapse only the licensed arithmetic/signature duplication, call enable_x64() before first select/null trace, and remove nova/jax/select.py without a shim.
+  2. Delete the unused traced FieldNull wrapper. Relocate and colocate Null, Target, and Topology in the consuming biot/equilibrium domains with explicit traced_/host_ names where true peers exist; preserve the JAX-free eager boundary.
+  3. Relocate Picard, Anderson, and Newton–Krylov intact to equilibrium/fixed_point.py; there is no host pair.
+  4. Relocate rectangular stencil/connectivity routines into equilibrium. Reject flat plateaux before publishing found and expose fixed-slot candidate overflow. Collapse the duplicate subnull adapter only.
+  5. Relocate connectivity kernels and host adapters into equilibrium, preserving distinct hard and smooth semantics. Delete the zero-caller flux_surface_bins host materialisation adapter.
+  6. Rename dependency-named public symbols in transport/current_diffusion.py and its exports/tests to traced_ prefixes. Retire nova/jax to config.py, tree_util.py, and package metadata only.
+
+Verification
+  Keep numerics identical except the separately landed §7 policy and the two explicitly measured stencil defect repairs. Add focused regression tests for every repair and path move, run affected slow-inclusive lanes once with full output capture, then run the complete slow-inclusive suite on a sun_debug allocation. Prove JAX-free imports remain intact. Return commit SHAs, exact changed paths, test logs, and confirmation that no moving nova.jax import remains.</pre>
     </article>
 </section>
 

@@ -1,6 +1,7 @@
 """Accuracy, semantics, and device cost of the stencil critical-point route.
 
-The routines in :mod:`nova.jax.stencil_nulls` are not a host/traced pair.  The
+The routines in :mod:`nova.equilibrium.stencil_nulls` are not a host/traced pair.
+The
 module owns an eight-neighbour rectangular-grid classifier, a masked magnetic
 axis reduction, and a fixed-slot saddle reduction.  The older field-null path
 uses a six-neighbour hexagonal stencil and returns every local null; it is a
@@ -36,7 +37,7 @@ import numpy as np
 import scipy.optimize  # type: ignore[import-untyped]
 
 from nova.jax import select
-from nova.jax.stencil_nulls import (
+from nova.equilibrium.stencil_nulls import (
     magnetic_axis_subgrid,
     ring_sign_changes,
     subnull,

@@ -495,12 +495,12 @@ def test_the_two_profile_ladders_are_one_family(nonneg, n_terms):
     wrong by the difference.
     """
     jnp = pytest.importorskip("jax.numpy")
-    from nova.transport.current_diffusion import _profile_shapes_jax
+    from nova.transport.current_diffusion import _traced_profile_shapes
 
     psi_n = np.linspace(0.0, 1.0, 33)
     host = profile_shapes(psi_n, n_terms, nonneg=nonneg)
     traced = np.asarray(
-        _profile_shapes_jax(jnp.asarray(psi_n), n_terms, nonnegative=nonneg)
+        _traced_profile_shapes(jnp.asarray(psi_n), n_terms, nonnegative=nonneg)
     )
     assert host.shape == traced.shape == (psi_n.size, n_terms)
     np.testing.assert_allclose(traced, host, rtol=1e-12, atol=1e-13)
@@ -510,11 +510,13 @@ def test_the_two_profile_ladders_are_one_family(nonneg, n_terms):
 def test_both_ladders_clip_outside_the_unit_interval(nonneg):
     """Off-interval flux is clipped identically, not extrapolated."""
     jnp = pytest.importorskip("jax.numpy")
-    from nova.transport.current_diffusion import _profile_shapes_jax
+    from nova.transport.current_diffusion import _traced_profile_shapes
 
     psi_n = np.array([-0.5, -0.1, 0.0, 0.5, 1.0, 1.4])
     host = profile_shapes(psi_n, 4, nonneg=nonneg)
-    traced = np.asarray(_profile_shapes_jax(jnp.asarray(psi_n), 4, nonnegative=nonneg))
+    traced = np.asarray(
+        _traced_profile_shapes(jnp.asarray(psi_n), 4, nonnegative=nonneg)
+    )
     np.testing.assert_allclose(traced, host, rtol=1e-12, atol=1e-13)
     np.testing.assert_allclose(host[0], host[2])  # clipped to the axis value
     np.testing.assert_allclose(host[-1], host[-2])  # clipped to the edge value

@@ -15,7 +15,7 @@ Two device primitives:
    (:func:`jax.lax.fori_loop`).  It selects the axis-connected core and rejects
    any disconnected private pocket at comparable flux by CONNECTIVITY, never by
    ψ height or sign-of-Z — the same rule as
-   :func:`nova.jax.connectivity_boundary.classify_regions`, but as a fixed-shape
+   :mod:`nova.equilibrium.connectivity_boundary`, but as a fixed-shape
    device kernel rather than ``scipy.ndimage.label``.
 
 2. **smooth-CDF coarea average** — the flux-surface average
@@ -60,8 +60,7 @@ _SQRT2 = 2.0**0.5
 
 __all__ = [
     "flood_fill_core",
-    "flux_surface_bins_jax",
-    "flux_surface_bins",
+    "traced_flux_surface_bins",
 ]
 
 
@@ -114,7 +113,7 @@ def _gaussian_cdf(z: jnp.ndarray) -> jnp.ndarray:
 
 
 @partial(jax.jit, static_argnums=(8,))
-def flux_surface_bins_jax(
+def traced_flux_surface_bins(
     psi2d: jnp.ndarray,
     rg: jnp.ndarray,
     zg: jnp.ndarray,
@@ -210,45 +209,3 @@ def flux_surface_bins_jax(
         "n_core_cells": ncore,
         "well_posed": (dv_lvl > 0).all() & (ncore >= 200),
     }
-
-
-# ---------------------------------------------------------------------------
-# numpy-facing adapter for the current_diffusion assembly
-# ---------------------------------------------------------------------------
-
-
-def flux_surface_bins(
-    psi2d,
-    grid,
-    *,
-    axis_psi: float,
-    boundary_psi: float,
-    psin_min: float,
-    psin_max: float,
-    n_psin: int,
-    h_factor: float = 1.25,
-) -> dict | None:
-    """Host adapter: run :func:`flux_surface_bins_jax` and return numpy arrays.
-
-    ``grid`` is any equilibrium grid supplying ``rg`` / ``zg`` /
-    ``inside_limiter``.  Returns the ψ_N-binned metrics as numpy
-    arrays for the shared coarea assembly, or ``None`` when the core is too small
-    to bin (matching the coarea guard).
-    """
-    import numpy as np  # noqa: PLC0415
-
-    out = flux_surface_bins_jax(
-        jnp.asarray(np.asarray(psi2d, dtype=np.float64)),
-        jnp.asarray(np.asarray(grid.rg, dtype=np.float64)),
-        jnp.asarray(np.asarray(grid.zg, dtype=np.float64)),
-        jnp.asarray(np.asarray(grid.inside_limiter, dtype=bool)),
-        jnp.asarray(float(axis_psi)),
-        jnp.asarray(float(boundary_psi)),
-        jnp.asarray(float(psin_min)),
-        jnp.asarray(float(psin_max)),
-        int(n_psin),
-        jnp.asarray(float(h_factor)),
-    )
-    if not bool(out["well_posed"]):
-        return None
-    return {k: np.asarray(v) for k, v in out.items() if k not in ("well_posed",)}

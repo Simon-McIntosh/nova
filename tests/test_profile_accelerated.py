@@ -13,6 +13,9 @@ the Picard fixed point far inside a shared cold-seed evaluation budget.
 from __future__ import annotations
 
 import dataclasses
+import subprocess
+import sys
+import textwrap
 
 import numpy as np
 import pytest
@@ -25,10 +28,38 @@ with skip_import("jax"):
     from nova.equilibrium import ProfileDegrees, ReconstructProfile
     from nova.equilibrium.measurement import Magnetics
     from nova.equilibrium.fixed_point import anderson, newton_krylov, picard
-    from nova.jax.stencil_nulls import magnetic_axis_subgrid
+    from nova.equilibrium.stencil_nulls import magnetic_axis_subgrid
 
 
 NR = NZ = 17
+
+
+def test_equilibrium_package_import_does_not_require_jax():
+    """The package boundary remains importable when JAX is unavailable."""
+    probe = textwrap.dedent(
+        """
+        import builtins
+        import sys
+
+        original_import = builtins.__import__
+
+        def block_jax(name, *args, **kwargs):
+            if name == "jax" or name.startswith("jax."):
+                raise ModuleNotFoundError("JAX blocked by package-boundary probe")
+            return original_import(name, *args, **kwargs)
+
+        builtins.__import__ = block_jax
+        import nova.equilibrium
+        assert not any(name == "jax" or name.startswith("jax.") for name in sys.modules)
+        """
+    )
+    completed = subprocess.run(
+        [sys.executable, "-c", probe],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.returncode == 0, completed.stderr
 
 
 def _machine() -> ReconstructProfile:

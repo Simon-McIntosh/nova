@@ -7,6 +7,8 @@ X-point, and that the axis position carries a finite ``jax.grad``.
 
 from __future__ import annotations
 
+import importlib.util
+
 import numpy as np
 import pytest
 
@@ -16,7 +18,7 @@ with skip_import("jax"):
     import jax
     import jax.numpy as jnp
 
-    from nova.jax.stencil_nulls import (
+    from nova.equilibrium.stencil_nulls import (
         STATE_RESOLVED,
         STATE_UNRESOLVED,
         critical_point_candidates_batch,
@@ -24,6 +26,10 @@ with skip_import("jax"):
         ring_sign_changes,
         xpoint_candidates,
     )
+
+
+def test_equilibrium_module_is_the_only_stencil_implementation():
+    assert importlib.util.find_spec("nova.jax.stencil_nulls") is None
 
 
 def _two_peak_field(nr=81, nz=101, rc=1.007, z1=-0.30, z2=0.30, w=0.15):

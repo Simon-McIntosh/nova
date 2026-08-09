@@ -197,7 +197,7 @@ class FluxSurfaceGeometry:
         return i_face
 
 
-def _profile_shapes_jax(psi_n, n_terms: int, *, nonnegative: bool):
+def _traced_profile_shapes(psi_n, n_terms: int, *, nonnegative: bool):
     """Profile-ladder shapes on a normalised-flux sample, as JAX arrays."""
     normalised = jnp.clip(psi_n, 0.0, 1.0)
     if n_terms == 0:
@@ -250,7 +250,7 @@ def _integrate_diamagnetic_drive(
 
 def _connectivity_core(psi_n, inside_limiter):
     """Return the axis-connected confined cells using Nova's flood-fill kernel."""
-    from nova.jax.flux_surface_connectivity import flood_fill_core
+    from nova.equilibrium.flux_surface_connectivity import flood_fill_core
 
     confined = (psi_n < 1.0) & inside_limiter
     seed_position = jnp.argmin(jnp.where(confined, psi_n, jnp.inf).reshape(-1))
@@ -282,7 +282,7 @@ def _surface_interpolation(rho, rho_samples, values, axis_value, edge_value):
         "nonnegative",
     ),
 )
-def assemble_flux_surface_geometry_jax(
+def traced_assemble_flux_surface_geometry(
     surface_bins,
     psi2d,
     radius,
@@ -306,7 +306,8 @@ def assemble_flux_surface_geometry_jax(
 
     The input grid is ``psi2d[height, radius]`` in total poloidal flux [Wb].
     ``surface_bins`` is the output of
-    :func:`nova.jax.flux_surface_connectivity.flux_surface_bins_jax`: its
+    :func:`nova.equilibrium.flux_surface_connectivity.traced_flux_surface_bins`:
+    its
     ``n_surface_bins`` arrays live on increasing normalised-poloidal-flux
     mid-levels and may be nonuniform. ``profile_coefficients`` and
     ``coefficient_scale`` are the pressure-gradient columns followed by the
@@ -335,10 +336,10 @@ def assemble_flux_surface_geometry_jax(
     mesh_radius = jnp.broadcast_to(radius[jnp.newaxis, :], psi2d.shape)
 
     scaled_coefficients = profile_coefficients * coefficient_scale
-    pressure_shapes = _profile_shapes_jax(
+    pressure_shapes = _traced_profile_shapes(
         psi_n_grid, n_pressure, nonnegative=nonnegative
     )
-    diamagnetic_shapes = _profile_shapes_jax(
+    diamagnetic_shapes = _traced_profile_shapes(
         psi_n_grid, n_diamagnetic, nonnegative=nonnegative
     )
     pressure_drive = pressure_shapes @ scaled_coefficients[:n_pressure]
@@ -350,7 +351,7 @@ def assemble_flux_surface_geometry_jax(
 
     psi_n_profile = jnp.linspace(0.0, 1.0, 101)
     diamagnetic_profile = (
-        _profile_shapes_jax(psi_n_profile, n_diamagnetic, nonnegative=nonnegative)
+        _traced_profile_shapes(psi_n_profile, n_diamagnetic, nonnegative=nonnegative)
         @ scaled_coefficients[n_pressure:]
     )
     f_profile, f_well_posed = _integrate_diamagnetic_drive(
@@ -577,7 +578,7 @@ def assemble_flux_surface_geometry_jax(
         "nonnegative",
     ),
 )
-def flux_surface_geometry_jax(
+def traced_flux_surface_geometry(
     psi2d,
     radius,
     height,
@@ -602,12 +603,12 @@ def flux_surface_geometry_jax(
     """Build fixed-shape flux-surface geometry directly from an equilibrium grid.
 
     This device entry point composes Nova's connectivity bins with
-    :func:`assemble_flux_surface_geometry_jax`; it is safe under ``jit`` and
+    :func:`traced_assemble_flux_surface_geometry`; it is safe under ``jit`` and
     ``vmap`` when slices share a machine grid and the static shape parameters.
     """
-    from nova.jax.flux_surface_connectivity import flux_surface_bins_jax
+    from nova.equilibrium.flux_surface_connectivity import traced_flux_surface_bins
 
-    surface_bins = flux_surface_bins_jax(
+    surface_bins = traced_flux_surface_bins(
         psi2d,
         radius,
         height,
@@ -619,7 +620,7 @@ def flux_surface_geometry_jax(
         n_surface_bins,
         bandwidth_factor,
     )
-    return assemble_flux_surface_geometry_jax(
+    return traced_assemble_flux_surface_geometry(
         surface_bins,
         psi2d,
         radius,
@@ -689,7 +690,7 @@ def flux_surface_geometry(
     if n_surface_bins < 2:
         raise ValueError("n_surface_bins must be at least 2")
 
-    assembled = flux_surface_geometry_jax(
+    assembled = traced_flux_surface_geometry(
         jnp.asarray(np.asarray(psi2d, dtype=np.float64)),
         jnp.asarray(np.asarray(grid.rg, dtype=np.float64)),
         jnp.asarray(np.asarray(grid.zg, dtype=np.float64)),
@@ -1237,13 +1238,13 @@ __all__ = [
     "CurrentDiffusion",
     "EtaProfile",
     "FluxSurfaceGeometry",
-    "assemble_flux_surface_geometry_jax",
+    "traced_assemble_flux_surface_geometry",
     "basis_projection_images",
     "diffuse_psi",
     "ejima_coefficient",
     "flux_budget",
     "flux_surface_geometry",
-    "flux_surface_geometry_jax",
+    "traced_flux_surface_geometry",
     "poloidal_field_energy_li",
     "predicted_current",
     "profile_shapes",

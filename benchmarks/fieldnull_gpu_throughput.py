@@ -50,9 +50,9 @@ import jax.numpy as jnp
 import numpy as np
 
 from nova.geometry.hexstencil import hex_stencil
-from nova.jax.flux_surface_connectivity import _dilate4
+from nova.equilibrium.flux_surface_connectivity import _dilate4
 from nova.biot.null import Null2D
-from nova.jax.stencil_nulls import (
+from nova.equilibrium.stencil_nulls import (
     _refine_at,
     magnetic_axis_subgrid,
     ring_sign_changes,
@@ -671,7 +671,7 @@ def _source_hashes() -> dict[str, str]:
         "benchmarks/fieldnull_gpu_throughput.py": Path(__file__),
         "nova/biot/null.py": ROOT / "nova/biot/null.py",
         "nova/jax/select.py": ROOT / "nova/jax/select.py",
-        "nova/jax/stencil_nulls.py": ROOT / "nova/jax/stencil_nulls.py",
+        "nova/equilibrium/stencil_nulls.py": ROOT / "nova/equilibrium/stencil_nulls.py",
         "nova/equilibrium/fixed_point.py": ROOT / "nova/equilibrium/fixed_point.py",
         "nova/equilibrium/profile.py": ROOT / "nova/equilibrium/profile.py",
         "nova/imas/mast_solve_inputs.py": ROOT / "nova/imas/mast_solve_inputs.py",
@@ -1228,7 +1228,7 @@ def _production_trace() -> dict[str, Any]:
             ),
             "fieldnull_calls": [
                 "magnetic_axis_subgrid once in _result for every returned solved field",
-                "boundary_read_smooth_jax repeatedly inside each nonlinear sweep",
+                "traced_smooth_boundary_read repeatedly inside each nonlinear sweep",
                 "connectivity paths also call fixed-slot xpoint_candidates with "
                 "eight slots",
             ],

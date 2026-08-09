@@ -67,8 +67,8 @@ from functools import partial
 import jax
 import jax.numpy as jnp
 
-from nova.jax.flux_surface_connectivity import _dilate4, flood_fill_core
-from nova.jax.stencil_nulls import (
+from nova.equilibrium.flux_surface_connectivity import _dilate4, flood_fill_core
+from nova.equilibrium.stencil_nulls import (
     magnetic_axis_subgrid,
     xpoint_candidates,
 )
@@ -104,11 +104,11 @@ _X_ON_RING_U = 0.02
 
 __all__ = [
     "ConnectivityBoundary",
-    "boundary_read_jax",
-    "boundary_read",
-    "boundary_read_batch",
-    "boundary_read_smooth_jax",
-    "boundary_read_smooth",
+    "traced_boundary_read",
+    "host_boundary_read",
+    "host_boundary_read_batch",
+    "traced_smooth_boundary_read",
+    "host_boundary_read_smooth",
 ]
 
 
@@ -201,9 +201,9 @@ def _read_ingredients(
 ) -> dict:
     """Everything the binding needs, up to (but not including) the min/softmin.
 
-    Shared by the HARD read (:func:`boundary_read_jax` — the reference, the
+    Shared by the HARD read (:func:`traced_boundary_read` — the reference, the
     binding is the exact ``min``) and the SMOOTH read
-    (:func:`boundary_read_smooth_jax` — the differentiable path, the binding is
+    (:func:`traced_smooth_boundary_read` — the differentiable path, the binding is
     a temperature-controlled softmin and the core mask a sigmoid).  Returns the
     normalised flux ``u``, the flood binding ``s_flood``, the two sub-grid
     binding candidates ``u_wall_c`` / ``u_x_c`` (``inf`` when absent), and the
@@ -403,7 +403,7 @@ def _read_ingredients(
 
 
 @partial(jax.jit, static_argnums=(6, 7, 8))
-def boundary_read_jax(
+def traced_boundary_read(
     psi2d: jnp.ndarray,
     rg: jnp.ndarray,
     zg: jnp.ndarray,
@@ -571,7 +571,7 @@ _ABSENT_U = 2.0
 
 
 @partial(jax.jit, static_argnums=(6, 7, 8))
-def boundary_read_smooth_jax(
+def traced_smooth_boundary_read(
     psi2d: jnp.ndarray,
     rg: jnp.ndarray,
     zg: jnp.ndarray,
@@ -590,7 +590,7 @@ def boundary_read_smooth_jax(
 ) -> dict:
     """The SMOOTH connectivity boundary read — the end-to-end differentiable path.
 
-    Same ingredients as :func:`boundary_read_jax` (the hard reference), with the
+    Same ingredients as :func:`traced_boundary_read` (the hard reference), with the
     two remaining hard thresholds replaced by temperature-controlled smooth
     surrogates so a gradient flows from any read scalar back to ψ (and through a
     linear Green's map, to the currents):
@@ -725,7 +725,7 @@ def _smooth_read_at_stencil_axis(
     ax = magnetic_axis_subgrid(psi2d, rg, zg, inside_limiter)
     ax_r = jnp.where(ax["found"], ax["r"], seed_r)
     ax_z = jnp.where(ax["found"], ax["z"], seed_z)
-    out = boundary_read_smooth_jax(
+    out = traced_smooth_boundary_read(
         psi2d,
         rg,
         zg,
@@ -791,7 +791,7 @@ def _densify_wall(grid, m: int = 720):
 
 @dataclass
 class ConnectivityBoundary:
-    """Host-side result of :func:`boundary_read` (mirrors ``LcfsContour`` fields)."""
+    """Host-side result of :func:`host_boundary_read` (mirrors contour fields)."""
 
     found: bool
     psi_bnd: float
@@ -819,7 +819,7 @@ class ConnectivityBoundary:
     x_binding_state: int
 
 
-def boundary_read(
+def host_boundary_read(
     psi2d,
     grid,
     axis: tuple[float, float],
@@ -831,7 +831,7 @@ def boundary_read(
     lcfs_norm: float = 0.999,
     wall_psi=None,
 ) -> ConnectivityBoundary:
-    """Host adapter: run :func:`boundary_read_jax` on one slice, return numpy.
+    """Host adapter: run :func:`traced_boundary_read` on one slice, return numpy.
 
     ``grid`` is an any equilibrium grid (supplies
     ``rg``/``zg``/``inside_limiter`` and the multi-unit wall nodes).  ``wall_psi``
@@ -863,7 +863,7 @@ def boundary_read(
         wpsi = _NO_WALL_PSI
     else:
         wpsi = jnp.asarray(np.asarray(wall_psi, dtype=np.float64))
-    out = boundary_read_jax(
+    out = traced_boundary_read(
         jnp.asarray(np.asarray(psi2d, dtype=np.float64)),
         jnp.asarray(rg_np),
         jnp.asarray(zg_np),
@@ -906,7 +906,7 @@ def boundary_read(
     )
 
 
-def boundary_read_smooth(
+def host_boundary_read_smooth(
     psi2d,
     grid,
     axis: tuple[float, float],
@@ -921,7 +921,7 @@ def boundary_read_smooth(
 ) -> dict:
     """Host adapter: the smooth read at the stencil axis, on one slice (numpy out).
 
-    Same contract as :func:`boundary_read` with the softmin/sigmoid smooth read
+    Same contract as :func:`host_boundary_read` with the softmin/sigmoid smooth read
     (:func:`_smooth_read_at_stencil_axis`): the sub-grid stencil O-point is read
     first (``axis`` is the flood seed / fallback only) and the smooth read is
     seeded at it, exactly the solve-map wiring the accelerator probe measured.
@@ -958,7 +958,7 @@ def boundary_read_smooth(
     return {k: np.asarray(v) for k, v in out.items()}
 
 
-def boundary_read_batch(
+def host_boundary_read_batch(
     psi_stack,
     grid,
     axes,
@@ -995,7 +995,7 @@ def boundary_read_batch(
         wpsi = jnp.asarray(np.asarray(wall_psi, dtype=np.float64))
 
     def one(psi2d, axis, wp):
-        return boundary_read_jax(
+        return traced_boundary_read(
             psi2d,
             rg,
             zg,

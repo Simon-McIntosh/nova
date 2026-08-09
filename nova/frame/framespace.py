@@ -114,7 +114,7 @@ class FrameSpace(FrameLink):
             value = value[subref]
             if col == "Ic":
                 value = value * np.asarray(self["factor"], dtype=float)
-        except KeyError, IndexError, TypeError:
+        except (KeyError, IndexError, TypeError):
             pass
         with self.setlock(True, "subspace"):
             super().__setitem__(col, value.view(Vector))

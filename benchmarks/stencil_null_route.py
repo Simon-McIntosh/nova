@@ -5,9 +5,8 @@ The
 module owns an eight-neighbour rectangular-grid classifier, a masked magnetic
 axis reduction, and a fixed-slot saddle reduction.  The older field-null path
 uses a six-neighbour hexagonal stencil and returns every local null; it is a
-different geometry and selection contract.  The only duplicate-looking member,
-``subnull``, is already a thin signature adapter around the single traced fit in
-``nova.jax.select``.
+different geometry and selection contract.  The sub-grid quadratic fit has one
+canonical three-array traced interface in ``nova.geometry.select``.
 
 This benchmark measures the current call-site grid sizes on every requested JAX
 device, checks positions against analytic critical points and an independently
@@ -36,11 +35,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.optimize  # type: ignore[import-untyped]
 
-from nova.jax import select
+from nova.geometry import select
+from nova.jax.config import configure_dtypes
 from nova.equilibrium.stencil_nulls import (
     magnetic_axis_subgrid,
     ring_sign_changes,
-    subnull,
     xpoint_candidates,
 )
 
@@ -199,7 +198,7 @@ def _device_arrays(device, arrays: tuple[np.ndarray, ...]) -> tuple[jax.Array, .
 
 
 def _cost_rows(device) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
-    """Measure the three grid reductions and the two subnull signatures."""
+    """Measure the three grid reductions and the canonical subnull fit."""
     rows: list[dict[str, object]] = []
     host_rows: list[dict[str, object]] = []
     for nz, nr, source in SIZES:
@@ -249,26 +248,15 @@ def _cost_rows(device) -> tuple[list[dict[str, object]], list[dict[str, object]]
     z_cluster = zg[rows_i]
     psi_cluster = psi[rows_i, cols_j]
     d_r, d_z, d_psi = _device_arrays(device, (r_cluster, z_cluster, psi_cluster))
-    signatures = {
-        "subnull_three_arrays": (
-            lambda r, z, p: subnull(r, z, p),
-            (d_r, d_z, d_psi),
-        ),
-        "subnull_stacked": (
-            lambda r, z, p: select.subnull(jnp.stack((r, z, p))),
-            (d_r, d_z, d_psi),
-        ),
-    }
-    for name, (function, args) in signatures.items():
-        rows.append(
-            {
-                "device": device.platform,
-                "routine": name,
-                "samples": 9,
-                "call_site": "three-array stencil gather or stacked legacy locator",
-            }
-            | _timed_compiled(function, *args)
-        )
+    rows.append(
+        {
+            "device": device.platform,
+            "routine": "subnull_three_arrays",
+            "samples": 9,
+            "call_site": "canonical traced quadratic fit",
+        }
+        | _timed_compiled(select.traced_subnull, d_r, d_z, d_psi)
+    )
     return rows, host_rows
 
 
@@ -324,8 +312,8 @@ def _accuracy_rows(device, truth: dict[str, object]) -> list[dict[str, object]]:
     return rows
 
 
-def _quadratic_and_signature_checks(device) -> dict[str, object]:
-    """Check the shared fit against exact quadratics and both live signatures."""
+def _quadratic_fit_checks(device) -> dict[str, object]:
+    """Check the shared traced fit against independent exact quadratics."""
     r = np.array([0.91, 1.00, 1.09] * 3)
     z = np.repeat(np.array([-0.07, 0.00, 0.07]), 3)
     cases = {
@@ -350,13 +338,11 @@ def _quadratic_and_signature_checks(device) -> dict[str, object]:
     d_r, d_z = _device_arrays(device, (r, z))
     for name, case in cases.items():
         d_psi = jax.device_put(case["psi"], device)
-        three = np.asarray(subnull(d_r, d_z, d_psi))
-        stacked = np.asarray(select.subnull(jnp.stack((d_r, d_z, d_psi))))
+        result = np.asarray(select.traced_subnull(d_r, d_z, d_psi))
         results[name] = {
-            "position_error": float(np.linalg.norm(three[:2] - case["truth"])),
-            "type": float(three[3]),
+            "position_error": float(np.linalg.norm(result[:2] - case["truth"])),
+            "type": float(result[3]),
             "expected_type": case["type"],
-            "signature_max_abs_difference": float(np.max(np.abs(three - stacked))),
         }
     return results
 
@@ -397,7 +383,7 @@ def _degenerate_checks(device) -> dict[str, object]:
     cols_j = np.tile(np.arange(29, 32), 3)
     d_r = d_rg[cols_j]
     d_z = d_zg[rows_i]
-    plane_sub = np.asarray(subnull(d_r, d_z, d_plane[rows_i, cols_j]))
+    plane_sub = np.asarray(select.traced_subnull(d_r, d_z, d_plane[rows_i, cols_j]))
     _block((flat_axis, plane_axis, plane_x, empty_x, overflow_x))
     return {
         "flat_field": {
@@ -524,20 +510,11 @@ def _inventory() -> list[dict[str, object]]:
         },
         {
             "routine": "subnull",
-            "reachability": (
-                "stencil adapter is called only by _refine_at; the shared select "
-                "fit is also called by Null2D"
-            ),
-            "true_peer": (
-                "the same traced fit in nova.jax.select, reached through a "
-                "stacked signature"
-            ),
-            "semantic_difference": "signature only; arithmetic is already single-homed",
+            "reachability": "called by Null2D and exercised directly here",
+            "true_peer": "none after deleting the stacked adapter",
+            "semantic_difference": "one canonical traced three-array contract",
             "verdict": "COLLAPSE",
-            "decision": (
-                "one traced three-array signature matching the host contract; "
-                "adapt the stacked caller and delete the stencil adapter"
-            ),
+            "decision": "retain the canonical fit and its explicit host peer",
         },
         {
             "routine": "magnetic_axis_subgrid",
@@ -753,6 +730,7 @@ def _json_ready(value):
 
 def main(argv: list[str] | None = None) -> int:
     """Run the measurement once and write the evidence bundle."""
+    configure_dtypes()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--platforms",
@@ -798,7 +776,7 @@ def main(argv: list[str] | None = None) -> int:
         "timings": [],
         "host_reference_timings": [],
         "accuracy": [],
-        "quadratic_signature_checks": {},
+        "quadratic_fit_checks": {},
         "degenerate": {},
         "differentiation": {},
     }
@@ -810,8 +788,8 @@ def main(argv: list[str] | None = None) -> int:
             if device.platform == "cpu":
                 payload["host_reference_timings"].extend(host_timings)
             payload["accuracy"].extend(_accuracy_rows(device, truth))
-            payload["quadratic_signature_checks"][device.platform] = (
-                _quadratic_and_signature_checks(device)
+            payload["quadratic_fit_checks"][device.platform] = _quadratic_fit_checks(
+                device
             )
             payload["degenerate"][device.platform] = _degenerate_checks(device)
             payload["differentiation"][device.platform] = _differentiation_checks(

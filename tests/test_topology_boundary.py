@@ -21,10 +21,12 @@ with skip_import("jax"):
 
     from nova.biot.null import Null1D, Null2D
     from nova.equilibrium.topology import Topology
+    from nova.jax.config import configure_dtypes
 
 
 def _raster_nulls(nx=41, nz=51, r_lim=(0.6, 1.4), z_lim=(-0.6, 0.6)):
     """Structured-grid ``Null2D`` plus a circular-wall ``Null1D``."""
+    configure_dtypes()
     xg = np.linspace(*r_lim, nx)
     zg = np.linspace(*z_lim, nz)
     x2d, z2d = np.meshgrid(xg, zg, indexing="ij")
@@ -34,12 +36,7 @@ def _raster_nulls(nx=41, nz=51, r_lim=(0.6, 1.4), z_lim=(-0.6, 0.6)):
         np.indices((nx - 2, nz - 2)).reshape(2, -1, 1) + 1 + patch.T[:, np.newaxis],
         (nx, nz),
     )
-    grid = Null2D(
-        jnp.asarray(coordinate),
-        jnp.asarray(stencil),
-        jnp.asarray(coordinate[stencil]),
-        maxsize=3,
-    )
+    grid = Null2D.from_coordinates(coordinate, stencil, maxsize=3)
     theta = np.linspace(0.0, 2.0 * np.pi, 128, endpoint=False)
     wall_coordinate = np.column_stack([1.0 + 0.3 * np.cos(theta), 0.45 * np.sin(theta)])
     wall = Null1D(jnp.asarray(wall_coordinate))

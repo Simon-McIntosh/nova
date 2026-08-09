@@ -22,7 +22,8 @@ class Topology(Pytree):
     def x_point_index(self, vmap_x, polarity, o_psi):
         """Return index of primary x-point."""
         x_psi = vmap_x[:, 2]
-        return jnp.nanargmax(polarity * (x_psi - o_psi))
+        score = jnp.asarray(polarity * (x_psi - o_psi), dtype=self.grid.fit_dtype)
+        return jnp.nanargmax(score)
 
     @jax.jit
     def x_point_data(self, vmap_x, polarity, o_psi):
@@ -48,7 +49,8 @@ class Topology(Pytree):
     def o_point_index(self, vmap_o, polarity):
         """Return primary o-point index."""
         o_psi = vmap_o[:, 2]
-        return jnp.nanargmax(polarity * o_psi)
+        score = jnp.asarray(polarity * o_psi, dtype=self.grid.fit_dtype)
+        return jnp.nanargmax(score)
 
     @jax.jit
     def o_point_data(self, vmap_o, polarity):
@@ -96,11 +98,14 @@ class Topology(Pytree):
         x_height_min = jnp.where(x_height_min > o_height, -jnp.inf, x_height_min)
         x_height_max = jnp.where(x_height_max < o_height, jnp.inf, x_height_max)
         # asses plasma operational mode
+        selection_flux = jnp.asarray(
+            jnp.r_[data_x[2], data_w[2]], dtype=self.grid.fit_dtype
+        )
         mode_index = jax.lax.cond(
             polarity < 0,
             jnp.nanargmin,
             jnp.nanargmax,
-            jnp.r_[data_x[2], data_w[2]],
+            selection_flux,
         )
         return jnp.where(
             (w_height < x_height_min) | (w_height > x_height_max),

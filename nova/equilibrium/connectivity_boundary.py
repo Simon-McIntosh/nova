@@ -91,6 +91,40 @@ _NO_WALL = jnp.asarray([1.0e30])
 #: finite node then reads its EXACT flux instead of the O(Δ²) bilerp.
 _NO_WALL_PSI = jnp.asarray([jnp.nan])
 
+
+def _arg_extreme(values, *, maximize):
+    """Return the first extreme index with a dtype-exact reduction seed."""
+    values = jax.lax.stop_gradient(values)
+    indices = jax.lax.broadcasted_iota(jnp.int32, values.shape, 0)
+    initial_value = -jnp.inf if maximize else jnp.inf
+    initial = (
+        jnp.asarray(initial_value, dtype=values.dtype),
+        jnp.asarray(values.size, dtype=jnp.int32),
+    )
+
+    def choose(left, right):
+        left_value, left_index = left
+        right_value, right_index = right
+        better = right_value > left_value if maximize else right_value < left_value
+        take_right = better | ((right_value == left_value) & (right_index < left_index))
+        return (
+            jnp.where(take_right, right_value, left_value),
+            jnp.where(take_right, right_index, left_index),
+        )
+
+    return jax.lax.reduce((values, indices), initial, choose, dimensions=(0,))[1]
+
+
+def _argmax_exact(values):
+    """Return the first maximum index without a default-dtype seed."""
+    return _arg_extreme(values, maximize=True)
+
+
+def _argmin_exact(values):
+    """Return the first minimum index without a default-dtype seed."""
+    return _arg_extreme(values, maximize=False)
+
+
 #: static count of X-point candidate slots the stencil classifier fills (a
 #: double-null plus spares); the emergent set is then trimmed to N_XPOINT_SLOTS.
 _K_XCAND = 8
@@ -215,13 +249,13 @@ def _read_ingredients(
 
     psi_axis = _bilerp(psi2d, rg, zg, axis_r, axis_z)
     edge = jnp.concatenate([psi2d[0, :], psi2d[-1, :], psi2d[:, 0], psi2d[:, -1]])
-    psi_out = edge[jnp.argmax(jnp.abs(edge - psi_axis))]
+    psi_out = edge[_argmax_exact(jnp.abs(edge - psi_axis))]
     span = psi_out - psi_axis
     span_safe = jnp.where(jnp.abs(span) < 1e-30, 1e-30, span)
     u = (psi2d - psi_axis) / span_safe  # 0 at axis, 1 at the edge extreme
 
-    ja = jnp.argmin(jnp.abs(rg - axis_r))
-    ia = jnp.argmin(jnp.abs(zg - axis_z))
+    ja = _argmin_exact(jnp.abs(rg - axis_r))
+    ia = _argmin_exact(jnp.abs(zg - axis_z))
     seed = jnp.zeros((nz, nr), dtype=bool).at[ia, ja].set(True)
     seed_flat = ia * nr + ja
 
@@ -373,7 +407,7 @@ def _read_ingredients(
     u_x = (psi_x_safe - psi_axis) / span_safe  # (_K_XCAND,), finite everywhere
     x_valid = xc_valid
     x_key = jnp.where(x_valid, jnp.abs(u_x - s_flood), jnp.inf)
-    kbind = jnp.argmin(x_key)
+    kbind = _argmin_exact(x_key)
     x_bind_valid = x_valid[kbind] & jnp.isfinite(x_key[kbind])
     x_bind_state = jnp.where(x_bind_valid, xc["state"][kbind], 0)
     u_x_c = jnp.where(x_bind_valid, u_x[kbind], jnp.inf)
@@ -511,8 +545,8 @@ def traced_boundary_read(
     # saddle, so it is skipped instead of consuming a slot.  Fixed unroll over
     # the static candidate count — jit/vmap/grad-safe.
     dedupe_d2 = (1.5 * jnp.maximum(rg[1] - rg[0], zg[1] - zg[0])) ** 2
-    sel_r = jnp.full((N_XPOINT_SLOTS,), jnp.nan)
-    sel_z = jnp.full((N_XPOINT_SLOTS,), jnp.nan)
+    sel_r = jnp.full((N_XPOINT_SLOTS,), jnp.nan, dtype=xr_s.dtype)
+    sel_z = jnp.full((N_XPOINT_SLOTS,), jnp.nan, dtype=xz_s.dtype)
     sel_state = jnp.zeros((N_XPOINT_SLOTS,), dtype=xc["state"].dtype)
     n_taken = jnp.asarray(0)
     for m in range(_K_XCAND):
@@ -862,21 +896,21 @@ def host_boundary_read(
     if wall_psi is None:
         wpsi = _NO_WALL_PSI
     else:
-        wpsi = jnp.asarray(np.asarray(wall_psi, dtype=np.float64))
+        wpsi = jnp.asarray(wall_psi, dtype=jnp.float64)
     out = traced_boundary_read(
-        jnp.asarray(np.asarray(psi2d, dtype=np.float64)),
-        jnp.asarray(rg_np),
-        jnp.asarray(zg_np),
+        jnp.asarray(psi2d, dtype=jnp.float64),
+        jnp.asarray(rg_np, dtype=jnp.float64),
+        jnp.asarray(zg_np, dtype=jnp.float64),
         jnp.asarray(inside),
-        jnp.asarray(float(axis[0])),
-        jnp.asarray(float(axis[1])),
+        jnp.asarray(axis[0], dtype=jnp.float64),
+        jnp.asarray(axis[1], dtype=jnp.float64),
         int(n_levels),
         int(n_bisect),
         int(n_ray),
-        jnp.asarray(np.asarray(angles, dtype=np.float64)),
-        jnp.asarray(float(lcfs_norm)),
-        jnp.asarray(wall_r),
-        jnp.asarray(wall_z),
+        jnp.asarray(angles, dtype=jnp.float64),
+        jnp.asarray(lcfs_norm, dtype=jnp.float64),
+        jnp.asarray(wall_r, dtype=jnp.float64),
+        jnp.asarray(wall_z, dtype=jnp.float64),
         wpsi,
     )
     return ConnectivityBoundary(
@@ -937,23 +971,23 @@ def host_boundary_read_smooth(
     if wall_psi is None:
         wpsi = _NO_WALL_PSI
     else:
-        wpsi = jnp.asarray(np.asarray(wall_psi, dtype=np.float64))
+        wpsi = jnp.asarray(wall_psi, dtype=jnp.float64)
     out = _smooth_read_at_stencil_axis(
-        jnp.asarray(np.asarray(psi2d, dtype=np.float64)),
-        jnp.asarray(np.asarray(grid.rg, dtype=np.float64)),
-        jnp.asarray(np.asarray(grid.zg, dtype=np.float64)),
+        jnp.asarray(psi2d, dtype=jnp.float64),
+        jnp.asarray(grid.rg, dtype=jnp.float64),
+        jnp.asarray(grid.zg, dtype=jnp.float64),
         jnp.asarray(np.asarray(grid.inside_limiter, dtype=bool)),
-        jnp.asarray(float(axis[0])),
-        jnp.asarray(float(axis[1])),
+        jnp.asarray(axis[0], dtype=jnp.float64),
+        jnp.asarray(axis[1], dtype=jnp.float64),
         int(n_levels),
         int(n_bisect),
         int(n_ray),
-        jnp.asarray(np.asarray(angles, dtype=np.float64)),
-        jnp.asarray(float(lcfs_norm)),
-        jnp.asarray(wall_r),
-        jnp.asarray(wall_z),
+        jnp.asarray(angles, dtype=jnp.float64),
+        jnp.asarray(lcfs_norm, dtype=jnp.float64),
+        jnp.asarray(wall_r, dtype=jnp.float64),
+        jnp.asarray(wall_z, dtype=jnp.float64),
         wpsi,
-        jnp.asarray(float(temperature)),
+        jnp.asarray(temperature, dtype=jnp.float64),
     )
     return {k: np.asarray(v) for k, v in out.items()}
 
@@ -980,19 +1014,19 @@ def host_boundary_read_batch(
     """
     import numpy as np  # noqa: PLC0415
 
-    rg = jnp.asarray(np.asarray(grid.rg, dtype=np.float64))
-    zg = jnp.asarray(np.asarray(grid.zg, dtype=np.float64))
+    rg = jnp.asarray(grid.rg, dtype=jnp.float64)
+    zg = jnp.asarray(grid.zg, dtype=jnp.float64)
     inside = jnp.asarray(np.asarray(grid.inside_limiter, dtype=bool))
-    ang = jnp.asarray(np.asarray(angles, dtype=np.float64))
-    ps = jnp.asarray(np.asarray(psi_stack, dtype=np.float64))
-    ax = jnp.asarray(np.asarray(axes, dtype=np.float64))
+    ang = jnp.asarray(angles, dtype=jnp.float64)
+    ps = jnp.asarray(psi_stack, dtype=jnp.float64)
+    ax = jnp.asarray(axes, dtype=jnp.float64)
     wall_r, wall_z = _densify_wall(grid)
-    wr = jnp.asarray(wall_r)
-    wz = jnp.asarray(wall_z)
+    wr = jnp.asarray(wall_r, dtype=jnp.float64)
+    wz = jnp.asarray(wall_z, dtype=jnp.float64)
     if wall_psi is None:
         wpsi = jnp.broadcast_to(_NO_WALL_PSI, (ps.shape[0], 1))
     else:
-        wpsi = jnp.asarray(np.asarray(wall_psi, dtype=np.float64))
+        wpsi = jnp.asarray(wall_psi, dtype=jnp.float64)
 
     def one(psi2d, axis, wp):
         return traced_boundary_read(
@@ -1006,7 +1040,7 @@ def host_boundary_read_batch(
             int(n_bisect),
             int(n_ray),
             ang,
-            jnp.asarray(float(lcfs_norm)),
+            jnp.asarray(lcfs_norm, dtype=jnp.float64),
             wr,
             wz,
             wp,

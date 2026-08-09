@@ -245,7 +245,6 @@ class ReconstructProfile:
         for name in (
             "grid_r",
             "grid_z",
-            "inside_limiter",
             "cell_area",
             "source_to_grid",
             "plasma_to_grid",
@@ -254,9 +253,10 @@ class ReconstructProfile:
             "wall_r",
             "wall_z",
         ):
-            setattr(self, name, jnp.asarray(getattr(self, name)))
-        self._prior_matrix = jnp.asarray(prior_matrix)
-        self._prior_target = jnp.asarray(prior_target)
+            setattr(self, name, jnp.asarray(getattr(self, name), dtype=jnp.float64))
+        self.inside_limiter = jnp.asarray(self.inside_limiter, dtype=bool)
+        self._prior_matrix = jnp.asarray(prior_matrix, dtype=jnp.float64)
+        self._prior_target = jnp.asarray(prior_target, dtype=jnp.float64)
         radius, height = jnp.meshgrid(self.grid_r, self.grid_z)
         self._cell_r = radius.reshape(-1)
         self._cell_z = height.reshape(-1)
@@ -405,8 +405,8 @@ class ReconstructProfile:
             self.grid_r,
             self.grid_z,
             self.inside_limiter,
-            jnp.asarray(self.axis_seed[0]),
-            jnp.asarray(self.axis_seed[1]),
+            jnp.asarray(self.axis_seed[0], dtype=jnp.float64),
+            jnp.asarray(self.axis_seed[1], dtype=jnp.float64),
             self.topology_levels,
             self.topology_bisections,
             self.topology_rays,
@@ -448,7 +448,9 @@ class ReconstructProfile:
         data_target = jnp.nan_to_num(target) * weight
         matrix = jnp.concatenate([data_matrix, self._prior_matrix], axis=0)
         rhs = jnp.concatenate([data_target, self._prior_target], axis=0)
-        gram = matrix.T @ matrix + self.ridge * jnp.eye(self.degrees.number)
+        gram = matrix.T @ matrix + self.ridge * jnp.eye(
+            self.degrees.number, dtype=matrix.dtype
+        )
         vector = matrix.T @ rhs
         current_row = jnp.sum(basis, axis=0)
         kkt, constrained_rhs, coefficient_scale = self._scaled_kkt(
@@ -487,7 +489,10 @@ class ReconstructProfile:
         kkt = jnp.block(
             [
                 [scaled_gram, scaled_current[:, None]],
-                [scaled_current[None, :], jnp.zeros((1, 1))],
+                [
+                    scaled_current[None, :],
+                    jnp.zeros((1, 1), dtype=scaled_current.dtype),
+                ],
             ]
         )
         rhs = jnp.concatenate([scaled_vector, plasma_current[None] / equality_scale])
@@ -517,7 +522,7 @@ class ReconstructProfile:
         axis = jnp.where(
             null["found"],
             jnp.stack([null["r"], null["z"]]),
-            jnp.asarray(self.axis_seed),
+            jnp.asarray(self.axis_seed, dtype=jnp.float64),
         )
         return ProfileResult(
             flux=flux,
@@ -593,7 +598,10 @@ class ReconstructProfile:
 
         (flux, carried), previous_flux = jax.lax.scan(
             sweep,
-            (initial_flux, jnp.zeros(self.degrees.number)),
+            (
+                initial_flux,
+                jnp.zeros(self.degrees.number, dtype=initial_flux.dtype),
+            ),
             jnp.arange(self.iterations),
         )
         basis, topology = self._profile_basis(flux)

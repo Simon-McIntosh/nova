@@ -32,8 +32,8 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-from nova.geometry import select as host_select
-from nova.jax import select as traced_select
+from nova.geometry import select
+from nova.jax.config import configure_dtypes
 
 
 REPEATS = 9
@@ -63,10 +63,10 @@ def _git_commit() -> str:
 def _source_hashes() -> dict[str, str]:
     """Return hashes of the select implementation and its live composites."""
     paths = (
-        "nova/jax/select.py",
         "nova/geometry/select.py",
         "nova/equilibrium/stencil_nulls.py",
-        "nova/jax/null.py",
+        "nova/biot/null.py",
+        "nova/jax/config.py",
     )
     return {path: hashlib.sha256(Path(path).read_bytes()).hexdigest() for path in paths}
 
@@ -217,24 +217,27 @@ def _surface_case(
 
 
 def _flatten_host_subnull(value: Any) -> np.ndarray:
-    """Flatten the host's nested ``((R, Z), psi, type)`` return."""
-    coordinates, flux, kind = value
-    return np.asarray([coordinates[0], coordinates[1], flux, kind], dtype=np.float64)
+    """Promote the host's flat result for benchmark aggregation."""
+    return np.asarray(value, dtype=np.float64)
 
 
 def _host_subnull_batch(radial: np.ndarray, vertical: np.ndarray, flux: np.ndarray):
     """Run the live host call pattern over independent candidate clusters."""
     return np.stack(
         [
-            _flatten_host_subnull(host_select.subnull(r, z, psi))
+            _flatten_host_subnull(select.host_subnull(r, z, psi))
             for r, z, psi in zip(radial, vertical, flux)
         ]
     )
 
 
 def _traced_stacked_batch():
-    """Build the live stacked-cluster traced batch route."""
-    return jax.jit(jax.vmap(traced_select.subnull))
+    """Build the compatibility measurement around the canonical three arrays."""
+    return jax.jit(
+        jax.vmap(
+            lambda cluster: select.traced_subnull(cluster[0], cluster[1], cluster[2])
+        )
+    )
 
 
 def _wall_accuracy(dtype: Any) -> dict[str, Any]:
@@ -247,11 +250,9 @@ def _wall_accuracy(dtype: Any) -> dict[str, Any]:
             vertical = np.asarray(case["vertical"])
             flux = np.asarray(case["flux"])
             truth = np.asarray(case["truth"])
-            host = np.r_[
-                host_select.wall_flux(radial, vertical, flux, polarity), truth[3]
-            ]
+            host = select.host_wall_flux(radial, vertical, flux, polarity)
             traced = np.asarray(
-                traced_select.wall_flux(
+                select.traced_wall_flux(
                     jnp.asarray(radial, dtype=dtype),
                     jnp.asarray(vertical, dtype=dtype),
                     jnp.asarray(flux, dtype=dtype),
@@ -327,24 +328,15 @@ def _bisect_accuracy(dtype: Any) -> dict[str, Any]:
     right_truth = np.array(
         [python_bisect.bisect_right(vector.tolist(), x) for x in values]
     )
-    host_left = np.array([host_select.bisect(vector, x) for x in values])
-    host_right = np.array([host_select.bisect_right(vector, x) for x in values])
-    traced_left = np.array(
-        [traced_select.bisect(jnp.asarray(vector, dtype=dtype), x) for x in values]
-    )
-    traced_right = np.array(
-        [
-            traced_select.bisect_right(jnp.asarray(vector, dtype=dtype), x)
-            for x in values
-        ]
-    )
+    host_left = np.array([select.bisect(vector, x) for x in values])
+    host_right = np.array([select.bisect_right(vector, x) for x in values])
+    del dtype
     return {
         "reference": "Python standard-library bisect_left and bisect_right",
         "queries": int(values.size),
         "host_left_mismatches": int(np.count_nonzero(host_left != left_truth)),
-        "traced_left_mismatches": int(np.count_nonzero(traced_left != left_truth)),
         "host_right_mismatches": int(np.count_nonzero(host_right != right_truth)),
-        "traced_right_mismatches": int(np.count_nonzero(traced_right != right_truth)),
+        "traced_route": "deleted",
     }
 
 
@@ -363,9 +355,9 @@ def _wall_cost(dtype: Any) -> list[dict[str, Any]]:
             1,
         )
         host_us = _fastest(
-            lambda r=radial, z=vertical, psi=flux: host_select.wall_flux(r, z, psi, 1)
+            lambda r=radial, z=vertical, psi=flux: select.host_wall_flux(r, z, psi, 1)
         )
-        traced_us = _fastest(lambda args=traced_args: traced_select.wall_flux(*args))
+        traced_us = _fastest(lambda args=traced_args: select.traced_wall_flux(*args))
         rows.append(
             {
                 "nodes": nodes,
@@ -418,27 +410,20 @@ def _subnull_cost(
 
 
 def _bisect_cost(dtype: Any) -> list[dict[str, Any]]:
-    """Return scalar insertion latency over real vector-size regimes."""
+    """Return host insertion latency after deletion of the traced copies."""
+    del dtype
     rows = []
     for size in BISECT_SIZES:
         vector = np.linspace(-1.0, 1.0, size)
-        device_vector = jnp.asarray(vector, dtype=dtype)
         value = 0.123456
-        host_left = _fastest(lambda v=vector: host_select.bisect(v, value))
-        traced_left = _fastest(lambda v=device_vector: traced_select.bisect(v, value))
-        host_right = _fastest(lambda v=vector: host_select.bisect_right(v, value))
-        traced_right = _fastest(
-            lambda v=device_vector: traced_select.bisect_right(v, value)
-        )
+        host_left = _fastest(lambda v=vector: select.bisect(v, value))
+        host_right = _fastest(lambda v=vector: select.bisect_right(v, value))
         rows.append(
             {
                 "vector_size": size,
                 "host_left_us": host_left,
-                "traced_left_us": traced_left,
-                "left_traced_over_host": traced_left / host_left,
                 "host_right_us": host_right,
-                "traced_right_us": traced_right,
-                "right_traced_over_host": traced_right / host_right,
+                "traced_route": "deleted",
             }
         )
     return rows
@@ -451,14 +436,14 @@ def _autodiff(dtype: Any) -> dict[str, Any]:
     vertical = jnp.asarray(wall["vertical"], dtype=dtype)
     flux = jnp.asarray(wall["flux"], dtype=dtype)
     wall_gradient = jax.grad(
-        lambda psi: traced_select.wall_flux(radial, vertical, psi, 1)[2]
+        lambda psi: select.traced_wall_flux(radial, vertical, psi, 1)[2]
     )(flux)
 
     r, z, psi, _ = _surface_case(1)
     fixed_r = jnp.asarray(r[0], dtype=dtype)
     fixed_z = jnp.asarray(z[0], dtype=dtype)
     subnull_gradient = jax.grad(
-        lambda values: traced_select.subnull(jnp.stack([fixed_r, fixed_z, values]))[2]
+        lambda values: select.traced_subnull(fixed_r, fixed_z, values)[2]
     )(jnp.asarray(psi[0], dtype=dtype))
     return {
         "wall_flux_all_finite": bool(np.all(np.isfinite(np.asarray(wall_gradient)))),
@@ -470,8 +455,6 @@ def _autodiff(dtype: Any) -> dict[str, Any]:
 
 def _semantics() -> list[dict[str, Any]]:
     """Return all known signature, dtype, and degenerate-case differences."""
-    vector = jnp.array([1.0, 2.0, 3.0])
-    values = jnp.array([1.5, 2.5])
     wall = _wall_case(24)
     radial = np.asarray(wall["radial"])
     vertical = np.asarray(wall["vertical"])
@@ -479,72 +462,64 @@ def _semantics() -> list[dict[str, Any]]:
     plane_coefficients = np.array([0.0, 0.0, 1.0, 1.0, 0.0, 0.0])
     x, z, psi, _ = _surface_case(1)
     far_flux = (x[0] - 20.0) ** 2 + (z[0] - 20.0) ** 2
-    host_valid = host_select.subnull(x[0], z[0], psi[0])
-    traced_valid = traced_select.subnull(jnp.asarray([x[0], z[0], psi[0]]))
+    host_valid = select.host_subnull(x[0], z[0], psi[0])
+    traced_valid = select.traced_subnull(
+        jnp.asarray(x[0], dtype=jnp.float64),
+        jnp.asarray(z[0], dtype=jnp.float64),
+        jnp.asarray(psi[0], dtype=jnp.float64),
+    )
     return [
         {
             "logical_pair": "bisect",
-            "difference": "return scalar width",
-            "host": str(np.asarray(host_select.bisect(np.arange(8.0), 3.5)).dtype),
-            "traced": str(np.asarray(traced_select.bisect(jnp.arange(8.0), 3.5)).dtype),
-            "consequence": (
-                "indices agree; traced scalar width follows JAX configuration"
-            ),
+            "difference": "traced peer deleted",
+            "host": str(np.asarray(select.bisect(np.arange(8.0), 3.5)).dtype),
+            "traced": "deleted",
+            "consequence": "the live bisection contract is host-only",
         },
         {
             "logical_pair": "bisect_right",
             "difference": "traceability",
             "host": "numba-jitted and callable from compiled host code",
-            "traced": _capture(
-                lambda: jax.jit(traced_select.bisect_right)(vector, 1.5)
-            ),
-            "consequence": (
-                "the traced peer uses Python boolean control flow and cannot be traced"
-            ),
+            "traced": "deleted",
+            "consequence": "the untraceable peer is no longer executable",
         },
         {
             "logical_pair": "bisect_2d",
             "difference": "reachability",
-            "host": _capture(lambda: host_select.bisect_2d(np.arange(4.0), [1.5, 2.5])),
-            "traced": _capture(lambda: traced_select.bisect_2d(vector, values)),
-            "consequence": (
-                "every non-empty traced call reaches immutable item assignment"
-            ),
+            "host": _capture(lambda: select.bisect_2d(np.arange(4.0), [1.5, 2.5])),
+            "traced": "deleted",
+            "consequence": "the broken immutable-assignment peer is absent",
         },
         {
             "logical_pair": "wall_index",
             "difference": "NaN selection",
             "host": _capture(
-                lambda: host_select.wall_index(np.array([1.0, np.nan, 2.0]))
+                lambda: select.host_wall_index(np.array([1.0, np.nan, 2.0]))
             ),
             "traced": _capture(
-                lambda: traced_select.wall_index(jnp.array([1.0, jnp.nan, 2.0]))
+                lambda: select.traced_wall_index(jnp.array([1.0, jnp.nan, 2.0]))
             ),
             "consequence": "host argmax selects NaN; traced nanargmax ignores it",
         },
         {
             "logical_pair": "wall_length",
             "difference": "zero quadratic curvature",
-            "host": _capture(
-                lambda: host_select.wall_length(np.array([0.0, 1.0, 2.0]))
-            ),
-            "traced": _capture(
-                lambda: traced_select.wall_length(jnp.array([0.0, 1.0, 2.0]))
-            ),
+            "host": _capture(lambda: select.wall_length(np.array([0.0, 1.0, 2.0]))),
+            "traced": _capture(lambda: select.wall_length(jnp.array([0.0, 1.0, 2.0]))),
             "consequence": "host raises while traced returns an infinity sentinel",
         },
         {
             "logical_pair": "wall_flux",
             "difference": "signature and zero polarity",
-            "host": _capture(lambda: host_select.wall_flux(radial, vertical, flux, 0)),
+            "host": _capture(lambda: select.host_wall_flux(radial, vertical, flux, 0)),
             "traced": _capture(
-                lambda: traced_select.wall_flux(
+                lambda: select.traced_wall_flux(
                     jnp.asarray(radial), jnp.asarray(vertical), jnp.asarray(flux), 0
                 )
             ),
             "consequence": (
-                "host returns a three-tuple and defaults polarity; traced requires "
-                "polarity and returns a four-array with type"
+                "host defaults polarity while traced requires it; both return the "
+                "same flat four-value contract"
             ),
         },
         {
@@ -559,39 +534,44 @@ def _semantics() -> list[dict[str, Any]]:
             "difference": "least-squares precision and interface",
             "host": "promotes flux to float64 and passes rcond=-1 for numba gelsd",
             "traced": "uses configured JAX dtype and jnp.linalg.lstsq default rcond",
-            "consequence": (
-                "direct select/null imports are fp32 unless another module enables fp64"
-            ),
+            "consequence": ("explicit input dtype selects the traced fit precision"),
         },
         {
             "logical_pair": "null_type",
             "difference": "planar surface",
-            "host": _capture(lambda: host_select.null_type(plane_coefficients)),
+            "host": _capture(lambda: select.null_type(plane_coefficients)),
             "traced": _capture(
-                lambda: traced_select.null_type(jnp.asarray(plane_coefficients))
+                lambda: select.null_type(
+                    jnp.asarray(plane_coefficients, dtype=jnp.float64),
+                    array_namespace=jnp,
+                )
             ),
-            "consequence": (
-                "host raises; traced emits NaN because traced control flow cannot "
-                "raise on a data value"
-            ),
+            "consequence": ("both namespaces emit the converged NaN sentinel"),
         },
         {
             "logical_pair": "null_coordinate",
             "difference": "zero Hessian determinant",
-            "host": _capture(lambda: host_select.null_coordinate(plane_coefficients)),
+            "host": _capture(lambda: select.null_coordinate(plane_coefficients)),
             "traced": _capture(
-                lambda: traced_select.null_coordinate(jnp.asarray(plane_coefficients))
+                lambda: select.null_coordinate(
+                    jnp.asarray(plane_coefficients, dtype=jnp.float64),
+                    array_namespace=jnp,
+                )
             ),
             "consequence": (
-                "host divides by zero; traced floors the determinant at 1e-30"
+                "both namespaces apply the shared sign-aware determinant floor"
             ),
         },
         {
             "logical_pair": "null_coordinate",
             "difference": "coordinate outside sampled cluster",
-            "host": _capture(lambda: host_select.subnull(x[0], z[0], far_flux)),
+            "host": _capture(lambda: select.host_subnull(x[0], z[0], far_flux)),
             "traced": _capture(
-                lambda: traced_select.subnull(jnp.asarray([x[0], z[0], far_flux]))
+                lambda: select.traced_subnull(
+                    jnp.asarray(x[0], dtype=jnp.float64),
+                    jnp.asarray(z[0], dtype=jnp.float64),
+                    jnp.asarray(far_flux, dtype=jnp.float64),
+                )
             ),
             "consequence": (
                 "host subnull asserts a loose cluster bound; traced extrapolates"
@@ -602,26 +582,23 @@ def _semantics() -> list[dict[str, Any]]:
             "difference": "signature and return shape",
             "host": {
                 "signature": "subnull(r_cluster, z_cluster, psi_cluster)",
-                "shape": "((R, Z), psi, type)",
+                "shape": "array([R, Z, psi, type])",
                 "example": _serialise(host_valid),
             },
             "traced": {
-                "signature": "subnull(cluster_3_by_n)",
+                "signature": "subnull(r_cluster, z_cluster, psi_cluster)",
                 "shape": "array([R, Z, psi, type])",
                 "example": _serialise(traced_valid),
             },
             "consequence": (
-                "the stacked route forces a transpose in Null2D; separate arrays "
-                "match both host gathers and the device-native stencil gather"
+                "both composites now consume the canonical three-array signature"
             ),
         },
         {
-            "logical_pair": "length_2d/wall_coordinate/null",
+            "logical_pair": "length_2d/wall_length/wall_coordinate",
             "difference": "array namespace and dtype only on valid inputs",
             "host": "numpy arithmetic, eager float64 at live host callers",
-            "traced": (
-                "JAX arithmetic, fp32 or fp64 according to process-global import order"
-            ),
+            "traced": "JAX arithmetic at the explicitly selected input dtype",
             "consequence": (
                 "the expressions are otherwise identical and can be one "
                 "namespace-threaded body"
@@ -639,17 +616,17 @@ def _reachability() -> dict[str, Any]:
         ],
         "bisect_traced": [],
         "bisect_right_host": ["nova/frame/plasmaloc.py:38"],
-        "bisect_right_traced": ["nova/jax/select.py:55 (inside broken bisect_2d only)"],
+        "bisect_right_traced": [],
         "bisect_2d_host": ["nova/biot/plasmagap.py:115"],
         "bisect_2d_traced": [],
         "wall_flux_host": ["nova/biot/limiter.py:56"],
-        "wall_flux_traced": ["nova/jax/null.py:36"],
+        "wall_flux_traced": ["nova/biot/null.py:38"],
         "subnull_host_three_array": [
             "nova/biot/fieldnull.py:96",
             "nova/biot/fieldnull.py:109",
         ],
-        "subnull_traced_stacked": ["nova/jax/null.py:109"],
-        "subnull_traced_three_array": ["nova/equilibrium/stencil_nulls.py:74"],
+        "subnull_traced_stacked": [],
+        "subnull_traced_three_array": ["nova/biot/null.py:170"],
         "candidate_regime": {
             "host": "one candidate per Python loop iteration",
             "traced_null2d": "two categories times maxsize=5, so ten fixed slots",
@@ -683,13 +660,14 @@ def _precision_measurement(
 
 def measure(label: str, expected_platform: str) -> dict[str, Any]:
     """Run one complete machine measurement."""
+    configure_dtypes()
     backend = jax.default_backend()
     if backend != expected_platform:
         raise RuntimeError(
             f"expected JAX platform {expected_platform!r}, observed {backend!r}"
         )
     if jax.config.jax_enable_x64:
-        raise RuntimeError("benchmark must start before process-global fp64 is enabled")
+        raise RuntimeError("runtime dtype setup must retain the default fp32 policy")
 
     devices = [
         {
@@ -730,19 +708,12 @@ def measure(label: str, expected_platform: str) -> dict[str, Any]:
     }
 
     record["precision"] = [
-        _precision_measurement("direct-select-fp32", jnp.float32, None)
+        _precision_measurement("direct-select-fp32", jnp.float32, select.traced_subnull)
     ]
-
-    # This import is itself a live semantic input: stencil_nulls enables fp64
-    # before tracing, whereas nova.biot.null imports select directly and does not.
-    from nova.equilibrium.stencil_nulls import subnull as three_array_subnull
-
-    if not jax.config.jax_enable_x64:
-        raise RuntimeError(
-            "stencil null import did not enable the required fp64 policy"
-        )
     record["precision"].append(
-        _precision_measurement("stencil-enabled-fp64", jnp.float64, three_array_subnull)
+        _precision_measurement(
+            "explicit-select-fp64", jnp.float64, select.traced_subnull
+        )
     )
     return _serialise(record)
 
@@ -762,8 +733,8 @@ def _verdicts(runs: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
     """Return explicit outcomes for each logical implementation pair."""
     cpu = next(run for run in runs if run["environment"]["jax_backend"] == "cpu")
     gpu = next(run for run in runs if run["environment"]["jax_backend"] == "gpu")
-    cpu64 = _find_precision(cpu, "stencil-enabled-fp64")
-    gpu64 = _find_precision(gpu, "stencil-enabled-fp64")
+    cpu64 = _find_precision(cpu, "explicit-select-fp64")
+    gpu64 = _find_precision(gpu, "explicit-select-fp64")
     cpu32 = _find_precision(cpu, "direct-select-fp32")
     gpu32 = _find_precision(gpu, "direct-select-fp32")
 
@@ -771,8 +742,6 @@ def _verdicts(runs: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
     gpu_wall = _best_ratio(gpu64["cost"]["wall_flux"], "traced_over_host")
     cpu_sub = _best_ratio(cpu64["cost"]["subnull"], "traced_over_host")
     gpu_sub = _best_ratio(gpu64["cost"]["subnull"], "traced_over_host")
-    cpu_bisect = _best_ratio(cpu64["cost"]["bisect"], "left_traced_over_host")
-    gpu_bisect = _best_ratio(gpu64["cost"]["bisect"], "left_traced_over_host")
     signature = _best_ratio(gpu64["cost"]["subnull"], "three_array_over_stacked")
 
     return [
@@ -785,8 +754,8 @@ def _verdicts(runs: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
                 "preserves the JAX-free eager path"
             ),
             "required_condition": (
-                "enable JAX fp64 before the first select trace; direct fp32 "
-                "misclassified 12 of 18 analytic call-site-scale surfaces"
+                "absolute physical-coordinate fits use explicit fp64; the Null2D "
+                "consumer normalizes geometry before its licensed fp32 fit"
             ),
         },
         {
@@ -798,8 +767,7 @@ def _verdicts(runs: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
                 "zero traced callers, two host callers, exact agreement with "
                 "Python bisect"
             ),
-            "cpu_traced_over_host": cpu_bisect,
-            "gpu_traced_over_host": gpu_bisect,
+            "traced_reachability": 0,
         },
         {
             "logical_pair": "right and vector bisection",
@@ -930,8 +898,8 @@ def _plot(report: dict[str, Any], path: Path) -> None:
     runs = report["runs"]
     cpu = next(run for run in runs if run["environment"]["jax_backend"] == "cpu")
     gpu = next(run for run in runs if run["environment"]["jax_backend"] == "gpu")
-    cpu64 = _find_precision(cpu, "stencil-enabled-fp64")
-    gpu64 = _find_precision(gpu, "stencil-enabled-fp64")
+    cpu64 = _find_precision(cpu, "explicit-select-fp64")
+    gpu64 = _find_precision(gpu, "explicit-select-fp64")
 
     figure, axes = plt.subplots(1, 3, figsize=(14.2, 4.6))
     wall_axis, subnull_axis, verdict_axis = axes

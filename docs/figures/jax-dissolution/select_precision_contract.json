@@ -1,0 +1,315 @@
+{
+  "assembled_at": "2026-08-09T15:49:49.056038+00:00",
+  "captures": {
+    "cpu": {
+      "captured_at": "2026-08-09T15:48:19.051775+00:00",
+      "environment": {
+        "device": "cpu:0",
+        "host": "98dci4-clu-3141.iter.org",
+        "jax": "0.11.0",
+        "jax_enable_x64": false,
+        "jax_explicit_x64_dtypes": "3",
+        "python": "3.14.2",
+        "slurm_job_id": "1242803",
+        "slurm_partition": "sun_debug",
+        "system": "Linux-5.14.0-284.25.1.el9_2.x86_64-x86_64-with-glibc2.34"
+      },
+      "platform": "cpu",
+      "precision": [
+        {
+          "classification_errors": 0,
+          "compile_ms_two_fields": 629.3822545558214,
+          "fit_dtype": "float32",
+          "metadata_dtype": "float64",
+          "precision": "auto",
+          "rows": [
+            {
+              "coordinate": [
+                6.203099999547004,
+                -3.6981999995708468
+              ],
+              "coordinate_error_cells": [
+                -3.774965525356796e-08,
+                4.7683684161686166e-08
+              ],
+              "coordinate_error_metres": [
+                -4.5299586304281547e-10,
+                4.2915315745517546e-10
+              ],
+              "expected_kind": -1.0,
+              "field": "extremum",
+              "location_error_cells_max_axis": 4.7683684161686166e-08,
+              "location_error_metres": 6.240013497482613e-10,
+              "observed_kind": -1.0,
+              "truth": [
+                6.2031,
+                -3.6982
+              ]
+            },
+            {
+              "coordinate": [
+                6.20310000026226,
+                -3.6981999987661838
+              ],
+              "coordinate_error_cells": [
+                2.185496228435113e-08,
+                1.370906844834331e-07
+              ],
+              "coordinate_error_metres": [
+                2.622595474122136e-10,
+                1.233816160350898e-09
+              ],
+              "expected_kind": 0.0,
+              "field": "saddle",
+              "location_error_cells_max_axis": 1.370906844834331e-07,
+              "location_error_metres": 1.2613811429349544e-09,
+              "observed_kind": 0.0,
+              "truth": [
+                6.2031,
+                -3.6982
+              ]
+            }
+          ],
+          "steady_ms_two_fields": 0.18950551748275757,
+          "worst_location_error_cells": 1.370906844834331e-07
+        },
+        {
+          "classification_errors": 0,
+          "compile_ms_two_fields": 473.3912590891123,
+          "fit_dtype": "float64",
+          "metadata_dtype": "float64",
+          "precision": "float64",
+          "rows": [
+            {
+              "coordinate": [
+                6.2031,
+                -3.6982
+              ],
+              "coordinate_error_cells": [
+                0.0,
+                0.0
+              ],
+              "coordinate_error_metres": [
+                0.0,
+                0.0
+              ],
+              "expected_kind": -1.0,
+              "field": "extremum",
+              "location_error_cells_max_axis": 0.0,
+              "location_error_metres": 0.0,
+              "observed_kind": -1.0,
+              "truth": [
+                6.2031,
+                -3.6982
+              ]
+            },
+            {
+              "coordinate": [
+                6.2031,
+                -3.6982
+              ],
+              "coordinate_error_cells": [
+                0.0,
+                0.0
+              ],
+              "coordinate_error_metres": [
+                0.0,
+                0.0
+              ],
+              "expected_kind": 0.0,
+              "field": "saddle",
+              "location_error_cells_max_axis": 0.0,
+              "location_error_metres": 0.0,
+              "observed_kind": 0.0,
+              "truth": [
+                6.2031,
+                -3.6982
+              ]
+            }
+          ],
+          "steady_ms_two_fields": 0.19356980919837952,
+          "worst_location_error_cells": 0.0
+        }
+      ],
+      "revision": "6a77c0fec2abb6a4128fbc8a343cd63eb5bde801+bundle:5a4ed583d35ec883fa9d10f0be785148d2ecc6fef389d7b07baf29ea32fdb2c5",
+      "schema": "nova.select-precision-contract",
+      "source_hashes": {
+        "benchmarks/select_precision_contract.py": "03e42a617b90663ce14a4002860f0f833dc1fd271028969221a37fea165a5373",
+        "nova/biot/null.py": "525f8982de68e08a876447e0bc6aa826cc68823c3cc9e85b17746bcf39415310",
+        "nova/geometry/select.py": "a4a6b93bfde147319bc606f4b9f85c1ae57cea5de0f4bc51a1d8eb5c860728c5",
+        "nova/jax/config.py": "8f788ec5ab034e99aeb5e31aa6a566db3ede3cc6dc7f8a049c9aa369739b15ae"
+      }
+    },
+    "gpu": {
+      "captured_at": "2026-08-09T15:48:50.713167+00:00",
+      "environment": {
+        "device": "cuda:0",
+        "host": "98dci4-gpu-0003.iter.org",
+        "jax": "0.11.0",
+        "jax_enable_x64": false,
+        "jax_explicit_x64_dtypes": "3",
+        "python": "3.14.2",
+        "slurm_job_id": "1242804",
+        "slurm_partition": "betelgeuse",
+        "system": "Linux-6.12.0-124.11.1.el10_1.x86_64-x86_64-with-glibc2.39"
+      },
+      "platform": "gpu",
+      "precision": [
+        {
+          "classification_errors": 0,
+          "compile_ms_two_fields": 1300.4026589915156,
+          "fit_dtype": "float32",
+          "metadata_dtype": "float64",
+          "precision": "auto",
+          "rows": [
+            {
+              "coordinate": [
+                6.203099999547004,
+                -3.6981999995708468
+              ],
+              "coordinate_error_cells": [
+                -3.774965525356796e-08,
+                4.7683684161686166e-08
+              ],
+              "coordinate_error_metres": [
+                -4.5299586304281547e-10,
+                4.2915315745517546e-10
+              ],
+              "expected_kind": -1.0,
+              "field": "extremum",
+              "location_error_cells_max_axis": 4.7683684161686166e-08,
+              "location_error_metres": 6.240013497482613e-10,
+              "observed_kind": -1.0,
+              "truth": [
+                6.2031,
+                -3.6982
+              ]
+            },
+            {
+              "coordinate": [
+                6.203099999904632,
+                -3.6981999987661838
+              ],
+              "coordinate_error_cells": [
+                -7.947346484608412e-09,
+                1.370906844834331e-07
+              ],
+              "coordinate_error_metres": [
+                -9.536815781530095e-11,
+                1.233816160350898e-09
+              ],
+              "expected_kind": 0.0,
+              "field": "saddle",
+              "location_error_cells_max_axis": 1.370906844834331e-07,
+              "location_error_metres": 1.2374964254769048e-09,
+              "observed_kind": 0.0,
+              "truth": [
+                6.2031,
+                -3.6982
+              ]
+            }
+          ],
+          "steady_ms_two_fields": 9.025657083839178,
+          "worst_location_error_cells": 1.370906844834331e-07
+        },
+        {
+          "classification_errors": 0,
+          "compile_ms_two_fields": 625.0695390626788,
+          "fit_dtype": "float64",
+          "metadata_dtype": "float64",
+          "precision": "float64",
+          "rows": [
+            {
+              "coordinate": [
+                6.2031,
+                -3.6982
+              ],
+              "coordinate_error_cells": [
+                0.0,
+                0.0
+              ],
+              "coordinate_error_metres": [
+                0.0,
+                0.0
+              ],
+              "expected_kind": -1.0,
+              "field": "extremum",
+              "location_error_cells_max_axis": 0.0,
+              "location_error_metres": 0.0,
+              "observed_kind": -1.0,
+              "truth": [
+                6.2031,
+                -3.6982
+              ]
+            },
+            {
+              "coordinate": [
+                6.2031,
+                -3.6982
+              ],
+              "coordinate_error_cells": [
+                0.0,
+                0.0
+              ],
+              "coordinate_error_metres": [
+                0.0,
+                0.0
+              ],
+              "expected_kind": 0.0,
+              "field": "saddle",
+              "location_error_cells_max_axis": 0.0,
+              "location_error_metres": 0.0,
+              "observed_kind": 0.0,
+              "truth": [
+                6.2031,
+                -3.6982
+              ]
+            }
+          ],
+          "steady_ms_two_fields": 9.293727111071348,
+          "worst_location_error_cells": 0.0
+        }
+      ],
+      "revision": "6a77c0fec2abb6a4128fbc8a343cd63eb5bde801+bundle:5a4ed583d35ec883fa9d10f0be785148d2ecc6fef389d7b07baf29ea32fdb2c5",
+      "schema": "nova.select-precision-contract",
+      "source_hashes": {
+        "benchmarks/select_precision_contract.py": "03e42a617b90663ce14a4002860f0f833dc1fd271028969221a37fea165a5373",
+        "nova/biot/null.py": "525f8982de68e08a876447e0bc6aa826cc68823c3cc9e85b17746bcf39415310",
+        "nova/geometry/select.py": "a4a6b93bfde147319bc606f4b9f85c1ae57cea5de0f4bc51a1d8eb5c860728c5",
+        "nova/jax/config.py": "8f788ec5ab034e99aeb5e31aa6a566db3ede3cc6dc7f8a049c9aa369739b15ae"
+      }
+    }
+  },
+  "contract": {
+    "absolute_fp32_geometry": "rejected before normalization",
+    "automatic": "normalized local fp32 fit with fp64 physical metadata",
+    "explicit_double": "normalized local fp64 fit with fp64 physical metadata"
+  },
+  "cpu_gpu_parity": [
+    {
+      "coordinate_max_abs_metres": 0.0,
+      "field": "extremum",
+      "kind_equal": true
+    },
+    {
+      "coordinate_max_abs_metres": 3.576277052275145e-10,
+      "field": "saddle",
+      "kind_equal": true
+    }
+  ],
+  "gate": {
+    "automatic_classification_errors": 0,
+    "automatic_worst_location_error_cells": 1.370906844834331e-07,
+    "cpu_gpu_coordinate_limit_metres": 1e-08,
+    "normalized_exact_limit_cells": 0.02,
+    "pass": true
+  },
+  "revision": "6a77c0fec2abb6a4128fbc8a343cd63eb5bde801+bundle:5a4ed583d35ec883fa9d10f0be785148d2ecc6fef389d7b07baf29ea32fdb2c5",
+  "schema": "nova.select-precision-contract",
+  "source_hashes": {
+    "benchmarks/select_precision_contract.py": "03e42a617b90663ce14a4002860f0f833dc1fd271028969221a37fea165a5373",
+    "nova/biot/null.py": "525f8982de68e08a876447e0bc6aa826cc68823c3cc9e85b17746bcf39415310",
+    "nova/geometry/select.py": "a4a6b93bfde147319bc606f4b9f85c1ae57cea5de0f4bc51a1d8eb5c860728c5",
+    "nova/jax/config.py": "8f788ec5ab034e99aeb5e31aa6a566db3ede3cc6dc7f8a049c9aa369739b15ae"
+  }
+}

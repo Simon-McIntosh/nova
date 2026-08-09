@@ -46,7 +46,7 @@ def test_length_2d():
 def test_quadratic_coefficents(null_type: int):
     w = select.length_2d(*meshwall())
     psi = quadratic_wall(w, null_type)
-    coef = select.quadratic_wall(w, psi)
+    coef = select.host_quadratic_wall(w, psi)
     assert np.allclose(psi, coefficient_matrix(w) @ coef)
 
 
@@ -56,7 +56,7 @@ def test_quadratic_coefficents(null_type: int):
 def test_wall_length(null_type, null_position):
     w_coordinate = select.length_2d(*meshwall())
     psi = quadratic_wall(w_coordinate, null_type, null_position)
-    coef = select.quadratic_wall(w_coordinate, psi)
+    coef = select.host_quadratic_wall(w_coordinate, psi)
     assert np.allclose(select.wall_length(coef), null_position)
 
 
@@ -71,7 +71,7 @@ def test_wall_coordinate(null_type, null_position, plot=False):
         np.interp(null_position, w_cluster, x_cluster),
         np.interp(null_position, w_cluster, z_cluster),
     )
-    coef = select.quadratic_wall(w_cluster, psi)
+    coef = select.host_quadratic_wall(w_cluster, psi)
     w_coordinate = select.wall_length(coef)
     null_coordinate = select.wall_coordinate(
         w_coordinate, x_cluster, z_cluster, w_cluster
@@ -98,7 +98,7 @@ def test_wall_flux(null_type, null_position, null_flux):
     )
     psi_cluster = quadratic_surface(x_cluster, z_cluster, null_type, *null_coordinate)
     psi_cluster += null_flux
-    result = select.wall_flux(x_cluster, z_cluster, psi_cluster, null_type)
+    result = select.host_wall_flux(x_cluster, z_cluster, psi_cluster, null_type)
     assert result.shape == (4,)
     assert result[3] == null_type
     assert np.isclose(result[2], null_flux, atol=0.01 * np.max(abs(psi_cluster)))
@@ -107,7 +107,7 @@ def test_wall_flux(null_type, null_position, null_flux):
 def test_wall_flux_zero_polarity_returns_four_nan_values():
     """A missing wall-limit point has the same fixed-shape sentinel as traced code."""
     x_wall, z_wall = meshwall()
-    result = select.wall_flux(x_wall, z_wall, np.zeros_like(x_wall), 0)
+    result = select.host_wall_flux(x_wall, z_wall, np.zeros_like(x_wall), 0)
 
     assert result.shape == (4,)
     assert np.all(np.isnan(result))

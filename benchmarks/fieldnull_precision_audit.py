@@ -49,6 +49,8 @@ import jax.numpy as jnp
 import jax.scipy as jsp
 import numpy as np
 
+from nova.jax.config import configure_dtypes
+
 
 jax.config.update("jax_default_matmul_precision", "highest")
 
@@ -136,10 +138,9 @@ def _git_commit() -> str:
 def _source_hashes() -> dict[str, str]:
     """Return hashes of the production kernels and call-site composites."""
     paths = (
-        "nova/jax/select.py",
         "nova/equilibrium/stencil_nulls.py",
-        "nova/jax/null.py",
         "nova/geometry/select.py",
+        "nova/biot/null.py",
     )
     return {path: hashlib.sha256(Path(path).read_bytes()).hexdigest() for path in paths}
 
@@ -1498,6 +1499,7 @@ def _matrix_spec(cases_by_name: dict[str, CaseSet]):
 
 def measure(label: str, expected_platform: str):
     """Run one complete precision audit on an allocated device."""
+    configure_dtypes()
     backend = jax.default_backend()
     if backend != expected_platform:
         raise RuntimeError(f"expected {expected_platform!r}, observed {backend!r}")
@@ -1516,7 +1518,6 @@ def measure(label: str, expected_platform: str):
         }
         for algorithm, function in ALGORITHMS.items()
     }
-    jax.config.update("jax_enable_x64", True)
     fp64_results = {
         algorithm: {
             name: _run(function, cases, jnp.float64)
@@ -1739,7 +1740,6 @@ def smoke() -> None:
             raise AssertionError((name, result.shape))
         if not np.all(np.isfinite(result[:, :3])):
             raise AssertionError(f"{name} returned nonfinite coordinates")
-    jax.config.update("jax_enable_x64", True)
     for name, function in ALGORITHMS.items():
         result = _run(function, tiny, jnp.float64)
         if result.shape != (4, 15):

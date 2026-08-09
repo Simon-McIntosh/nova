@@ -8,6 +8,9 @@ X-point, and that the axis position carries a finite ``jax.grad``.
 from __future__ import annotations
 
 import importlib.util
+import json
+import subprocess
+import sys
 
 import numpy as np
 import pytest
@@ -26,10 +29,72 @@ with skip_import("jax"):
         ring_sign_changes,
         xpoint_candidates,
     )
+    from nova.jax.config import configure_dtypes
 
 
 def test_equilibrium_module_is_the_only_stencil_implementation():
     assert importlib.util.find_spec("nova.jax.stencil_nulls") is None
+
+
+def test_fieldnull_result_is_independent_of_connectivity_import_order():
+    """Explicit dtype setup removes the connectivity x64 import-order effect."""
+    script = """
+import importlib
+import json
+import sys
+
+import numpy as np
+
+for name in sys.argv[1:]:
+    importlib.import_module(name)
+
+from nova.jax.config import configure_dtypes
+configure_dtypes()
+
+import jax
+import jax.numpy as jnp
+from nova.equilibrium.stencil_nulls import magnetic_axis_subgrid
+
+rg = np.linspace(6.18, 6.22, 21, dtype=np.float64)
+zg = np.linspace(-0.03, 0.03, 25, dtype=np.float64)
+rr, zz = np.meshgrid(rg, zg)
+truth = (6.2031, -0.0047)
+field = -((rr - truth[0]) ** 2 + 1.3 * (zz - truth[1]) ** 2)
+result = magnetic_axis_subgrid(
+    jnp.asarray(field, dtype=jnp.float32),
+    jnp.asarray(rg, dtype=jnp.float64),
+    jnp.asarray(zg, dtype=jnp.float64),
+    jnp.ones(field.shape, dtype=bool),
+)
+print(json.dumps({
+    'r': float(result['r']),
+    'z': float(result['z']),
+    'kind': float(result['ntype']),
+    'found': bool(result['found']),
+    'x64': bool(jax.config.x64_enabled),
+}))
+"""
+    modules = (
+        "nova.equilibrium.stencil_nulls",
+        "nova.equilibrium.flux_surface_connectivity",
+    )
+    rows = []
+    for order in (modules, modules[::-1]):
+        result = subprocess.run(
+            [sys.executable, "-c", script, *order],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        assert result.returncode == 0, result.stderr
+        rows.append(json.loads(result.stdout.splitlines()[-1]))
+
+    assert rows[0] == rows[1]
+    assert rows[0]["found"]
+    assert not rows[0]["x64"]
+    assert rows[0]["kind"] == 1.0
+    assert abs(rows[0]["r"] - 6.2031) < 2e-5
+    assert abs(rows[0]["z"] + 0.0047) < 2e-5
 
 
 def _two_peak_field(nr=81, nz=101, rc=1.007, z1=-0.30, z2=0.30, w=0.15):
@@ -122,9 +187,12 @@ def _periodic_field(resolution=61):
 
 
 def test_native_degree_collapses_legacy_duplicates_and_reports_overflow():
+    configure_dtypes()
     field, radial, vertical = _periodic_field()
     inside = jnp.ones(field.shape, dtype=bool)
-    legacy_raw = np.asarray(ring_sign_changes(jnp.asarray(field))) == 4
+    legacy_raw = (
+        np.asarray(ring_sign_changes(jnp.asarray(field, dtype=jnp.float64))) == 4
+    )
     assert int(np.sum(legacy_raw)) == 99
 
     result = xpoint_candidates(
@@ -160,6 +228,27 @@ def test_plateau_is_absent_and_noise_candidates_remain_unresolved():
     assert np.all(
         np.asarray(candidates["state"])[np.asarray(candidates["present"])]
         == STATE_UNRESOLVED
+    )
+
+
+def test_host_float64_field_keeps_the_device_axis_contract():
+    """A host round trip must not silently demote an explicit fp64 flux map."""
+    configure_dtypes()
+    radial = np.linspace(0.65, 1.35, 17, dtype=np.float64)
+    vertical = np.linspace(-0.5, 0.5, 17, dtype=np.float64)
+    rr, zz = np.meshgrid(radial, vertical)
+    field = -((rr - 1.021) ** 2 + 1.3 * (zz - 0.013) ** 2)
+    inside = np.ones(field.shape, dtype=bool)
+    host = magnetic_axis_subgrid(field, radial, vertical, inside)
+    device = magnetic_axis_subgrid(
+        jnp.asarray(field, dtype=jnp.float64),
+        jnp.asarray(radial, dtype=jnp.float64),
+        jnp.asarray(vertical, dtype=jnp.float64),
+        jnp.asarray(inside),
+    )
+    np.testing.assert_array_equal(
+        [float(host["r"]), float(host["z"])],
+        [float(device["r"]), float(device["z"])],
     )
 
 

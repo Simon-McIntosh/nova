@@ -72,8 +72,9 @@ from nova.biot.fieldnull import FieldNull as HostFieldNull
 from nova.biot.null import Null1D, Null2D
 from nova.biot.target import FluxTarget
 from nova.equilibrium.topology import Topology
-from nova.geometry import select as host_select
+from nova.geometry import select
 from nova.geometry.hexstencil import hex_stencil
+from nova.jax.config import configure_dtypes
 
 REPEATS = 7
 FULL_GRID_SIZES = (17, 33, 65, 129)
@@ -370,12 +371,7 @@ def _measure_null_routes(
         host = _host_fieldnull(case.structured)
         host_first, host_result = _once(lambda: host.categorize_2d(case.psi2d))
         host_warm = _fastest(lambda: host.categorize_2d(case.psi2d))
-        null = Null2D(
-            jnp.asarray(case.coordinate),
-            jnp.asarray(case.stencil),
-            jnp.asarray(case.coordinate[case.stencil]),
-            MAX_NULLS,
-        )
+        null = Null2D.from_coordinates(case.coordinate, case.stencil, maxsize=MAX_NULLS)
         stencil_device = jnp.asarray(case.stencil)
         psi_stencil = psi_device[stencil_device]
         traced_first, traced_result = _once(lambda: null.categorize(psi_stencil), True)
@@ -538,7 +534,7 @@ def _host_topology(
     else:
         data_x = np.array([np.nan, np.nan, np.nan])
     data_w = np.asarray(
-        host_select.wall_flux(wall[:, 0], wall[:, 1], psi_wall, polarity)
+        select.host_wall_flux(wall[:, 0], wall[:, 1], psi_wall, polarity)
     )
     if np.isfinite(data_x[0]):
         boundary = data_x if polarity * data_x[2] >= polarity * data_w[2] else data_w
@@ -564,12 +560,7 @@ def _measure_topology(grid_sizes: tuple[int, ...]) -> tuple[list[dict], dict]:
         data["z2d"] = (("x", "z"), z2d)
         host = _host_fieldnull(data)
 
-        grid = Null2D(
-            jnp.asarray(coordinate),
-            jnp.asarray(stencil),
-            jnp.asarray(coordinate[stencil]),
-            MAX_NULLS,
-        )
+        grid = Null2D.from_coordinates(coordinate, stencil, maxsize=MAX_NULLS)
         traced = Topology(grid, Null1D(jnp.asarray(wall)))
         psi = np.r_[psi_grid, psi_wall]
         psi_device = jnp.asarray(psi)
@@ -672,6 +663,7 @@ def _measure_topology(grid_sizes: tuple[int, ...]) -> tuple[list[dict], dict]:
 
 def measure(profile_name: str) -> dict[str, Any]:
     """Return the complete report for the selected JAX platform."""
+    configure_dtypes()
     grid_sizes = QUICK_GRID_SIZES if profile_name == "quick" else FULL_GRID_SIZES
     target_sizes = QUICK_TARGET_SIZES if profile_name == "quick" else FULL_TARGET_SIZES
     devices = jax.devices()

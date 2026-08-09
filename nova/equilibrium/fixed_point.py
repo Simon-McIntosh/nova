@@ -40,9 +40,7 @@ from typing import NamedTuple
 import jax
 import jax.numpy as jnp
 
-from nova.jax.config import enable_x64
-
-enable_x64()
+from nova.jax.config import Precision, _resolve_precision, configure_dtypes
 
 __all__ = ["FixedPointResult", "anderson", "newton_krylov", "picard"]
 
@@ -61,6 +59,14 @@ class FixedPointResult(NamedTuple):
     trace: jax.Array
 
 
+def _solver_state(initial: jax.Array, precision: Precision | str) -> jax.Array:
+    """Cast the state before tracing under the general-solver policy."""
+    configure_dtypes()
+    resolved = _resolve_precision(precision, Precision.DOUBLE)
+    dtype = jnp.float32 if resolved is Precision.SINGLE else jnp.float64
+    return jnp.asarray(initial, dtype=dtype)
+
+
 def _relative_residual(mapped: jax.Array, state: jax.Array) -> jax.Array:
     """Relative sup-norm fixed-point residual ``max|g−x| / max|g|``."""
     return jnp.max(jnp.abs(mapped - state)) / jnp.maximum(
@@ -74,8 +80,10 @@ def picard(
     *,
     evaluations: int,
     relaxation: float = 0.5,
+    precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult:
     """Relaxed Picard iteration with per-evaluation residual accounting."""
+    initial = _solver_state(initial, precision)
 
     def body(index, carry):
         state, trace = carry
@@ -84,7 +92,10 @@ def picard(
         return state + relaxation * (mapped - state), trace
 
     state, trace = jax.lax.fori_loop(
-        0, evaluations, body, (initial, jnp.full(evaluations, jnp.nan))
+        0,
+        evaluations,
+        body,
+        (initial, jnp.full(evaluations, jnp.nan, dtype=initial.dtype)),
     )
     return FixedPointResult(state, trace[evaluations - 1], trace)
 
@@ -99,6 +110,7 @@ def anderson(
     warmup: int = 6,
     step_cap: float = 2.0,
     ridge: float = 1.0e-10,
+    precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult:
     """Safeguarded Anderson acceleration of the relaxed iteration.
 
@@ -114,6 +126,7 @@ def anderson(
     plain relaxed step; and a non-finite candidate falls back to the relaxed
     step.  The ridge is relative to the mean diagonal of ΔFᵀΔF.
     """
+    initial = _solver_state(initial, precision)
     n_flat = initial.shape[0]
 
     def body(index, carry):
@@ -134,7 +147,9 @@ def anderson(
         df = jnp.where(have_history, update(df, f - f_prev, column, axis=1), df)
 
         gram = df.T @ df
-        gram = gram + ridge * (jnp.trace(gram) / depth + 1.0e-30) * jnp.eye(depth)
+        gram = gram + ridge * (jnp.trace(gram) / depth + 1.0e-30) * jnp.eye(
+            depth, dtype=gram.dtype
+        )
         gamma = jnp.linalg.solve(gram, df.T @ f)
         mixed = state + relaxation * f - (dx + relaxation * df) @ gamma
 
@@ -153,12 +168,12 @@ def anderson(
 
     init = (
         initial,
-        jnp.zeros((n_flat, depth)),
-        jnp.zeros((n_flat, depth)),
-        jnp.zeros(n_flat),
+        jnp.zeros((n_flat, depth), dtype=initial.dtype),
+        jnp.zeros((n_flat, depth), dtype=initial.dtype),
+        jnp.zeros(n_flat, dtype=initial.dtype),
         initial,
         jnp.asarray(jnp.inf, dtype=initial.dtype),
-        jnp.full(evaluations, jnp.nan),
+        jnp.full(evaluations, jnp.nan, dtype=initial.dtype),
     )
     state, *_, trace = jax.lax.fori_loop(0, evaluations, body, init)
     return FixedPointResult(state, trace[evaluations - 1], trace)
@@ -173,6 +188,7 @@ def newton_krylov(
     warmup: int = 8,
     relaxation: float = 0.5,
     step_cap: float = 10.0,
+    precision: Precision | str = Precision.AUTOMATIC,
 ) -> FixedPointResult:
     """Exact-tangent Jacobian-free Newton–Krylov on the fixed-point residual.
 
@@ -186,6 +202,7 @@ def newton_krylov(
     is ``2 + gmres_iterations`` map evaluations (one linearisation value, the
     tangent passes, one promotion read), which is exactly the trace layout.
     """
+    initial = _solver_state(initial, precision)
     stride = 2 + gmres_iterations
     trace_length = warmup + newton_steps * stride
 
@@ -196,7 +213,10 @@ def newton_krylov(
         return state + relaxation * (mapped - state), trace
 
     state, trace = jax.lax.fori_loop(
-        0, warmup, warm_body, (initial, jnp.full(trace_length, jnp.nan))
+        0,
+        warmup,
+        warm_body,
+        (initial, jnp.full(trace_length, jnp.nan, dtype=initial.dtype)),
     )
 
     def newton_body(index, carry):

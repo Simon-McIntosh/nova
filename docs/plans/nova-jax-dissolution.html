@@ -22,7 +22,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-09">
-<meta name="plan-version" content="30">
+<meta name="plan-version" content="31">
 <meta name="plan-impl" content="0.6666666666666666">
 </head>
 <body>
@@ -930,6 +930,60 @@ Required work
 
 Verification
   Keep numerics identical except the separately landed §7 policy and the two explicitly measured stencil defect repairs. Add focused regression tests for every repair and path move, run affected slow-inclusive lanes once with full output capture, then run the complete slow-inclusive suite on a sun_debug allocation. Prove JAX-free imports remain intact. Return commit SHAs, exact changed paths, test logs, and confirmation that no moving nova.jax import remains.</pre>
+    </article>
+<article class="r-fu" data-id="f-njd-007" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-09" data-recommends-skill="/reckon-ship nova-jax-dissolution §11" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Make null detection noise-robust and GPU-throughput capable</h4>
+    <div class="r-fu-body"><p>The first route measurements exposed unresolved scientific and performance risks rather than licensing relocation: a smooth periodic field produced 99 raw candidates truncated to 8, clean ITER-scale fp32 fits misclassified 12/18 cases, and several single-field H200 paths were slower than CPU. Audit true-versus-noise null persistence, stabilize the local solve at reduced precision, and build a batched device-resident path whose measured throughput supports the long-term 4.5 TB MAST target before the FieldNull conversion closes.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan: nova-jax-dissolution
+Scope: FieldNull scientific robustness and GPU throughput repair
+Capability: orchestrator
+Requirements: deep reasoning, strict verification, elevated risk
+
+Questions that must be answered from measurement
+  1. Are the 99 candidates genuine continuous stationary points, grid/periodic
+     duplicates, or noise/low-gradient false positives? Report raw, clustered,
+     reference, false-positive and false-negative counts.
+  2. Across weak O/X points plus white and spatially correlated noise, what
+     mechanism steps over noise while retaining weak true nulls? Measure
+     precision/recall, false positives per field, localization error, and the
+     minimum detectable null strength versus noise and correlation length.
+  3. Can centered, nondimensional cell-local fitting plus a stable Hessian solve
+     and scale-relative classification thresholds eliminate the clean fp32
+     failures without requiring blanket fp64?
+  4. Which documented H200 paths are slower than CPU, by how much, and whether
+     batched device-resident execution reverses the result under realistic grid
+     and batch shapes.
+  5. What bytes/s, fields/s and slices/s are required for 4.5 TB/hour, and what
+     share belongs to I/O, decompression, transfers, compile/launch and FieldNull
+     compute?
+
+Required repair
+  Use topological/persistence evidence across neighbouring cells and useful
+  scales, with an explicitly measured weak-null/noise operating point; never
+  accept a raw sign-change count or an arbitrary absolute gradient cutoff.
+  Stabilize the local stationary solve in normalized coordinates at fp32, with
+  scale-aware degeneracy/classification tests and fp64 only as an audited
+  reference or narrowly justified fallback.
+  Expose candidate overflow and confidence/persistence so fixed slots cannot
+  silently truncate scientific results.
+  Provide a batch-first, shape-bucketed, jitted API that remains device-resident
+  through candidate detection, local fit, classification and compaction; avoid
+  Python per-field loops, host callbacks and synchronization/materialization in
+  the hot path.
+
+Done-when
+  Independent synthetic/reference audits show the chosen noise filter&#x27;s full
+  detection operating curve, including weak true nulls and noise-only fields.
+  The fp32 audit matrix has zero clean-field classification failures and a
+  bounded localization error stated relative to grid spacing and metres.
+  CPU and reserved H200 benchmarks separate compile, synchronized steady kernel,
+  transfer-inclusive and device-resident batched throughput. The H200 repair
+  demonstrates a meaningful throughput win at realistic batches and publishes a
+  defensible end-to-end projection toward 4.5 TB/hour with bottlenecks named.
+  Focused regressions pin noise rejection, weak-null retention, overflow,
+  reduced-precision stability and CPU/GPU parity. Full slow-inclusive validation
+  is green before relocation/closure.</pre>
     </article>
 </section>
 

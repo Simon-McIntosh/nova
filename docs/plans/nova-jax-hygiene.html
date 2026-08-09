@@ -19,8 +19,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-sprint" content="S7">
-<meta name="plan-modified" content="2026-08-08">
-<meta name="plan-version" content="2">
+<meta name="plan-modified" content="2026-08-09">
+<meta name="plan-version" content="4">
 <meta name="plan-impl" content="1.0">
 </head>
 <body>
@@ -94,7 +94,7 @@
         <code>nova/geometry/hexstencil.py</code> instead), and the four greens hosts were KEPT:
         measured, the traced twins cost 1.9–3.9× and return a small negative flux where the host
         returns the divergence <code>inf</code>. No suite regressed; ruff 34 against a 36 baseline.
-        Full record: <a href="archive/nova-jax-hygiene-s2-landed.html">§2 landed</a>.
+        Full record: <a href="/nova/evidence/archive/nova-jax-hygiene-s2-landed">§2 landed</a>.
       </p>
     </section>
 
@@ -119,7 +119,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-njh-001" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-08" data-recommends-skill="" data-resolved-at="2026-08-08T21:55:41+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-njh-001" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-08" data-recommends-skill="" data-resolved-at="2026-08-09T08:07:23+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Execute the hygiene sweep (§2 items 1–5)</h4>
     <div class="r-fu-body"><p>Deletions front-load the value: most of the apparent variant
         proliferation is six dead files and nine scattered config calls. Zero-importer proof
@@ -158,11 +158,11 @@ Done-when
   2. nova/jax/ holds only JAX code; duplicate math single-homed.
   3. Divergence parity tests added and green; full suite green; followup
      resolved with the before/after file census.</pre>
-    <p class="r-fu-outcome">All five items landed, commits 28035f70..0f553ebb. Census: nova/jax 16 modules -> 14, every remaining one referencing jax; 5 dead modules deleted (jax/gap, jax/plasmaloc, field/jax_bspline, field/jaxopt_linalg, utilities/xpu) with per-file zero-importer proof; wall_mask + equilibrium_labels rehomed to nova/equilibrium; nova/jax/config.py added as the single jax_enable_x64 owner, collapsing 10 sites in nova and 9 in tests. Duplicate math single-homed: Bernstein (by deletion), _dilate4, the biquadratic null fit. THREE REAL DEFECTS found by the parity work, each returning a wrong answer rather than an error: a Force operator left with no index by a silent except-KeyError (e4ec7a0c); an empty profile ladder that raised on the host arm and returned a clean (n,0) basis on the traced arm (b31e198d); a missing degenerate-fit guard letting +-inf into vmapped gradients (ed33cf3a). TWO LISTED ITEMS REFUSED ON EVIDENCE: nova/jax/fieldnull.py is not a class-for-class copy -- its hex-stencil construction was unique and moved to nova/geometry/hexstencil.py per owner direction (the stencil is 6-point; the 7th column is the prepended centre); and the four greens hosts were KEPT after measurement -- the traced twins run 1.9-3.9x and return a small negative flux where the host returns the divergence inf, which is the wrong answer a caller cannot detect. No suite regressed (1172/103/72/58/28/23/20/18 passed across the affected lanes); ruff 34 against a 36 baseline. Record: docs/plans/archive/nova-jax-hygiene-s2-landed.html</p>
+    <p class="r-fu-outcome">All five items landed, commits 28035f70..0f553ebb. Census: nova/jax 16 modules -> 14, every remaining one referencing jax; 5 dead modules deleted (jax/gap, jax/plasmaloc, field/jax_bspline, field/jaxopt_linalg, utilities/xpu) with per-file zero-importer proof; wall_mask + equilibrium_labels rehomed to nova/equilibrium; nova/jax/config.py added as the single jax_enable_x64 owner, collapsing 10 sites in nova and 9 in tests. Duplicate math single-homed: Bernstein (by deletion), _dilate4, the biquadratic null fit. THREE REAL DEFECTS found by the parity work, each returning a wrong answer rather than an error: a Force operator left with no index by a silent except-KeyError (e4ec7a0c); an empty profile ladder that raised on the host arm and returned a clean (n,0) basis on the traced arm (b31e198d); a missing degenerate-fit guard letting +-inf into vmapped gradients (ed33cf3a). TWO LISTED ITEMS REFUSED ON EVIDENCE: nova/jax/fieldnull.py is not a class-for-class copy -- its hex-stencil construction was unique and moved to nova/geometry/hexstencil.py per owner direction (the stencil is 6-point; the 7th column is the prepended centre); and the four greens hosts were KEPT after measurement -- the traced twins run 1.9-3.9x and return a small negative flux where the host returns the divergence inf, which is the wrong answer a caller cannot detect. No suite regressed (1172/103/72/58/28/23/20/18 passed across the affected lanes); ruff 34 against a 36 baseline. Record: docs/evidence/archive/nova-jax-hygiene-s2-landed.html</p>
     </article>
 <article class="r-fu" data-id="f-njh-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-08" data-recommends-skill="/reckon-ship nova-jax-hygiene" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Adopt the NaN wall_flux convention, or keep the serial sentinel deliberately</h4>
-    <div class="r-fu-body"><p>The sweep documented rather than aligned the one convention split it found. The serial <code>wall_flux</code> returns <code>(0, 0, 0)</code> at zero polarity, the traced one all-NaN. NaN is the safer answer &mdash; <code>(0, 0, 0)</code> is a well-formed coordinate and flux a caller cannot distinguish from a real result &mdash; but adopting it changes what <code>Limiter.update_wall</code> publishes at zero plasma current, so it needs validating rather than doing in passing. Two callers.</p></div>
+    <div class="r-fu-body"><p>The sweep documented rather than aligned the one convention split it found. The serial <code>wall_flux</code> returns <code>(0, 0, 0)</code> at zero polarity, the traced one all-NaN. NaN is the safer answer — <code>(0, 0, 0)</code> is a well-formed coordinate and flux a caller cannot distinguish from a real result — but adopting it changes what <code>Limiter.update_wall</code> publishes at zero plasma current, so it needs validating rather than doing in passing. Two callers.</p></div>
     <pre class="r-fu-prompt">Project: nova
 Plan:    nova-jax-hygiene (http://127.0.0.1:8765/nova/nova-jax-hygiene.html)
 Section: the wall_flux convention left open by the sweep

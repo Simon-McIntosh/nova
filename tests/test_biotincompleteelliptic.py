@@ -59,7 +59,16 @@ from scipy.special import elliprf, elliprj
 from nova.biot import incompleteelliptic
 from nova.biot.completeelliptic import complete_kind, complete_pole
 from nova.biot.incompleteelliptic import TRIPS, incomplete_kind, incomplete_pole
-from nova.jax.config import enable_x64
+from nova.jax.config import configure_dtypes
+
+
+def _f64(value):
+    """Construct an explicitly selected double-precision JAX value."""
+    configure_dtypes()
+    import jax.numpy as jnp
+
+    return jnp.asarray(value, dtype=jnp.float64)
+
 
 LONG_PI = np.longdouble("3.14159265358979323846264338327950288")
 
@@ -312,7 +321,7 @@ def test_the_trip_count_is_bounded_by_the_argument_range_in_both_directions():
 def traced_namespace():
     """Return ``jax.numpy`` and a jit, or skip where jax is not installed."""
     jax = pytest.importorskip("jax")
-    enable_x64()
+    configure_dtypes()
     return jax, jax.numpy
 
 
@@ -325,17 +334,17 @@ def test_the_traced_path_is_the_same_code_and_agrees_to_a_few_ulp():
     @jax.jit
     def traced(complement):
         return incomplete_kind(
-            jnp.asarray(amplitude),
+            _f64(amplitude),
             complement,
-            sine=jnp.asarray(sine),
-            cosine=jnp.asarray(cosine),
+            sine=_f64(sine),
+            cosine=_f64(cosine),
             xp=jnp,
         )
 
     host = incomplete_kind(
         np.full_like(complements, amplitude), complements, sine=sine, cosine=cosine
     )
-    device = traced(jnp.asarray(complements))
+    device = traced(_f64(complements))
     for one, other in zip(host, device):
         assert np.max(np.abs(np.asarray(other) - one) / np.abs(one)) < 1e-14
 
@@ -348,14 +357,14 @@ def test_the_first_kind_differentiates_in_the_amplitude_exactly():
     def first(amplitude):
         return incomplete_kind(
             amplitude,
-            jnp.asarray(complement),
+            _f64(complement),
             sine=jnp.sin(amplitude),
             cosine=jnp.cos(amplitude),
             xp=jnp,
         )[0]
 
     for amplitude in (0.2, 0.8, 1.4):
-        got = float(jax.grad(first)(jnp.asarray(amplitude)))
+        got = float(jax.grad(first)(_f64(amplitude)))
         expected = 1.0 / np.sqrt(
             np.cos(amplitude) ** 2 + complement * np.sin(amplitude) ** 2
         )
@@ -650,12 +659,10 @@ def test_the_third_kind_traces_and_agrees_to_a_few_ulp():
 
     @jax.jit
     def traced(pole, complement):
-        return incomplete_pole(
-            pole, complement, jnp.asarray(sine), jnp.asarray(cosine), xp=jnp
-        )
+        return incomplete_pole(pole, complement, _f64(sine), _f64(cosine), xp=jnp)
 
     host = incomplete_pole(poles, complements, sine, cosine)
-    device = traced(jnp.asarray(poles), jnp.asarray(complements))
+    device = traced(_f64(poles), _f64(complements))
     assert np.max(np.abs(np.asarray(device) - host) / np.abs(host)) < 1e-14
 
 
@@ -698,10 +705,10 @@ def test_the_compiled_third_kind_holds_the_extended_reference_over_the_sweep():
         host = np.asarray(incomplete_pole(poles, complements, sine, cosine))
         device = np.asarray(
             traced(
-                jnp.asarray(poles),
-                jnp.asarray(complements),
-                jnp.asarray(sine),
-                jnp.asarray(cosine),
+                _f64(poles),
+                _f64(complements),
+                _f64(sine),
+                _f64(cosine),
             )
         )
         for index, (pole, complement) in enumerate(zip(poles, complements)):
@@ -839,9 +846,7 @@ def test_the_gaps_are_carried_as_products_because_the_subtraction_has_no_digits(
 
     @jax.jit
     def traced(pole, complement):
-        return incomplete_pole(
-            pole, complement, jnp.asarray(sine), jnp.asarray(cosine), xp=jnp
-        )
+        return incomplete_pole(pole, complement, _f64(sine), _f64(cosine), xp=jnp)
 
     def strayed(got):
         return max(
@@ -852,7 +857,7 @@ def test_the_gaps_are_carried_as_products_because_the_subtraction_has_no_digits(
 
     def compiled():
         traced.clear_cache()
-        return np.asarray(traced(jnp.asarray(swept), jnp.asarray(complements)))
+        return np.asarray(traced(_f64(swept), _f64(complements)))
 
     host = np.asarray(incomplete_pole(swept, complements, sine, cosine))
     assert strayed(host) < 4e-15  # measured 1.3e-15
@@ -897,21 +902,19 @@ def test_the_third_kind_differentiates_where_a_gap_vanishes_exactly():
     _, sine, cosine = pair(0.4)
 
     def value(pole, complement):
-        return incomplete_pole(
-            pole, complement, jnp.asarray(sine), jnp.asarray(cosine), xp=jnp
-        )
+        return incomplete_pole(pole, complement, _f64(sine), _f64(cosine), xp=jnp)
 
     slope = jax.jit(jax.grad(value, argnums=(0, 1)))
     # the confluence: the partner pole and the complement coincide exactly
     for pole in (1e-8, 1e-3, 0.3):
-        for taken in slope(jnp.asarray(pole), jnp.asarray(pole)):
+        for taken in slope(_f64(pole), _f64(pole)):
             assert np.isfinite(float(taken))
 
     # and away from it the slope is the derivative itself, against a central
     # difference -- taken where the difference is well conditioned, since a step
     # small enough to sit inside a tiny complement is all round-off
     for pole, complement in ((0.3, 0.1), (3.0, 0.1), (0.3, 1e-3)):
-        taken = slope(jnp.asarray(pole), jnp.asarray(complement))
+        taken = slope(_f64(pole), _f64(complement))
         for index, argument in enumerate((pole, complement)):
             step = 1e-5 * argument
             moved = [
@@ -923,8 +926,8 @@ def test_the_third_kind_differentiates_where_a_gap_vanishes_exactly():
                 for other in (0, 1)
             ]
             difference = (
-                float(value(*(jnp.asarray(term) for term in moved)))
-                - float(value(*(jnp.asarray(term) for term in backed)))
+                float(value(*(_f64(term) for term in moved)))
+                - float(value(*(_f64(term) for term in backed)))
             ) / (2.0 * step)
             assert float(taken[index]) == pytest.approx(difference, rel=1e-7)
 
@@ -945,17 +948,11 @@ def test_the_third_kind_differentiates_forward_below_a_pole_of_one():
     _, sine, cosine = pair(0.4)
 
     def value(pole, complement):
-        return incomplete_pole(
-            pole, complement, jnp.asarray(sine), jnp.asarray(cosine), xp=jnp
-        )
+        return incomplete_pole(pole, complement, _f64(sine), _f64(cosine), xp=jnp)
 
     for pole, complement in ((1e-8, 0.1), (0.3, 0.1), (3.0, 0.1)):
-        forward = jax.jacfwd(value, argnums=(0, 1))(
-            jnp.asarray(pole), jnp.asarray(complement)
-        )
-        reverse = jax.grad(value, argnums=(0, 1))(
-            jnp.asarray(pole), jnp.asarray(complement)
-        )
+        forward = jax.jacfwd(value, argnums=(0, 1))(_f64(pole), _f64(complement))
+        reverse = jax.grad(value, argnums=(0, 1))(_f64(pole), _f64(complement))
         for one, other in zip(forward, reverse):
             assert np.isfinite(float(one))
             assert float(one) == pytest.approx(float(other), rel=1e-12)
@@ -993,9 +990,9 @@ def test_the_slope_in_the_pole_holds_the_extended_reference_over_the_sweep():
     def value(pole):
         return incomplete_pole(
             pole,
-            jnp.asarray(complement),
-            jnp.asarray(sine),
-            jnp.asarray(cosine),
+            _f64(complement),
+            _f64(sine),
+            _f64(cosine),
             xp=jnp,
         )
 
@@ -1005,5 +1002,5 @@ def test_the_slope_in_the_pole_holds_the_extended_reference_over_the_sweep():
         expected = _pole_slope(0.4, pole, complement)
         coarse = _pole_slope(0.4, pole, complement, nodes=30)
         assert coarse == pytest.approx(expected, rel=1e-15)
-        for taken in (forward(jnp.asarray(pole)), reverse(jnp.asarray(pole))):
+        for taken in (forward(_f64(pole)), reverse(_f64(pole))):
             assert float(taken) == pytest.approx(expected, rel=1e-13)

@@ -11,13 +11,13 @@ import optimistix as optx
 from nova.equilibrium.forward import ForwardProfile
 from nova.equilibrium.forward_operator import ForwardFluxOperator
 from nova.imas.operate import Operate
-from nova.jax.config import enable_x64
+from nova.jax.config import configure_dtypes
 
 logger = logging.getLogger()
 logging.basicConfig(level=logging.INFO, force=True)
 
 timer.set_level(logging.INFO)
-enable_x64()
+configure_dtypes()
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--dirname", default=".nova", help="set cache dir")

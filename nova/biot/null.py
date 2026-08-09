@@ -6,7 +6,7 @@ import jax.numpy as jnp
 import numpy as np
 
 from nova.geometry import select
-from nova.jax.config import Precision, _resolve_precision
+from nova.jax.config import Precision, resolve_precision
 from nova.jax.tree_util import Pytree
 
 
@@ -81,7 +81,7 @@ class Null2D(NullBase):
         if np.any(scale <= 0):
             raise ValueError("Null2D stencils must span both physical axes")
         local = offsets / scale[:, None, :]
-        precision = _resolve_precision(precision, Precision.SINGLE)
+        precision = resolve_precision(precision, Precision.SINGLE)
         fit_dtype = jnp.float32 if precision is Precision.SINGLE else jnp.float64
         return cls(
             coordinate=jnp.asarray(physical, dtype=jnp.float64),

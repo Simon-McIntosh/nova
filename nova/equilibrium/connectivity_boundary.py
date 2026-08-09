@@ -73,23 +73,20 @@ from nova.equilibrium.stencil_nulls import (
     xpoint_candidates,
 )
 from nova.equilibrium.labels import LCFS_ANGLES, N_XPOINT_SLOTS
-from nova.jax.config import enable_x64
+from nova.jax.config import Precision, resolve_precision
 
-enable_x64()
 
-#: the evaluator's 8 fixed poloidal query angles as a device array (default
-#: `angles` — a module singleton so the jitted signature has no call in defaults)
-_DEFAULT_ANGLES = jnp.asarray(LCFS_ANGLES)
-
-#: default wall boundary points — a single far-away point that is never reachable,
-#: so a call without a wall polygon falls back to the flood binding level.
-_NO_WALL = jnp.asarray([1.0e30])
-
-#: default wall-node flux — a single NaN so, by broadcasting, every node falls
-#: back to the bilinear grid read.  A caller with the exact campaign ``g_wall``
-#: node flux passes a finite array aligned with ``wall_r``/``wall_z`` and each
-#: finite node then reads its EXACT flux instead of the O(Δ²) bilerp.
-_NO_WALL_PSI = jnp.asarray([jnp.nan])
+def _boundary_defaults(psi2d, rg, zg, angles, wall_r, wall_z, wall_psi):
+    """Materialise optional values in geometry or solved-field dtype."""
+    if angles is None:
+        angles = jnp.asarray(LCFS_ANGLES, dtype=rg.dtype)
+    if wall_r is None:
+        wall_r = jnp.asarray([1.0e30], dtype=rg.dtype)
+    if wall_z is None:
+        wall_z = jnp.asarray([1.0e30], dtype=zg.dtype)
+    if wall_psi is None:
+        wall_psi = jnp.asarray([jnp.nan], dtype=psi2d.dtype)
+    return angles, wall_r, wall_z, wall_psi
 
 
 def _arg_extreme(values, *, maximize):
@@ -155,12 +152,8 @@ def _bilerp(field: jnp.ndarray, rg: jnp.ndarray, zg: jnp.ndarray, r, z):
     """Bilinear-interpolate a ``(nz, nr)`` field at physical ``(r, z)`` (device)."""
     nr = rg.shape[0]
     nz = zg.shape[0]
-    fr = jnp.clip(
-        jnp.interp(r, rg, jnp.arange(nr, dtype=jnp.float64)), 0.0, nr - 1 - 1e-9
-    )
-    fz = jnp.clip(
-        jnp.interp(z, zg, jnp.arange(nz, dtype=jnp.float64)), 0.0, nz - 1 - 1e-9
-    )
+    fr = jnp.clip(jnp.interp(r, rg, jnp.arange(nr, dtype=rg.dtype)), 0.0, nr - 1 - 1e-9)
+    fz = jnp.clip(jnp.interp(z, zg, jnp.arange(nz, dtype=zg.dtype)), 0.0, nz - 1 - 1e-9)
     j0 = jnp.floor(fr).astype(jnp.int32)
     i0 = jnp.floor(fz).astype(jnp.int32)
     dj = fr - j0
@@ -357,8 +350,8 @@ def _read_ingredients(
     # adjacent to the axis region.  Computed for EVERY slice; on a diverted plasma
     # the reachable wall sits OUTSIDE the separatrix so this overshoots and loses
     # the confined-most min to the saddle below — no class switch needed.
-    ar_idx = jnp.arange(nr, dtype=jnp.float64)
-    az_idx = jnp.arange(nz, dtype=jnp.float64)
+    ar_idx = jnp.arange(nr, dtype=rg.dtype)
+    az_idx = jnp.arange(nz, dtype=zg.dtype)
     wj = jnp.clip(jnp.round(jnp.interp(wall_r, rg, ar_idx)), 0, nr - 1)
     wi = jnp.clip(jnp.round(jnp.interp(wall_z, zg, az_idx)), 0, nz - 1)
     reachable = reach[wi.astype(jnp.int32), wj.astype(jnp.int32)]
@@ -447,11 +440,11 @@ def traced_boundary_read(
     n_levels: int = 96,
     n_bisect: int = 18,
     n_ray: int = 512,
-    angles: jnp.ndarray = _DEFAULT_ANGLES,
+    angles: jnp.ndarray | None = None,
     lcfs_norm=0.999,
-    wall_r: jnp.ndarray = _NO_WALL,
-    wall_z: jnp.ndarray = _NO_WALL,
-    wall_psi: jnp.ndarray = _NO_WALL_PSI,
+    wall_r: jnp.ndarray | None = None,
+    wall_z: jnp.ndarray | None = None,
+    wall_psi: jnp.ndarray | None = None,
 ) -> dict:
     """Connectivity LCFS read from ψ — the device-native ``lcfs_contour``.
 
@@ -471,6 +464,9 @@ def traced_boundary_read(
     ``s_star`` (the binding level in [0, 1]), ``radii`` ``(len(angles),)`` LCFS
     radii about the axis [m], and ``n_core_cells``.  ``jit``/``vmap``/``grad``-safe.
     """
+    angles, wall_r, wall_z, wall_psi = _boundary_defaults(
+        psi2d, rg, zg, angles, wall_r, wall_z, wall_psi
+    )
     ing = _read_ingredients(
         psi2d,
         rg,
@@ -615,11 +611,11 @@ def traced_smooth_boundary_read(
     n_levels: int = 96,
     n_bisect: int = 18,
     n_ray: int = 512,
-    angles: jnp.ndarray = _DEFAULT_ANGLES,
+    angles: jnp.ndarray | None = None,
     lcfs_norm=0.999,
-    wall_r: jnp.ndarray = _NO_WALL,
-    wall_z: jnp.ndarray = _NO_WALL,
-    wall_psi: jnp.ndarray = _NO_WALL_PSI,
+    wall_r: jnp.ndarray | None = None,
+    wall_z: jnp.ndarray | None = None,
+    wall_psi: jnp.ndarray | None = None,
     temperature=0.01,
 ) -> dict:
     """The SMOOTH connectivity boundary read — the end-to-end differentiable path.
@@ -652,6 +648,9 @@ def traced_smooth_boundary_read(
     ``core_weight`` ``(nz, nr)``, ``n_core_soft``, ``p_diverted``, ``u_wall``,
     ``u_xpoint``.  ``jit``/``vmap``/``grad``-safe.
     """
+    angles, wall_r, wall_z, wall_psi = _boundary_defaults(
+        psi2d, rg, zg, angles, wall_r, wall_z, wall_psi
+    )
     ing = _read_ingredients(
         psi2d,
         rg,
@@ -864,6 +863,7 @@ def host_boundary_read(
     angles=LCFS_ANGLES,
     lcfs_norm: float = 0.999,
     wall_psi=None,
+    precision: Precision | str = Precision.AUTOMATIC,
 ) -> ConnectivityBoundary:
     """Host adapter: run :func:`traced_boundary_read` on one slice, return numpy.
 
@@ -877,6 +877,9 @@ def host_boundary_read(
     """
     import numpy as np  # noqa: PLC0415
 
+    resolved = resolve_precision(precision, Precision.DOUBLE)
+    dtype = jnp.float32 if resolved is Precision.SINGLE else jnp.float64
+    geometry_dtype = jnp.float64
     wall_r, wall_z = _densify_wall(grid)
     # ONE hard error per solve: the flood seed (the axis cell) must be occupiable
     # — if it lands in wall material (or outside the vessel) the connectivity read
@@ -894,23 +897,23 @@ def host_boundary_read(
             "axis-connected plasma to grow"
         )
     if wall_psi is None:
-        wpsi = _NO_WALL_PSI
+        wpsi = jnp.asarray([jnp.nan], dtype=dtype)
     else:
-        wpsi = jnp.asarray(wall_psi, dtype=jnp.float64)
+        wpsi = jnp.asarray(wall_psi, dtype=dtype)
     out = traced_boundary_read(
-        jnp.asarray(psi2d, dtype=jnp.float64),
-        jnp.asarray(rg_np, dtype=jnp.float64),
-        jnp.asarray(zg_np, dtype=jnp.float64),
+        jnp.asarray(psi2d, dtype=dtype),
+        jnp.asarray(rg_np, dtype=geometry_dtype),
+        jnp.asarray(zg_np, dtype=geometry_dtype),
         jnp.asarray(inside),
-        jnp.asarray(axis[0], dtype=jnp.float64),
-        jnp.asarray(axis[1], dtype=jnp.float64),
+        jnp.asarray(axis[0], dtype=geometry_dtype),
+        jnp.asarray(axis[1], dtype=geometry_dtype),
         int(n_levels),
         int(n_bisect),
         int(n_ray),
-        jnp.asarray(angles, dtype=jnp.float64),
-        jnp.asarray(lcfs_norm, dtype=jnp.float64),
-        jnp.asarray(wall_r, dtype=jnp.float64),
-        jnp.asarray(wall_z, dtype=jnp.float64),
+        jnp.asarray(angles, dtype=geometry_dtype),
+        jnp.asarray(lcfs_norm, dtype=dtype),
+        jnp.asarray(wall_r, dtype=geometry_dtype),
+        jnp.asarray(wall_z, dtype=geometry_dtype),
         wpsi,
     )
     return ConnectivityBoundary(
@@ -952,6 +955,7 @@ def host_boundary_read_smooth(
     angles=LCFS_ANGLES,
     lcfs_norm: float = 0.999,
     wall_psi=None,
+    precision: Precision | str = Precision.AUTOMATIC,
 ) -> dict:
     """Host adapter: the smooth read at the stencil axis, on one slice (numpy out).
 
@@ -967,27 +971,30 @@ def host_boundary_read_smooth(
     """
     import numpy as np  # noqa: PLC0415
 
+    resolved = resolve_precision(precision, Precision.DOUBLE)
+    dtype = jnp.float32 if resolved is Precision.SINGLE else jnp.float64
+    geometry_dtype = jnp.float64
     wall_r, wall_z = _densify_wall(grid)
     if wall_psi is None:
-        wpsi = _NO_WALL_PSI
+        wpsi = jnp.asarray([jnp.nan], dtype=dtype)
     else:
-        wpsi = jnp.asarray(wall_psi, dtype=jnp.float64)
+        wpsi = jnp.asarray(wall_psi, dtype=dtype)
     out = _smooth_read_at_stencil_axis(
-        jnp.asarray(psi2d, dtype=jnp.float64),
-        jnp.asarray(grid.rg, dtype=jnp.float64),
-        jnp.asarray(grid.zg, dtype=jnp.float64),
+        jnp.asarray(psi2d, dtype=dtype),
+        jnp.asarray(grid.rg, dtype=geometry_dtype),
+        jnp.asarray(grid.zg, dtype=geometry_dtype),
         jnp.asarray(np.asarray(grid.inside_limiter, dtype=bool)),
-        jnp.asarray(axis[0], dtype=jnp.float64),
-        jnp.asarray(axis[1], dtype=jnp.float64),
+        jnp.asarray(axis[0], dtype=geometry_dtype),
+        jnp.asarray(axis[1], dtype=geometry_dtype),
         int(n_levels),
         int(n_bisect),
         int(n_ray),
-        jnp.asarray(angles, dtype=jnp.float64),
-        jnp.asarray(lcfs_norm, dtype=jnp.float64),
-        jnp.asarray(wall_r, dtype=jnp.float64),
-        jnp.asarray(wall_z, dtype=jnp.float64),
+        jnp.asarray(angles, dtype=geometry_dtype),
+        jnp.asarray(lcfs_norm, dtype=dtype),
+        jnp.asarray(wall_r, dtype=geometry_dtype),
+        jnp.asarray(wall_z, dtype=geometry_dtype),
         wpsi,
-        jnp.asarray(temperature, dtype=jnp.float64),
+        jnp.asarray(temperature, dtype=dtype),
     )
     return {k: np.asarray(v) for k, v in out.items()}
 
@@ -1003,6 +1010,7 @@ def host_boundary_read_batch(
     angles=LCFS_ANGLES,
     lcfs_norm: float = 0.999,
     wall_psi=None,
+    precision: Precision | str = Precision.AUTOMATIC,
 ) -> dict:
     """Batched read over ``(B, nz, nr)`` ψ fields sharing one grid — a single vmap.
 
@@ -1014,19 +1022,22 @@ def host_boundary_read_batch(
     """
     import numpy as np  # noqa: PLC0415
 
-    rg = jnp.asarray(grid.rg, dtype=jnp.float64)
-    zg = jnp.asarray(grid.zg, dtype=jnp.float64)
+    resolved = resolve_precision(precision, Precision.DOUBLE)
+    dtype = jnp.float32 if resolved is Precision.SINGLE else jnp.float64
+    geometry_dtype = jnp.float64
+    rg = jnp.asarray(grid.rg, dtype=geometry_dtype)
+    zg = jnp.asarray(grid.zg, dtype=geometry_dtype)
     inside = jnp.asarray(np.asarray(grid.inside_limiter, dtype=bool))
-    ang = jnp.asarray(angles, dtype=jnp.float64)
-    ps = jnp.asarray(psi_stack, dtype=jnp.float64)
-    ax = jnp.asarray(axes, dtype=jnp.float64)
+    ang = jnp.asarray(angles, dtype=geometry_dtype)
+    ps = jnp.asarray(psi_stack, dtype=dtype)
+    ax = jnp.asarray(axes, dtype=dtype)
     wall_r, wall_z = _densify_wall(grid)
-    wr = jnp.asarray(wall_r, dtype=jnp.float64)
-    wz = jnp.asarray(wall_z, dtype=jnp.float64)
+    wr = jnp.asarray(wall_r, dtype=geometry_dtype)
+    wz = jnp.asarray(wall_z, dtype=geometry_dtype)
     if wall_psi is None:
-        wpsi = jnp.broadcast_to(_NO_WALL_PSI, (ps.shape[0], 1))
+        wpsi = jnp.full((ps.shape[0], 1), jnp.nan, dtype=dtype)
     else:
-        wpsi = jnp.asarray(wall_psi, dtype=jnp.float64)
+        wpsi = jnp.asarray(wall_psi, dtype=dtype)
 
     def one(psi2d, axis, wp):
         return traced_boundary_read(
@@ -1040,7 +1051,7 @@ def host_boundary_read_batch(
             int(n_bisect),
             int(n_ray),
             ang,
-            jnp.asarray(lcfs_norm, dtype=jnp.float64),
+            jnp.asarray(lcfs_norm, dtype=dtype),
             wr,
             wz,
             wp,

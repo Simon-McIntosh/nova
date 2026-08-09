@@ -27,17 +27,17 @@ by construction (pinned by test):
 
 from __future__ import annotations
 
+import functools
+
 import numpy as np
 
+from nova.jax.config import Precision, resolve_precision
 from nova.utilities.importmanager import skip_import
 
 with skip_import("jax"):
     import jax
     import jax.numpy as jnp
 
-    from nova.jax.config import enable_x64
-
-    enable_x64()
 
 #: floor on a step interval [s] -- a repeated sample must not divide by zero
 MIN_STEP = 1e-6
@@ -121,28 +121,20 @@ def zoh_mode_response(
     return state
 
 
-def scan_eddy_modes(tau, times, psi_mode, initial=None, voltage_mode=None):
-    """Exact-ZOH mode integration as a fixed-shape ``jax.lax.scan``.
-
-    Identical recurrence and identical output to :func:`integrate_eddy_ode`, with
-    every shape fixed at trace time: ``tau`` ``(n_modes,)``, ``times``
-    ``(n_t,)``, ``psi_mode`` ``(n_t, n_modes)``.  ``jit`` / ``vmap`` / ``grad``
-    -safe, so a batch of drive histories (or of candidate resistance models,
-    through ``tau``) propagates in one device call.
-
-    Returns ``(a, u)`` as arrays of the input dtype -- run with x64 enabled (this
-    module does so on import) to match the host integrator to round-off.
-    """
-    tau = jnp.asarray(tau)
-    times = jnp.asarray(times)
-    psi_mode = jnp.asarray(psi_mode)
-    start = jnp.zeros_like(psi_mode[0]) if initial is None else jnp.asarray(initial)
+def _scan_eddy_modes_core(
+    tau,
+    times,
+    psi_mode,
+    initial=None,
+    voltage_mode=None,
+):
+    """Run one already-typed drive history through the traced recurrence."""
+    start = jnp.zeros_like(psi_mode[0]) if initial is None else initial
     intervals = jnp.maximum(jnp.diff(times), MIN_STEP)
     swing = -jnp.diff(psi_mode, axis=0)
     if voltage_mode is None:
         mid = jnp.zeros_like(swing)
     else:
-        voltage_mode = jnp.asarray(voltage_mode)
         mid = 0.5 * (voltage_mode[1:] + voltage_mode[:-1])
 
     def step(state, carry):
@@ -160,6 +152,56 @@ def scan_eddy_modes(tau, times, psi_mode, initial=None, voltage_mode=None):
         jnp.concatenate([start[jnp.newaxis, :], history]),
         jnp.concatenate([jnp.zeros_like(start)[jnp.newaxis, :], swing]),
     )
+
+
+@functools.lru_cache(maxsize=None)
+def _compiled_scan(batched: bool, has_initial: bool, has_voltage: bool):
+    """Return the compiled single-history or leading-batch recurrence."""
+    if not batched:
+        return jax.jit(_scan_eddy_modes_core)
+    return jax.jit(
+        jax.vmap(
+            _scan_eddy_modes_core,
+            in_axes=(
+                None,
+                None,
+                0,
+                0 if has_initial else None,
+                0 if has_voltage else None,
+            ),
+        )
+    )
+
+
+def scan_eddy_modes(
+    tau,
+    times,
+    psi_mode,
+    initial=None,
+    voltage_mode=None,
+    *,
+    precision: Precision | str = Precision.AUTOMATIC,
+):
+    """Exact-ZOH mode integration through a dtype-selecting device dispatcher.
+
+    ``psi_mode`` is either ``(n_t, n_modes)`` or a leading batch of that shape.
+    The dispatcher constructs explicitly typed device arrays before entering the
+    compiled recurrence, so raw host arrays cannot be silently canonicalised at
+    an outer JIT boundary.  Automatic precision is float64; explicit float32
+    selects a separate executable for throughput-sensitive device work.
+    """
+    resolved = resolve_precision(precision, Precision.DOUBLE)
+    dtype = jnp.float32 if resolved is Precision.SINGLE else jnp.float64
+    tau = jnp.asarray(tau, dtype=dtype)
+    times = jnp.asarray(times, dtype=dtype)
+    psi_mode = jnp.asarray(psi_mode, dtype=dtype)
+    initial = None if initial is None else jnp.asarray(initial, dtype=dtype)
+    voltage_mode = (
+        None if voltage_mode is None else jnp.asarray(voltage_mode, dtype=dtype)
+    )
+    batched = psi_mode.ndim > 2
+    kernel = _compiled_scan(batched, initial is not None, voltage_mode is not None)
+    return kernel(tau, times, psi_mode, initial, voltage_mode)
 
 
 __all__ = [

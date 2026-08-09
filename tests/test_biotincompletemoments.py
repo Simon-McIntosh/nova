@@ -47,7 +47,16 @@ from nova.biot.incompletemoments import (
     harmonic_moments,
     sn_pole_moment,
 )
-from nova.jax.config import enable_x64
+from nova.jax.config import configure_dtypes
+
+
+def _f64(value):
+    """Construct an explicitly selected double-precision JAX value."""
+    configure_dtypes()
+    import jax.numpy as jnp
+
+    return jnp.asarray(value, dtype=jnp.float64)
+
 
 # Held as the amplitude's distance BELOW a quarter turn, which is the arc's own
 # half-separation from one of its ends, and the quantity the accuracy depends on.
@@ -309,7 +318,7 @@ def test_the_source_term_is_what_the_partial_range_adds():
 def test_the_traced_path_is_the_same_code_and_agrees_to_a_few_ulp():
     """One implementation, numpy on the host and a compiled kernel on a device."""
     jax = pytest.importorskip("jax")
-    enable_x64()
+    configure_dtypes()
     jnp = jax.numpy
     co_amplitude = 0.4
     complements = np.array([0.9, 1e-2, 1e-6, 1e-16])
@@ -317,12 +326,12 @@ def test_the_traced_path_is_the_same_code_and_agrees_to_a_few_ulp():
     @jax.jit
     def traced(complement):
         return harmonic_moments(
-            jnp.asarray(0.5 * np.pi - co_amplitude),
+            _f64(0.5 * np.pi - co_amplitude),
             1.0 - complement,
             ORDERS,
             complement=complement,
-            sine=jnp.asarray(np.cos(co_amplitude)),
-            cosine=jnp.asarray(np.sin(co_amplitude)),
+            sine=_f64(np.cos(co_amplitude)),
+            cosine=_f64(np.sin(co_amplitude)),
             xp=jnp,
         )
 
@@ -334,7 +343,7 @@ def test_the_traced_path_is_the_same_code_and_agrees_to_a_few_ulp():
         sine=np.cos(co_amplitude),
         cosine=np.sin(co_amplitude),
     )
-    device = traced(jnp.asarray(complements))
+    device = traced(_f64(complements))
     scale = np.abs(host[0])
     for one, other in zip(host, device):
         assert np.max(np.abs(np.asarray(other) - one) / scale) < 1e-14

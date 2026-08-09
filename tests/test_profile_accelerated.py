@@ -30,6 +30,7 @@ with skip_import("jax"):
     from nova.equilibrium.measurement import Magnetics
     from nova.equilibrium.fixed_point import anderson, newton_krylov, picard
     from nova.equilibrium.stencil_nulls import magnetic_axis_subgrid
+    from nova.jax.config import Precision
 
 
 NR = NZ = 17
@@ -142,6 +143,52 @@ def test_profile_axis_is_independent_of_dtype_bootstrap_import_order():
     assert rows[0]["axis_dtype"] == rows[1]["axis_dtype"] == "float64"
     assert rows[0]["grid_dtype"] == rows[1]["grid_dtype"] == "float64"
     np.testing.assert_array_equal(rows[0]["axis"], rows[1]["axis"])
+
+
+def test_profile_precision_separates_compute_arrays_from_physical_geometry():
+    """Explicit fp32 keeps the hot state single while coordinates remain fp64."""
+    size = 11
+    radial = np.linspace(6.14, 6.26, size, dtype=np.float64)
+    vertical = np.linspace(-3.75, -3.65, size, dtype=np.float64)
+    count = size * size
+
+    def build(precision):
+        return ReconstructProfile(
+            grid_r=radial,
+            grid_z=vertical,
+            inside_limiter=np.ones((size, size), dtype=bool),
+            cell_area=np.full(count, 1.0e-4, dtype=np.float64),
+            source_to_grid=np.zeros((count, 1), dtype=np.float64),
+            plasma_to_grid=np.zeros((count, count), dtype=np.float64),
+            source_to_sensor=np.zeros((1, 1), dtype=np.float64),
+            plasma_to_sensor=np.zeros((1, count), dtype=np.float64),
+            source_names=("source",),
+            degrees=ProfileDegrees(1, 1),
+            axis_seed=(6.2, -3.7),
+            wall_r=np.array([6.14, 6.26, 6.26, 6.14], dtype=np.float64),
+            wall_z=np.array([-3.75, -3.75, -3.65, -3.65], dtype=np.float64),
+            precision=precision,
+        )
+
+    automatic = build(Precision.AUTOMATIC)
+    single = build(Precision.SINGLE)
+    source = single.pack_source_currents({"source": 0.0})
+    flux = single.initial_flux(source, jnp.asarray(1.0, dtype=jnp.float32))
+    radius, height = np.meshgrid(radial, vertical)
+    shaped_flux = -((radius - 6.2031) ** 2 + 1.3 * (height + 3.6982) ** 2)
+    basis, topology = single._profile_basis(
+        jnp.asarray(shaped_flux.ravel(), dtype=jnp.float32)
+    )
+
+    assert automatic.source_to_grid.dtype == jnp.float64
+    assert single.source_to_grid.dtype == jnp.float32
+    assert single._cell_r.dtype == jnp.float32
+    assert source.dtype == jnp.float32
+    assert flux.dtype == jnp.float32
+    assert basis.dtype == jnp.float32
+    assert topology["psi_axis"].dtype == jnp.float32
+    assert topology["core_weight"].dtype == jnp.float32
+    assert automatic.grid_r.dtype == single.grid_r.dtype == jnp.float64
 
 
 def _machine() -> ReconstructProfile:

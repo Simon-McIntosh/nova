@@ -52,12 +52,12 @@ _TRACED_PSI_REFERENCE = np.array(
 _TRACED_PSI_RELATIVE_BOUND = 5.667e-8
 
 
-def test_traced_psi_precision_is_pinned_when_x64_is_enabled():
-    """The selected operator retains its measured fp32 result under global fp64."""
+def test_traced_psi_precision_stays_fp32_under_explicit_dtype_policy():
+    """The selected operator retains its measured fp32 result with fp64 available."""
     from nova.frame.coilset import CoilSet
-    from nova.jax.config import enable_x64
+    from nova.jax.config import configure_dtypes
 
-    assert enable_x64()
+    configure_dtypes()
     coilset = CoilSet(dcoil=-5, dplasma=-15, tcoil="hex", tplasma="hex")
     coilset.firstwall.insert(dict(o=[5, 1, 5]), Ic=15e6)
     coilset.coil.insert(8, 0, 0.75, 0.75, Ic=5e6)
@@ -194,15 +194,20 @@ def test_force_evaluate_applies_index_gain():
     force_index = np.array([1, 0, 3])
 
     operator = Coupling(
-        jnp.asarray(source_target),
+        jnp.asarray(source_target, dtype=jnp.float32),
         MatrixData(force_index=jnp.asarray(force_index)),
         classname="Force",
     )
     result = np.asarray(
-        operator.evaluate(operator.source_target, jnp.asarray(source_current))
+        operator.evaluate(
+            operator.source_target, jnp.asarray(source_current, dtype=jnp.float32)
+        )
     )
+    source_target = source_target.astype(np.float32)
+    source_current = source_current.astype(np.float32)
     reference = source_current[force_index] * (source_target @ source_current)
-    assert np.allclose(result, reference, atol=1e-12)
+    assert result.dtype == np.float32
+    np.testing.assert_allclose(result, reference, rtol=2e-7, atol=2e-8)
 
 
 def test_evaluate_is_jit_traced(cached_plasmagrid):

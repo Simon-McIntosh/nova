@@ -23,6 +23,7 @@ import inspect
 
 import numpy as np
 
+from nova.jax.config import configure_dtypes
 from nova.utilities.importmanager import skip_import
 
 with skip_import("jax"):
@@ -30,6 +31,12 @@ with skip_import("jax"):
     import jax.numpy as jnp
 
     from nova.equilibrium import flux_surface_connectivity as fsc
+
+
+def _f64(value):
+    """Construct an explicitly selected double-precision JAX value."""
+    configure_dtypes()
+    return jnp.asarray(value, dtype=jnp.float64)
 
 
 def _solovev_psi(*, nr=65, nz=97, rax=0.9, a=0.55, elong=1.6):
@@ -46,16 +53,16 @@ def _solovev_psi(*, nr=65, nz=97, rax=0.9, a=0.55, elong=1.6):
 
 def _bins(psi, rg, zg, inside, psi_axis=0.0, psi_bnd=-1.0, n_psin=28):
     return fsc.traced_flux_surface_bins(
-        jnp.asarray(psi),
-        jnp.asarray(rg),
-        jnp.asarray(zg),
+        _f64(psi),
+        _f64(rg),
+        _f64(zg),
         jnp.asarray(inside),
-        jnp.asarray(float(psi_axis)),
-        jnp.asarray(float(psi_bnd)),
-        jnp.asarray(0.04),
-        jnp.asarray(0.985),
+        _f64(psi_axis),
+        _f64(psi_bnd),
+        _f64(0.04),
+        _f64(0.985),
         int(n_psin),
-        jnp.asarray(1.25),
+        _f64(1.25),
     )
 
 
@@ -68,21 +75,19 @@ def test_jax_fsa_is_fp64_jit_vmap_grad_safe():
     assert np.all(np.isfinite(np.asarray(out["inv_r2"])))
     assert abs(float(out["inv_r2"][0]) - 1.0 / 0.9**2) < 0.1
 
-    batch = jnp.stack(
-        [jnp.asarray(psi), jnp.asarray(psi * 1.01), jnp.asarray(psi * 0.99)]
-    )
+    batch = jnp.stack([_f64(psi), _f64(psi * 1.01), _f64(psi * 0.99)])
     vfun = jax.vmap(
         lambda p: fsc.traced_flux_surface_bins(
             p,
-            jnp.asarray(rg),
-            jnp.asarray(zg),
+            _f64(rg),
+            _f64(zg),
             jnp.asarray(inside),
-            jnp.asarray(0.0),
-            jnp.asarray(-1.0),
-            jnp.asarray(0.04),
-            jnp.asarray(0.985),
+            _f64(0.0),
+            _f64(-1.0),
+            _f64(0.04),
+            _f64(0.985),
             28,
-            jnp.asarray(1.25),
+            _f64(1.25),
         )["inv_r2"]
     )
     vb = vfun(batch)
@@ -90,20 +95,20 @@ def test_jax_fsa_is_fp64_jit_vmap_grad_safe():
 
     def loss(pb):
         o = fsc.traced_flux_surface_bins(
-            jnp.asarray(psi),
-            jnp.asarray(rg),
-            jnp.asarray(zg),
+            _f64(psi),
+            _f64(rg),
+            _f64(zg),
             jnp.asarray(inside),
-            jnp.asarray(0.0),
+            _f64(0.0),
             pb,
-            jnp.asarray(0.04),
-            jnp.asarray(0.985),
+            _f64(0.04),
+            _f64(0.985),
             28,
-            jnp.asarray(1.25),
+            _f64(1.25),
         )
         return jnp.mean(o["inv_r2"])
 
-    g = jax.grad(loss)(jnp.asarray(-1.0))
+    g = jax.grad(loss)(_f64(-1.0))
     assert np.isfinite(float(g))
 
 
@@ -123,20 +128,20 @@ def test_output_shape_is_fixed_independent_of_core_size():
 def test_batched_matches_per_slice():
     """vmap over a batch of psi fields equals the per-slice metric reads."""
     psi, rg, zg, inside = _solovev_psi()
-    slices = [jnp.asarray(psi), jnp.asarray(psi * 1.01), jnp.asarray(psi * 0.99)]
+    slices = [_f64(psi), _f64(psi * 1.01), _f64(psi * 0.99)]
 
     def read(p):
         return fsc.traced_flux_surface_bins(
             p,
-            jnp.asarray(rg),
-            jnp.asarray(zg),
+            _f64(rg),
+            _f64(zg),
             jnp.asarray(inside),
-            jnp.asarray(0.0),
-            jnp.asarray(-1.0),
-            jnp.asarray(0.04),
-            jnp.asarray(0.985),
+            _f64(0.0),
+            _f64(-1.0),
+            _f64(0.04),
+            _f64(0.985),
             28,
-            jnp.asarray(1.25),
+            _f64(1.25),
         )["inv_r2"]
 
     per_slice = np.stack([np.asarray(read(p)) for p in slices])

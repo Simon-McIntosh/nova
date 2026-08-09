@@ -41,9 +41,15 @@ from nova.biot.polygon import polygon_greens
 jax = pytest.importorskip("jax")
 
 import jax.numpy as jnp  # noqa: E402
-from nova.jax.config import enable_x64  # noqa: E402
+from nova.jax.config import configure_dtypes  # noqa: E402
 
-enable_x64()
+configure_dtypes()
+
+
+def _f64(value):
+    """Construct an explicitly selected double-precision JAX value."""
+    return jnp.asarray(value, dtype=jnp.float64)
+
 
 # Three axis-aligned turns of a winding pack: every section carries two edges of
 # constant z, which is the configuration the traced pack cannot differentiate in
@@ -219,7 +225,7 @@ def test_the_traced_coupling_reproduces_the_shipped_kernel():
 
     masks = np.asarray([horizontal_edges(section) for section in PENTAGON])
     traced = np.asarray(
-        traced_pack_coupling(jnp, jnp.asarray(PENTAGON), SENSORS, masks, rule=RULE)
+        traced_pack_coupling(jnp, _f64(PENTAGON), SENSORS, masks, rule=RULE)
     )
     host = pack_coupling(PENTAGON, SENSORS, rule=RULE)
     assert np.max(np.abs(traced - host)) < 1e-13 * np.max(np.abs(host))

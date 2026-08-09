@@ -41,7 +41,16 @@ from nova.biot.zeta import (
     zeta,
     zeta_midpoint,
 )
-from nova.jax.config import enable_x64
+from nova.jax.config import Precision, configure_dtypes
+
+
+def _f64(value):
+    """Construct an explicitly selected double-precision JAX value."""
+    configure_dtypes()
+    import jax.numpy as jnp
+
+    return jnp.asarray(value, dtype=jnp.float64)
+
 
 HALF = np.pi / 2.0
 
@@ -286,8 +295,8 @@ def test_batched_path_matches_the_numpy_rule():
     It runs the tanh-sinh rule unconditionally rather than switching per
     element, so the two agree to the gate rather than to the last bit.
     """
-    jax = pytest.importorskip("jax")
-    enable_x64()
+    pytest.importorskip("jax")
+    configure_dtypes()
     from nova.biot.zeta import Zeta
 
     rs, gamma, alpha, want = _scan(CASES + APPROACH_CASES)
@@ -297,3 +306,15 @@ def test_batched_path_matches_the_numpy_rule():
     np.testing.assert_allclose(
         got, zeta(rs, np.ones_like(rs), gamma, alpha), rtol=GATE, atol=0.0
     )
+
+
+def test_batched_precision_is_selected_per_evaluator():
+    """Automatic fp64 and explicit fp32 coexist without a process-wide toggle."""
+    pytest.importorskip("jax")
+    from nova.biot.zeta import Zeta
+
+    arguments = (np.array([1.2]), np.array([0.1]), np.array([1.0]), np.array([0.0]))
+    automatic = Zeta(*arguments, np.array([0.3]))()
+    single = Zeta(*arguments, np.array([0.3]), precision=Precision.SINGLE)()
+    assert automatic.dtype.name == "float64"
+    assert single.dtype.name == "float32"

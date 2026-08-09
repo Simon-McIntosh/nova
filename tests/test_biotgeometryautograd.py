@@ -63,9 +63,15 @@ from nova.biot.zeta import traced_zeta, zeta
 jax = pytest.importorskip("jax")
 
 import jax.numpy as jnp  # noqa: E402
-from nova.jax.config import enable_x64  # noqa: E402
+from nova.jax.config import configure_dtypes  # noqa: E402
 
-enable_x64()
+configure_dtypes()
+
+
+def _f64(value):
+    """Construct an explicitly selected double-precision JAX value."""
+    return jnp.asarray(value, dtype=jnp.float64)
+
 
 # A pentagon with no horizontal edges (every edge carries weight one, so the
 # pack is smooth in every vertex) and a trapezoid whose one horizontal edge
@@ -142,7 +148,7 @@ def test_the_traced_pack_reproduces_pack_section_exactly():
     for section in (PENTAGON, TRAPEZOID):
         mask = horizontal_edges(section)
         edge, weight, norm = pack_section(section)
-        traced = traced_pack_section(jnp, jnp.asarray(section), mask)
+        traced = traced_pack_section(jnp, _f64(section), mask)
         assert np.array_equal(np.asarray(traced[0]), edge)
         assert np.array_equal(np.asarray(traced[1]), weight)
         assert abs(float(traced[2]) - norm) <= 1e-15 * abs(norm)
@@ -162,11 +168,11 @@ def quadrature_traced(vertices):
     edge, weight, norm = traced_pack_section(jnp, vertices, horizontal_edges(PENTAGON))
     phi, wts = _phi_rule(16, 48)
     nodes = tuple(
-        jnp.asarray(array)
+        _f64(array)
         for array in (np.cos(phi), np.sin(phi), np.sin(2.0 * phi), wts * np.cos(phi))
     )
-    r = jnp.asarray(TARGET_R)[:, None]
-    z = jnp.asarray(TARGET_Z)[:, None]
+    r = _f64(TARGET_R)[:, None]
+    z = _f64(TARGET_Z)[:, None]
     psi, dpsi_dr, dpsi_dz = _traced_psi_gradient(
         jnp, r, z, edge[..., None], weight[:, None], *nodes, norm
     )
@@ -181,16 +187,14 @@ def quadrature_reference(vertices):
 def test_polygon_quadrature_geometry_autograd():
     """Vertices -> pack -> quadrature kernel: values, jacfwd vs FD, jacrev."""
     assert (
-        relative_gap(
-            quadrature_traced(jnp.asarray(PENTAGON)), quadrature_reference(PENTAGON)
-        )
+        relative_gap(quadrature_traced(_f64(PENTAGON)), quadrature_reference(PENTAGON))
         < 1e-10
     )
 
     def shifted(delta):
-        return quadrature_traced(jnp.asarray(PENTAGON) + delta[None, :])
+        return quadrature_traced(_f64(PENTAGON) + delta[None, :])
 
-    forward = jax.jacfwd(shifted)(jnp.zeros(2))
+    forward = jax.jacfwd(shifted)(jnp.zeros(2, dtype=jnp.float64))
     step = 1e-6
     for axis in (0, 1):
         difference = central_difference(
@@ -202,7 +206,7 @@ def test_polygon_quadrature_geometry_autograd():
         assert peak_scaled_gap(np.asarray(forward[..., axis]), difference) < 1e-6
 
     # one vertex coordinate, where the kernel has vertices
-    vertex_forward = jax.jacfwd(quadrature_traced)(jnp.asarray(PENTAGON))
+    vertex_forward = jax.jacfwd(quadrature_traced)(_f64(PENTAGON))
     move = np.zeros_like(PENTAGON)
     move[2, 1] = step
     difference = (
@@ -210,7 +214,7 @@ def test_polygon_quadrature_geometry_autograd():
     ) / (2.0 * step)
     assert peak_scaled_gap(np.asarray(vertex_forward[..., 2, 1]), difference) < 1e-6
 
-    reverse = jax.jacrev(shifted)(jnp.zeros(2))
+    reverse = jax.jacrev(shifted)(jnp.zeros(2, dtype=jnp.float64))
     assert relative_gap(reverse, forward) < 1e-10
 
 
@@ -219,11 +223,12 @@ def test_polygon_quadrature_geometry_autograd():
 
 def analytic_packed(xp, vertices, mask):
     edge, weight, norm = traced_pack_section(xp, vertices, mask)
+    dtype = vertices.dtype
     return xp.stack(
         packed_analytic_greens(
             xp,
-            xp.asarray(TARGET_R),
-            xp.asarray(TARGET_Z),
+            xp.asarray(TARGET_R, dtype=dtype),
+            xp.asarray(TARGET_Z, dtype=dtype),
             edge[..., None],
             weight[:, None],
             norm,
@@ -244,14 +249,14 @@ def test_closed_form_polygon_geometry_autograd(section):
     class, each of them seconds rather than a minute.
     """
     mask = horizontal_edges(section)
-    traced = analytic_packed(jnp, jnp.asarray(section), mask)
+    traced = analytic_packed(jnp, _f64(section), mask)
     host = np.stack(polygon_analytic_greens(TARGET_R, TARGET_Z, section, nodes=NODES))
     assert relative_gap(traced, host) < 1e-9
 
     def shifted(delta):
-        return analytic_packed(jnp, jnp.asarray(section) + delta[None, :], mask)
+        return analytic_packed(jnp, _f64(section) + delta[None, :], mask)
 
-    forward = jax.jacfwd(shifted)(jnp.zeros(2))
+    forward = jax.jacfwd(shifted)(jnp.zeros(2, dtype=jnp.float64))
     assert np.all(np.isfinite(np.asarray(forward)))
     step = 1e-4
     for axis in (0, 1):
@@ -263,7 +268,7 @@ def test_closed_form_polygon_geometry_autograd(section):
         )
         assert peak_scaled_gap(np.asarray(forward[..., axis]), difference) < 1e-5
 
-    reverse = jax.jacrev(shifted)(jnp.zeros(2))
+    reverse = jax.jacrev(shifted)(jnp.zeros(2, dtype=jnp.float64))
     assert relative_gap(reverse, forward) < 1e-8
 
 
@@ -272,12 +277,13 @@ def test_closed_form_polygon_geometry_autograd(section):
 
 def arc_packed(xp, vertices, mask, start, end, nodes=NODES):
     edge, weight, norm = traced_pack_section(xp, vertices, mask)
+    dtype = vertices.dtype
     return xp.stack(
         packed_arc_greens(
             xp,
-            xp.asarray(TARGET_R),
-            xp.asarray(TARGET_Z),
-            xp.asarray(TARGET_PHI),
+            xp.asarray(TARGET_R, dtype=dtype),
+            xp.asarray(TARGET_Z, dtype=dtype),
+            xp.asarray(TARGET_PHI, dtype=dtype),
             edge[..., None],
             weight[:, None],
             norm,
@@ -319,12 +325,14 @@ def test_finite_arc_geometry_autograd():
 
     def rows(xp, parameters):
         """The five rows at every target, from the four-parameter geometry."""
-        vertices = xp.asarray(TRIANGLE) + parameters[:2][None, :]
+        vertices = (
+            xp.asarray(TRIANGLE, dtype=parameters.dtype) + parameters[:2][None, :]
+        )
         return arc_packed(
             xp, vertices, mask, parameters[2:3], parameters[3:4], nodes=ARC_NODES
         )
 
-    traced = rows(jnp, jnp.asarray(ARC_PARAMETERS))
+    traced = rows(jnp, _f64(ARC_PARAMETERS))
     host = np.stack(
         polygon_arc_greens(
             TARGET_R, TARGET_Z, TARGET_PHI, TRIANGLE, *ARC_SPAN, nodes=ARC_NODES
@@ -332,7 +340,7 @@ def test_finite_arc_geometry_autograd():
     )
     assert relative_gap(traced, host) < 1e-9
 
-    forward = jax.jacfwd(lambda p: rows(jnp, p))(jnp.asarray(ARC_PARAMETERS))
+    forward = jax.jacfwd(lambda p: rows(jnp, p))(_f64(ARC_PARAMETERS))
     assert np.all(np.isfinite(np.asarray(forward)))
     for axis, step in enumerate(ARC_STEPS):
         difference = central_difference(
@@ -345,8 +353,8 @@ def test_finite_arc_geometry_autograd():
     covector = np.linspace(0.37, 1.73, forward.shape[0] * forward.shape[1]).reshape(
         forward.shape[:2]
     )
-    reverse = jax.grad(lambda p: jnp.sum(rows(jnp, p) * jnp.asarray(covector)))(
-        jnp.asarray(ARC_PARAMETERS)
+    reverse = jax.grad(lambda p: jnp.sum(rows(jnp, p) * _f64(covector)))(
+        _f64(ARC_PARAMETERS)
     )
     contracted = np.einsum("ij,ijk->k", covector, np.asarray(forward))
     assert peak_scaled_gap(np.asarray(reverse), contracted) < 1e-8
@@ -364,7 +372,7 @@ def filament_host(source):
 def filament_traced(source):
     return jnp.stack(
         traced_filament_greens(
-            jnp, jnp.asarray(TARGET_R), jnp.asarray(TARGET_Z), source[0], source[1]
+            jnp, _f64(TARGET_R), _f64(TARGET_Z), source[0], source[1]
         )
     )
 
@@ -372,17 +380,14 @@ def filament_traced(source):
 def test_ring_filament_geometry_autograd():
     """The loop position differentiates; the elliptic pair costs a few ulp."""
     source = np.array([1.52, -1.08])
-    assert (
-        relative_gap(filament_traced(jnp.asarray(source)), filament_host(source))
-        < 1e-12
-    )
+    assert relative_gap(filament_traced(_f64(source)), filament_host(source)) < 1e-12
 
-    forward = jax.jacfwd(filament_traced)(jnp.asarray(source))
+    forward = jax.jacfwd(filament_traced)(_f64(source))
     for axis in (0, 1):
         difference = central_difference(filament_host, source, axis, 1e-6)
         assert relative_gap(np.asarray(forward[..., axis]), difference) < 1e-6
 
-    reverse = jax.jacrev(filament_traced)(jnp.asarray(source))
+    reverse = jax.jacrev(filament_traced)(_f64(source))
     assert relative_gap(reverse, forward) < 1e-11
 
 
@@ -391,10 +396,14 @@ def test_ring_filament_axis_targets_keep_finite_tangents():
     jacobian = jax.jacfwd(
         lambda source: jnp.stack(
             traced_filament_greens(
-                jnp, jnp.zeros(1), jnp.full(1, 0.3), source[0], source[1]
+                jnp,
+                jnp.zeros(1, dtype=jnp.float64),
+                jnp.full(1, 0.3, dtype=jnp.float64),
+                source[0],
+                source[1],
             )
         )
-    )(jnp.asarray([1.52, -1.08]))
+    )(_f64([1.52, -1.08]))
     assert np.all(np.isfinite(np.asarray(jacobian)))
 
 
@@ -403,9 +412,7 @@ def test_ring_filament_axis_targets_keep_finite_tangents():
 
 def cylinder_traced(descriptor):
     return jnp.stack(
-        traced_cylinder_greens(
-            jnp, jnp.asarray(TARGET_R), jnp.asarray(TARGET_Z), *descriptor
-        )
+        traced_cylinder_greens(jnp, _f64(TARGET_R), _f64(TARGET_Z), *descriptor)
     )
 
 
@@ -413,9 +420,9 @@ def test_rectangle_section_geometry_autograd():
     """Centroid and extents differentiate; parity is the two zeta rules' own."""
     descriptor = np.array([1.52, -1.08, 0.12, 0.09])
     host = np.stack(cylinder_greens(TARGET_R, TARGET_Z, *descriptor))
-    assert relative_gap(cylinder_traced(jnp.asarray(descriptor)), host) < 1e-11
+    assert relative_gap(cylinder_traced(_f64(descriptor)), host) < 1e-11
 
-    forward = jax.jacfwd(cylinder_traced)(jnp.asarray(descriptor))
+    forward = jax.jacfwd(cylinder_traced)(_f64(descriptor))
     step = 1e-5
     for axis in range(4):
         difference = central_difference(
@@ -426,7 +433,7 @@ def test_rectangle_section_geometry_autograd():
         )
         assert peak_scaled_gap(np.asarray(forward[..., axis]), difference) < 3e-6
 
-    reverse = jax.jacrev(cylinder_traced)(jnp.asarray(descriptor))
+    reverse = jax.jacrev(cylinder_traced)(_f64(descriptor))
     assert relative_gap(reverse, forward) < 1e-7
 
 
@@ -437,9 +444,9 @@ def arc_filament_traced(geometry):
     return jnp.stack(
         traced_arc_filament_greens(
             jnp,
-            jnp.asarray(TARGET_R),
-            jnp.asarray(TARGET_Z),
-            jnp.asarray(TARGET_PHI),
+            _f64(TARGET_R),
+            _f64(TARGET_Z),
+            _f64(TARGET_PHI),
             geometry[0],
             geometry[1],
             geometry[2],
@@ -466,18 +473,16 @@ def test_arc_filament_geometry_autograd():
     """Position and both azimuths differentiate off the same fixed-node rule."""
     geometry = np.array([1.52, -1.08, *ARC_SPAN])
     assert (
-        relative_gap(
-            arc_filament_traced(jnp.asarray(geometry)), arc_filament_host(geometry)
-        )
+        relative_gap(arc_filament_traced(_f64(geometry)), arc_filament_host(geometry))
         < 1e-13
     )
 
-    forward = jax.jacfwd(arc_filament_traced)(jnp.asarray(geometry))
+    forward = jax.jacfwd(arc_filament_traced)(_f64(geometry))
     for axis in range(4):
         difference = central_difference(arc_filament_host, geometry, axis, 1e-6)
         assert relative_gap(np.asarray(forward[..., axis]), difference) < 1e-6
 
-    reverse = jax.jacrev(arc_filament_traced)(jnp.asarray(geometry))
+    reverse = jax.jacrev(arc_filament_traced)(_f64(geometry))
     assert relative_gap(reverse, forward) < 1e-12
 
 
@@ -494,7 +499,7 @@ def test_traced_zeta_matches_the_routed_host_rule_in_both_regimes():
     )
     alpha = np.full(64, np.pi / 2.0)
     host = zeta(rs, r, gamma, alpha)
-    traced = np.asarray(traced_zeta(jnp, rs, r, gamma, alpha))
+    traced = np.asarray(traced_zeta(jnp, _f64(rs), _f64(r), _f64(gamma), _f64(alpha)))
     assert relative_gap(traced, host) < 1e-13
     # a zero-length interval integrates to zero without a divide
-    assert float(traced_zeta(jnp, 1.0, 1.0, 0.0, 0.0)) == 0.0
+    assert float(traced_zeta(jnp, _f64(1.0), _f64(1.0), _f64(0.0), _f64(0.0))) == 0.0

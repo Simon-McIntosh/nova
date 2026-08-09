@@ -118,8 +118,8 @@ def test_tree_roundtrip_preserves_normalized_geometry_and_precision():
     np.testing.assert_array_equal(restored.physical_scale, locator.physical_scale)
 
 
-def test_runtime_setup_keeps_default_fp32_and_honours_explicit_fp64():
-    """One setup supports dtype-keyed fp32 and fp64 variants without toggling."""
+def test_runtime_setup_supports_explicit_fp32_and_fp64_without_toggling():
+    """One capability setup supports dtype-keyed fp32 and fp64 variants."""
     script = """
 import jax
 import jax.numpy as jnp
@@ -127,11 +127,9 @@ import jax.numpy as jnp
 from nova.jax.config import configure_dtypes
 
 configure_dtypes()
-assert not jax.config.x64_enabled
-default = jnp.asarray([1.25])
+assert jax.config.x64_enabled
 single = jnp.asarray([1.25], dtype=jnp.float32)
 double = jnp.asarray([1.25], dtype=jnp.float64)
-assert default.dtype == jnp.float32
 assert single.dtype == jnp.float32
 assert double.dtype == jnp.float64
 

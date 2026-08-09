@@ -91,7 +91,7 @@ print(json.dumps({
 
     assert rows[0] == rows[1]
     assert rows[0]["found"]
-    assert not rows[0]["x64"]
+    assert rows[0]["x64"]
     assert rows[0]["kind"] == 1.0
     assert abs(rows[0]["r"] - 6.2031) < 2e-5
     assert abs(rows[0]["z"] + 0.0047) < 2e-5

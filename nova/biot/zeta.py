@@ -47,6 +47,8 @@ from functools import cached_property, lru_cache
 
 import numpy as np
 
+from nova.jax.config import Precision, resolve_precision
+
 GAUSS_ORDER = 48
 """Gauss-Legendre node count of the default rule (<=1e-12 for gamma >= 0.2 r)."""
 
@@ -213,10 +215,11 @@ def traced_zeta(xp, rs, r, gamma, alpha):
     the zero it integrates to without dividing by a vanishing ``sin phi`` --
     and without the held element poisoning a geometry tangent.
     """
+    dtype = xp.result_type(rs, r, gamma, alpha)
     offset, upper, weights = _tanh_sinh_rule()
-    offset = xp.asarray(offset)
+    offset = xp.asarray(offset, dtype=dtype)
     upper = xp.asarray(upper)
-    weights = xp.asarray(weights)
+    weights = xp.asarray(weights, dtype=dtype)
     rs, r, gamma, alpha = xp.broadcast_arrays(
         xp.asarray(rs), xp.asarray(r), xp.asarray(gamma), xp.asarray(alpha)
     )
@@ -296,15 +299,27 @@ try:  # optional: only importable where JAX is installed
         r: np.ndarray | jnp.ndarray = field(repr=False)
         z: np.ndarray | jnp.ndarray = field(repr=False)
         alpha: np.ndarray | jnp.ndarray = field(repr=False)
+        precision: Precision | str = field(default=Precision.AUTOMATIC, repr=False)
+
+        def __post_init__(self):
+            """Construct device leaves in the precision chosen for this evaluator."""
+            resolved = resolve_precision(self.precision, Precision.DOUBLE)
+            dtype = jnp.float32 if resolved is Precision.SINGLE else jnp.float64
+            for name in ("rs", "zs", "r", "z", "alpha"):
+                setattr(self, name, jnp.asarray(getattr(self, name), dtype=dtype))
+            self.precision = resolved
 
         def tree_flatten(self):
             """Return flattened pytree structure."""
-            return ((self.rs, self.zs, self.r, self.z, self.alpha), None)
+            return (
+                (self.rs, self.zs, self.r, self.z, self.alpha),
+                self.precision,
+            )
 
         @classmethod
         def tree_unflatten(cls, aux_data, children):
             """Rebuild instance from pytree variables."""
-            return cls(*children)
+            return cls(*children, precision=aux_data)
 
         @cached_property
         @jax.jit
@@ -322,9 +337,10 @@ try:  # optional: only importable where JAX is installed
         def __call__(self):
             """Return the zeta integral."""
             offset, upper, weights = _tanh_sinh_rule()
+            dtype = jnp.result_type(self.rs, self.zs, self.r, self.z, self.alpha)
             # the node axis leads, so rs/r/gamma broadcast against it unchanged
             shape = (-1,) + (1,) * jnp.ndim(self.alpha)
-            offset = jnp.asarray(offset).reshape(shape)
+            offset = jnp.asarray(offset, dtype=dtype).reshape(shape)
             upper = jnp.asarray(upper).reshape(shape)
             alpha = jnp.abs(self.alpha)
             angle = 2.0 * alpha * offset
@@ -332,7 +348,9 @@ try:  # optional: only importable where JAX is installed
             integrand = self.arcsinh_beta_1(
                 jnp.sin(angle), jnp.where(upper, jnp.cos(angle), -jnp.cos(angle))
             )
-            return alpha * jnp.tensordot(jnp.asarray(weights), integrand, axes=1)
+            return alpha * jnp.tensordot(
+                jnp.asarray(weights, dtype=dtype), integrand, axes=1
+            )
 
 except ModuleNotFoundError:  # numpy-only environment
 

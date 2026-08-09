@@ -25,7 +25,16 @@ import pytest
 from numpy.polynomial.legendre import leggauss
 
 from nova.biot.arcamplitude import ArcLimit, arc_limits, fold
-from nova.jax.config import enable_x64
+from nova.jax.config import configure_dtypes
+
+
+def _f64(value):
+    """Construct an explicitly selected double-precision JAX value."""
+    configure_dtypes()
+    import jax.numpy as jnp
+
+    return jnp.asarray(value, dtype=jnp.float64)
+
 
 QUARTER = 0.5 * np.pi
 
@@ -207,7 +216,7 @@ def test_the_two_ends_carry_opposite_assembly_weights():
 def test_the_fold_traces_and_batches():
     """No branch on a value anywhere in it, which is why an arc can be tiled."""
     jax = pytest.importorskip("jax")
-    enable_x64()
+    configure_dtypes()
     jnp = jax.numpy
     azimuth = np.linspace(-3.0, 3.0, 17)
 
@@ -218,7 +227,7 @@ def test_the_fold_traces_and_batches():
             for limit in arc_limits(azimuth, -0.4, 1.9, xp=jnp)
         ]
 
-    device = traced(jnp.asarray(azimuth))
+    device = traced(_f64(azimuth))
     host = arc_limits(azimuth, -0.4, 1.9)
     for one, other in zip(host, device):
         for field, value in zip(

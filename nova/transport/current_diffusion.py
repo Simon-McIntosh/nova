@@ -53,15 +53,13 @@ from functools import partial
 import numpy as np
 
 from nova.biot.greens import MU0
+from nova.jax.config import Precision, resolve_precision
 from nova.utilities.importmanager import skip_import
 
 with skip_import("jax"):
     import jax
     import jax.numpy as jnp
 
-    from nova.jax.config import enable_x64
-
-    enable_x64()
 
 _TWO_PI = 2.0 * np.pi
 _16PI3 = 16.0 * np.pi**3
@@ -203,7 +201,7 @@ def _traced_profile_shapes(psi_n, n_terms: int, *, nonnegative: bool):
     if n_terms == 0:
         return jnp.empty((*normalised.shape, 0), dtype=normalised.dtype)
     if nonnegative:
-        exponents = jnp.asarray(NONNEGATIVE_EXPONENTS[:n_terms])
+        exponents = jnp.asarray(NONNEGATIVE_EXPONENTS[:n_terms], dtype=normalised.dtype)
         return (1.0 - normalised)[..., jnp.newaxis] ** exponents
 
     coordinate = 2.0 * normalised - 1.0
@@ -320,12 +318,13 @@ def traced_assemble_flux_surface_geometry(
     scalar ``valid`` is false for empty or ill-posed surfaces; callers can
     discard that slice without fabricating geometry.
     """
-    psi2d = jnp.asarray(psi2d, dtype=jnp.float64)
-    radius = jnp.asarray(radius, dtype=jnp.float64)
-    height = jnp.asarray(height, dtype=jnp.float64)
+    dtype = jnp.asarray(psi2d).dtype
+    psi2d = jnp.asarray(psi2d, dtype=dtype)
+    radius = jnp.asarray(radius, dtype=dtype)
+    height = jnp.asarray(height, dtype=dtype)
     inside_limiter = jnp.asarray(inside_limiter, dtype=bool)
-    profile_coefficients = jnp.asarray(profile_coefficients, dtype=jnp.float64)
-    coefficient_scale = jnp.asarray(coefficient_scale, dtype=jnp.float64)
+    profile_coefficients = jnp.asarray(profile_coefficients, dtype=dtype)
+    coefficient_scale = jnp.asarray(coefficient_scale, dtype=dtype)
 
     poloidal_flux_span = boundary_psi - axis_psi
     safe_span = jnp.where(
@@ -349,7 +348,7 @@ def traced_assemble_flux_surface_geometry(
         + major_radius / mesh_radius * diamagnetic_drive
     )
 
-    psi_n_profile = jnp.linspace(0.0, 1.0, 101)
+    psi_n_profile = jnp.linspace(0.0, 1.0, 101, dtype=dtype)
     diamagnetic_profile = (
         _traced_profile_shapes(psi_n_profile, n_diamagnetic, nonnegative=nonnegative)
         @ scaled_coefficients[n_pressure:]
@@ -361,15 +360,15 @@ def traced_assemble_flux_surface_geometry(
         poloidal_flux_span=safe_span,
     )
 
-    psi_n_surface = jnp.asarray(surface_bins["pn_s"], dtype=jnp.float64)
-    volume_derivative = jnp.asarray(surface_bins["dv_dpn"], dtype=jnp.float64)
-    inverse_radius_squared = jnp.asarray(surface_bins["inv_r2"], dtype=jnp.float64)
-    inverse_radius = jnp.asarray(surface_bins["inv_r"], dtype=jnp.float64)
+    psi_n_surface = jnp.asarray(surface_bins["pn_s"], dtype=dtype)
+    volume_derivative = jnp.asarray(surface_bins["dv_dpn"], dtype=dtype)
+    inverse_radius_squared = jnp.asarray(surface_bins["inv_r2"], dtype=dtype)
+    inverse_radius = jnp.asarray(surface_bins["inv_r"], dtype=dtype)
     gradient_squared_over_radius_squared = jnp.asarray(
-        surface_bins["grad2_r2"], dtype=jnp.float64
+        surface_bins["grad2_r2"], dtype=dtype
     )
-    cumulative_volume = jnp.asarray(surface_bins["v_cum"], dtype=jnp.float64)
-    volume = jnp.asarray(surface_bins["v_total"], dtype=jnp.float64)
+    cumulative_volume = jnp.asarray(surface_bins["v_cum"], dtype=dtype)
+    volume = jnp.asarray(surface_bins["v_total"], dtype=dtype)
 
     f_surface = jnp.interp(psi_n_surface, psi_n_profile, f_profile)
     volume_derivative_per_flux = volume_derivative / jnp.abs(safe_span)
@@ -395,7 +394,7 @@ def traced_assemble_flux_surface_geometry(
         gradient_squared_over_radius_squared / (4.0 * jnp.pi**2)
         + f_surface**2 * inverse_radius_squared
     )
-    rho_face = jnp.linspace(0.0, 1.0, n_radial_cells + 1)
+    rho_face = jnp.linspace(0.0, 1.0, n_radial_cells + 1, dtype=dtype)
     rho_cell = 0.5 * (rho_face[:-1] + rho_face[1:])
     psi_n_face = _surface_interpolation(rho_face, rho_surface, psi_n_surface, 0.0, 1.0)
     psi_n_cell = _surface_interpolation(rho_cell, rho_surface, psi_n_surface, 0.0, 1.0)
@@ -515,7 +514,7 @@ def traced_assemble_flux_surface_geometry(
     )
     psi_face = axis_psi + jnp.concatenate(
         [
-            jnp.zeros(1),
+            jnp.zeros(1, dtype=dtype),
             jnp.cumsum(
                 0.5
                 * (poloidal_flux_gradient[1:] + poloidal_flux_gradient[:-1])
@@ -659,6 +658,7 @@ def flux_surface_geometry(
     psi_n_max: float = 0.985,
     nonnegative: bool = True,
     bandwidth_factor: float = 1.25,
+    precision: Precision | str = Precision.AUTOMATIC,
 ) -> FluxSurfaceGeometry | None:
     """Return transport geometry for one equilibrium, or ``None`` if invalid.
 
@@ -667,9 +667,12 @@ def flux_surface_geometry(
     outputs use raw SI: total poloidal flux [Wb], plasma current [A], toroidal
     field [T], distances [m], and profile-column scales [A m-2].
     """
+    resolved = resolve_precision(precision, Precision.DOUBLE)
+    np_dtype = np.float32 if resolved is Precision.SINGLE else np.float64
+    jax_dtype = jnp.float32 if resolved is Precision.SINGLE else jnp.float64
     expected_coefficients = n_pressure + n_diamagnetic
-    coefficients = np.asarray(profile_coefficients, dtype=np.float64)
-    scales = np.asarray(coefficient_scale, dtype=np.float64)
+    coefficients = np.asarray(profile_coefficients, dtype=np_dtype)
+    scales = np.asarray(coefficient_scale, dtype=np_dtype)
     if coefficients.shape != (expected_coefficients,):
         raise ValueError(
             "profile_coefficients must have shape "
@@ -691,25 +694,25 @@ def flux_surface_geometry(
         raise ValueError("n_surface_bins must be at least 2")
 
     assembled = traced_flux_surface_geometry(
-        jnp.asarray(np.asarray(psi2d, dtype=np.float64)),
-        jnp.asarray(np.asarray(grid.rg, dtype=np.float64)),
-        jnp.asarray(np.asarray(grid.zg, dtype=np.float64)),
+        jnp.asarray(np.asarray(psi2d, dtype=np_dtype), dtype=jax_dtype),
+        jnp.asarray(np.asarray(grid.rg, dtype=np_dtype), dtype=jax_dtype),
+        jnp.asarray(np.asarray(grid.zg, dtype=np_dtype), dtype=jax_dtype),
         jnp.asarray(np.asarray(grid.inside_limiter, dtype=bool)),
-        axis_psi=jnp.asarray(float(axis_psi)),
-        boundary_psi=jnp.asarray(float(boundary_psi)),
-        profile_coefficients=jnp.asarray(coefficients),
-        coefficient_scale=jnp.asarray(scales),
-        ip_amperes=jnp.asarray(float(ip_amperes)),
-        major_radius=jnp.asarray(float(grid.r0)),
-        boundary_toroidal_field=jnp.asarray(float(boundary_toroidal_field)),
+        axis_psi=jnp.asarray(axis_psi, dtype=jax_dtype),
+        boundary_psi=jnp.asarray(boundary_psi, dtype=jax_dtype),
+        profile_coefficients=jnp.asarray(coefficients, dtype=jax_dtype),
+        coefficient_scale=jnp.asarray(scales, dtype=jax_dtype),
+        ip_amperes=jnp.asarray(ip_amperes, dtype=jax_dtype),
+        major_radius=jnp.asarray(grid.r0, dtype=jax_dtype),
+        boundary_toroidal_field=jnp.asarray(boundary_toroidal_field, dtype=jax_dtype),
         n_pressure=int(n_pressure),
         n_diamagnetic=int(n_diamagnetic),
         n_radial_cells=int(n_radial_cells),
         n_surface_bins=int(n_surface_bins),
-        psi_n_min=jnp.asarray(float(psi_n_min)),
-        psi_n_max=jnp.asarray(float(psi_n_max)),
+        psi_n_min=jnp.asarray(psi_n_min, dtype=jax_dtype),
+        psi_n_max=jnp.asarray(psi_n_max, dtype=jax_dtype),
         nonnegative=bool(nonnegative),
-        bandwidth_factor=jnp.asarray(float(bandwidth_factor)),
+        bandwidth_factor=jnp.asarray(bandwidth_factor, dtype=jax_dtype),
     )
     if not bool(assembled["valid"]):
         return None
@@ -868,6 +871,7 @@ def diffuse_psi(
     ip_of_t: np.ndarray,
     psi0_face: np.ndarray | None = None,
     theta: float = 1.0,
+    precision: Precision | str = Precision.AUTOMATIC,
 ) -> dict:
     """Integrate the flux diffusion over ``t_grid`` with the current condition.
 
@@ -878,19 +882,23 @@ def diffuse_psi(
 
     The geometry is FROZEN over the interval (metrics from the starting slice); a
     recorded approximation the soft prior downstream absorbs.  Implicit
-    theta-scheme (``theta = 1`` backward Euler), one jitted fp64 tridiagonal solve
-    per sub-step.
+    theta-scheme (``theta = 1`` backward Euler), one jitted tridiagonal solve per
+    sub-step. ``precision="auto"`` resolves to float64; explicit float32 selects
+    a separate trace.
 
     Returns ``psi_face`` ``(n_t, n_rho + 1)`` [Wb] plus the flux-budget traces:
     ``v_axis`` and ``v_bdry``, the axis and boundary ``dpsi/dt`` [V], and
     ``psidot_face`` at the final step for the ohmic parallel current.
     """
-    times = np.asarray(t_grid, dtype=np.float64)
-    ip = np.asarray(ip_of_t, dtype=np.float64)
+    resolved = resolve_precision(precision, Precision.DOUBLE)
+    np_dtype = np.float32 if resolved is Precision.SINGLE else np.float64
+    jax_dtype = jnp.float32 if resolved is Precision.SINGLE else jnp.float64
+    times = np.asarray(t_grid, dtype=np_dtype)
+    ip = np.asarray(ip_of_t, dtype=np_dtype)
     n_face = geometry.rho_face.size
     drho = float(geometry.rho_face[1] - geometry.rho_face[0])
 
-    sigma_cell = 1.0 / np.asarray(eta(geometry.psi_n_cell), dtype=np.float64)
+    sigma_cell = 1.0 / np.asarray(eta(geometry.psi_n_cell), dtype=np_dtype)
     toc_cell = (
         sigma_cell
         * MU0
@@ -900,7 +908,7 @@ def diffuse_psi(
         / geometry.f_cell**2
     )
     # face-centred state: interpolate the time coefficient onto the faces
-    toc_face = np.empty(n_face)
+    toc_face = np.empty(n_face, dtype=np_dtype)
     toc_face[1:-1] = 0.5 * (toc_cell[:-1] + toc_cell[1:])
     toc_face[0] = toc_cell[0]
     toc_face[-1] = toc_cell[-1]
@@ -908,20 +916,20 @@ def diffuse_psi(
     d_face = geometry.d_face
     d_mid = 0.5 * (d_face[:-1] + d_face[1:])
     psi0 = np.asarray(
-        geometry.psi_face if psi0_face is None else psi0_face, dtype=np.float64
+        geometry.psi_face if psi0_face is None else psi0_face, dtype=np_dtype
     )
     intervals = np.diff(times)
     gradients = np.array([geometry.ip_edge_gradient(float(value)) for value in ip[1:]])
 
     if intervals.size:
         psi_history, v_axis_history, v_bdry_history = _COMPILED_SCAN(
-            jnp.asarray(psi0),
-            jnp.asarray(d_face),
-            jnp.asarray(d_mid),
-            jnp.asarray(toc_face),
+            jnp.asarray(psi0, dtype=jax_dtype),
+            jnp.asarray(d_face, dtype=jax_dtype),
+            jnp.asarray(d_mid, dtype=jax_dtype),
+            jnp.asarray(toc_face, dtype=jax_dtype),
             drho,
-            jnp.asarray(intervals),
-            jnp.asarray(gradients),
+            jnp.asarray(intervals, dtype=jax_dtype),
+            jnp.asarray(gradients, dtype=jax_dtype),
             float(theta),
         )
         psi_face = np.vstack([psi0, np.asarray(psi_history)])
@@ -1178,6 +1186,10 @@ class CurrentDiffusion:
     geometry: FluxSurfaceGeometry
     eta: EtaProfile
     theta: float = 1.0
+    precision: Precision | str = Precision.AUTOMATIC
+
+    def __post_init__(self):
+        self.precision = resolve_precision(self.precision, Precision.DOUBLE)
 
     def evolve(
         self,
@@ -1193,6 +1205,7 @@ class CurrentDiffusion:
             ip_of_t=ip_of_t,
             psi0_face=psi0_face,
             theta=self.theta,
+            precision=self.precision,
         )
 
     def predict(self, step: dict) -> dict:

@@ -40,7 +40,16 @@ import scipy.integrate
 import scipy.special
 
 from nova.biot.completeelliptic import TRIPS, complete_kind, complete_pole
-from nova.jax.config import enable_x64
+from nova.jax.config import configure_dtypes
+
+
+def _f64(value):
+    """Construct an explicitly selected double-precision JAX value."""
+    configure_dtypes()
+    import jax.numpy as jnp
+
+    return jnp.asarray(value, dtype=jnp.float64)
+
 
 EPS = float(np.finfo(np.float64).eps)
 LONG_PI = np.longdouble("3.14159265358979323846264338327950288")
@@ -324,7 +333,7 @@ def test_the_trip_count_is_bounded_by_the_argument_range_in_both_directions():
 def traced_namespace():
     """Return ``jax.numpy`` with float64 on, or skip."""
     jax = pytest.importorskip("jax")
-    enable_x64()
+    configure_dtypes()
     import jax.numpy as jnp
 
     return jax, jnp
@@ -339,14 +348,14 @@ def test_the_traced_path_is_the_same_code_and_agrees_to_a_few_ulp():
     bits without moving the answer.
     """
     jax, jnp = traced_namespace()
-    complement = jnp.asarray(COMPLEMENTS)
+    complement = _f64(COMPLEMENTS)
     first, second = jax.jit(lambda c: complete_kind(c, xp=jnp))(complement)
     host_first, host_second = complete_kind(COMPLEMENTS)
     assert np.abs(np.asarray(first) / host_first - 1.0).max() < 8.0 * EPS
     assert np.abs(np.asarray(second) / host_second - 1.0).max() < 8.0 * EPS
     for pole in (1e-12, 1e-3, 0.5, 1.0, 2.0, 1e6, 1e18):
         kernel = jax.jit(lambda p, c: complete_pole(p, c, xp=jnp))
-        got = np.asarray(kernel(pole, complement))
+        got = np.asarray(kernel(_f64(pole), complement))
         assert np.abs(got / complete_pole(pole, COMPLEMENTS) - 1.0).max() < 16.0 * EPS
 
 
@@ -361,7 +370,7 @@ def test_the_trace_is_compiled_once_however_many_tiles_it_serves():
     jax, jnp = traced_namespace()
     kernel = jax.jit(lambda p, c: complete_pole(p, c, xp=jnp))
     for shift in (1e-9, 1e-3, 0.5, 7.0, 1e9):
-        kernel(shift, jnp.asarray(COMPLEMENTS))
+        kernel(_f64(shift), _f64(COMPLEMENTS))
     assert kernel._cache_size() == 1
 
 
@@ -369,8 +378,8 @@ def test_the_trace_is_compiled_once_however_many_tiles_it_serves():
 def test_a_batch_of_moduli_maps_over_the_same_kernel():
     """``vmap`` over the pair axis, which is how a tile presents itself."""
     jax, jnp = traced_namespace()
-    poles = jnp.asarray(POLES)
-    complement = jnp.asarray(np.linspace(1e-9, 1.0, POLES.size))
+    poles = _f64(POLES)
+    complement = _f64(np.linspace(1e-9, 1.0, POLES.size))
     kernel = jax.jit(jax.vmap(lambda p, c: complete_pole(p, c, xp=jnp)))
     mapped = kernel(poles, complement)
     direct = complete_pole(POLES, np.asarray(complement))
@@ -393,7 +402,9 @@ def test_the_first_kind_differentiates_exactly_over_the_whole_range():
         expected = -(second - complement * first) / (
             2.0 * (1.0 - complement) * complement
         )
-        gradient = float(jax.grad(lambda c: complete_kind(c, xp=jnp)[0])(complement))
+        gradient = float(
+            jax.grad(lambda c: complete_kind(c, xp=jnp)[0])(_f64(complement))
+        )
         assert np.isfinite(gradient)
         assert gradient == pytest.approx(expected, rel=8.0 * EPS)
 
@@ -427,7 +438,7 @@ def test_the_third_kind_differentiates_exactly_in_the_pole_and_the_modulus():
             for index in (0, 1):
                 gradient = float(
                     jax.grad(lambda p, c: complete_pole(p, c, xp=jnp), argnums=index)(
-                        pole, complement
+                        _f64(pole), _f64(complement)
                     )
                 )
                 assert np.isfinite(gradient)
@@ -451,6 +462,8 @@ def test_the_second_kind_derivative_degrades_where_its_value_becomes_one():
     for complement, bound in bounds.items():
         first, second = (float(v) for v in complete_kind(np.float64(complement)))
         expected = (first - second) / (2.0 * (1.0 - complement))
-        gradient = float(jax.grad(lambda c: complete_kind(c, xp=jnp)[1])(complement))
+        gradient = float(
+            jax.grad(lambda c: complete_kind(c, xp=jnp)[1])(_f64(complement))
+        )
         assert np.isfinite(gradient)
         assert abs(gradient / expected - 1.0) < bound

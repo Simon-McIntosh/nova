@@ -42,10 +42,10 @@ from nova.circuit.propagate import (
     integrate_eddy_ode,
     zoh_mode_response,
 )
+from nova.jax.config import Precision, configure_dtypes
 from nova.utilities.importmanager import skip_import
 
 with skip_import("jax"):
-    import jax
     import jax.numpy as jnp
 
     from nova.circuit.propagate import scan_eddy_modes
@@ -221,24 +221,37 @@ def test_voltage_drive_matches_the_reference_and_its_steady_state():
 
 @pytest.mark.slow
 def test_jax_scan_matches_the_host_integrator_and_batches():
+    configure_dtypes()
     basis = _toy_basis()
     times, i_channel, i_cell = _sequences(basis, n_t=20)
     psi_mode = i_channel @ basis.m_channel.T + i_cell @ basis.m_cell.T
     reference, swing = integrate_eddy_ode(basis.tau, times, psi_mode)
 
-    state, mode_swing = jax.jit(scan_eddy_modes)(basis.tau, times, psi_mode)
+    state, mode_swing = scan_eddy_modes(basis.tau, times, psi_mode)
     np.testing.assert_allclose(np.asarray(state), reference, rtol=1e-12, atol=1e-18)
     np.testing.assert_allclose(np.asarray(mode_swing), swing, rtol=1e-12, atol=0.0)
 
     # a batch of drive histories propagates in one call, shapes fixed
     batch = jnp.stack([psi_mode, 2.0 * psi_mode, -psi_mode])
-    batched = jax.vmap(scan_eddy_modes, in_axes=(None, None, 0))(
-        basis.tau, times, batch
-    )[0]
+    batched = scan_eddy_modes(basis.tau, times, batch)[0]
     assert batched.shape == (3, times.size, basis.n_modes)
     np.testing.assert_allclose(
         np.asarray(batched[1]), 2.0 * reference, rtol=1e-12, atol=1e-18
     )
+
+
+def test_jax_scan_precision_is_selected_per_call():
+    """General automatic propagation is fp64 and explicit fp32 remains available."""
+    configure_dtypes()
+    tau = np.array([0.03, 0.008])
+    times = np.linspace(0.0, 0.1, 8)
+    psi = np.column_stack([times, -2.0 * times])
+
+    automatic, _ = scan_eddy_modes(tau, times, psi)
+    single, _ = scan_eddy_modes(tau, times, psi, precision=Precision.SINGLE)
+
+    assert automatic.dtype == jnp.float64
+    assert single.dtype == jnp.float32
 
 
 def test_raw_cadence_equals_slice_cadence_for_a_piecewise_linear_drive():

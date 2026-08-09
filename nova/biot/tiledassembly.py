@@ -66,6 +66,7 @@ import zarr
 from nova.biot.polygon import _BLOCK, _phi_rule, pad_batch
 from nova.biot.polygonanalytic import packed_analytic_greens
 from nova.biot.polygonarc import packed_arc_greens
+from nova.jax.config import Precision, resolve_precision
 
 COMPONENTS = ("Psi", "Br", "Bz")
 ARC_COMPONENTS = ("Ar", "Aphi", "Br", "Bphi", "Bz")
@@ -264,7 +265,7 @@ def _traced_psi_gradient(jnp, r, z, edge, weight, cosp, sinp, sin2p, w_cos, norm
     than mutated. The edge and limit loops are over STATIC bounds, so a trace
     unrolls them and the compiled kernel holds no control flow at all.
     """
-    a_hat = da_dr = da_dz = jnp.zeros(r.shape[0])
+    a_hat = da_dr = da_dz = jnp.zeros(r.shape[0], dtype=r.dtype)
     rc = r * cosp
     s = r * sinp
     s2 = s * s
@@ -422,6 +423,7 @@ class TileEvaluator:
         geometry: str = "ring",
         components: tuple[str, ...] = COMPONENTS,
         devices: int = 1,
+        precision: Precision = Precision.DOUBLE,
     ):
         self._kernel = kernel
         self.plan = plan
@@ -430,6 +432,8 @@ class TileEvaluator:
         self.geometry = geometry
         self.components = components
         self.devices = devices
+        self.precision = precision
+        self.dtype = np.float32 if precision is Precision.SINGLE else np.float64
 
     @property
     def compile_count(self) -> int:
@@ -438,6 +442,8 @@ class TileEvaluator:
 
     def __call__(self, *geometry):
         """Return the component sub-matrices of one tile, each shape ``(T, S)``."""
+        import jax.numpy as jnp
+
         plan = self.plan
         n_target = np.size(geometry[0])
         if self.geometry == "ring":
@@ -446,7 +452,9 @@ class TileEvaluator:
         else:
             n_source = np.size(geometry[5])
             filled = _fill_arc_tile(plan, *geometry)
-        result = np.asarray(self._kernel(*filled))
+        dtype = jnp.float32 if self.precision is Precision.SINGLE else jnp.float64
+        arrays = (jnp.asarray(value, dtype=dtype) for value in filled)
+        result = np.asarray(self._kernel(*arrays))
         if self.devices > 1:
             result = result.reshape(-1, len(self.components), plan.block)
         flat = result.transpose(1, 0, 2).reshape(len(self.components), -1)[
@@ -515,11 +523,12 @@ def tile_evaluator(
     kernel: str = "quadrature",
     geometry: str = "ring",
     devices: int = 1,
+    precision: Precision | str = Precision.AUTOMATIC,
 ) -> TileEvaluator:
     """Return a compiled evaluator for the tiles of one plan.
 
-    The evaluator is MEMOISED on its plan, mapping, kernel, geometry family and
-    device count: asking twice for the
+    The evaluator is MEMOISED on its plan, mapping, kernel, geometry family,
+    device count, and resolved precision: asking twice for the
     same tile shape returns the same object, and therefore the same executable.
     That is what turns the compile into a per-PROCESS cost rather than a per-build
     one, which is the difference between a usable and an unusable closed-form
@@ -557,9 +566,9 @@ def tile_evaluator(
 
     The pair list of a full tile is a constant of the plan, so it is closed over
     rather than passed: the compiled kernel is a function of geometry alone.
-    float64 is switched on for the process -- the operator is validated at
-    machine precision, and a float32 build would be an accuracy regression
-    disguised as a speedup.
+    ``precision="auto"`` resolves to float64 because that is the operator's
+    validated numerical contract.  Explicit float32 builds a separate cached
+    executable for callers whose accuracy budget licenses it.
 
     ``geometry="arc"`` selects the five-row finite-arc driver.  Its only kernel is
     ``"closed"``. ``devices`` divides pair blocks evenly across local devices
@@ -576,9 +585,10 @@ def tile_evaluator(
         raise ValueError("devices must be positive")
     if devices > 1 and not batched:
         raise ValueError("multiple devices require batched block evaluation")
+    resolved = resolve_precision(precision, Precision.DOUBLE)
     if geometry == "arc":
-        return _warm_arc_evaluator(plan, batched, kernel, devices)
-    return _warm_evaluator(plan, batched, kernel, devices)
+        return _warm_arc_evaluator(plan, batched, kernel, devices, resolved)
+    return _warm_evaluator(plan, batched, kernel, devices, resolved)
 
 
 def forget_evaluators() -> None:
@@ -594,24 +604,29 @@ def forget_evaluators() -> None:
 
 @functools.lru_cache(maxsize=_WARM_EVALUATORS)
 def _warm_evaluator(
-    plan: TilePlan, batched: bool, kernel: str, devices: int
+    plan: TilePlan,
+    batched: bool,
+    kernel: str,
+    devices: int,
+    precision: Precision,
 ) -> TileEvaluator:
     """Trace and compile one tile kernel; see :func:`tile_evaluator`."""
     import jax
     import jax.numpy as jnp
 
-    from nova.jax.config import enable_x64
-
-    enable_x64()
     compilation_cache()
+
+    dtype = jnp.float32 if precision is Precision.SINGLE else jnp.float64
 
     phi, wts = _phi_rule(plan.n_panels, plan.n_nodes)
     cosp, sinp = np.cos(phi), np.sin(phi)
     sin2p, w_cos = np.sin(2.0 * phi), wts * cosp
-    nodes = tuple(jnp.asarray(array) for array in (cosp, sinp, sin2p, w_cos))
+    nodes = tuple(
+        jnp.asarray(array, dtype=dtype) for array in (cosp, sinp, sin2p, w_cos)
+    )
     rows, columns = _device_blocks(plan, devices)
     index = (jnp.asarray(rows), jnp.asarray(columns))
-    two_pi = 2.0 * np.pi
+    two_pi = jnp.asarray(2.0 * np.pi, dtype=dtype)
 
     def one_block(target_r, target_z, edge, weight, norm, rows, columns):
         """Return the (3, block) components of one padded block of pairs."""
@@ -691,6 +706,7 @@ def _warm_evaluator(
         batched=batched,
         name=kernel,
         devices=devices,
+        precision=precision,
     )
 
 
@@ -700,14 +716,12 @@ def _warm_arc_evaluator(
     batched: bool,
     kernel: str,
     devices: int,
+    precision: Precision,
 ) -> TileEvaluator:
     """Trace and compile the finite-arc packed kernel for one tile shape."""
     import jax
     import jax.numpy as jnp
 
-    from nova.jax.config import enable_x64
-
-    enable_x64()
     compilation_cache()
 
     rows, columns = _device_blocks(plan, devices)
@@ -804,6 +818,7 @@ def _warm_arc_evaluator(
         geometry="arc",
         components=ARC_COMPONENTS,
         devices=devices,
+        precision=precision,
     )
 
 
@@ -855,6 +870,7 @@ def assemble(
     kernel: str = "quadrature",
     evaluator: TileEvaluator | None = None,
     devices: int = 1,
+    precision: Precision | str = Precision.AUTOMATIC,
 ) -> TilePlan:
     """Build the coupling operator tile by tile, streaming it into a zarr store.
 
@@ -885,13 +901,15 @@ def assemble(
     if evaluator is not None:
         if backend != "jax":
             raise ValueError(f"the {backend!r} backend takes no compiled evaluator")
-        asked = (plan, kernel, batched, "ring", devices)
+        resolved = resolve_precision(precision, Precision.DOUBLE)
+        asked = (plan, kernel, batched, "ring", devices, resolved)
         built = (
             evaluator.plan,
             evaluator.kernel,
             evaluator.batched,
             evaluator.geometry,
             evaluator.devices,
+            evaluator.precision,
         )
         if asked != built:
             raise ValueError(f"evaluator built for {built}, not the requested {asked}")
@@ -915,7 +933,11 @@ def assemble(
         evaluate = evaluator
         if evaluate is None:
             evaluate = tile_evaluator(
-                plan, batched=batched, kernel=kernel, devices=devices
+                plan,
+                batched=batched,
+                kernel=kernel,
+                devices=devices,
+                precision=precision,
             )
         for rows, columns in bounds:
             tile = evaluate(
@@ -959,6 +981,7 @@ def assemble_arcs(
     batched: bool = True,
     evaluator: TileEvaluator | None = None,
     devices: int = 1,
+    precision: Precision | str = Precision.AUTOMATIC,
 ) -> TilePlan:
     """Build a finite-arc operator with the packed closed kernel.
 
@@ -988,14 +1011,17 @@ def assemble_arcs(
             kernel="closed",
             geometry="arc",
             devices=devices,
+            precision=precision,
         )
-    asked = (plan, "closed", batched, "arc", devices)
+    resolved = resolve_precision(precision, Precision.DOUBLE)
+    asked = (plan, "closed", batched, "arc", devices, resolved)
     built = (
         evaluator.plan,
         evaluator.kernel,
         evaluator.batched,
         evaluator.geometry,
         evaluator.devices,
+        evaluator.precision,
     )
     if asked != built:
         raise ValueError(f"evaluator built for {built}, not the requested {asked}")

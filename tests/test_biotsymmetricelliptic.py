@@ -27,7 +27,16 @@ import pytest
 from scipy.special import elliprf, elliprj
 
 from nova.biot.symmetricelliptic import TRIPS, _elementary, symmetric_kinds
-from nova.jax.config import enable_x64
+from nova.jax.config import configure_dtypes
+
+
+def _f64(value):
+    """Construct an explicitly selected double-precision JAX value."""
+    configure_dtypes()
+    import jax.numpy as jnp
+
+    return jnp.asarray(value, dtype=jnp.float64)
+
 
 # The arguments the incomplete third kind forms: ``x`` is the amplitude's squared
 # cosine, ``y`` the modulus radical there, ``z`` one, and the pole argument the
@@ -313,18 +322,16 @@ def test_the_trip_count_is_bounded_by_the_argument_range_in_both_directions():
 def test_the_traced_path_is_the_same_code_and_agrees_to_a_few_ulp():
     """One implementation, numpy on the host and a compiled kernel on a device."""
     jax = pytest.importorskip("jax")
-    enable_x64()
+    configure_dtypes()
     jnp = jax.numpy
     complements = np.array([1e-300, 1e-40, 1e-12, 1e-3, 0.4])
     poles = np.array([1e-30, 1e-8, 1e-2, 0.5, 1.0])
 
     @jax.jit
     def traced(complement, pole):
-        return symmetric_kinds(
-            jnp.asarray(0.0), complement, jnp.asarray(1.0), pole, xp=jnp
-        )
+        return symmetric_kinds(_f64(0.0), complement, _f64(1.0), pole, xp=jnp)
 
     host = symmetric_kinds(0.0, complements, 1.0, poles)
-    device = traced(jnp.asarray(complements), jnp.asarray(poles))
+    device = traced(_f64(complements), _f64(poles))
     for one, other in zip(host, device):
         assert np.max(np.abs(np.asarray(other) - one) / np.abs(one)) < 1e-14

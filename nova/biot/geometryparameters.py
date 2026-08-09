@@ -69,6 +69,7 @@ from nova.biot.polygon import (
     polygon_greens,
     traced_pack_section,
 )
+from nova.jax.config import Precision, resolve_precision
 from nova.biot.tiledassembly import _traced_psi_gradient
 
 # The full-turn quadrature rule the shipped kernel defaults to.
@@ -160,11 +161,17 @@ class PackDeformation:
 
     def offsets(self, xp, parameters):
         """Return the ``(S, N, 2)`` vertex displacement of a parameter vector."""
-        return xp.tensordot(xp.asarray(parameters), xp.asarray(self.generators), 1)
+        parameters = xp.asarray(parameters)
+        return xp.tensordot(
+            parameters, xp.asarray(self.generators, dtype=parameters.dtype), 1
+        )
 
     def deform(self, xp, parameters):
         """Return the deformed sections, base plus displacement."""
-        return xp.asarray(self.sections) + self.offsets(xp, parameters)
+        parameters = xp.asarray(parameters)
+        return xp.asarray(self.sections, dtype=parameters.dtype) + self.offsets(
+            xp, parameters
+        )
 
     def gram(self) -> np.ndarray:
         """Return the parameter metric: mean vertex-wise generator overlap.
@@ -287,9 +294,10 @@ def traced_pack_coupling(
     Jacobian is evaluated at.  The section loop is over a static bound, so a
     trace unrolls it and the graph holds no control flow.
     """
+    dtype = sections.dtype
     phi, weights = _phi_rule(*rule)
     nodes = tuple(
-        xp.asarray(array)
+        xp.asarray(array, dtype=dtype)
         for array in (
             np.cos(phi),
             np.sin(phi),
@@ -297,11 +305,11 @@ def traced_pack_coupling(
             weights * np.cos(phi),
         )
     )
-    r = xp.asarray(sensors.r)[:, None]
-    z = xp.asarray(sensors.z)[:, None]
-    two_pi_r = 2.0 * np.pi * xp.asarray(sensors.r)
-    projection = xp.asarray(sensors.projection)
-    total = xp.zeros(len(sensors))
+    r = xp.asarray(sensors.r, dtype=dtype)[:, None]
+    z = xp.asarray(sensors.z, dtype=dtype)[:, None]
+    two_pi_r = 2.0 * np.pi * xp.asarray(sensors.r, dtype=dtype)
+    projection = xp.asarray(sensors.projection, dtype=dtype)
+    total = xp.zeros(len(sensors), dtype=dtype)
     for index in range(len(masks)):
         edge, weight, norm = traced_pack_section(xp, sections[index], masks[index])
         psi, dpsi_dr, dpsi_dz = _traced_psi_gradient(
@@ -342,6 +350,7 @@ def coupling_jacobian(
     rule=DEFAULT_RULE,
     tilt_offset: float | None = None,
     mode: str = "forward",
+    precision: Precision | str = Precision.AUTOMATIC,
 ) -> np.ndarray:
     """Return ``d(channel reading)/d(parameter)``, ``(n_channels, n_parameters)``.
 
@@ -353,14 +362,16 @@ def coupling_jacobian(
     import jax
     import jax.numpy as jnp
 
-    generators = jnp.asarray(deformation.generators)
-    start = jnp.zeros(deformation.size)
+    resolved = resolve_precision(precision, Precision.DOUBLE)
+    dtype = jnp.float32 if resolved is Precision.SINGLE else jnp.float64
+    generators = jnp.asarray(deformation.generators, dtype=dtype)
+    start = jnp.zeros(deformation.size, dtype=dtype)
     jacobian = np.zeros((len(sensors), deformation.size))
     tilts = _evaluation_tilts(deformation.sections, tilt_offset)
     for angle in tilts:
         base = _rotate(deformation.sections, angle)
         masks = np.asarray([horizontal_edges(section) for section in base])
-        anchor = jnp.asarray(base)
+        anchor = jnp.asarray(base, dtype=dtype)
 
         def rows(parameters, anchor=anchor, masks=masks):
             sections = anchor + jnp.tensordot(parameters, generators, 1)

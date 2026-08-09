@@ -107,6 +107,29 @@ def test_the_traced_kernel_carries_float64():
     )
 
 
+def test_tile_precision_is_selected_per_evaluator():
+    """Automatic retains fp64 while explicit fp32 owns a separate executable."""
+    from nova.jax.config import Precision
+
+    sections, target_r, target_z = mesh(5)
+    edge, weight, norm = polygon.pad_batch(sections)
+    plan = TilePlan(
+        target_tile=target_r.size, source_tile=5, block=4, n_panels=4, n_nodes=8
+    )
+    automatic = tile_evaluator(plan)
+    single = tile_evaluator(plan, precision=Precision.SINGLE)
+
+    assert automatic is not single
+    assert all(
+        block.dtype == np.float64
+        for block in automatic(target_r, target_z, edge, weight, norm)
+    )
+    assert all(
+        block.dtype == np.float32
+        for block in single(target_r, target_z, edge, weight, norm)
+    )
+
+
 @pytest.mark.parametrize("batched", [False, True])
 def test_a_whole_build_compiles_the_kernel_once(batched):
     """Fixed padded shapes across tiles: the compile is amortised over the build."""

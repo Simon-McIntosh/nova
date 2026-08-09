@@ -28,6 +28,7 @@ import numpy as np
 import pytest
 
 from nova.biot.greens import MU0
+from nova.jax.config import Precision, configure_dtypes
 from nova.transport.current_diffusion import (
     CurrentDiffusion,
     EtaProfile,
@@ -42,6 +43,15 @@ from nova.transport.current_diffusion import (
 )
 
 DATA = Path(__file__).parent / "data"
+
+
+def _f64(value):
+    """Construct an explicitly selected double-precision JAX value."""
+    configure_dtypes()
+    import jax.numpy as jnp
+
+    return jnp.asarray(value, dtype=jnp.float64)
+
 
 #: the geometry fields the frozen torch reference carries, in dataclass order
 _GEOMETRY_ARRAYS = (
@@ -128,6 +138,26 @@ def _circular_geometry(
 
 
 # --- analytic pins ---------------------------------------------------------
+def test_diffusion_precision_is_selected_per_solve():
+    """General automatic diffusion is fp64 while explicit fp32 stays available."""
+    geometry = _circular_geometry(n_rho=8)
+    eta = EtaProfile(eta0=1.0e-7, contrast=0.0, shape=1.0)
+    times = np.linspace(0.0, 0.001, 3)
+    current = np.full(times.size, geometry.ip_amperes)
+
+    automatic = diffuse_psi(geometry, eta, t_grid=times, ip_of_t=current)
+    single = diffuse_psi(
+        geometry,
+        eta,
+        t_grid=times,
+        ip_of_t=current,
+        precision=Precision.SINGLE,
+    )
+
+    assert automatic["psi_face"].dtype == np.float64
+    assert single["psi_face"].dtype == np.float32
+
+
 def test_bessel_mode_decays_at_the_analytic_rate():
     """A Neumann eigenmode of the cylinder equation decays at
     ``lam = (eta/mu0)(j'_1/a)^2`` -- the diffusion operator against the classical
@@ -494,13 +524,13 @@ def test_the_two_profile_ladders_are_one_family(nonneg, n_terms):
     against one and evaluated against the other would otherwise be silently
     wrong by the difference.
     """
-    jnp = pytest.importorskip("jax.numpy")
+    pytest.importorskip("jax.numpy")
     from nova.transport.current_diffusion import _traced_profile_shapes
 
     psi_n = np.linspace(0.0, 1.0, 33)
     host = profile_shapes(psi_n, n_terms, nonneg=nonneg)
     traced = np.asarray(
-        _traced_profile_shapes(jnp.asarray(psi_n), n_terms, nonnegative=nonneg)
+        _traced_profile_shapes(_f64(psi_n), n_terms, nonnegative=nonneg)
     )
     assert host.shape == traced.shape == (psi_n.size, n_terms)
     np.testing.assert_allclose(traced, host, rtol=1e-12, atol=1e-13)
@@ -509,14 +539,12 @@ def test_the_two_profile_ladders_are_one_family(nonneg, n_terms):
 @pytest.mark.parametrize("nonneg", [True, False])
 def test_both_ladders_clip_outside_the_unit_interval(nonneg):
     """Off-interval flux is clipped identically, not extrapolated."""
-    jnp = pytest.importorskip("jax.numpy")
+    pytest.importorskip("jax.numpy")
     from nova.transport.current_diffusion import _traced_profile_shapes
 
     psi_n = np.array([-0.5, -0.1, 0.0, 0.5, 1.0, 1.4])
     host = profile_shapes(psi_n, 4, nonneg=nonneg)
-    traced = np.asarray(
-        _traced_profile_shapes(jnp.asarray(psi_n), 4, nonnegative=nonneg)
-    )
+    traced = np.asarray(_traced_profile_shapes(_f64(psi_n), 4, nonnegative=nonneg))
     np.testing.assert_allclose(traced, host, rtol=1e-12, atol=1e-13)
     np.testing.assert_allclose(host[0], host[2])  # clipped to the axis value
     np.testing.assert_allclose(host[-1], host[-2])  # clipped to the edge value

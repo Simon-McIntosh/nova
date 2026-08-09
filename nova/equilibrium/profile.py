@@ -27,11 +27,9 @@ from scipy.constants import mu_0
 
 from nova.biot.greens import hybrid_greens
 from nova.equilibrium.measurement import Magnetics
-from nova.jax.config import enable_x64
 from nova.equilibrium.connectivity_boundary import traced_smooth_boundary_read
 from nova.equilibrium.stencil_nulls import magnetic_axis_subgrid
-
-enable_x64()
+from nova.jax.config import Precision, resolve_precision
 
 
 class ProfileResult(NamedTuple):
@@ -204,9 +202,14 @@ class ReconstructProfile:
     topology_levels: int = 48
     topology_bisections: int = 12
     topology_rays: int = 128
+    precision: Precision | str = Precision.AUTOMATIC
 
     def __post_init__(self):
         """Validate fixed shapes and place numerical state on the JAX device."""
+        self.precision = resolve_precision(self.precision, Precision.DOUBLE)
+        compute_dtype = (
+            jnp.float32 if self.precision is Precision.SINGLE else jnp.float64
+        )
         grid_r = np.asarray(self.grid_r, dtype=np.float64)
         grid_z = np.asarray(self.grid_z, dtype=np.float64)
         inside = np.asarray(self.inside_limiter, dtype=bool)
@@ -242,24 +245,25 @@ class ReconstructProfile:
         if self.topology_temperature <= 0.0:
             raise ValueError("topology_temperature must be positive")
         prior_matrix, prior_target = _prior_rows(self.priors, self.coefficient_names)
+        for name in ("grid_r", "grid_z", "wall_r", "wall_z"):
+            setattr(self, name, jnp.asarray(getattr(self, name), dtype=jnp.float64))
         for name in (
-            "grid_r",
-            "grid_z",
             "cell_area",
             "source_to_grid",
             "plasma_to_grid",
             "source_to_sensor",
             "plasma_to_sensor",
-            "wall_r",
-            "wall_z",
         ):
-            setattr(self, name, jnp.asarray(getattr(self, name), dtype=jnp.float64))
+            setattr(self, name, jnp.asarray(getattr(self, name), dtype=compute_dtype))
         self.inside_limiter = jnp.asarray(self.inside_limiter, dtype=bool)
-        self._prior_matrix = jnp.asarray(prior_matrix, dtype=jnp.float64)
-        self._prior_target = jnp.asarray(prior_target, dtype=jnp.float64)
+        self.topology_temperature = jnp.asarray(
+            self.topology_temperature, dtype=compute_dtype
+        )
+        self._prior_matrix = jnp.asarray(prior_matrix, dtype=compute_dtype)
+        self._prior_target = jnp.asarray(prior_target, dtype=compute_dtype)
         radius, height = jnp.meshgrid(self.grid_r, self.grid_z)
-        self._cell_r = radius.reshape(-1)
-        self._cell_z = height.reshape(-1)
+        self._cell_r = radius.reshape(-1).astype(compute_dtype)
+        self._cell_z = height.reshape(-1).astype(compute_dtype)
 
     @classmethod
     def from_geometry(
@@ -371,7 +375,9 @@ class ReconstructProfile:
             if unknown:
                 details.append("unknown " + ", ".join(sorted(unknown)))
             raise ValueError(f"{kind} names do not match: {'; '.join(details)}")
-        return jnp.asarray([values[name] for name in names], dtype=jnp.float64)
+        return jnp.asarray(
+            [values[name] for name in names], dtype=self.source_to_grid.dtype
+        )
 
     def pack_source_currents(self, values: Mapping[str, float]) -> jax.Array:
         """Pack named conductor currents [A] into the traced source order."""
@@ -385,8 +391,15 @@ class ReconstructProfile:
         self, source_current: jax.Array, plasma_current: jax.Array
     ) -> jax.Array:
         """Return a compact current seed added to the known-conductor field."""
-        scale_r = jnp.maximum(0.2 * (self.grid_r[-1] - self.grid_r[0]), 1.0e-3)
-        scale_z = jnp.maximum(0.2 * (self.grid_z[-1] - self.grid_z[0]), 1.0e-3)
+        dtype = self.source_to_grid.dtype
+        scale_r = jnp.asarray(
+            jnp.maximum(0.2 * (self.grid_r[-1] - self.grid_r[0]), 1.0e-3),
+            dtype=dtype,
+        )
+        scale_z = jnp.asarray(
+            jnp.maximum(0.2 * (self.grid_z[-1] - self.grid_z[0]), 1.0e-3),
+            dtype=dtype,
+        )
         seed = jnp.exp(
             -(
                 ((self._cell_r - self.axis_seed[0]) / scale_r) ** 2
@@ -412,13 +425,22 @@ class ReconstructProfile:
             self.topology_rays,
             wall_r=self.wall_r,
             wall_z=self.wall_z,
-            temperature=jnp.asarray(self.topology_temperature),
+            temperature=self.topology_temperature,
         )
-        span = topology["psi_bnd"] - topology["psi_axis"]
+        psi_axis = jnp.asarray(topology["psi_axis"], dtype=flux.dtype)
+        psi_bnd = jnp.asarray(topology["psi_bnd"], dtype=flux.dtype)
+        core_weight = jnp.asarray(topology["core_weight"], dtype=flux.dtype)
+        topology = {
+            **topology,
+            "psi_axis": psi_axis,
+            "psi_bnd": psi_bnd,
+            "core_weight": core_weight,
+        }
+        span = psi_bnd - psi_axis
         span = jnp.where(jnp.abs(span) > 1.0e-30, span, 1.0e-30)
-        flux_norm = (flux - topology["psi_axis"]) / span
+        flux_norm = (flux - psi_axis) / span
         edge = jnp.clip(1.0 - flux_norm, 0.0, 1.0)
-        weight = topology["core_weight"].reshape(-1) * self.cell_area
+        weight = core_weight.reshape(-1) * self.cell_area
         radius = jnp.maximum(self._cell_r, 1.0e-6)
         pressure = [
             -2.0 * jnp.pi * radius * edge ** (order + 1) * weight

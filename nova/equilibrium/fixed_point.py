@@ -40,7 +40,7 @@ from typing import NamedTuple
 import jax
 import jax.numpy as jnp
 
-from nova.jax.config import Precision, _resolve_precision, configure_dtypes
+from nova.jax.config import Precision, resolve_precision
 
 __all__ = ["FixedPointResult", "anderson", "newton_krylov", "picard"]
 
@@ -61,8 +61,7 @@ class FixedPointResult(NamedTuple):
 
 def _solver_state(initial: jax.Array, precision: Precision | str) -> jax.Array:
     """Cast the state before tracing under the general-solver policy."""
-    configure_dtypes()
-    resolved = _resolve_precision(precision, Precision.DOUBLE)
+    resolved = resolve_precision(precision, Precision.DOUBLE)
     dtype = jnp.float32 if resolved is Precision.SINGLE else jnp.float64
     return jnp.asarray(initial, dtype=dtype)
 

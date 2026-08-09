@@ -53,9 +53,6 @@ import jax
 import jax.numpy as jnp
 
 from nova.equilibrium.morphology import _dilate4
-from nova.jax.config import enable_x64
-
-enable_x64()
 
 _SQRT2 = 2.0**0.5
 
@@ -86,7 +83,9 @@ def flood_fill_core(
         return _dilate4(core) & confined
 
     core = jax.lax.fori_loop(0, n_iter, body, seed & confined)
-    return core.astype(jnp.float64)
+    # Exact 0/1 connectivity weights need no double-precision storage.  Their
+    # products promote to the solved field's selected compute dtype.
+    return core.astype(jnp.float32)
 
 
 # ---------------------------------------------------------------------------
@@ -158,7 +157,9 @@ def traced_flux_surface_bins(
     g2r2_flat = (grad2 * inv_r2_cell).reshape(-1)
 
     # fixed ψ_N level grid (data-independent → fixed shape, vmap-safe)
-    levels = jnp.linspace(psin_min, psin_max, n_psin + 1)  # (n_psin+1,)
+    levels = jnp.linspace(
+        psin_min, psin_max, n_psin + 1, dtype=psi2d.dtype
+    )  # (n_psin+1,)
     pn_s = 0.5 * (levels[:-1] + levels[1:])  # metric samples at mid-levels
     dlevel = (psin_max - psin_min) / n_psin
     h = h_factor * dlevel

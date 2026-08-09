@@ -22,8 +22,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-09">
-<meta name="plan-version" content="5">
-<meta name="plan-impl" content="0.12">
+<meta name="plan-version" content="7">
+<meta name="plan-impl" content="0.2222222222222222">
 </head>
 <body>
   <main class="plan-doc">
@@ -552,21 +552,19 @@ max rel diff traced vs numpy:      5.667e-08</code></pre>
     <p>Each deletion is its own focused commit, separate from any numerics change, so a
     dead-code question never mixes with a physics question in review.</p>
 
-    <h2 id="s9">§9 — The basis pair is not a pair</h2>
-
-    <p><code>nova/jax/basis.py:17</code> <code>Basis(coordinate, data)</code> — with
-    <code>forward</code>/<code>__call__</code> and a <code>Fit.__truediv__</code> inverse —
-    is an <strong>interpolant</strong> hierarchy. <code>nova/linalg/basis.py:37</code>
-    <code>Basis(length, order=0)</code> — with a <code>name</code> ClassVar and a
-    <code>matrix</code> built in <code>__post_init__</code> — is a <strong>regression
-    design-matrix</strong> hierarchy. They compute different objects and share only the
-    token <code>Bernstein</code>.</p>
-
-    <p>No naming token resolves this, because there is nothing to distinguish: they are not
-    two implementations of one concept. The traced interpolant hierarchy lands as
-    <code>nova/linalg/interpolant.py</code> and <code>nova/linalg/basis.py</code> keeps the
-    design matrices untouched. This is a concept rename, outside the §3 rule, and it blocks
-    the basis conversion until it is done.</p>
+    <section id="s9" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-09</span>
+        <h2>§9 — The basis pair is not a pair</h2>
+      </header>
+      <p class="landed-summary">
+        Moved the traced interpolant hierarchy to <code>nova/linalg/interpolant.py</code>
+        while leaving the independent design matrices in <code>nova/linalg/basis.py</code>.
+        Independent verification passed 16 tests in 30.02 s, including the JAX-free import.
+        Full record: <a href="archive/nova-jax-dissolution-s9-landed.html">§9 landed</a>
+        (worker <code>efde9b97</code>; integrated <code>66240aaf</code>).
+      </p>
+    </section>
 
     <h2 id="s10">§10 — The JAX-free guarantee</h2>
 
@@ -953,7 +951,7 @@ Done-when
   5. Commit SHAs, the before/after published value at zero current, and test output
      returned.</pre>
     </article>
-<article class="r-fu" data-id="f-njd-005" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship" data-written-at="2026-08-09" data-recommends-skill="/reckon-ship nova-jax-dissolution §9" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-njd-005" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship" data-written-at="2026-08-09" data-recommends-skill="/reckon-ship nova-jax-dissolution §9" data-resolved-at="2026-08-09T07:07:06+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Split the interpolant hierarchy out of linalg/basis.py — it is not a pair</h4>
     <div class="r-fu-body"><p>Independent of every other section and safe to run in parallel. The two Basis hierarchies are not two implementations of one concept; they compute different objects and collide only on the token Bernstein, so no naming token can resolve them. Until the concept split lands, the basis conversion is blocked.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -995,6 +993,7 @@ Done-when
   3. JAX-free import of nova.linalg proved.
   4. Suite green in the slow lane (-m &quot;slow or not slow&quot;).
   5. Commit SHAs and test output returned.</pre>
+    <p class="r-fu-outcome">§9 landed — efde9b97 integrated by 66240aaf; interpolant hierarchy moved to nova/linalg/interpolant.py, design matrices remained independent, and independent verification passed 16 tests in 30.02 s with JAX-free import, Ruff, diff, and naming checks clean.</p>
     </article>
 </section>
 

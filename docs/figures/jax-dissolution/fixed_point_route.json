@@ -144,7 +144,7 @@
           "OMP_NUM_THREADS": "1",
           "XLA_FLAGS": "--xla_cpu_multi_thread_eigen=false"
         },
-        "benchmark_sha256": "3616a0a8fac08e12e34fac4865f4d2c8ecfa34d3b4ec2c589dcbcd71949963f6"
+        "benchmark_sha256": "1381f488b9be7743a384667f5b82555c032aa929d0459d0d973e2dfe27440257"
       },
       "methodology": {
         "case_shapes": [
@@ -483,7 +483,7 @@
           "OMP_NUM_THREADS": "1",
           "XLA_FLAGS": null
         },
-        "benchmark_sha256": "3616a0a8fac08e12e34fac4865f4d2c8ecfa34d3b4ec2c589dcbcd71949963f6"
+        "benchmark_sha256": "1381f488b9be7743a384667f5b82555c032aa929d0459d0d973e2dfe27440257"
       },
       "methodology": {
         "case_shapes": [

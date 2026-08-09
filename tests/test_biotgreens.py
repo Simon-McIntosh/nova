@@ -22,10 +22,16 @@ These run on plain numpy arrays with no frame machinery.  They pin:
 
 from __future__ import annotations
 
+from decimal import Decimal, localcontext
+
 import numpy as np
+import pytest
+import scipy.special
 
 from nova.biot.completeelliptic import complete_kind, complete_pole
 from nova.biot.greens import (
+    _ELLIPTIC_SERIES_LIMIT,
+    _filament_elliptic_combinations,
     MU0,
     corner_fields,
     cylinder_greens,
@@ -238,6 +244,190 @@ def test_point_loop_psi_b_consistency():
         np.testing.assert_allclose(
             br[0], -(psi_zp - psi_zm) / (2 * h) / (2 * np.pi * r), rtol=1e-5
         )
+
+
+def test_point_loop_exact_axis_uses_the_symmetry_limit_without_warnings():
+    """The exact axis has zero linked flux and radial field with analytic Bz."""
+    source_r = 1.7
+    target_z = np.array([-3.0, -0.4, 0.0, 0.9, 4.0])
+    target_r = np.zeros_like(target_z)
+    with np.errstate(divide="raise", invalid="raise", over="raise"):
+        psi = greens_psi(target_r, target_z, source_r, 0.2)
+        bz, br = greens_bz_br(target_r, target_z, source_r, 0.2)
+        traced_psi, traced_br, traced_bz = traced_filament_greens(
+            np, target_r, target_z, source_r, 0.2
+        )
+    expected_bz = (
+        MU0 * source_r**2 / (2.0 * (source_r**2 + (target_z - 0.2) ** 2) ** 1.5)
+    )
+    np.testing.assert_array_equal(psi, 0.0)
+    np.testing.assert_array_equal(br, 0.0)
+    np.testing.assert_allclose(bz, expected_bz, rtol=3e-16, atol=0.0)
+    np.testing.assert_array_equal(traced_psi, psi)
+    np.testing.assert_array_equal(traced_br, br)
+    np.testing.assert_allclose(traced_bz, expected_bz, rtol=3e-16, atol=0.0)
+
+
+def _decimal_elliptic_combinations(parameter, *, derivative=False):
+    """Return a 100-digit power-series arbiter for the three loop combinations."""
+    with localcontext() as context:
+        context.prec = 110
+        one = Decimal(1)
+        two = Decimal(2)
+        arithmetic_mean = one
+        geometric_mean = (one / two).sqrt()
+        correction = one / Decimal(4)
+        weight = one
+        for _ in range(9):
+            next_mean = (arithmetic_mean + geometric_mean) / two
+            geometric_mean = (arithmetic_mean * geometric_mean).sqrt()
+            correction -= weight * (arithmetic_mean - next_mean) ** 2
+            arithmetic_mean = next_mean
+            weight *= two
+        pi = (arithmetic_mean + geometric_mean) ** 2 / (Decimal(4) * correction)
+
+        m = Decimal.from_float(float(parameter))
+        complete_coefficient = one
+        first_minus_second = Decimal(0)
+        flux = Decimal(0)
+        radial = Decimal(0)
+        for degree in range(1, 80):
+            prior_coefficient = complete_coefficient
+            ratio = Decimal(2 * degree - 1) / Decimal(2 * degree)
+            complete_coefficient *= ratio * ratio
+            if derivative:
+                power = one if degree == 1 else m ** (degree - 1)
+                power *= degree
+            else:
+                power = m**degree
+            first_minus_second += (
+                complete_coefficient
+                * Decimal(2 * degree)
+                / Decimal(2 * degree - 1)
+                * power
+            )
+            if degree >= 2:
+                coefficient = (
+                    prior_coefficient * Decimal(degree - 1) / Decimal(2 * degree)
+                )
+                flux += coefficient * power
+                radial += Decimal(2 * degree - 1) * coefficient * power
+        scale = pi / two
+        return np.array(
+            [float(scale * value) for value in (first_minus_second, flux, radial)]
+        )
+
+
+def test_small_parameter_elliptic_combinations_match_a_high_precision_arbiter():
+    """Cancellation-free loop combinations retain all binary64 digits."""
+    parameter = np.array(
+        [
+            1e-16,
+            1e-12,
+            1.2e-9,
+            3.67e-9,
+            3.67e-8,
+            1e-6,
+            0.5 * _ELLIPTIC_SERIES_LIMIT,
+            np.nextafter(_ELLIPTIC_SERIES_LIMIT, 0.0),
+            _ELLIPTIC_SERIES_LIMIT,
+        ]
+    )
+    first = scipy.special.ellipk(parameter)
+    second = scipy.special.ellipe(parameter)
+    got = np.array(
+        _filament_elliptic_combinations(np, parameter, 1.0 - parameter, first, second)
+    ).T
+    expected = np.array([_decimal_elliptic_combinations(value) for value in parameter])
+    np.testing.assert_allclose(got, expected, rtol=3e-16, atol=0.0)
+
+
+def test_small_parameter_point_filament_matches_a_high_precision_arbiter():
+    """Psi and both field components keep their scale in the far regime."""
+    requested = np.array([1e-16, 1e-12, 1.2e-9, 3.67e-9, 3.67e-8, 1e-6, 0.009])
+    target_z = 2.0 * np.sqrt(1.0 / requested - 1.0)
+    target_r = np.ones_like(target_z)
+    parameter = 4.0 / (4.0 + target_z**2)
+    combinations = np.array(
+        [_decimal_elliptic_combinations(value) for value in parameter]
+    )
+    span_root = np.sqrt(4.0 + target_z**2)
+    expected = np.column_stack(
+        [
+            MU0 * span_root * combinations[:, 1],
+            MU0 / (2.0 * np.pi) * target_z / span_root * combinations[:, 2],
+            MU0 / (2.0 * np.pi) / span_root * combinations[:, 0],
+        ]
+    )
+    host_bz, host_br = greens_bz_br(target_r, target_z, 1.0, 0.0)
+    host = np.column_stack([greens_psi(target_r, target_z, 1.0, 0.0), host_br, host_bz])
+    traced = np.column_stack(traced_filament_greens(np, target_r, target_z, 1.0, 0.0))
+    np.testing.assert_allclose(host, expected, rtol=5e-15, atol=0.0)
+    np.testing.assert_allclose(traced, expected, rtol=5e-15, atol=0.0)
+
+
+def test_small_parameter_branch_has_traced_value_and_tangent_continuity():
+    """The held series arm supplies finite, accurate traced tangents."""
+    jax = pytest.importorskip("jax")
+    jax.config.update("jax_enable_x64", True)
+    jnp = pytest.importorskip("jax.numpy")
+
+    def combinations(parameter):
+        first, second = complete_kind(1.0 - parameter, xp=jnp)
+        return jnp.stack(
+            _filament_elliptic_combinations(
+                jnp, parameter, 1.0 - parameter, first, second
+            )
+        )
+
+    for parameter in (1e-12, 0.5 * _ELLIPTIC_SERIES_LIMIT):
+        value, tangent = jax.jvp(
+            combinations, (jnp.asarray(parameter),), (jnp.asarray(1.0),)
+        )
+        np.testing.assert_allclose(
+            np.asarray(value),
+            _decimal_elliptic_combinations(parameter),
+            rtol=5e-15,
+            atol=0.0,
+        )
+        np.testing.assert_allclose(
+            np.asarray(tangent),
+            _decimal_elliptic_combinations(parameter, derivative=True),
+            rtol=5e-14,
+            atol=0.0,
+        )
+
+    distance = 1e-8
+    lower_value, lower_tangent = jax.jvp(
+        combinations,
+        (jnp.asarray(_ELLIPTIC_SERIES_LIMIT - distance),),
+        (jnp.asarray(1.0),),
+    )
+    upper_value, upper_tangent = jax.jvp(
+        combinations,
+        (jnp.asarray(_ELLIPTIC_SERIES_LIMIT + distance),),
+        (jnp.asarray(1.0),),
+    )
+    expected_change = (
+        2.0
+        * distance
+        * _decimal_elliptic_combinations(_ELLIPTIC_SERIES_LIMIT, derivative=True)
+    )
+    np.testing.assert_allclose(
+        np.asarray(upper_value - lower_value), expected_change, rtol=2e-5, atol=1e-18
+    )
+    lower_expected = _decimal_elliptic_combinations(
+        _ELLIPTIC_SERIES_LIMIT - distance, derivative=True
+    )
+    upper_expected = _decimal_elliptic_combinations(
+        _ELLIPTIC_SERIES_LIMIT + distance, derivative=True
+    )
+    np.testing.assert_allclose(
+        np.asarray(lower_tangent), lower_expected, rtol=3e-6, atol=1e-14
+    )
+    np.testing.assert_allclose(
+        np.asarray(upper_tangent), upper_expected, rtol=3e-6, atol=1e-14
+    )
 
 
 def test_units_constant():
@@ -783,14 +973,18 @@ def test_a_target_on_the_filament_returns_the_divergence():
     for radius in (0.9, 1.0, 6.2):
         target = np.array([radius])
         level = np.array([0.0])
-        with np.errstate(divide="ignore", invalid="ignore"):
+        with np.errstate(divide="raise", invalid="raise", over="raise"):
             psi = np.asarray(greens_psi(target, level, radius, 0.0))
             bz, br = (
                 np.asarray(part) for part in greens_bz_br(target, level, radius, 0.0)
             )
+            traced = traced_filament_greens(np, target, level, radius, 0.0)
         assert psi[0] == np.inf
         assert np.isnan(bz[0])
-        assert np.isnan(br[0]) or br[0] == 0.0
+        assert np.isnan(br[0])
+        assert traced[0][0] == np.inf
+        assert np.isnan(traced[1][0])
+        assert np.isnan(traced[2][0])
 
 
 def test_one_ulp_off_the_filament_is_finite_at_every_ring_radius():
@@ -886,17 +1080,8 @@ def test_the_point_filament_routes_agree_in_the_ring_plane():
     np.testing.assert_array_equal(br, host_br)
 
 
-def test_the_two_routes_part_only_on_the_filament_itself():
-    """One ulp off, they agree; ON it, the divergence and the finite part differ.
-
-    The descent returns the first kind's FINITE PART at a zero complement, which
-    the section reduction needs -- its total weight on the divergence is zero --
-    and which for a bare loop arrives as a small NEGATIVE flux.  The point form
-    returns the divergence instead.  Both conventions are defensible and they
-    are not interchangeable: an infinity is checkable and a plausible negative
-    number is not, so this pins which form carries which rather than letting one
-    be quietly conformed to the other.
-    """
+def test_the_two_routes_share_the_filament_singularity_contract():
+    """One ulp off the routes agree; on the filament both expose the singularity."""
     for radius in (0.9, 1.0, 6.2, 12.0):
         adjacent = np.array([np.nextafter(radius, np.inf)])
         level = np.array([0.0])
@@ -907,10 +1092,12 @@ def test_the_two_routes_part_only_on_the_filament_itself():
         assert abs(bz[0] - host_bz[0]) < 1e-14 * abs(host_bz[0])
 
         on_source = np.array([radius])
-        with np.errstate(divide="ignore", invalid="ignore"):
+        with np.errstate(divide="raise", invalid="raise", over="raise"):
             assert greens_psi(on_source, level, radius, 0.0)[0] == np.inf
-            finite_part = traced_filament_greens(np, on_source, level, radius, 0.0)[0]
-        assert np.isfinite(finite_part[0]) and finite_part[0] < 0.0
+            traced = traced_filament_greens(np, on_source, level, radius, 0.0)
+        assert traced[0][0] == np.inf
+        assert np.isnan(traced[1][0])
+        assert np.isnan(traced[2][0])
 
 
 def test_the_rectangular_section_routes_agree_through_the_quadrature_switch():

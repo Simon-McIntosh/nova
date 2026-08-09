@@ -69,20 +69,13 @@ and both differences are what being traceable costs:
 Off the filament the two routes agree to round-off -- 2e-15 of the regime's own
 scale for the point form and 2e-12 for the four-corner section rule, over
 targets from a nanometre off the filament out to the far side of the machine,
-pinned by ``tests/test_biotgreens.py``.  The one place they part is a target ON
-the filament, and it is not a tie: the host returns the divergence, ``inf``,
-while the descent returns the first kind's FINITE PART, which arrives as a small
-NEGATIVE flux.  A caller can test for an infinity; a plausible-looking negative
-number is the one wrong answer it cannot detect, so the point form keeps the
-divergence and the finite-part convention stays where the reduction that needs
-it -- the section corner, whose total weight on the divergence is zero -- is.
+pinned by ``tests/test_biotgreens.py``.  On the filament both routes expose the
+physical singularity: ``psi = inf`` and both field components are ``nan``.
 
-Neither route rescues the small-``k^2`` bracket.  ``K - E`` is a difference of
-two numbers both near ``pi/2`` whose value is of order ``k^2``, so a target near
-the axis or many ring radii away loses digits at a rate set by the arrangement
-and not by where ``K`` and ``E`` came from: both routes stand at 1e-3 of the
-field scale by ``k^2 ~ 1e-9``, together, and the fix would be to split the pole
-off the bracket rather than to change the special function.
+The three loop-specific elliptic combinations use their power series for
+``k^2 <= 1e-2``.  Factoring the leading power before Horner evaluation avoids
+subtracting nearly equal complete integrals near the axis and in the far field,
+while leaving the accurate complete-integral algorithms unchanged.
 """
 
 from __future__ import annotations
@@ -96,14 +89,98 @@ from nova.biot.zeta import traced_zeta, zeta
 MU0 = 4.0e-7 * np.pi
 """Vacuum permeability [T.m/A]."""
 
-# Numerical floor so an ON-AXIS point does not divide by zero.  It bounds the ring
-# SPAN ``(a + R)^2 + dz^2``, the target radius, and the modulus -- all three of order
-# the machine, and all three reached only at the axis, where what they guard is
-# masked to its own limit anyway.  It is NOT applied to the target's distance to the
-# FILAMENT: an absolute floor on a squared length there engages 32 micrometres out at
-# any ring radius -- the radius does not appear -- and answers, silently, for a target
-# that far away.
-_R_FLOOR = 1.0e-9
+_ELLIPTIC_SERIES_LIMIT = 1.0e-2
+
+# Coefficients are in descending order for Horner evaluation.  The polynomials
+# multiply pi/2 and respectively m, m^2 and m^2.  Their exact dyadic forms are
+# derived from the complete-integral coefficient recurrence in the tests.
+_FIRST_MINUS_SECOND_HORNER = (
+    0.03642282681539655,
+    0.04113636910915375,
+    0.047254085540771484,
+    0.055515289306640625,
+    0.067291259765625,
+    0.08544921875,
+    0.1171875,
+    0.1875,
+    0.5,
+)
+_FLUX_ELLIPTIC_HORNER = (
+    0.015479701396543533,
+    0.017140153795480728,
+    0.019196972250938416,
+    0.02180957794189453,
+    0.025234222412109375,
+    0.0299072265625,
+    0.03662109375,
+    0.046875,
+    0.0625,
+)
+_RADIAL_FIELD_ELLIPTIC_HORNER = (
+    0.2941143265343271,
+    0.2913826145231724,
+    0.28795458376407623,
+    0.2835245132446289,
+    0.2775764465332031,
+    0.2691650390625,
+    0.25634765625,
+    0.234375,
+    0.1875,
+)
+
+
+def _horner_polynomial(xp, argument, coefficients):
+    """Evaluate a scalar-coefficient polynomial in a traced array namespace."""
+    value = xp.asarray(coefficients[0])
+    for coefficient in coefficients[1:]:
+        value = value * argument + coefficient
+    return value
+
+
+def _filament_elliptic_combinations(xp, parameter, complement, first, second):
+    """Return the three cancellation-free combinations used by a loop kernel.
+
+    The returned values are ``K-E``, ``(1-m/2)K-E`` and
+    ``E-K+mE/(2(1-m))``.  Both inactive arms are held at benign constants before
+    selection so traced values and tangents never evaluate an invalid denominator.
+    """
+    use_series = parameter <= _ELLIPTIC_SERIES_LIMIT
+    series_parameter = xp.where(use_series, parameter, 0.0)
+    direct_parameter = xp.where(use_series, 0.0, parameter)
+    direct_complement = xp.where(use_series, 1.0, complement)
+    direct_first = xp.where(use_series, 1.0, first)
+    direct_second = xp.where(use_series, 1.0, second)
+
+    first_minus_second = direct_first - direct_second
+    flux = 0.5 * (1.0 + direct_complement) * direct_first - direct_second
+    radial = (
+        direct_second
+        - direct_first
+        + 0.5 * direct_parameter / direct_complement * direct_second
+    )
+
+    half_pi = 0.5 * np.pi
+    squared_parameter = series_parameter * series_parameter
+    series_first_minus_second = (
+        half_pi
+        * series_parameter
+        * _horner_polynomial(xp, series_parameter, _FIRST_MINUS_SECOND_HORNER)
+    )
+    series_flux = (
+        half_pi
+        * squared_parameter
+        * _horner_polynomial(xp, series_parameter, _FLUX_ELLIPTIC_HORNER)
+    )
+    series_radial = (
+        half_pi
+        * squared_parameter
+        * _horner_polynomial(xp, series_parameter, _RADIAL_FIELD_ELLIPTIC_HORNER)
+    )
+    return (
+        xp.where(use_series, series_first_minus_second, first_minus_second),
+        xp.where(use_series, series_flux, flux),
+        xp.where(use_series, series_radial, radial),
+    )
 
 
 # --- point circular filament ------------------------------------------
@@ -164,17 +241,17 @@ def greens_psi(rs: np.ndarray, zs: np.ndarray, ar: float, az: float) -> np.ndarr
     r = np.asarray(rs, dtype=np.float64)
     z = np.asarray(zs, dtype=np.float64)
     dz = z - az
-    denom = (ar + r) ** 2 + dz**2
-    span = np.maximum(denom, _R_FLOOR)
+    span = (ar + r) ** 2 + dz**2
     k2 = 4.0 * ar * r / span
-    complement = _filament_gap(r, dz, ar) / span
-    k = np.sqrt(k2)
-    big_k = scipy.special.ellipkm1(complement)
+    gap = _filament_gap(r, dz, ar)
+    singular = gap == 0.0
+    complement = gap / span
+    held_complement = np.where(singular, 1.0, complement)
+    big_k = scipy.special.ellipkm1(held_complement)
     big_e = scipy.special.ellipe(_held_parameter(k2))
-    pref = 2.0 * MU0 * np.sqrt(ar * np.maximum(r, _R_FLOOR)) / np.maximum(k, _R_FLOOR)
-    psi = pref * (0.5 * (1.0 + complement) * big_k - big_e)
-    # at R->0 the loop encloses no flux at the axis target -> Phi->0
-    return np.where(r < _R_FLOOR, 0.0, psi)
+    _, flux, _ = _filament_elliptic_combinations(np, k2, held_complement, big_k, big_e)
+    psi = MU0 * np.sqrt(span) * flux
+    return np.where(singular, np.inf, psi)
 
 
 def greens_bz_br(
@@ -199,28 +276,30 @@ def greens_bz_br(
     r = np.asarray(rs, dtype=np.float64)
     z = np.asarray(zs, dtype=np.float64)
     dz = z - az
-    denom = (ar + r) ** 2 + dz**2
-    span = np.maximum(denom, _R_FLOOR)
+    span = (ar + r) ** 2 + dz**2
     sq = np.sqrt(span)
     k2 = 4.0 * ar * r / span
     gap = _filament_gap(r, dz, ar)
-    big_k = scipy.special.ellipkm1(gap / span)
+    singular = gap == 0.0
+    held_gap = np.where(singular, 1.0, gap)
+    complement = gap / span
+    held_complement = np.where(singular, 1.0, complement)
+    big_k = scipy.special.ellipkm1(held_complement)
     big_e = scipy.special.ellipe(_held_parameter(k2))
+    first_minus_second, _, radial = _filament_elliptic_combinations(
+        np, k2, held_complement, big_k, big_e
+    )
     pre = MU0 / (2.0 * np.pi)
     # Both brackets are printed with the pole's numerator as a difference of terms of
     # order a^2 whose value is of order a d -- so it arrives with relative error
     # eps a/2d, which beats the modulus as the near-field limit.  Splitting the pole
     # off removes it: a^2 - R^2 - dz^2 is -d^2 + 2 a (a - R) and a^2 + R^2 + dz^2 is
     # d^2 + 2 a R, both exact, and what is left over d^2 is the divergence itself.
-    bz = pre / sq * (big_k - big_e + 2.0 * ar * (ar - r) / gap * big_e)
-    br_full = (
-        pre
-        * dz
-        / (np.maximum(r, _R_FLOOR) * sq)
-        * (big_e - big_k + 2.0 * ar * r / gap * big_e)
-    )
-    br = np.where(r < _R_FLOOR, 0.0, br_full)
-    return bz, br
+    bz = pre / sq * (first_minus_second + 2.0 * ar * (ar - r) / held_gap * big_e)
+    on_axis = r == 0.0
+    held_r = np.where(on_axis, 1.0, r)
+    br = np.where(on_axis, 0.0, pre * dz / (held_r * sq) * radial)
+    return np.where(singular, np.nan, bz), np.where(singular, np.nan, br)
 
 
 def traced_filament_greens(xp, target_r, target_z, source_r, source_z):
@@ -235,11 +314,9 @@ def traced_filament_greens(xp, target_r, target_z, source_r, source_z):
     The complete integrals come from
     :func:`nova.biot.completeelliptic.complete_kind` -- complement-native,
     fixed trip count, differentiable -- rather than the Cephes pair; the two
-    routes agree to a few ulp everywhere off the filament, and the second kind
-    taken from the complement needs no held parameter at all.  The one place
-    they differ is a target ON the filament, where the first kind's divergence
-    comes back as its finite part instead of an infinity -- a configuration
-    that has no derivative under either convention.
+    routes agree to a few ulp everywhere off the filament.  Exact coincident
+    pairs are held away from the special-function confluence and then assigned
+    the public physical singularity.
 
     The axis guards hold their arguments rather than only masking the result:
     ``sqrt`` has an unbounded derivative at zero, so an on-axis target passed
@@ -251,25 +328,29 @@ def traced_filament_greens(xp, target_r, target_z, source_r, source_z):
     ar = xp.asarray(source_r)
     az = xp.asarray(source_z)
     dz = z - az
-    span = xp.maximum((ar + r) ** 2 + dz**2, _R_FLOOR)
+    span = (ar + r) ** 2 + dz**2
     gap = (ar - r) ** 2 + dz**2
     complement = gap / span
     k2 = 4.0 * ar * r / span
-    big_k, big_e = complete_kind(complement, xp=xp)
-    on_axis = r < _R_FLOOR
-    held_r = xp.where(on_axis, _R_FLOOR, r)
-    k = xp.sqrt(xp.where(on_axis, 1.0, k2))
-    pref = 2.0 * MU0 * xp.sqrt(ar * held_r) / xp.maximum(k, _R_FLOOR)
-    psi = xp.where(on_axis, 0.0, pref * (0.5 * (1.0 + complement) * big_k - big_e))
+    singular = gap == 0.0
+    held_gap = xp.where(singular, 1.0, gap)
+    held_complement = xp.where(singular, 1.0, complement)
+    big_k, big_e = complete_kind(held_complement, xp=xp)
+    first_minus_second, flux, radial = _filament_elliptic_combinations(
+        xp, k2, held_complement, big_k, big_e
+    )
+    psi = xp.where(singular, xp.inf, MU0 * xp.sqrt(span) * flux)
     sq = xp.sqrt(span)
     pre = MU0 / (2.0 * np.pi)
-    bz = pre / sq * (big_k - big_e + 2.0 * ar * (ar - r) / gap * big_e)
+    bz = pre / sq * (first_minus_second + 2.0 * ar * (ar - r) / held_gap * big_e)
+    on_axis = r == 0.0
+    held_r = xp.where(on_axis, 1.0, r)
     br = xp.where(
         on_axis,
         0.0,
-        pre * dz / (held_r * sq) * (big_e - big_k + 2.0 * ar * r / gap * big_e),
+        pre * dz / (held_r * sq) * radial,
     )
-    return psi, br, bz
+    return psi, xp.where(singular, xp.nan, br), xp.where(singular, xp.nan, bz)
 
 
 # --- rectangular finite section ---------------------------------------
@@ -605,16 +686,19 @@ def section_centroid(vertices: np.ndarray) -> np.ndarray:
     (dipole) error that no second-moment correction can absorb.
     """
     v = np.asarray(vertices, dtype=np.float64)
-    r, z = v[:, 0], v[:, 1]
+    origin = v[0]
+    local = v - origin
+    r, z = local[:, 0], local[:, 1]
     r_next, z_next = np.roll(r, -1), np.roll(z, -1)
     cross = r * z_next - r_next * z
     area = 0.5 * cross.sum()
-    return np.array(
+    centroid = np.array(
         [
             float(np.sum((r + r_next) * cross) / (6.0 * area)),
             float(np.sum((z + z_next) * cross) / (6.0 * area)),
         ]
     )
+    return origin + centroid
 
 
 def second_moments(vertices: np.ndarray) -> tuple[float, float, float]:

@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 840" role="img" aria-labelledby="title description">
+<title id="title">Connectivity route cost and disposition</title>
+<desc id="description">Direct device and host adapter cost across three grid sizes on CPU and GPU, followed by module verdicts.</desc>
+<style>
+  text { font-family: system-ui, sans-serif; fill: #17202a; }
+  .title { font-size: 23px; font-weight: 700; }
+  .subtitle { font-size: 13px; fill: #52606d; }
+  .backend { font-size: 15px; font-weight: 650; }
+  .panel-title { font-size: 14px; font-weight: 650; }
+  .axis { fill: #fbfcfd; stroke: #aab4be; }
+  .tick, .note { font-size: 11px; fill: #52606d; }
+  .value { font-size: 10px; fill: #7d3c0c; }
+  .verdict { font-size: 15px; font-weight: 700; fill: #176b4d; }
+  .summary { font-size: 12px; fill: #34495e; }
+</style>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="40" y="38" class="title">Connectivity execution routes</text>
+<text x="40" y="62" class="subtitle">Minimum synchronous time; direct inputs are device-resident, adapters include host conversion and materialisation.</text>
+<text x="40" y="81" class="backend">sun_debug_cpu: cpu</text><text x="70" y="105" class="panel-title">Boundary read</text>
+<rect x="70" y="129" width="350" height="145" class="axis"/>
+<polyline points="70.0,274.0 229.6,210.2 420.0,129.0" fill="none" stroke="#1f77b4" stroke-width="2.5"/>
+<polyline points="70.0,270.1 229.6,209.5 420.0,129.5" fill="none" stroke="#d95f02" stroke-width="2.5"/>
+<circle cx="70.0" cy="274.0" r="3.5" fill="#1f77b4"/>
+<text x="65.0" y="269.0" text-anchor="end" class="tick">16ms</text>
+<text x="70.0" y="291.0" text-anchor="middle" class="tick">49x65</text>
+<circle cx="229.6" cy="210.2" r="3.5" fill="#1f77b4"/>
+<text x="224.6" y="223.2" text-anchor="end" class="tick">41ms</text>
+<text x="229.6" y="291.0" text-anchor="middle" class="tick">65x97</text>
+<circle cx="420.0" cy="129.0" r="3.5" fill="#1f77b4"/>
+<text x="415.0" y="142.0" text-anchor="end" class="tick">131ms</text>
+<text x="420.0" y="291.0" text-anchor="middle" class="tick">101x141</text>
+<circle cx="70.0" cy="270.1" r="3.5" fill="#d95f02"/>
+<text x="75.0" y="265.1" class="value">17ms</text>
+<circle cx="229.6" cy="209.5" r="3.5" fill="#d95f02"/>
+<text x="234.6" y="204.5" class="value">41ms</text>
+<circle cx="420.0" cy="129.5" r="3.5" fill="#d95f02"/>
+<text x="425.0" y="124.5" class="value">130ms</text>
+<text x="70" y="313" class="note">compile/steady 11–92× · <tspan fill="#1f77b4">direct</tspan> · <tspan fill="#d95f02">host adapter</tspan></text><text x="600" y="105" class="panel-title">Flux-surface metrics</text>
+<rect x="600" y="129" width="350" height="145" class="axis"/>
+<polyline points="600.0,274.0 759.6,226.1 950.0,139.0" fill="none" stroke="#1f77b4" stroke-width="2.5"/>
+<polyline points="600.0,251.4 759.6,210.4 950.0,129.0" fill="none" stroke="#d95f02" stroke-width="2.5"/>
+<circle cx="600.0" cy="274.0" r="3.5" fill="#1f77b4"/>
+<text x="595.0" y="269.0" text-anchor="end" class="tick">1.20ms</text>
+<text x="600.0" y="291.0" text-anchor="middle" class="tick">49x65</text>
+<circle cx="759.6" cy="226.1" r="3.5" fill="#1f77b4"/>
+<text x="754.6" y="239.1" text-anchor="end" class="tick">1.99ms</text>
+<text x="759.6" y="291.0" text-anchor="middle" class="tick">65x97</text>
+<circle cx="950.0" cy="139.0" r="3.5" fill="#1f77b4"/>
+<text x="945.0" y="152.0" text-anchor="end" class="tick">4.98ms</text>
+<text x="950.0" y="291.0" text-anchor="middle" class="tick">101x141</text>
+<circle cx="600.0" cy="251.4" r="3.5" fill="#d95f02"/>
+<text x="605.0" y="246.4" class="value">1.53ms</text>
+<circle cx="759.6" cy="210.4" r="3.5" fill="#d95f02"/>
+<text x="764.6" y="205.4" class="value">2.35ms</text>
+<circle cx="950.0" cy="129.0" r="3.5" fill="#d95f02"/>
+<text x="955.0" y="124.0" class="value">5.53ms</text>
+<text x="600" y="313" class="note">compile/steady 43–207× · <tspan fill="#1f77b4">direct</tspan> · <tspan fill="#d95f02">host adapter</tspan></text><text x="40" y="331" class="backend">h200_gpu: NVIDIA H200 NVL</text><text x="70" y="355" class="panel-title">Boundary read</text>
+<rect x="70" y="379" width="350" height="145" class="axis"/>
+<polyline points="70.0,524.0 229.6,463.9 420.0,405.2" fill="none" stroke="#1f77b4" stroke-width="2.5"/>
+<polyline points="70.0,465.2 229.6,430.3 420.0,379.0" fill="none" stroke="#d95f02" stroke-width="2.5"/>
+<circle cx="70.0" cy="524.0" r="3.5" fill="#1f77b4"/>
+<text x="65.0" y="519.0" text-anchor="end" class="tick">19ms</text>
+<text x="70.0" y="541.0" text-anchor="middle" class="tick">49x65</text>
+<circle cx="229.6" cy="463.9" r="3.5" fill="#1f77b4"/>
+<text x="224.6" y="476.9" text-anchor="end" class="tick">27ms</text>
+<text x="229.6" y="541.0" text-anchor="middle" class="tick">65x97</text>
+<circle cx="420.0" cy="405.2" r="3.5" fill="#1f77b4"/>
+<text x="415.0" y="418.2" text-anchor="end" class="tick">39ms</text>
+<text x="420.0" y="541.0" text-anchor="middle" class="tick">101x141</text>
+<circle cx="70.0" cy="465.2" r="3.5" fill="#d95f02"/>
+<text x="75.0" y="460.2" class="value">27ms</text>
+<circle cx="229.6" cy="430.3" r="3.5" fill="#d95f02"/>
+<text x="234.6" y="425.3" class="value">33ms</text>
+<circle cx="420.0" cy="379.0" r="3.5" fill="#d95f02"/>
+<text x="425.0" y="374.0" class="value">46ms</text>
+<text x="70" y="563" class="note">compile/steady 45–130× · <tspan fill="#1f77b4">direct</tspan> · <tspan fill="#d95f02">host adapter</tspan></text><text x="600" y="355" class="panel-title">Flux-surface metrics</text>
+<rect x="600" y="379" width="350" height="145" class="axis"/>
+<polyline points="600.0,524.0 759.6,478.7 950.0,453.7" fill="none" stroke="#1f77b4" stroke-width="2.5"/>
+<polyline points="600.0,400.5 759.6,389.5 950.0,379.0" fill="none" stroke="#d95f02" stroke-width="2.5"/>
+<circle cx="600.0" cy="524.0" r="3.5" fill="#1f77b4"/>
+<text x="595.0" y="519.0" text-anchor="end" class="tick">0.89ms</text>
+<text x="600.0" y="541.0" text-anchor="middle" class="tick">49x65</text>
+<circle cx="759.6" cy="478.7" r="3.5" fill="#1f77b4"/>
+<text x="754.6" y="491.7" text-anchor="end" class="tick">1.41ms</text>
+<text x="759.6" y="541.0" text-anchor="middle" class="tick">65x97</text>
+<circle cx="950.0" cy="453.7" r="3.5" fill="#1f77b4"/>
+<text x="945.0" y="466.7" text-anchor="end" class="tick">1.82ms</text>
+<text x="950.0" y="541.0" text-anchor="middle" class="tick">101x141</text>
+<circle cx="600.0" cy="400.5" r="3.5" fill="#d95f02"/>
+<text x="605.0" y="395.5" class="value">3.11ms</text>
+<circle cx="759.6" cy="389.5" r="3.5" fill="#d95f02"/>
+<text x="764.6" y="384.5" class="value">3.48ms</text>
+<circle cx="950.0" cy="379.0" r="3.5" fill="#d95f02"/>
+<text x="955.0" y="374.0" class="value">3.87ms</text>
+<text x="600" y="563" class="note">compile/steady 161–376× · <tspan fill="#1f77b4">direct</tspan> · <tspan fill="#d95f02">host adapter</tspan></text>
+<rect x="40" y="620" width="960" height="120" rx="8" fill="#eef8f4" stroke="#7ab89f"/>
+<text x="62" y="650" class="verdict">connectivity_boundary — SINGLE IMPLEMENTATION RELOCATION</text>
+<text x="62" y="672" class="summary">Host entries prepare and materialise the traced kernels; hard exact topology and smooth differentiability remain intentional semantic routes.</text>
+<text x="62" y="702" class="verdict">flux_surface_connectivity — SINGLE IMPLEMENTATION RELOCATION</text>
+<text x="62" y="724" class="summary">The host entry calls the same fixed-shape kernel and adds only conversion plus ill-posed-result filtering.</text>
+</svg>

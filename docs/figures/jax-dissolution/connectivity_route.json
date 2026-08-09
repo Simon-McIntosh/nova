@@ -1,0 +1,1558 @@
+{
+  "campaigns": [
+    {
+      "configuration": {
+        "batch_size": 4,
+        "boundary_bisections": 12,
+        "boundary_levels": 48,
+        "boundary_rays": 128,
+        "grid_shape_order": "radial x vertical",
+        "grid_shapes": [
+          "49x65",
+          "65x97",
+          "101x141"
+        ],
+        "repeats": 5,
+        "route_boundary": "direct timings start with device-resident arrays; adapter timings include conversion, launch, blocking transfer, and result materialisation",
+        "surface_bins": 28,
+        "timing_statistic": "minimum synchronous wall time"
+      },
+      "environment": {
+        "argv": [
+          "-",
+          "measure",
+          "--label",
+          "sun_debug_cpu",
+          "--output",
+          "/tmp/connectivity_cpu.json"
+        ],
+        "device": "cpu:0",
+        "device_kind": "cpu",
+        "device_platform": "cpu",
+        "git_revision": "a15aa62ff7f8ebe6eaac20997b4f8fdaedf392db",
+        "hostname": "98dci4-clu-3141.iter.org",
+        "jax": "0.11.0",
+        "jax_enable_x64": true,
+        "label": "sun_debug_cpu",
+        "numpy": "2.4.6",
+        "python": "3.14.2",
+        "scipy": "1.17.1"
+      },
+      "measurements": {
+        "connectivity_boundary": {
+          "batch_cost": {
+            "batch_size": 4,
+            "compile_execute_ms": 1920.697394758463,
+            "grid": "65x97",
+            "steady_batch_ms": 172.88214899599552,
+            "steady_per_slice_ms": 43.22053724899888,
+            "steady_samples_ms": [
+              177.13535577058792,
+              175.027746707201,
+              174.20753836631775,
+              173.59909787774086,
+              172.88214899599552
+            ]
+          },
+          "cost": [
+            {
+              "cells": 3185,
+              "compile_execute_ms": 1491.3621060550213,
+              "grid": "49x65",
+              "host_adapter_ms": 17.22552441060543,
+              "host_adapter_samples_ms": [
+                17.673339694738388,
+                17.78666488826275,
+                17.260396853089333,
+                17.22552441060543,
+                17.28213019669056
+              ],
+              "host_over_direct": 1.0578451166126566,
+              "steady_ms": 16.28359779715538,
+              "steady_samples_ms": [
+                16.518885269761086,
+                16.28359779715538,
+                16.482237726449966,
+                16.36859029531479,
+                16.626382246613503
+              ]
+            },
+            {
+              "cells": 6305,
+              "compile_execute_ms": 1297.7419178932905,
+              "grid": "65x97",
+              "host_adapter_ms": 41.16712883114815,
+              "host_adapter_samples_ms": [
+                41.917722672224045,
+                41.630350053310394,
+                42.59750805795193,
+                41.16712883114815,
+                41.25925712287426
+              ],
+              "host_over_direct": 1.011123790258587,
+              "steady_ms": 40.71423225104809,
+              "steady_samples_ms": [
+                41.44321568310261,
+                40.98447412252426,
+                41.00025072693825,
+                40.79834930598736,
+                40.71423225104809
+              ]
+            },
+            {
+              "cells": 14241,
+              "compile_execute_ms": 1490.4107060283422,
+              "grid": "101x141",
+              "host_adapter_ms": 129.90167923271656,
+              "host_adapter_samples_ms": [
+                132.8849084675312,
+                131.276223808527,
+                129.90167923271656,
+                143.30913312733173,
+                132.62100331485271
+              ],
+              "host_over_direct": 0.9924929630423047,
+              "steady_ms": 130.8842319995165,
+              "steady_samples_ms": [
+                132.9442262649536,
+                132.3949359357357,
+                130.9163235127926,
+                131.18611834943295,
+                130.8842319995165
+              ]
+            }
+          ],
+          "host_direct_parity": [
+            {
+              "grid": "49x65",
+              "host_direct_core_cell_difference": 0,
+              "host_direct_psi_bnd_abs": 0.0,
+              "host_direct_radii_max_abs_m": 0.0,
+              "same_topology_class": true
+            },
+            {
+              "grid": "65x97",
+              "host_direct_core_cell_difference": 0,
+              "host_direct_psi_bnd_abs": 0.0,
+              "host_direct_radii_max_abs_m": 0.0,
+              "same_topology_class": true
+            },
+            {
+              "grid": "101x141",
+              "host_direct_core_cell_difference": 0,
+              "host_direct_psi_bnd_abs": 0.0,
+              "host_direct_radii_max_abs_m": 0.0,
+              "same_topology_class": true
+            }
+          ],
+          "independent_accuracy": {
+            "diverted": {
+              "boundary_flux_relative_error": 2.8610964201234726e-06,
+              "expected_topology": "diverted",
+              "reported_topology": "diverted",
+              "reported_xpoint_count": 1,
+              "saddle_position_error_m": 1.247807383097932e-05,
+              "saddle_r": 1.0,
+              "saddle_z": -0.25489819352999665
+            },
+            "grid": "101x141",
+            "limited": {
+              "boundary_flux_relative_error": 1.5512827832077088e-17,
+              "core_cell_difference": 0,
+              "expected_topology": "limited",
+              "independent_core_cells": 2783,
+              "kernel_core_cells": 2783,
+              "radius_max_abs_m": 0.00046911865766863237,
+              "radius_rmse_m": 0.0004282205801333928,
+              "reported_topology": "limited"
+            }
+          },
+          "smooth_cost": {
+            "cells": 6305,
+            "compile_execute_ms": 1042.3367079347372,
+            "grid": "65x97",
+            "host_adapter_ms": 41.93804785609245,
+            "host_adapter_samples_ms": [
+              42.67754592001438,
+              41.93804785609245,
+              42.29707829654217,
+              42.16417111456394,
+              42.0354250818491
+            ],
+            "host_compile_execute_ms": 1224.7351258993149,
+            "host_over_direct": 1.030641078076997,
+            "steady_ms": 40.69122485816479,
+            "steady_samples_ms": [
+              41.18787124752998,
+              41.03789106011391,
+              40.69122485816479,
+              41.43878445029259,
+              41.33460484445095
+            ]
+          },
+          "smooth_host_direct_difference": {
+            "grid": "65x97",
+            "host_direct_axis_shift_m": 6.743084686642234e-15,
+            "host_direct_core_weight_max_abs": 1.887379141862766e-14,
+            "host_direct_psi_bnd_abs": 1.3877787807814457e-17,
+            "semantic_reason": "the host adapter first refines the stencil magnetic axis; the direct kernel uses the supplied axis"
+          }
+        },
+        "flood_fill_core": {
+          "accuracy": [
+            {
+              "cells": 3185,
+              "disconnected_pocket_excluded": true,
+              "grid": "49x65",
+              "kernel_core_cells": 1083,
+              "mask_equal": true,
+              "mismatched_cells": 0,
+              "reference_core_cells": 1083
+            },
+            {
+              "cells": 6305,
+              "disconnected_pocket_excluded": true,
+              "grid": "65x97",
+              "kernel_core_cells": 2183,
+              "mask_equal": true,
+              "mismatched_cells": 0,
+              "reference_core_cells": 2183
+            },
+            {
+              "cells": 14241,
+              "disconnected_pocket_excluded": true,
+              "grid": "101x141",
+              "kernel_core_cells": 4973,
+              "mask_equal": true,
+              "mismatched_cells": 0,
+              "reference_core_cells": 4973
+            }
+          ],
+          "cost": [
+            {
+              "cells": 3185,
+              "compile_execute_ms": 72.68732786178589,
+              "grid": "49x65",
+              "ndimage_label_ms": 0.04339590668678284,
+              "ndimage_samples_ms": [
+                0.1946818083524704,
+                0.05946122109889984,
+                0.04871375858783722,
+                0.04591420292854309,
+                0.04339590668678284
+              ],
+              "steady_ms": 0.33056922256946564,
+              "steady_samples_ms": [
+                0.3558509051799774,
+                0.3356076776981354,
+                0.33056922256946564,
+                0.3321133553981781,
+                0.3566499799489975
+              ]
+            },
+            {
+              "cells": 6305,
+              "compile_execute_ms": 70.36029733717442,
+              "grid": "65x97",
+              "ndimage_label_ms": 0.05562044680118561,
+              "ndimage_samples_ms": [
+                0.23178942501544952,
+                0.06881542503833771,
+                0.059233978390693665,
+                0.05562044680118561,
+                0.05617178976535797
+              ],
+              "steady_ms": 0.8075647056102753,
+              "steady_samples_ms": [
+                0.8320994675159454,
+                0.863267108798027,
+                0.8467938750982285,
+                0.8075647056102753,
+                0.8125957101583481
+              ]
+            },
+            {
+              "cells": 14241,
+              "compile_execute_ms": 72.71067053079605,
+              "grid": "101x141",
+              "ndimage_label_ms": 0.10000541806221008,
+              "ndimage_samples_ms": [
+                0.29482506215572357,
+                0.1155119389295578,
+                0.10378286242485046,
+                0.10438449680805206,
+                0.10000541806221008
+              ],
+              "steady_ms": 2.6575811207294464,
+              "steady_samples_ms": [
+                2.7289222925901413,
+                2.6772376149892807,
+                2.6575811207294464,
+                2.6716962456703186,
+                2.6775039732456207
+              ]
+            }
+          ]
+        },
+        "flux_surface_connectivity": {
+          "batch_cost": {
+            "batch_size": 4,
+            "compile_execute_ms": 215.48189409077168,
+            "grid": "65x97",
+            "steady_batch_ms": 7.53391906619072,
+            "steady_per_slice_ms": 1.88347976654768,
+            "steady_samples_ms": [
+              8.234415203332901,
+              7.728207856416702,
+              7.78253935277462,
+              7.8207217156887054,
+              7.53391906619072
+            ]
+          },
+          "cost": [
+            {
+              "cells": 3185,
+              "compile_execute_ms": 248.95497225224972,
+              "grid": "49x65",
+              "host_adapter_ms": 1.5271082520484924,
+              "host_adapter_samples_ms": [
+                1.7726421356201172,
+                1.5271082520484924,
+                1.6102269291877747,
+                1.6374383121728897,
+                1.5824921429157257
+              ],
+              "host_over_direct": 1.268414489623526,
+              "steady_ms": 1.2039504945278168,
+              "steady_samples_ms": [
+                1.3151373714208603,
+                1.2504532933235168,
+                1.241503283381462,
+                1.2039504945278168,
+                1.2638885527849197
+              ]
+            },
+            {
+              "cells": 6305,
+              "compile_execute_ms": 201.31023228168488,
+              "grid": "65x97",
+              "host_adapter_ms": 2.3492593318223953,
+              "host_adapter_samples_ms": [
+                2.565290778875351,
+                2.3492593318223953,
+                2.386387437582016,
+                2.3846272379159927,
+                2.3614484816789627
+              ],
+              "host_over_direct": 1.1792487583400653,
+              "steady_ms": 1.9921660423278809,
+              "steady_samples_ms": [
+                1.9921660423278809,
+                2.0786579698324203,
+                2.087140455842018,
+                1.9976217299699783,
+                2.0135249942541122
+              ]
+            },
+            {
+              "cells": 14241,
+              "compile_execute_ms": 214.73939158022404,
+              "grid": "101x141",
+              "host_adapter_ms": 5.528707057237625,
+              "host_adapter_samples_ms": [
+                6.248621270060539,
+                6.29882887005806,
+                5.548460409045219,
+                5.556818097829819,
+                5.528707057237625
+              ],
+              "host_over_direct": 1.110768822002803,
+              "steady_ms": 4.9773696810007095,
+              "steady_samples_ms": [
+                4.9773696810007095,
+                5.009153857827187,
+                5.048170685768127,
+                5.10614737868309,
+                5.100501701235771
+              ]
+            }
+          ],
+          "host_direct_parity": [
+            {
+              "adapter_none_semantics": "host returns None when well_posed is false; direct returns fixed-shape outputs plus the well_posed flag",
+              "grid": "49x65",
+              "max_abs_by_output": {
+                "dv_dpn": 0.0,
+                "grad2_r2": 0.0,
+                "inv_r": 0.0,
+                "inv_r2": 0.0,
+                "pn_s": 0.0,
+                "v_cum": 0.0
+              },
+              "same_core_cells": true
+            },
+            {
+              "adapter_none_semantics": "host returns None when well_posed is false; direct returns fixed-shape outputs plus the well_posed flag",
+              "grid": "65x97",
+              "max_abs_by_output": {
+                "dv_dpn": 0.0,
+                "grad2_r2": 0.0,
+                "inv_r": 0.0,
+                "inv_r2": 0.0,
+                "pn_s": 0.0,
+                "v_cum": 0.0
+              },
+              "same_core_cells": true
+            },
+            {
+              "adapter_none_semantics": "host returns None when well_posed is false; direct returns fixed-shape outputs plus the well_posed flag",
+              "grid": "101x141",
+              "max_abs_by_output": {
+                "dv_dpn": 0.0,
+                "grad2_r2": 0.0,
+                "inv_r": 0.0,
+                "inv_r2": 0.0,
+                "pn_s": 0.0,
+                "v_cum": 0.0
+              },
+              "same_core_cells": true
+            }
+          ],
+          "independent_accuracy": {
+            "analytic_geometry": {
+              "elongation": 1.6,
+              "interior_levels_compared": 24,
+              "level_range": [
+                0.056874999999999995,
+                0.9681249999999999
+              ],
+              "major_radius_m": 0.9,
+              "minor_radius_m": 0.55,
+              "relative_errors": {
+                "dv_dpn": {
+                  "all_levels_max_relative": 0.22549606843862688,
+                  "max_relative": 0.010456142673752684,
+                  "median_relative": 1.0346260870174544e-10
+                },
+                "grad2_r2": {
+                  "all_levels_max_relative": 0.1494101764088981,
+                  "max_relative": 0.005970033889833078,
+                  "median_relative": 0.0012191303139347082
+                },
+                "inv_r": {
+                  "all_levels_max_relative": 7.993605777301127e-15,
+                  "max_relative": 7.993605777301127e-15,
+                  "median_relative": 1.298960938811433e-15
+                },
+                "inv_r2": {
+                  "all_levels_max_relative": 0.0020110493118558597,
+                  "max_relative": 0.0002052954959961414,
+                  "median_relative": 0.0001501182710990195
+                }
+              }
+            },
+            "connectivity": {
+              "core_cell_difference": 0,
+              "core_fraction": 0.4857102731549751,
+              "independent_core_cells": 6917,
+              "kernel_core_cells": 6917,
+              "well_posed": true
+            },
+            "grid": "101x141"
+          }
+        }
+      },
+      "reachability": {
+        "_profile_shapes_jax": [
+          "nova/transport/current_diffusion.py:200",
+          "nova/transport/current_diffusion.py:338",
+          "nova/transport/current_diffusion.py:341",
+          "nova/transport/current_diffusion.py:353",
+          "tests/test_current_diffusion.py:498",
+          "tests/test_current_diffusion.py:503",
+          "tests/test_current_diffusion.py:513",
+          "tests/test_current_diffusion.py:517"
+        ],
+        "assemble_flux_surface_geometry_jax": [
+          "nova/transport/__init__.py:26",
+          "nova/transport/__init__.py:42",
+          "nova/transport/current_diffusion.py:285",
+          "nova/transport/current_diffusion.py:605",
+          "nova/transport/current_diffusion.py:622",
+          "nova/transport/current_diffusion.py:1240",
+          "tests/test_flux_surface_geometry.py:12",
+          "tests/test_flux_surface_geometry.py:99"
+        ],
+        "boundary_read": [
+          "nova/equilibrium/moment.py:623",
+          "nova/equilibrium/moment.py:625",
+          "nova/jax/connectivity_boundary.py:108",
+          "nova/jax/connectivity_boundary.py:764",
+          "nova/jax/connectivity_boundary.py:781",
+          "nova/jax/connectivity_boundary.py:872",
+          "tests/test_connectivity_boundary.py:228",
+          "tests/test_connectivity_boundary.py:313",
+          "tests/test_connectivity_boundary.py:329",
+          "tests/test_connectivity_boundary.py:387",
+          "tests/test_connectivity_boundary.py:457"
+        ],
+        "boundary_read_batch": [
+          "nova/jax/connectivity_boundary.py:109",
+          "nova/jax/connectivity_boundary.py:909"
+        ],
+        "boundary_read_jax": [
+          "nova/jax/connectivity_boundary.py:107",
+          "nova/jax/connectivity_boundary.py:204",
+          "nova/jax/connectivity_boundary.py:397",
+          "nova/jax/connectivity_boundary.py:567",
+          "nova/jax/connectivity_boundary.py:793",
+          "nova/jax/connectivity_boundary.py:825",
+          "nova/jax/connectivity_boundary.py:946",
+          "tests/test_connectivity_boundary.py:92",
+          "tests/test_connectivity_boundary.py:118",
+          "tests/test_connectivity_boundary.py:137",
+          "tests/test_connectivity_boundary.py:183"
+        ],
+        "boundary_read_smooth": [
+          "nova/jax/connectivity_boundary.py:111",
+          "nova/jax/connectivity_boundary.py:857",
+          "tests/test_connectivity_boundary.py:416",
+          "tests/test_connectivity_boundary.py:420"
+        ],
+        "boundary_read_smooth_jax": [
+          "nova/equilibrium/profile.py:31",
+          "nova/equilibrium/profile.py:399",
+          "nova/jax/connectivity_boundary.py:110",
+          "nova/jax/connectivity_boundary.py:206",
+          "nova/jax/connectivity_boundary.py:548",
+          "nova/jax/connectivity_boundary.py:698"
+        ],
+        "flood_fill_core": [
+          "nova/jax/connectivity_boundary.py:22",
+          "nova/jax/connectivity_boundary.py:70",
+          "nova/jax/connectivity_boundary.py:255",
+          "nova/jax/connectivity_boundary.py:311",
+          "nova/jax/connectivity_boundary.py:480",
+          "nova/jax/connectivity_boundary.py:646",
+          "nova/jax/flux_surface_connectivity.py:62",
+          "nova/jax/flux_surface_connectivity.py:88",
+          "nova/jax/flux_surface_connectivity.py:159",
+          "nova/transport/current_diffusion.py:253",
+          "nova/transport/current_diffusion.py:263",
+          "tests/test_flux_surface_connectivity.py:185"
+        ],
+        "flux_surface_bins": [
+          "nova/jax/flux_surface_connectivity.py:64",
+          "nova/jax/flux_surface_connectivity.py:220"
+        ],
+        "flux_surface_bins_jax": [
+          "nova/jax/flux_surface_connectivity.py:63",
+          "nova/jax/flux_surface_connectivity.py:117",
+          "nova/jax/flux_surface_connectivity.py:231",
+          "nova/jax/flux_surface_connectivity.py:240",
+          "nova/transport/current_diffusion.py:309",
+          "nova/transport/current_diffusion.py:608",
+          "nova/transport/current_diffusion.py:610",
+          "tests/test_flux_surface_connectivity.py:47",
+          "tests/test_flux_surface_connectivity.py:74",
+          "tests/test_flux_surface_connectivity.py:91",
+          "tests/test_flux_surface_connectivity.py:128"
+        ],
+        "flux_surface_geometry_jax": [
+          "nova/transport/__init__.py:32",
+          "nova/transport/__init__.py:48",
+          "nova/transport/current_diffusion.py:580",
+          "nova/transport/current_diffusion.py:692",
+          "nova/transport/current_diffusion.py:1246",
+          "tests/test_flux_surface_geometry.py:14",
+          "tests/test_flux_surface_geometry.py:160"
+        ]
+      },
+      "schema": "nova.connectivity-route-benchmark.1",
+      "symbol_inventory": [
+        {
+          "current": "boundary_read_jax",
+          "mechanism_name": "traced_boundary_read",
+          "reason": "device-resident hard connectivity kernel"
+        },
+        {
+          "current": "boundary_read_smooth_jax",
+          "mechanism_name": "traced_boundary_read_smooth",
+          "reason": "device-resident differentiable connectivity kernel"
+        },
+        {
+          "current": "boundary_read",
+          "mechanism_name": "host_boundary_read",
+          "reason": "grid preparation, seed validation, and host materialisation"
+        },
+        {
+          "current": "boundary_read_smooth",
+          "mechanism_name": "host_boundary_read_smooth",
+          "reason": "host launch that first refines the stencil axis"
+        },
+        {
+          "current": "boundary_read_batch",
+          "mechanism_name": "host_boundary_read_batch",
+          "reason": "host-prepared vmap launch over ordinary arrays"
+        },
+        {
+          "current": "flux_surface_bins_jax",
+          "mechanism_name": "traced_flux_surface_bins",
+          "reason": "device-resident fixed-shape surface metric kernel"
+        },
+        {
+          "current": "flux_surface_bins",
+          "mechanism_name": "host_flux_surface_bins",
+          "reason": "host materialisation and ill-posed-result filtering"
+        },
+        {
+          "current": "assemble_flux_surface_geometry_jax",
+          "mechanism_name": "traced_assemble_flux_surface_geometry",
+          "reason": "public device assembly caller"
+        },
+        {
+          "current": "flux_surface_geometry_jax",
+          "mechanism_name": "traced_flux_surface_geometry",
+          "reason": "public device composition caller"
+        },
+        {
+          "current": "_profile_shapes_jax",
+          "mechanism_name": "_traced_profile_shapes",
+          "reason": "internal device profile basis helper"
+        }
+      ],
+      "verdicts": {
+        "connectivity_boundary": {
+          "basis": "the host entries invoke the traced implementation; they are adapters, not arithmetic peers. Keep hard and smooth kernels because exact topology and differentiability are intentionally different semantics",
+          "target": "nova/equilibrium/connectivity_boundary.py",
+          "verdict": "SINGLE IMPLEMENTATION RELOCATION"
+        },
+        "flux_surface_connectivity": {
+          "basis": "the host entry invokes flux_surface_bins_jax and materialises its outputs; no second arithmetic body exists",
+          "target": "nova/equilibrium/flux_surface_connectivity.py",
+          "verdict": "SINGLE IMPLEMENTATION RELOCATION"
+        }
+      }
+    },
+    {
+      "configuration": {
+        "batch_size": 4,
+        "boundary_bisections": 12,
+        "boundary_levels": 48,
+        "boundary_rays": 128,
+        "grid_shape_order": "radial x vertical",
+        "grid_shapes": [
+          "49x65",
+          "65x97",
+          "101x141"
+        ],
+        "repeats": 5,
+        "route_boundary": "direct timings start with device-resident arrays; adapter timings include conversion, launch, blocking transfer, and result materialisation",
+        "surface_bins": 28,
+        "timing_statistic": "minimum synchronous wall time"
+      },
+      "environment": {
+        "argv": [
+          "-",
+          "measure",
+          "--label",
+          "h200_gpu",
+          "--output",
+          "/tmp/connectivity_gpu.json"
+        ],
+        "device": "cuda:0",
+        "device_kind": "NVIDIA H200 NVL",
+        "device_platform": "gpu",
+        "git_revision": "a15aa62ff7f8ebe6eaac20997b4f8fdaedf392db",
+        "hostname": "98dci4-gpu-0003.iter.org",
+        "jax": "0.11.0",
+        "jax_enable_x64": true,
+        "label": "h200_gpu",
+        "numpy": "2.4.6",
+        "python": "3.14.2",
+        "scipy": "1.17.1"
+      },
+      "measurements": {
+        "connectivity_boundary": {
+          "batch_cost": {
+            "batch_size": 4,
+            "compile_execute_ms": 1896.7392700724304,
+            "grid": "65x97",
+            "steady_batch_ms": 26.477350387722254,
+            "steady_per_slice_ms": 6.6193375969305634,
+            "steady_samples_ms": [
+              26.874172035604715,
+              26.797517202794552,
+              26.53921488672495,
+              26.560793165117502,
+              26.477350387722254
+            ]
+          },
+          "cost": [
+            {
+              "cells": 3185,
+              "compile_execute_ms": 2404.0814200416207,
+              "grid": "49x65",
+              "host_adapter_ms": 26.778025086969137,
+              "host_adapter_samples_ms": [
+                28.602853883057833,
+                27.363595087081194,
+                27.129072695970535,
+                27.305203955620527,
+                26.778025086969137
+              ],
+              "host_over_direct": 1.443338565511687,
+              "steady_ms": 18.55283696204424,
+              "steady_samples_ms": [
+                19.135302864015102,
+                18.988613970577717,
+                18.846571911126375,
+                18.621252849698067,
+                18.55283696204424
+              ]
+            },
+            {
+              "cells": 6305,
+              "compile_execute_ms": 1709.2854636721313,
+              "grid": "65x97",
+              "host_adapter_ms": 33.28956011682749,
+              "host_adapter_samples_ms": [
+                34.02498224750161,
+                34.36101181432605,
+                33.54762215167284,
+                33.28956011682749,
+                33.79877610132098
+              ],
+              "host_over_direct": 1.2335715512207397,
+              "steady_ms": 26.986322831362486,
+              "steady_samples_ms": [
+                27.00721099972725,
+                27.01540058478713,
+                27.09725871682167,
+                27.013590093702078,
+                26.986322831362486
+              ]
+            },
+            {
+              "cells": 14241,
+              "compile_execute_ms": 1755.0224945880473,
+              "grid": "101x141",
+              "host_adapter_ms": 45.83231778815389,
+              "host_adapter_samples_ms": [
+                47.926254104822874,
+                46.41358321532607,
+                47.023710794746876,
+                45.83231778815389,
+                46.95260990411043
+              ],
+              "host_over_direct": 1.177780625775758,
+              "steady_ms": 38.91413798555732,
+              "steady_samples_ms": [
+                38.93026802688837,
+                38.98082999512553,
+                39.25123391672969,
+                38.91413798555732,
+                38.97706000134349
+              ]
+            }
+          ],
+          "host_direct_parity": [
+            {
+              "grid": "49x65",
+              "host_direct_core_cell_difference": 0,
+              "host_direct_psi_bnd_abs": 0.0,
+              "host_direct_radii_max_abs_m": 0.0,
+              "same_topology_class": true
+            },
+            {
+              "grid": "65x97",
+              "host_direct_core_cell_difference": 0,
+              "host_direct_psi_bnd_abs": 0.0,
+              "host_direct_radii_max_abs_m": 0.0,
+              "same_topology_class": true
+            },
+            {
+              "grid": "101x141",
+              "host_direct_core_cell_difference": 0,
+              "host_direct_psi_bnd_abs": 0.0,
+              "host_direct_radii_max_abs_m": 0.0,
+              "same_topology_class": true
+            }
+          ],
+          "independent_accuracy": {
+            "diverted": {
+              "boundary_flux_relative_error": 2.861096419927565e-06,
+              "expected_topology": "diverted",
+              "reported_topology": "diverted",
+              "reported_xpoint_count": 1,
+              "saddle_position_error_m": 1.2478073830146652e-05,
+              "saddle_r": 1.0,
+              "saddle_z": -0.25489819352999665
+            },
+            "grid": "101x141",
+            "limited": {
+              "boundary_flux_relative_error": 4.653848349623127e-17,
+              "core_cell_difference": 0,
+              "expected_topology": "limited",
+              "independent_core_cells": 2783,
+              "kernel_core_cells": 2783,
+              "radius_max_abs_m": 0.00046911865766863237,
+              "radius_rmse_m": 0.0004282205801334063,
+              "reported_topology": "limited"
+            }
+          },
+          "smooth_cost": {
+            "cells": 6305,
+            "compile_execute_ms": 1155.404943972826,
+            "grid": "65x97",
+            "host_adapter_ms": 33.142485190182924,
+            "host_adapter_samples_ms": [
+              35.984907764941454,
+              34.72167486324906,
+              34.72444787621498,
+              34.01612304151058,
+              33.142485190182924
+            ],
+            "host_compile_execute_ms": 1233.859611209482,
+            "host_over_direct": 1.2620861202214164,
+            "steady_ms": 26.26008214429021,
+            "steady_samples_ms": [
+              26.59722790122032,
+              26.26008214429021,
+              26.667888276278973,
+              26.468526106327772,
+              26.382528245449066
+            ]
+          },
+          "smooth_host_direct_difference": {
+            "grid": "65x97",
+            "host_direct_axis_shift_m": 4.871269253853007e-16,
+            "host_direct_core_weight_max_abs": 1.4654943925052066e-14,
+            "host_direct_psi_bnd_abs": 0.0,
+            "semantic_reason": "the host adapter first refines the stencil magnetic axis; the direct kernel uses the supplied axis"
+          }
+        },
+        "flood_fill_core": {
+          "accuracy": [
+            {
+              "cells": 3185,
+              "disconnected_pocket_excluded": true,
+              "grid": "49x65",
+              "kernel_core_cells": 1083,
+              "mask_equal": true,
+              "mismatched_cells": 0,
+              "reference_core_cells": 1083
+            },
+            {
+              "cells": 6305,
+              "disconnected_pocket_excluded": true,
+              "grid": "65x97",
+              "kernel_core_cells": 2183,
+              "mask_equal": true,
+              "mismatched_cells": 0,
+              "reference_core_cells": 2183
+            },
+            {
+              "cells": 14241,
+              "disconnected_pocket_excluded": true,
+              "grid": "101x141",
+              "kernel_core_cells": 4973,
+              "mask_equal": true,
+              "mismatched_cells": 0,
+              "reference_core_cells": 4973
+            }
+          ],
+          "cost": [
+            {
+              "cells": 3185,
+              "compile_execute_ms": 567.0847492292523,
+              "grid": "49x65",
+              "ndimage_label_ms": 0.02263067290186882,
+              "ndimage_samples_ms": [
+                0.15307916328310966,
+                0.034481752663850784,
+                0.025519169867038727,
+                0.024342909455299377,
+                0.02263067290186882
+              ],
+              "steady_ms": 0.7450953125953674,
+              "steady_samples_ms": [
+                1.053249929100275,
+                1.0001109912991524,
+                0.9004790335893631,
+                0.7450953125953674,
+                0.7455800659954548
+              ]
+            },
+            {
+              "cells": 6305,
+              "compile_execute_ms": 55.84930395707488,
+              "grid": "65x97",
+              "ndimage_label_ms": 0.03256881609559059,
+              "ndimage_samples_ms": [
+                0.14144601300358772,
+                0.046011991798877716,
+                0.03523705527186394,
+                0.03256881609559059,
+                0.03313599154353142
+              ],
+              "steady_ms": 0.9709037840366364,
+              "steady_samples_ms": [
+                1.0998081415891647,
+                0.9834333322942257,
+                0.9771469049155712,
+                0.9717671200633049,
+                0.9709037840366364
+              ]
+            },
+            {
+              "cells": 14241,
+              "compile_execute_ms": 57.136562652885914,
+              "grid": "101x141",
+              "ndimage_label_ms": 0.048001762479543686,
+              "ndimage_samples_ms": [
+                0.16511930152773857,
+                0.061602797359228134,
+                0.05495408549904823,
+                0.049274880439043045,
+                0.048001762479543686
+              ],
+              "steady_ms": 1.4426251873373985,
+              "steady_samples_ms": [
+                1.5749549493193626,
+                1.5522520989179611,
+                1.4426251873373985,
+                1.56090734526515,
+                1.6957791522145271
+              ]
+            }
+          ]
+        },
+        "flux_surface_connectivity": {
+          "batch_cost": {
+            "batch_size": 4,
+            "compile_execute_ms": 363.4843761101365,
+            "grid": "65x97",
+            "steady_batch_ms": 1.4152619987726212,
+            "steady_per_slice_ms": 0.3538154996931553,
+            "steady_samples_ms": [
+              1.6979249194264412,
+              1.6350951045751572,
+              1.5516378916800022,
+              1.5480443835258484,
+              1.4152619987726212
+            ]
+          },
+          "cost": [
+            {
+              "cells": 3185,
+              "compile_execute_ms": 334.26147792488337,
+              "grid": "49x65",
+              "host_adapter_ms": 3.1126937828958035,
+              "host_adapter_samples_ms": [
+                7.292494177818298,
+                3.1616343185305595,
+                3.1126937828958035,
+                3.127884119749069,
+                3.4287949092686176
+              ],
+              "host_over_direct": 3.49918180047867,
+              "steady_ms": 0.8895490318536758,
+              "steady_samples_ms": [
+                1.1273911222815514,
+                1.0210569016635418,
+                0.9869346395134926,
+                0.9052343666553497,
+                0.8895490318536758
+              ]
+            },
+            {
+              "cells": 6305,
+              "compile_execute_ms": 288.30981673672795,
+              "grid": "65x97",
+              "host_adapter_ms": 3.4803999587893486,
+              "host_adapter_samples_ms": [
+                5.054547917097807,
+                3.4803999587893486,
+                4.039674066007137,
+                3.9046471938490868,
+                3.6420109681785107
+              ],
+              "host_over_direct": 2.470942522442821,
+              "steady_ms": 1.408531330525875,
+              "steady_samples_ms": [
+                1.7366698011755943,
+                1.6014939174056053,
+                1.408531330525875,
+                1.4832490123808384,
+                1.4423131942749023
+              ]
+            },
+            {
+              "cells": 14241,
+              "compile_execute_ms": 292.1883910894394,
+              "grid": "101x141",
+              "host_adapter_ms": 3.871454857289791,
+              "host_adapter_samples_ms": [
+                6.1820680275559425,
+                4.004879854619503,
+                4.194286186248064,
+                4.7184559516608715,
+                3.871454857289791
+              ],
+              "host_over_direct": 2.132961193120041,
+              "steady_ms": 1.8150610849261284,
+              "steady_samples_ms": [
+                2.021429594606161,
+                1.8790997564792633,
+                1.9044200889766216,
+                1.8538287840783596,
+                1.8150610849261284
+              ]
+            }
+          ],
+          "host_direct_parity": [
+            {
+              "adapter_none_semantics": "host returns None when well_posed is false; direct returns fixed-shape outputs plus the well_posed flag",
+              "grid": "49x65",
+              "max_abs_by_output": {
+                "dv_dpn": 0.0,
+                "grad2_r2": 0.0,
+                "inv_r": 0.0,
+                "inv_r2": 0.0,
+                "pn_s": 0.0,
+                "v_cum": 0.0
+              },
+              "same_core_cells": true
+            },
+            {
+              "adapter_none_semantics": "host returns None when well_posed is false; direct returns fixed-shape outputs plus the well_posed flag",
+              "grid": "65x97",
+              "max_abs_by_output": {
+                "dv_dpn": 0.0,
+                "grad2_r2": 0.0,
+                "inv_r": 0.0,
+                "inv_r2": 0.0,
+                "pn_s": 0.0,
+                "v_cum": 0.0
+              },
+              "same_core_cells": true
+            },
+            {
+              "adapter_none_semantics": "host returns None when well_posed is false; direct returns fixed-shape outputs plus the well_posed flag",
+              "grid": "101x141",
+              "max_abs_by_output": {
+                "dv_dpn": 0.0,
+                "grad2_r2": 0.0,
+                "inv_r": 0.0,
+                "inv_r2": 0.0,
+                "pn_s": 0.0,
+                "v_cum": 0.0
+              },
+              "same_core_cells": true
+            }
+          ],
+          "independent_accuracy": {
+            "analytic_geometry": {
+              "elongation": 1.6,
+              "interior_levels_compared": 24,
+              "level_range": [
+                0.05687500000000001,
+                0.9681249999999999
+              ],
+              "major_radius_m": 0.9,
+              "minor_radius_m": 0.55,
+              "relative_errors": {
+                "dv_dpn": {
+                  "all_levels_max_relative": 0.22549606843862066,
+                  "max_relative": 0.010456142673752684,
+                  "median_relative": 1.0346105926495533e-10
+                },
+                "grad2_r2": {
+                  "all_levels_max_relative": 0.1494101764088974,
+                  "max_relative": 0.005970033889832925,
+                  "median_relative": 0.0012191303139321113
+                },
+                "inv_r": {
+                  "all_levels_max_relative": 7.993605777301127e-15,
+                  "max_relative": 7.993605777301127e-15,
+                  "median_relative": 1.0991207943789048e-15
+                },
+                "inv_r2": {
+                  "all_levels_max_relative": 0.0020110493118689374,
+                  "max_relative": 0.00020529549600032114,
+                  "median_relative": 0.0001501182710959555
+                }
+              }
+            },
+            "connectivity": {
+              "core_cell_difference": 0,
+              "core_fraction": 0.4857102731549751,
+              "independent_core_cells": 6917,
+              "kernel_core_cells": 6917,
+              "well_posed": true
+            },
+            "grid": "101x141"
+          }
+        }
+      },
+      "reachability": {
+        "_profile_shapes_jax": [
+          "nova/transport/current_diffusion.py:200",
+          "nova/transport/current_diffusion.py:338",
+          "nova/transport/current_diffusion.py:341",
+          "nova/transport/current_diffusion.py:353",
+          "tests/test_current_diffusion.py:498",
+          "tests/test_current_diffusion.py:503",
+          "tests/test_current_diffusion.py:513",
+          "tests/test_current_diffusion.py:517"
+        ],
+        "assemble_flux_surface_geometry_jax": [
+          "nova/transport/__init__.py:26",
+          "nova/transport/__init__.py:42",
+          "nova/transport/current_diffusion.py:285",
+          "nova/transport/current_diffusion.py:605",
+          "nova/transport/current_diffusion.py:622",
+          "nova/transport/current_diffusion.py:1240",
+          "tests/test_flux_surface_geometry.py:12",
+          "tests/test_flux_surface_geometry.py:99"
+        ],
+        "boundary_read": [
+          "nova/equilibrium/moment.py:623",
+          "nova/equilibrium/moment.py:625",
+          "nova/jax/connectivity_boundary.py:108",
+          "nova/jax/connectivity_boundary.py:764",
+          "nova/jax/connectivity_boundary.py:781",
+          "nova/jax/connectivity_boundary.py:872",
+          "tests/test_connectivity_boundary.py:228",
+          "tests/test_connectivity_boundary.py:313",
+          "tests/test_connectivity_boundary.py:329",
+          "tests/test_connectivity_boundary.py:387",
+          "tests/test_connectivity_boundary.py:457"
+        ],
+        "boundary_read_batch": [
+          "nova/jax/connectivity_boundary.py:109",
+          "nova/jax/connectivity_boundary.py:909"
+        ],
+        "boundary_read_jax": [
+          "nova/jax/connectivity_boundary.py:107",
+          "nova/jax/connectivity_boundary.py:204",
+          "nova/jax/connectivity_boundary.py:397",
+          "nova/jax/connectivity_boundary.py:567",
+          "nova/jax/connectivity_boundary.py:793",
+          "nova/jax/connectivity_boundary.py:825",
+          "nova/jax/connectivity_boundary.py:946",
+          "tests/test_connectivity_boundary.py:92",
+          "tests/test_connectivity_boundary.py:118",
+          "tests/test_connectivity_boundary.py:137",
+          "tests/test_connectivity_boundary.py:183"
+        ],
+        "boundary_read_smooth": [
+          "nova/jax/connectivity_boundary.py:111",
+          "nova/jax/connectivity_boundary.py:857",
+          "tests/test_connectivity_boundary.py:416",
+          "tests/test_connectivity_boundary.py:420"
+        ],
+        "boundary_read_smooth_jax": [
+          "nova/equilibrium/profile.py:31",
+          "nova/equilibrium/profile.py:399",
+          "nova/jax/connectivity_boundary.py:110",
+          "nova/jax/connectivity_boundary.py:206",
+          "nova/jax/connectivity_boundary.py:548",
+          "nova/jax/connectivity_boundary.py:698"
+        ],
+        "flood_fill_core": [
+          "nova/jax/connectivity_boundary.py:22",
+          "nova/jax/connectivity_boundary.py:70",
+          "nova/jax/connectivity_boundary.py:255",
+          "nova/jax/connectivity_boundary.py:311",
+          "nova/jax/connectivity_boundary.py:480",
+          "nova/jax/connectivity_boundary.py:646",
+          "nova/jax/flux_surface_connectivity.py:62",
+          "nova/jax/flux_surface_connectivity.py:88",
+          "nova/jax/flux_surface_connectivity.py:159",
+          "nova/transport/current_diffusion.py:253",
+          "nova/transport/current_diffusion.py:263",
+          "tests/test_flux_surface_connectivity.py:185"
+        ],
+        "flux_surface_bins": [
+          "nova/jax/flux_surface_connectivity.py:64",
+          "nova/jax/flux_surface_connectivity.py:220"
+        ],
+        "flux_surface_bins_jax": [
+          "nova/jax/flux_surface_connectivity.py:63",
+          "nova/jax/flux_surface_connectivity.py:117",
+          "nova/jax/flux_surface_connectivity.py:231",
+          "nova/jax/flux_surface_connectivity.py:240",
+          "nova/transport/current_diffusion.py:309",
+          "nova/transport/current_diffusion.py:608",
+          "nova/transport/current_diffusion.py:610",
+          "tests/test_flux_surface_connectivity.py:47",
+          "tests/test_flux_surface_connectivity.py:74",
+          "tests/test_flux_surface_connectivity.py:91",
+          "tests/test_flux_surface_connectivity.py:128"
+        ],
+        "flux_surface_geometry_jax": [
+          "nova/transport/__init__.py:32",
+          "nova/transport/__init__.py:48",
+          "nova/transport/current_diffusion.py:580",
+          "nova/transport/current_diffusion.py:692",
+          "nova/transport/current_diffusion.py:1246",
+          "tests/test_flux_surface_geometry.py:14",
+          "tests/test_flux_surface_geometry.py:160"
+        ]
+      },
+      "schema": "nova.connectivity-route-benchmark.1",
+      "symbol_inventory": [
+        {
+          "current": "boundary_read_jax",
+          "mechanism_name": "traced_boundary_read",
+          "reason": "device-resident hard connectivity kernel"
+        },
+        {
+          "current": "boundary_read_smooth_jax",
+          "mechanism_name": "traced_boundary_read_smooth",
+          "reason": "device-resident differentiable connectivity kernel"
+        },
+        {
+          "current": "boundary_read",
+          "mechanism_name": "host_boundary_read",
+          "reason": "grid preparation, seed validation, and host materialisation"
+        },
+        {
+          "current": "boundary_read_smooth",
+          "mechanism_name": "host_boundary_read_smooth",
+          "reason": "host launch that first refines the stencil axis"
+        },
+        {
+          "current": "boundary_read_batch",
+          "mechanism_name": "host_boundary_read_batch",
+          "reason": "host-prepared vmap launch over ordinary arrays"
+        },
+        {
+          "current": "flux_surface_bins_jax",
+          "mechanism_name": "traced_flux_surface_bins",
+          "reason": "device-resident fixed-shape surface metric kernel"
+        },
+        {
+          "current": "flux_surface_bins",
+          "mechanism_name": "host_flux_surface_bins",
+          "reason": "host materialisation and ill-posed-result filtering"
+        },
+        {
+          "current": "assemble_flux_surface_geometry_jax",
+          "mechanism_name": "traced_assemble_flux_surface_geometry",
+          "reason": "public device assembly caller"
+        },
+        {
+          "current": "flux_surface_geometry_jax",
+          "mechanism_name": "traced_flux_surface_geometry",
+          "reason": "public device composition caller"
+        },
+        {
+          "current": "_profile_shapes_jax",
+          "mechanism_name": "_traced_profile_shapes",
+          "reason": "internal device profile basis helper"
+        }
+      ],
+      "verdicts": {
+        "connectivity_boundary": {
+          "basis": "the host entries invoke the traced implementation; they are adapters, not arithmetic peers. Keep hard and smooth kernels because exact topology and differentiability are intentionally different semantics",
+          "target": "nova/equilibrium/connectivity_boundary.py",
+          "verdict": "SINGLE IMPLEMENTATION RELOCATION"
+        },
+        "flux_surface_connectivity": {
+          "basis": "the host entry invokes flux_surface_bins_jax and materialises its outputs; no second arithmetic body exists",
+          "target": "nova/equilibrium/flux_surface_connectivity.py",
+          "verdict": "SINGLE IMPLEMENTATION RELOCATION"
+        }
+      }
+    }
+  ],
+  "interpretation": {
+    "adapter_semantics": "Host timings include array conversion, device launch, blocking transfer, and result materialisation; direct timings start device-resident.",
+    "boundary_semantics": "Keep the hard kernel as the exact topology reference and the smooth kernel as the differentiable solve route; they are not candidates for arithmetic collapse.",
+    "pair_status": "Neither module is an implementation pair. Both are one traced implementation plus host adapters."
+  },
+  "moment_boundary_campaigns": [
+    {
+      "caller": "nova/equilibrium/moment.py:625",
+      "environment": {
+        "argv": [
+          "-",
+          "moment",
+          "--label",
+          "sun_debug_cpu",
+          "--output",
+          "/tmp/connectivity_moment_cpu.json"
+        ],
+        "device": "cpu:0",
+        "device_kind": "cpu",
+        "device_platform": "cpu",
+        "git_revision": "a15aa62ff7f8ebe6eaac20997b4f8fdaedf392db",
+        "hostname": "98dci4-clu-3141.iter.org",
+        "jax": "0.11.0",
+        "jax_enable_x64": true,
+        "label": "sun_debug_cpu",
+        "numpy": "2.4.6",
+        "python": "3.14.2",
+        "scipy": "1.17.1"
+      },
+      "measurement": {
+        "boundary_bisections": 18,
+        "boundary_levels": 96,
+        "boundary_rays": 512,
+        "cells": 3185,
+        "compile_execute_ms": 1511.3319884985685,
+        "grid": "49x65",
+        "host_adapter_ms": 27.53208391368389,
+        "host_adapter_samples_ms": [
+          28.171170502901077,
+          27.66144834458828,
+          27.53208391368389,
+          27.627475559711456,
+          27.808325365185738
+        ],
+        "host_over_direct": 1.0262697220967258,
+        "steady_ms": 26.827337220311165,
+        "steady_samples_ms": [
+          27.65592560172081,
+          26.827337220311165,
+          28.022026643157005,
+          26.927804574370384,
+          26.856517419219017
+        ]
+      },
+      "schema": "nova.connectivity-route-benchmark.1"
+    },
+    {
+      "caller": "nova/equilibrium/moment.py:625",
+      "environment": {
+        "argv": [
+          "-",
+          "moment",
+          "--label",
+          "h200_gpu",
+          "--output",
+          "/tmp/connectivity_moment_gpu.json"
+        ],
+        "device": "cuda:0",
+        "device_kind": "NVIDIA H200 NVL",
+        "device_platform": "gpu",
+        "git_revision": "a15aa62ff7f8ebe6eaac20997b4f8fdaedf392db",
+        "hostname": "98dci4-gpu-0003.iter.org",
+        "jax": "0.11.0",
+        "jax_enable_x64": true,
+        "label": "h200_gpu",
+        "numpy": "2.4.6",
+        "python": "3.14.2",
+        "scipy": "1.17.1"
+      },
+      "measurement": {
+        "boundary_bisections": 18,
+        "boundary_levels": 96,
+        "boundary_rays": 512,
+        "cells": 3185,
+        "compile_execute_ms": 1947.3607810214162,
+        "grid": "49x65",
+        "host_adapter_ms": 33.13708025962114,
+        "host_adapter_samples_ms": [
+          35.73344089090824,
+          33.40537706390023,
+          33.47079362720251,
+          33.87764096260071,
+          33.13708025962114
+        ],
+        "host_over_direct": 1.2551872601523533,
+        "steady_ms": 26.400108821690083,
+        "steady_samples_ms": [
+          26.775149162858725,
+          26.6136871650815,
+          26.49501385167241,
+          26.710101403295994,
+          26.400108821690083
+        ]
+      },
+      "schema": "nova.connectivity-route-benchmark.1"
+    }
+  ],
+  "reachability": {
+    "_profile_shapes_jax": [
+      "nova/transport/current_diffusion.py:200",
+      "nova/transport/current_diffusion.py:338",
+      "nova/transport/current_diffusion.py:341",
+      "nova/transport/current_diffusion.py:353",
+      "tests/test_current_diffusion.py:498",
+      "tests/test_current_diffusion.py:503",
+      "tests/test_current_diffusion.py:513",
+      "tests/test_current_diffusion.py:517"
+    ],
+    "assemble_flux_surface_geometry_jax": [
+      "nova/transport/__init__.py:26",
+      "nova/transport/__init__.py:42",
+      "nova/transport/current_diffusion.py:285",
+      "nova/transport/current_diffusion.py:605",
+      "nova/transport/current_diffusion.py:622",
+      "nova/transport/current_diffusion.py:1240",
+      "tests/test_flux_surface_geometry.py:12",
+      "tests/test_flux_surface_geometry.py:99"
+    ],
+    "boundary_read": [
+      "nova/equilibrium/moment.py:623",
+      "nova/equilibrium/moment.py:625",
+      "nova/jax/connectivity_boundary.py:108",
+      "nova/jax/connectivity_boundary.py:764",
+      "nova/jax/connectivity_boundary.py:781",
+      "nova/jax/connectivity_boundary.py:872",
+      "tests/test_connectivity_boundary.py:228",
+      "tests/test_connectivity_boundary.py:313",
+      "tests/test_connectivity_boundary.py:329",
+      "tests/test_connectivity_boundary.py:387",
+      "tests/test_connectivity_boundary.py:457"
+    ],
+    "boundary_read_batch": [
+      "nova/jax/connectivity_boundary.py:109",
+      "nova/jax/connectivity_boundary.py:909"
+    ],
+    "boundary_read_jax": [
+      "nova/jax/connectivity_boundary.py:107",
+      "nova/jax/connectivity_boundary.py:204",
+      "nova/jax/connectivity_boundary.py:397",
+      "nova/jax/connectivity_boundary.py:567",
+      "nova/jax/connectivity_boundary.py:793",
+      "nova/jax/connectivity_boundary.py:825",
+      "nova/jax/connectivity_boundary.py:946",
+      "tests/test_connectivity_boundary.py:92",
+      "tests/test_connectivity_boundary.py:118",
+      "tests/test_connectivity_boundary.py:137",
+      "tests/test_connectivity_boundary.py:183"
+    ],
+    "boundary_read_smooth": [
+      "nova/jax/connectivity_boundary.py:111",
+      "nova/jax/connectivity_boundary.py:857",
+      "tests/test_connectivity_boundary.py:416",
+      "tests/test_connectivity_boundary.py:420"
+    ],
+    "boundary_read_smooth_jax": [
+      "nova/equilibrium/profile.py:31",
+      "nova/equilibrium/profile.py:399",
+      "nova/jax/connectivity_boundary.py:110",
+      "nova/jax/connectivity_boundary.py:206",
+      "nova/jax/connectivity_boundary.py:548",
+      "nova/jax/connectivity_boundary.py:698"
+    ],
+    "flood_fill_core": [
+      "nova/jax/connectivity_boundary.py:22",
+      "nova/jax/connectivity_boundary.py:70",
+      "nova/jax/connectivity_boundary.py:255",
+      "nova/jax/connectivity_boundary.py:311",
+      "nova/jax/connectivity_boundary.py:480",
+      "nova/jax/connectivity_boundary.py:646",
+      "nova/jax/flux_surface_connectivity.py:62",
+      "nova/jax/flux_surface_connectivity.py:88",
+      "nova/jax/flux_surface_connectivity.py:159",
+      "nova/transport/current_diffusion.py:253",
+      "nova/transport/current_diffusion.py:263",
+      "tests/test_flux_surface_connectivity.py:185"
+    ],
+    "flux_surface_bins": [
+      "nova/jax/flux_surface_connectivity.py:64",
+      "nova/jax/flux_surface_connectivity.py:220"
+    ],
+    "flux_surface_bins_jax": [
+      "nova/jax/flux_surface_connectivity.py:63",
+      "nova/jax/flux_surface_connectivity.py:117",
+      "nova/jax/flux_surface_connectivity.py:231",
+      "nova/jax/flux_surface_connectivity.py:240",
+      "nova/transport/current_diffusion.py:309",
+      "nova/transport/current_diffusion.py:608",
+      "nova/transport/current_diffusion.py:610",
+      "tests/test_flux_surface_connectivity.py:47",
+      "tests/test_flux_surface_connectivity.py:74",
+      "tests/test_flux_surface_connectivity.py:91",
+      "tests/test_flux_surface_connectivity.py:128"
+    ],
+    "flux_surface_geometry_jax": [
+      "nova/transport/__init__.py:32",
+      "nova/transport/__init__.py:48",
+      "nova/transport/current_diffusion.py:580",
+      "nova/transport/current_diffusion.py:692",
+      "nova/transport/current_diffusion.py:1246",
+      "tests/test_flux_surface_geometry.py:14",
+      "tests/test_flux_surface_geometry.py:160"
+    ]
+  },
+  "regime_provenance": {
+    "101x141": "diverted connectivity boundary reference grid",
+    "49x65": "current-moment boundary reconstruction grid",
+    "65x97": "flux-surface connectivity reference grid",
+    "boundary_moment_statics": "96 levels, 18 bisections, and 512 rays from the hard adapter defaults",
+    "boundary_profile_statics": "48 levels, 12 bisections, and 128 rays from ReconstructProfile",
+    "surface_statics": "28 bins from flux_surface_geometry_jax"
+  },
+  "schema": "nova.connectivity-route-benchmark.1",
+  "symbol_inventory": [
+    {
+      "current": "boundary_read_jax",
+      "mechanism_name": "traced_boundary_read",
+      "reason": "device-resident hard connectivity kernel"
+    },
+    {
+      "current": "boundary_read_smooth_jax",
+      "mechanism_name": "traced_boundary_read_smooth",
+      "reason": "device-resident differentiable connectivity kernel"
+    },
+    {
+      "current": "boundary_read",
+      "mechanism_name": "host_boundary_read",
+      "reason": "grid preparation, seed validation, and host materialisation"
+    },
+    {
+      "current": "boundary_read_smooth",
+      "mechanism_name": "host_boundary_read_smooth",
+      "reason": "host launch that first refines the stencil axis"
+    },
+    {
+      "current": "boundary_read_batch",
+      "mechanism_name": "host_boundary_read_batch",
+      "reason": "host-prepared vmap launch over ordinary arrays"
+    },
+    {
+      "current": "flux_surface_bins_jax",
+      "mechanism_name": "traced_flux_surface_bins",
+      "reason": "device-resident fixed-shape surface metric kernel"
+    },
+    {
+      "current": "flux_surface_bins",
+      "mechanism_name": "host_flux_surface_bins",
+      "reason": "host materialisation and ill-posed-result filtering"
+    },
+    {
+      "current": "assemble_flux_surface_geometry_jax",
+      "mechanism_name": "traced_assemble_flux_surface_geometry",
+      "reason": "public device assembly caller"
+    },
+    {
+      "current": "flux_surface_geometry_jax",
+      "mechanism_name": "traced_flux_surface_geometry",
+      "reason": "public device composition caller"
+    },
+    {
+      "current": "_profile_shapes_jax",
+      "mechanism_name": "_traced_profile_shapes",
+      "reason": "internal device profile basis helper"
+    }
+  ],
+  "verdicts": {
+    "connectivity_boundary": {
+      "basis": "the host entries invoke the traced implementation; they are adapters, not arithmetic peers. Keep hard and smooth kernels because exact topology and differentiability are intentionally different semantics",
+      "target": "nova/equilibrium/connectivity_boundary.py",
+      "verdict": "SINGLE IMPLEMENTATION RELOCATION"
+    },
+    "flux_surface_connectivity": {
+      "basis": "the host entry invokes flux_surface_bins_jax and materialises its outputs; no second arithmetic body exists",
+      "target": "nova/equilibrium/flux_surface_connectivity.py",
+      "verdict": "SINGLE IMPLEMENTATION RELOCATION"
+    }
+  }
+}

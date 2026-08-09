@@ -13,6 +13,7 @@ the Picard fixed point far inside a shared cold-seed evaluation budget.
 from __future__ import annotations
 
 import dataclasses
+import json
 import subprocess
 import sys
 import textwrap
@@ -60,6 +61,87 @@ def test_equilibrium_package_import_does_not_require_jax():
         text=True,
     )
     assert completed.returncode == 0, completed.stderr
+
+
+def test_profile_axis_is_independent_of_dtype_bootstrap_import_order():
+    """Physical metadata and the published axis stay fp64 after setup."""
+    probe = textwrap.dedent(
+        """
+        import importlib
+        import json
+        import sys
+
+        import numpy as np
+
+        for name in sys.argv[1:]:
+            importlib.import_module(name)
+
+        from nova.jax.config import configure_dtypes
+        configure_dtypes()
+
+        import jax.numpy as jnp
+        from nova.equilibrium.profile import ProfileDegrees, ReconstructProfile
+
+        size = 11
+        radial = np.linspace(6.14, 6.26, size, dtype=np.float64)
+        vertical = np.linspace(-3.75, -3.65, size, dtype=np.float64)
+        rr, zz = np.meshgrid(radial, vertical)
+        count = rr.size
+        solver = ReconstructProfile(
+            grid_r=radial,
+            grid_z=vertical,
+            inside_limiter=np.ones(rr.shape, dtype=bool),
+            cell_area=np.full(count, 1.0e-4, dtype=np.float64),
+            source_to_grid=np.zeros((count, 1), dtype=np.float64),
+            plasma_to_grid=np.zeros((count, count), dtype=np.float64),
+            source_to_sensor=np.zeros((1, 1), dtype=np.float64),
+            plasma_to_sensor=np.zeros((1, count), dtype=np.float64),
+            source_names=('source',),
+            degrees=ProfileDegrees(1, 1),
+            axis_seed=(6.2, -3.7),
+            wall_r=np.array([6.14, 6.26, 6.26, 6.14], dtype=np.float64),
+            wall_z=np.array([-3.75, -3.75, -3.65, -3.65], dtype=np.float64),
+        )
+        truth = np.array([6.2031, -3.6982], dtype=np.float64)
+        flux = -((rr - truth[0]) ** 2 + 1.3 * (zz - truth[1]) ** 2)
+        flux = jnp.asarray(flux.ravel(), dtype=jnp.float64)
+        basis = jnp.zeros((count, 2), dtype=jnp.float64)
+        topology = {
+            'psi_bnd': jnp.asarray(-1.0, dtype=jnp.float64),
+            'core_weight': jnp.ones(rr.shape, dtype=jnp.float64),
+        }
+        result = solver._result(
+            flux,
+            flux,
+            basis,
+            jnp.zeros(2, dtype=jnp.float64),
+            topology,
+        )
+        print(json.dumps({
+            'axis': np.asarray(result.axis).tolist(),
+            'axis_dtype': str(result.axis.dtype),
+            'grid_dtype': str(solver.grid_r.dtype),
+        }))
+        """
+    )
+    modules = (
+        "nova.equilibrium.stencil_nulls",
+        "nova.equilibrium.profile",
+    )
+    rows = []
+    for order in (modules, modules[::-1]):
+        completed = subprocess.run(
+            [sys.executable, "-c", probe, *order],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        assert completed.returncode == 0, completed.stderr
+        rows.append(json.loads(completed.stdout.strip().splitlines()[-1]))
+
+    assert rows[0]["axis_dtype"] == rows[1]["axis_dtype"] == "float64"
+    assert rows[0]["grid_dtype"] == rows[1]["grid_dtype"] == "float64"
+    np.testing.assert_array_equal(rows[0]["axis"], rows[1]["axis"])
 
 
 def _machine() -> ReconstructProfile:

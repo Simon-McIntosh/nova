@@ -58,6 +58,7 @@ from nova.equilibrium.stencil_nulls import (
     ring_sign_changes,
     xpoint_candidates,
 )
+from nova.jax.config import configure_dtypes
 
 
 ROOT = Path(
@@ -474,12 +475,7 @@ def _legacy_null(dtype, batches) -> list[dict[str, Any]]:
     stencil = hex_stencil((nz, nr))
     rr, zz = np.meshgrid(rg, zg)
     coordinate = np.column_stack([rr.reshape(-1), zz.reshape(-1)])
-    null = Null2D(
-        jnp.asarray(coordinate),
-        jnp.asarray(stencil),
-        jnp.asarray(coordinate[stencil]),
-        SLOTS,
-    )
+    null = Null2D.from_coordinates(coordinate, stencil, maxsize=SLOTS)
     rows = []
     device = jax.devices()[0]
     for batch in batches:
@@ -670,7 +666,7 @@ def _source_hashes() -> dict[str, str]:
     paths = {
         "benchmarks/fieldnull_gpu_throughput.py": Path(__file__),
         "nova/biot/null.py": ROOT / "nova/biot/null.py",
-        "nova/jax/select.py": ROOT / "nova/jax/select.py",
+        "nova/geometry/select.py": ROOT / "nova/geometry/select.py",
         "nova/equilibrium/stencil_nulls.py": ROOT / "nova/equilibrium/stencil_nulls.py",
         "nova/equilibrium/fixed_point.py": ROOT / "nova/equilibrium/fixed_point.py",
         "nova/equilibrium/profile.py": ROOT / "nova/equilibrium/profile.py",
@@ -684,6 +680,7 @@ def _source_hashes() -> dict[str, str]:
 
 def measure(platform_name: str) -> dict[str, Any]:
     """Capture both precisions once on the selected backend."""
+    configure_dtypes()
     environment = _environment(platform_name)
     batches = (1, 8, 32, 128) if platform_name == "cpu" else (1, 8, 32, 128, 512, 2048)
     legacy_batches = (1, 32, 128) if platform_name == "cpu" else (1, 32, 256, 1024)
@@ -806,6 +803,7 @@ def _memory_probe_row(host_fields, rg, zg, inside, dtype) -> dict[str, Any]:
 
 def measure_memory(platform_name: str) -> dict[str, Any]:
     """Probe large H200 batches until the bounded host allocation is exhausted."""
+    configure_dtypes()
     if platform_name != "gpu":
         raise ValueError("the large memory probe is reserved for the H200 backend")
     environment = _environment(platform_name)

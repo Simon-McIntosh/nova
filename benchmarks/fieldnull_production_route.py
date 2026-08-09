@@ -44,6 +44,7 @@ from nova.equilibrium.stencil_nulls import (
     critical_point_candidates_batch,
     gradient_cell_degree,
 )
+from nova.jax.config import configure_dtypes
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -513,6 +514,7 @@ def _scientific_check(device) -> dict[str, Any]:
 
 
 def measure(platform_name: str) -> dict[str, Any]:
+    configure_dtypes()
     device = jax.devices(platform_name)[0]
     return {
         "schema": "nova.fieldnull-production-route",

@@ -39,6 +39,7 @@ with skip_import("jax"):
 
     from nova.equilibrium import connectivity_boundary as cb
     from nova.equilibrium.stencil_nulls import xpoint_candidates
+    from nova.jax.config import configure_dtypes
 
 from nova.equilibrium.labels import LCFS_ANGLES
 from nova.equilibrium.wall_mask import inside_polygon as _inside_polygon
@@ -82,6 +83,16 @@ class _Grid:
 
 
 # --- accelerator compliance -------------------------------------------------
+
+
+def test_explicit_double_extreme_reductions_keep_first_tie():
+    """False-plus-allow keeps exact fp64 selection and first-index ties."""
+    configure_dtypes()
+    values = jnp.asarray([2.0, -3.0, 7.0, 7.0], dtype=jnp.float64)
+
+    assert values.dtype == jnp.float64
+    assert int(cb._argmax_exact(values)) == 2
+    assert int(cb._argmin_exact(values)) == 1
 
 
 def test_jit_vmap_grad_safe_and_fixed_shape():

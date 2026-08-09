@@ -14,6 +14,7 @@ with skip_import("jax"):
     from nova.biot.target import FluxTarget
     from nova.equilibrium.forward_operator import ForwardFluxOperator
     from nova.equilibrium.topology import Topology
+    from nova.jax.config import configure_dtypes
 
 
 def _structured_grid(nx, nz, xlim=(0.5, 1.5), zlim=(-0.6, 0.6)):
@@ -37,13 +38,10 @@ def _flux_field(coordinate, xo=1.0, zo=0.0, xs=1.0, zs=-0.4, amp=1.0):
 @pytest.fixture(scope="module")
 def topology():
     """Return fixed-shape topology on a synthetic structured grid and wall loop."""
+    configure_dtypes()
     coordinate, stencil, coordinate_stencil = _structured_grid(40, 40)
-    grid = Null2D(
-        jnp.asarray(coordinate),
-        jnp.asarray(stencil),
-        jnp.asarray(coordinate_stencil),
-        maxsize=5,
-    )
+    del coordinate_stencil
+    grid = Null2D.from_coordinates(coordinate, stencil, maxsize=5)
     theta = np.linspace(0, 2 * np.pi, 30, endpoint=False)
     wall_xy = np.c_[1.0 + 0.45 * np.cos(theta), 0.45 * np.sin(theta)]
     return Topology(grid, Null1D(jnp.asarray(wall_xy))), coordinate, wall_xy
@@ -64,6 +62,23 @@ def test_update_resolves_finite_topology(topology):
     psi_norm, ionize = topo.update(psi, 1)
     assert np.all(np.isfinite(np.asarray(psi_norm)))
     assert int(np.sum(np.asarray(ionize))) > 0
+
+
+def test_physical_nulls_keep_double_outputs_with_single_selection_scores(topology):
+    """Physical null data stay fp64 while topology ranking follows fit precision."""
+    topo, coordinate, wall_xy = topology
+    psi = _flux_stack(coordinate, wall_xy, [1.0])[0]
+    psi_grid, psi_wall = topo.split_flux_map(psi)
+    vmap_o, vmap_x = topo.grid(psi_grid)
+    data_o = topo.o_point_data(vmap_o, 1)
+    data_w = topo.wall(psi_wall, 1)
+    data_b = topo.boundary(data_o, vmap_x, data_w, 1)
+
+    assert topo.grid.fit_dtype == jnp.float32
+    assert vmap_o.dtype == jnp.float64
+    assert vmap_x.dtype == jnp.float64
+    assert data_b.dtype == jnp.float64
+    assert np.all(np.isfinite(np.asarray(data_b)))
 
 
 def test_batched_update_matches_per_slice(topology):

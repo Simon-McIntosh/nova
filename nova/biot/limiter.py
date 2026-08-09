@@ -52,7 +52,9 @@ class Limiter(Plot, Array):
 
     def update_wall(self, psi, polarity):
         """Publish the wall-limit point and flux."""
-        x_coord, z_coord, psi, _ = select.wall_flux(self["x"], self["z"], psi, polarity)
+        x_coord, z_coord, psi, _ = select.host_wall_flux(
+            self["x"], self["z"], psi, polarity
+        )
         self.data_w = dict(psi=psi, point=(x_coord, z_coord))
 
     def plot(self, axes=None):

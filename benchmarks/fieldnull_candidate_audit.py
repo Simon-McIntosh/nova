@@ -1432,7 +1432,9 @@ def _device_check(platform_name: str) -> dict[str, Any]:
     import jax
 
     from nova.equilibrium.stencil_nulls import ring_sign_changes, xpoint_candidates
+    from nova.jax.config import configure_dtypes
 
+    configure_dtypes()
     device = jax.devices(platform_name)[0]
     rows = []
     for resolution, shift_label in ((61, "unshifted"), (65, "off_vertex")):

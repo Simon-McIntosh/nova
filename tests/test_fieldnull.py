@@ -8,16 +8,24 @@ import numpy as np
 import pytest
 
 from nova.biot.fieldnull import DataNull
-from nova.geometry import select as host_select
+from nova.geometry import select
 from nova.utilities.importmanager import skip_import
-from nova.jax.config import enable_x64
 
 with skip_import("jax"):
     import jax.numpy as jnp
 
-    from nova.jax import select as traced_select
+    from nova.jax.config import configure_dtypes
 
-    enable_x64()
+
+@pytest.fixture(scope="module", autouse=True)
+def _explicit_dtype_policy():
+    """Install explicit dtype support after test-module collection."""
+    configure_dtypes()
+
+
+def _double(value):
+    """Return an explicit traced float64 array for physical coordinates."""
+    return jnp.asarray(value, dtype=jnp.float64)
 
 
 def test_host_fieldnull_consumers_import_without_jax():
@@ -70,9 +78,9 @@ def quadratic_surface(x, z, null_type: int, xo=2, zo=2):
 def test_quadratic_coefficents(null_type: int):
     x, z = meshgrid()
     psi = quadratic_surface(x, z, null_type)
-    host_coef = host_select.quadratic_surface(x, z, psi)
+    host_coef = select.host_quadratic_surface(x, z, psi)
     traced_coef = np.asarray(
-        traced_select.quadratic_surface(jnp.array(x), jnp.array(z), jnp.array(psi))
+        select.traced_quadratic_surface(_double(x), _double(z), _double(psi))
     )
     assert np.allclose(psi, coefficient_matrix(x, z) @ host_coef)
     assert np.allclose(psi, coefficient_matrix(x, z) @ traced_coef)
@@ -83,24 +91,20 @@ def test_quadratic_coefficents(null_type: int):
 def test_quadratic_null_type(null_type: int):
     x, z = meshgrid()
     psi = quadratic_surface(x, z, null_type)
-    host_coef = host_select.quadratic_surface(x, z, psi)
-    traced_coef = traced_select.quadratic_surface(
-        jnp.array(x), jnp.array(z), jnp.array(psi)
-    )
-    assert int(host_select.null_type(host_coef)) == null_type
-    assert int(traced_select.null_type(traced_coef)) == null_type
+    host_coef = select.host_quadratic_surface(x, z, psi)
+    traced_coef = select.traced_quadratic_surface(_double(x), _double(z), _double(psi))
+    assert int(select.null_type(host_coef)) == null_type
+    assert int(select.null_type(traced_coef, array_namespace=jnp)) == null_type
 
 
 def test_quadratic_plane_surface():
     """A plane has a degenerate quadratic form reported as NaN by both routes."""
     x, z = meshgrid()
     psi = quadratic_surface(x, z, 2)
-    host_coef = host_select.quadratic_surface(x, z, psi)
-    traced_coef = traced_select.quadratic_surface(
-        jnp.array(x), jnp.array(z), jnp.array(psi)
-    )
-    assert np.isnan(host_select.null_type(host_coef))
-    assert np.isnan(float(traced_select.null_type(traced_coef)))
+    host_coef = select.host_quadratic_surface(x, z, psi)
+    traced_coef = select.traced_quadratic_surface(_double(x), _double(z), _double(psi))
+    assert np.isnan(select.null_type(host_coef))
+    assert np.isnan(float(select.null_type(traced_coef, array_namespace=jnp)))
 
 
 @pytest.mark.parametrize(
@@ -113,9 +117,9 @@ def test_null_coordinate_determinant_floor_is_finite_and_sign_preserving(
     """The shared determinant floor remains nonzero for degenerate quadratics."""
     coefficients = np.array([0.0, 0.0, 1.0, 1.0, cross_term, 1.0])
     determinant = -(cross_term**2)
-    host_coordinate = np.asarray(host_select.null_coordinate(coefficients))
+    host_coordinate = np.asarray(select.null_coordinate(coefficients))
     traced_coordinate = np.asarray(
-        traced_select.null_coordinate(jnp.asarray(coefficients))
+        select.null_coordinate(_double(coefficients), array_namespace=jnp)
     )
 
     assert abs(determinant) < 1e-30
@@ -133,12 +137,12 @@ def test_null_coordinate_determinant_floor_is_finite_and_sign_preserving(
 def test_quadratic_coordinate(null_type, coordinate):
     x, z = meshgrid()
     psi = quadratic_surface(x, z, null_type, *coordinate)
-    host_coef = host_select.quadratic_surface(x, z, psi)
-    traced_coef = traced_select.quadratic_surface(
-        jnp.array(x), jnp.array(z), jnp.array(psi)
+    host_coef = select.host_quadratic_surface(x, z, psi)
+    traced_coef = select.traced_quadratic_surface(_double(x), _double(z), _double(psi))
+    host_coordinate = np.asarray(select.null_coordinate(host_coef, (x, z)))
+    traced_coordinate = np.asarray(
+        select.null_coordinate(traced_coef, array_namespace=jnp)
     )
-    host_coordinate = np.asarray(host_select.null_coordinate(host_coef, (x, z)))
-    traced_coordinate = np.asarray(traced_select.null_coordinate(traced_coef))
     assert np.allclose(host_coordinate, coordinate)
     assert np.allclose(traced_coordinate, coordinate)
     assert np.allclose(host_coordinate, traced_coordinate)
@@ -151,9 +155,9 @@ def test_quadratic_coordinate(null_type, coordinate):
 def test_subnull(null_type, coordinate):
     x, z = meshgrid()
     psi = quadratic_surface(x, z, null_type, *coordinate)
-    host_result = host_select.subnull(x, z, psi)
+    host_result = select.host_subnull(x, z, psi)
     traced_result = np.asarray(
-        traced_select.subnull(jnp.array(x), jnp.array(z), jnp.array(psi))
+        select.traced_subnull(_double(x), _double(z), _double(psi))
     )
     assert host_result.shape == (4,)
     assert traced_result.shape == (4,)
@@ -180,9 +184,9 @@ def test_wall_flux(polarity):
     z = 0.4 * np.sin(theta)
     # flux extremum on the loop sits at the outboard vertex (theta = 0)
     psi = polarity * -((x - 1.4) ** 2 + z**2)
-    host_result = host_select.wall_flux(x, z, psi, polarity)
+    host_result = select.host_wall_flux(x, z, psi, polarity)
     traced_result = np.asarray(
-        traced_select.wall_flux(jnp.array(x), jnp.array(z), jnp.array(psi), polarity)
+        select.traced_wall_flux(_double(x), _double(z), _double(psi), polarity)
     )
     assert host_result.shape == (4,)
     assert traced_result.shape == (4,)
@@ -197,9 +201,9 @@ def test_wall_flux_zero_polarity_is_nan():
     x = 1.0 + 0.4 * np.cos(theta)
     z = 0.4 * np.sin(theta)
     psi = -((x - 1.4) ** 2 + z**2)
-    host_result = host_select.wall_flux(x, z, psi, 0)
+    host_result = select.host_wall_flux(x, z, psi, 0)
     traced_result = np.asarray(
-        traced_select.wall_flux(jnp.array(x), jnp.array(z), jnp.array(psi), 0)
+        select.traced_wall_flux(_double(x), _double(z), _double(psi), 0)
     )
     assert host_result.shape == (4,)
     assert traced_result.shape == (4,)

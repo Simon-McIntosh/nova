@@ -20,6 +20,7 @@ with skip_import("jax"):
     import jax.numpy as jnp
 
     from nova.equilibrium.fixed_point import anderson, newton_krylov, picard
+    from nova.jax.config import Precision, configure_dtypes
 
 
 DIMENSION = 12
@@ -177,6 +178,51 @@ def test_trace_layout_shares_one_evaluation_axis():
         assert np.isfinite(trace[base])  # linearisation value
         assert np.all(np.isnan(trace[base + 1 : base + 1 + gmres_iterations]))
         assert np.isfinite(trace[base + stride - 1])  # promotion read
+
+
+def test_explicit_double_state_keeps_double_solver_scratch():
+    """False-plus-allow retains fp64 state, history, and residual traces."""
+    configure_dtypes()
+    initial = jnp.zeros(4, dtype=jnp.float64)
+
+    def map_fn(state):
+        return 0.25 * state + jnp.ones_like(state)
+
+    results = (
+        picard(map_fn, initial, evaluations=5),
+        anderson(map_fn, initial, evaluations=8, warmup=2),
+        newton_krylov(
+            map_fn,
+            initial,
+            newton_steps=1,
+            gmres_iterations=4,
+            warmup=2,
+        ),
+    )
+    for result in results:
+        assert result.state.dtype == jnp.float64
+        assert result.trace.dtype == jnp.float64
+
+
+def test_runtime_precision_selects_fixed_point_state_dtype():
+    """Automatic general solves use fp64 while explicit fp32 stays available."""
+    configure_dtypes()
+    initial = jnp.zeros(4)
+
+    def map_fn(state):
+        return 0.25 * state + jnp.ones_like(state)
+
+    automatic = picard(map_fn, initial, evaluations=5)
+    single = picard(
+        map_fn,
+        initial,
+        evaluations=5,
+        precision=Precision.SINGLE,
+    )
+    assert automatic.state.dtype == jnp.float64
+    assert automatic.trace.dtype == jnp.float64
+    assert single.state.dtype == jnp.float32
+    assert single.trace.dtype == jnp.float32
 
 
 if __name__ == "__main__":

@@ -21,7 +21,7 @@ import jax.numpy as jnp
 import jax.scipy as jsp
 import numpy as np
 
-from nova.equilibrium.flux_surface_connectivity import _dilate4
+from nova.equilibrium.morphology import _dilate4
 
 STATE_ABSENT = 0
 STATE_UNRESOLVED = 1
@@ -56,6 +56,55 @@ _RING = (
 )
 
 
+def _explicit_float_array(value):
+    """Preserve an explicitly supplied NumPy floating dtype at the JAX boundary."""
+    if isinstance(value, np.ndarray) and np.issubdtype(value.dtype, np.floating):
+        return jnp.asarray(value, dtype=value.dtype)
+    return jnp.asarray(value)
+
+
+def _arg_extreme(values, axis, *, maximize):
+    """Return first extreme indices with an initial matching the value dtype."""
+    values = jax.lax.stop_gradient(values)
+    axis %= values.ndim
+    indices = jax.lax.broadcasted_iota(jnp.int32, values.shape, axis)
+    initial_value = -jnp.inf if maximize else jnp.inf
+    initial = (
+        jnp.asarray(initial_value, dtype=values.dtype),
+        jnp.asarray(values.shape[axis], dtype=jnp.int32),
+    )
+
+    def choose(left, right):
+        left_value, left_index = left
+        right_value, right_index = right
+        better = right_value > left_value if maximize else right_value < left_value
+        take_right = better | ((right_value == left_value) & (right_index < left_index))
+        return (
+            jnp.where(take_right, right_value, left_value),
+            jnp.where(take_right, right_index, left_index),
+        )
+
+    return jax.lax.reduce((values, indices), initial, choose, dimensions=(axis,))[1]
+
+
+def _argmin_exact(values, axis=-1):
+    """Return first minimum indices without a default-dtype reduction seed."""
+    return _arg_extreme(values, axis, maximize=False)
+
+
+def _argmax_exact(values, axis=-1):
+    """Return first maximum indices without a default-dtype reduction seed."""
+    return _arg_extreme(values, axis, maximize=True)
+
+
+def _normal_cdf(value):
+    """Evaluate the standard normal CDF with constants matching value dtype."""
+    one = jnp.asarray(1.0, dtype=value.dtype)
+    two = jnp.asarray(2.0, dtype=value.dtype)
+    half = jnp.asarray(0.5, dtype=value.dtype)
+    return half * (one + jax.lax.erf(value / jnp.sqrt(two)))
+
+
 def _shift(field, dz, dr):
     """Return a shifted view; callers exclude the wrapped border."""
     return jnp.roll(field, shift=(-dz, -dr), axis=(-2, -1))
@@ -75,25 +124,34 @@ def ring_sign_changes(psi):
 
 def _native_gradient(fields, rg, zg):
     """Finite-difference gradient at native vertices on a shared grid."""
-    dr_mid = rg[2:] - rg[:-2]
-    dz_mid = zg[2:] - zg[:-2]
+    dr_mid = (rg[2:] - rg[:-2]).astype(fields.dtype)
+    dz_mid = (zg[2:] - zg[:-2]).astype(fields.dtype)
     radial_middle = (fields[..., 2:] - fields[..., :-2]) / dr_mid
     radial = jnp.concatenate(
         [
-            ((fields[..., 1] - fields[..., 0]) / (rg[1] - rg[0]))[..., None],
+            ((fields[..., 1] - fields[..., 0]) / (rg[1] - rg[0]).astype(fields.dtype))[
+                ..., None
+            ],
             radial_middle,
-            ((fields[..., -1] - fields[..., -2]) / (rg[-1] - rg[-2]))[..., None],
+            (
+                (fields[..., -1] - fields[..., -2])
+                / (rg[-1] - rg[-2]).astype(fields.dtype)
+            )[..., None],
         ],
         axis=-1,
     )
     vertical_middle = (fields[..., 2:, :] - fields[..., :-2, :]) / dz_mid[:, None]
     vertical = jnp.concatenate(
         [
-            ((fields[..., 1, :] - fields[..., 0, :]) / (zg[1] - zg[0]))[..., None, :],
+            (
+                (fields[..., 1, :] - fields[..., 0, :])
+                / (zg[1] - zg[0]).astype(fields.dtype)
+            )[..., None, :],
             vertical_middle,
-            ((fields[..., -1, :] - fields[..., -2, :]) / (zg[-1] - zg[-2]))[
-                ..., None, :
-            ],
+            (
+                (fields[..., -1, :] - fields[..., -2, :])
+                / (zg[-1] - zg[-2]).astype(fields.dtype)
+            )[..., None, :],
         ],
         axis=-2,
     )
@@ -315,7 +373,7 @@ def _fit_selected_cells(
         ).reshape(*corner_rows.shape)
         ** 2
     )
-    nearest = jnp.argmin(gradient_norm, axis=-1)
+    nearest = _argmin_exact(gradient_norm, axis=-1)
     centre_rows = jnp.take_along_axis(corner_rows, nearest[..., None], axis=-1)[..., 0]
     centre_columns = jnp.take_along_axis(corner_columns, nearest[..., None], axis=-1)[
         ..., 0
@@ -549,17 +607,22 @@ def _compact_refit_near_scale(
         key: value.reshape(batch, count, 4, *value.shape[2:])
         for key, value in candidates.items()
     }
-    distance = jnp.sqrt(
-        ((shaped["r"] - scale_fit["r"][..., None]) / jnp.min(jnp.diff(rg))) ** 2
-        + ((shaped["z"] - scale_fit["z"][..., None]) / jnp.min(jnp.diff(zg))) ** 2
+    distance = jnp.asarray(
+        jnp.sqrt(
+            ((shaped["r"] - scale_fit["r"][..., None]) / jnp.min(jnp.diff(rg))) ** 2
+            + ((shaped["z"] - scale_fit["z"][..., None]) / jnp.min(jnp.diff(zg))) ** 2
+        ),
+        dtype=fields.dtype,
     )
     supported = (
         shaped["nonsingular"]
         & (shaped["fitted_index"] == target_index)
         & (shaped["root_support"] <= ROOT_SUPPORT_LIMIT)
     )
-    selection_cost = jnp.where(supported, distance, jnp.inf)
-    selected = jnp.argmin(selection_cost, axis=2)
+    selection_cost = jnp.where(
+        supported, distance, jnp.asarray(jnp.inf, dtype=fields.dtype)
+    )
+    selected = _argmin_exact(selection_cost, axis=2)
 
     def take(value):
         index = selected.reshape(batch, count, 1, *([1] * (value.ndim - 3)))
@@ -730,7 +793,7 @@ def _same_root_clusters(
         jnp.finfo(score.dtype).eps / max(count, 1)
     )
     adjusted_score = score - tie
-    parent = jnp.argmax(
+    parent = _argmax_exact(
         jnp.where(same_root, adjusted_score[:, None, :], -jnp.inf), axis=-1
     ).astype(jnp.int32)
     maximum_hops = max(1, (count - 1).bit_length())
@@ -833,7 +896,9 @@ def _native_candidate_stage(
     unit_candidates = (degree == target_index) & eligible
     absolute_scale = jnp.max(jnp.abs(fields), axis=(-2, -1))
     numeric_floor = 32.0 * jnp.finfo(jnp.float32).eps * absolute_scale
-    minimum_spacing = jnp.minimum(jnp.min(jnp.diff(rg)), jnp.min(jnp.diff(zg)))
+    minimum_spacing = jnp.minimum(jnp.min(jnp.diff(rg)), jnp.min(jnp.diff(zg))).astype(
+        fields.dtype
+    )
     gradient_noise_sigma = jnp.maximum(
         sample_sigma[:, None, None] / (jnp.sqrt(2.0) * minimum_spacing),
         numeric_floor[:, None, None] / minimum_spacing,
@@ -1052,7 +1117,7 @@ def _gathered_confidence_stage(
         / jnp.maximum(eigen_sigma, jnp.finfo(jnp.float32).tiny),
         axis=-1,
     )
-    class_probability = jsp.special.ndtr(class_margin)
+    class_probability = _normal_cdf(class_margin)
     scale_drift = jnp.sqrt(
         ((fit["r"] - confidence_fit["r"]) / minimum_spacing) ** 2
         + ((fit["z"] - confidence_fit["z"]) / minimum_spacing) ** 2
@@ -1179,11 +1244,16 @@ def _gathered_confidence_stage(
         * independent_gradient[..., 1]
     ) / safe_covariance_determinant
     independent_residual = jnp.sqrt(jnp.maximum(residual_quadratic, 0.0) / 2.0)
-    fit_probability = jsp.special.gammaincc(
-        0.5 * outer_fit["degrees_of_freedom"],
-        outer_fit["residual_sum_squares"]
-        / jnp.maximum(2.0 * flux_sigma**2, jnp.finfo(jnp.float32).tiny),
+    probability_shape = jnp.asarray(
+        0.5 * outer_fit["degrees_of_freedom"], dtype=jnp.float32
     )
+    probability_argument = (
+        outer_fit["residual_sum_squares"]
+        / jnp.maximum(2.0 * flux_sigma**2, jnp.finfo(jnp.float32).tiny)
+    ).astype(jnp.float32)
+    fit_probability = jsp.special.gammaincc(
+        probability_shape, probability_argument
+    ).astype(fields.dtype)
 
     native_index_consistent = fit["fitted_index"] == work_native_index
     confidence_index_consistent = confidence_fit["fitted_index"] == work_native_index
@@ -1554,7 +1624,7 @@ def critical_point_candidates_batch(
     acquisition covariance is known; otherwise a quadratic-annihilating robust
     estimate is used.
     """
-    fields = jnp.asarray(fields)
+    fields = _explicit_float_array(fields)
     if fields.ndim != 3:
         raise ValueError("fields must have shape (batch, nz, nr)")
     inside_limiter = jnp.asarray(inside_limiter, dtype=bool)
@@ -1572,8 +1642,8 @@ def critical_point_candidates_batch(
         )
     return _critical_point_candidates_batch(
         fields,
-        jnp.asarray(rg),
-        jnp.asarray(zg),
+        _explicit_float_array(rg),
+        _explicit_float_array(zg),
         inside_limiter,
         extra_masks,
         supplied_noise_sigma,
@@ -1595,7 +1665,7 @@ def _refine_selected_vertices(psi, rg, zg, rows, columns):
     offset_r = jnp.asarray([-1, 0, 1, -1, 0, 1, -1, 0, 1])
     clusters = psi[rows[:, None] + offset_z, columns[:, None] + offset_r]
     flux_offset = jnp.mean(clusters, axis=-1)
-    centred = (clusters - flux_offset[:, None]).astype(jnp.float32)
+    centred = (clusters - flux_offset[:, None]).astype(psi.dtype)
     inverse = jnp.asarray(
         [
             [1 / 6, -1 / 3, 1 / 6, 1 / 6, -1 / 3, 1 / 6, 1 / 6, -1 / 3, 1 / 6],
@@ -1605,7 +1675,7 @@ def _refine_selected_vertices(psi, rg, zg, rows, columns):
             [1 / 4, 0, -1 / 4, 0, 0, 0, -1 / 4, 0, 1 / 4],
             [-1 / 9, 2 / 9, -1 / 9, 2 / 9, 5 / 9, 2 / 9, -1 / 9, 2 / 9, -1 / 9],
         ],
-        dtype=jnp.float32,
+        dtype=psi.dtype,
     )
     coefficients = jnp.einsum("ij,nj->ni", inverse, centred)
     a, b, c, d, e, constant = jnp.moveaxis(coefficients, -1, 0)
@@ -1646,10 +1716,13 @@ def xpoint_candidates(
     noise_sigma=None,
 ):
     """Return score-ranked rectangular X-point evidence in fixed slots."""
+    psi = _explicit_float_array(psi)
+    rg = _explicit_float_array(rg)
+    zg = _explicit_float_array(zg)
     mask = None if extra_mask is None else jnp.asarray(extra_mask)[None]
     selected = _scalar_result(
         critical_point_candidates_batch(
-            jax.lax.stop_gradient(jnp.asarray(psi))[None],
+            jax.lax.stop_gradient(psi)[None],
             rg,
             zg,
             inside_limiter,
@@ -1661,14 +1734,14 @@ def xpoint_candidates(
         )
     )
     refined = _refine_selected_vertices(
-        jnp.asarray(psi),
-        jnp.asarray(rg),
-        jnp.asarray(zg),
+        psi,
+        rg,
+        zg,
         selected["fit_center_row"],
         selected["fit_center_column"],
     )
     selected = dict(selected)
-    nan = jnp.full(selected["present"].shape, jnp.nan, dtype=jnp.asarray(psi).dtype)
+    nan = jnp.full(selected["present"].shape, jnp.nan, dtype=psi.dtype)
     for key, value in zip(("r", "z", "psi", "ntype"), refined, strict=True):
         selected[key] = jnp.where(selected["present"], value, nan)
     return selected
@@ -1676,12 +1749,15 @@ def xpoint_candidates(
 
 def magnetic_axis_subgrid(psi, rg, zg, inside_limiter, region=None, noise_sigma=None):
     """Return the deepest resolved rectangular extremum as the magnetic axis."""
+    psi = _explicit_float_array(psi)
+    rg = _explicit_float_array(rg)
+    zg = _explicit_float_array(zg)
     mask = jnp.asarray(inside_limiter, dtype=bool)
     if region is not None:
         mask &= jnp.asarray(region) > 0.5
     result = _scalar_result(
         critical_point_candidates_batch(
-            jax.lax.stop_gradient(jnp.asarray(psi))[None],
+            jax.lax.stop_gradient(psi)[None],
             rg,
             zg,
             inside_limiter,
@@ -1693,9 +1769,9 @@ def magnetic_axis_subgrid(psi, rg, zg, inside_limiter, region=None, noise_sigma=
         )
     )
     refined = _refine_selected_vertices(
-        jnp.asarray(psi),
-        jnp.asarray(rg),
-        jnp.asarray(zg),
+        psi,
+        rg,
+        zg,
         result["fit_center_row"],
         result["fit_center_column"],
     )

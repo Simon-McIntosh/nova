@@ -3,8 +3,10 @@
 from dataclasses import dataclass, field
 import jax
 import jax.numpy as jnp
+import numpy as np
 
-from nova.jax import select
+from nova.geometry import select
+from nova.jax.config import Precision, _resolve_precision
 from nova.jax.tree_util import Pytree
 
 
@@ -33,7 +35,7 @@ class Null1D(NullBase):
     @jax.jit
     def __call__(self, psi, polarity):
         """Return subgrid interpolated field null."""
-        return select.wall_flux(
+        return select.traced_wall_flux(
             self.coordinate[:, 0], self.coordinate[:, 1], psi, polarity
         )
 
@@ -41,18 +43,67 @@ class Null1D(NullBase):
 @dataclass
 @jax.tree_util.register_pytree_node_class
 class Null2D(NullBase):
-    """Locate and label field nulls on structured and unstructured grids."""
+    """Locate nulls from normalized stencils and precise physical metadata."""
 
     stencil: jnp.ndarray = field(repr=False)
-    coordinate_stencil: jnp.ndarray = field(repr=False)
+    local_coordinate_stencil: jnp.ndarray = field(repr=False)
+    physical_origin: jnp.ndarray = field(repr=False)
+    physical_scale: jnp.ndarray = field(repr=False)
     maxsize: int = 5
+    precision: Precision = Precision.SINGLE
+
+    @classmethod
+    def from_coordinates(
+        cls,
+        coordinate,
+        stencil,
+        maxsize=5,
+        precision: Precision | str = Precision.AUTOMATIC,
+    ):
+        """Construct normalized fit data from host float64 geometry.
+
+        Normalization occurs before any selected-precision device cast.  Passing
+        an absolute fp32 coordinate grid is rejected because its lost low bits
+        cannot be recovered by centering later.
+        """
+        physical = np.asarray(coordinate)
+        if physical.dtype != np.float64:
+            raise TypeError("Null2D physical coordinates must be host float64")
+        if physical.ndim != 2 or physical.shape[1] != 2:
+            raise ValueError("Null2D coordinates must have shape (nodes, 2)")
+        stencil_index = np.asarray(stencil)
+        if stencil_index.ndim != 2:
+            raise ValueError("Null2D stencil must have shape (centres, vertices)")
+        clusters = physical[stencil_index]
+        origin = clusters[:, 0]
+        offsets = clusters - origin[:, None, :]
+        scale = np.max(np.abs(offsets), axis=1)
+        if np.any(scale <= 0):
+            raise ValueError("Null2D stencils must span both physical axes")
+        local = offsets / scale[:, None, :]
+        precision = _resolve_precision(precision, Precision.SINGLE)
+        fit_dtype = jnp.float32 if precision is Precision.SINGLE else jnp.float64
+        return cls(
+            coordinate=jnp.asarray(physical, dtype=jnp.float64),
+            stencil=jnp.asarray(stencil_index),
+            local_coordinate_stencil=jnp.asarray(local, dtype=fit_dtype),
+            physical_origin=jnp.asarray(origin, dtype=jnp.float64),
+            physical_scale=jnp.asarray(scale, dtype=jnp.float64),
+            maxsize=maxsize,
+            precision=precision,
+        )
+
+    @property
+    def fit_dtype(self):
+        """Return the selected local-fit dtype."""
+        return jnp.float32 if self.precision is Precision.SINGLE else jnp.float64
 
     @jax.jit
     def __call__(self, psi):
         """Return subgrid interpolated field nulls."""
-        psi_stencil = psi[self.stencil]
-        number, cluster = self.categorize(psi_stencil)
-        return jax.vmap(self.interpolate, (0, 0))(number, cluster)
+        psi_stencil = jnp.asarray(psi, dtype=self.fit_dtype)[self.stencil]
+        number, cluster, origin, scale = self.categorize(psi_stencil)
+        return jax.vmap(self.interpolate, (0, 0, 0, 0))(number, cluster, origin, scale)
 
     @staticmethod
     @jax.jit
@@ -86,36 +137,55 @@ class Null2D(NullBase):
     @jax.jit
     def categorize(self, psi_stencil):
         """Categorize points in 1d hexagonal grid."""
+        psi_stencil = jnp.asarray(psi_stencil, dtype=self.fit_dtype)
         number, count = jax.lax.scan(self.zero_cross_count, (0, 0), psi_stencil)
 
         def cluster(_, null_type):
             index = jnp.where((count == null_type), size=self.maxsize)[0]
             return (
                 _,
-                jnp.c_[
-                    self.coordinate_stencil[index], psi_stencil[index, :, jnp.newaxis]
-                ],
+                (
+                    jnp.concatenate(
+                        (
+                            self.local_coordinate_stencil[index],
+                            psi_stencil[index, :, jnp.newaxis],
+                        ),
+                        axis=-1,
+                    ),
+                    self.physical_origin[index],
+                    self.physical_scale[index],
+                ),
             )
 
-        return jnp.array(number), jax.lax.scan(cluster, (), jnp.array([0, 4]))[1]
+        clusters, origins, scales = jax.lax.scan(cluster, (), jnp.array([0, 4]))[1]
+        return jnp.array(number), clusters, origins, scales
 
     @jax.jit
-    def interpolate(self, number, cluster):
+    def interpolate(self, number, cluster, origin, scale):
         """Interpolate subnull from cluster data."""
 
-        def subnull(carry, cluster):
+        def subnull(carry, values):
+            cluster, physical_origin, physical_scale = values
             carry += 1
+            local = select.traced_subnull(cluster[:, 0], cluster[:, 1], cluster[:, 2])
+            physical = physical_origin + local[:2].astype(jnp.float64) * physical_scale
+            result = jnp.concatenate((physical, local[2:].astype(jnp.float64)))
             return carry, jnp.where(
                 carry <= number,
-                select.subnull(cluster[:, 0], cluster[:, 1], cluster[:, 2]),
-                jnp.nan * jnp.ones(4),
+                result,
+                jnp.full(4, jnp.nan, dtype=jnp.float64),
             )
 
-        return jax.lax.scan(subnull, 0, cluster)[1]
+        return jax.lax.scan(subnull, 0, (cluster, origin, scale))[1]
 
     def tree_flatten(self):
         """Return flattened pytree."""
         children, aux_data = super().tree_flatten()
-        children += (self.stencil, self.coordinate_stencil)
-        aux_data |= {"maxsize": self.maxsize}
+        children += (
+            self.stencil,
+            self.local_coordinate_stencil,
+            self.physical_origin,
+            self.physical_scale,
+        )
+        aux_data |= {"maxsize": self.maxsize, "precision": self.precision}
         return (children, aux_data)

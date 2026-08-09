@@ -52,6 +52,7 @@ from functools import partial
 import jax
 import jax.numpy as jnp
 
+from nova.equilibrium.morphology import _dilate4
 from nova.jax.config import enable_x64
 
 enable_x64()
@@ -67,20 +68,6 @@ __all__ = [
 # ---------------------------------------------------------------------------
 # connectivity core weight — fixed-iteration flood-fill (device kernel)
 # ---------------------------------------------------------------------------
-
-
-def _dilate4(mask: jnp.ndarray) -> jnp.ndarray:
-    """One 4-neighbour binary dilation of a ``(nz, nr)`` boolean field.
-
-    Shift-and-or in the four orthogonal directions with a false border (no
-    wraparound) — a fixed-shape stencil, the device-native analogue of the
-    structuring-element step inside ``scipy.ndimage.label``.
-    """
-    up = jnp.zeros_like(mask).at[1:, :].set(mask[:-1, :])
-    down = jnp.zeros_like(mask).at[:-1, :].set(mask[1:, :])
-    left = jnp.zeros_like(mask).at[:, 1:].set(mask[:, :-1])
-    right = jnp.zeros_like(mask).at[:, :-1].set(mask[:, 1:])
-    return mask | up | down | left | right
 
 
 @partial(jax.jit, static_argnums=(2,))

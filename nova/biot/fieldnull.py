@@ -93,7 +93,7 @@ class DataNull(Plot, Array):
             x_cluster = self["x"][stencil_vertex]
             z_cluster = self["z"][stencil_vertex]
             psi_cluster = psi[stencil_vertex]
-            nulls.append(select.subnull(x_cluster, z_cluster, psi_cluster))
+            nulls.append(select.host_subnull(x_cluster, z_cluster, psi_cluster))
         return {"index": index} | self._unique(nulls)
 
     def _subnull_2d(self, index, psi2d):
@@ -106,7 +106,7 @@ class DataNull(Plot, Array):
             )
             x_cluster, z_cluster = x2d.flatten(), z2d.flatten()
             psi_cluster = psi2d[i - 1 : i + 2, j - 1 : j + 2].flatten()
-            nulls.append(select.subnull(x_cluster, z_cluster, psi_cluster))
+            nulls.append(select.host_subnull(x_cluster, z_cluster, psi_cluster))
         return dict(index=index) | self._unique(nulls)
 
     @staticmethod

@@ -1,6 +1,7 @@
 """Machine-agnostic wall as DATA: supercover raster (tiles-as-holes) + nodes.
 
-The connectivity topology read (:mod:`nova.jax.connectivity_boundary`) takes the
+The connectivity topology read (:mod:`nova.equilibrium.connectivity_boundary`)
+takes the
 wall ONLY as a raster boolean mask (``inside_limiter``) plus a string of wall
 boundary sample points (the sub-grid tangency). This module builds both from an
 arbitrary list of wall UNITS, so a single closed loop, a union of discrete

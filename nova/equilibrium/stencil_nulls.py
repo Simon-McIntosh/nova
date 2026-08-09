@@ -21,7 +21,7 @@ import jax.numpy as jnp
 import jax.scipy as jsp
 import numpy as np
 
-from nova.jax.flux_surface_connectivity import _dilate4
+from nova.equilibrium.flux_surface_connectivity import _dilate4
 
 STATE_ABSENT = 0
 STATE_UNRESOLVED = 1

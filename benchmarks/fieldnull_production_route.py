@@ -40,7 +40,7 @@ from benchmarks.fieldnull_candidate_audit import (
     _quadratic_null_field,
     _ring_counts,
 )
-from nova.jax.stencil_nulls import (
+from nova.equilibrium.stencil_nulls import (
     critical_point_candidates_batch,
     gradient_cell_degree,
 )
@@ -48,8 +48,8 @@ from nova.jax.stencil_nulls import (
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_PATHS = (
-    "nova/jax/stencil_nulls.py",
-    "nova/jax/connectivity_boundary.py",
+    "nova/equilibrium/stencil_nulls.py",
+    "nova/equilibrium/connectivity_boundary.py",
     "nova/equilibrium/profile.py",
     "benchmarks/fieldnull_production_route.py",
 )

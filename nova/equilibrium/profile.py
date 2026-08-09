@@ -28,8 +28,8 @@ from scipy.constants import mu_0
 from nova.biot.greens import hybrid_greens
 from nova.equilibrium.measurement import Magnetics
 from nova.jax.config import enable_x64
-from nova.jax.connectivity_boundary import boundary_read_smooth_jax
-from nova.jax.stencil_nulls import magnetic_axis_subgrid
+from nova.equilibrium.connectivity_boundary import traced_smooth_boundary_read
+from nova.equilibrium.stencil_nulls import magnetic_axis_subgrid
 
 enable_x64()
 
@@ -400,7 +400,7 @@ class ReconstructProfile:
     def _profile_basis(self, flux: jax.Array) -> tuple[jax.Array, dict[str, jax.Array]]:
         """Return per-coefficient cell-current columns and the topology read."""
         flux2d = flux.reshape(self.grid_z.size, self.grid_r.size)
-        topology = boundary_read_smooth_jax(
+        topology = traced_smooth_boundary_read(
             flux2d,
             self.grid_r,
             self.grid_z,

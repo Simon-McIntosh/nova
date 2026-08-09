@@ -25,6 +25,7 @@ ways that stand alone on the nova spine (no data):
 from __future__ import annotations
 
 import ast
+import importlib.util
 import inspect
 
 import numpy as np
@@ -36,8 +37,8 @@ with skip_import("jax"):
     import jax
     import jax.numpy as jnp
 
-    from nova.jax import connectivity_boundary as cb
-    from nova.jax.stencil_nulls import xpoint_candidates
+    from nova.equilibrium import connectivity_boundary as cb
+    from nova.equilibrium.stencil_nulls import xpoint_candidates
 
 from nova.equilibrium.labels import LCFS_ANGLES
 from nova.equilibrium.wall_mask import inside_polygon as _inside_polygon
@@ -89,7 +90,7 @@ def test_jit_vmap_grad_safe_and_fixed_shape():
     big = _diverted_field(nr=61, nz=61)
 
     def read(psi, rg, zg, inside, ar, az):
-        return cb.boundary_read_jax(
+        return cb.traced_boundary_read(
             jnp.asarray(psi),
             jnp.asarray(rg),
             jnp.asarray(zg),
@@ -120,7 +121,7 @@ def test_jit_vmap_grad_safe_and_fixed_shape():
         [jnp.asarray(psi), jnp.asarray(psi * 1.03), jnp.asarray(psi * 0.97)]
     )
     vfun = jax.vmap(
-        lambda p: cb.boundary_read_jax(
+        lambda p: cb.traced_boundary_read(
             p,
             jnp.asarray(rg),
             jnp.asarray(zg),
@@ -139,7 +140,7 @@ def test_jit_vmap_grad_safe_and_fixed_shape():
     assert np.all(np.isfinite(np.asarray(vb)))
 
     def loss(az):
-        return cb.boundary_read_jax(
+        return cb.traced_boundary_read(
             jnp.asarray(psi),
             jnp.asarray(rg),
             jnp.asarray(zg),
@@ -178,6 +179,20 @@ def test_module_is_contour_free():
     assert "argwhere" not in calls and "label" not in calls
 
 
+def test_mechanism_names_replace_dependency_names_without_aliases():
+    """The public boundary API distinguishes traced, smooth, and host reads."""
+    assert cb.traced_boundary_read is not cb.traced_smooth_boundary_read
+    assert callable(cb.host_boundary_read)
+    assert callable(cb.host_boundary_read_smooth)
+    assert callable(cb.host_boundary_read_batch)
+    assert not hasattr(cb, "boundary_read_jax")
+    assert not hasattr(cb, "boundary_read_smooth_jax")
+    assert not hasattr(cb, "boundary_read")
+    assert not hasattr(cb, "boundary_read_smooth")
+    assert not hasattr(cb, "boundary_read_batch")
+    assert importlib.util.find_spec("nova.jax.connectivity_boundary") is None
+
+
 def test_batched_matches_per_slice():
     """vmap over a batch of psi fields equals the per-slice reads, element-wise."""
     ang = jnp.asarray(np.asarray(LCFS_ANGLES))
@@ -185,7 +200,7 @@ def test_batched_matches_per_slice():
     slices = [jnp.asarray(psi), jnp.asarray(psi * 1.03), jnp.asarray(psi * 0.97)]
 
     def read(p):
-        return cb.boundary_read_jax(
+        return cb.traced_boundary_read(
             p,
             jnp.asarray(rg),
             jnp.asarray(zg),
@@ -230,7 +245,7 @@ def _double_null_field(nr=45, nz=61):
 
 def test_emergent_xset_holds_both_nulls_of_a_double_null():
     psi, rg, zg, axis, lr, lz, inside = _double_null_field()
-    gpu = cb.boundary_read(psi, _Grid(rg, zg, inside, lr, lz), axis, lcfs_norm=1.0)
+    gpu = cb.host_boundary_read(psi, _Grid(rg, zg, inside, lr, lz), axis, lcfs_norm=1.0)
     assert gpu.found and gpu.is_diverted
     assert gpu.axis_state == 2
     assert gpu.axis_candidate_count >= 1
@@ -321,7 +336,7 @@ def test_wall_termination_binds_at_exact_tangency():
     wall_psi = _psi_limited(wall_r, wall_z)
     grid = _Grid(rg, zg, inside, lr, lz)
     grid.wall_r, grid.wall_z = wall_r, wall_z
-    out = cb.boundary_read(psi, grid, axis, wall_psi=wall_psi)
+    out = cb.host_boundary_read(psi, grid, axis, wall_psi=wall_psi)
     truth = wall_psi.max()
     span = abs(out.psi_axis - truth)
     assert out.found and not out.is_diverted
@@ -337,7 +352,7 @@ def test_x_point_termination_binds_at_synthetic_saddle():
     psi, rg, zg, axis, lr, lz, inside = _diverted_field()
     saddle = _newton_saddle(_psi_diverted, 1.0, -0.25)
     psi_x = _psi_diverted(*saddle)
-    out = cb.boundary_read(psi, _Grid(rg, zg, inside, lr, lz), axis)
+    out = cb.host_boundary_read(psi, _Grid(rg, zg, inside, lr, lz), axis)
     span = abs(out.psi_axis - psi_x)
     assert out.found and out.is_diverted
     # biquadratic sub-null refine: measured 2.9e-6 of span on this grid
@@ -395,7 +410,7 @@ def test_continuous_through_marginal_transition():
     conn, clf, n_x = [], [], []
     for amp in amps:
         psi, rg, zg, axis, lr, lz, inside = _sweep_field(amp)
-        read = cb.boundary_read(psi, _Grid(rg, zg, inside, lr, lz), axis)
+        read = cb.host_boundary_read(psi, _Grid(rg, zg, inside, lr, lz), axis)
         conn.append(read.psi_bnd - read.psi_axis)
         step, count = _classify_first_psi_bnd(
             psi, rg, zg, inside, read.psi_axis, lr, lz, amp
@@ -424,11 +439,11 @@ def test_smooth_weight_is_lipschitz_in_psi():
     """
     psi, rg, zg, axis, lr, lz, inside = _limited_field()
     grid = _Grid(rg, zg, inside, lr, lz)
-    base = cb.boundary_read_smooth(psi, grid, axis, temperature=1e-3)
+    base = cb.host_boundary_read_smooth(psi, grid, axis, temperature=1e-3)
     span = float(base["psi_bnd"] - base["psi_axis"])
     rng = np.random.default_rng(7)
     ripple = 1e-4 * abs(span) * rng.standard_normal(psi.shape)
-    moved = cb.boundary_read_smooth(psi + ripple, grid, axis, temperature=1e-3)
+    moved = cb.host_boundary_read_smooth(psi + ripple, grid, axis, temperature=1e-3)
     delta = np.abs(moved["core_weight"] - base["core_weight"])
     assert delta.max() < 0.8
     assert delta.mean() < 0.01
@@ -465,7 +480,9 @@ def test_no_flip_on_topology_switch():
     heights = []
     for upper_amp in np.linspace(0.82, 0.98, 17):
         psi, rg, zg, axis, lr, lz, inside = _imbalanced_double_null(upper_amp)
-        read = cb.boundary_read(psi, _Grid(rg, zg, inside, lr, lz), axis, lcfs_norm=1.0)
+        read = cb.host_boundary_read(
+            psi, _Grid(rg, zg, inside, lr, lz), axis, lcfs_norm=1.0
+        )
         xset = np.asarray(read.xset, dtype=np.float64)
         for row in xset:
             assert np.isfinite(row[0]) == np.isfinite(row[1])

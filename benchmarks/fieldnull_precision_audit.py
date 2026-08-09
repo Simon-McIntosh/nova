@@ -137,7 +137,7 @@ def _source_hashes() -> dict[str, str]:
     """Return hashes of the production kernels and call-site composites."""
     paths = (
         "nova/jax/select.py",
-        "nova/jax/stencil_nulls.py",
+        "nova/equilibrium/stencil_nulls.py",
         "nova/jax/null.py",
         "nova/geometry/select.py",
     )

@@ -1431,7 +1431,7 @@ def _device_check(platform_name: str) -> dict[str, Any]:
     """Replay representative masks and fixed slots on one explicit JAX device."""
     import jax
 
-    from nova.jax.stencil_nulls import ring_sign_changes, xpoint_candidates
+    from nova.equilibrium.stencil_nulls import ring_sign_changes, xpoint_candidates
 
     device = jax.devices(platform_name)[0]
     rows = []

@@ -65,7 +65,7 @@ def _source_hashes() -> dict[str, str]:
     paths = (
         "nova/jax/select.py",
         "nova/geometry/select.py",
-        "nova/jax/stencil_nulls.py",
+        "nova/equilibrium/stencil_nulls.py",
         "nova/jax/null.py",
     )
     return {path: hashlib.sha256(Path(path).read_bytes()).hexdigest() for path in paths}
@@ -649,7 +649,7 @@ def _reachability() -> dict[str, Any]:
             "nova/biot/fieldnull.py:109",
         ],
         "subnull_traced_stacked": ["nova/jax/null.py:109"],
-        "subnull_traced_three_array": ["nova/jax/stencil_nulls.py:74"],
+        "subnull_traced_three_array": ["nova/equilibrium/stencil_nulls.py:74"],
         "candidate_regime": {
             "host": "one candidate per Python loop iteration",
             "traced_null2d": "two categories times maxsize=5, so ten fixed slots",
@@ -735,7 +735,7 @@ def measure(label: str, expected_platform: str) -> dict[str, Any]:
 
     # This import is itself a live semantic input: stencil_nulls enables fp64
     # before tracing, whereas nova.biot.null imports select directly and does not.
-    from nova.jax.stencil_nulls import subnull as three_array_subnull
+    from nova.equilibrium.stencil_nulls import subnull as three_array_subnull
 
     if not jax.config.jax_enable_x64:
         raise RuntimeError(

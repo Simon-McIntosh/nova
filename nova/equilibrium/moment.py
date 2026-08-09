@@ -91,7 +91,9 @@ def moment_terms(order: MomentOrder | int) -> list[tuple[int, int]]:
     if int(order) < 1:
         raise ValueError(f"order must be at least MomentOrder.CENTROID, got {order}")
     return [
-        (p, q) for degree in range(int(order) + 1) for p in range(degree + 1)
+        (p, q)
+        for degree in range(int(order) + 1)
+        for p in range(degree + 1)
         for q in [degree - p]
     ]
 
@@ -162,9 +164,7 @@ def build_moment_basis(
     keep = np.asarray(candidate, dtype=np.float64) > 0.0
     if scale is None:
         if keep.any():
-            scale = float(
-                np.sqrt(np.mean((r[keep] - r0) ** 2 + (z[keep] - z0) ** 2))
-            )
+            scale = float(np.sqrt(np.mean((r[keep] - r0) ** 2 + (z[keep] - z0) ** 2)))
         else:  # degenerate geometry
             scale = 1.0
     scale = max(float(scale), 1e-9)
@@ -584,9 +584,9 @@ class ReconstructMoment:
         elongation comes from the coil field shaping the flux contour around
         the disc, not from the current distribution.
         """
-        inside = (
-            np.hypot(self.cells.r - r0, self.cells.z - z0) < radius
-        ) & (np.asarray(self.cells.candidate) > 0.0)
+        inside = (np.hypot(self.cells.r - r0, self.cells.z - z0) < radius) & (
+            np.asarray(self.cells.candidate) > 0.0
+        )
         count = int(inside.sum())
         if count < self.config.min_cells:
             raise ValueError(
@@ -620,9 +620,9 @@ class ReconstructMoment:
         connectivity boundary, taken at the separatrix rather than a hair
         inside it.
         """
-        from nova.jax.connectivity_boundary import boundary_read
+        from nova.equilibrium.connectivity_boundary import host_boundary_read
 
-        read = boundary_read(flux, self.grid, centre, lcfs_norm=1.0)
+        read = host_boundary_read(flux, self.grid, centre, lcfs_norm=1.0)
         return read if read.found else None
 
     @staticmethod
@@ -732,9 +732,7 @@ class ReconstructMoment:
         flux = self.flux_map(cell_current, measurement.vacuum_flux)
         return cell_current, self.push_out(flux, centre), float(np.sum(coefficients**2))
 
-    def misfit(
-        self, measurement: SliceMeasurement, cell_current: np.ndarray
-    ) -> float:
+    def misfit(self, measurement: SliceMeasurement, cell_current: np.ndarray) -> float:
         """Return the whitened mean-square sensor residual of a cell current."""
         keep = np.asarray(measurement.mask, dtype=bool)
         residual = (
@@ -757,9 +755,7 @@ class ReconstructMoment:
         order = MomentOrder(int(order if order is not None else self.config.order))
         centre = self.fit_centroid(measurement)
         radius, seed_read = self.self_sized_seed(measurement, centre)
-        seed_current = self.uniform_disc(
-            *centre, radius, measurement.plasma_current
-        )
+        seed_current = self.uniform_disc(*centre, radius, measurement.plasma_current)
         seed_ring = self.boundary_ring(seed_read, centre)
 
         cell_current, read, ring = seed_current, seed_read, seed_ring

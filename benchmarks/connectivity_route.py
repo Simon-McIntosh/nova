@@ -1,8 +1,9 @@
 # ruff: noqa: E501
 """Connectivity accuracy, topology semantics, and execution-route cost.
 
-Two connectivity modules expose traced kernels together with host-facing
-adapters.  The adapters are not independent numerical implementations: they
+The boundary module exposes traced kernels together with host-facing adapters;
+the surface module exposes only its traced kernel after the unused adapter was
+removed.  Boundary adapters are not independent numerical implementations: they
 prepare grid objects and ordinary arrays, invoke the traced kernels, and
 materialise results on the host.  This benchmark therefore answers two separate
 questions without manufacturing a false arithmetic comparison:
@@ -47,8 +48,8 @@ from scipy import integrate, ndimage, optimize
 
 from nova.equilibrium.labels import LCFS_ANGLES
 from nova.equilibrium.wall_mask import inside_polygon
-from nova.jax import connectivity_boundary as boundary
-from nova.jax import flux_surface_connectivity as surface
+from nova.equilibrium import connectivity_boundary as boundary
+from nova.equilibrium import flux_surface_connectivity as surface
 
 REPEATS = 5
 GRID_SHAPES = ((49, 65), (65, 97), (101, 141))
@@ -287,13 +288,13 @@ def _boundary_cost(nr: int, nz: int) -> tuple[dict[str, Any], dict[str, Any]]:
     psi, grid, wall_psi, args = _boundary_arguments(nr, nz)
 
     def direct_call():
-        return boundary.boundary_read_jax(*args)
+        return boundary.traced_boundary_read(*args)
 
     compile_seconds, direct = _seconds(direct_call)
     steady_seconds, samples, direct = _steady(direct_call)
 
     def host_call():
-        return boundary.boundary_read(
+        return boundary.host_boundary_read(
             psi,
             grid,
             (1.0, 0.0),
@@ -341,13 +342,13 @@ def _moment_boundary_cost() -> dict[str, Any]:
     )
 
     def direct_call():
-        return boundary.boundary_read_jax(*args)
+        return boundary.traced_boundary_read(*args)
 
     compile_seconds, _ = _seconds(direct_call)
     steady_seconds, samples, _ = _steady(direct_call)
 
     def host_call():
-        return boundary.boundary_read(
+        return boundary.host_boundary_read(
             psi,
             grid,
             (1.0, 0.0),
@@ -379,13 +380,13 @@ def _smooth_cost(nr: int = 65, nz: int = 97) -> tuple[dict[str, Any], dict[str, 
     smooth_args = (*args, jnp.asarray(1.0e-3))
 
     def direct_call():
-        return boundary.boundary_read_smooth_jax(*smooth_args)
+        return boundary.traced_smooth_boundary_read(*smooth_args)
 
     compile_seconds, direct = _seconds(direct_call)
     steady_seconds, samples, direct = _steady(direct_call)
 
     def host_call():
-        return boundary.boundary_read_smooth(
+        return boundary.host_boundary_read_smooth(
             psi,
             grid,
             (1.0, 0.0),
@@ -438,7 +439,7 @@ def _boundary_batch_cost(nr: int = 65, nz: int = 97) -> dict[str, Any]:
     psi_stack = jnp.stack([args[0] * scale for scale in (1.0, 1.01, 0.99, 1.02)])
 
     def one(psi):
-        return boundary.boundary_read_jax(psi, *args[1:])
+        return boundary.traced_boundary_read(psi, *args[1:])
 
     batched = jax.jit(jax.vmap(one))
 
@@ -476,7 +477,7 @@ def _boundary_accuracy(nr: int = 101, nz: int = 141) -> dict[str, Any]:
         jnp.asarray(wall_z),
         jnp.asarray(wall_psi),
     )
-    limited = _block(boundary.boundary_read_jax(*args))
+    limited = _block(boundary.traced_boundary_read(*args))
     exact_wall_flux = float(np.max(wall_psi))
     axis_flux = float(limited["psi_axis"])
     span = abs(axis_flux - exact_wall_flux)
@@ -503,7 +504,7 @@ def _boundary_accuracy(nr: int = 101, nz: int = 141) -> dict[str, Any]:
         saddle_psi,
     ) = _diverted_field(nr, nz)
     diverted = _block(
-        boundary.boundary_read_jax(
+        boundary.traced_boundary_read(
             jnp.asarray(psi_d),
             jnp.asarray(grid_d.rg),
             jnp.asarray(grid_d.zg),
@@ -562,29 +563,20 @@ def _boundary_accuracy(nr: int = 101, nz: int = 141) -> dict[str, Any]:
 
 
 def _surface_cost(nr: int, nz: int) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Measure the surface kernel and the numpy-materialising adapter."""
-    psi, grid, *_truth, args = _surface_arguments(nr, nz)
+    """Measure the surface kernel and benchmark-local host materialisation."""
+    _psi, _grid, *_truth, args = _surface_arguments(nr, nz)
 
     def direct_call():
-        return surface.flux_surface_bins_jax(*args)
+        return surface.traced_flux_surface_bins(*args)
 
     compile_seconds, direct = _seconds(direct_call)
     steady_seconds, samples, direct = _steady(direct_call)
 
     def host_call():
-        return surface.flux_surface_bins(
-            psi,
-            grid,
-            axis_psi=0.0,
-            boundary_psi=-1.0,
-            psin_min=0.04,
-            psin_max=0.985,
-            n_psin=SURFACE_BINS,
-            h_factor=1.25,
-        )
+        output = surface.traced_flux_surface_bins(*args)
+        return {key: np.asarray(value) for key, value in output.items()}
 
     host_seconds, host_samples, host = _steady(host_call)
-    assert host is not None
     keys = ("pn_s", "dv_dpn", "inv_r2", "inv_r", "grad2_r2", "v_cum")
     parity = {
         "grid": f"{nr}x{nz}",
@@ -595,9 +587,8 @@ def _surface_cost(nr: int, nz: int) -> tuple[dict[str, Any], dict[str, Any]]:
         "same_core_cells": bool(
             int(direct["n_core_cells"]) == int(host["n_core_cells"])
         ),
-        "adapter_none_semantics": (
-            "host returns None when well_posed is false; direct returns fixed-shape "
-            "outputs plus the well_posed flag"
+        "materialisation_semantics": (
+            "the benchmark-local host route materialises every fixed-shape output"
         ),
     }
     cost = {
@@ -619,7 +610,7 @@ def _surface_batch_cost(nr: int = 65, nz: int = 97) -> dict[str, Any]:
     psi_stack = jnp.stack([args[0] * scale for scale in (1.0, 1.01, 0.99, 1.02)])
 
     def one(psi):
-        return surface.flux_surface_bins_jax(psi, *args[1:])
+        return surface.traced_flux_surface_bins(psi, *args[1:])
 
     batched = jax.jit(jax.vmap(one))
 
@@ -683,7 +674,7 @@ def _surface_accuracy(nr: int = 101, nz: int = 141) -> dict[str, Any]:
     _psi, _grid, major_radius, minor_radius, elongation, args = _surface_arguments(
         nr, nz
     )
-    result = _block(surface.flux_surface_bins_jax(*args))
+    result = _block(surface.traced_flux_surface_bins(*args))
     pn_s = np.asarray(result["pn_s"])
     expected = _exact_surface_metrics(pn_s, major_radius, minor_radius, elongation)
     interior = slice(2, -2)
@@ -785,6 +776,15 @@ def measure(label: str) -> dict[str, Any]:
     smooth_cost, smooth_difference = _smooth_cost()
     occurrences = _source_occurrences(
         (
+            "traced_boundary_read",
+            "traced_smooth_boundary_read",
+            "host_boundary_read",
+            "host_boundary_read_smooth",
+            "host_boundary_read_batch",
+            "traced_flux_surface_bins",
+            "traced_assemble_flux_surface_geometry",
+            "traced_flux_surface_geometry",
+            "_traced_profile_shapes",
             "boundary_read_jax",
             "boundary_read_smooth_jax",
             "boundary_read",
@@ -836,37 +836,37 @@ def measure(label: str) -> dict[str, Any]:
         "reachability": occurrences,
         "symbol_inventory": [
             {
-                "current": "boundary_read_jax",
+                "current": "traced_boundary_read",
                 "mechanism_name": "traced_boundary_read",
                 "reason": "device-resident hard connectivity kernel",
             },
             {
-                "current": "boundary_read_smooth_jax",
-                "mechanism_name": "traced_boundary_read_smooth",
+                "current": "traced_smooth_boundary_read",
+                "mechanism_name": "traced_smooth_boundary_read",
                 "reason": "device-resident differentiable connectivity kernel",
             },
             {
-                "current": "boundary_read",
+                "current": "host_boundary_read",
                 "mechanism_name": "host_boundary_read",
                 "reason": "grid preparation, seed validation, and host materialisation",
             },
             {
-                "current": "boundary_read_smooth",
+                "current": "host_boundary_read_smooth",
                 "mechanism_name": "host_boundary_read_smooth",
                 "reason": "host launch that first refines the stencil axis",
             },
             {
-                "current": "boundary_read_batch",
+                "current": "host_boundary_read_batch",
                 "mechanism_name": "host_boundary_read_batch",
                 "reason": "host-prepared vmap launch over ordinary arrays",
             },
             {
-                "current": "flux_surface_bins_jax",
+                "current": "traced_flux_surface_bins",
                 "mechanism_name": "traced_flux_surface_bins",
                 "reason": "device-resident fixed-shape surface metric kernel",
             },
             {
-                "current": "flux_surface_bins",
+                "deleted": "flux_surface_bins",
                 "mechanism_name": None,
                 "disposition": "delete",
                 "reason": (
@@ -875,17 +875,17 @@ def measure(label: str) -> dict[str, Any]:
                 ),
             },
             {
-                "current": "assemble_flux_surface_geometry_jax",
+                "current": "traced_assemble_flux_surface_geometry",
                 "mechanism_name": "traced_assemble_flux_surface_geometry",
                 "reason": "public device assembly caller",
             },
             {
-                "current": "flux_surface_geometry_jax",
+                "current": "traced_flux_surface_geometry",
                 "mechanism_name": "traced_flux_surface_geometry",
                 "reason": "public device composition caller",
             },
             {
-                "current": "_profile_shapes_jax",
+                "current": "_traced_profile_shapes",
                 "mechanism_name": "_traced_profile_shapes",
                 "reason": "internal device profile basis helper",
             },
@@ -909,7 +909,7 @@ def measure(label: str) -> dict[str, Any]:
                     "single implementation"
                 ),
                 "delete": "flux_surface_bins",
-                "relocate": ["flood_fill_core", "flux_surface_bins_jax"],
+                "relocate": ["flood_fill_core", "traced_flux_surface_bins"],
                 "target": "nova/equilibrium/flux_surface_connectivity.py",
             },
         },
@@ -1115,12 +1115,12 @@ def combine(
             "materialisation overhead. Relocate the remaining single implementation"
         ),
         "delete": "flux_surface_bins",
-        "relocate": ["flood_fill_core", "flux_surface_bins_jax"],
+        "relocate": ["flood_fill_core", "traced_flux_surface_bins"],
         "target": "nova/equilibrium/flux_surface_connectivity.py",
     }
     symbol_inventory = [dict(item) for item in reports[0]["symbol_inventory"]]
     for item in symbol_inventory:
-        if item["current"] == "flux_surface_bins":
+        if item.get("deleted") == "flux_surface_bins":
             item.update(
                 mechanism_name=None,
                 disposition="delete",
@@ -1139,10 +1139,10 @@ def combine(
         "symbol_inventory": symbol_inventory,
         "reachability": reports[0]["reachability"],
         "reachability_summary": {
-            "boundary_read": ["nova/equilibrium/moment.py:625"],
-            "boundary_read_smooth_jax": ["nova/equilibrium/profile.py:399"],
-            "flood_fill_core": ["nova/transport/current_diffusion.py:263"],
-            "flux_surface_bins_jax": ["nova/transport/current_diffusion.py:610"],
+            "host_boundary_read": ["nova/equilibrium/moment.py:625"],
+            "traced_smooth_boundary_read": ["nova/equilibrium/profile.py:403"],
+            "flood_fill_core": ["nova/transport/current_diffusion.py:253"],
+            "traced_flux_surface_bins": ["nova/transport/current_diffusion.py:611"],
             "flux_surface_bins": [],
         },
         "regime_provenance": {
@@ -1155,13 +1155,14 @@ def combine(
             "boundary_moment_statics": (
                 "96 levels, 18 bisections, and 512 rays from the hard adapter defaults"
             ),
-            "surface_statics": "28 bins from flux_surface_geometry_jax",
+            "surface_statics": "28 bins from traced_flux_surface_geometry",
         },
         "moment_boundary_campaigns": moment_reports,
         "interpretation": {
             "pair_status": (
-                "Neither module is an implementation pair. Both are one traced "
-                "implementation plus host adapters."
+                "Neither module is an implementation pair. The boundary route is one "
+                "traced implementation plus host adapters; the surface route is one "
+                "traced implementation."
             ),
             "boundary_semantics": (
                 "Keep the hard kernel as the exact topology reference and the smooth "

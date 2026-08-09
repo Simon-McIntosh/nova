@@ -18,6 +18,7 @@ with the free-boundary solver: they need the current-diffusion assembly.
 
 from __future__ import annotations
 
+import importlib.util
 import inspect
 
 import numpy as np
@@ -28,7 +29,7 @@ with skip_import("jax"):
     import jax
     import jax.numpy as jnp
 
-    from nova.jax import flux_surface_connectivity as fsc
+    from nova.equilibrium import flux_surface_connectivity as fsc
 
 
 def _solovev_psi(*, nr=65, nz=97, rax=0.9, a=0.55, elong=1.6):
@@ -44,7 +45,7 @@ def _solovev_psi(*, nr=65, nz=97, rax=0.9, a=0.55, elong=1.6):
 
 
 def _bins(psi, rg, zg, inside, psi_axis=0.0, psi_bnd=-1.0, n_psin=28):
-    return fsc.flux_surface_bins_jax(
+    return fsc.traced_flux_surface_bins(
         jnp.asarray(psi),
         jnp.asarray(rg),
         jnp.asarray(zg),
@@ -71,7 +72,7 @@ def test_jax_fsa_is_fp64_jit_vmap_grad_safe():
         [jnp.asarray(psi), jnp.asarray(psi * 1.01), jnp.asarray(psi * 0.99)]
     )
     vfun = jax.vmap(
-        lambda p: fsc.flux_surface_bins_jax(
+        lambda p: fsc.traced_flux_surface_bins(
             p,
             jnp.asarray(rg),
             jnp.asarray(zg),
@@ -88,7 +89,7 @@ def test_jax_fsa_is_fp64_jit_vmap_grad_safe():
     assert vb.shape == (3, 28)
 
     def loss(pb):
-        o = fsc.flux_surface_bins_jax(
+        o = fsc.traced_flux_surface_bins(
             jnp.asarray(psi),
             jnp.asarray(rg),
             jnp.asarray(zg),
@@ -125,7 +126,7 @@ def test_batched_matches_per_slice():
     slices = [jnp.asarray(psi), jnp.asarray(psi * 1.01), jnp.asarray(psi * 0.99)]
 
     def read(p):
-        return fsc.flux_surface_bins_jax(
+        return fsc.traced_flux_surface_bins(
             p,
             jnp.asarray(rg),
             jnp.asarray(zg),
@@ -164,6 +165,14 @@ def test_module_is_contour_free():
         if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
     }
     assert "argsort" not in calls and "sort" not in calls
+
+
+def test_traced_kernel_has_no_host_adapter_or_dependency_named_alias():
+    """Only the traced fixed-shape implementation remains executable."""
+    assert callable(fsc.traced_flux_surface_bins)
+    assert not hasattr(fsc, "flux_surface_bins_jax")
+    assert not hasattr(fsc, "flux_surface_bins")
+    assert importlib.util.find_spec("nova.jax.flux_surface_connectivity") is None
 
 
 def test_flood_fill_core_matches_ndimage_label():

@@ -9,9 +9,9 @@ import numpy as np
 from nova.transport import (
     CurrentDiffusion,
     EtaProfile,
-    assemble_flux_surface_geometry_jax,
+    traced_assemble_flux_surface_geometry,
     flux_surface_geometry,
-    flux_surface_geometry_jax,
+    traced_flux_surface_geometry,
 )
 
 
@@ -96,7 +96,7 @@ def test_nonuniform_surface_bins_preserve_fixed_output_contract():
         "v_cum": volume * psi_n_surface,
         "v_total": jnp.asarray(volume),
     }
-    assembled = assemble_flux_surface_geometry_jax(
+    assembled = traced_assemble_flux_surface_geometry(
         bins,
         jnp.asarray(psi),
         jnp.asarray(grid.rg),
@@ -157,7 +157,7 @@ def test_device_assembly_is_jit_and_vmap_safe():
     scales = jnp.asarray([8.0e5, 8.0e5])
 
     def assemble(one_psi, boundary_flux):
-        return flux_surface_geometry_jax(
+        return traced_flux_surface_geometry(
             one_psi,
             radius,
             height,

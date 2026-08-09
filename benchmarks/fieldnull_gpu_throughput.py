@@ -672,7 +672,7 @@ def _source_hashes() -> dict[str, str]:
         "nova/biot/null.py": ROOT / "nova/biot/null.py",
         "nova/jax/select.py": ROOT / "nova/jax/select.py",
         "nova/jax/stencil_nulls.py": ROOT / "nova/jax/stencil_nulls.py",
-        "nova/jax/fixed_point.py": ROOT / "nova/jax/fixed_point.py",
+        "nova/equilibrium/fixed_point.py": ROOT / "nova/equilibrium/fixed_point.py",
         "nova/equilibrium/profile.py": ROOT / "nova/equilibrium/profile.py",
         "nova/imas/mast_solve_inputs.py": ROOT / "nova/imas/mast_solve_inputs.py",
     }

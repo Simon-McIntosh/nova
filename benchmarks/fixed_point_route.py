@@ -1,6 +1,6 @@
 """Route evidence for the traced fixed-point accelerator module.
 
-This module first answers the structural question: ``nova.jax.fixed_point``
+This module first answers the structural question: ``nova.equilibrium.fixed_point``
 does not have a host twin.  ``ReconstructProfile.picard`` is a traced,
 physics-bound method with a different result contract; the SciPy
 Newton--Krylov calls drive mutable legacy plasma objects; and the traced
@@ -53,7 +53,12 @@ import scipy.optimize
 
 from nova.equilibrium import ProfileDegrees, ReconstructProfile
 from nova.equilibrium.measurement import Magnetics
-from nova.jax.fixed_point import FixedPointResult, anderson, newton_krylov, picard
+from nova.equilibrium.fixed_point import (
+    FixedPointResult,
+    anderson,
+    newton_krylov,
+    picard,
+)
 
 
 ROOT = Path(
@@ -437,7 +442,7 @@ def _import_census() -> dict[str, Any]:
             for node in ast.walk(tree):
                 if (
                     isinstance(node, ast.ImportFrom)
-                    and node.module == "nova.jax.fixed_point"
+                    and node.module == "nova.equilibrium.fixed_point"
                 ):
                     imports.append(
                         {

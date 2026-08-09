@@ -24,7 +24,7 @@ with skip_import("jax"):
 
     from nova.equilibrium import ProfileDegrees, ReconstructProfile
     from nova.equilibrium.measurement import Magnetics
-    from nova.jax.fixed_point import anderson, newton_krylov, picard
+    from nova.equilibrium.fixed_point import anderson, newton_krylov, picard
     from nova.jax.stencil_nulls import magnetic_axis_subgrid
 
 

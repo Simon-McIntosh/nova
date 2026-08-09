@@ -31,7 +31,7 @@ import jax.numpy as jnp
 
 from nova.equilibrium import ProfileDegrees, ReconstructProfile
 from nova.equilibrium.measurement import Magnetics
-from nova.jax.fixed_point import anderson, newton_krylov, picard
+from nova.equilibrium.fixed_point import anderson, newton_krylov, picard
 
 BUDGET = 40
 CHECKPOINTS = (10, 20, 40)

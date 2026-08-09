@@ -19,7 +19,7 @@ with skip_import("jax"):
     import jax
     import jax.numpy as jnp
 
-    from nova.jax.fixed_point import anderson, newton_krylov, picard
+    from nova.equilibrium.fixed_point import anderson, newton_krylov, picard
 
 
 DIMENSION = 12

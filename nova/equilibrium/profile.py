@@ -619,7 +619,7 @@ class ReconstructProfile:
         The map refits the profile coefficients at every evaluation (the
         implicit inner fit) and returns the mapped flux, so its fixed points
         are the force-balanced reconstructions the Picard path approaches.
-        Drive it with :mod:`nova.jax.fixed_point` (``picard`` / ``anderson``
+        Drive it with :mod:`nova.equilibrium.fixed_point` (``picard`` / ``anderson``
         / ``newton_krylov``); the axis seed pins the topology read's flood
         basin, guarding the accelerated iteration against the map's other
         attractors.

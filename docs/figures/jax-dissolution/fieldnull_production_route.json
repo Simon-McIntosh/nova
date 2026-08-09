@@ -55,7 +55,11 @@
     },
     "gradient_semantics": {
       "axis_gradient_finite_and_nonzero_cpu": true,
-      "axis_gradient_finite_and_nonzero_gpu": true,
+      "axis_gradient_finite_and_nonzero_gpu": {
+        "basis": "process attestation from the focused CUDA run",
+        "independently_proven_by_named_node_command_receipt": false,
+        "status": "attested"
+      },
       "outer_jit_gradient_compile_seconds_on_staged_smoke": 1.8221365381032228,
       "outer_jit_gradient_steady_seconds_on_staged_smoke": 0.0014518462121486664
     },
@@ -73,9 +77,10 @@
       "domain_cell_degree_sum_equal": true,
       "fp64_coordinate_target_m": 1e-10,
       "fp64_coordinate_target_pass": false,
-      "max_nearest_physical_coordinate_difference_m": 5.262692769347765e-06,
-      "max_source_associated_coordinate_difference_m": 5.262692769347765e-06,
-      "qualification": "integer and physical candidate sets agree; normalized fp32 local fits differ by about five micrometres on this grid",
+      "max_nearest_physical_coordinate_l2_difference_m": 5.28195675812384e-06,
+      "max_nearest_physical_coordinate_linf_difference_m": 5.262692769347765e-06,
+      "max_source_associated_coordinate_linf_difference_m": 5.262692769347765e-06,
+      "qualification": "integer and physical candidate sets agree; the maximum componentwise absolute difference is 5.263 micrometres and the maximum Euclidean difference is 5.282 micrometres",
       "rank_order_equal": false,
       "resolved_count_equal": true,
       "source_cell_set_equal": true
@@ -94,10 +99,14 @@
           "path": "/home/ITER/mcintos/Code/nova-fieldnull-repair-VQje3Q/njd-fieldnull-certified-compile-interrupted.log",
           "sha256": "e2bda1b03842133adea5d2db951b9680f9b4892661134dedc0dbee26036e5d50"
         },
-        "first_shape_compile_seconds": 636.6,
+        "first_shape_compile_seconds": 636.626733664,
+        "reported_context_not_independently_bound_by_log": {
+          "source_revision": "d998",
+          "stop_elapsed_seconds": 3000
+        },
         "second_shape_compile_completed": false,
-        "stopped_at_allocation_elapsed_seconds": 3000,
-        "verdict": "rejected compile-complexity failure"
+        "verdict": "rejected compile-complexity failure",
+        "verifier_qualification": "the log proves the first compile duration and an incomplete second compile, but does not independently bind the reported source revision or stop time"
       },
       "staged_smoke": {
         "backend": "cpu",
@@ -505,6 +514,15 @@
         "sha256": "891ddb504e180e5f3b6737c140c3ac57464e4e1b168514da38f2377a288a8187"
       }
     },
+    "excluded_captures": {
+      "njd-fieldnull-confidence-candidates.json": {
+        "path": "/home/ITER/mcintos/Code/nova-fieldnull-repair-VQje3Q/njd-fieldnull-confidence-candidates.json",
+        "reason": "source-unhashed calibration characterization; excluded from final claims",
+        "sha256": "91a0921a8f0e0ad9df0dc0290551708d29e2b6d3dc58cca9c8e3106424d08d2f",
+        "source_hashes_captured": false,
+        "used_for_final_claims": false
+      }
+    },
     "measurement_policy": "each unchanged test or benchmark captured once; invalidated and environment-failed captures preserved but excluded from passing metrics",
     "source_snapshot": "/home/ITER/mcintos/Code/nova-fieldnull-repair-VQje3Q"
   },
@@ -798,11 +816,14 @@
     },
     "cpu_capture": {
       "capture_composition": {
-        "benchmark_only_change_between_captures": "TIMING_CAPACITY changed from 64 to 8; AUDIT_CAPACITY and scientific routines unchanged",
-        "scientific_and_legacy": "frozen CPU capture on identical production source",
-        "timing": "single corrected K8 CPU performance capture"
+        "benchmark_only_change_between_captures": "TIMING_CAPACITY changed from 64 to 8; the detector, AUDIT_CAPACITY, and scientific/legacy routines were unchanged",
+        "scientific_and_legacy": "frozen CPU scientific benchmark with benchmark hash 4f886d069b922047c00af588b841158b0409f53bd73efbea27f44eeb69e69119",
+        "timing": "single corrected K8 CPU timing benchmark with benchmark hash a3521ea19e003c801ce8b2a31e1f2d72bbd9e5c0b74a1c1474287de5c051dd34"
       },
-      "captured_at": "2026-08-09T11:48:28.057924+00:00",
+      "component_captured_at": {
+        "corrected_k8_timing": "2026-08-09T11:52:54.063028+00:00",
+        "scientific_and_legacy": "2026-08-09T11:48:28.057924+00:00"
+      },
       "device": "cpu:0",
       "environment": {
         "host": "98dci4-clu-3141.iter.org",
@@ -1365,11 +1386,19 @@
         "retained_generation_recall": 0.83875,
         "true_fields": 2400
       },
-      "source_hashes": {
-        "benchmarks/fieldnull_production_route.py": "a3521ea19e003c801ce8b2a31e1f2d72bbd9e5c0b74a1c1474287de5c051dd34",
-        "nova/equilibrium/profile.py": "4bb927816e6f9f007515ebe8d9a10e74b015afcc15bbae73ca2fe080a0602e2a",
-        "nova/jax/connectivity_boundary.py": "bcbbcb9cbae4221cfc79ba42846c257028f08471accfc7aaa0564510188afb07",
-        "nova/jax/stencil_nulls.py": "8486692c7b61bb0b52babaa3b8049371f535e24232971b07c86509029abb75a6"
+      "component_source_hashes": {
+        "corrected_k8_timing": {
+          "benchmarks/fieldnull_production_route.py": "a3521ea19e003c801ce8b2a31e1f2d72bbd9e5c0b74a1c1474287de5c051dd34",
+          "nova/equilibrium/profile.py": "4bb927816e6f9f007515ebe8d9a10e74b015afcc15bbae73ca2fe080a0602e2a",
+          "nova/jax/connectivity_boundary.py": "bcbbcb9cbae4221cfc79ba42846c257028f08471accfc7aaa0564510188afb07",
+          "nova/jax/stencil_nulls.py": "8486692c7b61bb0b52babaa3b8049371f535e24232971b07c86509029abb75a6"
+        },
+        "scientific_and_legacy": {
+          "benchmarks/fieldnull_production_route.py": "4f886d069b922047c00af588b841158b0409f53bd73efbea27f44eeb69e69119",
+          "nova/equilibrium/profile.py": "4bb927816e6f9f007515ebe8d9a10e74b015afcc15bbae73ca2fe080a0602e2a",
+          "nova/jax/connectivity_boundary.py": "bcbbcb9cbae4221cfc79ba42846c257028f08471accfc7aaa0564510188afb07",
+          "nova/jax/stencil_nulls.py": "8486692c7b61bb0b52babaa3b8049371f535e24232971b07c86509029abb75a6"
+        }
       },
       "timing": {
         "batch": 128,
@@ -1481,6 +1510,13 @@
       "resolved_recall": 1.0,
       "resolved_true_fields": 384,
       "retuning_after_capture": false,
+      "retuning_after_capture_evidence": {
+        "artifact_has_captured_at": false,
+        "artifact_has_execution_source_hashes": false,
+        "artifact_has_script_hashes": false,
+        "basis": "process attestation",
+        "hash_proven": false
+      },
       "summary_by_kind": {
         "o_noise": {
           "fields": 192,

@@ -165,6 +165,19 @@
   </tbody></table>
   <p>The relocation was integrated at <code>b1e1e530</code>. Historical benchmark provenance remains explicit: retired wrapper rows are unavailable rather than carrying a fabricated post-deletion timing.</p>
 
+  <h2 id="connectivity-relocation">Connectivity, stencil, and current-diffusion relocation</h2>
+  <p>Worker commit <code>170689e2</code> was merged to main at <code>7d3e6170</code>. The single implementations in <code>nova.jax.connectivity_boundary</code>, <code>nova.jax.flux_surface_connectivity</code>, and <code>nova.jax.stencil_nulls</code> moved to <code>nova.equilibrium</code> without compatibility shims.</p>
+  <ul>
+    <li>Boundary entry points now state their mechanism and semantics: <code>traced_boundary_read</code>, <code>traced_smooth_boundary_read</code>, <code>host_boundary_read</code>, <code>host_boundary_read_smooth</code>, and <code>host_boundary_read_batch</code>. Hard and smooth reads remain intentionally distinct.</li>
+    <li>The fixed-shape surface kernel is <code>traced_flux_surface_bins</code>; the zero-caller host <code>flux_surface_bins</code> materialisation adapter was deleted. Current-diffusion exports now use <code>traced_assemble_flux_surface_geometry</code>, <code>traced_flux_surface_geometry</code>, and <code>_traced_profile_shapes</code>.</li>
+    <li>Retained numerical bodies, the FieldNull scientific repair, and the existing connectivity/profile <code>enable_x64()</code> behaviour were preserved. Precision-side-effect decoupling remains part of select consolidation.</li>
+  </ul>
+  <table><thead><tr><th>Check</th><th>Landed evidence</th><th>Qualification</th></tr></thead><tbody>
+    <tr><td>Slow-inclusive compute gate</td><td>66 passed, 1 expected no-GPU skip in 135.35 s on <code>sun_debug</code>; exit 0.</td><td><code>/home/ITER/mcintos/.cache/nova-connectivity-relocation-54d592ff0642816c674fd3cca594aa61eb5f427a536ecd6b6baf10af52b086ac-pytest-execution.log</code>; SHA-256 <code>b6807955a29bf60e174ec24910a8e67b85140801ccc5c00d6daa97d35dc79f64</code>.</td></tr>
+    <tr><td>Source equivalence</td><td>Normalized AST comparison retained every boundary, stencil, surface-kernel, and current-diffusion definition; the host adapter was the only deleted definition.</td><td>Existing <code>enable_x64()</code> calls were deliberately not changed in this relocation.</td></tr>
+    <tr><td>Post-summary LAPACK diagnostics</td><td>The suite remained green and exited 0.</td><td>The <code>DLASCL</code> lines come from the unchanged intentional NaN-target negative case, which verifies that a degenerate projection returns <code>None</code>; suppressing them would require a separate control-flow change.</td></tr>
+  </tbody></table>
+
   <h2>What is next</h2>
-  <p>Finish the connectivity and select domain relocations licensed by the measured matrix, then run complete slow-inclusive validation and retire the technology-organised namespace. This cumulative record will receive those implementation and closure results.</p>
+  <p>Finish select domain consolidation, then run complete slow-inclusive validation and retire the technology-organised namespace. This cumulative record will receive those implementation and closure results.</p>
 </main></body></html>

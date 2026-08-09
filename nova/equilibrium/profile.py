@@ -44,6 +44,10 @@ class ProfileResult(NamedTuple):
     axis: jax.Array
     boundary_flux: jax.Array
     core_weight: jax.Array
+    axis_state: jax.Array
+    axis_confidence: jax.Array
+    axis_candidate_count: jax.Array
+    axis_overflow: jax.Array
 
 
 @dataclass(frozen=True)
@@ -523,6 +527,10 @@ class ReconstructProfile:
             axis=axis,
             boundary_flux=topology["psi_bnd"],
             core_weight=topology["core_weight"],
+            axis_state=null["state"],
+            axis_confidence=null["confidence"],
+            axis_candidate_count=null["candidate_count"],
+            axis_overflow=null["overflow"],
         )
 
     def picard(

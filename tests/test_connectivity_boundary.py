@@ -109,6 +109,11 @@ def test_jit_vmap_grad_safe_and_fixed_shape():
     assert int(o_s["n_core_cells"]) != int(o_b["n_core_cells"])
     assert np.asarray(o_s["radii"]).shape == (len(LCFS_ANGLES),)
     assert bool(o_s["found"]) and bool(o_b["found"])
+    assert int(o_s["axis_state"]) in (1, 2)
+    assert int(o_s["axis_candidate_count"]) >= 1
+    assert int(o_s["x_candidate_count"]) >= 0
+    assert int(o_s["x_unresolved_count"]) >= 0
+    assert np.asarray(o_s["x_overflow"]).shape == ()
 
     psi, rg, zg, axis, _lr, _lz, inside = _limited_field(nr=61, nz=61)
     batch = jnp.stack(
@@ -227,6 +232,12 @@ def test_emergent_xset_holds_both_nulls_of_a_double_null():
     psi, rg, zg, axis, lr, lz, inside = _double_null_field()
     gpu = cb.boundary_read(psi, _Grid(rg, zg, inside, lr, lz), axis, lcfs_norm=1.0)
     assert gpu.found and gpu.is_diverted
+    assert gpu.axis_state == 2
+    assert gpu.axis_candidate_count >= 1
+    assert gpu.x_candidate_count >= 2
+    assert not gpu.x_overflow
+    assert gpu.x_binding_state in (1, 2)
+    assert gpu.boundary_resolved == (gpu.x_binding_state == 2)
     xset = np.asarray(gpu.xset, dtype=np.float64)
     finite = xset[np.isfinite(xset).all(axis=1)]
     assert finite.shape[0] == 2

@@ -155,6 +155,10 @@ def test_result_axis_is_the_solved_subgrid_null(problem):
     )
     assert bool(null["found"])
     np.testing.assert_allclose(axis, [float(null["r"]), float(null["z"])], atol=1e-12)
+    assert int(result.axis_state) == 2
+    assert float(result.axis_confidence) >= 1.0
+    assert int(result.axis_candidate_count) >= 1
+    assert bool(result.axis_overflow) == (int(result.axis_candidate_count) > 1)
 
 
 def test_accelerators_reach_the_fixed_point_inside_the_budget(problem):

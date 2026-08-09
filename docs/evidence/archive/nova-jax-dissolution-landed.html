@@ -36,7 +36,7 @@
   <h2>Accuracy and policy findings</h2>
   <ul>
     <li>Global fp64 is the measured workaround, not the final select policy: direct fp32 imports misclassified 12 of 18 ITER-scale analytic surfaces, while fp64 classified all 18 correctly. A centered, nondimensional fp32 formulation and scale-relative classification are under audit for the GPU path.</li>
-    <li>The select behaviour change must land before arithmetic collapse: four-value wall results, all-NaN at zero polarity, NaN plane classification, a <code>1e-30</code> determinant floor, and the three-array <code>subnull</code> signature.</li>
+    <li>The select behaviour change landed before arithmetic collapse: four-value wall results, all-NaN at zero polarity, NaN plane classification, a sign-preserving nonzero determinant sentinel, and the three-array <code>subnull</code> signature.</li>
     <li>Stencil relocation must repair plateau acceptance and surface fixed-slot overflow rather than carry the measured defects into the domain package.</li>
     <li>JAX-free eager boundaries remain required while namespaces consolidate.</li>
   </ul>
@@ -67,6 +67,14 @@
     <tr><td>Forward warning</td><td>The direct kernel regression passes with <code>FutureWarning</code> promoted to error.</td><td><code>44119ae5</code></td></tr>
   </tbody></table>
 
+  <h2 id="s7">Unified select and null return contract</h2>
+  <p>The host and traced routes now publish one explicit contract before any structural relocation. Wall selection returns <code>[x, z, psi, null_type]</code> on both routes; zero polarity publishes four NaNs. Planar or otherwise degenerate fits classify as NaN, and <code>subnull</code> accepts three sample arrays and returns one flat four-value result. The adaptive host store, traced stacked caller, stencil caller, and limiter were adapted together so no caller silently changed arity.</p>
+  <table><thead><tr><th>Check</th><th>Result</th><th>Commit</th></tr></thead><tbody>
+    <tr><td>Published zero-current state</td><td><code>Limiter.w_psi</code> and both <code>w_point</code> coordinates are NaN rather than a physically plausible zero.</td><td><code>7193988c</code></td></tr>
+    <tr><td>Determinant sentinel</td><td>Exact zero maps to <code>+1e-30</code>; a tiny negative determinant maps to <code>-1e-30</code>. Host and traced coordinates remain finite and agree.</td><td><code>ba5845a0</code></td></tr>
+    <tr><td>Independent verification</td><td>83 slow-inclusive focused tests passed in 19.54 s on <code>sun_debug</code>, with no pytest warnings; Ruff, full-range diff, caller census, optional-JAX boundary, and exact nine-file scope passed.</td><td><code>714bebd2</code></td></tr>
+  </tbody></table>
+
   <h2 id="s9">Interpolant concept split</h2>
   <p>The traced interpolation hierarchy moved from <code>nova/jax/basis.py</code> to <code>nova/linalg/interpolant.py</code>; the independent regression design matrices remain in <code>nova/linalg/basis.py</code>. This removes a concept collision rather than inventing backend variants.</p>
   <table><thead><tr><th>Check</th><th>Result</th><th>Commit</th></tr></thead><tbody>
@@ -75,5 +83,5 @@
   </tbody></table>
 
   <h2>What is next</h2>
-  <p>Land the select return-policy change on its own commit, then execute only the relocations, collapses, and deletions licensed by the measurement matrix. This cumulative record will receive the conversion and closure evidence.</p>
+  <p>Complete the weak-null/noise, reduced-precision, and GPU-throughput audits; implement their combined detector and batch-path repair; then execute only the relocations, collapses, and deletions licensed by the measured matrix. This cumulative record will receive the repair, conversion, and closure evidence.</p>
 </main></body></html>

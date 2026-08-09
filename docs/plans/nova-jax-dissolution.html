@@ -22,8 +22,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-09">
-<meta name="plan-version" content="33">
-<meta name="plan-impl" content="0.6666666666666666">
+<meta name="plan-version" content="35">
+<meta name="plan-impl" content="0.7777777777777778">
 </head>
 <body>
   <main class="plan-doc">
@@ -380,65 +380,17 @@ except ImportError:  # jax extra absent
       </p>
     </section>
 
-    <h2 id="s7">§7 — Where the two routes disagree, converge them</h2>
-
-    <p>The pairs do not merely differ in speed; several return different shapes and answer
-    degenerate cases differently. These are the divergences co-location is meant to expose,
-    and the plan resolves them rather than freezing them.</p>
-
-    <table>
-      <thead>
-        <tr><th>Concept</th><th>Host</th><th>Traced</th><th>Resolution</th></tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><code>wall_flux</code></td>
-          <td>3-tuple <code>(x, z, psi)</code>; <code>(0, 0, 0)</code> at zero polarity</td>
-          <td>4-array <code>[x, z, psi, null_type]</code>; all-NaN at zero polarity</td>
-          <td>converge on the traced convention</td>
-        </tr>
-        <tr>
-          <td><code>null_type</code></td>
-          <td><strong>raises</strong> <code>ValueError("Plane surface")</code></td>
-          <td>returns <code>NaN</code></td>
-          <td>converge on the traced convention</td>
-        </tr>
-        <tr>
-          <td><code>null_coordinate</code></td>
-          <td>no floor; extra <code>cluster</code> argument for assertions</td>
-          <td>Hessian determinant floored at <code>1e-30</code></td>
-          <td>adopt the floor on both</td>
-        </tr>
-        <tr>
-          <td><code>subnull</code></td>
-          <td>three arrays → nested <code>(coords, psi, type)</code></td>
-          <td>stacked <code>(3, N)</code> → flat array</td>
-          <td>one signature, decided by the measurement</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <p>The asymmetry is forced, not arbitrary: JAX cannot branch on a traced value to raise
-    a Python exception, so a traced kernel must fold the classification into its return and
-    signal degeneracy with a sentinel. The question is only which convention both sides
-    adopt, and the codebase has already written down the answer — in the <em>host's</em> own
-    docstring at <code>nova/geometry/select.py:117-122</code>:</p>
-
-    <blockquote><p><code>(0, 0, 0)</code> is a well-formed coordinate and flux, so a caller
-    cannot tell it from a real result; <strong>the traced convention is the safer one</strong>,
-    and moving to it would change what <code>Limiter.update_wall</code> publishes at zero
-    plasma current.</p></blockquote>
-
-    <p>So converging is a deliberate behaviour change with a known blast radius: one live
-    consumer at <code>nova/biot/limiter.py:56</code>, unpacking three values, with the
-    traced call commented out one line above. This is the only place the naming work touches
-    physics output, and it gets its own commit and its own test at zero plasma current — it
-    must not be resolved silently by whoever happens to convert the module.</p>
-
-    <p>Until it converges, the import-time fallback is a hazard in its own right: in a
-    JAX-free process the bare name would bind to a host peer of <strong>different
-    arity</strong>. Either converge first, or let the traced name be absent without JAX —
-    never fall back silently across a shape change.</p>
+    <section id="s7" class="section-landed">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-09</span><h2>§7 — Unified select and null contracts</h2></header>
+      <p class="landed-summary">
+        Host and traced wall/null routes now share four-value NaN-safe results and the
+        three-array <code>subnull</code> signature. A sign-preserving determinant sentinel
+        also repaired the tiny-negative divide-by-zero path found during audit.
+        Full record: <a href="/nova/evidence/archive/nova-jax-dissolution-landed#s7">§7 landed</a>;
+        83 independently run focused tests passed without warnings
+        (commits <code>7193988c</code>, <code>ba5845a0</code>; merge <code>714bebd2</code>).
+      </p>
+    </section>
 
     <h2 id="s8">§8 — Code that cannot have run</h2>
 
@@ -811,7 +763,7 @@ Done-when
   5. Commit SHAs, benchmark output paths, and the verdict table returned.</pre>
     <p class="r-fu-outcome">§4 landed — five CPU/H200 measurement bundles plus a canonical summary JSON/SVG are integrated by c3afd5a1 and the route-summary merge. Independent verification passed arithmetic, provenance, call-site census, source hashes, synchronized timing, XML, Ruff, compilation, and diff checks. The licensed actions are recorded in the measurement section of docs/evidence/archive/nova-jax-dissolution-landed.html; select requires fp64 before first trace, and stencil relocation must repair plateau acceptance and candidate overflow.</p>
     </article>
-<article class="r-fu" data-id="f-njd-004" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-09" data-recommends-skill="/reckon-ship nova-jax-dissolution §7" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-njd-004" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-09" data-recommends-skill="/reckon-ship nova-jax-dissolution §7" data-resolved-at="2026-08-09T08:51:23+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Converge the select return conventions onto the traced one, with a zero-current test</h4>
     <div class="r-fu-body"><p>The only place this plan touches published physics output. The host's own docstring already states the traced convention is the safer one and names exactly what converging would move — Limiter.update_wall at zero plasma current. It lands on its own commit so the behaviour change is never buried inside a structural merge.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -862,6 +814,7 @@ Done-when
   4. Suite green in the slow lane (-m &quot;slow or not slow&quot;).
   5. Commit SHAs, the before/after published value at zero current, and test output
      returned.</pre>
+    <p class="r-fu-outcome">§7 landed — host and traced wall/null routes now share four-value NaN-safe results and the canonical three-array subnull signature. The audit also found and repaired the inherited tiny-negative determinant floor, which could still produce an exact zero divisor. Commits 7193988c and ba5845a0 integrated by 714bebd2; independent sun_debug verification passed 83 focused tests in 19.54 s with no pytest warnings, plus Ruff, diff, scope, caller, and optional-JAX checks.</p>
     </article>
 <article class="r-fu" data-id="f-njd-005" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship" data-written-at="2026-08-09" data-recommends-skill="/reckon-ship nova-jax-dissolution §9" data-resolved-at="2026-08-09T07:07:06+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Split the interpolant hierarchy out of linalg/basis.py — it is not a pair</h4>

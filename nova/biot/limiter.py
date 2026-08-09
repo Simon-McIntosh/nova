@@ -23,7 +23,7 @@ class Limiter(Plot, Array):
         """Return jax backed null instance."""
         import jax.numpy as jnp  # noqa: PLC0415
 
-        from nova.jax.null import Null1D  # noqa: PLC0415
+        from nova.biot.null import Null1D  # noqa: PLC0415
 
         return Null1D(jnp.c_[self["x"], self["z"]])
 
@@ -32,9 +32,9 @@ class Limiter(Plot, Array):
         """Return jax backed poloidal flux wall target."""
         import jax.numpy as jnp  # noqa: PLC0415
 
-        from nova.jax.target import Target  # noqa: PLC0415
+        from nova.biot.target import FluxTarget  # noqa: PLC0415
 
-        return Target(
+        return FluxTarget(
             jnp.array(self.data["Psi"]),
             jnp.array(self.data["Psi_"]),
             self.null,

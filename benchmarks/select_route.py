@@ -734,7 +734,7 @@ def measure(label: str, expected_platform: str) -> dict[str, Any]:
     ]
 
     # This import is itself a live semantic input: stencil_nulls enables fp64
-    # before tracing, whereas nova.jax.null imports select directly and does not.
+    # before tracing, whereas nova.biot.null imports select directly and does not.
     from nova.jax.stencil_nulls import subnull as three_array_subnull
 
     if not jax.config.jax_enable_x64:

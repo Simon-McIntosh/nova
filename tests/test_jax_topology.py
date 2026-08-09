@@ -10,8 +10,10 @@ with skip_import("jax"):
     import jax
     import jax.numpy as jnp
 
-    from nova.jax.null import Null1D, Null2D
-    from nova.jax.topology import Topology
+    from nova.biot.null import Null1D, Null2D
+    from nova.biot.target import FluxTarget
+    from nova.equilibrium.forward_operator import ForwardFluxOperator
+    from nova.equilibrium.topology import Topology
 
 
 def _structured_grid(nx, nz, xlim=(0.5, 1.5), zlim=(-0.6, 0.6)):
@@ -34,7 +36,7 @@ def _flux_field(coordinate, xo=1.0, zo=0.0, xs=1.0, zs=-0.4, amp=1.0):
 
 @pytest.fixture(scope="module")
 def topology():
-    """Return a jax Topology on a synthetic structured grid + wall loop."""
+    """Return fixed-shape topology on a synthetic structured grid and wall loop."""
     coordinate, stencil, coordinate_stencil = _structured_grid(40, 40)
     grid = Null2D(
         jnp.asarray(coordinate),
@@ -94,6 +96,45 @@ def test_batched_primary_points_match_per_slice(topology):
     for i in range(len(scales)):
         o_i = topo.o_point(psi_grid[i], polarity)
         assert np.allclose(np.asarray(batch_o[i]), np.asarray(o_i), equal_nan=True)
+
+
+def test_flux_target_preserves_matrix_and_tree_contracts():
+    """The domain target evaluates both matrices and reconstructs as a pytree."""
+    null = Null1D(jnp.asarray([[1.0, -0.2], [1.1, 0.0], [1.0, 0.2]]))
+    source_target = jnp.asarray([[1.0, 2.0], [3.0, 4.0], [5.0, 6.0]])
+    plasma_target = jnp.asarray([[0.5, 1.5], [2.5, 3.5], [4.5, 5.5]])
+    target = FluxTarget(source_target, plasma_target, null)
+
+    np.testing.assert_allclose(target.external(jnp.asarray([2.0, -1.0])), [0, 2, 4])
+    np.testing.assert_allclose(
+        target.internal(jnp.asarray([1.0, 2.0])), [3.5, 9.5, 15.5]
+    )
+    leaves, structure = jax.tree_util.tree_flatten(target)
+    restored = jax.tree_util.tree_unflatten(structure, leaves)
+
+    assert restored.node_number == 3
+    np.testing.assert_array_equal(restored.coordinate, null.coordinate)
+    np.testing.assert_array_equal(restored.source_target, source_target)
+    np.testing.assert_array_equal(restored.plasma_target, plasma_target)
+
+
+def test_forward_operator_uses_domain_flux_targets():
+    """The differentiable consumer names its grid and wall capability."""
+    assert ForwardFluxOperator.__annotations__["grid"] is FluxTarget
+    assert ForwardFluxOperator.__annotations__["wall"] is FluxTarget
+
+
+def test_topology_tree_roundtrip_preserves_null_kernels(topology):
+    """Topology reconstruction retains the fixed grid and wall capacities."""
+    topo = topology[0]
+    leaves, structure = jax.tree_util.tree_flatten(topo)
+    restored = jax.tree_util.tree_unflatten(structure, leaves)
+
+    assert restored.grid.maxsize == topo.grid.maxsize
+    assert restored.grid.node_number == topo.grid.node_number
+    assert restored.wall.node_number == topo.wall.node_number
+    np.testing.assert_array_equal(restored.grid.coordinate, topo.grid.coordinate)
+    np.testing.assert_array_equal(restored.wall.coordinate, topo.wall.coordinate)
 
 
 if __name__ == "__main__":

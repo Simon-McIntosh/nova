@@ -1,18 +1,18 @@
-"""Manage jax EM wall and grid targets."""
+"""Evaluate electromagnetic coupling matrices on fixed flux targets."""
 
 from dataclasses import dataclass, field
 
 import jax
 import jax.numpy as jnp
 
-from nova.jax.null import Null1D, Null2D
+from nova.biot.null import Null1D, Null2D
 from nova.jax.tree_util import Pytree
 
 
 @dataclass
 @jax.tree_util.register_pytree_node_class
-class Target(Pytree):
-    """Manage EM coupling form external sources and plasma to target."""
+class FluxTarget(Pytree):
+    """Evaluate external-source and plasma coupling on a flux target."""
 
     source_target: jnp.ndarray = field(repr=False)
     plasma_target: jnp.ndarray = field(repr=False)

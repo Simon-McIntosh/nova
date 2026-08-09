@@ -365,13 +365,17 @@ def _read_ingredients(
     # arithmetic: a NaN numerator would poison the VJP of the /span_safe division
     # (0·NaN into span_safe, which depends on the axis), even though the value is
     # gated out downstream.  The x_valid flag still drops these slots.
-    xc_valid = xc["valid"] & jnp.isfinite(xc["psi"])
+    # The flood-adjacency and binding-flux band are independent connectivity
+    # evidence.  They may consume an unresolved native-degree candidate while
+    # preserving its state in the returned uncertainty metadata.
+    xc_valid = xc["present"] & jnp.isfinite(xc["psi"])
     psi_x_safe = jnp.where(xc_valid, xc["psi"], psi_axis)
     u_x = (psi_x_safe - psi_axis) / span_safe  # (_K_XCAND,), finite everywhere
     x_valid = xc_valid
     x_key = jnp.where(x_valid, jnp.abs(u_x - s_flood), jnp.inf)
     kbind = jnp.argmin(x_key)
     x_bind_valid = x_valid[kbind] & jnp.isfinite(x_key[kbind])
+    x_bind_state = jnp.where(x_bind_valid, xc["state"][kbind], 0)
     u_x_c = jnp.where(x_bind_valid, u_x[kbind], jnp.inf)
 
     return {
@@ -387,9 +391,14 @@ def _read_ingredients(
         "u_wall_c": u_wall_c,
         "u_x_c": u_x_c,
         "x_bind_valid": x_bind_valid,
+        "x_bind_state": x_bind_state,
         "u_x": u_x,
         "x_valid": x_valid,
         "xc": xc,
+        "x_candidate_count": xc["candidate_count"],
+        "x_overflow": xc["overflow"],
+        "x_discarded_score_upper_bound": xc["discarded_score_upper_bound"],
+        "x_unresolved_count": jnp.sum(xc["state"] == 1, dtype=jnp.int32),
     }
 
 
@@ -452,6 +461,7 @@ def boundary_read_jax(
     u_wall_c = ing["u_wall_c"]
     u_x_c = ing["u_x_c"]
     x_bind_valid = ing["x_bind_valid"]
+    x_bind_state = ing["x_bind_state"]
     u_x = ing["u_x"]
     x_valid = ing["x_valid"]
     xc = ing["xc"]
@@ -464,6 +474,7 @@ def boundary_read_jax(
     # is a SOFT continuous quantity (>0 diverted, <0 limited, ~0 marginal) so the
     # class is never a code-path switch.
     is_diverted = x_bind_valid & (u_x_c <= u_wall_c)
+    boundary_resolved = (~is_diverted) | (x_bind_state == 2)
     class_margin = u_wall_c - u_x_c
 
     psi_bnd = psi_axis + s_star * span
@@ -502,6 +513,7 @@ def boundary_read_jax(
     dedupe_d2 = (1.5 * jnp.maximum(rg[1] - rg[0], zg[1] - zg[0])) ** 2
     sel_r = jnp.full((N_XPOINT_SLOTS,), jnp.nan)
     sel_z = jnp.full((N_XPOINT_SLOTS,), jnp.nan)
+    sel_state = jnp.zeros((N_XPOINT_SLOTS,), dtype=xc["state"].dtype)
     n_taken = jnp.asarray(0)
     for m in range(_K_XCAND):
         d2 = (sel_r - xr_s[m]) ** 2 + (sel_z - xz_s[m]) ** 2  # NaN on empty slots
@@ -510,6 +522,9 @@ def boundary_read_jax(
         slot = jnp.clip(n_taken, 0, N_XPOINT_SLOTS - 1)
         sel_r = jnp.where(take_m, sel_r.at[slot].set(xr_s[m]), sel_r)
         sel_z = jnp.where(take_m, sel_z.at[slot].set(xz_s[m]), sel_z)
+        sel_state = jnp.where(
+            take_m, sel_state.at[slot].set(xc["state"][order[m]]), sel_state
+        )
         n_taken = n_taken + take_m.astype(n_taken.dtype)
     xset = jnp.stack([sel_r, sel_z], axis=1)  # (N_XPOINT_SLOTS, 2)
 
@@ -526,11 +541,22 @@ def boundary_read_jax(
         "axis_r": jnp.where(ax["found"], ax["r"], jnp.nan),
         "axis_z": jnp.where(ax["found"], ax["z"], jnp.nan),
         "axis_psi_sub": jnp.where(ax["found"], ax["psi"], jnp.nan),
+        "axis_state": ax["state"],
+        "axis_confidence": ax["confidence"],
+        "axis_candidate_count": ax["candidate_count"],
+        "axis_overflow": ax["overflow"],
         "xset": xset,
+        "xset_state": sel_state,
         "is_diverted": is_diverted,
+        "boundary_resolved": boundary_resolved,
+        "x_binding_state": x_bind_state,
         "class_margin": class_margin,
         "u_wall": u_wall_c,
         "u_xpoint": u_x_c,
+        "x_candidate_count": ing["x_candidate_count"],
+        "x_overflow": ing["x_overflow"],
+        "x_discarded_score_upper_bound": ing["x_discarded_score_upper_bound"],
+        "x_unresolved_count": ing["x_unresolved_count"],
     }
 
 
@@ -662,6 +688,10 @@ def boundary_read_smooth_jax(
         "p_diverted": p_diverted,
         "u_wall": ing["u_wall_c"],
         "u_xpoint": ing["u_x_c"],
+        "x_candidate_count": ing["x_candidate_count"],
+        "x_overflow": ing["x_overflow"],
+        "x_discarded_score_upper_bound": ing["x_discarded_score_upper_bound"],
+        "x_unresolved_count": ing["x_unresolved_count"],
     }
 
 
@@ -776,6 +806,17 @@ class ConnectivityBoundary:
     xset: object  # np.ndarray (N_XPOINT_SLOTS, 2) NaN-padded emergent X-points [m]
     is_diverted: bool
     class_margin: float  # u_wall − u_xpoint (>0 diverted, <0 limited, ~0 marginal)
+    axis_state: int
+    axis_confidence: float
+    axis_candidate_count: int
+    axis_overflow: bool
+    x_candidate_count: int
+    x_overflow: bool
+    x_discarded_score_upper_bound: float
+    x_unresolved_count: int
+    xset_state: object
+    boundary_resolved: bool
+    x_binding_state: int
 
 
 def boundary_read(
@@ -851,6 +892,17 @@ def boundary_read(
         xset=np.asarray(out["xset"], dtype=np.float64),
         is_diverted=bool(out["is_diverted"]),
         class_margin=float(out["class_margin"]),
+        axis_state=int(out["axis_state"]),
+        axis_confidence=float(out["axis_confidence"]),
+        axis_candidate_count=int(out["axis_candidate_count"]),
+        axis_overflow=bool(out["axis_overflow"]),
+        x_candidate_count=int(out["x_candidate_count"]),
+        x_overflow=bool(out["x_overflow"]),
+        x_discarded_score_upper_bound=float(out["x_discarded_score_upper_bound"]),
+        x_unresolved_count=int(out["x_unresolved_count"]),
+        xset_state=np.asarray(out["xset_state"], dtype=np.int8),
+        boundary_resolved=bool(out["boundary_resolved"]),
+        x_binding_state=int(out["x_binding_state"]),
     )
 
 

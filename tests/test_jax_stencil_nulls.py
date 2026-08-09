@@ -17,6 +17,9 @@ with skip_import("jax"):
     import jax.numpy as jnp
 
     from nova.jax.stencil_nulls import (
+        STATE_RESOLVED,
+        STATE_UNRESOLVED,
+        critical_point_candidates_batch,
         magnetic_axis_subgrid,
         ring_sign_changes,
         xpoint_candidates,
@@ -102,6 +105,185 @@ def test_extra_mask_restricts_candidates():
     empty_mask = jnp.zeros(psi.shape, dtype=bool)
     xc_none = xpoint_candidates(psi, rg, zg, inside, k_slots=6, extra_mask=empty_mask)
     assert not np.asarray(xc_none["valid"]).any()
+
+
+def _periodic_field(resolution=61):
+    radial = np.linspace(0.5, 1.5, resolution)
+    vertical = np.linspace(-0.8, 0.8, resolution)
+    rr, zz = np.meshgrid(radial, vertical)
+    field = np.sin(8.0 * np.pi * (rr - 0.5)) * np.sin(8.0 * np.pi * (zz + 0.8) / 1.6)
+    return field, radial, vertical
+
+
+def test_native_degree_collapses_legacy_duplicates_and_reports_overflow():
+    field, radial, vertical = _periodic_field()
+    inside = jnp.ones(field.shape, dtype=bool)
+    legacy_raw = np.asarray(ring_sign_changes(jnp.asarray(field))) == 4
+    assert int(np.sum(legacy_raw)) == 99
+
+    result = xpoint_candidates(
+        jnp.asarray(field),
+        jnp.asarray(radial),
+        jnp.asarray(vertical),
+        inside,
+        k_slots=8,
+        material_dilate=0,
+        noise_sigma=0.0,
+    )
+    assert int(result["candidate_count"]) == 49
+    assert int(result["candidate_index_sum"]) == -49
+    assert int(result["domain_signed_index"]) == 15
+    assert bool(result["overflow"])
+    assert np.isfinite(float(result["discarded_score_upper_bound"]))
+    assert np.all(np.asarray(result["cluster_size"])[result["present"]] == 1)
+
+
+def test_plateau_is_absent_and_noise_candidates_remain_unresolved():
+    grid = jnp.linspace(-1.0, 1.0, 41)
+    inside = jnp.ones((41, 41), dtype=bool)
+    flat = magnetic_axis_subgrid(jnp.zeros((41, 41)), grid, grid, inside)
+    assert not bool(flat["found"])
+    assert not bool(flat["present"])
+
+    noise = np.random.default_rng(19).standard_normal((41, 41))
+    candidates = xpoint_candidates(
+        jnp.asarray(noise), grid, grid, inside, k_slots=32, noise_sigma=1.0
+    )
+    assert int(candidates["candidate_count"]) > 0
+    assert not np.asarray(candidates["resolved"]).any()
+    assert np.all(
+        np.asarray(candidates["state"])[np.asarray(candidates["present"])]
+        == STATE_UNRESOLVED
+    )
+
+
+def test_weak_native_candidate_is_retained_before_confidence_resolution():
+    coordinate = jnp.arange(-10.0, 11.0)
+    rr, zz = jnp.meshgrid(coordinate, coordinate)
+    inside = jnp.ones(rr.shape, dtype=bool)
+    weak = 0.005 * ((rr - 0.3) ** 2 - 0.8 * (zz + 0.2) ** 2)
+    result = xpoint_candidates(
+        weak,
+        coordinate,
+        coordinate,
+        inside,
+        k_slots=4,
+        material_dilate=0,
+        noise_sigma=0.01,
+    )
+    assert int(result["candidate_count"]) == 1
+    assert bool(result["present"][0])
+    assert int(result["state"][0]) == STATE_UNRESOLVED
+    assert int(result["native_signed_index"][0]) == -1
+
+
+def test_normalized_fp32_fit_is_stable_at_iter_scale_coordinates():
+    radial = np.linspace(6.18, 6.26, 41)
+    vertical = np.linspace(-0.04, 0.04, 41)
+    spacing = radial[1] - radial[0]
+    truth = np.array([6.2187, -0.0113])
+    rr, zz = np.meshgrid(radial, vertical)
+    field = ((rr - truth[0]) / spacing) ** 2 - 0.7 * ((zz - truth[1]) / spacing) ** 2
+    result = xpoint_candidates(
+        jnp.asarray(field, dtype=jnp.float32),
+        jnp.asarray(radial),
+        jnp.asarray(vertical),
+        jnp.ones(field.shape, dtype=bool),
+        k_slots=4,
+        material_dilate=0,
+        noise_sigma=0.0,
+    )
+    assert bool(result["resolved"][0])
+    error_cells = (
+        np.hypot(float(result["r"][0]) - truth[0], float(result["z"][0]) - truth[1])
+        / spacing
+    )
+    assert error_cells <= 0.02
+
+
+def test_batch_order_and_scalar_adapter_agree():
+    field, radial, vertical = _periodic_field(41)
+    fields = jnp.asarray(np.stack([field, 0.7 * field]))
+    inside = jnp.ones(field.shape, dtype=bool)
+    batched = critical_point_candidates_batch(
+        fields,
+        jnp.asarray(radial),
+        jnp.asarray(vertical),
+        inside,
+        k_slots=8,
+        material_dilate=0,
+        target_index=-1,
+        noise_sigma=0.0,
+    )
+    reversed_batch = critical_point_candidates_batch(
+        fields[::-1],
+        jnp.asarray(radial),
+        jnp.asarray(vertical),
+        inside,
+        k_slots=8,
+        material_dilate=0,
+        target_index=-1,
+        noise_sigma=0.0,
+    )
+    scalar = xpoint_candidates(
+        fields[0],
+        jnp.asarray(radial),
+        jnp.asarray(vertical),
+        inside,
+        k_slots=8,
+        material_dilate=0,
+        noise_sigma=0.0,
+    )
+    np.testing.assert_array_equal(
+        np.asarray(batched["source_cell"]),
+        np.asarray(reversed_batch["source_cell"])[::-1],
+    )
+    np.testing.assert_array_equal(
+        np.asarray(batched["source_cell"])[0], np.asarray(scalar["source_cell"])
+    )
+    np.testing.assert_allclose(
+        np.asarray(batched["r"])[0], np.asarray(scalar["r"]), equal_nan=True
+    )
+    assert np.all(
+        np.asarray(batched["state"])[np.asarray(batched["resolved"])] == STATE_RESOLVED
+    )
+
+
+def test_cpu_gpu_candidate_metadata_and_coordinates_match():
+    try:
+        gpu = jax.devices("gpu")[0]
+    except RuntimeError:
+        pytest.skip("no GPU device")
+    cpu = jax.devices("cpu")[0]
+    field, radial, vertical = _periodic_field(41)
+    inside = np.ones(field.shape, dtype=bool)
+
+    def run(device):
+        return xpoint_candidates(
+            jax.device_put(field, device),
+            jax.device_put(radial, device),
+            jax.device_put(vertical, device),
+            jax.device_put(inside, device),
+            k_slots=16,
+            material_dilate=0,
+            noise_sigma=0.0,
+        )
+
+    cpu_result = run(cpu)
+    gpu_result = run(gpu)
+    jax.block_until_ready((cpu_result, gpu_result))
+    for key in ("candidate_count", "overflow", "source_cell", "state"):
+        np.testing.assert_array_equal(
+            np.asarray(cpu_result[key]), np.asarray(gpu_result[key])
+        )
+    for key in ("r", "z"):
+        np.testing.assert_allclose(
+            np.asarray(cpu_result[key]),
+            np.asarray(gpu_result[key]),
+            atol=1.0e-10,
+            rtol=0.0,
+            equal_nan=True,
+        )
 
 
 if __name__ == "__main__":

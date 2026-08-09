@@ -125,6 +125,17 @@
   </tbody></table>
   <p>The <a href="/nova/figures/jax-dissolution/fieldnull_gpu_throughput.json">throughput JSON</a> and <code>benchmarks/fieldnull_gpu_throughput.py</code> were integrated at <code>b84ac53a</code>. The production candidate must still replace placeholder confidence/index values with the measured native-degree, persistence, tri-state, and overflow semantics before its throughput is scientifically licensed.</p>
 
+  <h2>Null and topology domain relocation</h2>
+  <p>The fixed-shape null stack now lives with the domains it implements. The zero-caller traced <code>FieldNull</code> wrapper was deleted without a compatibility shim; the eager adaptive <code>nova.biot.fieldnull.FieldNull</code> remains the host API.</p>
+  <table><thead><tr><th>Capability</th><th>Landed location</th><th>Verification</th></tr></thead><tbody>
+    <tr><td><code>Null1D</code>, <code>Null2D</code></td><td><code>nova.biot.null</code></td><td>Fixed-shape numerical bodies and pytree structure preserved.</td></tr>
+    <tr><td>Matrix flux evaluator</td><td><code>nova.biot.target.FluxTarget</code></td><td>Capability name distinguishes it from the unrelated geometry <code>Target</code>.</td></tr>
+    <tr><td><code>Topology</code></td><td><code>nova.equilibrium.topology</code></td><td>Static capacities and numerical body preserved.</td></tr>
+    <tr><td>Retired technology routes</td><td><code>nova.jax.fieldnull</code>, <code>nova.jax.null</code>, <code>nova.jax.target</code>, <code>nova.jax.topology</code> removed</td><td>AST census found zero executable imports or re-export shims.</td></tr>
+    <tr><td>Independent gate</td><td>100 focused tests passed in 96.11 s on <code>sun_debug</code></td><td>Ruff, formatting, bytecode compilation, full-range diff, naming, optional-JAX imports, and broken-JAX propagation passed.</td></tr>
+  </tbody></table>
+  <p>The relocation was integrated at <code>b1e1e530</code>. Historical benchmark provenance remains explicit: retired wrapper rows are unavailable rather than carrying a fabricated post-deletion timing.</p>
+
   <h2>What is next</h2>
-  <p>Complete the weak-null/noise, reduced-precision, and GPU-throughput audits; implement their combined detector and batch-path repair; then execute only the relocations, collapses, and deletions licensed by the measured matrix. This cumulative record will receive the repair, conversion, and closure evidence.</p>
+  <p>Complete and independently verify the combined native-degree, multiscale-confidence, normalized-fp32, device-resident FieldNull repair. Then finish the fixed-point, connectivity, and select domain relocations licensed by the measured matrix. This cumulative record will receive those implementation and closure results.</p>
 </main></body></html>

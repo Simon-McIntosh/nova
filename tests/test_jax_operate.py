@@ -116,7 +116,7 @@ def test_traced_update_turns_matches_selected_adapter(cached_plasmagrid):
     """The pure traced turn update agrees with the selected traced adapter."""
     pg = cached_plasmagrid
     selected_operator = pg.operator["Psi"]
-    plasma_nturn = jnp.asarray(selected_operator.plasma_nturn)
+    plasma_nturn = jnp.asarray(selected_operator.plasma_nturn, dtype=jnp.float32)
 
     coupling = Operators(pg.data)["Psi"]
     traced_source_target = np.asarray(coupling.update_plasma_turns(plasma_nturn))

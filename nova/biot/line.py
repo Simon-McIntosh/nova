@@ -10,6 +10,17 @@ import numpy as np
 from nova.biot.matrix import Matrix
 
 
+def _asinh_ratio(magnitude, radius):
+    """Return ``asinh(magnitude / radius)`` without forming a huge ratio."""
+    result = np.empty_like(magnitude)
+    direct = magnitude <= radius
+    result[direct] = np.arcsinh(magnitude[direct] / radius[direct])
+    result[~direct] = np.log(
+        magnitude[~direct] + np.hypot(magnitude[~direct], radius[~direct])
+    ) - np.log(radius[~direct])
+    return result
+
+
 @dataclass
 class Line(Matrix):
     """
@@ -88,18 +99,59 @@ class Line(Matrix):
         """Return the stable definite local vector-potential coefficient."""
         radius = self.a2[0]
         first, second = self.wi
-        first_distance, second_distance = self.ri
-        exterior_axis = (radius == 0.0) & (first * second > 0.0)
-        singular_axis = (radius == 0.0) & ~exterior_axis
-        ordinary = radius != 0.0
+        same_sign = ((first > 0.0) & (second > 0.0)) | ((first < 0.0) & (second < 0.0))
+        exterior_axis = (radius == 0.0) & same_sign
+        singular_axis = (radius == 0.0) & ~same_sign
+        same_sign_off_axis = (radius != 0.0) & same_sign
+        crossing_off_axis = (radius != 0.0) & ~same_sign
 
         difference = np.empty(self.shape, dtype=np.float64)
-        difference[ordinary] = 2.0 * np.arctanh(
-            (second[ordinary] - first[ordinary])
-            / (first_distance[ordinary] + second_distance[ordinary])
+        scale = np.maximum.reduce([radius, np.abs(first), np.abs(second)])
+        normalized_radius = radius / scale
+        normalized_first = first / scale
+        normalized_second = second / scale
+        normalized_first_distance = np.hypot(normalized_radius, normalized_first)
+        normalized_second_distance = np.hypot(normalized_radius, normalized_second)
+
+        argument = np.zeros(self.shape, dtype=np.float64)
+        argument[same_sign_off_axis] = (
+            normalized_second[same_sign_off_axis] - normalized_first[same_sign_off_axis]
+        ) / (
+            normalized_first_distance[same_sign_off_axis]
+            + normalized_second_distance[same_sign_off_axis]
         )
-        difference[exterior_axis] = np.sign(first[exterior_axis]) * np.log(
-            np.abs(second[exterior_axis] / first[exterior_axis])
+        direct = same_sign_off_axis & (np.abs(argument) <= 0.5)
+        rationalized = same_sign_off_axis & ~direct
+        difference[direct] = 2.0 * np.arctanh(argument[direct])
+
+        first_magnitude = np.abs(normalized_first[rationalized])
+        second_magnitude = np.abs(normalized_second[rationalized])
+        distance_sum = (
+            normalized_first_distance[rationalized]
+            + normalized_second_distance[rationalized]
+        )
+        magnitude_difference = (second_magnitude - first_magnitude) * (
+            1.0 + (second_magnitude + first_magnitude) / distance_sum
+        )
+        difference[rationalized] = np.sign(first[rationalized]) * np.log1p(
+            magnitude_difference
+            / (normalized_first_distance[rationalized] + first_magnitude)
+        )
+        difference[crossing_off_axis] = np.sign(
+            normalized_second[crossing_off_axis] - normalized_first[crossing_off_axis]
+        ) * (
+            _asinh_ratio(
+                np.abs(normalized_second[crossing_off_axis]),
+                normalized_radius[crossing_off_axis],
+            )
+            + _asinh_ratio(
+                np.abs(normalized_first[crossing_off_axis]),
+                normalized_radius[crossing_off_axis],
+            )
+        )
+        difference[exterior_axis] = np.sign(first[exterior_axis]) * (
+            np.log(np.abs(normalized_second[exterior_axis]))
+            - np.log(np.abs(normalized_first[exterior_axis]))
         )
         difference[singular_axis] = np.inf
         return np.stack([np.zeros(self.shape), difference])
@@ -119,28 +171,41 @@ class Line(Matrix):
         """Return the endpoint field bracket with its exterior-axis limit."""
         radius = self.a2[0]
         first, second = self.wi
-        first_distance, second_distance = self.ri
-        same_sign = first * second > 0.0
+        same_sign = ((first > 0.0) & (second > 0.0)) | ((first < 0.0) & (second < 0.0))
         singular_axis = (radius == 0.0) & ~same_sign
         literal = ~same_sign & ~singular_axis
 
+        scale = np.maximum.reduce([radius, np.abs(first), np.abs(second)])
+        normalized_radius = radius / scale
+        normalized_first = first / scale
+        normalized_second = second / scale
+        first_distance = np.hypot(normalized_radius, normalized_first)
+        second_distance = np.hypot(normalized_radius, normalized_second)
+
         coefficient = np.empty(self.shape, dtype=np.float64)
-        coefficient[same_sign] = (
-            (second[same_sign] - first[same_sign])
-            * (second[same_sign] + first[same_sign])
+        dimensionless = np.empty(self.shape, dtype=np.float64)
+        dimensionless[same_sign] = (
+            (normalized_second[same_sign] - normalized_first[same_sign])
+            * (normalized_second[same_sign] + normalized_first[same_sign])
             / (
                 first_distance[same_sign]
                 * second_distance[same_sign]
                 * (
-                    second[same_sign] * first_distance[same_sign]
-                    + first[same_sign] * second_distance[same_sign]
+                    normalized_second[same_sign] * first_distance[same_sign]
+                    + normalized_first[same_sign] * second_distance[same_sign]
                 )
             )
         )
-        coefficient[literal] = (
-            second[literal] / second_distance[literal]
-            - first[literal] / first_distance[literal]
-        ) / radius[literal] ** 2
+        dimensionless[literal] = (
+            (
+                normalized_second[literal] / second_distance[literal]
+                - normalized_first[literal] / first_distance[literal]
+            )
+            / normalized_radius[literal]
+            / normalized_radius[literal]
+        )
+        live = ~singular_axis
+        coefficient[live] = dimensionless[live] / scale[live] / scale[live]
         coefficient[singular_axis] = np.nan
         return coefficient
 

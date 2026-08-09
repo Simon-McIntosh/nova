@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from decimal import Decimal, localcontext
 from functools import cached_property
 from itertools import product
 from numpy import allclose
@@ -429,6 +430,44 @@ def _line_element(start, end, targets):
     return Line(source, target, turns=[False, False], reduce=[False, False])
 
 
+def _decimal_asinh_ratio(value: float, radius: float) -> Decimal:
+    """Return ``asinh(value / radius)`` from 100-digit Decimal operations."""
+    value = Decimal.from_float(value)
+    radius = Decimal.from_float(radius)
+    magnitude = abs(value)
+    result = (magnitude + (magnitude * magnitude + radius * radius).sqrt()).ln()
+    result -= radius.ln()
+    return result.copy_sign(value)
+
+
+def _decimal_line_potential(radius: float, first: float, second: float) -> float:
+    """Return the unnormalised endpoint potential bracket at high precision."""
+    with localcontext() as context:
+        context.prec = 100
+        return float(
+            _decimal_asinh_ratio(second, radius) - _decimal_asinh_ratio(first, radius)
+        )
+
+
+def _decimal_line_field(radius: float, first: float, second: float) -> float:
+    """Return the transverse endpoint field row at high precision."""
+    with localcontext() as context:
+        context.prec = 100
+        radius_decimal = Decimal.from_float(radius)
+        first_decimal = Decimal.from_float(first)
+        second_decimal = Decimal.from_float(second)
+        first_distance = (
+            radius_decimal * radius_decimal + first_decimal * first_decimal
+        ).sqrt()
+        second_distance = (
+            radius_decimal * radius_decimal + second_decimal * second_decimal
+        ).sqrt()
+        bracket = (
+            second_decimal / second_distance - first_decimal / first_distance
+        ) / (radius_decimal * radius_decimal)
+        return float(abs(radius_decimal * bracket))
+
+
 def test_line_exterior_axis_has_the_finite_logarithmic_limit():
     """Exterior collinear targets have finite potential and exactly zero field."""
     line = _line_element([0, 0, -1], [0, 0, 1], [[0, 0, 3], [0, 0, -4]])
@@ -452,6 +491,50 @@ def test_line_interior_and_endpoint_targets_keep_the_filament_singularity():
     assert np.all(np.isinf(potential))
     assert np.all(np.isnan(field_x))
     assert np.all(np.isnan(field_y))
+
+
+@pytest.mark.parametrize("distance_ratio", [1.5e-8, 2.0e-8, 1.0e-6])
+@pytest.mark.parametrize("scale", [1.0e-6, 1.0e6])
+@pytest.mark.parametrize("reverse", [False, True])
+def test_line_near_interior_potential_matches_decimal_at_every_orientation(
+    distance_ratio, scale, reverse
+):
+    """An off-line interior target stays finite when the atanh ratio rounds to one."""
+    start = np.array([0.0, 0.0, -scale])
+    end = np.array([0.0, 0.0, scale])
+    if reverse:
+        start, end = end, start
+    line = _line_element(start, end, [[scale * distance_ratio, 0.0, 0.0]])
+    radius = float(line.a2[0, 0, 0])
+    first = float(line.wi[0, 0, 0])
+    second = float(line.wi[1, 0, 0])
+    expected = _decimal_line_potential(radius, first, second)
+
+    with np.errstate(divide="raise", invalid="raise", over="raise", under="ignore"):
+        coefficient = float(line._Az_hat[1, 0, 0])
+        vector = np.asarray(line.Avector[:, 0], dtype=np.float64)
+    direction = (end - start) / np.linalg.norm(end - start)
+    assert coefficient == pytest.approx(expected, rel=3e-15)
+    np.testing.assert_allclose(
+        vector, direction[np.newaxis] * expected / (4.0 * np.pi), rtol=3e-15
+    )
+
+
+@pytest.mark.parametrize("scale", [1.0e-90, 1.0e-6, 1.0, 1.0e6, 1.0e80])
+def test_line_field_normalisation_preserves_extreme_geometric_scales(scale):
+    """Dimensionless endpoint algebra avoids intermediate overflow and underflow."""
+    line = _line_element(
+        [0.0, 0.0, -4.0 * scale],
+        [0.0, 0.0, -2.0 * scale],
+        [[0.3 * scale, 0.0, 0.0]],
+    )
+    radius = float(line.a2[0, 0, 0])
+    first = float(line.wi[0, 0, 0])
+    second = float(line.wi[1, 0, 0])
+    expected = _decimal_line_field(radius, first, second)
+    with np.errstate(divide="raise", invalid="raise", over="raise", under="ignore"):
+        got = abs(float(line._By_hat[1, 0, 0]))
+    assert got == pytest.approx(expected, rel=8e-15)
 
 
 @pytest.mark.parametrize(

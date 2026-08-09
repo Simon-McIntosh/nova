@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-08T23:50:12",
+  "updated": "2026-08-09T07:30:58",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -328,6 +328,19 @@
                 "verification": "strict"
               }
             }
+          },
+          {
+            "slug": "biot-element-conditioning",
+            "why_now": "Three accuracy losses are already measured and one raises a warning in ordinary runs: the K-E bracket loses digits at small k^2 on BOTH special-function routes, so the arrangement owns it rather than the library; the B_R bracket forms inf+(-inf) at the coincident limit and masks the NaN; and a 4.3e-4 self-inductance residual common to every source route is the target rule, not any element. The arc reduction already had this treatment; nothing else has. Sequenced after the directory reorg so the audit sweeps files in their final homes.",
+            "done_when": "The two seeded bracket faults fixed by rearrangement with tests pinning the regimes that exposed them and the greens warning gone; every element in the Solve registry carries a recorded worst-regime accuracy figure against an independent arbiter with a test holding it; no element computes a NaN it then selects away; the source-route default and the target-side integration rule both locked on the audit's numbers.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
           }
         ],
         "starts": "2026-08-10",
@@ -458,6 +471,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 22
+    "_version": 23
   }
 }

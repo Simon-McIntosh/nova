@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="biot-element-conditioning">
+  <meta name="plan-title" content="Conditioning Audit of Every Biot Element">
+  <meta name="plan-summary" content="Audit each biot element for catastrophic cancellation and accuracy loss, give every one the treatment the arc reduction already had, and settle the source-side route and target-side integration rule on measurement">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="L">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-sprint" content="S7">
+  <meta name="plan-depends-on" content="nova-jax-dissolution">
+  <title>Conditioning Audit of Every Biot Element | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-09">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Why: three measured losses, and one that raises a warning</h2>
+
+    <p>The arc reduction has already had this treatment once — its two residual terms
+    wanting opposite by-parts constants were found and fixed by working the algebra
+    rather than by adding nodes. Nothing equivalent has been done for the rest of the
+    element set, and the evidence says at least three sites are losing digits now.</p>
+
+    <p><strong>The small-<code>k²</code> bracket, measured 2026-08-08.</strong>
+    <code>K − E</code> is a difference of two numbers both near <code>π/2</code> whose
+    value is of order <code>k²</code>. A target near the axis or many ring radii away
+    therefore loses digits at a rate set by the arrangement, not by where <code>K</code>
+    and <code>E</code> came from: the Cephes route and the Bulirsch descent stand
+    <em>together</em> at 1e-3 of the field scale by <code>k² ~ 1e-9</code>. Changing the
+    special function cannot help; splitting the pole off the bracket can.</p>
+
+    <p><strong>The same file already knows the technique.</strong>
+    <code>nova/biot/greens.py:210-214</code> carries a comment doing exactly this for the
+    <em>other</em> bracket — "<code>a² − R² − dz²</code> is <code>−d² + 2a(a − R)</code>
+    and <code>a² + R² + dz²</code> is <code>d² + 2aR</code>, both exact, and what is left
+    over <code>d²</code> is the divergence itself". The method is established in the
+    codebase; it has simply not been carried across every bracket.</p>
+
+    <p><strong>A live warning at <code>greens.py:220</code>.</strong> The
+    <code>B_R</code> bracket <code>(big_e − big_k + 2·ar·r/gap·big_e)</code> raises
+    <code>RuntimeWarning: invalid value encountered in add</code> — an
+    <code>inf + (−inf)</code> as <code>gap → 0</code> at the coincident limit. The result
+    is masked afterwards by <code>np.where(r &lt; _R_FLOOR, 0.0, br_full)</code>, so the
+    warning is not obviously wrong output; but computing a NaN and selecting it away is
+    the pattern that hides a real conditioning problem, and it fires in ordinary test
+    runs and benchmark sweeps.</p>
+
+    <p><strong>A residual every route shares.</strong> Across every source-side route
+    measured — filament, exact polygon, corner rule, banded — the reduced
+    <em>self</em>-inductance sits at the same 4.32e-04 from the double integral. A number
+    common to all four is not a property of any of them: it is the target frame's own
+    subdivision residual, and §4 is where it is addressed.</p>
+
+    <figure>
+      <svg viewBox="0 0 880 250" role="img" style="max-width:100%;height:auto;font-family:system-ui">
+        <text x="440" y="20" text-anchor="middle" font-size="14" font-weight="600" fill="#111">Where accuracy is lost, and whether the element or the arrangement owns it</text>
+
+        <line x1="60" y1="210" x2="840" y2="210" stroke="#333" stroke-width="1"/>
+        <text x="450" y="238" text-anchor="middle" font-size="12" fill="#555">relative error contributed</text>
+
+        <g font-size="12" fill="#111">
+          <text x="200" y="58" text-anchor="end">K − E bracket at k² ~ 1e-9</text>
+          <rect x="210" y="46" width="430" height="15" fill="#b00" fill-opacity="0.12" stroke="#b00" stroke-width="1"/>
+          <text x="648" y="58" font-size="11" fill="#b00">1e-3 — the ARRANGEMENT; both routes lose it together</text>
+
+          <text x="200" y="90" text-anchor="end">banded lane mutual (machine)</text>
+          <rect x="210" y="78" width="120" height="15" fill="none" stroke="#555" stroke-width="1"/>
+          <text x="338" y="90" font-size="11" fill="#555">4.5e-3 filament / 7.4e-5 section — the ELEMENT</text>
+
+          <text x="200" y="122" text-anchor="end">self-inductance, every route</text>
+          <rect x="210" y="110" width="215" height="15" fill="#b60" fill-opacity="0.12" stroke="#b60" stroke-width="1"/>
+          <text x="433" y="122" font-size="11" fill="#b60">4.3e-4 — the TARGET RULE, shared by all four (§4)</text>
+
+          <text x="200" y="154" text-anchor="end">corner rule vs polygon kernel</text>
+          <rect x="210" y="142" width="12" height="15" fill="none" stroke="#0a6" stroke-width="1.2"/>
+          <text x="230" y="154" font-size="11" fill="#0a6">1.3e-10 — agreement; nothing to fix</text>
+
+          <text x="200" y="186" text-anchor="end">B_R bracket at gap → 0</text>
+          <rect x="210" y="174" width="430" height="15" fill="#b00" fill-opacity="0.12" stroke="#b00" stroke-width="1"/>
+          <text x="648" y="186" font-size="11" fill="#b00">NaN, then masked — unquantified</text>
+        </g>
+      </svg>
+      <figcaption>Two of the five are the element's own doing and one is already clean.
+      The two red rows are arrangement faults — the same class the arc reduction fixed by
+      algebra — and they are what this plan is for.</figcaption>
+    </figure>
+
+    <h2 id="s2">§2 — The audit: every element, one method</h2>
+
+    <p>Each element in <code>nova/biot/</code> that evaluates a kernel gets the same
+    pass. The list is the <code>Solve.generator</code> registry and what it reaches:
+    <code>arc</code>, <code>beam</code>, <code>bow</code>, <code>circle</code>,
+    <code>cylinder</code>, <code>line</code>, <code>polybeam</code>,
+    <code>polybow</code>, <code>polysection</code>, and the kernels beneath them —
+    <code>greens</code>, <code>polygon</code>, <code>polygonanalytic</code>,
+    <code>completeelliptic</code>, <code>incompleteelliptic</code>,
+    <code>incompletemoments</code>, <code>symmetricelliptic</code>,
+    <code>elliptic</code>, <code>zeta</code>, <code>arcamplitude</code>,
+    <code>toroidalharmonic</code>, <code>sectionaverage</code>,
+    <code>bandedcoupling</code>.</p>
+
+    <p>For each: identify every difference of like-sized quantities and every division by
+    a quantity that can approach zero; state the limit in which it degenerates; measure
+    the achieved accuracy against an arbiter the element does not share a code path with
+    (extended precision, an independent quadrature, or an analytic limit); and where a
+    loss is found, fix it by rearrangement — splitting the pole off, factoring the
+    difference, or a series in the small parameter — rather than by adding nodes. Adding
+    nodes to a cancelling bracket buys nothing, which is why this is algebra work.</p>
+
+    <p>Every element ends the pass with a test pinning its accuracy in its worst regime,
+    and no element is allowed to compute a NaN it then selects away: a branch that cannot
+    be evaluated is guarded before evaluation, not after.</p>
+
+    <h2 id="s3">§3 — Settle the source-side route on the measurement</h2>
+
+    <p>The coil section promotion (2026-08-08) measured four source-side routes on an
+    ITER pair and a twelve-coil machine. <code>polysection</code> shipped as the default
+    on accuracy and on two properties the filament lane lacks — reduced terms invariant
+    under mesh refinement to 1e-9 where the banded lane drifts above 1e-4, and
+    reciprocity held to 7.6e-5 where the filament lane breaks it by 2.6e-3.</p>
+
+    <p>But exact-everywhere was not measured as the best point on the curve.
+    <code>polysection-banded</code> lands 6.08e-06 from the exact lane — three orders
+    inside the filament lane's error — at 2.64 s against 9.52 s for exact on the machine
+    grid, only 1.7× the filament route. The remaining options are
+    <code>standoff</code> (a two-way exact/filament split, which the module's own
+    docstring notes does not converge for a full ring at any standoff),
+    <code>quadrature</code> order reduction, and the <code>cylinder</code> corner rule,
+    which already serves the undivided axis-aligned rectangle exactly and cheaply.</p>
+
+    <p>The decision below settles which is the shipped default, on the audit's numbers
+    rather than on this one sweep.</p>
+
+    <h2 id="s4">§4 — The target-side rule: what <code>dcoil</code> is actually for</h2>
+
+    <p>With the section integrated on every pair, the source side no longer depends on
+    the mesh: a tiling of sub-sections sums to the whole section's integral identically,
+    which is why the reduced coil-coil terms hold 1e-9 across <code>dcoil</code> −2 to
+    −20. What <code>dcoil</code> still buys is the <strong>target</strong>-side area
+    average — the flux a conductor links is the mean over the area its current occupies,
+    and the force it feels is set by the mean field there. Uniform subdivision is a
+    midpoint rule for that average, and it converges like one.</p>
+
+    <p><strong>The better rule already exists in the package and is not wired into the
+    operator.</strong> <code>nova/biot/sectionaverage.py</code> supplies exactly this: a
+    tensor-product Gauss-Legendre rule on a signed fan decomposition of the section, nine
+    nodes a triangle — 36 nodes for a rectangular filament, 54 for a hexagonal one. It is
+    currently used only as the <em>reference</em> the elements are measured against.
+    Reaching the same average through 36 Gauss nodes instead of hundreds of uniformly
+    subdivided filaments is the cheaper and the more accurate route, and it would decouple
+    accuracy from <code>dcoil</code> in the same way integrating the section decoupled the
+    source side.</p>
+
+    <p>That is a measurement, not an assumption: the rule's convergence has to be shown
+    against the same double-integral arbiter, on sections that are not axis-aligned
+    rectangles (the hexagonal plasma cell and the wall-clipped one are the hard cases),
+    and the cost compared at equal accuracy. <code>dcoil</code> keeps whatever role
+    survives — it still sets where force is resolved <em>within</em> a coil, which is a
+    different question from what the coil links.</p>
+
+    <h2 id="s5">§5 — The GPU route does not currently reach this kernel</h2>
+
+    <p>Worth stating plainly because it bears on the cost argument. The tiled assembly in
+    <code>nova/biot/tiledassembly.py</code> carries the device path — batched evaluation,
+    a compilation cache, and <code>devices</code> splitting pair blocks across local
+    devices — but its <code>geometry</code> is <code>"ring"</code> or <code>"arc"</code>
+    only, and nothing in the element registry routes through it; its sole importer in
+    <code>nova/</code> is the geometry-Jacobian helper. So promoting the polygon section
+    did not move coil assembly onto a GPU, because no GPU route to that kernel exists
+    yet.</p>
+
+    <p>The kernel itself is not the obstacle: <code>polygon.traced_pack_section</code> is
+    <code>xp</code>-threaded and a geometry Jacobian already reaches through it. Whether
+    to extend the tiled assembly to polygon sections is a scoping question this audit
+    should answer with a cost number, since it changes what the exact route costs and
+    therefore what §3 should default to.</p>
+
+    <p>Against that, the cost is paid once. Verified 2026-08-08: a solved operator
+    reloads from its netCDF cache in 0.199 s against 36.4 s to build, a 183× saving, with
+    the mutual inductance bit-identical across the round trip. For a static machine the
+    exact route is a one-time build; the routes only separate for work that rebuilds
+    operators repeatedly — a geometry solve, a mesh sweep, or a per-pulse wall.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="source-route-default" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Which source-side route ships as the default for a coil
+        section, given banded lands 6e-06 from exact at a fraction of the cost?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="exact-everywhere">exact everywhere, as shipped today</button>
+      <button class="r-opt" data-value="banded">the three-band scheme</button>
+      <button class="r-opt" data-value="banded-after-gpu">decide after the tiled assembly reaches the polygon kernel</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="target-rule" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Does the operator&#x27;s target-side area average move from uniform
+        subdivision onto the section quadrature that already exists?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="section-quadrature">move to the Gauss fan rule in sectionaverage</button>
+      <button class="r-opt" data-value="keep-subdivision">keep uniform subdivision</button>
+      <button class="r-opt" data-value="hybrid">quadrature for the linked flux, subdivision where force must resolve within a coil</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-bec-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-09" data-recommends-skill="/reckon-ship biot-element-conditioning §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Fix the two known bracket faults, then sweep the element set</h4>
+    <div class="r-fu-body"><p>Two sites are already identified with evidence: the <code>K &minus; E</code> bracket, where both special-function routes lose digits together at small <code>k&sup2;</code>, and the <code>B_R</code> bracket at <code>greens.py:220</code>, which forms <code>inf + (&minus;inf)</code> at the coincident limit and masks the NaN afterwards. Fix those two by the rearrangement the same file already documents for its sibling bracket, which establishes the method, then apply the pass to the rest of the registry.</p></div>
+    <pre class="r-fu-prompt">Project: nova
+Plan:    biot-element-conditioning (http://127.0.0.1:8765/nova/biot-element-conditioning.html)
+Section: §2, seeded by the two faults in §1
+Capability: orchestrator
+Requirements: deep reasoning, strict verification
+
+Context
+  The arc reduction already had this treatment -- two residual terms wanting
+  opposite by-parts constants, found by algebra rather than by adding nodes.
+  Nothing equivalent has been done for the rest of the element set, and three
+  losses are already measured.
+
+State to read  (CODE)
+  nova/biot/greens.py:205-224   the B_R bracket that raises, and the comment at
+                                :210-214 that does the pole split correctly for
+                                the SIBLING bracket -- this is the method
+  nova/biot/completeelliptic.py the Bulirsch descent and its traced contract
+  benchmarks/greens_elliptic_route.py  the measured small-k^2 result: both
+                                routes stand together at 1e-3 of field scale by
+                                k^2 ~ 1e-9, so the special function is not the cause
+  nova/biot/solve.py            the generator registry -- the element list to sweep
+  nova/biot/sectionaverage.py   the independent double-integral arbiter
+
+Scope locks / constraints
+  Fix by REARRANGEMENT -- split the pole off, factor the difference, series in
+  the small parameter. Adding quadrature nodes to a cancelling bracket buys
+  nothing and is not a fix.
+  Every measurement uses an arbiter the element shares no code path with:
+  extended precision, an independent quadrature, or an analytic limit.
+  No element may compute a NaN it then selects away -- guard the branch before
+  evaluating it, not after.
+  Numerics must not silently move: any change to a shipped value is reported
+  with its magnitude, never absorbed into a tolerance.
+
+Done-when
+  1. The two seeded faults fixed by rearrangement, each with a test pinning the
+     regime that exposed it, and the greens warning gone from ordinary runs.
+  2. Every element in the registry has a recorded worst-regime accuracy figure
+     against an independent arbiter, and a test holding it.
+  3. Full suite green; findings that warrant their own fix are queued; followup
+     written and this one resolved.</pre>
+    </article>
+</section>
+
+  </main>
+</body>
+</html>

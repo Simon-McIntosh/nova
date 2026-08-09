@@ -7,8 +7,8 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="nova-jax-dissolution">
   <meta name="plan-title" content="Dissolve the JAX Directory into the Domain Packages">
-  <meta name="plan-summary" content="nova/jax is the package&#x27;s only technology-organised directory and holds a subset of its JAX code; measure each pair before it moves, then file it by domain with both implementations in one file under explicit traced_/host_ names, retire dependency-based naming repo-wide, and pin the traced path&#x27;s precision">
-  <meta name="plan-status" content="active">
+  <meta name="plan-summary" content="The technology-organised JAX namespace is dissolved into Nova&#x27;s domain packages; measured keep/collapse/delete/relocate dispositions, JAX-free imports, runtime-selectable precision, FieldNull robustness, and CPU/H200 validation are landed.">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="mid">
   <meta name="plan-effort" content="L">
   <meta name="plan-capability-version" content="1.0">
@@ -22,8 +22,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-09">
-<meta name="plan-version" content="44">
-<meta name="plan-impl" content="0.7777777777777778">
+<meta name="plan-version" content="49">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -372,11 +372,12 @@ except ImportError:  # jax extra absent
     <section id="s6" class="section-landed">
       <header><span class="badge badge-shipped">✓ landed 2026-08-09</span><h2>§6 — Precision is a policy, not an accident</h2></header>
       <p class="landed-summary">
-        Pinned the traced operator to order-independent fp32 and documented the measured
-        throughput exception. The 26-value reference stayed byte-identical: dtype float32,
-        maximum absolute regression 0.
-        Full record: <a href="/nova/evidence/archive/nova-jax-dissolution-landed#s5">§6 landed</a>
-        (commit <code>d2fc5bb6</code>).
+        Replaced import-order precision with one runtime contract: x64 capability is enabled
+        once, while each solver selects explicit fp32 or fp64 arrays before tracing. FieldNull
+        is auto-fp32; general Biot and equilibrium solves are auto-fp64 until an end-to-end
+        accelerator campaign licenses a narrower default.
+        Full record: <a href="/nova/evidence/archive/nova-jax-dissolution-landed#runtime-precision">§6 landed</a>
+        (commits <code>39c98f52</code>, <code>839f2359</code>).
       </p>
     </section>
 
@@ -392,12 +393,12 @@ except ImportError:  # jax extra absent
       </p>
     </section>
 
-    <h2 id="s8">§8 — Code that cannot have run</h2>
+    <header><span class="badge badge-shipped">✓ landed 2026-08-09</span><h2 id="s8">§8 — Code that cannot have run</h2></header>
 
-    <p class="note"><strong>Partial outcome.</strong> The operator portion landed first:
-    unused <code>Coupling.target</code>, <code>evaluate_external</code>, and the commented
-    SVD branches were removed in <code>dd293ea9</code>. The measured select and stencil
-    deletions remain open until their domain conversions land.</p>
+    <p class="landed-summary">All measured dead routes are removed without shims:
+    unused operator members and commented branches were deleted first; unreachable select
+    bisection, the zero-caller traced FieldNull wrapper, and unused connectivity materialisation
+    followed their licensed domain conversions. The retired executable-import census is zero.</p>
 
     <p>The survey found members that are unreachable, not merely unused. They are deleted
     before their concept is merged, so nothing dead inherits a promoted name:</p>
@@ -444,7 +445,11 @@ except ImportError:  # jax extra absent
       </p>
     </section>
 
-    <h2 id="s11">§11 — Sequencing and blast radius</h2>
+    <header><span class="badge badge-shipped">✓ landed 2026-08-09</span><h2 id="s11">§11 — Sequencing and blast radius</h2></header>
+    <p class="landed-summary">Every licensed conversion is integrated and pushed.
+    <code>nova/jax</code> retains only configuration, pytree support, and package metadata;
+    runtime precision is explicit; 5,024 repository tests and all 30 unique H200
+    operator/config tests pass. The sequence below is the retained execution record.</p>
 
     <p>Thirty-two files import <code>nova.jax.*</code>. Eleven touch only
     <code>config.enable_x64</code> — that module stays, so they never churn. Twenty-one
@@ -523,15 +528,15 @@ except ImportError:  # jax extra absent
       </p>
     <p class="r-dec-rat">Owner decision 2026-08-09: measure before merge. The tree holds three arrangements, not one: the xp-threaded single body across ~14 biot elliptic modules (no duplication, no divergence possible); the traced_ twins in greens and zeta whose duplication is justified by benchmark and semantics at greens.py:44-77; and the eleven nova/jax pairs, which have never been measured and in which three divergences accumulated plus at least one unreachable member (jax/select.py:50 bisect_2d assigns into a jnp.zeros array, which JAX rejects). Merging first would freeze eleven unjustified duplications into the domain packages and make them permanent. Each pair is measured on the model of benchmarks/greens_elliptic_route.py -- cost over the argument regime the call sites reach, accuracy against a reference neither route can be, and every semantic difference stated -- and lands in exactly one verdict: collapse to one xp-threaded body, keep both with the justification written into the module docstring, or delete the dead half. A pair that collapses needs no naming decision and no merge. Note the measurement can invert the usual assumption: greens measures the traced filament twin at 1.9-3.9x the host and the section twin at 1.2-1.6x, because the differentiable Bulirsch descent costs 6-50x the Cephes pair per element. Tracing buys GPU portability and autodiff, not universal speed.</p>
     </div>
-<div class="r-dec" data-key="precision-policy" data-choice="runtime-explicit" data-by="Simon McIntosh" data-when="2026-08-09T14:24:55+00:00">
+<div class="r-dec" data-key="precision-policy" data-choice="runtime-explicit" data-by="Simon McIntosh" data-when="2026-08-09T18:39:30+00:00">
     <p class="r-dec-q">The traced operator never calls enable_x64(), so the default path evaluates in single precision. Keep, fix, or pin?</p>
     <p class="r-dec-opts">
-      <button class="r-opt chosen" data-value="runtime-explicit">fp32 process defaults with explicit per-solver fp32/fp64 arrays and evidence-based auto resolution</button>
+      <button class="r-opt chosen" data-value="runtime-explicit">x64 capability once; explicit per-solver fp32/fp64 arrays with evidence-based auto resolution</button>
       <button class="r-opt" data-value="pinned-fp32">retain fp32 as the deliberate traced default, pinned by test and made order-independent</button>
       <button class="r-opt" data-value="promote-fp64">add enable_x64() so the operator matches the other twelve modules</button>
       <button class="r-opt" data-value="leave-emergent">leave it as it is</button>
       </p>
-    <p class="r-dec-rat">Owner decision 2026-08-09: precision is a runtime solver/data contract, never an import side effect. The process keeps jax_enable_x64=False and enables explicit x64 dtypes once; each solver instance selects auto, float32, or float64 before arrays are constructed and traced, so fp32 and fp64 compiled variants coexist. Auto follows measured conditioning rather than device alone: normalized FieldNull/topology defaults to fp32 on CPU and GPU; general CPU equilibrium defaults to fp64; GPU equilibrium also remains fp64 until a dedicated end-to-end fp32 Grad-Shafranov validation passes. Compact physical origin/spacing metadata remains fp64 while qualified bulk fields and hot kernels use fp32. All enable_x64() imports are retired, and absolute-coordinate fp32 stationary fits are forbidden rather than accepted through wider tolerances.</p>
+    <p class="r-dec-rat">Precision is a runtime solver and data contract, not an import side effect or a device-name heuristic. configure_dtypes() enables ordinary JAX float64 capability once per process; it does not choose an array dtype. Every solver or operator resolves auto, float32, or float64 before constructing arrays, so dtype-specialized fp32 and fp64 executables coexist without configuration toggles. Normalized FieldNull topology resolves auto to fp32; general Biot, equilibrium, fixed-point, diffusion, tile, circuit, and zeta routes resolve auto to fp64 on CPU and GPU until an end-to-end fp32 free-boundary Grad-Shafranov campaign licenses a narrower default. Explicit float32 remains available for GPU batches, and compact physical origin and spacing metadata remain fp64. The attempted jax_enable_x64=False plus explicit-x64 ALLOW policy was rejected because a differentiated float64 incomplete-elliptic case differed from ordinary fp64 by 4.38e-10 absolute, about 7.45e-11 relative. All executable enable_x64() calls are retired; the capability is established centrally and no compatibility shim is retained.</p>
     </div>
 <div class="r-dec" data-key="return-convention" data-choice="converge-on-traced" data-by="Simon McIntosh" data-when="2026-08-09T06:30:00+00:00">
     <p class="r-dec-q">The host and traced halves of the select pair return different shapes and answer degenerate cases differently. Converge or preserve?</p>
@@ -861,7 +866,7 @@ Done-when
   5. Commit SHAs and test output returned.</pre>
     <p class="r-fu-outcome">§9 landed — efde9b97 integrated by 66240aaf; interpolant hierarchy moved to nova/linalg/interpolant.py, design matrices remained independent, and independent verification passed 16 tests in 30.02 s with JAX-free import, Ruff, diff, and naming checks clean.</p>
     </article>
-<article class="r-fu" data-id="f-njd-006" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-09" data-recommends-skill="/reckon-ship nova-jax-dissolution §11" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-njd-006" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-09" data-recommends-skill="/reckon-ship nova-jax-dissolution §11" data-resolved-at="2026-08-09T18:39:30+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Execute every licensed domain conversion and retire dependency-named entry points</h4>
     <div class="r-fu-body"><p>After the select return policy lands, execute the measured dispositions: delete dead wrappers and adapters, colocate measured twins under mechanism names, relocate single implementations into their consuming domain, repair the two stencil defects exposed by measurement, and leave nova/jax containing only config.py and tree_util.py.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -883,6 +888,7 @@ Required work
 
 Verification
   Keep numerics identical except the separately landed §7 policy and the two explicitly measured stencil defect repairs. Add focused regression tests for every repair and path move, run affected slow-inclusive lanes once with full output capture, then run the complete slow-inclusive suite on a sun_debug allocation. Prove JAX-free imports remain intact. Return commit SHAs, exact changed paths, test logs, and confirmation that no moving nova.jax import remains.</pre>
+    <p class="r-fu-outcome">All licensed dispositions landed without compatibility shims. nova/jax now contains only package metadata, config.py, and tree_util.py; the executable retired-import census is zero. Runtime precision landed at 39c98f52 and the Biot operator completion at 839f2359. The exact focused CPU gate passed 1,328 tests with 16 skips; the final repository lane passed 5,024 with 121 expected skips; all 30 unique H200 operator/config tests passed. The strict select precision artifact at docs/figures/jax-dissolution/select_precision_contract.json passed with zero classification errors, 1.371e-7-cell worst automatic location error, and 3.576e-10 m maximum CPU/H200 coordinate delta. Full cumulative evidence is recorded in docs/evidence/archive/nova-jax-dissolution-landed.html.</p>
     </article>
 <article class="r-fu" data-id="f-njd-007" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-09" data-recommends-skill="/reckon-ship nova-jax-dissolution §11" data-resolved-at="2026-08-09T12:44:32+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Make null detection noise-robust and GPU-throughput capable</h4>
@@ -963,6 +969,9 @@ Done-when
 <div class="r-comment" data-section="_top" data-id="c-njd-fieldnull-production" data-who="reckon-ship" data-when="2026-08-09">
     <div class="r-comment-body"><p><strong>Production FieldNull repair:</strong> native unsmoothed degree now owns candidate existence, a frozen class-margin threshold controls resolution, same-root topology is certified without erasing weak evidence, normalized local fits remain differentiable, and fixed-capacity overflow is explicit. The exact smooth field produces 49 physical saddles rather than 99 raw raster representations. A no-retuning held-out bank resolved 384/384 true fields with zero extras and zero resolved candidates in 384 noise-only fields. Live B128/K8 throughput is 193.9 CPU versus 18,930 resident and 13,303 inclusive H200 fields/s. One H200 projects to 4.577 TB/hour resident but 3.216 TB/hour inclusive because transfers consume 29.73%; multi-GPU/archive throughput remains a qualified projection, not a measured end-to-end claim. Integrated and pushed at <code>be0b64ad</code>; cumulative evidence is at <code>docs/evidence/archive/nova-jax-dissolution-landed.html</code>.</p></div>
 </div>
+<div class="r-comment" data-section="_top" data-id="c-njd-closure" data-who="reckon-ship" data-when="2026-08-09">
+    <div class="r-comment-body"><p><strong>Closure:</strong> domain dissolution, defect repairs, optional-JAX boundaries, and runtime precision are complete and pushed. <code>nova/jax</code> retains only <code>config.py</code>, <code>tree_util.py</code>, and package metadata. CPU validation passed 5,024 tests with 121 expected skips; the H200 operator/config lane passed all 30 unique tests. The long-term 4.5 TB/hour MAST objective remains correctly scoped: the measured 97.65× resident and 69.00× inclusive GPU speedups are FieldNull topology extraction from already-computed 65×129 maps, not free-boundary Grad–Shafranov solves or archive I/O.</p></div>
+</div>
 <div class="r-comment" data-section="s11" data-id="fixed-point-relocation-landed" data-who="reckon-ship" data-when="2026-08-09">
     <div class="r-comment-body"><p>Fixed-point relocation landed at <code>58cccee3</code>: Picard, Anderson, and Newton–Krylov moved byte-identically to <code>nova.equilibrium.fixed_point</code> with no shim and zero production importers. Independent verification found a qualified pass; the preserved <code>sun_debug</code> lane passed 12/12, while Ruff receipts were process-attested rather than separately captured.</p><p><strong>Precision correction for the remaining select conversion:</strong> the later FieldNull audit supersedes the followup prompt’s global-x64 instruction. Preserve the measured index-native normalized fp32 contract and do not enable global x64.</p></div>
 </div>
@@ -971,6 +980,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s11" data-id="runtime-precision-contract" data-who="reckon-ship" data-when="2026-08-09">
     <div class="r-comment-body"><p><strong>Runtime precision contract:</strong> JAX keeps fp32 defaults while explicit fp64 arrays remain available in the same process. Precision is resolved on each solver before tracing, producing dtype-specialized executables without global toggling. Normalized FieldNull is auto-fp32; unvalidated equilibrium and Grad–Shafranov routes remain auto-fp64 on CPU and GPU until an end-to-end fp32 campaign licenses the accelerator default. Geometry metadata stays fp64. Import-time <code>enable_x64()</code> calls and absolute-coordinate fp32 fits are being removed.</p></div>
+</div>
+<div class="r-comment" data-section="s11" data-id="runtime-precision-final-correction" data-who="reckon-ship" data-when="2026-08-09">
+    <div class="r-comment-body"><p><strong>Final precision correction:</strong> this outcome supersedes the earlier interim notes that said not to enable global x64 or that removals were still in progress. The process now enables ordinary x64 capability exactly once through <code>configure_dtypes()</code>; solver objects choose explicit fp32 or fp64 arrays before tracing. No module calls <code>enable_x64()</code>, and no configuration is toggled around a solve.</p></div>
 </div>
 </section>
 </main>

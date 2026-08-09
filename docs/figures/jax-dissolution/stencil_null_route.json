@@ -1,0 +1,862 @@
+{
+  "format": "stencil-null-route",
+  "generated_at": "2026-08-09T07:10:02.712083+00:00",
+  "git_revision": "274112bc1c86fb0c0d2744901701f92a26b06f0c",
+  "command": "uv run python benchmarks/stencil_null_route.py --platforms cpu,gpu --require-gpu",
+  "call_sites": [
+    {
+      "nz": 17,
+      "nr": 17,
+      "cells": 289,
+      "source": "profile reconstruction test"
+    },
+    {
+      "nz": 61,
+      "nr": 61,
+      "cells": 3721,
+      "source": "batched connectivity contract"
+    },
+    {
+      "nz": 101,
+      "nr": 81,
+      "cells": 8181,
+      "source": "limited and stencil-null tests"
+    },
+    {
+      "nz": 141,
+      "nr": 101,
+      "cells": 14241,
+      "source": "diverted connectivity test"
+    },
+    {
+      "nz": 161,
+      "nr": 121,
+      "cells": 19481,
+      "source": "connectivity amplitude sweep"
+    }
+  ],
+  "inventory": [
+    {
+      "routine": "ring_sign_changes",
+      "reachability": "internal to magnetic_axis_subgrid and xpoint_candidates; directly tested",
+      "true_peer": "six-neighbour hexagonal classifiers in Null2D and host FieldNull",
+      "semantic_difference": "eight-neighbour rectangular raster versus six-neighbour structured or unstructured hex stencil",
+      "verdict": "KEEP BOTH",
+      "decision": "keep each geometry contract; relocate the rectangular routine with the connectivity domain"
+    },
+    {
+      "routine": "subnull",
+      "reachability": "stencil adapter is called only by _refine_at; the shared select fit is also called by Null2D",
+      "true_peer": "the same traced fit in nova.jax.select, reached through a stacked signature",
+      "semantic_difference": "signature only; arithmetic is already single-homed",
+      "verdict": "COLLAPSE",
+      "decision": "one traced three-array signature matching the host contract; adapt the stacked caller and delete the stencil adapter"
+    },
+    {
+      "routine": "magnetic_axis_subgrid",
+      "reachability": "one profile solve site and three connectivity sites",
+      "true_peer": "none; legacy locators return every local extremum and do not apply wall or flood-region selection",
+      "semantic_difference": "returns one deepest in-mask axis with fixed-shape device semantics",
+      "verdict": "SINGLE-IMPLEMENTATION RELOCATION",
+      "decision": "move intact to equilibrium connectivity; reject degenerate plateau fits before publishing found"
+    },
+    {
+      "routine": "xpoint_candidates",
+      "reachability": "one connectivity boundary site with eight slots; directly exercised by connectivity tests",
+      "true_peer": "none; legacy locators return unmasked local nulls with a different stencil",
+      "semantic_difference": "wall dilation, optional flux/flood mask, static slots, saddle recheck, masked-gradient fencing",
+      "verdict": "SINGLE-IMPLEMENTATION RELOCATION",
+      "decision": "move intact to equilibrium connectivity; preserve fixed slots and expose overflow or prove the upstream mask bounds it"
+    }
+  ],
+  "independent_truth": {
+    "extrema": [
+      [
+        1.007,
+        -0.2999999324786596
+      ],
+      [
+        1.007,
+        0.2999999324786596
+      ]
+    ],
+    "saddle": [
+      1.007,
+      0.0
+    ],
+    "gradient_norm_max": 1.9115864964623468E-15
+  },
+  "environments": [
+    {
+      "platform": "cpu",
+      "device": "cpu:0",
+      "device_kind": "cpu",
+      "jax": "0.11.0",
+      "jaxlib": "0.11.0",
+      "python": "3.14.2",
+      "x64_enabled": true
+    },
+    {
+      "platform": "gpu",
+      "device": "cuda:0",
+      "device_kind": "NVIDIA H200 NVL",
+      "jax": "0.11.0",
+      "jaxlib": "0.11.0",
+      "python": "3.14.2",
+      "x64_enabled": true
+    }
+  ],
+  "unavailable_platforms": [],
+  "timings": [
+    {
+      "device": "cpu",
+      "routine": "ring_sign_changes",
+      "nz": 17,
+      "nr": 17,
+      "cells": 289,
+      "call_site": "profile reconstruction test",
+      "compile_ms": 148.1402013450861,
+      "first_execution_us": 428.53597551584244,
+      "steady_us_min": 8.555594831705093,
+      "steady_us_median": 14.158431440591812
+    },
+    {
+      "device": "cpu",
+      "routine": "magnetic_axis_subgrid",
+      "nz": 17,
+      "nr": 17,
+      "cells": 289,
+      "call_site": "profile reconstruction test",
+      "compile_ms": 159.6555272117257,
+      "first_execution_us": 6005.282048135996,
+      "steady_us_min": 59.35505032539368,
+      "steady_us_median": 72.80218414962292
+    },
+    {
+      "device": "cpu",
+      "routine": "xpoint_candidates",
+      "nz": 17,
+      "nr": 17,
+      "cells": 289,
+      "call_site": "profile reconstruction test",
+      "compile_ms": 173.99707157164812,
+      "first_execution_us": 551.2489005923271,
+      "steady_us_min": 93.48616003990173,
+      "steady_us_median": 106.63154534995556
+    },
+    {
+      "device": "cpu",
+      "routine": "ring_sign_changes",
+      "nz": 61,
+      "nr": 61,
+      "cells": 3721,
+      "call_site": "batched connectivity contract",
+      "compile_ms": 65.00113802030683,
+      "first_execution_us": 478.75987365841866,
+      "steady_us_min": 18.308404833078384,
+      "steady_us_median": 143.4357836842537
+    },
+    {
+      "device": "cpu",
+      "routine": "magnetic_axis_subgrid",
+      "nz": 61,
+      "nr": 61,
+      "cells": 3721,
+      "call_site": "batched connectivity contract",
+      "compile_ms": 142.78445532545447,
+      "first_execution_us": 449.64440166950226,
+      "steady_us_min": 87.52429857850075,
+      "steady_us_median": 107.6054759323597
+    },
+    {
+      "device": "cpu",
+      "routine": "xpoint_candidates",
+      "nz": 61,
+      "nr": 61,
+      "cells": 3721,
+      "call_site": "batched connectivity contract",
+      "compile_ms": 163.5612901300192,
+      "first_execution_us": 691.2220269441605,
+      "steady_us_min": 121.59766629338264,
+      "steady_us_median": 138.05017806589603
+    },
+    {
+      "device": "cpu",
+      "routine": "ring_sign_changes",
+      "nz": 101,
+      "nr": 81,
+      "cells": 8181,
+      "call_site": "limited and stencil-null tests",
+      "compile_ms": 51.35913286358118,
+      "first_execution_us": 481.25069588422775,
+      "steady_us_min": 44.03572529554367,
+      "steady_us_median": 75.01104846596718
+    },
+    {
+      "device": "cpu",
+      "routine": "magnetic_axis_subgrid",
+      "nz": 101,
+      "nr": 81,
+      "cells": 8181,
+      "call_site": "limited and stencil-null tests",
+      "compile_ms": 123.36036004126072,
+      "first_execution_us": 2112.890128046274,
+      "steady_us_min": 113.13799768686295,
+      "steady_us_median": 130.14883734285831
+    },
+    {
+      "device": "cpu",
+      "routine": "xpoint_candidates",
+      "nz": 101,
+      "nr": 81,
+      "cells": 8181,
+      "call_site": "limited and stencil-null tests",
+      "compile_ms": 162.10887907072902,
+      "first_execution_us": 902.2830054163933,
+      "steady_us_min": 181.78625032305717,
+      "steady_us_median": 212.82164379954338
+    },
+    {
+      "device": "cpu",
+      "routine": "ring_sign_changes",
+      "nz": 141,
+      "nr": 101,
+      "cells": 14241,
+      "call_site": "diverted connectivity test",
+      "compile_ms": 50.45111617073417,
+      "first_execution_us": 422.5820302963257,
+      "steady_us_min": 59.67309698462486,
+      "steady_us_median": 141.77104458212852
+    },
+    {
+      "device": "cpu",
+      "routine": "magnetic_axis_subgrid",
+      "nz": 141,
+      "nr": 101,
+      "cells": 14241,
+      "call_site": "diverted connectivity test",
+      "compile_ms": 153.31446612253785,
+      "first_execution_us": 931.9530799984932,
+      "steady_us_min": 149.14991334080696,
+      "steady_us_median": 188.69247287511826
+    },
+    {
+      "device": "cpu",
+      "routine": "xpoint_candidates",
+      "nz": 141,
+      "nr": 101,
+      "cells": 14241,
+      "call_site": "diverted connectivity test",
+      "compile_ms": 162.61734999716282,
+      "first_execution_us": 904.6369232237339,
+      "steady_us_min": 278.27173471450806,
+      "steady_us_median": 289.71116989851
+    },
+    {
+      "device": "cpu",
+      "routine": "ring_sign_changes",
+      "nz": 161,
+      "nr": 121,
+      "cells": 19481,
+      "call_site": "connectivity amplitude sweep",
+      "compile_ms": 61.01802084594965,
+      "first_execution_us": 208.8570035994053,
+      "steady_us_min": 68.5746781527996,
+      "steady_us_median": 270.44606395065784
+    },
+    {
+      "device": "cpu",
+      "routine": "magnetic_axis_subgrid",
+      "nz": 161,
+      "nr": 121,
+      "cells": 19481,
+      "call_site": "connectivity amplitude sweep",
+      "compile_ms": 136.14834798499942,
+      "first_execution_us": 1618.8682056963444,
+      "steady_us_min": 203.70539277791977,
+      "steady_us_median": 237.80995979905128
+    },
+    {
+      "device": "cpu",
+      "routine": "xpoint_candidates",
+      "nz": 161,
+      "nr": 121,
+      "cells": 19481,
+      "call_site": "connectivity amplitude sweep",
+      "compile_ms": 166.62355419248343,
+      "first_execution_us": 904.6881459653378,
+      "steady_us_min": 343.996100127697,
+      "steady_us_median": 392.0644521713257
+    },
+    {
+      "device": "cpu",
+      "routine": "subnull_three_arrays",
+      "samples": 9,
+      "call_site": "three-array stencil gather or stacked legacy locator",
+      "compile_ms": 50.887545105069876,
+      "first_execution_us": 281.24917298555374,
+      "steady_us_min": 14.48020339012146,
+      "steady_us_median": 16.064848750829697
+    },
+    {
+      "device": "cpu",
+      "routine": "subnull_stacked",
+      "samples": 9,
+      "call_site": "three-array stencil gather or stacked legacy locator",
+      "compile_ms": 62.92604794725776,
+      "first_execution_us": 373.13206121325493,
+      "steady_us_min": 15.610363334417343,
+      "steady_us_median": 16.230856999754906
+    },
+    {
+      "device": "gpu",
+      "routine": "ring_sign_changes",
+      "nz": 17,
+      "nr": 17,
+      "cells": 289,
+      "call_site": "profile reconstruction test",
+      "compile_ms": 189.5381468348205,
+      "first_execution_us": 1998.9870488643646,
+      "steady_us_min": 61.3601878285408,
+      "steady_us_median": 135.25434769690037
+    },
+    {
+      "device": "gpu",
+      "routine": "magnetic_axis_subgrid",
+      "nz": 17,
+      "nr": 17,
+      "cells": 289,
+      "call_site": "profile reconstruction test",
+      "compile_ms": 327.27275416255,
+      "first_execution_us": 42585.35290136933,
+      "steady_us_min": 508.31399857997894,
+      "steady_us_median": 883.6635388433933
+    },
+    {
+      "device": "gpu",
+      "routine": "xpoint_candidates",
+      "nz": 17,
+      "nr": 17,
+      "cells": 289,
+      "call_site": "profile reconstruction test",
+      "compile_ms": 753.1424039043486,
+      "first_execution_us": 2405.719365924597,
+      "steady_us_min": 349.2799587547779,
+      "steady_us_median": 465.32019041478634
+    },
+    {
+      "device": "gpu",
+      "routine": "ring_sign_changes",
+      "nz": 61,
+      "nr": 61,
+      "cells": 3721,
+      "call_site": "batched connectivity contract",
+      "compile_ms": 84.53234704211354,
+      "first_execution_us": 830.2656933665276,
+      "steady_us_min": 70.0000673532486,
+      "steady_us_median": 135.2471299469471
+    },
+    {
+      "device": "gpu",
+      "routine": "magnetic_axis_subgrid",
+      "nz": 61,
+      "nr": 61,
+      "cells": 3721,
+      "call_site": "batched connectivity contract",
+      "compile_ms": 279.8042455688119,
+      "first_execution_us": 2108.57717320323,
+      "steady_us_min": 608.7538786232471,
+      "steady_us_median": 808.9782204478979
+    },
+    {
+      "device": "gpu",
+      "routine": "xpoint_candidates",
+      "nz": 61,
+      "nr": 61,
+      "cells": 3721,
+      "call_site": "batched connectivity contract",
+      "compile_ms": 244.62380399927497,
+      "first_execution_us": 1576.26299187541,
+      "steady_us_min": 243.5203641653061,
+      "steady_us_median": 251.23730301856995
+    },
+    {
+      "device": "gpu",
+      "routine": "ring_sign_changes",
+      "nz": 101,
+      "nr": 81,
+      "cells": 8181,
+      "call_site": "limited and stencil-null tests",
+      "compile_ms": 82.50069990754128,
+      "first_execution_us": 773.321371525526,
+      "steady_us_min": 53.27118560671806,
+      "steady_us_median": 155.29408119618893
+    },
+    {
+      "device": "gpu",
+      "routine": "magnetic_axis_subgrid",
+      "nz": 101,
+      "nr": 81,
+      "cells": 8181,
+      "call_site": "limited and stencil-null tests",
+      "compile_ms": 335.61761723831296,
+      "first_execution_us": 2093.828283250332,
+      "steady_us_min": 573.7841129302979,
+      "steady_us_median": 805.6492079049349
+    },
+    {
+      "device": "gpu",
+      "routine": "xpoint_candidates",
+      "nz": 101,
+      "nr": 81,
+      "cells": 8181,
+      "call_site": "limited and stencil-null tests",
+      "compile_ms": 253.94382188096642,
+      "first_execution_us": 1314.2209500074387,
+      "steady_us_min": 253.2796934247017,
+      "steady_us_median": 256.7586489021778
+    },
+    {
+      "device": "gpu",
+      "routine": "ring_sign_changes",
+      "nz": 141,
+      "nr": 101,
+      "cells": 14241,
+      "call_site": "diverted connectivity test",
+      "compile_ms": 82.61205721646547,
+      "first_execution_us": 887.5541388988495,
+      "steady_us_min": 90.59300646185875,
+      "steady_us_median": 135.85598208010197
+    },
+    {
+      "device": "gpu",
+      "routine": "magnetic_axis_subgrid",
+      "nz": 141,
+      "nr": 101,
+      "cells": 14241,
+      "call_site": "diverted connectivity test",
+      "compile_ms": 314.91411104798317,
+      "first_execution_us": 2199.9813616275787,
+      "steady_us_min": 493.0347204208374,
+      "steady_us_median": 615.5178416520357
+    },
+    {
+      "device": "gpu",
+      "routine": "xpoint_candidates",
+      "nz": 141,
+      "nr": 101,
+      "cells": 14241,
+      "call_site": "diverted connectivity test",
+      "compile_ms": 259.6499319188297,
+      "first_execution_us": 1586.3999724388123,
+      "steady_us_min": 246.59233167767525,
+      "steady_us_median": 317.3723816871643
+    },
+    {
+      "device": "gpu",
+      "routine": "ring_sign_changes",
+      "nz": 161,
+      "nr": 121,
+      "cells": 19481,
+      "call_site": "connectivity amplitude sweep",
+      "compile_ms": 86.5779253654182,
+      "first_execution_us": 767.6202803850174,
+      "steady_us_min": 68.43777373433113,
+      "steady_us_median": 169.02456991374493
+    },
+    {
+      "device": "gpu",
+      "routine": "magnetic_axis_subgrid",
+      "nz": 161,
+      "nr": 121,
+      "cells": 19481,
+      "call_site": "connectivity amplitude sweep",
+      "compile_ms": 424.91259472444654,
+      "first_execution_us": 2213.219180703163,
+      "steady_us_min": 613.6540323495865,
+      "steady_us_median": 838.8387504965067
+    },
+    {
+      "device": "gpu",
+      "routine": "xpoint_candidates",
+      "nz": 161,
+      "nr": 121,
+      "cells": 19481,
+      "call_site": "connectivity amplitude sweep",
+      "compile_ms": 286.0931260511279,
+      "first_execution_us": 1581.9701366126537,
+      "steady_us_min": 262.55426928400993,
+      "steady_us_median": 307.99885280430317
+    },
+    {
+      "device": "gpu",
+      "routine": "subnull_three_arrays",
+      "samples": 9,
+      "call_site": "three-array stencil gather or stacked legacy locator",
+      "compile_ms": 142.0056950300932,
+      "first_execution_us": 1432.6642267405987,
+      "steady_us_min": 460.4170098900795,
+      "steady_us_median": 503.4457426518202
+    },
+    {
+      "device": "gpu",
+      "routine": "subnull_stacked",
+      "samples": 9,
+      "call_site": "three-array stencil gather or stacked legacy locator",
+      "compile_ms": 95.67143023014069,
+      "first_execution_us": 1224.1159565746784,
+      "steady_us_min": 455.447006970644,
+      "steady_us_median": 466.30227006971836
+    }
+  ],
+  "host_reference_timings": [
+    {
+      "routine": "rectangular_ring_numpy_reference",
+      "nz": 17,
+      "nr": 17,
+      "cells": 289,
+      "call_site": "profile reconstruction test",
+      "steady_us_min": 55.513810366392136,
+      "steady_us_median": 57.741766795516014
+    },
+    {
+      "routine": "rectangular_ring_numpy_reference",
+      "nz": 61,
+      "nr": 61,
+      "cells": 3721,
+      "call_site": "batched connectivity contract",
+      "steady_us_min": 75.18008351325989,
+      "steady_us_median": 77.49744690954685
+    },
+    {
+      "routine": "rectangular_ring_numpy_reference",
+      "nz": 101,
+      "nr": 81,
+      "cells": 8181,
+      "call_site": "limited and stencil-null tests",
+      "steady_us_min": 91.38369932770729,
+      "steady_us_median": 94.28104385733604
+    },
+    {
+      "routine": "rectangular_ring_numpy_reference",
+      "nz": 141,
+      "nr": 101,
+      "cells": 14241,
+      "call_site": "diverted connectivity test",
+      "steady_us_min": 121.10406532883644,
+      "steady_us_median": 123.23888950049877
+    },
+    {
+      "routine": "rectangular_ring_numpy_reference",
+      "nz": 161,
+      "nr": 121,
+      "cells": 19481,
+      "call_site": "connectivity amplitude sweep",
+      "steady_us_min": 146.35827392339706,
+      "steady_us_median": 150.20696446299553
+    }
+  ],
+  "accuracy": [
+    {
+      "device": "cpu",
+      "nz": 17,
+      "nr": 17,
+      "cells": 289,
+      "call_site": "profile reconstruction test",
+      "spacing_max": 0.10000000000000009,
+      "rectangular_reference_exact_fraction": 1.0,
+      "o_mask_difference_vs_hex_fraction": 0.0,
+      "x_mask_difference_vs_hex_fraction": 0.0,
+      "axis_position_error": 0.0005627731263808081,
+      "xpoint_position_error": 0.0005627722777949984,
+      "xpoint_count": 1
+    },
+    {
+      "device": "cpu",
+      "nz": 61,
+      "nr": 61,
+      "cells": 3721,
+      "call_site": "batched connectivity contract",
+      "spacing_max": 0.02666666666666684,
+      "rectangular_reference_exact_fraction": 1.0,
+      "o_mask_difference_vs_hex_fraction": 0.0,
+      "x_mask_difference_vs_hex_fraction": 0.0,
+      "axis_position_error": 0.00005230341418455056,
+      "xpoint_position_error": 0.000012750118696835955,
+      "xpoint_count": 1
+    },
+    {
+      "device": "cpu",
+      "nz": 101,
+      "nr": 81,
+      "cells": 8181,
+      "call_site": "limited and stencil-null tests",
+      "spacing_max": 0.016000000000000014,
+      "rectangular_reference_exact_fraction": 1.0,
+      "o_mask_difference_vs_hex_fraction": 0.0,
+      "x_mask_difference_vs_hex_fraction": 0.0,
+      "axis_position_error": 0.000007240394391104921,
+      "xpoint_position_error": 0.000004314922366077667,
+      "xpoint_count": 1
+    },
+    {
+      "device": "cpu",
+      "nz": 141,
+      "nr": 101,
+      "cells": 14241,
+      "call_site": "diverted connectivity test",
+      "spacing_max": 0.011428571428571566,
+      "rectangular_reference_exact_fraction": 1.0,
+      "o_mask_difference_vs_hex_fraction": 0.0,
+      "x_mask_difference_vs_hex_fraction": 0.0,
+      "axis_position_error": 0.000004470263969679855,
+      "xpoint_position_error": 0.000004266914645389974,
+      "xpoint_count": 1
+    },
+    {
+      "device": "cpu",
+      "nz": 161,
+      "nr": 121,
+      "cells": 19481,
+      "call_site": "connectivity amplitude sweep",
+      "spacing_max": 0.010000000000000009,
+      "rectangular_reference_exact_fraction": 1.0,
+      "o_mask_difference_vs_hex_fraction": 0.0,
+      "x_mask_difference_vs_hex_fraction": 0.0,
+      "axis_position_error": 0.0000018462575866471227,
+      "xpoint_position_error": 0.0000018462549855602362,
+      "xpoint_count": 1
+    },
+    {
+      "device": "gpu",
+      "nz": 17,
+      "nr": 17,
+      "cells": 289,
+      "call_site": "profile reconstruction test",
+      "spacing_max": 0.10000000000000009,
+      "rectangular_reference_exact_fraction": 1.0,
+      "o_mask_difference_vs_hex_fraction": 0.0,
+      "x_mask_difference_vs_hex_fraction": 0.0,
+      "axis_position_error": 0.0005627731263816964,
+      "xpoint_position_error": 0.0005627722777972188,
+      "xpoint_count": 1
+    },
+    {
+      "device": "gpu",
+      "nz": 61,
+      "nr": 61,
+      "cells": 3721,
+      "call_site": "batched connectivity contract",
+      "spacing_max": 0.02666666666666684,
+      "rectangular_reference_exact_fraction": 1.0,
+      "o_mask_difference_vs_hex_fraction": 0.0,
+      "x_mask_difference_vs_hex_fraction": 0.0,
+      "axis_position_error": 0.00005230341417558371,
+      "xpoint_position_error": 0.000012750118690618706,
+      "xpoint_count": 1
+    },
+    {
+      "device": "gpu",
+      "nz": 101,
+      "nr": 81,
+      "cells": 8181,
+      "call_site": "limited and stencil-null tests",
+      "spacing_max": 0.016000000000000014,
+      "rectangular_reference_exact_fraction": 1.0,
+      "o_mask_difference_vs_hex_fraction": 0.0,
+      "x_mask_difference_vs_hex_fraction": 0.0,
+      "axis_position_error": 0.000007240394388902749,
+      "xpoint_position_error": 0.00000431492237296105,
+      "xpoint_count": 1
+    },
+    {
+      "device": "gpu",
+      "nz": 141,
+      "nr": 101,
+      "cells": 14241,
+      "call_site": "diverted connectivity test",
+      "spacing_max": 0.011428571428571566,
+      "rectangular_reference_exact_fraction": 1.0,
+      "o_mask_difference_vs_hex_fraction": 0.0,
+      "x_mask_difference_vs_hex_fraction": 0.0,
+      "axis_position_error": 0.000004470263970651917,
+      "xpoint_position_error": 0.0000042669146553819814,
+      "xpoint_count": 1
+    },
+    {
+      "device": "gpu",
+      "nz": 161,
+      "nr": 121,
+      "cells": 19481,
+      "call_site": "connectivity amplitude sweep",
+      "spacing_max": 0.010000000000000009,
+      "rectangular_reference_exact_fraction": 1.0,
+      "o_mask_difference_vs_hex_fraction": 0.0,
+      "x_mask_difference_vs_hex_fraction": 0.0,
+      "axis_position_error": 0.0000018462575886596929,
+      "xpoint_position_error": 0.0000018462549702391584,
+      "xpoint_count": 1
+    }
+  ],
+  "quadratic_signature_checks": {
+    "cpu": {
+      "maximum": {
+        "position_error": 2.6328056556377738E-15,
+        "type": 1.0,
+        "expected_type": 1.0,
+        "signature_max_abs_difference": 0.0
+      },
+      "saddle": {
+        "position_error": 2.542385065232522E-15,
+        "type": 0.0,
+        "expected_type": 0.0,
+        "signature_max_abs_difference": 0.0
+      }
+    },
+    "gpu": {
+      "maximum": {
+        "position_error": 7.965857001556848E-16,
+        "type": 1.0,
+        "expected_type": 1.0,
+        "signature_max_abs_difference": 0.0
+      },
+      "saddle": {
+        "position_error": 1.4145178175922888E-15,
+        "type": 0.0,
+        "expected_type": 0.0,
+        "signature_max_abs_difference": 0.0
+      }
+    }
+  },
+  "degenerate": {
+    "cpu": {
+      "flat_field": {
+        "axis_found": true,
+        "axis_type": null,
+        "axis_position_finite": true,
+        "meaning": "a plateau is classified as zero sign changes"
+      },
+      "planar_field": {
+        "axis_found": false,
+        "xpoint_count": 0,
+        "subnull_type_is_nan": true,
+        "subnull_position_finite": true
+      },
+      "empty_extra_mask": {
+        "xpoint_count": 0
+      },
+      "fixed_slot_overflow": {
+        "raw_rectangular_saddles": 99,
+        "slots": 8,
+        "returned_valid": 8,
+        "overflow_is_reported": false
+      }
+    },
+    "gpu": {
+      "flat_field": {
+        "axis_found": true,
+        "axis_type": null,
+        "axis_position_finite": true,
+        "meaning": "a plateau is classified as zero sign changes"
+      },
+      "planar_field": {
+        "axis_found": false,
+        "xpoint_count": 0,
+        "subnull_type_is_nan": true,
+        "subnull_position_finite": true
+      },
+      "empty_extra_mask": {
+        "xpoint_count": 0
+      },
+      "fixed_slot_overflow": {
+        "raw_rectangular_saddles": 99,
+        "slots": 8,
+        "returned_valid": 8,
+        "overflow_is_reported": false
+      }
+    }
+  },
+  "differentiation": {
+    "cpu": {
+      "magnetic_axis_subgrid": {
+        "automatic": 0.15384615384606953,
+        "centred_difference": 0.15384615377200817,
+        "absolute_difference": 7.406136814935849E-11,
+        "finite": true,
+        "classification_note": "the selected integer vertex is nondifferentiable; the local fit carries the derivative"
+      },
+      "xpoint_candidates": {
+        "automatic": -0.18181818181821352,
+        "centred_difference": -0.1818181818158404,
+        "absolute_difference": 2.3731294707118877E-12,
+        "finite": true,
+        "classification_note": "the selected integer vertex is nondifferentiable; the local fit carries the derivative"
+      }
+    },
+    "gpu": {
+      "magnetic_axis_subgrid": {
+        "automatic": 0.15384615384607236,
+        "centred_difference": 0.1538461537831104,
+        "absolute_difference": 6.296196897181972E-11,
+        "finite": true,
+        "classification_note": "the selected integer vertex is nondifferentiable; the local fit carries the derivative"
+      },
+      "xpoint_candidates": {
+        "automatic": -0.18181818181817927,
+        "centred_difference": -0.18181818177698258,
+        "absolute_difference": 4.119668495228268E-11,
+        "finite": true,
+        "classification_note": "the selected integer vertex is nondifferentiable; the local fit carries the derivative"
+      }
+    }
+  },
+  "summary": {
+    "verdicts": [
+      {
+        "routine": "ring_sign_changes",
+        "verdict": "KEEP BOTH",
+        "decision": "keep each geometry contract; relocate the rectangular routine with the connectivity domain"
+      },
+      {
+        "routine": "subnull",
+        "verdict": "COLLAPSE",
+        "decision": "one traced three-array signature matching the host contract; adapt the stacked caller and delete the stencil adapter"
+      },
+      {
+        "routine": "magnetic_axis_subgrid",
+        "verdict": "SINGLE-IMPLEMENTATION RELOCATION",
+        "decision": "move intact to equilibrium connectivity; reject degenerate plateau fits before publishing found"
+      },
+      {
+        "routine": "xpoint_candidates",
+        "verdict": "SINGLE-IMPLEMENTATION RELOCATION",
+        "decision": "move intact to equilibrium connectivity; preserve fixed slots and expose overflow or prove the upstream mask bounds it"
+      }
+    ],
+    "rectangular_reference_min_exact_fraction": 1.0,
+    "gaussian_axis_max_position_error": 0.0005627731263816964,
+    "gaussian_xpoint_max_position_error": 0.0005627722777972188,
+    "largest_grid_steady_us": {
+      "cpu:ring_sign_changes": 270.44606395065784,
+      "cpu:magnetic_axis_subgrid": 237.80995979905128,
+      "cpu:xpoint_candidates": 392.0644521713257,
+      "gpu:ring_sign_changes": 169.02456991374493,
+      "gpu:magnetic_axis_subgrid": 838.8387504965067,
+      "gpu:xpoint_candidates": 307.99885280430317
+    },
+    "degenerate_plateau_axis_found": true
+  },
+  "geometry_semantics": {
+    "field": "smooth periodic critical-point lattice",
+    "shape": [
+      61,
+      61
+    ],
+    "rectangular_saddles": 99,
+    "hexagonal_saddles": 50,
+    "saddle_mask_difference_fraction": 0.013168503090567052,
+    "rectangular_extrema": 64,
+    "hexagonal_extrema": 64,
+    "extremum_mask_difference_fraction": 0.0
+  }
+}

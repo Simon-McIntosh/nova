@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="biot-element-conditioning">
   <meta name="plan-title" content="Conditioning Audit of Every Biot Element">
   <meta name="plan-summary" content="Audit each biot element for catastrophic cancellation and accuracy loss, give every one the treatment the arc reduction already had, and settle the source-side route and target-side integration rule on measurement">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
   <meta name="plan-capability-version" content="1.0">
@@ -22,7 +22,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-09">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
@@ -222,7 +222,7 @@
 <h2><span class="sec">§</span> Followups</h2>
 <article class="r-fu" data-id="f-bec-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-09" data-recommends-skill="/reckon-ship biot-element-conditioning §2" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Fix the two known bracket faults, then sweep the element set</h4>
-    <div class="r-fu-body"><p>Two sites are already identified with evidence: the <code>K &minus; E</code> bracket, where both special-function routes lose digits together at small <code>k&sup2;</code>, and the <code>B_R</code> bracket at <code>greens.py:220</code>, which forms <code>inf + (&minus;inf)</code> at the coincident limit and masks the NaN afterwards. Fix those two by the rearrangement the same file already documents for its sibling bracket, which establishes the method, then apply the pass to the rest of the registry.</p></div>
+    <div class="r-fu-body"><p>Two sites are already identified with evidence: the <code>K − E</code> bracket, where both special-function routes lose digits together at small <code>k²</code>, and the <code>B_R</code> bracket at <code>greens.py:220</code>, which forms <code>inf + (−inf)</code> at the coincident limit and masks the NaN afterwards. Fix those two by the rearrangement the same file already documents for its sibling bracket, which establishes the method, then apply the pass to the rest of the registry.</p></div>
     <pre class="r-fu-prompt">Project: nova
 Plan:    biot-element-conditioning (http://127.0.0.1:8765/nova/biot-element-conditioning.html)
 Section: §2, seeded by the two faults in §1

@@ -1,0 +1,880 @@
+{
+  "schema_version": 1,
+  "benchmark": "fixed_point_route",
+  "verdict": {
+    "classification": "RELOCATE",
+    "pair_decision": "NOT_A_PAIR",
+    "destination": "nova/equilibrium/fixed_point.py",
+    "retain": [
+      "picard",
+      "anderson",
+      "newton_krylov"
+    ],
+    "host_peer": false,
+    "reachability": "opt-in integration seam; no production import currently",
+    "reason": "one JAX-native fixed-point family serves equilibrium maps; the apparent host candidates have different maps, mutation semantics and result APIs"
+  },
+  "methodology": {
+    "case_shapes": [
+      81,
+      289
+    ],
+    "batch_shape": 4,
+    "map_evaluation_budget": 20,
+    "relaxation": 0.6,
+    "timing_repeats": 5,
+    "timing_statistic": "minimum for headline; median also retained",
+    "compile_measurement": "trace, lower and compile after jax.clear_caches",
+    "oracle": "SciPy finite-difference Krylov root on CPU, residual <= 1e-10"
+  },
+  "reachability": {
+    "imports": [
+      {
+        "path": "benchmarks/fixed_point_ladder.py",
+        "line": 34,
+        "symbols": [
+          "anderson",
+          "newton_krylov",
+          "picard"
+        ]
+      },
+      {
+        "path": "tests/test_fixed_point.py",
+        "line": 22,
+        "symbols": [
+          "anderson",
+          "newton_krylov",
+          "picard"
+        ]
+      },
+      {
+        "path": "tests/test_profile_accelerated.py",
+        "line": 27,
+        "symbols": [
+          "anderson",
+          "newton_krylov",
+          "picard"
+        ]
+      }
+    ],
+    "production_imports": [],
+    "production_import_count": 0,
+    "documented_map_protocol": "nova/equilibrium/profile.py:ReconstructProfile.least_squares_map",
+    "candidate_peer_audit": [
+      {
+        "path": "nova/equilibrium/profile.py",
+        "symbol": "ReconstructProfile.picard",
+        "peer": false,
+        "reason": "traced physics-bound scan; prescribed coefficients; ProfileResult contract"
+      },
+      {
+        "path": "nova/equilibrium/forward.py",
+        "symbol": "scipy.optimize.newton_krylov",
+        "peer": false,
+        "reason": "finite-difference host root solver over a mutable Plasma adapter; no shared result API"
+      },
+      {
+        "path": "nova/equilibrium/inverse.py",
+        "symbol": "scipy.optimize.newton_krylov",
+        "peer": false,
+        "reason": "legacy mutating inverse solve; only one algorithm and a different residual protocol"
+      },
+      {
+        "path": "nova/equilibrium/forward_operator.py",
+        "symbol": "ForwardFluxOperator",
+        "peer": false,
+        "reason": "a map consumed directly by Optimistix; it is an accelerator input, not another accelerator"
+      }
+    ]
+  },
+  "oracles": [
+    {
+      "method": "scipy.optimize.root(method='krylov')",
+      "derivative": "host finite differences",
+      "success": true,
+      "message": "A solution was found at the specified tolerance.",
+      "function_evaluations": 52,
+      "wall_seconds": 0.02852839045226574,
+      "relative_residual": 5.599580918691906e-14,
+      "case": "profile_9x9",
+      "dimension": 81
+    },
+    {
+      "method": "scipy.optimize.root(method='krylov')",
+      "derivative": "host finite differences",
+      "success": true,
+      "message": "A solution was found at the specified tolerance.",
+      "function_evaluations": 35,
+      "wall_seconds": 0.060108549892902374,
+      "relative_residual": 5.978725679340658e-14,
+      "case": "profile_17x17",
+      "dimension": 289
+    }
+  ],
+  "measurements": {
+    "cpu": {
+      "platform": "cpu",
+      "environment": {
+        "command": [
+          "-",
+          "measure",
+          "--platform",
+          "cpu",
+          "--partial",
+          "/home/ITER/mcintos/.cache/nova-fixed-point/cpu.json"
+        ],
+        "hostname": "98dci4-clu-3141.iter.org",
+        "python": "3.14.2",
+        "numpy": "2.4.6",
+        "scipy": "1.17.1",
+        "jax": "0.11.0",
+        "jaxlib": "0.11.0",
+        "backend": "cpu",
+        "devices": [
+          {
+            "platform": "cpu",
+            "kind": "cpu",
+            "description": "cpu:0"
+          }
+        ],
+        "cpu_model": "Intel(R) Xeon(R) Gold 5220 CPU @ 2.20GHz",
+        "jax_enable_x64": true,
+        "threads": {
+          "OPENBLAS_NUM_THREADS": "1",
+          "OMP_NUM_THREADS": "1",
+          "XLA_FLAGS": "--xla_cpu_multi_thread_eigen=false"
+        },
+        "benchmark_sha256": "3616a0a8fac08e12e34fac4865f4d2c8ecfa34d3b4ec2c589dcbcd71949963f6"
+      },
+      "methodology": {
+        "case_shapes": [
+          81,
+          289
+        ],
+        "batch_shape": 4,
+        "map_evaluation_budget": 20,
+        "relaxation": 0.6,
+        "timing_repeats": 5,
+        "timing_statistic": "minimum for headline; median also retained",
+        "compile_measurement": "trace, lower and compile after jax.clear_caches",
+        "oracle": "SciPy finite-difference Krylov root on CPU, residual <= 1e-10"
+      },
+      "oracles": [
+        {
+          "method": "scipy.optimize.root(method='krylov')",
+          "derivative": "host finite differences",
+          "success": true,
+          "message": "A solution was found at the specified tolerance.",
+          "function_evaluations": 52,
+          "wall_seconds": 0.02852839045226574,
+          "relative_residual": 5.599580918691906e-14,
+          "case": "profile_9x9",
+          "dimension": 81
+        },
+        {
+          "method": "scipy.optimize.root(method='krylov')",
+          "derivative": "host finite differences",
+          "success": true,
+          "message": "A solution was found at the specified tolerance.",
+          "function_evaluations": 35,
+          "wall_seconds": 0.060108549892902374,
+          "relative_residual": 5.978725679340658e-14,
+          "case": "profile_17x17",
+          "dimension": 289
+        }
+      ],
+      "runs": [
+        {
+          "algorithm": "picard",
+          "dimension": 81,
+          "batch": 1,
+          "map_evaluations": 20,
+          "compile_seconds": 1.5059275589883327,
+          "first_execution_ms": 8.782809600234032,
+          "steady_min_ms": 6.016528233885765,
+          "steady_median_ms": 6.383612751960754,
+          "residual": 9.60957001936833e-07,
+          "oracle_relative_sup_error": 8.753724590352972e-07,
+          "dtype": "float64",
+          "devices": [
+            "cpu:0"
+          ],
+          "finite": true,
+          "case": "profile_9x9"
+        },
+        {
+          "algorithm": "anderson",
+          "dimension": 81,
+          "batch": 1,
+          "map_evaluations": 20,
+          "compile_seconds": 1.8500080350786448,
+          "first_execution_ms": 10.571140795946121,
+          "steady_min_ms": 7.929490879178047,
+          "steady_median_ms": 8.608480915427208,
+          "residual": 3.7849319197205036e-12,
+          "oracle_relative_sup_error": 3.1538905402260128e-12,
+          "dtype": "float64",
+          "devices": [
+            "cpu:0"
+          ],
+          "finite": true,
+          "case": "profile_9x9"
+        },
+        {
+          "algorithm": "newton_krylov",
+          "dimension": 81,
+          "batch": 1,
+          "map_evaluations": 20,
+          "compile_seconds": 4.5030720718204975,
+          "first_execution_ms": 19.031498581171036,
+          "steady_min_ms": 4.169130697846413,
+          "steady_median_ms": 4.517395049333572,
+          "residual": 3.706051747271688e-14,
+          "oracle_relative_sup_error": 1.1138406890707335e-15,
+          "dtype": "float64",
+          "devices": [
+            "cpu:0"
+          ],
+          "finite": true,
+          "case": "profile_9x9"
+        },
+        {
+          "algorithm": "picard",
+          "dimension": 289,
+          "batch": 1,
+          "map_evaluations": 20,
+          "compile_seconds": 1.4205064848065376,
+          "first_execution_ms": 29.696272686123848,
+          "steady_min_ms": 23.31242337822914,
+          "steady_median_ms": 24.782145395874977,
+          "residual": 3.293526273341825e-06,
+          "oracle_relative_sup_error": 3.3116392810225292e-06,
+          "dtype": "float64",
+          "devices": [
+            "cpu:0"
+          ],
+          "finite": true,
+          "case": "profile_17x17"
+        },
+        {
+          "algorithm": "anderson",
+          "dimension": 289,
+          "batch": 1,
+          "map_evaluations": 20,
+          "compile_seconds": 1.584902910515666,
+          "first_execution_ms": 28.752777725458145,
+          "steady_min_ms": 27.216963469982147,
+          "steady_median_ms": 28.014611452817917,
+          "residual": 4.5110287764164734e-12,
+          "oracle_relative_sup_error": 1.3616648048887746e-12,
+          "dtype": "float64",
+          "devices": [
+            "cpu:0"
+          ],
+          "finite": true,
+          "case": "profile_17x17"
+        },
+        {
+          "algorithm": "newton_krylov",
+          "dimension": 289,
+          "batch": 1,
+          "map_evaluations": 20,
+          "compile_seconds": 3.5053669046610594,
+          "first_execution_ms": 24.62935820221901,
+          "steady_min_ms": 13.483241200447083,
+          "steady_median_ms": 13.57327401638031,
+          "residual": 6.871521963672079e-14,
+          "oracle_relative_sup_error": 5.677783111588672e-14,
+          "dtype": "float64",
+          "devices": [
+            "cpu:0"
+          ],
+          "finite": true,
+          "case": "profile_17x17"
+        },
+        {
+          "algorithm": "picard",
+          "dimension": 289,
+          "batch": 4,
+          "map_evaluations": 20,
+          "compile_seconds": 1.5920181889086962,
+          "first_execution_ms": 89.04954418540001,
+          "steady_min_ms": 79.99267987906933,
+          "steady_median_ms": 81.08569122850895,
+          "residual": 3.293526218269435e-06,
+          "oracle_relative_sup_error": 3.3116392922577182e-06,
+          "dtype": "float64",
+          "devices": [
+            "cpu:0"
+          ],
+          "finite": true,
+          "case": "profile_17x17"
+        },
+        {
+          "algorithm": "anderson",
+          "dimension": 289,
+          "batch": 4,
+          "map_evaluations": 20,
+          "compile_seconds": 1.729106716811657,
+          "first_execution_ms": 88.35682086646557,
+          "steady_min_ms": 80.35847544670105,
+          "steady_median_ms": 89.08929862082005,
+          "residual": 4.492570965594373e-12,
+          "oracle_relative_sup_error": 1.3317711764920708e-12,
+          "dtype": "float64",
+          "devices": [
+            "cpu:0"
+          ],
+          "finite": true,
+          "case": "profile_17x17"
+        },
+        {
+          "algorithm": "newton_krylov",
+          "dimension": 289,
+          "batch": 4,
+          "map_evaluations": 20,
+          "compile_seconds": 5.391769869253039,
+          "first_execution_ms": 96.82452864944935,
+          "steady_min_ms": 56.173838675022125,
+          "steady_median_ms": 57.973530143499374,
+          "residual": 7.25271588282433e-14,
+          "oracle_relative_sup_error": 1.1937388520831307e-14,
+          "dtype": "float64",
+          "devices": [
+            "cpu:0"
+          ],
+          "finite": true,
+          "case": "profile_17x17"
+        }
+      ],
+      "differentiation": [
+        {
+          "algorithm": "picard",
+          "parameter": "multiplicative source-current scale",
+          "mode": "jax.jvp",
+          "finite_difference_epsilon": 0.0001,
+          "relative_sup_error": 9.601294538743963e-09,
+          "tangent_finite": true,
+          "state_finite": true,
+          "dtype": "float64",
+          "devices": [
+            "cpu:0"
+          ]
+        },
+        {
+          "algorithm": "anderson",
+          "parameter": "multiplicative source-current scale",
+          "mode": "jax.jvp",
+          "finite_difference_epsilon": 0.0001,
+          "relative_sup_error": 8.10824836842244e-09,
+          "tangent_finite": true,
+          "state_finite": true,
+          "dtype": "float64",
+          "devices": [
+            "cpu:0"
+          ]
+        },
+        {
+          "algorithm": "newton_krylov",
+          "parameter": "multiplicative source-current scale",
+          "mode": "jax.jvp",
+          "finite_difference_epsilon": 0.0001,
+          "relative_sup_error": 1.0127389857503082e-08,
+          "tangent_finite": true,
+          "state_finite": true,
+          "dtype": "float64",
+          "devices": [
+            "cpu:0"
+          ]
+        }
+      ],
+      "reachability": {
+        "imports": [
+          {
+            "path": "benchmarks/fixed_point_ladder.py",
+            "line": 34,
+            "symbols": [
+              "anderson",
+              "newton_krylov",
+              "picard"
+            ]
+          },
+          {
+            "path": "tests/test_fixed_point.py",
+            "line": 22,
+            "symbols": [
+              "anderson",
+              "newton_krylov",
+              "picard"
+            ]
+          },
+          {
+            "path": "tests/test_profile_accelerated.py",
+            "line": 27,
+            "symbols": [
+              "anderson",
+              "newton_krylov",
+              "picard"
+            ]
+          }
+        ],
+        "production_imports": [],
+        "production_import_count": 0,
+        "documented_map_protocol": "nova/equilibrium/profile.py:ReconstructProfile.least_squares_map",
+        "candidate_peer_audit": [
+          {
+            "path": "nova/equilibrium/profile.py",
+            "symbol": "ReconstructProfile.picard",
+            "peer": false,
+            "reason": "traced physics-bound scan; prescribed coefficients; ProfileResult contract"
+          },
+          {
+            "path": "nova/equilibrium/forward.py",
+            "symbol": "scipy.optimize.newton_krylov",
+            "peer": false,
+            "reason": "finite-difference host root solver over a mutable Plasma adapter; no shared result API"
+          },
+          {
+            "path": "nova/equilibrium/inverse.py",
+            "symbol": "scipy.optimize.newton_krylov",
+            "peer": false,
+            "reason": "legacy mutating inverse solve; only one algorithm and a different residual protocol"
+          },
+          {
+            "path": "nova/equilibrium/forward_operator.py",
+            "symbol": "ForwardFluxOperator",
+            "peer": false,
+            "reason": "a map consumed directly by Optimistix; it is an accelerator input, not another accelerator"
+          }
+        ]
+      }
+    },
+    "gpu": {
+      "platform": "gpu",
+      "environment": {
+        "command": [
+          "-",
+          "measure",
+          "--platform",
+          "gpu",
+          "--cases-from",
+          "/home/ITER/mcintos/.cache/nova-fixed-point/cpu.json",
+          "--partial",
+          "/home/ITER/mcintos/.cache/nova-fixed-point/gpu.json"
+        ],
+        "hostname": "98dci4-gpu-0003.iter.org",
+        "python": "3.14.2",
+        "numpy": "2.4.6",
+        "scipy": "1.17.1",
+        "jax": "0.11.0",
+        "jaxlib": "0.11.0",
+        "backend": "gpu",
+        "devices": [
+          {
+            "platform": "gpu",
+            "kind": "NVIDIA H200 NVL",
+            "description": "cuda:0"
+          }
+        ],
+        "cpu_model": "Intel(R) Xeon(R) 6530P",
+        "jax_enable_x64": true,
+        "threads": {
+          "OPENBLAS_NUM_THREADS": "1",
+          "OMP_NUM_THREADS": "1",
+          "XLA_FLAGS": null
+        },
+        "benchmark_sha256": "3616a0a8fac08e12e34fac4865f4d2c8ecfa34d3b4ec2c589dcbcd71949963f6"
+      },
+      "methodology": {
+        "case_shapes": [
+          81,
+          289
+        ],
+        "batch_shape": 4,
+        "map_evaluation_budget": 20,
+        "relaxation": 0.6,
+        "timing_repeats": 5,
+        "timing_statistic": "minimum for headline; median also retained",
+        "compile_measurement": "trace, lower and compile after jax.clear_caches",
+        "oracle": "SciPy finite-difference Krylov root on CPU, residual <= 1e-10"
+      },
+      "oracles": [],
+      "runs": [
+        {
+          "algorithm": "picard",
+          "dimension": 81,
+          "batch": 1,
+          "map_evaluations": 20,
+          "compile_seconds": 1.1117458520457149,
+          "first_execution_ms": 67.73363519459963,
+          "steady_min_ms": 62.62293178588152,
+          "steady_median_ms": 62.84090969711542,
+          "residual": 9.609570188469636e-07,
+          "oracle_relative_sup_error": 8.753724433402692e-07,
+          "dtype": "float64",
+          "devices": [
+            "cuda:0"
+          ],
+          "finite": true,
+          "case": "profile_9x9"
+        },
+        {
+          "algorithm": "anderson",
+          "dimension": 81,
+          "batch": 1,
+          "map_evaluations": 20,
+          "compile_seconds": 1.2914270390756428,
+          "first_execution_ms": 68.77084216102958,
+          "steady_min_ms": 63.751832116395235,
+          "steady_median_ms": 63.89281386509538,
+          "residual": 3.808018799457661e-12,
+          "oracle_relative_sup_error": 3.14741001258051e-12,
+          "dtype": "float64",
+          "devices": [
+            "cuda:0"
+          ],
+          "finite": true,
+          "case": "profile_9x9"
+        },
+        {
+          "algorithm": "newton_krylov",
+          "dimension": 81,
+          "batch": 1,
+          "map_evaluations": 20,
+          "compile_seconds": 3.6861740299500525,
+          "first_execution_ms": 268.81769811734557,
+          "steady_min_ms": 41.44813306629658,
+          "steady_median_ms": 41.58393479883671,
+          "residual": 3.169383051628624e-14,
+          "oracle_relative_sup_error": 6.055243018766352e-14,
+          "dtype": "float64",
+          "devices": [
+            "cuda:0"
+          ],
+          "finite": true,
+          "case": "profile_9x9"
+        },
+        {
+          "algorithm": "picard",
+          "dimension": 289,
+          "batch": 1,
+          "map_evaluations": 20,
+          "compile_seconds": 1.4553900239989161,
+          "first_execution_ms": 118.25139774009585,
+          "steady_min_ms": 112.55145585164428,
+          "steady_median_ms": 112.74334881454706,
+          "residual": 3.2935263742578818e-06,
+          "oracle_relative_sup_error": 3.3116392396930834e-06,
+          "dtype": "float64",
+          "devices": [
+            "cuda:0"
+          ],
+          "finite": true,
+          "case": "profile_17x17"
+        },
+        {
+          "algorithm": "anderson",
+          "dimension": 289,
+          "batch": 1,
+          "map_evaluations": 20,
+          "compile_seconds": 1.759265043772757,
+          "first_execution_ms": 118.15467895939946,
+          "steady_min_ms": 111.6561028175056,
+          "steady_median_ms": 111.8558868765831,
+          "residual": 4.345209421585283e-12,
+          "oracle_relative_sup_error": 1.3086989129644137e-12,
+          "dtype": "float64",
+          "devices": [
+            "cuda:0"
+          ],
+          "finite": true,
+          "case": "profile_17x17"
+        },
+        {
+          "algorithm": "newton_krylov",
+          "dimension": 289,
+          "batch": 1,
+          "map_evaluations": 20,
+          "compile_seconds": 3.8261874900199473,
+          "first_execution_ms": 85.3610779158771,
+          "steady_min_ms": 69.2345299758017,
+          "steady_median_ms": 69.5283249951899,
+          "residual": 3.290305407422447e-14,
+          "oracle_relative_sup_error": 3.71162500227528e-14,
+          "dtype": "float64",
+          "devices": [
+            "cuda:0"
+          ],
+          "finite": true,
+          "case": "profile_17x17"
+        },
+        {
+          "algorithm": "picard",
+          "dimension": 289,
+          "batch": 4,
+          "map_evaluations": 20,
+          "compile_seconds": 2.5321184122003615,
+          "first_execution_ms": 293.58241707086563,
+          "steady_min_ms": 111.20543675497174,
+          "steady_median_ms": 111.26786610111594,
+          "residual": 3.2935263357372835e-06,
+          "oracle_relative_sup_error": 3.31163926356786e-06,
+          "dtype": "float64",
+          "devices": [
+            "cuda:0"
+          ],
+          "finite": true,
+          "case": "profile_17x17"
+        },
+        {
+          "algorithm": "anderson",
+          "dimension": 289,
+          "batch": 4,
+          "map_evaluations": 20,
+          "compile_seconds": 2.2125022620894015,
+          "first_execution_ms": 118.66240995004773,
+          "steady_min_ms": 112.08477104082704,
+          "steady_median_ms": 112.28666873648763,
+          "residual": 4.4959816480288885e-12,
+          "oracle_relative_sup_error": 1.33899379811812e-12,
+          "dtype": "float64",
+          "devices": [
+            "cuda:0"
+          ],
+          "finite": true,
+          "case": "profile_17x17"
+        },
+        {
+          "algorithm": "newton_krylov",
+          "dimension": 289,
+          "batch": 4,
+          "map_evaluations": 20,
+          "compile_seconds": 5.750668609049171,
+          "first_execution_ms": 90.01754317432642,
+          "steady_min_ms": 70.67551603540778,
+          "steady_median_ms": 70.86539594456553,
+          "residual": 7.44331284240112e-14,
+          "oracle_relative_sup_error": 8.857742910835332e-14,
+          "dtype": "float64",
+          "devices": [
+            "cuda:0"
+          ],
+          "finite": true,
+          "case": "profile_17x17"
+        }
+      ],
+      "differentiation": [
+        {
+          "algorithm": "picard",
+          "parameter": "multiplicative source-current scale",
+          "mode": "jax.jvp",
+          "finite_difference_epsilon": 0.0001,
+          "relative_sup_error": 9.89512711051573e-09,
+          "tangent_finite": true,
+          "state_finite": true,
+          "dtype": "float64",
+          "devices": [
+            "cuda:0"
+          ]
+        },
+        {
+          "algorithm": "anderson",
+          "parameter": "multiplicative source-current scale",
+          "mode": "jax.jvp",
+          "finite_difference_epsilon": 0.0001,
+          "relative_sup_error": 9.633946957652659e-09,
+          "tangent_finite": true,
+          "state_finite": true,
+          "dtype": "float64",
+          "devices": [
+            "cuda:0"
+          ]
+        },
+        {
+          "algorithm": "newton_krylov",
+          "parameter": "multiplicative source-current scale",
+          "mode": "jax.jvp",
+          "finite_difference_epsilon": 0.0001,
+          "relative_sup_error": 1.0248882970240576e-08,
+          "tangent_finite": true,
+          "state_finite": true,
+          "dtype": "float64",
+          "devices": [
+            "cuda:0"
+          ]
+        }
+      ],
+      "reachability": {
+        "imports": [
+          {
+            "path": "benchmarks/fixed_point_ladder.py",
+            "line": 34,
+            "symbols": [
+              "anderson",
+              "newton_krylov",
+              "picard"
+            ]
+          },
+          {
+            "path": "tests/test_fixed_point.py",
+            "line": 22,
+            "symbols": [
+              "anderson",
+              "newton_krylov",
+              "picard"
+            ]
+          },
+          {
+            "path": "tests/test_profile_accelerated.py",
+            "line": 27,
+            "symbols": [
+              "anderson",
+              "newton_krylov",
+              "picard"
+            ]
+          }
+        ],
+        "production_imports": [],
+        "production_import_count": 0,
+        "documented_map_protocol": "nova/equilibrium/profile.py:ReconstructProfile.least_squares_map",
+        "candidate_peer_audit": [
+          {
+            "path": "nova/equilibrium/profile.py",
+            "symbol": "ReconstructProfile.picard",
+            "peer": false,
+            "reason": "traced physics-bound scan; prescribed coefficients; ProfileResult contract"
+          },
+          {
+            "path": "nova/equilibrium/forward.py",
+            "symbol": "scipy.optimize.newton_krylov",
+            "peer": false,
+            "reason": "finite-difference host root solver over a mutable Plasma adapter; no shared result API"
+          },
+          {
+            "path": "nova/equilibrium/inverse.py",
+            "symbol": "scipy.optimize.newton_krylov",
+            "peer": false,
+            "reason": "legacy mutating inverse solve; only one algorithm and a different residual protocol"
+          },
+          {
+            "path": "nova/equilibrium/forward_operator.py",
+            "symbol": "ForwardFluxOperator",
+            "peer": false,
+            "reason": "a map consumed directly by Optimistix; it is an accelerator input, not another accelerator"
+          }
+        ]
+      }
+    }
+  },
+  "summary": {
+    "cross_device": [
+      {
+        "case": "profile_17x17",
+        "algorithm": "anderson",
+        "batch": 1,
+        "gpu_speedup": 0.24375706104006198,
+        "gpu_compile_over_cpu": 1.110014394004968,
+        "cpu_gpu_relative_sup": 1.895938176840495e-13
+      },
+      {
+        "case": "profile_17x17",
+        "algorithm": "anderson",
+        "batch": 4,
+        "gpu_speedup": 0.7169437444577583,
+        "gpu_compile_over_cpu": 1.2795637426989408,
+        "cpu_gpu_relative_sup": 1.1235189196091487e-14
+      },
+      {
+        "case": "profile_17x17",
+        "algorithm": "newton_krylov",
+        "batch": 1,
+        "gpu_speedup": 0.19474734941018068,
+        "gpu_compile_over_cpu": 1.0915226833836695,
+        "cpu_gpu_relative_sup": 1.966158109313457e-14
+      },
+      {
+        "case": "profile_17x17",
+        "algorithm": "newton_krylov",
+        "batch": 4,
+        "gpu_speedup": 0.7948132794230969,
+        "gpu_compile_over_cpu": 1.0665641799444703,
+        "cpu_gpu_relative_sup": 7.664004058752275e-14
+      },
+      {
+        "case": "profile_17x17",
+        "algorithm": "picard",
+        "batch": 1,
+        "gpu_speedup": 0.20712680437432623,
+        "gpu_compile_over_cpu": 1.0245571136531133,
+        "cpu_gpu_relative_sup": 4.132957271288654e-14
+      },
+      {
+        "case": "profile_17x17",
+        "algorithm": "picard",
+        "batch": 4,
+        "gpu_speedup": 0.7193234630724387,
+        "gpu_compile_over_cpu": 1.590508468961708,
+        "cpu_gpu_relative_sup": 4.975599045046713e-14
+      },
+      {
+        "case": "profile_9x9",
+        "algorithm": "anderson",
+        "batch": 1,
+        "gpu_speedup": 0.12438059606978413,
+        "gpu_compile_over_cpu": 0.6980656378720774,
+        "cpu_gpu_relative_sup": 7.118454585625745e-14
+      },
+      {
+        "case": "profile_9x9",
+        "algorithm": "newton_krylov",
+        "batch": 1,
+        "gpu_speedup": 0.10058669448821396,
+        "gpu_compile_over_cpu": 0.8185909466156533,
+        "cpu_gpu_relative_sup": 5.94385894985928e-14
+      },
+      {
+        "case": "profile_9x9",
+        "algorithm": "picard",
+        "batch": 1,
+        "gpu_speedup": 0.09607548005668755,
+        "gpu_compile_over_cpu": 0.7382465679773964,
+        "cpu_gpu_relative_sup": 3.2908951967304594e-14
+      }
+    ],
+    "worst_oracle_relative_sup": {
+      "cpu": 3.3116392810225292e-06,
+      "gpu": 3.3116392396930834e-06
+    },
+    "worst_cpu_gpu_relative_sup": 1.895938176840495e-13,
+    "residual_range": {
+      "cpu": {
+        "picard": [
+          9.60957001936833e-07,
+          3.293526273341825e-06
+        ],
+        "anderson": [
+          3.7849319197205036e-12,
+          4.5110287764164734e-12
+        ],
+        "newton_krylov": [
+          3.706051747271688e-14,
+          6.871521963672079e-14
+        ]
+      },
+      "gpu": {
+        "picard": [
+          9.609570188469636e-07,
+          3.2935263742578818e-06
+        ],
+        "anderson": [
+          3.808018799457661e-12,
+          4.345209421585283e-12
+        ],
+        "newton_krylov": [
+          3.169383051628624e-14,
+          3.290305407422447e-14
+        ]
+      }
+    }
+  }
+}

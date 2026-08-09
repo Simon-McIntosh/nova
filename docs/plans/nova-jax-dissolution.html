@@ -22,8 +22,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-09">
-<meta name="plan-version" content="7">
-<meta name="plan-impl" content="0.2222222222222222">
+<meta name="plan-version" content="15">
+<meta name="plan-impl" content="0.5555555555555556">
 </head>
 <body>
   <main class="plan-doc">
@@ -345,131 +345,27 @@ except ImportError:  # jax extra absent
     <p>A pair may not be merged on the assumption that both halves are wanted. The
     measurement is the deliverable that licenses the merge.</p>
 
-    <h2 id="s5">§5 — The pattern conversion: the biot operator</h2>
+    <section id="s5" class="section-landed">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-09</span><h2>§5 — The pattern conversion: the biot operator</h2></header>
+      <p class="landed-summary">
+        Colocated <code>HostOperator</code>, <code>Coupling</code>, and <code>TracedOperator</code>
+        in <code>nova/biot/operate.py</code>; the bare <code>Operator</code> remains selection-only.
+        Independent verification passed 103 tests in 36.22 s.
+        Full record: <a href="archive/nova-jax-dissolution-s5-landed.html">§5 landed</a>
+        (integrated <code>35f51707</code>).
+      </p>
+    </section>
 
-    <p>The operator goes first: both halves exist, a parity test exists, and the rewire
-    surface is one line. Its measurement is cheap because the two halves already agree to
-    <code>atol=1e-10</code> across the existing suite.</p>
-
-    <h3>Three classes want two names</h3>
-
-    <p>The host does one job in one class. JAX forces the traced side into two, and the
-    merged file must name all three plus the selection alias:</p>
-
-    <table>
-      <thead>
-        <tr><th>Today</th><th>What it is</th><th>Becomes</th></tr>
-      </thead>
-      <tbody>
-        <tr><td><code>NumpyOperator</code> <code>biot/operate.py:25</code></td><td>holds live numpy views into the dataset; mutates in place</td><td><code>HostOperator</code></td></tr>
-        <tr><td><code>Operator</code> <code>jax/operate.py:34</code></td><td>the pure jitted pytree kernel; <em>cannot</em> mutate — JAX arrays are immutable, so it returns new arrays via <code>.at[…].set()</code></td><td><code>Coupling</code></td></tr>
-        <tr><td><code>BiotOperator</code> <code>jax/operate.py:152</code></td><td>adapter: holds the live views, calls the kernel, writes the result back in place so it presents the host's mutating interface</td><td><code>TracedOperator</code></td></tr>
-        <tr><td><code>Operator</code> <code>biot/operate.py:97-100</code></td><td>the import-time selection alias, annotated at <code>:110</code> and constructed at <code>:184</code></td><td><code>Operator</code> (unchanged)</td></tr>
-      </tbody>
-    </table>
-
-    <p>The kernel takes a concept name rather than a mechanism suffix because it is not the
-    traced half of the adapter — it is a different object with a different contract
-    (functional, returns matrices) that happens to be traced. <code>Coupling</code> names
-    what it holds: the electromagnetic influence matrices and their plasma row and column.
-    With that rename the collision dissolves and <code>:110</code> and <code>:184</code>
-    need no edit.</p>
-
-    <h3>The guard must wrap definitions, not imports</h3>
-
-    <p>Every module in <code>nova/jax/</code> imports JAX at module top level, and the
-    binding decorators run at <em>class-definition</em> time —
-    <code>@jax.tree_util.register_pytree_node_class</code> at <code>jax/operate.py:33</code>
-    and <code>@jax.jit</code> on thirteen module-level functions in
-    <code>jax/select.py</code>. So the traced class bodies cannot execute at all in a
-    JAX-free process. Nova's two existing deferral idioms — function-scope import
-    (<code>biot/zeta.py:279</code>) and <code>with skip_import("jax")</code>
-    (<code>circuit/propagate.py:34</code>) — both fail for a decorated class definition.</p>
-
-    <p>The merged file therefore uses a module-scope <code>try/except</code> that wraps the
-    <strong>definitions</strong>, with the host block defined unconditionally above it. This
-    is the same shape the repository already uses one level up at <code>:97-100</code> and
-    for the other optional accelerator at <code>nova/__init__.py:51-68</code>, where a
-    missing numba degrades to a pass-through <code>njit</code> under the same public name.
-    Catch narrowly: <code>except ImportError</code> currently also swallows a
-    <em>broken</em> JAX — a realistic CUDA mismatch given <code>jax[cuda12]</code> at
-    <code>pyproject.toml:73</code> — and silently downgrades the whole biot package with no
-    diagnostic. Widening the guard to cover four class definitions widens that window, so
-    the downgrade is logged.</p>
-
-    <h3>Conversion is a move, not a retype</h3>
-
-    <p>Bodies are moved verbatim in dependency order. No tidying of <code>.at[].set()</code>,
-    no reordering of the three update branches, no <code>jnp.array</code> to
-    <code>jnp.asarray</code>. Two behavioural asymmetries are documented and
-    <strong>preserved</strong>, not harmonised: the traced adapter re-derives the whole
-    matrix from a construction-time snapshot where the host accumulates into the live one
-    (<code>jax/operate.py:71,199</code> vs <code>biot/operate.py:82-94</code>), and the two
-    raise the missing-Force-index error at different lifecycle moments — host at
-    construction (<code>:42-43</code>), kernel at evaluation (<code>jax/operate.py:57-58</code>).
-    The <code>svd=True</code> parameter is accepted and read by neither; it is left alone
-    here because <code>Operate.rank</code> is live public API and removing it is a separate
-    decision.</p>
-
-    <h3>The test lane is not what the plan assumed</h3>
-
-    <p><code>tests/test_jax_operate.py</code> is marked <code>slow</code> by
-    <code>conftest.py:47-50</code>, and <code>pyproject.toml:255</code> sets
-    <code>addopts = "-rfEs --doctest-modules -m 'not slow'"</code>. The plain command
-    deselects all twenty tests and exits 5 — a green-looking run that proves nothing. Every
-    verification in this plan runs <code>-m "slow or not slow"</code>. Baseline on
-    <code>main</code>, established 2026-08-09: <code>test_jax_operate.py</code> 20 passed in
-    31.75 s, <code>test_biotoperate.py</code> 31 passed in 29.50 s, nothing failing.</p>
-
-    <h2 id="s6">§6 — Precision is a policy, not an accident</h2>
-
-    <p><code>nova/jax/operate.py</code> is the only JAX module in nova that never calls
-    <code>enable_x64()</code>; the other twelve all do. Because the traced operator is the
-    live default (§2), the consequence is shipped behaviour today:</p>
-
-    <pre><code>BiotOperator.source_target dtype:  float64   (the live numpy view)
-inner jnp source_target dtype:     float32
-evaluate dtype:                    float32
-coilset.plasmagrid.psi dtype:      float32
-max rel diff traced vs numpy:      5.667e-08</code></pre>
-
-    <p>Single precision is <strong>retained deliberately</strong> as the traced default: the
-    target is high-throughput GPU solve, where the fp64 rate penalty is severe, and that is
-    what the traced path exists to serve. Three things follow, none of them optional.</p>
-
-    <p><strong>It must be pinned.</strong> Precision is currently
-    <em>import-order dependent</em> — with <code>enable_x64()</code> called earlier in the
-    process the same operator is fp64 end to end. That is not a maintained choice, it is an
-    emergent one, and this merge changes import order by construction. A dtype assertion
-    pins the traced operator's output and a captured reference array proves the merge did
-    not move it.</p>
-
-    <p><strong>The existing tests cannot see it.</strong> Every cross-implementation
-    assertion leaves <code>rtol</code> at numpy's default <code>1e-5</code> — three to four
-    decades looser than the 5.7e-08 fp32 gap — so
-    <code>test_jitted_update_turns_matches_numpy</code> and
-    <code>test_numpy_fallback_is_drop_in</code> pass identically whether the traced path is
-    fp32 or fp64. Only
-    <code>test_force_index_gain_agrees_across_implementations:200</code> acknowledges the
-    divergence, and it accommodates it rather than pinning it. <strong>A green suite after
-    this merge is not evidence that precision was preserved.</strong> Note also that
-    <code>test_evaluate_is_jit_traced:145</code> asserts
-    <code>hasattr(x,"lower") or callable(x)</code>, which is true of any callable — the real
-    traced-default guard is <code>test_operate_selects_jitted_operator:169</code>.</p>
-
-    <p><strong>The stated policy must be amended to match.</strong>
-    <code>nova/jax/config.py</code> currently declares fp64 "mandatory rather than a
-    preference" for exactly this class of quantity. If the operator is a deliberate fp32
-    exception, <code>config.py</code> says so and says why, with the throughput
-    justification and the accuracy bound. A policy contradicted by the default path is
-    worse than no policy.</p>
-
-    <p>One escape route is worth measuring rather than assuming: <code>Operate.check_source:342</code>
-    <em>rebinds</em> <code>self.array[attr]</code> to whatever dtype <code>evaluate</code>
-    returned, while <code>__getattr__:292</code> writes in place into the pre-allocated
-    float64 array. The shaped and unshaped views can therefore sit at different dtypes.
-    That is the mechanism by which fp32 escapes into public attributes, and it should be
-    made deliberate in the same pass.</p>
+    <section id="s6" class="section-landed">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-09</span><h2>§6 — Precision is a policy, not an accident</h2></header>
+      <p class="landed-summary">
+        Pinned the traced operator to order-independent fp32 and documented the measured
+        throughput exception. The 26-value reference stayed byte-identical: dtype float32,
+        maximum absolute regression 0.
+        Full record: <a href="archive/nova-jax-dissolution-s6-landed.html">§6 landed</a>
+        (commit <code>d2fc5bb6</code>).
+      </p>
+    </section>
 
     <h2 id="s7">§7 — Where the two routes disagree, converge them</h2>
 
@@ -533,6 +429,11 @@ max rel diff traced vs numpy:      5.667e-08</code></pre>
 
     <h2 id="s8">§8 — Code that cannot have run</h2>
 
+    <p class="note"><strong>Partial outcome.</strong> The operator portion landed first:
+    unused <code>Coupling.target</code>, <code>evaluate_external</code>, and the commented
+    SVD branches were removed in <code>dd293ea9</code>. The measured select and stencil
+    deletions remain open until their domain conversions land.</p>
+
     <p>The survey found members that are unreachable, not merely unused. They are deleted
     before their concept is merged, so nothing dead inherits a promoted name:</p>
 
@@ -543,10 +444,11 @@ max rel diff traced vs numpy:      5.667e-08</code></pre>
       caller; the live implementations are the host ones at
       <code>nova/geometry/select.py:28,47</code>.</li>
       <li><code>nova/jax/operate.py:43</code> <code>Operator.target</code> and
-      <code>:62</code> <code>evaluate_external</code> have zero callers repo-wide;
-      <code>evaluate_external</code> would silently zero the <em>last</em> element when
-      <code>source_plasma_index == -1</code>.</li>
-      <li>Commented-out SVD blocks at <code>nova/biot/operate.py:51-59,75-81</code>.</li>
+      <code>:62</code> <code>evaluate_external</code> had zero callers repo-wide;
+      <code>evaluate_external</code> could silently zero the <em>last</em> element when
+      <code>source_plasma_index == -1</code>. Both are now removed.</li>
+      <li>Commented-out SVD blocks formerly at <code>nova/biot/operate.py:51-59,75-81</code>
+      are now removed.</li>
     </ul>
 
     <p>Each deletion is its own focused commit, separate from any numerics change, so a
@@ -566,21 +468,16 @@ max rel diff traced vs numpy:      5.667e-08</code></pre>
       </p>
     </section>
 
-    <h2 id="s10">§10 — The JAX-free guarantee</h2>
-
-    <p>JAX is an optional extra (<code>pyproject.toml:72-75</code>; it appears in the
-    <code>test</code> extra at <code>:83</code>, which is why the suite may assume it).
-    Eight biot solvers import <code>nova.biot.operate</code> unconditionally, so a
-    module-scope <code>import jax</code> in the merged file would take down the entire biot
-    package without the extra.</p>
-
-    <p><strong>No test currently covers this.</strong>
-    <code>test_numpy_fallback_is_drop_in</code> exercises the host <em>class</em>, never the
-    import guard, and there is no JAX-free CI job — which is exactly how a module-scope
-    import could land unnoticed. This plan adds the missing guarantee: with <code>jax</code>
-    masked in <code>sys.modules</code>, <code>import nova.biot.grid</code> must succeed and
-    the selection alias must resolve to <code>HostOperator</code>. The check runs for every
-    merged module, not just the operator.</p>
+    <section id="s10" class="section-landed">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-09</span><h2>§10 — The JAX-free guarantee</h2></header>
+      <p class="landed-summary">
+        Added a subprocess guarantee that <code>nova.biot.grid</code> imports without JAX
+        and selects <code>HostOperator</code>, while broken installed-JAX imports remain visible.
+        The independently verified 103-test lane passed.
+        Full record: <a href="archive/nova-jax-dissolution-s10-landed.html">§10 landed</a>
+        (commit <code>6fd21575</code>).
+      </p>
+    </section>
 
     <h2 id="s11">§11 — Sequencing and blast radius</h2>
 
@@ -722,7 +619,7 @@ Done-when
      followup written and this one resolved.</pre>
     <p class="r-fu-outcome">§3 landed 2026-08-09 — entry-point-naming locked as both-explicit (traced_/host_, bare name reserved for the selection alias), plus three further decisions the surveys forced: merge-gate=measure-first, precision-policy=pinned-fp32, return-convention=converge-on-traced. The paired §4 operator conversion was NOT executed and was deliberately re-sequenced behind a measurement gate: the surveys established that the plan's premise was wrong in ways that would have made the conversion misleading. Selection is at biot/operate.py:97-100, not :84, and traced is already the live default, so traced-default ratifies rather than inverts. jax is optional and the traced classes need it at class-definition time, so the guard must wrap definitions. Three classes want two names once merged. The default traced path is fp32 today (psi float32, 5.667e-08 vs host) and import-order dependent, and no existing test can see it at rtol=1e-5. The plan's own verification command deselects all 20 tests and exits 5. Baseline established green on main: test_jax_operate 20 passed 31.75s, test_biotoperate 31 passed 29.50s. Evidence: scratchpad operator-anatomy and naming-survey reports; no repo file was modified.</p>
     </article>
-<article class="r-fu" data-id="f-njd-002" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship" data-written-at="2026-08-09" data-recommends-skill="/reckon-ship nova-jax-dissolution §5" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-njd-002" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship" data-written-at="2026-08-09" data-recommends-skill="/reckon-ship nova-jax-dissolution §5" data-resolved-at="2026-08-09T07:23:28+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Convert the biot operator as the reviewed pattern, pinning precision and the JAX-free import</h4>
     <div class="r-fu-body"><p>The naming is locked and the operator's anatomy is fully mapped, so this is the one conversion that needs no prior measurement — the two halves already agree to atol=1e-10 across the existing suite. It establishes the pattern every later conversion follows: definitions behind a narrow guard, three classes renamed to two mechanisms plus a concept, precision pinned rather than inherited, and the JAX-free import proved for the first time. Stop for review before any other module moves.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -832,6 +729,7 @@ Done-when
      proved unchanged; dtype assertion added; config.py policy amended.
   5. JAX-free import test present and green.
   6. Commit SHAs, test output, and the before/after dtype evidence returned.</pre>
+    <p class="r-fu-outcome">§5, §6, §10, and the operator portion of §8 landed — dd293ea9, 6fd21575, d2fc5bb6, and 44119ae5 integrated by 35f51707. Operators are colocated under HostOperator/Coupling/TracedOperator with selection-only Operator; the traced path remains order-independent fp32 with a byte-identical 26-value reference and zero maximum regression; unreachable operator code is removed; and the JAX-free import/broken-JAX boundary is executable. Independent verification: 103 passed in 36.22 s; the warning regression passed with FutureWarning promoted to error.</p>
     </article>
 <article class="r-fu" data-id="f-njd-003" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-ship" data-written-at="2026-08-09" data-recommends-skill="/reckon-ship nova-jax-dissolution §4" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Measure every remaining pair and record collapse / keep / delete with its numbers</h4>

@@ -1,8 +1,10 @@
 """Manage matmul operations and svd reductions on Biot Data."""
 
 from contextlib import contextmanager
-from dataclasses import dataclass, field, InitVar
+from dataclasses import InitVar, dataclass, field
 from functools import cached_property
+import logging
+from typing import NamedTuple
 
 import numpy as np
 import xarray
@@ -11,8 +13,8 @@ from nova.biot.data import Data
 from nova.frame.framesetloc import ArrayLocIndexer
 
 
-# stated here rather than imported so the numpy operator stands alone when the
-# jax extra is absent; the jitted operator raises the same condition.
+# Defined outside the optional traced block so the host operator remains usable
+# when JAX is absent. Both implementations raise the same condition.
 MISSING_FORCE_INDEX = (
     "A Force operator scales its interaction by the source current at index, "
     "so the index is required: none was passed and the dataset carries no "
@@ -22,8 +24,8 @@ MISSING_FORCE_INDEX = (
 
 
 @dataclass
-class NumpyOperator:
-    """Fast array opperations for Biot Data arrays."""
+class HostOperator:
+    """Apply Biot data arrays eagerly on the host."""
 
     aloc: ArrayLocIndexer
     saloc: ArrayLocIndexer
@@ -48,16 +50,6 @@ class NumpyOperator:
         if source_plasma and target_plasma:
             self.plasma_plasma = dataset[f"_{attr}_"].data
 
-        """
-        #  perform svd order reduction
-        self.svd_rank = min([len(plasma_s), svd_rank])
-
-        # TODO fix svd_rank == -1 bug - crop plasma_U
-        self.plasma_U = plasma_U.copy()#[:, :self.svd_rank].copy()
-        self.plasma_s = plasma_s.copy()#[:self.svd_rank].copy()
-        self.plasma_V = plasma_V.copy()#[:self.svd_rank, :].copy()
-        """
-
     def evaluate(self):
         """Return interaction."""
         result = self.source_target @ self.saloc["Ic"]
@@ -72,13 +64,6 @@ class NumpyOperator:
 
     def update_turns(self, svd=True):
         """Update plasma turns."""
-        """
-        if svd:
-            self.matrix[:, self.plasma_index] = self.plasma_U @ \
-                (self.plasma_s * (self.plasma_V @ self.plasma_nturn))
-            return
-        print('svd == -1')
-        """
         plasma_nturn = self.plasma_nturn
         if update_source := self.source_plasma_index != -1:
             self.source_target[:, self.source_plasma_index] = (
@@ -94,10 +79,187 @@ class NumpyOperator:
             )
 
 
-try:  # jitted operator is the primary path; numpy is the fallback
-    from nova.jax.operate import BiotOperator as Operator
-except ImportError:  # jax extra absent
-    Operator = NumpyOperator
+logger = logging.getLogger(__name__)
+
+try:
+    import jax
+    import jax.numpy as jnp
+
+    from nova.jax.tree_util import Pytree
+except ModuleNotFoundError as error:
+    if error.name != "jax":
+        raise
+    logger.warning("JAX is not installed; using the host Biot operator")
+    Operator = HostOperator
+else:
+
+    class MatrixData(NamedTuple):
+        """EM coupling data for traced computations."""
+
+        plasma_target: jnp.ndarray | None = None
+        source_plasma: jnp.ndarray | None = None
+        plasma_plasma: jnp.ndarray | None = None
+        force_index: jnp.ndarray | None = None
+
+    @dataclass
+    @jax.tree_util.register_pytree_node_class
+    class Coupling(Pytree):
+        """Manage EM influence matrices."""
+
+        source_target: jnp.ndarray
+        matrix_data: MatrixData
+        source_plasma_index: int = -1
+        target_plasma_index: int = -1
+        classname: str = ""
+
+        @jax.jit
+        def evaluate(self, source_target, source_current):
+            """Return source-target interaction."""
+            result = source_target @ source_current
+            if self.classname == "Force":
+                if (force_index := self.matrix_data.force_index) is None:
+                    raise ValueError(MISSING_FORCE_INDEX)
+                return source_current[force_index] * result
+            return result
+
+        @jax.jit
+        def update_plasma_turns(self, plasma_nturn):
+            """Update plasma turns inplace."""
+            source_target = self.source_target
+            if update_source := self.source_plasma_index != -1:
+                source_target = source_target.at[:, self.source_plasma_index].set(
+                    self.matrix_data.plasma_target @ plasma_nturn
+                )
+            if update_target := self.target_plasma_index != -1:
+                source_target = source_target.at[self.target_plasma_index, :].set(
+                    plasma_nturn @ self.matrix_data.source_plasma
+                )
+            if update_source and update_target:
+                source_target = source_target.at[
+                    self.target_plasma_index, self.source_plasma_index
+                ].set(plasma_nturn @ self.matrix_data.plasma_plasma @ plasma_nturn)
+            return source_target
+
+        def tree_flatten(self):
+            """Return flattened pytree."""
+            children = (
+                self.source_target,
+                self.matrix_data,
+            )
+            aux_data = {
+                "source_plasma_index": self.source_plasma_index,
+                "target_plasma_index": self.target_plasma_index,
+                "classname": self.classname,
+            }
+            return (children, aux_data)
+
+    @dataclass
+    class Operators:
+        """Generate EM coupling matricies."""
+
+        data: xarray.Dataset = field(repr=False)
+        index: np.ndarray | None = None
+
+        def force_index(self, classname: str) -> jnp.ndarray | None:
+            """Return the source-current index a Force operator applies as a gain.
+
+            Only the Force interaction reads an index, so every other classname
+            returns None. The caller's index takes precedence; when none is passed
+            the index is read from the dataset. An absent index raises rather than
+            leaving a Force operator to index with None.
+            """
+            if classname != "Force":
+                return None
+            index = self.index
+            if index is None:
+                index = self.data.get("index", xarray.DataArray([])).data
+            if np.asarray(index).size == 0:
+                raise ValueError(MISSING_FORCE_INDEX)
+            return jnp.asarray(index, dtype=jnp.int32)
+
+        def __getitem__(self, attr: str) -> Coupling:
+            """Retrun traced Coupling instance."""
+            # attrs, not attribute access: a data_var or coord of the same name
+            # would shadow the dataset attribute it resolves to.
+            source_plasma_index = self.data.attrs["source_plasma_index"]
+            target_plasma_index = self.data.attrs["target_plasma_index"]
+            classname = self.data.attrs["classname"]
+
+            plasma_dataset = {}
+            if source_plasma := source_plasma_index != -1:
+                plasma_dataset["plasma_target"] = jnp.array(
+                    self.data[f"{attr}_"], dtype=jnp.float32
+                )
+            if target_plasma := target_plasma_index != -1:
+                plasma_dataset["source_plasma"] = jnp.array(
+                    self.data[f"_{attr}"], dtype=jnp.float32
+                )
+            if source_plasma and target_plasma:
+                plasma_dataset["plasma_plasma"] = jnp.array(
+                    self.data[f"_{attr}_"], dtype=jnp.float32
+                )
+            if (force_index := self.force_index(classname)) is not None:
+                plasma_dataset["force_index"] = force_index
+
+            return Coupling(
+                jnp.array(self.data[attr], dtype=jnp.float32),
+                MatrixData(**plasma_dataset),
+                source_plasma_index,
+                target_plasma_index,
+                classname,
+            )
+
+    @dataclass
+    class TracedOperator:
+        """Traced operator presenting the host operator's mutating interface.
+
+        Wraps the traced pytree :class:`Coupling` so it drops into the biot
+        version-counter cache in place of the eager host operator: the
+        source-target matmul and plasma-turn update run through traced code while
+        the ``source_target`` matrix and the ``evaluate``/``update_turns`` surface
+        stay in the mutating shape Operate's invalidation contract drives. The
+        plasma row/column are always re-derived from the pristine coupling
+        matrices, so repeated turn updates carry no accumulated state.
+        """
+
+        aloc: ArrayLocIndexer
+        saloc: ArrayLocIndexer
+        classname: str
+        index: np.ndarray
+        dataset: InitVar[xarray.Dataset]
+
+        def __post_init__(self, dataset):
+            """Build the traced operator and link the mutable source-target."""
+            attr = list(dataset.data_vars)[0]
+            # the caller's index is the Force gain, so the traced and host
+            # operators scale by the same array rather than by separate lookups.
+            self._operator = Operators(dataset, self.index)[attr]
+            self.source_plasma_index = self._operator.source_plasma_index
+            self.target_plasma_index = self._operator.target_plasma_index
+            # source_target stays a live view into the dataset array so a plasma-turn
+            # update propagates back to data[attr], as the host operator does.
+            self.source_target = dataset[attr].data
+
+        def evaluate(self):
+            """Return the source-target interaction for the current currents."""
+            source_current = jnp.asarray(self.saloc["Ic"], dtype=jnp.float32)
+            result = self._operator.evaluate(
+                jnp.asarray(self.source_target, dtype=jnp.float32), source_current
+            )
+            return np.asarray(result)
+
+        @property
+        def plasma_nturn(self):
+            """Return plasma turns."""
+            return self.aloc["nturn"][self.aloc["plasma"]]
+
+        def update_turns(self, svd=True):
+            """Re-derive the plasma row/column in the live matrix."""
+            plasma_nturn = jnp.asarray(self.plasma_nturn, dtype=jnp.float32)
+            updated = np.asarray(self._operator.update_plasma_turns(plasma_nturn))
+            self.source_target[...] = updated
+
+    Operator = TracedOperator
 
 
 @dataclass

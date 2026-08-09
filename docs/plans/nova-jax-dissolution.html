@@ -22,7 +22,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-09">
-<meta name="plan-version" content="36">
+<meta name="plan-version" content="37">
 <meta name="plan-impl" content="0.7777777777777778">
 </head>
 <body>
@@ -945,6 +945,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="_top" data-id="c-njd-topology-audit" data-who="reckon-ship" data-when="2026-08-09">
     <div class="r-comment-body"><p><strong>Field-null topology audit:</strong> the exact smooth 61×61 field contains 49 genuine strict-interior saddles. The legacy mask reports 99 vertex hits because 50 are duplicate representations; it produces no extra continuous stationary points. The fixed eight slots represent only 7/49 saddles and silently omit 91 raw hits. Across 640 noise-only fields, 72,090 native candidates yielded zero automatically resolved false positives at the measured score while uncertain candidates remained unresolved; generation recall reached 1.0 from cell SNR 0.4 and resolved recall from SNR 1.6. The production repair therefore uses native gradient degree for candidate existence, three-state resolution, index-preserving dedupe, and explicit ranked overflow.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-njd-precision-result" data-who="reckon-ship" data-when="2026-08-09">
+    <div class="r-comment-body"><p><strong>Reduced-precision audit:</strong> index-native normalized fp32 resolved 14,688 clean exact cases with zero wrong classes and worst localization error 0.01143 cell on CPU and 0.00784 cell on H200. Centering after an absolute-coordinate fp32 cast still lost 0.863–0.867 cell, so origin/spacing must remain explicit metadata and absolute coordinate grids must stay out of the hot kernel. At the measured automatic gate, 1,256/1,256 white-noise and 1,405/1,405 correlated-noise accepted classifications were correct with zero noise-only false positives; weaker evidence remains unresolved. Batch-4,096 H200 cost was 90.9 ns/case versus 1,143 ns/case on CPU.</p></div>
 </div>
 </section>
 </main>

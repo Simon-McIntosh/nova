@@ -22,7 +22,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-09">
-<meta name="plan-version" content="40">
+<meta name="plan-version" content="41">
 <meta name="plan-impl" content="0.7777777777777778">
 </head>
 <body>
@@ -883,7 +883,7 @@ Required work
 Verification
   Keep numerics identical except the separately landed §7 policy and the two explicitly measured stencil defect repairs. Add focused regression tests for every repair and path move, run affected slow-inclusive lanes once with full output capture, then run the complete slow-inclusive suite on a sun_debug allocation. Prove JAX-free imports remain intact. Return commit SHAs, exact changed paths, test logs, and confirmation that no moving nova.jax import remains.</pre>
     </article>
-<article class="r-fu" data-id="f-njd-007" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-09" data-recommends-skill="/reckon-ship nova-jax-dissolution §11" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-njd-007" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-09" data-recommends-skill="/reckon-ship nova-jax-dissolution §11" data-resolved-at="2026-08-09T12:44:32+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Make null detection noise-robust and GPU-throughput capable</h4>
     <div class="r-fu-body"><p>The first route measurements exposed unresolved scientific and performance risks rather than licensing relocation: a smooth periodic field produced 99 raw candidates truncated to 8, clean ITER-scale fp32 fits misclassified 12/18 cases, and several single-field H200 paths were slower than CPU. Audit true-versus-noise null persistence, stabilize the local solve at reduced precision, and build a batched device-resident path whose measured throughput supports the long-term 4.5 TB MAST target before the FieldNull conversion closes.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -936,6 +936,7 @@ Done-when
   Focused regressions pin noise rejection, weak-null retention, overflow,
   reduced-precision stability and CPU/GPU parity. Full slow-inclusive validation
   is green before relocation/closure.</pre>
+    <p class="r-fu-outcome">Production FieldNull repair integrated at be0b64ad and independently verified: 99 raw hits collapse to 49 physical saddles; frozen held-out 384/384 true fields resolved with zero extras and zero resolved candidates across 384 noise-only fields; H200 live B128/K8 is 97.65x resident and 69.00x transfer-inclusive over CPU. Resident projection passes 4.5 TB/hour while transfer-inclusive projection is 3.216 TB/hour, leaving archive transfer/I/O as the qualified boundary.</p>
     </article>
 </section>
 
@@ -957,6 +958,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="_top" data-id="c-njd-null-relocation" data-who="reckon-ship" data-when="2026-08-09">
     <div class="r-comment-body"><p><strong>Null/topology relocation:</strong> the zero-caller traced <code>FieldNull</code> wrapper and the four technology-organised routes were removed without shims. Fixed-shape <code>Null1D</code>/<code>Null2D</code> now live in <code>nova.biot.null</code>, the matrix evaluator is <code>nova.biot.target.FluxTarget</code>, and <code>Topology</code> is in <code>nova.equilibrium.topology</code>. Independent verification found zero executable retired imports, preserved numerical bodies and static capacities, and confirmed the optional-JAX boundary; 100 focused tests passed in 96.11 s. Integrated at <code>b1e1e530</code>.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-njd-fieldnull-production" data-who="reckon-ship" data-when="2026-08-09">
+    <div class="r-comment-body"><p><strong>Production FieldNull repair:</strong> native unsmoothed degree now owns candidate existence, a frozen class-margin threshold controls resolution, same-root topology is certified without erasing weak evidence, normalized local fits remain differentiable, and fixed-capacity overflow is explicit. The exact smooth field produces 49 physical saddles rather than 99 raw raster representations. A no-retuning held-out bank resolved 384/384 true fields with zero extras and zero resolved candidates in 384 noise-only fields. Live B128/K8 throughput is 193.9 CPU versus 18,930 resident and 13,303 inclusive H200 fields/s. One H200 projects to 4.577 TB/hour resident but 3.216 TB/hour inclusive because transfers consume 29.73%; multi-GPU/archive throughput remains a qualified projection, not a measured end-to-end claim. Integrated and pushed at <code>be0b64ad</code>; cumulative evidence is at <code>docs/evidence/archive/nova-jax-dissolution-landed.html</code>.</p></div>
 </div>
 </section>
 </main>

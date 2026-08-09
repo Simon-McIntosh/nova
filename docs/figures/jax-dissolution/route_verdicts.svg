@@ -1,0 +1,258 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1840" viewBox="0 0 1600 1840" role="img" aria-labelledby="title desc">
+  <title id="title">Canonical JAX route dispositions</title>
+  <desc id="desc">A five-group summary of twenty measured routing decisions for select, null stack, fixed point, stencil nulls, and connectivity. Eight routes keep both implementations, four collapse, four delete a duplicate, and four relocate a single implementation.</desc>
+  <defs>
+    <linearGradient id="page" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f8fafc"/>
+      <stop offset="1" stop-color="#eef2ff"/>
+    </linearGradient>
+    <linearGradient id="masthead" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#172554"/>
+      <stop offset="0.55" stop-color="#1e3a8a"/>
+      <stop offset="1" stop-color="#312e81"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="125%">
+      <feDropShadow dx="0" dy="5" stdDeviation="8" flood-color="#1e293b" flood-opacity="0.10"/>
+    </filter>
+    <style>
+      .title { font: 700 48px 'DejaVu Sans', sans-serif; letter-spacing: -1px; fill: #fff; }
+      .subtitle { font: 400 20px 'DejaVu Sans', sans-serif; fill: #dbeafe; }
+      .meta { font: 500 15px 'DejaVu Sans Mono', monospace; fill: #bfdbfe; }
+      .count { font: 800 25px 'DejaVu Sans', sans-serif; }
+      .count-label { font: 700 14px 'DejaVu Sans', sans-serif; letter-spacing: .6px; }
+      .group { font: 800 24px 'DejaVu Sans', sans-serif; fill: #172033; }
+      .group-meta { font: 500 14px 'DejaVu Sans Mono', monospace; fill: #64748b; }
+      .column { font: 700 12px 'DejaVu Sans', sans-serif; letter-spacing: 1.2px; fill: #7c8aa0; }
+      .item { font: 700 16px 'DejaVu Sans', sans-serif; fill: #243047; }
+      .symbols { font: 400 13px 'DejaVu Sans Mono', monospace; fill: #64748b; }
+      .evidence { font: 500 15px 'DejaVu Sans', sans-serif; fill: #374151; }
+      .note { font: 500 14px 'DejaVu Sans', sans-serif; fill: #526078; }
+      .tag { font: 800 12px 'DejaVu Sans', sans-serif; letter-spacing: .6px; text-anchor: middle; dominant-baseline: middle; }
+      .alert-label { font: 800 12px 'DejaVu Sans', sans-serif; letter-spacing: 1px; fill: #9a3412; }
+      .alert-text { font: 700 14px 'DejaVu Sans', sans-serif; fill: #7c2d12; }
+      .footer { font: 500 13px 'DejaVu Sans', sans-serif; fill: #64748b; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="1840" fill="url(#page)"/>
+  <circle cx="1515" cy="120" r="205" fill="#60a5fa" opacity="0.09"/>
+  <circle cx="1405" cy="10" r="130" fill="#c4b5fd" opacity="0.10"/>
+
+  <rect width="1600" height="220" fill="url(#masthead)"/>
+  <text class="title" x="48" y="68">Canonical JAX route dispositions</text>
+  <text class="subtitle" x="50" y="106">Independent measurement synthesis · 20 routines and logical pairs · no benchmark rerun</text>
+  <text class="meta" x="50" y="139">integrated base c3afd5a1 · corrected measured heads carried below · 2026-08-09</text>
+
+  <g transform="translate(50 163)">
+    <rect width="198" height="42" rx="21" fill="#ccfbf1"/>
+    <circle cx="22" cy="21" r="7" fill="#0f766e"/>
+    <text class="count" x="39" y="29" fill="#0f766e">8</text>
+    <text class="count-label" x="73" y="27" fill="#115e59">KEEP BOTH</text>
+  </g>
+  <g transform="translate(262 163)">
+    <rect width="188" height="42" rx="21" fill="#dbeafe"/>
+    <circle cx="22" cy="21" r="7" fill="#2563eb"/>
+    <text class="count" x="39" y="29" fill="#2563eb">4</text>
+    <text class="count-label" x="73" y="27" fill="#1d4ed8">COLLAPSE</text>
+  </g>
+  <g transform="translate(464 163)">
+    <rect width="166" height="42" rx="21" fill="#ffe4e6"/>
+    <circle cx="22" cy="21" r="7" fill="#be123c"/>
+    <text class="count" x="39" y="29" fill="#be123c">4</text>
+    <text class="count-label" x="73" y="27" fill="#9f1239">DELETE</text>
+  </g>
+  <g transform="translate(644 163)">
+    <rect width="184" height="42" rx="21" fill="#fef3c7"/>
+    <circle cx="22" cy="21" r="7" fill="#b45309"/>
+    <text class="count" x="39" y="29" fill="#b45309">4</text>
+    <text class="count-label" x="73" y="27" fill="#92400e">RELOCATE</text>
+  </g>
+
+  <!-- Select -->
+  <g transform="translate(40 246)">
+    <rect width="1520" height="470" rx="20" fill="#fff" stroke="#dbe3ef"/>
+    <rect width="10" height="470" rx="5" fill="#4f46e5"/>
+    <text class="group" x="34" y="42">Select</text>
+    <text class="group-meta" x="132" y="41">9 decisions · abb5f013</text>
+    <g transform="translate(978 15)">
+      <rect width="514" height="46" rx="11" fill="#fff7ed" stroke="#fdba74"/>
+      <text class="alert-label" x="16" y="19">REPAIR BOUNDARY</text>
+      <text class="alert-text" x="16" y="37">Enable fp64 before the first select trace</text>
+    </g>
+    <text class="column" x="34" y="86">LOGICAL PAIR</text>
+    <text class="column" x="368" y="86">DISPOSITION</text>
+    <text class="column" x="540" y="86">DECISIVE MEASUREMENT OR SEMANTIC BOUNDARY</text>
+
+    <g transform="translate(0 101)">
+      <text class="item" x="34" y="19">select module</text>
+      <g transform="translate(355 1)"><rect width="132" height="27" rx="13.5" fill="#ccfbf1"/><text class="tag" x="66" y="14" fill="#0f766e">KEEP BOTH</text></g>
+      <text class="evidence" x="540" y="19">fp32: 12/18 class mismatches on CPU and GPU · fp64: 0/18 · GPU max error 1.09e−11</text>
+    </g>
+    <line x1="34" x2="1488" y1="137" y2="137" stroke="#edf1f7"/>
+    <g transform="translate(0 143)">
+      <text class="item" x="34" y="19">bisect</text>
+      <g transform="translate(355 1)"><rect width="132" height="27" rx="13.5" fill="#ffe4e6"/><text class="tag" x="66" y="14" fill="#be123c">DELETE</text></g>
+      <text class="evidence" x="540" y="19">0 traced callers · CPU 17.7–18.4× host · GPU 472–874× host</text>
+    </g>
+    <line x1="34" x2="1488" y1="179" y2="179" stroke="#edf1f7"/>
+    <g transform="translate(0 185)">
+      <text class="item" x="34" y="19">right and vector bisection</text>
+      <g transform="translate(355 1)"><rect width="132" height="27" rx="13.5" fill="#ffe4e6"/><text class="tag" x="66" y="14" fill="#be123c">DELETE</text></g>
+      <text class="evidence" x="540" y="19">0 traced callers · right route cannot trace · vector route fails on non-empty input</text>
+    </g>
+    <line x1="34" x2="1488" y1="221" y2="221" stroke="#edf1f7"/>
+    <g transform="translate(0 227)">
+      <text class="item" x="34" y="19">wall arithmetic</text>
+      <g transform="translate(355 1)"><rect width="132" height="27" rx="13.5" fill="#dbeafe"/><text class="tag" x="66" y="14" fill="#2563eb">COLLAPSE</text></g>
+      <text class="evidence" x="540" y="19">Array namespace is the only body difference · preserve backend zero-division semantics</text>
+    </g>
+    <line x1="34" x2="1488" y1="263" y2="263" stroke="#edf1f7"/>
+    <g transform="translate(0 269)">
+      <text class="item" x="34" y="19">wall fitting and selection</text>
+      <g transform="translate(355 1)"><rect width="132" height="27" rx="13.5" fill="#ccfbf1"/><text class="tag" x="66" y="14" fill="#0f766e">KEEP BOTH</text></g>
+      <text class="evidence" x="540" y="19">Different branching, mutation, least-squares, NaN, and fixed-shape contracts</text>
+    </g>
+    <line x1="34" x2="1488" y1="305" y2="305" stroke="#edf1f7"/>
+    <g transform="translate(0 311)">
+      <text class="item" x="34" y="19">quadratic surface fit</text>
+      <g transform="translate(355 1)"><rect width="132" height="27" rx="13.5" fill="#ccfbf1"/><text class="tag" x="66" y="14" fill="#0f766e">KEEP BOTH</text></g>
+      <text class="evidence" x="540" y="19">Host float64 + gelsd contract differs from traced JAX precision and device semantics</text>
+    </g>
+    <line x1="34" x2="1488" y1="347" y2="347" stroke="#edf1f7"/>
+    <g transform="translate(0 353)">
+      <text class="item" x="34" y="19">converged surface arithmetic</text>
+      <g transform="translate(355 1)"><rect width="132" height="27" rx="13.5" fill="#dbeafe"/><text class="tag" x="66" y="14" fill="#2563eb">COLLAPSE</text></g>
+      <text class="evidence" x="540" y="19">Only after NaN sentinel and determinant-floor policy are locked</text>
+    </g>
+    <line x1="34" x2="1488" y1="389" y2="389" stroke="#edf1f7"/>
+    <g transform="translate(0 395)">
+      <text class="item" x="34" y="19">subnull composite</text>
+      <g transform="translate(355 1)"><rect width="132" height="27" rx="13.5" fill="#ccfbf1"/><text class="tag" x="66" y="14" fill="#0f766e">KEEP BOTH</text></g>
+      <text class="evidence" x="540" y="19">Host scalar loops and traced vmap are independently live · GPU ratio 0.14–35.4×</text>
+    </g>
+    <line x1="34" x2="1488" y1="431" y2="431" stroke="#edf1f7"/>
+    <g transform="translate(0 437)">
+      <text class="item" x="34" y="19">subnull signature</text>
+      <g transform="translate(355 1)"><rect width="132" height="27" rx="13.5" fill="#dbeafe"/><text class="tag" x="66" y="14" fill="#2563eb">COLLAPSE</text></g>
+      <text class="evidence" x="540" y="19">Three coordinate arrays → [r, z, psi, type] · exact max difference 0 · GPU ratio 0.71–1.33×</text>
+    </g>
+  </g>
+
+  <!-- Null stack -->
+  <g transform="translate(40 726)">
+    <rect width="1520" height="258" rx="20" fill="#fff" stroke="#dbe3ef"/>
+    <rect width="10" height="258" rx="5" fill="#0891b2"/>
+    <text class="group" x="34" y="42">Null stack</text>
+    <text class="group-meta" x="176" y="41">4 decisions · ee5503fa · measured fp32</text>
+    <text class="note" x="905" y="41">Preserve adaptive host semantics and JAX-free boundaries</text>
+    <text class="column" x="34" y="82">MODULE</text>
+    <text class="column" x="368" y="82">DISPOSITION</text>
+    <text class="column" x="540" y="82">DECISIVE MEASUREMENT OR SEMANTIC BOUNDARY</text>
+    <g transform="translate(0 96)">
+      <text class="item" x="34" y="19">fieldnull</text>
+      <g transform="translate(355 1)"><rect width="132" height="27" rx="13.5" fill="#ffe4e6"/><text class="tag" x="66" y="14" fill="#be123c">DELETE</text></g>
+      <text class="evidence" x="540" y="19">Delete zero-caller traced wrapper · retain 2-caller host class + live kernels · max Δ 3.12e−4</text>
+    </g>
+    <line x1="34" x2="1488" y1="132" y2="132" stroke="#edf1f7"/>
+    <g transform="translate(0 138)">
+      <text class="item" x="34" y="19">null</text>
+      <g transform="translate(355 1)"><rect width="132" height="27" rx="13.5" fill="#ccfbf1"/><text class="tag" x="66" y="14" fill="#0f766e">KEEP BOTH</text></g>
+      <text class="evidence" x="540" y="19">4 importers · fixed-size derivatives vs adaptive state/filtering · 7 nonzero gradient entries</text>
+    </g>
+    <line x1="34" x2="1488" y1="174" y2="174" stroke="#edf1f7"/>
+    <g transform="translate(0 180)">
+      <text class="item" x="34" y="19">target</text>
+      <g transform="translate(355 1)"><rect width="132" height="27" rx="13.5" fill="#ccfbf1"/><text class="tag" x="66" y="14" fill="#0f766e">KEEP BOTH</text></g>
+      <text class="evidence" x="540" y="19">Matrix evaluator is not the host geometry container · 3 importers · max scaled error 2.03e−7</text>
+    </g>
+    <line x1="34" x2="1488" y1="216" y2="216" stroke="#edf1f7"/>
+    <g transform="translate(0 222)">
+      <text class="item" x="34" y="19">topology</text>
+      <g transform="translate(355 1)"><rect width="132" height="27" rx="13.5" fill="#ccfbf1"/><text class="tag" x="66" y="14" fill="#0f766e">KEEP BOTH</text></g>
+      <text class="evidence" x="540" y="19">Fixed-shape pure kernel vs mutable adaptive state · max normalized Δ 6.33e−4</text>
+    </g>
+  </g>
+
+  <!-- Fixed point -->
+  <g transform="translate(40 1008)">
+    <rect width="1520" height="177" rx="20" fill="#fff" stroke="#dbe3ef"/>
+    <rect width="10" height="177" rx="5" fill="#d97706"/>
+    <text class="group" x="34" y="42">Fixed point</text>
+    <text class="group-meta" x="224" y="41">1 solver family · 0f2ae46a</text>
+    <g transform="translate(1210 17)"><rect width="278" height="30" rx="15" fill="#f1f5f9"/><text class="tag" x="139" y="16" fill="#475569">NOT A PAIR · NO HOST PEER</text></g>
+    <text class="item" x="34" y="86">picard · anderson · newton_krylov</text>
+    <g transform="translate(355 66)"><rect width="132" height="27" rx="13.5" fill="#fef3c7"/><text class="tag" x="66" y="14" fill="#b45309">RELOCATE</text></g>
+    <text class="evidence" x="540" y="86">Move intact to equilibrium/fixed_point.py · retain all algorithms · production imports: 0</text>
+    <rect x="34" y="111" width="1454" height="45" rx="10" fill="#fffbeb" stroke="#fde68a"/>
+    <text class="evidence" x="52" y="139">CPU won every steady regime: GPU speedup 0.096–0.795× · CPU/GPU relative sup ≤ 1.90e−13 · oracle error ≤ 3.32e−6 · compile measured separately</text>
+  </g>
+
+  <!-- Stencil nulls -->
+  <g transform="translate(40 1209)">
+    <rect width="1520" height="319" rx="20" fill="#fff" stroke="#dbe3ef"/>
+    <rect width="10" height="319" rx="5" fill="#7c3aed"/>
+    <text class="group" x="34" y="42">Stencil nulls</text>
+    <text class="group-meta" x="204" y="41">4 decisions · 3fa13b4a</text>
+    <text class="column" x="34" y="82">ROUTINE</text>
+    <text class="column" x="368" y="82">DISPOSITION</text>
+    <text class="column" x="540" y="82">DECISIVE MEASUREMENT OR SEMANTIC BOUNDARY</text>
+    <g transform="translate(0 96)">
+      <text class="item" x="34" y="19">ring_sign_changes</text>
+      <g transform="translate(355 1)"><rect width="132" height="27" rx="13.5" fill="#ccfbf1"/><text class="tag" x="66" y="14" fill="#0f766e">KEEP BOTH</text></g>
+      <text class="evidence" x="540" y="19">Rectangular reference exact 1.0 · saddles 99 vs 50 · geometry contracts differ</text>
+    </g>
+    <line x1="34" x2="1488" y1="132" y2="132" stroke="#edf1f7"/>
+    <g transform="translate(0 138)">
+      <text class="item" x="34" y="19">subnull</text>
+      <g transform="translate(355 1)"><rect width="132" height="27" rx="13.5" fill="#dbeafe"/><text class="tag" x="66" y="14" fill="#2563eb">COLLAPSE</text></g>
+      <text class="evidence" x="540" y="19">Three-array signature is exact (max Δ 0) · CPU 16.06 vs 16.23 µs · GPU 503 vs 466 µs</text>
+    </g>
+    <line x1="34" x2="1488" y1="174" y2="174" stroke="#edf1f7"/>
+    <g transform="translate(0 180)">
+      <text class="item" x="34" y="19">magnetic_axis_subgrid</text>
+      <g transform="translate(355 1)"><rect width="132" height="27" rx="13.5" fill="#fef3c7"/><text class="tag" x="66" y="14" fill="#b45309">RELOCATE</text></g>
+      <text class="evidence" x="540" y="19">Single implementation · Gaussian max position error 5.63e−4</text>
+    </g>
+    <line x1="34" x2="1488" y1="216" y2="216" stroke="#edf1f7"/>
+    <g transform="translate(0 222)">
+      <text class="item" x="34" y="19">xpoint_candidates</text>
+      <g transform="translate(355 1)"><rect width="132" height="27" rx="13.5" fill="#fef3c7"/><text class="tag" x="66" y="14" fill="#b45309">RELOCATE</text></g>
+      <text class="evidence" x="540" y="19">Single implementation · Gaussian max position error 5.63e−4 · preserve 8 fixed slots</text>
+    </g>
+    <g transform="translate(34 267)">
+      <rect width="704" height="35" rx="9" fill="#fff1f2" stroke="#fda4af"/>
+      <text class="alert-text" x="15" y="23" fill="#9f1239">PLATEAU REJECTION: flat field currently publishes axis found = true</text>
+    </g>
+    <g transform="translate(752 267)">
+      <rect width="736" height="35" rx="9" fill="#fff7ed" stroke="#fdba74"/>
+      <text class="alert-text" x="15" y="23">OVERFLOW EXPOSURE: 99 candidates → 8 slots, overflow currently silent</text>
+    </g>
+  </g>
+
+  <!-- Connectivity -->
+  <g transform="translate(40 1552)">
+    <rect width="1520" height="218" rx="20" fill="#fff" stroke="#dbe3ef"/>
+    <rect width="10" height="218" rx="5" fill="#059669"/>
+    <text class="group" x="34" y="42">Connectivity</text>
+    <text class="group-meta" x="226" y="41">2 modules · 4af8d31f</text>
+    <text class="column" x="34" y="82">MODULE</text>
+    <text class="column" x="368" y="82">DISPOSITION</text>
+    <text class="column" x="540" y="82">DECISIVE MEASUREMENT OR SEMANTIC BOUNDARY</text>
+    <g transform="translate(0 96)">
+      <text class="item" x="34" y="19">connectivity_boundary</text>
+      <g transform="translate(355 1)"><rect width="132" height="27" rx="13.5" fill="#fef3c7"/><text class="tag" x="66" y="14" fill="#b45309">RELOCATE</text></g>
+      <text class="evidence" x="540" y="19">Adapter parity exact · diverted flux error 2.86e−6 · saddle error 1.25e−5 m</text>
+      <text class="note" x="540" y="39">Keep hard exact topology and smooth differentiability; host entries are adapters, not peers</text>
+    </g>
+    <line x1="34" x2="1488" y1="151" y2="151" stroke="#edf1f7"/>
+    <g transform="translate(0 158)">
+      <text class="item" x="34" y="19">flux_surface_connectivity</text>
+      <g transform="translate(355 1)"><rect width="132" height="27" rx="13.5" fill="#ffe4e6"/><text class="tag" x="66" y="14" fill="#be123c">DELETE</text></g>
+      <text class="evidence" x="540" y="19">Delete 0-caller host adapter · exact flood masks · interior relative errors ≤ 1.05e−2</text>
+      <text class="note" x="540" y="39">Relocate traced core; endpoint errors remain larger: dv 0.225 · grad² 0.149</text>
+    </g>
+  </g>
+
+  <text class="footer" x="42" y="1810">Source of truth: route_verdicts.json · raw artifacts: select_route, null_stack_route, fixed_point_route, stencil_null_route, connectivity_route</text>
+  <text class="footer" x="1558" y="1810" text-anchor="end">PASS · independent source, provenance, syntax, and artifact checks</text>
+</svg>

@@ -15,10 +15,10 @@ import jax
 import jax.numpy as jnp
 from scipy.constants import mu_0
 
-from nova.jax.basis import Basis
 from nova.jax.tree_util import Pytree
 from nova.jax.target import Target
 from nova.jax.topology import Topology
+from nova.linalg.interpolant import Basis
 
 
 @dataclass

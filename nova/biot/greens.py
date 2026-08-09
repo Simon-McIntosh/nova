@@ -72,14 +72,16 @@ targets from a nanometre off the filament out to the far side of the machine,
 pinned by ``tests/test_biotgreens.py``.  On the filament both routes expose the
 physical singularity: ``psi = inf`` and both field components are ``nan``.
 
-The three loop-specific elliptic combinations use their power series through
-``k^2 = 1e-2`` and a value-and-slope preserving transition to the direct form by
-``k^2 = 2e-2``.  Factoring the leading power before Horner evaluation avoids
-subtracting nearly equal complete integrals near the axis and in the far field,
-while the transition avoids an artificial jump at the numerical route boundary.
+The three loop-specific elliptic combinations take one descending Landen step
+through ``k^2 = 15/16`` and evaluate the resulting small parameter with exact
+power-series coefficients.  This avoids subtracting nearly equal complete
+integrals over almost the whole parameter range; direct combinations are used
+only near the filament, where their terms no longer cancel.
 """
 
 from __future__ import annotations
+
+from fractions import Fraction
 
 import numpy as np
 import scipy.special  # type: ignore[import-untyped]
@@ -90,44 +92,34 @@ from nova.biot.zeta import traced_zeta, zeta
 MU0 = 4.0e-7 * np.pi
 """Vacuum permeability [T.m/A]."""
 
-_ELLIPTIC_SERIES_LIMIT = 1.0e-2
-_ELLIPTIC_DIRECT_LIMIT = 2.0e-2
+_ELLIPTIC_CONDITIONED_LIMIT = 15.0 / 16.0
+_ELLIPTIC_SERIES_TERMS = 40
 
-# Coefficients are in descending order for Horner evaluation.  The polynomials
-# multiply pi/2 and respectively m, m^2 and m^2.  Their exact dyadic forms are
-# derived from the complete-integral coefficient recurrence in the tests.
-_FIRST_MINUS_SECOND_HORNER = (
-    0.03642282681539655,
-    0.04113636910915375,
-    0.047254085540771484,
-    0.055515289306640625,
-    0.067291259765625,
-    0.08544921875,
-    0.1171875,
-    0.1875,
-    0.5,
-)
-_FLUX_ELLIPTIC_HORNER = (
-    0.015479701396543533,
-    0.017140153795480728,
-    0.019196972250938416,
-    0.02180957794189453,
-    0.025234222412109375,
-    0.0299072265625,
-    0.03662109375,
-    0.046875,
-    0.0625,
-)
-_RADIAL_FIELD_ELLIPTIC_HORNER = (
-    0.2941143265343271,
-    0.2913826145231724,
-    0.28795458376407623,
-    0.2835245132446289,
-    0.2775764465332031,
-    0.2691650390625,
-    0.25634765625,
-    0.234375,
-    0.1875,
+
+def _elliptic_series_coefficients(terms):
+    """Return exactly derived Horner coefficients for ``K-E`` and ``E``.
+
+    If ``a_n = (binomial(2n, n) / 4**n)**2``, the coefficients of ``K-E``
+    and the amount subtracted from one in ``E`` are respectively
+    ``2n a_n / (2n - 1)`` and ``a_n / (2n - 1)``.  Building the recurrence
+    with rational arithmetic makes every stored float the direct rounding of
+    that exact coefficient rather than the result of accumulated float error.
+    """
+    complete_coefficient = Fraction(1, 1)
+    first_minus_second = []
+    second_kind = []
+    for degree in range(1, terms + 1):
+        ratio = Fraction(2 * degree - 1, 2 * degree)
+        complete_coefficient *= ratio * ratio
+        first_minus_second.append(
+            float(complete_coefficient * Fraction(2 * degree, 2 * degree - 1))
+        )
+        second_kind.append(float(complete_coefficient / Fraction(2 * degree - 1, 1)))
+    return tuple(reversed(first_minus_second)), tuple(reversed(second_kind))
+
+
+_FIRST_MINUS_SECOND_HORNER, _SECOND_KIND_HORNER = _elliptic_series_coefficients(
+    _ELLIPTIC_SERIES_TERMS
 )
 
 
@@ -143,16 +135,28 @@ def _filament_elliptic_combinations(xp, parameter, complement, first, second):
     """Return the three cancellation-free combinations used by a loop kernel.
 
     The returned values are ``K-E``, ``(1-m/2)K-E`` and
-    ``E-K+mE/(2(1-m))``.  Both inactive arms are held at benign constants before
-    selection so traced values and tangents never evaluate an invalid denominator.
+    ``E-K+mE/(2(1-m))``.  A descending Landen step uses
+
+    ``q = m / (1 + sqrt(1-m))^2`` and ``p = q^2``.
+
+    Writing ``D = K(p)-E(p)`` gives the conditioned identities
+
+    ``K(m)-E(m) = 2D + 2q E(p)/(1+q)``,
+    ``(1-m/2)K(m)-E(m) = 2D/(1+q)``, and
+    ``E(m)-K(m)+mE(m)/(2(1-m))``
+    ``= -2D/(1-q) + 4q^2 E(p)/((1+q)(1-q)^2)``.
+
+    At the route boundary ``p = 0.36``, where the fixed series is at its
+    binary64 rounding floor.  Both inactive arms are held at benign constants
+    before selection so traced values and tangents stay finite.
     """
-    use_series = parameter <= _ELLIPTIC_SERIES_LIMIT
-    use_direct = parameter >= _ELLIPTIC_DIRECT_LIMIT
-    series_parameter = xp.where(use_direct, 0.0, parameter)
-    direct_parameter = xp.where(use_series, 0.0, parameter)
-    direct_complement = xp.where(use_series, 1.0, complement)
-    direct_first = xp.where(use_series, 1.0, first)
-    direct_second = xp.where(use_series, 1.0, second)
+    use_conditioned = parameter <= _ELLIPTIC_CONDITIONED_LIMIT
+    conditioned_parameter = xp.where(use_conditioned, parameter, 0.0)
+    conditioned_complement = xp.where(use_conditioned, complement, 1.0)
+    direct_parameter = xp.where(use_conditioned, 0.0, parameter)
+    direct_complement = xp.where(use_conditioned, 1.0, complement)
+    direct_first = xp.where(use_conditioned, 1.0, first)
+    direct_second = xp.where(use_conditioned, 1.0, second)
 
     first_minus_second = direct_first - direct_second
     flux = 0.5 * (1.0 + direct_complement) * direct_first - direct_second
@@ -162,39 +166,38 @@ def _filament_elliptic_combinations(xp, parameter, complement, first, second):
         + 0.5 * direct_parameter / direct_complement * direct_second
     )
 
+    landen_ratio = conditioned_parameter / (1.0 + xp.sqrt(conditioned_complement)) ** 2
+    transformed_parameter = landen_ratio * landen_ratio
     half_pi = 0.5 * np.pi
-    squared_parameter = series_parameter * series_parameter
-    series_first_minus_second = (
+    transformed_first_minus_second = (
         half_pi
-        * series_parameter
-        * _horner_polynomial(xp, series_parameter, _FIRST_MINUS_SECOND_HORNER)
+        * transformed_parameter
+        * _horner_polynomial(xp, transformed_parameter, _FIRST_MINUS_SECOND_HORNER)
     )
-    series_flux = (
-        half_pi
-        * squared_parameter
-        * _horner_polynomial(xp, series_parameter, _FLUX_ELLIPTIC_HORNER)
+    transformed_second = half_pi * (
+        1.0
+        - transformed_parameter
+        * _horner_polynomial(xp, transformed_parameter, _SECOND_KIND_HORNER)
     )
-    series_radial = (
-        half_pi
-        * squared_parameter
-        * _horner_polynomial(xp, series_parameter, _RADIAL_FIELD_ELLIPTIC_HORNER)
+    ratio_sum = 1.0 + landen_ratio
+    ratio_gap = 1.0 - landen_ratio
+    conditioned_first_minus_second = (
+        2.0 * transformed_first_minus_second
+        + 2.0 * landen_ratio / ratio_sum * transformed_second
     )
-    transition = (parameter - _ELLIPTIC_SERIES_LIMIT) / (
-        _ELLIPTIC_DIRECT_LIMIT - _ELLIPTIC_SERIES_LIMIT
+    conditioned_flux = 2.0 / ratio_sum * transformed_first_minus_second
+    conditioned_radial = (
+        -2.0 / ratio_gap * transformed_first_minus_second
+        + 4.0
+        * transformed_parameter
+        / (ratio_sum * ratio_gap * ratio_gap)
+        * transformed_second
     )
-    transition = xp.where(use_series, 0.0, xp.where(use_direct, 1.0, transition))
-    blend = transition * transition * (3.0 - 2.0 * transition)
-
-    def select(series_value, direct_value):
-        mixed = series_value + blend * (direct_value - series_value)
-        return xp.where(
-            use_series, series_value, xp.where(use_direct, direct_value, mixed)
-        )
 
     return (
-        select(series_first_minus_second, first_minus_second),
-        select(series_flux, flux),
-        select(series_radial, radial),
+        xp.where(use_conditioned, conditioned_first_minus_second, first_minus_second),
+        xp.where(use_conditioned, conditioned_flux, flux),
+        xp.where(use_conditioned, conditioned_radial, radial),
     )
 
 
@@ -812,7 +815,7 @@ def moment_filament(
     full toroidal ring the curvature it multiplies is set by the MAJOR radius
     rather than by the distance to the target, so a BARE centroid filament does
     not converge to the section at any standoff -- its relative error flattens
-    onto a floor of order ``(a / R0)^2``.  Carrying the quadrupole removes that
+    onto a floor of order ``(a / R_major)^2``.  Carrying the quadrupole removes that
     floor for five Green's-function evaluations, nine when the cross moment
     survives.
 

@@ -26,12 +26,12 @@ from decimal import Decimal, localcontext
 
 import numpy as np
 import pytest
+import scipy.integrate
 import scipy.special
 
 from nova.biot.completeelliptic import complete_kind, complete_pole
 from nova.biot.greens import (
-    _ELLIPTIC_DIRECT_LIMIT,
-    _ELLIPTIC_SERIES_LIMIT,
+    _ELLIPTIC_CONDITIONED_LIMIT,
     _filament_elliptic_combinations,
     MU0,
     corner_fields,
@@ -42,7 +42,7 @@ from nova.biot.greens import (
     traced_cylinder_greens,
     traced_filament_greens,
 )
-from nova.biot.zeta import zeta
+from nova.biot.zeta import GAUSS_ORDER, NEAR_PLANE_RATIO, traced_zeta, zeta
 
 # rectangular section + off-section targets (inside and outside)
 _A, _Z0, _DA, _DZ = 0.90, 0.10, 0.12, 0.18
@@ -292,15 +292,16 @@ def _decimal_elliptic_combinations(parameter, *, derivative=False):
         first_minus_second = Decimal(0)
         flux = Decimal(0)
         radial = Decimal(0)
-        for degree in range(1, 80):
+        value_power = m
+        derivative_power = one
+        for degree in range(1, 1601):
             prior_coefficient = complete_coefficient
             ratio = Decimal(2 * degree - 1) / Decimal(2 * degree)
             complete_coefficient *= ratio * ratio
             if derivative:
-                power = one if degree == 1 else m ** (degree - 1)
-                power *= degree
+                power = derivative_power * degree
             else:
-                power = m**degree
+                power = value_power
             first_minus_second += (
                 complete_coefficient
                 * Decimal(2 * degree)
@@ -313,14 +314,16 @@ def _decimal_elliptic_combinations(parameter, *, derivative=False):
                 )
                 flux += coefficient * power
                 radial += Decimal(2 * degree - 1) * coefficient * power
+            value_power *= m
+            derivative_power *= m
         scale = pi / two
         return np.array(
             [float(scale * value) for value in (first_minus_second, flux, radial)]
         )
 
 
-def test_small_parameter_elliptic_combinations_match_a_high_precision_arbiter():
-    """Cancellation-free loop combinations retain all binary64 digits."""
+def test_conditioned_elliptic_combinations_match_a_high_precision_arbiter():
+    """The Landen-series route retains binary64 accuracy across its domain."""
     parameter = np.array(
         [
             1e-16,
@@ -329,9 +332,11 @@ def test_small_parameter_elliptic_combinations_match_a_high_precision_arbiter():
             3.67e-9,
             3.67e-8,
             1e-6,
-            0.5 * _ELLIPTIC_SERIES_LIMIT,
-            np.nextafter(_ELLIPTIC_SERIES_LIMIT, 0.0),
-            _ELLIPTIC_SERIES_LIMIT,
+            0.125,
+            0.5,
+            0.9,
+            np.nextafter(_ELLIPTIC_CONDITIONED_LIMIT, 0.0),
+            _ELLIPTIC_CONDITIONED_LIMIT,
         ]
     )
     first = scipy.special.ellipk(parameter)
@@ -340,57 +345,94 @@ def test_small_parameter_elliptic_combinations_match_a_high_precision_arbiter():
         _filament_elliptic_combinations(np, parameter, 1.0 - parameter, first, second)
     ).T
     expected = np.array([_decimal_elliptic_combinations(value) for value in parameter])
-    np.testing.assert_allclose(got, expected, rtol=3e-16, atol=0.0)
+    np.testing.assert_allclose(got, expected, rtol=2e-15, atol=0.0)
 
 
-def test_elliptic_series_transition_has_no_artificial_boundary_jump():
-    """Adjacent values at the series boundary move only by the analytic slope."""
+def test_elliptic_route_boundary_tracks_the_analytic_nextafter_step():
+    """Both route sides move by the physical slope without a numerical jump."""
     parameter = np.array(
         [
-            np.nextafter(_ELLIPTIC_SERIES_LIMIT, 0.0),
-            _ELLIPTIC_SERIES_LIMIT,
-            np.nextafter(_ELLIPTIC_SERIES_LIMIT, np.inf),
+            np.nextafter(_ELLIPTIC_CONDITIONED_LIMIT, 0.0),
+            _ELLIPTIC_CONDITIONED_LIMIT,
+            np.nextafter(_ELLIPTIC_CONDITIONED_LIMIT, np.inf),
         ]
     )
-    first = scipy.special.ellipk(parameter)
-    second = scipy.special.ellipe(parameter)
-    got = np.array(
-        _filament_elliptic_combinations(np, parameter, 1.0 - parameter, first, second)
-    ).T
     expected = np.array([_decimal_elliptic_combinations(value) for value in parameter])
-    np.testing.assert_allclose(got, expected, rtol=4e-16, atol=0.0)
-    observed_step = got[2] - got[0]
+    complement = 1.0 - parameter
+    host_first = scipy.special.ellipk(parameter)
+    host_second = scipy.special.ellipe(parameter)
+    traced_first, traced_second = complete_kind(complement)
+    routes = (
+        np.array(
+            _filament_elliptic_combinations(
+                np, parameter, complement, host_first, host_second
+            )
+        ).T,
+        np.array(
+            _filament_elliptic_combinations(
+                np, parameter, complement, traced_first, traced_second
+            )
+        ).T,
+    )
     expected_step = expected[2] - expected[0]
-    roundoff = 4.0 * np.spacing(np.abs(got[1]))
-    assert np.all(np.abs(observed_step - expected_step) <= roundoff)
+    for got in routes:
+        np.testing.assert_allclose(got, expected, rtol=2e-15, atol=0.0)
+        observed_step = got[2] - got[0]
+        residual = np.abs(observed_step - expected_step)
+        assert np.all(residual <= 8.0 * np.spacing(np.abs(expected[1])))
+        assert np.all(np.abs(observed_step) <= 1.4 * np.abs(expected_step))
 
-    direct_parameter = np.array(
+
+def test_conditioned_elliptic_route_has_analytic_jitted_tangents():
+    """Value and slope stay accurate on both sides of the traced route boundary."""
+    jax = pytest.importorskip("jax")
+    jax.config.update("jax_enable_x64", True)
+    jnp = pytest.importorskip("jax.numpy")
+
+    def combinations(parameter):
+        first, second = complete_kind(1.0 - parameter, xp=jnp)
+        return jnp.stack(
+            _filament_elliptic_combinations(
+                jnp, parameter, 1.0 - parameter, first, second
+            )
+        )
+
+    parameter = np.array(
         [
-            np.nextafter(_ELLIPTIC_DIRECT_LIMIT, 0.0),
-            _ELLIPTIC_DIRECT_LIMIT,
-            np.nextafter(_ELLIPTIC_DIRECT_LIMIT, np.inf),
+            1e-12,
+            0.5,
+            np.nextafter(_ELLIPTIC_CONDITIONED_LIMIT, 0.0),
+            _ELLIPTIC_CONDITIONED_LIMIT,
+            np.nextafter(_ELLIPTIC_CONDITIONED_LIMIT, np.inf),
+            0.95,
         ]
     )
-    first = scipy.special.ellipk(direct_parameter)
-    second = scipy.special.ellipe(direct_parameter)
-    direct = np.array(
-        _filament_elliptic_combinations(
-            np,
-            direct_parameter,
-            1.0 - direct_parameter,
-            first,
-            second,
+    evaluate = jax.jit(
+        lambda value: jax.jvp(
+            combinations,
+            (value,),
+            (jnp.ones_like(value),),
         )
-    ).T
-    direct_expected = np.array(
-        [_decimal_elliptic_combinations(value) for value in direct_parameter]
     )
-    np.testing.assert_allclose(direct, direct_expected, rtol=2e-12, atol=0.0)
+    value, tangent = evaluate(jnp.asarray(parameter))
+    expected = np.array([_decimal_elliptic_combinations(item) for item in parameter])
+    expected_tangent = np.array(
+        [_decimal_elliptic_combinations(item, derivative=True) for item in parameter]
+    )
+    np.testing.assert_allclose(np.asarray(value).T, expected, rtol=3e-15, atol=0.0)
+    np.testing.assert_allclose(
+        np.asarray(tangent).T,
+        expected_tangent,
+        rtol=5e-14,
+        atol=1e-15,
+    )
 
 
 def test_small_parameter_point_filament_matches_a_high_precision_arbiter():
     """Psi and both field components keep their scale in the far regime."""
-    requested = np.array([1e-16, 1e-12, 1.2e-9, 3.67e-9, 3.67e-8, 1e-6, 0.009])
+    requested = np.array(
+        [1e-16, 1e-12, 1.2e-9, 3.67e-9, 3.67e-8, 1e-6, 0.125, 0.5, 0.9]
+    )
     target_z = 2.0 * np.sqrt(1.0 / requested - 1.0)
     target_r = np.ones_like(target_z)
     parameter = 4.0 / (4.0 + target_z**2)
@@ -410,70 +452,6 @@ def test_small_parameter_point_filament_matches_a_high_precision_arbiter():
     traced = np.column_stack(traced_filament_greens(np, target_r, target_z, 1.0, 0.0))
     np.testing.assert_allclose(host, expected, rtol=5e-15, atol=0.0)
     np.testing.assert_allclose(traced, expected, rtol=5e-15, atol=0.0)
-
-
-def test_small_parameter_branch_has_traced_value_and_tangent_continuity():
-    """The held series arm supplies finite, accurate traced tangents."""
-    jax = pytest.importorskip("jax")
-    jax.config.update("jax_enable_x64", True)
-    jnp = pytest.importorskip("jax.numpy")
-
-    def combinations(parameter):
-        first, second = complete_kind(1.0 - parameter, xp=jnp)
-        return jnp.stack(
-            _filament_elliptic_combinations(
-                jnp, parameter, 1.0 - parameter, first, second
-            )
-        )
-
-    for parameter in (1e-12, 0.5 * _ELLIPTIC_SERIES_LIMIT):
-        value, tangent = jax.jvp(
-            combinations, (jnp.asarray(parameter),), (jnp.asarray(1.0),)
-        )
-        np.testing.assert_allclose(
-            np.asarray(value),
-            _decimal_elliptic_combinations(parameter),
-            rtol=5e-15,
-            atol=0.0,
-        )
-        np.testing.assert_allclose(
-            np.asarray(tangent),
-            _decimal_elliptic_combinations(parameter, derivative=True),
-            rtol=5e-14,
-            atol=0.0,
-        )
-
-    distance = 1e-8
-    lower_value, lower_tangent = jax.jvp(
-        combinations,
-        (jnp.asarray(_ELLIPTIC_SERIES_LIMIT - distance),),
-        (jnp.asarray(1.0),),
-    )
-    upper_value, upper_tangent = jax.jvp(
-        combinations,
-        (jnp.asarray(_ELLIPTIC_SERIES_LIMIT + distance),),
-        (jnp.asarray(1.0),),
-    )
-    expected_change = (
-        2.0
-        * distance
-        * _decimal_elliptic_combinations(_ELLIPTIC_SERIES_LIMIT, derivative=True)
-    )
-    np.testing.assert_allclose(
-        np.asarray(upper_value - lower_value), expected_change, rtol=2e-5, atol=1e-18
-    )
-    lower_expected = _decimal_elliptic_combinations(
-        _ELLIPTIC_SERIES_LIMIT - distance, derivative=True
-    )
-    upper_expected = _decimal_elliptic_combinations(
-        _ELLIPTIC_SERIES_LIMIT + distance, derivative=True
-    )
-    np.testing.assert_allclose(
-        np.asarray(lower_tangent), lower_expected, rtol=5e-10, atol=1e-14
-    )
-    np.testing.assert_allclose(
-        np.asarray(upper_tangent), upper_expected, rtol=5e-10, atol=1e-14
-    )
 
 
 def test_units_constant():
@@ -1086,6 +1064,43 @@ def _set_deviation(one, other):
     return 0.0 if scale == 0.0 else float((np.abs(one - other) / scale).max())
 
 
+def test_reflected_zeta_reduction_matches_adaptive_section_values():
+    """The 48-node rule keeps endpoint cancellation at an off-section target."""
+    assert GAUSS_ORDER == 48
+    a, z0, da, dz = _TWIN_SECTION
+    target_r = 8.957377009836597
+    target_z = -3.814117371896103
+    source_r = np.array([a - da / 2.0, a + da / 2.0, a + da / 2.0, a - da / 2.0])
+    source_z = np.array([z0 - dz / 2.0] * 2 + [z0 + dz / 2.0] * 2)
+    radius = np.full(4, target_r)
+    gamma = source_z - target_z
+    alpha = np.full(4, np.pi / 2.0)
+
+    def adaptive(source_radius, level_gap):
+        def integrand(angle):
+            phi = np.pi - 2.0 * angle
+            denominator = np.sqrt(level_gap**2 + target_r**2 * np.sin(phi) ** 2)
+            return np.arcsinh((source_radius - target_r * np.cos(phi)) / denominator)
+
+        return scipy.integrate.quad(
+            integrand,
+            0.0,
+            np.pi / 2.0,
+            epsabs=2e-14,
+            epsrel=2e-14,
+            limit=200,
+        )[0]
+
+    expected = np.array(
+        [adaptive(source, gap) for source, gap in zip(source_r, gamma, strict=True)]
+    )
+    host = zeta(source_r, radius, gamma, alpha)
+    traced = traced_zeta(np, source_r, radius, gamma, alpha)
+    np.testing.assert_allclose(host, expected, rtol=2e-14, atol=0.0)
+    np.testing.assert_allclose(traced, expected, rtol=2e-14, atol=0.0)
+    np.testing.assert_allclose(host, traced, rtol=2e-15, atol=0.0)
+
+
 def test_the_point_filament_routes_agree_including_the_coincident_limit():
     """Cephes and the Bulirsch descent give the same filament, to round-off.
 
@@ -1152,11 +1167,11 @@ def test_the_rectangular_section_routes_agree_through_the_quadrature_switch():
     Both reach all three complete kinds through the same descent, so what is
     pinned here is the quadrature: the host routes each element between a
     48-node Gauss-Legendre rule and a 177-node tanh-sinh one, the traced form
-    takes tanh-sinh throughout.  ``corner_plane`` sweeps a target through a
-    corner's own level and so crosses the switch, which is the only place the
-    two rules can disagree; the four-corner combination differences four corner
-    values against each other, so it is carried alongside the bare corner
-    antiderivative in case that cancellation amplifies a per-corner difference.
+    takes tanh-sinh throughout.  ``corner_plane`` crosses the integrand's own
+    endpoint confluence, while ``quadrature_switch`` brackets both exact routing
+    boundaries.  The four-corner combination differences four corner values
+    against each other, so it is carried alongside the bare corner antiderivative
+    in case that cancellation amplifies a per-corner difference.
     """
     a, z0, da, dz = _TWIN_SECTION
     grid = np.meshgrid(
@@ -1164,11 +1179,31 @@ def test_the_rectangular_section_routes_agree_through_the_quadrature_switch():
         np.linspace(z0 - 0.4 * dz, z0 + 0.4 * dz, 20),
     )
     gap = np.geomspace(1.0, 1e-9, 200)
+    switch_radius = a + 0.3 * da
+    switch = NEAR_PLANE_RATIO * abs(switch_radius)
+    inner = switch - dz / 2.0
+    outer = switch + dz / 2.0
+    positive_switch = np.array(
+        [
+            np.nextafter(inner, -np.inf),
+            inner,
+            np.nextafter(inner, np.inf),
+            0.5 * (inner + outer),
+            np.nextafter(outer, -np.inf),
+            outer,
+            np.nextafter(outer, np.inf),
+        ]
+    )
+    switch_levels = z0 + np.concatenate([-positive_switch[::-1], positive_switch])
     regimes = {
         "inside": tuple(axis.ravel() for axis in grid),
         "corner_plane": (
             np.full(2 * gap.size, a + 0.3 * da),
             z0 + dz / 2.0 + np.concatenate([gap, -gap]) * da,
+        ),
+        "quadrature_switch": (
+            np.full(switch_levels.shape, switch_radius),
+            switch_levels,
         ),
         "near": _spiral(np.geomspace(0.6 * da, 4.0 * da, 400)),
         "standoff": _spiral(np.geomspace(1.0, 5.0, 400)),

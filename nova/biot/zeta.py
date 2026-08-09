@@ -49,7 +49,7 @@ import numpy as np
 
 from nova.jax.config import Precision, resolve_precision
 
-GAUSS_ORDER = 56
+GAUSS_ORDER = 48
 """Gauss-Legendre node count of the default rule (<=1e-12 for gamma >= 0.2 r)."""
 
 TANH_SINH_HALF_COUNT = 88
@@ -143,6 +143,29 @@ def _integrand(
     return np.arcsinh((rs - r * cos_phi) / np.sqrt(gamma**2 + r**2 * sin_phi**2))
 
 
+def _symmetric_rule_sum(xp, integrand, weights):
+    """Sum a reflected fixed rule by pairing equal-weight endpoint nodes.
+
+    Both fixed rules store nodes from one interval end to the other.  Pairing
+    reflected integrand values before multiplying by their common weight keeps
+    their natural cancellation inside one rounded product.  Averaging each
+    stored weight pair preserves its constant-function moment even if generating
+    the symmetric nodes left their last bits different.
+    """
+    count = weights.shape[0]
+    half = count // 2
+    reflected = xp.flip(integrand[..., -half:], axis=-1)
+    reflected_weights = xp.flip(weights[-half:], axis=0)
+    pair_weights = 0.5 * (weights[:half] + reflected_weights)
+    result = xp.sum(
+        (integrand[..., :half] + reflected) * pair_weights,
+        axis=-1,
+    )
+    if count % 2:
+        result = result + integrand[..., half] * weights[half]
+    return result
+
+
 def _integrate(
     rs: np.ndarray,
     r: np.ndarray,
@@ -157,7 +180,7 @@ def _integrate(
     for start in range(0, alpha.size, stride):
         block = slice(start, start + stride)
         integrand = _integrand(rs[block], r[block], gamma[block], alpha[block], rule)
-        result[block] = alpha[block] * (integrand @ weights)
+        result[block] = alpha[block] * _symmetric_rule_sum(np, integrand, weights)
     return result
 
 
@@ -235,7 +258,7 @@ def traced_zeta(xp, rs, r, gamma, alpha):
         (rs[..., None] - r[..., None] * cos_phi)
         / xp.sqrt(gamma[..., None] ** 2 + r[..., None] ** 2 * sin_phi**2)
     )
-    return xp.where(extent, alpha, 0.0) * (integrand @ weights)
+    return xp.where(extent, alpha, 0.0) * _symmetric_rule_sum(xp, integrand, weights)
 
 
 def zeta_midpoint(
@@ -336,20 +359,12 @@ try:  # optional: only importable where JAX is installed
         @jax.jit
         def __call__(self):
             """Return the zeta integral."""
-            offset, upper, weights = _tanh_sinh_rule()
-            dtype = jnp.result_type(self.rs, self.zs, self.r, self.z, self.alpha)
-            # the node axis leads, so rs/r/gamma broadcast against it unchanged
-            shape = (-1,) + (1,) * jnp.ndim(self.alpha)
-            offset = jnp.asarray(offset, dtype=dtype).reshape(shape)
-            upper = jnp.asarray(upper).reshape(shape)
-            alpha = jnp.abs(self.alpha)
-            angle = 2.0 * alpha * offset
-            angle = jnp.where(upper, jnp.pi - 2.0 * alpha + angle, angle)
-            integrand = self.arcsinh_beta_1(
-                jnp.sin(angle), jnp.where(upper, jnp.cos(angle), -jnp.cos(angle))
-            )
-            return alpha * jnp.tensordot(
-                jnp.asarray(weights, dtype=dtype), integrand, axes=1
+            return traced_zeta(
+                jnp,
+                self.rs,
+                self.r,
+                self.gamma,
+                self.alpha,
             )
 
 except ModuleNotFoundError:  # numpy-only environment

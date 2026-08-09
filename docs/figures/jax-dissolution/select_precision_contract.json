@@ -1,16 +1,16 @@
 {
-  "assembled_at": "2026-08-09T15:49:49.056038+00:00",
+  "assembled_at": "2026-08-09T17:28:31.284200+00:00",
   "captures": {
     "cpu": {
-      "captured_at": "2026-08-09T15:48:19.051775+00:00",
+      "captured_at": "2026-08-09T17:26:57.599459+00:00",
       "environment": {
         "device": "cpu:0",
         "host": "98dci4-clu-3141.iter.org",
         "jax": "0.11.0",
-        "jax_enable_x64": false,
-        "jax_explicit_x64_dtypes": "3",
+        "jax_enable_x64": true,
+        "jax_explicit_x64_dtypes": "1",
         "python": "3.14.2",
-        "slurm_job_id": "1242803",
+        "slurm_job_id": "1242821",
         "slurm_partition": "sun_debug",
         "system": "Linux-5.14.0-284.25.1.el9_2.x86_64-x86_64-with-glibc2.34"
       },
@@ -18,7 +18,7 @@
       "precision": [
         {
           "classification_errors": 0,
-          "compile_ms_two_fields": 629.3822545558214,
+          "compile_ms_two_fields": 1598.8913644105196,
           "fit_dtype": "float32",
           "metadata_dtype": "float64",
           "precision": "auto",
@@ -70,12 +70,12 @@
               ]
             }
           ],
-          "steady_ms_two_fields": 0.18950551748275757,
+          "steady_ms_two_fields": 0.18711574375629425,
           "worst_location_error_cells": 1.370906844834331e-07
         },
         {
           "classification_errors": 0,
-          "compile_ms_two_fields": 473.3912590891123,
+          "compile_ms_two_fields": 475.21864250302315,
           "fit_dtype": "float64",
           "metadata_dtype": "float64",
           "precision": "float64",
@@ -127,29 +127,29 @@
               ]
             }
           ],
-          "steady_ms_two_fields": 0.19356980919837952,
+          "steady_ms_two_fields": 0.19221752882003784,
           "worst_location_error_cells": 0.0
         }
       ],
-      "revision": "6a77c0fec2abb6a4128fbc8a343cd63eb5bde801+bundle:5a4ed583d35ec883fa9d10f0be785148d2ecc6fef389d7b07baf29ea32fdb2c5",
+      "revision": "39c98f52c3826954a78b2d8ad60aa8b2a8c04c8c",
       "schema": "nova.select-precision-contract",
       "source_hashes": {
         "benchmarks/select_precision_contract.py": "03e42a617b90663ce14a4002860f0f833dc1fd271028969221a37fea165a5373",
-        "nova/biot/null.py": "525f8982de68e08a876447e0bc6aa826cc68823c3cc9e85b17746bcf39415310",
+        "nova/biot/null.py": "a2f4e7eed41a010fcebb31794ff37ce5b7f915b1315afa10b5310005af47eab5",
         "nova/geometry/select.py": "a4a6b93bfde147319bc606f4b9f85c1ae57cea5de0f4bc51a1d8eb5c860728c5",
-        "nova/jax/config.py": "8f788ec5ab034e99aeb5e31aa6a566db3ede3cc6dc7f8a049c9aa369739b15ae"
+        "nova/jax/config.py": "871c6acd35796daaca9798f14f08021053c581546b8ba4eee97179c6fba4efb8"
       }
     },
     "gpu": {
-      "captured_at": "2026-08-09T15:48:50.713167+00:00",
+      "captured_at": "2026-08-09T17:26:35.817658+00:00",
       "environment": {
         "device": "cuda:0",
         "host": "98dci4-gpu-0003.iter.org",
         "jax": "0.11.0",
-        "jax_enable_x64": false,
-        "jax_explicit_x64_dtypes": "3",
+        "jax_enable_x64": true,
+        "jax_explicit_x64_dtypes": "1",
         "python": "3.14.2",
-        "slurm_job_id": "1242804",
+        "slurm_job_id": "1242819",
         "slurm_partition": "betelgeuse",
         "system": "Linux-6.12.0-124.11.1.el10_1.x86_64-x86_64-with-glibc2.39"
       },
@@ -157,7 +157,7 @@
       "precision": [
         {
           "classification_errors": 0,
-          "compile_ms_two_fields": 1300.4026589915156,
+          "compile_ms_two_fields": 569.6099153719842,
           "fit_dtype": "float32",
           "metadata_dtype": "float64",
           "precision": "auto",
@@ -209,12 +209,12 @@
               ]
             }
           ],
-          "steady_ms_two_fields": 9.025657083839178,
+          "steady_ms_two_fields": 9.378555230796337,
           "worst_location_error_cells": 1.370906844834331e-07
         },
         {
           "classification_errors": 0,
-          "compile_ms_two_fields": 625.0695390626788,
+          "compile_ms_two_fields": 550.1421173103154,
           "fit_dtype": "float64",
           "metadata_dtype": "float64",
           "precision": "float64",
@@ -266,17 +266,17 @@
               ]
             }
           ],
-          "steady_ms_two_fields": 9.293727111071348,
+          "steady_ms_two_fields": 9.82827553525567,
           "worst_location_error_cells": 0.0
         }
       ],
-      "revision": "6a77c0fec2abb6a4128fbc8a343cd63eb5bde801+bundle:5a4ed583d35ec883fa9d10f0be785148d2ecc6fef389d7b07baf29ea32fdb2c5",
+      "revision": "39c98f52c3826954a78b2d8ad60aa8b2a8c04c8c",
       "schema": "nova.select-precision-contract",
       "source_hashes": {
         "benchmarks/select_precision_contract.py": "03e42a617b90663ce14a4002860f0f833dc1fd271028969221a37fea165a5373",
-        "nova/biot/null.py": "525f8982de68e08a876447e0bc6aa826cc68823c3cc9e85b17746bcf39415310",
+        "nova/biot/null.py": "a2f4e7eed41a010fcebb31794ff37ce5b7f915b1315afa10b5310005af47eab5",
         "nova/geometry/select.py": "a4a6b93bfde147319bc606f4b9f85c1ae57cea5de0f4bc51a1d8eb5c860728c5",
-        "nova/jax/config.py": "8f788ec5ab034e99aeb5e31aa6a566db3ede3cc6dc7f8a049c9aa369739b15ae"
+        "nova/jax/config.py": "871c6acd35796daaca9798f14f08021053c581546b8ba4eee97179c6fba4efb8"
       }
     }
   },
@@ -304,12 +304,12 @@
     "normalized_exact_limit_cells": 0.02,
     "pass": true
   },
-  "revision": "6a77c0fec2abb6a4128fbc8a343cd63eb5bde801+bundle:5a4ed583d35ec883fa9d10f0be785148d2ecc6fef389d7b07baf29ea32fdb2c5",
+  "revision": "39c98f52c3826954a78b2d8ad60aa8b2a8c04c8c",
   "schema": "nova.select-precision-contract",
   "source_hashes": {
     "benchmarks/select_precision_contract.py": "03e42a617b90663ce14a4002860f0f833dc1fd271028969221a37fea165a5373",
-    "nova/biot/null.py": "525f8982de68e08a876447e0bc6aa826cc68823c3cc9e85b17746bcf39415310",
+    "nova/biot/null.py": "a2f4e7eed41a010fcebb31794ff37ce5b7f915b1315afa10b5310005af47eab5",
     "nova/geometry/select.py": "a4a6b93bfde147319bc606f4b9f85c1ae57cea5de0f4bc51a1d8eb5c860728c5",
-    "nova/jax/config.py": "8f788ec5ab034e99aeb5e31aa6a566db3ede3cc6dc7f8a049c9aa369739b15ae"
+    "nova/jax/config.py": "871c6acd35796daaca9798f14f08021053c581546b8ba4eee97179c6fba4efb8"
   }
 }

@@ -24,7 +24,7 @@
     <tr><td>Select</td><td><code>subnull</code></td><td>Keep both bodies; collapse signature</td><td>Canonical form is three coordinate arrays to one flat four-value array; stacked and three-array outputs matched exactly.</td></tr>
     <tr><td>Null stack</td><td><code>FieldNull</code></td><td>Delete traced wrapper</td><td>Zero importers; retain the live host adapter and shared kernels.</td></tr>
     <tr><td>Null stack</td><td><code>Null</code>, <code>Target</code>, <code>Topology</code></td><td>Keep both</td><td>Contracts differ. Target crosses over near 4,096 rows and is 2.63× CPU / 5.58× H200 faster at 16,384 rows; maximum scaled error was 2.03e-7.</td></tr>
-    <tr><td>Fixed point</td><td>Picard, Anderson, Newton–Krylov</td><td>Relocate intact</td><td>There is no host peer. H200 speedup was 0.096–0.795×; CPU/GPU states agreed within 1.90e-13.</td></tr>
+    <tr><td>Fixed point</td><td>Picard, Anderson, Newton–Krylov</td><td>Relocate intact</td><td>There is no host peer or production importer. Small batches underfill the H200; fused batch 4,096 reached 37.34–39.40× one-core CPU with CPU/GPU disagreement at most 2.01e-13.</td></tr>
     <tr><td>Stencil</td><td><code>ring_sign_changes</code></td><td>Keep both contracts</td><td>Rectangular and hex neighbourhoods produced 99 versus 50 raw candidate vertices on the same smooth periodic field. These are not yet established as unique physical nulls; analytic clustering and weak-null/noise rejection are under audit.</td></tr>
     <tr><td>Stencil</td><td><code>subnull</code> adapter</td><td>Collapse</td><td>The duplicate adapter is signature-only.</td></tr>
     <tr><td>Stencil</td><td><code>magnetic_axis_subgrid</code></td><td>Relocate</td><td>Single implementation; reject flat plateaux before publishing <code>found</code>.</td></tr>
@@ -50,6 +50,16 @@
     <tr><td>Connectivity</td><td><a href="/nova/figures/jax-dissolution/connectivity_route.svg">figure</a> · <a href="/nova/figures/jax-dissolution/connectivity_route.json">JSON</a></td><td>Head <code>4af8d31f</code>; 14 scoped tests passed in 34.77 s.</td></tr>
   </tbody></table>
   <p>Independent audit also confirmed Ruff, cache-isolated compilation, SVG XML, full-range diff checks, call-site census, timing synchronization, and independent references across all five bundles. The evidence wave is integrated and pushed at <code>c3afd5a1</code>.</p>
+
+  <h3>Fixed-point batching qualification</h3>
+  <table><thead><tr><th>Finding</th><th>Measured result</th><th>Meaning</th></tr></thead><tbody>
+    <tr><td>GPU crossover</td><td>All three algorithms first beat CPU at batch 8; at batch 4,096 Picard, Anderson, and Newton–Krylov reached 5,733, 5,680, and 9,346 fields/s.</td><td>The earlier H200 loss was launch and underfill, not an inherent solver penalty.</td></tr>
+    <tr><td>Batch organization</td><td>Sequential <code>lax.map</code> was 31.66× slower than fused <code>vmap</code>.</td><td>Compile one complete fixed-budget solve over independent fields; do not scan fields sequentially.</td></tr>
+    <tr><td>Host visibility</td><td>Twenty host residual reads reduced throughput by 13–31%.</td><td>Keep convergence masks, traces, and intermediates on device.</td></tr>
+    <tr><td>Scientific parity</td><td>Worst CPU/H200 disagreement was 2.01e-13; the independent oracle residual was 5.98e-14.</td><td>The batching result preserves the measured fixed point.</td></tr>
+    <tr><td>Catalog relevance</td><td><code>nova.jax.fixed_point</code> has zero production imports.</td><td>Relocate it intact, but do not claim that optimizing this seam proves the MAST catalog goal; the real Optimistix/ReconstructProfile solve and archive path remain unmeasured.</td></tr>
+  </tbody></table>
+  <p>The <a href="/nova/figures/jax-dissolution/fixed_point_gpu_throughput.json">batched throughput JSON</a> and <code>benchmarks/fixed_point_gpu_throughput.py</code> were integrated at <code>7deff826</code>.</p>
 
   <h2 id="s5">Operator, precision, and optional-import boundary</h2>
   <p><code>HostOperator</code>, functional <code>Coupling</code>, and <code>TracedOperator</code> now live together in <code>nova/biot/operate.py</code>. The bare <code>Operator</code> remains selection-only, and <code>nova/jax/operate.py</code> was deleted without a shim.</p>

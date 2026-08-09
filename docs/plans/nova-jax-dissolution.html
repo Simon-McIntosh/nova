@@ -22,7 +22,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-09">
-<meta name="plan-version" content="38">
+<meta name="plan-version" content="39">
 <meta name="plan-impl" content="0.7777777777777778">
 </head>
 <body>
@@ -951,6 +951,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="_top" data-id="c-njd-gpu-throughput" data-who="reckon-ship" data-when="2026-08-09">
     <div class="r-comment-body"><p><strong>FieldNull GPU audit:</strong> scalar H200 latency is genuinely worse—the current composed fp32 route is 1.526× slower than one CPU core at batch 1—but it becomes 17.389× faster at batch 128. A fixed-output ranked cost model reached 631,684 resident fields/s at batch 2,048 and 841,100 fields/s at batch 524,288 with 58.97% of visible HBM. Transfer-inclusive batch-2,048 throughput was 114,106 fields/s because transfer and dispatch consumed 81.94% of wall time. The production repair is therefore batch-first, shape-bucketed, and device-resident. This kernel result does not prove 4.5 TB/hour: the target requires 1.25 GB/s aggregate archive input, while the exact slice census and connector/I/O/decompression/solve overlap remain unmeasured.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-njd-fixed-point-throughput" data-who="reckon-ship" data-when="2026-08-09">
+    <div class="r-comment-body"><p><strong>Fixed-point GPU qualification:</strong> all three generic solvers first beat one-core CPU at batch 8. At batch 4,096, Picard, Anderson, and Newton–Krylov reached 5,733, 5,680, and 9,346 fields/s, or 37.34–39.40× CPU; CPU/H200 disagreement stayed within 2.01e-13. Sequential <code>lax.map</code> was 31.66× slower than fused <code>vmap</code>, and host-visible residual reads lost 13–31% throughput. The family still has zero production imports, so it will relocate intact but cannot serve as evidence for the catalog target; the real Optimistix/ReconstructProfile solve and archive path remain unmeasured.</p></div>
 </div>
 </section>
 </main>

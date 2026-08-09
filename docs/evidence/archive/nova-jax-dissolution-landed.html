@@ -25,17 +25,17 @@
     <tr><td>Null stack</td><td><code>FieldNull</code></td><td>Delete traced wrapper</td><td>Zero importers; retain the live host adapter and shared kernels.</td></tr>
     <tr><td>Null stack</td><td><code>Null</code>, <code>Target</code>, <code>Topology</code></td><td>Keep both</td><td>Contracts differ. Target crosses over near 4,096 rows and is 2.63× CPU / 5.58× H200 faster at 16,384 rows; maximum scaled error was 2.03e-7.</td></tr>
     <tr><td>Fixed point</td><td>Picard, Anderson, Newton–Krylov</td><td>Relocate intact</td><td>There is no host peer. H200 speedup was 0.096–0.795×; CPU/GPU states agreed within 1.90e-13.</td></tr>
-    <tr><td>Stencil</td><td><code>ring_sign_changes</code></td><td>Keep both contracts</td><td>Rectangular and hex neighbourhoods found 99 versus 50 saddles on the same smooth field.</td></tr>
+    <tr><td>Stencil</td><td><code>ring_sign_changes</code></td><td>Keep both contracts</td><td>Rectangular and hex neighbourhoods produced 99 versus 50 raw candidate vertices on the same smooth periodic field. These are not yet established as unique physical nulls; analytic clustering and weak-null/noise rejection are under audit.</td></tr>
     <tr><td>Stencil</td><td><code>subnull</code> adapter</td><td>Collapse</td><td>The duplicate adapter is signature-only.</td></tr>
     <tr><td>Stencil</td><td><code>magnetic_axis_subgrid</code></td><td>Relocate</td><td>Single implementation; reject flat plateaux before publishing <code>found</code>.</td></tr>
-    <tr><td>Stencil</td><td><code>xpoint_candidates</code></td><td>Relocate</td><td>Single implementation; expose overflow because 99 candidates silently truncated to eight slots.</td></tr>
+    <tr><td>Stencil</td><td><code>xpoint_candidates</code></td><td>Relocate</td><td>Single implementation; expose overflow because 99 raw candidates silently truncated to eight slots. The repair must distinguish unique persistent nulls from duplicate/noise candidates before compaction.</td></tr>
     <tr><td>Connectivity</td><td>Boundary reads</td><td>Relocate</td><td>Single traced implementation with host adapters; preserve distinct hard and smooth semantics. H200 was 3.36× faster at 101×141 and 6.53× per slice for a four-slice batch.</td></tr>
     <tr><td>Connectivity</td><td>Flux-surface connectivity</td><td>Delete host adapter; relocate kernels</td><td>Independent masks matched exactly; host materialisation added 1.11–1.27× CPU and 2.13–3.50× H200 cost.</td></tr>
   </tbody></table>
 
   <h2>Accuracy and policy findings</h2>
   <ul>
-    <li>Select must call <code>enable_x64()</code> before its first trace: direct fp32 imports misclassified 12 of 18 ITER-scale analytic surfaces, while fp64 classified all 18 correctly.</li>
+    <li>Global fp64 is the measured workaround, not the final select policy: direct fp32 imports misclassified 12 of 18 ITER-scale analytic surfaces, while fp64 classified all 18 correctly. A centered, nondimensional fp32 formulation and scale-relative classification are under audit for the GPU path.</li>
     <li>The select behaviour change must land before arithmetic collapse: four-value wall results, all-NaN at zero polarity, NaN plane classification, a <code>1e-30</code> determinant floor, and the three-array <code>subnull</code> signature.</li>
     <li>Stencil relocation must repair plateau acceptance and surface fixed-slot overflow rather than carry the measured defects into the domain package.</li>
     <li>JAX-free eager boundaries remain required while namespaces consolidate.</li>

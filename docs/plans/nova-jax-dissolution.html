@@ -22,7 +22,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-09">
-<meta name="plan-version" content="32">
+<meta name="plan-version" content="33">
 <meta name="plan-impl" content="0.6666666666666666">
 </head>
 <body>
@@ -986,6 +986,11 @@ Done-when
     </article>
 </section>
 
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s4" data-id="c-njd-precision-audit" data-who="reckon-ship" data-when="2026-08-09">
+    <div class="r-comment-body"><p><strong>Measurement qualification:</strong> the fp64 result is a workaround that proved the clean failure was conditioning-sensitive, not the final GPU policy. Followup f-njd-007 now requires a centered, nondimensional fp32 formulation and scale-relative classification. Likewise, 99 was a raw periodic-grid candidate count, not a count of unique physical nulls; analytic clustering and weak-null/noise persistence must settle the detector before relocation.</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>

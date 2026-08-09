@@ -205,7 +205,9 @@ def null_coordinate(coefficients):
     """
     root = 4 * coefficients[0] * coefficients[1] - coefficients[4] ** 2
     root = jnp.where(
-        jnp.abs(root) < _ROOT_FLOOR, jnp.sign(root) * _ROOT_FLOOR + _ROOT_FLOOR, root
+        jnp.abs(root) < _ROOT_FLOOR,
+        jnp.where(root < 0, -_ROOT_FLOOR, _ROOT_FLOOR),
+        root,
     )
     x_coordinate = (
         coefficients[4] * coefficients[3] - 2 * coefficients[1] * coefficients[2]

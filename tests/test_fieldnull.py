@@ -80,22 +80,32 @@ def test_quadratic_plane_surface():
     assert np.isnan(float(traced_select.null_type(traced_coef)))
 
 
-def test_plane_null_coordinate_uses_finite_determinant_sentinel():
-    """The shared determinant sentinel keeps discarded planar coordinates finite."""
-    coefficients = np.array([0.0, 0.0, 1.0, 1.0, 0.0, 1.0])
+@pytest.mark.parametrize(
+    "cross_term",
+    [pytest.param(0.0, id="zero"), pytest.param(np.sqrt(5e-31), id="tiny-negative")],
+)
+def test_null_coordinate_determinant_floor_is_finite_and_sign_preserving(
+    cross_term,
+):
+    """The shared determinant floor remains nonzero for degenerate quadratics."""
+    coefficients = np.array([0.0, 0.0, 1.0, 1.0, cross_term, 1.0])
+    determinant = -(cross_term**2)
     host_coordinate = np.asarray(host_select.null_coordinate(coefficients))
     traced_coordinate = np.asarray(
         traced_select.null_coordinate(jnp.asarray(coefficients))
     )
 
+    assert abs(determinant) < 1e-30
     assert np.all(np.isfinite(host_coordinate))
     assert np.all(np.isfinite(traced_coordinate))
     assert np.allclose(host_coordinate, traced_coordinate)
+    if determinant < 0:
+        assert np.all(host_coordinate < 0)
 
 
 @pytest.mark.parametrize(
     "null_type,coordinate",
-    product([-1, 0, 1], [(0.8, 2.7), (2.2, 2.2), (-1, 5.2), (2, 2)]),
+    list(product([-1, 0, 1], [(0.8, 2.7), (2.2, 2.2), (-1, 5.2), (2, 2)])),
 )
 def test_quadratic_coordinate(null_type, coordinate):
     x, z = meshgrid()
@@ -112,7 +122,8 @@ def test_quadratic_coordinate(null_type, coordinate):
 
 
 @pytest.mark.parametrize(
-    "null_type,coordinate", product([-1, 0, 1], [(1, 2.7), (2.2, 2.2), (2, 3)])
+    "null_type,coordinate",
+    list(product([-1, 0, 1], [(1, 2.7), (2.2, 2.2), (2, 3)])),
 )
 def test_subnull(null_type, coordinate):
     x, z = meshgrid()

@@ -205,7 +205,7 @@ def null_coordinate(coefficients, cluster=None):
     """
     root = 4 * coefficients[0] * coefficients[1] - coefficients[4] ** 2
     if abs(root) < _ROOT_FLOOR:
-        root = np.sign(root) * _ROOT_FLOOR + _ROOT_FLOOR
+        root = -_ROOT_FLOOR if root < 0 else _ROOT_FLOOR
     x_coordinate = (
         coefficients[4] * coefficients[3] - 2 * coefficients[1] * coefficients[2]
     ) / root

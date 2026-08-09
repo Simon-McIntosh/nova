@@ -51,7 +51,7 @@ def test_quadratic_coefficents(null_type: int):
 
 
 @pytest.mark.parametrize(
-    "null_type,null_position", product([-1, 1], [0.1, 3.3, 11, 26.7])
+    "null_type,null_position", list(product([-1, 1], [0.1, 3.3, 11, 26.7]))
 )
 def test_wall_length(null_type, null_position):
     w_coordinate = select.length_2d(*meshwall())
@@ -61,7 +61,7 @@ def test_wall_length(null_type, null_position):
 
 
 @pytest.mark.parametrize(
-    "null_type,null_position", product([-1, 1], [0, 0.1, 3.3, 11, 26.7])
+    "null_type,null_position", list(product([-1, 1], [0, 0.1, 3.3, 11, 26.7]))
 )
 def test_wall_coordinate(null_type, null_position, plot=False):
     x_cluster, z_cluster = meshwall()
@@ -87,7 +87,7 @@ def test_wall_coordinate(null_type, null_position, plot=False):
 
 @pytest.mark.parametrize(
     "null_type,null_position,null_flux",
-    product([-1, 1], [0, 5.5, 30.6], [0, 3.76, -12.3]),
+    list(product([-1, 1], [0, 5.5, 30.6], [0, 3.76, -12.3])),
 )
 def test_wall_flux(null_type, null_position, null_flux):
     x_cluster, z_cluster = meshwall()

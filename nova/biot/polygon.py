@@ -361,10 +361,12 @@ def _psi_gradient(
         a02 = 1.0 + b1 * b1
         a0 = np.sqrt(a02)
         a03 = a02 * a0
-        r1 = ra - b1 * (za - z)  # (N, 1) -- depends on z, dr1/dz = b1
-        for u, s_lim in ((zb - z, 1.0), (za - z, -1.0)):
-            rmc = (r1 + b1 * u) - rc
-            r1mc = r1 - rc
+        for u, endpoint_r, s_lim in (
+            (zb - z, rb, 1.0),
+            (za - z, ra, -1.0),
+        ):
+            rmc = endpoint_r - rc
+            r1mc = rmc - b1 * u
             g2 = u * u + s2
             b2 = r1mc * r1mc + a02 * s2
             d = np.sqrt(g2 + rmc * rmc)

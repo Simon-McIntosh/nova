@@ -373,13 +373,41 @@ def coupling_jacobian(
         masks = np.asarray([horizontal_edges(section) for section in base])
         anchor = jnp.asarray(base, dtype=dtype)
 
-        def rows(parameters, anchor=anchor, masks=masks):
-            sections = anchor + jnp.tensordot(parameters, generators, 1)
-            return traced_pack_coupling(jnp, sections, sensors, masks, rule=rule)
+        if mode == "forward":
 
-        take = jax.jacfwd if mode == "forward" else jax.jacrev
-        jacobian += np.asarray(take(rows)(start))
-    return jacobian / len(tilts)
+            def rows(parameters, anchor=anchor, masks=masks):
+                sections = anchor + jnp.tensordot(parameters, generators, 1)
+                return traced_pack_coupling(jnp, sections, sensors, masks, rule=rule)
+
+            jacobian += np.asarray(jax.jacfwd(rows)(start))
+            continue
+
+        # Reverse accumulation transposes the parameter-to-vertex projection.
+        # Materialising each section before the host sum keeps the mixed-sign
+        # cotangents from every turn out of one cancellation-heavy reduction.
+        for index in range(len(masks)):
+            section_anchor = anchor[index : index + 1]
+            section_generators = generators[:, index : index + 1]
+            section_masks = masks[index : index + 1]
+
+            def rows(
+                parameters,
+                anchor=section_anchor,
+                generators=section_generators,
+                masks=section_masks,
+            ):
+                section = anchor + jnp.tensordot(parameters, generators, 1)
+                return traced_pack_coupling(
+                    jnp,
+                    section,
+                    sensors,
+                    masks,
+                    rule=rule,
+                )
+
+            jacobian += np.asarray(jax.jacrev(rows)(start))
+    section_count = 1 if mode == "forward" else len(deformation.sections)
+    return jacobian / (len(tilts) * section_count)
 
 
 def mirror_rows(sections) -> np.ndarray:

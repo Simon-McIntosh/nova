@@ -107,6 +107,38 @@ def test_the_traced_kernel_carries_float64():
     )
 
 
+def test_transfer_compile_kernel_and_materialization_are_separate_stages():
+    """The benchmark can time each device boundary without changing the tile."""
+    sections, target_r, target_z = mesh(3)
+    edge, weight, norm = polygon.pad_batch(sections)
+    plan = TilePlan(
+        target_tile=target_r.size, source_tile=3, block=4, n_panels=2, n_nodes=4
+    )
+    evaluate = tile_evaluator(plan, batched=True)
+    prepared = evaluate.prepare(
+        target_r, target_z, edge, weight, norm, synchronize=True
+    )
+    executable = evaluate.compile(prepared)
+    assert evaluate.compile_count == 1
+    device_result = evaluate.launch(prepared, executable)
+    jax.block_until_ready(device_result)
+    computed = evaluate.materialize(device_result, prepared[0], prepared[1])
+    reference = tile_coupling(
+        target_r,
+        target_z,
+        edge,
+        weight,
+        norm,
+        n_panels=2,
+        n_nodes=4,
+        block=4,
+    )
+    for got, expected in zip(computed, reference):
+        np.testing.assert_allclose(
+            got, expected, rtol=2e-12, atol=1e-12 * np.max(np.abs(expected))
+        )
+
+
 def test_tile_precision_is_selected_per_evaluator():
     """Automatic retains fp64 while explicit fp32 owns a separate executable."""
     from nova.jax.config import Precision
@@ -309,11 +341,26 @@ def test_the_same_tile_shape_hands_back_the_same_compiled_kernel():
     assert tile_evaluator(other) is not evaluate
 
 
+def test_packed_edge_count_is_part_of_the_executable_identity():
+    """Different static edge loops cannot hide a second shape compilation."""
+    plan = TilePlan(target_tile=2, source_tile=2, block=4, n_panels=2, n_nodes=4)
+    quadrilateral = tile_evaluator(plan, batched=True, edge_count=4)
+    pentagon = tile_evaluator(plan, batched=True, edge_count=5)
+    assert quadrilateral is tile_evaluator(plan, batched=True, edge_count=4)
+    assert pentagon is not quadrilateral
+
+    sections, target_r, target_z = mesh(2)
+    edge, weight, norm = polygon.pad_batch(sections)
+    with pytest.raises(ValueError, match="built for 4 packed edges"):
+        quadrilateral.prepare(target_r, target_z, edge, weight, norm)
+
+
 def test_a_scan_over_positions_compiles_at_the_first_position_only(tmp_path):
     """Moving a section changes argument VALUES, which cannot force a retrace."""
     sections, target_r, target_z = mesh(8)
     plan = TilePlan(target_tile=5, source_tile=4, block=8, n_panels=4, n_nodes=8)
-    evaluate = tile_evaluator(plan, batched=True)
+    edge_count = polygon.pad_batch(sections)[0].shape[0]
+    evaluate = tile_evaluator(plan, batched=True, edge_count=edge_count)
     stores = []
     for index, shift in enumerate((0.0, 0.05, 0.11)):
         path = tmp_path / f"position-{index}.zarr"
@@ -338,7 +385,8 @@ def test_a_caller_can_hand_in_the_kernel_it_already_holds(tmp_path):
     """An evaluator passed in builds the same store the default path builds."""
     sections, target_r, target_z = mesh(7)
     plan = TilePlan(target_tile=4, source_tile=4, block=8, n_panels=4, n_nodes=8)
-    evaluate = tile_evaluator(plan, batched=True)
+    edge_count = polygon.pad_batch(sections)[0].shape[0]
+    evaluate = tile_evaluator(plan, batched=True, edge_count=edge_count)
     reference, supplied = tmp_path / "default.zarr", tmp_path / "supplied.zarr"
     for path, given in ((reference, None), (supplied, evaluate)):
         assemble(

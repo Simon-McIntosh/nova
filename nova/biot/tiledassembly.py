@@ -424,6 +424,7 @@ class TileEvaluator:
         components: tuple[str, ...] = COMPONENTS,
         devices: int = 1,
         precision: Precision = Precision.DOUBLE,
+        edge_count: int | None = None,
     ):
         self._kernel = kernel
         self.plan = plan
@@ -433,28 +434,63 @@ class TileEvaluator:
         self.components = components
         self.devices = devices
         self.precision = precision
+        self.edge_count = edge_count
         self.dtype = np.float32 if precision is Precision.SINGLE else np.float64
+        self._staged_shape = False
 
     @property
     def compile_count(self) -> int:
         """Return the number of distinct shapes the kernel has been compiled for."""
-        return self._kernel._cache_size()
+        return max(self._kernel._cache_size(), int(self._staged_shape))
 
-    def __call__(self, *geometry):
-        """Return the component sub-matrices of one tile, each shape ``(T, S)``."""
+    def prepare(self, *geometry, synchronize: bool = False):
+        """Pad a tile and transfer its fixed-shape geometry to the selected device.
+
+        ``synchronize`` is useful to a benchmark that needs input transfer as its
+        own stage. Normal evaluation leaves the transfer asynchronous so the
+        runtime can overlap it with launch preparation.
+        """
+        import jax
         import jax.numpy as jnp
 
         plan = self.plan
         n_target = np.size(geometry[0])
         if self.geometry == "ring":
             n_source = np.size(geometry[4])
+            edge_count = np.shape(geometry[2])[0]
             filled = _fill_tile(plan, *geometry)
         else:
             n_source = np.size(geometry[5])
+            edge_count = np.shape(geometry[3])[0]
             filled = _fill_arc_tile(plan, *geometry)
+        if self.edge_count is not None and edge_count != self.edge_count:
+            raise ValueError(
+                f"evaluator was built for {self.edge_count} packed edges, "
+                f"not {edge_count}"
+            )
         dtype = jnp.float32 if self.precision is Precision.SINGLE else jnp.float64
-        arrays = (jnp.asarray(value, dtype=dtype) for value in filled)
-        result = np.asarray(self._kernel(*arrays))
+        arrays = tuple(jnp.asarray(value, dtype=dtype) for value in filled)
+        if synchronize:
+            jax.block_until_ready(arrays)
+        return n_target, n_source, arrays
+
+    def compile(self, prepared):
+        """Lower and compile one prepared tile without launching the kernel."""
+        if self.devices != 1 or not hasattr(self._kernel, "lower"):
+            raise ValueError("staged compilation requires one local device")
+        executable = self._kernel.lower(*prepared[2]).compile()
+        self._staged_shape = True
+        return executable
+
+    def launch(self, prepared, executable=None):
+        """Launch a prepared tile and return its device-resident component rows."""
+        kernel = self._kernel if executable is None else executable
+        return kernel(*prepared[2])
+
+    def materialize(self, result, n_target: int, n_source: int):
+        """Transfer device rows to host and restore component matrix shapes."""
+        result = np.asarray(result)
+        plan = self.plan
         if self.devices > 1:
             result = result.reshape(-1, len(self.components), plan.block)
         flat = result.transpose(1, 0, 2).reshape(len(self.components), -1)[
@@ -462,6 +498,12 @@ class TileEvaluator:
         ]
         tile = flat.reshape(len(self.components), plan.target_tile, plan.source_tile)
         return tuple(tile[:, :n_target, :n_source])
+
+    def __call__(self, *geometry):
+        """Return the component sub-matrices of one tile, each shape ``(T, S)``."""
+        prepared = self.prepare(*geometry)
+        result = self.launch(prepared)
+        return self.materialize(result, prepared[0], prepared[1])
 
 
 def compilation_cache(
@@ -524,11 +566,12 @@ def tile_evaluator(
     geometry: str = "ring",
     devices: int = 1,
     precision: Precision | str = Precision.AUTOMATIC,
+    edge_count: int | None = None,
 ) -> TileEvaluator:
     """Return a compiled evaluator for the tiles of one plan.
 
     The evaluator is MEMOISED on its plan, mapping, kernel, geometry family,
-    device count, and resolved precision: asking twice for the
+    device count, resolved precision, and packed edge count: asking twice for the
     same tile shape returns the same object, and therefore the same executable.
     That is what turns the compile into a per-PROCESS cost rather than a per-build
     one, which is the difference between a usable and an unusable closed-form
@@ -574,6 +617,11 @@ def tile_evaluator(
     ``"closed"``. ``devices`` divides pair blocks evenly across local devices
     with replicated geometry; multiple devices require ``batched`` evaluation
     because the shard unit is the mapped block axis.
+
+    ``edge_count`` is part of the executable identity because the edge loop is a
+    static traced bound. Product and assembly adapters always supply it; direct
+    diagnostic callers may omit it when they intentionally allow shape-driven JAX
+    compilation and inspect :attr:`TileEvaluator.compile_count` themselves.
     """
     if geometry not in {"ring", "arc"}:
         raise ValueError(f"unknown geometry {geometry!r}")
@@ -585,10 +633,12 @@ def tile_evaluator(
         raise ValueError("devices must be positive")
     if devices > 1 and not batched:
         raise ValueError("multiple devices require batched block evaluation")
+    if edge_count is not None and edge_count < 1:
+        raise ValueError("packed edge count must be positive")
     resolved = resolve_precision(precision, Precision.DOUBLE)
     if geometry == "arc":
-        return _warm_arc_evaluator(plan, batched, kernel, devices, resolved)
-    return _warm_evaluator(plan, batched, kernel, devices, resolved)
+        return _warm_arc_evaluator(plan, batched, kernel, devices, resolved, edge_count)
+    return _warm_evaluator(plan, batched, kernel, devices, resolved, edge_count)
 
 
 def forget_evaluators() -> None:
@@ -609,6 +659,7 @@ def _warm_evaluator(
     kernel: str,
     devices: int,
     precision: Precision,
+    edge_count: int | None,
 ) -> TileEvaluator:
     """Trace and compile one tile kernel; see :func:`tile_evaluator`."""
     import jax
@@ -707,6 +758,7 @@ def _warm_evaluator(
         name=kernel,
         devices=devices,
         precision=precision,
+        edge_count=edge_count,
     )
 
 
@@ -717,6 +769,7 @@ def _warm_arc_evaluator(
     kernel: str,
     devices: int,
     precision: Precision,
+    edge_count: int | None,
 ) -> TileEvaluator:
     """Trace and compile the finite-arc packed kernel for one tile shape."""
     import jax
@@ -819,6 +872,7 @@ def _warm_arc_evaluator(
         components=ARC_COMPONENTS,
         devices=devices,
         precision=precision,
+        edge_count=edge_count,
     )
 
 
@@ -916,6 +970,11 @@ def assemble(
     target_r = np.ascontiguousarray(target_r, dtype=np.float64)
     target_z = np.ascontiguousarray(target_z, dtype=np.float64)
     edge, weight, norm = pad_batch(sections)
+    if evaluator is not None and evaluator.edge_count not in (None, edge.shape[0]):
+        raise ValueError(
+            f"evaluator was built for {evaluator.edge_count} packed edges, "
+            f"not {edge.shape[0]}"
+        )
     shape = (target_r.size, len(sections))
 
     store = zarr.open_group(str(path), mode="w")
@@ -938,6 +997,7 @@ def assemble(
                 kernel=kernel,
                 devices=devices,
                 precision=precision,
+                edge_count=edge.shape[0],
             )
         for rows, columns in bounds:
             tile = evaluate(
@@ -1012,6 +1072,12 @@ def assemble_arcs(
             geometry="arc",
             devices=devices,
             precision=precision,
+            edge_count=edge.shape[0],
+        )
+    elif evaluator.edge_count not in (None, edge.shape[0]):
+        raise ValueError(
+            f"evaluator was built for {evaluator.edge_count} packed edges, "
+            f"not {edge.shape[0]}"
         )
     resolved = resolve_precision(precision, Precision.DOUBLE)
     asked = (plan, "closed", batched, "arc", devices, resolved)

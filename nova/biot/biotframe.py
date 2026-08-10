@@ -104,6 +104,7 @@ class Source(BiotFrame):
             {
                 "available": [
                     "segment",
+                    "polysection_policy",
                     "section",
                     "poly",
                     "x0",

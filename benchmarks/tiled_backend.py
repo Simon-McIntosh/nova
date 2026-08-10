@@ -39,6 +39,11 @@ build -- so what a compile is paid PER is measured too, on either kernel:
     jax-cache        two fresh processes sharing one on-disk compilation cache:
     closed-cache     the first compiles, the second must not
 
+Traced timings split input transfer, compilation, kernel execution, output
+transfer, authored-source owner scatter, a representative nonunit electrical-link
+reduction, Zarr storage, and warm Zarr reload. This keeps an accelerator rate from
+absorbing the host orchestration around it.
+
 Timings are one variant per FRESH process, because a compiled kernel and a warm
 allocator both make a second measurement in the same interpreter look faster
 than a build does. The parent process spawns those children and reports the
@@ -301,52 +306,131 @@ def _pair_geometry(target_r, target_z, edge, weight, norm):
 def measure_traced(
     batched: bool, cells: int, tile: int, kernel: str = "quadrature"
 ) -> dict:
-    """Return compile time and steady-state build time of the traced backend.
+    """Return each product stage of one traced, reduced, stored operator build."""
+    import jax
+    import zarr
 
-    The first tile carries the compile, so it is timed alone and then the whole
-    operator is built with the compiled kernel. Both phases write into the zarr
-    store, so the steady-state figure is comparable with the numpy build rather
-    than being a bare kernel rate.
-    """
     watch_cache()
     sections, target_r, target_z = hex_mesh(cells)
     plan = build_plan(tile)
     edge, weight, norm = pad_batch(sections)
     shape = (target_r.size, len(sections))
+    reduced_sources = (len(sections) + 1) // 2
+    stored_shape = (target_r.size, reduced_sources)
     bounds = list(plan.tiles(*shape))
     directory = pathlib.Path(tempfile.mkdtemp(prefix="tiled-backend-"))
     try:
-        store = new_store(directory / "coupling.zarr", shape, plan)
-        evaluate = tile_evaluator(plan, batched=batched, kernel=kernel)
-
-        def write(rows, columns):
-            tile_result = evaluate(
-                target_r[rows],
-                target_z[rows],
-                edge[:, :, columns],
-                weight[:, columns],
-                norm[columns],
-            )
-            for name, component in zip(COMPONENTS, tile_result):
-                store[name][rows, columns] = component
-
         start = time.perf_counter()
-        write(*bounds[0])
+        store = new_store(directory / "coupling.zarr", stored_shape, plan)
+        store_create_seconds = time.perf_counter() - start
+        evaluate = tile_evaluator(
+            plan, batched=batched, kernel=kernel, edge_count=edge.shape[0]
+        )
+        first_rows, first_columns = bounds[0]
+        start = time.perf_counter()
+        first = evaluate.prepare(
+            target_r[first_rows],
+            target_z[first_rows],
+            edge[:, :, first_columns],
+            weight[:, first_columns],
+            norm[first_columns],
+            synchronize=True,
+        )
+        input_transfer_seconds = time.perf_counter() - start
+        start = time.perf_counter()
+        executable = evaluate.compile(first)
         compile_seconds = time.perf_counter() - start
+        kernel_seconds = output_transfer_seconds = 0.0
+        owner_scatter_seconds = store_seconds = 0.0
+        authored = np.zeros((len(COMPONENTS), *shape), dtype=np.float64)
+        for index, (rows, columns) in enumerate(bounds):
+            if index == 0:
+                prepared = first
+            else:
+                start = time.perf_counter()
+                prepared = evaluate.prepare(
+                    target_r[rows],
+                    target_z[rows],
+                    edge[:, :, columns],
+                    weight[:, columns],
+                    norm[columns],
+                    synchronize=True,
+                )
+                input_transfer_seconds += time.perf_counter() - start
+            start = time.perf_counter()
+            device_result = evaluate.launch(prepared, executable)
+            jax.block_until_ready(device_result)
+            kernel_seconds += time.perf_counter() - start
+            start = time.perf_counter()
+            tile_result = evaluate.materialize(device_result, prepared[0], prepared[1])
+            output_transfer_seconds += time.perf_counter() - start
+
+            # The regular benchmark mesh has one packed section per authored
+            # source. Keep the adapter's owner scatter explicit and label it as
+            # such; material-piece contraction is exercised by product tests.
+            start = time.perf_counter()
+            owner = np.arange(len(sections), dtype=np.intp)[columns]
+            for destination, component in zip(authored, tile_result):
+                np.add.at(destination[rows].T, owner, component.T)
+            owner_scatter_seconds += time.perf_counter() - start
+
+        # Pair neighbouring source columns into one circuit: the first is the
+        # independent head and the second is a dependent with factor -0.5.  This
+        # is the same global scatter Solve applies after route-local kernels, and
+        # is deliberately nontrivial so the reduction stage measures real work.
         start = time.perf_counter()
-        for rows, columns in bounds:
-            write(rows, columns)
-        seconds = time.perf_counter() - start
+        output = np.arange(len(sections), dtype=np.intp) // 2
+        coefficient = np.where(np.arange(len(sections)) % 2, -0.5, 1.0)
+        reduced = np.zeros(
+            (len(COMPONENTS), target_r.size, reduced_sources), dtype=np.float64
+        )
+        for destination, component in zip(reduced, authored):
+            np.add.at(
+                destination.T,
+                output,
+                (component * coefficient[np.newaxis, :]).T,
+            )
+        reduction_seconds = time.perf_counter() - start
+
+        start = time.perf_counter()
+        for name, component in zip(COMPONENTS, reduced):
+            store[name][:] = component
+        store_seconds = time.perf_counter() - start
+
+        start = time.perf_counter()
+        warm = zarr.open_group(str(directory / "coupling.zarr"), mode="r")
+        for name in COMPONENTS:
+            np.asarray(warm[name][:])
+        warm_reload_seconds = time.perf_counter() - start
     finally:
         shutil.rmtree(directory, ignore_errors=True)
     pairs = target_r.size * len(sections)
+    seconds = (
+        store_create_seconds
+        + input_transfer_seconds
+        + kernel_seconds
+        + output_transfer_seconds
+        + owner_scatter_seconds
+        + reduction_seconds
+        + store_seconds
+    )
     return {
         "seconds": seconds,
         "compile_seconds": compile_seconds,
         "cold_seconds": compile_seconds + seconds,
+        "store_create_seconds": store_create_seconds,
+        "input_transfer_seconds": input_transfer_seconds,
+        "kernel_seconds": kernel_seconds,
+        "output_transfer_seconds": output_transfer_seconds,
+        "owner_scatter_seconds": owner_scatter_seconds,
+        "reduction_seconds": reduction_seconds,
+        "store_seconds": store_seconds,
+        "warm_reload_seconds": warm_reload_seconds,
         "pairs": pairs,
         "us_per_pair": 1e6 * seconds / pairs,
         "tiles": len(bounds),
+        "authored_sources": len(sections),
+        "reduced_sources": reduced_sources,
         "compile_count": evaluate.compile_count,
         **cache_report(),
         **device_report(),
@@ -386,7 +470,8 @@ def measure_positions(cells: int, tile: int, kernel: str) -> dict:
             seconds.append(time.perf_counter() - start)
     finally:
         shutil.rmtree(directory, ignore_errors=True)
-    evaluate = tile_evaluator(plan, batched=True, kernel=kernel)
+    edge_count = pad_batch(sections)[0].shape[0]
+    evaluate = tile_evaluator(plan, batched=True, kernel=kernel, edge_count=edge_count)
     later = statistics.median(seconds[1:])
     pairs = target_r.size * len(sections)
     return {
@@ -414,7 +499,9 @@ def measure_closed_parity(cells: int, tile: int) -> dict:
     sections, target_r, target_z = hex_mesh(cells)
     plan = build_plan(tile)
     edge, weight, norm = pad_batch(sections)
-    evaluate = tile_evaluator(plan, batched=True, kernel="closed")
+    evaluate = tile_evaluator(
+        plan, batched=True, kernel="closed", edge_count=edge.shape[0]
+    )
     worst_abs = worst_rel = 0.0
     for rows, columns in plan.tiles(target_r.size, len(sections)):
         arguments = (
@@ -444,7 +531,7 @@ def measure_parity(cells: int, tile: int) -> dict:
     sections, target_r, target_z = hex_mesh(cells)
     plan = build_plan(tile)
     edge, weight, norm = pad_batch(sections)
-    evaluate = tile_evaluator(plan, batched=True)
+    evaluate = tile_evaluator(plan, batched=True, edge_count=edge.shape[0])
     worst_abs = worst_rel = 0.0
     for rows, columns in plan.tiles(target_r.size, len(sections)):
         arguments = (
@@ -609,8 +696,9 @@ def cache_table(rows: list[dict]) -> str:
 def table(rows: list[dict]) -> str:
     """Return the markdown table the decision is read from."""
     header = (
-        "| variant | seconds (median) | us/pair | compile s | cold s | tiles |\n"
-        "|---|---|---|---|---|---|"
+        "| variant | steady s | us/pair | compile | create | prepare/H2D | "
+        "kernel | D2H/materialize | owner | links | store | reload |\n"
+        "|---|---|---|---|---|---|---|---|---|---|---|---|"
     )
     lines = [header]
     for row in rows:
@@ -621,8 +709,14 @@ def table(rows: list[dict]) -> str:
             f"| {row['variant']} | {row['seconds']:.2f} "
             f"| {row['us_per_pair']:.1f} "
             f"| {f'{row["compile_seconds"]:.2f}' if traced else '-'} "
-            f"| {f'{row["cold_seconds"]:.2f}' if traced else '-'} "
-            f"| {row['tiles']} |"
+            f"| {f'{row["store_create_seconds"]:.2f}' if traced else '-'} "
+            f"| {f'{row["input_transfer_seconds"]:.2f}' if traced else '-'} "
+            f"| {f'{row["kernel_seconds"]:.2f}' if traced else '-'} "
+            f"| {f'{row["output_transfer_seconds"]:.2f}' if traced else '-'} "
+            f"| {f'{row["owner_scatter_seconds"]:.2f}' if traced else '-'} "
+            f"| {f'{row["reduction_seconds"]:.2f}' if traced else '-'} "
+            f"| {f'{row["store_seconds"]:.2f}' if traced else '-'} "
+            f"| {f'{row["warm_reload_seconds"]:.2f}' if traced else '-'} |"
         )
     return "\n".join(lines)
 
@@ -642,7 +736,20 @@ def sweep(
         # every pair, so the worst run is the summary rather than the median
         median = {
             key: statistics.median([record[key] for record in records])
-            for key in ("seconds", "us_per_pair", "compile_seconds", "cold_seconds")
+            for key in (
+                "seconds",
+                "us_per_pair",
+                "compile_seconds",
+                "cold_seconds",
+                "store_create_seconds",
+                "input_transfer_seconds",
+                "kernel_seconds",
+                "output_transfer_seconds",
+                "owner_scatter_seconds",
+                "reduction_seconds",
+                "store_seconds",
+                "warm_reload_seconds",
+            )
             if key in records[0]
         }
         median.update(

@@ -48,18 +48,128 @@ Quantities are per ampere of total conductor current, in raw SI: total poloidal
 flux :math:`\\Phi = 2 \\pi R A_\\phi` [Wb] and field components [T].
 """
 
-from contextlib import contextmanager
-from dataclasses import dataclass
+from __future__ import annotations
+
+from collections.abc import Mapping
+from dataclasses import asdict, dataclass, field
 from functools import cached_property
-from typing import ClassVar
+import json
+from typing import ClassVar, Literal
 
 import numpy as np
+from shapely.geometry import MultiPolygon, Polygon
 
 from nova.biot.bandedcoupling import banded_greens
 from nova.biot.greens import greens_bz_br, greens_psi, section_centroid
 from nova.biot.matrix import Matrix
-from nova.biot.polygon import polygon_greens
+from nova.biot.polygon import _N_NODES, _N_PANELS, polygon_greens
 from nova.biot.polygonanalytic import polygon_analytic_greens
+from nova.biot.sectionaverage import section_triangles
+
+
+@dataclass(frozen=True)
+class PolySectionPolicy:
+    """Immutable routing policy for one polygon-section kernel instance."""
+
+    arrangement: Literal["exact", "standoff", "banded", "filament"] = "exact"
+    exact_kernel: Literal["closed_form", "quadrature"] = "closed_form"
+    backend: Literal["numpy", "jax"] = "numpy"
+    precision: Literal["float64"] = "float64"
+    device_eligibility: Literal["host", "axisymmetric_ring"] = "host"
+    standoff: float | None = None
+    quadrature: tuple[int, int] | None = None
+
+    def __post_init__(self):
+        """Validate and resolve every setting that changes kernel values."""
+        if self.arrangement not in {"exact", "standoff", "banded", "filament"}:
+            raise ValueError(
+                f"unknown polygon-section arrangement {self.arrangement!r}"
+            )
+        if self.exact_kernel not in {"closed_form", "quadrature"}:
+            raise ValueError(f"unknown polygon-section kernel {self.exact_kernel!r}")
+        if self.backend not in {"numpy", "jax"}:
+            raise ValueError(f"unsupported polygon-section backend {self.backend!r}")
+        if self.precision != "float64":
+            raise ValueError(
+                f"unsupported polygon-section precision {self.precision!r}"
+            )
+        expected_device = "host" if self.backend == "numpy" else "axisymmetric_ring"
+        if self.device_eligibility != expected_device:
+            raise ValueError(
+                f"the {self.backend!r} backend requires {expected_device!r} "
+                "device eligibility"
+            )
+        if self.backend == "jax" and self.arrangement != "exact":
+            raise ValueError("the tiled ring backend evaluates only exact routing")
+        if self.backend == "jax" and self.exact_kernel != "quadrature":
+            raise ValueError(
+                "the tiled ring backend requires the compiled quadrature kernel"
+            )
+        if self.arrangement == "filament" and self.exact_kernel != "closed_form":
+            raise ValueError("filament routing does not accept an exact kernel")
+
+        if self.arrangement == "standoff":
+            if isinstance(self.standoff, bool | np.bool_) or not isinstance(
+                self.standoff, int | float | np.integer | np.floating
+            ):
+                raise ValueError("standoff routing requires a finite distance")
+            standoff = float(self.standoff)
+            if not np.isfinite(standoff):
+                raise ValueError("standoff routing requires a finite distance")
+            if standoff <= 0:
+                raise ValueError("standoff distance must be positive")
+            object.__setattr__(self, "standoff", standoff)
+        elif self.standoff is not None:
+            raise ValueError(
+                f"standoff has no meaning for {self.arrangement!r} routing"
+            )
+
+        if self.exact_kernel == "closed_form" and self.quadrature is not None:
+            raise ValueError("closed-form routing does not accept a quadrature rule")
+        if self.arrangement == "banded" and self.quadrature is not None:
+            raise ValueError("banded routing owns its fixed near and middle rules")
+        if self.exact_kernel == "quadrature" and self.arrangement in {
+            "exact",
+            "standoff",
+        }:
+            rule = (_N_PANELS, _N_NODES) if self.quadrature is None else self.quadrature
+            if len(rule) != 2 or any(
+                isinstance(value, bool | np.bool_)
+                or not isinstance(value, int | np.integer)
+                or value <= 0
+                for value in rule
+            ):
+                raise ValueError("quadrature must contain two positive integers")
+            object.__setattr__(self, "quadrature", tuple(int(value) for value in rule))
+
+    @property
+    def key(self) -> str:
+        """Return the canonical cache and source-batch identity."""
+        return json.dumps(asdict(self), sort_keys=True, separators=(",", ":"))
+
+    @classmethod
+    def resolve(
+        cls, value: PolySectionPolicy | Mapping | str | None
+    ) -> PolySectionPolicy:
+        """Return a validated policy from an instance or persisted identity."""
+        if value is None or value == "":
+            return cls()
+        if isinstance(value, cls):
+            return value
+        if isinstance(value, str):
+            try:
+                value = json.loads(value)
+            except json.JSONDecodeError as error:
+                raise ValueError("invalid polygon-section policy identity") from error
+        if isinstance(value, Mapping):
+            values = dict(value)
+            if values.get("quadrature") is not None:
+                values["quadrature"] = tuple(values["quadrature"])
+            return cls(**values)
+        raise TypeError(f"cannot resolve polygon-section policy from {type(value)}")
+
+
+DEFAULT_POLYSECTION_POLICY = PolySectionPolicy().key
 
 
 @dataclass
@@ -73,140 +183,12 @@ class PolySection(Matrix):
 
     axisymmetric: ClassVar[bool] = True
     name: ClassVar[str] = "polysection"
+    policy: PolySectionPolicy | Mapping | str = field(default_factory=PolySectionPolicy)
 
-    standoff: ClassVar[float | None] = None
-    """Standoff band, in section radii, within which the exact kernel is used.
-
-    The default ``None`` (or ``inf``) means *exact everywhere*: every
-    target-source pair goes through the polygon kernel, with no point-filament
-    far field and no seam at all. That is the physically unimpeachable setting
-    and the only one shipped as a default — a finite band needs a principled,
-    error-bounded cutoff, and none of the geometry-derived candidates measured
-    so far qualifies (a few section radii keeps the seam small, ~5e-4 in flux,
-    but where the finite-section correction stops mattering has to come from
-    the section's second-moment error bound, not from a budget). The
-    operator-assembly review owns that choice.
-
-    A finite value is for scoped studies via :meth:`configured`. Measured
-    guidance for such sweeps: the exact kernel costs about four orders of
-    magnitude more per pair than the point form; two radii is the useful floor
-    (it still covers a cell and its first ring of neighbours — in a hexagonal
-    tiling of circumradius ``a`` the nearest centres sit at ``sqrt(3) a`` —
-    and on a 234-cell mesh delivers the identical self-term correction for a
-    quarter of the cost of three radii). Below two radii, near-neighbour pairs
-    fall back to the bare point kernel, and :class:`nova.biot.circle.Circle` --
-    which carries its own finite-section band and averages the target's section
-    over the coincident term -- is then the better-founded lane for those pairs
-    than a narrow band here.
-    """
-
-    quadrature: ClassVar[tuple[int, int] | None] = None
-    """Boundary quadrature as ``(n_panels, n_nodes)``; ``None`` uses the kernel's
-    own rule.
-
-    Lowering it is a false economy: at ``(8, 24)`` the flux still holds a few
-    parts in ten million but ``B_Z`` degrades to ~1e-02 relative against the
-    closed-form rectangle oracle, which :mod:`tests.test_biotpolygon` pins at
-    ``rtol=1e-10``. Raise it if a section is far more elongated than a plasma
-    cell; otherwise leave it alone.
-    """
-
-    banded: ClassVar[bool] = False
-    """Route pairs through :mod:`nova.biot.bandedcoupling` instead of the exact rule.
-
-    The three-band scheme evaluates the converged rule only where the finite
-    section is physically resolved, a reduced rule out to the section's own far
-    seam, and a moment-corrected filament beyond it — about one percent of the
-    exact-everywhere quadrature node count on a plasma grid, with every component
-    held to one part in a million of its peak against the exact lane.
-
-    The default is ``False``: exact everywhere stays the shipped lane and the
-    reference the banded one is measured against. Flipping the plasma-coupling
-    default is a separate decision from having the scheme available.
-    """
-
-    closed_form: ClassVar[bool] = True
-    """Take the exact kernel from :mod:`nova.biot.polygonanalytic` in closed form.
-
-    The angular integral the boundary quadrature does numerically is done
-    analytically instead, leaving two smooth ``arsinh`` residuals per corner —
-    the same physics through a different evaluation. It is the default because on
-    the lane it serves, exact everywhere, it is measurably better on both counts.
-    It is NOT better on both counts everywhere: see the crossing below.
-
-    Cheaper on a whole column: a hexagonal plasma cell costs 162.9 µs/pair
-    against the ``(16, 48)`` rule's 849.7 (5.2×), and a real 560-cell plasma-grid
-    build 54.5 s against 274.5 (5.0×), because a corner is evaluated once for both
-    its edges rather than 768 quadrature nodes being spent per pair. Shape-dependent
-    as that implies, where the quadrature is not: the cost tracks the corner count
-    (wall-clipped 196.3 against the regular hexagon's 162.9), so a grid gets cheaper
-    per pair as it refines and the clipped fraction falls — mean corners 6.09 at 560
-    cells and 5.99 at 2120, the six-corner fraction climbing 75 % to 87 %.
-
-    More accurate, and most where it matters: it holds 1e-10 of local magnitude
-    on all three components across the whole acceptance gate, and it is finite and
-    accurate ON the contour and ON a vertex, where a boundary quadrature is
-    integrating through its own singularity. Measured on a real 179-cell plasma
-    grid, the worst off-diagonal pair is a neighbour's centre 0.001 contour radii
-    outside the source cell, where the quadrature is 2.9e-03 out on B_Z; refining
-    it to 1024 panels brings it to 2.1e-12 OF THE CLOSED FORM's value, so the
-    closed form is the value and the quadrature was the error.
-
-    Independent of ``standoff`` and ``banded`` in MEANING — they choose how pairs
-    are binned, this chooses what the exact treatment is, so with neither set it is
-    closed-form everywhere and with ``banded`` it serves the near band.
-    ``quadrature`` has no meaning for it: the closed form's own residual node count
-    is fixed by its acceptance gate. Set it ``False`` to get the boundary
-    quadrature back, which is what the closed form's equivalence gate is measured
-    against.
-
-    Independent in meaning, NOT in cost, which is the one thing measuring it
-    disproved. The closed form holds three corner parts live and amortises them
-    across a call, so its rate falls 38× between 8 and 4096 pairs in one call
-    (6532 → 170 µs/pair) where the quadrature — which builds one angular rule and
-    reuses it — falls only 1.3× (1084 → 851). **The two cross at 64 pairs per
-    call.** An exact-everywhere column hands the kernel every pair at once and the
-    closed form wins five-fold; the three-band scheme hands its near band about
-    thirteen, an order below the crossing, and there it LOSES — three figures at
-    three scopes, all measured, none of them the others: the near-band kernel call
-    alone 4023.4 µs/pair against 984.2 (**4.1× dearer**), the whole banded column
-    31.5 against 13.6 (2.3×), and a real 560-cell banded build 36.4 s against 19.2
-    (1.9×). A caller minimising a banded build should turn this off; one that needs
-    the near band right should not.
-
-    It is not switched automatically on batch width: which kernel ran would then
-    depend on how a caller happened to group its pairs, and a stored operator's
-    values have to be reproducible from its geometry alone.
-    """
-
-    @classmethod
-    @contextmanager
-    def configured(cls, *, standoff=..., quadrature=..., banded=..., closed_form=...):
-        """Apply a temporary configuration for the duration of a solve.
-
-        The element is built inside :class:`nova.biot.solve.Solve`, so there is
-        no per-call argument to thread a configuration through; this scopes a
-        change instead of leaving the class mutated::
-
-            with PolySection.configured(banded=True):  # three-band scheme
-                coilset.plasmagrid.solve()
-
-            with PolySection.configured(closed_form=True):  # exact, in closed form
-                coilset.plasmagrid.solve()
-        """
-        previous = (cls.standoff, cls.quadrature, cls.banded, cls.closed_form)
-        if standoff is not ...:
-            cls.standoff = standoff
-        if quadrature is not ...:
-            cls.quadrature = quadrature
-        if banded is not ...:
-            cls.banded = banded
-        if closed_form is not ...:
-            cls.closed_form = closed_form
-        try:
-            yield cls
-        finally:
-            cls.standoff, cls.quadrature, cls.banded, cls.closed_form = previous
+    def __post_init__(self):
+        """Resolve this element's private routing policy before evaluation."""
+        self.policy = PolySectionPolicy.resolve(self.policy)
+        super().__post_init__()
 
     @staticmethod
     def section_radius(vertices: np.ndarray) -> float:
@@ -215,9 +197,12 @@ class PolySection(Matrix):
         centre = section_centroid(vertices)
         return float(np.max(np.hypot(*(vertices - centre).T)))
 
-    @classmethod
+    @staticmethod
     def near_band(
-        cls, target_r: np.ndarray, target_z: np.ndarray, vertices: np.ndarray
+        target_r: np.ndarray,
+        target_z: np.ndarray,
+        vertices: np.ndarray,
+        policy: PolySectionPolicy | Mapping | str | None = None,
     ) -> np.ndarray:
         """Return the mask of targets inside the section's standoff band.
 
@@ -225,7 +210,10 @@ class PolySection(Matrix):
         infinite, which is how *exact everywhere* is expressed.
         """
         target_r = np.asarray(target_r, dtype=np.float64)
-        if cls.standoff is None or not np.isfinite(cls.standoff):
+        policy = PolySectionPolicy.resolve(policy)
+        if policy.arrangement == "filament":
+            return np.zeros(target_r.shape, dtype=bool)
+        if policy.arrangement != "standoff":
             return np.ones(target_r.shape, dtype=bool)
         vertices = np.asarray(vertices, dtype=np.float64)
         centre = section_centroid(vertices)
@@ -233,11 +221,14 @@ class PolySection(Matrix):
             target_r - centre[0],
             np.asarray(target_z, dtype=np.float64) - centre[1],
         )
-        return distance < cls.standoff * cls.section_radius(vertices)
+        return distance < policy.standoff * PolySection.section_radius(vertices)
 
-    @classmethod
+    @staticmethod
     def section_greens(
-        cls, target_r: np.ndarray, target_z: np.ndarray, vertices: np.ndarray
+        target_r: np.ndarray,
+        target_z: np.ndarray,
+        vertices: np.ndarray,
+        policy: PolySectionPolicy | Mapping | str | None = None,
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Return ``(psi, Br, Bz)`` per ampere: exact near the section, point far.
 
@@ -247,26 +238,39 @@ class PolySection(Matrix):
         which exact kernel serves either arrangement, and ``quadrature`` applies
         only to the boundary-quadrature one.
         """
+        policy = PolySectionPolicy.resolve(policy)
         target_r = np.asarray(target_r, dtype=np.float64)
         target_z = np.asarray(target_z, dtype=np.float64)
-        if cls.banded:
+        if policy.arrangement == "banded":
             return banded_greens(
-                target_r, target_z, vertices, closed_form=cls.closed_form
+                target_r,
+                target_z,
+                vertices,
+                closed_form=policy.exact_kernel == "closed_form",
             )
-        centre = section_centroid(vertices)
-        psi = greens_psi(target_r, target_z, centre[0], centre[1])
-        bz, br = greens_bz_br(target_r, target_z, centre[0], centre[1])
-        near = cls.near_band(target_r, target_z, vertices)
+        psi = np.empty(target_r.shape)
+        br = np.empty(target_r.shape)
+        bz = np.empty(target_r.shape)
+        near = PolySection.near_band(target_r, target_z, vertices, policy)
         if near.any():
-            psi, br, bz = psi.copy(), br.copy(), bz.copy()
-            psi[near], br[near], bz[near] = cls.exact_greens(
-                target_r[near], target_z[near], vertices
+            psi[near], br[near], bz[near] = PolySection.exact_greens(
+                target_r[near], target_z[near], vertices, policy
+            )
+        far = ~near
+        if far.any():
+            centre = section_centroid(vertices)
+            psi[far] = greens_psi(target_r[far], target_z[far], centre[0], centre[1])
+            bz[far], br[far] = greens_bz_br(
+                target_r[far], target_z[far], centre[0], centre[1]
             )
         return psi, br, bz
 
-    @classmethod
+    @staticmethod
     def exact_greens(
-        cls, target_r: np.ndarray, target_z: np.ndarray, vertices: np.ndarray
+        target_r: np.ndarray,
+        target_z: np.ndarray,
+        vertices: np.ndarray,
+        policy: PolySectionPolicy | Mapping | str | None = None,
     ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Return ``(psi, Br, Bz)`` from the configured exact kernel.
 
@@ -274,25 +278,47 @@ class PolySection(Matrix):
         band, the banded scheme's near band and a direct call cannot disagree
         about which one is in force.
         """
-        if cls.closed_form:
+        policy = PolySectionPolicy.resolve(policy)
+        if policy.exact_kernel == "closed_form":
             return polygon_analytic_greens(target_r, target_z, vertices)
-        rule = (
-            {}
-            if cls.quadrature is None
-            else dict(zip(("n_panels", "n_nodes"), cls.quadrature))
-        )
+        rule = dict(zip(("n_panels", "n_nodes"), policy.quadrature))
         return polygon_greens(target_r, target_z, vertices, **rule)
 
+    @staticmethod
+    def _material_geometry(value) -> Polygon | MultiPolygon:
+        """Return validated Shapely material from a Nova section wrapper."""
+        geometry = value
+        visited: set[int] = set()
+        while not isinstance(geometry, Polygon | MultiPolygon):
+            if id(geometry) in visited or not hasattr(geometry, "poly"):
+                raise ValueError("polygon-section source requires polygonal material")
+            visited.add(id(geometry))
+            geometry = geometry.poly
+        if geometry.is_empty or not geometry.is_valid or geometry.area <= 0.0:
+            raise ValueError(
+                "polygon-section source material must be valid and positive"
+            )
+        return geometry
+
     @cached_property
-    def _section_vertices(self) -> list[np.ndarray]:
-        """Return each source element's section vertices as ``(n, 2)`` r-z arrays."""
-        vertices = []
-        for poly in np.asarray(self.source["poly"]):
-            points = np.asarray(poly.points, dtype=np.float64)[:, [0, 2]]
-            if len(points) > 1 and np.allclose(points[0], points[-1]):
-                points = points[:-1]  # drop the repeated closing vertex
-            vertices.append(points)
-        return vertices
+    def _section_components(self) -> list[tuple[tuple[np.ndarray, float], ...]]:
+        """Return positive simple components and normalized source-current weights."""
+        sections = []
+        for value in np.asarray(self.source["poly"]):
+            geometry = self._material_geometry(value)
+            if isinstance(geometry, Polygon) and len(geometry.interiors) == 0:
+                points = np.asarray(geometry.exterior.coords, dtype=np.float64)[:-1, :2]
+                sections.append(((points, 1.0),))
+                continue
+            triangles, area = section_triangles(geometry)
+            total = float(area.sum())
+            sections.append(
+                tuple(
+                    (vertices, float(weight / total))
+                    for vertices, weight in zip(triangles, area)
+                )
+            )
+        return sections
 
     @cached_property
     def _coupling(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -302,10 +328,29 @@ class PolySection(Matrix):
         psi = np.empty(target_r.shape)
         br = np.empty(target_r.shape)
         bz = np.empty(target_r.shape)
-        for column, vertices in enumerate(self._section_vertices):
-            psi[:, column], br[:, column], bz[:, column] = self.section_greens(
-                target_r[:, column], target_z[:, column], vertices
-            )
+        for column, components in enumerate(self._section_components):
+            if self.policy.arrangement == "filament":
+                centre = sum(
+                    weight * section_centroid(vertices)
+                    for vertices, weight in components
+                )
+                psi[:, column] = greens_psi(
+                    target_r[:, column], target_z[:, column], centre[0], centre[1]
+                )
+                bz[:, column], br[:, column] = greens_bz_br(
+                    target_r[:, column], target_z[:, column], centre[0], centre[1]
+                )
+                continue
+            psi[:, column] = 0.0
+            br[:, column] = 0.0
+            bz[:, column] = 0.0
+            for vertices, weight in components:
+                component = self.section_greens(
+                    target_r[:, column], target_z[:, column], vertices, self.policy
+                )
+                psi[:, column] += weight * component[0]
+                br[:, column] += weight * component[1]
+                bz[:, column] += weight * component[2]
         return psi, br, bz
 
     @cached_property
@@ -316,7 +361,15 @@ class PolySection(Matrix):
     @cached_property
     def Aphi(self):
         """Return the toroidal vector potential array [Wb/(m.A)]."""
-        return self.Psi / (2 * np.pi * self.mu_0 * self.target("r"))
+        radius = np.asarray(self.target("r"))
+        potential = np.zeros_like(self.Psi)
+        np.divide(
+            self.Psi,
+            2 * np.pi * self.mu_0 * radius,
+            out=potential,
+            where=radius != 0,
+        )
+        return potential
 
     @cached_property
     def Br(self):
@@ -327,3 +380,147 @@ class PolySection(Matrix):
     def Bz(self):
         """Return the vertical field array [T/A]."""
         return self._coupling[2]
+
+
+@dataclass
+class TiledPolySection(PolySection):
+    """Evaluate complete-ring sections through the compiled quadrature tile kernel.
+
+    This is an explicit product adapter around the existing ring kernel. It keeps
+    the ordinary :class:`Matrix` turn, target-quadrature and row-reduction contract;
+    :class:`~nova.biot.solve.Solve` performs the complete source electrical
+    reduction after each bounded route batch returns. Historical finite arcs use
+    their geometry-specific host elements and never enter this adapter.
+
+    Complex material is expanded into positive simple triangles before packing.
+    Their area fractions are accumulated back onto the authored source column, so
+    holes carry no current and disconnected components retain one electrical
+    identity.
+    """
+
+    _tile_side: ClassVar[int] = 40
+
+    def __post_init__(self):
+        """Require the explicit accelerator route before allocating an evaluator."""
+        super().__post_init__()
+        if (
+            self.policy.backend != "jax"
+            or self.policy.device_eligibility != "axisymmetric_ring"
+        ):
+            raise ValueError("tiled polygon sections require the JAX ring policy")
+
+    def build_transform(self):
+        """Avoid the unused target-by-source Cartesian transform allocation."""
+        self.coordinate_axes = np.empty((0, 3, 3), dtype=np.float64)
+        self.coordinate_origin = np.empty((0, 3), dtype=np.float64)
+
+    @cached_property
+    def _packed_sections(self) -> tuple[list[np.ndarray], np.ndarray, np.ndarray]:
+        """Return simple sections, authored owners and positive current fractions."""
+        sections = []
+        owner = []
+        fraction = []
+        for column, components in enumerate(self._section_components):
+            for vertices, weight in components:
+                sections.append(vertices)
+                owner.append(column)
+                fraction.append(weight)
+        return (
+            sections,
+            np.asarray(owner, dtype=np.intp),
+            np.asarray(fraction, dtype=np.float64),
+        )
+
+    @cached_property
+    def _coupling(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Return packed tile results accumulated onto authored source columns."""
+        from nova.biot.polygon import pad_batch
+        from nova.biot.polygonanalytic import polygon_analytic_greens
+        from nova.biot.tiledassembly import TilePlan, tile_evaluator
+
+        target_r = np.hypot(
+            np.asarray(self.target.x, dtype=np.float64),
+            np.asarray(self.target.y, dtype=np.float64),
+        )
+        target_z = np.asarray(self.target.z, dtype=np.float64)
+        sections, owner, fraction = self._packed_sections
+        if target_r.size == 0 or not sections:
+            empty = np.zeros((target_r.size, len(self.source)), dtype=np.float64)
+            return empty.copy(), empty.copy(), empty.copy()
+
+        components = np.zeros((3, target_r.size, len(self.source)), dtype=np.float64)
+        axis_positions = np.flatnonzero(target_r == 0.0)
+        if len(axis_positions) > 0:
+            # The quadrature field is a flux gradient divided by radius.  Keep
+            # symmetry-axis rows out of that traced graph and use the same finite
+            # closed reduction as the host quadrature route before accumulating
+            # material pieces back to their authored source columns.
+            for vertices, column, current_fraction in zip(sections, owner, fraction):
+                values = polygon_analytic_greens(
+                    target_r[axis_positions], target_z[axis_positions], vertices
+                )
+                for result, value in zip(components, values):
+                    result[axis_positions, column] += current_fraction * value
+
+        off_axis_positions = np.flatnonzero(target_r != 0.0)
+        if len(off_axis_positions) == 0:
+            return tuple(components)
+
+        n_panels, n_nodes = (
+            self.policy.quadrature
+            if self.policy.exact_kernel == "quadrature"
+            else (_N_PANELS, _N_NODES)
+        )
+        edge, weight, norm = pad_batch(sections)
+        plan = TilePlan(
+            target_tile=min(self._tile_side, len(off_axis_positions)),
+            source_tile=min(self._tile_side, len(sections)),
+            block=16,
+            n_panels=n_panels,
+            n_nodes=n_nodes,
+        )
+        evaluate = tile_evaluator(
+            plan,
+            batched=True,
+            kernel="quadrature",
+            precision=self.policy.precision,
+            edge_count=edge.shape[0],
+        )
+        for rows, columns in plan.tiles(len(off_axis_positions), len(sections)):
+            authored_rows = off_axis_positions[rows]
+            tile = evaluate(
+                target_r[authored_rows],
+                target_z[authored_rows],
+                edge[:, :, columns],
+                weight[:, columns],
+                norm[columns],
+            )
+            tile_owner = owner[columns]
+            tile_fraction = fraction[columns]
+            for result, values in zip(components, tile):
+                reduced = np.zeros(
+                    (len(authored_rows), len(self.source)), dtype=np.float64
+                )
+                np.add.at(
+                    reduced.T,
+                    tile_owner,
+                    (values * tile_fraction[np.newaxis, :]).T,
+                )
+                result[authored_rows] += reduced
+        return tuple(components)
+
+    @cached_property
+    def Aphi(self):
+        """Return finite zero vector potential on the magnetic axis."""
+        radius = np.hypot(
+            np.asarray(self.target.x, dtype=np.float64),
+            np.asarray(self.target.y, dtype=np.float64),
+        )[:, np.newaxis]
+        potential = np.zeros_like(self.Psi)
+        np.divide(
+            self.Psi,
+            2 * np.pi * self.mu_0 * radius,
+            out=potential,
+            where=radius != 0.0,
+        )
+        return potential

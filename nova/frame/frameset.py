@@ -24,7 +24,11 @@ def frame_factory(frame_method):
         @cached_property
         def wrapper(self):
             nonlocal frame_method
-            kwargs = {"name": method.__name__} | method(self)
+            kwargs = (
+                {"name": method.__name__}
+                | method(self)
+                | self.frame_factory_kwargs(method.__name__)
+            )
             try:
                 return frame_method(*self.frames, **kwargs)
             except TypeError:  # import_module from DeferredImport.load()
@@ -124,6 +128,7 @@ class FrameSet(ZarrStore, FrameSetLoc):
         "Bz",
         "B",
         "acloss",
+        "polysection_policy",
     ]
 
     def __post_init__(self):
@@ -157,12 +162,21 @@ class FrameSet(ZarrStore, FrameSetLoc):
             delim="_",
             version=["index", "nturn"],
         )
+        self.frame.metaframe.default["polysection_policy"] = ""
+        self.subframe.metaframe.default["polysection_policy"] = ""
         self.subframe.frame_attr(Select, ["Ic"])
         super().__post_init__()
 
     def __str__(self):
         """Return string representation of coilset frame."""
         return str(self.superframe)
+
+    def frame_factory_kwargs(self, name: str) -> dict:
+        """Return instance-specific additions for a cached frame factory."""
+        return {}
+
+    def restore_store_metadata(self):
+        """Apply instance identity loaded from the root cache group."""
 
     @property
     def superframe(self):
@@ -196,6 +210,8 @@ class FrameSet(ZarrStore, FrameSetLoc):
 
     def load(self):
         """Load frameset from the grouped zarr store."""
+        super().load()
+        self.restore_store_metadata()
         self.frame.load(self.filepath, self.subgroup("frame"))
         self.subframe.load(self.filepath, self.subgroup("subframe"))
         self.clear_frameset()
@@ -206,7 +222,6 @@ class FrameSet(ZarrStore, FrameSetLoc):
                 data.filepath = self.filepath
                 data.group = self.subgroup(data.name)
                 data.load()
-        super().load()
         return self
 
     def store(self, vtk=True):

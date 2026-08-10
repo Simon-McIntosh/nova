@@ -243,6 +243,12 @@ Tiled assembly (`nova/biot/tiledassembly.py`): ~48 B/pair (vs 267 B/pair
 through the ≤500-source chunking), 16-core scaling 8.78×; measured 16-core
 rate 107 µs/pair ⇒ projected 2000-cell exact-everywhere polygon build 7.1 min.
 
+The projection tables in this historical receipt predate the explicit product
+adapter and are retained only to explain earlier route decisions. They are not
+current executable-route measurements; current benchmark drivers emit completed
+kernel, compile, transfer, reduction, store, and reload timings without scaling
+them to unexecuted hardware or mesh sizes.
+
 ### a real plasma-grid build through each arrangement
 
 Recorded 2026-07-26, same node and protocol. `CoilSet(dplasma=-500,
@@ -257,7 +263,7 @@ tessellation.
 
 | arrangement | build s | µs/pair | × point build |
 |---|---|---|---|
-| point filament (shipped default) | 1.16 (1.13–1.19) | 3.7 | 1 |
+| point filament (explicit reference route) | 1.16 (1.13–1.19) | 3.7 | 1 |
 | exact-everywhere quadrature | 274.53 (273.17–275.14) | 875.4 | 237 |
 | exact-everywhere CLOSED FORM | **54.46** (54.25–54.61) | 173.7 | **47** |
 | three-band, quadrature near | 19.18 (19.13–19.26) | 61.1 | 17 |
@@ -455,7 +461,7 @@ per-block build is still the wrong shape for it (0.4 s against 8.5 s at 20,000
 pairs, in a fresh process), but a session that builds repeatedly now pays the
 compile once rather than once a build.
 
-## three-band polygon-section coupling (opt-in: PolySection.configured(banded=True))
+## three-band polygon-section coupling (opt-in: `PolySectionPolicy(arrangement="banded")`)
 
 Recorded 2026-07-25 (sun_debug node; drivers were throwaway — acceptance
 sweeps live in `tests/test_biotbandedcoupling.py`). Bands by distance to the
@@ -469,7 +475,7 @@ far filament 2.5/5.0 µs; whole 2339-target column 13.1/52.0 µs/pair vs
 869/1008 exact-everywhere — **66× / 19× cheaper per column**. Banded node
 count 1.20% / 4.28% of exact. Worst per-component error beyond the near band
 ≤ 1.7e-7 of local |B| (≤ 6.8e-9 on ψ contour maps); the near band is
-bit-identical to the production 16×48 rule. Seam jumps ≤ 1.6e-7 of local.
+bit-identical to the explicit 16×48 quadrature rule. Seam jumps ≤ 1.6e-7 of local.
 
 ### band populations, and the closed form on the near band
 
@@ -601,10 +607,9 @@ evenly with `pmap`.
 
 Four devices give only **1.53×** steady-state speedup because one H200 already
 fills a mapped tile; they also double cold dispatch at the smaller tile. A
-two-term replicated-geometry fit projects 1.686 µs/pair on eight H200s, only
-1.68× over one. The actual eight-device run was unavailable: two H200s serve the
-long-running DeepSeek process and one serves embeddings, and those unrelated
-services were deliberately left untouched. The operational rule is therefore:
+complete eight-device run was unavailable because unrelated long-running services
+occupied three cards, so no eight-device estimate is retained. The operational
+rule is therefore:
 use one large-tile H200 by default; shard only an already-large ring build whose
 remaining wall justifies the extra devices. Straight prisms, filament arcs,
 rectangular bows and cylinders remain host routes until they acquire a

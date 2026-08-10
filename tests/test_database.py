@@ -5,6 +5,9 @@ import zarr
 
 from nova.database.filepath import FilePath
 from nova.database.zarrstore import ZarrStore
+from nova.biot.polysection import PolySectionPolicy
+from nova.biot.target import TargetQuadraturePolicy
+from nova.frame.coilset import CoilSet
 from nova.imas.database import Database
 from nova.imas.dataset import IdsBase
 from nova.imas.equilibrium import EquilibriumData
@@ -263,6 +266,116 @@ def test_cache_key_includes_dd_version():
     assert fp.hash_attrs(older) != fp.hash_attrs(newer)
 
 
+def test_cache_key_distinguishes_source_lanes_and_target_quadrature():
+    """Every route-affecting default participates in the stored operator identity."""
+    fp = FilePath(filename="cache")
+    exact = PolySectionPolicy()
+    banded = PolySectionPolicy(arrangement="banded")
+    baseline = CoilSet().coilset_attrs
+    coil_opt_in = CoilSet(coil_polysection_policy=banded).coilset_attrs
+    plasma_opt_in = CoilSet(plasma_polysection_policy=banded).coilset_attrs
+    accelerator = CoilSet(
+        plasma_polysection_policy=PolySectionPolicy(
+            exact_kernel="quadrature",
+            backend="jax",
+            device_eligibility="axisymmetric_ring",
+        )
+    ).coilset_attrs
+    target_order = CoilSet(
+        inductance_target_policy=TargetQuadraturePolicy(order=4)
+    ).coilset_attrs
+    assert baseline["coil_polysection_policy"] == exact.key
+    assert baseline["plasma_polysection_policy"] == exact.key
+    keys = {
+        fp.hash_attrs(attrs)
+        for attrs in (
+            baseline,
+            coil_opt_in,
+            plasma_opt_in,
+            accelerator,
+            target_order,
+        )
+    }
+    assert len(keys) == 5
+    assert coil_opt_in["coil_polysection_policy"] == banded.key
+    assert plasma_opt_in["plasma_polysection_policy"] == banded.key
+
+
+def test_route_identity_round_trips_through_the_zarr_root_group(tmp_path):
+    """A fresh CoilSet reconstructs source and target factories from stored routes."""
+    coil_policy = PolySectionPolicy(arrangement="banded")
+    plasma_policy = PolySectionPolicy(exact_kernel="quadrature")
+    target_policy = TargetQuadraturePolicy(order=4)
+    stored = CoilSet(
+        filename="route_identity",
+        dirname=tmp_path,
+        coil_polysection_policy=coil_policy,
+        plasma_polysection_policy=plasma_policy,
+        inductance_target_policy=target_policy,
+        dcoil=-2,
+    )
+    stored.coil.insert(3.0, 0.0, 0.4, 0.2, nturn=12, name="PF")
+    stored.store()
+
+    loaded = CoilSet(filename="route_identity", dirname=tmp_path).load()
+    assert loaded.route_attrs == stored.route_attrs
+    assert loaded.coil.polysection_policy == coil_policy.key
+    assert loaded.firstwall.polysection_policy == plasma_policy.key
+    assert loaded.inductance.target_policy == target_policy.key
+    np.testing.assert_array_equal(
+        loaded.subframe.polysection_policy, stored.subframe.polysection_policy
+    )
+    filepath = FilePath(filename="cache")
+    assert filepath.hash_attrs(loaded.coilset_attrs) == filepath.hash_attrs(
+        stored.coilset_attrs
+    )
+
+
+@pytest.mark.parametrize(
+    ("attribute", "value"),
+    [
+        ("coil_polysection_policy", PolySectionPolicy(arrangement="banded")),
+        ("plasma_polysection_policy", PolySectionPolicy(arrangement="banded")),
+        ("inductance_target_policy", TargetQuadraturePolicy(order=4)),
+    ],
+)
+def test_coilset_root_route_identity_is_immutable(attribute, value):
+    """Root cache metadata cannot drift away from its already-bound factories."""
+    coilset = CoilSet()
+    # Materialise the factories whose routes would otherwise retain the old key.
+    assert all(
+        factory is not None
+        for factory in (coilset.coil, coilset.firstwall, coilset.inductance)
+    )
+    with pytest.raises(ValueError, match="route policies are fixed"):
+        setattr(coilset, attribute, value)
+
+
+def test_subframe_route_mutation_cannot_poison_the_root_cache_key(tmp_path):
+    """Executable per-row routes must agree with their persisted owner identity."""
+    coilset = CoilSet(
+        filename="row_route_identity",
+        dirname=tmp_path,
+        dcoil=-2,
+    )
+    coilset.coil.insert(
+        {"hexagon": [3.0, 0.0, 0.2, 0.2]},
+        nturn=12,
+        name="PF",
+        ifttt=False,
+    )
+    position = np.flatnonzero(np.asarray(coilset.subframe.segment) == "polysection")[0]
+    label = coilset.subframe.index[position]
+    coilset.subframe.loc[label, "polysection_policy"] = PolySectionPolicy(
+        arrangement="banded"
+    ).key
+
+    with pytest.raises(ValueError, match="routes differ from the CoilSet cache"):
+        getattr(coilset, "inductance")
+    with pytest.raises(ValueError, match="routes differ from the CoilSet cache"):
+        coilset.store()
+
+
 def test_cache_round_trip_bit_identical(tmp_path):
     data = xarray.Dataset(
         {"psi": ("node", np.linspace(0.0, 1.0, 8))}, attrs={"machine": "iter"}
@@ -372,21 +485,59 @@ def test_machine_cache_folds_dd_version(monkeypatch, tmp_path):
         wall=False,
         ninductance=5,
         dirname=str(tmp_path),
+        coil_polysection_policy=PolySectionPolicy(arrangement="banded"),
+        plasma_polysection_policy=PolySectionPolicy(exact_kernel="quadrature"),
+        inductance_target_policy=TargetQuadraturePolicy(order=4),
     )
 
     cold = Machine(105011, 9, dd_version="3.40.0", **config)
     assert "dd_version" in cold.group_attrs
     assert len(cold.frame) == 2
+    assert cold.inductance.data.attrs["target_quadrature_policy"] == (
+        TargetQuadraturePolicy(order=4).key
+    )
 
     # a warm load reuses the cache group and is bit-identical to the cold build
     warm = Machine(105011, 9, dd_version="3.40.0", **config)
     assert warm.group == cold.group
     assert len(warm.frame) == 2
+    assert warm.route_attrs == cold.route_attrs
+    np.testing.assert_array_equal(
+        warm.subframe.polysection_policy, cold.subframe.polysection_policy
+    )
     xarray.testing.assert_identical(warm.data, cold.data)
 
     # a differing DD version changes the composite key -- no stale reuse
     stale = Machine(105011, 9, dd_version="3.42.0", **config)
     assert stale.group != cold.group
+
+    changed_route = Machine(
+        105011,
+        9,
+        dd_version="3.40.0",
+        **(config | {"inductance_target_policy": TargetQuadraturePolicy(order=5)}),
+    )
+    assert changed_route.group != cold.group
+
+    with pytest.raises(ValueError, match="route policies are fixed"):
+        cold.inductance_target_policy = TargetQuadraturePolicy(order=5).key
+
+
+def test_fresh_process_reload_uses_distinct_readers_and_zarr_cleanup(tmp_path):
+    """Reload timing measures real process starts and removes the exact Zarr store."""
+    from benchmarks.biotoperate import measure_fresh_process_reload
+
+    result = measure_fresh_process_reload(str(tmp_path), dplasma=-3, readers=2)
+    writer = result["writer"]
+    readers = result["readers"]
+    assert len({writer["pid"], *(reader["pid"] for reader in readers)}) == 3
+    for reader in readers:
+        assert reader["shape"] == writer["shape"]
+        assert reader["dtype"] == writer["dtype"]
+        assert reader["checksum"] == pytest.approx(writer["checksum"], rel=0, abs=0)
+        assert reader["load_seconds"] > 0
+        assert reader["process_seconds"] >= reader["load_seconds"]
+    assert not (tmp_path / "fresh_process_coilset.zarr").exists()
 
 
 if __name__ == "__main__":

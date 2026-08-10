@@ -1259,7 +1259,7 @@ class Machine(CoilSet, Geometry, CoilData):  # Diagnostics,
         for geometry in self.dataset_attrs:
             if (attrs := self.dataset_attrs[geometry]) is False:
                 continue
-            if isinstance(attrs, (int, bytes, str)):  # ids input
+            if isinstance(attrs, int | bytes | str):  # ids input
                 metadata[geometry] = attrs
                 continue
             metadata[geometry] = ",".join([str(attrs[attr]) for attr in attrs])
@@ -1270,6 +1270,9 @@ class Machine(CoilSet, Geometry, CoilData):  # Diagnostics,
         """Set instance metadata, assert consistent attr_hash."""
         for attr in self.frameset_attrs:
             setattr(self, attr, metadata[attr])
+        self._restore_route_attrs(
+            {attr: metadata[attr] for attr in self._route_fields if attr in metadata}
+        )
         for attr in metadata.keys() & self._biot_attrs.keys():
             setattr(self, attr, metadata[attr])
         for attr in self.dataset_attrs:
@@ -1330,7 +1333,9 @@ class Machine(CoilSet, Geometry, CoilData):  # Diagnostics,
         for attr, geometry in self.geometry.items():
             geometry_attrs = getattr(self, attr)
             if isinstance(geometry_attrs, dict):
-                coilset = geometry(**geometry_attrs, **self.frameset_attrs)
+                coilset = geometry(
+                    **geometry_attrs, **self.frameset_attrs, **self.route_attrs
+                )
                 self += coilset
         """
         for attr, diagnostic in self.diagnostic.items():
@@ -1352,6 +1357,11 @@ class Machine(CoilSet, Geometry, CoilData):  # Diagnostics,
 
     def store(self):
         """Store frameset, biot attributes and metadata."""
+        expected_group = self.hash_attrs(self.group_attrs)
+        if self.group != expected_group:
+            raise ValueError(
+                "machine cache identity changed after its group was selected"
+            )
         self.data.attrs |= self.metadata
         super().store()
         return self

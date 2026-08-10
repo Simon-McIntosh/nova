@@ -11,9 +11,16 @@ thick-filament kernel at all.
 
 import numpy as np
 import pytest
+from dataclasses import FrozenInstanceError
+from shapely.geometry import Polygon
 
+from nova.biot.biotframe import Source, Target
 from nova.biot.greens import greens_bz_br, greens_psi
-from nova.biot.polysection import PolySection
+from nova.biot.polysection import PolySection, PolySectionPolicy, TiledPolySection
+from nova.biot.polygonanalytic import polygon_analytic_greens
+from nova.biot.sectionaverage import section_triangles
+from nova.biot.solve import Solve
+from nova.biot.target import TargetQuadraturePolicy
 from nova.frame.coilset import CoilSet
 
 
@@ -136,9 +143,14 @@ def test_the_blend_is_continuous_across_the_standoff_band():
     standoff = 3.0
     edge = np.array([1.0 + standoff * PolySection.section_radius(vertices)])
     height = np.zeros(1)
-    with PolySection.configured(standoff=standoff):
-        exact = polygon_greens(edge, height, vertices)[0]
-        point = greens_psi(edge, height, 1.0, 0.0)
+    policy = PolySectionPolicy(
+        arrangement="standoff",
+        exact_kernel="quadrature",
+        standoff=standoff,
+    )
+    exact = polygon_greens(edge, height, vertices)[0]
+    point = greens_psi(edge, height, 1.0, 0.0)
+    assert PolySection.near_band(edge, height, vertices, policy).tolist() == [False]
     assert abs(float(exact[0]) - float(point[0])) < 1e-3 * abs(float(point[0]))
 
 
@@ -152,24 +164,96 @@ def test_the_default_band_is_unbounded_and_exact_everywhere():
     vertices = hexagon(radius=0.03)
     far_r = np.array([1.9])
     far_z = np.array([0.8])
-    assert PolySection.standoff is None
-    assert PolySection.near_band(far_r, far_z, vertices).all()
+    default_policy = PolySectionPolicy()
+    assert default_policy.arrangement == "exact"
+    assert PolySection.near_band(far_r, far_z, vertices, default_policy).all()
     exact = PolySection.section_greens(far_r, far_z, vertices)[0]
-    with PolySection.configured(standoff=3.0):
-        assert not PolySection.near_band(far_r, far_z, vertices).any()
-        blended = PolySection.section_greens(far_r, far_z, vertices)[0]
+    study_policy = PolySectionPolicy(arrangement="standoff", standoff=3.0)
+    assert not PolySection.near_band(far_r, far_z, vertices, study_policy).any()
+    blended = PolySection.section_greens(far_r, far_z, vertices, study_policy)[0]
     # far out the two agree closely, but the exact path is not the point form
     np.testing.assert_allclose(exact, blended, rtol=1e-3)
     assert float(exact[0]) != float(blended[0])
 
 
-def test_the_configuration_is_restored_after_use():
-    """A scoped configuration never leaks into the next solve."""
-    before = (PolySection.standoff, PolySection.quadrature)
-    with PolySection.configured(standoff=None, quadrature=(4, 12)):
-        assert PolySection.standoff is None
-        assert PolySection.quadrature == (4, 12)
-    assert (PolySection.standoff, PolySection.quadrature) == before
+def test_route_policies_are_immutable_and_cache_distinct():
+    """One study route cannot mutate the default or collide with its cache key."""
+    default = PolySectionPolicy()
+    study = PolySectionPolicy(
+        arrangement="standoff",
+        exact_kernel="quadrature",
+        standoff=3.0,
+        quadrature=(4, 12),
+    )
+    assert default == PolySectionPolicy()
+    assert default.key != study.key
+    with pytest.raises(FrozenInstanceError):
+        study.standoff = 5.0
+
+
+def test_filament_policy_rejects_unused_exact_settings():
+    """One point-filament value has one cache identity, with no inert quadrature."""
+    with pytest.raises(ValueError, match="does not accept an exact kernel"):
+        PolySectionPolicy(
+            arrangement="filament",
+            exact_kernel="quadrature",
+            quadrature=(-1, 0),
+        )
+
+
+def test_policy_numeric_domains_have_one_canonical_cache_key():
+    """Equivalent scalar spellings cannot split one route into multiple keys."""
+    policies = [
+        PolySectionPolicy(arrangement="standoff", standoff=value)
+        for value in (3, 3.0, np.int64(3))
+    ]
+    assert {policy.key for policy in policies} == {policies[0].key}
+    assert all(type(policy.standoff) is float for policy in policies)
+    with pytest.raises(ValueError, match="finite distance"):
+        PolySectionPolicy(arrangement="standoff", standoff=True)
+    with pytest.raises(ValueError, match="positive integers"):
+        PolySectionPolicy(exact_kernel="quadrature", quadrature=(True, 4))
+    with pytest.raises(ValueError, match="positive integer"):
+        TargetQuadraturePolicy(order=True)
+
+
+def test_accelerator_policy_requires_the_exact_axisymmetric_ring_lane():
+    """Backend and geometry eligibility form one canonical executable identity."""
+    with pytest.raises(ValueError, match="requires 'axisymmetric_ring'"):
+        PolySectionPolicy(backend="jax")
+    with pytest.raises(ValueError, match="only exact routing"):
+        PolySectionPolicy(
+            arrangement="banded",
+            backend="jax",
+            device_eligibility="axisymmetric_ring",
+        )
+    with pytest.raises(ValueError, match="compiled quadrature"):
+        PolySectionPolicy(backend="jax", device_eligibility="axisymmetric_ring")
+    policy = PolySectionPolicy(
+        exact_kernel="quadrature",
+        quadrature=(2, 4),
+        backend="jax",
+        device_eligibility="axisymmetric_ring",
+    )
+    assert PolySectionPolicy.resolve(policy.key) == policy
+
+
+def test_coilset_factories_reject_routes_outside_the_cache_identity():
+    """Per-insert and post-construction mutations cannot bypass the stored route."""
+    banded = PolySectionPolicy(arrangement="banded")
+    coilset = CoilSet()
+    with pytest.raises(ValueError, match="fixed by its CoilSet constructor"):
+        coilset.coil.insert(
+            3.0,
+            0.0,
+            0.2,
+            0.2,
+            nturn=1,
+            polysection_policy=banded,
+        )
+    coilset.firstwall.polysection_policy = banded.key
+    with pytest.raises(ValueError, match="fixed by its CoilSet constructor"):
+        coilset.firstwall.insert({"circle": [3.0, 0.0, 0.5]})
 
 
 def test_the_quadrature_override_reaches_the_kernel():
@@ -188,20 +272,20 @@ def test_the_quadrature_override_reaches_the_kernel():
     target_z = np.full(target_r.size, 0.005)
     reference = cylinder_greens(target_r, target_z, 1.0, 0.0, width, height)[2]
 
-    with PolySection.configured(closed_form=False):
-        default = PolySection.section_greens(target_r, target_z, vertices)[2]
-        with PolySection.configured(quadrature=(2, 6)):
-            coarse = PolySection.section_greens(target_r, target_z, vertices)[2]
+    default_policy = PolySectionPolicy(exact_kernel="quadrature")
+    coarse_policy = PolySectionPolicy(exact_kernel="quadrature", quadrature=(2, 6))
+    default = PolySection.section_greens(target_r, target_z, vertices, default_policy)[
+        2
+    ]
+    coarse = PolySection.section_greens(target_r, target_z, vertices, coarse_policy)[2]
     scale = np.max(np.abs(reference))
     assert np.max(np.abs(default - reference)) / scale < 1e-6
     assert np.max(np.abs(coarse - reference)) / scale > 1e-4
 
-    # the closed form is unmoved by a quadrature it does not run
+    # A meaningless quadrature cannot be smuggled into a closed-form identity.
     closed = PolySection.section_greens(target_r, target_z, vertices)[2]
-    with PolySection.configured(quadrature=(2, 6)):
-        np.testing.assert_array_equal(
-            PolySection.section_greens(target_r, target_z, vertices)[2], closed
-        )
+    with pytest.raises(ValueError, match="does not accept"):
+        PolySectionPolicy(quadrature=(2, 6))
     assert np.max(np.abs(closed - reference)) / scale < 1e-6
 
 
@@ -209,9 +293,211 @@ def test_a_finite_band_is_a_small_fraction_of_a_grid():
     """A configured blend is what keeps the exact kernel affordable on a grid."""
     vertices = hexagon(radius=0.03)
     radius, height = np.meshgrid(np.linspace(0.3, 1.7, 45), np.linspace(-1.1, 1.1, 45))
-    with PolySection.configured(standoff=3.0):
-        near = PolySection.near_band(radius.ravel(), height.ravel(), vertices)
+    policy = PolySectionPolicy(arrangement="standoff", standoff=3.0)
+    near = PolySection.near_band(radius.ravel(), height.ravel(), vertices, policy)
     assert near.mean() < 0.05
+
+
+def test_standoff_dispatch_evaluates_exact_and_filament_masks_separately(monkeypatch):
+    """Neither kernel sees targets belonging exclusively to the other route."""
+    vertices = hexagon(radius=0.03)
+    target_r = np.array([1.0, 1.8])
+    target_z = np.array([0.0, 0.4])
+    calls = []
+
+    def exact(near_r, near_z, section, policy):
+        calls.append((near_r.copy(), near_z.copy(), section.copy(), policy))
+        assert near_r.tolist() == [1.0]
+        return tuple(np.ones_like(near_r) for _ in range(3))
+
+    monkeypatch.setattr(PolySection, "exact_greens", staticmethod(exact))
+    policy = PolySectionPolicy(arrangement="standoff", standoff=2.0)
+    psi, br, bz = PolySection.section_greens(target_r, target_z, vertices, policy)
+    assert len(calls) == 1
+    assert (psi[0], br[0], bz[0]) == (1.0, 1.0, 1.0)
+    assert np.all(np.isfinite([psi[1], br[1], bz[1]]))
+
+
+def test_vector_potential_masks_the_magnetic_axis_division():
+    """A target on the axis has finite zero Aphi without hiding other rows."""
+    coilset = CoilSet(dcoil=-1)
+    coilset.coil.insert(
+        {"hexagon": [1.0, 0.0, 0.08, 0.08]},
+        nturn=1.0,
+        segment="polysection",
+    )
+    element = PolySection(
+        Source(coilset.subframe),
+        Target({"x": [0.0, 1.4], "z": [0.0, 0.2]}),
+        turns=False,
+        reduce=False,
+    )
+    assert element.Aphi[0, 0] == 0.0
+    assert np.all(np.isfinite(element.Aphi))
+    assert element.Aphi[1, 0] != 0.0
+
+
+@pytest.mark.slow
+def test_tiled_quadrature_partitions_axis_rows_onto_the_finite_host_limit():
+    """The traced gradient never divides an exact-axis target by its radius."""
+    coilset = CoilSet(dcoil=-1)
+    coilset.coil.insert(
+        {"hexagon": [1.0, 0.0, 0.08, 0.08]},
+        nturn=1.0,
+        segment="polysection",
+    )
+    source = Source(coilset.subframe)
+    target_data = {"x": [0.0, 1.4], "z": [0.2, -0.1]}
+    host_policy = PolySectionPolicy(exact_kernel="quadrature", quadrature=(2, 4))
+    tiled_policy = PolySectionPolicy(
+        exact_kernel="quadrature",
+        quadrature=(2, 4),
+        backend="jax",
+        device_eligibility="axisymmetric_ring",
+    )
+    host = PolySection(
+        source,
+        Target(target_data),
+        turns=False,
+        reduce=False,
+        policy=host_policy,
+    )
+    tiled = TiledPolySection(
+        Source(coilset.subframe),
+        Target(target_data),
+        turns=False,
+        reduce=False,
+        policy=tiled_policy,
+    )
+    for attribute in ("Psi", "Br", "Bz", "Aphi"):
+        got = getattr(tiled, attribute)
+        expected = getattr(host, attribute)
+        assert np.all(np.isfinite(got))
+        np.testing.assert_allclose(got, expected, rtol=2e-12, atol=1e-15)
+    assert tiled.Aphi[0, 0] == 0.0
+
+
+def test_hollow_source_integrates_only_positive_material_triangles():
+    """A source void carries no current and is not filled by its exterior."""
+    material = Polygon(
+        [(2.7, -0.3), (3.3, -0.3), (3.3, 0.3), (2.7, 0.3)],
+        holes=[[(2.9, -0.1), (3.1, -0.1), (3.1, 0.1), (2.9, 0.1)]],
+    )
+    coilset = CoilSet(dcoil=0)
+    coilset.coil.insert(
+        material,
+        nturn=1.0,
+        name="Hollow",
+        ifttt=False,
+        segment="polysection",
+    )
+    target_r = np.array([2.82, 3.0, 3.4])
+    target_z = np.array([0.0, 0.0, 0.2])
+    element = PolySection(
+        Source(coilset.subframe),
+        Target({"x": target_r, "z": target_z}),
+        turns=False,
+        reduce=False,
+    )
+
+    source_material = coilset.subframe.poly[0].poly
+    assert len(source_material.interiors) == 1
+    triangles, area = section_triangles(source_material)
+    reference = [np.zeros(len(target_r)) for _ in range(3)]
+    for vertices, weight in zip(triangles, area / area.sum()):
+        for row, value in enumerate(
+            polygon_analytic_greens(target_r, target_z, vertices)
+        ):
+            reference[row] += weight * value
+    for got, expected in zip((element.Psi, element.Br, element.Bz), reference):
+        np.testing.assert_allclose(got[:, 0], expected, rtol=3e-13, atol=1e-15)
+
+
+@pytest.mark.slow
+def test_tiled_product_adapter_matches_host_and_preserves_hollow_material():
+    """The explicit JAX route packs material pieces and restores authored columns."""
+    material = Polygon(
+        [(2.7, -0.3), (3.3, -0.3), (3.3, 0.3), (2.7, 0.3)],
+        holes=[[(2.9, -0.1), (3.1, -0.1), (3.1, 0.1), (2.9, 0.1)]],
+    )
+    coilset = CoilSet(dcoil=0)
+    coilset.coil.insert(
+        material,
+        nturn=1.0,
+        name="Hollow",
+        ifttt=False,
+        segment="polysection",
+    )
+    source = Source(coilset.subframe)
+    target = Target({"x": [2.82, 3.0, 3.4], "z": [0.0, 0.0, 0.2]})
+    host_policy = PolySectionPolicy(exact_kernel="quadrature", quadrature=(2, 4))
+    tiled_policy = PolySectionPolicy(
+        exact_kernel="quadrature",
+        quadrature=(2, 4),
+        backend="jax",
+        device_eligibility="axisymmetric_ring",
+    )
+    host = PolySection(source, target, turns=False, reduce=False, policy=host_policy)
+    tiled = TiledPolySection(
+        Source(coilset.subframe),
+        Target({"x": [2.82, 3.0, 3.4], "z": [0.0, 0.0, 0.2]}),
+        turns=False,
+        reduce=False,
+        policy=tiled_policy,
+    )
+    assert tiled.coordinate_axes.shape == (0, 3, 3)
+    for got, expected in zip(
+        (tiled.Psi, tiled.Br, tiled.Bz), (host.Psi, host.Br, host.Bz)
+    ):
+        np.testing.assert_allclose(got, expected, rtol=2e-12, atol=1e-15)
+
+
+@pytest.mark.slow
+def test_solve_tiled_ring_matches_host_after_turns_and_electrical_links():
+    """Adapter dispatch precedes one global authored-source electrical reduction."""
+    host_policy = PolySectionPolicy(exact_kernel="quadrature", quadrature=(2, 4))
+    tiled_policy = PolySectionPolicy(
+        exact_kernel="quadrature",
+        quadrature=(2, 4),
+        backend="jax",
+        device_eligibility="axisymmetric_ring",
+    )
+
+    def source(policy):
+        return Source(
+            {
+                "x": [1.0, 1.12],
+                "y": [0.0, 0.0],
+                "z": [0.0, 0.03],
+                "segment": ["polysection", "polysection"],
+                "polysection_policy": [policy.key, policy.key],
+                "poly": [
+                    Polygon([(0.96, -0.04), (1.04, -0.04), (1.04, 0.04), (0.96, 0.04)]),
+                    Polygon([(1.08, -0.01), (1.16, -0.01), (1.16, 0.07), (1.08, 0.07)]),
+                ],
+                "frame": ["head", "dependent"],
+                "nturn": [2.0, 3.0],
+                "plasma": [False, False],
+                "link": ["", "head"],
+                "factor": [1.0, -0.5],
+            },
+            index=["head", "dependent"],
+        )
+
+    def solve(policy):
+        return Solve(
+            source(policy),
+            Target({"x": [1.3, 1.5], "z": [0.1, -0.2]}),
+            attrs=["Psi"],
+            turns=[True, False],
+            reduce=[True, False],
+        )
+
+    host = solve(host_policy)
+    tiled = solve(tiled_policy)
+    assert tiled.source_batches[0].policy == tiled_policy
+    assert tiled.data.source.values.tolist() == ["head"]
+    np.testing.assert_allclose(tiled.data.Psi, host.data.Psi, rtol=2e-12, atol=1e-15)
 
 
 # --- the coilset wiring -----------------------------------------------------
@@ -235,17 +521,17 @@ def test_a_hexagonal_plasma_cell_is_coupled_as_the_finite_section_it_is():
     assert segment == {"polysection"}
 
 
-def test_a_rectangular_plasma_mesh_still_couples_through_the_cylinder_kernel():
-    """The section rule that was already there is not displaced by the new one.
+def test_a_rectangular_plasma_mesh_routes_only_complete_cells_to_cylinder():
+    """The rectangle shortcut does not claim wall-clipped polygon cells.
 
-    A rectangular plasma cell has a closed-form finite-area kernel of its own and
-    keeps it; only the hexagonal mesh -- which had no section kernel and so fell
-    back to a point -- changes.
+    Complete axis-aligned cells keep their closed-form finite-area kernel. Cells
+    clipped against the curved wall carry their actual polygon through the exact
+    polygon-section lane.
     """
     coilset = CoilSet(dplasma=-40)
     coilset.firstwall.insert({"e": [1.0, 0, 0.3, 0.4]}, Ic=1e6, turn="rectangle")
     segment = set(np.asarray(coilset.subframe.segment).tolist())
-    assert segment == {"cylinder"}
+    assert segment == {"cylinder", "polysection"}
 
 
 def test_every_real_plasma_cell_evaluates_in_closed_form_including_the_clipped_ones():
@@ -334,9 +620,15 @@ def test_the_shipped_default_is_the_closed_form_everywhere_and_not_banded():
     """
     from nova.biot.polygonanalytic import polygon_analytic_greens
 
-    assert PolySection.banded is False
-    assert PolySection.standoff is None
-    assert PolySection.closed_form is True
+    policy = PolySectionPolicy()
+    assert policy.arrangement == "exact"
+    assert policy.standoff is None
+    assert policy.exact_kernel == "closed_form"
+    assert (policy.backend, policy.precision, policy.device_eligibility) == (
+        "numpy",
+        "float64",
+        "host",
+    )
     vertices = plasma_cell()
     target_r = np.array([6.2, 7.4, 8.9])
     target_z = np.array([0.5, -0.9, 1.4])
@@ -347,8 +639,8 @@ def test_the_shipped_default_is_the_closed_form_everywhere_and_not_banded():
         np.testing.assert_array_equal(got, expected)
 
 
-def test_the_banded_scheme_is_reached_through_the_scoped_configuration():
-    """Turning it on routes every pair through the band dispatch, and only then."""
+def test_the_banded_scheme_is_reached_through_an_instance_policy():
+    """A banded instance routes every pair through the band dispatch, and only it."""
     from nova.biot.bandedcoupling import banded_greens
 
     vertices = plasma_cell()
@@ -357,13 +649,11 @@ def test_the_banded_scheme_is_reached_through_the_scoped_configuration():
     target_z = np.geomspace(0.1, 2.0, 12) * np.sin(angle)
 
     exact = PolySection.section_greens(target_r, target_z, vertices)
-    with PolySection.configured(banded=True):
-        banded = PolySection.section_greens(target_r, target_z, vertices)
+    policy = PolySectionPolicy(arrangement="banded")
+    banded = PolySection.section_greens(target_r, target_z, vertices, policy)
     for got, expected in zip(
         banded,
-        banded_greens(
-            target_r, target_z, vertices, closed_form=PolySection.closed_form
-        ),
+        banded_greens(target_r, target_z, vertices, closed_form=True),
     ):
         np.testing.assert_array_equal(got, expected)
     # it is a different path, not a no-op rename of the exact one
@@ -379,21 +669,24 @@ def test_the_banded_scheme_holds_every_component_against_the_exact_lane():
     target_z = (reach * np.sin(angle)).ravel()
 
     exact = PolySection.section_greens(target_r, target_z, vertices)
-    with PolySection.configured(banded=True):
-        banded = PolySection.section_greens(target_r, target_z, vertices)
+    banded = PolySection.section_greens(
+        target_r,
+        target_z,
+        vertices,
+        PolySectionPolicy(arrangement="banded"),
+    )
     for got, expected in zip(banded, exact):
         scale = np.max(np.abs(expected))
         assert np.max(np.abs(got - expected)) / scale <= 1e-6
 
 
-def test_the_banded_configuration_is_restored_after_use():
-    """The opt-in never leaks into the next solve."""
-    scoped = ("standoff", "quadrature", "banded", "closed_form")
-    before = tuple(getattr(PolySection, name) for name in scoped)
-    with PolySection.configured(banded=True, closed_form=True):
-        assert PolySection.banded is True
-        assert PolySection.closed_form is True
-    assert tuple(getattr(PolySection, name) for name in scoped) == before
+def test_banded_and_exact_instances_coexist_without_shared_state():
+    """An opt-in batch cannot alter the policy of any following batch."""
+    exact = PolySectionPolicy()
+    banded = PolySectionPolicy(arrangement="banded")
+    assert exact.arrangement == "exact"
+    assert banded.arrangement == "banded"
+    assert PolySectionPolicy() == exact
 
 
 # --- the closed form as the exact kernel, opt-in ------------------------------
@@ -416,8 +709,9 @@ def test_the_closed_form_is_reached_through_the_scoped_configuration():
     target_r = 6.2 + np.geomspace(0.02, 2.0, 12) * np.cos(angle)
     target_z = np.geomspace(0.02, 2.0, 12) * np.sin(angle)
 
-    with PolySection.configured(closed_form=True):
-        closed = PolySection.section_greens(target_r, target_z, vertices)
+    closed = PolySection.section_greens(
+        target_r, target_z, vertices, PolySectionPolicy()
+    )
     for got, expected in zip(
         closed, polygon_analytic_greens(target_r, target_z, vertices)
     ):
@@ -446,8 +740,12 @@ def test_the_closed_form_serves_the_near_band_of_the_banded_scheme():
     target_r = (6.2 + reach * np.cos(angle)).ravel()
     target_z = (reach * np.sin(angle)).ravel()
 
-    with PolySection.configured(banded=True, closed_form=True):
-        scheme = PolySection.section_greens(target_r, target_z, vertices)
+    scheme = PolySection.section_greens(
+        target_r,
+        target_z,
+        vertices,
+        PolySectionPolicy(arrangement="banded"),
+    )
     for got, expected in zip(
         scheme, banded_greens(target_r, target_z, vertices, closed_form=True)
     ):
@@ -474,11 +772,17 @@ def test_the_closed_form_also_serves_a_standoff_band():
     # are inside it, the third target is far outside
     target_r = np.array([6.24, 6.31, 8.9])
     target_z = np.array([0.01, 0.0, 1.4])
-    with PolySection.configured(standoff=3.0):
-        inside = PolySection.near_band(target_r, target_z, vertices)
-        quadrature = PolySection.section_greens(target_r, target_z, vertices)
-        with PolySection.configured(closed_form=True):
-            closed = PolySection.section_greens(target_r, target_z, vertices)
+    quadrature_policy = PolySectionPolicy(
+        arrangement="standoff",
+        exact_kernel="quadrature",
+        standoff=3.0,
+    )
+    closed_policy = PolySectionPolicy(arrangement="standoff", standoff=3.0)
+    inside = PolySection.near_band(target_r, target_z, vertices, quadrature_policy)
+    quadrature = PolySection.section_greens(
+        target_r, target_z, vertices, quadrature_policy
+    )
+    closed = PolySection.section_greens(target_r, target_z, vertices, closed_policy)
     assert inside.tolist() == [True, True, False]
     reference = polygon_analytic_greens(target_r[inside], target_z[inside], vertices)
     for got, expected in zip(closed, reference):
@@ -501,6 +805,6 @@ def test_the_point_far_field_sits_at_the_section_area_centroid():
     assert not np.allclose(centre, vertices.mean(axis=0), atol=1e-6)
     far_r = np.array([7.6])
     far_z = np.array([1.1])
-    with PolySection.configured(standoff=3.0):
-        psi = PolySection.section_greens(far_r, far_z, vertices)[0]
+    policy = PolySectionPolicy(arrangement="standoff", standoff=3.0)
+    psi = PolySection.section_greens(far_r, far_z, vertices, policy)[0]
     np.testing.assert_array_equal(psi, greens_psi(far_r, far_z, centre[0], centre[1]))

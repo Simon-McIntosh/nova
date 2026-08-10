@@ -43,6 +43,7 @@ a changed section fails rather than quietly comparing against the wrong number.
 import numpy as np
 import pytest
 from scipy.special import ellipe, ellipkm1
+from shapely.geometry import MultiPolygon, Point, Polygon
 
 from nova.biot.greens import section_centroid
 from nova.biot.polygonanalytic import polygon_analytic_greens
@@ -262,9 +263,67 @@ def test_the_weights_sum_to_the_section_area(name):
     _, weights = section_nodes(vertices, ORDER)
     corner = np.asarray(vertices)
     rolled = np.roll(corner, -1, axis=0)
-    shoelace = 0.5 * np.sum(corner[:, 0] * rolled[:, 1] - rolled[:, 0] * corner[:, 1])
-    assert weights.sum() == pytest.approx(shoelace, rel=1e-12, abs=0)
+    local = corner - corner[0]
+    rolled = np.roll(local, -1, axis=0)
+    shoelace = 0.5 * np.sum(local[:, 0] * rolled[:, 1] - rolled[:, 0] * local[:, 1])
+    assert np.all(np.isfinite(weights))
+    assert np.all(weights > 0.0)
+    assert weights.sum() == pytest.approx(abs(shoelace), rel=1e-12, abs=0)
     assert np.sum(weights * 3.0) / weights.sum() == pytest.approx(3.0, rel=1e-15)
+
+
+def test_a_concave_section_has_only_positive_area_weights():
+    """A re-entrant wall clip is decomposed into material, never a signed fan."""
+    vertices = np.array(
+        [(0, 0), (3, 0), (3, 1), (1, 1), (1, 2), (3, 2), (3, 3), (0, 3)],
+        dtype=float,
+    )
+    points, weights = section_nodes(vertices)
+    assert np.all(np.isfinite(points))
+    assert np.all(np.isfinite(weights))
+    assert np.all(weights > 0.0)
+    assert weights.sum() == pytest.approx(7.0, rel=1e-14)
+    np.testing.assert_allclose(
+        weights @ points / weights.sum(), [1.3571428571428572, 1.5]
+    )
+
+
+@pytest.mark.parametrize("order", [1, 2, 3, ORDER])
+def test_holes_and_disconnected_material_keep_positive_weights(order):
+    """Interior voids and separated pieces contribute only their material area."""
+    hollow = Polygon(
+        [(0, 0), (4, 0), (4, 4), (0, 4)],
+        holes=[[(1, 1), (3, 1), (3, 3), (1, 3)]],
+    )
+    disconnected = MultiPolygon(
+        [
+            Polygon([(0, 0), (1, 0), (1, 1), (0, 1)]),
+            Polygon([(2, 0), (3, 0), (3, 1), (2, 1)]),
+        ]
+    )
+    for section, area in ((hollow, 12.0), (disconnected, 2.0)):
+        points, weights = section_nodes(section, order=order)
+        assert np.all(weights > 0.0)
+        assert weights.sum() == pytest.approx(area, rel=1e-14)
+        assert all(section.covers(Point(point)) for point in points)
+        centroid = np.array([section.centroid.x, section.centroid.y])
+        np.testing.assert_allclose(
+            weights @ points / weights.sum(), centroid, rtol=2e-14, atol=2e-14
+        )
+
+
+@pytest.mark.parametrize("translation", [(1.0e8, -1.0e8), (1.0e9, -1.0e9)])
+def test_section_area_is_stable_under_large_translation(translation):
+    """A small section keeps its area when absolute coordinates are very large."""
+    vertices = np.array([(0.0, 0.0), (0.2, 0.0), (0.2, 0.04), (0.0, 0.04)])
+    _, weights = section_nodes(vertices + np.asarray(translation))
+    assert weights.sum() == pytest.approx(0.008, rel=3e-6)
+
+
+def test_nonpositive_section_area_is_rejected():
+    """No mean can be formed from an empty or collinear target section."""
+    with pytest.raises(ValueError, match="positive finite area"):
+        section_nodes(np.array([(0.0, 0.0), (1.0, 0.0), (2.0, 0.0)]))
 
 
 @pytest.mark.parametrize("name", list(SECTIONS))

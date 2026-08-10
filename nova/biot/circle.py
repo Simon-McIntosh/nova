@@ -128,9 +128,9 @@ The pairs the wider band converts were already inside ``section_band`` and alrea
 paying a kernel evaluation, and the closed form holds its corner parts live across
 one call, so the extra nodes cost far less than their count.
 
-A principled error-BOUNDED cutoff remains open, exactly as
-:attr:`nova.biot.polysection.PolySection.standoff` records; these bands are placed
-on measurement, and the measurements are in :mod:`tests.test_biotcircle`.
+A principled error-bounded cutoff remains open. Polygon-section standoff is therefore
+an explicit immutable study policy rather than a mutable product default; these
+Circle bands remain measurement-based and are pinned in :mod:`tests.test_biotcircle`.
 
 Which mechanism serves which path
 ---------------------------------
@@ -144,21 +144,12 @@ routes and neither is a fallback for the other:
   sub-sections reproduces the whole section's double integral identically, because
   the pair sum IS the area integral split up, so the reduced value does not depend on
   ``dcoil`` at all once both bands cover the coil.
-* a target frame WITHOUT sections -- a grid point, a field probe, and the target
-  :class:`nova.frame.polygrid.PolyTarget` builds for
-  :class:`nova.biot.inductance.Inductance` -- is a point at any distance, and the
-  target-side average is carried by that target's own SUBDIVISION instead. That is a
-  convergent substitute rather than an equivalent one, and it has to be RESOLVED --
-  a coarse target frame leaves the near pairs on the single integral with the whole
-  target-side average missing, and returns a quietly wrong inductance rather than
-  refusing. Measured on the ITER PF1/CS3U pair against the uniform-current double
-  integral over each undivided section, the reduced matrix deviates by
-
-    targets     2      60      134     265     816
-    deviation   1.3e-01 5.7e-03 2.2e-03 1.2e-03 3.1e-04   [H]
-
-  so the lane is usable only from something like a hundred targets a coil upwards.
-  The two-target case is off by more than a sixth of the inductance it reports.
+* a target frame WITHOUT sections -- a grid point or field probe -- remains a point
+  at any distance. Inductance instead expands strictly positive nodes over the actual
+  material in every existing dcoil cell, contracts those nodes to that physical
+  target cell, and only then applies turns and parent reduction. Measured on the ITER
+  PF1/CS3U pair, the fixed-order target rule converges with the existing dcoil cells
+  towards the independent uniform-current double integral.
 
 Neither lane covers a tiled plasma grid, whose cells default to
 ``segment="polysection"``: exact on the source side for every pair and with no band,

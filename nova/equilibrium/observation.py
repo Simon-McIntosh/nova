@@ -28,6 +28,15 @@ rule pinned in :mod:`nova.equilibrium.convention`, a rotating one returns its
 own major-radius-dependent primitive — so the observation is a property of
 the solve and not of a frozen grid.
 
+All three are read on the labelled CORE, whatever else the source declares.
+A continuation beyond the separatrix adds current on the open branches, and
+that current is published — per domain, and as a total — by
+:class:`CurrentLedger`; folding it into :math:`I_p` would silently change the
+denominator both :math:`\beta_p` and :math:`l_i` are defined against and make
+two solves with different scrape-off policies incomparable in quantities that
+are supposed to describe the confined plasma. The ledger is where the open
+current is read.
+
 Enforcement is separate from observation. A caller may ask the solve to
 enforce moments only up to the number of scalar degrees of freedom the
 declared closure carries; an absolute source carries none, so any enforcement
@@ -45,7 +54,6 @@ import jax
 import jax.numpy as jnp
 from scipy.constants import mu_0
 
-from nova.equilibrium.convention import flux_function_toroidal_field
 from nova.equilibrium.domain import DomainMasks, PlasmaDomain
 
 __all__ = [
@@ -54,6 +62,9 @@ __all__ = [
     "IntegralObservation",
     "MomentEnforcementError",
     "MomentTargets",
+    "declared_body_force",
+    "declared_field_function_squared",
+    "declared_pressure",
     "gradient_tail",
     "moment_residual",
     "observe_moments",
@@ -157,8 +168,69 @@ def core_field_function_squared(
     source, masks: DomainMasks, flux_span: jax.Array
 ) -> jax.Array:
     """Return the squared toroidal-field function [T^2 m^2] on every cell."""
-    tail = gradient_tail(source.core.ff_prime, masks.psi_norm)
-    return flux_function_toroidal_field(source.boundary_field_function, flux_span, tail)
+    return source.core.field_function_squared(
+        masks.psi_norm, source.boundary_field_function, flux_span
+    )
+
+
+def _select_open(source, masks: DomainMasks, core_value: jax.Array, evaluate):
+    """Return one cell field with each declared open closure's own value.
+
+    The core value fills the map and a declared continuation overwrites its
+    own domain, so a solve that declares nothing beyond the core reaches the
+    identical expression it always did. The evaluation point is held on the
+    open domain the same way the current image holds it, at the separatrix,
+    which is inside the support of either branch.
+    """
+    value = core_value
+    for domain, profile in source.open_profiles:
+        selection = masks.mask(domain)
+        value = jnp.where(
+            selection,
+            evaluate(profile, jnp.where(selection, masks.psi_norm, 1.0)),
+            value,
+        )
+    return value
+
+
+def declared_pressure(
+    source, masks: DomainMasks, radius: jax.Array, flux_span: jax.Array
+) -> jax.Array:
+    """Return the pressure [Pa] every declared closure implies on its domain."""
+    return _select_open(
+        source,
+        masks,
+        core_pressure(source, masks, radius, flux_span),
+        lambda profile, psi_norm: profile.pressure(
+            radius, psi_norm, source.boundary_pressure, flux_span
+        ),
+    )
+
+
+def declared_field_function_squared(
+    source, masks: DomainMasks, flux_span: jax.Array
+) -> jax.Array:
+    """Return the squared toroidal-field function [T^2 m^2] of every closure."""
+    return _select_open(
+        source,
+        masks,
+        core_field_function_squared(source, masks, flux_span),
+        lambda profile, psi_norm: profile.field_function_squared(
+            psi_norm, source.boundary_field_function, flux_span
+        ),
+    )
+
+
+def declared_body_force(
+    source, masks: DomainMasks, radius: jax.Array, pressure: jax.Array
+) -> jax.Array:
+    """Return the non-magnetic radial force density [N/m^3] of every closure."""
+    return _select_open(
+        source,
+        masks,
+        source.core.radial_body_force(radius, masks.psi_norm, pressure),
+        lambda profile, psi_norm: profile.radial_body_force(radius, psi_norm, pressure),
+    )
 
 
 def current_ledger(cell_current: jax.Array, masks: DomainMasks) -> CurrentLedger:

@@ -59,8 +59,9 @@ from nova.equilibrium.convention import (
 )
 from nova.equilibrium.domain import DomainMasks
 from nova.equilibrium.observation import (
-    core_field_function_squared,
-    core_pressure,
+    declared_body_force,
+    declared_field_function_squared,
+    declared_pressure,
 )
 
 __all__ = [
@@ -268,24 +269,29 @@ def conservation_ledger(
 ) -> ConservationLedger:
     """Return the conservation receipts of one converged flux map.
 
-    Residuals are read on the labelled core eroded by the difference stencil
-    width, so every reported number comes from a complete central stencil
-    inside the domain the source is declared on.
+    Residuals are read on the union of the domains the source declares a
+    closure on, eroded by the difference stencil width, so every reported
+    number comes from a complete central stencil inside declared support. A
+    source that declares the core alone is therefore read exactly where it
+    always was; a source carrying a separatrix continuation is read across the
+    seam as well, which is where a continuation that is smooth in the profile
+    but not in the equilibrium would show up.
     """
     radius = jnp.asarray(lattice.node_radius)
-    checked = lattice.flatten(_erode(lattice.reshape(masks.core), STENCIL_MARGIN))
+    support = source.declared_support(masks)
+    checked = lattice.flatten(_erode(lattice.reshape(support), STENCIL_MARGIN))
     checked = checked & lattice.interior()
 
     elliptic = delta_star(lattice, flux)
     drive = delta_star_from_current_density(
-        radius, source.core.current_density(radius, masks.psi_norm)
+        radius, source.current_density(radius, masks)
     )
 
     radial_field, vertical_field = poloidal_field(lattice, flux)
     divergence_b = _axisymmetric_divergence(lattice, radial_field, vertical_field)
 
     radius2d = lattice.reshape(radius)
-    squared = lattice.reshape(core_field_function_squared(source, masks, flux_span))
+    squared = lattice.reshape(declared_field_function_squared(source, masks, flux_span))
     # the poloidal current is carried by the toroidal-field function; its sign
     # branch is the toroidal-field direction and flips J entirely, so the
     # positive branch is taken and the divergence it is read for is unchanged
@@ -310,11 +316,11 @@ def conservation_ledger(
     diamagnetic_vertical = lattice.flatten(
         _central(squared, lattice.vertical_step, 1) / (2.0 * mu_0 * radius2d**2)
     )
-    cell_pressure = core_pressure(source, masks, radius, flux_span)
+    cell_pressure = declared_pressure(source, masks, radius, flux_span)
     pressure = lattice.reshape(cell_pressure)
     pressure_radial = lattice.flatten(_central(pressure, lattice.radial_step, 0))
     pressure_vertical = lattice.flatten(_central(pressure, lattice.vertical_step, 1))
-    body_force = source.core.radial_body_force(radius, masks.psi_norm, cell_pressure)
+    body_force = declared_body_force(source, masks, radius, cell_pressure)
 
     toroidal_current = -elliptic / (TOTAL_FLUX_FACTOR * mu_0 * radius)
     force = jnp.hypot(

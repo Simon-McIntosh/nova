@@ -24,8 +24,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-10">
-<meta name="plan-version" content="5">
-<meta name="plan-impl" content="0.5">
+<meta name="plan-version" content="7">
+<meta name="plan-impl" content="0.65">
 </head>
 <body>
   <main class="plan-doc">
@@ -45,7 +45,7 @@
     <p>Each optional physics term is a typed force-balance closure with its own required functions and manufactured solution. The first extension is toroidal rotation with isothermal flux surfaces. The second is a static SOL extension of pressure and toroidal-field-function gradients across the separatrix on topology-qualified common-SOL and private-flux masks. Arbitrary cell-current images may be used only as field-response diagnostics; they do not qualify as a force-balanced equilibrium source.</p>
 
     <h2 id="s3">§3 — Implementation work</h2>
-    <p><span class="badge badge-shipped">✓ items 1–4, 7 landed 2026-08-10</span> — commit <code>f07e8b05</code> merged as <code>18168796</code>; integration lane 4728 passed / 121 skipped / 2 known pre-existing MAST failures; authority, static-physics, conservation, absolute-closure, integral-moment and static-numerics gates all PASS. Rotating-reference benchmarks banked (<code>1a2de9c7</code>). Full record: <a href="/nova/evidence/archive/flux-function-forward-equilibrium-landed#static-rung">static rung landed</a>. Items 5 (rotation) and 6 (SOL) remain open.</p>
+    <p><span class="badge badge-shipped">✓ items 1–5, 7 landed 2026-08-10</span> — static rung <code>f07e8b05</code> (all six static gates PASS, lane 4728/121/2-known), isothermal rotation closure <code>ebd322ae</code> (rotation gate PASS: J_φ at machine epsilon vs the banked family across Mach 0.10–0.90, ladder residual ~1e-16, lane 4758), rotating references <code>1a2de9c7</code>, and the §5 geometry record <code>b0af2d23</code> (13 columns 5–130× inside pre-registered tolerances). Full record: <a href="/nova/evidence/archive/flux-function-forward-equilibrium-landed">cumulative evidence</a>. Item 6 (SOL continuation) is in flight; the §4 interface gate stays blocked on the Ambix contract and the accelerated topology read.</p>
     <ol>
       <li><strong>Unify the façade.</strong> Make the eager and JAX paths consume the same immutable source state, fixed-point result and topology/conservation result types. Export <code>ForwardProfile</code> from <code>nova.equilibrium</code>; document <code>ForwardFluxOperator</code> as its traced map.</li>
       <li><strong>Make current closure explicit.</strong> Remove the unconditional net-current rescale from the absolute-source path. Support at most one declared common-amplitude <code>I_p</code> equality in <code>ForwardProfile</code>, applied consistently to source primitives and derivatives and solved with a bracketing/conditioning receipt. Do not silently rescale the cell-current image.</li>

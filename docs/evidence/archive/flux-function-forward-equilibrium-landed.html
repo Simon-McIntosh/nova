@@ -50,5 +50,29 @@
 
   <p>Pins the rotation implementation must reproduce: the isothermal factor d ln p/dR|<sub>ψ</sub> = 2θR (checked three ways to 1e-14); the R⁴ rotating-Solov'ev source as the first-order truncation whose coefficient is <em>fixed</em> by m̄Ω²/2T, never free; the static limit to 1e-15 with the rotating flux linear in θ; outward Shafranov-shift growth linear in θ with the predicted coefficient to better than 1e-3; axis position and q_axis exactly Mach-independent; a normative sign block (σ_Bp = +1, σ_RΦZ = +1, e_Bp = 0 — COCOS 1 per radian / 11 total-flux) asserted against equations, not labels; and midplane boundary radii in closed form on the two Lambert-W branches (agreement 1e-9). Convention traps recorded for consumers: flux per radian vs Nova total flux (2π conversion is the caller's), and an explicit mean-particle-mass parameter (single-species vs quasineutral differ by 2× in θ).</p>
 
+  <h2 id="rotation">Isothermal rotation closure</h2>
+  <p>Commit <code>ebd322ae</code> (merged as <code>bf500369</code>, 2026-08-10) adds toroidal rotation as a typed force-balance closure per the locked isothermal-surface decision: <code>nova/equilibrium/rotation.py</code> plus a radius-aware evaluation seam in <code>source.py</code>; accepted primitives are p₀, p₀′, FF′, T, Ω, their flux gradients, an explicit mean particle mass, and the reference radius — no generic radial-power column reached the public API. 46 tests; integration lane 4758 passed (+30, exactly the fast-group additions), same two known MAST failures only.</p>
+  <table><thead><tr><th>Rotation-gate pin</th><th>Result</th></tr></thead><tbody>
+    <tr><td>Source reproduction vs banked family (J_φ, max relative)</td><td>3.2e-16 / 3.7e-16 / 3.6e-16 at Mach 0.10 / 0.35 / 0.90 — machine epsilon against a 1e-12 gate</td></tr>
+    <tr><td>ΔStar vs 4th-order stencil on the analytic flux</td><td>1.4e-11 → 1.2e-09 across the Mach ladder (pins total-flux factor and COCOS signs through the solution)</td></tr>
+    <tr><td>Static limit</td><td>exact array equality at Ω = 0 for all three cases (bit-identical static path)</td></tr>
+    <tr><td>Exponent-gradient (θ′) term</td><td>two-term source matches the closure's own fixed-R pressure difference to 1e-6; dropping θ′ is a &gt;1% drive error</td></tr>
+    <tr><td>Free-boundary ladder (Anderson, 240 evaluations)</td><td>residual ~1e-16 at Mach 0 / 0.10 / 0.35 / 0.90; axis radius Mach-independent to 7.4e-04 m (0.027 node spacing); Shafranov-shift growth matches analytic to 3% at Mach 0.90; outboard/inboard pressure ratio reaches 2.47</td></tr>
+    <tr><td>Parity and gradients</td><td>jit vs eager 1.9e-16; vmap matches per-slice to 1e-15; d(ΣJ_φ)/dM analytic vs central difference 1.7e-09 relative</td></tr>
+  </tbody></table>
+  <p>The seam work surfaced and fixed two latent defects in the landed static rung, both value-identical for finite closures: the poloidal-beta integral let one off-domain non-finite cell poison the weighted sum, and the cell-current evaluation point sat off the declared support, turning reverse-mode conductor-current gradients of a rotating solve into NaN. Convention pins now live in tests: Nova total flux = +2π × the references' per-radian flux with ψ_N = 1 − ψ/ψ_a; halving the declared mean particle mass exactly halves the centrifugal exponent.</p>
+
+  <h2 id="geometry-record">Flux-surface geometry record</h2>
+  <p>Commit <code>b0af2d23</code> (2026-08-10) publishes <code>FluxSurfaceGeometry</code> — the §5 public output contract for the transport consumer: a frozen, finite-validated record of 13 columns on a caller-supplied normalised toroidal-flux grid (ρ_tor family, ψ_N, fluxes, V, A, dV/dρ, signed dV/dΦ, F, q, ⟨1/R²⟩, ⟨|∇ρ|⟩, ⟨|∇ρ|²⟩, ⟨|∇ρ|²/R²⟩), with two entry seams (<code>from_flux_map</code>, <code>from_equilibrium</code>) and a moving-grid mechanism: records built on one label grid align element-for-element, and <code>motion(later, interval)</code> returns the boundary-radius and fixed-label dV′/dt rates a conservative balance needs beyond the transport fluxes (verified on a genuine pair: ρ_b 0.75971 → 0.72765, boundary rate −0.641 m/s). 12 tests, 22 s.</p>
+  <p>Agreement against the analytic family: every column sits 5–130× inside its pre-registered tolerance (e.g. q at 3.6e-08 vs 2e-07; F at 1.1e-10 vs 1e-08); measured convergence order 2.7–3.5 on a 33→97-node ladder, set by the cubic flux interpolant since the polar surface trace is spectral; the pitch identity q = F⟨1/R²⟩|dV/dΦ|/2π holds to 3.1e-16 by construction. The two 2π factors are documented as different constants: toroidal revolution in dV, and the total-flux cancellation against B_pol that is the single point where the flux convention touches the module. μ₀ appears nowhere — the record integrates geometry and F, never a current.</p>
+  <figure>
+    <img src="/nova/figures/flux-function-forward-equilibrium/static-solve-domains.png" alt="Free-boundary solve flux map with last-closed surface, axis and material boundary, beside the four-way topology domain partition">
+    <figcaption>The solved free-boundary flux map and its topology-qualified domain partition (468 excluded-material / 126 core / 31 common-SOL cells; the private-flux mask is empty because a wall-limited plasma has no X-point).</figcaption>
+  </figure>
+  <figure>
+    <img src="/nova/figures/flux-function-forward-equilibrium/geometry-profiles.png" alt="q, V-prime, inverse-square-radius and F versus rho_tor with the exact family overlaid, and the sup-norm convergence ladder">
+    <figcaption>Geometry-record columns against the exact rotating-family static limit, with the measured convergence ladder.</figcaption>
+  </figure>
+
 </main></body>
 </html>

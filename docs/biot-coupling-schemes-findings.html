@@ -424,9 +424,13 @@
     a trapezoidal or wall-clipped one it is displaced, leaving a dipole error the far field
     cannot absorb. Both now use the shoelace area centroid. <code>benchmarks/nearfar_error.py</code>
     still carries the same assumption — harmless there because it only measures a hexagon.</li>
-    <li>The printed <code>sn_moments</code> recursion is unusable past order ~2 below k² ≈ 0.1,
-    and the printed eq 24a/23 forms are ill-conditioned as printed; stable re-derivations are in
-    <code>nova/biot/elliptic.py</code> and are what callers should use.</li>
+    <li>The public <code>sn_moments</code> route selects the printed upward recursion where
+    division by k² is conditioned and a normalised downward recursion at small k². The related
+    <code>sn_cn_moments</code> route expands eq 24a in powers of the cancellation-free quantity
+    δ = k²/(1 + k′), while <code>pole_moment</code> combines eq 23's two inverse-trigonometric
+    terms before evaluation and accepts exact complements. Callers therefore use these public
+    routes in <code>nova/biot/elliptic.py</code> rather than evaluating the printed cancelling
+    forms directly.</li>
     <li><strong>The same complement defect is present in the point-filament kernels.</strong>
     <code>nova/biot/greens.py</code> calls <code>ellipk(k2)</code> / <code>ellipe(k2)</code> with
     the parameter, and k² → 1 is the near field — the zone that matters most, since it is where

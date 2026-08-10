@@ -12,6 +12,8 @@
   <title>Force-Balance Source Contract | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-10">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -29,7 +31,7 @@
     <h2 id="s2">§2 — Toroidal rotation</h2>
     <p>For purely toroidal flow, ideal-MHD force balance does not generally leave pressure as a flux function. Under the isothermal-surface closure used by the Maschke–Perrin family, <code>T=T(psi)</code> and <code>Omega=Omega(psi)</code>, and pressure has an explicit major-radius dependence of the form <code>p(R,psi)=p0(psi) exp[theta(psi) R²]</code>, with <code>theta</code> determined by species mass, temperature and rotation. The GS source uses the derivative at fixed <code>R</code>, so both <code>p0'</code> and <code>theta'</code> contribute. A low-Mach expansion produces additional radial powers, including the familiar <code>R⁴</code> contribution in the GS source, but a free <code>R⁴</code> coefficient is not sufficient evidence that the term is rotation.</p>
     <p>The recommended first implementation therefore accepts <code>p0(psi)</code>, <code>T(psi)</code>, <code>Omega(psi)</code>, species assumptions and their consistent derivatives, then lets Nova compose <code>p(R,psi)</code> and the source. This is directly testable against rotating Solov'ev and Maschke–Perrin solutions. A later polytropic closure can be another typed model without changing the public solver name.</p>
-    <p>Primary numerical reference: Luo et al., <a href="https://doi.org/10.1016/j.cpc.2020.107264">Solving the Grad–Shafranov equation using spectral elements for tokamak equilibrium with toroidal rotation</a>, which documents the modified equation and benchmarks against analytic rotating equilibria.</p>
+    <p>Primary numerical reference: Li and Zhu, <a href="https://doi.org/10.1016/j.cpc.2020.107264">Solving the Grad–Shafranov equation using spectral elements for tokamak equilibrium with toroidal rotation</a>, which documents the modified equation and benchmarks against analytic rotating equilibria.</p>
 
     <h2 id="s3">§3 — SOL currents</h2>
     <p>There are two different capabilities hidden by the phrase “SOL current.”</p>

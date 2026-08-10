@@ -132,8 +132,27 @@ class Arc(Constants, Matrix):
         return np.mod(np.arctan2(cross, dot), 2.0 * np.pi)
 
     @cached_property
+    def _fit_condition(self):
+        """Bound circle-fit amplification from the authored three-point span.
+
+        The fit sees the start, midpoint, and end of the arc.  Their longest
+        chord, divided by the diameter, is the larger of ``sin(sweep / 4)``
+        and ``sin(sweep / 2)``.  Mapping global-coordinate round-off through
+        the fitted centre and radius therefore costs at most the reciprocal of
+        that ratio, in addition to the direct coordinate transform.  Major
+        arcs retain their nearly diametric midpoint chord instead of inheriting
+        the conditioning of their short excluded gap.
+        """
+        sweep = self._directed_sweep
+        half_chord_ratio = np.maximum(
+            abs(np.sin(sweep / 4.0)), abs(np.sin(sweep / 2.0))
+        )
+        resolved_ratio = np.maximum(half_chord_ratio, np.sqrt(np.finfo(float).eps))
+        return 1.0 + 1.0 / resolved_ratio
+
+    @cached_property
     def _geometry_tolerance(self):
-        """Return a scale-aware bound for local transform round-off."""
+        """Return a fit-conditioned bound for local transform round-off."""
         target = self.target.stack("x", "y", "z")
         source_start = np.asarray(self.source.start_point)[np.newaxis]
         source_end = np.asarray(self.source.end_point)[np.newaxis]
@@ -148,7 +167,7 @@ class Arc(Constants, Matrix):
             np.max(abs(source_end), axis=-1),
         )
         scale = np.maximum.reduce(terms)
-        return 32.0 * np.finfo(float).eps * scale
+        return 32.0 * np.finfo(float).eps * scale * self._fit_condition
 
     @cached_property
     def _exact_authored_endpoint(self):

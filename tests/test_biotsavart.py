@@ -705,6 +705,19 @@ def _arc_element(source_points, target_points):
     return Arc(source, target, turns=[False, False], reduce=[False, False])
 
 
+def _clustered_arc_rigid_motion():
+    """Return a reproducible rigid motion that exposes circle-fit conditioning."""
+    rotation = np.array(
+        [
+            [0.8905064662746885, 0.44224844728943735, 0.10683887117078991],
+            [-0.3923117428434416, 0.865317430022136, -0.31195711520500213],
+            [-0.23041208724827836, 0.23588568453801384, 0.9440700259408326],
+        ]
+    )
+    translation = np.array([5.954319589053021, -4.181867561911852, -6.839780771099049])
+    return rotation, translation
+
+
 @pytest.mark.parametrize(
     "angles,outside_angle,rigid",
     [
@@ -801,6 +814,93 @@ def test_arc_same_ring_excluded_span_matches_the_closed_elementary_limit():
     np.testing.assert_allclose(
         rigid_field, expected_field @ rotation.T, rtol=5e-12, atol=1e-18
     )
+
+
+def test_arc_clustered_fit_keeps_transformed_excluded_ring_target_finite():
+    """Three-point fit conditioning covers exact rigid same-ring geometry."""
+    radius = 2.3
+    height = -0.4
+    source_points = _arc_points(radius, height, [350.0, 360.0, 370.0])
+    target_points = _arc_points(radius, height, [180.0])
+    base = _arc_element(source_points, target_points)
+    rotation, translation = _clustered_arc_rigid_motion()
+    rigid = _arc_element(
+        source_points @ rotation.T + translation,
+        target_points @ rotation.T + translation,
+    )
+
+    expected_condition = 1.0 + 1.0 / np.sin(np.deg2rad(10.0))
+    np.testing.assert_allclose(rigid._fit_condition, expected_condition, rtol=1e-12)
+    assert abs(rigid.r - rigid.rs) <= rigid._geometry_tolerance
+    assert abs(rigid.z - rigid.zs) <= rigid._geometry_tolerance
+    assert np.all(rigid._same_ring_outside_span)
+    with np.errstate(divide="raise", invalid="raise", over="raise", under="ignore"):
+        base_potential = base.Avector[:, 0]
+        base_field = base.Bvector[:, 0]
+        rigid_potential = rigid.Avector[:, 0]
+        rigid_field = rigid.Bvector[:, 0]
+    np.testing.assert_allclose(
+        rigid_potential, base_potential @ rotation.T, rtol=5e-12, atol=2e-14
+    )
+    np.testing.assert_allclose(
+        rigid_field, base_field @ rotation.T, rtol=5e-12, atol=1e-18
+    )
+
+
+def test_arc_clustered_fit_is_invariant_under_random_rigid_motion():
+    """Conditioned same-ring classification is stable across rigid frames."""
+    radius = 2.3
+    height = -0.4
+    source_points = _arc_points(radius, height, [350.0, 360.0, 370.0])
+    target_points = _arc_points(radius, height, [180.0])
+    base = _arc_element(source_points, target_points)
+    with np.errstate(divide="raise", invalid="raise", over="raise", under="ignore"):
+        base_potential = base.Avector[:, 0]
+        base_field = base.Bvector[:, 0]
+
+    random = np.random.default_rng(1729)
+    for _ in range(12):
+        axis = random.normal(size=3)
+        rotation = _rodrigues_rotation(axis, random.uniform(-np.pi, np.pi))
+        translation = random.uniform(-12.0, 12.0, size=3)
+        rigid = _arc_element(
+            source_points @ rotation.T + translation,
+            target_points @ rotation.T + translation,
+        )
+        assert np.all(rigid._same_ring_outside_span)
+        with np.errstate(divide="raise", invalid="raise", over="raise", under="ignore"):
+            potential = rigid.Avector[:, 0]
+            field = rigid.Bvector[:, 0]
+        np.testing.assert_allclose(
+            potential, base_potential @ rotation.T, rtol=5e-12, atol=2e-14
+        )
+        np.testing.assert_allclose(
+            field, base_field @ rotation.T, rtol=5e-12, atol=1e-18
+        )
+
+
+def test_arc_clustered_fit_tolerance_preserves_resolved_standoffs():
+    """Resolved radial and plane gaps remain outside the fitted source ring."""
+    radius = 2.3
+    height = -0.4
+    source_points = _arc_points(radius, height, [350.0, 360.0, 370.0])
+    rotation, translation = _clustered_arc_rigid_motion()
+    rigid_source = source_points @ rotation.T + translation
+    on_filament = _arc_element(rigid_source, rigid_source[1:2])
+    displacement = 8.0 * float(on_filament._geometry_tolerance[0, 0])
+    target_points = np.vstack(
+        [
+            rigid_source[1] + displacement * (np.array([1.0, 0.0, 0.0]) @ rotation.T),
+            rigid_source[1] + displacement * (np.array([0.0, 0.0, 1.0]) @ rotation.T),
+        ]
+    )
+    arc = _arc_element(rigid_source, target_points)
+    assert abs(arc.r[0] - arc.rs[0]) > 4.0 * arc._geometry_tolerance[0]
+    assert abs(arc.z[1] - arc.zs[1]) > 4.0 * arc._geometry_tolerance[1]
+    assert not np.any(arc._same_source_ring)
+    with np.errstate(divide="raise", invalid="raise", over="raise", under="ignore"):
+        assert np.all(np.isfinite(arc.Avector))
+        assert np.all(np.isfinite(arc.Bvector))
 
 
 def test_arc_directed_span_keeps_adjacent_angular_sides_distinct():

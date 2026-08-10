@@ -96,7 +96,7 @@ class Arc(Constants, Matrix):
             np.asarray(self.source.start_point) == np.asarray(self.source.end_point),
             axis=1,
         )
-        if np.any(coincident):
+        if np.any(coincident & ~self._complete_source_ring):
             raise ValueError("arc source coincident endpoints have ambiguous topology")
         if np.any(self._fit_leverage <= np.sqrt(np.finfo(float).eps)):
             raise ValueError(
@@ -114,8 +114,8 @@ class Arc(Constants, Matrix):
         return np.arctan2(self("target", "y"), self("target", "x"))
 
     @cached_property
-    def _directed_sweep(self):
-        """Return the source end's directed phase from its authored start."""
+    def _raw_directed_sweep(self):
+        """Return the source end's represented phase from its authored start."""
         start_x = self("source", "x1")
         start_y = self("source", "y1")
         delta_x = self("source", "x2") - start_x
@@ -123,6 +123,46 @@ class Arc(Constants, Matrix):
         cross = start_x * delta_y - start_y * delta_x
         dot = start_x**2 + start_y**2 + start_x * delta_x + start_y * delta_y
         return np.mod(np.arctan2(cross, dot), 2.0 * np.pi)
+
+    @cached_property
+    def _complete_source_ring(self):
+        """Identify an authored complete ring from its represented topology.
+
+        A complete path has the same stored endpoint to coordinate precision and
+        a stored length consistent with its complete circumference.  Endpoint
+        precision is assessed per Cartesian component, so a large translation in
+        one coordinate cannot absorb a resolved gap in another.  This certificate
+        does not widen the directed angular span of an open near-complete arc.
+        """
+        start = np.asarray(self.source.start_point, dtype=float)
+        end = np.asarray(self.source.end_point, dtype=float)
+        length = np.asarray(self.source("length"), dtype=float)
+        eps = np.finfo(float).eps
+        radius_scale = length[..., np.newaxis] / (2.0 * np.pi)
+        component_ulp = np.maximum.reduce(
+            np.broadcast_arrays(
+                np.spacing(abs(start))[np.newaxis],
+                np.spacing(abs(end))[np.newaxis],
+                eps * radius_scale,
+            )
+        )
+        same_represented_point = np.all(
+            abs(end - start)[np.newaxis] <= 4.0 * component_ulp,
+            axis=-1,
+        )
+        circumference = 2.0 * np.pi * self.rs
+        length_scale = np.maximum(abs(length), abs(circumference))
+        complete_length = abs(length - circumference) <= 128.0 * eps * length_scale
+        return same_represented_point & complete_length
+
+    @cached_property
+    def _directed_sweep(self):
+        """Return the source's directed sweep, including complete topology."""
+        return np.where(
+            self._complete_source_ring,
+            2.0 * np.pi,
+            self._raw_directed_sweep,
+        )
 
     @cached_property
     def _directed_phase(self):
@@ -148,7 +188,8 @@ class Arc(Constants, Matrix):
         sweep = self._directed_sweep
         sagitta_ratio = 2.0 * np.sin(sweep / 4.0) ** 2
         endpoint_chord_ratio = abs(np.sin(sweep / 2.0))
-        return np.minimum(sagitta_ratio, endpoint_chord_ratio)
+        leverage = np.minimum(sagitta_ratio, endpoint_chord_ratio)
+        return np.where(self._complete_source_ring, 1.0, leverage)
 
     @cached_property
     def _fit_condition(self):

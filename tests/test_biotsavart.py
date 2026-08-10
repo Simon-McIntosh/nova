@@ -10,6 +10,7 @@ import scipy.special
 
 from nova.biot.arc import Arc
 from nova.biot.biotframe import BiotFrame, Source, Target
+from nova.biot.bow import Bow
 from nova.biot.circle import Circle
 from nova.biot.constants import Constants
 from nova.biot.grid import Grid
@@ -716,6 +717,125 @@ def _clustered_arc_rigid_motion():
     )
     translation = np.array([5.954319589053021, -4.181867561911852, -6.839780771099049])
     return rotation, translation
+
+
+@pytest.mark.parametrize("rigid", [False, True], ids=["canonical", "rigid"])
+def test_sampled_complete_ring_preserves_arc_and_bow_topology(rigid):
+    """A represented closed path remains a complete turn for both arc elements."""
+    radius = 2.1
+    height = -3.2
+    theta = np.linspace(0.0, 2.0 * np.pi, 103)
+    source_points = np.stack(
+        [
+            radius * np.cos(theta),
+            radius * np.sin(theta),
+            np.full_like(theta, height),
+        ],
+        axis=-1,
+    )
+    target_points = np.array([[0.4, -0.3, 0.8]])
+    if rigid:
+        rotation = _rodrigues_rotation([1.0, -2.0, 0.7], 0.91)
+        translation = np.array([8.2, -3.7, 5.1])
+        source_points = source_points @ rotation.T + translation
+        target_points = target_points @ rotation.T + translation
+
+    arc = _arc_element(source_points, target_points)
+    coilset = CoilSet()
+    coilset.winding.insert(
+        source_points,
+        {"c": (0.0, 0.0, 0.25)},
+        minimum_arc_nodes=3,
+        Ic=1.0,
+    )
+    bow = Bow(
+        Source(coilset.subframe),
+        Target(dict(zip("xyz", target_points.T, strict=True))),
+        turns=[False, False],
+        reduce=[False, False],
+    )
+
+    for element in [arc, bow]:
+        assert np.all(element._complete_source_ring)
+        assert np.all(element._directed_sweep == 2.0 * np.pi)
+        assert np.all(element._fit_leverage == 1.0)
+        with np.errstate(divide="raise", invalid="raise", over="raise", under="ignore"):
+            assert np.all(np.isfinite(element.Avector))
+            assert np.all(np.isfinite(element.Bvector))
+
+
+def test_open_near_complete_arc_keeps_resolved_orthogonal_gap():
+    """A large translation cannot turn a represented endpoint gap into closure."""
+    radius = 2.3
+    height = -0.4
+    gap = 1.0e-6
+    sweep = 2.0 * np.pi - gap
+    angles = np.array([0.0, sweep / 2.0, sweep])
+    source_points = np.stack(
+        [
+            radius * np.cos(angles),
+            radius * np.sin(angles),
+            np.full_like(angles, height),
+        ],
+        axis=-1,
+    )
+    translation = np.array([0.0, 0.0, 2.0e9])
+    source = Source(
+        PolyLine(source_points, minimum_arc_nodes=3, line_eps=0.0).path_geometry
+    )
+    for coordinate in ["z0", "z1", "z2"]:
+        source.loc[:, coordinate] += translation[2]
+    target_points = np.array([[0.1, 0.2, 0.3]]) + translation
+    arc = Arc(
+        source,
+        Target(dict(zip("xyz", target_points.T, strict=True))),
+        turns=[False, False],
+        reduce=[False, False],
+    )
+    assert not np.any(arc._complete_source_ring)
+    np.testing.assert_allclose(arc._directed_sweep, sweep, rtol=0.0, atol=2e-15)
+    assert np.all(arc._fit_leverage > np.sqrt(np.finfo(float).eps))
+
+
+def test_open_near_complete_arc_rejects_unresolved_endpoint_leverage():
+    """A represented open gap below the fit leverage remains fail-closed."""
+    radius = 2.3
+    height = -0.4
+    gap = 1.0e-8
+    sweep = 2.0 * np.pi - gap
+    angles = np.array([0.0, sweep / 2.0, sweep])
+    source_points = np.stack(
+        [
+            radius * np.cos(angles),
+            radius * np.sin(angles),
+            np.full_like(angles, height),
+        ],
+        axis=-1,
+    )
+    source = Source(
+        PolyLine(
+            source_points,
+            minimum_arc_nodes=3,
+            line_eps=0.0,
+        ).path_geometry
+    )
+    target = Target({"x": [0.1], "y": [0.2], "z": [0.3]})
+    with pytest.raises(
+        ValueError, match="arc source sweep is unresolved at floating-point precision"
+    ):
+        Arc(source, target, turns=[False, False], reduce=[False, False])
+
+
+def test_coincident_major_arc_does_not_acquire_complete_topology():
+    """Endpoint identity alone cannot promote a partial authored circumference."""
+    source_points = _arc_points(2.3, -0.4, [0.0, 135.0, 270.0])
+    source = Source(
+        PolyLine(source_points, minimum_arc_nodes=3, line_eps=0.0).path_geometry
+    )
+    source.loc[:, ["x2", "y2", "z2"]] = source.loc[:, ["x1", "y1", "z1"]].to_numpy()
+    target = Target({"x": [0.1], "y": [0.2], "z": [0.3]})
+    with pytest.raises(ValueError, match="coincident endpoints.*ambiguous topology"):
+        Arc(source, target, turns=[False, False], reduce=[False, False])
 
 
 @pytest.mark.parametrize(

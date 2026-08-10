@@ -274,7 +274,7 @@ Eq (24b): `(2m+1) k² El2p = sn^{2m+1} cn dn + 2m(1+k²) El2m − (2m−1) El2q`
 (p = m+1, q = m−1); `El0 = K(α,k)`, `k² El2 = K(α,k) − E(α,k)`.
 
 At α = π/2 every `El2m` is the complete moment (`nova.biot.elliptic
-.stable_sn_moments`), every `π(π/2, η², k) = Π(η² | k²)`
+.sn_moments`), every `π(π/2, η², k) = Π(η² | k²)`
 (`complete_pi`), and `I(η²)` over the quarter period is elementary
 (`pole_moment`).
 

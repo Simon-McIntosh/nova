@@ -83,6 +83,19 @@ and half the mantissa a micrometre from it.  Only ``Q_{1/2}`` uses it, and only
 through ``Q^1_{-1/2}``, where it is added to a term larger by ``t``, so the loss
 never reaches the ladder.
 
+Radial domain
+-------------
+The order raise divides by ``sqrt(x^2 - 1)`` and the two independent radial
+solutions coalesce as ``x = cosh(eta)`` approaches one.  Returning a value at a
+held ``x`` would silently answer at a different point, and is especially wrong
+for the second kind, which genuinely diverges there.  The public ladders instead
+require ``x - 1 >= MINIMUM_COSH_GAP`` and reject the axis/infinity boundary.
+The bound is tied to the backward recurrence's finite padding: at its boundary,
+100-decimal references through degree eight give worst relative errors below
+``4e-11`` for the first kind and ``4e-12`` for the second.  The coordinates may
+still represent ``eta = 0`` exactly; only evaluation of a radial ladder there is
+outside the numerical contract.
+
 Conditioning
 ------------
 The angular factors are orthogonal on a full turn, so an evaluation set that
@@ -119,20 +132,23 @@ INNER = "inner"
 OUTER = "outer"
 """Radial family carrying current beyond the observer."""
 
-# ``cosh eta`` is held just off one so the order raise, which divides by
-# ``sqrt(x^2 - 1)``, stays finite on the axis and at infinity.  Both families are
-# masked there by the geometry -- the first kind vanishes and the second diverges
-# -- so the clamp bounds an unused value rather than answering for a phantom.
-_AXIS_HOLD = 1.0 + 1.0e-13
+MINIMUM_COSH_GAP = 1.0e-5
+"""Smallest supported ``cosh(eta) - 1`` for either radial ladder.
+
+The boundary keeps the ratio recurrence within its finite backward padding and
+is an accuracy domain, not a replacement value for points nearer ``eta = 0``.
+"""
 
 # Padding of the backward second-kind recurrence.  Its convergence is the same
 # ``t^{-2}`` per step that makes the forward climb fail, so the trip count that
-# brings the whole double range is ``log(1/eps)/(2 log t)``; the floor covers the
-# degenerate case where the two solutions are barely separated (which is also
-# where the forward climb is safe) and the cap bounds the cost at the axis, where
-# no finite padding converges and the columns are masked anyway.
+# brings the whole double range is ``log(1/eps)/(2 log t)``.  The floor covers
+# well-separated solutions; the cap and ``MINIMUM_COSH_GAP`` jointly define the
+# nearest supported coordinate, so the recurrence is never truncated and passed
+# off as an accurate value.
 _BACKWARD_PAD_FLOOR = 24
 _BACKWARD_PAD_CAP = 4096
+
+_MINIMUM_DISTANCE = float(np.arccosh(1.0 + MINIMUM_COSH_GAP))
 
 # Floor on the product of focal distances, which vanishes only ON the focal
 # circle.  The inner family genuinely diverges there, so the floor bounds a real
@@ -165,7 +181,7 @@ class FocalFrame:
     """
 
     cosine: np.ndarray
-    """``cosh eta`` at each point, held just off one."""
+    """``cosh eta`` at each point, including one on the axis/infinity boundary."""
 
     sine: np.ndarray
     """``sinh eta`` at each point."""
@@ -211,7 +227,10 @@ def focal_frame(r, z, focus: FocalCircle) -> FocalFrame:
     far = (r + radius) ** 2 + height**2
     separation = np.sqrt(np.maximum(near * far, _SEPARATION_FLOOR))
     square = r**2 + height**2
-    cosine = np.maximum((square + radius**2) / separation, _AXIS_HOLD)
+    # Round-off may put this positive geometric ratio a few ulp below one.  One
+    # is the exact coordinate boundary; radial evaluation applies its own public
+    # accuracy domain rather than moving the point away from that boundary.
+    cosine = np.maximum((square + radius**2) / separation, 1.0)
     gap = 2.0 * radius**2 / separation
     angle = np.arctan2(
         2.0 * radius * height / separation, (square - radius**2) / separation
@@ -236,10 +255,20 @@ def focal_frame(r, z, focus: FocalCircle) -> FocalFrame:
 def focal_position(
     focus: FocalCircle, distance, angle
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Return ``(R, Z)`` from the focal coordinates ``(eta, theta)``."""
-    distance = np.asarray(distance, dtype=np.float64)
-    angle = np.asarray(angle, dtype=np.float64)
-    gap = np.cosh(distance) - np.cos(angle)
+    """Return ``(R, Z)`` from the focal coordinates ``(eta, theta)``.
+
+    The denominator is formed as a sum of squares, retaining tiny ``eta`` or
+    ``theta`` that ``cosh(eta) - cos(theta)`` rounds to zero.  Exactly
+    ``eta = theta = 0`` is the coordinate point at infinity and is path
+    dependent, so it raises instead of inventing finite coordinates.
+    """
+    distance, angle = np.broadcast_arrays(
+        np.asarray(distance, dtype=np.float64),
+        np.asarray(angle, dtype=np.float64),
+    )
+    gap = 2.0 * np.sinh(0.5 * distance) ** 2 + 2.0 * np.sin(0.5 * angle) ** 2
+    if np.any(gap == 0.0):
+        raise ValueError("eta = theta = 0 is the path-dependent point at infinity")
     return (
         focus.radius * np.sinh(distance) / gap,
         focus.height + focus.radius * np.sin(angle) / gap,
@@ -249,13 +278,29 @@ def focal_position(
 # --- the two radial ladders -------------------------------------------------
 
 
+def _radial_argument(order: int, x) -> np.ndarray:
+    """Return a validated radial argument inside the public accuracy domain."""
+    if order < 0:
+        raise ValueError(f"order must be non-negative, got {order}")
+    x = np.asarray(x, dtype=np.float64)
+    minimum = 1.0 + MINIMUM_COSH_GAP
+    if np.any(~np.isfinite(x)) or np.any(x < minimum):
+        raise ValueError(
+            f"radial ladders require finite x with x - 1 >= {MINIMUM_COSH_GAP:g}"
+        )
+    return x
+
+
 def _seeds(x: np.ndarray) -> tuple[np.ndarray, ...]:
-    """Return ``(sinh eta, exp eta)`` and the four order-one lowest seeds.
+    """Return ``(sinh eta, exp eta)`` and three order-one lowest seeds.
 
     The order raise is ``F^1_nu = nu (x F_nu - F_{nu-1}) / sqrt(x^2 - 1)`` with
     the degree reflection ``F_{-3/2} = F_{1/2}``, which holds for both kinds --
     the second kind's reflection carries a cotangent that vanishes at this
-    half-integer degree.
+    half-integer degree.  The first kind returns both reflected neighbours from
+    closed forms.  The second kind returns only its stable lowest value; its
+    reflected neighbour is obtained from the backward ratio chain, avoiding the
+    cancellation in the raised ``K - E`` expression at large ``x``.
     """
     sine = np.sqrt((x - 1.0) * (x + 1.0))
     exponential = x + sine
@@ -275,11 +320,12 @@ def _seeds(x: np.ndarray) -> tuple[np.ndarray, ...]:
         -0.5 * (x * first_low - first_high) / sine,
         0.5 * (x * first_high - first_low) / sine,
         -0.5 * (x * second_low - second_high) / sine,
-        0.5 * (x * second_high - second_low) / sine,
     )
 
 
-def _degree_gradient(order: int, x: np.ndarray, ladder: np.ndarray) -> np.ndarray:
+def _degree_gradient(
+    order: int, x: np.ndarray, ladder: np.ndarray, reflected: np.ndarray
+) -> np.ndarray:
     """Return ``dF^1_{n-1/2}/dx`` for a complete order-one ladder.
 
     ``(x^2 - 1) dF^1_nu/dx = nu x F^1_nu - (nu + 1) F^1_{nu-1}`` at order one,
@@ -288,7 +334,7 @@ def _degree_gradient(order: int, x: np.ndarray, ladder: np.ndarray) -> np.ndarra
     span = (x - 1.0) * (x + 1.0)
     out = np.empty_like(ladder)
     for n in range(order + 1):
-        previous = ladder[1] if n == 0 else ladder[n - 1]
+        previous = reflected if n == 0 else ladder[n - 1]
         out[n] = ((n - 0.5) * x * ladder[n] - (n + 0.5) * previous) / span
     return out
 
@@ -297,15 +343,19 @@ def ring_legendre_first(order: int, x) -> tuple[np.ndarray, np.ndarray]:
     """Return ``P^1_{n-1/2}(x)`` and its ``x`` derivative for ``n = 0..order``.
 
     The dominant solution of the degree recurrence, so it is climbed forward from
-    the two elliptic-integral seeds.  Both returns are ``(order + 1, x.size)``.
+    the two elliptic-integral seeds.  The leading dimension of both returns is
+    ``order + 1`` and the remaining dimensions are the broadcast shape of ``x``.
+
+    ``x - 1`` must be at least :data:`MINIMUM_COSH_GAP`; the axis/infinity
+    boundary is rejected rather than evaluated at a surrogate point.
     """
-    x = np.asarray(x, dtype=np.float64)
-    _sine, _exponential, low, high, _, _ = _seeds(x)
+    x = _radial_argument(order, x)
+    _sine, _exponential, low, high, _second_low = _seeds(x)
     ladder = [low, high]
     for n in range(1, order):
         ladder.append((2.0 * n * x * ladder[n] - (n + 0.5) * ladder[n - 1]) / (n - 0.5))
     stacked = np.stack(ladder[: order + 1])
-    return stacked, _degree_gradient(order, x, stacked)
+    return stacked, _degree_gradient(order, x, stacked, high)
 
 
 def ring_legendre_second(order: int, x) -> tuple[np.ndarray, np.ndarray]:
@@ -317,11 +367,18 @@ def ring_legendre_second(order: int, x) -> tuple[np.ndarray, np.ndarray]:
     ratio chain is walked up from the exact lowest seed.  The ratio form neither
     overflows nor needs rescaling, so one padding serves the whole point set.
 
-    Both returns are ``(order + 1, x.size)``.
+    The ratio chain is always carried through degree one, even for an order-zero
+    request, because the reflected adjacent value is required by the derivative.
+    The leading dimension of both returns is ``order + 1`` and the remaining
+    dimensions are the broadcast shape of ``x``.
+
+    ``x - 1`` must be at least :data:`MINIMUM_COSH_GAP`; the divergent
+    axis/infinity boundary is rejected rather than clipped.
     """
-    x = np.asarray(x, dtype=np.float64)
-    _sine, exponential, _, _, low, _high = _seeds(x)
-    separation = np.log(np.maximum(exponential.min(initial=np.inf), _AXIS_HOLD))
+    x = _radial_argument(order, x)
+    _sine, exponential, _first_low, _first_high, low = _seeds(x)
+    required = max(order, 1)
+    separation = np.log(exponential.min(initial=np.inf))
     padding = int(
         np.clip(
             np.ceil(-np.log(np.finfo(np.float64).eps) / (2.0 * separation)),
@@ -331,15 +388,15 @@ def ring_legendre_second(order: int, x) -> tuple[np.ndarray, np.ndarray]:
     )
     ratio = np.zeros_like(x)
     chain: dict[int, np.ndarray] = {}
-    for n in range(order + padding, 0, -1):
+    for n in range(required + padding, 0, -1):
         ratio = (n + 0.5) / (2.0 * n * x - (n - 0.5) * ratio)
-        if n <= order:
+        if n <= required:
             chain[n - 1] = ratio
     ladder = [low]
-    for n in range(order):
+    for n in range(required):
         ladder.append(ladder[-1] * chain[n])
-    stacked = np.stack(ladder)
-    return stacked, _degree_gradient(order, x, stacked)
+    stacked = np.stack(ladder[: order + 1])
+    return stacked, _degree_gradient(order, x, stacked, ladder[1])
 
 
 _LADDER = {INNER: ring_legendre_first, OUTER: ring_legendre_second}
@@ -431,6 +488,10 @@ class ToroidalHarmonics:
         angular = self._angular(frame.angle)
         degree = self._degree_index()
         sine_theta = np.sin(frame.angle)
+        # cosh(eta) * gap - sinh(eta)^2 / 2 is this positive sum.
+        # The identity retains the small distance derivative when both terms in
+        # the direct difference agree to nearly every floating-point digit.
+        distance_numerator = 0.5 * (frame.gap**2 + sine_theta**2)
         radial_parts, height_parts = [], []
         for family in self.families:
             radial, gradient = _LADDER[family](self.order, frame.cosine)
@@ -442,10 +503,7 @@ class ToroidalHarmonics:
                     self.focus.radius
                     / frame.gap**1.5
                     * shape
-                    * (
-                        (frame.cosine * frame.gap - 0.5 * frame.sine**2) * value
-                        + frame.sine * frame.gap * derivative
-                    )
+                    * (distance_numerator * value + frame.sine * frame.gap * derivative)
                 )
                 by_angle = (
                     self.focus.radius
@@ -649,7 +707,10 @@ def locate_source(
         )
 
     search = scipy.optimize.minimize_scalar(
-        scatter, bounds=(1.0e-3, 12.0), method="bounded", options={"xatol": 1.0e-10}
+        scatter,
+        bounds=(_MINIMUM_DISTANCE, 12.0),
+        method="bounded",
+        options={"xatol": 1.0e-10},
     )
     distance = float(search.x)
 
@@ -833,6 +894,7 @@ def select_order(
 
 __all__ = [
     "INNER",
+    "MINIMUM_COSH_GAP",
     "OUTER",
     "ColumnFit",
     "FocalCircle",

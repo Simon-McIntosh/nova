@@ -106,10 +106,18 @@ def case_amplitudes():
 def limit_at(amplitude):
     """Return the fold for a single amplitude, through the arc's own entry point.
 
-    The entry point takes azimuths, so the amplitude is handed to it as the
-    separation it comes from: ``alpha = (pi + psi)/2``.
+    Common target turns are deliberately absent from the returned pair, so the
+    amplitude is encoded in the arc sweep and read from its upper end:
+    ``alpha = (pi + psi)/2`` with ``psi = target - end``.
     """
-    return arc_limits(2.0 * amplitude - np.pi, 0.0, 0.0)[0]
+    return arc_limits(0.0, 0.0, np.pi - 2.0 * amplitude)[1]
+
+
+def local_fields(limit):
+    """Return the continuously valued fields of one fold as a numeric vector."""
+    return np.asarray(
+        [limit.amplitude, limit.sine, limit.cosine, limit.parity], dtype=float
+    )
 
 
 @pytest.mark.parametrize("amplitude", case_amplitudes())
@@ -178,6 +186,19 @@ def test_a_full_turn_collapses_onto_twice_the_quarter_turn_value(azimuth):
     assert even_total == pytest.approx(0.0, abs=1e-13)
 
 
+@pytest.mark.parametrize("winding", [-3, -1, 1, 2, 3])
+def test_multi_turn_arcs_retain_only_their_own_integer_winding(winding):
+    """Local fields coincide while the upper relative count carries orientation."""
+    lower, upper = arc_limits(0.7, 0.0, 2.0 * np.pi * winding)
+    assert np.array_equal(local_fields(lower), local_fields(upper))
+    assert float(upper.turns - lower.turns) == -winding
+
+    quarter = 1.23456789012345
+    folded = np.sqrt(2.0)
+    total = fold(lower, folded, quarter) + fold(upper, folded, quarter)
+    assert total == pytest.approx(-2.0 * winding * quarter, rel=2e-16)
+
+
 def test_a_target_on_an_arc_end_gives_an_exact_quarter_turn():
     """Exactly, pair and all -- the configuration the full turn is made of."""
     limit, _ = arc_limits(0.75, 0.75, 2.0)
@@ -204,6 +225,40 @@ def test_a_whole_turn_of_target_azimuth_leaves_the_arc_unchanged(turns):
         return answer
 
     assert total(0.6 + 2.0 * np.pi * turns) == pytest.approx(total(0.6), rel=1e-13)
+
+
+@pytest.mark.parametrize("winding", [-3, -1, 1, 2, 5])
+def test_upper_endpoint_winding_changes_only_its_relative_turn(winding):
+    """The formal sign is negative because ``alpha`` contains target minus end."""
+    baseline = arc_limits(0.6, -0.4, 1.9)
+    shifted = arc_limits(0.6, -0.4, 1.9 + 2.0 * np.pi * winding)
+    assert np.allclose(local_fields(shifted[0]), local_fields(baseline[0]), atol=2e-15)
+    assert np.allclose(local_fields(shifted[1]), local_fields(baseline[1]), atol=2e-15)
+    assert float(shifted[0].turns) == float(baseline[0].turns)
+    assert float(shifted[1].turns - baseline[1].turns) == -winding
+
+
+def test_huge_common_angles_lose_no_more_than_their_input_phase_spacing():
+    """No large turn terms survive; only phase bits absent from the inputs move."""
+    baseline = arc_limits(0.6, -0.4, 1.9)
+    offset = 1.0e12
+    shifted = arc_limits(offset + 0.6, offset - 0.4, offset + 1.9)
+    bound = np.spacing(offset)
+    for reference, moved in zip(baseline, shifted):
+        assert np.max(np.abs(local_fields(moved) - local_fields(reference))) <= bound
+        assert float(moved.turns) == float(reference.turns)
+
+
+def test_a_huge_target_winding_is_removed_before_the_two_ends_are_evaluated():
+    """The common count stays small and the phase error is bounded by one ulp."""
+    baseline = arc_limits(0.6, -0.4, 1.9)
+    winding = 159_154_943_092
+    offset = 2.0 * np.pi * winding
+    shifted = arc_limits(0.6 + offset, -0.4, 1.9)
+    for reference, moved in zip(baseline, shifted):
+        difference = np.max(np.abs(local_fields(moved) - local_fields(reference)))
+        assert difference <= np.spacing(offset)
+        assert abs(float(moved.turns)) <= 1.0
 
 
 def test_the_two_ends_carry_opposite_assembly_weights():
@@ -236,9 +291,55 @@ def test_the_fold_traces_and_batches():
             assert np.max(np.abs(np.asarray(value) - field)) < 1e-15
 
 
+def test_the_local_phase_has_the_same_jvp_on_host_and_device():
+    """The exposed array namespace keeps derivatives through the smooth fields."""
+    jax = pytest.importorskip("jax")
+    configure_dtypes()
+    jnp = jax.numpy
+
+    def device_signature(azimuth):
+        limits = arc_limits(azimuth, -0.7, 1.1, xp=jnp)
+        return jnp.stack(
+            [
+                field
+                for limit in limits
+                for field in (limit.amplitude, limit.sine, limit.cosine)
+            ]
+        )
+
+    point = _f64(0.2)
+    value, tangent = jax.jvp(device_signature, (point,), (_f64(1.0),))
+    step = 1.0e-6
+
+    def host_signature(azimuth):
+        return np.concatenate(
+            [local_fields(limit)[:3] for limit in arc_limits(azimuth, -0.7, 1.1)]
+        )
+
+    difference = (host_signature(0.2 + step) - host_signature(0.2 - step)) / (
+        2.0 * step
+    )
+    assert np.allclose(np.asarray(value), host_signature(0.2), rtol=1e-14, atol=1e-14)
+    assert np.allclose(np.asarray(tangent), difference, rtol=1e-8, atol=1e-10)
+
+
 def test_the_limit_carries_its_own_fields():
     """A shape check, so a consumer can rely on what it is handed."""
     limit, _ = arc_limits(np.zeros(3), 0.0, 1.0)
     assert isinstance(limit, ArcLimit)
     for field in (limit.amplitude, limit.sine, limit.cosine, limit.turns, limit.parity):
         assert np.shape(field) == (3,)
+
+
+def test_all_three_angle_inputs_broadcast_to_each_limit():
+    """A scalar target and lower end still broadcast over an upper-end vector."""
+    limits = arc_limits(0.3, -0.4, np.asarray([0.2, 0.8, 1.4]))
+    for limit in limits:
+        for field in (
+            limit.amplitude,
+            limit.sine,
+            limit.cosine,
+            limit.turns,
+            limit.parity,
+        ):
+            assert np.shape(field) == (3,)

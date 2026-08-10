@@ -176,9 +176,15 @@ def quadrature_legendre(nu, x, second_kind):
     """Return ``P_nu(x)`` or ``Q_nu(x)`` from the Legendre integral representation."""
     span = np.sqrt(x * x - 1.0)
     if second_kind:
-        value, _ = scipy.integrate.quad(
-            lambda t: (x + span * np.cosh(t)) ** (-nu - 1.0), 0.0, np.inf, limit=400
-        )
+
+        def decaying_integrand(t):
+            """Evaluate the infinite-range tail without forming ``cosh(t)``."""
+            magnitude = abs(t)
+            log_cosh = magnitude + np.log1p(np.exp(-2.0 * magnitude)) - np.log(2.0)
+            log_denominator = np.logaddexp(np.log(x), np.log(span) + log_cosh)
+            return np.exp((-nu - 1.0) * log_denominator)
+
+        value, _ = scipy.integrate.quad(decaying_integrand, 0.0, np.inf, limit=400)
         return value
     value, _ = scipy.integrate.quad(
         lambda t: (x + span * np.cos(t)) ** nu, 0.0, np.pi, limit=400
@@ -208,8 +214,7 @@ def quadrature_order_one(n, x, second_kind, relative_step=1.0e-5):
 
 def forward_second_kind(order, x):
     """Climb the second kind FORWARD, the arrangement the module rejects."""
-    seeds = th._seeds(np.asarray(x, dtype=float))
-    ladder = [seeds[4], seeds[5]]
+    ladder = list(th.ring_legendre_second(1, np.asarray(x, dtype=float))[0])
     for n in range(1, order):
         ladder.append((2.0 * n * x * ladder[n] - (n + 0.5) * ladder[n - 1]) / (n - 0.5))
     return np.stack(ladder[: order + 1])
@@ -217,6 +222,52 @@ def forward_second_kind(order, x):
 
 LADDER_ARGUMENTS = [1.05, 1.3, 2.0, 5.0, 30.0, 300.0]
 """``cosh eta`` over the span a focal circle inside a machine reaches."""
+
+# Rounded float64 projections of 100-decimal associated Legendre values.  These
+# pin cancellation and recurrence accuracy without sharing the implementation's
+# elliptic-integral seeds or either recurrence direction.
+BOUNDARY_FIRST_REFERENCE = np.asarray(
+    [
+        -0.0005590152474536093,
+        0.0016770499349725635,
+        0.00838531256424848,
+        0.01956597388804339,
+        0.03521936932472958,
+        0.05534596847176781,
+        0.07994637511744725,
+        0.10902132725598004,
+        0.1425716971059511,
+    ]
+)
+BOUNDARY_SECOND_REFERENCE = np.asarray(
+    [
+        -223.61070489318686,
+        -223.5961943239923,
+        -223.56160646418158,
+        -223.50992167400275,
+        -223.44292720587256,
+        -223.3618987280413,
+        -223.2678275195526,
+        -223.16152375303002,
+        -223.04367211678482,
+    ]
+)
+
+LARGE_ARGUMENTS = np.asarray([30.0, 30_000.0])
+LARGE_FIRST_REFERENCE = np.asarray(
+    [
+        [-0.14309881872246607, 2.4608407008521786, 3.2885120057541387e13],
+        [-0.013499662888983075, 77.96967974797411, 1.0419746769180037e36],
+    ]
+)
+LARGE_FIRST_GRADIENT = np.asarray([0.0010189787879987784, 1.8167789293604108e-7])
+LARGE_SECOND_REFERENCE = np.asarray(
+    [
+        [-0.20288759422205875, -0.005073070811188697, -4.040899536419433e-15],
+        [-0.006412749153926629, -1.6031872887599884e-7, -1.2746231075955195e-40],
+    ]
+)
+LARGE_SECOND_GRADIENT = np.asarray([0.0033880427683386825, 1.068791527732644e-7])
 
 
 # --- coordinates ------------------------------------------------------------
@@ -232,6 +283,36 @@ def test_focal_coordinates_invert_the_forward_map():
     back_r, back_z = th.focal_position(focus, frame.distance, frame.angle)
     assert np.allclose(back_r, r, rtol=1e-12, atol=1e-12)
     assert np.allclose(back_z, z, rtol=1e-12, atol=1e-12)
+
+
+def test_focal_position_retains_tiny_distance_and_angle_denominators():
+    """The sum-of-squares gap resolves either approach to coordinate infinity."""
+    focus = th.FocalCircle(1.3, -0.2)
+    tiny = 1.0e-8
+    along_distance_r, along_distance_z = th.focal_position(focus, tiny, 0.0)
+    along_angle_r, along_angle_z = th.focal_position(focus, 0.0, tiny)
+    assert float(along_distance_r) == pytest.approx(
+        focus.radius / np.tanh(0.5 * tiny), rel=2e-16
+    )
+    assert float(along_distance_z) == focus.height
+    assert float(along_angle_r) == 0.0
+    assert float(along_angle_z) == pytest.approx(
+        focus.height + focus.radius / np.tan(0.5 * tiny), rel=2e-16
+    )
+
+
+def test_focal_position_rejects_the_path_dependent_point_at_infinity():
+    """Exactly zero in both coordinates has no single finite inverse image."""
+    with pytest.raises(ValueError, match="path-dependent point at infinity"):
+        th.focal_position(th.FocalCircle(1.0), 0.0, 0.0)
+
+
+def test_focal_position_broadcasts_distance_and_angle():
+    """Scalar distance and vector angle return one coordinate per angle."""
+    radius, height = th.focal_position(
+        th.FocalCircle(1.0), 0.2, np.asarray([0.1, 0.3, 0.5])
+    )
+    assert radius.shape == height.shape == (3,)
 
 
 def test_focal_gap_is_the_focal_distance_product():
@@ -314,12 +395,66 @@ def test_forward_second_kind_climb_is_destroyed_by_the_dominant_solution():
     assert abs(forward[order] / reference - 1.0) > 1.0e3
 
 
-def test_second_kind_ratio_chain_reproduces_its_own_closed_form_seed():
-    """The backward chain's first ratio matches the two independent closed forms."""
-    x = np.asarray(LADDER_ARGUMENTS)
-    seeds = th._seeds(x)
-    chain = th.ring_legendre_second(1, x)[0]
-    assert np.allclose(chain[1] / chain[0], seeds[5] / seeds[4], rtol=1e-9)
+@pytest.mark.parametrize(
+    "ladder, reference",
+    [
+        (th.ring_legendre_first, BOUNDARY_FIRST_REFERENCE),
+        (th.ring_legendre_second, BOUNDARY_SECOND_REFERENCE),
+    ],
+)
+def test_radial_domain_boundary_matches_a_hundred_decimal_arbiter(ladder, reference):
+    """The accepted boundary has a measured accuracy contract through degree eight."""
+    x = np.asarray([1.0 + th.MINIMUM_COSH_GAP])
+    value = ladder(8, x)[0][:, 0]
+    assert np.max(np.abs(value / reference - 1.0)) < 1.0e-9
+
+
+@pytest.mark.parametrize("ladder", [th.ring_legendre_first, th.ring_legendre_second])
+@pytest.mark.parametrize("x", [1.0, np.nan, np.inf])
+def test_radial_ladders_reject_the_axis_boundary_and_nonfinite_arguments(ladder, x):
+    """No held coordinate stands in for a divergent or unsupported value."""
+    with pytest.raises(ValueError, match="x - 1"):
+        ladder(0, np.asarray([x]))
+
+
+@pytest.mark.parametrize("ladder", [th.ring_legendre_first, th.ring_legendre_second])
+def test_radial_ladders_reject_just_below_the_public_boundary(ladder):
+    """The documented boundary is inclusive and the preceding float is not."""
+    boundary = 1.0 + th.MINIMUM_COSH_GAP
+    below = np.nextafter(boundary, 1.0)
+    with pytest.raises(ValueError, match="x - 1"):
+        ladder(8, np.asarray([below]))
+
+
+@pytest.mark.parametrize("ladder", [th.ring_legendre_first, th.ring_legendre_second])
+def test_order_zero_ladders_keep_the_reflected_adjacent_value(ladder):
+    """The reflected degree supplies the value derivative even when not returned."""
+    x = np.asarray([1.05, 30.0, 30_000.0])
+    value, gradient = ladder(0, x)
+    adjacent_value, adjacent_gradient = ladder(1, x)
+    assert value.shape == gradient.shape == (1, x.size)
+    assert np.array_equal(value, adjacent_value[:1])
+    assert np.array_equal(gradient, adjacent_gradient[:1])
+    span = (x - 1.0) * (x + 1.0)
+    reflected = (-0.5 * x * adjacent_value[0] - 0.5 * adjacent_value[1]) / span
+    assert np.array_equal(gradient[0], reflected)
+
+
+@pytest.mark.parametrize(
+    "ladder, reference, gradient_reference",
+    [
+        (th.ring_legendre_first, LARGE_FIRST_REFERENCE, LARGE_FIRST_GRADIENT),
+        (th.ring_legendre_second, LARGE_SECOND_REFERENCE, LARGE_SECOND_GRADIENT),
+    ],
+)
+def test_large_argument_ladders_match_hundred_decimal_values(
+    ladder, reference, gradient_reference
+):
+    """Degrees zero, one and eight pin the dominant and recessive large-x limits."""
+    value, gradient = ladder(8, LARGE_ARGUMENTS)
+    selected = value[[0, 1, 8]].T
+    assert np.max(np.abs(selected / reference - 1.0)) < 5.0e-13
+    assert np.max(np.abs(gradient[0] / gradient_reference - 1.0)) < 5.0e-13
 
 
 @pytest.mark.parametrize("second_kind", [False, True])
@@ -335,6 +470,20 @@ def test_ladder_derivatives_match_finite_differences(second_kind):
 
 
 # --- the basis --------------------------------------------------------------
+
+
+def test_frame_keeps_the_axis_boundary_while_basis_evaluation_rejects_it():
+    """Coordinates report eta zero exactly; radial values do not mask the boundary."""
+    focus = th.FocalCircle(1.0, 0.0)
+    frame = th.focal_frame(np.asarray([0.0]), np.asarray([0.0]), focus)
+    assert float(frame.cosine[0]) == 1.0
+    assert float(frame.sine[0]) == 0.0
+    for family in (th.INNER, th.OUTER):
+        basis = th.ToroidalHarmonics(focus, order=0, families=(family,))
+        with pytest.raises(ValueError, match="x - 1"):
+            basis.flux(np.asarray([0.0]), np.asarray([0.0]))
+        with pytest.raises(ValueError, match="x - 1"):
+            basis.field(np.asarray([0.0]), np.asarray([0.0]))
 
 
 @pytest.mark.parametrize("family", [th.INNER, th.OUTER])
@@ -373,6 +522,30 @@ def test_field_columns_are_the_flux_gradient():
     circumference = 2.0 * np.pi * r[:, None]
     assert np.allclose(radial, -by_height / circumference, rtol=1e-6, atol=1e-14)
     assert np.allclose(vertical, by_radius / circumference, rtol=1e-6, atol=1e-14)
+
+
+def test_field_columns_are_the_flux_gradient_at_small_focal_distance():
+    """The positive prefactor identity retains the derivative near eta zero."""
+    focus = th.FocalCircle(1.0, 0.0)
+    radius, height = th.focal_position(focus, 0.005, 0.0)
+    radius, height = float(radius), float(height)
+    frame = th.focal_frame(np.asarray([radius]), np.asarray([height]), focus)
+    assert float(frame.cosine[0] - 1.0) < 2.0 * th.MINIMUM_COSH_GAP
+
+    basis = th.ToroidalHarmonics(focus, order=1, families=(th.INNER, th.OUTER))
+    step = radius * 1.0e-5
+    by_radius = (
+        basis.flux(np.asarray([radius + step]), np.asarray([height]))
+        - basis.flux(np.asarray([radius - step]), np.asarray([height]))
+    ) / (2.0 * step)
+    by_height = (
+        basis.flux(np.asarray([radius]), np.asarray([height + step]))
+        - basis.flux(np.asarray([radius]), np.asarray([height - step]))
+    ) / (2.0 * step)
+    radial, vertical = basis.field(np.asarray([radius]), np.asarray([height]))
+    circumference = 2.0 * np.pi * radius
+    assert np.allclose(radial, -by_height / circumference, rtol=2e-6, atol=1e-14)
+    assert np.allclose(vertical, by_radius / circumference, rtol=2e-6, atol=1e-14)
 
 
 def test_projection_is_the_axis_weighted_field():

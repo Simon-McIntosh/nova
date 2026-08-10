@@ -49,6 +49,17 @@ Exactness matters here for the same reason it does in
 ``cos alpha = -sin(psi/2)``, so a target ON an arc end gives a cosine of exactly
 zero rather than 6e-17 -- and that end is not a corner case but the one the full
 turn is built from.
+
+Only RELATIVE turns belong in the two limits.  A target azimuth may carry an
+arbitrarily large common winding, but its contribution to both ends cancels.
+Keeping that winding until the two weighted values are added loses the small arc
+answer in a subtraction of two large half-turn terms.  :func:`arc_limits`
+therefore folds the target relative to the lower end first, decomposes the arc's
+own sweep into a principal phase and an integer winding, and derives the upper
+end from that same lower phase.  The returned counts retain the arc winding but
+not the cancelling target winding.  For very large input angles, the remaining
+phase uncertainty is bounded by the floating-point spacing of the inputs; digits
+already discarded by the caller's angle representation cannot be reconstructed.
 """
 
 from __future__ import annotations
@@ -58,6 +69,8 @@ from dataclasses import dataclass
 import numpy as np
 
 __all__ = ["ArcLimit", "arc_limits", "fold"]
+
+_FULL_TURN = 2.0 * np.pi
 
 
 @dataclass
@@ -108,6 +121,24 @@ def _limit(separation, weight, xp):
     )
 
 
+def _principal_phase(angle, xp):
+    """Return an angle in ``(-pi, pi]`` without a large trigonometric argument."""
+    phase = xp.remainder(angle, _FULL_TURN)
+    return xp.where(phase > np.pi, phase - _FULL_TURN, phase)
+
+
+def _shift_turns(limit: ArcLimit, offset) -> ArcLimit:
+    """Shift only a limit's half-turn count, retaining its local folded fields."""
+    return ArcLimit(
+        amplitude=limit.amplitude,
+        sine=limit.sine,
+        cosine=limit.cosine,
+        turns=limit.turns + offset,
+        parity=limit.parity,
+        weight=limit.weight,
+    )
+
+
 def arc_limits(azimuth, start, end, *, xp=np):
     """Return the two :class:`ArcLimit` folds for an arc from ``start`` to ``end``.
 
@@ -115,17 +146,30 @@ def arc_limits(azimuth, start, end, *, xp=np):
     and all broadcasting together.  The two ends carry opposite assembly weights,
     which is the ``-(-1)^(i+1)`` of the paper's eq 13 and eq 17.
 
-    Nothing here reduces the azimuth into a canonical turn, and nothing needs to:
-    adding a whole turn to the target shifts BOTH amplitudes by a half turn, so
-    both odd rows gain the same ``2 X(pi/2)`` and the difference between the ends
-    -- which is the whole answer -- does not move.  The periodicity is a property
-    of the fold rather than a normalisation imposed on the caller.
+    The target's common winding is removed before either limit is formed.  The
+    arc's own winding is retained: adding ``w`` complete turns to ``end`` lowers
+    the upper limit's relative half-turn count by exactly ``w``.  Both endpoints
+    are derived from one principal lower phase, so a complete turn has identical
+    folded fields at its two ends and differs only by that count.
+
+    Phase accuracy for huge angles is limited by their input spacing.  The
+    reduction avoids any additional large-argument trigonometry or subtraction
+    of common turn terms, but cannot recover phase bits absent from the inputs.
     """
-    azimuth = xp.asarray(azimuth)
-    return (
-        _limit(azimuth - xp.asarray(start), -1.0, xp),
-        _limit(azimuth - xp.asarray(end), 1.0, xp),
+    azimuth, start, end = xp.broadcast_arrays(
+        xp.asarray(azimuth), xp.asarray(start), xp.asarray(end)
     )
+    lower_phase = _principal_phase(azimuth - start, xp)
+
+    # sweep = phase + 2 pi winding.  Form the upper end from the SAME lower
+    # phase: this preserves identical local fields for an exact complete turn
+    # and keeps the arc's integer winding after the target's common one is gone.
+    sweep = end - start
+    sweep_phase = _principal_phase(sweep, xp)
+    winding = xp.round((sweep - sweep_phase) / _FULL_TURN)
+    lower = _limit(lower_phase, -1.0, xp)
+    upper = _limit(lower_phase - sweep_phase, 1.0, xp)
+    return lower, _shift_turns(upper, -winding)
 
 
 def fold(limit: ArcLimit, folded, quarter=None):

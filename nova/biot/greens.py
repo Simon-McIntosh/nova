@@ -65,11 +65,13 @@ and both differences are what being traceable costs:
   are far. The traced twin evaluates both static rules before the same selection,
   preserving the section cancellation without a data-shaped graph.
 
-Off the filament the two routes agree to round-off -- 2e-15 of the regime's own
-scale for the point form and 2e-12 for the four-corner section rule, over
-targets from a nanometre off the filament out to the far side of the machine,
-pinned by ``tests/test_biotgreens.py``.  On the filament both routes expose the
-physical singularity: ``psi = inf`` and both field components are ``nan``.
+Off the filament the point routes agree to 2e-15 of the regime's own scale, and
+the bare corner antiderivatives agree to 1e-14.  Alternating four-corner section
+sums can amplify that corner roundoff beyond 2e-12 for thin sections; the strict
+section tests retain that limitation as an expected failure until a positive
+material rule also preserves one-sided boundary tangents.  On the filament both
+point routes expose the physical singularity: ``psi = inf`` and both field
+components are ``nan``.
 
 The three loop-specific elliptic combinations take one descending Landen step
 through ``k^2 = 15/16`` and evaluate the resulting small parameter with exact
@@ -80,6 +82,7 @@ only near the filament, where their terms no longer cancel.
 
 from __future__ import annotations
 
+from contextlib import nullcontext
 from fractions import Fraction
 
 import numpy as np
@@ -130,6 +133,61 @@ def _horner_polynomial(xp, argument, coefficients):
     return value
 
 
+def _subnormal_product(xp, value, factor):
+    """Return a positive-subnormal product and its bit-derived selector.
+
+    Some XLA CPU targets flush a floating multiply whose result is subnormal,
+    even with fast math disabled. A subnormal is an integer count of the least
+    representable unit, so scale that count in the normal range, round it, and
+    construct the resulting bits directly. A zero-primal differentiable term
+    preserves the analytic tangent through the otherwise discrete construction.
+    """
+    if xp is np:
+        subnormal = (value > 0.0) & (value < np.finfo(value.dtype).tiny)
+        with np.errstate(under="ignore"):
+            product = value * factor
+        return product, subnormal
+
+    from jax import custom_jvp, lax  # type: ignore[import-not-found]
+
+    dtype = np.dtype(value.dtype)
+    if dtype == np.dtype(np.float64):
+        unsigned = xp.uint64
+        mantissa_bits = 52
+        sign_bit = 63
+        mantissa_mask = (1 << mantissa_bits) - 1
+    elif dtype == np.dtype(np.float32):
+        unsigned = xp.uint32
+        mantissa_bits = 23
+        sign_bit = 31
+        mantissa_mask = (1 << mantissa_bits) - 1
+    else:
+        subnormal = (value > 0.0) & (value < np.finfo(dtype).tiny)
+        return value * factor, subnormal
+
+    bits = lax.bitcast_convert_type(value, unsigned)
+    mantissa = bits & xp.asarray(mantissa_mask, dtype=unsigned)
+    exponent = bits >> xp.asarray(mantissa_bits, dtype=unsigned)
+    positive = (bits >> xp.asarray(sign_bit, dtype=unsigned)) == 0
+    subnormal = positive & (exponent == 0) & (mantissa != 0)
+    count = xp.where(subnormal, mantissa, xp.asarray(0, dtype=unsigned))
+    rounded = xp.rint(count.astype(dtype) * factor).astype(unsigned)
+    constructed = lax.stop_gradient(lax.bitcast_convert_type(rounded, value.dtype))
+
+    @custom_jvp
+    def attach_product_tangent(argument, multiplier, primal):
+        return primal
+
+    @attach_product_tangent.defjvp
+    def attach_product_tangent_jvp(primals, tangents):
+        argument, multiplier, primal = primals
+        argument_tangent, multiplier_tangent, _ = tangents
+        tangent = multiplier * argument_tangent + argument * multiplier_tangent
+        return primal, tangent
+
+    return attach_product_tangent(value, factor, constructed), subnormal
+
+
 def _filament_elliptic_combinations(xp, parameter, complement, first, second):
     """Return the three cancellation-free combinations used by a loop kernel.
 
@@ -169,35 +227,47 @@ def _filament_elliptic_combinations(xp, parameter, complement, first, second):
         + 0.5 * direct_parameter / direct_complement * direct_second
     )
 
-    landen_denominator = (1.0 + xp.sqrt(conditioned_complement)) ** 2
-    landen_ratio = conditioned_parameter / landen_denominator
-    transformed_parameter = landen_ratio * landen_ratio
-    half_pi = 0.5 * np.pi
-    transformed_first_minus_second = (
-        half_pi
-        * transformed_parameter
-        * _horner_polynomial(xp, transformed_parameter, _FIRST_MINUS_SECOND_HORNER)
-    )
-    transformed_second = half_pi * (
-        1.0
-        - transformed_parameter
-        * _horner_polynomial(xp, transformed_parameter, _SECOND_KIND_HORNER)
-    )
-    ratio_sum = 1.0 + landen_ratio
-    ratio_gap = 1.0 - landen_ratio
-    conditioned_first_minus_second = (
-        2.0 * transformed_first_minus_second
-        + conditioned_parameter
-        * (2.0 * transformed_second / (landen_denominator + conditioned_parameter))
-    )
-    conditioned_flux = 2.0 / ratio_sum * transformed_first_minus_second
-    conditioned_radial = (
-        -2.0 / ratio_gap * transformed_first_minus_second
-        + 4.0
-        * transformed_parameter
-        / (ratio_sum * ratio_gap * ratio_gap)
-        * transformed_second
-    )
+    expected_underflow = np.errstate(under="ignore") if xp is np else nullcontext()
+    with expected_underflow:
+        landen_denominator = (1.0 + xp.sqrt(conditioned_complement)) ** 2
+        landen_ratio = conditioned_parameter / landen_denominator
+        transformed_parameter = landen_ratio * landen_ratio
+        half_pi = 0.5 * np.pi
+        transformed_first_minus_second = (
+            half_pi
+            * transformed_parameter
+            * _horner_polynomial(xp, transformed_parameter, _FIRST_MINUS_SECOND_HORNER)
+        )
+        transformed_second = half_pi * (
+            1.0
+            - transformed_parameter
+            * _horner_polynomial(xp, transformed_parameter, _SECOND_KIND_HORNER)
+        )
+        ratio_sum = 1.0 + landen_ratio
+        ratio_gap = 1.0 - landen_ratio
+        conditioned_first_minus_second = (
+            2.0 * transformed_first_minus_second
+            + conditioned_parameter
+            * (2.0 * transformed_second / (landen_denominator + conditioned_parameter))
+        )
+        subnormal_first_minus_second, subnormal = _subnormal_product(
+            xp,
+            conditioned_parameter,
+            2.0 * transformed_second / (landen_denominator + conditioned_parameter),
+        )
+        conditioned_first_minus_second = xp.where(
+            subnormal,
+            subnormal_first_minus_second,
+            conditioned_first_minus_second,
+        )
+        conditioned_flux = 2.0 / ratio_sum * transformed_first_minus_second
+        conditioned_radial = (
+            -2.0 / ratio_gap * transformed_first_minus_second
+            + 4.0
+            * transformed_parameter
+            / (ratio_sum * ratio_gap * ratio_gap)
+            * transformed_second
+        )
 
     return (
         xp.where(use_conditioned, conditioned_first_minus_second, first_minus_second),
@@ -623,62 +693,56 @@ def traced_corner_fields(xp, rs, zs, r, z):
     return aphi_hat, br_hat, bz_hat
 
 
-_SECTION_QUADRATURE_ORDER = 6
-_SECTION_QUADRATURE_CLEARANCE = 8.0
-_SECTION_RULE_NODE, _SECTION_RULE_WEIGHT = np.polynomial.legendre.leggauss(
-    _SECTION_QUADRATURE_ORDER
-)
-_SECTION_RULE_R, _SECTION_RULE_Z = (
+_AXIS_SECTION_NODE, _AXIS_SECTION_WEIGHT = np.polynomial.legendre.leggauss(6)
+_AXIS_SECTION_R, _AXIS_SECTION_Z = (
     array.ravel()
     for array in np.meshgrid(
-        0.5 * _SECTION_RULE_NODE,
-        0.5 * _SECTION_RULE_NODE,
+        0.5 * _AXIS_SECTION_NODE,
+        0.5 * _AXIS_SECTION_NODE,
         indexing="ij",
     )
 )
-_SECTION_RULE_WEIGHT = (
-    0.25 * _SECTION_RULE_WEIGHT[:, None] * _SECTION_RULE_WEIGHT[None, :]
+_AXIS_SECTION_WEIGHT = (
+    0.25 * _AXIS_SECTION_WEIGHT[:, None] * _AXIS_SECTION_WEIGHT[None, :]
 ).ravel()
 
 
-def _section_quadrature_greens(xp, target_r, target_z, a, z0, da, dz):
-    """Average filament fields over a well-separated rectangular section.
+def _axis_section_limit(xp, target_r, target_z, a, z0, da, dz):
+    """Return the rectangular-section loop expansion at the symmetry axis.
 
-    Six-point Gauss-Legendre integration on each material coordinate is used only
-    beyond eight section half-diagonals, where the filament integrand is smooth.
-    In that domain it avoids the large-condition subtraction of four corner
-    antiderivatives while retaining positive source weights and traced geometry.
+    The point-loop axis coefficient is smooth over a section whose radial
+    interval is positive.  A positive six-by-six material rule integrates that
+    coefficient and its axial derivative; multiplying the resulting coefficients
+    by the leading powers of target radius retains the exact axis values and their
+    first target-radius tangents.
     """
     dtype = xp.result_type(target_r, target_z, a, z0, da, dz)
     if not np.issubdtype(np.dtype(dtype), np.floating):
         dtype = xp.asarray(1.0).dtype
-    target_r, target_z = xp.broadcast_arrays(
-        xp.asarray(target_r, dtype=dtype), xp.asarray(target_z, dtype=dtype)
+    target_r, target_z, a, z0, da, dz = xp.broadcast_arrays(
+        xp.asarray(target_r, dtype=dtype),
+        xp.asarray(target_z, dtype=dtype),
+        xp.asarray(a, dtype=dtype),
+        xp.asarray(z0, dtype=dtype),
+        xp.asarray(da, dtype=dtype),
+        xp.asarray(dz, dtype=dtype),
     )
-    node_r = xp.asarray(_SECTION_RULE_R, dtype=dtype)
-    node_z = xp.asarray(_SECTION_RULE_Z, dtype=dtype)
-    weight = xp.asarray(_SECTION_RULE_WEIGHT, dtype=dtype)
-    source_r = xp.asarray(a, dtype=dtype) + xp.asarray(da, dtype=dtype) * node_r
-    source_z = xp.asarray(z0, dtype=dtype) + xp.asarray(dz, dtype=dtype) * node_z
-    values = traced_filament_greens(
-        xp,
-        target_r[..., None],
-        target_z[..., None],
-        source_r,
-        source_z,
+    node_r = xp.asarray(_AXIS_SECTION_R, dtype=dtype)
+    node_z = xp.asarray(_AXIS_SECTION_Z, dtype=dtype)
+    weight = xp.asarray(_AXIS_SECTION_WEIGHT, dtype=dtype)
+    source_r = a[..., None] + da[..., None] * node_r
+    source_z = z0[..., None] + dz[..., None] * node_z
+    vertical_gap = target_z[..., None] - source_z
+    denominator = source_r**2 + vertical_gap**2
+    axis_bz = xp.sum(weight * MU0 * source_r**2 / (2.0 * denominator**1.5), axis=-1)
+    radial_slope = xp.sum(
+        weight * 3.0 * MU0 * source_r**2 * vertical_gap / (4.0 * denominator**2.5),
+        axis=-1,
     )
-    return tuple(xp.sum(value * weight, axis=-1) for value in values)
-
-
-def _section_quadrature_mask(xp, target_r, target_z, a, z0, da, dz):
-    """Select the smooth domain where direct section quadrature is conditioned."""
-    radial_extent = 0.5 * xp.abs(da)
-    vertical_extent = 0.5 * xp.abs(dz)
-    radial_gap = xp.maximum(xp.abs(target_r - a) - radial_extent, 0.0)
-    vertical_gap = xp.maximum(xp.abs(target_z - z0) - vertical_extent, 0.0)
-    half_diagonal = xp.sqrt(radial_extent**2 + vertical_extent**2)
-    clearance = _SECTION_QUADRATURE_CLEARANCE * half_diagonal
-    return radial_gap**2 + vertical_gap**2 >= clearance**2
+    if xp is np:
+        with np.errstate(under="ignore"):
+            return np.pi * target_r**2 * axis_bz, target_r * radial_slope, axis_bz
+    return np.pi * target_r**2 * axis_bz, target_r * radial_slope, axis_bz
 
 
 def cylinder_greens(
@@ -694,16 +758,12 @@ def cylinder_greens(
     ``a, z0`` -- section centroid [m]; ``da, dz`` -- radial/vertical extents [m].
     Returns arrays shaped like ``target_r``: total poloidal flux psi [Wb/A] and
     field components [T/A], finite throughout the section material.
-
-    The exact corner antiderivative is used near the material. Beyond eight
-    section half-diagonals, direct positive source quadrature is better
-    conditioned than subtracting four increasingly equal antiderivatives.
     """
     tr = np.asarray(target_r, dtype=np.float64)
     tz = np.asarray(target_z, dtype=np.float64)
-    quadrature = _section_quadrature_mask(np, tr, tz, a, z0, da, dz)
-    corner_tr = np.where(quadrature, a, tr)
-    corner_tz = np.where(quadrature, z0, tz)
+    on_axis = tr == 0.0
+    corner_tr = np.where(on_axis, a, tr)
+    corner_tz = np.where(on_axis, z0, tz)
     # corner order (matching the reference): (-,-), (+,-), (+,+), (-,+)
     rs = np.stack(
         [np.full(tr.shape, a + d * da / 2.0) for d in (-1, 1, 1, -1)], axis=-1
@@ -728,18 +788,10 @@ def cylinder_greens(
     psi = 2.0 * np.pi * MU0 * corner_tr * aphi
     br = MU0 * corner(br_hat)
     bz = MU0 * corner(bz_hat)
-    direct = _section_quadrature_greens(
-        np,
-        np.where(quadrature, tr, 0.0),
-        np.where(quadrature, tz, z0),
-        a,
-        z0,
-        da,
-        dz,
-    )
+    axis_values = _axis_section_limit(np, tr, tz, a, z0, da, dz)
     return tuple(
-        np.where(quadrature, direct_value, corner_value)
-        for direct_value, corner_value in zip(direct, (psi, br, bz), strict=True)
+        np.where(on_axis, axis_value, corner_value)
+        for axis_value, corner_value in zip(axis_values, (psi, br, bz), strict=True)
     )
 
 
@@ -747,15 +799,14 @@ def traced_cylinder_greens(xp, target_r, target_z, a, z0, da, dz):
     """(psi, B_R, B_Z) per ampere from a rectangular-section ring, traced.
 
     :func:`cylinder_greens` with the section descriptor ``(a, z0, da, dz)`` as
-    trace inputs. The corner and direct-quadrature arms hold inactive targets at
-    finite geometry before evaluation, so values and geometry tangents follow
-    the same conditioning route without evaluate-then-mask singularities.
+    trace inputs and the corner pass through :func:`traced_corner_fields`, so
+    the section's position and extents carry exact geometry Jacobians.
     """
     tr = xp.asarray(target_r)
     tz = xp.asarray(target_z)
-    quadrature = _section_quadrature_mask(xp, tr, tz, a, z0, da, dz)
-    corner_tr = xp.where(quadrature, a, tr)
-    corner_tz = xp.where(quadrature, z0, tz)
+    on_axis = tr == 0.0
+    corner_tr = xp.where(on_axis, a, tr)
+    corner_tz = xp.where(on_axis, z0, tz)
     one = xp.ones_like(tr)
     # corner order (matching the reference): (-,-), (+,-), (+,+), (-,+)
     rs = xp.stack([(a + d * da / 2.0) * one for d in (-1, 1, 1, -1)], axis=-1)
@@ -778,18 +829,10 @@ def traced_cylinder_greens(xp, target_r, target_z, a, z0, da, dz):
         MU0 * corner(br_hat),
         MU0 * corner(bz_hat),
     )
-    direct = _section_quadrature_greens(
-        xp,
-        xp.where(quadrature, tr, 0.0),
-        xp.where(quadrature, tz, z0),
-        a,
-        z0,
-        da,
-        dz,
-    )
+    axis_values = _axis_section_limit(xp, tr, tz, a, z0, da, dz)
     return tuple(
-        xp.where(quadrature, direct_value, corner_value)
-        for direct_value, corner_value in zip(direct, corner_values, strict=True)
+        xp.where(on_axis, axis_value, corner_value)
+        for axis_value, corner_value in zip(axis_values, corner_values, strict=True)
     )
 
 

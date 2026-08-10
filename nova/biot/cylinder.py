@@ -6,7 +6,7 @@ from typing import ClassVar
 
 import numpy as np
 
-from nova.biot.greens import corner_fields
+from nova.biot.greens import MU0, cylinder_greens
 from nova.biot.matrix import Matrix
 
 
@@ -16,36 +16,31 @@ class Cylinder(Matrix):
     Extend Biot base class.
 
     Compute interaction for rectangular section complete toroidal conductors.
-    The per-corner antiderivative coefficients come from the canonical
-    axisymmetric kernel :func:`nova.biot.greens.corner_fields`; this class
-    stacks the section corners against the targets, integrates the four-corner
-    definite-integral rule, and normalises per ampere of total conductor
-    current.
+    Every quantity comes from the canonical rectangle kernel
+    :func:`nova.biot.greens.cylinder_greens`, which drives the shared corner
+    antiderivative over the section's four corners and carries the on-axis
+    expansion the corner form cannot reach -- a target ON the symmetry axis
+    divides by its own radius inside the antiderivative, so an element that
+    stacks the corners itself returns ``nan`` for the whole axis column.
     """
 
     axisymmetric: ClassVar[bool] = True
     name: ClassVar[str] = "cylinder"  # element name
+    mu_0: ClassVar[float] = MU0
+    """The kernel's own permeability, so ``Aphi`` inverts ``Psi`` exactly.
+
+    ``Psi`` arrives already carrying the kernel's ``4 pi x 1e-7``.  Dividing it by the
+    measured CODATA value the base class holds would leave the two views of one field
+    disagreeing by the part in ten billion those constants differ by -- and by a
+    different part in ten billion after each CODATA revision, since the measured value
+    moves and the defined one does not.  Small, but a fixed offset no rule ever
+    removes.  :class:`~nova.biot.circle.Circle` takes the same constant.
+    """
 
     def __post_init__(self):
-        """Stack section corners against targets."""
+        """Validate the rectangular source geometry."""
         super().__post_init__()
         self._validate_source_geometry()
-        self.rs = np.stack(
-            [
-                self.source("x") + delta / 2 * self.source("dx")
-                for delta in [-1, 1, 1, -1]
-            ],
-            axis=-1,
-        )
-        self.zs = np.stack(
-            [
-                self.source("z") + delta / 2 * self.source("dz")
-                for delta in [-1, -1, 1, 1]
-            ],
-            axis=-1,
-        )
-        self.r = np.stack([self.target("r") for _ in range(4)], axis=-1)
-        self.z = np.stack([self.target("z") for _ in range(4)], axis=-1)
 
     def _validate_source_geometry(self):
         """Reject source sections without finite positive dimensions and area."""
@@ -55,37 +50,49 @@ class Cylinder(Matrix):
                 raise ValueError(f"cylinder source {attr} must be finite and positive")
 
     @cached_property
-    def _corners(self):
-        """Return (Aphi_hat, Br_hat, Bz_hat) per corner from the canonical kernel."""
-        return corner_fields(self.rs, self.zs, self.r, self.z)
-
-    def _intergrate(self, data):
-        """Return corner intergration."""
-        return (
-            1
-            / (2 * np.pi * self.source("area"))
-            * ((data[..., 2] - data[..., 3]) - (data[..., 1] - data[..., 0]))
+    def _fields(self):
+        """Return (Psi, Br, Bz) per ampere from the canonical rectangle kernel."""
+        return cylinder_greens(
+            self.target("r"),
+            self.target("z"),
+            self.source("x"),
+            self.source("z"),
+            self.source("dx"),
+            self.source("dz"),
         )
 
     @cached_property
     def Aphi(self):
-        """Return Aphi array."""
-        return self._intergrate(self._corners[0])
+        """Return the toroidal vector potential array [Wb/(m.A)].
+
+        ``Phi = 2 pi R A_phi``, inverted here rather than integrated separately so
+        the two cannot drift apart.  The axis value is the loop limit ``A_phi = 0``,
+        left in place rather than divided for and selected afterwards.
+        """
+        radius = np.asarray(self.target("r"))
+        potential = np.zeros_like(self.Psi)
+        np.divide(
+            self.Psi,
+            2 * np.pi * self.mu_0 * radius,
+            out=potential,
+            where=radius != 0.0,
+        )
+        return potential
 
     @property
     def Psi(self):
         """Return Psi array."""
-        return 2 * np.pi * self.mu_0 * self.target("r") * self.Aphi
+        return self._fields[0]
 
     @cached_property
     def Br(self):
         """Return radial field array."""
-        return self.mu_0 * self._intergrate(self._corners[1])
+        return self._fields[1]
 
     @cached_property
     def Bz(self):
         """Return vertical field array."""
-        return self.mu_0 * self._intergrate(self._corners[2])
+        return self._fields[2]
 
 
 if __name__ == "__main__":

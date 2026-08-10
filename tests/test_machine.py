@@ -170,7 +170,7 @@ def test_catalog_ids_validate_reopen_and_preserve_diagnostic_geometry(tmp_path):
     assert np.isclose(probe.position.r, source_probe[0])
     assert np.isclose(probe.position.z, source_probe[1])
     assert not probe.position.phi.has_value
-    assert np.isclose(probe.poloidal_angle, source_probe[2])
+    assert np.isclose(probe.poloidal_angle, -source_probe[2])
     assert not probe.toroidal_angle.has_value
     assert np.isclose(probe.length, source_probe[3])
 

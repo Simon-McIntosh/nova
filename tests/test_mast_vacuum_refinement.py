@@ -70,7 +70,7 @@ from nova.imas.mast_vacuum_response import (
 )
 
 REFINED_SEMANTIC_IDENTITY = (
-    "sha256:18c75c19493714108fc71f88a55cc775836218e489e073f43942fd007d937bdc"
+    "sha256:ec2f7c6015ac4b193e2f9bb4594b2a90e7ff9650bb5566d214c3aec39f179c88"
 )
 """Semantic address of the refined revision this worktree authors.
 
@@ -718,7 +718,7 @@ def test_refined_ids_carry_the_fitted_turns_and_axis():
         if str(probe.name)
     }
     assert angles[RADIAL_PROBE_FAMILY] == pytest.approx(0.0)
-    assert angles["ccbv"] == pytest.approx(math.pi / 2.0, abs=1e-4)
+    assert angles["ccbv"] == pytest.approx(-math.pi / 2.0, abs=1e-4)
 
 
 def test_refined_artifact_keeps_the_machine_it_describes(tmp_path):

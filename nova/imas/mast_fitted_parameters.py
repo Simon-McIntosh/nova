@@ -1109,7 +1109,9 @@ def fitted_diagnostic_records(
             last_shot=last_shot,
             statement=(
                 "the level-1 store puts this family's sensitive axis along the major "
-                "radius, and refitting the whole cohort under each assignment "
+                "radius, whose zero angle is unchanged when mapped from the source's "
+                "counter-clockwise direction into DDv4's clockwise direction; "
+                "refitting the whole cohort under each assignment "
                 f"predicts the probes {AXIS_RESIDUAL_MARGIN:.2f} times better in "
                 "residual that way round than the other"
             ),
@@ -1183,7 +1185,9 @@ def fitted_diagnostic_records(
             last_shot=last_shot,
             statement=(
                 "these families' sensitive axes lie along the machine axis, which "
-                "the catalog pose records and the vacuum response confirms"
+                "the catalog pose records and the vacuum response confirms; the "
+                "source's positive quarter-turn is authored as DDv4's negative "
+                "quarter-turn so the directed field component is preserved"
             ),
             source=catalog_source("level-1 magnetics named probe arrays"),
         ),

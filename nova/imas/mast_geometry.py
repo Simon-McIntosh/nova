@@ -222,13 +222,13 @@ def _author_magnetics(
     *,
     radial_families: frozenset[str] = frozenset(),
 ) -> Any:
-    """Author the diagnostic set, optionally correcting a family's sensitive axis.
+    """Author the diagnostic set in the DDv4 directed-angle convention.
 
     ``radial_families`` names the probe families the vacuum response placed along
-    the major radius.  The registry stores one poloidal angle for every probe and
-    cannot distinguish them, so an empty set reproduces the registry exactly and a
-    populated one carries a fitted orientation.  Nothing else about the probe
-    changes, so the geometric identity the artifact is keyed on is untouched.
+    the major radius.  The MAST catalog angle increases counter-clockwise from
+    increasing major radius in the poloidal plane, whereas DDv4
+    ``poloidal_angle`` increases clockwise.  Negating the source angle preserves
+    the installed directed sensitive axis without rewriting the catalog.
     """
 
     ids = _new_ids(factory, "magnetics")
@@ -270,9 +270,8 @@ def _author_magnetics(
         probe.name = f"{row['family']}_{index}"
         probe.position.r = float(r)
         probe.position.z = float(z)
-        probe.poloidal_angle = (
-            0.0 if row["family"] in radial_families else float(poloidal_angle)
-        )
+        source_angle = 0.0 if row["family"] in radial_families else poloidal_angle
+        probe.poloidal_angle = -float(source_angle)
         probe.length = float(length)
     for index, (family, family_index, point) in enumerate(
         poloidal_points,

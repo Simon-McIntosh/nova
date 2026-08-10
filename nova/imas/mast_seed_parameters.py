@@ -844,7 +844,9 @@ def _magnetics_records(
             last_shot=last_shot,
             statement=(
                 f"the sensitive-axis angle of the {probes} primary probes is joined "
-                "from the level-1 setup arrays and converted once to radians"
+                "from the level-1 setup arrays, converted to radians and reversed "
+                "from the source's counter-clockwise direction into the DDv4 "
+                "clockwise poloidal-angle direction"
             ),
             source=catalog_source("level-1 magnetic probe orientation arrays"),
         ),

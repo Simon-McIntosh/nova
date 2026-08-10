@@ -1,5 +1,7 @@
 """Batched-evaluation contract for the jax plasma-topology stack."""
 
+import typing
+
 import numpy as np
 import pytest
 
@@ -135,8 +137,9 @@ def test_flux_target_preserves_matrix_and_tree_contracts():
 
 def test_forward_operator_uses_domain_flux_targets():
     """The differentiable consumer names its grid and wall capability."""
-    assert ForwardFluxOperator.__annotations__["grid"] is FluxTarget
-    assert ForwardFluxOperator.__annotations__["wall"] is FluxTarget
+    hints = typing.get_type_hints(ForwardFluxOperator)
+    assert hints["grid"] is FluxTarget
+    assert hints["wall"] is FluxTarget
 
 
 def test_topology_tree_roundtrip_preserves_null_kernels(topology):

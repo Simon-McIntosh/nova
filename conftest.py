@@ -39,6 +39,7 @@ _SLOW_FILES = frozenset(
         "test_biotpolygon.py",
         "test_decompose.py",
         "test_connectivity_boundary.py",
+        "test_equilibrium_forward_solve.py",
         "test_equilibrium_moment_boundary.py",
         "test_topology_boundary.py",
         "test_flux_surface_connectivity.py",

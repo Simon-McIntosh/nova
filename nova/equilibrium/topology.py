@@ -2,12 +2,34 @@
 
 from dataclasses import dataclass
 from functools import partial
+from typing import NamedTuple
+
 import jax
 import jax.numpy as jnp
 
 from nova.graphics.plot import Plot2D
 from nova.biot.null import Null1D, Null2D
+from nova.equilibrium.domain import classify_domains
 from nova.jax.tree_util import Pytree
+
+
+class TopologyState(NamedTuple):
+    """Axis, separatrix and wall-limit state read from one flux map."""
+
+    axis: jax.Array
+    axis_flux: jax.Array
+    boundary: jax.Array
+    boundary_flux: jax.Array
+    x_point: jax.Array
+    x_point_flux: jax.Array
+    wall_point: jax.Array
+    wall_point_flux: jax.Array
+    diverted: jax.Array
+
+    @property
+    def flux_span(self) -> jax.Array:
+        """Return the total poloidal flux [Wb] from the axis to the boundary."""
+        return self.boundary_flux - self.axis_flux
 
 
 @dataclass
@@ -181,6 +203,53 @@ class Topology(Pytree):
         psi_lcfs = self.psi_lcfs(data_o[2], data_b[2])
         ionize = self.ionize(data_o, vmap_x, polarity, psi_grid, psi_lcfs)
         return psi_norm, ionize
+
+    @jax.jit
+    def read(self, psi, polarity, inside_material):
+        """Return the domain labels and axis/separatrix state of one flux map.
+
+        The same axis, X-point set and wall-limit read that
+        :meth:`update` performs, published as a labelled domain partition
+        instead of a single ionisation mask: the axis-connected closed cells
+        become the core, the closed cells the X-point cut separates from the
+        axis become the private-flux branch, and the remaining in-material
+        cells become the common scrape-off layer. The core selection is
+        identical to :meth:`update`'s ionisation mask, so both entry points
+        drive current on exactly the same cells.
+        """
+        psi_grid, psi_wall = self.split_flux_map(psi)
+        vmap_o, vmap_x = self.grid(psi_grid)
+        data_o = self.o_point_data(vmap_o, polarity)
+        data_x = self.x_point_data(vmap_x, polarity, data_o[2])
+        data_w = self.wall(psi_wall, polarity)
+        data_b = self.boundary(data_o, vmap_x, data_w, polarity)
+        psi_norm = self.normalize(data_o[2], data_b[2], psi_grid)
+        psi_lcfs = self.psi_lcfs(data_o[2], data_b[2])
+        masks = classify_domains(
+            psi_norm,
+            self.psi_mask(polarity, psi_grid, psi_lcfs),
+            self.x_mask(data_o, vmap_x),
+            inside_material,
+        )
+        state = TopologyState(
+            axis=data_o[:2],
+            axis_flux=data_o[2],
+            boundary=data_b[:2],
+            boundary_flux=data_b[2],
+            x_point=data_x[:2],
+            x_point_flux=data_x[2],
+            wall_point=data_w[:2],
+            wall_point_flux=data_w[2],
+            diverted=jnp.equal(data_b[2], data_x[2]),
+        )
+        return masks, state
+
+    @jax.jit
+    def read_batch(self, psi, polarity, inside_material):
+        """Return :meth:`read` mapped over a leading batch axis."""
+        return jax.vmap(self.read, in_axes=(0, None, None))(
+            psi, polarity, inside_material
+        )
 
     @jax.jit
     def update_batch(self, psi, polarity):

@@ -1,104 +1,122 @@
-"""Jitted flux operator for the forward free-boundary equilibrium solve.
+r"""Traced free-boundary flux map behind the forward equilibrium solve.
 
-The eager Newton-Krylov path in :mod:`nova.equilibrium.forward` drives the
-plasma component's write-then-read cycle; this module carries the same
-free-boundary map as a fixed-shape JAX pytree, so the residual is
-differentiable and a batch of slices can be solved under ``vmap``. It is kept
-apart from :mod:`nova.equilibrium.forward` so importing the eager solver does
-not require the optional jax extra.
+This is the implementation-level operator of
+:class:`nova.equilibrium.forward.ForwardProfile`, not a second public
+equilibrium problem. It carries one write-then-read cycle of the
+free-boundary map: a trial total poloidal flux is read for its topology, the
+prescribed flux functions are evaluated on the domains that read labels, and
+the resulting cell currents are mapped back to flux through the precomputed
+coupling operators. A root of :meth:`ForwardFluxOperator.residual` is a
+free-boundary equilibrium.
+
+The supplied source reaches the current image unchanged. There is no net
+plasma current on this operator and no place to put one: the amplitude the
+caller supplied is the amplitude the map uses, so a current image can never
+be silently rescaled to meet a target.
+
+The operator is immutable host-and-device state that the traced maps close
+over rather than a traced argument, so a flux function may be any callable —
+an interpolant carrying device arrays or a closed-form profile. Everything
+that varies across a batch (the trial flux, the conductor currents) is an
+explicit argument, which is what ``jit``, ``vmap`` and ``grad`` need.
+
+All fluxes are total poloidal fluxes, :math:`\Phi = 2 \pi R A_\phi` in Wb,
+concatenated over the plasma grid nodes followed by the wall nodes.
 """
 
+from __future__ import annotations
+
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from functools import cached_property
 
 import jax
 import jax.numpy as jnp
-from scipy.constants import mu_0
 
 from nova.biot.target import FluxTarget
-from nova.equilibrium.topology import Topology
-from nova.jax.tree_util import Pytree
-from nova.linalg.interpolant import Basis
+from nova.equilibrium.domain import DomainMasks
+from nova.equilibrium.source import ForwardSource
+from nova.equilibrium.topology import Topology, TopologyState
+
+__all__ = ["ForwardFluxOperator"]
 
 
 @dataclass
-@jax.tree_util.register_pytree_node_class
-class ForwardFluxOperator(Pytree):
-    """Map a trial poloidal flux to the flux its plasma current generates.
-
-    The total flux on the concatenated grid and wall targets is the sum of the
-    external contribution (all conductors except the plasma) and the internal
-    contribution of the plasma filaments, whose current follows from the trial
-    flux through the flux functions :math:`p'(\\psi_N)` and
-    :math:`FF'(\\psi_N)`. The plasma current is rescaled to the prescribed net
-    current, so the free-boundary fixed point conserves :math:`I_p`.
-
-    A root of :meth:`residual` is a free-boundary equilibrium. All fluxes are
-    total poloidal fluxes, :math:`\\Phi = 2 \\pi R A_\\phi` in Wb.
-    """
+class ForwardFluxOperator:
+    """Map a trial poloidal flux to the flux its plasma current generates."""
 
     grid: FluxTarget
     wall: FluxTarget
-    p_prime: Basis
-    ff_prime: Basis
-    current: jnp.ndarray = field(repr=False)
+    source: ForwardSource
+    external_current: jnp.ndarray = field(repr=False)
     area: jnp.ndarray = field(repr=False)
-    plasma_index: int
-    polarity: int
+    polarity: int = 1
+    inside_material: jnp.ndarray | None = field(repr=False, default=None)
 
     def __post_init__(self):
-        """Generate topology instance and split plasma from external current."""
+        """Build the topology read and default the material mask."""
         self.topology = Topology(self.grid.null, self.wall.null)
-        self.net_plasma_current = self.current[self.plasma_index]
-        self.external_current = self.current.at[self.plasma_index].set(0.0)
+        self.external_current = jnp.asarray(self.external_current)
+        self.area = jnp.asarray(self.area)
+        if self.inside_material is None:
+            self.inside_material = jnp.ones(self.grid.node_number, dtype=bool)
+        else:
+            self.inside_material = jnp.asarray(self.inside_material, dtype=bool)
+        if self.area.shape != (self.grid.node_number,):
+            raise ValueError("area must carry one control area per grid node")
+        if self.inside_material.shape != (self.grid.node_number,):
+            raise ValueError("inside_material must carry one flag per grid node")
 
-    @jax.jit
-    def __call__(self, psi: jnp.ndarray):
-        """Return total poloidal flux."""
-        return self.external + self.internal(psi)
+    @property
+    def node_number(self) -> int:
+        """Return the length of the concatenated grid and wall flux vector."""
+        return self.grid.node_number + self.wall.node_number
 
-    @jax.jit
-    def residual(self, psi):
-        """Return poloidal flux residual."""
-        return psi - self(psi)
+    @property
+    def radius(self) -> jax.Array:
+        """Return the radius [m] of every plasma grid node."""
+        return self.grid.coordinate[:, 0]
 
-    @jax.jit
-    def plasma_current(self, psi):
-        """Return plasma current calculated from poloidal flux."""
-        psi_norm, ionize = self.topology.update(psi, self.polarity)
-        current_density = self.grid.coordinate[:, 0] * self.p_prime(
-            psi_norm
-        ) + self.ff_prime(psi_norm) / (mu_0 * self.grid.coordinate[:, 0])
-        current_density *= -2 * jnp.pi
-        plasma_current = jnp.where(ionize, current_density * self.area, 0)
-        plasma_current *= self.net_plasma_current / jnp.sum(plasma_current)
-        return plasma_current
+    def _current(self, current) -> jax.Array:
+        """Return the conductor currents one evaluation should use."""
+        return self.external_current if current is None else jnp.asarray(current)
 
-    @cached_property
-    def external(self):
-        """Return external flux map."""
-        return jnp.r_[
-            self.grid.external(self.external_current),
-            self.wall.external(self.external_current),
-        ]
+    def external(self, current=None) -> jax.Array:
+        """Return the flux map [Wb] of every conductor but the plasma."""
+        conductor = self._current(current)
+        return jnp.r_[self.grid.external(conductor), self.wall.external(conductor)]
 
-    @jax.jit
-    def internal(self, psi):
-        """Return internal (plasma generated) flux map."""
-        plasma_current = self.plasma_current(psi)
-        return jnp.r_[
-            self.grid.internal(plasma_current), self.wall.internal(plasma_current)
-        ]
+    def read(self, psi) -> tuple[DomainMasks, TopologyState]:
+        """Return the domain labels and axis/separatrix state of a trial flux."""
+        return self.topology.read(psi, self.polarity, self.inside_material)
 
-    def tree_flatten(self):
-        """Return flattened pytree."""
-        children = (
-            self.grid,
-            self.wall,
-            self.p_prime,
-            self.ff_prime,
-            self.current,
-            self.area,
-        )
-        aux_data = {"plasma_index": self.plasma_index, "polarity": self.polarity}
-        return (children, aux_data)
+    def cell_current(self, psi) -> jax.Array:
+        """Return the per-cell plasma current [A] a trial flux drives."""
+        masks = self.read(psi)[0]
+        return self.source.cell_current(self.radius, self.area, masks)
+
+    def internal(self, psi) -> jax.Array:
+        """Return the flux map [Wb] generated by the plasma current."""
+        current = self.cell_current(psi)
+        return jnp.r_[self.grid.internal(current), self.wall.internal(current)]
+
+    def __call__(self, psi, current=None) -> jax.Array:
+        """Return the total poloidal flux [Wb] one write-then-read cycle gives."""
+        return self.external(current) + self.internal(psi)
+
+    def residual(self, psi, current=None) -> jax.Array:
+        """Return the free-boundary flux residual of a trial flux map."""
+        return psi - self(psi, current)
+
+    def flux_map(self, current=None) -> Callable[[jax.Array], jax.Array]:
+        """Return the fixed-point map ``psi -> g(psi)`` at one conductor state.
+
+        The external contribution is evaluated once and captured, so a
+        fixed-point ladder pays for the plasma coupling alone.
+        """
+        external = self.external(current)
+
+        def mapped(psi: jax.Array) -> jax.Array:
+            """Return the free-boundary flux map of one trial flux."""
+            return external + self.internal(psi)
+
+        return mapped

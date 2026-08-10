@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 import numpy as np
 
 from nova.biot.biotframe import Source, Target
+from nova.biot.target import TargetQuadrature
 from nova.frame.framespace import FrameSpace
 from nova.graphics.plot import Plot
 
@@ -34,6 +35,10 @@ class GroupSet(Plot):
     target: Target | FrameSpace = field(repr=False, default_factory=Target)
     turns: list[bool] = field(default_factory=lambda: [True, False])
     reduce: list[bool] = field(default_factory=lambda: [True, True])
+    target_quadrature: TargetQuadrature | None = field(
+        default=None, repr=False, kw_only=True
+    )
+    logical_target: Target = field(init=False, repr=False)
 
     def __post_init__(self):
         """Format source and target biot frames."""
@@ -41,6 +46,11 @@ class GroupSet(Plot):
             self.source = Source(self.source)
         if not isinstance(self.target, Target):
             self.target = Target(self.target, available=[])
+        self.logical_target = (
+            self.target_quadrature.logical
+            if self.target_quadrature is not None
+            else self.target
+        )
         self.set_flags()
         self.assemble()
 
@@ -60,9 +70,15 @@ class GroupSet(Plot):
         if isinstance(self.reduce, bool):
             self.reduce = [self.reduce, self.reduce]
         self.source.turns = self.turns[0]
-        self.target.turns = self.turns[1]
         self.source.reduce = self.reduce[0]
-        self.target.reduce = self.reduce[1]
+        self.logical_target.turns = self.turns[1]
+        self.logical_target.reduce = self.reduce[1]
+        if self.target_quadrature is None:
+            self.target.turns = self.turns[1]
+            self.target.reduce = self.reduce[1]
+        else:
+            self.target.turns = False
+            self.target.reduce = False
 
     def assemble(self):
         """Assemble GroupSet."""
@@ -73,6 +89,8 @@ class GroupSet(Plot):
         """Set source and target shapes."""
         self.source.set_target(len(self.target))
         self.target.set_source(len(self.source))
+        if self.logical_target is not self.target:
+            self.logical_target.set_source(len(self.source))
 
     def build_index(self):
         """Build index. Product of source and target biot frames."""

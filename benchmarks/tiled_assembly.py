@@ -3,15 +3,14 @@
     python benchmarks/tiled_assembly.py tile <output.json> <targets>x<sources>
     python benchmarks/tiled_assembly.py budget <output.json>
     python benchmarks/tiled_assembly.py cores <output.json> <n1,n2,...>
-    python benchmarks/tiled_assembly.py project <output.json>
 
 ``tile`` measures the resident-memory high-water mark of ONE tile evaluation, in
 a fresh process, against a baseline taken after the imports -- the per-worker
 peak the tiling exists to bound. It has to be one point per process: peak RSS is
 a high-water mark, so a second tile in the same interpreter reports the first
 tile's peak. ``budget`` sweeps the byte budget over a whole build. ``cores``
-holds the budget fixed and sweeps the pool size. ``project`` extrapolates a
-full plasma-mesh build from a measured per-pair rate.
+holds the budget fixed and sweeps the pool size. Every emitted record is a
+completed measurement; this driver does not extrapolate unexecuted build sizes.
 
 Every mode writes JSON so a driver can collect several runs. Run on a compute
 node; a shared login node cannot resolve any of this.
@@ -153,27 +152,6 @@ def sweep_cores(counts: list[int], cells=320, tile=40) -> list[dict]:
     return [run_build(sections, target_r, target_z, plan, n) for n in counts]
 
 
-def project(cells=(560, 1000, 2000), rate_cells=140) -> list[dict]:
-    """Return projected full-mesh build times from one measured per-pair rate."""
-    sections, target_r, target_z = hex_mesh(rate_cells)
-    plan = plan_tiles(target_r.size, len(sections), budget_bytes=16 << 20)
-    measured = run_build(sections, target_r, target_z, plan, 1)
-    rate = measured["us_per_pair"]
-    out = []
-    for count in cells:
-        pairs = count * count
-        out.append(
-            {
-                "cells": count,
-                "pairs": pairs,
-                "us_per_pair": rate,
-                "serial_hours": rate * 1e-6 * pairs / 3600.0,
-                "sixteen_core_minutes": rate * 1e-6 * pairs / 60.0 / 16.0,
-            }
-        )
-    return [measured] + out
-
-
 if __name__ == "__main__":
     mode, destination = sys.argv[1], pathlib.Path(sys.argv[2])
     match mode:
@@ -184,8 +162,6 @@ if __name__ == "__main__":
             records = sweep_budget()
         case "cores":
             records = sweep_cores([int(n) for n in sys.argv[3].split(",")])
-        case "project":
-            records = project()
         case _:
             raise SystemExit(f"unknown mode {mode}")
     destination.write_text(json.dumps(records, indent=2))

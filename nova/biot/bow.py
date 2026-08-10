@@ -41,11 +41,19 @@ class Bow(Arc, Matrix):
 
     axisymmetric: ClassVar[bool] = False
     name: ClassVar[str] = "bow"
+    filament_centerline_limits: ClassVar[bool] = False
 
     def __post_init__(self):
         """Load intergration constants."""
         super().__post_init__()
+        area = np.asarray(self.source("area"), dtype=np.float64)
+        if not np.all(np.isfinite(area) & (area > 0.0)):
+            raise ValueError("bow sources require a finite positive area")
         width, height = self._section_extent
+        if not np.all(np.isfinite(width) & (width > 0.0)):
+            raise ValueError("bow sources require a finite positive section width")
+        if not np.all(np.isfinite(height) & (height > 0.0)):
+            raise ValueError("bow sources require a finite positive section height")
         self.rs = np.stack(
             [self.rs + delta / 2 * width for delta in [-1, 1, 1, -1]],
             axis=-1,

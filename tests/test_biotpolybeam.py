@@ -331,8 +331,8 @@ def frame_rows(coilset):
     )
 
 
-def elements(cross_section):
-    """Return a ``(Beam, PolyBeam)`` pair built on one frame and one target set."""
+def element_inputs(cross_section):
+    """Return a source and target built from one straight winding."""
     coilset = straight_winding(cross_section)
     frame = coilset.subframe
     source = Source(
@@ -346,7 +346,19 @@ def elements(cross_section):
             "z": FRAME_TARGETS[:, 2],
         }
     )
+    return source, target
+
+
+def elements(cross_section):
+    """Return a ``(Beam, PolyBeam)`` pair for a rectangular section."""
+    source, target = element_inputs(cross_section)
     return Beam(source, target), PolyBeam(source, target)
+
+
+def prism_element(cross_section):
+    """Return a polygon-prism element without constructing a rectangle element."""
+    source, target = element_inputs(cross_section)
+    return PolyBeam(source, target)
 
 
 def globalise(element, potential, field):
@@ -414,72 +426,44 @@ def test_a_rectangular_section_reproduces_beam_to_round_off():
     assert prism.name == "polybeam"
 
 
-def test_the_prism_is_finite_where_beam_is_not():
-    """A target aligned axially with a section corner, which ``Beam`` cannot reach.
-
-    ``Beam``'s last three ratios divide by the two transverse offsets, so a target
-    whose transverse position IS a corner of the section returns a non-finite
-    value on every row -- and a field grid laid over a conductor hits that
-    configuration by construction rather than by accident.  The contour sum has no
-    such denominator: the corner is where two edges meet and each is evaluated on
-    its own perpendicular foot.
-    """
-    corners = section("rectangle")
-    target = np.array([[corners[2][0], corners[2][1], 0.1]])
-    got = np.stack(
-        polygon_beam_greens(target[:, 0], target[:, 1], target[:, 2], corners, *LIMITS)
+def test_beam_is_finite_at_a_transverse_section_corner():
+    """Bounded products preserve all three local rows at an aligned corner."""
+    template, _ = elements({"rect": (0, 0, WIDTH, HEIGHT)})
+    vertices = beam_rectangle(template)[0]
+    local_target = np.array([vertices[2, 0], vertices[2, 1], 0.1])
+    axes = template.coordinate_axes[0, 0]
+    origin = template.coordinate_origin[0, 0]
+    global_target = np.einsum("i,ji->j", local_target, axes) + origin
+    source = Source(
+        {
+            column: np.asarray(template.source[column])[:1]
+            for column in template.source.columns
+        },
+        index=[template.source.index[0]],
     )
+    target = Target(
+        {"x": [global_target[0]], "y": [global_target[1]], "z": [global_target[2]]}
+    )
+    beam = Beam(source, target)
+    with np.errstate(divide="raise", invalid="raise", over="raise"):
+        got = np.array(
+            [
+                beam._intergrate(beam._Az_hat)[0, 0],
+                beam._intergrate(beam._Bx_hat)[0, 0],
+                beam._intergrate(beam._By_hat)[0, 0],
+            ]
+        )
+    target_x = np.asarray(beam("target", "x"))[:, 0]
+    target_y = np.asarray(beam("target", "y"))[:, 0]
+    target_z = np.asarray(beam("target", "z"))[:, 0]
+    source_z1 = float(np.asarray(beam("source", "z1"))[0, 0])
+    source_z2 = float(np.asarray(beam("source", "z2"))[0, 0])
+    expected = section_average(
+        target_x, target_y, target_z, vertices, source_z1, source_z2
+    )[:, 0]
+    expected *= section_area(vertices) / float(np.asarray(source["area"])[0])
     assert np.all(np.isfinite(got))
-    want = section_average(target[:, 0], target[:, 1], target[:, 2], corners, *LIMITS)
-    assert np.max(np.abs(got - want)) <= 1e-12 * np.max(np.abs(want))
-    beam = np.stack(beam_local_rows(target, corners, *LIMITS))
-    assert not np.all(np.isfinite(beam))
-
-
-def beam_local_rows(target, corners, z1, z2):
-    """Return ``Beam``'s own local rows, evaluated off the frame.
-
-    ``Beam``'s expressions read from a source frame, and the configuration under
-    test is a target the frame machinery cannot be asked to place -- so the rows
-    are formed here from the same six theta coefficients the class carries, which
-    is what makes the non-finite value ``Beam``'s and not a fixture's.
-    """
-    low, high = np.min(corners, axis=0), np.max(corners, axis=0)
-    ones = np.ones(len(target))
-    ui = (np.stack([low[0] * ones, high[0] * ones]) - target[:, 0])[:, None, None]
-    vj = (np.stack([low[1] * ones, high[1] * ones]) - target[:, 1])[None, :, None]
-    wk = (np.stack([z1 * ones, z2 * ones]) - target[:, 2])[None, None]
-    radius = np.sqrt(ui**2 + vj**2 + wk**2)
-    with np.errstate(divide="ignore", invalid="ignore"):
-        theta = {
-            1: wk / np.sqrt(ui**2 + vj**2),
-            2: ui / np.sqrt(vj**2 + wk**2),
-            3: vj / np.sqrt(wk**2 + ui**2),
-            4: vj * wk / (ui * radius),
-            5: wk * ui / (vj * radius),
-            6: ui * vj / (wk * radius),
-        }
-        stack = [
-            ui * vj * np.arcsinh(theta[1])
-            + vj * wk * np.arcsinh(theta[2])
-            + wk * ui * np.arcsinh(theta[3])
-            - 0.5
-            * (
-                ui**2 * np.arctan(theta[4])
-                + vj**2 * np.arctan(theta[5])
-                + wk**2 * np.arctan(theta[6])
-            ),
-            -ui * np.arcsinh(theta[1])
-            - wk * np.arcsinh(theta[2])
-            + vj * np.arctan(theta[5]),
-            vj * np.arcsinh(theta[1])
-            + wk * np.arcsinh(theta[3])
-            - ui * np.arctan(theta[4]),
-        ]
-    index = np.arange(1, 3)
-    sign = (-1.0) ** (index[:, None, None] + index[None, :, None] + index[None, None])
-    area = float(np.prod(high - low))
-    return [np.einsum("ijk,ijk...", sign, data) / (4 * np.pi * area) for data in stack]
+    np.testing.assert_allclose(got, expected, rtol=2e-12, atol=1e-14)
 
 
 # ---------------------------------------------------------------------------
@@ -678,7 +662,7 @@ def test_a_free_form_polygon_section_reaches_the_kernel():
         [[-0.03, -0.02], [0.03, -0.02], [0.02, 0.0], [0.03, 0.02], [-0.01, 0.015]]
     )
     coilset = straight_winding(shapely.geometry.Polygon(loop))
-    _, prism = elements(shapely.geometry.Polygon(loop))
+    prism = prism_element(shapely.geometry.Polygon(loop))
     # the local frame's y axis is MINUS the vertical -- right-handedness demands it,
     # with x on the radial direction and z on the path -- so the section arrives
     # mirrored in its second coordinate.  Asserted on an ASYMMETRIC section, because
@@ -702,25 +686,23 @@ def test_a_swept_hexagon_reaches_the_kernel_with_six_corners():
     section's own edges.  A closed-form section reduction costs one evaluation per
     corner, so the run is collapsed before the section is handed over.
     """
-    _, prism = elements({"hex": (0, 0, WIDTH, HEIGHT)})
+    prism = prism_element({"hex": (0, 0, WIDTH, HEIGHT)})
     for vertices in prism._section_vertices:
         assert len(vertices) == 6
 
 
-def test_routing_a_hexagon_to_beam_overstates_it_by_a_third():
-    """The size of the gap this element closes, asserted rather than described.
+def test_beam_rejects_a_hexagonal_section():
+    """A rectangle-only kernel cannot be forced onto a six-corner section."""
+    with pytest.raises(ValueError, match="axis-aligned rectangle"):
+        straight_winding({"hex": (0, 0, WIDTH, HEIGHT)}, "beam")
 
-    ``Beam`` integrates over the rectangle its width and height bound while
-    dividing by the frame's area, which is the hexagon's -- and a regular hexagon
-    fills three quarters of that box, so every row comes back at four thirds of
-    its value.  The ratio is the same on all of them because the error is a
-    normalisation and not a shape.
-    """
-    beam = frame_rows(straight_winding({"hex": (0, 0, WIDTH, HEIGHT)}, "beam"))
-    prism = frame_rows(straight_winding({"hex": (0, 0, WIDTH, HEIGHT)}, "polybeam"))
-    # against each row's OWN scale rather than element by element: a row passes
-    # through zero somewhere in the target cloud, where a ratio means nothing
-    assert np.max(worst_by_row(beam, 4.0 / 3.0 * prism)) <= 1e-02  # measured 5.9e-03
+
+def test_automatic_straight_section_routing_preserves_geometry():
+    """Named rectangles use Beam while general sections use PolyBeam."""
+    rectangle = straight_winding({"rect": (0, 0, WIDTH, HEIGHT)})
+    hexagon = straight_winding({"hex": (0, 0, WIDTH, HEIGHT)})
+    assert np.array_equal(np.unique(rectangle.subframe.segment), ["beam"])
+    assert np.array_equal(np.unique(hexagon.subframe.segment), ["polybeam"])
 
 
 @pytest.mark.parametrize(
@@ -730,19 +712,11 @@ def test_routing_a_hexagon_to_beam_overstates_it_by_a_third():
         ({"ellipse": (0, 0, WIDTH, HEIGHT)}, 4.0 / np.pi),
     ],
 )
-def test_routing_a_round_section_to_beam_overstates_it_by_four_over_pi(
-    cross_section, ratio
-):
-    """The same normalisation gap on the sections whose corner count is the cost.
-
-    A disc fills ``pi/4`` of its bounding box and an ellipse the same fraction of
-    its own, so ``Beam`` returns 27 % too much on every row.  What the correct
-    answer costs is sixty-four corners against a hexagon's six, which is the trade
-    the round sections force and the reason this ratio is recorded.
-    """
-    beam = frame_rows(straight_winding(cross_section, "beam"))
-    prism = frame_rows(straight_winding(cross_section, "polybeam"))
-    assert np.max(worst_by_row(beam, ratio * prism)) <= 1e-02  # measured 5.7e-03
+def test_beam_rejects_a_round_section(cross_section, ratio):
+    """Circular and elliptical sections remain on their polygon route."""
+    assert ratio == 4.0 / np.pi
+    with pytest.raises(ValueError, match="axis-aligned rectangle"):
+        straight_winding(cross_section, "beam")
 
 
 # ---------------------------------------------------------------------------
@@ -798,7 +772,7 @@ def test_a_hollow_section_is_a_coupled_pair_rather_than_a_refusal(name):
     not about the kernel.
     """
     coilset = straight_winding({name: (0, 0, WIDTH, HOLLOW)}, "polybeam")
-    _, prism = elements({name: (0, 0, WIDTH, HOLLOW)})
+    prism = prism_element({name: (0, 0, WIDTH, HOLLOW)})
     assert len(coilset.subframe) == 4  # two segments, each an outer and a core
     factor = np.asarray(coilset.subframe["factor"], dtype=float)
     assert factor.tolist() == [1.0, 1.0, -1.0, -1.0]
@@ -849,7 +823,7 @@ def test_two_sources_share_one_segment_and_sum():
     so a segment carrying two sources is checked against the two evaluated apart.
     """
     coilset = straight_winding({"hex": (0, 0, WIDTH, HEIGHT)}, "polybeam")
-    _, prism = elements({"hex": (0, 0, WIDTH, HEIGHT)})
+    prism = prism_element({"hex": (0, 0, WIDTH, HEIGHT)})
     assert len(coilset.subframe) == 2
     assert prism._rows.shape == (3, len(FRAME_TARGETS), 2)
     assert len(prism._section_vertices) == 2

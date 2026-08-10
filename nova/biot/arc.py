@@ -42,6 +42,7 @@ turn is the row every odd row's fold picks up.  :mod:`nova.biot.arcamplitude`
 carries the pair from the half separation instead, and is what closes the rest.
 """
 
+from copy import copy
 from dataclasses import dataclass, field
 from functools import cached_property, wraps
 from typing import Callable, ClassVar
@@ -71,6 +72,7 @@ class Arc(Constants, Matrix):
 
     axisymmetric: ClassVar[bool] = False
     name: ClassVar[str] = "arc"  # element name
+    filament_centerline_limits: ClassVar[bool] = True
 
     attrs: dict[str, str] = field(default_factory=lambda: {"dl": "dl"})
 
@@ -81,6 +83,25 @@ class Arc(Constants, Matrix):
         self.zs = self("source", "z1")
         self.r = np.linalg.norm([self("target", "x"), self("target", "y")], axis=0)
         self.z = self("target", "z")
+        self._validate_source_geometry()
+
+    def _validate_source_geometry(self):
+        """Reject source geometry that has no unambiguous finite arc."""
+        if np.any(~np.isfinite(self.rs) | (self.rs <= 0.0)):
+            raise ValueError("arc source radius must be finite and positive")
+        dl = np.asarray(self["dl"], dtype=float)
+        if np.any(~np.isfinite(dl) | (dl <= 0.0)):
+            raise ValueError("arc source dl must be finite and positive")
+        coincident = np.all(
+            np.asarray(self.source.start_point) == np.asarray(self.source.end_point),
+            axis=1,
+        )
+        if np.any(coincident & ~self._complete_source_ring):
+            raise ValueError("arc source coincident endpoints have ambiguous topology")
+        if np.any(self._fit_leverage <= np.sqrt(np.finfo(float).eps)):
+            raise ValueError(
+                "arc source sweep is unresolved at floating-point precision"
+            )
 
     @cached_property
     def phi(self):
@@ -91,6 +112,168 @@ class Arc(Constants, Matrix):
     def _phi(self):
         """Return local target toroidal angle."""
         return np.arctan2(self("target", "y"), self("target", "x"))
+
+    @cached_property
+    def _raw_directed_sweep(self):
+        """Return the source end's represented phase from its authored start."""
+        start_x = self("source", "x1")
+        start_y = self("source", "y1")
+        delta_x = self("source", "x2") - start_x
+        delta_y = self("source", "y2") - start_y
+        cross = start_x * delta_y - start_y * delta_x
+        dot = start_x**2 + start_y**2 + start_x * delta_x + start_y * delta_y
+        return np.mod(np.arctan2(cross, dot), 2.0 * np.pi)
+
+    @cached_property
+    def _complete_source_ring(self):
+        """Identify an authored complete ring from its represented topology.
+
+        A complete path has the same stored endpoint to coordinate precision and
+        a stored length consistent with its complete circumference.  Endpoint
+        precision is assessed per Cartesian component, so a large translation in
+        one coordinate cannot absorb a resolved gap in another.  This certificate
+        does not widen the directed angular span of an open near-complete arc.
+        """
+        start = np.asarray(self.source.start_point, dtype=float)
+        end = np.asarray(self.source.end_point, dtype=float)
+        length = np.asarray(self.source("length"), dtype=float)
+        eps = np.finfo(float).eps
+        radius_scale = length[..., np.newaxis] / (2.0 * np.pi)
+        component_ulp = np.maximum.reduce(
+            np.broadcast_arrays(
+                np.spacing(abs(start))[np.newaxis],
+                np.spacing(abs(end))[np.newaxis],
+                eps * radius_scale,
+            )
+        )
+        same_represented_point = np.all(
+            abs(end - start)[np.newaxis] <= 4.0 * component_ulp,
+            axis=-1,
+        )
+        circumference = 2.0 * np.pi * self.rs
+        complete_length = abs(length - circumference) <= self._circumference_tolerance
+        return same_represented_point & complete_length
+
+    @cached_property
+    def _circumference_tolerance(self):
+        """Bound fitted-length drift without hiding resolved partial turns.
+
+        The circle fit operates on uncentred plane coordinates and a squared
+        radial right-hand side.  Its round-off condition therefore grows with
+        the square of the represented plane-coordinate scale divided by the
+        fitted radius.  The endpoint-leverage resolution maps to a relative
+        circumference deficit of ``asin(sqrt(eps)) / pi``.  Half that distance
+        gives disjoint complete and resolved-partial error intervals, so
+        translation cannot make a resolved partial circumference look complete.
+        """
+        length = np.asarray(self.source("length"), dtype=float)
+        circumference = 2.0 * np.pi * self.rs
+        length_scale = np.maximum(abs(length), abs(circumference))
+        fit_radius = abs(length) / (2.0 * np.pi)
+
+        origin = np.asarray(self.source.space.origin, dtype=float)
+        axes = np.asarray(self.source.space.coordinate_axes, dtype=float)
+        plane_origin = np.einsum("...i,...ij->...j", origin, axes)[..., :2]
+        plane_scale = np.linalg.norm(plane_origin, axis=-1) + fit_radius
+
+        eps = np.finfo(float).eps
+        resolution = 0.5 * np.arcsin(np.sqrt(eps)) / np.pi
+        condition_limit = resolution / (128.0 * eps)
+        with np.errstate(divide="ignore", invalid="ignore", over="ignore"):
+            scale_ratio = plane_scale / fit_radius
+        scale_ratio = np.minimum(scale_ratio, np.sqrt(condition_limit - 1.0))
+        fit_condition = 1.0 + scale_ratio**2
+        roundoff_bound = 128.0 * eps * length_scale * fit_condition
+        return np.minimum(roundoff_bound, resolution * length_scale)
+
+    @cached_property
+    def _directed_sweep(self):
+        """Return the source's directed sweep, including complete topology."""
+        return np.where(
+            self._complete_source_ring,
+            2.0 * np.pi,
+            self._raw_directed_sweep,
+        )
+
+    @cached_property
+    def _directed_phase(self):
+        """Return each target's directed phase from the authored start."""
+        start_x = self("source", "x1")
+        start_y = self("source", "y1")
+        delta_x = self("target", "x") - start_x
+        delta_y = self("target", "y") - start_y
+        cross = start_x * delta_y - start_y * delta_x
+        dot = start_x**2 + start_y**2 + start_x * delta_x + start_y * delta_y
+        return np.mod(np.arctan2(cross, dot), 2.0 * np.pi)
+
+    @cached_property
+    def _fit_leverage(self):
+        """Return the independent geometric leverage of the circle fit.
+
+        A clustered minor arc resolves its centre through the midpoint
+        sagitta, ``2 sin(sweep / 4)^2`` relative to the radius.  Near a complete
+        turn, the endpoint chord ``sin(sweep / 2)`` is instead the limiting
+        independent direction.  The smaller dimension controls the
+        three-point circumcircle fit.
+        """
+        sweep = self._directed_sweep
+        sagitta_ratio = 2.0 * np.sin(sweep / 4.0) ** 2
+        endpoint_chord_ratio = abs(np.sin(sweep / 2.0))
+        leverage = np.minimum(sagitta_ratio, endpoint_chord_ratio)
+        return np.where(self._complete_source_ring, 1.0, leverage)
+
+    @cached_property
+    def _fit_condition(self):
+        """Bound direct and fit-amplified coordinate round-off."""
+        return 1.0 + 1.0 / self._fit_leverage
+
+    @cached_property
+    def _geometry_tolerance(self):
+        """Return a fit-conditioned bound for local transform round-off."""
+        target = self.target.stack("x", "y", "z")
+        source_start = np.asarray(self.source.start_point)[np.newaxis]
+        source_end = np.asarray(self.source.end_point)[np.newaxis]
+        terms = np.broadcast_arrays(
+            np.ones_like(self.r),
+            abs(self.r),
+            abs(self.rs),
+            abs(self.z),
+            abs(self.zs),
+            np.max(abs(target), axis=-1),
+            np.max(abs(source_start), axis=-1),
+            np.max(abs(source_end), axis=-1),
+        )
+        scale = np.maximum.reduce(terms)
+        return 32.0 * np.finfo(float).eps * scale * self._fit_condition
+
+    @cached_property
+    def _exact_authored_endpoint(self):
+        """Identify targets that are stored source endpoints in global space."""
+        target = self.target.stack("x", "y", "z")
+        start = np.asarray(self.source.start_point)[np.newaxis]
+        end = np.asarray(self.source.end_point)[np.newaxis]
+        return np.all(target == start, axis=-1) | np.all(target == end, axis=-1)
+
+    @cached_property
+    def _same_source_ring(self):
+        """Identify targets on the source circle within transform precision."""
+        tolerance = self._geometry_tolerance
+        return (abs(self.r - self.rs) <= tolerance) & (
+            abs(self.z - self.zs) <= tolerance
+        )
+
+    @cached_property
+    def _on_filament(self):
+        """Identify targets on the directed authored span of the filament."""
+        in_span = (self._directed_phase < self._directed_sweep) | (
+            self._exact_authored_endpoint
+        )
+        return self._same_source_ring & in_span
+
+    @cached_property
+    def _same_ring_outside_span(self):
+        """Identify finite same-ring targets in the excluded angular gap."""
+        return self._same_source_ring & ~self._on_filament
 
     @cached_property
     def alpha(self):
@@ -200,7 +383,24 @@ class Arc(Constants, Matrix):
     # @coefficent
     def B2(self):
         """Return B2 coefficient."""
-        return self.rs**2 + self.r**2 - 2 * self.r * self.rs * np.cos(self.Phi)
+        return (
+            self.rs - self.r
+        ) ** 2 + 4 * self.rs * self.r * self.half_phi_sine_squared
+
+    @property
+    def half_phi_sine_squared(self):
+        """Return sin(Phi / 2)^2 without subtracting a near-unit cosine."""
+        return np.sin(self.Phi / 2) ** 2
+
+    @property
+    def radial_projection_gap(self):
+        """Return rs - r cos(Phi) from the radial gap and a positive term."""
+        return (self.rs - self.r) + 2 * self.r * self.half_phi_sine_squared
+
+    @property
+    def radial_square_gap(self):
+        """Return rs^2 - r^2 with the square difference factored."""
+        return (self.rs - self.r) * (self.rs + self.r)
 
     @property
     # @coefficent
@@ -218,7 +418,7 @@ class Arc(Constants, Matrix):
     # @coefficent
     def beta_1(self):
         """Return beta 1 coefficient."""
-        return (self.rs - self.r * np.cos(self.Phi)) / np.sqrt(self.G2)
+        return self.radial_projection_gap / np.sqrt(self.G2)
 
     @property
     # @coefficent
@@ -232,7 +432,7 @@ class Arc(Constants, Matrix):
         """Return beta 3 coefficient."""
         return (
             self.gamma
-            * (self.rs - self.r * np.cos(self.Phi))
+            * self.radial_projection_gap
             / (self.r * np.sin(self.Phi) * np.sqrt(self.D2))
         )
 
@@ -269,10 +469,7 @@ class Arc(Constants, Matrix):
             / 6
             * np.arcsinh(self.beta_2)
             * np.sin(2 * self.theta)
-            * (
-                2 * self.r**2 * np.sin(2 * self.theta) ** 2
-                + 3 * (self.rs**2 - self.r**2)
-            )
+            * (2 * self.r**2 * np.sin(2 * self.theta) ** 2 + 3 * self.radial_square_gap)
             - 1
             / 4
             * self.gamma
@@ -615,6 +812,67 @@ class Arc(Constants, Matrix):
     def _intergrate(self, data):
         """Return intergral quantity."""
         return 1 / (4 * np.pi) * (data[0] - data[1])
+
+    def _held_vector(self, attr: str, special: np.ndarray) -> np.ndarray:
+        """Evaluate ordinary rows after holding exact confluences off the ring."""
+        held = copy(self)
+        for cls in type(self).mro():
+            for name, descriptor in vars(cls).items():
+                if isinstance(descriptor, cached_property):
+                    held.__dict__.pop(name, None)
+        held.r = np.where(special, 0.5 * self.rs, self.r)
+        held.z = np.where(special, self.zs + self.rs, self.z)
+        return Matrix._vector(held, attr)
+
+    def _same_ring_limit(self, attr: str) -> np.ndarray:
+        """Return the elementary excluded-gap limit in the source-local frame."""
+        outside = self._same_ring_outside_span
+        phase = np.where(outside, self._directed_phase, np.pi)
+        sweep = np.where(outside, self._directed_sweep, 0.5 * np.pi)
+        gap_from_end = phase - sweep
+        gap_to_start = 2.0 * np.pi - phase
+        logarithm = -np.log(np.tan(gap_from_end / 4.0)) - np.log(
+            np.tan(gap_to_start / 4.0)
+        )
+        if attr == "A":
+            radial = (np.sin(gap_to_start / 2.0) - np.sin(gap_from_end / 2.0)) / (
+                2.0 * np.pi
+            )
+            toroidal = (
+                logarithm
+                - 2.0 * (np.cos(gap_to_start / 2.0) + np.cos(gap_from_end / 2.0))
+            ) / (4.0 * np.pi)
+            local = np.stack(
+                [
+                    radial * np.cos(phase) - toroidal * np.sin(phase),
+                    radial * np.sin(phase) + toroidal * np.cos(phase),
+                    np.zeros_like(radial),
+                ],
+                axis=-1,
+            )
+        else:
+            radius = np.where(outside, self.r, 1.0)
+            local = np.stack(
+                [
+                    np.zeros_like(logarithm),
+                    np.zeros_like(logarithm),
+                    logarithm / (8.0 * np.pi * radius),
+                ],
+                axis=-1,
+            )
+        return self.loc.rotate(local, "to_global")
+
+    def _vector(self, attr: str):
+        """Return finite gap limits and explicit filament singularities."""
+        if not self.filament_centerline_limits:
+            return Matrix._vector(self, attr)
+        on_filament = self._on_filament
+        outside = self._same_ring_outside_span
+        ordinary = self._held_vector(attr, on_filament | outside)
+        result = np.where(
+            outside[..., np.newaxis], self._same_ring_limit(attr), ordinary
+        )
+        return np.where(on_filament[..., np.newaxis], np.nan, result)
 
 
 if __name__ == "__main__":

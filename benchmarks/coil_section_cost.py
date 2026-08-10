@@ -17,9 +17,9 @@ outside the filament seam, ``Circle`` carries a truncation error the other two d
 not. Where a target declares a section of its own, ``Circle`` returns the double
 integral over that section and the other two return the single integral at its
 centre. Which of those two effects a caller meets is decided by the operator, not by
-the element: the three measured here -- grid, force and inductance -- all build a
-POINT target frame, so the second effect is inactive on all of them and the target
-average is carried instead by the target frame's own subdivision.
+the element: grid and force retain physical point targets, while inductance expands
+strictly positive material nodes and contracts them to each original dcoil cell
+before applying turns and physical-parent reduction.
 
 The reference
 -------------
@@ -51,7 +51,7 @@ import time
 
 import numpy as np
 
-from nova.biot.polysection import PolySection
+from nova.biot.polysection import PolySectionPolicy
 from nova.biot.sectionaverage import averaged_greens
 from nova.frame.coilset import CoilSet
 
@@ -77,11 +77,17 @@ MACHINE = [
 CASES = {"pair": ("PF1", "CS3U"), "machine": tuple(coil[-1] for coil in MACHINE)}
 
 ROUTES = {
-    "circle": ("circle", {}),
-    "polysection": ("polysection", {"closed_form": True, "banded": False}),
-    "polysection-quadrature": ("polysection", {"closed_form": False, "banded": False}),
-    "polysection-banded": ("polysection", {"closed_form": True, "banded": True}),
-    "cylinder": ("cylinder", {}),
+    "circle": ("circle", PolySectionPolicy()),
+    "polysection": ("polysection", PolySectionPolicy()),
+    "polysection-quadrature": (
+        "polysection",
+        PolySectionPolicy(exact_kernel="quadrature"),
+    ),
+    "polysection-banded": (
+        "polysection",
+        PolySectionPolicy(arrangement="banded"),
+    ),
+    "cylinder": ("cylinder", PolySectionPolicy()),
 }
 
 DCOIL = (-1, -5, -20)
@@ -90,16 +96,8 @@ FORCE_TARGETS = 20
 INDUCTANCE_TARGETS = 100
 CURRENT = 40e3  # amperes per turn, the scale an ITER PF conductor carries
 
-RESOLVED = 0
-"""Inductance target count that puts one target on every turn of every coil.
-
-The lane's target frame carries no section, so the target-side area average is
-carried by that frame's own subdivision and has to be RESOLVED before a route
-difference means anything: at one target a coil the reduced self term is out by a
-sixth, which would swamp every difference measured here. Zero is one filament per
-turn in :meth:`nova.frame.polygrid.PolyDelta.divide`, the finest the lane offers,
-and it leaves a residual of 4e-04 common to every route.
-"""
+INDUCTANCE_ENABLED = 1
+"""Non-null solve selector; target resolution comes from positive material nodes."""
 
 
 def sections(names: tuple[str, ...]) -> dict[str, np.ndarray]:
@@ -149,8 +147,13 @@ def coilset(route: str, dcoil: float, names: tuple[str, ...]) -> CoilSet:
     ``ifttt`` is off so the frame's conditional rules cannot reroute the segment;
     the rules themselves are what the ``cylinder`` route measures in isolation.
     """
-    segment = ROUTES[route][0]
-    frames = CoilSet(dcoil=dcoil, nforce=FORCE_TARGETS, ninductance=INDUCTANCE_TARGETS)
+    segment, policy = ROUTES[route]
+    frames = CoilSet(
+        dcoil=dcoil,
+        nforce=FORCE_TARGETS,
+        ninductance=INDUCTANCE_TARGETS,
+        coil_polysection_policy=policy,
+    )
     for x, z, dx, dz, nturn, name in MACHINE:
         if name not in names:
             continue
@@ -158,11 +161,6 @@ def coilset(route: str, dcoil: float, names: tuple[str, ...]) -> CoilSet:
             x, z, dx, dz, nturn=nturn, name=name, segment=segment, ifttt=False
         )
     return frames
-
-
-def configured(route: str):
-    """Return the element configuration context for a route."""
-    return PolySection.configured(**ROUTES[route][1])
 
 
 def timed(call) -> tuple[float, object]:
@@ -177,10 +175,9 @@ def measure_cost(route: str, case: str, dcoil: float) -> dict:
     names = CASES[case]
     frames = coilset(route, dcoil, names)
     element = len(frames.subframe)
-    with configured(route):
-        grid, _ = timed(lambda: frames.grid.solve(GRID_TARGETS))
-        force, _ = timed(lambda: frames.force.solve(FORCE_TARGETS))
-        inductance, _ = timed(lambda: frames.inductance.solve(INDUCTANCE_TARGETS))
+    grid, _ = timed(lambda: frames.grid.solve(GRID_TARGETS))
+    force, _ = timed(lambda: frames.force.solve(FORCE_TARGETS))
+    inductance, _ = timed(lambda: frames.inductance.solve(INDUCTANCE_TARGETS))
     return {
         "route": route,
         "case": case,
@@ -197,8 +194,7 @@ def measure_inductance(route: str, case: str, dcoil: float) -> dict:
     """Return the reduced inductance and its deviation from the double integral."""
     names = CASES[case]
     frames = coilset(route, dcoil, names)
-    with configured(route):
-        frames.inductance.solve(RESOLVED)
+    frames.inductance.solve(INDUCTANCE_ENABLED)
     matrix = np.asarray(frames.inductance.Psi)
     want = reference_inductance(names)
     deviation = np.abs(matrix - want) / np.abs(want)
@@ -226,8 +222,7 @@ def measure_force(case: str, dcoil: float, routes: tuple[str, ...]) -> dict:
     for route in routes:
         frames = coilset(route, dcoil, names)
         frames.sloc["coil", "Ic"] = CURRENT
-        with configured(route):
-            frames.force.solve(FORCE_TARGETS)
+        frames.force.solve(FORCE_TARGETS)
         force[route] = np.column_stack(
             [np.asarray(frames.force.fr), np.asarray(frames.force.fz)]
         )
@@ -262,8 +257,7 @@ def measure_standoff(dcoil: float) -> dict:
     for route in ("circle", "polysection"):
         frames = coilset(route, dcoil, names)
         frames.sloc["coil", "Ic"] = CURRENT
-        with configured(route):
-            frames.point.solve(points)
+        frames.point.solve(points)
         field[route] = np.stack(
             [np.asarray(frames.point.br).ravel(), np.asarray(frames.point.bz).ravel()]
         )

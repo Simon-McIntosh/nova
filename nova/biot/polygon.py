@@ -127,8 +127,14 @@ def _orientation(v: np.ndarray) -> tuple[float, float]:
     all three components at once (pinned by the rectangle-reduction and filament
     oracles in ``tests/test_biotpolygon.py``).
     """
-    rolled = np.roll(v, -1, axis=0)
-    signed_area2 = float(np.sum(v[:, 0] * rolled[:, 1] - rolled[:, 0] * v[:, 1]))
+    # Shoelace products made from absolute coordinates lose the section area when
+    # a small conductor is translated onto a large machine coordinate.  Translation
+    # does not change the cross products, so take them about one represented vertex.
+    local = v - v[0]
+    rolled = np.roll(local, -1, axis=0)
+    signed_area2 = float(
+        np.sum(local[:, 0] * rolled[:, 1] - rolled[:, 0] * local[:, 1])
+    )
     return -np.sign(signed_area2), 0.5 * abs(signed_area2)
 
 
@@ -169,20 +175,22 @@ def pack_section(vertices: np.ndarray) -> tuple[np.ndarray, np.ndarray, float]:
 
     ``edge`` is ``(n, 4)`` of ``(ra, za, rb, zb)`` and ``weight`` is ``(n,)``.
     Horizontal edges (dz = 0) contribute nothing -- f_nu(phi) vanishes, paper eq
-    7a -- so instead of being dropped they are given a harmless unit slope and
-    zero weight.  Keeping them in the array is what lets a batch of sections
-    with different corner counts share one fixed-shape kernel call: nothing
-    about the arithmetic depends on which edges are real.  ``norm`` folds the
+    7a -- and carry zero weight.  Their real endpoints remain in ``edge`` because
+    they are still part of the polygon topology: the live edges on either side
+    need those corners for their residual terms.  Kernel drivers replace a dead
+    row with benign target-relative geometry before forming its slope.  ``norm``
+    folds the
     orientation sign, the per-ampere area normalisation, the 2 pi R of the total
     flux and the [0, pi] half-turn doubling into one factor.
     """
     v = np.asarray(vertices, dtype=np.float64)
     sign, area = _orientation(v)
+    if not np.isfinite(area) or area <= 0.0:
+        raise ValueError("polygon section must have positive finite area")
     rolled = np.roll(v, -1, axis=0)
     edge = np.column_stack([v[:, 0], v[:, 1], rolled[:, 0], rolled[:, 1]])
     horizontal = horizontal_edges(v)
     weight = (~horizontal).astype(np.float64)
-    edge[horizontal] = (0.0, 0.0, 0.0, 1.0)
     norm = 2.0 * np.pi * sign * MU0 / (4.0 * np.pi * area) * 2.0
     return edge, weight, float(norm)
 
@@ -205,20 +213,21 @@ def traced_pack_section(xp, vertices, horizontal):
     An edge's weight is a discrete property of which integrand the kernel
     evaluates, so a perturbation that would tilt a dropped edge into a live one
     is a re-pack, not a derivative -- and baking the mask keeps the trace free
-    of value branching.  A masked edge keeps the pack's harmless placeholder,
-    so its own coordinates carry no gradient, exactly as they carry no value.
+    of value branching.  The kernel holds a masked edge away from its target
+    before using its coordinates, so it carries neither a value nor a tangent.
     """
     vertices = xp.asarray(vertices)
     mask = np.asarray(horizontal, dtype=bool)
-    rolled = xp.roll(vertices, -1, axis=0)
-    cross = vertices[:, 0] * rolled[:, 1] - rolled[:, 0] * vertices[:, 1]
+    local = vertices - vertices[0]
+    rolled_local = xp.roll(local, -1, axis=0)
+    cross = local[:, 0] * rolled_local[:, 1] - rolled_local[:, 0] * local[:, 1]
     signed_area = 0.5 * xp.sum(cross)
     sign = -xp.sign(signed_area)
     area = xp.abs(signed_area)
+    rolled = xp.roll(vertices, -1, axis=0)
     edge = xp.stack(
         [vertices[:, 0], vertices[:, 1], rolled[:, 0], rolled[:, 1]], axis=1
     )
-    edge = xp.where(xp.asarray(mask)[:, None], xp.asarray((0.0, 0.0, 0.0, 1.0)), edge)
     weight = xp.asarray((~mask).astype(np.float64))
     norm = 2.0 * np.pi * sign * MU0 / (4.0 * np.pi * area) * 2.0
     return edge, weight, norm
@@ -230,18 +239,23 @@ def pad_batch(
     """Return ``(edge, weight, norm)`` for a batch of sections, one fixed shape.
 
     ``edge`` is ``(E, 4, S)``, ``weight`` is ``(E, S)`` and ``norm`` is ``(S,)``
-    for ``S`` sections padded to a common edge count ``E``.  Pad edges carry the
-    same harmless slope and zero weight as a horizontal edge, so a batch of
-    hexagonal cells and wall-clipped cells of six, seven or four corners is a
-    single rectangular kernel call with no ragged branch and no masking of the
-    arithmetic itself.
+    for ``S`` sections padded to a common edge count ``E``.  Pad weights are
+    negative zero while real horizontal edges carry positive zero.  Both multiply
+    identically, but their sign bit preserves which rows belong to the closed
+    contour without adding another public array.  Packed kernels use that topology
+    to close each heterogeneous section before holding every dead row at benign
+    target-relative geometry.
     """
+    if not sections:
+        raise ValueError("at least one polygon section is required")
     packed = [pack_section(section) for section in sections]
     count = edge_count or max(len(edge) for edge, _, _ in packed)
     edge = np.zeros((count, 4, len(packed)))
     edge[..., 1, :] = 0.0
     edge[..., 3, :] = 1.0
-    weight = np.zeros((count, len(packed)))
+    # IEEE negative zero is an arithmetic zero and a one-bit topology marker.  It
+    # survives NumPy/JAX conversion and contiguous tile packing.
+    weight = -np.zeros((count, len(packed)))
     norm = np.empty(len(packed))
     for column, (section_edge, section_weight, section_norm) in enumerate(packed):
         rows = len(section_edge)
@@ -253,6 +267,55 @@ def pad_batch(
         weight[:rows, column] = section_weight
         norm[column] = section_norm
     return edge, weight, norm
+
+
+def _held_edge(xp, one_edge, live, target_r, target_z):
+    """Return one edge with dead lanes held away from every target singularity.
+
+    ``one_edge`` may be scalar geometry shared by all targets or one row per
+    pair.  ``live`` has the corresponding pair axes but no quadrature axis, so it
+    is grown on the right until it broadcasts against ``target_r``.  A dead row
+    is vertical, unit-height, and displaced from its own target in both
+    coordinates; its slope and all corner reductions are therefore finite even
+    on the symmetry axis.  The zero weight still removes its value and tangent.
+    """
+    target_r = xp.asarray(target_r)
+    target_z = xp.asarray(target_z)
+    active = xp.asarray(live)
+    while active.ndim < target_r.ndim:
+        active = active[..., None]
+    held = (target_r + 1.0, target_z + 1.0, target_r + 1.0, target_z + 2.0)
+    return tuple(
+        xp.where(active, coordinate, substitute)
+        for coordinate, substitute in zip(one_edge, held, strict=True)
+    )
+
+
+def _packed_topology(xp, weight):
+    """Return live, present, chain, and next-live arrays for a padded contour.
+
+    Real section rows are contiguous from zero.  Positive zero marks a real
+    horizontal edge and negative zero a pad, so the final present row closes onto
+    row zero independently in every trailing batch lane.  The returned arrays
+    retain the fixed padded shape and contain no value-dependent Python branch.
+    """
+    weight = xp.asarray(weight)
+    live = weight != 0.0
+    present = ~xp.signbit(weight)
+    sides = weight.shape[0]
+    row = xp.arange(sides).reshape((sides,) + (1,) * (weight.ndim - 1))
+    last = xp.sum(present, axis=0) - 1
+    last_live = xp.sum(live & (row == last), axis=0) != 0
+    previous_live = xp.concatenate((last_live[None, ...], live[:-1]), axis=0)
+    following = xp.concatenate((live[1:], live[:1]), axis=0)
+    next_live = xp.where(row == last, live[0], following)
+    chain = xp.where(
+        present,
+        xp.asarray(live, dtype=weight.dtype)
+        - xp.asarray(previous_live, dtype=weight.dtype),
+        xp.zeros_like(weight),
+    )
+    return live, present, chain, next_live
 
 
 def _psi_gradient(
@@ -292,8 +355,8 @@ def _psi_gradient(
     s2 = s * s
     dg2_dr = 2.0 * s * sinp
     for index in range(len(edge)):
-        ra, za, rb, zb = edge[index]
         edge_weight = weight[index]
+        ra, za, rb, zb = _held_edge(np, edge[index], edge_weight != 0.0, r, z)
         b1 = (rb - ra) / (zb - za)
         a02 = 1.0 + b1 * b1
         a0 = np.sqrt(a02)
@@ -436,40 +499,55 @@ def polygon_greens(
     nodes) temporaries stay in cache; ``None`` evaluates every target at once.
     The result does not depend on it.
     """
-    tr = np.asarray(target_r, dtype=np.float64)
-    tz = np.asarray(target_z, dtype=np.float64)
+    tr, tz = np.broadcast_arrays(
+        np.asarray(target_r, dtype=np.float64),
+        np.asarray(target_z, dtype=np.float64),
+    )
     shape = tr.shape
-    r = tr.ravel()[:, None]
-    z = tz.ravel()[:, None]
-
-    edge, weight, norm = pack_section(vertices)
-    phi, wts = _phi_rule(n_panels, n_nodes)
-    cosp = np.cos(phi)
-    sinp = np.sin(phi)
-    sin2p = np.sin(2.0 * phi)
-    w_cos = wts * cosp
-
-    size = r.shape[0]
-    step = size if block is None else min(block, max(size, 1))
+    flat_r = tr.ravel()
+    flat_z = tz.ravel()
+    size = flat_r.size
     psi = np.empty(size)
-    dpsi_dr = np.empty(size)
-    dpsi_dz = np.empty(size)
-    for start in range(0, size, max(step, 1)):
-        stop = start + step
-        psi[start:stop], dpsi_dr[start:stop], dpsi_dz[start:stop] = _psi_gradient(
-            r[start:stop],
-            z[start:stop],
-            edge,
-            weight,
-            cosp,
-            sinp,
-            sin2p,
-            w_cos,
-            norm,
-        )
-    two_pi_r = 2.0 * np.pi * r[:, 0]
-    bz = dpsi_dr / two_pi_r
-    br = -dpsi_dz / two_pi_r
+    br = np.empty(size)
+    bz = np.empty(size)
+
+    # The quadrature field is a flux gradient divided by r.  Partition exact axis
+    # targets before either operation and take the finite field directly from the
+    # closed reduction, whose parity gives Br=0 without cancellation.
+    axis = flat_r == 0.0
+    if np.any(axis):
+        from nova.biot.polygonanalytic import polygon_analytic_greens
+
+        axis_rows = polygon_analytic_greens(flat_r[axis], flat_z[axis], vertices)
+        psi[axis], br[axis], bz[axis] = axis_rows
+
+    off_axis = ~axis
+    if np.any(off_axis):
+        edge, weight, norm = pack_section(vertices)
+        phi, wts = _phi_rule(n_panels, n_nodes)
+        cosp = np.cos(phi)
+        sinp = np.sin(phi)
+        sin2p = np.sin(2.0 * phi)
+        w_cos = wts * cosp
+        indices = np.flatnonzero(off_axis)
+        step = len(indices) if block is None else min(block, max(len(indices), 1))
+        for start in range(0, len(indices), max(step, 1)):
+            selected = indices[start : start + step]
+            one_psi, dpsi_dr, dpsi_dz = _psi_gradient(
+                flat_r[selected, None],
+                flat_z[selected, None],
+                edge,
+                weight,
+                cosp,
+                sinp,
+                sin2p,
+                w_cos,
+                norm,
+            )
+            psi[selected] = one_psi
+            two_pi_r = 2.0 * np.pi * flat_r[selected]
+            bz[selected] = dpsi_dr / two_pi_r
+            br[selected] = -dpsi_dz / two_pi_r
     return psi.reshape(shape), br.reshape(shape), bz.reshape(shape)
 
 

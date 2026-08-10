@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from decimal import Decimal, localcontext
 from functools import cached_property
 from itertools import product
 from numpy import allclose
@@ -7,10 +8,13 @@ import pytest
 import scipy.special
 
 
-from nova.biot.biotframe import BiotFrame
+from nova.biot.arc import Arc
+from nova.biot.biotframe import BiotFrame, Source, Target
+from nova.biot.bow import Bow
 from nova.biot.circle import Circle
 from nova.biot.constants import Constants
 from nova.biot.grid import Grid
+from nova.biot.line import Line
 from nova.biot.matrix import Matrix
 from nova.biot.point import Point
 from nova.biot.solve import Solve
@@ -418,17 +422,240 @@ def test_3d_line_arc(rng_sead, current):
         assert np.allclose(getattr(coilset.point, attr.lower()), 0, atol=1e-6)
 
 
-@pytest.mark.skip("pending development of singularity skip methods")
-def test_line_singularity():
-    segment_number = 30
-    x = np.linspace(0, 5, segment_number)
-    points = np.stack([x, np.zeros_like(x), np.zeros_like(x)], axis=-1)
-    coilset = CoilSet(field_attrs=["Bx", "By", "Bz"])
-    coilset.winding.insert(points, {"c": (0, 0, 0.25)}, Ic=1)
-    coilset.point.solve(np.c_[[0, 0, 0], [0, 0.25 / 2, 0], [0, 0.25, 0]].T)
-    assert coilset.point.bz[0] < coilset.point.bz[1]
-    assert coilset.point.bz[0] < coilset.point.bz[2]
-    assert coilset.point.bz[2] < coilset.point.bz[1]
+def _line_element(start, end, targets):
+    """Return a Line element on an authored segment and target cloud."""
+    source = Source(
+        PolyLine(np.array([start, end], dtype=float), minimum_arc_nodes=3).path_geometry
+    )
+    targets = np.atleast_2d(np.asarray(targets, dtype=float))
+    target = Target(dict(zip("xyz", targets.T, strict=True)))
+    return Line(source, target, turns=[False, False], reduce=[False, False])
+
+
+@pytest.mark.parametrize("end", ([0.0, 0.0, -1.0], [0.0, 0.0, np.inf]))
+def test_line_rejects_zero_or_nonfinite_segment_length(end):
+    """A Line requires two finite, distinct authored endpoints."""
+    source = Source(
+        PolyLine(
+            np.array([[0.0, 0.0, -1.0], [0.0, 0.0, 1.0]]),
+            minimum_arc_nodes=3,
+        ).path_geometry
+    )
+    source.loc[source.index[0], ["x2", "y2", "z2"]] = end
+    target = Target({"x": [0.1], "y": [0.0], "z": [0.0]})
+    with pytest.raises(ValueError, match="finite positive length"):
+        Line(source, target)
+
+
+def _decimal_asinh_ratio(value: float, radius: float) -> Decimal:
+    """Return ``asinh(value / radius)`` from 100-digit Decimal operations."""
+    value = Decimal.from_float(value)
+    radius = Decimal.from_float(radius)
+    magnitude = abs(value)
+    result = (magnitude + (magnitude * magnitude + radius * radius).sqrt()).ln()
+    result -= radius.ln()
+    return result.copy_sign(value)
+
+
+def _decimal_line_potential(radius: float, first: float, second: float) -> float:
+    """Return the unnormalised endpoint potential bracket at high precision."""
+    with localcontext() as context:
+        context.prec = 100
+        return float(
+            _decimal_asinh_ratio(second, radius) - _decimal_asinh_ratio(first, radius)
+        )
+
+
+def _decimal_line_field(radius: float, first: float, second: float) -> float:
+    """Return the transverse endpoint field row at high precision."""
+    with localcontext() as context:
+        context.prec = 100
+        radius_decimal = Decimal.from_float(radius)
+        first_decimal = Decimal.from_float(first)
+        second_decimal = Decimal.from_float(second)
+        first_distance = (
+            radius_decimal * radius_decimal + first_decimal * first_decimal
+        ).sqrt()
+        second_distance = (
+            radius_decimal * radius_decimal + second_decimal * second_decimal
+        ).sqrt()
+        bracket = (
+            second_decimal / second_distance - first_decimal / first_distance
+        ) / (radius_decimal * radius_decimal)
+        return float(abs(radius_decimal * bracket))
+
+
+def test_line_exterior_axis_has_the_finite_logarithmic_limit():
+    """Exterior collinear targets have finite potential and exactly zero field."""
+    line = _line_element([0, 0, -1], [0, 0, 1], [[0, 0, 3], [0, 0, -4]])
+    with np.errstate(divide="raise", invalid="raise", over="raise"):
+        potential = line._intergrate(line._Az_hat)[:, 0]
+        field_x = line._intergrate(line._Bx_hat)[:, 0]
+        field_y = line._intergrate(line._By_hat)[:, 0]
+    expected = np.array([np.log(2.0), np.log(5.0 / 3.0)]) / (4.0 * np.pi)
+    np.testing.assert_allclose(potential, expected, rtol=2e-16, atol=0.0)
+    np.testing.assert_array_equal(field_x, 0.0)
+    np.testing.assert_array_equal(field_y, 0.0)
+
+
+def test_line_interior_and_endpoint_targets_keep_the_filament_singularity():
+    """A target on the material line is not assigned an artificial standoff."""
+    line = _line_element([0, 0, -1], [0, 0, 1], [[0, 0, 0], [0, 0, -1], [0, 0, 1]])
+    with np.errstate(divide="raise", invalid="raise", over="raise"):
+        potential = line._intergrate(line._Az_hat)[:, 0]
+        field_x = line._intergrate(line._Bx_hat)[:, 0]
+        field_y = line._intergrate(line._By_hat)[:, 0]
+    assert np.all(np.isinf(potential))
+    assert np.all(np.isnan(field_x))
+    assert np.all(np.isnan(field_y))
+
+
+@pytest.mark.parametrize("distance_ratio", [1.5e-8, 2.0e-8, 1.0e-6])
+@pytest.mark.parametrize("scale", [1.0e-6, 1.0e6])
+@pytest.mark.parametrize("reverse", [False, True])
+def test_line_near_interior_potential_matches_decimal_at_every_orientation(
+    distance_ratio, scale, reverse
+):
+    """An off-line interior target stays finite when the atanh ratio rounds to one."""
+    start = np.array([0.0, 0.0, -scale])
+    end = np.array([0.0, 0.0, scale])
+    if reverse:
+        start, end = end, start
+    line = _line_element(start, end, [[scale * distance_ratio, 0.0, 0.0]])
+    radius = float(line.a2[0, 0, 0])
+    first = float(line.wi[0, 0, 0])
+    second = float(line.wi[1, 0, 0])
+    expected = _decimal_line_potential(radius, first, second)
+
+    with np.errstate(divide="raise", invalid="raise", over="raise", under="ignore"):
+        coefficient = float(line._Az_hat[1, 0, 0])
+        vector = np.asarray(line.Avector[:, 0], dtype=np.float64)
+    direction = (end - start) / np.linalg.norm(end - start)
+    assert coefficient == pytest.approx(expected, rel=3e-15)
+    np.testing.assert_allclose(
+        vector, direction[np.newaxis] * expected / (4.0 * np.pi), rtol=3e-15
+    )
+
+
+def test_line_exterior_endpoint_potential_matches_decimal_from_both_directions():
+    """Either endpoint and segment orientation use the same conditioned magnitude."""
+    levels = np.geomspace(1.0e-16, 1.0e-6, 6)
+    for endpoint in (-0.25, 0.25):
+        for reverse in (False, True):
+            start = np.array([0.0, 0.0, -0.25])
+            end = np.array([0.0, 0.0, 0.25])
+            if reverse:
+                start, end = end, start
+            for axial_gap in levels:
+                target_z = endpoint + np.copysign(axial_gap, endpoint)
+                for transverse_distance in levels:
+                    line = _line_element(
+                        start,
+                        end,
+                        [[transverse_distance, 0.0, target_z]],
+                    )
+                    radius = float(line.a2[0, 0, 0])
+                    first = float(line.wi[0, 0, 0])
+                    second = float(line.wi[1, 0, 0])
+                    expected = _decimal_line_potential(radius, first, second)
+                    with np.errstate(
+                        divide="raise",
+                        invalid="raise",
+                        over="raise",
+                        under="ignore",
+                    ):
+                        got = float(line._Az_hat[1, 0, 0])
+                    assert got == pytest.approx(expected, rel=5e-16, abs=0.0)
+
+
+def test_line_reported_near_endpoint_regime_is_decimal_exact():
+    """A tiny equal axial and transverse offset stays on the positive log path."""
+    radius = 1.0e-12
+    line = _line_element(
+        [0.0, 0.0, -1.0],
+        [0.0, 0.0, 1.0],
+        [[radius, 0.0, 1.0 + radius]],
+    )
+    first = float(line.wi[0, 0, 0])
+    second = float(line.wi[1, 0, 0])
+    expected = _decimal_line_potential(radius, first, second)
+    assert float(line._Az_hat[1, 0, 0]) == expected
+
+
+@pytest.mark.parametrize("scale", [1.0e-90, 1.0e-6, 1.0, 1.0e6, 1.0e80])
+def test_line_field_normalisation_preserves_extreme_geometric_scales(scale):
+    """Dimensionless endpoint algebra avoids intermediate overflow and underflow."""
+    line = _line_element(
+        [0.0, 0.0, -4.0 * scale],
+        [0.0, 0.0, -2.0 * scale],
+        [[0.3 * scale, 0.0, 0.0]],
+    )
+    radius = float(line.a2[0, 0, 0])
+    first = float(line.wi[0, 0, 0])
+    second = float(line.wi[1, 0, 0])
+    expected = _decimal_line_field(radius, first, second)
+    with np.errstate(divide="raise", invalid="raise", over="raise", under="ignore"):
+        got = abs(float(line._By_hat[1, 0, 0]))
+    assert got == pytest.approx(expected, rel=8e-15)
+
+
+@pytest.mark.parametrize(
+    "centre,direction,length,target",
+    [
+        ([12.0, -7.0, 3.0], [1.0, 2.0, -1.0], 2.5, [14.0, -9.0, 5.0]),
+        ([100.0, -200.0, 300.0], [0.0, 0.0, 1.0], 2e-5, [1000.0, 200.0, 300.0]),
+    ],
+)
+def test_line_short_far_and_rotated_geometry_matches_direct_quadrature(
+    centre, direction, length, target
+):
+    """Stable endpoint reductions agree with a direct smooth line integral."""
+    centre = np.asarray(centre, dtype=np.longdouble)
+    direction = np.asarray(direction, dtype=np.longdouble)
+    direction /= np.linalg.norm(direction)
+    target = np.asarray(target, dtype=np.longdouble)
+    start = centre - 0.5 * np.longdouble(length) * direction
+    end = centre + 0.5 * np.longdouble(length) * direction
+    line = _line_element(start, end, target)
+
+    start = np.asarray(start, dtype=np.float64).astype(np.longdouble)
+    end = np.asarray(end, dtype=np.float64).astype(np.longdouble)
+    target = np.asarray(target, dtype=np.float64).astype(np.longdouble)
+    centre = 0.5 * (start + end)
+    displacement_along_line = end - start
+    length = np.linalg.norm(displacement_along_line)
+    direction = displacement_along_line / length
+
+    node, weight = np.polynomial.legendre.leggauss(96)
+    node = node.astype(np.longdouble)
+    weight = weight.astype(np.longdouble)
+    source = centre + 0.5 * length * node[:, None] * direction
+    displacement = target - source
+    distance = np.linalg.norm(displacement, axis=1)
+    differential = 0.5 * length * weight
+    expected_a = direction * np.sum(differential / distance) / (4.0 * np.pi)
+    expected_b = (
+        np.longdouble(Matrix.mu_0)
+        * np.sum(
+            differential[:, None]
+            * np.cross(direction, displacement)
+            / distance[:, None] ** 3,
+            axis=0,
+        )
+        / (4.0 * np.pi)
+    )
+    np.testing.assert_allclose(
+        np.asarray(line.Avector[:, 0], dtype=np.longdouble),
+        expected_a[None],
+        rtol=2e-10,
+        atol=1e-24,
+    )
+    np.testing.assert_allclose(
+        np.asarray(line.Bvector[:, 0], dtype=np.longdouble),
+        expected_b[None],
+        rtol=2e-9,
+        atol=1e-30,
+    )
 
 
 def test_multifilament_3d_vector():
@@ -440,42 +667,560 @@ def test_multifilament_3d_vector():
     assert np.allclose(coilset.point.magnetic_field, 0)
 
 
-@pytest.mark.skip("pending development of singularity skip methods")
-def test_arc_singularity():
-    segment_number = 501
-    theta, dtheta = np.linspace(0, 2 * np.pi, segment_number, retstep=True)
-    radius = 5.3
-    points = np.stack(
-        [radius * np.cos(theta), radius * np.sin(theta), np.zeros_like(theta)], axis=-1
-    )
-    coilset = CoilSet(field_attrs=["Ax", "Ay", "Az", "Bx", "By", "Bz"])
-    coilset.coil.insert(radius, 0, 0.1, 0.1, Ic=1e6, ifttt=False, segment="cylinder")
-    # coilset.coil.insert(radius, 0, 0.1, 0.1, Ic=-1e6, ifttt=False, segment="circle")
-
-    coilset.winding.insert(points, {"c": (0, 0, 0.1)}, Ic=-1e6, minimum_arc_nodes=0)
-
-    print(coilset.frame.segment)
-
-    number = 200
-    grid = np.stack(
+def _rodrigues_rotation(axis, angle):
+    """Return the active rotation matrix about ``axis`` by ``angle``."""
+    axis = np.asarray(axis, dtype=float)
+    axis /= np.linalg.norm(axis)
+    cross = np.array(
         [
-            np.linspace(-0.5, 0.5, number),
-            radius * np.ones(number),
-            np.zeros(number),
+            [0.0, -axis[2], axis[1]],
+            [axis[2], 0.0, -axis[0]],
+            [-axis[1], axis[0], 0.0],
+        ]
+    )
+    cosine = np.cos(angle)
+    return (
+        cosine * np.eye(3)
+        + (1.0 - cosine) * np.outer(axis, axis)
+        + np.sin(angle) * cross
+    )
+
+
+def _arc_points(radius, height, angles):
+    """Return circle points from angles expressed in degrees."""
+    angles = np.deg2rad(np.asarray(angles, dtype=float))
+    return np.stack(
+        [
+            radius * np.cos(angles),
+            radius * np.sin(angles),
+            np.full_like(angles, height),
         ],
         axis=-1,
     )
-    coilset.point.solve(grid)
-    coilset.grid.solve(5e3, 1)
 
-    print(coilset.grid.ay.max())
 
-    coilset.grid.plot("ay")
-    coilset.plot()
+def _arc_element(source_points, target_points):
+    """Return a filament Arc from explicit authored and evaluation points."""
+    source = Source(PolyLine(source_points, minimum_arc_nodes=3).path_geometry)
+    target = Target(dict(zip("xyz", np.asarray(target_points).T, strict=True)))
+    return Arc(source, target, turns=[False, False], reduce=[False, False])
 
-    # coilset.point.set_axes("1d")
-    # coilset.point.axes.plot(grid[:, 0], coilset.point.ax)
-    assert False
+
+def _clustered_arc_rigid_motion():
+    """Return a reproducible rigid motion that exposes circle-fit conditioning."""
+    rotation = np.array(
+        [
+            [0.8905064662746885, 0.44224844728943735, 0.10683887117078991],
+            [-0.3923117428434416, 0.865317430022136, -0.31195711520500213],
+            [-0.23041208724827836, 0.23588568453801384, 0.9440700259408326],
+        ]
+    )
+    translation = np.array([5.954319589053021, -4.181867561911852, -6.839780771099049])
+    return rotation, translation
+
+
+def _translated_complete_ring_motion():
+    """Return a rigid motion that conditions an uncentred circle fit."""
+    rotation = _rodrigues_rotation(
+        [0.12908115546257984, 0.6051292798440823, -0.7855931580530903],
+        -0.5304190955930088,
+    )
+    translation = np.array([68.68021277132141, 74.7029247123845, 21.33257663750969])
+    return rotation, translation
+
+
+@pytest.mark.parametrize(
+    "motion",
+    [None, _clustered_arc_rigid_motion(), _translated_complete_ring_motion()],
+    ids=["canonical", "rigid", "translated-fit"],
+)
+def test_sampled_complete_ring_preserves_arc_and_bow_topology(motion):
+    """A represented closed path remains a complete turn for both arc elements."""
+    radius = 2.1
+    height = -3.2
+    theta = np.linspace(0.0, 2.0 * np.pi, 103)
+    source_points = np.stack(
+        [
+            radius * np.cos(theta),
+            radius * np.sin(theta),
+            np.full_like(theta, height),
+        ],
+        axis=-1,
+    )
+    target_points = np.array([[0.4, -0.3, 0.8]])
+    if motion is not None:
+        rotation, translation = motion
+        source_points = source_points @ rotation.T + translation
+        target_points = target_points @ rotation.T + translation
+
+    arc = _arc_element(source_points, target_points)
+    coilset = CoilSet()
+    coilset.winding.insert(
+        source_points,
+        {"c": (0.0, 0.0, 0.25)},
+        minimum_arc_nodes=3,
+        Ic=1.0,
+    )
+    bow = Bow(
+        Source(coilset.subframe),
+        Target(dict(zip("xyz", target_points.T, strict=True))),
+        turns=[False, False],
+        reduce=[False, False],
+    )
+
+    for element in [arc, bow]:
+        assert np.all(element._complete_source_ring)
+        assert np.all(element._directed_sweep == 2.0 * np.pi)
+        assert np.all(element._fit_leverage == 1.0)
+        if element.filament_centerline_limits:
+            length = np.asarray(element.source("length"), dtype=float)
+            residual = abs(length - 2.0 * np.pi * element.rs)
+            assert np.all(residual <= element._circumference_tolerance)
+        with np.errstate(divide="raise", invalid="raise", over="raise", under="ignore"):
+            assert np.all(np.isfinite(element.Avector))
+            assert np.all(np.isfinite(element.Bvector))
+
+
+def test_sampled_complete_ring_survives_bounded_rigid_fit_conditioning():
+    """One-row complete rings remain certified across bounded rigid motions."""
+    radius = 2.1
+    height = -3.2
+    theta = np.linspace(0.0, 2.0 * np.pi, 103)
+    source_points = np.stack(
+        [
+            radius * np.cos(theta),
+            radius * np.sin(theta),
+            np.full_like(theta, height),
+        ],
+        axis=-1,
+    )
+    target_points = np.array([[0.4, -0.3, 0.8]])
+    rng = np.random.default_rng(281034)
+    residual_ratios = []
+
+    for _ in range(8):
+        axis = rng.normal(size=3)
+        rotation = _rodrigues_rotation(axis, rng.uniform(-np.pi, np.pi))
+        translation = rng.uniform(-100.0, 100.0, size=3)
+        moved_source = source_points @ rotation.T + translation
+        moved_target = target_points @ rotation.T + translation
+        polyline = PolyLine(moved_source, minimum_arc_nodes=3)
+        assert len(polyline) == 1
+        assert type(polyline.segments[0]).__name__ == "Arc"
+
+        element = _arc_element(moved_source, moved_target)
+        assert np.all(element._complete_source_ring)
+        length = np.asarray(element.source("length"), dtype=float)
+        residual = abs(length - 2.0 * np.pi * element.rs)
+        residual_ratios.append(
+            float(np.max(residual / element._circumference_tolerance))
+        )
+
+    assert max(residual_ratios) < 1.0
+
+
+def test_open_near_complete_arc_keeps_resolved_orthogonal_gap():
+    """A large translation cannot turn a represented endpoint gap into closure."""
+    radius = 2.3
+    height = -0.4
+    gap = 1.0e-6
+    sweep = 2.0 * np.pi - gap
+    angles = np.array([0.0, sweep / 2.0, sweep])
+    source_points = np.stack(
+        [
+            radius * np.cos(angles),
+            radius * np.sin(angles),
+            np.full_like(angles, height),
+        ],
+        axis=-1,
+    )
+    translation = np.array([0.0, 0.0, 2.0e9])
+    source = Source(
+        PolyLine(source_points, minimum_arc_nodes=3, line_eps=0.0).path_geometry
+    )
+    for coordinate in ["z0", "z1", "z2"]:
+        source.loc[:, coordinate] += translation[2]
+    target_points = np.array([[0.1, 0.2, 0.3]]) + translation
+    arc = Arc(
+        source,
+        Target(dict(zip("xyz", target_points.T, strict=True))),
+        turns=[False, False],
+        reduce=[False, False],
+    )
+    assert not np.any(arc._complete_source_ring)
+    np.testing.assert_allclose(arc._directed_sweep, sweep, rtol=0.0, atol=2e-15)
+    assert np.all(arc._fit_leverage > np.sqrt(np.finfo(float).eps))
+
+
+def test_open_near_complete_arc_rejects_unresolved_endpoint_leverage():
+    """A represented open gap below the fit leverage remains fail-closed."""
+    radius = 2.3
+    height = -0.4
+    gap = 1.0e-8
+    sweep = 2.0 * np.pi - gap
+    angles = np.array([0.0, sweep / 2.0, sweep])
+    source_points = np.stack(
+        [
+            radius * np.cos(angles),
+            radius * np.sin(angles),
+            np.full_like(angles, height),
+        ],
+        axis=-1,
+    )
+    source = Source(
+        PolyLine(
+            source_points,
+            minimum_arc_nodes=3,
+            line_eps=0.0,
+        ).path_geometry
+    )
+    target = Target({"x": [0.1], "y": [0.2], "z": [0.3]})
+    with pytest.raises(
+        ValueError, match="arc source sweep is unresolved at floating-point precision"
+    ):
+        Arc(source, target, turns=[False, False], reduce=[False, False])
+
+
+def test_translated_resolved_partial_arc_does_not_acquire_complete_topology():
+    """Coordinate ULPs cannot promote a resolved partial circumference."""
+    radius = 2.3
+    height = -0.4
+    gap = 3.1e-8
+    sweep = 2.0 * np.pi - gap
+    source_points = _arc_points(
+        radius,
+        height,
+        np.rad2deg([0.0, sweep / 2.0, sweep]),
+    )
+    frame = PolyLine(
+        source_points,
+        minimum_arc_nodes=3,
+        line_eps=0.0,
+    ).path_geometry
+    for coordinate in ["y0", "y1", "y2"]:
+        frame[coordinate] = [value + 1.0e9 for value in frame[coordinate]]
+
+    source = Source(frame)
+    target = Target({"x": [0.1], "y": [1.0e9 + 0.2], "z": [0.3]})
+    arc = Arc(source, target, turns=[False, False], reduce=[False, False])
+    length = np.asarray(source("length"), dtype=float)
+    residual = abs(length - 2.0 * np.pi * arc.rs)
+
+    assert not np.any(arc._complete_source_ring)
+    assert np.all(arc._fit_leverage > np.sqrt(np.finfo(float).eps))
+    assert np.all(residual > arc._circumference_tolerance)
+    np.testing.assert_allclose(arc._directed_sweep, sweep, rtol=0.0, atol=6.0e-8)
+
+
+def test_coincident_major_arc_does_not_acquire_complete_topology():
+    """Endpoint identity alone cannot promote a partial authored circumference."""
+    source_points = _arc_points(2.3, -0.4, [0.0, 135.0, 270.0])
+    source = Source(
+        PolyLine(source_points, minimum_arc_nodes=3, line_eps=0.0).path_geometry
+    )
+    source.loc[:, ["x2", "y2", "z2"]] = source.loc[:, ["x1", "y1", "z1"]].to_numpy()
+    target = Target({"x": [0.1], "y": [0.2], "z": [0.3]})
+    with pytest.raises(ValueError, match="coincident endpoints.*ambiguous topology"):
+        Arc(source, target, turns=[False, False], reduce=[False, False])
+
+
+@pytest.mark.parametrize(
+    "angles,outside_angle,rigid",
+    [
+        ([0.0, 45.0, 90.0], 180.0, False),
+        ([90.0, 45.0, 0.0], -90.0, False),
+        ([350.0, 0.0, 10.0], 40.0, False),
+        ([10.0, 0.0, 350.0], 320.0, False),
+        ([10.0, 180.0, 350.0], 0.0, False),
+        ([350.0, 180.0, 10.0], 0.0, False),
+        ([0.0, 45.0, 90.0], 180.0, True),
+        ([90.0, 45.0, 0.0], -90.0, True),
+    ],
+    ids=[
+        "minor-forward",
+        "minor-reverse",
+        "branch-forward",
+        "branch-reverse",
+        "major-forward",
+        "major-reverse",
+        "rigid-forward",
+        "rigid-reverse",
+    ],
+)
+def test_arc_authored_span_is_singular_under_orientation_and_rigid_motion(
+    angles, outside_angle, rigid
+):
+    """Start, interior, and end are singular while every off-filament row is finite."""
+    radius = 2.3
+    height = -0.4
+    source_points = _arc_points(radius, height, angles)
+    outside = _arc_points(radius, height, [outside_angle])[0]
+    middle_angle = angles[1]
+    axial = _arc_points(radius, height + 0.125, [middle_angle])[0]
+    radial = _arc_points(radius + 0.125, height, [middle_angle])[0]
+    target_points = np.vstack([source_points, outside, axial, radial])
+    if rigid:
+        rotation = _rodrigues_rotation([1.0, -2.0, 0.7], 0.91)
+        translation = np.array([8.2, -3.7, 5.1])
+        source_points = source_points @ rotation.T + translation
+        target_points = target_points @ rotation.T + translation
+        target_points[:3] = source_points
+    arc = _arc_element(source_points, target_points)
+    with np.errstate(divide="raise", invalid="raise", over="raise", under="ignore"):
+        potential = arc.Avector[:, 0]
+        field = arc.Bvector[:, 0]
+    assert np.all(np.isnan(potential[:3]))
+    assert np.all(np.isnan(field[:3]))
+    assert np.all(np.isfinite(potential[3:]))
+    assert np.all(np.isfinite(field[3:]))
+
+
+def test_arc_same_ring_excluded_span_matches_the_closed_elementary_limit():
+    """The source-ring gap has a finite limit independent of elliptic confluence."""
+    radius = 2.3
+    height = -0.4
+    source_points = _arc_points(radius, height, [0.0, 170.0, 340.0])
+    target_points = _arc_points(radius, height, [345.0, 350.0, 355.0])
+    arc = _arc_element(source_points, target_points)
+    reverse = _arc_element(source_points[::-1], target_points)
+    rotation = _rodrigues_rotation([1.0, -2.0, 0.7], 0.91)
+    translation = np.array([8.2, -3.7, 5.1])
+    rigid = _arc_element(
+        source_points @ rotation.T + translation,
+        target_points @ rotation.T + translation,
+    )
+    expected_potential = np.array(
+        [
+            [0.06627148985679406, 0.19388718476456500, 0.0],
+            [0.03147607024416739, 0.17850966492875640, 0.0],
+            [0.00403849273526940, 0.20486054124744205, 0.0],
+        ]
+    )
+    expected_field = np.array(
+        [
+            [0.0, 0.0, 1.4239057700647921e-7],
+            [0.0, 0.0, 1.3614353613296574e-7],
+            [0.0, 0.0, 1.4239057700647921e-7],
+        ]
+    )
+    with np.errstate(divide="raise", invalid="raise", over="raise", under="ignore"):
+        potential = arc.Avector[:, 0]
+        field = arc.Bvector[:, 0]
+        reverse_potential = reverse.Avector[:, 0]
+        reverse_field = reverse.Bvector[:, 0]
+        rigid_potential = rigid.Avector[:, 0]
+        rigid_field = rigid.Bvector[:, 0]
+    np.testing.assert_allclose(potential, expected_potential, rtol=5e-12, atol=2e-14)
+    np.testing.assert_allclose(field, expected_field, rtol=5e-12, atol=1e-18)
+    np.testing.assert_allclose(reverse_potential, -expected_potential, rtol=5e-12)
+    np.testing.assert_allclose(reverse_field, -expected_field, rtol=5e-12)
+    np.testing.assert_allclose(
+        rigid_potential, expected_potential @ rotation.T, rtol=5e-12, atol=2e-14
+    )
+    np.testing.assert_allclose(
+        rigid_field, expected_field @ rotation.T, rtol=5e-12, atol=1e-18
+    )
+
+
+def test_arc_clustered_fit_keeps_transformed_excluded_ring_target_finite():
+    """Three-point fit conditioning covers exact rigid same-ring geometry."""
+    radius = 2.3
+    height = -0.4
+    source_points = _arc_points(radius, height, [350.0, 360.0, 370.0])
+    target_points = _arc_points(radius, height, [180.0])
+    base = _arc_element(source_points, target_points)
+    rotation, translation = _clustered_arc_rigid_motion()
+    rigid = _arc_element(
+        source_points @ rotation.T + translation,
+        target_points @ rotation.T + translation,
+    )
+
+    expected_condition = 1.0 + 1.0 / (2.0 * np.sin(np.deg2rad(5.0)) ** 2)
+    np.testing.assert_allclose(rigid._fit_condition, expected_condition, rtol=1e-12)
+    assert abs(rigid.r - rigid.rs) <= rigid._geometry_tolerance
+    assert abs(rigid.z - rigid.zs) <= rigid._geometry_tolerance
+    assert np.all(rigid._same_ring_outside_span)
+    with np.errstate(divide="raise", invalid="raise", over="raise", under="ignore"):
+        base_potential = base.Avector[:, 0]
+        base_field = base.Bvector[:, 0]
+        rigid_potential = rigid.Avector[:, 0]
+        rigid_field = rigid.Bvector[:, 0]
+    np.testing.assert_allclose(
+        rigid_potential, base_potential @ rotation.T, rtol=5e-12, atol=2e-14
+    )
+    np.testing.assert_allclose(
+        rigid_field, base_field @ rotation.T, rtol=5e-12, atol=1e-18
+    )
+
+
+def test_arc_minimum_retained_sweep_is_invariant_under_rigid_motion():
+    """Sagitta conditioning covers the shortest arc kept by the path fitter."""
+    radius = 2.3
+    height = -0.4
+    source_points = _arc_points(radius, height, [-1.5, 0.0, 1.5])
+    target_points = _arc_points(radius, height, [180.0])
+    geometry = PolyLine(source_points, minimum_arc_nodes=3).path_geometry
+    assert geometry["segment"] == ["arc"]
+    base = _arc_element(source_points, target_points)
+
+    random = np.random.default_rng(987654)
+    rotation = _rodrigues_rotation(random.normal(size=3), random.uniform(-np.pi, np.pi))
+    translation = random.uniform(-12.0, 12.0, size=3)
+    rigid = _arc_element(
+        source_points @ rotation.T + translation,
+        target_points @ rotation.T + translation,
+    )
+    assert np.all(rigid._same_ring_outside_span)
+    with np.errstate(divide="raise", invalid="raise", over="raise", under="ignore"):
+        base_potential = base.Avector[:, 0]
+        base_field = base.Bvector[:, 0]
+        rigid_potential = rigid.Avector[:, 0]
+        rigid_field = rigid.Bvector[:, 0]
+    np.testing.assert_allclose(
+        rigid_potential, base_potential @ rotation.T, rtol=5e-12, atol=2e-14
+    )
+    np.testing.assert_allclose(
+        rigid_field, base_field @ rotation.T, rtol=5e-12, atol=1e-18
+    )
+
+
+def test_arc_rejects_a_sweep_with_unresolved_fit_leverage():
+    """A circle with sub-resolution sagitta cannot classify physical standoff."""
+    source_points = _arc_points(2.3, -0.4, [-0.0005, 0.0, 0.0005])
+    source = Source(
+        PolyLine(
+            source_points,
+            minimum_arc_nodes=3,
+            line_eps=0.0,
+        ).path_geometry
+    )
+    target = Target(dict(zip("xyz", source_points[1:2].T, strict=True)))
+    with pytest.raises(
+        ValueError, match="arc source sweep is unresolved at floating-point precision"
+    ):
+        Arc(source, target, turns=[False, False], reduce=[False, False])
+
+
+def test_arc_clustered_fit_is_invariant_under_random_rigid_motion():
+    """Conditioned same-ring classification is stable across rigid frames."""
+    radius = 2.3
+    height = -0.4
+    source_points = _arc_points(radius, height, [350.0, 360.0, 370.0])
+    target_points = _arc_points(radius, height, [180.0])
+    base = _arc_element(source_points, target_points)
+    with np.errstate(divide="raise", invalid="raise", over="raise", under="ignore"):
+        base_potential = base.Avector[:, 0]
+        base_field = base.Bvector[:, 0]
+
+    random = np.random.default_rng(1729)
+    for _ in range(12):
+        axis = random.normal(size=3)
+        rotation = _rodrigues_rotation(axis, random.uniform(-np.pi, np.pi))
+        translation = random.uniform(-12.0, 12.0, size=3)
+        rigid = _arc_element(
+            source_points @ rotation.T + translation,
+            target_points @ rotation.T + translation,
+        )
+        assert np.all(rigid._same_ring_outside_span)
+        with np.errstate(divide="raise", invalid="raise", over="raise", under="ignore"):
+            potential = rigid.Avector[:, 0]
+            field = rigid.Bvector[:, 0]
+        np.testing.assert_allclose(
+            potential, base_potential @ rotation.T, rtol=5e-12, atol=2e-14
+        )
+        np.testing.assert_allclose(
+            field, base_field @ rotation.T, rtol=5e-12, atol=1e-18
+        )
+
+
+def test_arc_clustered_fit_tolerance_preserves_resolved_standoffs():
+    """Resolved radial and plane gaps remain outside the fitted source ring."""
+    radius = 2.3
+    height = -0.4
+    source_points = _arc_points(radius, height, [350.0, 360.0, 370.0])
+    rotation, translation = _clustered_arc_rigid_motion()
+    rigid_source = source_points @ rotation.T + translation
+    on_filament = _arc_element(rigid_source, rigid_source[1:2])
+    displacement = 8.0 * float(on_filament._geometry_tolerance[0, 0])
+    target_points = np.vstack(
+        [
+            rigid_source[1] + displacement * (np.array([1.0, 0.0, 0.0]) @ rotation.T),
+            rigid_source[1] + displacement * (np.array([0.0, 0.0, 1.0]) @ rotation.T),
+        ]
+    )
+    arc = _arc_element(rigid_source, target_points)
+    assert abs(arc.r[0] - arc.rs[0]) > 4.0 * arc._geometry_tolerance[0]
+    assert abs(arc.z[1] - arc.zs[1]) > 4.0 * arc._geometry_tolerance[1]
+    assert not np.any(arc._same_source_ring)
+    with np.errstate(divide="raise", invalid="raise", over="raise", under="ignore"):
+        assert np.all(np.isfinite(arc.Avector))
+        assert np.all(np.isfinite(arc.Bvector))
+
+
+def test_arc_directed_span_keeps_adjacent_angular_sides_distinct():
+    """Angular nextafters stay on their authored side without widening the span."""
+    radius = 2.3
+    height = -0.4
+    sweep = np.deg2rad(340.0)
+    source_points = _arc_points(radius, height, [0.0, 170.0, 340.0])
+    target_angles = np.array(
+        [
+            np.nextafter(0.0, np.inf),
+            np.nextafter(sweep, -np.inf),
+            np.nextafter(sweep, np.inf),
+            np.nextafter(2.0 * np.pi, 0.0),
+        ]
+    )
+    nearby = np.stack(
+        [
+            radius * np.cos(target_angles),
+            radius * np.sin(target_angles),
+            np.full_like(target_angles, height),
+        ],
+        axis=-1,
+    )
+    arc = _arc_element(source_points, np.vstack([source_points, nearby]))
+    np.testing.assert_array_equal(
+        arc._on_filament[:, 0],
+        [True, True, True, True, True, False, False],
+    )
+    np.testing.assert_array_equal(
+        arc._same_ring_outside_span[:, 0],
+        [False, False, False, False, False, True, True],
+    )
+    with np.errstate(divide="raise", invalid="raise", over="raise", under="ignore"):
+        potential = arc.Avector[:, 0]
+        field = arc.Bvector[:, 0]
+    assert np.all(np.isnan(potential[:5]))
+    assert np.all(np.isnan(field[:5]))
+    assert np.all(np.isfinite(potential[5:]))
+    assert np.all(np.isfinite(field[5:]))
+
+
+def test_arc_transform_tolerance_does_not_absorb_resolved_standoff():
+    """Radial and plane gaps beyond the transform bound remain physical targets."""
+    radius = 2.3
+    height = -0.4
+    middle_angle = 170.0
+    source_points = _arc_points(radius, height, [0.0, middle_angle, 340.0])
+    on_filament = _arc_element(
+        source_points, _arc_points(radius, height, [middle_angle])
+    )
+    displacement = 8.0 * float(on_filament._geometry_tolerance[0, 0])
+    target_points = np.vstack(
+        [
+            _arc_points(radius + displacement, height, [middle_angle]),
+            _arc_points(radius, height + displacement, [middle_angle]),
+        ]
+    )
+    arc = _arc_element(source_points, target_points)
+    assert np.all(
+        abs(arc.r - arc.rs) + abs(arc.z - arc.zs) > 4.0 * arc._geometry_tolerance
+    )
+    assert not np.any(arc._same_source_ring)
+    with np.errstate(divide="raise", invalid="raise", over="raise", under="ignore"):
+        assert np.all(np.isfinite(arc.Avector))
+        assert np.all(np.isfinite(arc.Bvector))
 
 
 def test_ellipf():

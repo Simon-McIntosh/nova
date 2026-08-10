@@ -27,27 +27,24 @@ whole. Tiles are disjoint chunks, which is what lets a process pool write
 concurrently without coordination.
 
 *Backends.* :func:`tile_coupling` evaluates a tile with numpy, distributed over
-cores by a process pool. :func:`tile_evaluator` builds the same tile from the
-same closed-form expressions through JAX, so one traced kernel serves both a
-compiled CPU run and a GPU run -- ``scan`` over the quadrature blocks keeps the
-CPU working set in cache, ``vmap`` over the same blocks fills a device. Because
-the shapes are padded, the trace is compiled once for a whole build; the two
-backends are pinned against each other in float64 by
-``tests/test_biottiledbackend.py``.
+cores by a process pool. :func:`tile_evaluator` traces the fixed-node ring
+quadrature through JAX, so ``scan`` over quadrature blocks bounds the working set
+and ``vmap`` over the same blocks fills a device. Because the shapes are padded,
+the trace is compiled once for a whole build; numpy and JAX are pinned against
+each other in float64 by ``tests/test_biottiledbackend.py``.
 
-Finite arcs use the same pair-block registry through
-:func:`nova.biot.polygonarc.packed_arc_greens`.
+The registry also exposes packed closed-ring and finite-arc kernels for numerical
+parity, differentiation and compile-resource diagnostics. Their large elliptic
+moment graphs are not product accelerator routes: section operators select the
+quadrature ring kernel, while finite arcs retain their geometry-specific host
+path. A diagnostic compile is keyed by every static shape, including edge count.
 
-*The compile.* Once per build is not once, and for the closed-form kernel the
-difference decides the route: its executable costs a hundred seconds to produce
-against a second and a half to run a tile with, so a caller that builds the same
-operator at several geometries -- a winding pack swept through positions -- would
-spend all of its time in the compiler. Two things make that cost a constant.
-:func:`tile_evaluator` MEMOISES on the plan, so the same tile shape hands back the
-same compiled kernel however many builds ask for it, and geometry is an argument
-rather than a constant so moving a section cannot force a retrace.
-:func:`compilation_cache` points JAX's persistent cache at a directory, so the
-executable outlives the process that produced it. Neither changes any arithmetic.
+*The compile.* :func:`tile_evaluator` memoises on that complete executable
+identity, and geometry is an argument rather than a constant, so moving a section
+does not force a retrace. :func:`compilation_cache` points JAX's persistent cache
+at a directory, allowing a diagnostic executable to outlive the process that
+produced it. Neither cache changes arithmetic or makes a diagnostic kernel a
+supported product route.
 """
 
 from __future__ import annotations
@@ -63,7 +60,7 @@ from typing import Iterator
 import numpy as np
 import zarr
 
-from nova.biot.polygon import _BLOCK, _phi_rule, pad_batch
+from nova.biot.polygon import _BLOCK, _held_edge, _phi_rule, pad_batch
 from nova.biot.polygonanalytic import packed_analytic_greens
 from nova.biot.polygonarc import packed_arc_greens
 from nova.jax.config import Precision, resolve_precision
@@ -271,8 +268,8 @@ def _traced_psi_gradient(jnp, r, z, edge, weight, cosp, sinp, sin2p, w_cos, norm
     s2 = s * s
     dg2_dr = 2.0 * s * sinp
     for index in range(edge.shape[0]):
-        ra, za, rb, zb = edge[index]
         edge_weight = weight[index]
+        ra, za, rb, zb = _held_edge(jnp, edge[index], edge_weight != 0.0, r, z)
         b1 = (rb - ra) / (zb - za)
         a02 = 1.0 + b1 * b1
         a0 = jnp.sqrt(a02)
@@ -424,6 +421,7 @@ class TileEvaluator:
         components: tuple[str, ...] = COMPONENTS,
         devices: int = 1,
         precision: Precision = Precision.DOUBLE,
+        edge_count: int | None = None,
     ):
         self._kernel = kernel
         self.plan = plan
@@ -433,28 +431,63 @@ class TileEvaluator:
         self.components = components
         self.devices = devices
         self.precision = precision
+        self.edge_count = edge_count
         self.dtype = np.float32 if precision is Precision.SINGLE else np.float64
+        self._staged_shape = False
 
     @property
     def compile_count(self) -> int:
         """Return the number of distinct shapes the kernel has been compiled for."""
-        return self._kernel._cache_size()
+        return max(self._kernel._cache_size(), int(self._staged_shape))
 
-    def __call__(self, *geometry):
-        """Return the component sub-matrices of one tile, each shape ``(T, S)``."""
+    def prepare(self, *geometry, synchronize: bool = False):
+        """Pad a tile and transfer its fixed-shape geometry to the selected device.
+
+        ``synchronize`` is useful to a benchmark that needs input transfer as its
+        own stage. Normal evaluation leaves the transfer asynchronous so the
+        runtime can overlap it with launch preparation.
+        """
+        import jax
         import jax.numpy as jnp
 
         plan = self.plan
         n_target = np.size(geometry[0])
         if self.geometry == "ring":
             n_source = np.size(geometry[4])
+            edge_count = np.shape(geometry[2])[0]
             filled = _fill_tile(plan, *geometry)
         else:
             n_source = np.size(geometry[5])
+            edge_count = np.shape(geometry[3])[0]
             filled = _fill_arc_tile(plan, *geometry)
+        if self.edge_count is not None and edge_count != self.edge_count:
+            raise ValueError(
+                f"evaluator was built for {self.edge_count} packed edges, "
+                f"not {edge_count}"
+            )
         dtype = jnp.float32 if self.precision is Precision.SINGLE else jnp.float64
-        arrays = (jnp.asarray(value, dtype=dtype) for value in filled)
-        result = np.asarray(self._kernel(*arrays))
+        arrays = tuple(jnp.asarray(value, dtype=dtype) for value in filled)
+        if synchronize:
+            jax.block_until_ready(arrays)
+        return n_target, n_source, arrays
+
+    def compile(self, prepared):
+        """Lower and compile one prepared tile without launching the kernel."""
+        if self.devices != 1 or not hasattr(self._kernel, "lower"):
+            raise ValueError("staged compilation requires one local device")
+        executable = self._kernel.lower(*prepared[2]).compile()
+        self._staged_shape = True
+        return executable
+
+    def launch(self, prepared, executable=None):
+        """Launch a prepared tile and return its device-resident component rows."""
+        kernel = self._kernel if executable is None else executable
+        return kernel(*prepared[2])
+
+    def materialize(self, result, n_target: int, n_source: int):
+        """Transfer device rows to host and restore component matrix shapes."""
+        result = np.asarray(result)
+        plan = self.plan
         if self.devices > 1:
             result = result.reshape(-1, len(self.components), plan.block)
         flat = result.transpose(1, 0, 2).reshape(len(self.components), -1)[
@@ -462,6 +495,12 @@ class TileEvaluator:
         ]
         tile = flat.reshape(len(self.components), plan.target_tile, plan.source_tile)
         return tuple(tile[:, :n_target, :n_source])
+
+    def __call__(self, *geometry):
+        """Return the component sub-matrices of one tile, each shape ``(T, S)``."""
+        prepared = self.prepare(*geometry)
+        result = self.launch(prepared)
+        return self.materialize(result, prepared[0], prepared[1])
 
 
 def compilation_cache(
@@ -472,9 +511,8 @@ def compilation_cache(
     An executable is a pure function of the graph, the JAX and XLA versions and
     the device, so keeping one on disk between processes is a cache in the strict
     sense -- it cannot change an answer, only the time taken to reach it. That
-    matters here because the closed-form tile kernel takes a hundred seconds to
-    compile and under two to run, so a fresh process spends more on the compiler
-    than on the operator.
+    matters for the large packed elliptic graphs exposed to diagnostic callers,
+    whose compile can dominate a small evaluation.
 
     The directory comes from ``NOVA_COMPILATION_CACHE`` when it is set, falls back
     to the user cache home, and is switched off entirely by setting that variable
@@ -524,29 +562,27 @@ def tile_evaluator(
     geometry: str = "ring",
     devices: int = 1,
     precision: Precision | str = Precision.AUTOMATIC,
+    edge_count: int | None = None,
 ) -> TileEvaluator:
     """Return a compiled evaluator for the tiles of one plan.
 
     The evaluator is MEMOISED on its plan, mapping, kernel, geometry family,
-    device count, and resolved precision: asking twice for the
+    device count, resolved precision, and packed edge count: asking twice for the
     same tile shape returns the same object, and therefore the same executable.
-    That is what turns the compile into a per-PROCESS cost rather than a per-build
-    one, which is the difference between a usable and an unusable closed-form
-    kernel for a caller that builds the operator at more than one geometry --
-    section coordinates are arguments to the kernel, not constants of it, so
-    moving a section cannot force a retrace. :func:`forget_evaluators` releases
-    them; :func:`compilation_cache`, which this enables unless the environment
-    says otherwise, carries the executable across a process boundary as well.
+    That turns compilation into a per-process cost rather than a per-build one:
+    section coordinates are arguments to the kernel, not constants, so moving a
+    section cannot force a retrace. :func:`forget_evaluators` releases them;
+    :func:`compilation_cache`, which this enables unless the environment says
+    otherwise, carries the executable across a process boundary as well.
 
     ``kernel`` chooses what a tile is evaluated WITH. ``"quadrature"`` traces the
     fixed-node phi rule the operator is validated against. ``"closed"`` traces the
     closed-form reduction of :func:`nova.biot.polygonanalytic.packed_analytic_greens`
-    instead -- the same tile shape, the same store, one to two orders more accurate
-    and, on the host, several times cheaper. It reaches a device at all because its
-    elliptic integrals come through a fixed-trip descent rather than a library call,
-    and because the packed driver replaces the host driver's three value-dependent
-    shortcuts with arithmetic; it pays for that with the pole families and residual
-    quadratures a host evaluation would skip.
+    instead. The packed arithmetic is traceable because its elliptic integrals use
+    fixed-trip descents and its dead lanes are held before evaluation. It remains a
+    diagnostic kernel: the supported product accelerator route is the quadrature
+    ring, and finite product arcs stay on the host. Closed diagnostics pay for pole
+    families and residual quadratures that the host evaluation can skip.
 
     ``batched`` chooses how the quadrature blocks are combined: ``False`` walks
     them with ``scan``, holding one block's temporaries live; ``True`` maps them
@@ -570,10 +606,15 @@ def tile_evaluator(
     validated numerical contract.  Explicit float32 builds a separate cached
     executable for callers whose accuracy budget licenses it.
 
-    ``geometry="arc"`` selects the five-row finite-arc driver.  Its only kernel is
-    ``"closed"``. ``devices`` divides pair blocks evenly across local devices
-    with replicated geometry; multiple devices require ``batched`` evaluation
-    because the shard unit is the mapped block axis.
+    ``geometry="arc"`` selects the five-row diagnostic finite-arc driver. Its only
+    kernel is ``"closed"``. ``devices`` divides pair blocks evenly across local
+    devices with replicated geometry; multiple devices require ``batched``
+    evaluation because the shard unit is the mapped block axis.
+
+    ``edge_count`` is part of the executable identity because the edge loop is a
+    static traced bound. Product and assembly adapters always supply it; direct
+    diagnostic callers may omit it when they intentionally allow shape-driven JAX
+    compilation and inspect :attr:`TileEvaluator.compile_count` themselves.
     """
     if geometry not in {"ring", "arc"}:
         raise ValueError(f"unknown geometry {geometry!r}")
@@ -585,10 +626,12 @@ def tile_evaluator(
         raise ValueError("devices must be positive")
     if devices > 1 and not batched:
         raise ValueError("multiple devices require batched block evaluation")
+    if edge_count is not None and edge_count < 1:
+        raise ValueError("packed edge count must be positive")
     resolved = resolve_precision(precision, Precision.DOUBLE)
     if geometry == "arc":
-        return _warm_arc_evaluator(plan, batched, kernel, devices, resolved)
-    return _warm_evaluator(plan, batched, kernel, devices, resolved)
+        return _warm_arc_evaluator(plan, batched, kernel, devices, resolved, edge_count)
+    return _warm_evaluator(plan, batched, kernel, devices, resolved, edge_count)
 
 
 def forget_evaluators() -> None:
@@ -609,6 +652,7 @@ def _warm_evaluator(
     kernel: str,
     devices: int,
     precision: Precision,
+    edge_count: int | None,
 ) -> TileEvaluator:
     """Trace and compile one tile kernel; see :func:`tile_evaluator`."""
     import jax
@@ -707,6 +751,7 @@ def _warm_evaluator(
         name=kernel,
         devices=devices,
         precision=precision,
+        edge_count=edge_count,
     )
 
 
@@ -717,6 +762,7 @@ def _warm_arc_evaluator(
     kernel: str,
     devices: int,
     precision: Precision,
+    edge_count: int | None,
 ) -> TileEvaluator:
     """Trace and compile the finite-arc packed kernel for one tile shape."""
     import jax
@@ -819,6 +865,7 @@ def _warm_arc_evaluator(
         components=ARC_COMPONENTS,
         devices=devices,
         precision=precision,
+        edge_count=edge_count,
     )
 
 
@@ -916,6 +963,11 @@ def assemble(
     target_r = np.ascontiguousarray(target_r, dtype=np.float64)
     target_z = np.ascontiguousarray(target_z, dtype=np.float64)
     edge, weight, norm = pad_batch(sections)
+    if evaluator is not None and evaluator.edge_count not in (None, edge.shape[0]):
+        raise ValueError(
+            f"evaluator was built for {evaluator.edge_count} packed edges, "
+            f"not {edge.shape[0]}"
+        )
     shape = (target_r.size, len(sections))
 
     store = zarr.open_group(str(path), mode="w")
@@ -938,6 +990,7 @@ def assemble(
                 kernel=kernel,
                 devices=devices,
                 precision=precision,
+                edge_count=edge.shape[0],
             )
         for rows, columns in bounds:
             tile = evaluate(
@@ -983,14 +1036,15 @@ def assemble_arcs(
     devices: int = 1,
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> TilePlan:
-    """Build a finite-arc operator with the packed closed kernel.
+    """Build a diagnostic finite-arc operator with the packed closed kernel.
 
     Targets are cylindrical ``(r, z, phi)`` arrays and each section has one
     ``start``/``end`` azimuth.  The result is streamed into five zarr arrays,
     chunked to ``plan``.  Blocks are mapped within each accelerator; with
     ``devices > 1`` they are divided evenly across visible devices by ``pmap``.
     Geometry is replicated because it is small relative to the pair-space
-    temporaries and output that are sharded.
+    temporaries and output that are sharded. Product finite arcs use their host
+    route; this entry point exists for parity, differentiation and resource study.
     """
     target_r = np.ascontiguousarray(target_r, dtype=np.float64)
     target_z = np.ascontiguousarray(target_z, dtype=np.float64)
@@ -1012,6 +1066,12 @@ def assemble_arcs(
             geometry="arc",
             devices=devices,
             precision=precision,
+            edge_count=edge.shape[0],
+        )
+    elif evaluator.edge_count not in (None, edge.shape[0]):
+        raise ValueError(
+            f"evaluator was built for {evaluator.edge_count} packed edges, "
+            f"not {edge.shape[0]}"
         )
     resolved = resolve_precision(precision, Precision.DOUBLE)
     asked = (plan, "closed", batched, "arc", devices, resolved)

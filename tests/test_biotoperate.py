@@ -6,6 +6,7 @@ import scipy.special
 
 from nova.biot.constants import Constants
 from nova.frame.coilset import CoilSet
+from nova.frame.polygrid import PolyTarget
 
 QUARTER_TURN = np.pi / 2
 
@@ -123,6 +124,37 @@ def test_nturn_current_update():
     psi = coilset.plasmagrid.psi.copy()
     coilset.sloc["Ic"] = 2e6
     assert np.not_equal(coilset.plasmagrid.psi, psi).all()
+
+
+def test_inductance_quadrature_keeps_original_plasma_block_dimensions():
+    """Kernel nodes contract before the live plasma-turn matrices are extracted."""
+    coilset = CoilSet(dplasma=-8, tplasma="hex")
+    coilset.firstwall.insert({"circle": [3.0, 0.0, 0.5]}, Ic=1.0)
+    logical_cells = int(np.asarray(coilset.subframe.plasma).sum())
+    coilset.inductance.solve(1)
+    data = coilset.inductance.data
+    assert data.sizes["source_plasma"] == logical_cells
+    assert data.sizes["target_plasma"] == logical_cells
+    assert data["Psi_"].shape == (1, logical_cells)
+    assert data["_Psi"].shape == (logical_cells, 1)
+    assert data["_Psi_"].shape == (logical_cells, logical_cells)
+
+
+def test_force_keeps_the_physical_poly_target_and_dcoil_cells():
+    """Linked-flux quadrature changes neither force targets nor conducting sources."""
+    coilset = CoilSet(dcoil=-3)
+    coilset.coil.insert(3.0, 0.0, 0.4, 0.2, nturn=12, name="PF")
+    expected = PolyTarget(*coilset.frames, index="coil", delta=-2).target
+    source_index = coilset.subframe.index.tolist()
+    source_x = np.asarray(coilset.subframe.x).copy()
+    source_z = np.asarray(coilset.subframe.z).copy()
+    coilset.force.solve(2)
+    assert coilset.force.target.index.tolist() == expected.index.tolist()
+    np.testing.assert_array_equal(coilset.force.target.x, expected.x)
+    np.testing.assert_array_equal(coilset.force.target.z, expected.z)
+    assert coilset.subframe.index.tolist() == source_index
+    np.testing.assert_array_equal(coilset.subframe.x, source_x)
+    np.testing.assert_array_equal(coilset.subframe.z, source_z)
 
 
 def test_nturn_skip_current_update():

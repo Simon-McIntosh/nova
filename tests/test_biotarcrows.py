@@ -317,6 +317,59 @@ def worst(got, want):
 
 
 # ---------------------------------------------------------------------------
+# Elementary geometry, assembled from small differences rather than nearby terms.
+
+
+def test_the_chord_square_and_beta_numerator_survive_a_small_azimuth():
+    """Half-angle identities retain a separation lost by the printed cosine forms."""
+    element = arc_rows(RADIUS, 0.2, RADIUS, [1.0, 0.3])
+    phi = np.full_like(element.theta, 1e-8)
+    element.__dict__["Phi"] = phi
+
+    rs = np.longdouble(element.rs)
+    r = np.longdouble(element.r)
+    gamma = np.longdouble(element.gamma)
+    phi_extended = np.longdouble(phi)
+    half_sine_squared = np.sin(phi_extended / 2) ** 2
+    want_chord_square = (rs - r) ** 2 + 4 * rs * r * half_sine_squared
+    want_projection_gap = (rs - r) + 2 * r * half_sine_squared
+
+    printed_chord_square = (
+        element.rs**2 + element.r**2 - 2 * element.rs * element.r * np.cos(phi)
+    )
+    printed_projection_gap = element.rs - element.r * np.cos(phi)
+    assert np.all(printed_chord_square == 0.0)
+    assert np.all(printed_projection_gap == 0.0)
+    assert worst(element.B2, want_chord_square) < 4e-16
+    assert worst(element.radial_projection_gap, want_projection_gap) < 4e-16
+
+    want_beta_1 = want_projection_gap / np.sqrt(
+        gamma**2 + r**2 * np.sin(phi_extended) ** 2
+    )
+    want_beta_3 = (
+        gamma
+        * want_projection_gap
+        / (r * np.sin(phi_extended) * np.sqrt(gamma**2 + want_chord_square))
+    )
+    assert worst(element.beta_1, want_beta_1) < 4e-16
+    assert worst(element.beta_3, want_beta_3) < 4e-16
+
+
+def test_the_radial_square_gap_is_factored_at_adjacent_radii():
+    """Factoring keeps a one-ulp radial gap that direct squares largely cancel."""
+    source_radius = np.nextafter(RADIUS, np.inf)
+    element = arc_rows(source_radius, 0.2, RADIUS, [1.0, 0.3])
+    rs = np.longdouble(source_radius)
+    r = np.longdouble(RADIUS)
+    want = (rs - r) * (rs + r)
+    direct = source_radius**2 - RADIUS**2
+    direct_error = abs(np.longdouble(direct) / want - 1.0)
+    factored_error = abs(np.longdouble(element.radial_square_gap) / want - 1.0)
+    assert np.max(direct_error) > 0.3  # measured 0.35 at a 6.2 metre radius
+    assert np.max(factored_error) < 2e-16  # measured 7.2e-17
+
+
+# ---------------------------------------------------------------------------
 # The Jacobian functions, which are the amplitude's own pair and one radical.
 
 

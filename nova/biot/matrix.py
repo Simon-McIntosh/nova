@@ -252,24 +252,29 @@ class Matrix(GroupSet):
 
         """
         matrix = getattr(self, attr).copy()
+        if self.target_quadrature is not None:
+            matrix = self.target_quadrature.collapse(matrix)
+        target = self.logical_target
         target_plasma = matrix[:, self.source.plasma]
-        plasma_source = matrix[self.target.plasma]
+        plasma_source = matrix[target.plasma]
         plasma_plasma = plasma_source[:, self.source.plasma]
-        if self.target.turns:
-            matrix *= self.target("nturn")
-            target_plasma *= self.target("nturn")[:, self.source.plasma]
+        if target.turns:
+            target_turns = np.asarray(target["nturn"], dtype=float)
+            matrix *= target_turns[:, np.newaxis]
+            target_plasma *= target_turns[:, np.newaxis]
         if self.source.turns:
-            matrix *= self.source("nturn")
-            plasma_source *= self.source("nturn")[self.target.plasma]
+            source_turns = np.asarray(self.source["nturn"], dtype=float)
+            matrix *= source_turns[np.newaxis, :]
+            plasma_source *= source_turns[np.newaxis, :]
         if self.source.reduce and self.source.biotreduce.reduce:
             matrix = np.add.reduceat(matrix, self.source.biotreduce.indices, axis=1)
             plasma_source = np.add.reduceat(
                 plasma_source, self.source.biotreduce.indices, axis=1
             )
-        if self.target.reduce and self.target.biotreduce.reduce:
-            matrix = np.add.reduceat(matrix, self.target.biotreduce.indices, axis=0)
+        if target.reduce and target.biotreduce.reduce:
+            matrix = np.add.reduceat(matrix, target.biotreduce.indices, axis=0)
             target_plasma = np.add.reduceat(
-                target_plasma, self.target.biotreduce.indices, axis=0
+                target_plasma, target.biotreduce.indices, axis=0
             )
         # link source
         source_link = self.source.biotreduce.link
@@ -281,8 +286,8 @@ class Matrix(GroupSet):
             matrix = np.delete(matrix, list(source_link), 1)
             plasma_source = np.delete(plasma_source, list(source_link), 1)
         # link target
-        target_link = self.target.biotreduce.link
-        if self.target.reduce and len(target_link) > 0:
+        target_link = target.biotreduce.link
+        if target.reduce and len(target_link) > 0:
             for link in target_link:  # sum linked rows
                 ref, factor = target_link[link]
                 matrix[ref] += factor * matrix[link]

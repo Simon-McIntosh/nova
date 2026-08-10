@@ -10,6 +10,17 @@ import numpy as np
 from nova.biot.matrix import Matrix
 
 
+def _asinh_ratio(magnitude, radius):
+    """Return ``asinh(magnitude / radius)`` without forming a huge ratio."""
+    result = np.empty_like(magnitude)
+    direct = magnitude <= radius
+    result[direct] = np.arcsinh(magnitude[direct] / radius[direct])
+    result[~direct] = np.log(
+        magnitude[~direct] + np.hypot(magnitude[~direct], radius[~direct])
+    ) - np.log(radius[~direct])
+    return result
+
+
 @dataclass
 class Line(Matrix):
     """
@@ -23,6 +34,25 @@ class Line(Matrix):
     name: ClassVar[str] = "line"  # element name
 
     attrs: dict[str, str] = field(default_factory=lambda: {"dl": "dl"})
+
+    def __post_init__(self):
+        """Validate that every source represents a finite, nonzero segment."""
+        super().__post_init__()
+        start = np.column_stack(
+            [
+                np.asarray(self.source[f"{coordinate}1"], dtype=np.float64)
+                for coordinate in "xyz"
+            ]
+        )
+        end = np.column_stack(
+            [
+                np.asarray(self.source[f"{coordinate}2"], dtype=np.float64)
+                for coordinate in "xyz"
+            ]
+        )
+        length = np.linalg.norm(end - start, axis=1)
+        if not np.all(np.isfinite(length) & (length > 0.0)):
+            raise ValueError("line segments require a finite positive length")
 
     @cached_property
     def phi(self):
@@ -66,18 +96,127 @@ class Line(Matrix):
 
     @property
     def _Az_hat(self):
-        """Return stacked local z-coord vector potential intergration coefficents."""
-        return np.arcsinh(self.wi / self.a2)
+        """Return the stable definite local vector-potential coefficient."""
+        radius = self.a2[0]
+        first, second = self.wi
+        same_sign = ((first > 0.0) & (second > 0.0)) | ((first < 0.0) & (second < 0.0))
+        exterior_axis = (radius == 0.0) & same_sign
+        singular_axis = (radius == 0.0) & ~same_sign
+        same_sign_off_axis = (radius != 0.0) & same_sign
+        crossing_off_axis = (radius != 0.0) & ~same_sign
+
+        difference = np.empty(self.shape, dtype=np.float64)
+        scale = np.maximum.reduce([radius, np.abs(first), np.abs(second)])
+        normalized_radius = radius / scale
+        normalized_first = first / scale
+        normalized_second = second / scale
+
+        same_positions = np.flatnonzero(same_sign_off_axis)
+        first_magnitude = np.abs(first.flat[same_positions])
+        second_magnitude = np.abs(second.flat[same_positions])
+        low = np.minimum(
+            np.abs(normalized_first.flat[same_positions]),
+            np.abs(normalized_second.flat[same_positions]),
+        )
+        high = np.maximum(
+            np.abs(normalized_first.flat[same_positions]),
+            np.abs(normalized_second.flat[same_positions]),
+        )
+        normalized_radius_same = normalized_radius.flat[same_positions]
+        low_distance = np.hypot(normalized_radius_same, low)
+        high_distance = np.hypot(normalized_radius_same, high)
+        argument = (high - low) / (high_distance + low_distance)
+        small_difference = argument <= 0.5
+        magnitude_difference = np.empty_like(argument)
+        magnitude_difference[small_difference] = 2.0 * np.arctanh(
+            argument[small_difference]
+        )
+
+        separated = ~small_difference
+        radius_same = radius.flat[same_positions][separated]
+        low_original = np.minimum(first_magnitude, second_magnitude)[separated]
+        high_original = np.maximum(first_magnitude, second_magnitude)[separated]
+        low_original_distance = np.hypot(radius_same, low_original)
+        high_original_distance = np.hypot(radius_same, high_original)
+        magnitude_difference[separated] = np.logaddexp(
+            np.log(high_original), np.log(high_original_distance)
+        ) - np.logaddexp(np.log(low_original), np.log(low_original_distance))
+        difference.flat[same_positions] = (
+            np.sign(first.flat[same_positions])
+            * np.sign(second_magnitude - first_magnitude)
+            * magnitude_difference
+        )
+        difference[crossing_off_axis] = np.sign(
+            normalized_second[crossing_off_axis] - normalized_first[crossing_off_axis]
+        ) * (
+            _asinh_ratio(
+                np.abs(normalized_second[crossing_off_axis]),
+                normalized_radius[crossing_off_axis],
+            )
+            + _asinh_ratio(
+                np.abs(normalized_first[crossing_off_axis]),
+                normalized_radius[crossing_off_axis],
+            )
+        )
+        difference[exterior_axis] = np.sign(first[exterior_axis]) * (
+            np.log(np.abs(normalized_second[exterior_axis]))
+            - np.log(np.abs(normalized_first[exterior_axis]))
+        )
+        difference[singular_axis] = np.inf
+        return np.stack([np.zeros(self.shape), difference])
 
     @property
     def _Bx_hat(self):
-        """Return stacked local x-coord magnetic field intergration coefficents."""
-        return self.wi / (self.ri * self.a2**2) * self.v2
+        """Return the stable definite local x-field coefficient."""
+        return np.stack([np.zeros(self.shape), self.v2[0] * self._field_coefficient])
 
     @property
     def _By_hat(self):
-        """Return stacked local y-coord magnetic field intergration coefficents."""
-        return self.wi / (self.ri * self.a2**2) * -self.u2
+        """Return the stable definite local y-field coefficient."""
+        return np.stack([np.zeros(self.shape), -self.u2[0] * self._field_coefficient])
+
+    @cached_property
+    def _field_coefficient(self):
+        """Return the endpoint field bracket with its exterior-axis limit."""
+        radius = self.a2[0]
+        first, second = self.wi
+        same_sign = ((first > 0.0) & (second > 0.0)) | ((first < 0.0) & (second < 0.0))
+        singular_axis = (radius == 0.0) & ~same_sign
+        literal = ~same_sign & ~singular_axis
+
+        scale = np.maximum.reduce([radius, np.abs(first), np.abs(second)])
+        normalized_radius = radius / scale
+        normalized_first = first / scale
+        normalized_second = second / scale
+        first_distance = np.hypot(normalized_radius, normalized_first)
+        second_distance = np.hypot(normalized_radius, normalized_second)
+
+        coefficient = np.empty(self.shape, dtype=np.float64)
+        dimensionless = np.empty(self.shape, dtype=np.float64)
+        dimensionless[same_sign] = (
+            (normalized_second[same_sign] - normalized_first[same_sign])
+            * (normalized_second[same_sign] + normalized_first[same_sign])
+            / (
+                first_distance[same_sign]
+                * second_distance[same_sign]
+                * (
+                    normalized_second[same_sign] * first_distance[same_sign]
+                    + normalized_first[same_sign] * second_distance[same_sign]
+                )
+            )
+        )
+        dimensionless[literal] = (
+            (
+                normalized_second[literal] / second_distance[literal]
+                - normalized_first[literal] / first_distance[literal]
+            )
+            / normalized_radius[literal]
+            / normalized_radius[literal]
+        )
+        live = ~singular_axis
+        coefficient[live] = dimensionless[live] / scale[live] / scale[live]
+        coefficient[singular_axis] = np.nan
+        return coefficient
 
     @property
     def _Bz_hat(self):

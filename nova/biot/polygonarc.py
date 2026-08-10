@@ -102,7 +102,7 @@ from nova.biot.incompletemoments import (
     sn_pole_moment,
 )
 from nova.biot.momentchannel import Channel, factorise
-from nova.biot.polygon import pack_section
+from nova.biot.polygon import _held_edge, _packed_topology, pack_section
 from nova.biot.polygonanalytic import _NODES, _Edge as _RingEdge, _Vertex as _RingVertex
 from nova.biot.rangefunction import (
     across_the_range,
@@ -655,9 +655,11 @@ def packed_arc_greens(
     ``edge`` is ``(E, 4, N)`` and ``weight`` ``(E, N)`` after selecting ``N``
     pairs from :func:`nova.biot.polygon.pad_batch`; all other inputs are length
     ``N``.  The arithmetic is deliberately independent of which edges are live:
-    every padded edge and every possible broken-chain residual is evaluated, then
-    multiplied by its numeric weight.  That makes the same driver executable by
-    NumPy and traceable by JAX without changing the finite-arc reduction.
+    each dead edge is first held at benign target-relative geometry, then its
+    finite value is multiplied by zero.  Positive-zero horizontal edges and
+    negative-zero pads preserve the true closed topology of every pair without a
+    ragged branch.  That makes the same driver executable by NumPy and traceable
+    by JAX without changing the finite-arc reduction.
 
     The host driver below skips zero-weight edges, shares adjacent corners, and
     omits residual quadratures on a closed edge chain.  Those are valuable scalar
@@ -669,72 +671,135 @@ def packed_arc_greens(
     phi = xp.asarray(target_phi) + xp.zeros_like(radius)
     limits = arc_limits(phi, start, end, xp=xp)
     rows = [xp.zeros_like(radius) for _ in _ROWS]
-    live = xp.asarray(weight != 0.0, dtype=radius.dtype)
-    chain = live - xp.roll(live, 1, axis=0)
+    live_mask, present, chain, next_live_mask = _packed_topology(xp, weight)
+    live = xp.asarray(live_mask, dtype=radius.dtype)
+    next_live = xp.asarray(next_live_mask, dtype=radius.dtype)
     sides = edge.shape[0]
 
     def quarter_rows(values):
         return (None, values[0], values[1], None, values[2])
 
-    def corner_parts(corner_r, corner_z):
-        arc = tuple(
-            _Vertex(
-                radius,
-                z,
-                (corner_r, corner_z),
-                (limit.amplitude, limit.sine, limit.cosine),
-                nodes,
-                residual=True,
-                xp=xp,
-            )
-            for limit in limits
+    def corner(index: int):
+        """Return one topology-correct corner with unused pad lanes held finite."""
+        present_here = present[index]
+        wrap = (~present_here) & live_mask[index - 1]
+        corner_r = xp.where(present_here, edge[index][0], edge[0][0])
+        corner_z = xp.where(present_here, edge[index][1], edge[0][1])
+        active = present_here | wrap
+        return (
+            xp.where(active, corner_r, radius + 1.0),
+            xp.where(active, corner_z, z + 1.0),
         )
-        ring = _RingVertex(
-            radius,
-            z,
-            corner_r,
-            corner_z,
-            nodes,
-            residual=True,
-            xp=xp,
-        )
-        return arc, ring
 
-    def residual(parts):
-        arc, ring = parts
+    lower_r, lower_z = (
+        xp.stack([corner(index)[axis] for index in range(sides)], axis=0)
+        for axis in range(2)
+    )
+    corner_r = xp.stack((lower_r, xp.roll(lower_r, -1, axis=0)), axis=0)
+    corner_z = xp.stack((lower_z, xp.roll(lower_z, -1, axis=0)), axis=0)
+    held = [
+        _held_edge(xp, edge[index], live_mask[index], radius, z)
+        for index in range(sides)
+    ]
+    held_edge = tuple(
+        xp.stack([one_edge[coordinate] for one_edge in held], axis=0)
+        for coordinate in range(4)
+    )
+    endpoint_shape = (2, sides) + radius.shape
+    arc_shape = (len(limits),) + endpoint_shape
+
+    def endpoint_lanes(values):
+        repeated = xp.stack((values, values), axis=0)
+        return xp.broadcast_to(repeated, endpoint_shape).reshape(-1)
+
+    def arc_lanes(values):
+        expanded = xp.reshape(values, (len(limits), 1, 1) + radius.shape)
+        return xp.broadcast_to(expanded, arc_shape).reshape(-1)
+
+    ring_radius = xp.broadcast_to(radius, endpoint_shape).reshape(-1)
+    ring_height = xp.broadcast_to(z, endpoint_shape).reshape(-1)
+    ring_vertex = _RingVertex(
+        ring_radius,
+        ring_height,
+        corner_r.reshape(-1),
+        corner_z.reshape(-1),
+        nodes,
+        residual=True,
+        xp=xp,
+    )
+    ring_part = _RingEdge(
+        ring_radius,
+        ring_height,
+        tuple(endpoint_lanes(coordinate) for coordinate in held_edge),
+        nodes,
+        xp=xp,
+    )
+    ring_terms = tuple(
+        value.reshape(endpoint_shape) for value in ring_part.terms(ring_vertex)
+    )
+    ring_residual = tuple(
+        value.reshape(endpoint_shape) for value in ring_vertex.arsinh_terms()
+    )
+
+    arc_radius = xp.broadcast_to(radius, arc_shape).reshape(-1)
+    arc_height = xp.broadcast_to(z, arc_shape).reshape(-1)
+    limit_fields = tuple(
+        xp.stack([getattr(limit, attribute) for limit in limits], axis=0)
+        for attribute in ("amplitude", "sine", "cosine")
+    )
+    arc_vertex = _Vertex(
+        arc_radius,
+        arc_height,
+        (
+            xp.broadcast_to(corner_r, arc_shape).reshape(-1),
+            xp.broadcast_to(corner_z, arc_shape).reshape(-1),
+        ),
+        tuple(arc_lanes(values) for values in limit_fields),
+        nodes,
+        residual=True,
+        xp=xp,
+    )
+    arc_part = _Edge(
+        arc_radius,
+        arc_height,
+        tuple(
+            xp.broadcast_to(
+                xp.stack((coordinate, coordinate), axis=0), arc_shape
+            ).reshape(-1)
+            for coordinate in held_edge
+        ),
+        nodes,
+        xp=xp,
+    )
+    arc_terms = tuple(value.reshape(arc_shape) for value in arc_part.terms(arc_vertex))
+    arc_residual = tuple(
+        value.reshape(arc_shape) for value in arc_vertex.arsinh_terms()
+    )
+
+    def folded(values, ring_values, endpoint):
         return _folded(
             limits,
-            [vertex.arsinh_terms() for vertex in arc],
-            quarter_rows(ring.arsinh_terms()),
+            [
+                tuple(row[limit_index, endpoint] for row in values)
+                for limit_index in range(len(limits))
+            ],
+            quarter_rows(tuple(row[endpoint] for row in ring_values)),
         )
 
-    for index in range(sides):
-        ra, za, rb, zb = edge[index]
-        lower = corner_parts(ra, za)
-        upper = corner_parts(rb, zb)
-        part = _Edge(radius, z, edge[index], nodes, xp=xp)
-        high = _folded(
-            limits,
-            [part.terms(vertex) for vertex in upper[0]],
-            quarter_rows(_RingEdge.terms(part, upper[1])),
+    low = folded(arc_terms, ring_terms, 0)
+    high = folded(arc_terms, ring_terms, 1)
+    lower_residual = folded(arc_residual, ring_residual, 0)
+    upper_residual = folded(arc_residual, ring_residual, 1)
+    lower_chain = live * chain
+    upper_chain = live * (next_live - live)
+    for row_index in range(len(rows)):
+        contribution = (
+            weight * (low[row_index] - high[row_index])
+            + lower_chain * lower_residual[row_index]
+            + upper_chain * upper_residual[row_index]
         )
-        low = _folded(
-            limits,
-            [part.terms(vertex) for vertex in lower[0]],
-            quarter_rows(_RingEdge.terms(part, lower[1])),
-        )
-        edge_weight = weight[index]
-        lower_residual = residual(lower)
-        upper_residual = residual(upper)
-        lower_chain = live[index] * chain[index]
-        upper_chain = live[index] * chain[(index + 1) % sides]
-        for row_index in range(len(rows)):
-            rows[row_index] = (
-                rows[row_index]
-                + edge_weight * (low[row_index] - high[row_index])
-                + lower_chain * lower_residual[row_index]
-                + upper_chain * upper_residual[row_index]
-            )
+        for edge_index in range(sides):
+            rows[row_index] = rows[row_index] + contribution[edge_index]
     factor = norm / (4.0 * np.pi)
     return tuple(factor * row for row in rows)
 

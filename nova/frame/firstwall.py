@@ -15,6 +15,8 @@ class PlasmaGrid(PoloidalGrid):
     """Mesh rejoin interior to firstwall."""
 
     turn: str = "hexagon"
+    polysection_policy: str = ""
+    _configured_polysection_policy: str = field(init=False, repr=False, default="")
     tile: bool = field(init=False, default=True)
     required: list[str] = field(default_factory=lambda: ["x", "z", "dl", "dt"])
     default: dict = field(
@@ -27,6 +29,17 @@ class PlasmaGrid(PoloidalGrid):
             "active": True,
         },
     )
+
+    def __post_init__(self):
+        """Freeze the constructor route used by every plasma-grid insert."""
+        from nova.biot.polysection import PolySectionPolicy
+
+        self._configured_polysection_policy = PolySectionPolicy.resolve(
+            self.polysection_policy
+        ).key
+        self.polysection_policy = self._configured_polysection_policy
+        if hasattr(super(), "__post_init__"):
+            super().__post_init__()
 
     def set_conditional_attributes(self):
         """Set conditional attrs for plasma grid."""
@@ -43,7 +56,40 @@ class PlasmaGrid(PoloidalGrid):
         to delta and trimmed to the plasma's boundary curve.
 
         """
-        return super().insert(*required, iloc=iloc, **additional)
+        from nova.biot.polysection import PolySectionPolicy
+
+        current = PolySectionPolicy.resolve(self.polysection_policy).key
+        requested = PolySectionPolicy.resolve(
+            additional.get("polysection_policy", current)
+        ).key
+        if current != self._configured_polysection_policy or requested != current:
+            raise ValueError(
+                "plasma polygon-section policy is fixed by its CoilSet constructor"
+            )
+        additional["polysection_policy"] = current
+        index = super().insert(*required, iloc=iloc, **additional)
+        self._route_rectangular_cells(index)
+        return index
+
+    def _route_rectangular_cells(self, index):
+        """Keep the cylinder shortcut only on complete axis-aligned cells."""
+        import shapely.geometry
+
+        membership = np.asarray(self.subframe["frame"], dtype=object)
+        positions = np.flatnonzero(np.isin(membership, np.asarray(index)))
+        polygons = np.asarray(self.subframe["poly"], dtype=object)
+        for position in positions:
+            geometry = polygons[position]
+            while not isinstance(geometry, shapely.geometry.base.BaseGeometry):
+                geometry = geometry.poly
+            eligible = (
+                isinstance(geometry, shapely.geometry.Polygon)
+                and len(geometry.interiors) == 0
+                and geometry.equals(shapely.geometry.box(*geometry.bounds))
+            )
+            self.subframe.iloc[position, "segment"] = (
+                "cylinder" if eligible else "polysection"
+            )
 
 
 @dataclass

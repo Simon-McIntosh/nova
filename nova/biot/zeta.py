@@ -143,6 +143,31 @@ def _integrand(
     return np.arcsinh((rs - r * cos_phi) / np.sqrt(gamma**2 + r**2 * sin_phi**2))
 
 
+def _symmetric_rule_sum(xp, integrand, weights):
+    """Pair reflected endpoint nodes before the backend reduces the rule.
+
+    Both fixed rules store nodes from one interval end to the other.  Pairing
+    reflected integrand values before multiplying by their common weight keeps
+    their natural cancellation inside one rounded product.  Averaging each
+    stored weight pair preserves its constant-function moment even if generating
+    the symmetric nodes left their last bits different. The final array uses the
+    backend's ordinary sum, whose association may differ between NumPy and JAX;
+    this helper claims reflected pairing, not a prescribed reduction tree.
+    """
+    count = weights.shape[0]
+    half = count // 2
+    reflected = xp.flip(integrand[..., -half:], axis=-1)
+    reflected_weights = xp.flip(weights[-half:], axis=0)
+    pair_weights = 0.5 * (weights[:half] + reflected_weights)
+    result = xp.sum(
+        (integrand[..., :half] + reflected) * pair_weights,
+        axis=-1,
+    )
+    if count % 2:
+        result = result + integrand[..., half] * weights[half]
+    return result
+
+
 def _integrate(
     rs: np.ndarray,
     r: np.ndarray,
@@ -157,7 +182,7 @@ def _integrate(
     for start in range(0, alpha.size, stride):
         block = slice(start, start + stride)
         integrand = _integrand(rs[block], r[block], gamma[block], alpha[block], rule)
-        result[block] = alpha[block] * (integrand @ weights)
+        result[block] = alpha[block] * _symmetric_rule_sum(np, integrand, weights)
     return result
 
 
@@ -166,6 +191,8 @@ def zeta(
     r: np.ndarray,
     gamma: np.ndarray,
     alpha: np.ndarray,
+    *,
+    coherent_axis: int | None = None,
 ) -> np.ndarray:
     """Evaluate the zeta integral element-wise to better than 1e-12 relative.
 
@@ -174,20 +201,32 @@ def zeta(
     logarithmically singular at the interval ends -- take the tanh-sinh rule.
     Both node sets are fixed, so each group evaluates as a plain broadcast.
     Inputs broadcast to a common shape, which the result takes.
+
+    ``coherent_axis`` couples the rule choice along one physical reduction axis:
+    if any member is near the source plane, every member on that axis uses
+    tanh-sinh.  Rectangular-section corner sums use this to avoid amplifying a
+    mixed-rule rounding difference while bare element-wise calls leave it unset.
     """
     broadcast = np.broadcast_shapes(
         np.shape(rs), np.shape(r), np.shape(gamma), np.shape(alpha)
     )
     rs, r, gamma, alpha = (
-        np.ravel(np.broadcast_to(array, broadcast)) for array in (rs, r, gamma, alpha)
+        np.broadcast_to(array, broadcast) for array in (rs, r, gamma, alpha)
     )
     # the integrand is even in alpha, so the interval is taken as [0, |alpha|]
     alpha = np.abs(alpha)
+    near_plane = np.abs(gamma) < NEAR_PLANE_RATIO * np.abs(r)
+    if coherent_axis is not None:
+        near_plane = np.broadcast_to(
+            np.any(near_plane, axis=coherent_axis, keepdims=True), broadcast
+        )
+    rs, r, gamma, alpha, near_plane = (
+        np.ravel(array) for array in (rs, r, gamma, alpha, near_plane)
+    )
     result = np.zeros(alpha.size)
     # a zero-length interval integrates to zero by inspection; evaluating it
     # would divide by a vanishing sin(phi) in the plane of the source corner
     extent = alpha > 0.0
-    near_plane = np.abs(gamma) < NEAR_PLANE_RATIO * np.abs(r)
     for index, rule in (
         (np.flatnonzero(extent & ~near_plane), _gauss_legendre_rule()),
         (np.flatnonzero(extent & near_plane), _tanh_sinh_rule()),
@@ -199,43 +238,62 @@ def zeta(
     return result.reshape(broadcast)
 
 
-def traced_zeta(xp, rs, r, gamma, alpha):
+def traced_zeta(xp, rs, r, gamma, alpha, *, coherent_axis: int | None = None):
     """Return the zeta integral in whichever array namespace ``xp`` is.
 
-    The tanh-sinh rule UNCONDITIONALLY, as :class:`Zeta` takes it: the numpy
-    :func:`zeta` picks between two rules per element, which is a host-side cost
-    optimisation that a trace would have to pay for by evaluating both -- and
-    the double-exponential rule alone is uniformly accurate over the whole
-    domain, so the branch-free path takes it outright.  Everything else is
-    :func:`zeta`'s own arithmetic, so with ``xp = numpy`` the two agree to the
-    two rules' mutual accuracy wherever the host picks Gauss-Legendre and
-    exactly where it picks tanh-sinh.
+    With ``coherent_axis=None`` the tanh-sinh rule is unconditional, as
+    :class:`Zeta` takes it.  A physical corner reduction may instead pass an axis:
+    any near-plane member selects tanh-sinh for the whole axis and Gauss-Legendre
+    is selected only when all members are far.  A trace evaluates both fixed-size
+    rules before that selection; all operands are finite in either arm.
 
-    A zero-length interval is held at one and the result masked, so it returns
-    the zero it integrates to without dividing by a vanishing ``sin phi`` --
-    and without the held element poisoning a geometry tangent.
+    A zero-length interval holds every integrand operand at benign geometry before
+    either rule is evaluated, so the exact zero and its geometry tangent remain
+    finite.
     """
     dtype = xp.result_type(rs, r, gamma, alpha)
-    offset, upper, weights = _tanh_sinh_rule()
-    offset = xp.asarray(offset, dtype=dtype)
-    upper = xp.asarray(upper)
-    weights = xp.asarray(weights, dtype=dtype)
+    if not np.issubdtype(np.dtype(dtype), np.floating):
+        dtype = xp.asarray(1.0).dtype
     rs, r, gamma, alpha = xp.broadcast_arrays(
-        xp.asarray(rs), xp.asarray(r), xp.asarray(gamma), xp.asarray(alpha)
+        xp.asarray(rs, dtype=dtype),
+        xp.asarray(r, dtype=dtype),
+        xp.asarray(gamma, dtype=dtype),
+        xp.asarray(alpha, dtype=dtype),
     )
     # the integrand is even in alpha, so the interval is taken as [0, |alpha|]
     alpha = xp.abs(alpha)
     extent = alpha > 0.0
-    held = xp.where(extent, alpha, 1.0)[..., None]
-    angle = 2.0 * held * offset
-    angle = xp.where(upper, np.pi - 2.0 * held + angle, angle)
-    sin_phi = xp.sin(angle)
-    cos_phi = xp.where(upper, xp.cos(angle), -xp.cos(angle))
-    integrand = xp.arcsinh(
-        (rs[..., None] - r[..., None] * cos_phi)
-        / xp.sqrt(gamma[..., None] ** 2 + r[..., None] ** 2 * sin_phi**2)
-    )
-    return xp.where(extent, alpha, 0.0) * (integrand @ weights)
+    held_alpha = xp.where(extent, alpha, 1.0)
+    held_rs = xp.where(extent, rs, 2.0)
+    held_r = xp.where(extent, r, 1.0)
+    held_gamma = xp.where(extent, gamma, 1.0)
+    pi = xp.asarray(np.pi, dtype=dtype)
+
+    def integrate(rule):
+        offset, upper, weights = rule
+        offset = xp.asarray(offset, dtype=dtype)
+        upper = xp.asarray(upper)
+        weights = xp.asarray(weights, dtype=dtype)
+        held = held_alpha[..., None]
+        angle = 2.0 * held * offset
+        angle = xp.where(upper, pi - 2.0 * held + angle, angle)
+        sin_phi = xp.sin(angle)
+        cos_phi = xp.where(upper, xp.cos(angle), -xp.cos(angle))
+        integrand = xp.arcsinh(
+            (held_rs[..., None] - held_r[..., None] * cos_phi)
+            / xp.sqrt(held_gamma[..., None] ** 2 + held_r[..., None] ** 2 * sin_phi**2)
+        )
+        value = alpha * _symmetric_rule_sum(xp, integrand, weights)
+        return xp.where(extent, value, xp.zeros_like(value))
+
+    near_value = integrate(_tanh_sinh_rule())
+    if coherent_axis is None:
+        return near_value
+    near_plane = xp.abs(gamma) < NEAR_PLANE_RATIO * xp.abs(r)
+    if near_plane.ndim:
+        near_plane = xp.any(near_plane, axis=coherent_axis, keepdims=True)
+    far_value = integrate(_gauss_legendre_rule())
+    return xp.where(near_plane, near_value, far_value)
 
 
 def zeta_midpoint(
@@ -336,20 +394,12 @@ try:  # optional: only importable where JAX is installed
         @jax.jit
         def __call__(self):
             """Return the zeta integral."""
-            offset, upper, weights = _tanh_sinh_rule()
-            dtype = jnp.result_type(self.rs, self.zs, self.r, self.z, self.alpha)
-            # the node axis leads, so rs/r/gamma broadcast against it unchanged
-            shape = (-1,) + (1,) * jnp.ndim(self.alpha)
-            offset = jnp.asarray(offset, dtype=dtype).reshape(shape)
-            upper = jnp.asarray(upper).reshape(shape)
-            alpha = jnp.abs(self.alpha)
-            angle = 2.0 * alpha * offset
-            angle = jnp.where(upper, jnp.pi - 2.0 * alpha + angle, angle)
-            integrand = self.arcsinh_beta_1(
-                jnp.sin(angle), jnp.where(upper, jnp.cos(angle), -jnp.cos(angle))
-            )
-            return alpha * jnp.tensordot(
-                jnp.asarray(weights, dtype=dtype), integrand, axes=1
+            return traced_zeta(
+                jnp,
+                self.rs,
+                self.r,
+                self.gamma,
+                self.alpha,
             )
 
 except ModuleNotFoundError:  # numpy-only environment

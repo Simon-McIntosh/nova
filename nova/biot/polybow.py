@@ -54,6 +54,7 @@ the field alone.
 
 from dataclasses import dataclass
 from functools import cached_property
+import math
 from typing import ClassVar
 
 import numpy as np
@@ -79,17 +80,25 @@ def section_corners(poly) -> np.ndarray:
     return collapse_collinear(np.asarray(poly.points, dtype=np.float64)[:, [0, 2]])
 
 
+def signed_section_area(vertices: np.ndarray) -> float:
+    """Return a translation-stable signed area for a planar corner list."""
+    vertices = np.asarray(vertices, dtype=np.float64)
+    local = vertices - vertices[0]
+    rolled = np.roll(local, -1, axis=0)
+    cross = local[:, 0] * rolled[:, 1] - rolled[:, 0] * local[:, 1]
+    return 0.5 * math.fsum(cross.tolist())
+
+
 def section_area(vertices: np.ndarray) -> float:
-    """Return the area a closed corner list encloses, by the shoelace sum.
+    """Return the area a closed corner list encloses.
 
     The area the REDUCTION normalised by, measured on the same corners it was
     handed rather than read from a column, so the two cannot disagree about which
-    polygon the per-ampere convention refers to.
+    polygon the per-ampere convention refers to. Coordinates are recentered before
+    the shoelace products so a small section keeps its area after a large rigid
+    translation.
     """
-    rolled = np.roll(vertices, -1, axis=0)
-    return 0.5 * abs(
-        float(np.sum(vertices[:, 0] * rolled[:, 1] - rolled[:, 0] * vertices[:, 1]))
-    )
+    return abs(signed_section_area(vertices))
 
 
 @dataclass
@@ -103,6 +112,7 @@ class PolyBow(Arc, Matrix):
 
     axisymmetric: ClassVar[bool] = False
     name: ClassVar[str] = "polybow"
+    filament_centerline_limits: ClassVar[bool] = False
 
     nodes: ClassVar[int | None] = None
     """Residual quadrature nodes per panel; ``None`` uses the kernel's own count.

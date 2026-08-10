@@ -10,8 +10,8 @@ binned, so there are four arrangements to cost, not two:
 ===================  ==========================================================
 arrangement          treatment
 ===================  ==========================================================
-exact-quadrature     the converged boundary rule on every pair (shipped default)
-exact-closed         the closed form on every pair
+exact-quadrature     the converged boundary rule on every pair
+exact-closed         the closed form on every pair (shipped default)
 banded-quadrature    converged rule near, reduced rule mid, moment filament far
 banded-closed        closed form near, reduced rule mid, moment filament far
 ===================  ==========================================================
@@ -43,9 +43,8 @@ Each measurement is a subcommand, so each runs in its own interpreter:
     figure leaves out.
 ``sweep`` / ``collect``
     ``sweep`` runs every one of the above in a fresh subprocess and appends the
-    records to a file; ``collect`` turns that file into the tables and the figure,
-    and extends the measured per-pair rates to a projected 2000-cell first build on
-    one core, on a host pool and on one device.
+    records to a file; ``collect`` turns those measured records into tables and a
+    figure without extrapolating them to unexecuted hardware or problem sizes.
 
 One variant per process, first run, no in-process repeat: repeating a biot solve
 inside one interpreter warms the allocator and the allocator's free lists and
@@ -93,36 +92,6 @@ compare directly against it.
 
 BUILD_WALL = {"ellip": [4.2, -0.4, 1.25, 4.2]}
 """First wall of the tracked plasma baseline."""
-
-PROJECTED_CELLS = 2000
-"""Build size the first-build budget is stated at: its all-to-all pair count."""
-
-HOST_POOL_SCALING = 8.78
-"""Measured 16-core scaling of the tiled assembly, for the pool projection.
-
-A measured SCALING applied to a measured single-core rate is a projection, not a
-measurement, and is labelled as one wherever it is reported.
-"""
-
-DEVICE_RATE = 5.5
-"""Steady-state cost per pair of the traced closed form on one H200 [us]."""
-
-DEVICE_QUADRATURE_RATE = 5.3
-"""Steady-state cost per pair of the traced boundary quadrature on one H200 [us]."""
-
-DEVICE_COMPILE = {"cold": 101.9, "warm cache": 8.45, "warm evaluator": 0.0}
-"""Compile the traced closed form pays, by what is already warm [s].
-
-Cold is a fresh process with no on-disk cache; warm cache is a second process
-hitting ``NOVA_COMPILATION_CACHE``; warm evaluator is a later build in the same
-process, which retraces nothing.
-"""
-
-DEVICE_QUADRATURE_COMPILE = {"cold": 1.36, "warm cache": 0.23, "warm evaluator": 0.0}
-"""The same, for the traced boundary quadrature -- two orders below the above."""
-
-FIRST_BUILD_BUDGET = 20.0 * 60.0
-"""First-build budget the operator-assembly route is chosen against [s]."""
 
 TRACKED_POINT_BUILD = 0.963
 """Tracked plasma-grid solve through the point kernel [s].
@@ -190,13 +159,16 @@ def hex_lattice(cells=LATTICE_CELLS, radius=CELL_RADIUS):
 # --- the arrangements --------------------------------------------------------
 
 ARRANGEMENTS = {
-    "point": {},
-    "exact-quadrature": {"banded": False, "closed_form": False},
-    "exact-closed": {"banded": False, "closed_form": True},
-    "banded-quadrature": {"banded": True, "closed_form": False},
-    "banded-closed": {"banded": True, "closed_form": True},
+    "point": None,
+    "exact-quadrature": {"exact_kernel": "quadrature"},
+    "exact-closed": {},
+    "banded-quadrature": {
+        "arrangement": "banded",
+        "exact_kernel": "quadrature",
+    },
+    "banded-closed": {"arrangement": "banded"},
 }
-"""Keyword arguments each arrangement passes to ``PolySection.configured``.
+"""Arguments used to construct one immutable policy per measured arrangement.
 
 ``point`` is not a ``PolySection`` arrangement at all -- it is the bare
 centroid-filament ring, the floor -- and is handled separately.
@@ -231,12 +203,13 @@ def column_kernel(arrangement, target_r, target_z, vertices):
 
         return call
 
-    from nova.biot.polysection import PolySection
+    from nova.biot.polysection import PolySection, PolySectionPolicy
+
+    policy = PolySectionPolicy(**ARRANGEMENTS[arrangement])
 
     def call():
-        """Return the column through the configured polygon-section arrangement."""
-        with PolySection.configured(**ARRANGEMENTS[arrangement]):
-            return PolySection.section_greens(target_r, target_z, vertices)
+        """Return the column through the explicit polygon-section arrangement."""
+        return PolySection.section_greens(target_r, target_z, vertices, policy)
 
     return call
 
@@ -488,22 +461,21 @@ def measure_population(section, target_r=None, target_z=None, label=None):
 # --- a real plasma-grid build ------------------------------------------------
 
 
-def _plasma_coilset(cells=BUILD_CELLS, polysection=False):
+def _plasma_coilset(cells=BUILD_CELLS, policy=None):
     """Return an unsolved coilset of the tracked plasma baseline's first wall.
 
-    Plasma cells ship with ``segment="circle"`` -- the point-filament ring -- so
-    routing the build through the polygon-section element means relabelling the
-    subframe's own ``segment`` column, which is what ``Solve.generator`` maps to
-    an element class. Nothing else about the frame changes: the cells already
-    carry their own section polygons.
+    Exact finite-section rings are the product default. The point baseline is an
+    explicit benchmark route selected by relabelling the already-built source cells;
+    every finite-section arrangement is supplied through the CoilSet policy.
     """
     from nova.frame.coilset import CoilSet
 
-    coilset = CoilSet(dplasma=-cells, tplasma="hex")
+    kwargs = {} if policy is None else {"plasma_polysection_policy": policy}
+    coilset = CoilSet(dplasma=-cells, tplasma="hex", **kwargs)
     coilset.firstwall.insert(BUILD_WALL, turn="hex", Ic=1e6)
-    if polysection:
+    if policy is None:
         subframe = coilset.subframe
-        subframe.loc[np.asarray(subframe.plasma), "segment"] = "polysection"
+        subframe.loc[np.asarray(subframe.plasma), "segment"] = "circle"
     return coilset
 
 
@@ -517,15 +489,19 @@ def measure_build(arrangement, cells=BUILD_CELLS):
     warm process; a fresh process still pays each kernel's own first call here,
     which the tracked one does not.
     """
-    from nova.biot.polysection import PolySection
+    from nova.biot.polysection import PolySectionPolicy
 
-    coilset = _plasma_coilset(cells, polysection=arrangement != "point")
+    policy = (
+        None
+        if arrangement == "point"
+        else PolySectionPolicy(**ARRANGEMENTS[arrangement])
+    )
+    coilset = _plasma_coilset(cells, policy=policy)
     count = int(np.asarray(coilset.subframe.plasma).sum())
     grid = coilset.plasmagrid
-    with PolySection.configured(**ARRANGEMENTS.get(arrangement, {})):
-        start = time.perf_counter()
-        grid.solve()
-        seconds = time.perf_counter() - start
+    start = time.perf_counter()
+    grid.solve()
+    seconds = time.perf_counter() - start
     psi = np.asarray(grid.data.Psi)
     return {
         "measurement": "build",
@@ -541,8 +517,7 @@ def measure_build(arrangement, cells=BUILD_CELLS):
 def grid_sections(coilset):
     """Return each plasma cell's section vertices, closing vertex dropped.
 
-    The same reduction ``PolySection._section_vertices`` performs, so what is
-    measured here is the geometry the element itself sees.
+    This is the simple exterior geometry used by the measured plasma cells.
     """
     plasma = np.asarray(coilset.subframe.plasma)
     sections = []
@@ -574,8 +549,9 @@ def measure_build_population(cells=BUILD_CELLS):
         section_radius,
         section_skew,
     )
+    from nova.biot.polysection import PolySectionPolicy
 
-    coilset = _plasma_coilset(cells, polysection=True)
+    coilset = _plasma_coilset(cells, policy=PolySectionPolicy(arrangement="banded"))
     plasma = np.asarray(coilset.subframe.plasma)
     target_r = np.asarray(coilset.subframe.x)[plasma]
     target_z = np.asarray(coilset.subframe.z)[plasma]
@@ -613,7 +589,7 @@ def measure_build_population(cells=BUILD_CELLS):
     ]
 
 
-# --- collection, tables, projection -----------------------------------------
+# --- collection and measured tables -----------------------------------------
 
 
 def _median(records, key="us_per_pair"):
@@ -809,72 +785,11 @@ def build_table(records):
     return "\n".join(lines)
 
 
-def projection(records, cells=PROJECTED_CELLS):
-    """Return the projected first-build table for a square all-to-all operator.
-
-    One core is the measured column rate. The host pool divides it by the measured
-    tiled scaling, which makes it a PROJECTION and not a measurement. The device
-    column exists only for the two arrangements that have a traced tile kernel:
-    the banded arrangements bin pairs into three shapes per section and no traced
-    kernel does that, so a device figure for them would be invented.
-    """
-    pairs = cells * cells
-    grouped = _group(records, "column", "arrangement", "section")
-    device = {
-        "exact-closed": (DEVICE_RATE, DEVICE_COMPILE),
-        "exact-quadrature": (DEVICE_QUADRATURE_RATE, DEVICE_QUADRATURE_COMPILE),
-    }
-    rows = []
-    for arrangement in ARRANGEMENTS:
-        found = grouped.get((arrangement, "hexagon"))
-        if not found:
-            continue
-        rate = _median(found)[0]
-        one_core = 1e-6 * rate * pairs
-        row = {
-            "arrangement": arrangement,
-            "us_per_pair": rate,
-            "one core": one_core,
-            "host pool": one_core / HOST_POOL_SCALING,
-        }
-        if arrangement in device:
-            rate, compile_cost = device[arrangement]
-            for state, seconds in compile_cost.items():
-                row[f"device {state}"] = 1e-6 * rate * pairs + seconds
-        rows.append(row)
-    return {"measurement": "projection", "cells": cells, "pairs": pairs, "rows": rows}
-
-
-def projection_table(projected):
-    """Return the projection as markdown rows, with the budget verdict per route."""
-    columns = ["one core", "host pool", "device cold", "device warm cache"]
-    lines = [
-        "| arrangement | us/pair | " + " | ".join(columns) + " | inside budget |",
-        "|---|---|" + "---|" * (len(columns) + 1),
-    ]
-    for row in projected["rows"]:
-        cells = [
-            "--" if row.get(name) is None else f"{row[name] / 60.0:.2f} min"
-            for name in columns
-        ]
-        inside = [
-            name
-            for name in columns
-            if row.get(name) is not None and row[name] <= FIRST_BUILD_BUDGET
-        ]
-        lines.append(
-            f"| {row['arrangement']} | {row['us_per_pair']:.1f} | "
-            + " | ".join(cells)
-            + f" | {', '.join(inside) if inside else 'none'} |"
-        )
-    return "\n".join(lines)
-
-
 # --- the figure --------------------------------------------------------------
 
 
 def figure(records, path):
-    """Write the four-panel cost figure: per pair, by band, by build, projected."""
+    """Write measured kernel, band-population, and product-build costs."""
     import matplotlib
 
     matplotlib.use("Agg")
@@ -883,7 +798,7 @@ def figure(records, path):
     fig, axes = plt.subplot_mosaic(
         [
             ["per_pair", "population", "distance", "batch"],
-            ["build", "projection", "summary", "summary"],
+            ["build", "summary", "summary", "summary"],
         ],
         figsize=(23.0, 10.5),
     )
@@ -892,7 +807,6 @@ def figure(records, path):
     _panel_distance(axes["distance"], records)
     _panel_batch(axes["batch"], records)
     _panel_build(axes["build"], records)
-    _panel_projection(axes["projection"], records)
     _panel_summary(axes["summary"], records)
     fig.suptitle(
         "Cost of the exact polygon-section route: closed form against boundary "
@@ -1265,53 +1179,6 @@ def _panel_build(axis, records):
     axis.grid(axis="y", ls=":", lw=0.5, alpha=0.6)
 
 
-def _panel_projection(axis, records):
-    """Projected first build against core count and device, with the budget line."""
-    projected = projection(records)
-    columns = ["one core", "host pool", "device cold", "device warm cache"]
-    places = np.arange(len(columns))
-    for row in projected["rows"]:
-        values = [row.get(name) for name in columns]
-        keep = [index for index, value in enumerate(values) if value is not None]
-        axis.plot(
-            places[keep],
-            [values[index] / 60.0 for index in keep],
-            "o-",
-            color=ARRANGEMENT_COLOUR[row["arrangement"]],
-            label=row["arrangement"],
-            lw=1.6,
-            ms=5,
-        )
-    axis.axhline(FIRST_BUILD_BUDGET / 60.0, color="k", ls="--", lw=1.2)
-    axis.annotate(
-        f"{FIRST_BUILD_BUDGET / 60.0:.0f} min first-build budget",
-        (len(columns) - 1, FIRST_BUILD_BUDGET / 60.0),
-        textcoords="offset points",
-        xytext=(0, 4),
-        ha="right",
-        fontsize=8,
-    )
-    axis.set_yscale("log")
-    axis.set_xticks(places)
-    axis.set_xticklabels(
-        [
-            "1 core",
-            f"16 cores\n(x{HOST_POOL_SCALING} projected)",
-            "H200\ncold compile",
-            "H200\nwarm cache",
-        ],
-        fontsize=8,
-    )
-    axis.set_ylabel(f"projected {PROJECTED_CELLS}-cell first build  [min]")
-    axis.set_title(
-        f"(f) projected {PROJECTED_CELLS}-cell build "
-        f"({PROJECTED_CELLS**2 / 1e6:.0f}M pairs), hexagon rates",
-        fontsize=10,
-    )
-    axis.legend(fontsize=8)
-    axis.grid(axis="y", ls=":", lw=0.5, alpha=0.6)
-
-
 # --- command line ------------------------------------------------------------
 
 
@@ -1438,8 +1305,6 @@ def main(argv=None):
             print(batch_table(records))
             print("\n## plasma-grid build\n")
             print(build_table(records))
-            print(f"\n## projected {PROJECTED_CELLS}-cell first build\n")
-            print(projection_table(projection(records)))
             if args.figure:
                 print(f"\nfigure: {figure(records, args.figure)}")
     return 0

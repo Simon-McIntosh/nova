@@ -19,10 +19,12 @@ mesh refinement and every operator, with the assembly cost beside it.
 
 import numpy as np
 import pytest
+import shapely.geometry
 
 from nova.biot.cylinder import Cylinder
 from nova.biot.polysection import PolySection
 from nova.biot.sectionaverage import averaged_greens
+from nova.biot.target import TargetQuadraturePolicy, linked_flux_target
 from nova.frame.coilset import CoilSet
 
 PAIR = [
@@ -45,23 +47,22 @@ def rectangle(x, z, dx, dz):
     )
 
 
-def pair(dcoil, segment=None):
+def pair(dcoil, segment=None, target_policy=None):
     """Return the coil pair meshed at ``dcoil``, optionally forced onto a segment."""
     attrs = {} if segment is None else {"segment": segment, "ifttt": False}
-    coilset = CoilSet(dcoil=dcoil)
+    coilset = CoilSet(dcoil=dcoil, inductance_target_policy=target_policy or "")
     for x, z, dx, dz, nturn, name in PAIR:
         coilset.coil.insert(x, z, dx, dz, nturn=nturn, name=name, **attrs)
     return coilset
 
 
-def reduced(dcoil, segment=None):
+def reduced(dcoil, segment=None, order=3):
     """Return the reduced coil-coil inductance matrix [H].
 
-    The target frame carries no section of its own, so the target-side area average
-    is carried by that frame's subdivision; zero puts one target on every turn,
-    which is the finest the lane offers.
+    Positive target nodes integrate the actual material within each existing dcoil
+    cell, then contract to that cell before its parent turns and electrical links.
     """
-    coilset = pair(dcoil, segment)
+    coilset = pair(dcoil, segment, TargetQuadraturePolicy(order=order))
     coilset.inductance.solve(0)
     return np.asarray(coilset.inductance.Psi)
 
@@ -117,22 +118,72 @@ def test_the_corner_rule_and_the_polygon_kernel_are_one_quantity():
         assert got == pytest.approx(want, rel=1e-8, abs=1e-8 * scale), name
 
 
-def test_the_reduced_inductance_does_not_move_with_the_mesh():
-    """Summing the section integral over a tiling returns the whole section's own.
+def test_the_reduced_inductance_converges_with_the_mesh():
+    """Positive cell quadrature converges to the whole-section double integral.
 
-    The pair sum IS the area integral split up, so refining a coil's mesh cannot
-    move a reduced coil-coil term. A banded lane has no such identity: the filament
-    it substitutes beyond the band is a different function of where the sub-sections
-    land, so its reduced terms drift as the mesh changes.
+    The source integral sums exactly across a tiling. The target integral is a
+    fixed-order positive rule on each original dcoil cell, so its small residual
+    converges as the material cells refine instead of changing their identities.
     """
-    coarse = reduced(-2)
-    for dcoil in (-5, -20):
-        assert reduced(dcoil) == pytest.approx(coarse, rel=1e-9)
+    section = [reduced(dcoil) for dcoil in (-2, -5, -20)]
+    drift = [
+        np.max(np.abs(value - section[-1]) / np.abs(section[-1]))
+        for value in section[:-1]
+    ]
+    assert drift[1] < drift[0] < 5e-5
     banded = [reduced(dcoil, segment="circle") for dcoil in (-2, -5, -20)]
     drift = max(
         np.max(np.abs(value - banded[0]) / np.abs(banded[0])) for value in banded
     )
     assert drift > 1e-4
+
+
+@pytest.mark.parametrize("dcoil", [-2, -5, -20])
+def test_target_expansion_preserves_every_dcoil_cell_and_parent_turn_sum(dcoil):
+    """Kernel nodes add no conducting cells and do not alter turn ownership."""
+    coilset = pair(dcoil)
+    quadrature = linked_flux_target(coilset.frame, coilset.subframe)
+    assert quadrature.logical.index.tolist() == coilset.subframe.index.tolist()
+    assert quadrature.physical_index == tuple(coilset.frame.index)
+    for name in coilset.frame.index:
+        positions = np.asarray(coilset.subframe.frame) == name
+        assert np.sum(np.asarray(quadrature.logical.nturn)[positions]) == pytest.approx(
+            coilset.frame.at[name, "nturn"]
+        )
+
+
+def test_linked_source_reduces_columns_but_keeps_physical_target_rows():
+    """Electrical current links act on sources, not distinct conductor targets."""
+    factor = -0.25
+    baseline = pair(-2)
+    baseline.inductance.solve(1)
+    physical = np.asarray(baseline.inductance.Psi)
+
+    linked = pair(-2)
+    linked.linkframe(["PF1", "CS3U"], factor)
+    quadrature = linked_flux_target(linked.frame, linked.subframe)
+    assert quadrature.physical_index == ("PF1", "CS3U")
+    for name in linked.frame.index:
+        positions = np.flatnonzero(np.asarray(quadrature.logical.frame) == name)
+        assert quadrature.logical.link[positions[0]] == ""
+        assert np.all(quadrature.logical.factor[positions] == 1.0)
+        assert np.all(quadrature.logical.link[positions[1:]] == name)
+
+    linked.inductance.solve(1)
+    assert linked.inductance.data.target.values.tolist() == ["PF1", "CS3U"]
+    assert linked.inductance.data.source.values.tolist() == ["PF1"]
+    assert linked.inductance.Psi.shape == (2, 1)
+    circuit = np.array([1.0, factor])
+    expected = physical @ circuit
+    np.testing.assert_allclose(linked.inductance.Psi[:, 0], expected, rtol=2e-12)
+
+
+def test_inductance_rejects_target_policy_mutation_after_construction():
+    """A cached method cannot change target quadrature without changing its owner."""
+    coilset = pair(-2)
+    coilset.inductance.target_policy = TargetQuadraturePolicy(order=4)
+    with pytest.raises(ValueError, match="fixed by its CoilSet constructor"):
+        coilset.inductance.solve(1)
 
 
 def test_the_section_lane_lands_closer_to_the_double_integral(reference):
@@ -155,3 +206,69 @@ def test_the_section_lane_lands_closer_to_the_double_integral(reference):
     banded = np.abs(reduced(-2, segment="circle") - reference)[off] / scale
     assert section.max() < 5e-4
     assert banded.max() > 5 * section.max()
+
+
+def test_target_order_sweep_converges_to_raw_reciprocity():
+    """Positive target quadrature restores mutual-inductance reciprocity by order."""
+    matrices = [reduced(-2, order=order) for order in (1, 2, 3, 4)]
+    asymmetry = [np.max(np.abs(matrix - matrix.T)) for matrix in matrices]
+    assert np.all(np.diff(asymmetry) < 0)
+    assert asymmetry[-1] < 1e-9 * np.max(np.abs(matrices[-1]))
+    change = [
+        np.max(np.abs(later - earlier))
+        for earlier, later in zip(matrices, matrices[1:])
+    ]
+    assert np.all(np.diff(change) < 0)
+
+
+def test_hollow_target_nodes_stay_in_actual_parent_material():
+    """A void never receives positive target weight, even on a fine dcoil grid."""
+    coilset = CoilSet(dcoil=0)
+    coilset.coil.insert(
+        {"box": [3.0, 0.0, 0.8, 0.2]},
+        nturn=20,
+        name="Hollow",
+        turn="rectangle",
+        ifttt=False,
+    )
+    quadrature = linked_flux_target(coilset.frame, coilset.subframe)
+    parent = coilset.frame.poly[0].poly
+    void = shapely.geometry.Polygon(parent.interiors[0])
+    nodes = np.column_stack([quadrature.nodes.x, quadrature.nodes.z])
+    assert not any(void.covers(shapely.geometry.Point(node)) for node in nodes)
+    assert quadrature.logical.index.tolist() == coilset.subframe.index.tolist()
+    assert np.all(quadrature.weights > 0)
+    np.testing.assert_allclose(
+        np.add.reduceat(quadrature.weights, quadrature.offsets), 1.0
+    )
+
+
+def test_composite_and_wall_clipped_targets_preserve_logical_cells():
+    """Disconnected parents and clipped plasma cells keep their source-cell identity."""
+    composite = shapely.geometry.MultiPolygon(
+        [
+            shapely.geometry.box(2.7, -0.2, 2.9, 0.2),
+            shapely.geometry.box(3.1, -0.2, 3.3, 0.2),
+        ]
+    )
+    coilset = CoilSet(dcoil=-4, dplasma=-20, tplasma="hex")
+    coilset.coil.insert(composite, nturn=10, name="Composite")
+    coilset.firstwall.insert({"circle": [4.5, 0.0, 0.8]}, Ic=1.0)
+    quadrature = linked_flux_target(coilset.frame, coilset.subframe)
+    assert quadrature.logical.index.tolist() == coilset.subframe.index.tolist()
+    assert quadrature.physical_index == tuple(coilset.frame.index)
+    assert len(quadrature.logical) == len(coilset.subframe)
+    assert len(quadrature.nodes) > len(quadrature.logical)
+    for parent_name in coilset.frame.index:
+        parent = coilset.frame.at[parent_name, "poly"].poly
+        positions = np.flatnonzero(np.asarray(quadrature.logical.frame) == parent_name)
+        start = quadrature.offsets[positions]
+        stop = np.r_[quadrature.offsets, len(quadrature.nodes)][positions + 1]
+        for lower, upper in zip(start, stop):
+            points = zip(
+                quadrature.nodes.x[lower:upper], quadrature.nodes.z[lower:upper]
+            )
+            assert all(
+                parent.buffer(1e-12).covers(shapely.geometry.Point(point))
+                for point in points
+            )

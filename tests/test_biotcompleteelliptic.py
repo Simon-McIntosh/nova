@@ -39,7 +39,7 @@ import pytest
 import scipy.integrate
 import scipy.special
 
-from nova.biot.completeelliptic import TRIPS, complete_kind, complete_pole
+from nova.biot.completeelliptic import TRIPS, _finite_part, complete_kind, complete_pole
 from nova.jax.config import configure_dtypes
 
 
@@ -298,6 +298,93 @@ def test_a_target_on_the_source_ring_returns_the_finite_part():
         assert got == pytest.approx(expected, rel=1e-12)
     # a root ON the range end has no finite part; zero is the callers' convention
     assert float(complete_pole(np.float64(0.0), np.float64(0.5))) == 0.0
+
+
+def test_the_unit_pole_finite_part_has_its_exact_value_and_tangent():
+    """The elementary confluence is zero with unit slope in the pole argument."""
+    with np.errstate(all="raise"):
+        assert float(complete_pole(np.float64(1.0), np.float64(0.0))) == 0.0
+
+    jax, jnp = traced_namespace()
+
+    def finite_part(pole):
+        return complete_pole(pole, _f64(0.0), xp=jnp)
+
+    forward = float(jax.jacfwd(finite_part)(_f64(1.0)))
+    reverse = float(jax.grad(finite_part)(_f64(1.0)))
+    assert forward == pytest.approx(1.0, rel=2e-15)
+    assert reverse == pytest.approx(1.0, rel=2e-15)
+
+
+def test_the_unit_pole_neighbours_keep_their_exact_finite_parts():
+    """The coefficient exposes the one-bit pole displacement without cancellation."""
+    poles = np.array([np.nextafter(1.0, 0.0), 1.0, np.nextafter(1.0, np.inf)])
+    expected = np.array(
+        [
+            float.fromhex("-0x1.0000000000001p-53"),
+            0.0,
+            float.fromhex("0x1.ffffffffffffdp-53"),
+        ]
+    )
+    with np.errstate(all="raise"):
+        got = complete_pole(poles, 0.0)
+    np.testing.assert_array_equal(got, expected)
+
+    jax, jnp = traced_namespace()
+    expected_slopes = np.array(
+        [
+            float.fromhex("0x1.0000000000001p+0"),
+            1.0,
+            float.fromhex("0x1.ffffffffffffbp-1"),
+        ]
+    )
+
+    def finite_part(pole):
+        return complete_pole(pole, _f64(0.0), xp=jnp)
+
+    for pole, expected_slope in zip(poles, expected_slopes):
+        forward = float(jax.jacfwd(finite_part)(_f64(pole)))
+        reverse = float(jax.grad(finite_part)(_f64(pole)))
+        assert np.isfinite(forward)
+        assert forward == pytest.approx(expected_slope, rel=4.0 * EPS)
+        assert reverse == forward
+
+
+def test_the_weighted_finite_part_keeps_its_general_unit_pole_tangent():
+    """Both the coefficient and elementary factor contribute at a unit pole."""
+    assert float(_finite_part(np.float64(1.0), 2.0, 1.0, np)) == 1.0
+
+    jax, jnp = traced_namespace()
+
+    def weighted(pole):
+        return _finite_part(pole, 2.0, 1.0, jnp)
+
+    forward = float(jax.jacfwd(weighted)(_f64(1.0)))
+    reverse = float(jax.grad(weighted)(_f64(1.0)))
+    assert forward == pytest.approx(2.0 / 3.0, rel=4.0 * EPS)
+    assert reverse == forward
+
+
+def test_the_finite_part_holds_inactive_series_at_wide_poles():
+    """Mixed eager lanes stay finite across the representable physical scales."""
+    poles = np.array(
+        [
+            1e-300,
+            1e-100,
+            0.5,
+            np.nextafter(1.0, 0.0),
+            1.0,
+            np.nextafter(1.0, np.inf),
+            2.0,
+            1e100,
+            1e300,
+        ]
+    )
+    with np.errstate(all="raise"):
+        got = complete_pole(poles, 0.0)
+    assert np.all(np.isfinite(got))
+    assert got[6] == np.pi / 8.0
+    assert got[-1] == pytest.approx(np.pi / (2.0 * np.sqrt(poles[-1])), rel=2e-15)
 
 
 def test_the_trip_count_is_bounded_by_the_argument_range_in_both_directions():

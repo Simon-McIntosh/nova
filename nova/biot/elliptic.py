@@ -64,7 +64,6 @@ __all__ = [
     "sn_pole_moment",
     "sn_pole_moments",
     "stable_cn_moments",
-    "stable_sn_moments",
 ]
 
 # Below this the upward moment recursions divide by a small number once per
@@ -108,6 +107,44 @@ _HARMONIC_HEADROOM = 96
 # decay by 0.38 per order, so this many put the closure's own error under
 # round-off.
 POLE_HEADROOM = 32
+
+
+def _reciprocal_arctangent(magnitude, gap, hyperbolic, xp, *, signed_square=None):
+    """Return ``atanh(z)/z`` or ``atan(z)/z`` with inactive inputs held.
+
+    The two functions are the same even series with opposite signs.  ``gap`` is
+    the hyperbolic branch's exact ``1 - z`` and is supplied by the caller so a
+    ratio approaching one never loses the logarithm that remains.  Each inactive
+    transcendental receives zero before evaluation; array ``where`` evaluates
+    both expressions under NumPy and JAX.  ``signed_square`` is ``z^2`` on the
+    hyperbolic branch and ``-z^2`` on the circular one.  Supplying it before a
+    square root is taken gives the shared confluence its finite derivative.
+    """
+    magnitude = xp.asarray(magnitude)
+    hyperbolic = xp.asarray(hyperbolic)
+    if signed_square is None:
+        signed_square = xp.where(
+            hyperbolic, magnitude * magnitude, -magnitude * magnitude
+        )
+    signed_square = xp.asarray(signed_square)
+    held = xp.where(magnitude > 0.0, magnitude, 1.0)
+    circular_magnitude = xp.where(hyperbolic, 0.0, magnitude)
+    hyperbolic_magnitude = xp.where(hyperbolic, magnitude, 0.0)
+    hyperbolic_gap = xp.where(hyperbolic & (gap > 0.0), gap, 1.0)
+    transcendental = (
+        xp.where(
+            hyperbolic,
+            0.5 * (xp.log1p(hyperbolic_magnitude) - xp.log(hyperbolic_gap)),
+            xp.arctan(circular_magnitude),
+        )
+        / held
+    )
+    series = xp.ones_like(signed_square)
+    power = xp.ones_like(signed_square)
+    for order in range(1, 8):
+        power = power * signed_square
+        series = series + power / (2 * order + 1)
+    return xp.where(xp.abs(signed_square) < 1e-4, series, transcendental)
 
 
 def _complete_kind(complement: np.ndarray, xp=np) -> tuple[np.ndarray, np.ndarray]:
@@ -330,7 +367,7 @@ def harmonic_root_moments(
     ]
 
 
-def stable_sn_moments(
+def sn_moments(
     parameter: np.ndarray, count: int, *, complement: np.ndarray | None = None
 ) -> list[np.ndarray]:
     """Return ``[El0, El2, ...]`` accurately at every order and every parameter.
@@ -341,8 +378,7 @@ def stable_sn_moments(
     recursion carries every order's finite part exactly, the divergent branch of the
     ``k^2 = 1`` recursion being the constant one.
 
-    The same quantity :func:`sn_moments` returns, from the same three-term
-    recursion, run in whichever direction is accurate:
+    The three-term recursion is run in whichever direction is accurate:
 
     * UPWARD, as printed, divides by ``k^2`` once per order.  Accurate while
       ``k^2`` is not small, losing about a digit per order once it is -- and the
@@ -357,6 +393,8 @@ def stable_sn_moments(
     result is selected per element.  The downward branch is normalised by
     ``El0 = K``, which the recursion cannot fix, being homogeneous.
     """
+    if count <= 0:
+        return []
     parameter = np.asarray(parameter, dtype=np.float64)
     if complement is None:
         complement = 1.0 - parameter
@@ -400,7 +438,7 @@ def stable_cn_moments(
     """Return ``[A0, A1, ...]``, the even cn moments over a quarter period.
 
     ``A_m = integral_0^K cn^(2m)(u, k) du = integral_0^(pi/2) cos^(2m) a / Delta
-    da`` -- the mirror of :func:`stable_sn_moments` about the far end of the
+    da`` -- the mirror of :func:`sn_moments` about the far end of the
     range, and what a numerator expanded in ``cos^2 a`` contracts against.
 
     Why the mirror is needed at all.  The pole whose moments diverge as a section
@@ -420,7 +458,7 @@ def stable_cn_moments(
     Its two branches are ``1`` and ``-k'^2/k^2``, so the parasitic one decays
     upward exactly where the parameter exceeds its complement and downward where
     it does not.  Neither direction spans the range, so each is used where it
-    holds and the result selected per element, as in :func:`stable_sn_moments`;
+    holds and the result selected per element, as in :func:`sn_moments`;
     the downward branch is normalised on ``A0 = K``, which the recursion cannot
     fix, being homogeneous.
 
@@ -598,7 +636,7 @@ def sn_pole_moments(
     if parameter_complement is None:
         parameter_complement = 1.0 - parameter
     if moments is None:
-        moments = stable_sn_moments(
+        moments = sn_moments(
             parameter, count + _HEADROOM, complement=parameter_complement
         )
     return _shifted_family(
@@ -658,18 +696,18 @@ def pole_moments(
     ``V_(m-1) - n V_m = El_(m-1)`` ties the family to the plain moments and is
     accurate in one direction at a time -- upward from ``V_0 = Pi(n | k^2)``
     divides by ``n``, downward multiplies by it -- so the routes split on ``|n|``
-    exactly as :func:`stable_sn_moments` splits on the parameter.  The downward
+    exactly as :func:`sn_moments` splits on the parameter.  The downward
     branch needs no ``Pi`` at all: seeded past the top order it converges from
     above, which is why a characteristic of ``1e-3`` costs no special function.
 
-    ``moments`` accepts an already-computed :func:`stable_sn_moments` list (of at
+    ``moments`` accepts an already-computed :func:`sn_moments` list (of at
     least ``count + 60`` entries) so a caller with several pole families over one
     parameter pays for the plain moments once.
     """
     characteristic = np.asarray(characteristic, dtype=np.float64)
     parameter = np.asarray(parameter, dtype=np.float64)
     if moments is None:
-        moments = stable_sn_moments(parameter, count + _HEADROOM)
+        moments = sn_moments(parameter, count + _HEADROOM)
     if complement is None:
         complement = 1.0 - characteristic
     shape = np.broadcast_shapes(np.shape(characteristic), np.shape(parameter))
@@ -692,43 +730,6 @@ def pole_moments(
     for order in range(1, count):
         upward.append((upward[order - 1] - moments[order - 1]) / held)
     return [np.where(strong, upward[order], downward[order]) for order in range(count)]
-
-
-def sn_moments(parameter: np.ndarray, count: int) -> list[np.ndarray]:
-    """Return ``[El0, El2, El4, ...]``, the even sn moments over a quarter period.
-
-    ``El2m = integral_0^K sn^(2m)(u, k) du`` -- the paper's ``El2m`` (eq 24b) at
-    the complete limit, where the ``sn^(2m+1) cn dn`` boundary term drops
-    because ``cn K = 0``:
-
-        El0 = K,   k^2 El2 = K - E,
-        (2m + 1) k^2 El(2m+2) = 2m (1 + k^2) El(2m) - (2m - 1) El(2m-2).
-
-    ``count`` is the number of moments returned, so ``count=5`` gives El0 to El8
-    -- the highest order the vector potential needs.
-
-    Conditioning: each step divides by ``k^2``, so the recursion loses roughly
-    one digit per moment as ``k^2 -> 0`` (a target far from the ring).  The
-    seeds are the same story: ``El2 = (K - E)/k^2`` is a cancelling difference.
-    A far-field evaluation must either carry the small-``k`` series or reach the
-    far field by another route; this returns the recursion as printed and the
-    accompanying test pins the parameter range over which it holds.  Only the
-    RECURSION is as printed: the seeds come through the complement like everything
-    else here, since taking them from the parameter would put a second and larger
-    error beside the one this function is documenting.
-    """
-    parameter = np.asarray(parameter, dtype=np.float64)
-    complete_k, complete_e = _complete_kind(1.0 - parameter)
-    moments = [complete_k, (complete_k - complete_e) / parameter]
-    for order in range(1, count - 1):
-        moments.append(
-            (
-                2.0 * order * (1.0 + parameter) * moments[order]
-                - (2 * order - 1) * moments[order - 1]
-            )
-            / ((2 * order + 1) * parameter)
-        )
-    return moments[:count]
 
 
 def sn_cn_moments(parameter: np.ndarray, count: int) -> list[np.ndarray]:
@@ -778,7 +779,13 @@ def sn_cn_moments(parameter: np.ndarray, count: int) -> list[np.ndarray]:
     return moments
 
 
-def pole_moment(characteristic: np.ndarray, parameter: np.ndarray) -> np.ndarray:
+def pole_moment(
+    characteristic: np.ndarray,
+    parameter: np.ndarray,
+    *,
+    complement: np.ndarray | None = None,
+    parameter_complement: np.ndarray | None = None,
+) -> np.ndarray:
     """Return ``I(eta^2)`` over a quarter period, in closed elementary form.
 
     The paper defines (eq 23)
@@ -792,31 +799,128 @@ def pole_moment(characteristic: np.ndarray, parameter: np.ndarray) -> np.ndarray
 
         I(eta^2) = eta^2 integral_(k')^1 dv / (eta^2 v^2 + k^2 - eta^2).
 
-    With ``A = k^2 - eta^2`` that is an arctangent for ``A > 0``, a reciprocal
-    for ``A = 0``, and (since ``eta^2 v^2 - |A| > 0`` throughout the range for
-    every ``eta^2 < 1``) an ``artanh`` of the RECIPROCAL argument for ``A < 0``.
-    ``characteristic`` is ``eta^2`` and ``parameter`` is ``k^2``.
+    The direct antiderivative is a difference of two arctangents or inverse
+    hyperbolic tangents.  Near ``eta^2 = k^2`` those two values coincide while
+    their difference remains finite, so that arrangement can return zero for a
+    nonzero integral.  Combining the pair first leaves one small ratio instead.
+    With ``p = 1 - eta^2``, ``q = 1 - k^2``, ``c = sqrt(q)``, and
+
+        d = p + c,   z = sqrt(eta^2 |p - q|) / d,
+
+    the result is ``eta^2/d`` times ``atan(z)/z`` where ``eta^2 < k^2`` and
+    ``atanh(z)/z`` where it is greater.  At equality the ratio is one and the
+    paired value is ``eta^2/d``.  Near the hyperbolic endpoint, the exact
+    factorisation
+
+        (d - sqrt(eta^2 |p - q|)) (d + sqrt(eta^2 |p - q|))
+            = p (1 + c)^2
+
+    keeps the logarithm scale-normalised as the characteristic approaches one.
+
+    ``complement`` and ``parameter_complement`` supply ``p`` and ``q`` exactly
+    when the caller has them.  If either is supplied their difference is
+    authoritative too, after deriving the other one if necessary; otherwise the
+    small difference is taken directly as
+    ``parameter - characteristic`` rather than by subtracting two near-unit
+    complements.  The physical domain is ``0 <= characteristic <= 1`` and
+    ``0 <= parameter <= 1``.  A characteristic of one returns the integral's
+    positive infinity; a characteristic outside the domain returns ``nan``.
     """
     characteristic = np.asarray(characteristic, dtype=np.float64)
     parameter = np.asarray(parameter, dtype=np.float64)
-    eta = np.sqrt(characteristic)
-    complementary = np.sqrt(1.0 - parameter)
-    offset = parameter - characteristic
+    has_exact_complement = complement is not None or parameter_complement is not None
+    if complement is None:
+        complement = 1.0 - characteristic
+    if parameter_complement is None:
+        parameter_complement = 1.0 - parameter
+    characteristic, parameter, complement, parameter_complement = np.broadcast_arrays(
+        characteristic,
+        parameter,
+        np.asarray(complement, dtype=np.float64),
+        np.asarray(parameter_complement, dtype=np.float64),
+    )
 
-    safe = np.where(np.abs(offset) < 1e-300, 1.0, offset)
-    root = np.sqrt(np.abs(safe))
-    positive = (
-        eta / root * (np.arctan(eta / root) - np.arctan(eta * complementary / root))
+    valid = (
+        (characteristic >= 0.0)
+        & (characteristic <= 1.0)
+        & (parameter >= 0.0)
+        & (parameter <= 1.0)
+        & (complement >= 0.0)
+        & (complement <= 1.0)
+        & (parameter_complement >= 0.0)
+        & (parameter_complement <= 1.0)
     )
-    negative = (
-        eta
-        / root
-        * (
-            np.arctanh(np.clip(root / (eta * complementary), -1.0 + 1e-16, 1.0 - 1e-16))
-            - np.arctanh(np.clip(root / eta, -1.0 + 1e-16, 1.0 - 1e-16))
-        )
+    live = valid & (characteristic > 0.0) & (complement > 0.0)
+    held_characteristic = np.where(live, characteristic, 1.0)
+    held_complement = np.where(live, complement, 1.0)
+    held_parameter_complement = np.where(live, parameter_complement, 1.0)
+    complementary = np.sqrt(held_parameter_complement)
+    denominator = held_complement + complementary
+
+    if has_exact_complement:
+        difference = complement - parameter_complement
+    else:
+        difference = parameter - characteristic
+    held_difference = np.where(live, difference, 0.0)
+    root = np.sqrt(held_characteristic) * np.sqrt(np.abs(held_difference))
+    magnitude = root / denominator
+    hyperbolic = live & (held_difference < 0.0)
+
+    # The ratio form is used only while its argument is small.  Hold the argument
+    # at zero before squaring outside that lane, since the endpoint ``q = 0``
+    # drives it as high as ``1/sqrt(p)`` and its square need not fit even though
+    # the integral does.
+    use_series = live & (magnitude < 0.01)
+    series_magnitude = np.where(use_series, magnitude, 0.0)
+    signed_square = np.where(
+        hyperbolic,
+        series_magnitude * series_magnitude,
+        -series_magnitude * series_magnitude,
     )
-    degenerate = 1.0 / complementary - 1.0
+    series = np.ones_like(signed_square)
+    power = np.ones_like(signed_square)
+    for order in range(1, 8):
+        power = power * signed_square
+        series = series + power / (2 * order + 1)
+    series_characteristic = np.where(use_series, held_characteristic, 0.0)
+    series_denominator = np.where(use_series, denominator, 1.0)
+    series_value = series_characteristic / series_denominator * series
+
+    # Away from equality, cancel ``denominator`` analytically between the outer
+    # scale and ``z = root/denominator``.  ``characteristic/root`` is bounded by
+    # the inverse square root of the smallest positive double, whereas the direct
+    # ``characteristic/denominator`` overflows at a subnormal exact complement.
+    transcendental_live = live & ~use_series & (root > 0.0)
+    held_root = np.where(transcendental_live, root, 1.0)
+    circular = np.arctan2(
+        np.where(transcendental_live & ~hyperbolic, root, 0.0),
+        np.where(transcendental_live & ~hyperbolic, denominator, 1.0),
+    )
+    direct_hyperbolic = transcendental_live & hyperbolic & (magnitude < 0.9)
+    direct_hyperbolic_value = np.arctanh(np.where(direct_hyperbolic, magnitude, 0.0))
+    endpoint_hyperbolic = transcendental_live & hyperbolic & ~direct_hyperbolic
+    endpoint_numerator = np.where(endpoint_hyperbolic, denominator + root, 1.0)
+    endpoint_denominator = np.where(
+        endpoint_hyperbolic,
+        np.sqrt(held_complement) * (1.0 + complementary),
+        1.0,
+    )
+    endpoint_hyperbolic_value = np.log(endpoint_numerator / endpoint_denominator)
+    hyperbolic_value = np.where(
+        direct_hyperbolic, direct_hyperbolic_value, endpoint_hyperbolic_value
+    )
+    transcendental = np.where(hyperbolic, hyperbolic_value, circular)
+    transcendental_value = held_characteristic / held_root * transcendental
+    regular = np.where(use_series, series_value, transcendental_value)
+    equal = live & (held_difference == 0.0)
+    equal_characteristic = np.where(equal, held_characteristic, 0.0)
+    equal_denominator = np.where(equal, denominator, 1.0)
+    equal_value = equal_characteristic / equal_denominator
+    finite = np.where(equal, equal_value, regular)
+
+    singular = valid & (characteristic > 0.0) & (complement == 0.0)
     return np.where(
-        np.abs(offset) < 1e-300, degenerate, np.where(offset > 0.0, positive, negative)
+        valid & (characteristic == 0.0),
+        0.0,
+        np.where(singular, np.inf, np.where(live, finite, np.nan)),
     )

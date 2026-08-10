@@ -143,15 +143,35 @@ def _finite_part(pole, cosine_weight, sine_weight, xp):
     is ``p/(1 + t)`` exactly and the logarithm of the ratio is not.
     """
     rising = pole - 1.0
-    root = xp.sqrt(xp.abs(rising))
-    held_root = xp.where(root > 0.0, root, 1.0)
+    separated = rising != 0.0
+    # The elementary factor tends to one where the pole equals one.  Hold the
+    # root argument before evaluation at that confluence: taking sqrt(0) and only
+    # masking its quotient afterward leaves an unbounded tangent in both JAX
+    # differentiation modes.
+    root = xp.sqrt(xp.where(separated, xp.abs(rising), 1.0))
     held_pole = xp.where(rising < 0.0, pole, 1.0)
     over = xp.where(
         rising > 0.0,
-        xp.arctan(root) / held_root,
-        xp.log((1.0 + root) / xp.sqrt(held_pole)) / held_root,
+        xp.arctan(root) / root,
+        (xp.log1p(root) - 0.5 * xp.log(held_pole)) / root,
     )
-    return (cosine_weight - sine_weight / pole) * xp.where(rising == 0.0, 1.0, over)
+    # Close to one, both elementary branches are the same analytic series in
+    # ``rising``.  Besides avoiding the logarithm's near-unit ratio, this keeps
+    # the next representable poles on either side of one correctly rounded.
+    close = xp.abs(rising) < 1e-4
+    series_rising = xp.where(close, rising, 0.0)
+    series = xp.ones_like(rising)
+    power = xp.ones_like(rising)
+    for order in range(1, 8):
+        power = -power * series_rising
+        series = series + power / (2 * order + 1)
+    elementary = xp.where(close, series, over)
+
+    # ``a - b/p`` loses the whole small difference when ``a == b`` and the pole
+    # is immediately below one.  This equivalent arrangement exposes ``p - 1``
+    # directly; Sterbenz subtraction makes that difference exact around one.
+    coefficient = (cosine_weight - sine_weight) + sine_weight * rising / pole
+    return coefficient * elementary
 
 
 def complete_kind(complement, *, xp=np, trips: int = TRIPS):

@@ -26,7 +26,12 @@ import numpy as np
 import pytest
 from scipy.special import elliprf, elliprj
 
-from nova.biot.symmetricelliptic import TRIPS, _elementary, symmetric_kinds
+from nova.biot.symmetricelliptic import (
+    TRIPS,
+    _elementary,
+    symmetric_first,
+    symmetric_kinds,
+)
 from nova.jax.config import configure_dtypes
 
 
@@ -80,6 +85,19 @@ def test_both_kinds_reproduce_the_reference_implementation(squared_cosine, compl
         # its own test below records what this one returns instead
         if np.isfinite(expected):
             assert float(third) == pytest.approx(expected, rel=2e-13)
+
+
+@pytest.mark.parametrize("squared_cosine", SQUARED_COSINES)
+@pytest.mark.parametrize("complement", COMPLEMENTS)
+def test_the_pole_free_first_kind_reproduces_the_reference(squared_cosine, complement):
+    """The RF-only entry point is the same symmetric form without RJ machinery."""
+    radical = squared_cosine + complement * (1.0 - squared_cosine)
+    got = symmetric_first(squared_cosine, radical, 1.0)
+    expected = elliprf(squared_cosine, radical, 1.0)
+    assert float(got) == pytest.approx(float(expected), rel=2e-15)
+
+    shared, _ = symmetric_kinds(squared_cosine, radical, 1.0, 1.0)
+    assert float(got) == float(shared)
 
 
 def test_the_third_kind_holds_where_the_reference_implementation_gives_up():
@@ -335,3 +353,20 @@ def test_the_traced_path_is_the_same_code_and_agrees_to_a_few_ulp():
     device = traced(_f64(complements), _f64(poles))
     for one, other in zip(host, device):
         assert np.max(np.abs(np.asarray(other) - one) / np.abs(one)) < 1e-14
+
+
+def test_the_pole_free_first_kind_traces_and_broadcasts_with_the_same_values():
+    """The smaller primitive keeps the host, traced, scalar, and array contracts."""
+    jax = pytest.importorskip("jax")
+    configure_dtypes()
+    jnp = jax.numpy
+    x = np.array([0.0, 1e-28, 0.2, 1.0])
+    y = np.array([1e-300, 1e-28, 0.4, 1.0])
+
+    @jax.jit
+    def traced(first, second):
+        return symmetric_first(first, second, _f64(1.0), xp=jnp)
+
+    host = symmetric_first(x, y, 1.0)
+    device = np.asarray(traced(_f64(x), _f64(y)))
+    np.testing.assert_allclose(device, host, rtol=1e-14, atol=0.0)

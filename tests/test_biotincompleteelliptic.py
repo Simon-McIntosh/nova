@@ -51,6 +51,8 @@ of the two is right.  The sweep therefore holds both against
 :func:`_pole_integral` absolutely, across the whole small-pole side.
 """
 
+from decimal import Decimal, localcontext
+
 import numpy as np
 import pytest
 from numpy.polynomial.legendre import leggauss
@@ -85,14 +87,6 @@ COMPLEMENTS = np.array(
 # the amplitude vanishing outright -- has its own test, since the pair a caller
 # supplies for it is exactly (0, 1) rather than a cosine of a right angle.
 CO_AMPLITUDES = np.array([1.4, 1.2, 0.7, 0.2, 1e-2, 1e-4, 1e-8, 1e-12, 0.0])
-
-# Where the two smallnesses meet the routine loses digits, and the boundary is
-# measured rather than assumed: below this co-amplitude AND below the complement
-# beside it, the amplitude's own step underflows before the descent has begun.
-# Geometrically it is a target within a femtometre of the arc's END EDGE -- both
-# on a section corner and on the end plane -- and the tests exclude only that.
-FRAGILE_CO_AMPLITUDE = 1e-7
-FRAGILE_COMPLEMENT = 1e-25
 
 
 def pair(co_amplitude):
@@ -171,6 +165,31 @@ def extended_second_kind(co_amplitude, complement):
     return _defining_integral(co_amplitude, complement, 1)
 
 
+def decimal_first_kind(sine, cosine, complement):
+    """Return the Carlson identity after a 420-digit duplication.
+
+    The duplication is carried until its three arguments agree to more than one
+    hundred decimal digits, at which point ``R_F`` is their common inverse square
+    root.  No closing polynomial or floating-point special function is shared
+    with the implementation under test.
+    """
+    with localcontext() as context:
+        context.prec = 420
+        sine = Decimal.from_float(float(sine))
+        cosine = Decimal.from_float(float(cosine))
+        complement = Decimal.from_float(float(complement))
+        x = cosine * cosine
+        y = x + complement * sine * sine
+        z = Decimal(1)
+        four = Decimal(4)
+        for _ in range(240):
+            root_x, root_y, root_z = x.sqrt(), y.sqrt(), z.sqrt()
+            step = root_x * root_y + root_y * root_z + root_z * root_x
+            x, y, z = ((term + step) / four for term in (x, y, z))
+        mean = (x + y + z) / Decimal(3)
+        return float(sine / mean.sqrt())
+
+
 @pytest.mark.parametrize("complement", COMPLEMENTS)
 def test_the_quarter_turn_reproduces_the_complete_routine_to_the_last_bit(complement):
     """The limit in which the arc closes onto the ring the full turn evaluates."""
@@ -184,10 +203,7 @@ def test_the_quarter_turn_reproduces_the_complete_routine_to_the_last_bit(comple
 @pytest.mark.parametrize("co_amplitude", CO_AMPLITUDES)
 @pytest.mark.parametrize("complement", COMPLEMENTS)
 def test_first_kind_reproduces_its_defining_integral(co_amplitude, complement):
-    """Over the whole double range of complement and amplitude but one corner."""
-    if co_amplitude and co_amplitude < FRAGILE_CO_AMPLITUDE:
-        if complement < FRAGILE_COMPLEMENT:
-            pytest.skip("the arc end edge, whose boundary its own test measures")
+    """Over the whole double range of complement and amplitude."""
     amplitude, sine, cosine = pair(co_amplitude)
     first, _ = incomplete_kind(amplitude, complement, sine=sine, cosine=cosine)
     expected = float(extended_first_kind(co_amplitude, complement))
@@ -276,25 +292,16 @@ def test_a_target_on_the_source_ring_is_elementary(co_amplitude):
     assert float(first) == pytest.approx(np.log((1.0 + sine) / cosine), rel=4e-16)
 
 
-def test_the_arc_end_edge_corner_degrades_by_a_measured_amount():
-    """Where both smallnesses meet, and by how much -- asserted in BOTH directions.
-
-    The amplitude's first step is ``arctan2(k' sin a, cos a)``, and where the
-    co-amplitude and the complementary modulus are both tiny that step underflows
-    before the descent has begun: the routine returns the confluence's own
-    elementary value instead of the one a hair away from it.  The configuration is
-    a target on a section CORNER and within a rounding error of the arc's end
-    plane at once.  The bound below is what it costs, so a regression and an
-    unexplained improvement both fail.
-    """
+def test_the_arc_end_edge_corner_keeps_double_precision():
+    """The two-smallness corner against an independent high-precision RF value."""
     worst = 0.0
     for co_amplitude in (1e-8, 1e-10, 1e-12, 1e-14):
         for complement in (1e-30, 1e-40, 1e-80, 1e-300):
             amplitude, sine, cosine = pair(co_amplitude)
             first, _ = incomplete_kind(amplitude, complement, sine=sine, cosine=cosine)
-            expected = float(extended_first_kind(co_amplitude, complement))
+            expected = decimal_first_kind(sine, cosine, complement)
             worst = max(worst, abs(float(first) - expected) / abs(expected))
-    assert 1e-6 < worst < 1e-3
+    assert worst < 8e-16
 
 
 def test_the_trip_count_is_bounded_by_the_argument_range_in_both_directions():
@@ -307,15 +314,16 @@ def test_the_trip_count_is_bounded_by_the_argument_range_in_both_directions():
     """
     amplitude, sine, cosine = pair(0.3)
     complements = np.array([1e-300, 1e-80, 1e-16, 1e-3, 0.5, 1.0])
-    settled, _ = incomplete_kind(
+    settled = incomplete_kind(
         amplitude, complements, sine=sine, cosine=cosine, trips=TRIPS + 6
     )
-    at_count, _ = incomplete_kind(amplitude, complements, sine=sine, cosine=cosine)
-    short, _ = incomplete_kind(
-        amplitude, complements, sine=sine, cosine=cosine, trips=TRIPS - 4
+    at_count = incomplete_kind(amplitude, complements, sine=sine, cosine=cosine)
+    short = incomplete_kind(
+        amplitude, complements, sine=sine, cosine=cosine, trips=TRIPS - 6
     )
-    assert np.max(np.abs(at_count - settled) / settled) < 4e-16
-    assert np.max(np.abs(short - settled) / settled) > 1e-8
+    for got, expected in zip(at_count, settled):
+        assert np.max(np.abs(got - expected) / np.abs(expected)) < 4e-16
+    assert np.max(np.abs(short[1] - settled[1]) / np.abs(settled[1])) > 1e-8
 
 
 def traced_namespace():
@@ -369,6 +377,29 @@ def test_the_first_kind_differentiates_in_the_amplitude_exactly():
             np.cos(amplitude) ** 2 + complement * np.sin(amplitude) ** 2
         )
         assert got == pytest.approx(expected, rel=1e-12)
+
+
+def test_the_first_kind_corner_keeps_its_amplitude_derivative():
+    """The RF route has the defining derivative where both endpoint scales are tiny."""
+    jax, jnp = traced_namespace()
+    complement = 1e-300
+    amplitude = 0.5 * np.pi - 1e-12
+
+    def first(angle):
+        return incomplete_kind(
+            angle,
+            _f64(complement),
+            sine=jnp.sin(angle),
+            cosine=jnp.cos(angle),
+            xp=jnp,
+        )[0]
+
+    got = float(jax.jacfwd(first)(_f64(amplitude)))
+    expected = 1.0 / np.sqrt(
+        np.cos(amplitude) ** 2 + complement * np.sin(amplitude) ** 2
+    )
+    assert np.isfinite(got)
+    assert got == pytest.approx(expected, rel=3e-12)
 
 
 # The pole argument, which is the denominator's value at the FAR end of the range.
@@ -543,14 +574,10 @@ def test_a_unit_pole_is_the_first_kind(co_amplitude, complement):
     this module carries -- the amplitude-carrying descent and the symmetric forms
     -- at the one argument where they compute the same thing.
 
-    The arc-end-edge corner is excluded here for the reason the descent's own test
-    excludes it, and the exclusion is one-sided: measured against the longdouble
-    reference there, the descent is 5.3e-06 out and the symmetric route 2.5e-16.
-    The corner is the descent's and not the integral's.
+    The joint end-edge corner is included: both routes use Carlson's first form
+    there, so the equality remains a statement about the integral rather than the
+    conditioning of one arrangement.
     """
-    if co_amplitude and co_amplitude < FRAGILE_CO_AMPLITUDE:
-        if complement < FRAGILE_COMPLEMENT:
-            pytest.skip("the arc end edge, whose boundary its own test measures")
     amplitude, sine, cosine = pair(co_amplitude)
     got = incomplete_pole(np.asarray(1.0), np.asarray(complement), sine, cosine)
     first, _ = incomplete_kind(amplitude, complement, sine=sine, cosine=cosine)
@@ -577,6 +604,102 @@ def test_a_root_on_the_range_end_keeps_the_complete_routine_s_convention():
         got = incomplete_pole(np.asarray(0.0), np.asarray(1e-3), sine, cosine)
         assert float(got) == 0.0
         assert float(complete_pole(np.asarray(0.0), np.asarray(1e-3))) == 0.0
+
+
+@pytest.mark.parametrize("sine", [-1.0, 1.0])
+def test_the_double_confluence_is_the_signed_complete_finite_part(sine):
+    """The exact quarter turn never evaluates the inactive Carlson singularity."""
+    poles = np.array(
+        [
+            0.5,
+            np.nextafter(1.0, 0.0),
+            1.0,
+            np.nextafter(1.0, np.inf),
+            2.0,
+            1e100,
+            1e300,
+        ]
+    )
+    with np.errstate(all="raise"):
+        got = incomplete_pole(poles, 0.0, sine, 0.0)
+        expected = sine * complete_pole(poles, 0.0)
+    np.testing.assert_array_equal(got, expected)
+
+
+@pytest.mark.parametrize("sine", [-1.0, 1.0])
+def test_the_double_confluence_keeps_the_finite_part_pole_tangent(sine):
+    """The inactive Carlson branch contributes neither warnings nor tangents."""
+    jax, jnp = traced_namespace()
+
+    def value(pole):
+        return incomplete_pole(pole, _f64(0.0), _f64(sine), _f64(0.0), xp=jnp)
+
+    poles = np.array([np.nextafter(1.0, 0.0), 1.0, np.nextafter(1.0, np.inf)])
+    slopes = np.array(
+        [
+            float.fromhex("0x1.0000000000001p+0"),
+            1.0,
+            float.fromhex("0x1.ffffffffffffbp-1"),
+        ]
+    )
+    for pole, slope in zip(poles, slopes):
+        forward = float(jax.jacfwd(value)(_f64(pole)))
+        reverse = float(jax.grad(value)(_f64(pole)))
+        assert np.isfinite(forward)
+        assert forward == pytest.approx(sine * slope, rel=1e-15)
+        assert reverse == forward
+
+
+@pytest.mark.parametrize("sine_sign", [-1.0, 1.0])
+def test_a_characteristic_equal_to_the_parameter_uses_its_exact_identity(sine_sign):
+    """A pole equal to the modulus parameter is fixed by the second kind."""
+    for complement in (0.2, 1.0):
+        amplitude = sine_sign * 1.2
+        sine, cosine = np.sin(amplitude), np.cos(amplitude)
+        parameter = 1.0 - complement
+        _, second = incomplete_kind(
+            amplitude,
+            complement,
+            sine=sine,
+            cosine=cosine,
+            parameter=parameter,
+        )
+        edge = np.sqrt(complement + parameter * cosine * cosine)
+        expected = (second - parameter * sine * cosine / edge) / complement
+        got = incomplete_pole(complement, complement, sine, cosine)
+        assert float(got) == pytest.approx(float(expected), rel=2e-15)
+
+    for complement in (1e-12, 1e-6):
+        _, second = incomplete_kind(
+            sine_sign * 0.5 * np.pi,
+            complement,
+            sine=sine_sign,
+            cosine=0.0,
+        )
+        got = incomplete_pole(complement, complement, sine_sign, 0.0)
+        assert float(got) == pytest.approx(float(second / complement), rel=4e-15)
+
+
+def test_signed_amplitudes_are_odd_at_the_confluence_and_in_the_interior():
+    """Reflection through zero changes only the sign of every incomplete value."""
+    for complement in (0.0, 1e-300, 0.2, 1.0):
+        for amplitude in (0.0, 0.3, 0.5 * np.pi):
+            sine, cosine = np.sin(amplitude), np.cos(amplitude)
+            if amplitude == 0.5 * np.pi:
+                sine, cosine = 1.0, 0.0
+            positive = incomplete_kind(amplitude, complement, sine=sine, cosine=cosine)
+            negative = incomplete_kind(
+                -amplitude, complement, sine=-sine, cosine=cosine
+            )
+            for one, other in zip(positive, negative):
+                assert float(other) == -float(one)
+
+    sine, cosine = np.sin(0.7), np.cos(0.7)
+    with np.errstate(divide="raise", invalid="raise", over="raise", under="ignore"):
+        for pole in (0.5, 1.0, 2.0):
+            positive = incomplete_pole(pole, 1e-300, sine, cosine)
+            negative = incomplete_pole(pole, 1e-300, -sine, cosine)
+            assert float(negative) == pytest.approx(-float(positive), rel=2e-15)
 
 
 def test_the_symmetric_forms_taken_as_printed_are_what_the_reflection_repairs():

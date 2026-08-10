@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-10">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
@@ -76,48 +76,48 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="normalisation-policy" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="normalisation-policy" data-choice="absolute-only" data-by="Simon McIntosh" data-when="2026-08-10T09:49:16+00:00">
     <p class="r-dec-q">Should the first public solve accept only absolute source functions, or also one common-amplitude target- I_p closure? Recommendation: ship absolute-only first, but design the typed scalar closure now and add it only for a concrete shape-family consumer.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="absolute-only">absolute-only</button>
+      <button class="r-opt chosen" data-value="absolute-only">absolute-only</button>
       <button class="r-opt" data-value="absolute-and-explicit-shape-current">absolute-and-explicit-shape-current</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">The first public path must preserve supplied physical sources exactly; a typed one-amplitude target-current closure can be added later for a concrete shape-family consumer.</p>
     </div>
-<div class="r-dec" data-key="moment-enforcement" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="moment-enforcement" data-choice="diagnostics-and-ambix-conditioning" data-by="Simon McIntosh" data-when="2026-08-10T09:49:16+00:00">
     <p class="r-dec-q">How should target beta_p and l_i affect a prescribed-profile solve? Recommendation: ForwardProfile reports their residuals and Jacobian; if they must reshape profiles, Ambix conditions its ensemble or calls ReconstructProfile .</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="diagnostics-and-ambix-conditioning">diagnostics-and-ambix-conditioning</button>
+      <button class="r-opt chosen" data-value="diagnostics-and-ambix-conditioning">diagnostics-and-ambix-conditioning</button>
       <button class="r-opt" data-value="nova-reconstruct-profile">nova-reconstruct-profile</button>
       <button class="r-opt" data-value="forward-profile-enforcement">forward-profile-enforcement</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">ForwardProfile reports plasma current, beta_p and l_i residuals and Jacobians without modifying profiles; any profile reshaping remains Ambix conditioning or ReconstructProfile work.</p>
     </div>
-<div class="r-dec" data-key="rotation-closure" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="rotation-closure" data-choice="isothermal-surface" data-by="Simon McIntosh" data-when="2026-08-10T09:49:16+00:00">
     <p class="r-dec-q">Which toroidal-rotation thermodynamic closure is the first supported physical model? Recommendation: isothermal flux surfaces, benchmarked against analytic rotating equilibria; add polytropic support later.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="isothermal-surface">isothermal-surface</button>
+      <button class="r-opt chosen" data-value="isothermal-surface">isothermal-surface</button>
       <button class="r-opt" data-value="polytropic-surface">polytropic-surface</button>
       <button class="r-opt" data-value="both">both</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">The isothermal-surface model has a complete typed thermodynamic closure and analytic rotating-equilibrium benchmarks, making it the smallest verifiable first implementation.</p>
     </div>
-<div class="r-dec" data-key="private-flux-policy" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="private-flux-policy" data-choice="independent-low-pressure" data-by="Simon McIntosh" data-when="2026-08-10T09:49:16+00:00">
     <p class="r-dec-q">How is the private-flux region treated in the first SOL implementation? Recommendation: an independently specified low-pressure continuation with at least value and first-derivative continuity at the separatrix, never an unexamined copy of the common SOL.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="independent-low-pressure">independent-low-pressure</button>
+      <button class="r-opt chosen" data-value="independent-low-pressure">independent-low-pressure</button>
       <button class="r-opt" data-value="copy-common-sol">copy-common-sol</button>
       <button class="r-opt" data-value="zero-source">zero-source</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Private flux has different material connectivity and receives an independent low-pressure continuation with explicit separatrix continuity rather than copying the common SOL.</p>
     </div>
-<div class="r-dec" data-key="field-aligned-sol-current" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="field-aligned-sol-current" data-choice="defer-boundary-current" data-by="Simon McIntosh" data-when="2026-08-10T09:49:16+00:00">
     <p class="r-dec-q">Is field-aligned/poloidal SOL current part of this plan? Recommendation: defer it to a boundary-current plan unless a material return-current and sheath/halo closure is supplied.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="defer-boundary-current">defer-boundary-current</button>
+      <button class="r-opt chosen" data-value="defer-boundary-current">defer-boundary-current</button>
       <button class="r-opt" data-value="include-with-specified-closure">include-with-specified-closure</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Field-aligned or poloidal SOL current cannot conserve the full circuit until material return paths and sheath or halo boundary conditions are specified.</p>
     </div>
 </section>
 

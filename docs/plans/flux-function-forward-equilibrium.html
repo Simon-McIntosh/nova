@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-10">
-<meta name="plan-version" content="9">
+<meta name="plan-version" content="10">
 <meta name="plan-impl" content="0.65">
 </head>
 <body>
@@ -74,7 +74,7 @@
 
     <h2 id="s5">§5 — Sequencing and exclusions</h2>
     <p>The source/result types and analytic fixtures can land while the boundary accelerator finishes. Closing the plan requires the accelerated topology read and the Ambix interface contract. This plan does not fit profile coefficients, train a closure model, infer a state from diagnostics, design coil currents, model non-axisymmetric fields, or claim a sheath/neutral/halo-current closure.</p>
-    <p>The first useful integration is a one-slice static absolute-source solve, followed by batched static ensemble members, rotation, and then topology-qualified SOL continuation. Field-aligned SOL current is deferred until the material-boundary return path is physically specified.</p>
+    <p>The first useful integration is a one-slice static absolute-source solve, followed by batched static ensemble members, rotation, and then topology-qualified SOL continuation. The SOL continuation is an optional, strictly additive extension: the bulk plasma solve's correctness always takes priority, and an undeclared continuation leaves the static path byte-identical. The physical motivation for extending the flux-function parametrization beyond <code>psi_N = 1</code> is that real SOL current — mixed poloidal/toroidal, connecting between the divertor plates — must itself satisfy force balance and hence the GS constraint, exactly as the confined plasma does. Field-aligned SOL current is deferred until the material-boundary return path and sheath closure are physically specified.</p>
     <p><strong>The solved flux map has a second consumer beyond the Ambix seam.</strong> The flux-surface-averaged geometry record assembled from it — <code>V′</code>, the <code>⟨1/R²⟩</code> and diffusion-coefficient metrics, <code>F</code> and <code>q</code> on the toroidal-flux coordinate — is the geometry input of the transport forward solve (<a href="/nova/flux-function-forward-transport.html">flux-function-forward-transport</a>), and the transport-evolved <code>p′</code> and <code>FF′</code> return through the same typed flux-function state as a first-class source for this solve. The geometry record is therefore a public output contract of <code>ForwardProfile</code>, convention-pinned exactly like the field itself and supplied at both interval endpoints so the transport moving-grid term is correct.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">

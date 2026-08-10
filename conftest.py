@@ -64,10 +64,22 @@ _SLOW_FILES = frozenset(
     }
 )
 
-# Individually heavy tests inside otherwise-fast modules.
+# Individually heavy tests inside otherwise-fast modules. A parametrised test
+# is named without its argument list; the collected nodeid is stripped back to
+# the same form before matching.
 _SLOW_NODEIDS = frozenset(
     {
         "tests/test_polyline.py::test_single_arc_hd",
+        # the rotating free-boundary ladder: four bootstrapped machines, their
+        # solves, and a gradient through one of them. The source-level rotation
+        # contract in the same module stays in the fast lane.
+        "tests/test_equilibrium_rotation.py::test_the_rotating_solve_reaches_its_fixed_point",
+        "tests/test_equilibrium_rotation.py::test_the_rotating_solve_publishes_its_closure_and_conventions",
+        "tests/test_equilibrium_rotation.py::test_the_rotating_solve_meets_its_conservation_tolerances",
+        "tests/test_equilibrium_rotation.py::test_the_solved_axis_is_the_analytic_one_at_every_mach_number",
+        "tests/test_equilibrium_rotation.py::test_rotation_pulls_the_boundary_in_by_the_analytic_shift",
+        "tests/test_equilibrium_rotation.py::test_the_rotating_solve_is_differentiable_in_the_conductor_current",
+        "tests/test_equilibrium_rotation.py::test_the_host_and_traced_routes_agree_on_the_rotating_map",
     }
 )
 
@@ -90,5 +102,5 @@ def pytest_collection_modifyitems(config, items):
         if not imas_ok and item.nodeid.startswith("nova/imas/"):
             item.add_marker(skip_imas)
         filename = os.path.basename(str(getattr(item, "path", "")) or item.nodeid)
-        if filename in _SLOW_FILES or item.nodeid in _SLOW_NODEIDS:
+        if filename in _SLOW_FILES or item.nodeid.split("[")[0] in _SLOW_NODEIDS:
             item.add_marker(slow)

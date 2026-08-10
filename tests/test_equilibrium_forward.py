@@ -303,7 +303,7 @@ def test_absolute_profiles_are_untouched_by_a_source_evaluation(analytic):
     source.cell_current(
         jnp.asarray(lattice.node_radius), jnp.asarray(lattice.cell_area), masks
     )
-    core_pressure(source, masks, span)
+    core_pressure(source, masks, jnp.asarray(lattice.node_radius), span)
     after = (
         np.asarray(source.core.p_prime.data).tobytes(),
         np.asarray(source.core.ff_prime.data).tobytes(),
@@ -367,7 +367,8 @@ def test_profile_primitives_integrate_inward_from_the_boundary(analytic):
         label=jnp.full(3, int(PlasmaDomain.CORE), dtype=jnp.int8),
         psi_norm=jnp.asarray([0.0, 0.5, 1.0]),
     )
-    pressure = np.asarray(core_pressure(source, probe, span))
+    radius = jnp.full(3, AXIS_RADIUS)
+    pressure = np.asarray(core_pressure(source, probe, radius, span))
     squared = np.asarray(core_field_function_squared(source, probe, span))
     np.testing.assert_allclose(pressure[2], BOUNDARY_PRESSURE, rtol=1e-12)
     np.testing.assert_allclose(

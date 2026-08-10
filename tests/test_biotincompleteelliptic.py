@@ -609,7 +609,17 @@ def test_a_root_on_the_range_end_keeps_the_complete_routine_s_convention():
 @pytest.mark.parametrize("sine", [-1.0, 1.0])
 def test_the_double_confluence_is_the_signed_complete_finite_part(sine):
     """The exact quarter turn never evaluates the inactive Carlson singularity."""
-    poles = np.array([0.5, 1.0, 2.0])
+    poles = np.array(
+        [
+            0.5,
+            np.nextafter(1.0, 0.0),
+            1.0,
+            np.nextafter(1.0, np.inf),
+            2.0,
+            1e100,
+            1e300,
+        ]
+    )
     with np.errstate(all="raise"):
         got = incomplete_pole(poles, 0.0, sine, 0.0)
         expected = sine * complete_pole(poles, 0.0)
@@ -624,10 +634,20 @@ def test_the_double_confluence_keeps_the_finite_part_pole_tangent(sine):
     def value(pole):
         return incomplete_pole(pole, _f64(0.0), _f64(sine), _f64(0.0), xp=jnp)
 
-    forward = float(jax.jacfwd(value)(_f64(1.0)))
-    reverse = float(jax.grad(value)(_f64(1.0)))
-    assert forward == pytest.approx(sine, rel=2e-15)
-    assert reverse == pytest.approx(sine, rel=2e-15)
+    poles = np.array([np.nextafter(1.0, 0.0), 1.0, np.nextafter(1.0, np.inf)])
+    slopes = np.array(
+        [
+            float.fromhex("0x1.0000000000001p+0"),
+            1.0,
+            float.fromhex("0x1.ffffffffffffbp-1"),
+        ]
+    )
+    for pole, slope in zip(poles, slopes):
+        forward = float(jax.jacfwd(value)(_f64(pole)))
+        reverse = float(jax.grad(value)(_f64(pole)))
+        assert np.isfinite(forward)
+        assert forward == pytest.approx(sine * slope, rel=1e-15)
+        assert reverse == forward
 
 
 @pytest.mark.parametrize("sine_sign", [-1.0, 1.0])

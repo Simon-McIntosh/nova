@@ -32,6 +32,10 @@ PARAMETERS = [1e-3, 1e-2, 0.1, 0.3, 0.5, 0.7, 0.9, 0.99, 0.999]
 DECIMAL_PI = Decimal(
     "3.141592653589793238462643383279502884197169399375105820974944592307816406"
     "286208998628034825342117067982148086513282306647093844609550582231725359"
+    "408128481117450284102701938521105559644622948954930381964428810975665933"
+    "446128475648233786783165271201909145648566923460348610454326648213393607"
+    "260249141273724587006606315588174881520920962829254091715364367892590360"
+    "011330530548820466521384146951941511609433057270365759591953092186117381"
 )
 
 
@@ -108,6 +112,48 @@ def decimal_pole_moment(characteristic, parameter):
                 parameter_power *= parameter
             characteristic_power *= characteristic
         return float(characteristic * total / 2)
+
+
+def decimal_arctangent(value):
+    """Return an arctangent from a 300-digit argument-reduced power series."""
+    value = Decimal(value)
+    if value < 0:
+        return -decimal_arctangent(-value)
+    if value > 1:
+        return DECIMAL_PI / 2 - decimal_arctangent(1 / value)
+    if value > Decimal("0.5"):
+        return DECIMAL_PI / 4 + decimal_arctangent((value - 1) / (value + 1))
+    square = value * value
+    term = total = value
+    for order in range(1, 2000):
+        term = -term * square
+        increment = term / Decimal(2 * order + 1)
+        total += increment
+        if abs(increment) < Decimal("1e-310"):
+            return total
+    raise AssertionError("the decimal arctangent series did not converge")
+
+
+def decimal_complement_pole_moment(complement, parameter_complement):
+    """Return the closed quarter-period value with 300-digit complement arithmetic."""
+    with localcontext() as context:
+        context.prec = 320
+        pole_complement = Decimal.from_float(float(complement))
+        modulus_complement = Decimal.from_float(float(parameter_complement))
+        characteristic = Decimal(1) - pole_complement
+        complementary = modulus_complement.sqrt()
+        denominator = pole_complement + complementary
+        difference = pole_complement - modulus_complement
+        if difference == 0:
+            return float(characteristic / denominator)
+        root = (characteristic * abs(difference)).sqrt()
+        if difference > 0:
+            angle = decimal_arctangent(root / denominator)
+        else:
+            angle = (
+                (denominator + root) / (pole_complement.sqrt() * (1 + complementary))
+            ).ln()
+        return float(characteristic / root * angle)
 
 
 @pytest.mark.parametrize("parameter", PARAMETERS)
@@ -253,6 +299,109 @@ def test_pole_moment_keeps_exact_complements_and_elementary_limits():
         parameter_complement=np.float64(1.0),
     )
     assert float(exact) == pytest.approx(-0.5 * np.log(complement), rel=2e-15)
+
+
+def test_pole_moment_keeps_the_full_positive_complement_range_at_unit_parameter():
+    """The finite endpoint is scaled before any reciprocal can overflow."""
+    smallest = np.nextafter(np.float64(0.0), np.float64(1.0))
+    complements = np.array([smallest, 1e-320, 1e-300, 1e-250, 1e-200])
+    expected = np.array(
+        [decimal_complement_pole_moment(term, 0.0) for term in complements]
+    )
+    with np.errstate(all="raise"):
+        got = pole_moment(
+            np.ones(complements.shape, dtype=np.float32),
+            np.float32(1.0),
+            complement=complements,
+            parameter_complement=np.float32(0.0),
+        )
+    assert got.shape == complements.shape
+    assert got.dtype == np.float64
+    np.testing.assert_allclose(got, expected, rtol=4e-16, atol=0.0)
+
+
+def test_pole_moment_branches_on_exact_neighbouring_complements():
+    """Rounded principal values do not erase either side of complement equality."""
+    smallest = np.nextafter(np.float64(0.0), np.float64(1.0))
+    poles = np.array([smallest, 1e-300, 1e-250, 1e-200])
+    pole_grid = np.repeat(poles, 3)
+    modulus_grid = np.array(
+        [
+            neighbour
+            for pole in poles
+            for neighbour in (
+                np.nextafter(pole, 0.0),
+                pole,
+                np.nextafter(pole, np.inf),
+            )
+        ]
+    )
+    expected = np.array(
+        [
+            decimal_complement_pole_moment(pole, modulus)
+            for pole, modulus in zip(pole_grid, modulus_grid)
+        ]
+    )
+    with np.errstate(all="raise"):
+        got = pole_moment(
+            np.ones_like(pole_grid),
+            np.ones_like(modulus_grid),
+            complement=pole_grid,
+            parameter_complement=modulus_grid,
+        )
+    np.testing.assert_allclose(got, expected, rtol=2e-15, atol=0.0)
+
+
+def test_pole_moment_extreme_lanes_are_held_before_eager_evaluation():
+    """One broadcast covers zero, both finite branches, equality, and true infinity."""
+    smallest = np.nextafter(np.float64(0.0), np.float64(1.0))
+    poles = np.array([1.0, smallest, smallest, smallest, smallest, smallest, 0.0])
+    moduli = np.array([1.0, 0.0, smallest, 2.0 * smallest, 0.25, 1.0, 0.25])
+    characteristic = np.array([0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
+    parameter = 1.0 - moduli
+    with np.errstate(all="raise"):
+        got = pole_moment(
+            characteristic,
+            parameter,
+            complement=poles,
+            parameter_complement=moduli,
+        )
+    assert got[0] == 0.0
+    assert np.all(np.isfinite(got[1:-1]))
+    assert np.isposinf(got[-1])
+
+    references = np.array(
+        [
+            float(
+                "7.0668772630353430919108272455989351906971060222382893819705684e161"
+            ),
+            float(
+                "4.4989137945431963828105385076859818588696971183019166331007556e161"
+            ),
+            float(
+                "3.9652237887882404081692413173009657591670080061570872317507195e161"
+            ),
+            float("7.4362914170516493355015127221515293583994316345598915453038230e2"),
+            float("3.7222003596069063115705364922304081705654357215145707146280517e2"),
+        ]
+    )
+    np.testing.assert_allclose(got[1:-1], references, rtol=4e-16, atol=0.0)
+
+
+def test_pole_moment_retains_one_supplied_complement_and_small_equality():
+    """Either paired complement and the principal characteristic carry information."""
+    smallest = np.nextafter(np.float64(0.0), np.float64(1.0))
+    with np.errstate(all="raise"):
+        one_complement = pole_moment(1.0, 1.0, complement=smallest)
+        explicit_pair = pole_moment(
+            1.0,
+            1.0,
+            complement=smallest,
+            parameter_complement=0.0,
+        )
+        small_equal = pole_moment(1e-20, 1e-20)
+    assert float(one_complement) == float(explicit_pair)
+    assert float(small_equal) == pytest.approx(5e-21, rel=2e-15)
 
 
 @pytest.mark.parametrize("parameter", [0.05, 0.3, 0.7, 0.95])

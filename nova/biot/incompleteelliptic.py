@@ -367,10 +367,20 @@ def incomplete_pole(pole, complement, sine, cosine, *, xp=np, trips: int = TRIPS
     # element -- the value either way is the same zero
     growth = xp.where(
         reflected,
-        xp.sqrt(xp.where(reflected, (pole - 1.0) * (pole - complement) / held, 1.0)),
+        xp.sqrt(
+            xp.where(
+                reflected,
+                (pole - 1.0) * ((pole - complement) / held),
+                1.0,
+            )
+        ),
         0.0,
     )
-    partner_weight = xp.where(reflected, complement * (pole - 1.0) / (held * gap), 1.0)
+    partner_weight = xp.where(
+        reflected,
+        (complement / held) * ((pole - 1.0) / gap),
+        1.0,
+    )
     first_weight = partner_weight + xp.where(reflected, (1.0 - complement) / gap, 0.0)
 
     # the three gaps between the pole argument and the other three, as PRODUCTS of

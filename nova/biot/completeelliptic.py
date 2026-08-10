@@ -153,9 +153,25 @@ def _finite_part(pole, cosine_weight, sine_weight, xp):
     over = xp.where(
         rising > 0.0,
         xp.arctan(root) / root,
-        xp.log((1.0 + root) / xp.sqrt(held_pole)) / root,
+        (xp.log1p(root) - 0.5 * xp.log(held_pole)) / root,
     )
-    return (cosine_weight - sine_weight / pole) * xp.where(separated, over, 1.0)
+    # Close to one, both elementary branches are the same analytic series in
+    # ``rising``.  Besides avoiding the logarithm's near-unit ratio, this keeps
+    # the next representable poles on either side of one correctly rounded.
+    close = xp.abs(rising) < 1e-4
+    series_rising = xp.where(close, rising, 0.0)
+    series = xp.ones_like(rising)
+    power = xp.ones_like(rising)
+    for order in range(1, 8):
+        power = -power * series_rising
+        series = series + power / (2 * order + 1)
+    elementary = xp.where(close, series, over)
+
+    # ``a - b/p`` loses the whole small difference when ``a == b`` and the pole
+    # is immediately below one.  This equivalent arrangement exposes ``p - 1``
+    # directly; Sterbenz subtraction makes that difference exact around one.
+    coefficient = (cosine_weight - sine_weight) + sine_weight * rising / pole
+    return coefficient * elementary
 
 
 def complete_kind(complement, *, xp=np, trips: int = TRIPS):

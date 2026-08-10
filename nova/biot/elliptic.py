@@ -134,7 +134,7 @@ def _reciprocal_arctangent(magnitude, gap, hyperbolic, xp, *, signed_square=None
     transcendental = (
         xp.where(
             hyperbolic,
-            0.5 * xp.log1p(2.0 * hyperbolic_magnitude / hyperbolic_gap),
+            0.5 * (xp.log1p(hyperbolic_magnitude) - xp.log(hyperbolic_gap)),
             xp.arctan(circular_magnitude),
         )
         / held
@@ -809,16 +809,18 @@ def pole_moment(
 
     the result is ``eta^2/d`` times ``atan(z)/z`` where ``eta^2 < k^2`` and
     ``atanh(z)/z`` where it is greater.  At equality the ratio is one and the
-    value is the exact ``1/c - 1``.  The hyperbolic branch receives the exact
-    positive gap
+    paired value is ``eta^2/d``.  Near the hyperbolic endpoint, the exact
+    factorisation
 
-        1 - z = p (1 + c)^2 / (d (d + sqrt(eta^2 |p - q|))),
+        (d - sqrt(eta^2 |p - q|)) (d + sqrt(eta^2 |p - q|))
+            = p (1 + c)^2
 
-    so its logarithm remains accurate as the characteristic approaches one.
+    keeps the logarithm scale-normalised as the characteristic approaches one.
 
     ``complement`` and ``parameter_complement`` supply ``p`` and ``q`` exactly
-    when the caller has them.  If both are supplied their difference is
-    authoritative too; otherwise the small difference is taken directly as
+    when the caller has them.  If either is supplied their difference is
+    authoritative too, after deriving the other one if necessary; otherwise the
+    small difference is taken directly as
     ``parameter - characteristic`` rather than by subtracting two near-unit
     complements.  The physical domain is ``0 <= characteristic <= 1`` and
     ``0 <= parameter <= 1``.  A characteristic of one returns the integral's
@@ -826,9 +828,7 @@ def pole_moment(
     """
     characteristic = np.asarray(characteristic, dtype=np.float64)
     parameter = np.asarray(parameter, dtype=np.float64)
-    exact_complement_difference = (
-        complement is not None and parameter_complement is not None
-    )
+    has_exact_complement = complement is not None or parameter_complement is not None
     if complement is None:
         complement = 1.0 - characteristic
     if parameter_complement is None:
@@ -857,33 +857,65 @@ def pole_moment(
     complementary = np.sqrt(held_parameter_complement)
     denominator = held_complement + complementary
 
-    if exact_complement_difference:
+    if has_exact_complement:
         difference = complement - parameter_complement
     else:
         difference = parameter - characteristic
     held_difference = np.where(live, difference, 0.0)
-    root = np.sqrt(held_characteristic * np.abs(held_difference))
+    root = np.sqrt(held_characteristic) * np.sqrt(np.abs(held_difference))
     magnitude = root / denominator
     hyperbolic = live & (held_difference < 0.0)
-    reciprocal_gap = (held_complement / denominator) * (
-        (1.0 + complementary) ** 2 / (denominator + root)
+
+    # The ratio form is used only while its argument is small.  Hold the argument
+    # at zero before squaring outside that lane, since the endpoint ``q = 0``
+    # drives it as high as ``1/sqrt(p)`` and its square need not fit even though
+    # the integral does.
+    use_series = live & (magnitude < 0.01)
+    series_magnitude = np.where(use_series, magnitude, 0.0)
+    signed_square = np.where(
+        hyperbolic,
+        series_magnitude * series_magnitude,
+        -series_magnitude * series_magnitude,
     )
-    regular = (
-        held_characteristic
-        / denominator
-        * _reciprocal_arctangent(
-            magnitude,
-            reciprocal_gap,
-            hyperbolic,
-            np,
-            signed_square=(
-                -held_difference * held_characteristic / (denominator * denominator)
-            ),
-        )
+    series = np.ones_like(signed_square)
+    power = np.ones_like(signed_square)
+    for order in range(1, 8):
+        power = power * signed_square
+        series = series + power / (2 * order + 1)
+    series_characteristic = np.where(use_series, held_characteristic, 0.0)
+    series_denominator = np.where(use_series, denominator, 1.0)
+    series_value = series_characteristic / series_denominator * series
+
+    # Away from equality, cancel ``denominator`` analytically between the outer
+    # scale and ``z = root/denominator``.  ``characteristic/root`` is bounded by
+    # the inverse square root of the smallest positive double, whereas the direct
+    # ``characteristic/denominator`` overflows at a subnormal exact complement.
+    transcendental_live = live & ~use_series & (root > 0.0)
+    held_root = np.where(transcendental_live, root, 1.0)
+    circular = np.arctan2(
+        np.where(transcendental_live & ~hyperbolic, root, 0.0),
+        np.where(transcendental_live & ~hyperbolic, denominator, 1.0),
     )
+    direct_hyperbolic = transcendental_live & hyperbolic & (magnitude < 0.9)
+    direct_hyperbolic_value = np.arctanh(np.where(direct_hyperbolic, magnitude, 0.0))
+    endpoint_hyperbolic = transcendental_live & hyperbolic & ~direct_hyperbolic
+    endpoint_numerator = np.where(endpoint_hyperbolic, denominator + root, 1.0)
+    endpoint_denominator = np.where(
+        endpoint_hyperbolic,
+        np.sqrt(held_complement) * (1.0 + complementary),
+        1.0,
+    )
+    endpoint_hyperbolic_value = np.log(endpoint_numerator / endpoint_denominator)
+    hyperbolic_value = np.where(
+        direct_hyperbolic, direct_hyperbolic_value, endpoint_hyperbolic_value
+    )
+    transcendental = np.where(hyperbolic, hyperbolic_value, circular)
+    transcendental_value = held_characteristic / held_root * transcendental
+    regular = np.where(use_series, series_value, transcendental_value)
     equal = live & (held_difference == 0.0)
-    held_complementary = np.where(equal & (complementary > 0.0), complementary, 1.0)
-    equal_value = 1.0 / held_complementary - 1.0
+    equal_characteristic = np.where(equal, held_characteristic, 0.0)
+    equal_denominator = np.where(equal, denominator, 1.0)
+    equal_value = equal_characteristic / equal_denominator
     finite = np.where(equal, equal_value, regular)
 
     singular = valid & (characteristic > 0.0) & (complement == 0.0)

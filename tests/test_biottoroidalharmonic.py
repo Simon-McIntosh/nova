@@ -269,6 +269,26 @@ LARGE_SECOND_REFERENCE = np.asarray(
 )
 LARGE_SECOND_GRADIENT = np.asarray([0.0033880427683386825, 1.068791527732644e-7])
 
+FOCAL_POSITION_DISTANCE = np.asarray([1.0e-8, 0.7, 20.0, 720.0, 1000.0])
+FOCAL_POSITION_RADIUS_REFERENCE = np.asarray(
+    [
+        2.910653404869927e-7,
+        3.2890322366815075,
+        1.3000000051196476,
+        1.3,
+        1.3,
+    ]
+)
+FOCAL_POSITION_HEIGHT_REFERENCE = np.asarray(
+    [
+        8.601568957266926,
+        1.2813028858159323,
+        1.5836926218427926e-9,
+        1.56146969347e-313,
+        0.0,
+    ]
+)
+
 
 # --- coordinates ------------------------------------------------------------
 
@@ -299,6 +319,29 @@ def test_focal_position_retains_tiny_distance_and_angle_denominators():
     assert float(along_angle_z) == pytest.approx(
         focus.height + focus.radius / np.tan(0.5 * tiny), rel=2e-16
     )
+
+
+def test_focal_position_matches_hundred_decimal_references_through_large_distance():
+    """Bounded intermediates retain both tiny coordinates and the large-eta tail."""
+    focus = th.FocalCircle(1.3, 0.0)
+    with np.errstate(over="raise", invalid="raise", divide="raise", under="ignore"):
+        radius, height = th.focal_position(focus, FOCAL_POSITION_DISTANCE, 0.3)
+    assert radius.dtype == height.dtype == np.dtype(np.float64)
+    for value, reference in zip(radius, FOCAL_POSITION_RADIUS_REFERENCE):
+        assert abs(value - reference) <= 4.0 * abs(np.spacing(reference))
+    for value, reference in zip(height, FOCAL_POSITION_HEIGHT_REFERENCE):
+        assert abs(value - reference) <= 4.0 * abs(np.spacing(reference))
+
+
+def test_focal_position_promotes_float32_inputs_to_the_coordinate_dtype():
+    """Broadcast inputs retain the established float64 coordinate contract."""
+    radius, height = th.focal_position(
+        th.FocalCircle(1.0),
+        np.asarray([0.2, 0.3], dtype=np.float32),
+        np.float32(0.4),
+    )
+    assert radius.shape == height.shape == (2,)
+    assert radius.dtype == height.dtype == np.dtype(np.float64)
 
 
 def test_focal_position_rejects_the_path_dependent_point_at_infinity():
@@ -364,6 +407,48 @@ def test_focal_frame_survives_a_point_on_the_focal_circle():
     )
     assert np.all(np.isfinite(frame.cosine))
     assert frame.cosine[0] > 1.0e6
+
+
+def test_radial_boundary_survives_the_physical_coordinate_round_trip():
+    """The boundary and its adjacent floats keep their direct-ladder ordering."""
+    focus = th.FocalCircle(1.0, 0.0)
+    angle = np.linspace(-np.pi, np.pi, 2001)
+    boundary = 1.0 + th.MINIMUM_COSH_GAP
+    arguments = (
+        np.nextafter(boundary, 1.0),
+        boundary,
+        np.nextafter(boundary, np.inf),
+    )
+    recovered = []
+    for argument in arguments:
+        radius, height = th.focal_position(focus, np.arccosh(argument), angle)
+        recovered.append(th.focal_frame(radius, height, focus).cosine)
+    assert np.all(recovered[0] == arguments[0])
+    assert np.all(recovered[1] == arguments[1])
+    assert np.all(recovered[2] == arguments[2])
+
+
+@pytest.mark.parametrize("family", [th.INNER, th.OUTER])
+def test_basis_accepts_the_physical_boundary_and_rejects_the_adjacent_exterior(
+    family,
+):
+    """Flux and field share the inclusive radial domain on a complete contour."""
+    focus = th.FocalCircle(1.0, 0.0)
+    angle = np.linspace(-np.pi, np.pi, 2001)
+    boundary = 1.0 + th.MINIMUM_COSH_GAP
+    radius, height = th.focal_position(focus, np.arccosh(boundary), angle)
+    outside_r, outside_z = th.focal_position(
+        focus, np.arccosh(np.nextafter(boundary, 1.0)), angle
+    )
+    basis = th.ToroidalHarmonics(focus, order=0, families=(family,))
+    assert np.all(np.isfinite(basis.flux(radius, height)))
+    radial, vertical = basis.field(radius, height)
+    assert np.all(np.isfinite(radial))
+    assert np.all(np.isfinite(vertical))
+    with pytest.raises(ValueError, match="x - 1"):
+        basis.flux(outside_r, outside_z)
+    with pytest.raises(ValueError, match="x - 1"):
+        basis.field(outside_r, outside_z)
 
 
 # --- the radial ladders -----------------------------------------------------
@@ -633,6 +718,21 @@ def test_locate_source_inverts_the_filament_expansion(source):
     assert estimate.current == pytest.approx(1234.0, rel=1e-6)
     assert estimate.modulus_residual < 1.0e-6
     assert estimate.phase_residual < 1.0e-6
+
+
+def test_locate_source_retains_an_exactly_boundary_supported_distance():
+    """The inclusive search endpoint agrees with the frame and radial ladders."""
+    focus = th.FocalCircle(1.0, 0.0)
+    distance = np.arccosh(1.0 + th.MINIMUM_COSH_GAP)
+    source_r, source_z = th.focal_position(focus, distance, 0.7)
+    basis = th.ToroidalHarmonics(focus, order=3)
+    coefficients = th.filament_coefficients(
+        basis, float(source_r), float(source_z), current=123.0
+    )
+    estimate = th.locate_source(basis, coefficients)
+    assert estimate.distance == distance
+    assert np.hypot(estimate.r - source_r, estimate.z - source_z) < 2.0e-14
+    assert estimate.current == pytest.approx(123.0, rel=1e-14)
 
 
 def test_convergent_points_split_at_the_source_focal_circle():

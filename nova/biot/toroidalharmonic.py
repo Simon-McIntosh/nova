@@ -227,10 +227,13 @@ def focal_frame(r, z, focus: FocalCircle) -> FocalFrame:
     far = (r + radius) ** 2 + height**2
     separation = np.sqrt(np.maximum(near * far, _SEPARATION_FLOOR))
     square = r**2 + height**2
-    # Round-off may put this positive geometric ratio a few ulp below one.  One
-    # is the exact coordinate boundary; radial evaluation applies its own public
-    # accuracy domain rather than moving the point away from that boundary.
-    cosine = np.maximum((square + radius**2) / separation, 1.0)
+    total = square + radius**2
+    # Factor the small coordinate distance instead of subtracting one from
+    # total / separation.  The numerator follows from
+    # total^2 - near*far = 4 a^2 R^2, so it is positive and retains the public
+    # radial boundary through a position -> frame round trip.
+    cosine_gap = 4.0 * radius**2 * r**2 / (separation * (total + separation))
+    cosine = 1.0 + cosine_gap
     gap = 2.0 * radius**2 / separation
     angle = np.arctan2(
         2.0 * radius * height / separation, (square - radius**2) / separation
@@ -244,7 +247,7 @@ def focal_frame(r, z, focus: FocalCircle) -> FocalFrame:
     scale = gap**2 / (2.0 * radius**3)
     return FocalFrame(
         cosine=cosine,
-        sine=np.sqrt((cosine - 1.0) * (cosine + 1.0)),
+        sine=np.sqrt(cosine_gap * (2.0 + cosine_gap)),
         angle=angle,
         gap=gap,
         radial_gradient=-real * scale,
@@ -257,21 +260,31 @@ def focal_position(
 ) -> tuple[np.ndarray, np.ndarray]:
     """Return ``(R, Z)`` from the focal coordinates ``(eta, theta)``.
 
-    The denominator is formed as a sum of squares, retaining tiny ``eta`` or
-    ``theta`` that ``cosh(eta) - cos(theta)`` rounds to zero.  Exactly
-    ``eta = theta = 0`` is the coordinate point at infinity and is path
-    dependent, so it raises instead of inventing finite coordinates.
+    The denominator is formed from ``u = tanh(eta/2)`` and the angular
+    half-angle as ``sin(theta/2)^2 + cos(theta/2)^2 u^2``.  Every intermediate
+    stays bounded for finite ``eta``, while tiny ``eta`` or ``theta`` remain
+    resolved.  The height numerator uses ``sech(eta/2)^2`` formed from
+    ``exp(-abs(eta))``, retaining the representable tail as the point approaches
+    the focal circle.  Exactly ``eta = theta = 0`` is the coordinate point at
+    infinity and is path dependent, so it raises instead of inventing finite
+    coordinates.
     """
     distance, angle = np.broadcast_arrays(
         np.asarray(distance, dtype=np.float64),
         np.asarray(angle, dtype=np.float64),
     )
-    gap = 2.0 * np.sinh(0.5 * distance) ** 2 + 2.0 * np.sin(0.5 * angle) ** 2
-    if np.any(gap == 0.0):
+    half_angle = 0.5 * angle
+    sine = np.sin(half_angle)
+    cosine = np.cos(half_angle)
+    tangent = np.tanh(0.5 * distance)
+    denominator = sine**2 + cosine**2 * tangent**2
+    if np.any(denominator == 0.0):
         raise ValueError("eta = theta = 0 is the path-dependent point at infinity")
+    exponential = np.exp(-np.abs(distance))
+    squared_sech = 4.0 * exponential / (1.0 + exponential) ** 2
     return (
-        focus.radius * np.sinh(distance) / gap,
-        focus.height + focus.radius * np.sin(angle) / gap,
+        focus.radius * tangent / denominator,
+        focus.height + focus.radius * sine * cosine * squared_sech / denominator,
     )
 
 
@@ -712,7 +725,16 @@ def locate_source(
         method="bounded",
         options={"xatol": 1.0e-10},
     )
-    distance = float(search.x)
+    # The bounded solver samples only the open interval.  Compare its result to
+    # the inclusive public boundary explicitly so a source exactly on that
+    # boundary is not displaced inward by the optimiser's stopping distance.
+    boundary_scatter = scatter(_MINIMUM_DISTANCE)
+    scatter_roundoff = 64.0 * np.finfo(np.float64).eps
+    distance = (
+        _MINIMUM_DISTANCE
+        if boundary_scatter <= float(search.fun) + scatter_roundoff
+        else float(search.x)
+    )
 
     lowest = np.arctan2(sine[1], cosine[1])
     phase = np.arctan2(sine[1:], cosine[1:])

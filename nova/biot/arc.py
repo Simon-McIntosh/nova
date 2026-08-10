@@ -108,6 +108,13 @@ class Arc(Constants, Matrix):
         return np.arctan2(self("target", "y"), self("target", "x"))
 
     @cached_property
+    def _on_filament(self):
+        """Identify exactly represented targets on the authored finite arc."""
+        target_angle = np.mod(self._phi, 2.0 * np.pi)
+        end_angle = arctan2(self("source", "y2"), self("source", "x2"))
+        return (self.r == self.rs) & (self.z == self.zs) & (target_angle <= end_angle)
+
+    @cached_property
     def alpha(self):
         """Return system invariant angle alpha for start, end, and pi/2."""
         _phi = self._phi[np.newaxis]
@@ -643,7 +650,8 @@ class Arc(Constants, Matrix):
 
     def _intergrate(self, data):
         """Return intergral quantity."""
-        return 1 / (4 * np.pi) * (data[0] - data[1])
+        value = 1 / (4 * np.pi) * (data[0] - data[1])
+        return np.where(self._on_filament, np.nan, value)
 
 
 if __name__ == "__main__":

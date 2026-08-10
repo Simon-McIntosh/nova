@@ -8,6 +8,7 @@ import pytest
 import scipy.special
 
 
+from nova.biot.arc import Arc
 from nova.biot.biotframe import BiotFrame, Source, Target
 from nova.biot.circle import Circle
 from nova.biot.constants import Constants
@@ -430,6 +431,21 @@ def _line_element(start, end, targets):
     return Line(source, target, turns=[False, False], reduce=[False, False])
 
 
+@pytest.mark.parametrize("end", ([0.0, 0.0, -1.0], [0.0, 0.0, np.inf]))
+def test_line_rejects_zero_or_nonfinite_segment_length(end):
+    """A Line requires two finite, distinct authored endpoints."""
+    source = Source(
+        PolyLine(
+            np.array([[0.0, 0.0, -1.0], [0.0, 0.0, 1.0]]),
+            minimum_arc_nodes=3,
+        ).path_geometry
+    )
+    source.loc[source.index[0], ["x2", "y2", "z2"]] = end
+    target = Target({"x": [0.1], "y": [0.0], "z": [0.0]})
+    with pytest.raises(ValueError, match="finite positive length"):
+        Line(source, target)
+
+
 def _decimal_asinh_ratio(value: float, radius: float) -> Decimal:
     """Return ``asinh(value / radius)`` from 100-digit Decimal operations."""
     value = Decimal.from_float(value)
@@ -650,42 +666,36 @@ def test_multifilament_3d_vector():
     assert np.allclose(coilset.point.magnetic_field, 0)
 
 
-@pytest.mark.skip("pending development of singularity skip methods")
-def test_arc_singularity():
-    segment_number = 501
-    theta, dtheta = np.linspace(0, 2 * np.pi, segment_number, retstep=True)
-    radius = 5.3
-    points = np.stack(
-        [radius * np.cos(theta), radius * np.sin(theta), np.zeros_like(theta)], axis=-1
+def test_arc_filament_singularity_is_visible_without_hiding_the_test():
+    """An off-arc target is finite; an exact authored endpoint stays singular."""
+    diagonal = np.sqrt(0.5)
+    source = Source(
+        PolyLine(
+            np.array(
+                [
+                    [1.0, 0.0, 0.0],
+                    [diagonal, diagonal, 0.0],
+                    [0.0, 1.0, 0.0],
+                ]
+            ),
+            minimum_arc_nodes=3,
+        ).path_geometry
     )
-    coilset = CoilSet(field_attrs=["Ax", "Ay", "Az", "Bx", "By", "Bz"])
-    coilset.coil.insert(radius, 0, 0.1, 0.1, Ic=1e6, ifttt=False, segment="cylinder")
-    # coilset.coil.insert(radius, 0, 0.1, 0.1, Ic=-1e6, ifttt=False, segment="circle")
-
-    coilset.winding.insert(points, {"c": (0, 0, 0.1)}, Ic=-1e6, minimum_arc_nodes=0)
-
-    print(coilset.frame.segment)
-
-    number = 200
-    grid = np.stack(
-        [
-            np.linspace(-0.5, 0.5, number),
-            radius * np.ones(number),
-            np.zeros(number),
-        ],
-        axis=-1,
+    target = Target(
+        {
+            "x": [1.0, 1.0, -1.0],
+            "y": [0.0, 0.0, 0.0],
+            "z": [0.1, 0.0, 0.0],
+        }
     )
-    coilset.point.solve(grid)
-    coilset.grid.solve(5e3, 1)
-
-    print(coilset.grid.ay.max())
-
-    coilset.grid.plot("ay")
-    coilset.plot()
-
-    # coilset.point.set_axes("1d")
-    # coilset.point.axes.plot(grid[:, 0], coilset.point.ax)
-    assert False
+    arc = Arc(source, target, turns=[False, False], reduce=[False, False])
+    with np.errstate(divide="ignore", invalid="ignore", over="ignore"):
+        potential = arc.Avector[:, 0]
+        field = arc.Bvector[:, 0]
+    assert np.all(np.isfinite(potential[[0, 2]]))
+    assert np.all(np.isfinite(field[[0, 2]]))
+    assert np.all(np.isnan(potential[1]))
+    assert np.all(np.isnan(field[1]))
 
 
 def test_ellipf():

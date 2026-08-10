@@ -7,15 +7,11 @@ from dataclasses import asdict, dataclass, field
 import json
 from typing import Literal
 
-import jax
-import jax.numpy as jnp
 import numpy as np
 import shapely.geometry
 import shapely.ops
 
 from nova.biot.biotframe import Target
-from nova.biot.null import Null1D, Null2D
-from nova.jax.tree_util import Pytree
 
 
 @dataclass(frozen=True)
@@ -335,37 +331,48 @@ def linked_flux_target(
     )
 
 
-@dataclass
-@jax.tree_util.register_pytree_node_class
-class FluxTarget(Pytree):
-    """Evaluate external-source and plasma coupling on a flux target."""
+try:
+    import jax
+    import jax.numpy as jnp
 
-    source_target: jnp.ndarray = field(repr=False)
-    plasma_target: jnp.ndarray = field(repr=False)
-    null: Null1D | Null2D
+    from nova.biot.null import Null1D, Null2D
+    from nova.jax.tree_util import Pytree
+except ModuleNotFoundError as error:
+    if error.name != "jax":
+        raise
+else:
 
-    @property
-    def coordinate(self):
-        """Return target coordinate."""
-        return self.null.coordinate
+    @dataclass
+    @jax.tree_util.register_pytree_node_class
+    class FluxTarget(Pytree):
+        """Evaluate external-source and plasma coupling on a flux target."""
 
-    @property
-    def node_number(self):
-        """Return target node number."""
-        return self.null.node_number
+        source_target: jnp.ndarray = field(repr=False)
+        plasma_target: jnp.ndarray = field(repr=False)
+        null: Null1D | Null2D
 
-    @jax.jit
-    def external(self, external_current: jnp.ndarray):
-        """Return external poloidal flux map."""
-        return self.source_target @ external_current
+        @property
+        def coordinate(self):
+            """Return target coordinate."""
+            return self.null.coordinate
 
-    @jax.jit
-    def internal(self, plasma_current: jnp.ndarray):
-        """Return internal (plasma generated) poloidal flux map."""
-        return self.plasma_target @ plasma_current
+        @property
+        def node_number(self):
+            """Return target node number."""
+            return self.null.node_number
 
-    def tree_flatten(self):
-        """Return flattened pytree."""
-        children = (self.source_target, self.plasma_target, self.null)
-        aux_data = {}
-        return (children, aux_data)
+        @jax.jit
+        def external(self, external_current: jnp.ndarray):
+            """Return external poloidal flux map."""
+            return self.source_target @ external_current
+
+        @jax.jit
+        def internal(self, plasma_current: jnp.ndarray):
+            """Return internal (plasma generated) poloidal flux map."""
+            return self.plasma_target @ plasma_current
+
+        def tree_flatten(self):
+            """Return flattened pytree."""
+            children = (self.source_target, self.plasma_target, self.null)
+            aux_data = {}
+            return (children, aux_data)

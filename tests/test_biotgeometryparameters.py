@@ -302,9 +302,10 @@ def test_a_constant_z_edge_carries_no_gradient_of_its_own():
             assert gap > 1.0
 
 
-def test_reverse_mode_agrees_with_forward_mode():
+@pytest.mark.parametrize("sections", [BOX_PACK, PENTAGON], ids=["pack", "section"])
+def test_reverse_mode_agrees_with_forward_mode(sections):
     """What a large least-squares wants agrees with what the Jacobian is built by."""
-    deformation = pack_deformation(BOX_PACK, blocks=AFFINE_BLOCKS)
+    deformation = pack_deformation(sections, blocks=AFFINE_BLOCKS)
     forward = coupling_jacobian(deformation, SENSORS, rule=RULE)
     reverse = coupling_jacobian(deformation, SENSORS, rule=RULE, mode="reverse")
     assert peak_scaled_gap(reverse, forward) < 1e-7

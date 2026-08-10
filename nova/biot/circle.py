@@ -171,7 +171,7 @@ from typing import ClassVar
 import numpy as np
 
 from nova.biot.constants import Constants
-from nova.biot.greens import section_centroid, traced_filament_greens
+from nova.biot.greens import MU0, section_centroid, traced_filament_greens
 from nova.biot.matrix import Matrix
 from nova.biot.polygonanalytic import polygon_analytic_greens
 from nova.biot.sectionaverage import section_nodes
@@ -235,6 +235,7 @@ class Circle(Constants, Matrix):
 
     axisymmetric: ClassVar[bool] = True
     name: ClassVar[str] = "circle"  # element name
+    mu_0: ClassVar[float] = MU0
 
     section_band: ClassVar[float] = 4.0
     """Source-section radii within which the source is its true section.

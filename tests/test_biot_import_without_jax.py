@@ -15,11 +15,14 @@ import sys
 sys.modules['jax'] = None
 
 import nova.biot.grid
+import nova.biot.target as target
 from nova.biot.operate import HostOperator, Operator
 from nova.frame.coilset import CoilSet
 from nova.jax.config import Precision
 
 assert Operator is HostOperator
+assert target.TargetQuadraturePolicy().device_eligibility == 'host'
+assert not hasattr(target, 'FluxTarget')
 assert CoilSet().point.precision is Precision.DOUBLE
 """
     result = subprocess.run(
@@ -58,6 +61,32 @@ import nova.biot.grid
 
     assert result.returncode != 0
     assert "simulated broken JAX installation" in result.stderr
+
+
+def test_target_import_surfaces_missing_installed_jax_dependency():
+    """A missing JAX dependency must not make target look host-only."""
+    script = """
+import builtins
+
+original_import = builtins.__import__
+
+def guarded_import(name, *args, **kwargs):
+    if name == 'jax':
+        raise ModuleNotFoundError('simulated missing jaxlib', name='jaxlib')
+    return original_import(name, *args, **kwargs)
+
+builtins.__import__ = guarded_import
+import nova.biot.target
+"""
+    result = subprocess.run(
+        [sys.executable, "-c", script],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode != 0
+    assert "simulated missing jaxlib" in result.stderr
 
 
 def test_select_import_without_jax_exposes_only_host_contract():

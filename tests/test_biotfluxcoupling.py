@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+from scipy.constants import mu_0 as CODATA_MU0
 
 from nova.biot.biotframe import Source
+from nova.biot.circle import Circle
 from nova.biot.fluxcoupling import (
     axis_angle_rotation,
     circular_loop_quadrature,
@@ -14,6 +16,7 @@ from nova.biot.fluxcoupling import (
     polygon_loop_quadrature,
     transform_points,
 )
+from nova.biot.greens import MU0 as GREEN_MU0
 from nova.geometry.polyline import PolyLine
 
 
@@ -67,6 +70,40 @@ def test_circular_pair_matches_maxwell_mutual_inductance():
     )
     expected = circular_mutual_inductance(source_radius, target_radius, separation)
     np.testing.assert_allclose(coupling, [expected], rtol=2e-13)
+
+
+def test_circle_removes_its_internal_permeability_before_loop_integration():
+    """Loop integration applies CODATA once, independent of angular rule size."""
+    source_radius = 1.2
+    target_radius = 0.8
+    separation = 0.5
+    source = _circle_source(source_radius, height=0.3)
+    center = np.array([0.0, 0.0, -0.2])
+    expected = circular_mutual_inductance(source_radius, target_radius, separation)
+    coupling = np.array(
+        [
+            frame_loop_coupling(
+                source,
+                circular_loop_quadrature(
+                    target_radius,
+                    center=center,
+                    panels=panels,
+                    order=order,
+                ),
+                turns=False,
+                reduce=False,
+            )[0]
+            for panels, order in ((1, 1), (2, 4), (8, 12))
+        ]
+    )
+
+    assert Circle.mu_0 == GREEN_MU0
+    retained_internal_scale = coupling[-1] * GREEN_MU0 / CODATA_MU0
+    assert retained_internal_scale / expected - 1.0 == pytest.approx(
+        1.3203426e-10, rel=0.0, abs=2e-16
+    )
+    np.testing.assert_allclose(coupling, expected, rtol=2e-13, atol=0.0)
+    assert np.ptp(coupling) / expected < 5e-15
 
 
 def test_circular_pair_is_reciprocal():

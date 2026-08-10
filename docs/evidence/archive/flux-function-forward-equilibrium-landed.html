@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova"><meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="flux-function-forward-equilibrium-landed">
+  <meta name="plan-title" content="Flux-Function Forward Equilibrium — Cumulative Evidence">
+  <meta name="plan-summary" content="Implementation, gate, and benchmark evidence for the prescribed-source ForwardProfile solve: static absolute-source rung, rotating-equilibrium analytic references, and the integration lanes that verified them">
+  <meta name="plan-status" content="active">
+  <meta name="plan-evidence-for" content="flux-function-forward-equilibrium">
+  <meta name="plan-verifies" content="flux-function-forward-equilibrium#s2,flux-function-forward-equilibrium#s3,flux-function-forward-equilibrium#s4">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>Flux-Function Forward Equilibrium — Cumulative Evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css"><link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+
+  <h2 id="static-rung">Static absolute-source rung</h2>
+  <p>Commit <code>f07e8b05</code> (merged and pushed as <code>18168796</code>, 2026-08-10) makes <code>ForwardProfile</code> the single public prescribed-source-to-equilibrium-flux solve. Host and accelerated routes consume one immutable source state and return one typed <code>ForwardEquilibrium</code> carrying residual history, axis/separatrix state, a domain-labelled current ledger, integral observations, conservation residuals, finite checks, and every normalisation action. The absolute-source path no longer rescales the cell-current image: the operator carries no net-current amplitude at all, and supplied gradients reach source evaluation byte-identical. The topology read publishes a total domain partition — excluded material, core, common scrape-off layer, private flux — so sources select by connectivity, never by a normalised-flux range alone. Conventions are pinned in one module (<code>nova/equilibrium/convention.py</code>): Nova total flux with explicit 2π factors, explicit μ₀, and both COCOS signs fixed by the analytic pin below.</p>
+
+  <table><thead><tr><th>Gate (static scope)</th><th>Verdict</th><th>Decisive evidence</th></tr></thead><tbody>
+    <tr><td>authority</td><td>PASS</td><td>AST sweep over the seven public forward modules finds no measurement or least-squares import or symbol; <code>DomainProfile</code> refuses a sampled array and <code>ForwardProfile.solve(measured=...)</code> raises <code>TypeError</code>.</td></tr>
+    <tr><td>static physics</td><td>PASS</td><td>Constant-gradient Solov'ev at two lattices: relative GS residual 4.86e-05 (41 nodes) → 1.18e-05 (81), force residual 1.30e-04 → 3.03e-05, second-order convergence ratios 4.14 / 4.28. Source current vs Ampère-law read agree &lt; 1e-4, pinning the 2π total-flux factor and both COCOS signs at once.</td></tr>
+    <tr><td>conservation</td><td>PASS</td><td>div B ~1e-15, div J ~1e-15 (tol 1e-12) on both fixtures; tolerances pre-registered as module constants; free-boundary solve ledger: core = total = 5.574551e5 A, SOL/private/excluded integrate to exactly 0.0.</td></tr>
+    <tr><td>current closure (absolute half)</td><td>PASS</td><td>Supplied gradients byte-identical before/after source evaluation and after a solve; evaluated cell current equals the analytic source to 1e-12 with no amplitude applied; the declared-scalar-current policy is typed and refused.</td></tr>
+    <tr><td>integral moments</td><td>PASS</td><td>I_p, β_p, l_i definitions pinned in <code>observation.py</code> and re-derived independently in tests; moment Jacobian vs central difference 4.4e-04 relative; over-determined or unknown enforcement raises <code>MomentEnforcementError</code> with profiles untouched.</td></tr>
+    <tr><td>numerics (static scope)</td><td>PASS†</td><td>Free-boundary fixed point to 2.6e-14 (Anderson, 240 evaluations); picard/newton_krylov agree within 1e-6; host vs traced relaxed step 7.0e-11; seeds 0.85–1.15 reach the same equilibrium within 1e-4; jit(vmap) over 3 seeds equals per-slice solves within 1e-6; conductor-current gradient vs central difference 5.0e-05. †fp64 CPU/GPU parity carried forward (no GPU allocation in this wave).</td></tr>
+  </tbody></table>
+
+  <p>Integration: full fast lane at the merge point on a <code>sun_debug</code> node — <strong>4728 passed, 121 skipped, 660 deselected, 3 xfailed, 2 failed in 16m02s</strong>. Both failures are the pre-existing MAST packaged-registry probe-angle items (<code>test_mast_solve_inputs.py</code>, +1.5707963 vs published −1.5708 rad); the merge window <code>2be540ac..18168796</code> touches no MAST path and that module imports nothing from <code>nova.equilibrium</code>.</p>
+
+  <h3>Load-bearing findings</h3>
+  <ul>
+    <li><strong>The absolute-source map has a vacuum twin.</strong> With the net-current rescale removed, the free-boundary map always has a second fixed point — the vacuum field — and a source driven only marginally above the limiter sits on a fold between branches: at marginal drive, every ≥5% seed perturbation collapsed to vacuum under Picard, Anderson, and Krylov alike; at 1.4× drive, seeds 0.7–1.3 all reach the same equilibrium. Seed policy, not the accelerator, decides the branch. Pinned by test; this is the strongest practical argument for the deferred one-amplitude target-current closure.</li>
+    <li>The relaxed iteration floors near 1e-7 where a boundary cell alternates in and out of the boolean core mask; the mixed ladder damps the cycle to 2.6e-14 on the same map. Pinned by test.</li>
+    <li>A flux-function gradient vanishing at the boundary makes the discrete fixed point a single point rather than a lattice-quantised family; untapered constant gradients gave seed-dependent currents in the third digit.</li>
+    <li>The topology mask is a connectivity selection carrying no gradient, so derivatives through the solve omit the boundary-motion term; central differences must span enough cell-quantised motion (5e-5 agreement at 1e-3 relative step, degrading to 9e-2 at 1e-6). Registered as <code>GRADIENT_STEP</code> with the mechanism stated.</li>
+    <li>The finite-difference GS residual of a Green-operator solve is a two-discretisation consistency measure, not a convergence measure (2.7e-2 on the solve fixture vs 4.9e-5 analytic at comparable spacing); the convention pin therefore lives with the manufactured equilibrium.</li>
+  </ul>
+  <p>Carried forward: fp64 CPU/GPU parity; rotation, SOL-continuation, and Ambix/IMAS interface gates (later nodes). Out-of-scope debt flagged to owners: <code>nova/biot/boundary.py</code> (dev script) and a <code>nova/biot/plasma.py</code> docstring still reference the old <code>ForwardProfile</code>/<code>ForwardFluxOperator</code> signatures.</p>
+
+  <h2 id="rotation-references">Rotating-equilibrium analytic references</h2>
+  <p>Commit <code>1a2de9c7</code> banks a nova-independent (numpy/scipy only) reference family for the §4 rotation gate: purely toroidal flow under the locked isothermal-flux-surface closure. The exactly solvable Solov'ev-type branch is provably the uniform-thermal-Mach-number branch; its flux is a closed form on the entire function φ₂(x) = (eˣ−1−x)/x², exact at every Mach number, with the static Solov'ev limit reached through the same expression. 56 self-verifying tests, 4.7 s.</p>
+
+  <table><thead><tr><th>Case</th><th>M_th</th><th>Analytic GS residual</th><th>4th-order stencil residual (h = 0.01 R₀)</th><th>Measured orders</th></tr></thead><tbody>
+    <tr><td>weak-rotation-reactor (R₀ 6.2 m, 16.32 MA)</td><td>0.10</td><td>2.91e-16</td><td>9.08e-11</td><td>4.000, 4.000</td></tr>
+    <tr><td>moderate-rotation-conventional (R₀ 1.70 m, 1.628 MA)</td><td>0.35</td><td>2.42e-16</td><td>1.05e-09</td><td>4.000, 4.000</td></tr>
+    <tr><td>strong-rotation-compact (R₀ 0.90 m, 0.2535 MA)</td><td>0.90</td><td>2.29e-16</td><td>8.19e-09</td><td>4.002, 4.000</td></tr>
+  </tbody></table>
+
+  <p>Pins the rotation implementation must reproduce: the isothermal factor d ln p/dR|<sub>ψ</sub> = 2θR (checked three ways to 1e-14); the R⁴ rotating-Solov'ev source as the first-order truncation whose coefficient is <em>fixed</em> by m̄Ω²/2T, never free; the static limit to 1e-15 with the rotating flux linear in θ; outward Shafranov-shift growth linear in θ with the predicted coefficient to better than 1e-3; axis position and q_axis exactly Mach-independent; a normative sign block (σ_Bp = +1, σ_RΦZ = +1, e_Bp = 0 — COCOS 1 per radian / 11 total-flux) asserted against equations, not labels; and midplane boundary radii in closed form on the two Lambert-W branches (agreement 1e-9). Convention traps recorded for consumers: flux per radian vs Nova total flux (2π conversion is the caller's), and an explicit mean-particle-mass parameter (single-species vs quasineutral differ by 2× in θ).</p>
+
+</main></body>
+</html>

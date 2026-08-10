@@ -1,10 +1,28 @@
 r"""Bounded continuation of the source flux functions beyond the separatrix.
 
-The core closure stops at the last closed flux surface. Continuing it is not
-the extrapolation of a fitted curve: it is a second declared closure, on a
-domain with different material connectivity, and everything a reader needs to
-judge it — where it is anchored, how smoothly, on what functional form and out
-to what bound — is declared rather than inferred.
+The core closure stops at the plasma boundary. Continuing it is not the
+extrapolation of a fitted curve: it is a second declared closure, on a domain
+with different material connectivity, and everything a reader needs to judge
+it — where it is anchored, how smoothly, on what functional form and out to
+what bound — is declared rather than inferred.
+
+Why a flux-function source extends past the boundary at all
+-----------------------------------------------------------
+Current does flow beyond the separatrix, and it is not exempt from force
+balance. Scrape-off current is mixed poloidal and toroidal, following open
+field lines that connect between the divertor plates, and whatever carries it
+satisfies the same momentum balance the confined plasma does — which in an
+axisymmetric equilibrium is the Grad-Shafranov constraint. Continuing
+:math:`p'` and :math:`FF'` onto the open domains is the first rung of that: it
+is the part of the open-region current a flux-function source can represent,
+the toroidal part, driven by pressure and diamagnetic gradients that do not
+stop at :math:`\psi_N = 1`.
+
+What it is not is the divertor-connected circuit. A field-aligned current
+entering and leaving material surfaces closes through the plates, and closing
+it needs a specified material return path and a sheath boundary condition;
+:math:`\psi_N > 1` alone cannot close that circuit. That model stays deferred,
+so nothing here drives poloidal or field-aligned open-region current.
 
 Two branches, one distance
 --------------------------
@@ -28,6 +46,13 @@ continuous :math:`\psi_N` derivatives on whichever branch it was declared for.
 A continuation built for one branch is therefore wrong on the other, which is
 why the domain is part of the declaration and is checked against the argument
 it is supplied through.
+
+The distance is clipped at zero because the source is evaluated on every cell
+and selected afterwards. On its own domain a continuation never sees a
+negative distance — the partition puts the common scrape-off layer strictly
+beyond :math:`\psi_N = 1` and the private-flux branch strictly within it — so
+the clip only pins the value the selection discards, at the separatrix, where
+it is the anchor.
 
 Continuity is enforced, not hoped for
 -------------------------------------

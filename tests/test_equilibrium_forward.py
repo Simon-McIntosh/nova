@@ -483,11 +483,11 @@ def test_open_flux_alone_does_not_select_the_open_field_cells(diverted):
 
     assert np.any(private & ~naive), "the private branch sits below one"
     assert np.any(naive & ~material), "the range label leaks outside the material"
-    assert np.all(common[naive & material])
-    # the closed test cuts at the last-closed-flux-surface rather than at the
-    # separatrix itself, so the open label also owns the thin shell between them
-    shell = common & ~naive
-    assert np.all(psi_norm[shell] > 0.99)
+    # inside the material the open label and the flux range agree exactly: the
+    # closed test cuts at the boundary itself, so no within-boundary cell can
+    # carry an open label and no open cell can sit below one
+    np.testing.assert_array_equal(common, naive & material)
+    assert np.all(psi_norm[common] > 1.0)
 
 
 def test_no_current_appears_outside_the_declared_support(diverted):

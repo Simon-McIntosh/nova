@@ -19,10 +19,12 @@
   <meta name="plan-capability-risk" content="elevated">
   <meta name="plan-sprint" content="S7">
   <meta name="plan-owner" content="Simon McIntosh">
-  <meta name="plan-depends-on" content="spine-boundary-accelerator">
+  <meta name="plan-depends-on" content="">
   <title>Flux-Function-Constrained Forward Equilibrium | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-10">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -73,58 +75,58 @@
     <p>The first useful integration is a one-slice static absolute-source solve, followed by batched static ensemble members, rotation, and then topology-qualified SOL continuation. Field-aligned SOL current is deferred until the material-boundary return path is physically specified.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Interview decisions</h2>
-      <div class="r-dec" data-key="normalisation-policy" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Should the first public solve accept only absolute source functions, or also one common-amplitude target-<code>I_p</code> closure? Recommendation: ship absolute-only first, but design the typed scalar closure now and add it only for a concrete shape-family consumer.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="absolute-only">absolute-only</button>
-          <button class="r-opt" data-value="absolute-and-explicit-shape-current">absolute-and-explicit-shape-current</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="moment-enforcement" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">How should target <code>beta_p</code> and <code>l_i</code> affect a prescribed-profile solve? Recommendation: <code>ForwardProfile</code> reports their residuals and Jacobian; if they must reshape profiles, Ambix conditions its ensemble or calls <code>ReconstructProfile</code>.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="diagnostics-and-ambix-conditioning">diagnostics-and-ambix-conditioning</button>
-          <button class="r-opt" data-value="nova-reconstruct-profile">nova-reconstruct-profile</button>
-          <button class="r-opt" data-value="forward-profile-enforcement">forward-profile-enforcement</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="rotation-closure" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Which toroidal-rotation thermodynamic closure is the first supported physical model? Recommendation: isothermal flux surfaces, benchmarked against analytic rotating equilibria; add polytropic support later.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="isothermal-surface">isothermal-surface</button>
-          <button class="r-opt" data-value="polytropic-surface">polytropic-surface</button>
-          <button class="r-opt" data-value="both">both</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="private-flux-policy" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">How is the private-flux region treated in the first SOL implementation? Recommendation: an independently specified low-pressure continuation with at least value and first-derivative continuity at the separatrix, never an unexamined copy of the common SOL.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="independent-low-pressure">independent-low-pressure</button>
-          <button class="r-opt" data-value="copy-common-sol">copy-common-sol</button>
-          <button class="r-opt" data-value="zero-source">zero-source</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="field-aligned-sol-current" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Is field-aligned/poloidal SOL current part of this plan? Recommendation: defer it to a boundary-current plan unless a material return-current and sheath/halo closure is supplied.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="defer-boundary-current">defer-boundary-current</button>
-          <button class="r-opt" data-value="include-with-specified-closure">include-with-specified-closure</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="normalisation-policy" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Should the first public solve accept only absolute source functions, or also one common-amplitude target- I_p closure? Recommendation: ship absolute-only first, but design the typed scalar closure now and add it only for a concrete shape-family consumer.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="absolute-only">absolute-only</button>
+      <button class="r-opt" data-value="absolute-and-explicit-shape-current">absolute-and-explicit-shape-current</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="moment-enforcement" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">How should target beta_p and l_i affect a prescribed-profile solve? Recommendation: ForwardProfile reports their residuals and Jacobian; if they must reshape profiles, Ambix conditions its ensemble or calls ReconstructProfile .</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="diagnostics-and-ambix-conditioning">diagnostics-and-ambix-conditioning</button>
+      <button class="r-opt" data-value="nova-reconstruct-profile">nova-reconstruct-profile</button>
+      <button class="r-opt" data-value="forward-profile-enforcement">forward-profile-enforcement</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="rotation-closure" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Which toroidal-rotation thermodynamic closure is the first supported physical model? Recommendation: isothermal flux surfaces, benchmarked against analytic rotating equilibria; add polytropic support later.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="isothermal-surface">isothermal-surface</button>
+      <button class="r-opt" data-value="polytropic-surface">polytropic-surface</button>
+      <button class="r-opt" data-value="both">both</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="private-flux-policy" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">How is the private-flux region treated in the first SOL implementation? Recommendation: an independently specified low-pressure continuation with at least value and first-derivative continuity at the separatrix, never an unexamined copy of the common SOL.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="independent-low-pressure">independent-low-pressure</button>
+      <button class="r-opt" data-value="copy-common-sol">copy-common-sol</button>
+      <button class="r-opt" data-value="zero-source">zero-source</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="field-aligned-sol-current" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Is field-aligned/poloidal SOL current part of this plan? Recommendation: defer it to a boundary-current plan unless a material return-current and sheath/halo closure is supplied.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="defer-boundary-current">defer-boundary-current</button>
+      <button class="r-opt" data-value="include-with-specified-closure">include-with-specified-closure</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-fffe-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship flux-function-forward-equilibrium §2">
-        <h4 class="r-fu-title">Harden the static absolute-source ForwardProfile contract</h4>
-        <div class="r-fu-body"><p>Land the common source/result types, remove implicit current scaling from the absolute path, unify eager/JAX fixed-point entry points and bank the static analytic plus conservation fixtures. Rotation and SOL continuation follow only after the static authority boundary is green.</p></div>
-        <pre class="r-fu-prompt">Project: nova
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-fffe-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship flux-function-forward-equilibrium §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Harden the static absolute-source ForwardProfile contract</h4>
+    <div class="r-fu-body"><p>Land the common source/result types, remove implicit current scaling from the absolute path, unify eager/JAX fixed-point entry points and bank the static analytic plus conservation fixtures. Rotation and SOL continuation follow only after the static authority boundary is green.</p></div>
+    <pre class="r-fu-prompt">Project: nova
 Plan:    flux-function-forward-equilibrium (http://localhost:8765/nova/flux-function-forward-equilibrium.html)
 Section: §2–§4 static rung
 Capability: orchestrator
@@ -138,15 +140,15 @@ State to read  (CODE / FILES / DATA — not the plan itself; the builder already
   nova/equilibrium/forward.py, nova/equilibrium/forward_operator.py, nova/equilibrium/fixed_point.py, nova/equilibrium/profile.py, nova/equilibrium/topology.py, tests/test_profile_accelerated.py, docs/research/force-balance-source-contract.html
 
 Scope locks / constraints  (non-decision)
-  No measurement inputs or least-squares update in ForwardProfile. Preserve total poloidal flux, explicit mu0 and pinned COCOS signs. Builds and suites follow the repository's SLURM policy; core changes require strict full relevant validation before commit.
+  No measurement inputs or least-squares update in ForwardProfile. Preserve total poloidal flux, explicit mu0 and pinned COCOS signs. Builds and suites follow the repository&#x27;s SLURM policy; core changes require strict full relevant validation before commit.
 
 Done-when
   1. ForwardProfile exposes one eager/JAX source-to-equilibrium façade with typed receipts and no implicit absolute-source rescaling
   2. The result reports convention-pinned Ip, beta_p and li with differentiable residuals; unsupported multi-moment enforcement fails without changing the profiles
   3. Static analytic, force/field/current conservation, eager/JAX, gradient and batched tests are green; full relevant suite remains green
   4. Followup written into the plan + this followup marked resolved</pre>
-      </article>
-    </section>
+    </article>
+</section>
   </main>
 </body>
 </html>

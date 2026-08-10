@@ -46,6 +46,8 @@ reductions (a horizontal edge must contribute nothing, and a section with no
 sloped edge must reproduce the rectangle kernel we already trust).
 """
 
+import warnings
+
 import numpy as np
 import pytest
 
@@ -1353,3 +1355,122 @@ def test_the_packed_driver_takes_a_batch_of_unlike_sections_in_one_call():
             got = packed[component][index::count][index]
             want = host[component][index]
             assert abs(got - want) <= 1e-11 * max(abs(want), 1e-30), (name, index)
+
+
+def heterogeneous_sections():
+    """Return four-, five- and six-edge sections without horizontal edges."""
+    sections = []
+    for sides, radius in ((4, 0.08), (5, 0.07), (6, 0.06)):
+        angle = 0.17 + np.arange(sides) * 2.0 * np.pi / sides
+        sections.append(
+            np.column_stack([R0 + radius * np.cos(angle), radius * np.sin(angle)])
+        )
+    return sections
+
+
+def test_padded_topology_is_finite_on_the_axis_and_source_corners():
+    """Dead rows never enter a singular reduction before their zero is applied."""
+    from nova.biot.polygon import pad_batch
+    from nova.biot.polygonanalytic import packed_analytic_greens
+
+    sections = heterogeneous_sections()
+    edge, weight, norm = pad_batch(sections)
+    target_r = np.array([0.0, sections[1][1, 0], sections[2][2, 0]])
+    target_z = np.array([0.0, sections[1][1, 1], sections[2][2, 1]])
+    assert np.signbit(weight[4:, 0]).all()
+    assert np.signbit(weight[5:, 1]).all()
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
+        computed = packed_analytic_greens(
+            np, target_r, target_z, edge, weight, norm, nodes=32
+        )
+    for component in computed:
+        assert np.all(np.isfinite(component))
+    for index, section in enumerate(sections):
+        expected = polygon_analytic_greens(
+            target_r[index : index + 1],
+            target_z[index : index + 1],
+            section,
+            nodes=32,
+        )
+        for got, want in zip(computed, expected):
+            np.testing.assert_allclose(got[index], want[0], rtol=1e-12, atol=1e-20)
+
+
+def test_padded_topology_has_jax_parity_at_axis_and_corner_targets():
+    """The signed-zero topology and dead-edge holds survive a traced namespace."""
+    import jax.numpy as jnp
+
+    from nova.biot.polygon import pad_batch
+    from nova.biot.polygonanalytic import packed_analytic_greens
+    from nova.jax.config import configure_dtypes
+
+    configure_dtypes()
+    sections = heterogeneous_sections()
+    edge, weight, norm = pad_batch(sections)
+    target_r = np.array([0.0, sections[1][1, 0], sections[2][2, 0]])
+    target_z = np.array([0.0, sections[1][1, 1], sections[2][2, 1]])
+    expected = np.stack(
+        packed_analytic_greens(np, target_r, target_z, edge, weight, norm, nodes=8)
+    )
+    computed = np.asarray(
+        jnp.stack(
+            packed_analytic_greens(
+                jnp,
+                jnp.asarray(target_r),
+                jnp.asarray(target_z),
+                jnp.asarray(edge),
+                jnp.asarray(weight),
+                jnp.asarray(norm),
+                nodes=8,
+            )
+        )
+    )
+    assert np.all(np.isfinite(computed))
+    np.testing.assert_allclose(
+        computed,
+        expected,
+        rtol=1e-9,
+        atol=1e-9 * np.max(np.abs(expected)),
+    )
+
+
+def test_padded_coordinates_carry_zero_jax_tangents():
+    """Only live contour rows may contribute a geometry derivative."""
+    import jax
+    import jax.numpy as jnp
+
+    from nova.biot.polygon import pad_batch
+    from nova.biot.polygonanalytic import packed_analytic_greens
+    from nova.jax.config import configure_dtypes
+
+    configure_dtypes()
+    sections = heterogeneous_sections()
+    edge, weight, norm = pad_batch(sections)
+    target_r = np.array([0.0, sections[1][1, 0], sections[2][2, 0]])
+    target_z = np.array([0.0, sections[1][1, 1], sections[2][2, 1]])
+    pad_tangent = np.zeros_like(edge)
+    pad_tangent[4:, :, 0] = 1.0
+    pad_tangent[5:, :, 1] = 1.0
+
+    def evaluate(one_edge):
+        return jnp.stack(
+            packed_analytic_greens(
+                jnp,
+                jnp.asarray(target_r),
+                jnp.asarray(target_z),
+                one_edge,
+                jnp.asarray(weight),
+                jnp.asarray(norm),
+                nodes=4,
+            )
+        )
+
+    primal, tangent = jax.jvp(
+        evaluate,
+        (jnp.asarray(edge),),
+        (jnp.asarray(pad_tangent),),
+    )
+    assert np.all(np.isfinite(primal))
+    assert np.all(np.isfinite(tangent))
+    np.testing.assert_array_equal(tangent, 0.0)

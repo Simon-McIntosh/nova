@@ -150,7 +150,7 @@ from nova.biot.elliptic import (
 )
 from nova.biot.gradedresidual import QUARTER, graded_residual
 from nova.biot.momentchannel import Channel
-from nova.biot.polygon import pack_section
+from nova.biot.polygon import _held_edge, _packed_topology, pack_section
 from nova.biot.rangefunction import (
     across_the_range,
     product,
@@ -837,21 +837,21 @@ def packed_analytic_greens(
     The same reduction as :func:`polygon_analytic_greens`, driven over the packed
     arrays :func:`nova.biot.polygon.pack_section` and
     :func:`~nova.biot.polygon.pad_batch` produce -- ``edge`` ``(E, 4, ...)``,
-    ``weight`` ``(E, ...)`` and ``norm`` ``(...)``, in which a dropped horizontal
-    edge and a batch pad both carry zero weight and a harmless unit slope.  Every
-    trailing axis broadcasts, so ONE call evaluates a whole tile of pairs, each pair
-    against its own section.
+    ``weight`` ``(E, ...)`` and ``norm`` ``(...)``.  A dropped horizontal edge
+    carries positive zero and a batch pad negative zero.  Both are arithmetic
+    zeros, while the sign bit closes each heterogeneous contour at its own last
+    row.  Every trailing axis broadcasts, so ONE call evaluates a whole tile of
+    pairs, each pair against its own section.
 
     Written this way because nothing in it inspects a value.  Three things the host
     driver does with Python control flow are arithmetic here instead:
 
-    * a dead edge is not skipped but multiplied by its own zero weight, so the loop
-      over edges runs to a STATIC bound;
-    * a corner's geometry comes from the edge that STARTS there where that edge is
-      live, and from the edge that ENDS there where it is not.  Those are the same
-      point wherever both edges are live, and the second is the only one available
-      once a dropped edge's own corners have been replaced by the packed
-      placeholder -- a ``where``, not a dictionary;
+    * a dead edge is held at finite target-relative geometry BEFORE its slope or
+      corner reductions are formed, then multiplied by its zero weight, so the loop
+      over edges runs to a STATIC bound without evaluating a masked singularity;
+    * real horizontal edges retain their endpoints, while pad corners are held at
+      the same benign geometry.  The sign-bit topology makes the last real row wrap
+      to row zero independently for every pair;
     * the ``arsinh beta1`` term is still accumulated ONCE per corner against the
       signed number of live edges meeting there, so it still cancels EXACTLY around
       an unbroken chain rather than to round-off.
@@ -865,23 +865,47 @@ def packed_analytic_greens(
     radius = xp.abs(signed)
     height = xp.asarray(target_z) + xp.zeros_like(signed)
     sides = edge.shape[0]
+    live, present, chain, _ = _packed_topology(xp, weight)
 
     def corner(index: int):
         """Return the ``(r, z)`` of the corner that edge ``index`` starts from."""
-        live = weight[index] != 0.0
         return (
-            xp.where(live, edge[index][0], edge[index - 1][2]),
-            xp.where(live, edge[index][1], edge[index - 1][3]),
+            xp.where(present[index], edge[index][0], radius + 1.0),
+            xp.where(present[index], edge[index][1], height + 1.0),
+        )
+
+    def end_corner(index: int):
+        """Return the corner the real edge ``index`` ends at, pads held finite."""
+        return (
+            xp.where(present[index], edge[index][2], radius + 1.0),
+            xp.where(present[index], edge[index][3], height + 1.0),
         )
 
     corners = [
-        _Vertex(radius, height, *corner(index), nodes, residual=True, xp=xp)
+        _Vertex(radius, height, *corner(index), nodes, residual=False, xp=xp)
+        for index in range(sides)
+    ]
+    ends = [
+        _Vertex(radius, height, *end_corner(index), nodes, residual=False, xp=xp)
+        for index in range(sides)
+    ]
+    residual_corners = [
+        _Vertex(
+            radius,
+            height,
+            xp.where(chain[index] != 0.0, corner(index)[0], radius + 1.0),
+            xp.where(chain[index] != 0.0, corner(index)[1], height + 1.0),
+            nodes,
+            residual=True,
+            xp=xp,
+        )
         for index in range(sides)
     ]
     flux = radial = vertical = xp.zeros_like(radius)
     for index in range(sides):
-        part = _Edge(radius, height, edge[index], nodes, xp=xp)
-        high = part.terms(corners[(index + 1) % sides])
+        safe_edge = _held_edge(xp, edge[index], live[index], radius, height)
+        part = _Edge(radius, height, safe_edge, nodes, xp=xp)
+        high = part.terms(ends[index])
         low = part.terms(corners[index])
         # the antiderivative is of order the squared major radius where the flux is
         # not, so an edge's two limits are differenced before anything else is added
@@ -889,11 +913,10 @@ def packed_analytic_greens(
         radial = radial - weight[index] * (high[1] - low[1])
         vertical = vertical - weight[index] * (high[2] - low[2])
     for index in range(sides):
-        chain = weight[index] - weight[index - 1]
-        one_flux, one_radial, one_vertical = corners[index].arsinh_terms()
-        flux = flux + chain * one_flux
-        radial = radial + chain * one_radial
-        vertical = vertical + chain * one_vertical
+        one_flux, one_radial, one_vertical = residual_corners[index].arsinh_terms()
+        flux = flux + chain[index] * one_flux
+        radial = radial + chain[index] * one_radial
+        vertical = vertical + chain[index] * one_vertical
     return (
         0.5 * norm * radius * flux,
         # B_R is ODD in r, which is what makes it exactly zero on the axis

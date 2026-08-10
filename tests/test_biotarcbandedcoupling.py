@@ -1,6 +1,7 @@
 """Accuracy and geometry contract for finite-arc banding."""
 
 import numpy as np
+from shapely.geometry import Point, Polygon
 
 from nova.biot.arcbandedcoupling import (
     ARC_FAR_LIMIT,
@@ -82,7 +83,7 @@ def test_the_distance_carries_the_chord_beyond_an_arc_end():
         START,
         END,
     )
-    expected = 2.0 * RADIUS * np.sin(delta / 2.0)
+    expected = RADIUS * np.sin(delta)
     np.testing.assert_allclose(distance, expected, rtol=2e-13)
 
     within = arc_contour_distance(
@@ -95,6 +96,48 @@ def test_the_distance_carries_the_chord_beyond_an_arc_end():
     )
     radial_extent = SECTION_RADIUS * np.cos(np.pi / 6.0)
     np.testing.assert_allclose(within, 2.0 * SECTION_RADIUS - radial_extent, rtol=2e-13)
+
+
+def test_a_tiny_end_angle_retains_its_normal_distance():
+    """The end-face gap does not pass through cancellation in ``1-cos(delta)``."""
+    delta = 1.0e-8
+    got = arc_contour_distance(
+        np.array([RADIUS]),
+        np.array([0.0]),
+        np.array([START - delta]),
+        hexagon(),
+        START,
+        END,
+    )
+    np.testing.assert_allclose(got, RADIUS * np.sin(delta), rtol=2e-9)
+    assert got[0] > 0.0
+
+
+def test_off_end_distance_uses_the_transformed_end_face_polygon():
+    """The poloidal minimizer is taken after rotating into the end plane."""
+    vertices = thin_plate()
+    target_r = np.array([RADIUS + 0.31])
+    target_z = np.array([0.11])
+    delta = 0.23
+    target_phi = np.array([START - delta])
+    got = arc_contour_distance(target_r, target_z, target_phi, vertices, START, END)
+    plane_r = target_r[0] * np.cos(delta)
+    in_plane = Polygon(vertices).distance(Point(plane_r, target_z[0]))
+    expected = np.hypot(target_r[0] * np.sin(delta), in_plane)
+    np.testing.assert_allclose(got, expected, rtol=2e-14)
+
+
+def test_a_target_inside_the_swept_material_has_zero_distance():
+    """Distance is to the swept volume, not to its boundary from the inside."""
+    got = arc_contour_distance(
+        np.array([RADIUS]),
+        np.array([0.0]),
+        np.array([0.5 * (START + END)]),
+        hexagon(),
+        START,
+        END,
+    )
+    np.testing.assert_array_equal(got, 0.0)
 
 
 def target_routes(levels):
@@ -193,6 +236,20 @@ def test_an_elongated_section_widens_its_own_far_seam():
     )
     envelope = relative_envelope(got, exact)
     assert np.max(envelope[levels >= far_limit]) < 1.0e-6
+
+
+def test_the_far_seam_is_intrinsic_under_section_rotation():
+    """Principal area moments give a plate the same seam at every bearing."""
+    vertices = thin_plate()
+    centre = section_centroid(vertices)
+    limits = []
+    for angle in np.deg2rad([0.0, 30.0, 45.0, 60.0, 90.0]):
+        cosine, sine = np.cos(angle), np.sin(angle)
+        rotation = np.array([[cosine, -sine], [sine, cosine]])
+        rotated = centre + (vertices - centre) @ rotation.T
+        limits.append(arc_far_limit(rotated))
+    np.testing.assert_allclose(limits, limits[0], rtol=3e-13)
+    assert limits[0] > ARC_FAR_LIMIT
 
 
 def test_the_banded_route_is_exact_inside_and_moment_corrected_outside():

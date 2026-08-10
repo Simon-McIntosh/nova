@@ -102,7 +102,7 @@ from nova.biot.incompletemoments import (
     sn_pole_moment,
 )
 from nova.biot.momentchannel import Channel, factorise
-from nova.biot.polygon import pack_section
+from nova.biot.polygon import _held_edge, _packed_topology, pack_section
 from nova.biot.polygonanalytic import _NODES, _Edge as _RingEdge, _Vertex as _RingVertex
 from nova.biot.rangefunction import (
     across_the_range,
@@ -655,9 +655,11 @@ def packed_arc_greens(
     ``edge`` is ``(E, 4, N)`` and ``weight`` ``(E, N)`` after selecting ``N``
     pairs from :func:`nova.biot.polygon.pad_batch`; all other inputs are length
     ``N``.  The arithmetic is deliberately independent of which edges are live:
-    every padded edge and every possible broken-chain residual is evaluated, then
-    multiplied by its numeric weight.  That makes the same driver executable by
-    NumPy and traceable by JAX without changing the finite-arc reduction.
+    each dead edge is first held at benign target-relative geometry, then its
+    finite value is multiplied by zero.  Positive-zero horizontal edges and
+    negative-zero pads preserve the true closed topology of every pair without a
+    ragged branch.  That makes the same driver executable by NumPy and traceable
+    by JAX without changing the finite-arc reduction.
 
     The host driver below skips zero-weight edges, shares adjacent corners, and
     omits residual quadratures on a closed edge chain.  Those are valuable scalar
@@ -669,14 +671,15 @@ def packed_arc_greens(
     phi = xp.asarray(target_phi) + xp.zeros_like(radius)
     limits = arc_limits(phi, start, end, xp=xp)
     rows = [xp.zeros_like(radius) for _ in _ROWS]
-    live = xp.asarray(weight != 0.0, dtype=radius.dtype)
-    chain = live - xp.roll(live, 1, axis=0)
+    live_mask, _, chain, next_live_mask = _packed_topology(xp, weight)
+    live = xp.asarray(live_mask, dtype=radius.dtype)
+    next_live = xp.asarray(next_live_mask, dtype=radius.dtype)
     sides = edge.shape[0]
 
     def quarter_rows(values):
         return (None, values[0], values[1], None, values[2])
 
-    def corner_parts(corner_r, corner_z):
+    def corner_parts(corner_r, corner_z, *, residual):
         arc = tuple(
             _Vertex(
                 radius,
@@ -684,7 +687,7 @@ def packed_arc_greens(
                 (corner_r, corner_z),
                 (limit.amplitude, limit.sine, limit.cosine),
                 nodes,
-                residual=True,
+                residual=residual,
                 xp=xp,
             )
             for limit in limits
@@ -695,7 +698,7 @@ def packed_arc_greens(
             corner_r,
             corner_z,
             nodes,
-            residual=True,
+            residual=residual,
             xp=xp,
         )
         return arc, ring
@@ -709,10 +712,11 @@ def packed_arc_greens(
         )
 
     for index in range(sides):
-        ra, za, rb, zb = edge[index]
-        lower = corner_parts(ra, za)
-        upper = corner_parts(rb, zb)
-        part = _Edge(radius, z, edge[index], nodes, xp=xp)
+        safe_edge = _held_edge(xp, edge[index], live_mask[index], radius, z)
+        ra, za, rb, zb = safe_edge
+        lower = corner_parts(ra, za, residual=False)
+        upper = corner_parts(rb, zb, residual=False)
+        part = _Edge(radius, z, safe_edge, nodes, xp=xp)
         high = _folded(
             limits,
             [part.terms(vertex) for vertex in upper[0]],
@@ -724,10 +728,22 @@ def packed_arc_greens(
             quarter_rows(_RingEdge.terms(part, lower[1])),
         )
         edge_weight = weight[index]
-        lower_residual = residual(lower)
-        upper_residual = residual(upper)
         lower_chain = live[index] * chain[index]
-        upper_chain = live[index] * chain[(index + 1) % sides]
+        upper_chain = live[index] * (next_live[index] - live[index])
+        lower_residual = residual(
+            corner_parts(
+                xp.where(lower_chain != 0.0, ra, radius + 1.0),
+                xp.where(lower_chain != 0.0, za, z + 1.0),
+                residual=True,
+            )
+        )
+        upper_residual = residual(
+            corner_parts(
+                xp.where(upper_chain != 0.0, rb, radius + 1.0),
+                xp.where(upper_chain != 0.0, zb, z + 1.0),
+                residual=True,
+            )
+        )
         for row_index in range(len(rows)):
             rows[row_index] = (
                 rows[row_index]

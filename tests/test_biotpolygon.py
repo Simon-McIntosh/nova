@@ -24,12 +24,18 @@ import numpy as np
 import pytest
 
 from nova.biot.greens import MU0, cylinder_greens, greens_bz_br, greens_psi
-from nova.biot.polygon import polygon_greens
+from nova.biot.polygon import (
+    _orientation,
+    horizontal_edges,
+    pack_section,
+    polygon_greens,
+    traced_pack_section,
+)
 
 # ---------------------------------------------------------------- geometry --
 
 RECT = np.array([(0.84, 0.01), (0.96, 0.01), (0.96, 0.19), (0.84, 0.19)])
-# 45-degree slanted parallelogram (P2-arm-like)
+# 45-degree slanted parallelogram
 PARA = np.array([(0.85, 0.00), (0.97, 0.00), (1.05, 0.20), (0.93, 0.20)])
 # steep crown-like parallelogram (~65 degrees)
 CROWN = np.array([(0.30, 1.20), (0.42, 1.20), (0.50, 1.37), (0.38, 1.37)])
@@ -218,6 +224,54 @@ def test_broadcasts_target_shape():
     zz = np.full_like(rr, 0.25)
     psi, br, bz = polygon_greens(rr, zz, PARA)
     assert psi.shape == rr.shape and br.shape == rr.shape and bz.shape == rr.shape
+
+
+def test_axis_targets_take_the_finite_closed_form_before_division():
+    """The exact symmetry axis never enters the off-axis gradient or ``1/r`` path."""
+    from nova.biot.polygonanalytic import polygon_analytic_greens
+
+    target_r = np.array([0.0, 0.0, 1.3])
+    target_z = np.array([-0.2, 0.3, 0.25])
+    with np.errstate(divide="raise", invalid="raise", over="raise"):
+        got = polygon_greens(target_r, target_z, PARA)
+    expected = polygon_analytic_greens(target_r[:2], target_z[:2], PARA)
+    for component, reference in zip(got, expected):
+        assert np.all(np.isfinite(component))
+        np.testing.assert_allclose(component[:2], reference, rtol=0.0, atol=0.0)
+    np.testing.assert_array_equal(got[1][:2], 0.0)
+
+
+@pytest.mark.parametrize("translation", [(1.0e8, -1.0e8), (1.0e9, -1.0e9)])
+def test_pack_area_is_stable_under_large_translation(translation):
+    """Shoelace normalisation keeps a small section translated far from the origin."""
+    from nova.biot.polybow import signed_section_area
+
+    section = np.array([(0.0, 0.0), (0.2, 0.0), (0.2, 0.04), (0.0, 0.04)])
+    moved = section + np.asarray(translation)
+    baseline = pack_section(section)[2]
+    translated = pack_section(moved)[2]
+    sign, area = _orientation(moved)
+    assert sign == -1.0
+    assert area == pytest.approx(0.008, rel=1e-6)
+    assert area == pytest.approx(abs(signed_section_area(moved)), rel=1e-15)
+    assert translated == pytest.approx(baseline, rel=3e-6)
+
+
+@pytest.mark.parametrize("translation", [(1.0e8, -1.0e8), (1.0e9, -1.0e9)])
+def test_traced_pack_keeps_translation_stable_orientation(translation):
+    """The packed finite-arc path traces the same recentered area and norm."""
+    jnp = pytest.importorskip("jax.numpy")
+
+    from nova.jax.config import configure_dtypes
+
+    configure_dtypes()
+    section = np.array([(0.0, 0.0), (0.2, 0.0), (0.2, 0.04), (0.0, 0.04)])
+    moved = section + np.asarray(translation)
+    expected = pack_section(moved)
+    computed = traced_pack_section(jnp, jnp.asarray(moved), horizontal_edges(moved))
+    np.testing.assert_array_equal(np.asarray(computed[0]), expected[0])
+    np.testing.assert_array_equal(np.asarray(computed[1]), expected[1])
+    assert float(computed[2]) == pytest.approx(expected[2], rel=1e-14)
 
 
 # --------------------------------------------- robustness & singularity handling

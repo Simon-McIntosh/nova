@@ -63,7 +63,7 @@ from typing import Iterator
 import numpy as np
 import zarr
 
-from nova.biot.polygon import _BLOCK, _phi_rule, pad_batch
+from nova.biot.polygon import _BLOCK, _held_edge, _phi_rule, pad_batch
 from nova.biot.polygonanalytic import packed_analytic_greens
 from nova.biot.polygonarc import packed_arc_greens
 from nova.jax.config import Precision, resolve_precision
@@ -271,8 +271,8 @@ def _traced_psi_gradient(jnp, r, z, edge, weight, cosp, sinp, sin2p, w_cos, norm
     s2 = s * s
     dg2_dr = 2.0 * s * sinp
     for index in range(edge.shape[0]):
-        ra, za, rb, zb = edge[index]
         edge_weight = weight[index]
+        ra, za, rb, zb = _held_edge(jnp, edge[index], edge_weight != 0.0, r, z)
         b1 = (rb - ra) / (zb - za)
         a02 = 1.0 + b1 * b1
         a0 = jnp.sqrt(a02)

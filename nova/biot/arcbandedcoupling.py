@@ -151,9 +151,11 @@ def arc_far_limit(vertices: np.ndarray) -> float:
     plate carries a larger directional residual and widens the seam by the
     square-root scaling measured across the arc's thin-plate acceptance geometry.
     """
-    extent = np.ptp(np.asarray(vertices, dtype=np.float64), axis=0)
-    positive = extent[extent > 0.0]
-    aspect = float(np.max(positive) / np.min(positive))
+    radial, vertical, cross = second_moments(vertices)
+    principal = np.linalg.eigvalsh(np.array([[radial, cross], [cross, vertical]]))
+    if not np.all(np.isfinite(principal)) or principal[0] <= 0.0:
+        raise ValueError("arc section must have two positive principal area moments")
+    aspect = float(np.sqrt(principal[1] / principal[0]))
     return ARC_FAR_LIMIT * max(1.0, np.sqrt(aspect / 4.0))
 
 
@@ -300,12 +302,17 @@ def _section_distance(
     target_r: np.ndarray, target_z: np.ndarray, vertices: np.ndarray
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Return contour distance, nearest contour radius, and inside-polygon mask."""
-    target_r = np.asarray(target_r, dtype=np.float64)
-    target_z = np.asarray(target_z, dtype=np.float64)
+    target_r, target_z = np.broadcast_arrays(
+        np.asarray(target_r, dtype=np.float64),
+        np.asarray(target_z, dtype=np.float64),
+    )
     vertices = np.asarray(vertices, dtype=np.float64)
-    flat_r, flat_z = target_r.ravel(), target_z.ravel()
-    start = vertices[:, None, :]
-    edge = (np.roll(vertices, -1, axis=0) - vertices)[:, None, :]
+    origin = vertices[0]
+    local = vertices - origin
+    flat_r = target_r.ravel() - origin[0]
+    flat_z = target_z.ravel() - origin[1]
+    start = local[:, None, :]
+    edge = (np.roll(local, -1, axis=0) - local)[:, None, :]
     offset = np.stack([flat_r, flat_z], axis=-1)[None, :, :] - start
     length2 = np.sum(edge * edge, axis=-1)
     reach = np.clip(
@@ -319,10 +326,10 @@ def _section_distance(
     edge_index = np.argmin(distance2, axis=0)
     column = np.arange(flat_r.size)
     contour = np.sqrt(distance2[edge_index, column])
-    nearest_r = nearest[edge_index, column, 0]
+    nearest_r = nearest[edge_index, column, 0] + origin[0]
 
-    r0, z0 = vertices.T
-    r1, z1 = np.roll(vertices, -1, axis=0).T
+    r0, z0 = local.T
+    r1, z1 = np.roll(local, -1, axis=0).T
     crosses = (z0[:, None] > flat_z) != (z1[:, None] > flat_z)
     crossing_r = (r1 - r0)[:, None] * (flat_z - z0[:, None]) / np.where(
         z1[:, None] != z0[:, None], (z1 - z0)[:, None], 1.0
@@ -342,34 +349,35 @@ def arc_contour_distance(
 ) -> np.ndarray:
     """Return distance to the finite swept section, including either end [m].
 
-    Outside the angular span, the poloidal gap to the section and the azimuthal
-    chord to the nearer end are orthogonal contributions.  The chord uses the
-    closest poloidal point's radius; for a target whose poloidal projection lies
-    inside the section it uses the target radius and the poloidal term is zero.
+    Outside the angular span, rotate the target into each end face's own plane.
+    Its normal coordinate is ``r sin(delta)`` and its in-plane radial coordinate
+    is ``r cos(delta)``; the Euclidean distance to that polygonal face is the
+    hypotenuse of the normal gap and the in-plane polygon distance.  Forming those
+    coordinates directly retains a tiny angular separation that ``1-cos(delta)``
+    would round to zero.
     """
     target_r = np.abs(np.asarray(target_r, dtype=np.float64))
     target_z = np.broadcast_to(np.asarray(target_z, dtype=np.float64), target_r.shape)
     target_phi = np.broadcast_to(
         np.asarray(target_phi, dtype=np.float64), target_r.shape
     )
-    contour, nearest_r, inside_section = _section_distance(target_r, target_z, vertices)
+    contour, _, inside_section = _section_distance(target_r, target_z, vertices)
     sweep = end - start
     span = min(abs(sweep), 2.0 * np.pi)
     direction = 1.0 if sweep >= 0.0 else -1.0
     relative = np.remainder(direction * (target_phi - start), 2.0 * np.pi)
     within = relative <= span
-    start_gap = np.abs(
-        np.arctan2(np.sin(target_phi - start), np.cos(target_phi - start))
-    )
-    end_gap = np.abs(np.arctan2(np.sin(target_phi - end), np.cos(target_phi - end)))
-    angle_gap = np.minimum(start_gap, end_gap)
     poloidal = np.where(inside_section, 0.0, contour)
-    source_r = np.where(inside_section, target_r, nearest_r)
-    chord = np.sqrt(
-        np.maximum(2.0 * target_r * source_r * (1.0 - np.cos(angle_gap)), 0.0)
-    )
-    outside = np.hypot(poloidal, chord)
-    return np.where(within, contour, outside)
+
+    def end_face(angle):
+        delta = np.arctan2(np.sin(target_phi - angle), np.cos(target_phi - angle))
+        plane_r = target_r * np.cos(delta)
+        face_contour, _, in_face = _section_distance(plane_r, target_z, vertices)
+        in_plane = np.where(in_face, 0.0, face_contour)
+        return np.hypot(target_r * np.sin(delta), in_plane)
+
+    outside = np.minimum(end_face(start), end_face(end))
+    return np.where(within, poloidal, outside)
 
 
 def arc_band(

@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 620" role="img" aria-labelledby="title desc">
+  <title id="title">Equilibrium–transport loop: two deterministic forwards, one typed seam</title>
+  <desc id="desc">Ambix conditions the flux-function state. Nova ForwardProfile solves the free-boundary equilibrium and emits a flux-surface-averaged geometry record; Nova ForwardTransport advances the 1D profile state on that geometry and returns evolved pressure and diamagnetic drives through the same typed seam.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#345995"/></marker>
+  </defs>
+  <g font-family="system-ui, sans-serif" fill="#17212b">
+    <text x="40" y="34" font-size="19" font-weight="650">Two deterministic forwards, one typed seam</text>
+
+    <g font-size="14">
+      <!-- Ambix -->
+      <rect x="40" y="240" width="240" height="140" rx="5" fill="#fafafa" stroke="#7d8792"/>
+      <text x="58" y="270" font-size="16" font-weight="650">Ambix</text>
+      <text x="58" y="298">inference &amp; conditioning</text>
+      <text x="58" y="326">closure corrections</text>
+      <text x="58" y="354">ensemble + provenance</text>
+
+      <!-- Typed seam -->
+      <rect x="330" y="240" width="250" height="140" rx="5" fill="#fffdf7" stroke="#b27a00"/>
+      <text x="348" y="270" font-size="16" font-weight="650">FluxFunctionState</text>
+      <text x="348" y="298">ψ̂ + Jacobian · COCOS · units</text>
+      <text x="348" y="326">p, p′, F, FF′ · domain policy</text>
+      <text x="348" y="354">causal + uncertainty labels</text>
+
+      <!-- ForwardTransport -->
+      <rect x="660" y="70" width="380" height="168" rx="5" fill="#f6f9fc" stroke="#345995" stroke-width="1.5"/>
+      <text x="678" y="100" font-size="16" font-weight="650">Nova ForwardTransport</text>
+      <text x="678" y="128">1D flux-surface evolution on ρ̂</text>
+      <text x="678" y="156">rungs: native ψ-diffusion · TORAX step</text>
+      <text x="678" y="184">sources + neoclassical closures by rung</text>
+      <text x="678" y="212">receipts: flux budget · Iₚ ledger</text>
+
+      <!-- ForwardProfile -->
+      <rect x="660" y="410" width="380" height="140" rx="5" fill="#f6f9fc" stroke="#345995" stroke-width="1.5"/>
+      <text x="678" y="440" font-size="16" font-weight="650">Nova ForwardProfile</text>
+      <text x="678" y="468">free-boundary GS fixed point</text>
+      <text x="678" y="496">topology + force/field receipts</text>
+      <text x="678" y="524">no measurements · no least squares</text>
+
+      <!-- Ambix -> seam -->
+      <path d="M280,310 L328,310" stroke="#345995" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+
+      <!-- seam -> ForwardProfile -->
+      <path d="M580,340 L657,452" stroke="#345995" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+      <text x="565" y="415" font-size="13">source state</text>
+
+      <!-- seam -> ForwardTransport -->
+      <path d="M580,280 L657,180" stroke="#345995" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+      <text x="565" y="215" font-size="13">initial state</text>
+
+      <!-- ForwardProfile -> ForwardTransport (geometry, up) -->
+      <path d="M960,410 L960,241" stroke="#345995" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+      <text x="976" y="308" font-size="13" font-weight="600">FSA geometry record</text>
+      <text x="976" y="330" font-size="13">ρ̂ · V′ · g0–g3 · F · q</text>
+      <text x="976" y="352" font-size="13">at t and t+Δt</text>
+
+      <!-- ForwardTransport -> ForwardProfile (evolved drives, down) -->
+      <path d="M740,238 L740,407" stroke="#345995" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+      <text x="756" y="308" font-size="13" font-weight="600">evolved p′, FF′, Iₚ</text>
+      <text x="756" y="330" font-size="13">return channel</text>
+
+      <!-- ForwardTransport -> seam (causal prior) -->
+      <path d="M660,110 L455,110 L455,237" stroke="#345995" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+      <text x="330" y="96" font-size="13">evolved state → next causal prior</text>
+
+      <!-- actuator inputs -->
+      <text x="700" y="34" font-size="13">Iₚ(t) · heating &amp; current-drive waveforms</text>
+      <path d="M850,42 L850,67" stroke="#345995" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+      <text x="740" y="600" font-size="13">conductor currents · machine geometry</text>
+      <path d="M850,588 L850,553" stroke="#345995" stroke-width="1.5" fill="none" marker-end="url(#arrow)"/>
+    </g>
+  </g>
+</svg>

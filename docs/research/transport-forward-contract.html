@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="transport-forward-contract">
+  <meta name="plan-title" content="Transport Forward Contract — fidelity ladder, TORAX assessment and the equilibrium coupling seam">
+  <meta name="plan-summary" content="Research basis for a Nova-owned deterministic transport forward solve: what the ported current-diffusion rung covers, what a torax-class solver adds, and the embed-versus-reimplement verdict">
+  <meta name="plan-informs" content="flux-function-forward-transport,flux-function-forward-equilibrium,imas-ambix:flux-function-state-interface">
+  <title>Transport Forward Contract | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Result</h2>
+    <p>A transport forward solve is the same class of problem as the prescribed-profile free-boundary equilibrium: given geometry, an initial profile state, boundary and actuator waveforms, and a <strong>declared</strong> source and transport-model selection, the solver advances the 1D flux-surface state deterministically and reports conservation receipts. No measurement regression belongs inside it. Fidelity is an explicit model selection recorded in provenance — never a silent approximation. The producer of corrections and uncertainty remains Ambix; the deterministic evolution operator belongs to Nova, alongside <code>ForwardProfile</code>.</p>
+    <p>Nova already owns one rung of this ladder: the poloidal-flux (current) diffusion solve ported from the Ambix torch prototype (<code>nova/transport/current_diffusion.py</code>, landed <code>9e9c73e3</code>), formulated after the TORAX finite-volume ψ equation and verified three ways — analytic Bessel eigenmode decay, byte-level parity with the frozen torch prototype, and relative RMS &lt; 1% against a real TORAX run on shared circular geometry with Sauter conductivity. That verification pins the formulation (time coefficient, current normalisation, θ-scheme) but not the closures: the rung has no conductivity physics, no bootstrap current, no sources, and evolves one of the four coupled channels a torax-class solver carries.</p>
+
+    <figure>
+      <img src="/nova/figures/flux-function-forward-transport/equilibrium-transport-loop.svg" alt="Ambix conditions the typed flux-function state; Nova ForwardProfile solves the free-boundary equilibrium and emits a flux-surface-averaged geometry record; Nova ForwardTransport advances the 1D state and returns evolved pressure and diamagnetic drives through the same seam">
+      <figcaption>The equilibrium–transport loop: <code>ForwardProfile</code> emits the FSA geometry record, <code>ForwardTransport</code> advances the profile state on it, and the evolved <code>p′</code>/<code>FF′</code> return through the one typed seam.</figcaption>
+    </figure>
+
+    <h2 id="s2">§2 — What the native rung has and lacks</h2>
+    <p>The ported solve is a vertex-centred finite-volume θ-scheme (backward Euler default) with a jitted Thomas tridiagonal kernel — O(n), jit/vmap/grad-safe — the axis-regularity condition at ρ̂=0 and the measured plasma current as an edge-gradient condition at ρ̂=1. Geometry is frozen per interval by design. Conductivity is a three-parameter bounded empirical family fitted across shots; despite the "Sauter/Spitzer-informed" phrasing in its docstring, no Sauter, Spitzer or neoclassical conductivity is implemented anywhere in the ambix or nova trees — the family merely brackets the Spitzer temperature scaling while staying finite at the separatrix. The solver accepts any conductivity callable, which is how the TORAX cross-check injects Sauter values.</p>
+    <table>
+      <thead><tr><th>Capability</th><th>Native rung</th><th>torax-class solver</th></tr></thead>
+      <tbody>
+        <tr><td>current diffusion (ψ)</td><td>yes — verified against TORAX &lt; 1% RMS</td><td>yes, with moving-grid Φ̇_b term</td></tr>
+        <tr><td>ion + electron heat transport</td><td>absent</td><td>coupled T_i, T_e equations</td></tr>
+        <tr><td>particle transport (n_e)</td><td>absent</td><td>coupled density equation with pinch</td></tr>
+        <tr><td>conductivity</td><td>3-parameter empirical shape, cross-shot fit</td><td>Sauter neoclassical σ(T_e, Z_eff)</td></tr>
+        <tr><td>bootstrap current</td><td>absent</td><td>Sauter and Redl</td></tr>
+        <tr><td>sources</td><td>none — ohmic drive enters only via the I_p edge condition</td><td>ohmic, fusion, radiation, ECRH/ECCD, ICRH, NBI-generic, gas puff, pellet</td></tr>
+        <tr><td>turbulent transport models</td><td>absent</td><td>constant, CGM, Bohm/gyro-Bohm, QLKNN, TGLF-NN, direct QuaLiKiz/TGLF</td></tr>
+        <tr><td>pedestal / MHD</td><td>absent (a q≥1 soft prior lives equilibrium-side in ambix)</td><td>mtanh + adaptive L–H pedestal, sawtooth trigger/redistribution</td></tr>
+        <tr><td>time stepping</td><td>caller-supplied sub-steps, linear θ only</td><td>adaptive dt, Pereverzev–Corrigan, Newton–Raphson and optimizer steppers</td></tr>
+        <tr><td>geometry evolution</td><td>frozen per interval</td><td>time-dependent providers; documented external-equilibrium override loop</td></tr>
+      </tbody>
+    </table>
+    <p>What Nova has that TORAX does not, and which anchors the division of authority: a free-boundary GS solve; FSA metric extraction directly from a solved 2D ψ(R,Z) map (TORAX reads geometry from CHEASE/FBT/EQDSK/IMAS files); projection of evolved profiles back onto a p′/FF′ ladder — the two current targets weight the pressure-gradient and diamagnetic families differently, so parallel Ohm's law carries profile-split information no single-slice magnetics fit has; and the flux-consumption/Ejima ledger.</p>
+
+    <h2 id="s3">§3 — TORAX assessment</h2>
+    <p>TORAX (github.com/google-deepmind/torax, Apache-2.0, <a href="https://arxiv.org/abs/2406.06718">Citrin et al.</a>) is at v1.4.3 with active daily development and is verified against RAPTOR. It solves the four coupled 1D PDEs on normalised toroidal flux with the Φ̇_b moving-grid terms, and it exposes exactly the embedding surface an outer free-boundary loop needs:</p>
+    <ul>
+      <li><strong>Step-wise library API.</strong> <code>make_step_fn</code> returns a jitted <code>SimulationStepFn</code>; <code>jitted_fixed_time_step</code> accepts <code>runtime_params_overrides</code> and <code>geo_overrides</code>. The documentation's worked example is an iteration loop with an external equilibrium code, requiring the geometry provider to hold both the previous and new geometry so the Φ̇_b term is correct.</li>
+      <li><strong>Functional immutable state.</strong> Core state objects are frozen registered pytrees; the stepper itself is a pytree. An ensemble is a <code>vmap</code> over state, not a serialisation problem.</li>
+      <li><strong>Differentiability is tested end-to-end</strong> — value-and-grad of fusion gain with respect to an I_p waveform through a 200-step jitted loop, checked against central differences. The Newton-solver gradient path was fixed in v1.4.3.</li>
+      <li><strong>Return channel built in.</strong> Post-processing computes <code>pprime</code> and <code>FFprime</code> explicitly as the hand-back to an equilibrium code, and the IMAS writer accepts an external boundary.</li>
+    </ul>
+    <p>Four caveats shape the integration:</p>
+    <ol>
+      <li><strong>Dependency pin.</strong> TORAX ≥ 1.3.0 hard-pins <code>imas-python==2.1.0</code> and bounds <code>h5py&lt;3.15</code>; the ambix environment carries imas-python 2.2.0 (required by imas-ink ≥ 2.2) and h5py 3.16, so the installed TORAX is stuck at 1.1.1 — which predates the geometry-override API, Redl bootstrap, the IMAS DDv4 geometry path and the Newton gradient fix. Resolving this pin (uv override-dependencies, relaxing imas-ink, or an upstream loosening) gates everything else.</li>
+      <li><strong>COCOS is undeclared upstream</strong> (issue #528, open since 2024). Geometry construction force-normalises signs — ψ increasing outward, positive I_p, absolute values applied to Φ, F and the |∇ψ| averages — and the IMAS writers hard-code sign flips. The boundary therefore needs explicit round-trip sign tests against Nova's pinned COCOS 17 provenance, not documentation trust.</li>
+      <li><strong>Geometry construction is NumPy/SciPy.</strong> The resulting geometry object is a pytree and passes into jit, but gradients cannot flow back through its construction. Picard/fixed-point equilibrium coupling is unaffected; an end-to-end differentiable loop would need a jnp port of one ~250-line builder.</li>
+      <li><strong>Import side effects.</strong> TORAX sets <code>jax_enable_x64</code> and appends an XLA fast-compile preset at import — benign for Nova, which owns x64 configuration already, but worth pinning in a shared-process test.</li>
+    </ol>
+
+    <h2 id="s4">§4 — Geometry contract</h2>
+    <p>All non-circular TORAX geometry funnels through one adapter type whose fields are 1D profiles versus ρ̂ plus four scalars. Nova's traced FSA assembly already produces the majority from a solved flux map; the gap is a bounded list of additional surface averages, all computable by the same contour-free coarea kernel:</p>
+    <table>
+      <thead><tr><th>Adapter field</th><th>Nova status</th></tr></thead>
+      <tbody>
+        <tr><td>V′ = dV/dρ̂, ⟨1/R²⟩, ⟨1/R⟩, ⟨B²⟩, F, q, ψ, Φ, I_p(ρ̂)</td><td>produced by the traced FSA record</td></tr>
+        <tr><td>g2·g3/ρ̂ diffusion coefficient</td><td>produced (the ψ-equation coefficient)</td></tr>
+        <tr><td>∮dl/B_p</td><td>missing — needed for the q/current identities TORAX derives internally</td></tr>
+        <tr><td>⟨|∇ψ|⟩, ⟨|∇ψ|²⟩, ⟨1/B²⟩</td><td>missing — only the /R² moment is averaged today, so g1 is unrecoverable from the current record</td></tr>
+        <tr><td>R_in, R_out, elongation, upper/lower triangularity</td><td>missing from the FSA record (boundary machinery computes shape elsewhere)</td></tr>
+        <tr><td>vacuum B_0, R_major, a_minor, z_axis</td><td>available from machine description + solved map</td></tr>
+        <tr><td>divertor/SOL fields (connection lengths, R_OMP…)</td><td>optional — only the edge model consumes them; out of first scope</td></tr>
+      </tbody>
+    </table>
+    <p>Two handoff routes exist: construct the adapter object directly (explicit, sign-controlled, no experimental layer), or emit an in-memory IMAS equilibrium IDS and reuse TORAX's own reader (DDv4, marked experimental, requires the custom run loop we would use anyway). Either way the IMAS equilibrium representation remains the interchange format for egress.</p>
+
+    <h2 id="s5">§5 — Embed, do not reimplement</h2>
+    <p>Reimplementing even the current-diffusion equation plus Sauter conductivity to TORAX's verification standard consumed one plan already; the remaining three channels, the neoclassical closures, the source catalogue and the stepper machinery are person-years of verified physics available under Apache-2.0, maintained daily, with the coupling API designed for precisely this use. The native rung stays: it is the fully differentiable, dependency-free floor of the ladder, already validated against TORAX itself, and the right vehicle for learned-closure work where the empirical conductivity family is the point rather than a deficiency. Integration effort, in order: resolve the dependency pin; extend the FSA record with the missing averages and build the geometry adapter; write COCOS round-trip sign tests; lift consumers off whole-run calls onto the step API. State conversion is cheap (frozen pytrees), and differentiability through geometry construction is deferred until a gradient across the equilibrium loop is load-bearing.</p>
+
+    <h2 id="s6">§6 — Current consumers and recorded drift</h2>
+    <p>Real TORAX is already a declared ambix dependency, exercised two ways: a parameter-space ensemble smoother running up to 128 whole simulations per shot, and a sequential filter running one nominal trajectory per shot — both on analytic circular geometry rather than the reconstruction, with heat and particle evolution disabled, a resistivity multiplier folded into an effective Z_eff, and a broad exception handler that silently degrades to zero-filled profiles. The step-wise API removes the need for all four compromises. Separately, the torch donor of the ported solver still sits in the ambix tree with two unported functions (per-column amplitude scales and the β_p coefficient sensitivity), and the evolved-profile projection is not yet wired into the label-solve soft-prior hook it was built for. These are consumer-side obligations recorded in the ambix integration plan, not Nova work.</p>
+  </main>
+</body>
+</html>

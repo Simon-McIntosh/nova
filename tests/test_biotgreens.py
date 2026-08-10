@@ -1276,7 +1276,10 @@ def test_the_rectangular_section_routes_agree_through_the_quadrature_switch():
 
 @pytest.mark.xfail(
     strict=True,
-    reason="the four-corner section reduction amplifies host/traced corner roundoff",
+    reason="the four-corner combination amplifies corner roundoff by the ratio of "
+    "the widest corner term to the section value -- 9.4e02 for this thick section "
+    "and 1.5e04 for the thin one, so 2e-12 is below what the arrangement can hold; "
+    "test_the_section_combination_amplifies_the_widest_corner_term measures it",
 )
 @pytest.mark.parametrize("da,dz", [(0.1, 0.08), (0.02, 0.02)])
 def test_section_corner_rule_is_coherent_across_both_switch_boundaries(da, dz):
@@ -1349,7 +1352,9 @@ def test_section_corner_rule_is_coherent_across_both_switch_boundaries(da, dz):
 
 @pytest.mark.xfail(
     strict=True,
-    reason="the four-corner section reduction loses positive-average precision",
+    reason="same four-corner amplification as the switch-boundary case: the widest "
+    "corner term is ~1e03 times the section value here, so the reduction cannot "
+    "reach a converged positive average to 2e-12",
 )
 def test_far_section_average_matches_a_refined_value_and_tangent():
     """The corner reduction must match a converged positive source average."""
@@ -1406,6 +1411,149 @@ def test_far_section_average_matches_a_refined_value_and_tangent():
     )
     assert _set_deviation(candidate_value, refined_value) < 2e-12
     assert _set_deviation(candidate_tangent, refined_tangent) < 2e-12
+
+
+@pytest.mark.parametrize(
+    ("da", "dz", "amplification"),
+    [(0.1, 0.08, 9.37e2), (0.02, 0.02, 1.46e4), (0.002, 0.1, 3.42e4)],
+    ids=["compact", "thin-square", "slender"],
+)
+def test_the_section_combination_amplifies_the_widest_corner_term(
+    da, dz, amplification
+):
+    """What the four-corner rule costs, and which cancellation sets it.
+
+    The section value is a second difference of the corner antiderivative over the
+    section's own corners, and the antiderivative's widest single term is
+    ``amplification`` times that difference.  The cancellation behind that ratio is
+    identifiable: the boundary angle ``cphi`` and the third-kind pole moments each
+    survive the four-corner combination at about twice this ratio and cancel against
+    each other, leaving the section value.  It is the same cancellation the corner
+    planes rely on -- the one the docstring of :func:`corner_fields` sets out -- now
+    taken over a whole section instead of across one plane.  A corner value therefore
+    arrives with an absolute rounding set by that widest term, and the combination
+    divides it by the section value, so the section's achievable relative precision
+    is ``eps`` times this ratio rather than ``eps``.
+
+    The ratio is geometry, not roundoff, which is why it is pinned to a few percent:
+    it grows as the section shrinks against its own radius, so a slender winding pack
+    loses two decades where a thick coil loses one.  Measured against extended
+    precision in ``test_the_rectangle_section_matches_an_extended_precision_average``,
+    the flux error tracks ``eps`` times this ratio to within a factor of two at both
+    ends of a fifteenfold span in the ratio.
+
+    Splitting the combination across the antiderivative's own terms does NOT recover
+    it -- measured, the term-by-term arrangement lands within a factor of two of the
+    summed one, because the two cancelling terms are individually large whichever
+    order they are combined in.  Removing it needs the pole moments' divergent part
+    taken off against ``cphi`` in closed form, so that what is evaluated is already
+    the residual; until then the two strict expected failures above record the
+    consequence.  The gap asserted here is between the kernel's grouping and the
+    paper's, which is a sample of that rounding rather than a bound on it.
+    """
+    a, z0 = 6.2, 0.37
+    target_r = np.array([a])
+    target_z = np.array([z0])
+    stacks = _corner_stacks(a, z0, da, dz, target_r, target_z)
+    reference, envelope = _reference_corner_fields(*stacks)
+    kernel = corner_fields(*stacks)
+
+    def combine(data):
+        return (data[..., 2] - data[..., 3]) - (data[..., 1] - data[..., 0])
+
+    section = abs(combine(reference[0])[0])
+    widest = float(np.max(envelope[0]))
+    assert widest / section == pytest.approx(amplification, rel=0.05)
+    gap = abs(combine(kernel[0])[0] - combine(reference[0])[0]) / section
+    assert gap < 10.0 * _ULP * amplification
+
+
+#: Area means of the ring kernel over a rectangular section, in extended precision.
+#: Each entry is ``(section, target, (psi, Br, Bz), recorded gap)``.
+#:
+#: Computed at 40 decimal digits with mpmath: its own AGM for the first kind taken on
+#: the modulus COMPLEMENT so a node landing 1e-40 from the ring keeps every digit, its
+#: own second kind, and its own adaptive quadrature over a signed fan decomposition of
+#: the rectangle taken from the TARGET -- which puts the kernel's logarithmic and
+#: inverse-distance singularities at the fan apex, where the polar jacobian removes
+#: them.  So the reference shares no code path with the kernel: different special
+#: functions, different quadrature, different decomposition, and thirty digits of
+#: headroom.  Every digit shown is stable under refinement of both rule directions
+#: (2e-18 or better for the interior targets, exactly for the far one).
+#:
+#: The recorded gaps are what the four-corner combination costs, and they track
+#: ``eps`` times the amplification measured in
+#: ``test_the_section_combination_amplifies_the_widest_corner_term``: 9.4e02 predicts
+#: 2.1e-13 against 4.3e-13 measured, 1.5e04 predicts 3.2e-12 against 2.9e-12.  Two
+#: independent measurements of the same arrangement fault, so the tolerances below are
+#: the arrangement's own floor and not a fitted number.
+_SECTION_REFERENCE = (
+    (
+        (6.2, 0.37, 0.1, 0.08),
+        (6.2, 0.37),
+        (
+            4.185616857471096661158e-5,
+            0.0,
+            1.118632321333802432827e-7,
+        ),
+        1.0e-12,
+    ),
+    (
+        (6.2, 0.37, 0.02, 0.02),
+        (6.2, 0.37),
+        (
+            5.358122701894689329689e-5,
+            0.0,
+            1.35115941174320555146e-7,
+        ),
+        6.0e-12,
+    ),
+    (
+        (6.2, 0.37, 0.1, 0.08),
+        (9.2, 1.37),
+        (
+            9.825136588614350338087e-6,
+            1.418317288306867003002e-8,
+            -2.560095279615664065197e-8,
+        ),
+        8.0e-12,
+    ),
+)
+
+
+@pytest.mark.parametrize(
+    ("geometry", "target", "reference", "recorded"),
+    _SECTION_REFERENCE,
+    ids=["compact-centroid", "thin-centroid", "compact-far"],
+)
+def test_the_rectangle_section_matches_an_extended_precision_average(
+    geometry, target, reference, recorded
+):
+    """The section kernel against a reference it shares no code path with.
+
+    The target ON the centroid is the worst regime the kernel has: it sits inside its
+    own material, where the ring kernel it averages is singular and where the four
+    corner values it differences are furthest from their difference.  The far target
+    checks the other end, where the section average must fall back onto the point
+    loop.  See ``_SECTION_REFERENCE`` for how the reference was made and why these
+    tolerances are the arrangement's floor.
+    """
+    values = cylinder_greens(np.array([target[0]]), np.array([target[1]]), *geometry)
+    assert _set_deviation([value[0] for value in values], reference) < recorded
+
+
+def test_the_section_radial_field_vanishes_on_its_own_centroid_level():
+    """The one section value an analytic limit fixes exactly, held bit-exactly.
+
+    A rectangular section is symmetric about its own centroid level, so the radial
+    field there is zero for every section and every radius -- not small, zero.  The
+    corner rule reaches it by cancelling four corner values that are individually far
+    from zero, so this is the sharpest available statement that the combination is
+    sign-coherent: any grouping error survives as a nonzero residual.
+    """
+    for da, dz in ((0.1, 0.08), (0.02, 0.02), (0.002, 0.1), (0.5, 0.001)):
+        _, br, _ = cylinder_greens(np.array([6.2]), np.array([0.37]), 6.2, 0.37, da, dz)
+        assert br[0] == 0.0
 
 
 def test_rectangular_section_axis_limit_is_finite_and_differentiable():

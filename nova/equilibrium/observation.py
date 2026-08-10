@@ -21,11 +21,12 @@ them needs a traced boundary contour and all of them differentiate cleanly:
 
 The reference radius is pinned as the volume-averaged major radius of the
 labelled core rather than a machine constant or a boundary extremum, so it
-moves with the solved geometry and stays smooth in the flux map. Pressure
-comes from the supplied gradient and boundary primitive through the
-integration pinned in :mod:`nova.equilibrium.convention`, evaluated on the
-converged flux span, so the observation is a property of the solve and not of
-a frozen grid.
+moves with the solved geometry and stays smooth in the flux map. Pressure is
+asked of the declared closure at the node radius and the converged flux span
+— a static closure integrates it inward from the boundary primitive by the
+rule pinned in :mod:`nova.equilibrium.convention`, a rotating one returns its
+own major-radius-dependent primitive — so the observation is a property of
+the solve and not of a frozen grid.
 
 Enforcement is separate from observation. A caller may ask the solve to
 enforce moments only up to the number of scalar degrees of freedom the
@@ -44,10 +45,7 @@ import jax
 import jax.numpy as jnp
 from scipy.constants import mu_0
 
-from nova.equilibrium.convention import (
-    flux_function_pressure,
-    flux_function_toroidal_field,
-)
+from nova.equilibrium.convention import flux_function_toroidal_field
 from nova.equilibrium.domain import DomainMasks, PlasmaDomain
 
 __all__ = [
@@ -141,10 +139,18 @@ def gradient_tail(gradient, psi_norm: jax.Array, nodes: int = PROFILE_NODES):
     return jnp.interp(psi_norm, grid, tail)
 
 
-def core_pressure(source, masks: DomainMasks, flux_span: jax.Array) -> jax.Array:
-    """Return the pressure [Pa] the core closure implies on every cell."""
-    tail = gradient_tail(source.core.p_prime, masks.psi_norm)
-    return flux_function_pressure(source.boundary_pressure, flux_span, tail)
+def core_pressure(
+    source, masks: DomainMasks, radius: jax.Array, flux_span: jax.Array
+) -> jax.Array:
+    """Return the pressure [Pa] the core closure implies on every cell.
+
+    The major radius is passed because pressure is a flux function only under
+    a static closure; a rotation closure varies it along a surface and owns
+    its own primitive.
+    """
+    return source.core.pressure(
+        radius, masks.psi_norm, source.boundary_pressure, flux_span
+    )
 
 
 def core_field_function_squared(
@@ -186,8 +192,13 @@ def observe_moments(
     plasma_current = jnp.sum(jnp.where(masks.core, cell_current, 0.0))
 
     major_radius = jnp.sum(radius * volume_element) / safe_volume
+    # the closure is declared on the core and need not evaluate anywhere else,
+    # so the pressure is selected by label rather than weighted by an area
+    # that vanishes off it: a zero weight does not neutralise a non-finite
+    # value, and one such cell would carry the whole integral away
     pressure_integral = jnp.sum(
-        core_pressure(source, masks, flux_span) * volume_element
+        jnp.where(masks.core, core_pressure(source, masks, radius, flux_span), 0.0)
+        * volume_element
     )
     field_integral = jnp.sum(poloidal_field_squared * volume_element)
 

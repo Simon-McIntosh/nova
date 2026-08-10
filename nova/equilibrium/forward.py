@@ -32,9 +32,10 @@ rather than hiding the outcome behind a converged residual.
 
 The result is a receipt, not just a flux map: it carries the residual
 history, the axis and separatrix state, the domain-labelled current ledger,
-the integral observations, the conservation residuals, the finite checks and
-every normalisation action the solve took — which, for an absolute source,
-is none.
+the integral observations, the conservation residuals, the finite checks,
+the force-balance closure the source declared with the conventions it is
+unreadable without, and every normalisation action the solve took — which,
+for an absolute source, is none.
 """
 
 from __future__ import annotations
@@ -71,6 +72,7 @@ from nova.equilibrium.observation import (
 from nova.equilibrium.source import (
     ForwardSource,
     NormalisationRecord,
+    RotationRecord,
     absolute_normalisation_record,
 )
 from nova.equilibrium.topology import TopologyState
@@ -115,6 +117,7 @@ class ForwardEquilibrium(NamedTuple):
     ledger: CurrentLedger
     conservation: ConservationLedger
     normalisation: NormalisationRecord
+    rotation: RotationRecord
     finite: FiniteCheck
 
 
@@ -247,11 +250,12 @@ class ForwardProfile:
             self.operator.radius, self.operator.area, masks
         )
         grid_flux = flux[: self.lattice.node_count]
+        radius = jnp.asarray(self.lattice.node_radius)
         radial, vertical = poloidal_field(self.lattice, grid_flux)
         moments = observe_moments(
             self.operator.source,
             masks,
-            jnp.asarray(self.lattice.node_radius),
+            radius,
             self.operator.area,
             cell_current,
             radial**2 + vertical**2,
@@ -274,6 +278,7 @@ class ForwardProfile:
             ledger=current_ledger(cell_current, masks),
             conservation=conservation,
             normalisation=absolute_normalisation_record(flux.dtype),
+            rotation=self.operator.source.rotation_record(radius, masks),
             finite=FiniteCheck(
                 flux=jnp.all(jnp.isfinite(flux)),
                 cell_current=jnp.all(jnp.isfinite(cell_current)),

@@ -14,6 +14,13 @@ the forward solve consumes the source it is given.
 :class:`~nova.equilibrium.forward_operator.ForwardFluxOperator` is the traced
 map behind the forward solve, not a second public problem.
 
+Optional physics reaches the forward solve as a typed force-balance closure
+on the source rather than as a solver variant. The first is toroidal rotation
+under isothermal flux surfaces,
+:class:`~nova.equilibrium.rotation.RotatingDomainProfile`, which makes the
+pressure source depend on major radius and publishes the thermodynamic
+conventions it was formed under.
+
 All quantities are raw SI. Poloidal flux is the total flux
 :math:`\\Phi = 2 \\pi R A_\\phi` in Wb and :math:`\\mu_0` is always written
 explicitly; the full sign chain is pinned in
@@ -46,10 +53,16 @@ if TYPE_CHECKING:
         ProfileResult,
         ReconstructProfile,
     )
+    from nova.equilibrium.rotation import (
+        IsothermalRotation,
+        RotatingDomainProfile,
+    )
     from nova.equilibrium.source import (
         DomainProfile,
         ForwardSource,
         NormalisationPolicy,
+        RotationClosure,
+        RotationRecord,
     )
 
 #: Names loaded from their module on first attribute access, so importing the
@@ -65,6 +78,7 @@ _DEFERRED_EXPORTS: dict[str, str] = {
     "ForwardProfile": "forward",
     "ForwardSource": "source",
     "IntegralObservation": "observation",
+    "IsothermalRotation": "rotation",
     "MomentEnforcementError": "observation",
     "MomentTargets": "observation",
     "NormalisationPolicy": "source",
@@ -73,6 +87,9 @@ _DEFERRED_EXPORTS: dict[str, str] = {
     "ProfilePrior": "profile",
     "ProfileResult": "profile",
     "ReconstructProfile": "profile",
+    "RotatingDomainProfile": "rotation",
+    "RotationClosure": "source",
+    "RotationRecord": "source",
 }
 
 __all__ = [
@@ -87,6 +104,7 @@ __all__ = [
     "ForwardProfile",
     "ForwardSource",
     "IntegralObservation",
+    "IsothermalRotation",
     "MomentEnforcementError",
     "MomentTargets",
     "NormalisationPolicy",
@@ -95,6 +113,9 @@ __all__ = [
     "ProfilePrior",
     "ProfileResult",
     "ReconstructProfile",
+    "RotatingDomainProfile",
+    "RotationClosure",
+    "RotationRecord",
     "decay_index",
     "shafranov_vertical_field",
     "shafranov_vertical_field_elongated",

@@ -21,16 +21,22 @@ Four residuals, each measuring a different failure:
 ``grad_shafranov_residual``
     :math:`\Delta^\star \Phi - 4 \pi^2 (\mu_0 R^2 p' + FF')` is the real
     equilibrium residual, and the only one of the four that a converged but
-    wrong solve can fail.
+    wrong solve can fail. The pressure gradient is the one the declared
+    closure evaluates at fixed major radius, so a rotating source is read
+    against its own drive rather than against a flux-function idealisation
+    of it.
 
 ``force_residual``
-    :math:`J \times B - \nabla p` with the toroidal current density taken
-    from the FIELD, :math:`\mu_0 j_\phi = -\Delta^\star \Phi / (2 \pi R)`,
-    rather than from the source. Taking it from the source would make the
-    cancellation algebraic and the check empty; taking it from the field
-    makes the residual proportional to the Grad-Shafranov residual times
+    :math:`J \times B - \nabla p` plus whatever body force the closure
+    declares, with the toroidal current density taken from the FIELD,
+    :math:`\mu_0 j_\phi = -\Delta^\star \Phi / (2 \pi R)`, rather than from
+    the source. Taking it from the source would make the cancellation
+    algebraic and the check empty; taking it from the field makes the
+    residual proportional to the Grad-Shafranov residual times
     :math:`\nabla \Phi`, which is what a force-balance receipt should
-    measure.
+    measure. The body force is zero for a static closure and the centrifugal
+    density :math:`\rho R \Omega^2` for a rotating one, which is what makes
+    the outboard pressure pile-up a balance rather than a residual.
 
 Every residual is restricted to cells where the source is declared and the
 stencil is complete, so a one-sided difference at the lattice border never
@@ -49,7 +55,7 @@ from scipy.constants import mu_0
 
 from nova.equilibrium.convention import (
     TOTAL_FLUX_FACTOR,
-    grad_shafranov_source,
+    delta_star_from_current_density,
 )
 from nova.equilibrium.domain import DomainMasks
 from nova.equilibrium.observation import (
@@ -271,10 +277,8 @@ def conservation_ledger(
     checked = checked & lattice.interior()
 
     elliptic = delta_star(lattice, flux)
-    drive = grad_shafranov_source(
-        radius,
-        source.core.p_prime(masks.psi_norm),
-        source.core.ff_prime(masks.psi_norm),
+    drive = delta_star_from_current_density(
+        radius, source.core.current_density(radius, masks.psi_norm)
     )
 
     radial_field, vertical_field = poloidal_field(lattice, flux)
@@ -306,13 +310,18 @@ def conservation_ledger(
     diamagnetic_vertical = lattice.flatten(
         _central(squared, lattice.vertical_step, 1) / (2.0 * mu_0 * radius2d**2)
     )
-    pressure = lattice.reshape(core_pressure(source, masks, flux_span))
+    cell_pressure = core_pressure(source, masks, radius, flux_span)
+    pressure = lattice.reshape(cell_pressure)
     pressure_radial = lattice.flatten(_central(pressure, lattice.radial_step, 0))
     pressure_vertical = lattice.flatten(_central(pressure, lattice.vertical_step, 1))
+    body_force = source.core.radial_body_force(radius, masks.psi_norm, cell_pressure)
 
     toroidal_current = -elliptic / (TOTAL_FLUX_FACTOR * mu_0 * radius)
     force = jnp.hypot(
-        toroidal_current * vertical_field - diamagnetic_radial - pressure_radial,
+        toroidal_current * vertical_field
+        - diamagnetic_radial
+        - pressure_radial
+        + body_force,
         -toroidal_current * radial_field - diamagnetic_vertical - pressure_vertical,
     )
     pressure_gradient = jnp.hypot(pressure_radial, pressure_vertical)

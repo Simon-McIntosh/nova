@@ -1166,7 +1166,7 @@ Guidance
   - The full validation suite is the gate for anything in this tier, not the fast lane.
 
 Scope locks / constraints
-  Work in a detached worktree off develop; the primary checkout stays on main. This
+  Work in a detached worktree from main; the primary checkout stays on main. This
   changes the shipped operator, so the acceptance evidence is a before-and-after on the
   validation suite and on the tracked biotoperate baselines, not only unit tests.
 
@@ -1231,7 +1231,7 @@ Guidance
     is trace and lowering, which a smaller graph also shortens.
 
 Scope locks / constraints
-  Work in a detached worktree off develop; the primary checkout stays on main. This
+  Work in a detached worktree from main; the primary checkout stays on main. This
   changes no arithmetic if it is done right, so the gate is that every entry of
   SECTION_ACCURACY, ASPECT_ACCURACY and FIELD_ASPECT_ACCURACY holds UNCHANGED in
   both directions, and that tests/test_biottiledbackend.py&#x27;s traced-closed parity
@@ -1303,7 +1303,7 @@ Guidance
     measured build times if the padding eats the win.
 
 Scope locks / constraints
-  Work in a detached worktree off develop; the primary checkout stays on main.
+  Work in a detached worktree from main; the primary checkout stays on main.
   This changes no arithmetic, so the gate is that every per-component envelope and
   both seam-jump bounds in tests/test_biotbandedcoupling.py hold unchanged for
   both kernels, and that the gathered path is BIT-IDENTICAL to the per-column one.

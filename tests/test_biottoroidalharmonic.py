@@ -288,6 +288,48 @@ FOCAL_POSITION_HEIGHT_REFERENCE = np.asarray(
         0.0,
     ]
 )
+TINY_FOCAL_COORDINATE = np.asarray(
+    [
+        1.0e-300,
+        1.0e-240,
+        1.0e-200,
+        1.0e-170,
+        2.0e-162,
+        3.0e-162,
+        1.0e-160,
+        1.0e-154,
+        2.0e-154,
+        1.0e-100,
+    ]
+)
+TINY_FOCAL_RADIUS_REFERENCE = np.asarray(
+    [
+        5.2e299,
+        5.2e239,
+        5.2e199,
+        5.2e169,
+        2.6e161,
+        1.7333333333333333e161,
+        5.2e159,
+        5.2e153,
+        2.6e153,
+        5.2e99,
+    ]
+)
+TINY_FOCAL_HEIGHT_REFERENCE = np.asarray(
+    [
+        -1.04e300,
+        -1.04e240,
+        -1.04e200,
+        -1.04e170,
+        -5.2e161,
+        -3.4666666666666666e161,
+        -1.04e160,
+        -1.04e154,
+        -5.2e153,
+        -1.04e100,
+    ]
+)
 
 
 # --- coordinates ------------------------------------------------------------
@@ -319,6 +361,57 @@ def test_focal_position_retains_tiny_distance_and_angle_denominators():
     assert float(along_angle_z) == pytest.approx(
         focus.height + focus.radius / np.tan(0.5 * tiny), rel=2e-16
     )
+
+
+def test_focal_position_retains_coordinates_whose_squared_gap_underflows():
+    """Scale normalization matches 100-decimal values across the square boundary."""
+    focus = th.FocalCircle(1.3, -0.2)
+    with np.errstate(over="raise", invalid="raise", divide="raise", under="ignore"):
+        radius, height = th.focal_position(
+            focus, TINY_FOCAL_COORDINATE, -2.0 * TINY_FOCAL_COORDINATE
+        )
+    assert np.allclose(radius, TINY_FOCAL_RADIUS_REFERENCE, rtol=3.0e-16)
+    assert np.allclose(height, TINY_FOCAL_HEIGHT_REFERENCE, rtol=3.0e-16)
+
+
+@pytest.mark.parametrize(
+    "distance, angle, radius, height",
+    [
+        (1.0e-300, 0.0, 2.6e300, -0.2),
+        (-1.0e-300, 0.0, -2.6e300, -0.2),
+        (0.0, 1.0e-300, 0.0, 2.6e300),
+        (0.0, -1.0e-300, 0.0, -2.6e300),
+        (1.0e-300, 1.0e-300, 1.3e300, 1.3e300),
+    ],
+)
+def test_focal_position_retains_signed_tiny_coordinate_axes(
+    distance, angle, radius, height
+):
+    """Only the exact two-coordinate zero is the path-dependent point."""
+    focus = th.FocalCircle(1.3, -0.2)
+    with np.errstate(over="raise", invalid="raise", divide="raise", under="ignore"):
+        got_radius, got_height = th.focal_position(focus, distance, angle)
+    assert float(got_radius) == pytest.approx(radius, rel=2.0e-16, abs=0.0)
+    assert float(got_height) == pytest.approx(height, rel=2.0e-16, abs=0.0)
+
+
+@pytest.mark.parametrize(
+    "distance, angle", [(np.nextafter(0.0, 1.0), 0.0), (0.0, np.nextafter(0.0, 1.0))]
+)
+def test_focal_position_reports_only_unrepresentable_coordinate_overflow(
+    distance, angle
+):
+    """A tiny finite coordinate works until its analytic inverse exceeds float64."""
+    focus = th.FocalCircle(1.3)
+    with np.errstate(over="raise", invalid="raise", divide="raise", under="ignore"):
+        radius, height = th.focal_position(focus, 1.5e-308, 0.0)
+    assert float(radius) == pytest.approx(1.7333333333333335e308, rel=2.0e-16)
+    assert float(height) == 0.0
+    with (
+        np.errstate(over="raise", invalid="raise", divide="raise", under="ignore"),
+        pytest.raises(FloatingPointError, match="overflow"),
+    ):
+        th.focal_position(focus, distance, angle)
 
 
 def test_focal_position_matches_hundred_decimal_references_through_large_distance():
@@ -705,12 +798,13 @@ def test_filament_expansion_needs_a_single_sided_basis():
         th.filament_coefficients(basis, 1.3, 0.2)
 
 
+@pytest.mark.parametrize("family", [th.INNER, th.OUTER])
 @pytest.mark.parametrize(
     "source", [(1.3, 0.25), (0.75, -0.2), (1.45, -1.2), (0.35, 0.9)]
 )
-def test_locate_source_inverts_the_filament_expansion(source):
+def test_locate_source_inverts_the_filament_expansion(family, source):
     """Position and current come back out of the coefficients they went into."""
-    basis = th.ToroidalHarmonics(th.FocalCircle(1.0, 0.0), order=10)
+    basis = th.ToroidalHarmonics(th.FocalCircle(1.0, 0.0), order=10, families=(family,))
     estimate = th.locate_source(
         basis, th.filament_coefficients(basis, *source, current=1234.0)
     )
@@ -720,19 +814,72 @@ def test_locate_source_inverts_the_filament_expansion(source):
     assert estimate.phase_residual < 1.0e-6
 
 
-def test_locate_source_retains_an_exactly_boundary_supported_distance():
-    """The inclusive search endpoint agrees with the frame and radial ladders."""
+@pytest.mark.parametrize("family", [th.INNER, th.OUTER])
+@pytest.mark.parametrize("angle", [0.0, 0.7, -1.1])
+@pytest.mark.parametrize("order, current", [(3, 123.0), (6, -37.0)])
+def test_locate_source_retains_an_exactly_boundary_supported_distance(
+    family, angle, order, current
+):
+    """Both families retain source phase, sign, and the inclusive endpoint."""
     focus = th.FocalCircle(1.0, 0.0)
     distance = np.arccosh(1.0 + th.MINIMUM_COSH_GAP)
-    source_r, source_z = th.focal_position(focus, distance, 0.7)
-    basis = th.ToroidalHarmonics(focus, order=3)
+    source_r, source_z = th.focal_position(focus, distance, angle)
+    basis = th.ToroidalHarmonics(focus, order=order, families=(family,))
     coefficients = th.filament_coefficients(
-        basis, float(source_r), float(source_z), current=123.0
+        basis, float(source_r), float(source_z), current=current
     )
     estimate = th.locate_source(basis, coefficients)
     assert estimate.distance == distance
     assert np.hypot(estimate.r - source_r, estimate.z - source_z) < 2.0e-14
-    assert estimate.current == pytest.approx(123.0, rel=1e-14)
+    assert estimate.current == pytest.approx(current, rel=3.0e-11)
+
+
+@pytest.mark.parametrize("family", [th.INNER, th.OUTER])
+@pytest.mark.parametrize(
+    "offset", [np.spacing(1.0 + th.MINIMUM_COSH_GAP), 1.0e-12, 1.0e-8]
+)
+def test_locate_source_distinguishes_boundary_roundoff_from_interior(family, offset):
+    """Only an adjacent coordinate float may round back onto the endpoint."""
+    focus = th.FocalCircle(1.0, 0.0)
+    boundary = 1.0 + th.MINIMUM_COSH_GAP
+    argument = boundary + offset
+    source_r, source_z = th.focal_position(focus, np.arccosh(argument), 0.7)
+    basis = th.ToroidalHarmonics(focus, order=3, families=(family,))
+    coefficients = th.filament_coefficients(
+        basis, float(source_r), float(source_z), current=123.0
+    )
+    estimate = th.locate_source(basis, coefficients)
+    recovered = float(np.cosh(estimate.distance))
+    if offset == np.spacing(boundary):
+        assert abs(recovered - argument) <= np.spacing(boundary)
+    else:
+        assert recovered > boundary
+        assert recovered == pytest.approx(argument, abs=1.0e-13)
+    frame = th.focal_frame(np.asarray([estimate.r]), np.asarray([estimate.z]), focus)
+    assert float(frame.cosine[0]) == recovered
+    assert estimate.current == pytest.approx(123.0, rel=3.0e-7)
+
+
+@pytest.mark.parametrize("family", [th.INNER, th.OUTER])
+@pytest.mark.parametrize(
+    "focus, source, order, current",
+    [
+        (th.FocalCircle(1.0, 0.0), (1.3, 0.25), 10, 123.0),
+        (th.FocalCircle(0.7, -0.4), (1.15, -0.4), 3, -37.0),
+        (th.FocalCircle(1.4, 0.3), (0.8, -0.5), 6, 420_000.0),
+    ],
+)
+def test_locate_source_recovers_both_radial_families(
+    family, focus, source, order, current
+):
+    """Family phase conventions do not change physical position or current."""
+    basis = th.ToroidalHarmonics(focus, order=order, families=(family,))
+    coefficients = th.filament_coefficients(basis, *source, current=current)
+    estimate = th.locate_source(basis, coefficients)
+    assert np.hypot(estimate.r - source[0], estimate.z - source[1]) < 1.0e-6
+    assert estimate.current == pytest.approx(current, rel=1.0e-6)
+    assert estimate.modulus_residual < 1.0e-6
+    assert estimate.phase_residual < 1.0e-6
 
 
 def test_convergent_points_split_at_the_source_focal_circle():
@@ -868,7 +1015,7 @@ def test_probe_array_position_error_at_the_measured_sensor_floor():
             weight=weight,
             significance=3.0,
         )
-        estimate = th.locate_source(basis, fit.coefficients)
+        estimate = th.locate_source(basis, fit.coefficients, current_sign=1.0)
         errors.append(np.hypot(estimate.r - source[0], estimate.z - source[1]))
     assert np.median(errors) < 0.06
     assert np.percentile(errors, 90) < 0.09
@@ -915,7 +1062,7 @@ def iterate_focus(r, z, cosine, sine, data, seed, *, noise=None, order=6, steps=
             weight=weight,
             significance=0.0 if noise is None else 3.0,
         )
-        estimate = th.locate_source(basis, fit.coefficients)
+        estimate = th.locate_source(basis, fit.coefficients, current_sign=1.0)
         seed = (0.5 * (seed[0] + estimate.r), 0.5 * (seed[1] + estimate.z))
     return estimate
 

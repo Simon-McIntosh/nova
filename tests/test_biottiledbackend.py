@@ -345,7 +345,7 @@ def test_packed_edge_count_is_part_of_the_executable_identity():
     sections, target_r, target_z = mesh(2)
     edge, weight, norm = polygon.pad_batch(sections)
     with pytest.raises(ValueError, match="built for 4 packed edges"):
-        quadrilateral.prepare(target_r, target_z, edge, weight, norm)
+        quadrilateral.prepare(target_r[:2], target_z[:2], edge, weight, norm)
 
 
 def test_a_scan_over_positions_compiles_at_the_first_position_only(tmp_path):

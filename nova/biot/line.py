@@ -110,32 +110,41 @@ class Line(Matrix):
         normalized_radius = radius / scale
         normalized_first = first / scale
         normalized_second = second / scale
-        normalized_first_distance = np.hypot(normalized_radius, normalized_first)
-        normalized_second_distance = np.hypot(normalized_radius, normalized_second)
 
-        argument = np.zeros(self.shape, dtype=np.float64)
-        argument[same_sign_off_axis] = (
-            normalized_second[same_sign_off_axis] - normalized_first[same_sign_off_axis]
-        ) / (
-            normalized_first_distance[same_sign_off_axis]
-            + normalized_second_distance[same_sign_off_axis]
+        same_positions = np.flatnonzero(same_sign_off_axis)
+        first_magnitude = np.abs(first.flat[same_positions])
+        second_magnitude = np.abs(second.flat[same_positions])
+        low = np.minimum(
+            np.abs(normalized_first.flat[same_positions]),
+            np.abs(normalized_second.flat[same_positions]),
         )
-        direct = same_sign_off_axis & (np.abs(argument) <= 0.5)
-        rationalized = same_sign_off_axis & ~direct
-        difference[direct] = 2.0 * np.arctanh(argument[direct])
+        high = np.maximum(
+            np.abs(normalized_first.flat[same_positions]),
+            np.abs(normalized_second.flat[same_positions]),
+        )
+        normalized_radius_same = normalized_radius.flat[same_positions]
+        low_distance = np.hypot(normalized_radius_same, low)
+        high_distance = np.hypot(normalized_radius_same, high)
+        argument = (high - low) / (high_distance + low_distance)
+        small_difference = argument <= 0.5
+        magnitude_difference = np.empty_like(argument)
+        magnitude_difference[small_difference] = 2.0 * np.arctanh(
+            argument[small_difference]
+        )
 
-        first_magnitude = np.abs(normalized_first[rationalized])
-        second_magnitude = np.abs(normalized_second[rationalized])
-        distance_sum = (
-            normalized_first_distance[rationalized]
-            + normalized_second_distance[rationalized]
-        )
-        magnitude_difference = (second_magnitude - first_magnitude) * (
-            1.0 + (second_magnitude + first_magnitude) / distance_sum
-        )
-        difference[rationalized] = np.sign(first[rationalized]) * np.log1p(
-            magnitude_difference
-            / (normalized_first_distance[rationalized] + first_magnitude)
+        separated = ~small_difference
+        radius_same = radius.flat[same_positions][separated]
+        low_original = np.minimum(first_magnitude, second_magnitude)[separated]
+        high_original = np.maximum(first_magnitude, second_magnitude)[separated]
+        low_original_distance = np.hypot(radius_same, low_original)
+        high_original_distance = np.hypot(radius_same, high_original)
+        magnitude_difference[separated] = np.logaddexp(
+            np.log(high_original), np.log(high_original_distance)
+        ) - np.logaddexp(np.log(low_original), np.log(low_original_distance))
+        difference.flat[same_positions] = (
+            np.sign(first.flat[same_positions])
+            * np.sign(second_magnitude - first_magnitude)
+            * magnitude_difference
         )
         difference[crossing_off_axis] = np.sign(
             normalized_second[crossing_off_axis] - normalized_first[crossing_off_axis]

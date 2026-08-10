@@ -520,6 +520,51 @@ def test_line_near_interior_potential_matches_decimal_at_every_orientation(
     )
 
 
+def test_line_exterior_endpoint_potential_matches_decimal_from_both_directions():
+    """Either endpoint and segment orientation use the same conditioned magnitude."""
+    levels = np.geomspace(1.0e-16, 1.0e-6, 6)
+    for endpoint in (-0.25, 0.25):
+        for reverse in (False, True):
+            start = np.array([0.0, 0.0, -0.25])
+            end = np.array([0.0, 0.0, 0.25])
+            if reverse:
+                start, end = end, start
+            for axial_gap in levels:
+                target_z = endpoint + np.copysign(axial_gap, endpoint)
+                for transverse_distance in levels:
+                    line = _line_element(
+                        start,
+                        end,
+                        [[transverse_distance, 0.0, target_z]],
+                    )
+                    radius = float(line.a2[0, 0, 0])
+                    first = float(line.wi[0, 0, 0])
+                    second = float(line.wi[1, 0, 0])
+                    expected = _decimal_line_potential(radius, first, second)
+                    with np.errstate(
+                        divide="raise",
+                        invalid="raise",
+                        over="raise",
+                        under="ignore",
+                    ):
+                        got = float(line._Az_hat[1, 0, 0])
+                    assert got == pytest.approx(expected, rel=5e-16, abs=0.0)
+
+
+def test_line_reported_near_endpoint_regime_is_decimal_exact():
+    """A tiny equal axial and transverse offset stays on the positive log path."""
+    radius = 1.0e-12
+    line = _line_element(
+        [0.0, 0.0, -1.0],
+        [0.0, 0.0, 1.0],
+        [[radius, 0.0, 1.0 + radius]],
+    )
+    first = float(line.wi[0, 0, 0])
+    second = float(line.wi[1, 0, 0])
+    expected = _decimal_line_potential(radius, first, second)
+    assert float(line._Az_hat[1, 0, 0]) == expected
+
+
 @pytest.mark.parametrize("scale", [1.0e-90, 1.0e-6, 1.0, 1.0e6, 1.0e80])
 def test_line_field_normalisation_preserves_extreme_geometric_scales(scale):
     """Dimensionless endpoint algebra avoids intermediate overflow and underflow."""

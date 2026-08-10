@@ -41,6 +41,7 @@ class Bow(Arc, Matrix):
 
     axisymmetric: ClassVar[bool] = False
     name: ClassVar[str] = "bow"
+    filament_centerline_limits: ClassVar[bool] = False
 
     def __post_init__(self):
         """Load intergration constants."""

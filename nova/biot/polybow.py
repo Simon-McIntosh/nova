@@ -112,6 +112,7 @@ class PolyBow(Arc, Matrix):
 
     axisymmetric: ClassVar[bool] = False
     name: ClassVar[str] = "polybow"
+    filament_centerline_limits: ClassVar[bool] = False
 
     nodes: ClassVar[int | None] = None
     """Residual quadrature nodes per panel; ``None`` uses the kernel's own count.

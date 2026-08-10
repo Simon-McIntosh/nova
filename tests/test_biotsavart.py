@@ -666,36 +666,207 @@ def test_multifilament_3d_vector():
     assert np.allclose(coilset.point.magnetic_field, 0)
 
 
-def test_arc_filament_singularity_is_visible_without_hiding_the_test():
-    """An off-arc target is finite; an exact authored endpoint stays singular."""
-    diagonal = np.sqrt(0.5)
-    source = Source(
-        PolyLine(
-            np.array(
-                [
-                    [1.0, 0.0, 0.0],
-                    [diagonal, diagonal, 0.0],
-                    [0.0, 1.0, 0.0],
-                ]
-            ),
-            minimum_arc_nodes=3,
-        ).path_geometry
+def _rodrigues_rotation(axis, angle):
+    """Return the active rotation matrix about ``axis`` by ``angle``."""
+    axis = np.asarray(axis, dtype=float)
+    axis /= np.linalg.norm(axis)
+    cross = np.array(
+        [
+            [0.0, -axis[2], axis[1]],
+            [axis[2], 0.0, -axis[0]],
+            [-axis[1], axis[0], 0.0],
+        ]
     )
-    target = Target(
-        {
-            "x": [1.0, 1.0, -1.0],
-            "y": [0.0, 0.0, 0.0],
-            "z": [0.1, 0.0, 0.0],
-        }
+    cosine = np.cos(angle)
+    return (
+        cosine * np.eye(3)
+        + (1.0 - cosine) * np.outer(axis, axis)
+        + np.sin(angle) * cross
     )
-    arc = Arc(source, target, turns=[False, False], reduce=[False, False])
-    with np.errstate(divide="ignore", invalid="ignore", over="ignore"):
+
+
+def _arc_points(radius, height, angles):
+    """Return circle points from angles expressed in degrees."""
+    angles = np.deg2rad(np.asarray(angles, dtype=float))
+    return np.stack(
+        [
+            radius * np.cos(angles),
+            radius * np.sin(angles),
+            np.full_like(angles, height),
+        ],
+        axis=-1,
+    )
+
+
+def _arc_element(source_points, target_points):
+    """Return a filament Arc from explicit authored and evaluation points."""
+    source = Source(PolyLine(source_points, minimum_arc_nodes=3).path_geometry)
+    target = Target(dict(zip("xyz", np.asarray(target_points).T, strict=True)))
+    return Arc(source, target, turns=[False, False], reduce=[False, False])
+
+
+@pytest.mark.parametrize(
+    "angles,outside_angle,rigid",
+    [
+        ([0.0, 45.0, 90.0], 180.0, False),
+        ([90.0, 45.0, 0.0], -90.0, False),
+        ([350.0, 0.0, 10.0], 40.0, False),
+        ([10.0, 0.0, 350.0], 320.0, False),
+        ([10.0, 180.0, 350.0], 0.0, False),
+        ([350.0, 180.0, 10.0], 0.0, False),
+        ([0.0, 45.0, 90.0], 180.0, True),
+        ([90.0, 45.0, 0.0], -90.0, True),
+    ],
+    ids=[
+        "minor-forward",
+        "minor-reverse",
+        "branch-forward",
+        "branch-reverse",
+        "major-forward",
+        "major-reverse",
+        "rigid-forward",
+        "rigid-reverse",
+    ],
+)
+def test_arc_authored_span_is_singular_under_orientation_and_rigid_motion(
+    angles, outside_angle, rigid
+):
+    """Start, interior, and end are singular while every off-filament row is finite."""
+    radius = 2.3
+    height = -0.4
+    source_points = _arc_points(radius, height, angles)
+    outside = _arc_points(radius, height, [outside_angle])[0]
+    middle_angle = angles[1]
+    axial = _arc_points(radius, height + 0.125, [middle_angle])[0]
+    radial = _arc_points(radius + 0.125, height, [middle_angle])[0]
+    target_points = np.vstack([source_points, outside, axial, radial])
+    if rigid:
+        rotation = _rodrigues_rotation([1.0, -2.0, 0.7], 0.91)
+        translation = np.array([8.2, -3.7, 5.1])
+        source_points = source_points @ rotation.T + translation
+        target_points = target_points @ rotation.T + translation
+        target_points[:3] = source_points
+    arc = _arc_element(source_points, target_points)
+    with np.errstate(divide="raise", invalid="raise", over="raise", under="ignore"):
         potential = arc.Avector[:, 0]
         field = arc.Bvector[:, 0]
-    assert np.all(np.isfinite(potential[[0, 2]]))
-    assert np.all(np.isfinite(field[[0, 2]]))
-    assert np.all(np.isnan(potential[1]))
-    assert np.all(np.isnan(field[1]))
+    assert np.all(np.isnan(potential[:3]))
+    assert np.all(np.isnan(field[:3]))
+    assert np.all(np.isfinite(potential[3:]))
+    assert np.all(np.isfinite(field[3:]))
+
+
+def test_arc_same_ring_excluded_span_matches_the_closed_elementary_limit():
+    """The source-ring gap has a finite limit independent of elliptic confluence."""
+    radius = 2.3
+    height = -0.4
+    source_points = _arc_points(radius, height, [0.0, 170.0, 340.0])
+    target_points = _arc_points(radius, height, [345.0, 350.0, 355.0])
+    arc = _arc_element(source_points, target_points)
+    reverse = _arc_element(source_points[::-1], target_points)
+    rotation = _rodrigues_rotation([1.0, -2.0, 0.7], 0.91)
+    translation = np.array([8.2, -3.7, 5.1])
+    rigid = _arc_element(
+        source_points @ rotation.T + translation,
+        target_points @ rotation.T + translation,
+    )
+    expected_potential = np.array(
+        [
+            [0.06627148985679406, 0.19388718476456500, 0.0],
+            [0.03147607024416739, 0.17850966492875640, 0.0],
+            [0.00403849273526940, 0.20486054124744205, 0.0],
+        ]
+    )
+    expected_field = np.array(
+        [
+            [0.0, 0.0, 1.4239057700647921e-7],
+            [0.0, 0.0, 1.3614353613296574e-7],
+            [0.0, 0.0, 1.4239057700647921e-7],
+        ]
+    )
+    with np.errstate(divide="raise", invalid="raise", over="raise", under="ignore"):
+        potential = arc.Avector[:, 0]
+        field = arc.Bvector[:, 0]
+        reverse_potential = reverse.Avector[:, 0]
+        reverse_field = reverse.Bvector[:, 0]
+        rigid_potential = rigid.Avector[:, 0]
+        rigid_field = rigid.Bvector[:, 0]
+    np.testing.assert_allclose(potential, expected_potential, rtol=5e-12, atol=2e-14)
+    np.testing.assert_allclose(field, expected_field, rtol=5e-12, atol=1e-18)
+    np.testing.assert_allclose(reverse_potential, -expected_potential, rtol=5e-12)
+    np.testing.assert_allclose(reverse_field, -expected_field, rtol=5e-12)
+    np.testing.assert_allclose(
+        rigid_potential, expected_potential @ rotation.T, rtol=5e-12, atol=2e-14
+    )
+    np.testing.assert_allclose(
+        rigid_field, expected_field @ rotation.T, rtol=5e-12, atol=1e-18
+    )
+
+
+def test_arc_directed_span_keeps_adjacent_angular_sides_distinct():
+    """Angular nextafters stay on their authored side without widening the span."""
+    radius = 2.3
+    height = -0.4
+    sweep = np.deg2rad(340.0)
+    source_points = _arc_points(radius, height, [0.0, 170.0, 340.0])
+    target_angles = np.array(
+        [
+            np.nextafter(0.0, np.inf),
+            np.nextafter(sweep, -np.inf),
+            np.nextafter(sweep, np.inf),
+            np.nextafter(2.0 * np.pi, 0.0),
+        ]
+    )
+    nearby = np.stack(
+        [
+            radius * np.cos(target_angles),
+            radius * np.sin(target_angles),
+            np.full_like(target_angles, height),
+        ],
+        axis=-1,
+    )
+    arc = _arc_element(source_points, np.vstack([source_points, nearby]))
+    np.testing.assert_array_equal(
+        arc._on_filament[:, 0],
+        [True, True, True, True, True, False, False],
+    )
+    np.testing.assert_array_equal(
+        arc._same_ring_outside_span[:, 0],
+        [False, False, False, False, False, True, True],
+    )
+    with np.errstate(divide="raise", invalid="raise", over="raise", under="ignore"):
+        potential = arc.Avector[:, 0]
+        field = arc.Bvector[:, 0]
+    assert np.all(np.isnan(potential[:5]))
+    assert np.all(np.isnan(field[:5]))
+    assert np.all(np.isfinite(potential[5:]))
+    assert np.all(np.isfinite(field[5:]))
+
+
+def test_arc_transform_tolerance_does_not_absorb_resolved_standoff():
+    """Radial and plane gaps beyond the transform bound remain physical targets."""
+    radius = 2.3
+    height = -0.4
+    middle_angle = 170.0
+    source_points = _arc_points(radius, height, [0.0, middle_angle, 340.0])
+    on_filament = _arc_element(
+        source_points, _arc_points(radius, height, [middle_angle])
+    )
+    displacement = 8.0 * float(on_filament._geometry_tolerance[0, 0])
+    target_points = np.vstack(
+        [
+            _arc_points(radius + displacement, height, [middle_angle]),
+            _arc_points(radius, height + displacement, [middle_angle]),
+        ]
+    )
+    arc = _arc_element(source_points, target_points)
+    assert np.all(
+        abs(arc.r - arc.rs) + abs(arc.z - arc.zs) > 4.0 * arc._geometry_tolerance
+    )
+    assert not np.any(arc._same_source_ring)
+    with np.errstate(divide="raise", invalid="raise", over="raise", under="ignore"):
+        assert np.all(np.isfinite(arc.Avector))
+        assert np.all(np.isfinite(arc.Bvector))
 
 
 def test_ellipf():

@@ -42,6 +42,7 @@ turn is the row every odd row's fold picks up.  :mod:`nova.biot.arcamplitude`
 carries the pair from the half separation instead, and is what closes the rest.
 """
 
+from copy import copy
 from dataclasses import dataclass, field
 from functools import cached_property, wraps
 from typing import Callable, ClassVar
@@ -71,6 +72,7 @@ class Arc(Constants, Matrix):
 
     axisymmetric: ClassVar[bool] = False
     name: ClassVar[str] = "arc"  # element name
+    filament_centerline_limits: ClassVar[bool] = True
 
     attrs: dict[str, str] = field(default_factory=lambda: {"dl": "dl"})
 
@@ -108,11 +110,74 @@ class Arc(Constants, Matrix):
         return np.arctan2(self("target", "y"), self("target", "x"))
 
     @cached_property
+    def _directed_sweep(self):
+        """Return the source end's directed phase from its authored start."""
+        start_x = self("source", "x1")
+        start_y = self("source", "y1")
+        delta_x = self("source", "x2") - start_x
+        delta_y = self("source", "y2") - start_y
+        cross = start_x * delta_y - start_y * delta_x
+        dot = start_x**2 + start_y**2 + start_x * delta_x + start_y * delta_y
+        return np.mod(np.arctan2(cross, dot), 2.0 * np.pi)
+
+    @cached_property
+    def _directed_phase(self):
+        """Return each target's directed phase from the authored start."""
+        start_x = self("source", "x1")
+        start_y = self("source", "y1")
+        delta_x = self("target", "x") - start_x
+        delta_y = self("target", "y") - start_y
+        cross = start_x * delta_y - start_y * delta_x
+        dot = start_x**2 + start_y**2 + start_x * delta_x + start_y * delta_y
+        return np.mod(np.arctan2(cross, dot), 2.0 * np.pi)
+
+    @cached_property
+    def _geometry_tolerance(self):
+        """Return a scale-aware bound for local transform round-off."""
+        target = self.target.stack("x", "y", "z")
+        source_start = np.asarray(self.source.start_point)[np.newaxis]
+        source_end = np.asarray(self.source.end_point)[np.newaxis]
+        terms = np.broadcast_arrays(
+            np.ones_like(self.r),
+            abs(self.r),
+            abs(self.rs),
+            abs(self.z),
+            abs(self.zs),
+            np.max(abs(target), axis=-1),
+            np.max(abs(source_start), axis=-1),
+            np.max(abs(source_end), axis=-1),
+        )
+        scale = np.maximum.reduce(terms)
+        return 32.0 * np.finfo(float).eps * scale
+
+    @cached_property
+    def _exact_authored_endpoint(self):
+        """Identify targets that are stored source endpoints in global space."""
+        target = self.target.stack("x", "y", "z")
+        start = np.asarray(self.source.start_point)[np.newaxis]
+        end = np.asarray(self.source.end_point)[np.newaxis]
+        return np.all(target == start, axis=-1) | np.all(target == end, axis=-1)
+
+    @cached_property
+    def _same_source_ring(self):
+        """Identify targets on the source circle within transform precision."""
+        tolerance = self._geometry_tolerance
+        return (abs(self.r - self.rs) <= tolerance) & (
+            abs(self.z - self.zs) <= tolerance
+        )
+
+    @cached_property
     def _on_filament(self):
-        """Identify exactly represented targets on the authored finite arc."""
-        target_angle = np.mod(self._phi, 2.0 * np.pi)
-        end_angle = arctan2(self("source", "y2"), self("source", "x2"))
-        return (self.r == self.rs) & (self.z == self.zs) & (target_angle <= end_angle)
+        """Identify targets on the directed authored span of the filament."""
+        in_span = (self._directed_phase < self._directed_sweep) | (
+            self._exact_authored_endpoint
+        )
+        return self._same_source_ring & in_span
+
+    @cached_property
+    def _same_ring_outside_span(self):
+        """Identify finite same-ring targets in the excluded angular gap."""
+        return self._same_source_ring & ~self._on_filament
 
     @cached_property
     def alpha(self):
@@ -650,8 +715,68 @@ class Arc(Constants, Matrix):
 
     def _intergrate(self, data):
         """Return intergral quantity."""
-        value = 1 / (4 * np.pi) * (data[0] - data[1])
-        return np.where(self._on_filament, np.nan, value)
+        return 1 / (4 * np.pi) * (data[0] - data[1])
+
+    def _held_vector(self, attr: str, special: np.ndarray) -> np.ndarray:
+        """Evaluate ordinary rows after holding exact confluences off the ring."""
+        held = copy(self)
+        for cls in type(self).mro():
+            for name, descriptor in vars(cls).items():
+                if isinstance(descriptor, cached_property):
+                    held.__dict__.pop(name, None)
+        held.r = np.where(special, 0.5 * self.rs, self.r)
+        held.z = np.where(special, self.zs + self.rs, self.z)
+        return Matrix._vector(held, attr)
+
+    def _same_ring_limit(self, attr: str) -> np.ndarray:
+        """Return the elementary excluded-gap limit in the source-local frame."""
+        outside = self._same_ring_outside_span
+        phase = np.where(outside, self._directed_phase, np.pi)
+        sweep = np.where(outside, self._directed_sweep, 0.5 * np.pi)
+        gap_from_end = phase - sweep
+        gap_to_start = 2.0 * np.pi - phase
+        logarithm = -np.log(np.tan(gap_from_end / 4.0)) - np.log(
+            np.tan(gap_to_start / 4.0)
+        )
+        if attr == "A":
+            radial = (np.sin(gap_to_start / 2.0) - np.sin(gap_from_end / 2.0)) / (
+                2.0 * np.pi
+            )
+            toroidal = (
+                logarithm
+                - 2.0 * (np.cos(gap_to_start / 2.0) + np.cos(gap_from_end / 2.0))
+            ) / (4.0 * np.pi)
+            local = np.stack(
+                [
+                    radial * np.cos(phase) - toroidal * np.sin(phase),
+                    radial * np.sin(phase) + toroidal * np.cos(phase),
+                    np.zeros_like(radial),
+                ],
+                axis=-1,
+            )
+        else:
+            radius = np.where(outside, self.r, 1.0)
+            local = np.stack(
+                [
+                    np.zeros_like(logarithm),
+                    np.zeros_like(logarithm),
+                    logarithm / (8.0 * np.pi * radius),
+                ],
+                axis=-1,
+            )
+        return self.loc.rotate(local, "to_global")
+
+    def _vector(self, attr: str):
+        """Return finite gap limits and explicit filament singularities."""
+        if not self.filament_centerline_limits:
+            return Matrix._vector(self, attr)
+        on_filament = self._on_filament
+        outside = self._same_ring_outside_span
+        ordinary = self._held_vector(attr, on_filament | outside)
+        result = np.where(
+            outside[..., np.newaxis], self._same_ring_limit(attr), ordinary
+        )
+        return np.where(on_filament[..., np.newaxis], np.nan, result)
 
 
 if __name__ == "__main__":

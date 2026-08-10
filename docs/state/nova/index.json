@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-10T16:20:00",
+  "updated": "2026-08-10T17:39:44",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -390,8 +390,8 @@
         "items": [
           {
             "slug": "flux-function-forward-transport",
-            "why_now": "The seam plans place both deterministic physics forwards with Nova; the current-diffusion rung is landed and verified against TORAX while the multi-channel capability, geometry adapter and equilibrium\u2013transport loop are unbuilt \u2014 and the TORAX imas-python pin blocks every consumer upgrade until resolved.",
-            "done_when": "Dependency gate resolved with TORAX \u22651.4.3 and imas-python \u22652.2 co-resolving; FSA record completed and the geometry adapter validated on a shaped equilibrium against TORAX's own reader; COCOS round-trips banked; ForwardTransport fa\u00e7ade ships typed receipts with no silent fallback; the coupled Picard loop closes the flux and current ledgers; evolved states drive ForwardProfile through the typed seam.",
+            "why_now": "The seam plans place both deterministic physics forwards with Nova; the current-diffusion rung is landed and verified against TORAX while the multi-channel capability, geometry adapter and coupled window solve are unbuilt \u2014 and the TORAX imas-python pin blocks every consumer upgrade until resolved.",
+            "done_when": "Dependency gate resolved with TORAX \u22651.4.3 and imas-python \u22652.2 co-resolving; FSA record completed and the jnp geometry adapter validated on a shaped equilibrium against TORAX's own reader; COCOS round-trips banked; ForwardTransport fa\u00e7ade ships typed receipts with no silent fallback; the coupled window solve converges with receipts, its implicit-function gradients check against finite differences, and evolved states drive ForwardProfile through the typed seam.",
             "capability": {
               "version": "1.0",
               "class": "orchestrator",
@@ -404,7 +404,7 @@
             }
           }
         ],
-        "description": "Promote the transport forward solve to a public Nova capability beside ForwardProfile: a declared-fidelity ladder from the landed native current-diffusion rung to an embedded TORAX multi-channel step, the FSA geometry adapter, COCOS boundary tests, and the coupled equilibrium\u2013transport loop. Sequenced after the S7 spine-parity gate that hardens ForwardProfile; grounded in the transport-forward-contract research record (capability-gap inventory, embed-not-reimplement verdict, imas-python pin gate)."
+        "description": "Promote the transport forward solve to a public Nova capability beside ForwardProfile: a declared-fidelity ladder from the landed native current-diffusion rung to an embedded TORAX multi-channel step, the jnp FSA geometry adapter, COCOS boundary tests, and the coupled equilibrium\u2013transport solve as a windowed waveform exchange \u2014 Nova owns the converged window fixed point with typed convergence receipts and implicit-function gradients; staggered co-simulation is the contract's one-iteration point. Sequenced after the S7 spine-parity gate that hardens ForwardProfile; grounded in the transport-forward-contract research record (capability-gap inventory, embed-not-reimplement verdict, imas-python pin gate, window-coupling selection)."
       }
     ],
     "active_sprint_id": "S6",
@@ -483,6 +483,11 @@
         "when": "2026-08-10",
         "who": "reckon-sprint",
         "what": "S9 'Transport forward model' created: flux-function-forward-transport promotes the transport solve to a public Nova capability beside ForwardProfile \u2014 TORAX-embedded fidelity ladder over the landed current-diffusion rung, FSA geometry adapter, COCOS boundary tests, coupled equilibrium\u2013transport loop. Grounded in transport-forward-contract (capability-gap inventory; embed verdict; the TORAX imas-python==2.1.0 pin is the gate). The flux-function seam plans in both repos were extended to cover transport authority in the same session."
+      },
+      {
+        "when": "2026-08-10",
+        "who": "reckon-sprint",
+        "what": "Coupling contract locked after the ambix-side brainstorm: the coupled equilibrium\u2013transport rung is windowed waveform exchange (staggered co-simulation = its one-iteration point) with window length, sample grids, iteration cap and tolerance as declared knobs. Nova owns the converged window fixed point and surrenders convergence behaviour as typed receipts; gradients cross the window by the implicit-function adjoint; single-sweep waveform primitives stay public. Assigning principle: innovation purity \u2014 an unconverged seam would confound the assimilation innovation with splitting error. transport-engine=torax-embedded-ladder and loop-differentiability=picard-fixed-point-first locked on flux-function-forward-transport; S9 item done_when updated to the window contract."
       }
     ],
     "blockers": [
@@ -515,6 +520,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 25
+    "_version": 26
   }
 }

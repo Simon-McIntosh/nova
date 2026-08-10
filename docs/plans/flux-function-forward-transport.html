@@ -23,6 +23,8 @@
   <title>Flux-Function Forward Transport | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-10">
+<meta name="plan-version" content="5">
 </head>
 <body>
   <main class="plan-doc">
@@ -42,10 +44,12 @@
       <tbody>
         <tr><td>native ψ-diffusion</td><td><code>nova/transport/current_diffusion.py</code> (landed)</td><td>ψ only</td><td>injectable conductivity; empirical family default</td><td>end-to-end jit/vmap/grad</td></tr>
         <tr><td>TORAX multi-channel</td><td>embedded TORAX step (<code>make_step_fn</code>)</td><td>T_i, T_e, n_e, ψ</td><td>Sauter/Redl bootstrap and conductivity, source catalogue, QLKNN/TGLF-NN transport</td><td>grad through steps; not through geometry construction</td></tr>
-        <tr><td>coupled loop</td><td>ForwardProfile ⇄ TORAX step, Picard</td><td>as above + self-consistent geometry</td><td>as above, geometry re-solved per control interval</td><td>fixed-point coupling; end-to-end gradient deferred</td></tr>
+        <tr><td>coupled window</td><td>ForwardProfile ⇄ TORAX step, windowed waveform relaxation</td><td>as above + self-consistent geometry</td><td>as above, geometry re-solved at the window's coarse samples</td><td>implicit fixed-point gradients at the converged window</td></tr>
       </tbody>
     </table>
     <p>The native rung stays permanently: it is the dependency-free, fully differentiable floor, already verified to &lt;1% RMS against TORAX itself on shared geometry, and it is the correct vehicle where a learned or fitted closure is the object of study. The embedded rungs buy the verified physics surface Nova will not reimplement — coupled heat and particle transport, neoclassical closures, the source catalogue, adaptive nonlinear stepping, pedestal and sawtooth models. Evidence and the full capability-gap inventory: <a href="/nova/transport-forward-contract.html">transport-forward-contract</a>.</p>
+    <p><strong>The coupled rung's contract unit is the window, and its exchange is a waveform.</strong> Equilibrium and transport advance at different native rates, so the coupled solve works on a declared time window with each side consuming the other's trajectory: transport integrates against the interpolated geometry waveform, the equilibrium solves at its coarse sample times against the interpolated source waveform, and the exchange iterates to a fixed point (waveform relaxation). Conventional staggered co-simulation is this contract truncated at one iteration, so both schemes are points on one measured axis rather than competing designs. A window carries four declared knobs — window length, per-side sample grids, iteration cap and convergence tolerance — and returns convergence receipts: iterations used, a contraction estimate, exit residual per exchanged field, and any damping applied. Window length is a policy the receipts justify — short where shaping evolves quickly, long in flat-top — with the contraction estimate as the adaptive signal. A window that cannot converge raises; it never returns a silently degraded state.</p>
+    <p><strong>Innovation purity is the principle that assigns the fixed point to Nova.</strong> The assimilation layer upstream learns from model–measurement innovation, and an unconverged seam would confound that signal with numerical splitting error — teaching corrections to compensate the solver rather than the plasma. Nova therefore converges the window to its declared tolerance and surrenders the convergence behaviour as typed receipts, which the consumer classifies beside the innovation: slow contraction is itself physics. Gradients cross the window implicitly — a converged fixed point differentiates by the implicit-function adjoint without unrolling the iteration, so learned closures train through the coupled solve exactly when it converges. The window machinery is public at two granularities: the converged <code>solve_window</code> with receipts and implicit gradients is the default, and the single-sweep equilibrium/transport waveform primitives remain public pure functions for declared compositions that own their own convergence receipts.</p>
 
     <h2 id="s3">§3 — Implementation work</h2>
     <ol>
@@ -55,7 +59,7 @@
       <li><strong>COCOS boundary tests.</strong> TORAX declares no COCOS and normalises signs by construction; Nova pins COCOS 17 provenance. Bank explicit round-trip sign tests — ψ orientation, I_p, F, Φ and the flux-function derivatives — at the adapter boundary in both directions.</li>
       <li><strong><code>ForwardTransport</code> façade.</strong> One public entry point over the ladder: typed immutable inputs (geometry record, initial state, waveforms, model selection), typed receipts (flux budget, I_p ledger, achieved boundary values, solver diagnostics), rung recorded in provenance. The native rung and the TORAX rung sit behind the same contract. Any engine failure raises; a zero-filled or otherwise fabricated fallback state is prohibited.</li>
       <li><strong>Return channel.</strong> Map the evolved TORAX state (<code>pprime</code>, <code>FFprime</code>, I_p) into the typed flux-function seam so an evolved state is a first-class <code>ForwardProfile</code> source, with the derivative/consistency checks the seam already mandates.</li>
-      <li><strong>Coupled loop.</strong> Drive TORAX step-wise from Nova: solve the free-boundary equilibrium, assemble the FSA record, advance transport over the control interval with geometry overrides, hand the evolved drives back, repeat. Picard fixed-point coupling with a declared convergence measure and per-interval conservation receipts.</li>
+      <li><strong>Coupled window solve.</strong> Drive TORAX step-wise from Nova over a declared window: solve the free-boundary equilibrium at the coarse sample times, assemble FSA records, advance transport across the window against the interpolated geometry waveform, hand the evolved drive waveform back, and iterate the exchange to the declared tolerance. Expose <code>solve_window</code> — converged fixed point, convergence receipts, implicit-function gradients — as the default, and the single-sweep equilibrium/transport waveform primitives as public pure functions. The waveform type carries the evolving coordinate map (Φ_b(t), axis and boundary references) so temporal interpolation never mixes radial coordinates, and the geometry adapter is authored in jnp directly from the traced FSA record — bypassing TORAX's host-side geometry builder — so the implicit gradient survives the geometry leg.</li>
       <li><strong>Ensemble batching.</strong> Batch members by <code>vmap</code> over the frozen transport state, preserving member identity end-to-end, matching the weighted-ensemble handoff locked at the Ambix seam.</li>
     </ol>
 
@@ -66,6 +70,8 @@
       <li><strong>COCOS:</strong> sign round-trips for ψ, I_p, F, Φ, p′ and FF′ pass in both directions against pinned COCOS 17 provenance.</li>
       <li><strong>Physics:</strong> the native rung's existing analytic, torch-parity and TORAX cross-check gates stay green; the multi-channel rung reproduces a published TORAX reference case through the Nova façade.</li>
       <li><strong>Loop conservation:</strong> the coupled loop closes the flux-consumption and plasma-current ledgers across intervals; boundary I_p continuity holds at the declared tolerance; no rung mutates its input state.</li>
+      <li><strong>Window contract:</strong> a converged window and the same window run staggered (iteration cap one) agree within tolerance where coupling is weak and diverge measurably where it is strong; receipts report iterations, contraction, exit residual and damping; a non-converging window raises rather than returning a degraded state.</li>
+      <li><strong>Gradients:</strong> implicit-function gradients of a scalar functional through a converged window match finite differences, and the gradient path survives the jnp geometry adapter.</li>
       <li><strong>Numerics:</strong> jitted and eager paths agree; a vmapped member batch matches the member-by-member loop; engine failures raise rather than degrade.</li>
       <li><strong>Seam:</strong> an evolved state round-trips the typed flux-function contract and drives <code>ForwardProfile</code> to a converged, force-balanced equilibrium with receipts.</li>
     </ul>
@@ -75,51 +81,51 @@
     <p>Excluded: developing turbulent-transport or pedestal models (TORAX owns its physics; Nova validates the boundary); any measurement fitting or profile identification inside the forward solve; field-aligned/poloidal SOL current (deferred with the same boundary-current reasoning as the equilibrium sibling); porting TORAX's geometry construction to jnp for end-to-end differentiability, unless the loop-differentiability decision is revisited with a load-bearing gradient consumer. Consumer-side migrations — lifting the ambix estimators off whole-run TORAX calls and retiring the torch donor — belong to the ambix integration plan, not here.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="transport-engine" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Which engine strategy carries the transport forward capability? Recommendation: the embedded ladder — TORAX for multi-channel fidelity with the native ψ-diffusion rung retained as the differentiable, dependency-free floor — because rebuilding TORAX's verified closure surface in Nova is person-years of work the Apache-2.0 dependency already provides, while the native rung remains the right vehicle for learned-closure study.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="torax-embedded-ladder">torax-embedded-ladder</button>
-          <button class="r-opt" data-value="native-extension">native-extension</button>
-          <button class="r-opt" data-value="torax-only">torax-only</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="torax-pin-resolution" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">How is the TORAX imas-python==2.1.0 / h5py&lt;3.15 pin conflict resolved against the imas-python ≥2.2 stack? Recommendation: a uv override-dependencies entry now, validated by the full IMAS round-trip suites, with an upstream issue asking TORAX to relax the equality pin — because the override is reversible and unblocks immediately while the upstream fix removes it permanently.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="uv-override-plus-upstream">uv-override-plus-upstream</button>
-          <button class="r-opt" data-value="relax-imas-ink">relax-imas-ink</button>
-          <button class="r-opt" data-value="wait-for-upstream">wait-for-upstream</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="geometry-handoff" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Which route hands the Nova FSA record to TORAX? Recommendation: construct the standard geometry adapter object directly — explicit fields, explicit signs, no experimental layer — keeping the in-memory IMAS equilibrium IDS as the interchange/egress format rather than the coupling mechanism, because TORAX's IMAS geometry path is marked experimental and only its file route is integration-tested.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="direct-adapter-object">direct-adapter-object</button>
-          <button class="r-opt" data-value="in-memory-imas-ids">in-memory-imas-ids</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="loop-differentiability" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Does the coupled equilibrium–transport loop need end-to-end gradients? Recommendation: Picard fixed-point coupling first — gradients flow through transport steps but not through geometry construction — deferring a jnp port of the geometry builder until a specific gradient consumer (design optimisation or whole-loop calibration) is named, because the port is real work with no current load-bearing user.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="picard-fixed-point-first">picard-fixed-point-first</button>
-          <button class="r-opt" data-value="jnp-geometry-port-now">jnp-geometry-port-now</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="transport-engine" data-choice="torax-embedded-ladder" data-by="Simon McIntosh" data-when="2026-08-10T15:38:11+00:00">
+    <p class="r-dec-q">Which engine strategy carries the transport forward capability? Recommendation: the embedded ladder — TORAX for multi-channel fidelity with the native ψ-diffusion rung retained as the differentiable, dependency-free floor — because rebuilding TORAX&#x27;s verified closure surface in Nova is person-years of work the Apache-2.0 dependency already provides, while the native rung remains the right vehicle for learned-closure study.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="torax-embedded-ladder">torax-embedded-ladder</button>
+      <button class="r-opt" data-value="native-extension">native-extension</button>
+      <button class="r-opt" data-value="torax-only">torax-only</button>
+      </p>
+    <p class="r-dec-rat">Locked at the 2026-08-10 coupling-contract brainstorm: the embedded ladder carries the multi-channel physics while the native ψ-diffusion rung remains the dependency-free differentiable floor. The windowed coupling contract presumes the embedded TORAX step as the high-fidelity engine, and rebuilding its verified closure surface in Nova is person-years the Apache-2.0 dependency already provides.</p>
+    </div>
+<div class="r-dec" data-key="torax-pin-resolution" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">How is the TORAX imas-python==2.1.0 / h5py&lt;3.15 pin conflict resolved against the imas-python ≥2.2 stack? Recommendation: a uv override-dependencies entry now, validated by the full IMAS round-trip suites, with an upstream issue asking TORAX to relax the equality pin — because the override is reversible and unblocks immediately while the upstream fix removes it permanently.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="uv-override-plus-upstream">uv-override-plus-upstream</button>
+      <button class="r-opt" data-value="relax-imas-ink">relax-imas-ink</button>
+      <button class="r-opt" data-value="wait-for-upstream">wait-for-upstream</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="geometry-handoff" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Which route hands the Nova FSA record to TORAX? Recommendation: construct the standard geometry adapter object directly — explicit fields, explicit signs, no experimental layer — keeping the in-memory IMAS equilibrium IDS as the interchange/egress format rather than the coupling mechanism, because TORAX&#x27;s IMAS geometry path is marked experimental and only its file route is integration-tested.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="direct-adapter-object">direct-adapter-object</button>
+      <button class="r-opt" data-value="in-memory-imas-ids">in-memory-imas-ids</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="loop-differentiability" data-choice="picard-fixed-point-first" data-by="Simon McIntosh" data-when="2026-08-10T15:38:11+00:00">
+    <p class="r-dec-q">Does the coupled equilibrium–transport loop need end-to-end gradients? Recommendation: Picard fixed-point coupling first — gradients flow through transport steps but not through geometry construction — deferring a jnp port of the geometry builder until a specific gradient consumer (design optimisation or whole-loop calibration) is named, because the port is real work with no current load-bearing user.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="picard-fixed-point-first">picard-fixed-point-first</button>
+      <button class="r-opt" data-value="jnp-geometry-port-now">jnp-geometry-port-now</button>
+      </p>
+    <p class="r-dec-rat">Resolved by the windowed-waveform design: the converged window differentiates by the implicit-function adjoint without unrolling, so learned closures train through the coupled solve exactly when it converges. The jnp geometry adapter built directly from the traced FSA record bypasses TORAX&#x27;s host-side geometry builder and keeps that gradient path intact; a port of TORAX&#x27;s own builder stays unnecessary until a consumer needs gradients through TORAX&#x27;s reader path itself.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-fft-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship flux-function-forward-transport §3" data-resolved-at="" data-resolved-by="">
-        <h4 class="r-fu-title">Resolve the dependency gate, then land the geometry adapter and COCOS boundary</h4>
-        <div class="r-fu-body"><p>After the engine and pin-resolution decisions are locked, resolve the TORAX/imas-python pin conflict and verify the environment, then complete the FSA record, build the geometry adapter on the selected route, and bank the COCOS round-trip tests. The façade, return channel and coupled loop follow once the sibling plan's static ForwardProfile contract is green.</p></div>
-        <pre class="r-fu-prompt">/reckon-ship flux-function-forward-transport §3</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-fft-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship flux-function-forward-transport §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Resolve the dependency gate, then land the geometry adapter and COCOS boundary</h4>
+    <div class="r-fu-body"><p>After the engine and pin-resolution decisions are locked, resolve the TORAX/imas-python pin conflict and verify the environment, then complete the FSA record, build the geometry adapter on the selected route, and bank the COCOS round-trip tests. The façade, return channel and coupled loop follow once the sibling plan's static ForwardProfile contract is green.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship flux-function-forward-transport §3</pre>
+    </article>
+</section>
   </main>
 </body>
 </html>

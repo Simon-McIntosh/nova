@@ -34,8 +34,9 @@ The result is a receipt, not just a flux map: it carries the residual
 history, the axis and separatrix state, the domain-labelled current ledger,
 the integral observations, the conservation residuals, the finite checks,
 the force-balance closure the source declared with the conventions it is
-unreadable without, and every normalisation action the solve took — which,
-for an absolute source, is none.
+unreadable without, the continuation each open domain was driven under, and
+every normalisation action the solve took — which, for an absolute source, is
+none.
 """
 
 from __future__ import annotations
@@ -70,6 +71,7 @@ from nova.equilibrium.observation import (
     reject_unsupported_enforcement,
 )
 from nova.equilibrium.source import (
+    ContinuationLedger,
     ForwardSource,
     NormalisationRecord,
     RotationRecord,
@@ -118,6 +120,7 @@ class ForwardEquilibrium(NamedTuple):
     conservation: ConservationLedger
     normalisation: NormalisationRecord
     rotation: RotationRecord
+    continuation: ContinuationLedger
     finite: FiniteCheck
 
 
@@ -279,6 +282,7 @@ class ForwardProfile:
             conservation=conservation,
             normalisation=absolute_normalisation_record(flux.dtype),
             rotation=self.operator.source.rotation_record(radius, masks),
+            continuation=self.operator.source.continuation_ledger(flux.dtype),
             finite=FiniteCheck(
                 flux=jnp.all(jnp.isfinite(flux)),
                 cell_current=jnp.all(jnp.isfinite(cell_current)),

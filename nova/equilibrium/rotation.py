@@ -232,6 +232,11 @@ class RotatingDomainProfile(DomainProfile):
         if not isinstance(self.rotation, IsothermalRotation):
             raise TypeError("rotation must be an IsothermalRotation closure")
 
+    @property
+    def rotation_closure(self) -> RotationClosure:
+        """Return the isothermal-surface closure the source is formed under."""
+        return RotationClosure.ISOTHERMAL_SURFACE
+
     def validate_boundary_pressure(self, boundary_pressure) -> None:
         """Refuse a boundary primitive the pressure profile contradicts.
 

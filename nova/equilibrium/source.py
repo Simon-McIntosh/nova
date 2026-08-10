@@ -19,7 +19,13 @@ is not part of the shipped closure and constructing it fails loudly.
 Source support is domain qualified. A closure declared on
 :class:`~nova.equilibrium.domain.PlasmaDomain.CORE` drives current on the
 axis-connected closed surfaces and nowhere else, so no current can appear in
-the scrape-off layer, the private-flux region or the excluded material.
+the scrape-off layer, the private-flux region or the excluded material. An
+open region carries current only when a continuation is declared on it, and
+each open domain carries its own: the common scrape-off layer and the
+private-flux region are separate physical contracts, never one extrapolation
+applied twice. :mod:`nova.equilibrium.continuation` builds those closures;
+this module holds the declaration, the receipt and the domain-selected
+evaluation.
 
 Every profile evaluation is written against major radius as well as
 normalised flux. Under a static closure pressure is a flux function and the
@@ -44,19 +50,32 @@ import jax.numpy as jnp
 
 from nova.equilibrium.convention import (
     flux_function_pressure,
+    flux_function_toroidal_field,
     toroidal_current_density,
 )
-from nova.equilibrium.domain import DomainMasks
+from nova.equilibrium.domain import DomainMasks, PlasmaDomain
 from nova.equilibrium.observation import gradient_tail
 
 __all__ = [
+    "ContinuationForm",
+    "ContinuationLedger",
+    "ContinuationRecord",
     "DomainProfile",
     "ForwardSource",
     "NormalisationPolicy",
     "NormalisationRecord",
     "RotationClosure",
     "RotationRecord",
+    "SeparatrixContinuity",
+    "undeclared_continuation_ledger",
+    "undeclared_continuation_record",
 ]
+
+#: Open domains a continuation may be declared on, in argument order.
+OPEN_DOMAINS: tuple[tuple[str, PlasmaDomain], ...] = (
+    ("common_sol", PlasmaDomain.COMMON_SOL),
+    ("private_flux", PlasmaDomain.PRIVATE_FLUX),
+)
 
 
 class NormalisationPolicy(IntEnum):
@@ -78,6 +97,126 @@ class RotationClosure(IntEnum):
 
     STATIC = 0
     ISOTHERMAL_SURFACE = 1
+
+
+class ContinuationForm(IntEnum):
+    """Functional family a bounded open-region continuation is carried on.
+
+    ``UNDECLARED`` is the absence of a continuation, which is what an open
+    domain carries unless the caller declares one; it is not a continuation of
+    zero amplitude. The two declared families differ in what happens at the
+    outer support bound: the polynomial vanishes there to the same order it
+    matches at the separatrix, while the exponential is truncated and the
+    receipt reports the amplitude the truncation discarded.
+    """
+
+    UNDECLARED = -1
+    HERMITE_POLYNOMIAL = 0
+    EXPONENTIAL_DECAY = 1
+
+
+class SeparatrixContinuity(IntEnum):
+    """Orders a continuation matches the core closure at the separatrix.
+
+    The member value IS the number of matched orders, so
+    ``VALUE_AND_GRADIENT`` matches two — the value and the first derivative —
+    and is the minimum a continuation may declare. The two members below it
+    leave a jump in the source at the separatrix, which is carried by a
+    surface current or a thin current layer; declaring one fails until such a
+    layer is modelled, because a jump that arises numerically is not a
+    physical sheet.
+    """
+
+    UNDECLARED = -1
+    VALUE_JUMP = 0
+    GRADIENT_JUMP = 1
+    VALUE_AND_GRADIENT = 2
+    VALUE_GRADIENT_AND_CURVATURE = 3
+
+    @property
+    def matched_orders(self) -> int:
+        """Return how many orders the class matches at the separatrix."""
+        return max(int(self), 0)
+
+
+class ContinuationRecord(NamedTuple):
+    """The continuation one open domain was solved under.
+
+    ``support`` is the outer bound in separatrix distance — normalised flux
+    measured away from the separatrix on the domain's own branch — beyond
+    which the source is exactly zero. ``truncated_fraction`` is the amplitude
+    left at that bound relative to the separatrix value, zero for a family
+    that vanishes there, so a truncated continuation cannot hide the step it
+    takes to zero.
+
+    The two separatrix gradients are published because a continuation is only
+    readable against the closure it continues: they are the values the
+    continuity class pinned, and a private-flux continuation carrying a
+    different pair would be a value jump rather than an independent policy.
+    """
+
+    domain: jax.Array
+    form: jax.Array
+    continuity: jax.Array
+    support: jax.Array
+    decay_width: jax.Array
+    separatrix_pressure_gradient: jax.Array
+    separatrix_diamagnetic_gradient: jax.Array
+    truncated_fraction: jax.Array
+
+    @property
+    def active(self) -> jax.Array:
+        """Return whether a continuation was declared on this domain."""
+        return jnp.not_equal(self.form, int(ContinuationForm.UNDECLARED))
+
+    @property
+    def form_name(self) -> str:
+        """Return the declared functional-family name."""
+        return ContinuationForm(int(self.form)).name.lower()
+
+    @property
+    def continuity_name(self) -> str:
+        """Return the declared separatrix-continuity class name."""
+        return SeparatrixContinuity(int(self.continuity)).name.lower()
+
+    @property
+    def domain_name(self) -> str:
+        """Return the domain the continuation is declared on."""
+        if not bool(self.active):
+            return "undeclared"
+        return PlasmaDomain(int(self.domain)).name.lower()
+
+
+class ContinuationLedger(NamedTuple):
+    """The continuation declared on each open domain of one solve."""
+
+    common_sol: ContinuationRecord
+    private_flux: ContinuationRecord
+
+    @property
+    def active(self) -> jax.Array:
+        """Return whether either open domain carries a declared continuation."""
+        return self.common_sol.active | self.private_flux.active
+
+
+def undeclared_continuation_record(dtype=jnp.float64) -> ContinuationRecord:
+    """Return the receipt of an open domain no closure was declared on."""
+    return ContinuationRecord(
+        domain=jnp.asarray(int(ContinuationForm.UNDECLARED), dtype=jnp.int8),
+        form=jnp.asarray(int(ContinuationForm.UNDECLARED), dtype=jnp.int8),
+        continuity=jnp.asarray(int(SeparatrixContinuity.UNDECLARED), dtype=jnp.int8),
+        support=jnp.asarray(0.0, dtype=dtype),
+        decay_width=jnp.asarray(jnp.nan, dtype=dtype),
+        separatrix_pressure_gradient=jnp.asarray(0.0, dtype=dtype),
+        separatrix_diamagnetic_gradient=jnp.asarray(0.0, dtype=dtype),
+        truncated_fraction=jnp.asarray(0.0, dtype=dtype),
+    )
+
+
+def undeclared_continuation_ledger(dtype=jnp.float64) -> ContinuationLedger:
+    """Return the receipt of a solve whose source drives the core alone."""
+    record = undeclared_continuation_record(dtype)
+    return ContinuationLedger(common_sol=record, private_flux=record)
 
 
 def _validate_flux_function(value, name: str) -> Callable:
@@ -153,6 +292,20 @@ class DomainProfile:
             boundary_pressure, flux_span, gradient_tail(self.p_prime, psi_norm)
         )
 
+    def field_function_squared(
+        self, psi_norm: jax.Array, boundary_field_function, flux_span
+    ) -> jax.Array:
+        """Return the squared toroidal-field function [T^2 m^2] of the closure.
+
+        The same boundary-inward integration the pressure primitive uses,
+        applied to the diamagnetic gradient. A closure spanning a domain the
+        core integration does not reach owns its own primitive and overrides
+        this.
+        """
+        return flux_function_toroidal_field(
+            boundary_field_function, flux_span, gradient_tail(self.ff_prime, psi_norm)
+        )
+
     def radial_body_force(
         self, radius: jax.Array, psi_norm: jax.Array, pressure: jax.Array
     ) -> jax.Array:
@@ -178,6 +331,28 @@ class DomainProfile:
     ) -> "RotationRecord":
         """Return the receipt of a closure that declared no rotation."""
         return static_rotation_record(jnp.asarray(masks.psi_norm).dtype)
+
+    @property
+    def rotation_closure(self) -> RotationClosure:
+        """Return the force-balance closure the source is formed under.
+
+        A continuation reads its separatrix anchor off this profile, so it has
+        to know whether the anchor is a flux function at all: a rotating
+        closure's pressure gradient depends on major radius and cannot be
+        continued without continuing the thermodynamic primitives that produce
+        it.
+        """
+        return RotationClosure.STATIC
+
+    def continuation_record(self, dtype=jnp.float64) -> ContinuationRecord:
+        """Return the receipt of a closure that continues nothing.
+
+        A profile carrying no continuation policy is not admissible on an open
+        domain: the declaration a continuation needs — continuity class,
+        functional form and outer support — is exactly what this record
+        reports as undeclared.
+        """
+        return undeclared_continuation_record(dtype)
 
 
 class NormalisationRecord(NamedTuple):
@@ -259,11 +434,12 @@ class ForwardSource:
     pressure and toroidal-field function that the integral observations and
     the force residual are defined on.
 
-    ``common_sol`` and ``private_flux`` name the open-region closures. They
-    are typed here so a caller cannot smuggle an open-region source through
-    the core argument, but a static absolute solve declares neither: the
-    continuation policy, its separatrix continuity class and its outer
-    support are a separate physical contract.
+    ``common_sol`` and ``private_flux`` name the open-region closures, and
+    each is an independent declaration: a bare
+    :class:`DomainProfile` is refused on either argument because it carries no
+    continuity class, functional form or outer support, and a continuation
+    built for one branch is refused on the other. Neither may be defaulted
+    from the other or from the core.
     """
 
     core: DomainProfile
@@ -284,22 +460,98 @@ class ForwardSource:
                 "exactly; a declared scalar amplitude closed by a target "
                 "plasma current is a separate normalisation policy"
             )
-        for name in ("common_sol", "private_flux"):
-            if getattr(self, name) is not None:
+        for name, domain in OPEN_DOMAINS:
+            profile = getattr(self, name)
+            if profile is None:
+                continue
+            if not isinstance(profile, DomainProfile):
+                raise TypeError(f"{name} must be a DomainProfile")
+            record = profile.continuation_record()
+            if not bool(record.active):
                 raise NotImplementedError(
                     f"a {name} closure needs a declared continuity class, "
-                    "branch policy and outer support; the static absolute "
-                    "source drives the core alone"
+                    "functional form and outer support; the supplied profile "
+                    "declares none, and an absolute source without a "
+                    "continuation drives the core alone"
                 )
+            if int(record.domain) != int(domain):
+                raise ValueError(
+                    f"the {name} argument carries a continuation declared on "
+                    f"{record.domain_name}; the separatrix distance runs the "
+                    "other way there, so each open domain needs its own"
+                )
+            profile.validate_separatrix_match(self.core)
 
     @property
     def closure_degrees(self) -> int:
         """Return the number of scalar unknowns the closure may solve for."""
         return 0
 
+    @property
+    def open_profiles(self) -> tuple[tuple[PlasmaDomain, DomainProfile], ...]:
+        """Return the declared open-region closures with their domains."""
+        return tuple(
+            (domain, getattr(self, name))
+            for name, domain in OPEN_DOMAINS
+            if getattr(self, name) is not None
+        )
+
     def rotation_record(self, radius: jax.Array, masks: DomainMasks) -> RotationRecord:
         """Return the rotation receipt of the declared core closure."""
         return self.core.rotation_record(radius, masks)
+
+    def continuation_ledger(self, dtype=jnp.float64) -> ContinuationLedger:
+        """Return the continuation receipt of both open domains."""
+        return ContinuationLedger(
+            **{
+                name: (
+                    undeclared_continuation_record(dtype)
+                    if getattr(self, name) is None
+                    else getattr(self, name).continuation_record(dtype)
+                )
+                for name, _ in OPEN_DOMAINS
+            }
+        )
+
+    def declared_support(self, masks: DomainMasks) -> jax.Array:
+        """Return the mask of cells any declared closure drives current on."""
+        support = masks.core
+        for domain, _ in self.open_profiles:
+            support = support | masks.mask(domain)
+        return support
+
+    def current_density(self, radius: jax.Array, masks: DomainMasks) -> jax.Array:
+        """Return the toroidal current density [A/m^2] the declared closures drive.
+
+        Each closure is evaluated on its own domain and summed, so the
+        partition the topology read publishes decides which gradient pair
+        reaches which cell and a cell no closure was declared on carries
+        exactly zero.
+
+        The evaluation point is held on the declared support as well. Selecting
+        the result alone would leave the same numbers, but a closure is only
+        required to be a physical function of flux where it was declared, and a
+        value the selection discards still poisons a reverse-mode derivative of
+        everything downstream of it. The open closures are held at the
+        separatrix, which is inside the support of either branch.
+        """
+        density = jnp.where(
+            masks.core,
+            self.core.current_density(
+                radius, jnp.where(masks.core, masks.psi_norm, 0.0)
+            ),
+            0.0,
+        )
+        for domain, profile in self.open_profiles:
+            selection = masks.mask(domain)
+            density = density + jnp.where(
+                selection,
+                profile.current_density(
+                    radius, jnp.where(selection, masks.psi_norm, 1.0)
+                ),
+                0.0,
+            )
+        return density
 
     def cell_current(
         self, radius: jax.Array, area: jax.Array, masks: DomainMasks
@@ -307,15 +559,7 @@ class ForwardSource:
         """Return the per-cell toroidal current [A] on the declared support.
 
         The current density is evaluated from the supplied gradients without
-        any amplitude change and is then selected by domain label, so a cell
+        any amplitude change and is selected by domain label, so a cell
         outside the declared support carries exactly zero.
-
-        The evaluation point is held on the declared support as well. Selecting
-        the result alone would leave the same numbers, but a closure is only
-        required to be a physical function of flux where it was declared, and a
-        value the selection discards still poisons a reverse-mode derivative of
-        everything downstream of it.
         """
-        psi_norm = jnp.where(masks.core, masks.psi_norm, 0.0)
-        density = self.core.current_density(radius, psi_norm)
-        return jnp.where(masks.core, density * area, 0.0)
+        return self.current_density(radius, masks) * area

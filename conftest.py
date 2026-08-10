@@ -80,6 +80,23 @@ _SLOW_NODEIDS = frozenset(
         "tests/test_equilibrium_rotation.py::test_rotation_pulls_the_boundary_in_by_the_analytic_shift",
         "tests/test_equilibrium_rotation.py::test_the_rotating_solve_is_differentiable_in_the_conductor_current",
         "tests/test_equilibrium_rotation.py::test_the_host_and_traced_routes_agree_on_the_rotating_map",
+        # the continued free-boundary ladder: one bootstrapped machine with a
+        # circular material boundary, and the solves that measure what a
+        # declared scrape-off continuation does to its equilibrium. The
+        # declaration-level continuation contract in the same module — anchors,
+        # continuity, support bounds and the private-flux policy read on a
+        # labelled diverted map — stays in the fast lane.
+        "tests/test_equilibrium_sol.py::test_the_continued_solve_reaches_its_fixed_point",
+        "tests/test_equilibrium_sol.py::test_the_scrape_off_current_is_published_in_its_own_ledger_row",
+        "tests/test_equilibrium_sol.py::test_the_continuation_moves_the_solution_by_a_resolvable_bounded_amount",
+        "tests/test_equilibrium_sol.py::test_the_continued_equilibrium_meets_its_conservation_tolerances",
+        "tests/test_equilibrium_sol.py::test_no_current_appears_beyond_the_support_in_the_solved_map",
+        "tests/test_equilibrium_sol.py::test_declaring_a_continuation_on_an_empty_domain_changes_nothing",
+        "tests/test_equilibrium_sol.py::test_the_static_path_is_unchanged_when_no_continuation_is_declared",
+        "tests/test_equilibrium_sol.py::test_the_source_evaluation_is_the_declared_gradients_unscaled",
+        "tests/test_equilibrium_sol.py::test_the_host_and_traced_routes_agree_on_the_continued_map",
+        "tests/test_equilibrium_sol.py::test_the_batched_continued_solve_matches_the_single_slice",
+        "tests/test_equilibrium_sol.py::test_the_exponential_family_publishes_the_amplitude_it_truncates",
     }
 )
 

@@ -98,6 +98,10 @@ class Arc(Constants, Matrix):
         )
         if np.any(coincident):
             raise ValueError("arc source coincident endpoints have ambiguous topology")
+        if np.any(self._fit_leverage <= np.sqrt(np.finfo(float).eps)):
+            raise ValueError(
+                "arc source sweep is unresolved at floating-point precision"
+            )
 
     @cached_property
     def phi(self):
@@ -132,23 +136,24 @@ class Arc(Constants, Matrix):
         return np.mod(np.arctan2(cross, dot), 2.0 * np.pi)
 
     @cached_property
-    def _fit_condition(self):
-        """Bound circle-fit amplification from the authored three-point span.
+    def _fit_leverage(self):
+        """Return the independent geometric leverage of the circle fit.
 
-        The fit sees the start, midpoint, and end of the arc.  Their longest
-        chord, divided by the diameter, is the larger of ``sin(sweep / 4)``
-        and ``sin(sweep / 2)``.  Mapping global-coordinate round-off through
-        the fitted centre and radius therefore costs at most the reciprocal of
-        that ratio, in addition to the direct coordinate transform.  Major
-        arcs retain their nearly diametric midpoint chord instead of inheriting
-        the conditioning of their short excluded gap.
+        A clustered minor arc resolves its centre through the midpoint
+        sagitta, ``2 sin(sweep / 4)^2`` relative to the radius.  Near a complete
+        turn, the endpoint chord ``sin(sweep / 2)`` is instead the limiting
+        independent direction.  The smaller dimension controls the
+        three-point circumcircle fit.
         """
         sweep = self._directed_sweep
-        half_chord_ratio = np.maximum(
-            abs(np.sin(sweep / 4.0)), abs(np.sin(sweep / 2.0))
-        )
-        resolved_ratio = np.maximum(half_chord_ratio, np.sqrt(np.finfo(float).eps))
-        return 1.0 + 1.0 / resolved_ratio
+        sagitta_ratio = 2.0 * np.sin(sweep / 4.0) ** 2
+        endpoint_chord_ratio = abs(np.sin(sweep / 2.0))
+        return np.minimum(sagitta_ratio, endpoint_chord_ratio)
+
+    @cached_property
+    def _fit_condition(self):
+        """Bound direct and fit-amplified coordinate round-off."""
+        return 1.0 + 1.0 / self._fit_leverage
 
     @cached_property
     def _geometry_tolerance(self):

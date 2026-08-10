@@ -829,7 +829,7 @@ def test_arc_clustered_fit_keeps_transformed_excluded_ring_target_finite():
         target_points @ rotation.T + translation,
     )
 
-    expected_condition = 1.0 + 1.0 / np.sin(np.deg2rad(10.0))
+    expected_condition = 1.0 + 1.0 / (2.0 * np.sin(np.deg2rad(5.0)) ** 2)
     np.testing.assert_allclose(rigid._fit_condition, expected_condition, rtol=1e-12)
     assert abs(rigid.r - rigid.rs) <= rigid._geometry_tolerance
     assert abs(rigid.z - rigid.zs) <= rigid._geometry_tolerance
@@ -845,6 +845,54 @@ def test_arc_clustered_fit_keeps_transformed_excluded_ring_target_finite():
     np.testing.assert_allclose(
         rigid_field, base_field @ rotation.T, rtol=5e-12, atol=1e-18
     )
+
+
+def test_arc_minimum_retained_sweep_is_invariant_under_rigid_motion():
+    """Sagitta conditioning covers the shortest arc kept by the path fitter."""
+    radius = 2.3
+    height = -0.4
+    source_points = _arc_points(radius, height, [-1.5, 0.0, 1.5])
+    target_points = _arc_points(radius, height, [180.0])
+    geometry = PolyLine(source_points, minimum_arc_nodes=3).path_geometry
+    assert geometry["segment"] == ["arc"]
+    base = _arc_element(source_points, target_points)
+
+    random = np.random.default_rng(987654)
+    rotation = _rodrigues_rotation(random.normal(size=3), random.uniform(-np.pi, np.pi))
+    translation = random.uniform(-12.0, 12.0, size=3)
+    rigid = _arc_element(
+        source_points @ rotation.T + translation,
+        target_points @ rotation.T + translation,
+    )
+    assert np.all(rigid._same_ring_outside_span)
+    with np.errstate(divide="raise", invalid="raise", over="raise", under="ignore"):
+        base_potential = base.Avector[:, 0]
+        base_field = base.Bvector[:, 0]
+        rigid_potential = rigid.Avector[:, 0]
+        rigid_field = rigid.Bvector[:, 0]
+    np.testing.assert_allclose(
+        rigid_potential, base_potential @ rotation.T, rtol=5e-12, atol=2e-14
+    )
+    np.testing.assert_allclose(
+        rigid_field, base_field @ rotation.T, rtol=5e-12, atol=1e-18
+    )
+
+
+def test_arc_rejects_a_sweep_with_unresolved_fit_leverage():
+    """A circle with sub-resolution sagitta cannot classify physical standoff."""
+    source_points = _arc_points(2.3, -0.4, [-0.0005, 0.0, 0.0005])
+    source = Source(
+        PolyLine(
+            source_points,
+            minimum_arc_nodes=3,
+            line_eps=0.0,
+        ).path_geometry
+    )
+    target = Target(dict(zip("xyz", source_points[1:2].T, strict=True)))
+    with pytest.raises(
+        ValueError, match="arc source sweep is unresolved at floating-point precision"
+    ):
+        Arc(source, target, turns=[False, False], reduce=[False, False])
 
 
 def test_arc_clustered_fit_is_invariant_under_random_rigid_motion():

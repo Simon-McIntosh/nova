@@ -151,9 +151,40 @@ class Arc(Constants, Matrix):
             axis=-1,
         )
         circumference = 2.0 * np.pi * self.rs
-        length_scale = np.maximum(abs(length), abs(circumference))
-        complete_length = abs(length - circumference) <= 128.0 * eps * length_scale
+        complete_length = abs(length - circumference) <= self._circumference_tolerance
         return same_represented_point & complete_length
+
+    @cached_property
+    def _circumference_tolerance(self):
+        """Bound fitted-length drift without hiding resolved partial turns.
+
+        The circle fit operates on uncentred plane coordinates and a squared
+        radial right-hand side.  Its round-off condition therefore grows with
+        the square of the represented plane-coordinate scale divided by the
+        fitted radius.  The endpoint-leverage resolution maps to a relative
+        circumference deficit of ``asin(sqrt(eps)) / pi``.  Half that distance
+        gives disjoint complete and resolved-partial error intervals, so
+        translation cannot make a resolved partial circumference look complete.
+        """
+        length = np.asarray(self.source("length"), dtype=float)
+        circumference = 2.0 * np.pi * self.rs
+        length_scale = np.maximum(abs(length), abs(circumference))
+        fit_radius = abs(length) / (2.0 * np.pi)
+
+        origin = np.asarray(self.source.space.origin, dtype=float)
+        axes = np.asarray(self.source.space.coordinate_axes, dtype=float)
+        plane_origin = np.einsum("...i,...ij->...j", origin, axes)[..., :2]
+        plane_scale = np.linalg.norm(plane_origin, axis=-1) + fit_radius
+
+        eps = np.finfo(float).eps
+        resolution = 0.5 * np.arcsin(np.sqrt(eps)) / np.pi
+        condition_limit = resolution / (128.0 * eps)
+        with np.errstate(divide="ignore", invalid="ignore", over="ignore"):
+            scale_ratio = plane_scale / fit_radius
+        scale_ratio = np.minimum(scale_ratio, np.sqrt(condition_limit - 1.0))
+        fit_condition = 1.0 + scale_ratio**2
+        roundoff_bound = 128.0 * eps * length_scale * fit_condition
+        return np.minimum(roundoff_bound, resolution * length_scale)
 
     @cached_property
     def _directed_sweep(self):

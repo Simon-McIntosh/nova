@@ -719,8 +719,22 @@ def _clustered_arc_rigid_motion():
     return rotation, translation
 
 
-@pytest.mark.parametrize("rigid", [False, True], ids=["canonical", "rigid"])
-def test_sampled_complete_ring_preserves_arc_and_bow_topology(rigid):
+def _translated_complete_ring_motion():
+    """Return a rigid motion that conditions an uncentred circle fit."""
+    rotation = _rodrigues_rotation(
+        [0.12908115546257984, 0.6051292798440823, -0.7855931580530903],
+        -0.5304190955930088,
+    )
+    translation = np.array([68.68021277132141, 74.7029247123845, 21.33257663750969])
+    return rotation, translation
+
+
+@pytest.mark.parametrize(
+    "motion",
+    [None, _clustered_arc_rigid_motion(), _translated_complete_ring_motion()],
+    ids=["canonical", "rigid", "translated-fit"],
+)
+def test_sampled_complete_ring_preserves_arc_and_bow_topology(motion):
     """A represented closed path remains a complete turn for both arc elements."""
     radius = 2.1
     height = -3.2
@@ -734,9 +748,8 @@ def test_sampled_complete_ring_preserves_arc_and_bow_topology(rigid):
         axis=-1,
     )
     target_points = np.array([[0.4, -0.3, 0.8]])
-    if rigid:
-        rotation = _rodrigues_rotation([1.0, -2.0, 0.7], 0.91)
-        translation = np.array([8.2, -3.7, 5.1])
+    if motion is not None:
+        rotation, translation = motion
         source_points = source_points @ rotation.T + translation
         target_points = target_points @ rotation.T + translation
 
@@ -759,9 +772,51 @@ def test_sampled_complete_ring_preserves_arc_and_bow_topology(rigid):
         assert np.all(element._complete_source_ring)
         assert np.all(element._directed_sweep == 2.0 * np.pi)
         assert np.all(element._fit_leverage == 1.0)
+        if element.filament_centerline_limits:
+            length = np.asarray(element.source("length"), dtype=float)
+            residual = abs(length - 2.0 * np.pi * element.rs)
+            assert np.all(residual <= element._circumference_tolerance)
         with np.errstate(divide="raise", invalid="raise", over="raise", under="ignore"):
             assert np.all(np.isfinite(element.Avector))
             assert np.all(np.isfinite(element.Bvector))
+
+
+def test_sampled_complete_ring_survives_bounded_rigid_fit_conditioning():
+    """One-row complete rings remain certified across bounded rigid motions."""
+    radius = 2.1
+    height = -3.2
+    theta = np.linspace(0.0, 2.0 * np.pi, 103)
+    source_points = np.stack(
+        [
+            radius * np.cos(theta),
+            radius * np.sin(theta),
+            np.full_like(theta, height),
+        ],
+        axis=-1,
+    )
+    target_points = np.array([[0.4, -0.3, 0.8]])
+    rng = np.random.default_rng(281034)
+    residual_ratios = []
+
+    for _ in range(8):
+        axis = rng.normal(size=3)
+        rotation = _rodrigues_rotation(axis, rng.uniform(-np.pi, np.pi))
+        translation = rng.uniform(-100.0, 100.0, size=3)
+        moved_source = source_points @ rotation.T + translation
+        moved_target = target_points @ rotation.T + translation
+        polyline = PolyLine(moved_source, minimum_arc_nodes=3)
+        assert len(polyline) == 1
+        assert type(polyline.segments[0]).__name__ == "Arc"
+
+        element = _arc_element(moved_source, moved_target)
+        assert np.all(element._complete_source_ring)
+        length = np.asarray(element.source("length"), dtype=float)
+        residual = abs(length - 2.0 * np.pi * element.rs)
+        residual_ratios.append(
+            float(np.max(residual / element._circumference_tolerance))
+        )
+
+    assert max(residual_ratios) < 1.0
 
 
 def test_open_near_complete_arc_keeps_resolved_orthogonal_gap():
@@ -824,6 +879,37 @@ def test_open_near_complete_arc_rejects_unresolved_endpoint_leverage():
         ValueError, match="arc source sweep is unresolved at floating-point precision"
     ):
         Arc(source, target, turns=[False, False], reduce=[False, False])
+
+
+def test_translated_resolved_partial_arc_does_not_acquire_complete_topology():
+    """Coordinate ULPs cannot promote a resolved partial circumference."""
+    radius = 2.3
+    height = -0.4
+    gap = 3.1e-8
+    sweep = 2.0 * np.pi - gap
+    source_points = _arc_points(
+        radius,
+        height,
+        np.rad2deg([0.0, sweep / 2.0, sweep]),
+    )
+    frame = PolyLine(
+        source_points,
+        minimum_arc_nodes=3,
+        line_eps=0.0,
+    ).path_geometry
+    for coordinate in ["y0", "y1", "y2"]:
+        frame[coordinate] = [value + 1.0e9 for value in frame[coordinate]]
+
+    source = Source(frame)
+    target = Target({"x": [0.1], "y": [1.0e9 + 0.2], "z": [0.3]})
+    arc = Arc(source, target, turns=[False, False], reduce=[False, False])
+    length = np.asarray(source("length"), dtype=float)
+    residual = abs(length - 2.0 * np.pi * arc.rs)
+
+    assert not np.any(arc._complete_source_ring)
+    assert np.all(arc._fit_leverage > np.sqrt(np.finfo(float).eps))
+    assert np.all(residual > arc._circumference_tolerance)
+    np.testing.assert_allclose(arc._directed_sweep, sweep, rtol=0.0, atol=6.0e-8)
 
 
 def test_coincident_major_arc_does_not_acquire_complete_topology():

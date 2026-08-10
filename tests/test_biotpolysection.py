@@ -9,10 +9,12 @@ the point kernel is log-singular and wrong — the reason a plasma cell wants a
 thick-filament kernel at all.
 """
 
+import warnings
+
 import numpy as np
 import pytest
 from dataclasses import FrozenInstanceError
-from shapely.geometry import Polygon
+from shapely.geometry import MultiPolygon, Polygon
 
 from nova.biot.biotframe import Source, Target
 from nova.biot.greens import greens_bz_br, greens_psi
@@ -340,14 +342,25 @@ def test_vector_potential_masks_the_magnetic_axis_division():
 @pytest.mark.slow
 def test_tiled_quadrature_partitions_axis_rows_onto_the_finite_host_limit():
     """The traced gradient never divides an exact-axis target by its radius."""
-    coilset = CoilSet(dcoil=-1)
-    coilset.coil.insert(
-        {"hexagon": [1.0, 0.0, 0.08, 0.08]},
-        nturn=1.0,
-        segment="polysection",
-    )
-    source = Source(coilset.subframe)
-    target_data = {"x": [0.0, 1.4], "z": [0.2, -0.1]}
+    material = [
+        Polygon(
+            [(0.92, -0.08), (1.08, -0.08), (1.11, 0.01), (1.02, 0.10), (0.91, 0.05)]
+        ),
+        MultiPolygon(
+            [
+                Polygon(
+                    [(1.16, -0.05), (1.30, -0.05), (1.30, 0.08), (1.16, 0.08)],
+                    holes=[[(1.20, -0.01), (1.24, -0.01), (1.24, 0.03), (1.20, 0.03)]],
+                ),
+                Polygon([(1.33, 0.00), (1.38, 0.00), (1.38, 0.05), (1.33, 0.05)]),
+            ]
+        ),
+    ]
+    target_data = {
+        "x": [0.0, 0.0, 1.35, 1.10],
+        "y": [0.0, 0.0, 0.20, -0.30],
+        "z": [0.0, 0.31, -0.12, 0.24],
+    }
     host_policy = PolySectionPolicy(exact_kernel="quadrature", quadrature=(2, 4))
     tiled_policy = PolySectionPolicy(
         exact_kernel="quadrature",
@@ -355,26 +368,84 @@ def test_tiled_quadrature_partitions_axis_rows_onto_the_finite_host_limit():
         backend="jax",
         device_eligibility="axisymmetric_ring",
     )
-    host = PolySection(
-        source,
-        Target(target_data),
-        turns=False,
-        reduce=False,
-        policy=host_policy,
+
+    def source(policy):
+        return Source(
+            {
+                "x": [1.0, 1.24],
+                "y": [0.0, 0.0],
+                "z": [0.0, 0.02],
+                "segment": ["polysection", "polysection"],
+                "polysection_policy": [policy.key, policy.key],
+                "poly": material,
+                "frame": ["head", "dependent"],
+                "nturn": [2.0, 3.0],
+                "plasma": [False, False],
+                "link": ["", "head"],
+                "factor": [1.0, -0.25],
+            },
+            index=["head", "dependent"],
+        )
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
+        host = PolySection(
+            source(host_policy),
+            Target(target_data),
+            turns=False,
+            reduce=False,
+            policy=host_policy,
+        )
+        tiled = TiledPolySection(
+            source(tiled_policy),
+            Target(target_data),
+            turns=False,
+            reduce=False,
+            policy=tiled_policy,
+        )
+        for attribute in ("Psi", "Br", "Bz", "Aphi"):
+            got = getattr(tiled, attribute)
+            expected = getattr(host, attribute)
+            assert np.all(np.isfinite(got))
+            np.testing.assert_allclose(got, expected, rtol=2e-12, atol=1e-15)
+        np.testing.assert_array_equal(tiled.Psi[:2, :], 0.0)
+        np.testing.assert_array_equal(tiled.Br[:2, :], 0.0)
+        np.testing.assert_array_equal(tiled.Aphi[:2, :], 0.0)
+        assert np.all(np.isfinite(tiled.Bz[:2]))
+        np.testing.assert_allclose(
+            tiled.Bz[:2],
+            [
+                [6.255885856967584e-07, 5.040164419323532e-07],
+                [5.446909684052329e-07, 4.6482555846759426e-07],
+            ],
+            rtol=0.0,
+            atol=1.2e-16,
+        )
+
+        def solve(policy):
+            return Solve(
+                source(policy),
+                Target(target_data),
+                attrs=["Psi", "Br", "Bz"],
+                turns=[True, False],
+                reduce=[True, False],
+            )
+
+        host_solve = solve(host_policy)
+        tiled_solve = solve(tiled_policy)
+        for attribute in ("Psi", "Br", "Bz"):
+            expected = getattr(host_solve.data, attribute)
+            got = getattr(tiled_solve.data, attribute)
+            assert np.all(np.isfinite(got))
+            np.testing.assert_allclose(got, expected, rtol=2e-12, atol=1e-15)
+    np.testing.assert_array_equal(tiled_solve.data.Psi[:2], 0.0)
+    np.testing.assert_array_equal(tiled_solve.data.Br[:2], 0.0)
+    np.testing.assert_allclose(
+        tiled_solve.data.Bz[:2, 0],
+        [8.731648399442519e-07, 7.4076276795977e-07],
+        rtol=0.0,
+        atol=1.2e-16,
     )
-    tiled = TiledPolySection(
-        Source(coilset.subframe),
-        Target(target_data),
-        turns=False,
-        reduce=False,
-        policy=tiled_policy,
-    )
-    for attribute in ("Psi", "Br", "Bz", "Aphi"):
-        got = getattr(tiled, attribute)
-        expected = getattr(host, attribute)
-        assert np.all(np.isfinite(got))
-        np.testing.assert_allclose(got, expected, rtol=2e-12, atol=1e-15)
-    assert tiled.Aphi[0, 0] == 0.0
 
 
 def test_hollow_source_integrates_only_positive_material_triangles():

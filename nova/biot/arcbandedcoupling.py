@@ -15,6 +15,7 @@ does not silently compare different approximation orders.
 from __future__ import annotations
 
 from functools import lru_cache
+import math
 
 import numpy as np
 from numpy.polynomial.legendre import leggauss
@@ -143,6 +144,46 @@ def rms_radius(vertices: np.ndarray) -> float:
     return float(np.sqrt(centre[0] ** 2 + radial_moment))
 
 
+def _validated_arc_section(vertices: np.ndarray) -> np.ndarray:
+    """Return finite, resolved two-dimensional section vertices.
+
+    The moment formula divides by the signed shoelace area.  Validate its
+    geometry on recentered, scale-normalised coordinates so coincident or
+    collinear inputs never enter those divisions and a machine-scale translation
+    cannot hide a small conductor's area.
+    """
+    section = np.asarray(vertices, dtype=np.float64)
+    if section.ndim != 2 or section.shape[1:] != (2,) or len(section) < 3:
+        raise ValueError(
+            f"arc section vertices must have shape (N, 2), got {section.shape}"
+        )
+    if not np.all(np.isfinite(section)):
+        raise ValueError("arc section vertices must be finite")
+    local = section - section[0]
+    if not np.all(np.isfinite(local)):
+        raise ValueError("arc section extent must be finite")
+    scale = float(np.max(np.abs(local)))
+    if scale <= 0.0:
+        raise ValueError("arc section must be two-dimensional with nonzero area")
+    scaled = local / scale
+    centred = scaled - np.mean(scaled, axis=0)
+    singular = np.linalg.svd(centred, compute_uv=False)
+    rank_floor = np.finfo(np.float64).eps * max(centred.shape) * float(singular[0])
+    if len(singular) < 2 or singular[1] <= rank_floor:
+        raise ValueError("arc section must be two-dimensional with nonzero area")
+    rolled = np.roll(scaled, -1, axis=0)
+    cross = scaled[:, 0] * rolled[:, 1] - rolled[:, 0] * scaled[:, 1]
+    signed_area2 = math.fsum(cross.tolist())
+    resolution = (
+        64.0
+        * np.finfo(np.float64).eps
+        * max(math.fsum(np.abs(cross).tolist()), np.finfo(np.float64).tiny)
+    )
+    if not np.isfinite(signed_area2) or abs(signed_area2) <= resolution:
+        raise ValueError("arc section must be two-dimensional with nonzero area")
+    return section
+
+
 def arc_far_limit(vertices: np.ndarray) -> float:
     """Return the section's exact/filament seam in its own bounding radii.
 
@@ -151,6 +192,7 @@ def arc_far_limit(vertices: np.ndarray) -> float:
     plate carries a larger directional residual and widens the seam by the
     square-root scaling measured across the arc's thin-plate acceptance geometry.
     """
+    vertices = _validated_arc_section(vertices)
     radial, vertical, cross = second_moments(vertices)
     principal = np.linalg.eigvalsh(np.array([[radial, cross], [cross, vertical]]))
     if not np.all(np.isfinite(principal)) or principal[0] <= 0.0:

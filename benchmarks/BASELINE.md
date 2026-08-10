@@ -13,7 +13,7 @@ references; re-run on a quiet node before reading small deltas as regressions.
 | PlasmaEvaluate.time_flux_function_ev_only | 109 ms |
 | PlasmaEvaluate.time_radial_field | 117 ms |
 | PlasmaEvaluate.time_field_magnitude (`bp`) | 107 ms |
-| PlasmaOperate.time_load_operators | 4.4 ms |
+| PlasmaOperate.time_fresh_process_reload | not measured in this historical run |
 | PlasmaOperate.time_solve | 963 ms |
 | PlasmaTurns.time_update_turns (svd_rank 10/75/200/500/-1) | 229 / 229 / 209 / 290 / 205 ms |
 

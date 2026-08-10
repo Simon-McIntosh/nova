@@ -27,27 +27,24 @@ whole. Tiles are disjoint chunks, which is what lets a process pool write
 concurrently without coordination.
 
 *Backends.* :func:`tile_coupling` evaluates a tile with numpy, distributed over
-cores by a process pool. :func:`tile_evaluator` builds the same tile from the
-same closed-form expressions through JAX, so one traced kernel serves both a
-compiled CPU run and a GPU run -- ``scan`` over the quadrature blocks keeps the
-CPU working set in cache, ``vmap`` over the same blocks fills a device. Because
-the shapes are padded, the trace is compiled once for a whole build; the two
-backends are pinned against each other in float64 by
-``tests/test_biottiledbackend.py``.
+cores by a process pool. :func:`tile_evaluator` traces the fixed-node ring
+quadrature through JAX, so ``scan`` over quadrature blocks bounds the working set
+and ``vmap`` over the same blocks fills a device. Because the shapes are padded,
+the trace is compiled once for a whole build; numpy and JAX are pinned against
+each other in float64 by ``tests/test_biottiledbackend.py``.
 
-Finite arcs use the same pair-block registry through
-:func:`nova.biot.polygonarc.packed_arc_greens`.
+The registry also exposes packed closed-ring and finite-arc kernels for numerical
+parity, differentiation and compile-resource diagnostics. Their large elliptic
+moment graphs are not product accelerator routes: section operators select the
+quadrature ring kernel, while finite arcs retain their geometry-specific host
+path. A diagnostic compile is keyed by every static shape, including edge count.
 
-*The compile.* Once per build is not once, and for the closed-form kernel the
-difference decides the route: its executable costs a hundred seconds to produce
-against a second and a half to run a tile with, so a caller that builds the same
-operator at several geometries -- a winding pack swept through positions -- would
-spend all of its time in the compiler. Two things make that cost a constant.
-:func:`tile_evaluator` MEMOISES on the plan, so the same tile shape hands back the
-same compiled kernel however many builds ask for it, and geometry is an argument
-rather than a constant so moving a section cannot force a retrace.
-:func:`compilation_cache` points JAX's persistent cache at a directory, so the
-executable outlives the process that produced it. Neither changes any arithmetic.
+*The compile.* :func:`tile_evaluator` memoises on that complete executable
+identity, and geometry is an argument rather than a constant, so moving a section
+does not force a retrace. :func:`compilation_cache` points JAX's persistent cache
+at a directory, allowing a diagnostic executable to outlive the process that
+produced it. Neither cache changes arithmetic or makes a diagnostic kernel a
+supported product route.
 """
 
 from __future__ import annotations
@@ -514,9 +511,8 @@ def compilation_cache(
     An executable is a pure function of the graph, the JAX and XLA versions and
     the device, so keeping one on disk between processes is a cache in the strict
     sense -- it cannot change an answer, only the time taken to reach it. That
-    matters here because the closed-form tile kernel takes a hundred seconds to
-    compile and under two to run, so a fresh process spends more on the compiler
-    than on the operator.
+    matters for the large packed elliptic graphs exposed to diagnostic callers,
+    whose compile can dominate a small evaluation.
 
     The directory comes from ``NOVA_COMPILATION_CACHE`` when it is set, falls back
     to the user cache home, and is switched off entirely by setting that variable
@@ -573,23 +569,20 @@ def tile_evaluator(
     The evaluator is MEMOISED on its plan, mapping, kernel, geometry family,
     device count, resolved precision, and packed edge count: asking twice for the
     same tile shape returns the same object, and therefore the same executable.
-    That is what turns the compile into a per-PROCESS cost rather than a per-build
-    one, which is the difference between a usable and an unusable closed-form
-    kernel for a caller that builds the operator at more than one geometry --
-    section coordinates are arguments to the kernel, not constants of it, so
-    moving a section cannot force a retrace. :func:`forget_evaluators` releases
-    them; :func:`compilation_cache`, which this enables unless the environment
-    says otherwise, carries the executable across a process boundary as well.
+    That turns compilation into a per-process cost rather than a per-build one:
+    section coordinates are arguments to the kernel, not constants, so moving a
+    section cannot force a retrace. :func:`forget_evaluators` releases them;
+    :func:`compilation_cache`, which this enables unless the environment says
+    otherwise, carries the executable across a process boundary as well.
 
     ``kernel`` chooses what a tile is evaluated WITH. ``"quadrature"`` traces the
     fixed-node phi rule the operator is validated against. ``"closed"`` traces the
     closed-form reduction of :func:`nova.biot.polygonanalytic.packed_analytic_greens`
-    instead -- the same tile shape, the same store, one to two orders more accurate
-    and, on the host, several times cheaper. It reaches a device at all because its
-    elliptic integrals come through a fixed-trip descent rather than a library call,
-    and because the packed driver replaces the host driver's three value-dependent
-    shortcuts with arithmetic; it pays for that with the pole families and residual
-    quadratures a host evaluation would skip.
+    instead. The packed arithmetic is traceable because its elliptic integrals use
+    fixed-trip descents and its dead lanes are held before evaluation. It remains a
+    diagnostic kernel: the supported product accelerator route is the quadrature
+    ring, and finite product arcs stay on the host. Closed diagnostics pay for pole
+    families and residual quadratures that the host evaluation can skip.
 
     ``batched`` chooses how the quadrature blocks are combined: ``False`` walks
     them with ``scan``, holding one block's temporaries live; ``True`` maps them
@@ -613,10 +606,10 @@ def tile_evaluator(
     validated numerical contract.  Explicit float32 builds a separate cached
     executable for callers whose accuracy budget licenses it.
 
-    ``geometry="arc"`` selects the five-row finite-arc driver.  Its only kernel is
-    ``"closed"``. ``devices`` divides pair blocks evenly across local devices
-    with replicated geometry; multiple devices require ``batched`` evaluation
-    because the shard unit is the mapped block axis.
+    ``geometry="arc"`` selects the five-row diagnostic finite-arc driver. Its only
+    kernel is ``"closed"``. ``devices`` divides pair blocks evenly across local
+    devices with replicated geometry; multiple devices require ``batched``
+    evaluation because the shard unit is the mapped block axis.
 
     ``edge_count`` is part of the executable identity because the edge loop is a
     static traced bound. Product and assembly adapters always supply it; direct
@@ -1043,14 +1036,15 @@ def assemble_arcs(
     devices: int = 1,
     precision: Precision | str = Precision.AUTOMATIC,
 ) -> TilePlan:
-    """Build a finite-arc operator with the packed closed kernel.
+    """Build a diagnostic finite-arc operator with the packed closed kernel.
 
     Targets are cylindrical ``(r, z, phi)`` arrays and each section has one
     ``start``/``end`` azimuth.  The result is streamed into five zarr arrays,
     chunked to ``plan``.  Blocks are mapped within each accelerator; with
     ``devices > 1`` they are divided evenly across visible devices by ``pmap``.
     Geometry is replicated because it is small relative to the pair-space
-    temporaries and output that are sharded.
+    temporaries and output that are sharded. Product finite arcs use their host
+    route; this entry point exists for parity, differentiation and resource study.
     """
     target_r = np.ascontiguousarray(target_r, dtype=np.float64)
     target_z = np.ascontiguousarray(target_z, dtype=np.float64)

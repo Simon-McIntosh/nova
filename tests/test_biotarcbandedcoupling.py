@@ -1,6 +1,9 @@
 """Accuracy and geometry contract for finite-arc banding."""
 
+import warnings
+
 import numpy as np
+import pytest
 from shapely.geometry import Point, Polygon
 
 from nova.biot.arcbandedcoupling import (
@@ -241,6 +244,10 @@ def test_an_elongated_section_widens_its_own_far_seam():
 def test_the_far_seam_is_intrinsic_under_section_rotation():
     """Principal area moments give a plate the same seam at every bearing."""
     vertices = thin_plate()
+    radial, vertical, cross = second_moments(vertices)
+    principal = np.linalg.eigvalsh(np.array([[radial, cross], [cross, vertical]]))
+    aspect = np.sqrt(principal[1] / principal[0])
+    expected = ARC_FAR_LIMIT * np.sqrt(aspect / 4.0)
     centre = section_centroid(vertices)
     limits = []
     for angle in np.deg2rad([0.0, 30.0, 45.0, 60.0, 90.0]):
@@ -249,7 +256,47 @@ def test_the_far_seam_is_intrinsic_under_section_rotation():
         rotated = centre + (vertices - centre) @ rotation.T
         limits.append(arc_far_limit(rotated))
     np.testing.assert_allclose(limits, limits[0], rtol=3e-13)
-    assert limits[0] > ARC_FAR_LIMIT
+    assert limits[0] == pytest.approx(expected, rel=3e-13)
+
+
+def test_an_intrinsic_rectangle_has_its_analytic_seam_at_every_bearing():
+    """The seam follows intrinsic dimensions, independent of an axis-aligned box."""
+    length = 0.4
+    thickness = 0.0075
+    centre = np.array([RADIUS, 0.02])
+    local = np.array(
+        [
+            [-0.5 * length, -0.5 * thickness],
+            [0.5 * length, -0.5 * thickness],
+            [0.5 * length, 0.5 * thickness],
+            [-0.5 * length, 0.5 * thickness],
+        ]
+    )
+    expected = ARC_FAR_LIMIT * np.sqrt((length / thickness) / 4.0)
+    limits = []
+    for angle in np.deg2rad([0.0, 30.0, 45.0, 60.0, 90.0]):
+        cosine, sine = np.cos(angle), np.sin(angle)
+        rotation = np.array([[cosine, -sine], [sine, cosine]])
+        limits.append(arc_far_limit(centre + local @ rotation.T))
+    np.testing.assert_allclose(limits, expected, rtol=3e-13)
+    assert expected == pytest.approx(116.847478934435, rel=1e-14)
+
+
+@pytest.mark.parametrize(
+    "vertices",
+    [
+        np.full((4, 2), [RADIUS, 0.0]),
+        np.array([[RADIUS - 0.2, 0.0], [RADIUS, 0.0], [RADIUS + 0.2, 0.0]]),
+        np.array([[RADIUS - 0.2, 0.0], [RADIUS + 0.2, 0.0], [RADIUS, np.nan]]),
+    ],
+)
+def test_the_far_seam_rejects_invalid_geometry_before_forming_moments(vertices):
+    """Invalid sections fail without warning from a moment-area division."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
+        with np.errstate(all="raise"):
+            with pytest.raises(ValueError, match="finite|two-dimensional"):
+                arc_far_limit(vertices)
 
 
 def test_the_banded_route_is_exact_inside_and_moment_corrected_outside():

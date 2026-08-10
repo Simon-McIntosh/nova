@@ -715,6 +715,94 @@ def _edge_field(r, z, edge, which, nodes):
     return _edge_terms(r, z, edge, which, nodes)[1:]
 
 
+def _axis_vertical_field(
+    target_z: np.ndarray, vertices: np.ndarray, norm: float
+) -> np.ndarray:
+    """Return the finite symmetry-axis ``B_Z`` from a polygon boundary integral.
+
+    A circular filament at ``(r', z')`` contributes
+    ``mu0 r'^2 / (2 (r'^2 + (z-z')^2)^(3/2))`` on the axis.  Its section-area
+    integral is the Green-theorem contour integral of
+    ``(z-z') / hypot(r', z-z')`` with respect to ``r'``.  Each straight edge has
+    the closed antiderivative below.  Exact collinearity with the axis makes its
+    logarithmic coefficient zero, so the logarithm's inputs are held before
+    evaluation in that case.
+    """
+    z = np.asarray(target_z, dtype=np.float64).ravel()
+    section = np.asarray(vertices, dtype=np.float64)
+    following = np.roll(section, -1, axis=0)
+    contributions = []
+    for (ra, za), (rb, zb) in zip(section, following, strict=True):
+        dr = rb - ra
+        if dr == 0.0:
+            continue
+        dz = zb - za
+        length = np.hypot(dr, dz)
+        length2 = length * length
+        ua = z - za
+        ub = z - zb
+        distance_a = np.hypot(ra, ua)
+        distance_b = np.hypot(rb, ub)
+        along_a = (ra * dr - ua * dz) / length
+        along_b = (rb * dr - ub * dz) / length
+        perpendicular = ua + dz * along_a / length
+        gap = np.abs(ra * (-dz) - ua * dr) / length
+        has_logarithm = gap > 0.0
+        held_gap = np.where(has_logarithm, gap, 1.0)
+        logarithm = np.arcsinh(along_b / held_gap) - np.arcsinh(along_a / held_gap)
+        logarithm = np.where(has_logarithm, logarithm, 0.0)
+        contributions.append(
+            dr
+            * (
+                -dz / length2 * (distance_b - distance_a)
+                + perpendicular / length * logarithm
+            )
+        )
+    if not contributions:
+        return np.zeros_like(z)
+    # ``norm = -mu0 / signed_area`` for the packed contour orientation.
+    return -0.5 * norm * np.sum(np.stack(contributions), axis=0)
+
+
+def _packed_axis_vertical_field(xp, target_z, edge, present, norm):
+    """Return the exact finite axis field for one packed section per pair lane."""
+    target_z = xp.asarray(target_z)
+    contributions = []
+    for index in range(edge.shape[0]):
+        raw_ra, raw_za, raw_rb, raw_zb = edge[index]
+        raw_length = xp.hypot(raw_rb - raw_ra, raw_zb - raw_za)
+        active = present[index] & (raw_length > 0.0)
+        # Pads and zero-length rows contribute zero.  Give those lanes a benign
+        # horizontal edge before every division and logarithm is evaluated;
+        # vertical material edges stay live so their geometry tangents survive.
+        ra = xp.where(active, raw_ra, xp.ones_like(target_z))
+        za = xp.where(active, raw_za, target_z + 1.0)
+        rb = xp.where(active, raw_rb, xp.full_like(target_z, 2.0))
+        zb = xp.where(active, raw_zb, target_z + 1.0)
+        dr = rb - ra
+        dz = zb - za
+        length = xp.hypot(dr, dz)
+        length2 = length * length
+        ua = target_z - za
+        ub = target_z - zb
+        distance_a = xp.hypot(ra, ua)
+        distance_b = xp.hypot(rb, ub)
+        along_a = (ra * dr - ua * dz) / length
+        along_b = (rb * dr - ub * dz) / length
+        perpendicular = ua + dz * along_a / length
+        gap = xp.abs(-ra * dz - ua * dr) / length
+        has_logarithm = active & (gap > 0.0)
+        held_gap = xp.where(has_logarithm, gap, 1.0)
+        logarithm = xp.arcsinh(along_b / held_gap) - xp.arcsinh(along_a / held_gap)
+        logarithm = xp.where(has_logarithm, logarithm, 0.0)
+        contribution = dr * (
+            -dz / length2 * (distance_b - distance_a)
+            + perpendicular / length * logarithm
+        )
+        contributions.append(xp.where(active, contribution, 0.0))
+    return -0.5 * norm * xp.sum(xp.stack(contributions, axis=0), axis=0)
+
+
 def polygon_analytic_greens(
     target_r: np.ndarray,
     target_z: np.ndarray,
@@ -746,6 +834,18 @@ def polygon_analytic_greens(
     shape = signed.shape
     r = np.abs(signed).ravel()
     z = np.broadcast_to(height, shape).ravel()
+    axis = r == 0.0
+    if np.any(axis):
+        rows = [np.zeros_like(r), np.zeros_like(r), np.zeros_like(r)]
+        rows[2][axis] = _axis_vertical_field(z[axis], vertices, norm)
+        off_axis = ~axis
+        if np.any(off_axis):
+            computed = polygon_analytic_greens(
+                signed.ravel()[off_axis], z[off_axis], vertices, nodes=nodes
+            )
+            for row, values in zip(rows, computed, strict=True):
+                row[off_axis] = values
+        return tuple(row.reshape(shape) for row in rows)
     flux = np.zeros_like(r)
     radial = np.zeros_like(r)
     vertical = np.zeros_like(r)
@@ -866,60 +966,88 @@ def packed_analytic_greens(
     height = xp.asarray(target_z) + xp.zeros_like(signed)
     sides = edge.shape[0]
     live, present, chain, _ = _packed_topology(xp, weight)
+    axis = radius == 0.0
+    evaluation_radius = xp.where(axis, xp.ones_like(radius), radius)
 
     def corner(index: int):
-        """Return the ``(r, z)`` of the corner that edge ``index`` starts from."""
+        """Return one topology-correct corner with unused pad lanes held finite."""
+        present_here = present[index]
+        wrap = (~present_here) & live[index - 1]
+        corner_r = xp.where(present_here, edge[index][0], edge[0][0])
+        corner_z = xp.where(present_here, edge[index][1], edge[0][1])
+        active = present_here | wrap
         return (
-            xp.where(present[index], edge[index][0], radius + 1.0),
-            xp.where(present[index], edge[index][1], height + 1.0),
+            xp.where(active, corner_r, evaluation_radius + 1.0),
+            xp.where(active, corner_z, height + 1.0),
         )
 
-    def end_corner(index: int):
-        """Return the corner the real edge ``index`` ends at, pads held finite."""
-        return (
-            xp.where(present[index], edge[index][2], radius + 1.0),
-            xp.where(present[index], edge[index][3], height + 1.0),
-        )
+    lower_r, lower_z = (
+        xp.stack([corner(index)[axis] for index in range(sides)], axis=0)
+        for axis in range(2)
+    )
+    corner_r = xp.stack((lower_r, xp.roll(lower_r, -1, axis=0)), axis=0)
+    corner_z = xp.stack((lower_z, xp.roll(lower_z, -1, axis=0)), axis=0)
+    held = [
+        _held_edge(xp, edge[index], live[index], evaluation_radius, height)
+        for index in range(sides)
+    ]
+    held_edge = tuple(
+        xp.stack([one_edge[coordinate] for one_edge in held], axis=0)
+        for coordinate in range(4)
+    )
+    endpoint_shape = (2, sides) + evaluation_radius.shape
 
-    corners = [
-        _Vertex(radius, height, *corner(index), nodes, residual=False, xp=xp)
-        for index in range(sides)
-    ]
-    ends = [
-        _Vertex(radius, height, *end_corner(index), nodes, residual=False, xp=xp)
-        for index in range(sides)
-    ]
-    residual_corners = [
-        _Vertex(
-            radius,
-            height,
-            xp.where(chain[index] != 0.0, corner(index)[0], radius + 1.0),
-            xp.where(chain[index] != 0.0, corner(index)[1], height + 1.0),
-            nodes,
-            residual=True,
-            xp=xp,
-        )
-        for index in range(sides)
-    ]
-    flux = radial = vertical = xp.zeros_like(radius)
-    for index in range(sides):
-        safe_edge = _held_edge(xp, edge[index], live[index], radius, height)
-        part = _Edge(radius, height, safe_edge, nodes, xp=xp)
-        high = part.terms(ends[index])
-        low = part.terms(corners[index])
+    def endpoint_lanes(values):
+        repeated = xp.stack((values, values), axis=0)
+        return xp.broadcast_to(repeated, endpoint_shape).reshape(-1)
+
+    lane_radius = xp.broadcast_to(evaluation_radius, endpoint_shape).reshape(-1)
+    lane_height = xp.broadcast_to(height, endpoint_shape).reshape(-1)
+    vertex = _Vertex(
+        lane_radius,
+        lane_height,
+        corner_r.reshape(-1),
+        corner_z.reshape(-1),
+        nodes,
+        residual=True,
+        xp=xp,
+    )
+    part = _Edge(
+        lane_radius,
+        lane_height,
+        tuple(endpoint_lanes(coordinate) for coordinate in held_edge),
+        nodes,
+        xp=xp,
+    )
+    terms = tuple(value.reshape(endpoint_shape) for value in part.terms(vertex))
+    residual = tuple(value.reshape(endpoint_shape) for value in vertex.arsinh_terms())
+
+    def ordered_edge_sum(values):
+        """Match the host contour order without duplicating the moment graph."""
+        total = xp.zeros_like(values[0])
+        for index in range(sides):
+            total = total + values[index]
+        return total
+
+    rows = []
+    for edge_term, corner_term in zip(terms, residual, strict=True):
         # the antiderivative is of order the squared major radius where the flux is
-        # not, so an edge's two limits are differenced before anything else is added
-        flux = flux - weight[index] * (high[0] - low[0])
-        radial = radial - weight[index] * (high[1] - low[1])
-        vertical = vertical - weight[index] * (high[2] - low[2])
-    for index in range(sides):
-        one_flux, one_radial, one_vertical = residual_corners[index].arsinh_terms()
-        flux = flux + chain[index] * one_flux
-        radial = radial + chain[index] * one_radial
-        vertical = vertical + chain[index] * one_vertical
+        # not, so each edge's two limits are differenced before the edge axis is
+        # reduced.  Only the lower copy owns the corner residual; the two contour
+        # passes retain the scalar host's accumulation order.
+        rows.append(
+            ordered_edge_sum(-weight * (edge_term[1] - edge_term[0]))
+            + ordered_edge_sum(chain * corner_term[0])
+        )
+    flux, radial, vertical = rows
+    axis_vertical = _packed_axis_vertical_field(xp, height, edge, present, norm)
     return (
-        0.5 * norm * radius * flux,
+        xp.where(axis, 0.0, 0.5 * norm * radius * flux),
         # B_R is ODD in r, which is what makes it exactly zero on the axis
-        norm / (4.0 * np.pi) * xp.sign(signed) * radial,
-        norm / (4.0 * np.pi) * vertical,
+        xp.where(
+            axis,
+            0.0,
+            norm / (4.0 * np.pi) * xp.sign(signed) * radial,
+        ),
+        xp.where(axis, axis_vertical, norm / (4.0 * np.pi) * vertical),
     )

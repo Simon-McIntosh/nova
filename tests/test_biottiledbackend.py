@@ -10,11 +10,10 @@ Parity is pinned in float64 against the numpy kernel that the operator is
 already validated against -- an accelerator path is a cost change, never a
 physics change. Compilation is counted directly: the traced kernel must be
 compiled ONCE for a whole build, no matter how many tiles it evaluates, which
-is only true if the padded shapes really are constant. Once per build is not
-once, though, and the closed-form kernel costs a hundred seconds to compile
-against under two to run a tile with -- so the reuse is pinned as well: a
-caller building the operator at several geometries must compile at the first
-one only, and a second process must find the executable on disk.
+is only true if the padded shapes really are constant. The product accelerator
+route is the ring quadrature. Packed closed-ring and finite-arc graphs remain
+diagnostics for parity and differentiation, and their larger compile cost makes
+identity and cache reuse part of their low-level contract as well.
 
 The tolerance is stated against each component's own peak rather than pointwise:
 a device reassociates the quadrature sum, and the smallest entries of Br and Bz
@@ -236,11 +235,9 @@ def test_a_traced_build_streams_the_same_store(tmp_path):
         assert other[name].chunks == one[name].chunks
 
 
-# The closed-form kernel is the reason the elliptic primitives were made
-# complement-native and trip-bounded: scipy's routines cannot enter a trace at all,
-# so before this the accurate kernel was host-only. What has to be pinned is that
-# the traced reduction computes the SAME thing as the host one and still compiles
-# once -- its cost is a separate question, measured in benchmarks/tiled_backend.py.
+# The diagnostic closed graph can trace only because its elliptic primitives are
+# complement-native and trip-bounded.  Pin parity with the host reduction and a
+# constant constructor graph independently of the product quadrature route.
 
 
 def triangle(r0, z0, radius=0.05):
@@ -261,7 +258,7 @@ def pair_geometry(target_r, target_z, edge, weight, norm):
     )
 
 
-def test_the_traced_closed_form_matches_numpy_and_the_kernel_it_replaces():
+def test_the_traced_closed_form_matches_numpy_and_independent_quadrature():
     """One implementation, two namespaces, over a batch of unlike sections.
 
     Both references off ONE compilation, because that compilation is expensive: the
@@ -273,12 +270,12 @@ def test_the_traced_closed_form_matches_numpy_and_the_kernel_it_replaces():
     Against the same driver on numpy, to a few parts in 1e9 -- a compiler is free to
     reassociate and to contract a multiply-add, which moves the last bits of a
     reduction whose section sum differences an antiderivative of order the squared
-    major radius. And against the quadrature the closed form replaces, at targets far
-    enough from the contour for the rule to be converged: NOT a tolerance the closed
-    form should be judged by -- it is one to two orders more accurate, and the
-    acceptance gate in ``tests/test_biotpolygonanalytic.py`` is where that is measured
-    -- but the only check that would catch a transposed section or a mis-taken pair
-    column, which a self-comparison cannot see.
+    major radius. And against the independent quadrature, at targets far enough from
+    the contour for the rule to be converged: NOT a tolerance the closed form should
+    be judged by -- its independent accuracy gate is in
+    ``tests/test_biotpolygonanalytic.py`` -- but the only check that would catch a
+    transposed section or a mis-taken pair column, which a self-comparison cannot
+    see.
     """
     from nova.biot.polygonanalytic import packed_analytic_greens
 
@@ -316,13 +313,9 @@ def test_an_unknown_kernel_is_refused_rather_than_silently_ignored():
         tile_evaluator(plan, kernel="analytic")
 
 
-# What a compile is paid PER.  Compiling once per build is only a bounded cost
-# if a process performs one build; a caller sweeping a winding pack through
-# positions performs one per position, and the closed-form executable costs
-# more to produce than every tile of a small operator costs to evaluate.  The
-# geometry is an argument to the kernel rather than a constant of it, so the
-# same executable serves every position -- these checks pin that it is actually
-# reused, in the process and across a process boundary.
+# What a compile is paid per. Geometry is an argument to the kernel rather than a
+# constant, so the same executable serves every position. These checks pin reuse in
+# the process and across a process boundary for every diagnostic or product graph.
 
 
 def moved(sections, shift):

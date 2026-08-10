@@ -51,9 +51,10 @@ import warnings
 import numpy as np
 import pytest
 
-from nova.biot.greens import cylinder_greens
+from nova.biot.greens import MU0, cylinder_greens
 from nova.biot.polygon import polygon_greens
 from nova.biot.polygonanalytic import polygon_analytic_flux, polygon_analytic_greens
+from nova.biot.sectionaverage import section_nodes
 
 COMPONENTS = ("psi", "Br", "Bz")
 ORACLE_RULE = dict(n_panels=64, n_nodes=96)
@@ -1207,11 +1208,9 @@ def test_a_horizontal_edge_contributes_nothing_to_the_closed_form_field():
 def test_the_field_is_clean_on_the_axis():
     """B_R is odd in r and B_Z even, so on the axis B_R must vanish exactly.
 
-    The shipped kernel forms its field by dividing the flux gradient by 2 pi r and
-    returns a non-finite value on the axis. This module carries the field's own
-    integrand, which needs no such division, so it should be finite there -- and
-    the parity it inherits from the reduction pins B_R to zero rather than merely
-    small.
+    Axis rows use their finite section-area limit without entering an off-axis
+    flux-gradient division.  The parity of that limit pins B_R to zero rather than
+    merely small.
     """
 
     vertices = scaled_hexagon(3.0, 1.0)
@@ -1226,6 +1225,32 @@ def test_the_field_is_clean_on_the_axis():
     _, right, above = polygon_analytic_greens(offset, target_z, vertices)
     np.testing.assert_allclose(left, -right, rtol=1e-11)
     np.testing.assert_allclose(below, above, rtol=1e-11)
+
+
+def test_axis_rows_hold_level_geometry_before_the_closed_reduction():
+    """Interior-level and exterior-level axis rows match a positive-area oracle."""
+    vertices = np.array([[0.88, 0.0], [1.05, -0.07], [1.12, 0.09], [0.97, 0.16]])
+    target_r = np.array([0.0, 0.0, 1.4])
+    target_z = np.array([0.0, 0.31, -0.04])
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", RuntimeWarning)
+        with np.errstate(all="raise"):
+            computed = polygon_analytic_greens(target_r, target_z, vertices)
+    points, weights = section_nodes(vertices, order=12)
+    expected_bz = []
+    for height in target_z[:2]:
+        distance2 = points[:, 0] ** 2 + (height - points[:, 1]) ** 2
+        expected_bz.append(
+            MU0
+            / (2.0 * weights.sum())
+            * np.sum(weights * points[:, 0] ** 2 / distance2**1.5)
+        )
+    np.testing.assert_array_equal(computed[0][:2], 0.0)
+    np.testing.assert_array_equal(computed[1][:2], 0.0)
+    np.testing.assert_allclose(computed[2][:2], expected_bz, rtol=4e-14, atol=0.0)
+    off_axis = polygon_analytic_greens(target_r[2:], target_z[2:], vertices)
+    for mixed, separate in zip(computed, off_axis, strict=True):
+        np.testing.assert_allclose(mixed[2:], separate, rtol=0.0, atol=0.0)
 
 
 @pytest.mark.parametrize("section", sorted(SECTIONS))
@@ -1435,6 +1460,94 @@ def test_padded_topology_has_jax_parity_at_axis_and_corner_targets():
     )
 
 
+def test_packed_topology_builds_one_vectorized_moment_state(monkeypatch):
+    """All endpoints share one moment graph with one lane per endpoint and pair."""
+    import nova.biot.polygonanalytic as analytic
+    from nova.biot.polygon import pad_batch
+
+    sections = heterogeneous_sections()
+    edge, weight, norm = pad_batch(sections)
+    target_r = np.array([5.8, 6.0, 6.2])
+    target_z = np.array([0.2, -0.1, 0.3])
+    calls = {"edge": [], "vertex": []}
+    initialize_vertex = analytic._Vertex.__init__
+    initialize_edge = analytic._Edge.__init__
+
+    def counted_vertex(self, target_r, *args, **kwargs):
+        calls["vertex"].append(np.asarray(target_r).size)
+        initialize_vertex(self, target_r, *args, **kwargs)
+
+    def counted_edge(self, target_r, *args, **kwargs):
+        calls["edge"].append(np.asarray(target_r).size)
+        initialize_edge(self, target_r, *args, **kwargs)
+
+    monkeypatch.setattr(analytic._Vertex, "__init__", counted_vertex)
+    monkeypatch.setattr(analytic._Edge, "__init__", counted_edge)
+    analytic.packed_analytic_greens(np, target_r, target_z, edge, weight, norm, nodes=2)
+    lane_count = 2 * edge.shape[0] * target_r.size
+    assert calls == {"edge": [lane_count], "vertex": [lane_count]}
+
+
+def test_packed_arc_builds_one_vectorized_state_for_each_moment_family(monkeypatch):
+    """Finite-arc graph count is independent of packed contour edge count."""
+    import nova.biot.polygonarc as arc
+    from nova.biot.polygon import pad_batch
+
+    sections = heterogeneous_sections()
+    edge, weight, norm = pad_batch(sections)
+    target_r = np.array([5.8, 6.0, 6.2])
+    target_z = np.array([0.2, -0.1, 0.3])
+    target_phi = np.array([0.2, 1.1, -0.4])
+    start = np.array([0.4, -0.2, 0.1])
+    end = np.array([2.1, 1.4, 1.9])
+    calls = {"arc_edge": [], "arc_vertex": [], "ring_edge": [], "ring_vertex": []}
+
+    class CountedArcVertex(arc._Vertex):
+        def __init__(self, target_radius, *args, **kwargs):
+            calls["arc_vertex"].append(np.asarray(target_radius).size)
+            super().__init__(target_radius, *args, **kwargs)
+
+    class CountedArcEdge(arc._Edge):
+        def __init__(self, target_radius, *args, **kwargs):
+            calls["arc_edge"].append(np.asarray(target_radius).size)
+            super().__init__(target_radius, *args, **kwargs)
+
+    class CountedRingVertex(arc._RingVertex):
+        def __init__(self, target_radius, *args, **kwargs):
+            calls["ring_vertex"].append(np.asarray(target_radius).size)
+            super().__init__(target_radius, *args, **kwargs)
+
+    class CountedRingEdge(arc._RingEdge):
+        def __init__(self, target_radius, *args, **kwargs):
+            calls["ring_edge"].append(np.asarray(target_radius).size)
+            super().__init__(target_radius, *args, **kwargs)
+
+    monkeypatch.setattr(arc, "_Vertex", CountedArcVertex)
+    monkeypatch.setattr(arc, "_Edge", CountedArcEdge)
+    monkeypatch.setattr(arc, "_RingVertex", CountedRingVertex)
+    monkeypatch.setattr(arc, "_RingEdge", CountedRingEdge)
+    arc.packed_arc_greens(
+        np,
+        target_r,
+        target_z,
+        target_phi,
+        edge,
+        weight,
+        norm,
+        start,
+        end,
+        nodes=2,
+    )
+    endpoint_lanes = 2 * edge.shape[0] * target_r.size
+    arc_lanes = 2 * endpoint_lanes
+    assert calls == {
+        "arc_edge": [arc_lanes],
+        "arc_vertex": [arc_lanes],
+        "ring_edge": [endpoint_lanes],
+        "ring_vertex": [endpoint_lanes],
+    }
+
+
 def test_padded_coordinates_carry_zero_jax_tangents():
     """Only live contour rows may contribute a geometry derivative."""
     import jax
@@ -1474,3 +1587,49 @@ def test_padded_coordinates_carry_zero_jax_tangents():
     assert np.all(np.isfinite(primal))
     assert np.all(np.isfinite(tangent))
     np.testing.assert_array_equal(tangent, 0.0)
+
+
+def test_axis_field_keeps_live_vertical_edge_geometry_tangents():
+    """The finite packed axis limit differentiates through material edges."""
+    import jax
+    import jax.numpy as jnp
+
+    from nova.biot.polygon import horizontal_edges, traced_pack_section
+    from nova.biot.polygonanalytic import packed_analytic_greens
+    from nova.jax.config import configure_dtypes
+
+    configure_dtypes()
+    vertices = np.array([[0.9, -0.1], [1.1, -0.1], [1.1, 0.1], [0.9, 0.1]])
+    horizontal = horizontal_edges(vertices)
+    tangent = np.zeros_like(vertices)
+    tangent[1:3, 0] = 1.0
+
+    def evaluate(section):
+        edge, weight, norm = traced_pack_section(jnp, section, horizontal)
+        return packed_analytic_greens(
+            jnp,
+            jnp.asarray([0.0]),
+            jnp.asarray([0.02]),
+            edge,
+            weight,
+            norm,
+            nodes=2,
+        )[2][0]
+
+    primal, derivative = jax.jvp(
+        evaluate,
+        (jnp.asarray(vertices),),
+        (jnp.asarray(tangent),),
+    )
+    step = 1.0e-5
+    high = polygon_analytic_greens(
+        np.array([0.0]), np.array([0.02]), vertices + step * tangent
+    )[2][0]
+    low = polygon_analytic_greens(
+        np.array([0.0]), np.array([0.02]), vertices - step * tangent
+    )[2][0]
+    reference = (high - low) / (2.0 * step)
+    assert np.isfinite(primal)
+    assert np.isfinite(derivative)
+    assert derivative != 0.0
+    np.testing.assert_allclose(derivative, reference, rtol=2e-9, atol=0.0)

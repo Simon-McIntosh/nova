@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-10">
-<meta name="plan-version" content="7">
+<meta name="plan-version" content="9">
 <meta name="plan-impl" content="0.65">
 </head>
 <body>
@@ -50,7 +50,7 @@
       <li><strong>Unify the façade.</strong> Make the eager and JAX paths consume the same immutable source state, fixed-point result and topology/conservation result types. Export <code>ForwardProfile</code> from <code>nova.equilibrium</code>; document <code>ForwardFluxOperator</code> as its traced map.</li>
       <li><strong>Make current closure explicit.</strong> Remove the unconditional net-current rescale from the absolute-source path. Support at most one declared common-amplitude <code>I_p</code> equality in <code>ForwardProfile</code>, applied consistently to source primitives and derivatives and solved with a bracketing/conditioning receipt. Do not silently rescale the cell-current image.</li>
       <li><strong>Expose integral observations.</strong> Compute achieved <code>I_p</code>, <code>beta_p</code> and <code>l_i</code> from the converged field using pinned definitions and return target residuals plus JAX derivatives. Reject a request to enforce more moments than the supplied closure degrees of freedom. Multi-coefficient correction calls this observation map from Ambix or <code>ReconstructProfile</code>.</li>
-      <li><strong>Separate source assembly from topology.</strong> The topology update produces stable core, common-SOL, private-flux and excluded-material masks. Source functions select by those domain labels; <code>psi_N&gt;1</code> alone never selects every open-field cell.</li>
+      <li><strong>Separate source assembly from topology.</strong> The topology update produces stable core, common-SOL, private-flux and excluded-material masks. A plasma element whose centroid lies within the plasma boundary curve is plasma with <code>psi_N ≤ 1</code> by definition — the core extends exactly to the boundary and no within-boundary shell carries an open label; the SOL is strictly <code>psi_N &gt; 1</code>, with connectivity distinguishing common SOL from private flux (whose flux value may sit below one — the centroid test, not the value, excludes it from the plasma). Source functions select by those domain labels; <code>psi_N&gt;1</code> alone never selects every open-field cell.</li>
       <li><strong>Add rotation as a closure.</strong> Accept <code>p0</code>, temperature, toroidal angular frequency, species assumptions and consistent derivatives; form the major-radius-dependent pressure source inside Nova. Keep generic radial-power columns out of the public physical API.</li>
       <li><strong>Add SOL profile continuation.</strong> Support bounded continuation of pressure and <code>F F'</code> beyond the separatrix with explicit continuity class, branch policy and outer support. A derivative or value jump is rejected unless a separately modeled sheet/current layer owns it.</li>
       <li><strong>Return receipts.</strong> Report fixed-point residual history, topology, axis/separatrix state, integrated core and SOL toroidal current, optional poloidal boundary-current ledger, GS/force residuals, finite checks and all normalisation actions.</li>
@@ -156,6 +156,11 @@ Done-when
     <h4 class="r-fu-title">Land rotation closure, SOL continuation and the flux-surface geometry record</h4>
     <div class="r-fu-body"><p>The static authority boundary is green, so the remaining implementable rungs are §3 item 5 (isothermal rotation closure benchmarked against the banked rotating references), §3 item 6 (topology-qualified SOL continuation with the locked independent-low-pressure private-flux policy), and the §5 flux-surface geometry record for the transport consumer. The interface gate stays blocked on the Ambix contract and the accelerated topology read.</p></div>
     <pre class="r-fu-prompt">/reckon-ship flux-function-forward-equilibrium §3</pre>
+    </article>
+<article class="r-fu" data-id="f-fffe-003" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-10T20:40:00+00:00" data-recommends-skill="/reckon-ship flux-function-forward-equilibrium §5" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Demonstrate ForwardProfile on hex plasma elements against a DINA reference on ITER geometry</h4>
+    <div class="r-fu-body"><p>The gate fixtures solved on a synthetic rectangular lattice; the production plasma mesh is hexagonal cells coupled through their own polygon (PolySection). Demonstrate the public ForwardProfile solve on the hex plasma grid with representative ITER vessel and coil geometry: take a reference DINA case, drive the solve with its p' and FF' profiles and coil currents, and reproduce its flux map, boundary, I_p, beta_p and l_i with reported deviations. Regenerate the evidence figures under the corrected centroid-rule domain partition as part of this node.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship flux-function-forward-equilibrium §5</pre>
     </article>
 </section>
   </main>

@@ -80,10 +80,10 @@ def _reference_corner_fields(rs, zs, r4, z4):
     at a tenth of the section height off a corner level -- so a reference spelled
     that way disagrees with an accurate kernel by four decades more than the pin
     allows, and would be measuring its own conditioning rather than the algebra.
-    Both spellings therefore take the same exact complements, the same ``zeta`` and
-    the same complete-elliptic descent, leaving only the grouping between them;
-    the quadrature and the special functions have their own accuracy gates in
-    ``test_biotzeta`` and ``test_biotcompleteelliptic``.
+    Both spellings therefore take the same exact complements, one coherent
+    four-corner ``zeta`` rule and the same complete-elliptic descent, leaving only
+    the grouping between them; the quadrature and the special functions have their
+    own accuracy gates in ``test_biotzeta`` and ``test_biotcompleteelliptic``.
 
     Returns ``(values, widest)``: the three antiderivative coefficients, and the
     magnitude of the largest term each of them is assembled from.  The second is
@@ -101,7 +101,13 @@ def _reference_corner_fields(rs, zs, r4, z4):
     big_k, big_e = complete_kind(complement)
     v = 1 + k2 * (gamma**2 - b * r4) / (2 * r4 * rs)
     u_coef = k2 * (4 * gamma**2 + 3 * rs**2 - 5 * r4**2) / (4 * r4)
-    zt = zeta(rs, r4, gamma, (np.pi / 2) * np.ones_like(rs))
+    zt = zeta(
+        rs,
+        r4,
+        gamma,
+        (np.pi / 2) * np.ones_like(rs),
+        coherent_axis=-1,
+    )
 
     # r - c is -gamma^2/(r + c) exactly, which is what the first characteristic and
     # its own pole are built from rather than from r less c
@@ -346,6 +352,26 @@ def test_conditioned_elliptic_combinations_match_a_high_precision_arbiter():
     ).T
     expected = np.array([_decimal_elliptic_combinations(value) for value in parameter])
     np.testing.assert_allclose(got, expected, rtol=2e-15, atol=0.0)
+
+
+def test_first_elliptic_combination_retains_representable_subnormals():
+    """The leading ``pi m / 4`` term survives before higher powers underflow."""
+    smallest = np.nextafter(0.0, 1.0)
+    parameter = smallest * np.arange(1.0, 5.0)
+    first = scipy.special.ellipk(parameter)
+    second = scipy.special.ellipe(parameter)
+    got = np.array(
+        _filament_elliptic_combinations(
+            np,
+            parameter,
+            np.ones_like(parameter),
+            first,
+            second,
+        )
+    ).T
+    expected = np.array([_decimal_elliptic_combinations(value) for value in parameter])
+    np.testing.assert_array_equal(got, expected)
+    np.testing.assert_array_equal(got[:, 0] / smallest, [1.0, 2.0, 2.0, 3.0])
 
 
 def test_elliptic_route_boundary_tracks_the_analytic_nextafter_step():
@@ -1162,16 +1188,16 @@ def test_the_two_routes_share_the_filament_singularity_contract():
 
 
 def test_the_rectangular_section_routes_agree_through_the_quadrature_switch():
-    """The two section forms differ only in the ``zeta`` rule, and not in the answer.
+    """The two section forms select the same coherent ``zeta`` rule and answer.
 
-    Both reach all three complete kinds through the same descent, so what is
-    pinned here is the quadrature: the host routes each element between a
-    48-node Gauss-Legendre rule and a 177-node tanh-sinh one, the traced form
-    takes tanh-sinh throughout.  ``corner_plane`` crosses the integrand's own
-    endpoint confluence, while ``quadrature_switch`` brackets both exact routing
-    boundaries.  The four-corner combination differences four corner values
-    against each other, so it is carried alongside the bare corner antiderivative
-    in case that cancellation amplifies a per-corner difference.
+    Both reach all three complete kinds through the same descent. The host and
+    traced forms select Gauss-Legendre only when all four physical corners are
+    far from their source planes; one near corner selects tanh-sinh for all four.
+    ``corner_plane`` crosses the integrand's own endpoint confluence, while
+    ``quadrature_switch`` brackets both exact routing boundaries. The
+    four-corner combination differences four corner values against each other,
+    so it is carried alongside the bare corner antiderivative in case that
+    cancellation amplifies a corner value.
     """
     a, z0, da, dz = _TWIN_SECTION
     grid = np.meshgrid(
@@ -1218,3 +1244,169 @@ def test_the_rectangular_section_routes_agree_through_the_quadrature_switch():
         host_corner = corner_fields(*stacks)
         for one, other in zip(traced_corner_fields(np, *stacks), host_corner):
             assert _set_deviation(one, other) < 1e-14
+
+
+@pytest.mark.parametrize("da,dz", [(0.1, 0.08), (0.02, 0.02)])
+def test_section_corner_rule_is_coherent_across_both_switch_boundaries(da, dz):
+    """Thick and thin sections retain one rule across four alternating corners."""
+    a = 6.2
+    z0 = 0.0
+    target_radius = a + 0.3 * da
+    switch = NEAR_PLANE_RATIO * target_radius
+    boundaries = (switch - dz / 2.0, switch + dz / 2.0)
+    positive = np.array(
+        [
+            value
+            for boundary in boundaries
+            for value in (
+                np.nextafter(boundary, -np.inf),
+                boundary,
+                np.nextafter(boundary, np.inf),
+            )
+        ]
+    )
+    target_z = z0 + np.concatenate((-positive[::-1], positive))
+    target_r = np.full(target_z.shape, target_radius)
+    host = cylinder_greens(target_r, target_z, a, z0, da, dz)
+    traced = traced_cylinder_greens(np, target_r, target_z, a, z0, da, dz)
+    for one, other in zip(traced, host, strict=True):
+        assert _set_deviation(one, other) < 2e-12
+
+    source_r, source_z, radius, level = _corner_stacks(
+        a, z0, da, dz, target_r, target_z
+    )
+    gamma = source_z - level
+    host_zeta = zeta(
+        source_r,
+        radius,
+        gamma,
+        np.pi / 2.0,
+        coherent_axis=-1,
+    )
+    jax = pytest.importorskip("jax")
+    jax.config.update("jax_enable_x64", True)
+    jnp = pytest.importorskip("jax.numpy")
+    jitted_zeta = jax.jit(
+        lambda corner_r, target, gap: traced_zeta(
+            jnp,
+            corner_r,
+            target,
+            gap,
+            np.pi / 2.0,
+            coherent_axis=-1,
+        )
+    )(jnp.asarray(source_r), jnp.asarray(radius), jnp.asarray(gamma))
+    assert _set_deviation(jitted_zeta, host_zeta) < 2e-12
+
+    jitted = jax.jit(
+        lambda target_radius, target_level: jnp.stack(
+            traced_cylinder_greens(
+                jnp,
+                target_radius,
+                target_level,
+                a,
+                z0,
+                da,
+                dz,
+            )
+        )
+    )(jnp.asarray(target_r), jnp.asarray(target_z))
+    for one, other in zip(np.asarray(jitted), host, strict=True):
+        assert _set_deviation(one, other) < 2e-12
+
+
+def test_far_section_average_matches_a_refined_value_and_tangent():
+    """The conditioned source average converges before replacing corner subtraction."""
+    jax = pytest.importorskip("jax")
+    jax.config.update("jax_enable_x64", True)
+    jnp = pytest.importorskip("jax.numpy")
+
+    sections = ((0.1, 0.08), (0.02, 0.02))
+    geometry = []
+    for da, dz in sections:
+        radius = 6.2 + 0.3 * da
+        level = NEAR_PLANE_RATIO * radius + dz / 2.0
+        geometry.append((radius, level, 6.2, 0.0, da, dz))
+    geometry = jnp.asarray(geometry)
+    direction = jnp.asarray([[0.3, -0.2, 0.1, 0.05, 0.01, -0.02]] * len(sections))
+
+    node, weight = np.polynomial.legendre.leggauss(12)
+    node_r, node_z = (array.ravel() for array in np.meshgrid(node, node, indexing="ij"))
+    weight = (0.25 * weight[:, None] * weight[None, :]).ravel()
+    node_r = jnp.asarray(node_r)
+    node_z = jnp.asarray(node_z)
+    weight = jnp.asarray(weight)
+
+    def candidate(parameters):
+        target_r, target_z, a, z0, da, dz = parameters
+        return jnp.stack(traced_cylinder_greens(jnp, target_r, target_z, a, z0, da, dz))
+
+    def refined(parameters):
+        target_r, target_z, a, z0, da, dz = parameters
+        source_r = a + 0.5 * da * node_r
+        source_z = z0 + 0.5 * dz * node_z
+        values = traced_filament_greens(
+            jnp,
+            target_r,
+            target_z,
+            source_r,
+            source_z,
+        )
+        return jnp.stack([jnp.sum(value * weight) for value in values])
+
+    candidate = jax.vmap(candidate)
+    refined = jax.vmap(refined)
+
+    @jax.jit
+    def compare(parameters, tangent):
+        candidate_value, candidate_tangent = jax.jvp(
+            candidate, (parameters,), (tangent,)
+        )
+        refined_value, refined_tangent = jax.jvp(refined, (parameters,), (tangent,))
+        return candidate_value, candidate_tangent, refined_value, refined_tangent
+
+    candidate_value, candidate_tangent, refined_value, refined_tangent = compare(
+        geometry, direction
+    )
+    assert _set_deviation(candidate_value, refined_value) < 2e-12
+    assert _set_deviation(candidate_tangent, refined_tangent) < 2e-12
+
+
+def test_far_section_average_holds_the_inactive_corner_route_on_axis():
+    """Axis targets use their finite loop limit without evaluating corner poles."""
+    a, z0, da, dz = _TWIN_SECTION
+    target_r = np.zeros(2)
+    target_z = np.array([0.0, 0.31])
+    with np.errstate(all="raise"):
+        host = cylinder_greens(target_r, target_z, a, z0, da, dz)
+        traced = traced_cylinder_greens(np, target_r, target_z, a, z0, da, dz)
+    np.testing.assert_array_equal(host[0], 0.0)
+    np.testing.assert_array_equal(host[1], 0.0)
+    assert np.all(np.isfinite(host[2]))
+    for one, other in zip(traced, host, strict=True):
+        np.testing.assert_array_equal(one, other)
+
+    node, weight = np.polynomial.legendre.leggauss(12)
+    source_r, source_z = np.meshgrid(
+        a + 0.5 * da * node,
+        z0 + 0.5 * dz * node,
+        indexing="ij",
+    )
+    weight = 0.25 * weight[:, None] * weight[None, :]
+    expected_bz = []
+    for level in target_z:
+        gap = level - source_z
+        filament_bz = MU0 * source_r**2 / (2.0 * (source_r**2 + gap**2) ** 1.5)
+        expected_bz.append(np.sum(weight * filament_bz))
+    np.testing.assert_allclose(host[2], expected_bz, rtol=2e-14, atol=0.0)
+
+    jax = pytest.importorskip("jax")
+    jax.config.update("jax_enable_x64", True)
+    jnp = pytest.importorskip("jax.numpy")
+    jitted = jax.jit(
+        lambda radius, level: jnp.stack(
+            traced_cylinder_greens(jnp, radius, level, a, z0, da, dz)
+        )
+    )(jnp.asarray(target_r), jnp.asarray(target_z))
+    for one, other in zip(np.asarray(jitted), host, strict=True):
+        assert _set_deviation(one, other) < 2e-12

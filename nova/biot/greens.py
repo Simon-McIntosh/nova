@@ -59,12 +59,11 @@ and both differences are what being traceable costs:
   below takes all three kinds from the descent on BOTH routes -- which is why
   this cost difference is the point form's alone.  End to end the filament twin
   runs 1.9 to 3.9 times the host over 64 to 65536 targets;
-* the section kernels route ``zeta`` per element between a 48-node
-  Gauss-Legendre rule and a 177-node tanh-sinh one, where the twin takes
-  tanh-sinh unconditionally because a trace would otherwise evaluate both rules
-  and discard one.  Against adaptive quadrature both rules sit on round-off
-  across the whole switch, so the routing buys its 2.3 to 5.8 times cheaper
-  quadrature for nothing; the section twin runs 1.2 to 1.6 times the host.
+* a physical section routes its four ``zeta`` corners coherently between a
+  48-node Gauss-Legendre rule and a 177-node tanh-sinh one. If any corner is near
+  its source plane all four use tanh-sinh; Gauss is selected only when all four
+  are far. The traced twin evaluates both static rules before the same selection,
+  preserving the section cancellation without a data-shaped graph.
 
 Off the filament the two routes agree to round-off -- 2e-15 of the regime's own
 scale for the point form and 2e-12 for the four-corner section rule, over
@@ -146,9 +145,13 @@ def _filament_elliptic_combinations(xp, parameter, complement, first, second):
     ``E(m)-K(m)+mE(m)/(2(1-m))``
     ``= -2D/(1-q) + 4q^2 E(p)/((1+q)(1-q)^2)``.
 
-    At the route boundary ``p = 0.36``, where the fixed series is at its
-    binary64 rounding floor.  Both inactive arms are held at benign constants
-    before selection so traced values and tangents stay finite.
+    The first identity is evaluated as
+    ``2D + m 2E(p)/(d+m)``, where ``d = (1 + sqrt(1-m))^2``.  This is
+    algebraically the same because ``q = m/d``, but multiplying by ``m`` last
+    retains a representable leading term even when ``q`` itself would
+    underflow.  At the route boundary ``p = 0.36``, where the fixed series is at
+    its binary64 rounding floor.  Both inactive arms are held at benign
+    constants before selection so traced values and tangents stay finite.
     """
     use_conditioned = parameter <= _ELLIPTIC_CONDITIONED_LIMIT
     conditioned_parameter = xp.where(use_conditioned, parameter, 0.0)
@@ -166,7 +169,8 @@ def _filament_elliptic_combinations(xp, parameter, complement, first, second):
         + 0.5 * direct_parameter / direct_complement * direct_second
     )
 
-    landen_ratio = conditioned_parameter / (1.0 + xp.sqrt(conditioned_complement)) ** 2
+    landen_denominator = (1.0 + xp.sqrt(conditioned_complement)) ** 2
+    landen_ratio = conditioned_parameter / landen_denominator
     transformed_parameter = landen_ratio * landen_ratio
     half_pi = 0.5 * np.pi
     transformed_first_minus_second = (
@@ -183,7 +187,8 @@ def _filament_elliptic_combinations(xp, parameter, complement, first, second):
     ratio_gap = 1.0 - landen_ratio
     conditioned_first_minus_second = (
         2.0 * transformed_first_minus_second
-        + 2.0 * landen_ratio / ratio_sum * transformed_second
+        + conditioned_parameter
+        * (2.0 * transformed_second / (landen_denominator + conditioned_parameter))
     )
     conditioned_flux = 2.0 / ratio_sum * transformed_first_minus_second
     conditioned_radial = (
@@ -382,7 +387,7 @@ def _zeta(rs: np.ndarray, r: np.ndarray, gamma: np.ndarray) -> np.ndarray:
     piece of the cylinder antiderivative.  Delegates to the shared fixed-node
     quadrature so the cylinder and bow kernels evaluate one and the same rule.
     """
-    return zeta(rs, r, gamma, np.pi / 2.0)
+    return zeta(rs, r, gamma, np.pi / 2.0, coherent_axis=-1)
 
 
 def corner_fields(
@@ -422,10 +427,10 @@ def corner_fields(
     anywhere in that list caps the answer at ``eps`` over it.  Written as
     ``2r/(r - c)`` and ``2r/(r + c)`` instead, the pair costs the branch cancellation
     a relative ``eps (r + c) r/gamma^2``: three parts in a hundred thousand a
-    micrometre off a metre-scale face, and unbounded below that, which is what used
-    to leave a jump of the full ``pi r^2/3`` either side of a face.  The first two
-    poles are reciprocal, ``(1 - n1)(1 - n2) = 1`` exactly, the ring denominator's
-    two roots sitting symmetrically about the range.
+    micrometre off a metre-scale face, and unbounded below that.  Such a perturbed
+    characteristic leaves a jump of the full ``pi r^2/3`` either side of a face.
+    The first two poles are reciprocal, ``(1 - n1)(1 - n2) = 1`` exactly, the ring
+    denominator's two roots sitting symmetrically about the range.
     """
     gamma = zs - z
     a2 = gamma**2 + (rs + r) ** 2
@@ -539,10 +544,9 @@ def traced_corner_fields(xp, rs, zs, r, z):
     Jacobian -- d(psi, B)/d(section corners) -- follows from the same
     closed-form pass that produces the values.  Every branch of the host is
     already arithmetic (``where`` over held arguments, exact signs), so nothing
-    structural changes; the one substitution is the zeta quadrature, which the
-    host routes between two rules per element and the trace takes branch-free
-    through :func:`nova.biot.zeta.traced_zeta` -- the two agree to the rules'
-    mutual accuracy, ~1e-12 relative.
+    structural changes. Both routes select one zeta rule coherently over the four
+    physical corners through :func:`nova.biot.zeta.traced_zeta`, preserving their
+    alternating-sum cancellation.
     """
     gamma = zs - z
     a2 = gamma**2 + (rs + r) ** 2
@@ -597,7 +601,7 @@ def traced_corner_fields(xp, rs, zs, r, z):
 
     cphi = -1.0 / 3.0 * r**2 * np.pi / 2.0 * xp.sign(gamma) * (xp.sign(rs - r) + 1.0)
     dz_coef = 3.0 / r * cphi
-    zeta = traced_zeta(xp, rs, r, gamma, np.pi / 2.0)
+    zeta = traced_zeta(xp, rs, r, gamma, np.pi / 2.0, coherent_axis=-1)
 
     aphi_hat = (
         cphi
@@ -619,6 +623,64 @@ def traced_corner_fields(xp, rs, zs, r, z):
     return aphi_hat, br_hat, bz_hat
 
 
+_SECTION_QUADRATURE_ORDER = 6
+_SECTION_QUADRATURE_CLEARANCE = 8.0
+_SECTION_RULE_NODE, _SECTION_RULE_WEIGHT = np.polynomial.legendre.leggauss(
+    _SECTION_QUADRATURE_ORDER
+)
+_SECTION_RULE_R, _SECTION_RULE_Z = (
+    array.ravel()
+    for array in np.meshgrid(
+        0.5 * _SECTION_RULE_NODE,
+        0.5 * _SECTION_RULE_NODE,
+        indexing="ij",
+    )
+)
+_SECTION_RULE_WEIGHT = (
+    0.25 * _SECTION_RULE_WEIGHT[:, None] * _SECTION_RULE_WEIGHT[None, :]
+).ravel()
+
+
+def _section_quadrature_greens(xp, target_r, target_z, a, z0, da, dz):
+    """Average filament fields over a well-separated rectangular section.
+
+    Six-point Gauss-Legendre integration on each material coordinate is used only
+    beyond eight section half-diagonals, where the filament integrand is smooth.
+    In that domain it avoids the large-condition subtraction of four corner
+    antiderivatives while retaining positive source weights and traced geometry.
+    """
+    dtype = xp.result_type(target_r, target_z, a, z0, da, dz)
+    if not np.issubdtype(np.dtype(dtype), np.floating):
+        dtype = xp.asarray(1.0).dtype
+    target_r, target_z = xp.broadcast_arrays(
+        xp.asarray(target_r, dtype=dtype), xp.asarray(target_z, dtype=dtype)
+    )
+    node_r = xp.asarray(_SECTION_RULE_R, dtype=dtype)
+    node_z = xp.asarray(_SECTION_RULE_Z, dtype=dtype)
+    weight = xp.asarray(_SECTION_RULE_WEIGHT, dtype=dtype)
+    source_r = xp.asarray(a, dtype=dtype) + xp.asarray(da, dtype=dtype) * node_r
+    source_z = xp.asarray(z0, dtype=dtype) + xp.asarray(dz, dtype=dtype) * node_z
+    values = traced_filament_greens(
+        xp,
+        target_r[..., None],
+        target_z[..., None],
+        source_r,
+        source_z,
+    )
+    return tuple(xp.sum(value * weight, axis=-1) for value in values)
+
+
+def _section_quadrature_mask(xp, target_r, target_z, a, z0, da, dz):
+    """Select the smooth domain where direct section quadrature is conditioned."""
+    radial_extent = 0.5 * xp.abs(da)
+    vertical_extent = 0.5 * xp.abs(dz)
+    radial_gap = xp.maximum(xp.abs(target_r - a) - radial_extent, 0.0)
+    vertical_gap = xp.maximum(xp.abs(target_z - z0) - vertical_extent, 0.0)
+    half_diagonal = xp.sqrt(radial_extent**2 + vertical_extent**2)
+    clearance = _SECTION_QUADRATURE_CLEARANCE * half_diagonal
+    return radial_gap**2 + vertical_gap**2 >= clearance**2
+
+
 def cylinder_greens(
     target_r: np.ndarray,
     target_z: np.ndarray,
@@ -631,10 +693,17 @@ def cylinder_greens(
 
     ``a, z0`` -- section centroid [m]; ``da, dz`` -- radial/vertical extents [m].
     Returns arrays shaped like ``target_r``: total poloidal flux psi [Wb/A] and
-    field components [T/A], smooth everywhere including inside the section.
+    field components [T/A], finite throughout the section material.
+
+    The exact corner antiderivative is used near the material. Beyond eight
+    section half-diagonals, direct positive source quadrature is better
+    conditioned than subtracting four increasingly equal antiderivatives.
     """
     tr = np.asarray(target_r, dtype=np.float64)
     tz = np.asarray(target_z, dtype=np.float64)
+    quadrature = _section_quadrature_mask(np, tr, tz, a, z0, da, dz)
+    corner_tr = np.where(quadrature, a, tr)
+    corner_tz = np.where(quadrature, z0, tz)
     # corner order (matching the reference): (-,-), (+,-), (+,+), (-,+)
     rs = np.stack(
         [np.full(tr.shape, a + d * da / 2.0) for d in (-1, 1, 1, -1)], axis=-1
@@ -642,8 +711,8 @@ def cylinder_greens(
     zs = np.stack(
         [np.full(tr.shape, z0 + d * dz / 2.0) for d in (-1, -1, 1, 1)], axis=-1
     )
-    r4 = np.repeat(tr[..., None], 4, axis=-1)
-    z4 = np.repeat(tz[..., None], 4, axis=-1)
+    r4 = np.repeat(corner_tr[..., None], 4, axis=-1)
+    z4 = np.repeat(corner_tz[..., None], 4, axis=-1)
 
     aphi_hat, br_hat, bz_hat = corner_fields(rs, zs, r4, z4)
     area = da * dz
@@ -656,27 +725,43 @@ def cylinder_greens(
         )
 
     aphi = corner(aphi_hat)
-    psi = 2.0 * np.pi * MU0 * tr * aphi
+    psi = 2.0 * np.pi * MU0 * corner_tr * aphi
     br = MU0 * corner(br_hat)
     bz = MU0 * corner(bz_hat)
-    return psi, br, bz
+    direct = _section_quadrature_greens(
+        np,
+        np.where(quadrature, tr, 0.0),
+        np.where(quadrature, tz, z0),
+        a,
+        z0,
+        da,
+        dz,
+    )
+    return tuple(
+        np.where(quadrature, direct_value, corner_value)
+        for direct_value, corner_value in zip(direct, (psi, br, bz), strict=True)
+    )
 
 
 def traced_cylinder_greens(xp, target_r, target_z, a, z0, da, dz):
     """(psi, B_R, B_Z) per ampere from a rectangular-section ring, traced.
 
     :func:`cylinder_greens` with the section descriptor ``(a, z0, da, dz)`` as
-    trace inputs and the corner pass through :func:`traced_corner_fields`, so
-    the section's position and extents carry exact geometry Jacobians.
+    trace inputs. The corner and direct-quadrature arms hold inactive targets at
+    finite geometry before evaluation, so values and geometry tangents follow
+    the same conditioning route without evaluate-then-mask singularities.
     """
     tr = xp.asarray(target_r)
     tz = xp.asarray(target_z)
+    quadrature = _section_quadrature_mask(xp, tr, tz, a, z0, da, dz)
+    corner_tr = xp.where(quadrature, a, tr)
+    corner_tz = xp.where(quadrature, z0, tz)
     one = xp.ones_like(tr)
     # corner order (matching the reference): (-,-), (+,-), (+,+), (-,+)
     rs = xp.stack([(a + d * da / 2.0) * one for d in (-1, 1, 1, -1)], axis=-1)
     zs = xp.stack([(z0 + d * dz / 2.0) * one for d in (-1, -1, 1, 1)], axis=-1)
-    r4 = xp.stack([tr for _ in range(4)], axis=-1)
-    z4 = xp.stack([tz for _ in range(4)], axis=-1)
+    r4 = xp.stack([corner_tr for _ in range(4)], axis=-1)
+    z4 = xp.stack([corner_tz for _ in range(4)], axis=-1)
 
     aphi_hat, br_hat, bz_hat = traced_corner_fields(xp, rs, zs, r4, z4)
     area = da * dz
@@ -688,8 +773,24 @@ def traced_cylinder_greens(xp, target_r, target_z, a, z0, da, dz):
             * ((data[..., 2] - data[..., 3]) - (data[..., 1] - data[..., 0]))
         )
 
-    psi = 2.0 * np.pi * MU0 * tr * corner(aphi_hat)
-    return psi, MU0 * corner(br_hat), MU0 * corner(bz_hat)
+    corner_values = (
+        2.0 * np.pi * MU0 * corner_tr * corner(aphi_hat),
+        MU0 * corner(br_hat),
+        MU0 * corner(bz_hat),
+    )
+    direct = _section_quadrature_greens(
+        xp,
+        xp.where(quadrature, tr, 0.0),
+        xp.where(quadrature, tz, z0),
+        a,
+        z0,
+        da,
+        dz,
+    )
+    return tuple(
+        xp.where(quadrature, direct_value, corner_value)
+        for direct_value, corner_value in zip(direct, corner_values, strict=True)
+    )
 
 
 # --- second-moment corrected filament ---------------------------------

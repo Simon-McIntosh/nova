@@ -38,6 +38,7 @@ from nova.biot.zeta import (
     TANH_SINH_HALF_COUNT,
     _gauss_legendre_rule,
     _tanh_sinh_rule,
+    traced_zeta,
     zeta,
     zeta_midpoint,
 )
@@ -126,7 +127,13 @@ def _scan(cases):
 
 @pytest.mark.parametrize(
     "rs,gamma,alpha",
-    [(0.2, 0.0, HALF), (0.2, 1e-6, HALF - 1e-3), (5.0, 0.1, 1.4), (20.0, 10.0, 0.05)],
+    [
+        (0.2, 0.0, HALF),
+        (0.2, 0.0, np.nextafter(HALF, 0.0)),
+        (0.2, 1e-6, HALF - 1e-3),
+        (5.0, 0.1, 1.4),
+        (20.0, 10.0, 0.05),
+    ],
 )
 @pytest.mark.filterwarnings("ignore::scipy.integrate.IntegrationWarning")
 def test_reference_is_converged(rs, gamma, alpha):
@@ -318,3 +325,75 @@ def test_batched_precision_is_selected_per_evaluator():
     single = Zeta(*arguments, np.array([0.3]), precision=Precision.SINGLE)()
     assert automatic.dtype.name == "float64"
     assert single.dtype.name == "float32"
+
+
+@pytest.mark.parametrize(
+    "arguments,dtype,tolerance",
+    [
+        ((2, 1, 1, 1), np.dtype("float64"), 2e-15),
+        (
+            (np.float32(2), 1, np.float32(1), np.float32(1)),
+            np.dtype("float32"),
+            2e-6,
+        ),
+    ],
+)
+def test_traced_rule_resolves_a_floating_dtype(arguments, dtype, tolerance):
+    """Integer and weakly mixed inputs never cast quadrature nodes to integers."""
+    expected = zeta(*(np.asarray(value, dtype=dtype) for value in arguments))
+    host = traced_zeta(np, *arguments)
+    assert host.dtype == dtype
+    np.testing.assert_allclose(host, expected, rtol=tolerance, atol=0.0)
+
+    jax = pytest.importorskip("jax")
+    configure_dtypes()
+    jnp = pytest.importorskip("jax.numpy")
+    traced = jax.jit(lambda *values: traced_zeta(jnp, *values))(*arguments)
+    assert np.dtype(traced.dtype) == dtype
+    np.testing.assert_allclose(np.asarray(traced), expected, rtol=tolerance, atol=0.0)
+
+
+def test_zero_extent_holds_every_integrand_operand_and_tangent():
+    """The exact zero interval never evaluates its indeterminate corner geometry."""
+    with np.errstate(all="raise"):
+        value = traced_zeta(np, 0, 0, 0, 0)
+    assert value == 0.0
+    assert np.issubdtype(value.dtype, np.floating)
+
+    jax = pytest.importorskip("jax")
+    configure_dtypes()
+    jnp = pytest.importorskip("jax.numpy")
+
+    def evaluate(geometry):
+        return traced_zeta(jnp, *geometry)
+
+    primal, tangent = jax.jit(
+        lambda geometry: jax.jvp(
+            evaluate,
+            (geometry,),
+            (jnp.ones_like(geometry),),
+        )
+    )(jnp.zeros(4))
+    assert primal == 0.0
+    assert tangent == 0.0
+
+
+def test_coherent_rule_selection_routes_whole_physical_corner_rows(monkeypatch):
+    """One near corner moves its complete four-corner row onto tanh-sinh."""
+    from nova.biot import zeta as module
+
+    rs = np.full((2, 4), 2.0)
+    radius = np.ones((2, 4))
+    gamma = np.array([[0.3, 0.1, 0.3, 0.3], [0.3, 0.3, 0.3, 0.3]])
+    alpha = np.ones((2, 4))
+    calls = []
+    integrate = module._integrate
+
+    def counted(source_r, target_r, level, extent, rule):
+        calls.append((extent.size, rule[0].size))
+        return integrate(source_r, target_r, level, extent, rule)
+
+    monkeypatch.setattr(module, "_integrate", counted)
+    value = zeta(rs, radius, gamma, alpha, coherent_axis=-1)
+    assert np.all(np.isfinite(value))
+    assert calls == [(4, GAUSS_ORDER), (4, 2 * TANH_SINH_HALF_COUNT + 1)]

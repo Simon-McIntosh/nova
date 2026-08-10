@@ -159,6 +159,31 @@ def test_the_quarter_turn_reproduces_the_complete_family(complement):
         assert abs(float(one) - float(other)) < 4e-14 * max(scale, 1.0)
 
 
+def test_the_exact_quarter_confluence_uses_the_complete_finite_parts():
+    """Inactive closure divisions are held before the exact source-ring limit."""
+    with np.errstate(all="raise"):
+        positive = harmonic_moments(
+            0.5 * np.pi,
+            1.0,
+            12,
+            complement=0.0,
+            sine=1.0,
+            cosine=0.0,
+        )
+        negative = harmonic_moments(
+            -0.5 * np.pi,
+            1.0,
+            12,
+            complement=0.0,
+            sine=-1.0,
+            cosine=0.0,
+        )
+        complete = complete_harmonic_moments(1.0, 12, complement=0.0)
+    for plus, minus, expected in zip(positive, negative, complete):
+        assert float(plus) == float(expected)
+        assert float(minus) == -float(expected)
+
+
 @pytest.mark.parametrize("co_amplitude", CO_AMPLITUDES)
 @pytest.mark.parametrize("complement", COMPLEMENTS)
 def test_the_plain_moments_reproduce_their_defining_integral(co_amplitude, complement):

@@ -143,15 +143,19 @@ def _finite_part(pole, cosine_weight, sine_weight, xp):
     is ``p/(1 + t)`` exactly and the logarithm of the ratio is not.
     """
     rising = pole - 1.0
-    root = xp.sqrt(xp.abs(rising))
-    held_root = xp.where(root > 0.0, root, 1.0)
+    separated = rising != 0.0
+    # The elementary factor tends to one where the pole equals one.  Hold the
+    # root argument before evaluation at that confluence: taking sqrt(0) and only
+    # masking its quotient afterward leaves an unbounded tangent in both JAX
+    # differentiation modes.
+    root = xp.sqrt(xp.where(separated, xp.abs(rising), 1.0))
     held_pole = xp.where(rising < 0.0, pole, 1.0)
     over = xp.where(
         rising > 0.0,
-        xp.arctan(root) / held_root,
-        xp.log((1.0 + root) / xp.sqrt(held_pole)) / held_root,
+        xp.arctan(root) / root,
+        xp.log((1.0 + root) / xp.sqrt(held_pole)) / root,
     )
-    return (cosine_weight - sine_weight / pole) * xp.where(rising == 0.0, 1.0, over)
+    return (cosine_weight - sine_weight / pole) * xp.where(separated, over, 1.0)
 
 
 def complete_kind(complement, *, xp=np, trips: int = TRIPS):

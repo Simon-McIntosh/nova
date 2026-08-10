@@ -74,7 +74,13 @@ from __future__ import annotations
 
 import numpy as np
 
-__all__ = ["SERIES_RATIO", "SERIES_TERMS", "TRIPS", "symmetric_kinds"]
+__all__ = [
+    "SERIES_RATIO",
+    "SERIES_TERMS",
+    "TRIPS",
+    "symmetric_first",
+    "symmetric_kinds",
+]
 
 # Trips of the duplication.  Each takes a geometric mean of the running triple, so
 # the trips before the three are of one size halve their exponent gap and the ones
@@ -237,6 +243,47 @@ def _elementary(first, second, weight, xp, *, gaps=None):
     )
 
 
+def _first_closure(x, y, z, xp):
+    """Return the first symmetric form from three duplicated arguments."""
+    mean = (x + y + z) / 3.0
+    first_x, first_y = (mean - x) / mean, (mean - y) / mean
+    first_z = -first_x - first_y
+    pair = first_x * first_y - first_z * first_z
+    triple = first_x * first_y * first_z
+    return (
+        1.0
+        - pair / 10.0
+        + triple / 14.0
+        + pair * pair / 24.0
+        - 3.0 * pair * triple / 44.0
+    ) / xp.sqrt(mean)
+
+
+def symmetric_first(x, y, z, *, xp=np, trips: int = TRIPS):
+    """Return Carlson's ``R_F(x, y, z)`` from one fixed duplication.
+
+    This is the first-kind-only path for callers that do not have a pole.  It is
+    deliberately separate from :func:`symmetric_kinds`: passing a zero scale to
+    that routine would still evaluate every ``R_J`` degenerate form, including
+    pole-only roots that need not exist for ``R_F``.  Keeping this path to the
+    shared three-argument duplication means an inactive pole branch cannot emit a
+    warning or poison a derivative.
+
+    The arguments must be non-negative, with at most one of them zero.  A caller
+    selecting an exact confluence holds its inactive arguments at a benign
+    positive value before calling, just as the complete and incomplete entry
+    points hold their inactive descents.
+    """
+    x, y, z = (xp.asarray(term) for term in (x, y, z))
+    shape = xp.zeros_like(x + y + z)
+    x, y, z = (term + shape for term in (x, y, z))
+    for _ in range(trips):
+        root_x, root_y, root_z = xp.sqrt(x), xp.sqrt(y), xp.sqrt(z)
+        step = root_x * root_y + root_y * root_z + root_z * root_x
+        x, y, z = (0.25 * (term + step) for term in (x, y, z))
+    return _first_closure(x, y, z, xp)
+
+
 def symmetric_kinds(x, y, z, pole, scale=1.0, *, gaps=None, xp=np, trips: int = TRIPS):
     """Return ``(R_F(x, y, z), scale R_J(x, y, z, pole))`` off ONE duplication.
 
@@ -295,20 +342,8 @@ def symmetric_kinds(x, y, z, pole, scale=1.0, *, gaps=None, xp=np, trips: int = 
         if gaps is not None:
             gaps = tuple(0.25 * gap for gap in gaps)
 
-    # the first kind's closing series, in the deviations of the three from their
-    # own mean -- which sum to zero, so the third is not formed independently
-    mean = (x + y + z) / 3.0
-    first_x, first_y = (mean - x) / mean, (mean - y) / mean
-    first_z = -first_x - first_y
-    pair = first_x * first_y - first_z * first_z
-    triple = first_x * first_y * first_z
-    first = (
-        1.0
-        - pair / 10.0
-        + triple / 14.0
-        + pair * pair / 24.0
-        - 3.0 * pair * triple / 44.0
-    ) / xp.sqrt(mean)
+    # the first kind's closing series is shared with the pole-free entry point
+    first = _first_closure(x, y, z, xp)
 
     # the third kind's, in the deviations from the weighted mean the pole enters
     # twice, and its own accumulated sum

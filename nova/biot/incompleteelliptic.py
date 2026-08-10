@@ -47,14 +47,17 @@ grows by a factor of two per trip and so reaches some ten thousand radians; that
 costs nothing, because the answer is ``phi_N/(2^N a_N)`` and what survives into it
 is the RELATIVE accuracy of ``phi_N``.
 
-One corner is not covered and is measured rather than hidden.  Where the
-amplitude is within about 1e-7 of a quarter turn AND the complement is below
-about 1e-25, the first step's own arctangent underflows before the descent has
-begun and the routine returns the confluence's elementary value instead of the
-one a hair away from it, for a relative error that reaches 1e-4 at the extreme.
-Geometrically that is a target on a section CORNER and within a rounding error of
-the arc's END PLANE at once -- within a femtometre of the arc's end edge -- and
-the accompanying test asserts the bound in both directions.
+The first kind has one additional route.  At a genuine interior amplitude it is
+the principal-quarter Carlson identity
+
+    F(phi, k) = sin(phi) R_F(cos^2(phi), cos^2(phi) + k'^2 sin^2(phi), 1).
+
+This takes the two squared scales directly and therefore remains accurate where
+the amplitude-carrying descent cannot resolve its first angular increments: the
+joint limit of a quarter turn and a vanishing complement.  Exact endpoints stay
+on the descent, where its complete and elementary limits are already exact.  The
+Carlson arguments are held at ``(1, 1, 1)`` outside their active lane before the
+duplication is evaluated, so an exact confluence never enters an inactive root.
 
 The confluence ``k'^2 = 0`` is a target ON the source ring.  Unlike the complete
 case it is not generally a divergence here: the descent stalls -- a geometric mean
@@ -79,7 +82,8 @@ from __future__ import annotations
 
 import numpy as np
 
-from nova.biot.symmetricelliptic import symmetric_kinds
+from nova.biot.completeelliptic import _finite_part
+from nova.biot.symmetricelliptic import symmetric_first, symmetric_kinds
 
 __all__ = ["TRIPS", "incomplete_kind", "incomplete_pole"]
 
@@ -90,6 +94,8 @@ __all__ = ["TRIPS", "incomplete_kind", "incomplete_pole"]
 # The count matches :mod:`nova.biot.completeelliptic` because the mean is the same
 # one; the accompanying test asserts it in both directions.
 TRIPS = 14
+
+_HALF_PI = 0.5 * np.pi
 
 
 def _stepped_amplitude(amplitude, sine, cosine, ratio, xp):
@@ -140,10 +146,10 @@ def incomplete_kind(
         F(phi, k) = integral_0^phi da/sqrt(1 - k^2 sin^2 a)
         E(phi, k) = integral_0^phi da sqrt(1 - k^2 sin^2 a)
 
-    Both come off ONE descent.  The first kind is the doubled amplitude over the
-    mean, ``phi_N/(2^N a_N)``; the second is the first scaled by the descent's own
-    squared differences together with a sum over the sines of the amplitudes it
-    passed through,
+    Both are formed by ONE descent.  The first kind is the doubled amplitude over
+    the mean, ``phi_N/(2^N a_N)``; the second is the first scaled by the descent's
+    own squared differences together with a sum over the sines of the amplitudes
+    it passed through,
 
         E = F [1 - (1/2) sum_n 2^n c_n^2] + sum_(n>=1) c_n sin phi_n
 
@@ -213,14 +219,44 @@ def incomplete_kind(
         weight = weight + 0.5 * scale * difference * difference
         sines = sines + difference * step_sine
 
-    first = phase / (scale * mean)
-    second = first * (1.0 - weight) + sines
+    descended_first = phase / (scale * mean)
+    second = descended_first * (1.0 - weight) + sines
+
+    # At every nontrivial principal-quarter interior the Carlson identity is an
+    # independent first-kind arrangement.  It takes the two endpoint scales as
+    # squared quantities and therefore does not lose the angular increments the
+    # amplitude descent carries when both scales are tiny.  Exact endpoints stay
+    # on the descent so the complete, empty-range, and zero-parameter contracts
+    # retain their exact values.  Every inactive argument is held before the RF
+    # duplication, rather than selecting away a zero or negative root afterward.
+    use_symmetric = (
+        reachable & (cosine > 0.0) & (xp.abs(amplitude) < _HALF_PI) & (parameter != 0.0)
+    )
+    held_sine = xp.where(use_symmetric, sine, 0.0)
+    held_cosine = xp.where(use_symmetric, cosine, 1.0)
+    held_complement = xp.where(use_symmetric, complement, 1.0)
+    squared_cosine = held_cosine * held_cosine
+    radical = squared_cosine + held_complement * held_sine * held_sine
+    carlson_first = held_sine * symmetric_first(
+        squared_cosine, radical, xp.ones_like(radical), xp=xp, trips=trips
+    )
+    first = xp.where(use_symmetric, carlson_first, descended_first)
 
     # a quarter-turn amplitude at the confluence IS the full turn's divergence, and
     # the finite part the complete module assigns it is zero; anywhere short of it
     # the elementary first kind is finite and is the whole value
     live = cosine > 0.0
-    elementary = xp.where(live, xp.log((1.0 + sine) / xp.where(live, cosine, 1.0)), 0.0)
+    elementary_sine = xp.where(live, sine, 0.0)
+    elementary_cosine = xp.where(live, cosine, 1.0)
+    elementary_absolute_sine = xp.where(
+        elementary_sine < 0.0, -elementary_sine, elementary_sine
+    )
+    elementary_magnitude = xp.log1p(elementary_absolute_sine) - xp.log(
+        elementary_cosine
+    )
+    elementary = xp.where(
+        elementary_sine < 0.0, -elementary_magnitude, elementary_magnitude
+    )
     return (
         xp.where(reachable, first, elementary),
         xp.where(reachable, second, sine),
@@ -319,6 +355,9 @@ def incomplete_pole(pole, complement, sine, cosine, *, xp=np, trips: int = TRIPS
     squared_cosine, squared_sine = cosine * cosine, sine * sine
     radical = squared_cosine + complement * squared_sine
     weight = squared_cosine + partner * squared_sine
+    complete_limit = (
+        (complement == 0.0) & (squared_cosine == 0.0) & (squared_sine == 1.0)
+    )
 
     gap = xp.where(reflected, pole - complement, 1.0)
     # the sqrt's argument is held at one where no reflection is wanted and the
@@ -344,22 +383,38 @@ def incomplete_pole(pole, complement, sine, cosine, *, xp=np, trips: int = TRIPS
         (partner - 1.0) * squared_sine,
     )
 
+    regular = live & (radical > 0.0) & (weight > 0.0) & ~complete_limit
+    held_squared_cosine = xp.where(regular, squared_cosine, 1.0)
+    held_radical = xp.where(regular, radical, 1.0)
+    held_weight = xp.where(regular, weight, 1.0)
+    pole_scale = partner_weight * (1.0 - partner) * sine * squared_sine / 3.0
+    held_scale = xp.where(regular, pole_scale, 0.0)
+    held_gaps = tuple(xp.where(regular, term, 0.0) for term in gaps)
+
     # the third kind's own weight rides INTO the accumulation: at a near pole and a
     # target on the source ring the symmetric form passes 1e308 while the answer it
-    # belongs to is 1e-06, and this factor is small by the same amount
+    # belongs to is 1e-06, and this factor is small by the same amount.  The exact
+    # complete confluence has a finite part instead; its whole Carlson lane is held
+    # at benign equal arguments before evaluation.
     first, third = symmetric_kinds(
-        squared_cosine,
-        radical,
+        held_squared_cosine,
+        held_radical,
         1.0,
-        weight,
-        partner_weight * (1.0 - partner) * sine * squared_sine / 3.0,
-        gaps=gaps,
+        held_weight,
+        held_scale,
+        gaps=held_gaps,
         xp=xp,
         trips=trips,
     )
+    held_value_radical = xp.where(regular, radical, 1.0)
     value = (
         first_weight * sine * first
         + third
-        + growth * xp.arctan2(growth * sine * cosine, xp.sqrt(radical)) / gap
+        + growth * xp.arctan2(growth * sine * cosine, xp.sqrt(held_value_radical)) / gap
     )
-    return xp.where(live & (weight > 0.0), value, 0.0)
+    finite_part = xp.sign(sine) * _finite_part(held, 1.0, 1.0, xp)
+    return xp.where(
+        complete_limit,
+        finite_part,
+        xp.where(regular, value, 0.0),
+    )

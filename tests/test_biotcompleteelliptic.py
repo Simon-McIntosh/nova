@@ -300,6 +300,22 @@ def test_a_target_on_the_source_ring_returns_the_finite_part():
     assert float(complete_pole(np.float64(0.0), np.float64(0.5))) == 0.0
 
 
+def test_the_unit_pole_finite_part_has_its_exact_value_and_tangent():
+    """The elementary confluence is zero with unit slope in the pole argument."""
+    with np.errstate(all="raise"):
+        assert float(complete_pole(np.float64(1.0), np.float64(0.0))) == 0.0
+
+    jax, jnp = traced_namespace()
+
+    def finite_part(pole):
+        return complete_pole(pole, _f64(0.0), xp=jnp)
+
+    forward = float(jax.jacfwd(finite_part)(_f64(1.0)))
+    reverse = float(jax.grad(finite_part)(_f64(1.0)))
+    assert forward == pytest.approx(1.0, rel=2e-15)
+    assert reverse == pytest.approx(1.0, rel=2e-15)
+
+
 def test_the_trip_count_is_bounded_by_the_argument_range_in_both_directions():
     """The fixed count is a measured claim about the range, not a guess.
 

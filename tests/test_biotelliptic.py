@@ -11,6 +11,8 @@ The quadrature references are deliberately naive: adaptive integration of the
 literal definition, with no shared machinery with the thing under test.
 """
 
+from decimal import Decimal, localcontext
+
 import numpy as np
 import pytest
 import scipy.integrate
@@ -26,6 +28,11 @@ from nova.biot.elliptic import (
 # k^2 = 4 r r' / ((r + r')^2 + gamma^2) for a ring: bounded by 1, approaching it
 # for a target on the source radius in the plane, and falling to zero far away.
 PARAMETERS = [1e-3, 1e-2, 0.1, 0.3, 0.5, 0.7, 0.9, 0.99, 0.999]
+
+DECIMAL_PI = Decimal(
+    "3.141592653589793238462643383279502884197169399375105820974944592307816406"
+    "286208998628034825342117067982148086513282306647093844609550582231725359"
+)
 
 
 def jacobi(u, parameter):
@@ -48,6 +55,61 @@ def quadrature(integrand, parameter):
     return value
 
 
+def decimal_sn_moment(parameter, order):
+    """Return an even sn moment from its 120-digit hypergeometric series."""
+    with localcontext() as context:
+        context.prec = 120
+        parameter = Decimal.from_float(float(parameter))
+        half = Decimal(1) / 2
+        rising = Decimal(1)
+        factorial = Decimal(1)
+        for index in range(1, order + 1):
+            rising *= Decimal(index) - half
+            factorial *= Decimal(index)
+
+        first = half
+        second = Decimal(order) + half
+        third = Decimal(order + 1)
+        term = total = Decimal(1)
+        for index in range(1, 1000):
+            step = Decimal(index - 1)
+            term *= (
+                (first + step)
+                * (second + step)
+                * parameter
+                / ((third + step) * Decimal(index))
+            )
+            total += term
+            if abs(term) < Decimal("1e-115"):
+                break
+        return float((DECIMAL_PI / 2) * rising / factorial * total)
+
+
+def decimal_pole_moment(characteristic, parameter):
+    """Return the defining pole integral from a 120-digit double series."""
+    with localcontext() as context:
+        context.prec = 120
+        characteristic = Decimal.from_float(float(characteristic))
+        parameter = Decimal.from_float(float(parameter))
+        total = Decimal(0)
+        characteristic_power = Decimal(1)
+        for first_order in range(40):
+            central = Decimal(1)
+            parameter_power = Decimal(1)
+            for second_order in range(40):
+                total += (
+                    characteristic_power
+                    * central
+                    * parameter_power
+                    / Decimal(first_order + second_order + 1)
+                )
+                next_order = second_order + 1
+                central *= Decimal(2 * next_order - 1) / Decimal(2 * next_order)
+                parameter_power *= parameter
+            characteristic_power *= characteristic
+        return float(characteristic * total / 2)
+
+
 @pytest.mark.parametrize("parameter", PARAMETERS)
 def test_sn_moments_reproduce_their_defining_integral(parameter):
     """El(2m) is the even sn moment over a quarter period."""
@@ -56,27 +118,19 @@ def test_sn_moments_reproduce_their_defining_integral(parameter):
         expected = quadrature(
             lambda u, order=order: jacobi(u, parameter)[0] ** (2 * order), parameter
         )
-        # the recursion divides by k^2 once per order, so the attainable
-        # tolerance degrades with order as the parameter falls
-        tolerance = 1e-11 / parameter**order
-        assert abs(moment - expected) <= tolerance * max(abs(expected), 1.0), (
+        assert abs(moment - expected) <= 2e-12 * max(abs(expected), 1.0), (
             f"order {order}, parameter {parameter}: {moment} vs {expected}"
         )
 
 
-def test_sn_moments_lose_a_digit_per_order_as_the_parameter_falls():
-    """The conditioning limit is documented, so it is also asserted.
-
-    At the smallest parameter a far target produces, the highest moment the
-    vector potential needs has lost most of its digits. A far-field evaluation
-    cannot go through this recursion, and a future transcription needs to know
-    that before it debugs the wrong thing.
-    """
-    parameter = 1e-6
-    moments = sn_moments(np.float64(parameter), 5)
-    expected = quadrature(lambda u: jacobi(u, parameter)[0] ** 8, parameter)
-    relative = abs(moments[4] - expected) / abs(expected)
-    assert relative > 1e-6, "recursion is better conditioned than documented"
+def test_sn_moments_keep_the_small_parameter_and_zero_limits():
+    """The canonical recursion stays accurate where upward division cannot."""
+    assert sn_moments(np.float64(0.0), 0) == []
+    for parameter in (0.0, 1e-12, 1e-6):
+        moments = sn_moments(np.float64(parameter), 5)
+        for order, moment in enumerate(moments):
+            expected = decimal_sn_moment(parameter, order)
+            assert float(moment) == pytest.approx(expected, rel=3e-15)
 
 
 @pytest.mark.parametrize("parameter", PARAMETERS)
@@ -171,6 +225,36 @@ def test_pole_moment_handles_the_degenerate_branch():
     np.testing.assert_allclose(got, expected, rtol=1e-10, atol=1e-14)
 
 
+def test_pole_moment_keeps_the_value_immediately_below_equality():
+    """A one-ulp parameter gap is resolved against the defining 120-digit series."""
+    characteristic = np.float64(1e-12)
+    parameter = np.nextafter(characteristic, np.float64(np.inf))
+    expected = decimal_pole_moment(characteristic, parameter)
+    got = pole_moment(characteristic, parameter)
+    assert float(got) == pytest.approx(expected, rel=3e-15)
+
+
+def test_pole_moment_keeps_exact_complements_and_elementary_limits():
+    """Exact complements, broadcasting, zero, and the singular endpoint are held."""
+    characteristics = np.array([0.0, 0.2, 1.0])
+    with np.errstate(all="raise"):
+        got = pole_moment(characteristics, np.float32(0.0))
+    assert got.shape == characteristics.shape
+    assert got.dtype == np.float64
+    assert got[0] == 0.0
+    assert got[1] == pytest.approx(-0.5 * np.log1p(-0.2), rel=2e-15)
+    assert np.isposinf(got[2])
+
+    complement = np.float64(1e-20)
+    exact = pole_moment(
+        np.float64(1.0),
+        np.float64(0.0),
+        complement=complement,
+        parameter_complement=np.float64(1.0),
+    )
+    assert float(exact) == pytest.approx(-0.5 * np.log(complement), rel=2e-15)
+
+
 @pytest.mark.parametrize("parameter", [0.05, 0.3, 0.7, 0.95])
 @pytest.mark.parametrize("characteristic", [-2.0, -0.3, 1e-3, 0.4, 0.8])
 def test_complete_pi_reproduces_its_defining_integral(characteristic, parameter):
@@ -226,22 +310,15 @@ def test_the_quarter_period_jacobi_values_the_reduction_relies_on():
 
 
 @pytest.mark.parametrize("parameter", PARAMETERS + [1e-6, 1 - 1e-6])
-def test_the_stable_moments_agree_with_their_defining_integral_at_every_order(
+def test_the_canonical_moments_agree_with_their_defining_integral_at_every_order(
     parameter,
 ):
-    """The route used in anger has to hold where the printed recursion does not.
+    """The public route holds across both conditioning directions.
 
-    ``sn_moments`` divides by ``k^2`` once per order, so at the small parameter a
-    distant target produces it has lost most of its digits by the highest order
-    the vector potential needs.  Running the same recursion DOWNWARD cures that,
-    because the parasitic branch decays as ``k^(2m)`` -- but only while ``k^2``
-    stays clear of unity, where the two branches become degenerate.  Neither
-    direction covers the whole range, so the stable route picks per parameter and
-    this test spans both sides of the switch.
+    The downward direction carries small parameters and the upward direction
+    carries the near-unit limit; this test spans both sides of their switch.
     """
-    from nova.biot.elliptic import stable_sn_moments
-
-    moments = stable_sn_moments(np.float64(parameter), 9)
+    moments = sn_moments(np.float64(parameter), 9)
     for order, moment in enumerate(moments):
         expected = quadrature(
             lambda u, order=order: jacobi(u, parameter)[0] ** (2 * order), parameter
@@ -540,9 +617,7 @@ def test_a_pole_sitting_exactly_on_the_range_end_returns_the_plain_moments(param
     assert complement[0] == 0.0
     np.testing.assert_allclose(complement[1:], plain[:8], rtol=1e-13)
 
-    from nova.biot.elliptic import stable_sn_moments
-
-    plain = stable_sn_moments(np.float64(parameter), 9)
+    plain = sn_moments(np.float64(parameter), 9)
     shifted = sn_pole_moments(np.float64(0.0), np.float64(parameter), 9)
     assert shifted[0] == 0.0
     np.testing.assert_allclose(shifted[1:], plain[:8], rtol=1e-13)

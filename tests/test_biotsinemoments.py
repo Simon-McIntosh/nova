@@ -43,11 +43,23 @@ from nova.biot.elliptic import (
 from nova.biot.incompletemoments import (
     HEADROOM,
     SWITCH,
+    cn_pole_moment,
     harmonic_cosines,
     sine_cn_pole_moment,
     sine_moments,
     sine_sn_pole_moment,
+    sn_pole_moment,
 )
+from nova.jax.config import configure_dtypes
+
+
+def _f64(value):
+    """Construct an explicitly selected double-precision JAX value."""
+    configure_dtypes()
+    import jax.numpy as jnp
+
+    return jnp.asarray(value, dtype=jnp.float64)
+
 
 # The amplitude held as its distance BELOW a quarter turn -- the arc's own half
 # separation from one of its ends, and the quantity the accuracy depends on.
@@ -191,6 +203,17 @@ def test_the_zeroth_moment_meets_its_closed_form_at_a_quarter_turn(complement):
     assert abs(got - expected) <= 1e-15 * expected
 
 
+def test_the_exact_quarter_confluence_has_analytic_moments_without_warnings():
+    """At ``k'^2 = 0`` the radical cancels and every moment is elementary."""
+    with np.errstate(all="raise"):
+        got = family(0.0, 0.0)
+    expected = [
+        2.0 if order == 0 else 1.0 / (2 * order + 1) - 1.0 / (2 * order - 1)
+        for order in range(ORDERS)
+    ]
+    np.testing.assert_allclose(got, expected, rtol=3e-14, atol=2e-15)
+
+
 @pytest.mark.parametrize("co_amplitude", [1.0, 0.4, 5e-2])
 @pytest.mark.parametrize("complement", [0.9, 1e-2, 1e-9])
 def test_the_root_fold_holds_on_this_family_too(co_amplitude, complement):
@@ -283,6 +306,63 @@ def test_a_root_on_the_range_end_returns_the_rings_own_convention():
     """
     for mirrored in (False, True):
         assert seed(0.4, 1e-3, 0.0, mirrored) == 0.0
+
+
+def test_inactive_seed_branches_are_held_at_the_exact_confluence():
+    """Zero shifts and positive shifts avoid every unselected root and quotient."""
+    with np.errstate(all="raise"):
+        for shift in (-1.0, 0.0):
+            assert sine_cn_pole_moment(shift, 1.0, 1.0, 0.0, complement=0.0) == 0.0
+            assert sine_sn_pole_moment(shift, 1.0, 1.0, 0.0, complement=0.0) == 0.0
+            assert cn_pole_moment(shift, 1.0, 1.0, 0.0, complement=0.0) == 0.0
+            assert sn_pole_moment(shift, 1.0, 1.0, 0.0, complement=0.0) == 0.0
+        for shift in (1e-12, 0.5, 2.0):
+            cn_value = sine_cn_pole_moment(shift, 1.0, 1.0, 0.0, complement=0.0)
+            sn_value = sine_sn_pole_moment(shift, 1.0, 1.0, 0.0, complement=0.0)
+            cn_expected = 2.0 * np.arctan(1.0 / np.sqrt(shift)) / np.sqrt(shift)
+            sn_root = np.sqrt(1.0 + shift)
+            sn_gap = shift / (sn_root * (1.0 + sn_root))
+            sn_expected = np.log1p(2.0 / (sn_root * sn_gap)) / sn_root
+            assert float(cn_value) == pytest.approx(cn_expected, rel=3e-15)
+            assert float(sn_value) == pytest.approx(sn_expected, rel=3e-15)
+
+
+def test_the_seed_branch_crossing_has_one_value_and_one_jacobian():
+    """The circular and hyperbolic forms share their analytic squared series."""
+    jax = pytest.importorskip("jax")
+    configure_dtypes()
+    jnp = jax.numpy
+    crossing = 0.25
+
+    def value(shift):
+        return sine_cn_pole_moment(
+            shift,
+            _f64(0.8),
+            _f64(0.6),
+            _f64(0.8),
+            complement=_f64(0.2),
+            xp=jnp,
+        )
+
+    samples = (
+        np.nextafter(crossing, 0.0),
+        crossing,
+        np.nextafter(crossing, np.inf),
+    )
+    derivatives = []
+    for shift in samples:
+        forward = float(jax.jacfwd(value)(_f64(shift)))
+        reverse = float(jax.grad(value)(_f64(shift)))
+        assert np.isfinite(forward)
+        assert forward == pytest.approx(reverse, rel=2e-15)
+        derivatives.append(forward)
+    np.testing.assert_allclose(derivatives, derivatives[1], rtol=2e-15, atol=0.0)
+
+    step = 1e-5
+    difference = (
+        float(value(_f64(crossing + step))) - float(value(_f64(crossing - step)))
+    ) / (2.0 * step)
+    assert derivatives[1] == pytest.approx(difference, rel=2e-9)
 
 
 def test_the_harmonic_cosines_are_exact_at_a_quarter_turn():

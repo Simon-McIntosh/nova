@@ -93,6 +93,7 @@ from __future__ import annotations
 
 import numpy as np
 
+from nova.biot.elliptic import _reciprocal_arctangent
 from nova.biot.incompleteelliptic import incomplete_kind, incomplete_pole
 
 __all__ = [
@@ -125,6 +126,12 @@ HEADROOM = 130
 # Measured worst case over the sweep is 8.7e-15 here against 1.5e-13 at 0.997 and
 # 1.3e-7 with too little headroom on either side of it.
 SWITCH = 0.99
+
+
+def _root_or_zero(argument, live, xp):
+    """Return a square root with its exact-zero lane held before evaluation."""
+    held = xp.where(live, argument, 1.0)
+    return xp.where(live, xp.sqrt(held), 0.0)
 
 
 def harmonic_source(sine, cosine, count, *, xp=np):
@@ -226,7 +233,8 @@ def harmonic_moments(
     # Delta at the amplitude, as the radical of the two exact quantities rather
     # than of 1 - k^2 sin^2 a: at a target on the source ring the second is a
     # cancellation and the first is not
-    edge = xp.sqrt(complement + parameter * cosine * cosine)
+    edge_argument = complement + parameter * cosine * cosine
+    edge = _root_or_zero(edge_argument, edge_argument > 0.0, xp)
     source = harmonic_source(sine, cosine, top + 2, xp=xp)
     degenerate = parameter > switch
     held = xp.where(degenerate, parameter, 1.0)
@@ -240,7 +248,8 @@ def harmonic_moments(
         # the ASYMPTOTIC moment rather than zero: integrating the definition by
         # parts twice gives ``P_n = sin 2na/(2n Delta) + O(1/n^2)``, and using it
         # costs nothing -- it is one term of a series already formed
-        source[top + 1] / (2.0 * (top + 1) * edge),
+        source[top + 1]
+        / (2.0 * (top + 1) * xp.where(degenerate | (edge <= 0.0), 1.0, edge)),
         count,
         headroom,
         degenerate,
@@ -338,7 +347,8 @@ def _odd_harmonic_moments(
     has to be held there -- and it is the direction that is not selected.
     """
     top = count + headroom
-    edge = xp.sqrt(complement + parameter * cosine * cosine)
+    edge_argument = complement + parameter * cosine * cosine
+    edge = _root_or_zero(edge_argument, edge_argument > 0.0, xp)
     held_edge = xp.where(edge > 0.0, edge, 1.0)
     cosines = harmonic_cosines(sine, cosine, top + 2, xp=xp)
     return _solve(
@@ -417,37 +427,6 @@ def sine_moments(
     ]
 
 
-def _reciprocal_arctangent(magnitude, gap, hyperbolic, xp):
-    """Return ``artanh(z)/z``, or ``arctan(z)/z`` where the pole reflects it.
-
-    ``magnitude`` is ``|z|`` and ``hyperbolic`` says which of the two the pole's
-    own sign selects: the two are the SAME series, ``artanh(i z) = i arctan z``,
-    so a pole crossing the radical's root changes the branch and nothing else.
-
-    ``gap`` is ``1 - z``, and it has to be supplied rather than formed because
-    that is where the whole accuracy of the hyperbolic branch sits.  ``z``
-    reaches one as the root reaches the range end -- which is the configuration a
-    slender section produces -- and ``artanh`` there is a logarithm of the gap:
-    subtracting a ratio from one first caps it at ``eps`` over the gap, which is
-    five digits gone at a gap of 1e-11.  Each caller has the gap in closed form
-    as a ratio of positives, and ``log1p`` of ``2 z/(1 - z)`` then holds at both
-    ends of the range -- full RELATIVE accuracy as ``z`` vanishes with the pole,
-    and no cancellation as it approaches one.
-    """
-    held = xp.where(magnitude > 0.0, magnitude, 1.0)
-    value = (
-        xp.where(
-            hyperbolic,
-            0.5 * xp.log1p(2.0 * magnitude / xp.where(gap > 0.0, gap, 1.0)),
-            xp.arctan(magnitude),
-        )
-        / held
-    )
-    # the pole sitting exactly ON the radical's own root, where both branches
-    # meet: the ratio is one there and neither expression forms it
-    return xp.where(magnitude > 0.0, value, 1.0)
-
-
 def sine_cn_pole_moment(shift, parameter, sine, cosine, *, complement=None, xp=np):
     """Return ``integral_0^phi sin(2a) da/((cos^2 a + shift) Delta)``, a seed.
 
@@ -483,25 +462,40 @@ def sine_cn_pole_moment(shift, parameter, sine, cosine, *, complement=None, xp=n
     complement = xp.asarray(complement) + xp.zeros_like(shift)
     sine = xp.asarray(sine) + xp.zeros_like(shift)
     cosine = xp.asarray(cosine) + xp.zeros_like(shift)
+    live_shift = shift > 0.0
+    held_shift = xp.where(live_shift, shift, 1.0)
     near, far = sine * sine, cosine * cosine
-    edge = xp.sqrt(complement + parameter * far)
-    pivot = edge * near + (1.0 + edge) * (far + shift)
-    held = xp.where(pivot > 0.0, pivot, 1.0)
+    edge_argument = complement + parameter * far
+    edge = _root_or_zero(edge_argument, edge_argument > 0.0, xp)
+    pivot = edge * near + (1.0 + edge) * (far + held_shift)
+    live = live_shift & (pivot > 0.0)
+    held = xp.where(live, pivot, 1.0)
     # the reflected pole, and the two quantities its transcendental needs: both
     # come out as ratios of positives once k^2 is divided out of the numerator
     # and the pivot alike
-    partner = complement - shift * parameter
-    root = xp.sqrt(xp.abs(partner))
+    partner = complement - held_shift * parameter
+    root = _root_or_zero(xp.abs(partner), live & (partner != 0.0), xp)
+    magnitude = xp.where(live, root * near / held, 0.0)
+    gap_denominator = (edge + root) * held
+    held_gap_denominator = xp.where(
+        live & (gap_denominator > 0.0), gap_denominator, 1.0
+    )
+    reciprocal_gap = xp.where(
+        live,
+        (1.0 + root) * (1.0 + edge) * (far + held_shift) / held_gap_denominator,
+        1.0,
+    )
     return xp.where(
-        (shift > 0.0) & (pivot > 0.0),
+        live,
         2.0
         * near
         / held
         * _reciprocal_arctangent(
-            root * near / held,
-            (1.0 + root) * (1.0 + edge) * (far + shift) / ((edge + root) * held),
+            magnitude,
+            reciprocal_gap,
             partner > 0.0,
             xp,
+            signed_square=partner * near * near / (held * held),
         ),
         0.0,
     )
@@ -528,24 +522,36 @@ def sine_sn_pole_moment(shift, parameter, sine, cosine, *, complement=None, xp=n
     complement = xp.asarray(complement) + xp.zeros_like(shift)
     sine = xp.asarray(sine) + xp.zeros_like(shift)
     cosine = xp.asarray(cosine) + xp.zeros_like(shift)
+    live_shift = shift > 0.0
+    held_shift = xp.where(live_shift, shift, 1.0)
     near = sine * sine
-    edge = xp.sqrt(complement + parameter * cosine * cosine)
-    pivot = near + (1.0 + edge) * shift
-    held = xp.where(pivot > 0.0, pivot, 1.0)
+    edge_argument = complement + parameter * cosine * cosine
+    edge = _root_or_zero(edge_argument, edge_argument > 0.0, xp)
+    pivot = near + (1.0 + edge) * held_shift
+    root_argument = 1.0 + held_shift * parameter
+    live = live_shift & (pivot > 0.0) & (root_argument > 0.0)
+    held = xp.where(live, pivot, 1.0)
     # this pole never crosses the radical's root -- it is one PAST the range on
     # the other side -- so the branch is the hyperbolic one throughout, and the
     # gap carries the ``1 - p`` its own root supplies without a subtraction
-    root = xp.sqrt(1.0 + shift * parameter)
+    root = _root_or_zero(root_argument, live, xp)
+    magnitude = xp.where(live, root * near / held, 0.0)
+    reciprocal_gap = xp.where(
+        live,
+        held_shift * (1.0 + edge - parameter * near / (1.0 + root)) / held,
+        1.0,
+    )
     return xp.where(
-        (shift > 0.0) & (pivot > 0.0),
+        live,
         2.0
         * near
         / held
         * _reciprocal_arctangent(
-            root * near / held,
-            shift * (1.0 + edge - parameter * near / (1.0 + root)) / held,
+            magnitude,
+            reciprocal_gap,
             True,
             xp,
+            signed_square=root_argument * near * near / (held * held),
         ),
         0.0,
     )
@@ -569,8 +575,13 @@ def cn_pole_moment(shift, parameter, sine, cosine, *, complement=None, xp=np):
     shift = xp.asarray(shift)
     if complement is None:
         complement = 1.0 - xp.asarray(parameter)
-    return incomplete_pole(shift / (1.0 + shift), complement, sine, cosine, xp=xp) / (
-        1.0 + shift
+    live = shift > 0.0
+    held = xp.where(live, shift, 1.0)
+    return xp.where(
+        live,
+        incomplete_pole(held / (1.0 + held), complement, sine, cosine, xp=xp)
+        / (1.0 + held),
+        0.0,
     )
 
 

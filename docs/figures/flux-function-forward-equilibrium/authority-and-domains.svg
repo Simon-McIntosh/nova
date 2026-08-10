@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 500" role="img" aria-labelledby="title desc">
+  <title id="title">Flux-function-constrained forward equilibrium authority and source domains</title>
+  <desc id="desc">Ambix provides typed flux functions. Nova classifies core, common scrape-off layer and private flux regions, assembles force-balanced sources, solves the free-boundary fixed point and returns a conservation ledger.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#345995"/></marker>
+  </defs>
+  <g font-family="system-ui, sans-serif" fill="#17212b">
+    <text x="42" y="38" font-size="19" font-weight="650">One-way authority: inferred source state → deterministic field solve</text>
+
+    <g font-size="14">
+      <rect x="42" y="72" width="260" height="146" rx="5" fill="#fafafa" stroke="#7d8792"/>
+      <text x="60" y="102" font-size="16" font-weight="650">Ambix</text>
+      <text x="60" y="132">p(ξ), F(ξ), derivatives</text>
+      <text x="60" y="160">optional Ω(ξ), T(ξ)</text>
+      <text x="60" y="188">ensemble + provenance</text>
+
+      <rect x="400" y="72" width="270" height="146" rx="5" fill="#fffdf7" stroke="#b27a00"/>
+      <text x="418" y="102" font-size="16" font-weight="650">Typed source state</text>
+      <text x="418" y="132">coordinate + Jacobian</text>
+      <text x="418" y="160">COCOS + units + policy</text>
+      <text x="418" y="188">core/open-region profiles</text>
+
+      <rect x="768" y="60" width="310" height="170" rx="5" fill="#f6f9fc" stroke="#345995" stroke-width="1.5"/>
+      <text x="786" y="92" font-size="16" font-weight="650">Nova ForwardProfile</text>
+      <text x="786" y="122">topology-qualified source assembly</text>
+      <text x="786" y="150">free-boundary fixed point</text>
+      <text x="786" y="178">no measurements · no LSQ</text>
+      <text x="786" y="206">field + force + Iₚ/moment ledger</text>
+
+      <path d="M302 145 H400" stroke="#345995" stroke-width="2" marker-end="url(#arrow)"/>
+      <path d="M670 145 H768" stroke="#345995" stroke-width="2" marker-end="url(#arrow)"/>
+
+      <text x="42" y="288" font-size="16" font-weight="650">The scalar flux label is paired with connectivity</text>
+      <line x1="78" y1="338" x2="1048" y2="338" stroke="#6a7580" stroke-width="2"/>
+      <line x1="360" y1="324" x2="360" y2="352" stroke="#6a7580"/>
+      <line x1="668" y1="324" x2="668" y2="352" stroke="#6a7580"/>
+      <line x1="880" y1="324" x2="880" y2="352" stroke="#6a7580"/>
+
+      <text x="84" y="374" font-weight="650">closed core</text>
+      <text x="84" y="398">0 ≤ ψ<tspan baseline-shift="sub" font-size="11">N</tspan> ≤ 1</text>
+      <text x="84" y="422">nested surfaces</text>
+
+      <text x="384" y="374" font-weight="650">common SOL</text>
+      <text x="384" y="398">ψ<tspan baseline-shift="sub" font-size="11">N</tspan> &gt; 1</text>
+      <text x="384" y="422">open to divertor/wall</text>
+
+      <text x="692" y="374" font-weight="650">private flux</text>
+      <text x="692" y="398">also beyond separatrix</text>
+      <text x="692" y="422">distinct boundary data</text>
+
+      <text x="904" y="374" font-weight="650">material boundary</text>
+      <text x="904" y="398">return-current closure</text>
+      <text x="904" y="422">required for J<tspan baseline-shift="sub" font-size="11">parallel</tspan></text>
+    </g>
+    <text x="42" y="470" font-size="14" fill="#4d5a67">ψN &gt; 1 selects an open-flux range; connectivity selects the physical branch. Both are required.</text>
+  </g>
+</svg>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-09T07:30:58",
+  "updated": "2026-08-10T10:04:18",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -341,6 +341,22 @@
                 "verification": "strict"
               }
             }
+          },
+          {
+            "slug": "flux-function-forward-equilibrium",
+            "why_now": "Transport and Ambix can now own profile evolution, allowing Nova to prove a prescribed-source free-boundary solve that is force-balanced without recreating profile regression.",
+            "done_when": "ForwardProfile consumes absolute typed sources, exposes explicit current closure and integral moments, solves static/rotation/topology-qualified SOL equilibria, and banks field/force/current plus CPU/GPU parity receipts.",
+            "status": "active",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "context": "extended",
+                "verification": "strict",
+                "risk": "elevated"
+              }
+            }
           }
         ],
         "starts": "2026-08-10",
@@ -471,6 +487,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 23
+    "_version": 24
   }
 }

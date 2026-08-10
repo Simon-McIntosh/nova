@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="force-balance-source-contract">
+  <meta name="plan-title" content="Force-Balance Source Contract for Prescribed-Profile Equilibria">
+  <meta name="plan-summary" content="Research basis for carrying transport-derived core, rotation and SOL source functions into a field-conserving Nova forward equilibrium solve">
+  <meta name="plan-informs" content="flux-function-forward-equilibrium,imas-ambix:flux-function-state-interface">
+  <title>Force-Balance Source Contract | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Result</h2>
+    <p>A prescribed-profile free-boundary solve is a distinct problem from equilibrium reconstruction. Given machine geometry, external conductor currents, boundary conditions and physically complete source functions, Nova should solve only for the self-consistent poloidal flux. The source producer may be a transport model, a causal learned estimator or a hybrid of both; no measurement regression belongs inside this forward solve.</p>
+    <p>The conservative representation is the usual axisymmetric one, with poloidal flux per radian <code>psi</code> and toroidal-field function <code>F</code>:</p>
+    <p><code>B = grad(psi) × e_phi / R + F(psi) e_phi / R</code>, and <code>mu0 J = grad(F) × e_phi / R - DeltaStar(psi) e_phi / R</code>.</p>
+    <p>These forms make magnetic divergence zero by construction and make current continuity compatible with a single-valued <code>F(psi)</code>. Static force balance then reduces to <code>DeltaStar(psi) = -mu0 R² dp/dpsi - F dF/dpsi</code>. Nova uses total poloidal flux rather than flux per radian internally, so the implementation must carry the <code>2 pi</code> conversion and COCOS signs explicitly rather than copying this equation character-for-character.</p>
+
+    <figure>
+      <img src="/nova/figures/flux-function-forward-equilibrium/authority-and-domains.svg" alt="Ambix provides a typed flux-function state; Nova classifies source regions and solves the deterministic free-boundary equilibrium">
+      <figcaption>The source value and its connected topological region jointly define where a core or SOL closure applies.</figcaption>
+    </figure>
+
+    <h2 id="s2">§2 — Toroidal rotation</h2>
+    <p>For purely toroidal flow, ideal-MHD force balance does not generally leave pressure as a flux function. Under the isothermal-surface closure used by the Maschke–Perrin family, <code>T=T(psi)</code> and <code>Omega=Omega(psi)</code>, and pressure has an explicit major-radius dependence of the form <code>p(R,psi)=p0(psi) exp[theta(psi) R²]</code>, with <code>theta</code> determined by species mass, temperature and rotation. The GS source uses the derivative at fixed <code>R</code>, so both <code>p0'</code> and <code>theta'</code> contribute. A low-Mach expansion produces additional radial powers, including the familiar <code>R⁴</code> contribution in the GS source, but a free <code>R⁴</code> coefficient is not sufficient evidence that the term is rotation.</p>
+    <p>The recommended first implementation therefore accepts <code>p0(psi)</code>, <code>T(psi)</code>, <code>Omega(psi)</code>, species assumptions and their consistent derivatives, then lets Nova compose <code>p(R,psi)</code> and the source. This is directly testable against rotating Solov'ev and Maschke–Perrin solutions. A later polytropic closure can be another typed model without changing the public solver name.</p>
+    <p>Primary numerical reference: Luo et al., <a href="https://doi.org/10.1016/j.cpc.2020.107264">Solving the Grad–Shafranov equation using spectral elements for tokamak equilibrium with toroidal rotation</a>, which documents the modified equation and benchmarks against analytic rotating equilibria.</p>
+
+    <h2 id="s3">§3 — SOL currents</h2>
+    <p>There are two different capabilities hidden by the phrase “SOL current.”</p>
+    <table>
+      <thead><tr><th>Current</th><th>How it enters an axisymmetric equilibrium</th><th>Minimum closure</th></tr></thead>
+      <tbody>
+        <tr><td>toroidal <code>J_phi</code> in the SOL</td><td>extend <code>dp/dpsi</code> and <code>F dF/dpsi</code> smoothly beyond the separatrix and recompute the GS solution</td><td>core/common-SOL/private-flux profile policy, separatrix continuity, compact support or wall value, and a total-current ledger</td></tr>
+        <tr><td>poloidal or field-aligned current</td><td>carried by gradients of <code>F(psi)</code> and the toroidal magnetic field; it enters and leaves material boundaries on open lines</td><td><code>F</code> boundary values plus sheath/electrode/halo return-current closure; <code>psi_N&gt;1</code> alone cannot close the circuit</td></tr>
+      </tbody>
+    </table>
+    <p>King et al. extend fitted pressure and toroidal-field-function gradients into <code>psi_N&gt;1</code>, enforce differentiability at the separatrix, and recompute the GS solution. Their examples changed the reconstructed magnetic fit only modestly but displaced flux surfaces by as much as 2–3 cm; they also obtained poloidal SOL current from the toroidal-field-function gradient. The same paper warns that near-wall cold-plasma regions violate the flux-function approximation as neutral and material interactions become important. See <a href="https://arxiv.org/abs/1702.00076">Effect of Scrape-Off-Layer Current on Reconstructed Tokamak Equilibrium</a>.</p>
+    <p>For Nova, <code>psi_N&gt;1</code> is therefore a necessary range label but not a sufficient domain definition. A diverted solution has common-SOL and private-flux branches with different material connections. The topology read must emit those domain masks, and the source contract must state a profile for each applicable branch. Defaulting one extrapolation across every point beyond the separatrix is prohibited.</p>
+
+    <h2 id="s4">§4 — Normalisation and the moved inference boundary</h2>
+    <p>The existing <code>ForwardFluxOperator</code> rescales the cell-current image so its integral equals a prescribed net plasma current. That is legitimate only when the supplied profiles are dimensionless shapes whose amplitude is intentionally closed by <code>I_p</code>. It is not legitimate when Ambix supplies absolute transport-derived <code>dp/dpsi</code> and <code>F dF/dpsi</code>: rescaling them silently changes the inferred state.</p>
+    <p>The public contract should default to <strong>absolute sources, no implicit rescale</strong>. If a shape-plus-current formulation remains useful, expose it as a separately named normalisation policy. The scale is an explicit scalar unknown in the nonlinear equilibrium residual, not a hidden mutation of a current image: it acts consistently on the declared source primitives and derivatives, and the result records the unscaled source, target current, achieved current, scale, tolerance and conditioning. The solver still performs no least-squares fit.</p>
+
+    <h2 id="s5">§5 — Target <code>I_p</code>, <code>beta_p</code> and <code>l_i</code></h2>
+    <p>These quantities do not all have the same status. Total plasma current is a global equality on the GS source. Poloidal beta is an integral pressure-to-poloidal-field quantity and therefore also requires the pressure primitive and its edge convention. Internal inductance is a moment of the solved poloidal field and primarily constrains the radial current distribution. All depend on the converged geometry, so their residuals must be evaluated through the equilibrium solve rather than from a frozen grid.</p>
+    <table>
+      <thead><tr><th>Supplied profile family</th><th>Permitted target use</th><th>Owner</th></tr></thead>
+      <tbody>
+        <tr><td>absolute <code>p</code>, <code>p'</code>, <code>F</code> and <code>F F'</code></td><td><code>I_p</code>, <code>beta_p</code> and <code>l_i</code> are predictions; optional targets are validation residuals only</td><td><code>ForwardProfile</code></td></tr>
+        <tr><td>one declared common source amplitude</td><td>target <code>I_p</code> may close that scalar if the response is bracketed, non-degenerate and locally unique</td><td><code>ForwardProfile</code> explicit current-normalisation policy</td></tr>
+        <tr><td>two named amplitudes, for example pressure drive and diamagnetic drive</td><td><code>I_p</code> plus <code>beta_p</code> may close a two-scalar nonlinear system; <code>l_i</code> remains a prediction</td><td>prefer Ambix conditioning; a deterministic prescribed closure may call <code>ForwardProfile</code> as its observation operator</td></tr>
+        <tr><td>shape-changing coefficients</td><td>matching <code>I_p</code>, <code>beta_p</code> and <code>l_i</code> is a regularised profile-identification problem; target count alone does not guarantee identifiability</td><td>Ambix posterior update or Nova <code>ReconstructProfile</code>, never <code>ForwardProfile</code></td></tr>
+      </tbody>
+    </table>
+    <p>The Shafranov equilibrium relation couples pressure and internal-inductance effects, so external magnetic geometry often constrains a low-order combination more directly than it separates <code>beta_p</code> and <code>l_i</code>. Treating both as independent exact targets without an internal diagnostic or a transport prior can therefore manufacture confidence. The Equinox formulation makes the relevant architectural split explicit: the GS fixed point is paired with least-squares source identification only when measurements are used. See <a href="https://arxiv.org/abs/0909.4474">Blum, Boulbe and Faugeras</a>. The recent <a href="https://arxiv.org/abs/2606.11821">VEQ source-route study</a> independently demonstrates that multiple profile/current inputs can feed one equilibrium residual; compatible routes do not remove the need to declare which quantities are inputs and which are solved constraints.</p>
+    <p><strong>Recommendation:</strong> keep one public class. <code>ForwardProfile</code> accepts an immutable absolute source state and an optional typed scalar <code>I_p</code> closure; it always reports achieved <code>I_p</code>, <code>beta_p</code> and <code>l_i</code> plus their differentiable residuals. Ambix conditions its profile ensemble if moments must change the profiles. A new top-level forward solver would duplicate the locked class matrix, while placing multi-moment optimisation inside <code>ForwardProfile</code> would recreate reconstruction under a different name.</p>
+
+    <h2 id="s6">§6 — Verification ladder</h2>
+    <ol>
+      <li>Static analytic equilibrium: source sign, total-flux convention and force residual.</li>
+      <li>Rotating analytic equilibrium: isothermal-surface pressure and the radial source term.</li>
+      <li>Manufactured SOL equilibrium: smooth core-to-SOL transition, distinct private-flux policy and no source outside declared support.</li>
+      <li>Conservation: <code>div B</code>, <code>div J</code>, GS residual, perpendicular force residual and integrated core/SOL current ledger.</li>
+      <li>Numerics: eager/JAX parity, fixed-point convergence from multiple seeds, differentiable residual, <code>vmap</code> ensemble solve and topology-domain stability.</li>
+      <li>Interface: round-trip the Ambix typed state and a standards-compliant IMAS equilibrium representation without losing units, coordinate, COCOS, closure type or causal provenance.</li>
+      <li>Integral constraints: absolute sources are unchanged; a one-amplitude current closure meets its equality with a uniqueness/conditioning receipt; moment residual Jacobians agree with finite differences; underdetermined multi-moment requests fail before solving.</li>
+    </ol>
+    <p>For the nonlinear free-boundary algorithm and global-current constraint, the adaptive Newton formulation in <a href="https://arxiv.org/abs/2407.03499">An adaptive Newton-based free-boundary Grad–Shafranov solver</a> is a useful independent reference. Nova need not adopt its finite-element discretisation to reuse its separation between equilibrium residual, boundary control and explicit current constraint.</p>
+
+    <h2 id="s7">§7 — Questions that change the physics</h2>
+    <ul>
+      <li>Does “SOL current” mean toroidal current density, field-aligned/poloidal current, or both?</li>
+      <li>Are Ambix profiles absolute physical derivatives, or normalised shapes closed by a separately measured total current?</li>
+      <li>Are <code>beta_p</code> and <code>l_i</code> independent observations with uncertainties, outputs to validate, or exact scenario targets? Which internal diagnostics or transport priors justify separating them?</li>
+      <li>If moments are exact targets, which physically named profile amplitudes or shape modes may move, and what prior defines the unique correction when the moment map is rank-deficient?</li>
+      <li>Which radial coordinate is causal and transport-consistent across time, and who owns its remap when the free boundary moves?</li>
+      <li>Must pressure and <code>F</code> be continuous, continuously differentiable, or twice differentiable at the separatrix? A permitted jump implies an explicit surface-current or force layer and must not arise numerically.</li>
+      <li>Is the private-flux-region closure learned from data, tied to the common SOL, or forced to a low-pressure boundary value?</li>
+      <li>Which rotation thermodynamics is in scope first: isothermal surfaces, polytropic surfaces, or a more general anisotropic pressure model?</li>
+      <li>Should Nova solve each Ambix ensemble member, or only selected sigma points? Topology changes make mean-only propagation unsafe.</li>
+    </ul>
+  </main>
+</body>
+</html>

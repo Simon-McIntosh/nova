@@ -5,6 +5,7 @@ import numpy as np
 import scipy.special
 
 from nova.biot.constants import Constants
+from nova.biot.target import ForceTargetPolicy
 from nova.frame.coilset import CoilSet
 from nova.frame.polygrid import PolyTarget
 
@@ -141,8 +142,15 @@ def test_inductance_quadrature_keeps_original_plasma_block_dimensions():
 
 
 def test_force_keeps_the_physical_poly_target_and_dcoil_cells():
-    """Linked-flux quadrature changes neither force targets nor conducting sources."""
-    coilset = CoilSet(dcoil=-3)
+    """Linked-flux quadrature changes neither force targets nor conducting sources.
+
+    The force route is named here rather than taken from the default, so what the
+    comparison measures is that non-leakage and not the identity of whichever rule
+    the force operator happens to ship.
+    """
+    coilset = CoilSet(
+        dcoil=-3, force_target_policy=ForceTargetPolicy(rule="subdivision")
+    )
     coilset.coil.insert(3.0, 0.0, 0.4, 0.2, nturn=12, name="PF")
     expected = PolyTarget(*coilset.frames, index="coil", delta=-2).target
     source_index = coilset.subframe.index.tolist()

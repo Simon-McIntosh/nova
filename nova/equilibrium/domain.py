@@ -10,8 +10,8 @@ sweeps in cells that no plasma closure owns.
 The labels below split the flux map on the two properties that actually
 distinguish the branches: whether a cell lies inside the material boundary,
 and whether it is connected to the magnetic axis. With the closed test
-:math:`\psi_N \le \psi_N^{\mathrm{lcfs}}` written ``closed`` and the
-axis-connected test written ``connected``, the partition is exact and total:
+:math:`\psi_N \le 1` written ``closed`` and the axis-connected test written
+``connected``, the partition is exact and total:
 
 ===================  =========================================
 label                selection
@@ -22,10 +22,23 @@ label                selection
 ``EXCLUDED_MATERIAL`` outside the material boundary
 ===================  =========================================
 
-The closed test uses the last-closed-flux-surface cut rather than the
-separatrix itself, matching the ionisation cut the topology read already
-applies, so the thin shell between them is labelled with the open branch and
-carries no core source.
+The plasma reaches its own boundary
+-----------------------------------
+A cell whose centroid lies inside the plasma boundary curve — the separatrix
+of a diverted configuration, the limiting surface of a wall-limited one — IS
+plasma, and carries :math:`\psi_N \le 1` by definition. The closed test
+therefore cuts at that boundary and nowhere short of it: the core mask extends
+exactly to the boundary and no within-boundary shell may carry an open label.
+A cut a declared fraction inside the surface belongs to a fitted current image,
+where it guards cells straddling the edge; it is not a statement about where
+the plasma ends, and using one to partition domains shaves the plasma's outer
+edge into the scrape-off layer.
+
+The open branch is consequently strict. ``COMMON_SOL`` is :math:`\psi_N > 1`
+inside the material — a centroid outside the boundary curve. ``PRIVATE_FLUX``
+is what the CONNECTIVITY test removes from the closed set: geometrically
+outside the boundary curve although its flux value sits below one, which is
+exactly why the connectivity test and not the flux value decides it.
 """
 
 from __future__ import annotations
@@ -93,7 +106,7 @@ def classify_domains(
 ) -> DomainMasks:
     """Return the domain partition of one flux map.
 
-    ``closed`` marks cells inside the last-closed-flux-surface cut,
+    ``closed`` marks cells on the plasma side of the boundary flux itself,
     ``connected`` marks cells on the axis side of every X-point, and
     ``inside_material`` marks cells the material boundary encloses. The three
     are combined into a single integer label so no downstream selection can

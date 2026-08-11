@@ -209,14 +209,20 @@ class Topology(Pytree):
     def read(self, psi, polarity, inside_material):
         """Return the domain labels and axis/separatrix state of one flux map.
 
-        The same axis, X-point set and wall-limit read that
-        :meth:`update` performs, published as a labelled domain partition
-        instead of a single ionisation mask: the axis-connected closed cells
-        become the core, the closed cells the X-point cut separates from the
-        axis become the private-flux branch, and the remaining in-material
-        cells become the common scrape-off layer. The core selection is
-        identical to :meth:`update`'s ionisation mask, so both entry points
-        drive current on exactly the same cells.
+        The same axis, X-point set and wall-limit read that :meth:`update`
+        performs, published as a labelled domain partition instead of a single
+        ionisation mask: the axis-connected cells inside the boundary become
+        the core, the cells the X-point cut separates from the axis become the
+        private-flux branch, and the remaining in-material cells become the
+        common scrape-off layer.
+
+        The closed test cuts at the BOUNDARY FLUX itself — the separatrix or
+        the limiting surface the wall read returns — so a cell inside the
+        boundary curve is plasma and the core mask reaches the boundary
+        exactly. :meth:`update` keeps its own ionisation cut a declared
+        fraction inside that surface, which is a guard on a fitted current
+        image and not a statement about where the plasma ends; the two are
+        different questions and no longer the same cells.
         """
         psi_grid, psi_wall = self.split_flux_map(psi)
         vmap_o, vmap_x = self.grid(psi_grid)
@@ -225,10 +231,9 @@ class Topology(Pytree):
         data_w = self.wall(psi_wall, polarity)
         data_b = self.boundary(data_o, vmap_x, data_w, polarity)
         psi_norm = self.normalize(data_o[2], data_b[2], psi_grid)
-        psi_lcfs = self.psi_lcfs(data_o[2], data_b[2])
         masks = classify_domains(
             psi_norm,
-            self.psi_mask(polarity, psi_grid, psi_lcfs),
+            self.psi_mask(polarity, psi_grid, data_b[2]),
             self.x_mask(data_o, vmap_x),
             inside_material,
         )

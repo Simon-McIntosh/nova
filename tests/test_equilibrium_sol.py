@@ -647,6 +647,34 @@ def test_the_open_primitives_integrate_outward_from_the_boundary(domain):
     assert swing <= abs(span) * PRIVATE_SUPPORT * peak
 
 
+def test_the_plasma_reaches_its_boundary_before_any_open_label_starts(diverted):
+    """The core mask extends to the boundary; the open branch starts past it.
+
+    A cell inside the boundary curve is plasma, so the closed test cuts at the
+    boundary flux itself and not a fraction inside it. The check bites on this
+    lattice: fourteen cells sit in the outermost thousandth of the flux span, a
+    band a cut short of the boundary would have handed to the scrape-off label
+    although every one of them lies within the plasma boundary curve.
+    """
+    _lattice, masks, _state = diverted
+    psi_norm = np.asarray(masks.psi_norm)
+    label = np.asarray(masks.label)
+    inside = label != int(PlasmaDomain.EXCLUDED_MATERIAL)
+
+    edge = inside & (psi_norm > 0.999) & (psi_norm <= 1.0)
+    assert edge.sum() > 0, "the lattice must resolve the outermost flux band"
+    assert not np.any(label[edge] == int(PlasmaDomain.COMMON_SOL))
+    assert np.all(np.asarray(masks.psi_norm)[np.asarray(masks.common_sol)] > 1.0)
+    assert np.max(psi_norm[np.asarray(masks.core)]) > 0.999
+
+    # the private-flux branch is removed from the plasma by CONNECTIVITY, not
+    # by its flux value: it sits below one exactly like the core it is cut from
+    private = np.asarray(masks.private_flux)
+    assert np.all(psi_norm[private] <= 1.0)
+    assert np.max(psi_norm[private]) > 0.999
+    assert not np.any(private & np.asarray(masks.core))
+
+
 def test_the_private_flux_branch_is_labelled_and_reached_by_its_own_closure(diverted):
     """The map carries a private-flux pocket and the closure drives it."""
     lattice, masks, state = diverted
@@ -774,6 +802,11 @@ def test_the_continued_solve_reaches_its_fixed_point(continued):
     assert counts[PlasmaDomain.CORE] > 100
     assert counts[PlasmaDomain.COMMON_SOL] > 50
     assert counts[PlasmaDomain.PRIVATE_FLUX] == 0
+    # the continuation acts on cells the partition puts beyond the boundary,
+    # so its domain starts exactly where the plasma stops
+    psi_norm = np.asarray(continued.domains.psi_norm)
+    assert np.all(psi_norm[np.asarray(continued.domains.common_sol)] > 1.0)
+    assert np.all(psi_norm[np.asarray(continued.domains.core)] <= 1.0)
     record = continued.continuation.common_sol
     assert bool(continued.continuation.active)
     assert record.form_name == "hermite_polynomial"

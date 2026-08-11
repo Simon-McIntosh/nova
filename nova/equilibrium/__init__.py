@@ -44,7 +44,11 @@ from nova.equilibrium.diagnostics import (
 )
 
 if TYPE_CHECKING:
-    from nova.equilibrium.conservation import ConservationLedger, FluxLattice
+    from nova.equilibrium.conservation import (
+        ConservationLedger,
+        FluxLattice,
+        FluxMesh,
+    )
     from nova.equilibrium.continuation import (
         ContinuedDomainProfile,
         SeparatrixContinuation,
@@ -75,6 +79,7 @@ if TYPE_CHECKING:
         IsothermalRotation,
         RotatingDomainProfile,
     )
+    from nova.equilibrium.stencil_mesh import StencilMesh
     from nova.equilibrium.source import (
         ContinuationForm,
         ContinuationLedger,
@@ -99,6 +104,7 @@ _DEFERRED_EXPORTS: dict[str, str] = {
     "DomainMasks": "domain",
     "DomainProfile": "source",
     "FluxLattice": "conservation",
+    "FluxMesh": "conservation",
     "FluxSurfaceGeometry": "flux_surface_geometry",
     "ForwardEquilibrium": "forward",
     "ForwardFluxOperator": "forward_operator",
@@ -121,6 +127,7 @@ _DEFERRED_EXPORTS: dict[str, str] = {
     "SeparatrixContinuation": "continuation",
     "SeparatrixContinuity": "source",
     "SeparatrixJumpError": "continuation",
+    "StencilMesh": "stencil_mesh",
     "SurfaceGeometryError": "flux_surface_geometry",
     "source_field_function": "flux_surface_geometry",
 }
@@ -136,6 +143,7 @@ __all__ = [
     "DomainMasks",
     "DomainProfile",
     "FluxLattice",
+    "FluxMesh",
     "FluxSurfaceGeometry",
     "ForwardEquilibrium",
     "ForwardFluxOperator",
@@ -158,6 +166,7 @@ __all__ = [
     "SeparatrixContinuation",
     "SeparatrixContinuity",
     "SeparatrixJumpError",
+    "StencilMesh",
     "SurfaceGeometryError",
     "decay_index",
     "shafranov_vertical_field",

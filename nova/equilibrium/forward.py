@@ -56,6 +56,7 @@ from nova.equilibrium import fixed_point
 from nova.equilibrium.conservation import (
     ConservationLedger,
     FluxLattice,
+    FluxMesh,
     conservation_ledger,
     poloidal_field,
 )
@@ -135,14 +136,21 @@ class ForwardProfile:
     poloidal fluxes, :math:`\\Phi = 2 \\pi R A_\\phi` in Wb, concatenated over
     the plasma grid nodes followed by the wall nodes.
 
-    ``lattice`` is the structured node lattice the plasma grid is carried on.
-    It is required rather than optional because the conservation and integral
-    receipts are differentiated on it; a solve that cannot produce its
-    receipts is not the capability this class publishes.
+    ``lattice`` is the mesh the plasma grid is carried on, meeting the
+    :class:`~nova.equilibrium.conservation.FluxMesh` contract: a uniform
+    :class:`~nova.equilibrium.conservation.FluxLattice` for a structured
+    raster, or a :class:`~nova.equilibrium.stencil_mesh.StencilMesh` for the
+    offset, wall-trimmed hexagonal tiling the package ships. It is required
+    rather than optional because the conservation and integral receipts are
+    differentiated on it; a solve that cannot produce its receipts is not the
+    capability this class publishes. Nothing else in the solve reads it — the
+    map, the ladder and the domain partition are already mesh-agnostic — so
+    the mesh kind changes which stencil the receipts are formed on and
+    nothing about the equilibrium that is found.
     """
 
     operator: ForwardFluxOperator
-    lattice: FluxLattice
+    lattice: FluxMesh
     evaluations: int = 60
     relaxation: float = 0.5
     newton_steps: int = 4

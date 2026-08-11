@@ -21,11 +21,14 @@
   <title>Conditioning Audit of Every Biot Element | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-09">
-<meta name="plan-version" content="2">
+<meta name="plan-modified" content="2026-08-11">
+<meta name="plan-version" content="4">
+<meta name="plan-impl" content="0.8">
 </head>
 <body>
   <main class="plan-doc">
+
+    <p><span class="badge badge-shipped">✓ §1 faults closed, §2 audit landed 2026-08-11</span> — six waves merged (<code>4ed5fcd1</code>, <code>25435a82</code>, <code>f13aaa02</code>, <code>21b0f0bd</code>, <code>5520ee3c</code>, <code>5c410d01</code>): K−E now 1.4e-16 at k² ~ 1e-9 (was 1e-3), the B_R mask deleted with brackets held before evaluation, and every registry element carrying a worst-regime figure against an independent arbiter. Suite 4737 passed / 2 known pre-existing failures. The §1 citations of <code>greens.py:220</code> and <code>_R_FLOOR</code> below describe code removed by the first wave; the red rows in the figure are closed. Full record with the decision-relevant measurements: <a href="/nova/evidence/archive/biot-element-conditioning-landed">cumulative evidence</a>. Open: the two §3/§4 decisions (the code ships exact-everywhere source and the hybrid target rule pending ratification) and followups f-bec-002/f-bec-003.</p>
 
     <h2 id="s1">§1 — Why: three measured losses, and one that raises a warning</h2>
 
@@ -220,7 +223,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-bec-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-09" data-recommends-skill="/reckon-ship biot-element-conditioning §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-bec-001" data-status="resolved" data-written-by="reckon-create" data-written-at="2026-08-09" data-recommends-skill="/reckon-ship biot-element-conditioning §2" data-resolved-at="2026-08-11T04:07:30+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Fix the two known bracket faults, then sweep the element set</h4>
     <div class="r-fu-body"><p>Two sites are already identified with evidence: the <code>K − E</code> bracket, where both special-function routes lose digits together at small <code>k²</code>, and the <code>B_R</code> bracket at <code>greens.py:220</code>, which forms <code>inf + (−inf)</code> at the coincident limit and masks the NaN afterwards. Fix those two by the rearrangement the same file already documents for its sibling bracket, which establishes the method, then apply the pass to the rest of the registry.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -264,6 +267,17 @@ Done-when
      against an independent arbiter, and a test holding it.
   3. Full suite green; findings that warrant their own fix are queued; followup
      written and this one resolved.</pre>
+    <p class="r-fu-outcome">Both seeded faults closed in the conditioned-elements wave (4ed5fcd1) by rearrangement with pinning tests: K−E now 1.4e-16 at k²~1e-9 vs mpmath 120 dps (was 1e-3 of field scale); _R_FLOOR deleted, brackets held before evaluation, warning gone under -W error. Every §2 registry element and kernel carries a recorded worst-regime figure against an independent arbiter with a holding test — two stated qualifications (bow lacks a code-path-independent arbiter; the 50:1 slender rectangle is unpinned pending an edge-aligned arbiter). Suite green: 4737 passed / 2 known pre-existing MAST failures. Full record: /nova/evidence/archive/biot-element-conditioning-landed</p>
+    </article>
+<article class="r-fu" data-id="f-bec-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-11T04:30:00+00:00" data-recommends-skill="/reckon-ship biot-element-conditioning §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Remove the four-corner amplification by a closed-form pole split</h4>
+    <div class="r-fu-body"><p>The rectangle corner rule's section value is a second difference whose widest corner term exceeds it by up to 3.4e4 (slender sections), capping precision at eps×ratio. The per-term rearrangement was measured and ruled out; the working fix takes the third-kind pole moments' divergent part off against the boundary angle in closed form, needing the exact large-|n| behaviour of all three characteristics. Gate: the mpmath target-side fan arbiter.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship biot-element-conditioning §2</pre>
+    </article>
+<article class="r-fu" data-id="f-bec-003" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-11T04:30:00+00:00" data-recommends-skill="/reckon-ship biot-element-conditioning §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Close the audit residuals: bow arbiter, slender-section pin, and the §4 measurements</h4>
+    <div class="r-fu-body"><p>Five bounded measurements complete the record: a code-path-independent arbiter for bow; an edge-aligned decomposition so the slender rectangle section pins against extended precision; the §4 cost-at-equal-accuracy comparison (benchmarks/coil_section_cost.py exists, no output survives); a hexagonal-section target-rule convergence figure against the double-integral arbiter; and a post-change measurement of §1's 4.32e-04 self-inductance diagonal residual.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship biot-element-conditioning §4</pre>
     </article>
 </section>
 

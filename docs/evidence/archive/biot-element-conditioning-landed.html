@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova"><meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="biot-element-conditioning-landed">
+  <meta name="plan-title" content="Biot Element Conditioning — Cumulative Evidence">
+  <meta name="plan-summary" content="Reconstructed landed record of the six conditioning waves: seeded-fault closures, per-element worst-regime accuracy against independent arbiters, and the measured data bearing on the source-route and target-rule decisions">
+  <meta name="plan-status" content="active">
+  <meta name="plan-evidence-for" content="biot-element-conditioning">
+  <meta name="plan-verifies" content="biot-element-conditioning#s1,biot-element-conditioning#s2">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>Biot Element Conditioning — Cumulative Evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css"><link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+
+  <p>Six integration waves landed on <code>main</code> (2026-08-09/11). Waves 1–5 were merged by a prior orchestration that recorded nothing back to the plan; this record was reconstructed from the merge diffs, the tests' own recorded measurements and docstrings, two surviving verifier logs, and the rectangle wave's full manifest. All 29 branch commit messages have empty bodies — every mechanism statement below is read from shipped source, not quoted from a commit.</p>
+
+  <h2 id="waves">The six waves</h2>
+  <table><thead><tr><th>#</th><th>Merge</th><th>Scope</th><th>Files</th><th>+/−</th></tr></thead><tbody>
+    <tr><td>1</td><td><code>4ed5fcd1</code></td><td>Conditioned Biot elements — the bulk of the §2 audit; 19 commits, 112 tests across 22 files</td><td>54</td><td>+6821/−1319</td></tr>
+    <tr><td>2</td><td><code>25435a82</code></td><td>Conditioned elliptic limits (complete/incomplete/symmetric elliptic, moments)</td><td>11</td><td>+1047/−238</td></tr>
+    <tr><td>3</td><td><code>f13aaa02</code></td><td>Conditioned toroidal limits (arcamplitude, toroidalharmonic)</td><td>4</td><td>+819/−96</td></tr>
+    <tr><td>4</td><td><code>21b0f0bd</code></td><td>Documentation aligned to the landed routes; two stale benchmark projections withdrawn rather than restated</td><td>3</td><td>+67/−52</td></tr>
+    <tr><td>5</td><td><code>5520ee3c</code></td><td>Coupling repair: reverse-mode accumulation, ψ-gradient rearrangement, Circle permeability coherence, jax import guard</td><td>8</td><td>+163/−56</td></tr>
+    <tr><td>6</td><td><code>5c410d01</code> + <code>ec0627cd</code></td><td>Rectangle-section routing through the canonical kernel; inherited quadrature replacement evaluated and rejected on measurement; frame exception-syntax repair</td><td>3</td><td>+254/−41</td></tr>
+  </tbody></table>
+
+  <h2 id="seeded-faults">Both §1 seeded faults closed (wave 1), pinned, warning gone</h2>
+  <table><thead><tr><th>Fault</th><th>Mechanism (rearrangement, no added nodes)</th><th>Figure</th></tr></thead><tbody>
+    <tr><td>K − E at small k²</td><td><code>_filament_elliptic_combinations</code>: descending Landen step through k² = 15/16, then exactly derived rational series (40 Horner terms); <code>greens_psi</code>/<code>greens_bz_br</code> consume the three cancellation-free combinations</td><td><strong>1.4e-16 at k² ~ 1e-9</strong> vs mpmath 120 dps — against the plan's measured 1e-3 of field scale; subnormal parameters exact on the host</td></tr>
+    <tr><td>B_R at gap → 0</td><td><code>_R_FLOOR</code> deleted; <code>held_gap</code>/<code>held_complement</code> formed before <code>ellipkm1</code> and before division; the on-filament singularity (<code>psi=inf, br=nan, bz=nan</code>) is assigned as the public contract, never computed</td><td>clean under <code>warnings.simplefilter("error")</code> and <code>np.errstate(all="raise")</code> on the filament, one ulp either side, radii 0.9/1.0/6.2/12.0, 40-point sweep R = 1e-12→1e-3; one unrelated C-extension warning in 916 s of full-lane output</td></tr>
+  </tbody></table>
+  <p>Plan correction recorded: §1's live-warning paragraph and its <code>greens.py:220</code> / <code>_R_FLOOR</code> citation describe code deleted in wave 1; both §1 red rows close with the figures above.</p>
+
+  <h2 id="coverage">Element-registry coverage (§2 contract)</h2>
+  <p><code>Solve.generator</code> on <code>main</code> is exactly §2's nine elements. Every element and kernel carries a recorded worst-regime figure and a holding test; the two qualifications follow the tables.</p>
+  <table><thead><tr><th>Element</th><th>Wave</th><th>Worst-regime figure</th><th>Arbiter</th></tr></thead><tbody>
+    <tr><td>arc</td><td>1</td><td>printed rs²−r² 0.35 → factored 7.2e-17; assembled quarter-turn row 4.1e-06 → 4.4e-16; K<sub>inc</sub> 2.5e-12, E<sub>inc</sub> 2.6e-15; same-ring excluded span 5e-12</td><td>high-precision reference; closed elementary limit; rigid-motion invariance</td></tr>
+    <tr><td>beam</td><td>1</td><td>4.1e-13 far / 1.5e-13 near</td><td>converged independent section quadrature (self-convergence 5.3e-15)</td></tr>
+    <tr><td>bow</td><td>1</td><td>4.9e-09 vs PolyBow; 8.9e-15/1.1e-14 vs PolyBeam; 4/3 and 4/π overstatements pinned at 2e-3/3e-3</td><td>sibling kernels + analytic area ratios — <em>not code-path independent</em> (qualification 1)</td></tr>
+    <tr><td>circle</td><td>1, 5</td><td>band seams 8.6e-04 worst; tiling sums to the section integral 3.7e-06; mutual 8.8e-06 H inside the 1.94-radius band</td><td>whole-section double integral; CODATA mutual inductance</td></tr>
+    <tr><td>cylinder</td><td>6</td><td>2.9e-12 (0.020×0.020 ψ), 4.25e-13 compact; axis 1e-13</td><td>mpmath 40 dps target-side fan; independent 24×24 on-axis Gauss rule</td></tr>
+    <tr><td>line</td><td>1</td><td>2e-16 exterior axis; 3e-15 near interior; 2e-9 far/rotated</td><td>decimal.Decimal; direct quadrature</td></tr>
+    <tr><td>polybeam</td><td>1</td><td>4.1e-13; swept→prism 8.0e-05 at radius 1e3 (first order in 1/R, ratio 9.9–10.0)</td><td>converged section quadrature; straight-prism limit</td></tr>
+    <tr><td>polybow</td><td>1</td><td>7.8e-11 hollow skin; 3.0e-11 by row; 4.4e-16 section corners</td><td>packed kernel + direct annulus integral</td></tr>
+    <tr><td>polysection</td><td>1</td><td>tiled vs host 2e-12; hollow 3e-13; shipped default bit-identical to <code>polygon_analytic_greens</code></td><td>host route; closed form; <code>averaged_greens</code></td></tr>
+  </tbody></table>
+  <table><thead><tr><th>Kernel</th><th>Wave</th><th>Worst-regime figure</th><th>Arbiter</th></tr></thead><tbody>
+    <tr><td>greens</td><td>1, 6</td><td>K−E 1.4e-16 at k²=1e-9; rectangle section 2.9e-12; host subnormals exact</td><td>mpmath 120 dps; mpmath 40 dps fan; longdouble</td></tr>
+    <tr><td>polygon</td><td>1, 5</td><td>1e-10 vs cylinder; axis rows exact (rtol=0, atol=0); Ampère 1e-6</td><td>cylinder kernel; Ampère's law</td></tr>
+    <tr><td>polygonanalytic</td><td>1</td><td>2e-3 vs rectangle kernel; 1e-11 packed-vs-host; 2e-9 axis tangents</td><td>rectangle kernel; converged edge quadrature (self-convergence 1e-12)</td></tr>
+    <tr><td>completeelliptic</td><td>2</td><td>4 eps first kind over the whole double range; 8 eps second; 1e-13 third; second-kind derivative degradation recorded (4 eps → 1e-9 as k′²→1e-8), not absorbed</td><td>longdouble AGM on the complement; longdouble hypergeometric; small-k′ expansion; scipy Carlson in the positive arrangement</td></tr>
+    <tr><td>incompleteelliptic</td><td>2</td><td>2.2e-15 compiled third kind; 8e-16 arc-end corner; denormal partner's lost lane bounded 1e-7…1e-4 in both directions</td><td>longdouble defining integral on a composite sinh map; the complete routine at a quarter turn</td></tr>
+    <tr><td>incompletemoments</td><td>1, 2</td><td>5e-13 pole family; 5e-14 plain/root; direction switch shown necessary from both sides</td><td>longdouble defining integral (self-convergence 1e-15)</td></tr>
+    <tr><td>symmetricelliptic</td><td>2</td><td>1e-14 traced; 4e-15 degenerate form</td><td>scipy elliprf/elliprj, ties broken in longdouble</td></tr>
+    <tr><td>elliptic</td><td>2</td><td>1e-10 pole moment; 4e-16 unit-parameter complement range</td><td>decimal.Decimal at prec 120 / 320</td></tr>
+    <tr><td>zeta</td><td>1</td><td>1e-12 over the whole reduced scan; live 1.84e-15 vs adaptive; float64 dtype gap 1.6e-16 vs float32's 5.3e-08</td><td>tanh-sinh two refinement levels beyond production, cross-validated against adaptive quadrature</td></tr>
+    <tr><td>arcamplitude</td><td>3</td><td>2e-15 winding shift; 1e-14 host/device JVP</td><td>analytic winding identities; finite differences</td></tr>
+    <tr><td>toroidalharmonic</td><td>3</td><td>1.0e-9 at the published radial boundary (the worst regime); 5.0e-13 large-argument ladders; cosh-gap domain published as an accuracy domain, not a replacement value</td><td>hundred-decimal reference</td></tr>
+    <tr><td>sectionaverage</td><td>1</td><td>7.8e-06 at aspect 1 degrading to 6.0e-04 at aspect 10 — an order loss recorded as a number</td><td>brute-force double integral; published ring inductance</td></tr>
+    <tr><td>bandedcoupling (+arc)</td><td>1</td><td>1.0e-6 per component beyond the near band; seams ≤1.6e-7; 3e-11 inside; measured for both near-band kernels</td><td>the exact lane; the ring reduction</td></tr>
+  </tbody></table>
+  <p><strong>Qualifications, stated not waived:</strong> (1) <code>bow</code> has no arbiter free of a shared code path — its independent statements pin the documented 4/3 and 4/π overstatements, not its accuracy; (2) the slender 0.002×0.100 rectangle section is unpinned against extended precision because the fan arbiter degenerates at 50:1 aspect (covered instead by the four-corner amplification law; fix scoped: an edge-aligned decomposition).</p>
+
+  <h2 id="wave6">Wave 6 verdict and the new arrangement fault</h2>
+  <p>The inherited ~1050-line quadrature replacement of the rectangle kernel was evaluated and <strong>rejected on measurement</strong>: route gap 8.7e-13…3.5e-12 (indistinguishable from the closed form's own distance to extended precision), cost 81×/125× in interior/near regimes (per-pair Python dispatch replacing one vectorised elliptic pass), a traced route that compared the kernel against itself, and a pinned NaN-Jacobian contract. The salvage: <code>Cylinder</code> now routes through the canonical kernel (duplicate four-corner rule deleted; on-axis limit gained; μ₀ coherence — a +1.3203e-10 pure-permeability shift, reported; axis <code>nan</code> → finite). <strong>New fault, measured and mechanism-attributed:</strong> the four-corner combination amplifies the widest corner term by 9.4e2/1.5e4/3.4e4 (compact/small/slender), so achievable precision is eps×ratio; the per-term rearrangement was measured and ruled out; the working fix (closed-form removal of the third-kind pole moments' divergent part against <code>cphi</code>) is scoped with the mpmath fan as its gate. This amplification is a conditioning argument for the polygon route over the corner rule on slender sections.</p>
+
+  <h2 id="decision-data">Measured data for the two open decisions</h2>
+  <h3>source-route-default</h3>
+  <p>The code already ships the position: the product default is the <em>exact closed-form polygon source</em>; banded/standoff/filament/quadrature-ring are immutable <code>PolySectionPolicy</code> identities in the cache key (pinned by tests). The decision as posed is a ratification. Cost per pair (hexagon): boundary quadrature 858–869 µs, <strong>closed form 162.9 µs</strong> (5.2× cheaper than quadrature), three-band 31.5 µs, filament 3.7 µs; whole 2339-cell grid: 274.5 s quadrature / 54.5 s closed form / 19.2–36.4 s banded / 1.2 s filament. Accuracy: at the worst real-grid pair the shipped (16,48) quadrature is 2.9e-03 out on B_Z and converges to the closed form on refinement (2.1e-12 at 1024 panels) — the closed form is the more accurate lane as well as the cheaper. Banded lands 30–60× inside its 1e-6 gate at 66× lower cost. GPU: on one H200 the closed form costs what the quadrature costs for one-to-two orders more accuracy; no eight-device figure exists (the projection was withdrawn), so a banded-after-gpu choice has no number to condition on.</p>
+  <h3>target-rule</h3>
+  <p>Wave 1 landed the section quadrature as the shipped default for <em>linked flux</em> and left <em>force</em> on uniform subdivision — the <code>hybrid</code> option as written (<code>TargetQuadraturePolicy(rule="positive_material", order=3)</code>, 9 nodes/triangle, frozen into the CoilSet cache identity; force target pinned unchanged). Measured against the whole-section double integral: reduced-inductance drift &lt; 5e-5 across dcoil −2/−5/−20 where the banded lane stays &gt; 1e-4; mutual terms &lt; 5e-4 (banded &gt; 5× worse); reciprocity asymmetry driven monotonically below 1e-9 of matrix scale by order 1→4; identity preservation (turn ownership, hollow voids, clipped cells, plasma block) all pinned. Missing for full ratification: the §4 cost-at-equal-accuracy comparison (the benchmark driver exists; no recorded output survives), a hexagonal-target convergence figure, and a post-change measurement of §1's 4.32e-04 self-inductance diagonal (the tests deliberately do not assert on the diagonal).</p>
+
+  <h2 id="lane">Suite status and residual record</h2>
+  <p>Latest full lane (wave 6, SLURM sun_debug): 4737 passed / 121 skipped / 3 xfailed / 2 failed vs a 4728-passed base — +9, no new failure; both failures are the pre-existing MAST packaged-registry probe-angle items. Three strict xfails stand, each now naming its mechanism and measured ratio (the four-corner amplification and the far-section-average refinement). Queued follow-on: the pole-moment closed-form split. Reconstruction gaps recorded: empty commit-message bodies throughout; 22 of 24 verifier worktrees kept no logs; four surviving greens4 logs measure the rejected candidate kernel (only their zeta and elliptic-point rows are live); no per-wave whole-suite lane counts for waves 1–5.</p>
+
+</main></body>
+</html>

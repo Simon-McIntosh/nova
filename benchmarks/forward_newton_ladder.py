@@ -23,18 +23,24 @@ where the read goes
 what a lagged topology buys
     The domain labels are frozen through a solve on the reference case, which
     makes the map a smooth function of the flux alone and admits a plain
-    Newton step with a directly formed Jacobian. Two ways of forming it are
-    measured against each other: differentiating the frozen map in forward
-    mode over every direction, and writing the Jacobian down. With the labels
-    frozen the cell current is local in normalised flux and couples globally
-    only through the two scalars the normalisation is built from, so
+    Newton step. With the labels frozen the cell current is local in normalised
+    flux and couples globally only through the two scalars the normalisation is
+    built from, so the Jacobian is diagonal plus rank two under the coupling,
 
         I - J = I - C (D + u a^T + v b^T),
 
     with ``C`` the plasma coupling, ``D`` diagonal, and ``a``, ``b`` the
-    gradients of the fitted axis and boundary flux. That structure also
-    reduces the solved system from one unknown per node to one per cell the
-    source drives, plus two.
+    gradients of the fitted axis and boundary flux. Two ways of obtaining it
+    are timed against each other -- differentiating the frozen map in forward
+    mode over every direction, and writing it down -- and checked against each
+    other value for value, because a structured Jacobian that is merely fast is
+    not a Jacobian. Three linear steps then run on it: a dense factorisation, a
+    reduced one over the cells the source drives plus two, and a Krylov solve
+    that applies the same structure without factorising anything.
+
+Separating a fast route from a fast read needs one more arm than the question
+suggests, so the shipped ladder is also driven through the vectorised read. A
+speedup available to either route belongs to neither.
 
 Every prototype lives in this file. Nothing in the package is changed by it,
 and the converged flux is required to match the shipped route's within the

@@ -4,22 +4,24 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="nova">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="forward-profile-validator-set">
-  <meta name="plan-title"     content="Forward Profile Validator Set">
-  <meta name="plan-summary"   content="Copy the code-match cross-section of the imas-efit GHCR equilibrium store, pinned by digest, and build a banded reference-validation lane for the ForwardProfile prescribed-source solve">
-  <meta name="plan-status"    content="draft">
-  <meta name="plan-roi"       content="high">
-  <meta name="plan-effort"    content="M">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="forward-profile-validator-set">
+  <meta name="plan-title" content="Forward Profile Validator Set">
+  <meta name="plan-summary" content="Copy the code-match cross-section of the imas-efit GHCR equilibrium store, pinned by digest, and build a banded reference-validation lane for the ForwardProfile prescribed-source solve">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="M">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
   <meta name="plan-capability-verification" content="strict">
-  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-depends-on" content="">
   <title>Forward Profile Validator Set | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-11">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
@@ -47,35 +49,35 @@
     <p>Rungs, each independently landable: (1) the fetch shim + pinned manifest + analytic smoke rung; (2) CORSICA 130506 end-to-end — fetch, build the machine from the input bundle's own IDSs, solve all four slices under the shipped defaults, gate at the adapted LOOSE band, land figures; (3) DINA 105027 and ASTRA 131046 (the 256×257 reference is the resolution contrast); (4) the band-tightening study — where nova's deviations sit against LOOSE/MEDIUM per quantity, and which quantities can promote (the existing 135011/7 module's tolerances already sit between the two); (5) optional breadth per the open decision. This plan copies data and builds gates; it does not modify the solve (deviations become findings, not tuning), does not consume experimental reconstructions, does not republish anything to GHCR, and does not port imas-efit's comparator code wholesale — the bands and structural rules are re-derived in nova's own test idiom with the receipts alongside.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="store-strategy" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">How does nova reference the equilibria? Recommendation: consume the imas-efit store by pinned layer digest now; revisit a nova-owned content-addressed store only if redistribution consent is obtained and the imas-efit tag proves unstable.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="consume-by-digest">consume imas-efit layers by digest</button>
-          <button class="r-opt" data-value="recurate-from-upstream">re-curate from the upstream imasdb areas</button>
-          <button class="r-opt" data-value="republish-content-addressed">republish to a nova-owned content-addressed store</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="cross-section-breadth" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Does the first landing include a second machine? Recommendation: land the ITER trio first; add the TCV DINA pair as rung 5 once the gates are proven, for the machine-scale contrast.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="iter-trio-only">ITER trio + analytic only</button>
-          <button class="r-opt" data-value="add-tcv">add the TCV DINA pair</button>
-          <button class="r-opt" data-value="add-tcv-and-dina3420">add TCV and the dina3420 ramp-up set</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="store-strategy" data-choice="republish-content-addressed" data-by="user" data-when="2026-08-11 07:00">
+    <p class="r-dec-q">How does nova reference the equilibria? Recommendation: consume the imas-efit store by pinned layer digest now; revisit a nova-owned content-addressed store only if redistribution consent is obtained and the imas-efit tag proves unstable.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="consume-by-digest">consume imas-efit layers by digest</button>
+      <button class="r-opt" data-value="recurate-from-upstream">re-curate from the upstream imasdb areas</button>
+      <button class="r-opt chosen" data-value="republish-content-addressed">republish to a nova-owned content-addressed store</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="cross-section-breadth" data-choice="" data-by="user" data-when="2026-08-11 07:04">
+    <p class="r-dec-q">Does the first landing include a second machine? Recommendation: land the ITER trio first; add the TCV DINA pair as rung 5 once the gates are proven, for the machine-scale contrast.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="iter-trio-only">ITER trio + analytic only</button>
+      <button class="r-opt" data-value="add-tcv">add the TCV DINA pair</button>
+      <button class="r-opt" data-value="add-tcv-and-dina3420">add TCV and the dina3420 ramp-up set</button>
+      </p>
+    <p class="r-dec-rat">extend to all other supported machines and codes. we should run a validate run on a mid-rampup and flat-top slice for every variant. The nova coilset should be built from the source IDSs that the validators specify but can and should be cached locally. for the reconstruction validations remember that we are not validating the reconstruction (from mesurments), we are validating forwardprofile based on what the reconstruction code returned, this is a far easier problem and lets us validate the code correctness without any inference. this also widens our scope well beyond the ITER only cases, this is great. We use imas-python to load the data, it should handle maps automatically, but we need to be very careful with the transformations between versions to ensure that no data that we rely on is lost. the validators then serve a dual purpose, the verify the DDv3 load path at the same time as the forwardprofile reconstruction.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-fpv-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-11" data-recommends-skill="/reckon-ship forward-profile-validator-set §5" data-resolved-at="" data-resolved-by="">
-        <h4 class="r-fu-title">Land the fetch shim, the pinned manifest, and the CORSICA rung</h4>
-        <div class="r-fu-body"><p>Rungs 1 and 2 of §5: the digest-pinned fetch module with its availability gate and the analytic smoke case, then CORSICA 130506 solved end-to-end at all four slices under the adapted LOOSE band with the per-case figures. The two §&nbsp;Decisions should be locked (or explicitly defaulted to the recommendations) before rung 3 broadens the set.</p></div>
-        <pre class="r-fu-prompt">/reckon-ship forward-profile-validator-set §5</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-fpv-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-11" data-recommends-skill="/reckon-ship forward-profile-validator-set §5" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Land the fetch shim, the pinned manifest, and the CORSICA rung</h4>
+    <div class="r-fu-body"><p>Rungs 1 and 2 of §5: the digest-pinned fetch module with its availability gate and the analytic smoke case, then CORSICA 130506 solved end-to-end at all four slices under the adapted LOOSE band with the per-case figures. The two § Decisions should be locked (or explicitly defaulted to the recommendations) before rung 3 broadens the set.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship forward-profile-validator-set §5</pre>
+    </article>
+</section>
 
   </main>
 </body>

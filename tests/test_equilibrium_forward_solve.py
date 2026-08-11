@@ -39,6 +39,8 @@ the current ledger's declared support, and the conservation receipts.
 
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 import numpy as np
 import pytest
 from scipy.constants import mu_0
@@ -272,8 +274,16 @@ def _normalisation_quantum(profile, equilibrium):
     the source is normalised against lands on that dtype's ladder. The step
     of that ladder at this equilibrium's axis flux is the finest flux
     difference the normalisation itself can express.
+
+    The step is read on the magnitude of that flux. ``np.spacing`` carries
+    the sign of its argument, and the sign of an axis flux is set by the
+    plasma current direction and the flux convention, not by anything about
+    the resolution: a machine sitting on a negative axis flux would return a
+    negative quantum, which loses every ``max`` against the coupling sum and
+    inverts each comparison written against the resolution. The ladder is
+    symmetric about zero, so stepping the magnitude gives the same distance.
     """
-    axis_flux = float(equilibrium.topology.axis_flux)
+    axis_flux = abs(float(equilibrium.topology.axis_flux))
     return float(np.spacing(_fit_dtype(profile).type(axis_flux)))
 
 
@@ -374,6 +384,52 @@ def test_the_host_iteration_reproduces_the_traced_ladder(machine, converged):
     assert type(host.fixed_point) is type(traced.fixed_point)
     assert type(host.conservation) is type(traced.conservation)
     assert type(host.domains) is type(traced.domains)
+
+
+def _resolution_stub(fit_dtype, axis_flux, node_number=1):
+    """Return the smallest profile/equilibrium pair the resolution read touches.
+
+    The two floors are derived from a fit dtype, an axis flux and a node
+    count alone, so the sign handling can be pinned without solving anything.
+    """
+    grid = SimpleNamespace(
+        null=SimpleNamespace(fit_dtype=fit_dtype), node_number=node_number
+    )
+    profile = SimpleNamespace(operator=SimpleNamespace(grid=grid))
+    equilibrium = SimpleNamespace(topology=SimpleNamespace(axis_flux=axis_flux))
+    return profile, equilibrium
+
+
+@pytest.mark.parametrize("fit_dtype", ["float32", "float64"])
+def test_the_flux_resolution_is_a_magnitude_on_either_axis_flux_sign(fit_dtype):
+    """A sign-flipped axis flux leaves both floors, and their max, unchanged.
+
+    The fixture below carries a positive axis flux, but the sign is a
+    convention: reference machines with a negative axis flux are ordinary.
+    ``np.spacing`` carries the sign of its argument, so reading the ladder
+    step off a signed flux would hand back a negative quantum on exactly
+    those machines — it would lose the ``max`` against the coupling sum and
+    invert every comparison written against the resolution.
+    """
+    flux = 1.5
+    step = float(np.spacing(np.dtype(fit_dtype).type(flux)))
+    for sign in (1.0, -1.0):
+        quantum = _normalisation_quantum(*_resolution_stub(fit_dtype, sign * flux))
+        assert quantum == step > 0.0, sign
+
+    # this node count puts the coupling sum below a float32 ladder step and
+    # above a float64 one, so the two fits bind on opposite floors and a
+    # sign-flipped quantum would be visible in either direction
+    scale = 1.0
+    nodes = 4096
+    accumulation = nodes * float(np.spacing(scale))
+    binding = step if fit_dtype == "float32" else accumulation
+    assert (step > accumulation) == (fit_dtype == "float32")
+    for sign in (1.0, -1.0):
+        resolution = _flux_resolution(
+            *_resolution_stub(fit_dtype, sign * flux, node_number=nodes), scale
+        )
+        assert resolution == binding, sign
 
 
 def test_the_relaxed_iteration_floors_at_the_flux_resolution(

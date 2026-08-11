@@ -884,13 +884,19 @@ def run_measurement(arguments) -> dict[str, Any]:
 
     if "latency" in stages:
         record["latency"] = measure_latency(bundle, operator)
-        print("latency %.4f s" % record["latency"]["latency_seconds"]["median"])
+        print(
+            "latency %.4f s" % record["latency"]["latency_seconds"]["median"],
+            flush=True,
+        )
     if "batch" in stages:
         widths = tuple(int(item) for item in arguments.batch.split(","))
         record["batch"] = measure_batch(bundle, operator, widths)
         for point in record["batch"]:
             if "failed" in point:
-                print("batch %d FAILED %s" % (point["members"], point["failed"]))
+                print(
+                    "batch %d FAILED %s" % (point["members"], point["failed"]),
+                    flush=True,
+                )
             else:
                 print(
                     "batch %d %.2f solves/s"
@@ -904,10 +910,13 @@ def run_measurement(arguments) -> dict[str, Any]:
                 usable, key=lambda point: point["solves_per_second"], default={}
             ).get("members", 0)
         record["breakdown"] = measure_breakdown(bundle, operator, saturation)
-        print("breakdown map %.6f s" % record["breakdown"]["single"]["map_evaluation"])
+        print(
+            "breakdown map %.6f s" % record["breakdown"]["single"]["map_evaluation"],
+            flush=True,
+        )
     if "ceiling" in stages:
         record["ceiling"] = measure_kernel_ceiling(KERNEL_ORDERS, KERNEL_WIDTHS)
-        print("ceiling rows %d" % len(record["ceiling"]))
+        print("ceiling rows %d" % len(record["ceiling"]), flush=True)
 
     record["headroom"] = summarise_headroom(record)
     return record
@@ -1011,8 +1020,18 @@ def configure_compilation_cache(request: str | None):
 # --------------------------------------------------------------------------
 # the figure
 # --------------------------------------------------------------------------
-def render_figure(records: list[dict[str, Any]], output: Path) -> None:
-    """Write the throughput scaling and its time attribution."""
+def render_figure(
+    records: list[dict[str, Any]],
+    output: Path,
+    baselines: list[dict[str, Any]] | None = None,
+) -> None:
+    """Write the throughput scaling and its time attribution.
+
+    A baseline record contributes one horizontal rate per cell count. Drawing
+    it against the same axis is what makes the comparison answerable: the
+    accelerator only repays its own latency once enough members are in flight,
+    and the crossing is where that happens.
+    """
     import matplotlib
 
     matplotlib.use("Agg")
@@ -1022,6 +1041,29 @@ def render_figure(records: list[dict[str, Any]], output: Path) -> None:
         1, 2, figsize=(11.0, 4.4), gridspec_kw={"width_ratios": (1.32, 1.0)}
     )
     palette = ("#1f77b4", "#d62728", "#2ca02c", "#9467bd")
+
+    for index, record in enumerate(
+        sorted(baselines or [], key=lambda item: item["cells"])
+    ):
+        latency = record.get("latency")
+        if not latency:
+            continue
+        left.axhline(
+            latency["solves_per_second"],
+            color=palette[index % len(palette)],
+            linestyle="--",
+            linewidth=1.2,
+            alpha=0.75,
+        )
+        left.annotate(
+            "one host node, %d cells" % record["cells"],
+            xy=(1.0, latency["solves_per_second"]),
+            xytext=(3.0, 3.0),
+            textcoords="offset points",
+            color=palette[index % len(palette)],
+            fontsize=7.5,
+            alpha=0.9,
+        )
 
     annotated = False
     for index, record in enumerate(sorted(records, key=lambda item: item["cells"])):
@@ -1070,6 +1112,19 @@ def render_figure(records: list[dict[str, Any]], output: Path) -> None:
 
     left.set_xscale("log", base=2)
     left.set_yscale("log")
+    # The single-solve rate is annotated below its own line, so the axis needs
+    # room under the slowest point for that label to sit inside the frame.
+    floor = min(
+        (
+            point["solves_per_second"]
+            for record in records
+            for point in record.get("batch", [])
+            if "failed" not in point
+        ),
+        default=None,
+    )
+    if floor:
+        left.set_ylim(bottom=floor / 3.0)
     left.set_xlabel("ensemble members in flight, N")
     left.set_ylabel("solves per second")
     left.set_title("batched forward solve throughput", fontsize=10.5, loc="left")
@@ -1132,7 +1187,7 @@ def render_figure(records: list[dict[str, Any]], output: Path) -> None:
     figure.tight_layout()
     output.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(output, dpi=170)
-    print("wrote", output)
+    print("wrote", output, flush=True)
 
 
 # --------------------------------------------------------------------------
@@ -1159,6 +1214,7 @@ def main(argv: list[str] | None = None) -> int:
 
     draw = commands.add_parser("figure", help="render the throughput figure")
     draw.add_argument("--result", nargs="+", required=True)
+    draw.add_argument("--baseline", nargs="*", default=())
     draw.add_argument("--output", required=True)
 
     arguments = parser.parse_args(argv)
@@ -1189,11 +1245,12 @@ def main(argv: list[str] | None = None) -> int:
         output = Path(arguments.output)
         output.parent.mkdir(parents=True, exist_ok=True)
         output.write_text(json.dumps(record, indent=2, default=str))
-        print("wrote", output)
+        print("wrote", output, flush=True)
         return 0
 
     records = [json.loads(Path(item).read_text()) for item in arguments.result]
-    render_figure(records, Path(arguments.output))
+    baselines = [json.loads(Path(item).read_text()) for item in arguments.baseline]
+    render_figure(records, Path(arguments.output), baselines)
     return 0
 
 

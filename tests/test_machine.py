@@ -19,11 +19,13 @@ import pytest
 from nova.catalog.mast_geometry import EvidenceState, MachineGeometryRegistry
 from nova.frame.coilset import CoilSet
 from nova.imas.machine import (
+    CoilDatabase,
     CrossSection,
     FrameData,
     Outline,
     PoloidalFieldActive,
     TabularGeometryReader,
+    Wall,
 )
 from nova.imas.mast_geometry import (
     DD_VERSION,
@@ -341,3 +343,50 @@ def test_datastore_report_names_missing_level_and_parameter(monkeypatch, tmp_pat
     report = locate(dd_version="3.39.0")
     assert str(imasdb / "iter_md" / "3" / "999999" / "1") in report
     assert "pulse=999999" in report and "run=1" in report
+
+
+@mark["imas"]
+def test_cached_coilset_needs_no_reachable_datastore(monkeypatch, tmp_path):
+    """A cache hit is authoritative; the source is located only on a miss."""
+    monkeypatch.setenv("IMAS_HOME", str(tmp_path))
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "cache"))
+
+    class CachedCoilDatabase(CoilDatabase):
+        """Stand in for a coilset whose cached geometry is already stored."""
+
+        def load(self):
+            """Report a cache hit without touching the store."""
+            return self
+
+        def locate_datastore(self):
+            """Fail the test: a cache hit must never reach for the source."""
+            raise AssertionError("cache hit consulted the datastore")
+
+        def build(self):
+            """Fail the test: a cache hit must never rebuild."""
+            raise AssertionError("cache hit rebuilt the coilset")
+
+    assert CachedCoilDatabase(pulse=999999, run=1, name="pf_active").ids is None
+
+
+@mark["imas"]
+def test_wall_boundary_reports_an_absent_source(monkeypatch, tmp_path):
+    """A cached wall coilset still needs its ids before a boundary is read."""
+    monkeypatch.setenv("IMAS_HOME", str(tmp_path))
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "cache"))
+
+    class CachedWall(Wall):
+        """Stand in for a wall whose meshed geometry is already stored."""
+
+        def load(self):
+            """Report a cache hit without touching the store."""
+            return self
+
+        def build(self):
+            """Fail the test: a cache hit must never rebuild."""
+            raise AssertionError("cache hit rebuilt the wall")
+
+    wall = CachedWall(pulse=999999, run=1, user="public")
+    with pytest.raises(FileNotFoundError) as error:
+        wall.boundary
+    assert str(tmp_path / "shared") in str(error.value)

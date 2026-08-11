@@ -694,10 +694,20 @@ class CoilDatabase(CoilSet, CoilData):
     machine: str = "iter_md"
     ids_node: str = ""
 
-    def get(self, *args, **kwargs):
-        """Return the source IDS, locating an unreachable datastore first."""
-        self.locate_datastore()
-        return super().get(*args, **kwargs)
+    def load_build(self):
+        """Load the cached coilset, locating its source before a rebuild.
+
+        A cached coilset is authoritative on its own, so an unreachable
+        source is an error only once the geometry has to be read back from
+        its IDS. Construction otherwise probes the datastore tolerantly and
+        carries on with no IDS attached.
+        """
+        try:
+            self.load()
+            return
+        except FileNotFoundError, OSError:
+            self.locate_datastore()
+        super().load_build()
 
     def locate_datastore(self):
         """Raise a located error when the machine description path is absent.
@@ -1016,9 +1026,19 @@ class Wall(CoilDatabase):
 
     @cached_property
     def vessel(self):
-        """Return vessel."""
-        # return getattr(self.ids, "description_2d")[0].limiter
-        return getattr(self.ids, "description_2d")[0].vessel  # DDv4
+        """Return vessel.
+
+        The cached coilset holds meshed geometry, not the vessel outline, so a
+        boundary read needs the wall ids itself even when the coilset loaded
+        from cache. Locate the source instead of dereferencing an absent ids.
+        """
+        if self.ids is None:
+            self.locate_datastore()
+            raise ValueError(
+                f"no {self.name!r} ids attached; the vessel outline is read "
+                f"from {self.ids_path!r}"
+            )
+        return self.ids.description_2d[0].vessel  # DDv4
 
     @cached_property
     def contour(self):

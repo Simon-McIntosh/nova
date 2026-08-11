@@ -1315,156 +1315,195 @@ def render_figure(stages: list[dict], newton: list[dict], output: Path) -> None:
     ladder_colour = "#c44e52"
     newton_colour = "#4c72b0"
 
-    # ---- residual ladders ------------------------------------------------
+    # ---- convergence against the currency both routes spend --------------
+    # The x-axis is topology reads rather than iterations, because that is the
+    # stage the whole solve is priced in: the ladder spends one on each primal
+    # map evaluation and none on a tangent pass, while every Newton step inside
+    # one outer read spends none at all.
     reference = max(newton, key=lambda item: item["cells"], default=None)
     if reference is not None:
         trace = np.asarray(reference["ladder_trace"], dtype=float)
-        finite = np.isfinite(trace)
+        measured = trace[np.isfinite(trace)]
         left.semilogy(
-            np.arange(trace.size)[finite],
-            trace[finite],
+            np.arange(1, measured.size + 1),
+            measured,
             "o-",
             color=ladder_colour,
-            markersize=3.0,
+            markersize=3.4,
             linewidth=1.3,
             label="Krylov ladder",
         )
         newton_trace = np.asarray(reference["adaptive"]["trace"], dtype=float)
+        position = []
+        taken = 0
+        for read, entry in enumerate(reference["adaptive"]["outer"]):
+            steps = entry["inner_steps"]
+            position.extend(read + (step + 1) / steps for step in range(steps))
+            taken += steps
+        position = np.asarray(position[: newton_trace.size])
         left.semilogy(
-            np.arange(newton_trace.size),
+            position,
             newton_trace,
             "s-",
             color=newton_colour,
-            markersize=4.0,
+            markersize=4.4,
             linewidth=1.4,
             label="lagged-topology Newton",
         )
-        boundary = 0
-        for entry in reference["adaptive"]["outer"][:-1]:
-            boundary += entry["inner_steps"]
-            left.axvline(boundary - 0.5, color=newton_colour, linewidth=0.7, alpha=0.35)
+        for read in range(1, reference["adaptive"]["outer_reads"]):
+            left.axvline(read, color=newton_colour, linewidth=0.7, alpha=0.3)
         left.annotate(
-            "%d topology reads" % reference["adaptive"]["outer_reads"],
-            xy=(newton_trace.size, newton_trace[-1]),
-            xytext=(-6.0, 14.0),
+            "%d reads,\n%d Newton steps"
+            % (reference["adaptive"]["outer_reads"], taken),
+            xy=(position[-1], newton_trace[-1]),
+            xytext=(14.0, -4.0),
             textcoords="offset points",
             color=newton_colour,
             fontsize=8.5,
+            arrowprops={"arrowstyle": "-", "color": newton_colour, "linewidth": 0.8},
+        )
+        left.annotate(
+            "%d reads to the same floor" % measured.size,
+            xy=(measured.size, measured[-1]),
+            xytext=(-2.0, 16.0),
+            textcoords="offset points",
+            color=ladder_colour,
+            fontsize=8.5,
             ha="right",
         )
-        left.set_xlabel("map evaluations")
+        left.set_xlabel("topology reads consumed")
         left.set_ylabel("relative fixed-point residual")
         left.set_title(
             "convergence, %d cells" % reference["cells"], fontsize=10.5, loc="left"
         )
-        left.legend(frameon=False, fontsize=8.5)
+        left.legend(frameon=False, fontsize=8.5, loc="upper right")
 
-    # ---- where the read goes --------------------------------------------
-    stage_reference = max(
-        (item for item in stages if item.get("device", {}).get("platform") == "gpu"),
-        key=lambda item: item["cells"],
-        default=max(stages, key=lambda item: item["cells"], default=None),
+    # ---- where the read goes, scan against kernel ------------------------
+    # Read off the smaller accelerator mesh: once one stage dominates by two
+    # decades the differences of the others are the measurement error of the
+    # two large chains they come from, and only the smaller mesh separates
+    # every stage cleanly.
+    accelerated = [
+        item for item in stages if item.get("device", {}).get("platform") == "gpu"
+    ]
+    stage_reference = min(
+        accelerated or stages, key=lambda item: item["cells"], default=None
     )
     if stage_reference is not None:
-        names = (
-            "crossing_count",
-            "subcell_fit",
-            "cluster_selection",
-            "connectivity_cut",
-            "boundary_selection",
-            "label_partition",
+        marginal = stage_reference["stages"]["marginal"]
+        rows = (
+            ("zero-crossing\ncount", "crossing_count", "stencil_gather"),
+            ("cluster\nselection", "cluster_selection", "crossing_count"),
+            ("sub-cell\nfits", "subcell_fit", "cluster_selection"),
         )
-        labels = (
-            "zero-crossing\ncount",
-            "sub-cell\nfits",
-            "cluster\nselection",
-            "connectivity\ncut",
-            "boundary\nselection",
-            "label\npartition",
+        labels, scanned, kernelled = [], [], []
+        for label, upper, lower in rows:
+            base = marginal.get(f"{lower}_scan", marginal.get(lower, 0.0))
+            base_kernel = marginal.get(f"{lower}_kernel", marginal.get(lower, 0.0))
+            labels.append(label)
+            scanned.append(1.0e6 * (marginal[f"{upper}_scan"] - base))
+            kernelled.append(1.0e6 * (marginal[f"{upper}_kernel"] - base_kernel))
+        labels.append("wall\nread")
+        scanned.append(1.0e6 * marginal["wall_read"])
+        kernelled.append(1.0e6 * marginal["wall_read"])
+        labels.append("WHOLE\nREAD")
+        scanned.append(1.0e6 * marginal["shipped_read"])
+        kernelled.append(1.0e6 * marginal["kernel_read"])
+
+        position = np.arange(len(labels))
+        middle.barh(
+            position - 0.19,
+            scanned,
+            height=0.36,
+            color=ladder_colour,
+            label="as shipped (sequential scan)",
         )
-        stage = stage_reference["stages"]["stage"]
-        value = [1.0e6 * max(stage.get(name, 0.0), 0.0) for name in names]
-        position = np.arange(len(names))
-        middle.barh(position, value, color="#8c8c8c", height=0.62)
-        middle.barh(position[:1], value[:1], color=ladder_colour, height=0.62)
+        middle.barh(
+            position + 0.19,
+            kernelled,
+            height=0.36,
+            color=newton_colour,
+            label="vectorised (one kernel)",
+        )
+        for index, (slow, fast) in enumerate(zip(scanned, kernelled)):
+            if fast > 0.0 and slow / fast > 1.5:
+                middle.annotate(
+                    "x%.0f" % (slow / fast),
+                    xy=(slow, index - 0.19),
+                    xytext=(4.0, -2.0),
+                    textcoords="offset points",
+                    fontsize=8.0,
+                    color=ladder_colour,
+                    fontweight="bold" if index == 0 else "normal",
+                )
         middle.set_yticks(position)
         middle.set_yticklabels(labels, fontsize=8.0)
         middle.invert_yaxis()
         middle.set_xscale("log")
+        middle.set_xlim(right=max(scanned) * 12.0)
         middle.set_xlabel("microseconds per read")
         middle.set_title(
-            "topology read on %s, %d cells"
-            % (
-                stage_reference["device"]["platform"],
-                stage_reference["cells"],
-            ),
+            "topology read on the H200, %d cells" % stage_reference["cells"],
             fontsize=10.5,
             loc="left",
         )
-        saved = stage_reference["stages"]["stage"].get("whole_read_saved")
-        whole = stage_reference["stages"]["marginal"].get("shipped_read")
-        kernel = stage_reference["stages"]["marginal"].get("kernel_read")
-        if saved and whole and kernel:
-            middle.annotate(
-                "one sequential scan;\nas a kernel the whole\nread is %.0f times faster"
-                % (whole / kernel),
-                xy=(value[0], 0),
-                xytext=(-8.0, 24.0),
-                textcoords="offset points",
-                fontsize=8.0,
-                color=ladder_colour,
-                ha="right",
-            )
+        middle.legend(frameon=False, fontsize=7.8, loc="center right")
 
-    # ---- wall time -------------------------------------------------------
+    # ---- wall time: the decision panel -----------------------------------
     ordered = sorted(
         newton, key=lambda item: (item["device"]["platform"], item["cells"])
     )
-    names = []
-    ladder_time = []
-    newton_time = []
+    series = (
+        ("ladder_seconds", "Krylov ladder, as shipped", ladder_colour),
+        ("ladder_kernel_read_seconds", "ladder + vectorised read", "#dd8452"),
+        ("newton_seconds", "lagged-topology Newton", newton_colour),
+    )
+    names, values = [], {key: [] for key, _, _ in series}
     for item in ordered:
         end = item["end_to_end"]
-        if not isinstance(end.get("ladder_seconds"), float):
+        if not all(isinstance(end.get(key), float) for key, _, _ in series):
             continue
-        if not isinstance(end.get("newton_seconds"), float):
-            continue
-        names.append("%s\n%d cells" % (item["device"]["platform"], item["cells"]))
-        ladder_time.append(1.0e3 * end["ladder_seconds"])
-        newton_time.append(1.0e3 * end["newton_seconds"])
+        names.append(
+            "%s\n%d cells"
+            % ("H200" if item["device"]["platform"] == "gpu" else "host", item["cells"])
+        )
+        for key, _, _ in series:
+            values[key].append(1.0e3 * end[key])
     if names:
         position = np.arange(len(names))
-        right.bar(
-            position - 0.19,
-            ladder_time,
-            width=0.36,
-            color=ladder_colour,
-            label="Krylov ladder",
-        )
-        right.bar(
-            position + 0.19,
-            newton_time,
-            width=0.36,
-            color=newton_colour,
-            label="lagged-topology Newton",
-        )
-        for index, (slow, fast) in enumerate(zip(ladder_time, newton_time)):
+        width = 0.26
+        for index, (key, label, colour) in enumerate(series):
+            right.bar(
+                position + (index - 1) * width,
+                values[key],
+                width=width,
+                color=colour,
+                label=label,
+            )
+        # the comparison that decides the verdict is the last two bars, not the
+        # first and last: the read fix is available to either route
+        for index in range(len(names)):
+            fixed = values["ladder_kernel_read_seconds"][index]
+            lagged = values["newton_seconds"][index]
             right.annotate(
-                "x%.0f" % (slow / fast),
-                xy=(index + 0.19, fast),
-                xytext=(0.0, 4.0),
+                "x%.1f" % (fixed / lagged)
+                if lagged < fixed
+                else "x%.1f slower" % (lagged / fixed),
+                xy=(position[index] + width, lagged),
+                xytext=(0.0, 3.0),
                 textcoords="offset points",
                 ha="center",
-                fontsize=8.5,
+                fontsize=7.5,
                 color=newton_colour,
                 fontweight="bold",
             )
         right.set_xticks(position)
         right.set_xticklabels(names, fontsize=8.0)
         right.set_yscale("log")
+        right.set_ylim(top=max(values["ladder_seconds"]) * 6.0)
         right.set_ylabel("milliseconds per solve")
         right.set_title("single solve, after compilation", fontsize=10.5, loc="left")
-        right.legend(frameon=False, fontsize=8.0)
+        right.legend(frameon=False, fontsize=7.6, loc="upper left")
 
     for axis in axes:
         for spine in ("top", "right"):

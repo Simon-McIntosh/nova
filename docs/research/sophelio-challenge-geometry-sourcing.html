@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"  content="nova">
+  <meta name="reckon-type"   content="research">
+  <meta name="plan-slug"     content="sophelio-challenge-geometry-sourcing">
+  <meta name="plan-title"    content="Sophelio Challenge — Geometry and Machine-Description Sourcing">
+  <meta name="plan-summary"  content="What geometry the challenge dataset ships versus what nova must source externally, correcting the earlier withheld-geometry premise, with the reuse inventory for the DIII-D onboarding">
+  <meta name="plan-informs"  content="diiid-forward-onboarding,coil-geometry-inversion">
+  <title>Sophelio Challenge — Geometry Sourcing | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Premise correction: coil geometry ships</h2>
+    <p>The research reference recorded on <code>coil-geometry-inversion</code> (2026-08-07) stated the
+    challenge publishes coil currents and flux maps <em>but no coil geometry</em>. Verified against the
+    challenge data page on 2026-08-11, that premise is wrong: the dataset ships per-shot conductor
+    geometry — <code>coil_R</code>, <code>coil_Z</code>, <code>coil_width</code>, <code>coil_height</code>,
+    plus skew angles for six DIII-D F-coils — and Thomson chord coordinates
+    (<code>thomson_chord_R</code>, <code>thomson_chord_Z</code>), with the 65×65
+    <code>efit_grid_R/Z</code> in metres. Coil currents are ampere-turns (kA·turn), which dissolves most
+    turns ambiguity by construction (declared exceptions: ECOILA, bcoil on DIII-D and the MAST
+    solenoid/TF/EFPS channels, which keep uncertainty fields). The full verified dataset schema, scoring
+    and rules live in the companion doc <code>imas-ambix:sophelio-fusion-equilibrium-challenge</code>.</p>
+    <p>Consequence for <code>coil-geometry-inversion</code>: its challenge-facing deliverable — recover a
+    machine's coil description from published flux maps and currents — loses <em>necessity</em> for the
+    entry, but the machinery gains two better-posed challenge applications: (a) <strong>validating the
+    shipped DIII-D geometry</strong> against label-derived fields (a shipped description is a claim, not a
+    truth; the identifiability spectrum says which of its parameters the data can check), and
+    (b) <strong>inferring what does NOT ship</strong> — wall contour and passive/vessel structure — from
+    labeled ramp frames, where eddy fields dominate the mismatch. The MAST-side science deliverable
+    (registry-truth oracle development) is unchanged.</p>
+
+    <h2 id="s2">§2 — What must be sourced externally, and how</h2>
+    <table>
+      <thead><tr><th>Item</th><th>Ships?</th><th>Source route</th><th>Disclosure</th></tr></thead>
+      <tbody>
+        <tr><td>DIII-D coil positions, sections, skews</td><td>yes (per shot)</td><td>dataset-primary; external descriptions (e.g. mhdin-class files) used only as cross-checks</td><td>dataset use, no disclosure needed</td></tr>
+        <tr><td>DIII-D wall contour</td><td>no</td><td>published machine descriptions / OMFIT-distributed files</td><td>disclosed in methods report</td></tr>
+        <tr><td>DIII-D passive/vessel structure</td><td>no</td><td>published descriptions seed the geometry; resistances/eigenmodes fitted on labeled ramp frames (challenge-provided data)</td><td>geometry source disclosed; fits are competition-data-derived</td></tr>
+        <tr><td>MAST conductor + vessel description</td><td>coils yes; vessel no</td><td>in-house validated registry description (FAIR-MAST-derived machine description — permitted category: geometry, not training data)</td><td>disclosed, with the FAIR-MAST non-training statement</td></tr>
+        <tr><td>MAST vessel resistances/time constants</td><td>no</td><td>in-house vessel circuit fit (R≈7–9&nbsp;mΩ class, banked 2026-07) — machine description, pre-existing, not challenge-tuned</td><td>disclosed</td></tr>
+      </tbody>
+    </table>
+    <p>Doctrine boundary (locked on <code>imas-ambix:magnetics-free-equilibrium-recovery</code>):
+    FAIR-MAST material enters only as machine-description geometry and signal semantics; no
+    training-derived parameter that is not discoverable from competition data; MAST EFIT firewalled.</p>
+
+    <h2 id="s3">§3 — Reuse inventory for the DIII-D onboarding</h2>
+    <p>Three landed nova capabilities map directly onto the onboarding plan's hardest objects. The
+    <strong>polygonal-section coil kernels</strong> (Urankar-class analytic Green's functions, ~1e-13
+    accuracy) are exactly what the six skewed DIII-D F-coils need — parallelogram sections are the case
+    the capability was built for. The <strong>FSA extraction and p′/FF′ projection</strong> machinery
+    built for the transport seam already does most of what the label-extraction kernel needs (Δ* on a
+    gridded map, per-surface separation); the new work is conditioning-aware uncertainty near axis and
+    X-point plus the vacuum-region Δ*ψ≈0 receipt. The <strong>MAST vessel circuit fit</strong> supplies
+    the zero-shot machine's passive model without touching challenge or FAIR-MAST signals. The
+    accelerated boundary-push / NK solve work and the catalog-scale batching machinery carry the
+    throughput requirement; the onboarding plan publishes the measured budget rather than assuming one.</p>
+  </main>
+</body>
+</html>

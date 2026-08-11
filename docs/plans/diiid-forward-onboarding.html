@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="diiid-forward-onboarding">
+  <meta name="plan-title"     content="DIII-D Forward Onboarding">
+  <meta name="plan-summary"   content="Onboard a second machine entirely from its shipped description and complete the forward stack the magnetics-free entry needs: DIII-D geometry through the registry route, limiter-topology solve mode, passive circuit forwards, the response-kernel library with label-map extraction, and measured batched throughput with vertical-conditioning receipts">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort"    content="L">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-sprint"    content="S10">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-depends-on" content="flux-function-forward-equilibrium">
+  <meta name="plan-blocks"    content="imas-ambix:magnetics-free-equilibrium-recovery">
+  <title>DIII-D Forward Onboarding | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Purpose and authority</h2>
+    <p>Nova's side of the magnetics-free challenge entry (grounded facts:
+    <code>sophelio-challenge-geometry-sourcing</code> and
+    <code>imas-ambix:sophelio-fusion-equilibrium-challenge</code>): every deterministic capability the
+    actuator-only inference problem needs, delivered as receipts-bearing forwards with no measurement
+    fitting anywhere. The authority split follows the standing seam rule sharpened to
+    <em>produce, don't use</em>: nova produces every response kernel — coupling operators, chord
+    sampling, label-map extraction — exactly as it produces the magnetics design matrix it does not fit
+    with; everything statistical about a signal stays in ambix. Beyond the competition, this plan is the
+    first true second-machine onboarding, the direct test of the machine-portability claim: a repeatable
+    recipe from shipped machine description to converged free-boundary forwards.</p>
+
+    <h2 id="s2">§2 — DIII-D machine description through the registry route</h2>
+    <p>Ingest the dataset-shipped conductor geometry (18 F-coils with section dimensions and six skew
+    angles — parallelogram sections routed through the polygonal-section analytic kernels — plus ECOILA
+    and bcoil with declared turns-uncertainty fields) and per-shot Thomson chord coordinates as
+    diagnostic-geometry records. Source the wall contour and passive-structure geometry externally
+    (published DIII-D descriptions; disclosed), with provenance receipts on every element. The registry
+    recipe is written down as it is executed — machine onboarding is the deliverable, DIII-D is its first
+    instance.</p>
+    <p><strong>Done-when:</strong> vacuum ψ on the shipped <code>efit_grid</code> from coil currents
+    reproduces the challenge starter-kit vacuum check (reported R²≈0.94 class — exact bar pre-registered
+    from the starter kit itself); geometry provenance receipts complete. <em>This is a kill gate for the
+    entry: failure means the shipped geometry or our kernels are wrong, and everything downstream waits.</em></p>
+
+    <h2 id="s3">§3 — Limiter-topology forward mode</h2>
+    <p>A wall-contact boundary mode beside the diverted mode in the forward solve: LCFS by limiter
+    contact, topology class and transition handling in the convergence receipts. Never scored by the
+    challenge (limited frames are deleted corpus-wide) but load-bearing twice over: the reduced ramp
+    traversal hands over its state at the diverted transition, and mid-pulse topology churn must be
+    traversed without solver failure. Validation leans on assets the challenge deleted: synthetic limited
+    equilibria round-trips, plus agreement of the topology classifier against our own MAST solves on
+    limited frames (in-house data, no MAST EFIT involved).</p>
+    <p><strong>Done-when:</strong> limited/diverted mode switch is receipt-visible; synthetic round-trips
+    green; classifier agreement on in-house MAST limited frames banked.</p>
+
+    <h2 id="s4">§4 — Passive-conductor circuit forwards</h2>
+    <p>Eigenmode-reduced vessel circuit models driven by coil-current and plasma-current time
+    derivatives, per machine: DIII-D geometry from the external description with resistances/eigenmode
+    amplitudes fitted by ambix on labeled ramp frames (competition data); MAST from the in-house vessel
+    circuit fit, pre-existing and challenge-untouched. With no solver-side vertical pin (the owner
+    decision: NK stabilisation plus state-vector attribution, never a constraint hook), the passive model
+    sets the field decay index during every transient — it is promoted from ramp-frame nicety to the
+    entry's highest-risk physics component and gets hostile attention first.</p>
+    <p><strong>Done-when:</strong> passive forward operators are exposed through the seam with
+    conservation receipts; the eigenmode-order study on labeled DIII-D ramp frames is banked (order
+    decision locked); MAST vessel model wired from the registry.</p>
+
+    <h2 id="s5">§5 — Response-kernel library: sampling and label-map extraction</h2>
+    <p>The kernels ambix's measurement models consume: chord→ψ<sub>N</sub> sampling against a solved or
+    labeled map; the Δ* operator applied to gridded maps giving j<sub>φ</sub>; per-surface radial
+    separation recovering p′(ψ) and FF′(ψ) with conditioning-aware uncertainty (axis degeneracy, X-point
+    ∇ψ→0); and the vacuum-region Δ*ψ≈0 receipt that doubles as a label-sanity flag. Mostly a hardening
+    pass over the FSA-extraction and p′/FF′-projection machinery built for the transport seam.</p>
+    <p><strong>Done-when:</strong> extraction round-trips prescribed p′/FF′ on nova-solved equilibria
+    within pre-registered tolerance; on challenge train labels, extracted flux functions re-solve to the
+    labeled map at the grid-resolution floor. <em>Second kill gate: if the labels are not
+    self-consistent under our own GS operator, the extraction premise — and with it the entry's training
+    signal — is broken.</em></p>
+
+    <h2 id="s6">§6 — Batched throughput and vertical-conditioning receipts</h2>
+    <p>The measured compute budget: batched ensemble×frame NK solves with warm-start branch continuity
+    along each shot, and a per-solve vertical-mode conditioning receipt (n=0 stability margin / decay
+    index) so the consumer can widen ensemble spread where vertical placement is ill-conditioned —
+    receipts, not rails. Rides the accelerated boundary-push and catalog-batching machinery; publishes a
+    slices/s budget table on the H200 node from which ambix sizes ensembles and windows, replacing the
+    assumed compute envelope with a measured one.</p>
+    <p><strong>Done-when:</strong> budget table published (device, batch, precision, convergence policy);
+    conditioning receipt wired through the seam; branch-continuity behaviour pinned by tests.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="diiid-geometry-authority" data-choice="dataset-primary-external-wall" data-by="Simon McIntosh" data-when="2026-08-11">
+        <p class="r-dec-q">Which source is authoritative for the DIII-D machine description?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="dataset-primary-external-wall">Dataset-shipped conductor geometry is primary; external published descriptions supply only what does not ship (wall, passive) and serve as cross-checks; all external material disclosed</button>
+          <button class="r-opt" data-value="external-primary">External machine description primary, dataset geometry as check</button>
+        </p>
+        <p class="r-dec-rat">The scorer's ground truth was produced against the machine the dataset
+        describes; the shipped geometry is the challenge's own contract. External files fill the two
+        holes (wall, passive) and validate the rest.</p>
+      </div>
+      <div class="r-dec" data-key="vertical-authority" data-choice="nk-plus-attribution" data-by="Simon McIntosh" data-when="2026-08-11">
+        <p class="r-dec-q">How is vertical placement handled without magnetics?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="nk-plus-attribution">No solver-side constraint hook: NK-stabilised converged solves place the plasma; LCFS misfit is attributed by ambix across coil currents, positions, passive currents and flux profiles; nova emits an n=0 conditioning receipt</button>
+          <button class="r-opt" data-value="constraint-hook">Typed vertical-position constraint enforced inside the solve</button>
+        </p>
+        <p class="r-dec-rat">The recorded coil currents are the closed-loop currents — the information
+        that placed the plasma is already in the inputs. A constraint hook would smuggle a fitting term
+        into the forward solve and break the seam authority; the receipt gives the consumer the
+        conditioning information a hook would have hidden.</p>
+      </div>
+      <div class="r-dec" data-key="passive-model-order" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">How many vessel eigenmodes per machine does vertical placement and ramp fidelity require?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="minimal-two-four">2–4 modes, order chosen by the labeled-ramp-frame study</button>
+          <button class="r-opt" data-value="extended-ladder">Extended mode ladder with per-era refinement</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-dfo-001" data-status="open"
+               data-capability-version="1.0" data-capability-class="orchestrator"
+               data-written-by="reckon-create" data-written-at="2026-08-11">
+        <h4 class="r-fu-title">Ingest the shipped DIII-D description and pass the vacuum kill gate (§2)</h4>
+        <div class="r-fu-body"><p>First rung and first kill gate: shipped conductor geometry through the
+        registry route (parallelogram sections via the polygonal-section kernels), wall/passive sourced
+        externally with provenance, vacuum ψ on the shipped grid checked against the starter-kit bar.
+        Runnable as soon as the sibling equilibrium-forward contract's remaining §3 items land; the §5
+        extraction hardening can proceed in parallel off the transport-seam machinery.</p></div>
+        <pre class="r-fu-prompt">/reckon-ship diiid-forward-onboarding §2</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

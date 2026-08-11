@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-10T17:39:44",
+  "updated": "2026-08-11T21:14:13",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -405,6 +405,29 @@
           }
         ],
         "description": "Promote the transport forward solve to a public Nova capability beside ForwardProfile: a declared-fidelity ladder from the landed native current-diffusion rung to an embedded TORAX multi-channel step, the jnp FSA geometry adapter, COCOS boundary tests, and the coupled equilibrium\u2013transport solve as a windowed waveform exchange \u2014 Nova owns the converged window fixed point with typed convergence receipts and implicit-function gradients; staggered co-simulation is the contract's one-iteration point. Sequenced after the S7 spine-parity gate that hardens ForwardProfile; grounded in the transport-forward-contract research record (capability-gap inventory, embed-not-reimplement verdict, imas-python pin gate, window-coupling selection)."
+      },
+      {
+        "id": "S10",
+        "status": "planned",
+        "theme": "Second-machine forwards \u2014 DIII-D onboarding and the response-kernel library (Sophelio challenge)",
+        "items": [
+          {
+            "slug": "diiid-forward-onboarding",
+            "status": "active",
+            "why_now": "Blocks the imas-ambix entry plan and carries both entry kill gates; the first true second-machine onboarding is also the machine-portability claim's first real test.",
+            "done_when": "Vacuum kill gate passed on the shipped grid; limiter mode and passive forwards land with receipts; extraction round-trips prescribed flux functions and re-solves train labels at the grid-resolution floor; batched-solve budget table published from the H200 node.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict",
+                "risk": "elevated"
+              }
+            }
+          }
+        ],
+        "description": "Nova's side of the magnetics-free challenge entry, deadline 2026-10-18: onboard DIII-D entirely from its shipped description through the registry route, add the limiter-topology forward mode and passive circuit forwards, harden the response-kernel library (chord sampling, label-map extraction with conditioning-aware uncertainty), and publish the measured batched-solve budget with vertical-conditioning receipts. Two kill gates protect the entry premise: the vacuum flux starter-kit check and the extraction round-trip on labeled maps."
       }
     ],
     "active_sprint_id": "S6",
@@ -488,6 +511,11 @@
         "when": "2026-08-10",
         "who": "reckon-sprint",
         "what": "Coupling contract locked after the ambix-side brainstorm: the coupled equilibrium\u2013transport rung is windowed waveform exchange (staggered co-simulation = its one-iteration point) with window length, sample grids, iteration cap and tolerance as declared knobs. Nova owns the converged window fixed point and surrenders convergence behaviour as typed receipts; gradients cross the window by the implicit-function adjoint; single-sweep waveform primitives stay public. Assigning principle: innovation purity \u2014 an unconverged seam would confound the assimilation innovation with splitting error. transport-engine=torax-embedded-ladder and loop-differentiability=picard-fixed-point-first locked on flux-function-forward-transport; S9 item done_when updated to the window contract."
+      },
+      {
+        "when": "2026-08-11",
+        "who": "Simon McIntosh",
+        "what": "Sprint S10 created for the Sophelio-challenge forward stack (diiid-forward-onboarding). Premise correction recorded on coil-geometry-inversion: the challenge dataset ships conductor geometry and Thomson chords; wall and passive structure remain externally sourced."
       }
     ],
     "blockers": [
@@ -520,6 +548,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 26
+    "_version": 29
   }
 }

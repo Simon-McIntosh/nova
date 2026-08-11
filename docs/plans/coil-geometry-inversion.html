@@ -20,8 +20,8 @@
   <title>Coil Geometry Inversion | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-08">
-<meta name="plan-version" content="7">
+<meta name="plan-modified" content="2026-08-11">
+<meta name="plan-version" content="9">
 <meta name="plan-impl" content="0.4">
 </head>
 <body>
@@ -106,23 +106,27 @@
     geometry-Jacobian singular spectrum at the real sensor set decides how many geometry
     modes the array resolves (the current-space answer was rank 10 of 13 — the geometry-space
     answer bounds what any fit may claim), and regularisation follows from it.</li>
-    <li><strong>Problem class B — flux-map-space, and the near-term north star.</strong>
+    <li><strong>Problem class B — flux-map-space.</strong>
     Given fixed coil currents and a target flux map with the plasma contribution subtracted
     (an equilibrium-reconstruction by-product, or the toroidal-harmonic misfit maps), solve
     the coil set's geometry to match the map on its grid. Same machinery, different data
     functional — the form any machine can consume without raw sensor access. The named
-    application is the Sophelio Fusion Equilibrium Challenge (phase 1 open now, closing
-    2026-10-18): it publishes coil currents, Thomson profiles and 65×65 EFIT flux maps for
-    7,915 DIII-D shots (CC BY 4.0, magnetics withheld) but no coil geometry, and its blind
-    cross-machine target is MAST itself (1,206 shots, zero training). The north-star
-    deliverable: <em>recover a machine's coil positions from its published flux maps and
-    currents alone</em> — developed and scored on MAST as the oracle (our registry geometry
-    is the known truth; synthesise the exact challenge conditions from MAST data and measure
-    position-recovery error directly), then applied to the DIII-D training maps to produce a
-    data-derived DIII-D coil description. A physics route into the challenge also runs
-    through our validated MAST description: any model that carries real machine geometry has
-    a structural edge on the cross-machine metric that pure map-to-map learning cannot
-    reach.</li>
+    application is the Sophelio Fusion Equilibrium Challenge (development phase closes
+    2026-10-18), and its premise is corrected here: verified against the challenge data page
+    on 2026-08-11, the dataset <em>ships</em> per-shot conductor geometry (coil positions,
+    section width/height, skew angles on six DIII-D F-coils) alongside coil currents, Thomson
+    profiles and 65×65 EFIT flux maps for 7,915 DIII-D shots (CC BY 4.0, magnetics withheld;
+    blind cross-machine target MAST, 1,206 shots, zero training) — see
+    <code>sophelio-challenge-geometry-sourcing</code>. The challenge-facing deliverable
+    therefore re-anchors from recovering the coil description to (a) <em>validating the
+    shipped DIII-D geometry</em> against label-derived fields through the identifiability
+    spectrum, and (b) <em>inferring what does not ship</em> — wall contour and passive/vessel
+    structure — from labeled ramp frames where eddy fields dominate the mismatch, feeding
+    <code>diiid-forward-onboarding</code>. The MAST-side science deliverable —
+    <em>recover a machine's coil positions from its published flux maps and currents
+    alone</em>, developed and scored on MAST as the oracle where our registry geometry is the
+    known truth — is unchanged and keeps its full validation ladder; a machine that carries
+    real geometry retains its structural edge on the cross-machine metric.</li>
     <li><strong>Validation ladder, then MAST.</strong> Synthetic recovery throughout: perturb
     a known geometry, generate exact data (with realistic noise from the measured floors),
     recover, report bias and resolution limits per parameter class. Then the MAST
@@ -262,6 +266,8 @@ Done-when
 <h2><span class="sec">§</span> Research</h2>
 <div class="r-research" data-id="r-cgi-001" data-type="challenge" data-source="" data-added-by="Simon McIntosh" data-when="2026-08-07" data-url="https://fusion-equilibrium-challenge.sophelio.io/">
     <span class="r-research-title"><a href="https://fusion-equilibrium-challenge.sophelio.io/">Sophelio Fusion Equilibrium Challenge — DIII-D + MAST, coil currents and flux maps published, geometry and magnetics withheld; phase 1 closes 2026-10-18</a></span></div>
+<div class="r-research" data-id="r-cgi-002" data-type="doc" data-source="docs/research/sophelio-challenge-geometry-sourcing.html" data-added-by="Simon McIntosh" data-when="2026-08-11" data-url="/nova/sophelio-challenge-geometry-sourcing.html">
+    <span class="r-research-title"><a href="/nova/sophelio-challenge-geometry-sourcing.html">Sophelio challenge geometry sourcing — verified dataset schema: conductor geometry and Thomson chords SHIP per shot; wall and passive structure do not; re-anchoring rationale for this plan</a></span></div>
 </section>
 </main>
 </body>

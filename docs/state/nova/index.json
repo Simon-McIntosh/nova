@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-11T21:14:13",
+  "updated": "2026-08-11T21:29:00",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -137,28 +137,8 @@
         "description": "Closed 2026-08-05; implementation 99.2% at close; 3 of 4 plans shipped. Item accounting, without gloss: mast-catalog-geometry-recovery SHIPPED (both registry defects fixed at the builder root in one digest change 76cf833561e602a7 -> ca06c8f64481114f; probe axes upgraded fitted -> measured-in-source; coupled ambix pin bump green). mast-machine-description SHIPPED (139 solve-input rows through nova.io; 7-shot two-polarity pilot round-trips exact; TF summary rides as a triggered followup). physics-spine-adoption item complete via its explicit re-scope clause: the donor ladder has no migratable rung (measured census: six of eight donors are physics kernels; zero product route to the artifact path); residues shipped; the artifact-wiring design rung is the plan's open followup. mast-vacuum-floor-recovery SHIPPED on the honest-failure branch: the <=-incumbent clause of this item's done_when WAS NOT MET (artifact - incumbent = +0.023 sigma both arms; SAME_SOURCE fails; SOURCE_CUTOVER passes 15/15; the qualified status stands); everything else delivered: 387 uT noise envelope quantified (residual 91-253x per-channel floors), gap decomposed per channel (obr17 the largest ABSOLUTE share on both arms; the +0.023 is an outboard-vertical trade at obv06/obv14), all six S2 gaps re-dispositioned. Major discoveries: ten turn counts are PUBLISHED archive integers; 19 channels carry discrete unnormalised acquisition scales (1/2, 1/sqrt2, sqrt2, 2), now divided out on the read path - closing the P5-lower 4.5% shift at 0.37% and falsifying the campaign-geometry term; turn counts are operator-inert (drive weight supersedes); the gate gained a committed artifact arm reproducing the out-of-tree stamps to float equality, plus a committed per-channel decomposition. Records: docs/research/mast-registry-corrections-landed, mast-solve-input-maps-landed, mast-calibration-cohort-landed, mast-winding-lattice-landed, mast-sensor-adjudication-landed, mast-block-scale-normalisation-landed, mast-passive-calibration-landed, mast-vacuum-floor-closure-landed (all .html)."
       },
       {
-        "id": "S3",
-        "status": "planned",
-        "theme": "MAST 3D fields, passive structures and circuits",
-        "items": [
-          {
-            "slug": "mast-nonaxisymmetric-physics",
-            "why_now": "This closes the remaining Ambix-owned 3D/passive physics boundary before production labeling.",
-            "done_when": "Versioned geometry, circuits, vacuum taring and held-out ramp evidence ship in Nova.",
-            "capability": {
-              "version": "1.0",
-              "class": "orchestrator",
-              "requirements": {}
-            }
-          }
-        ],
-        "starts": "2026-08-21",
-        "ends": "2026-09-04",
-        "description": "Move MAST-specific non-axisymmetric geometry, drive semantics, passive screening and vacuum taring into Nova after the native 3D substrate ships."
-      },
-      {
         "id": "S4",
-        "status": "planned",
+        "status": "done",
         "theme": "Relocated to S8 - H200 production catalog",
         "items": [],
         "starts": "2026-09-05",
@@ -364,6 +344,29 @@
         "description": "Make the differentiable boundary push the pinned, accelerated core of the spine, then prove the assembled chain \u2014 corrected reads, moment seed, accelerated ReconstructProfile, topology labels, CurrentDiffusion flux-ledger consistency \u2014 reconstructs MAST equilibria comparably to the firewalled EFIT referee. The parity verdict is the gate the GPU catalog stands on: a catalog of fast wrong equilibria is worthless. Carries the capability recovered from the superseded ambix batched-newton-accelerator plan (exact-tangent NK 62% conversion vs Picard 10/19%; read-wall removals; coupled-KKT profile state) into nova, which owns all physics solves."
       },
       {
+        "id": "S10",
+        "status": "planned",
+        "theme": "Second-machine forwards \u2014 DIII-D onboarding and the response-kernel library (Sophelio challenge)",
+        "items": [
+          {
+            "slug": "diiid-forward-onboarding",
+            "status": "active",
+            "why_now": "Blocks the imas-ambix entry plan and carries both entry kill gates; the first true second-machine onboarding is also the machine-portability claim's first real test.",
+            "done_when": "Vacuum kill gate passed on the shipped grid; limiter mode and passive forwards land with receipts; extraction round-trips prescribed flux functions and re-solves train labels at the grid-resolution floor; batched-solve budget table published from the H200 node.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict",
+                "risk": "elevated"
+              }
+            }
+          }
+        ],
+        "description": "Nova's side of the magnetics-free challenge entry, deadline 2026-10-18: onboard DIII-D entirely from its shipped description through the registry route, add the limiter-topology forward mode and passive circuit forwards, harden the response-kernel library (chord sampling, label-map extraction with conditioning-aware uncertainty), and publish the measured batched-solve budget with vertical-conditioning receipts. Two kill gates protect the entry premise: the vacuum flux starter-kit check and the extraction round-trip on labeled maps."
+      },
+      {
         "id": "S8",
         "status": "planned",
         "theme": "H200 production catalog",
@@ -407,27 +410,24 @@
         "description": "Promote the transport forward solve to a public Nova capability beside ForwardProfile: a declared-fidelity ladder from the landed native current-diffusion rung to an embedded TORAX multi-channel step, the jnp FSA geometry adapter, COCOS boundary tests, and the coupled equilibrium\u2013transport solve as a windowed waveform exchange \u2014 Nova owns the converged window fixed point with typed convergence receipts and implicit-function gradients; staggered co-simulation is the contract's one-iteration point. Sequenced after the S7 spine-parity gate that hardens ForwardProfile; grounded in the transport-forward-contract research record (capability-gap inventory, embed-not-reimplement verdict, imas-python pin gate, window-coupling selection)."
       },
       {
-        "id": "S10",
+        "id": "S3",
         "status": "planned",
-        "theme": "Second-machine forwards \u2014 DIII-D onboarding and the response-kernel library (Sophelio challenge)",
+        "theme": "MAST 3D fields, passive structures and circuits",
         "items": [
           {
-            "slug": "diiid-forward-onboarding",
-            "status": "active",
-            "why_now": "Blocks the imas-ambix entry plan and carries both entry kill gates; the first true second-machine onboarding is also the machine-portability claim's first real test.",
-            "done_when": "Vacuum kill gate passed on the shipped grid; limiter mode and passive forwards land with receipts; extraction round-trips prescribed flux functions and re-solves train labels at the grid-resolution floor; batched-solve budget table published from the H200 node.",
+            "slug": "mast-nonaxisymmetric-physics",
+            "why_now": "This closes the remaining Ambix-owned 3D/passive physics boundary before production labeling.",
+            "done_when": "Versioned geometry, circuits, vacuum taring and held-out ramp evidence ship in Nova.",
             "capability": {
               "version": "1.0",
               "class": "orchestrator",
-              "requirements": {
-                "reasoning": "deep",
-                "verification": "strict",
-                "risk": "elevated"
-              }
+              "requirements": {}
             }
           }
         ],
-        "description": "Nova's side of the magnetics-free challenge entry, deadline 2026-10-18: onboard DIII-D entirely from its shipped description through the registry route, add the limiter-topology forward mode and passive circuit forwards, harden the response-kernel library (chord sampling, label-map extraction with conditioning-aware uncertainty), and publish the measured batched-solve budget with vertical-conditioning receipts. Two kill gates protect the entry premise: the vacuum flux starter-kit check and the extraction round-trip on labeled maps."
+        "starts": "2026-08-21",
+        "ends": "2026-09-04",
+        "description": "Move MAST-specific non-axisymmetric geometry, drive semantics, passive screening and vacuum taring into Nova after the native 3D substrate ships."
       }
     ],
     "active_sprint_id": "S6",
@@ -548,6 +548,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 29
+    "_version": 31
   }
 }

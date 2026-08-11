@@ -16,7 +16,7 @@ with skip_import("jax"):
     from nova.biot.target import FluxTarget
     from nova.equilibrium.forward_operator import ForwardFluxOperator
     from nova.equilibrium.topology import Topology
-    from nova.jax.config import configure_dtypes
+    from nova.jax.config import Precision, configure_dtypes
 
 
 def _structured_grid(nx, nz, xlim=(0.5, 1.5), zlim=(-0.6, 0.6)):
@@ -67,16 +67,33 @@ def test_update_resolves_finite_topology(topology):
 
 
 def test_physical_nulls_keep_double_outputs_with_single_selection_scores(topology):
-    """Physical null data stay fp64 while topology ranking follows fit precision."""
-    topo, coordinate, wall_xy = topology
-    psi = _flux_stack(coordinate, wall_xy, [1.0])[0]
-    psi_grid, psi_wall = topo.split_flux_map(psi)
-    vmap_o, vmap_x = topo.grid(psi_grid)
-    data_o = topo.o_point_data(vmap_o, 1)
-    data_w = topo.wall(psi_wall, 1)
-    data_b = topo.boundary(data_o, vmap_x, data_w, 1)
+    """Physical null data stay fp64 while topology ranking follows fit precision.
 
-    assert topo.grid.fit_dtype == jnp.float32
+    The reconstruction carries the physical origin and scale in fp64 whatever
+    the fit is normalised in, so narrowing the fit narrows the selection score
+    and the flux ladder without narrowing the coordinates that come back. The
+    narrow locator is built here rather than taken from the fixture because
+    the unqualified fit is fp64.
+    """
+    topo, coordinate, wall_xy = topology
+    narrow = Topology(
+        Null2D.from_coordinates(
+            np.asarray(topo.grid.coordinate),
+            np.asarray(topo.grid.stencil),
+            maxsize=topo.grid.maxsize,
+            precision=Precision.SINGLE,
+        ),
+        topo.wall,
+    )
+    psi = _flux_stack(coordinate, wall_xy, [1.0])[0]
+    psi_grid, psi_wall = narrow.split_flux_map(psi)
+    vmap_o, vmap_x = narrow.grid(psi_grid)
+    data_o = narrow.o_point_data(vmap_o, 1)
+    data_w = narrow.wall(psi_wall, 1)
+    data_b = narrow.boundary(data_o, vmap_x, data_w, 1)
+
+    assert topo.grid.fit_dtype == jnp.float64
+    assert narrow.grid.fit_dtype == jnp.float32
     assert vmap_o.dtype == jnp.float64
     assert vmap_x.dtype == jnp.float64
     assert data_b.dtype == jnp.float64

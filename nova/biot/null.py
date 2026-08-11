@@ -43,14 +43,24 @@ class Null1D(NullBase):
 @dataclass
 @jax.tree_util.register_pytree_node_class
 class Null2D(NullBase):
-    """Locate nulls from normalized stencils and precise physical metadata."""
+    """Locate nulls from normalized stencils and precise physical metadata.
+
+    ``precision`` selects the dtype of the local sub-cell fit, and that dtype
+    is the ladder every flux read taken through this locator lands on: the
+    fitted null flux cannot express a difference finer than one step of it,
+    and any quantity normalized against that flux inherits the same step.
+    Float64 is the default so the ladder sits at the arithmetic floor of the
+    surrounding fp64 map.  Float32 halves the fit's device footprint and its
+    memory traffic, and is selected explicitly where that throughput is worth
+    a ladder some seven decades coarser.
+    """
 
     stencil: jnp.ndarray = field(repr=False)
     local_coordinate_stencil: jnp.ndarray = field(repr=False)
     physical_origin: jnp.ndarray = field(repr=False)
     physical_scale: jnp.ndarray = field(repr=False)
     maxsize: int = 5
-    precision: Precision = Precision.SINGLE
+    precision: Precision = Precision.DOUBLE
 
     @classmethod
     def from_coordinates(
@@ -64,7 +74,10 @@ class Null2D(NullBase):
 
         Normalization occurs before any selected-precision device cast.  Passing
         an absolute fp32 coordinate grid is rejected because its lost low bits
-        cannot be recovered by centering later.
+        cannot be recovered by centering later.  ``precision="auto"`` resolves
+        to float64: the fit dtype sets the ladder of every flux read the
+        locator returns, so the automatic policy is the one that keeps that
+        ladder at the arithmetic floor.
         """
         physical = np.asarray(coordinate)
         if physical.dtype != np.float64:
@@ -81,7 +94,7 @@ class Null2D(NullBase):
         if np.any(scale <= 0):
             raise ValueError("Null2D stencils must span both physical axes")
         local = offsets / scale[:, None, :]
-        precision = resolve_precision(precision, Precision.SINGLE)
+        precision = resolve_precision(precision, Precision.DOUBLE)
         fit_dtype = jnp.float32 if precision is Precision.SINGLE else jnp.float64
         return cls(
             coordinate=jnp.asarray(physical, dtype=jnp.float64),
@@ -95,7 +108,7 @@ class Null2D(NullBase):
 
     @property
     def fit_dtype(self):
-        """Return the selected local-fit dtype."""
+        """Return the local-fit dtype, which is the ladder of every flux read."""
         return jnp.float32 if self.precision is Precision.SINGLE else jnp.float64
 
     @jax.jit

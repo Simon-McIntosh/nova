@@ -913,6 +913,41 @@ def step_callable(route, support, step: str):
     return lambda state, force: route["reduced_step"](state, force, support)
 
 
+def declared_schedule(bundle: SolveBundle, operator, outer: int, inner: int):
+    """Return the schedule record of a run whose counts the caller declared.
+
+    The adaptive loop is what establishes how many topology reads and Newton
+    steps a case needs, and it is host driven and uncompiled, so on a large
+    mesh it costs far more than the compiled route it calibrates. Where those
+    counts are already known — they are a property of the case, not of the
+    platform — the wall-time comparison can be taken directly against them.
+    The record keeps the same shape, with the convergence detail marked as not
+    measured here rather than fabricated.
+    """
+    import jax.numpy as jnp
+
+    flux = jnp.asarray(bundle.reference_flux)
+    identity = topology_identity(operator, flux)
+    scale = float(np.max(np.abs(bundle.reference_flux)))
+    return {
+        "outer_reads": outer,
+        "converged": None,
+        "measured_here": False,
+        "outer": [{"read": step + 1, "inner_steps": inner} for step in range(outer)],
+        "trace": [],
+        "flux_resolution": flux_resolution(
+            operator, float(identity["axis_flux"]), scale
+        ),
+        "support_size": declared_support_size(operator, identity),
+        "flux": np.asarray(bundle.reference_flux),
+        "flux_deviation": float("nan"),
+        "deviation_in_resolution_steps": float("nan"),
+        "parity": None,
+        "labels_identical": None,
+        "label_disagreements": -1,
+    }
+
+
 def newton_callable(
     operator,
     support_size: int,
@@ -1272,11 +1307,15 @@ def run_newton(arguments) -> dict[str, Any]:
         "krylov_iterations": KRYLOV_ITERATIONS,
         "warmup": WARMUP_SWEEPS,
     }
-    adaptive = adaptive_newton(bundle, operator)
+    adaptive = (
+        declared_schedule(bundle, operator, arguments.outer, arguments.inner)
+        if arguments.outer and arguments.inner
+        else adaptive_newton(bundle, operator)
+    )
     flux = adaptive.pop("flux")
     record["adaptive"] = adaptive
     print(
-        "adaptive: %d reads, inner %s, deviation %.3e (%.1f floor steps), parity %s"
+        "schedule: %d reads, inner %s, deviation %.3e (%.1f floor steps), parity %s"
         % (
             adaptive["outer_reads"],
             [entry["inner_steps"] for entry in adaptive["outer"]],
@@ -1369,7 +1408,7 @@ def render_figure(stages: list[dict], newton: list[dict], output: Path) -> None:
         left.annotate(
             "%d reads to the same floor" % measured.size,
             xy=(measured.size, measured[-1]),
-            xytext=(-2.0, 16.0),
+            xytext=(-2.0, 22.0),
             textcoords="offset points",
             color=ladder_colour,
             fontsize=8.5,
@@ -1444,14 +1483,14 @@ def render_figure(stages: list[dict], newton: list[dict], output: Path) -> None:
         middle.set_yticklabels(labels, fontsize=8.0)
         middle.invert_yaxis()
         middle.set_xscale("log")
-        middle.set_xlim(right=max(scanned) * 12.0)
+        middle.set_xlim(right=max(scanned) * 60.0)
         middle.set_xlabel("microseconds per read")
         middle.set_title(
             "topology read on the H200, %d cells" % stage_reference["cells"],
             fontsize=10.5,
             loc="left",
         )
-        middle.legend(frameon=False, fontsize=7.8, loc="center right")
+        middle.legend(frameon=False, fontsize=7.8, loc="lower right")
 
     # ---- wall time: the decision panel -----------------------------------
     ordered = sorted(
@@ -1534,6 +1573,8 @@ def main(argv: list[str] | None = None) -> int:
         run.add_argument("--output", required=True)
         if name == "newton":
             run.add_argument("--batch", default="")
+            run.add_argument("--outer", type=int, default=0)
+            run.add_argument("--inner", type=int, default=0)
 
     draw = commands.add_parser("figure")
     draw.add_argument("--stages", nargs="*", default=())

@@ -349,19 +349,102 @@ def test_the_double_null_fixture_exercises_every_branch_of_the_read(diverted):
     assert int(np.sum(label == 3)) > 0
 
 
-def test_the_topology_read_is_identical_to_a_traversed_formulation(diverted):
-    """Every quantity the read publishes matches the traversal bit for bit.
+#: Quantities the read publishes that select or normalise rather than fit, and
+#: that no rearrangement of the traversals may move by so much as a last bit.
+DECIDING_STATE = (
+    "axis_flux",
+    "boundary_flux",
+    "x_point_flux",
+    "wall_point_flux",
+    "diverted",
+)
+#: The fitted positions. These are the output of a least-squares solve, which
+#: is the one place the backend rather than the formulation decides the last
+#: bit, so they are read against the floor measured below.
+FITTED_STATE = ("axis", "boundary", "x_point", "wall_point")
+
+
+def _fit_reproducibility_floor(null, psi_grid):
+    """Return how far the sub-cell fit moves when only its batching changes.
+
+    The same least-squares fit is driven over the same clusters three ways —
+    both null types mapped together, one type at a time, and one cluster at a
+    time with no batch axis anywhere — so anything separating them is the
+    backend's scheduling of identical arithmetic rather than a difference in
+    what is computed. The unbatched arm matters most: mapping a fit and
+    serialising it is exactly the rearrangement the assertions below are
+    reading. A backend that schedules a batch the same way at every width
+    returns exactly zero, and those assertions then read as bit-identity.
+    """
+    psi_stencil = jnp.asarray(psi_grid, dtype=null.fit_dtype)[null.stencil]
+    number, cluster, origin, scale = null.categorize(psi_stencil)
+
+    @jax.jit
+    def one(single, single_origin, single_scale):
+        """Fit exactly one cluster, with no batch axis anywhere."""
+        local = select.traced_subnull(single[:, 0], single[:, 1], single[:, 2])
+        physical = single_origin + local[:2].astype(jnp.float64) * single_scale
+        return jnp.concatenate((physical, local[2:].astype(jnp.float64)))
+
+    kinds = range(number.shape[0])
+    mapped = np.asarray(
+        jax.vmap(null.interpolate, (0, 0, 0, 0))(number, cluster, origin, scale)
+    )
+    arrangement = [
+        np.stack(
+            [
+                np.asarray(
+                    null.interpolate(
+                        number[kind], cluster[kind], origin[kind], scale[kind]
+                    )
+                )
+                for kind in kinds
+            ]
+        ),
+        np.stack(
+            [
+                np.stack(
+                    [
+                        np.asarray(
+                            one(cluster[kind, i], origin[kind, i], scale[kind, i])
+                        )
+                        for i in range(cluster.shape[1])
+                    ]
+                )
+                for kind in kinds
+            ]
+        ),
+    ]
+    floor = 0.0
+    for other in arrangement:
+        finite = np.isfinite(mapped) & np.isfinite(other)
+        floor = max(floor, float(np.max(np.where(finite, np.abs(mapped - other), 0.0))))
+    return floor
+
+
+def test_the_topology_read_matches_a_traversed_formulation(diverted):
+    """Every quantity the read publishes matches the traversal it stands for.
 
     The crossing count, the sub-cell fit selection and the axis connectivity
     cut are each evaluated over the whole grid at once rather than walked, and
     every one of those rearrangements is value-preserving by construction: a
     ring's crossing count depends on no other ring, a cluster's position in the
     padded selection is known without carrying it, and a half-plane cut can
-    only remove cells. Nothing here is a tolerance — a difference in the last
-    bit of the normalised flux would mean one of those three claims is false.
+    only remove cells. So the labels, the normalised flux and every flux the
+    read publishes are required to be bit-identical, with no tolerance
+    anywhere — a difference in the last bit of any of them would mean one of
+    those three claims is false.
+
+    The fitted positions are the exception, and not because the claim is weaker
+    there: a least-squares solve is the one step whose last bit the backend
+    decides, and on an accelerator the same solve over the same clusters lands
+    differently at two batch widths. They are therefore held to the floor that
+    self-disagreement measures, which is zero wherever the backend is
+    batch-reproducible.
     """
     topology, psi, inside = diverted
     polarity = 1
+    floor = _fit_reproducibility_floor(topology.grid, topology.split_flux_map(psi)[0])
 
     masks, state = topology.read(psi, polarity, inside)
     reference_masks, reference_state = _traversed_read(topology, psi, polarity, inside)
@@ -372,23 +455,48 @@ def test_the_topology_read_is_identical_to_a_traversed_formulation(diverted):
     np.testing.assert_array_equal(
         np.asarray(masks.psi_norm), np.asarray(reference_masks.psi_norm)
     )
-    for field in TopologyState._fields:
+    for field in DECIDING_STATE:
         np.testing.assert_array_equal(
             np.asarray(getattr(state, field)),
             np.asarray(getattr(reference_state, field)),
             err_msg=field,
         )
+    for field in FITTED_STATE:
+        deviation = float(
+            np.max(
+                np.abs(
+                    np.asarray(getattr(state, field))
+                    - np.asarray(getattr(reference_state, field))
+                )
+            )
+        )
+        assert deviation <= floor, (field, deviation, floor)
 
 
-def test_the_null_tables_are_identical_to_a_traversed_formulation(diverted):
-    """The located nulls themselves match, padding rows included."""
+def test_the_null_tables_match_a_traversed_formulation(diverted):
+    """The located nulls themselves match, padding rows included.
+
+    Which rings were selected, and the flux and classification the fit returns
+    on them, are bit-identical; the fitted coordinates are held to the same
+    backend floor the published positions are.
+    """
     topology, psi, _ = diverted
     psi_grid = topology.split_flux_map(psi)[0]
+    floor = _fit_reproducibility_floor(topology.grid, psi_grid)
 
     for located, reference in zip(
         topology.grid(psi_grid), _traversed_nulls(topology.grid, psi_grid)
     ):
-        np.testing.assert_array_equal(np.asarray(located), np.asarray(reference))
+        located = np.asarray(located)
+        reference = np.asarray(reference)
+        np.testing.assert_array_equal(
+            np.isfinite(located), np.isfinite(reference), err_msg="selection"
+        )
+        np.testing.assert_array_equal(
+            located[:, 2:], reference[:, 2:], err_msg="flux and classification"
+        )
+        difference = np.abs(located[:, :2] - reference[:, :2])
+        assert np.nanmax(np.where(np.isnan(difference), 0.0, difference)) <= floor
 
 
 def test_topology_tree_roundtrip_preserves_null_kernels(topology):

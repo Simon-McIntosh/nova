@@ -40,7 +40,9 @@ def test_normalized_single_precision_reconstructs_iter_scale_null():
     """The local fp32 fit retains a precise physical-coordinate reconstruction."""
     configure_dtypes()
     coordinate, stencil = _geometry()
-    locator = Null2D.from_coordinates(coordinate, stencil, maxsize=1)
+    locator = Null2D.from_coordinates(
+        coordinate, stencil, maxsize=1, precision=Precision.SINGLE
+    )
     reference = Null2D.from_coordinates(
         coordinate, stencil, maxsize=1, precision=Precision.DOUBLE
     )
@@ -88,6 +90,22 @@ def test_normalized_single_precision_reconstructs_iter_scale_null():
     assert result[0, 3] == 0
 
 
+def test_an_unqualified_locator_fits_on_the_double_ladder():
+    """The fit dtype a locator defaults to is the ladder its flux reads land on.
+
+    Everything read through the locator — the null flux, and whatever is
+    normalised against it — is quantised at one step of this dtype, so the
+    unqualified fit is the one that keeps that step at the arithmetic floor.
+    """
+    configure_dtypes()
+    coordinate, stencil = _geometry()
+    locator = Null2D.from_coordinates(coordinate, stencil, maxsize=1)
+
+    assert locator.precision is Precision.DOUBLE
+    assert locator.fit_dtype == jnp.float64
+    assert locator.local_coordinate_stencil.dtype == jnp.float64
+
+
 def test_absolute_fp32_geometry_is_rejected_before_normalization():
     """Centering cannot recover coordinate information already lost to fp32."""
     configure_dtypes()
@@ -101,7 +119,11 @@ def test_tree_roundtrip_preserves_normalized_geometry_and_precision():
     """Pytree reconstruction retains fit data, metadata, and static capacity."""
     configure_dtypes()
     coordinate, stencil = _geometry()
-    locator = Null2D.from_coordinates(coordinate, stencil, maxsize=3)
+    # a locator built off the default: a roundtrip that reconstructed the
+    # default instead of carrying the selection would look identical otherwise
+    locator = Null2D.from_coordinates(
+        coordinate, stencil, maxsize=3, precision=Precision.SINGLE
+    )
 
     leaves, structure = jax.tree_util.tree_flatten(locator)
     restored = jax.tree_util.tree_unflatten(structure, leaves)

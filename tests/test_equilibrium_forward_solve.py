@@ -15,16 +15,20 @@ no current — and a source driven only just hard enough to reach the limiter
 sits on a fold between the two. The seed policy, not the accelerator, decides
 which branch a solve lands on; both branches are pinned below.
 
-How deep any route can drive the map is set by one read. The source is
+How deep any route can drive the map is set by the finest flux difference the
+map can express, and two mechanisms compete to set it. The source is
 normalised against the axis-to-boundary flux span, and the axis flux comes
-from a single-precision sub-cell fit of the grid stencil, so it is only ever
-known on a float32 ladder: below one step of that ladder the map cannot
-resolve its own progress. Everything downstream — the residual, the plasma
-current, the moments — inherits that step, so the pins that touch the
-convergence floor are written against it rather than against a fixed depth.
-Where a route stops inside the resulting band is decided by rounding far
-beneath it and is a property of the arithmetic the host emits, not of the
-equilibrium.
+from a sub-cell fit of the grid stencil, so it is only ever known on the
+ladder of that fit's dtype; everything downstream — the residual, the plasma
+current, the moments — inherits one step of it. Against that stands the
+round-off the plasma coupling accumulates, a dot product over the grid's
+nodes carrying up to that many units in the last place of the flux scale. A
+float32 fit puts its ladder decades above the sum and binds alone; a float64
+fit puts one step at a single unit in the last place and the sum binds
+instead. The pins that touch the convergence floor are written against the
+coarser of the two rather than against a fixed depth. Where a route stops
+inside the resulting band is decided by rounding far beneath it and is a
+property of the arithmetic the host emits, not of the equilibrium.
 
 Pinned here: route parity between the host root find and the accelerated
 ladder, the basin over multiple seeds, the batched ensemble solve under
@@ -86,11 +90,13 @@ CURRENT_GRADIENT_TOLERANCE = 1.0e-3
 #: it out; below about a thousandth of the conductor current that quantisation
 #: dominates and the measured error grows as the step shrinks.
 GRADIENT_STEP = 1.0e-3
-#: Relative residual the registered floor sits at. One step of the axis-flux
-#: ladder is 1.1e-7 of this machine's flux scale and the map turns a step of
-#: the normalisation into a few times that in the residual, so the stalled
-#: band runs to about five steps; the floor is registered a decade above one
-#: step, clear of the band and still far under the transient it terminates.
+#: Relative residual the registered early-exit floor sits at. It has to clear
+#: the band the relaxed step stalls in and stay far under the transient it
+#: terminates. That band moves with the fit dtype — seven decades between a
+#: float32 fit, whose ladder step is 1.1e-7 of this machine's flux scale, and
+#: a float64 one, which stalls on the coupling sum's round-off near 1.3e-13 —
+#: so the floor is registered against the coarser of the two and bounds the
+#: stall under either.
 QUANTISATION_FLOOR = 1.0e-6
 #: Contraction ``TRANSIENT`` evaluations buy while the iterate still moves the
 #: axis read, and the factor the same count of evaluations is allowed to move
@@ -99,17 +105,18 @@ QUANTISATION_FLOOR = 1.0e-6
 #: of one run, which no single depth could express.
 TRANSIENT_CONTRACTION = 1.0e3
 STALL_CONTRACTION = 1.0e2
-#: Ladder steps the stalled residual band is required to span. A step in the
-#: axis flux shifts the whole normalised profile, and the current change that
-#: produces re-enters the residual amplified by a factor of order unity to
-#: ten; the band brackets that amplification over two decades rather than
-#: predicting it, and separates the stall from both round-off and the
-#: transient above it.
-STALL_BAND = (0.5, 50.0)
-#: Ladder steps the Krylov root find's absolute residual target is set at. A
-#: target under one step asks for a flux difference the axis read cannot
-#: express; eight clears the few steps one solve was measured to move it by.
-ROOT_FIND_LADDER_STEPS = 8
+#: Multiples of the solve's flux resolution the stalled residual band is
+#: required to span. Whichever mechanism sets that resolution re-enters the
+#: residual amplified by a factor of order unity: a step of the axis ladder
+#: shifts the whole normalised profile, and the coupling sum's round-off is
+#: already measured in the residual's own units. The band brackets that
+#: amplification over two decades rather than predicting it, and separates
+#: the stall from both round-off and the transient above it.
+STALL_BAND = (0.1, 10.0)
+#: Multiples of the flux resolution the Krylov root find's absolute residual
+#: target is set at. A target under one asks for a flux difference the map
+#: cannot express; eight clears the few the solve was measured to move by.
+ROOT_FIND_RESOLUTION_STEPS = 8
 #: Agreement between the host and traced relaxed steps over the transient.
 #: Both accumulate the same fp64 arithmetic, but the traced loop is free to
 #: reassociate it, so the two drift apart at the round-off amplification of
@@ -253,15 +260,36 @@ def _relative(left, right, scale):
     return float(jnp.max(jnp.abs(left - right))) / float(scale)
 
 
-def _normalisation_quantum(equilibrium):
+def _fit_dtype(profile):
+    """Return the dtype the grid locator fits its sub-cell nulls in."""
+    return np.dtype(profile.operator.grid.null.fit_dtype)
+
+
+def _normalisation_quantum(profile, equilibrium):
     """Return the flux [Wb] one step of the axis-flux read carries.
 
-    The magnetic axis is fitted in single precision, so the axis flux the
-    source is normalised against lands on a float32 ladder. The step of that
-    ladder at this equilibrium's axis flux is the finest flux difference
-    anything downstream of the normalisation can express.
+    The magnetic axis is fitted in the locator's own dtype, so the axis flux
+    the source is normalised against lands on that dtype's ladder. The step
+    of that ladder at this equilibrium's axis flux is the finest flux
+    difference the normalisation itself can express.
     """
-    return float(np.spacing(np.float32(float(equilibrium.topology.axis_flux))))
+    axis_flux = float(equilibrium.topology.axis_flux)
+    return float(np.spacing(_fit_dtype(profile).type(axis_flux)))
+
+
+def _flux_resolution(profile, equilibrium, scale):
+    """Return the finest flux difference [Wb] the whole solve can express.
+
+    Two floors compete and the coarser one binds. One is a step of the
+    axis-flux ladder. The other is the round-off the plasma coupling
+    accumulates: every residual entry is a dot product over the grid's nodes,
+    so it carries up to that many units in the last place of the flux scale.
+    A float32 fit puts its ladder decades above the sum and binds alone; a
+    float64 fit puts one step at a single unit in the last place, underneath
+    the sum, and the sum binds instead.
+    """
+    accumulation = profile.operator.grid.node_number * float(np.spacing(float(scale)))
+    return max(_normalisation_quantum(profile, equilibrium), accumulation)
 
 
 def test_the_accelerated_solve_reaches_its_fixed_point(converged):
@@ -348,31 +376,36 @@ def test_the_host_iteration_reproduces_the_traced_ladder(machine, converged):
     assert type(host.domains) is type(traced.domains)
 
 
-def test_the_relaxed_iteration_floors_at_the_normalisation_ladder(converged, relaxed):
-    """The relaxed step stalls where the normalisation read is quantised.
+def test_the_relaxed_iteration_floors_at_the_flux_resolution(
+    machine, converged, relaxed
+):
+    """The relaxed step stalls where the map stops resolving its own progress.
 
-    Once an iterate moves the magnetic axis by less than one step of the
-    fit's float32 ladder, the map stops resolving its own progress: the
-    relaxed step cycles between neighbouring reads of the same equilibrium
-    instead of contracting, and the residual settles into a band a few
-    ladder steps wide. The stall is read as a contrast between two windows
-    of equal length — the transient buys orders of magnitude, the tail buys
-    nothing — because the depth a run stops at inside the band is set by
-    rounding below the ladder and is not a property of the equilibrium.
+    Once an iterate moves the flux by less than the map can express — one
+    step of the fit's ladder, or the round-off its coupling sum accumulates,
+    whichever is coarser — the relaxed step cycles between neighbouring reads
+    of the same equilibrium instead of contracting, and the residual settles
+    into a band a small multiple of that resolution wide. The stall is read
+    as a contrast between two windows of equal length — the transient buys
+    orders of magnitude, the tail buys nothing — because the depth a run
+    stops at inside the band is set by rounding below the resolution and is
+    not a property of the equilibrium.
     """
+    profile, _seed, _vacuum = machine
     trace = np.asarray(relaxed.fixed_point.trace)
     scale = jnp.max(jnp.abs(converged.flux))
     axis_flux = float(relaxed.topology.axis_flux)
     # cast the narrowed value back to a Python float before comparing: a
-    # float32 scalar compared against a Python float takes the narrow dtype
+    # narrow scalar compared against a Python float takes the narrow dtype
     # for the comparison and would report every value as representable
-    assert float(np.float32(axis_flux)) == axis_flux, "the axis flux is on the ladder"
-    ladder_step = _normalisation_quantum(relaxed) / float(scale)
+    narrowed = float(_fit_dtype(profile).type(axis_flux))
+    assert narrowed == axis_flux, "the axis flux is on the fit's ladder"
+    resolution = _flux_resolution(profile, relaxed, scale) / float(scale)
 
     assert trace[0] / trace[TRANSIENT - 1] > TRANSIENT_CONTRACTION
     stalled = trace[-TRANSIENT:]
     assert 1.0 / STALL_CONTRACTION < stalled[0] / stalled[-1] < STALL_CONTRACTION
-    assert STALL_BAND[0] < stalled.max() / ladder_step < STALL_BAND[1]
+    assert STALL_BAND[0] < stalled.max() / resolution < STALL_BAND[1]
     assert stalled.max() < QUANTISATION_FLOOR
     assert _relative(relaxed.flux, converged.flux, scale) < QUANTISATION_FLOOR
 
@@ -419,21 +452,23 @@ def test_the_host_root_find_holds_the_equilibrium_it_is_seeded_on(machine, conve
     the confined branch; the vacuum branch it can otherwise reach is pinned
     separately below.
 
-    The root find measures its own tolerance as an absolute sup-norm on the
-    flux residual, and that residual carries the axis flux the source is
-    normalised against. A target below one step of the axis read's ladder
-    therefore asks for a flux difference the read cannot express: the root
-    find drives the residual onto the ladder within a dozen steps and then
-    spends the rest of any budget there, so the target is set from the
-    ladder and not from a depth the map could not deliver.
+    The root find measures its own tolerance as an absolute norm on the flux
+    residual, and that residual carries both the axis flux the source is
+    normalised against and the round-off of the coupling sum that produced
+    it. A target below the resolution those two set asks for a flux
+    difference the map cannot express, and the root find exhausts its budget
+    and raises rather than returning. Seeded on a converged map it needs one
+    Krylov step, and where that step lands is decided by rounding beneath the
+    resolution, so the target is set from the resolution with enough margin
+    to hold on a host that rounds the other way.
     """
     profile, _seed, _vacuum = machine
-    # an absolute target: a relative one is measured against the seed's own
-    # residual, which is already on the ladder here and would leave the root
-    # find chasing a tolerance that shrinks with its own starting point
-    f_tol = ROOT_FIND_LADDER_STEPS * _normalisation_quantum(converged)
-    host = profile.solve(converged.flux, route="host_krylov", f_tol=f_tol, maxiter=20)
     scale = jnp.max(jnp.abs(converged.flux))
+    # an absolute target: a relative one is measured against the seed's own
+    # residual, which is already on the floor here and would leave the root
+    # find chasing a tolerance that shrinks with its own starting point
+    f_tol = ROOT_FIND_RESOLUTION_STEPS * _flux_resolution(profile, converged, scale)
+    host = profile.solve(converged.flux, route="host_krylov", f_tol=f_tol, maxiter=20)
     assert float(host.fixed_point.residual) < RESIDUAL_TOLERANCE
     assert _relative(host.flux, converged.flux, scale) < PARITY_TOLERANCE
     np.testing.assert_allclose(

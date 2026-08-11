@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="forward-profile-validator-set">
+  <meta name="plan-title"     content="Forward Profile Validator Set">
+  <meta name="plan-summary"   content="Copy the code-match cross-section of the imas-efit GHCR equilibrium store, pinned by digest, and build a banded reference-validation lane for the ForwardProfile prescribed-source solve">
+  <meta name="plan-status"    content="draft">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort"    content="M">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-depends-on" content="">
+  <title>Forward Profile Validator Set | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Why, and what already exists</h2>
+    <p><code>ForwardProfile</code> is validated today against one reference (DINA 135011/7, read live from a workstation imasdb) plus analytic fixtures. That proves the solve; it does not defend it: one machine model, one producing code, one time slice, and a data source that exists only on hosts with that imasdb. The imas-efit validator pipeline already curates exactly what a defensible lane needs — independent equilibria from non-EFIT++ codes, bundled with the machine inputs that produced them — in an OCI store at <code>ghcr.io/iterorganization/efitpp-test-data</code> (current tag <code>v0.0.14</code>, 96 layers, 285.9&nbsp;MB, layer identity via the <code>org.opencontainers.image.title</code> annotation, source of truth <code>tests/data-manifest.json</code>, per-dataset <code>dd_version</code> authoritative). Its <code>validation</code> section carries 23 equilibrium-only references whose <code>code</code> key separates simulated/code-match cases (DINA, CORSICA, ASTRA, Selene) from experimental reconstructions (NICE, LIUQE, EPM/EPQ, EQH) — the owner's scope is the former only.</p>
+    <p>Two store facts shape everything downstream. <strong>Tags are mutable and whole-bundle</strong>: <code>oras push</code> replaces the tag's entire content, so nova must pin the manifest digest (<code>sha256:7d96e70a9da74f231ab9ead5f87909cd6c394965d4900489f2e8b7a4424988c2</code> for v0.0.14) or individual layer digests, never a tag. <strong>The supported pull is whole-bundle</strong> (286&nbsp;MB via <code>efit pull</code>); a nova cross-section instead fetches single layers by digest with <code>oras blob fetch</code> (~16&nbsp;MB for the core set), which means nova writes a small fetch shim rather than reusing imas-efit's CLI. GHCR is reachable from SDCC login nodes; credentials exist in <code>~/.docker/config.json</code>; anonymous readability is unverified, so assume a token.</p>
+
+    <h2 id="s2">§2 — The cross-section</h2>
+    <p>The decisive property is <strong>time alignment</strong>: a prescribed-source solve needs coil currents sampled at the reference slice times, or it inherits an interpolation error that contaminates the comparison. Exactly three cases in the store were curated that way (the PredictMagnetics trio — coil currents sampled at the reference times to the digit), and they happen to span three producing codes on one machine at DD&nbsp;4.1.0 throughout:</p>
+    <table><thead><tr><th>Case</th><th>Code</th><th>Scenario</th><th>Ref slices</th><th>Input ⊃ ref times</th><th>Layers (input + reference)</th><th>Size</th></tr></thead><tbody>
+      <tr><td>ITER 130506</td><td>CORSICA</td><td>diverted, two X-points, flat-top, I_p −15 MA</td><td>4</td><td>4/4 exact</td><td><code>iter_corsica_130506_input.nc</code> <code>sha256:0b9f02c2…3071e5</code> + <code>iter_corsica_130506.nc</code> <code>sha256:af798541…28bb3</code></td><td>5.0 MB</td></tr>
+      <tr><td>ITER 105027</td><td>DINA</td><td>diverted lower-null, flat-top, I_p −5 MA</td><td>4</td><td>4/4 exact</td><td><code>iter_dina_105027_input.nc</code> <code>sha256:883df0b3…4fbcb</code> + <code>iter_dina_105027.nc</code> <code>sha256:d891738b…d79ae4</code></td><td>7.2 MB</td></tr>
+      <tr><td>ITER 131046</td><td>ASTRA</td><td>single slice t = 50.4 s, I_p −15 MA, ψ₂D 256×257</td><td>1</td><td>1/1 exact</td><td><code>iter_astra_131046_input.nc</code> <code>sha256:bb5910d7…6328cf</code> + <code>iter_astra_131046.nc</code> <code>sha256:9ac80c94…014ab</code></td><td>4.0 MB</td></tr>
+    </tbody></table>
+    <p>Each input bundle carries <code>pf_active</code> (14 coils, element geometry, turns, per-coil currents, circuits), <code>pf_passive</code> (103–210 loops), the 57-point limiter, and synthesized magnetics; each reference carries ψ₂D, p′ and FF′, boundary outline, and the global scalars (I_p, ψ_axis as <code>psi_magnetic_axis</code> — the DDv4 name; <code>psi_axis</code> reads the −9e40 empty sentinel). The analytic pair (<code>analytic.nc</code>/<code>analytic-dd4-1-0.nc</code>, 0.15&nbsp;MB) joins as the sub-second smoke rung. Optional breadth, behind the open decision: the TCV DINA pair (~12&nbsp;MB, DD 3.39.0 — a 0.3&nbsp;m² machine that flushes ITER-scale assumptions) and dina3420 (460 ramp-up slices, 41&nbsp;MB, DD 3.42.0, no pf_passive). <strong>Excluded with reasons</strong>: every experimental reconstruction (out of scope by the owner's directive); JT-60SA Selene (no ψ₂D, no p′/FF′, no ψ scalars, quarantine-flagged — too thin to validate a forward solve); 135013 as shipped (its input bundle covers 74.9–85.9&nbsp;s while its reference covers 430.9–529.9&nbsp;s — usable only via the <code>_raw</code>/full-pulse bundles with interpolated currents, which forfeits the time-alignment property).</p>
+
+    <h2 id="s3">§3 — Fetch, pinning, and storage</h2>
+    <p>A small fetch module (shaped on the norma corpus resolver, nova's working OCI precedent) pulls the named layers by digest into a local cache root, verifies each blob's sha256, converts NC→HDF5 the way imas-efit's <code>nc2hdf5</code> does (per-case directory with <code>master.h5</code>; read via <code>imas.DBEntry("imas:hdf5?path=…", "r", dd_version=…)</code> with the per-dataset DD from the pinned manifest), and exposes a pulse-availability gate so the validator modules skip cleanly when the store is unreachable — the pattern <code>tests/test_equilibrium_forward_reference.py</code> already uses. The reference record is a checked-in manifest of layer digests + DD versions + case metadata; the mutable tag never appears in code. Republishing under a nova-owned repository is explicitly deferred: the equilibria originate from named colleagues' imasdb areas and redistribution consent is undocumented — consuming the existing imas-efit store needs no consent, republication does. If a nova-owned store is later wanted, the content-addressed <code>mast_artifact</code> convention (semantic identity separate from manifest digest) is the model, not mutable tags.</p>
+
+    <h2 id="s4">§4 — The gate architecture</h2>
+    <p>Adapt the imas-efit comparator's structure, not its code: per-quantity absolute bands in physics units checked into the test module (its LOOSE band is the cross-code floor — axis 0.20&nbsp;m, I_p 200&nbsp;kA, ψ scalars 5&nbsp;Wb, q95 2.0), with <strong>scale-aware relaxation</strong> for extensive quantities (I_p at 1.5% of |I_p|, ψ family at 5% of the gauge-invariant flux depth — an absolute 200&nbsp;kA floor is tighter than legitimate cross-code agreement on ITER while correct on TCV). The ψ₂D map compares [0,1]-normalised over the domain (absorbing gauge and 2π but deliberately not sign) with an <em>absolute cross-section area guard</em> beside it, because normalisation absorbs gross contraction — imas-efit's area check is what caught two of its own rails 17–43% low. Three imas-efit lessons carry over verbatim: q_axis/β_p/l_i are extracted and reported but not gated (cross-code they differ by 0.4–0.55 on good equilibria); reference-free containment gates run even when the comparison does (axis inside wall, axis inside its own LCFS, LCFS area ≥ half its bounding box, minor radius floor); and bands only ever tighten. Nova adds what imas-efit cannot: the solve's own receipts as gates — conservation residuals within registered tolerances, the current ledger exactly zero outside declared support, the normalisation record absolute, and the non-contraction pin (the NK route holds equilibria whose map eigenvalue exceeds one). Per-case figures land with the first passing run: the coil geometry + reference-boundary overlay and a p′/FF′ panel per case (both one matplotlib pass over data already fetched).</p>
+
+    <h2 id="s5">§5 — Sequencing and exclusions</h2>
+    <p>Rungs, each independently landable: (1) the fetch shim + pinned manifest + analytic smoke rung; (2) CORSICA 130506 end-to-end — fetch, build the machine from the input bundle's own IDSs, solve all four slices under the shipped defaults, gate at the adapted LOOSE band, land figures; (3) DINA 105027 and ASTRA 131046 (the 256×257 reference is the resolution contrast); (4) the band-tightening study — where nova's deviations sit against LOOSE/MEDIUM per quantity, and which quantities can promote (the existing 135011/7 module's tolerances already sit between the two); (5) optional breadth per the open decision. This plan copies data and builds gates; it does not modify the solve (deviations become findings, not tuning), does not consume experimental reconstructions, does not republish anything to GHCR, and does not port imas-efit's comparator code wholesale — the bands and structural rules are re-derived in nova's own test idiom with the receipts alongside.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="store-strategy" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">How does nova reference the equilibria? Recommendation: consume the imas-efit store by pinned layer digest now; revisit a nova-owned content-addressed store only if redistribution consent is obtained and the imas-efit tag proves unstable.</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="consume-by-digest">consume imas-efit layers by digest</button>
+          <button class="r-opt" data-value="recurate-from-upstream">re-curate from the upstream imasdb areas</button>
+          <button class="r-opt" data-value="republish-content-addressed">republish to a nova-owned content-addressed store</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="cross-section-breadth" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Does the first landing include a second machine? Recommendation: land the ITER trio first; add the TCV DINA pair as rung 5 once the gates are proven, for the machine-scale contrast.</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="iter-trio-only">ITER trio + analytic only</button>
+          <button class="r-opt" data-value="add-tcv">add the TCV DINA pair</button>
+          <button class="r-opt" data-value="add-tcv-and-dina3420">add TCV and the dina3420 ramp-up set</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-fpv-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-11" data-recommends-skill="/reckon-ship forward-profile-validator-set §5" data-resolved-at="" data-resolved-by="">
+        <h4 class="r-fu-title">Land the fetch shim, the pinned manifest, and the CORSICA rung</h4>
+        <div class="r-fu-body"><p>Rungs 1 and 2 of §5: the digest-pinned fetch module with its availability gate and the analytic smoke case, then CORSICA 130506 solved end-to-end at all four slices under the adapted LOOSE band with the per-case figures. The two §&nbsp;Decisions should be locked (or explicitly defaulted to the recommendations) before rung 3 broadens the set.</p></div>
+        <pre class="r-fu-prompt">/reckon-ship forward-profile-validator-set §5</pre>
+      </article>
+    </section>
+
+  </main>
+</body>
+</html>

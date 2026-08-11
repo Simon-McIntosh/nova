@@ -10,10 +10,12 @@ produced with.
 
 Nothing here is fitted. The pressure and diamagnetic gradients are the
 reference case's own tabulated profiles, read as absolute flux functions; the
-conductor currents are the reference case's own coil currents. The solve is
-then asked to reproduce the reference flux map, boundary, plasma current,
-poloidal beta and internal inductance from those inputs alone, and the
-deviations are the measurement.
+conductor currents are the reference case's own, and every conductor the entry
+declares carries one — the twelve wound poloidal field packs, the two skewed
+in-vessel stabilisation plates, and the hundred and three passive loops of the
+vessel and the structure inside it. The solve is then asked to reproduce the
+reference flux map, boundary, plasma current, poloidal beta and internal
+inductance from those inputs alone, and the deviations are the measurement.
 
 Two conventions have to be crossed to do that, and both are pinned by
 construction rather than by a fitted factor:
@@ -61,7 +63,37 @@ fit instead. Neither is calibrated against the other and they agree to one
 percent, which is what turns the internal inductance into a measurement rather
 than a restatement of the source.
 
-Two results shaped the rest of the module and are worth stating up front.
+A few results shaped the rest of the module and are worth stating up front.
+
+The passive structure is in the machine, and is not the deviation floor.
+    The entry declares a hundred and three passive loops carrying 14.9 kA
+    between them at this slice, and every one of them reaches the coupling.
+    Reaching it takes reading a section the machine descriptions here do not
+    otherwise use: all but one of the loops declare a SKEWED cross-section, as
+    does the in-vessel stabilisation pair among the driven coils, so a reader
+    that resolves only rectangles finds no conductor at all in either family
+    and silently models a different machine. Both are read through the
+    parallelogram the entry itself declares.
+
+    What that is worth is measured twice over. Before any solve, the flux the
+    passive currents put on the plasma cells is a matrix-vector product, and it
+    comes to 0.093 percent of the axis to boundary span against the 0.958
+    percent by which the stored map misses being a fixed point of this
+    machine. After the solve, the deviation between the solved and the stored
+    flux map falls from 1.499 to 1.401 percent of that span, and the solved
+    magnetic axis comes from 11.3 mm inboard and 5.4 mm above the stored one to
+    9.6 mm inboard and 3.2 mm above. The two measurements agree, which is
+    itself a result: the free-boundary map amplifies almost nothing here, so
+    what came out is what went in.
+
+    The reading is therefore a falsification rather than a closure. The passive
+    currents are real and belong in the machine, but the closure is worth six
+    percent of the deviation it was supposed to explain, so more than nine
+    tenths of that deviation is something else; and since the map does not
+    amplify, no small excluded current elsewhere could be it either. Closing
+    what remains needs a source an order larger than anything the entry still
+    has to give, which points at how the currents that ARE declared are
+    distributed rather than at a conductor that is missing.
 
 The route is a root find because the map does not contract.
     An elongated diverted column held at fixed conductor currents is
@@ -163,11 +195,14 @@ with skip_import("jax"):
 with skip_import("imas"):
     import imas
 
+    from nova.imas.machine import Oblique
+
 #: Stored equilibrium the demonstration reproduces. The scenario pulse carries
-#: its own machine description — the poloidal field coil rectangles and turn
-#: counts, the first wall contour, and the coil current waveforms — so geometry,
-#: drive and reference come from one entry and cannot disagree about the
-#: machine. The slice is a flat-top diverted burn point.
+#: its own machine description — the conductor sections and turn counts of both
+#: the driven coils and the passive structure, the first wall contour, and every
+#: current waveform on one time base — so geometry, drive and reference come
+#: from one entry and cannot disagree about the machine. The slice is a flat-top
+#: diverted burn point.
 PULSE, RUN, MACHINE = 135011, 7, "iter"
 DD_VERSION = "3.39.0"
 TIME_SLICE = 353
@@ -193,6 +228,23 @@ EVIDENCE_CELLS = -1500
 #: contour's own vertex count.
 COIL_FILAMENTS = -25
 WALL_NODES = 3
+#: Elements each passive loop is decomposed into. The request is the coarsest
+#: the inserter takes, which tiles most plates into three or four pieces and a
+#: quarter of them into one. What justifies the coarseness is not that a plate
+#: is thin against the mesh — it is not, at 3 to 128 mm against a 137 to
+#: 237 mm cell pitch — but that the whole passive family contributes a tenth
+#: of a percent of the flux span at the plasma cells, so how its current is
+#: distributed WITHIN a plate is a correction to a term that is already an
+#: order below the deviation being chased. What the decomposition may not do
+#: is change the footprint, and that is asserted: every element's tiles sum to
+#: the area its own section declares.
+PASSIVE_ELEMENTS = -1
+
+#: Poloidal cross-section codes the entry's conductor elements declare, from
+#: the data dictionary's ``geometry_type`` enumeration. This pulse uses only
+#: these two and anything else is refused rather than approximated, because a
+#: conductor dropped for want of a section is a silent change of machine.
+RECTANGLE_SECTION, OBLIQUE_SECTION = 2, 3
 
 #: Root-find budget. Each Newton step linearises the map once and solves
 #: ``(I - J) s = f`` in a fixed-shape Krylov space, which is what lets it hold
@@ -235,6 +287,22 @@ MOMENT_TOLERANCE = 0.08
 #: selection, so a boundary that lands one cell in or out is exact at this
 #: resolution.
 BOUNDARY_PITCHES = 1.5
+
+#: Agreement between the area a conductor's tiles carry and the area its own
+#: section declares. The floor is the tiler's arithmetic, not the model: the
+#: worst element of the hundred and seventeen reproduces its declared area to
+#: 3.6e-7 relative, and a conductor tiled into the wrong footprint would miss
+#: by a percent or more.
+AREA_TOLERANCE = 1.0e-5
+#: Ceiling on the flux the passive structure alone puts on the plasma cells,
+#: as a fraction of the axis to boundary span. Measured 9.3e-4 — a tenth of a
+#: percent — on the suite mesh.
+PASSIVE_FLUX_CEILING = 2.0e-3
+#: How far the stored map's own free-boundary residual has to exceed that
+#: contribution for the passive structure to be excluded as the deviation
+#: floor. Measured 10.3 on the suite mesh, so the structure is an order too
+#: small; this pin keeps the claim at "an order" with room to spare.
+PASSIVE_SHORTFALL = 5.0
 
 #: Agreement between the current the tabulated gradients imply on the stored
 #: boundary and the stored plasma current. This is the convention pin, not a
@@ -299,6 +367,105 @@ FIGURE_DIRECTORY = (
 # --------------------------------------------------------------------------
 # the stored reference
 # --------------------------------------------------------------------------
+@dataclass(frozen=True, eq=False)
+class Conductor:
+    """One conductor element of the reference machine and its slice current.
+
+    An axis-aligned element is carried as the four scalars the entry declares
+    and a skewed one as the vertex loop its parallelogram resolves to, because
+    the two take different insert paths and a parallelogram has no faithful
+    ``(width, height)`` reading. Exactly one of the two is set.
+    """
+
+    name: str
+    current: float
+    turns: float
+    rectangle: tuple[float, float, float, float] | None = None
+    polygon: np.ndarray | None = None
+
+    @property
+    def placement(self) -> tuple:
+        """Return the positional arguments the element's insert path takes."""
+        if self.rectangle is not None:
+            return self.rectangle
+        return (self.polygon,)
+
+    @property
+    def declared_area(self) -> float:
+        """Return the cross-section area [m^2] the entry declares for it."""
+        if self.rectangle is not None:
+            return self.rectangle[2] * self.rectangle[3]
+        radius, height = self.polygon[:, 0], self.polygon[:, 1]
+        return 0.5 * abs(
+            np.dot(radius, np.roll(height, -1)) - np.dot(height, np.roll(radius, -1))
+        )
+
+
+def _oblique_polygon(geometry) -> np.ndarray:
+    """Return the parallelogram vertices one oblique element declares.
+
+    The reading is the package's own, :class:`nova.imas.machine.Oblique`, and
+    two of its choices are worth stating because neither is guessable from the
+    field names. ``(r, z)`` is a CORNER of the parallelogram rather than its
+    centre, and the two angles are referred to DIFFERENT axes: ``alpha`` turns
+    the first side off the major radius axis while ``beta`` turns the second
+    off the height axis, so an axis-aligned plate appears as ``alpha = pi``
+    with ``beta = 0`` rather than as a right angle between the two.
+
+    Neither choice can be pinned from this entry, and the obvious geometric
+    tests do not separate them: reading ``(r, z)`` as the centre instead
+    displaces every plate by half its own diagonal — a median 0.28 m, which is
+    of order the cell pitch — yet leaves the inventory equally clear of the
+    first wall (no plate meets it either way) and no more self-overlapped
+    (0.006 of 3.40 m^2 shared, both ways). The vessel plates are packed close
+    enough that a shift of that size lands them back among their neighbours.
+
+    What makes the ambiguity tolerable is therefore not that the two readings
+    are distinguishable but that the answer does not turn on it. The passive
+    structure's whole contribution to the flux at the plasma cells is a tenth
+    of a percent of the flux span, an order below the deviation this module
+    measures, so no rearrangement of it within its own footprint reaches the
+    quantity being chased.
+    """
+    return np.asarray(
+        Oblique(
+            None,
+            {
+                name: float(getattr(geometry.oblique, name))
+                for name in ("r", "z", "length_alpha", "length_beta", "alpha", "beta")
+            },
+        ).poly.exterior.coords
+    )[:-1]
+
+
+def _conductor(name, geometry, current, turns) -> Conductor | None:
+    """Return one placed conductor element, or ``None`` if the entry places none."""
+    section = int(geometry.geometry_type)
+    if section == RECTANGLE_SECTION:
+        rectangle = geometry.rectangle
+        if float(rectangle.width) <= 0.0:
+            return None
+        return Conductor(
+            name=name,
+            current=current,
+            turns=turns,
+            rectangle=(
+                float(rectangle.r),
+                float(rectangle.z),
+                float(rectangle.width),
+                float(rectangle.height),
+            ),
+        )
+    if section == OBLIQUE_SECTION:
+        return Conductor(
+            name=name,
+            current=current,
+            turns=turns,
+            polygon=_oblique_polygon(geometry),
+        )
+    raise ValueError(f"conductor {name} declares unsupported section {section}")
+
+
 #: ``eq=False`` keeps the identity hash: the fields are arrays, so a generated
 #: ``__eq__``/``__hash__`` pair could not be evaluated, and the memoised
 #: quadrature below needs the instance to be hashable.
@@ -325,14 +492,21 @@ class ReferenceCase:
     separatrix: np.ndarray
     x_point: np.ndarray
     wall: np.ndarray
-    coil_name: tuple[str, ...]
-    coil_current: np.ndarray
-    coil_turn: np.ndarray
-    coil_geometry: np.ndarray
+    active: tuple[Conductor, ...]
+    passive: tuple[Conductor, ...]
     unplaced: tuple[tuple[str, float], ...]
     grid_radius: np.ndarray
     grid_height: np.ndarray
     grid_flux: np.ndarray
+
+    def drive(self, passive: bool = True) -> tuple[Conductor, ...]:
+        """Return the conductor elements one machine model carries.
+
+        The driven coils are always present. The passive structure is a model
+        choice, kept switchable because whether it belongs in the machine is
+        the question the deviation table below answers.
+        """
+        return self.active + (self.passive if passive else ())
 
     @property
     def flux_span(self) -> float:
@@ -409,12 +583,61 @@ def _uri(user: str) -> str:
     )
 
 
+def _read_active(coils) -> tuple[list[Conductor], list[tuple[str, float]]]:
+    """Return the driven conductor elements and any the entry does not place.
+
+    A coil wound in two symmetric packs declares one current and two elements
+    carrying opposite turn signs, so the sign travels with the element and the
+    magnitude with the coil.
+    """
+    placed, unplaced = [], []
+    for coil in coils.coil:
+        current = float(np.asarray(coil.current.data)[TIME_SLICE])
+        found = False
+        for position, element in enumerate(coil.element):
+            turns = float(element.turns_with_sign)
+            label = str(coil.name)
+            if len(coil.element) > 1:
+                label = f"{label}{'UL'[position]}"
+            conductor = _conductor(
+                label, element.geometry, current * np.sign(turns), abs(turns)
+            )
+            if conductor is None:
+                continue
+            placed.append(conductor)
+            found = True
+        if not found:
+            unplaced.append((str(coil.name), current))
+    return placed, unplaced
+
+
+def _read_passive(loops) -> list[Conductor]:
+    """Return the passive structure elements and the currents they carry.
+
+    Every loop in this entry carries exactly one element, so the loop current
+    is the element current and no distribution over a pack is implied.
+    """
+    placed = []
+    for index in range(len(loops.loop)):
+        loop = loops.loop[index]
+        current = float(np.asarray(loop.current)[TIME_SLICE])
+        for element in loop.element:
+            turns = float(element.turns_with_sign)
+            conductor = _conductor(
+                str(loop.name), element.geometry, current * turns, 1.0
+            )
+            if conductor is not None:
+                placed.append(conductor)
+    return placed
+
+
 def _read_reference(user: str) -> ReferenceCase:
     """Return the stored slice, its profiles and its machine description."""
     entry = imas.DBEntry(_uri(user), "r", dd_version=DD_VERSION)
     try:
         equilibrium = entry.get("equilibrium")
         coils = entry.get("pf_active")
+        loops = entry.get("pf_passive")
         wall = entry.get("wall")
     finally:
         entry.close()
@@ -425,32 +648,7 @@ def _read_reference(user: str) -> ReferenceCase:
     flux_1d = np.asarray(profiles.psi)
     separatrix = slice_.boundary_separatrix
     surface = slice_.profiles_2d[0]
-
-    name, current, turn, geometry, unplaced = [], [], [], [], []
-    for coil in coils.coil:
-        conductor = float(np.asarray(coil.current.data)[TIME_SLICE])
-        placed = False
-        for position, element in enumerate(coil.element):
-            rectangle = element.geometry.rectangle
-            if float(rectangle.width) <= 0.0:
-                continue
-            label = str(coil.name)
-            if len(coil.element) > 1:
-                label = f"{label}{'UL'[position]}"
-            name.append(label)
-            current.append(conductor * np.sign(float(element.turns_with_sign)))
-            turn.append(abs(float(element.turns_with_sign)))
-            geometry.append(
-                (
-                    float(rectangle.r),
-                    float(rectangle.z),
-                    float(rectangle.width),
-                    float(rectangle.height),
-                )
-            )
-            placed = True
-        if not placed:
-            unplaced.append((str(coil.name), conductor))
+    active, unplaced = _read_active(coils)
 
     return ReferenceCase(
         user=user,
@@ -484,10 +682,8 @@ def _read_reference(user: str) -> ReferenceCase:
             np.asarray(wall.description_2d[0].limiter.unit[0].outline.r),
             np.asarray(wall.description_2d[0].limiter.unit[0].outline.z),
         ],
-        coil_name=tuple(name),
-        coil_current=np.asarray(current),
-        coil_turn=np.asarray(turn),
-        coil_geometry=np.asarray(geometry),
+        active=tuple(active),
+        passive=tuple(_read_passive(loops)),
         unplaced=tuple(unplaced),
         grid_radius=np.asarray(surface.grid.dim1),
         grid_height=np.asarray(surface.grid.dim2),
@@ -522,6 +718,9 @@ def require_reference() -> ReferenceCase:
 class HexMachine:
     """Machine geometry, its hexagonal plasma mesh and their couplings."""
 
+    coilset: CoilSet = field(repr=False)
+    source_current: np.ndarray
+    passive_columns: int
     node: np.ndarray
     area: np.ndarray
     hexagon: np.ndarray
@@ -533,6 +732,16 @@ class HexMachine:
     plasma_to_wall: np.ndarray
     radial_field: tuple[np.ndarray, np.ndarray]
     vertical_field: tuple[np.ndarray, np.ndarray]
+
+    @property
+    def passive_flux(self) -> np.ndarray:
+        """Return the flux [Wb] the passive structure alone puts on the cells."""
+        if self.passive_columns == 0:
+            return np.zeros(len(self.node))
+        return (
+            self.source_to_grid[:, -self.passive_columns :]
+            @ self.source_current[-self.passive_columns :]
+        )
 
     @property
     def radius(self) -> np.ndarray:
@@ -554,25 +763,34 @@ class HexMachine:
         """
         return self.stencil[self.hexagon[self.stencil].all(axis=1)]
 
-    def poloidal_field_squared(self, coil_current, cell_current) -> jnp.ndarray:
+    def poloidal_field_squared(self, source_current, cell_current) -> jnp.ndarray:
         """Return the squared poloidal field [T^2] the two sources produce."""
         radial = (
-            jnp.asarray(self.radial_field[0]) @ coil_current
+            jnp.asarray(self.radial_field[0]) @ source_current
             + jnp.asarray(self.radial_field[1]) @ cell_current
         )
         vertical = (
-            jnp.asarray(self.vertical_field[0]) @ coil_current
+            jnp.asarray(self.vertical_field[0]) @ source_current
             + jnp.asarray(self.vertical_field[1]) @ cell_current
         )
         return radial**2 + vertical**2
 
 
-def build_machine(case: ReferenceCase, cells: int) -> HexMachine:
+def build_machine(
+    case: ReferenceCase, cells: int, *, passive: bool = True
+) -> HexMachine:
     """Return the coilset, its hexagonal plasma mesh and their couplings.
 
     Every plasma cell is coupled through its own polygon: an interior cell is a
     hexagon and a cell the first wall cuts is the clipped polygon, both routed
     to the closed-form section kernel by the plasma grid constructor.
+
+    Both conductor families the entry declares are built the same way, through
+    the direct coilset route rather than through a machine description: a
+    rectangular element by its four scalars and a skewed one by its vertex
+    loop. The passive structure is decomposed coarsely — see
+    ``PASSIVE_ELEMENTS`` — because its plates are thin against the mesh, while
+    the driven coils keep the filament count a wound pack needs.
 
     The limiter contour is handed to the wall solve explicitly. Left to default
     it reads the plasma polygon off the SUBFRAME, which is one hexagonal cell
@@ -582,11 +800,21 @@ def build_machine(case: ReferenceCase, cells: int) -> HexMachine:
     coilset = CoilSet(
         dcoil=COIL_FILAMENTS, dplasma=cells, tplasma="hex", nwall=WALL_NODES
     )
-    for label, turn, (radius, height, width, thickness) in zip(
-        case.coil_name, case.coil_turn, case.coil_geometry
-    ):
+    drive = case.drive(passive)
+    for conductor in case.active:
         coilset.coil.insert(
-            radius, height, width, thickness, nturn=turn, part="pf", name=label
+            *conductor.placement,
+            nturn=conductor.turns,
+            part="pf",
+            name=conductor.name,
+        )
+    for conductor in case.passive if passive else ():
+        coilset.coil.insert(
+            *conductor.placement,
+            nturn=conductor.turns,
+            part="passive",
+            name=conductor.name,
+            delta=PASSIVE_ELEMENTS,
         )
     coilset.firstwall.insert(case.wall, turn="hex")
     coilset.plasmagrid.solve()
@@ -595,11 +823,15 @@ def build_machine(case: ReferenceCase, cells: int) -> HexMachine:
     grid = coilset.plasmagrid.data
     limiter = coilset.plasmawall.data
     order = [str(label) for label in np.asarray(grid.coords["source"])]
-    if order[:-1] != list(case.coil_name):
-        raise ValueError(f"coupling column order {order} is not the coil order")
+    expected = [conductor.name for conductor in drive]
+    if order[:-1] != expected:
+        raise ValueError(f"coupling column order {order} is not the conductor order")
     plasma = np.asarray(coilset.subframe.loc[:, "plasma"], dtype=bool)
     section = np.asarray(coilset.subframe.loc[:, "section"], dtype=object)[plasma]
     return HexMachine(
+        coilset=coilset,
+        source_current=np.array([conductor.current for conductor in drive]),
+        passive_columns=len(case.passive) if passive else 0,
         node=np.c_[np.asarray(grid.x), np.asarray(grid.z)].astype(float),
         area=np.asarray(coilset.aloc["plasma", "area"], dtype=float),
         hexagon=np.asarray([name == "hexagon" for name in section]),
@@ -660,7 +892,7 @@ def forward_operator(case: ReferenceCase, machine: HexMachine) -> ForwardFluxOpe
             Null1D(jnp.asarray(machine.wall_node, dtype=jnp.float64)),
         ),
         source=forward_source(case),
-        external_current=jnp.asarray(case.coil_current),
+        external_current=jnp.asarray(machine.source_current),
         area=jnp.asarray(machine.area),
         polarity=-1,
     )
@@ -780,6 +1012,57 @@ class SolvedEquilibrium:
         selected = radius[band & np.asarray(flux_map)]
         return float(selected.min()), float(selected.max())
 
+    def deviations(self) -> dict[str, float]:
+        """Return every row of the reproduction against the stored slice.
+
+        One definition, read by the closure comparison and by the evidence
+        figures alike, so a number quoted in either is the number the other
+        asserts on. The four fractional rows are percentages of their own
+        reference and the four geometric rows are millimetres; the two shape
+        moments are referred first, because the published pair and the
+        observation operator's normalise on different major radii.
+        """
+        moments = self.case.map_moments()
+        scale = self.reference_scale
+        axis = np.asarray(self.topology.axis)
+        core = np.asarray(self.masks.core)
+        height = float(self.case.axis[1])
+        inboard, outboard = self.midplane_radii(core, height)
+        band = np.abs(self.case.boundary[:, 1] - height) < 0.5
+        stored = self.case.boundary[band, 0]
+        deviation = np.max(np.abs(self.grid_flux - self.reference_flux)[core])
+        return {
+            "plasma current": 100.0
+            * (float(self.moments.plasma_current) / self.case.plasma_current - 1.0),
+            "poloidal beta": 100.0
+            * (
+                float(self.moments.poloidal_beta) * scale / moments["poloidal_beta"]
+                - 1.0
+            ),
+            "internal inductance": 100.0
+            * (
+                float(self.moments.internal_inductance)
+                * scale
+                / moments["internal_inductance"]
+                - 1.0
+            ),
+            "flux sup-norm": 100.0 * deviation / abs(self.case.flux_span),
+            "axis radius": 1e3 * (axis[0] - self.case.axis[0]),
+            "axis height": 1e3 * (axis[1] - self.case.axis[1]),
+            "inboard edge": 1e3 * (inboard - stored.min()),
+            "outboard edge": 1e3 * (outboard - stored.max()),
+        }
+
+
+#: Deviation rows carried as a percentage of their own reference; the rest of
+#: :meth:`SolvedEquilibrium.deviations` is in millimetres.
+FRACTIONAL_ROWS = (
+    "plasma current",
+    "poloidal beta",
+    "internal inductance",
+    "flux sup-norm",
+)
+
 
 def seed_flux(case: ReferenceCase, machine: HexMachine) -> jnp.ndarray:
     """Return the stored map on the plasma cells and the wall nodes."""
@@ -789,6 +1072,21 @@ def seed_flux(case: ReferenceCase, machine: HexMachine) -> jnp.ndarray:
             case.flux(machine.wall_node[:, 0], machine.wall_node[:, 1]),
         ]
     )
+
+
+def stored_map_residual(case: ReferenceCase, machine: HexMachine, core) -> float:
+    """Return how far the stored map is from a fixed point of one machine.
+
+    The stored flux map is pushed once through the free-boundary map and the
+    sup-norm of what it moves over the labelled core is read against the axis
+    to boundary span. Nothing is solved, so this is the machine model's own
+    disagreement with the reference before any solve can spread it around —
+    the yardstick any candidate missing conductor has to reach.
+    """
+    seed = seed_flux(case, machine)
+    image = forward_operator(case, machine).flux_map()(seed)
+    moved = np.asarray(image - seed)[: len(machine.node)]
+    return float(np.max(np.abs(moved)[np.asarray(core)]) / abs(case.flux_span))
 
 
 def solve(case: ReferenceCase, machine: HexMachine) -> SolvedEquilibrium:
@@ -838,33 +1136,39 @@ def solve(case: ReferenceCase, machine: HexMachine) -> SolvedEquilibrium:
     )
 
 
-@lru_cache(maxsize=2)
-def _machine(cells: int) -> tuple[ReferenceCase, HexMachine]:
+@lru_cache(maxsize=4)
+def _machine(cells: int, passive: bool) -> tuple[ReferenceCase, HexMachine]:
     """Return the reference and its production mesh at one resolution.
 
     The coupling assembly dominates the cost of this module, so the operator
     and the published solve are driven on ONE machine rather than on two
-    identical ones.
+    identical ones. Neither argument carries a default, because a default
+    would let the same machine be requested by two different call signatures
+    and the memo would then miss and build it twice.
     """
     configure_dtypes()
     case = require_reference()
-    return case, build_machine(case, cells)
+    return case, build_machine(case, cells, passive=passive)
 
 
-@lru_cache(maxsize=2)
-def _solved(cells: int) -> SolvedEquilibrium:
+@lru_cache(maxsize=4)
+def _solved(cells: int, passive: bool) -> SolvedEquilibrium:
     """Return the converged solve on one mesh resolution."""
-    return solve(*_machine(cells))
+    return solve(*_machine(cells, passive))
 
 
 @lru_cache(maxsize=2)
 def _published(cells: int):
-    """Return the published solve and its mesh at one resolution."""
-    case, machine = _machine(cells)
+    """Return the published solve and its mesh at one resolution.
+
+    The route is left at its default, so this is also where the shipped
+    default is exercised: the demonstration would not converge on a relaxed
+    one and says so through the eigenvalue measured below.
+    """
+    case, machine = _machine(cells, True)
     profile = forward_profile(case, machine)
     equilibrium = profile.solve(
         seed_flux(case, machine),
-        route="newton_krylov",
         gmres_iterations=KRYLOV_ITERATIONS,
         warmup=0,
     )
@@ -874,7 +1178,7 @@ def _published(cells: int):
 @pytest.fixture(scope="module")
 def solved() -> SolvedEquilibrium:
     """Return the converged solve on the suite mesh."""
-    return _solved(SUITE_CELLS)
+    return _solved(SUITE_CELLS, True)
 
 
 @pytest.fixture(scope="module")
@@ -923,6 +1227,113 @@ def test_the_stored_boundary_encloses_the_stored_axis():
     assert case.boundary[:, 0].min() < case.axis[0] < case.boundary[:, 0].max()
     assert abs(case.plasma_current) > 1.0e7
     assert case.flux_span > 0.0
+
+
+# --------------------------------------------------------------------------
+# the machine model, against the machine the entry declares
+# --------------------------------------------------------------------------
+def test_every_conductor_the_entry_declares_is_placed(solved):
+    """Nothing the entry carries current on is left out of the machine.
+
+    Both conductor families are read and both reach the coupling: fourteen
+    driven elements from ``pf_active`` — twelve rectangular central solenoid
+    and poloidal field packs plus the two skewed in-vessel stabilisation
+    plates — and one hundred and three passive loops from ``pf_passive``. The
+    skewed section is what makes this worth asserting rather than assuming: a
+    reader that resolves only rectangles finds no conductor in the passive
+    family and none in the stabilisation pair, and drops both without raising,
+    so the count is checked against the entry rather than against itself.
+
+    Placement is checked by area rather than by count, because a conductor
+    tiled into the wrong footprint is as wrong as one omitted, and it is the
+    area the coupling integrates over. The tile counts themselves are not
+    asserted — they are the inserter's business, and it takes most plates to
+    three or four pieces and a quarter of them to one — but the footprint is:
+    every element's tiles sum to the area its own section declares, the worst
+    of the hundred and seventeen to 3.6e-7 relative.
+    """
+    case, machine = solved.case, solved.machine
+    assert case.unplaced == (), case.unplaced
+    assert len(case.active) == 14
+    assert sum(1 for conductor in case.active if conductor.polygon is not None) == 2
+    assert len(case.passive) == 103
+    subframe = machine.coilset.subframe
+    plasma = np.asarray(subframe.loc[:, "plasma"], dtype=bool)
+    owner = np.asarray(subframe.frame, dtype=object)[~plasma]
+    area = np.asarray(subframe.loc[:, "area"], dtype=float)[~plasma]
+    for conductor in case.drive():
+        carried = float(area[owner == conductor.name].sum())
+        assert abs(carried / conductor.declared_area - 1.0) < AREA_TOLERANCE, (
+            conductor.name,
+            carried,
+        )
+
+
+def test_the_passive_structure_cannot_carry_the_reproduction_gap(solved):
+    """The leading candidate for the deviation floor is measured, and is too small.
+
+    The passive structure is the leading candidate for the deviation that
+    survives mesh refinement: a hundred and three loops carrying 14.9 kA
+    between them, close enough to the plasma to matter and easy to leave out.
+    What they are worth can be bounded without solving anything, because the
+    flux they put on the plasma cells is a direct matrix-vector product of the
+    coupling with their own currents, and it comes to 0.093 % of the axis to
+    boundary span against the 0.958 % by which the stored map misses being a
+    fixed point of this machine — short by a factor of ten.
+
+    That is a falsification, not a closure. The passive currents are real and
+    now carried, but they cannot be the floor. What remains is attributed
+    below.
+    """
+    case, machine = solved.case, solved.machine
+    assert machine.passive_columns == len(case.passive)
+    peak = float(np.max(np.abs(machine.passive_flux)) / abs(case.flux_span))
+    assert peak < PASSIVE_FLUX_CEILING, peak
+    residual = stored_map_residual(case, machine, solved.masks.core)
+    assert residual > PASSIVE_SHORTFALL * peak, (residual, peak)
+
+
+def test_the_passive_closure_moves_the_reproduction_by_a_tenth_of_a_percent():
+    """Solving both machine models is what the closure is finally worth.
+
+    The bound above is on the flux the passive currents put in. This is on
+    what comes out: the same source, the same profiles and the same mesh
+    solved twice, once with the passive structure in the machine and once
+    without.
+
+    What moves is what the structure should move, and by about what went in.
+    The deviation between the solved and the stored flux map falls from 1.499
+    to 1.401 percent of the span; the solved magnetic axis, which sits 5.4 mm
+    above and 11.3 mm inboard of the stored one, comes back to 3.2 mm above
+    and 9.6 mm inboard. The two shape moments do NOT improve — poloidal beta
+    goes from +3.44 to +3.49 percent and internal inductance from -1.81 to
+    -1.87 — and that is the honest reading rather than a blemish: at five
+    hundredths of a point they are moving by the same tenth-of-a-percent the
+    structure is worth anywhere, in whichever direction the volume integral
+    happens to take it. The midplane edge rows do not move at all, because a
+    core label is a whole-cell selection and the same cells stay in it.
+
+    Two readings follow. The passive structure belongs in the machine, because
+    a real conductor carrying real current is not a modelling choice. And it
+    is not the floor: the closure is worth six percent of the deviation it was
+    supposed to explain, so more than nine tenths of that deviation is
+    something else. The free-boundary map amplifies almost nothing here — what
+    the structure contributes to the solution is what it contributed to the
+    drive — which also says the remaining gap cannot be a small excluded
+    current anywhere: closing it needs a source an order larger, and there is
+    none left in the entry to supply one.
+    """
+    without = _solved(SUITE_CELLS, False).deviations()
+    structure = _solved(SUITE_CELLS, True).deviations()
+    closed = without["flux sup-norm"] - structure["flux sup-norm"]
+    assert 0.0 < closed < 0.25, closed
+    assert closed / without["flux sup-norm"] < 0.15, closed
+    assert structure["flux sup-norm"] > 1.0, structure["flux sup-norm"]
+    for name in ("axis radius", "axis height"):
+        assert abs(structure[name]) < abs(without[name]), name
+        assert abs(structure[name] - without[name]) < 5.0, name
+    for name in FRACTIONAL_ROWS:
+        assert abs(structure[name] - without[name]) < 0.15, name
 
 
 # --------------------------------------------------------------------------
@@ -1455,6 +1866,172 @@ def _instability_figure(figure, solved):
     lower.set_ylabel("magnetic axis $Z$ [m]")
 
 
+def _machine_panel(axes, solved, title):
+    """Draw one machine model and the equilibrium it supports.
+
+    The machine and its mesh are drawn by the package's own frame plot, which
+    renders every subframe element as its own polygon patch: the hexagonal
+    plasma cells, the filaments each wound pack is decomposed into and the
+    plates each passive loop is tiled with all appear exactly as the coupling
+    integrates them, rather than as markers standing in for them.
+    """
+    case, machine = solved.case, solved.machine
+    machine.coilset.plot(axes=axes)
+    axes.set_aspect("equal")
+    axes.tricontour(
+        machine.radius,
+        machine.node[:, 1],
+        solved.grid_flux,
+        levels=np.linspace(
+            float(solved.topology.axis_flux), float(solved.topology.boundary_flux), 9
+        ),
+        colors="C0",
+        linewidths=0.6,
+    )
+    closed = np.r_[case.boundary, case.boundary[:1]]
+    axes.plot(closed[:, 0], closed[:, 1], "--", color="C3", lw=1.4)
+    axes.plot(*np.asarray(solved.topology.axis), "o", color="C0", ms=5)
+    axes.plot(*case.axis, "x", color="C3", ms=7, mew=1.6)
+    axes.plot(*np.asarray(solved.topology.x_point), "o", color="C0", ms=5)
+    axes.plot(*case.x_point[0], "x", color="C3", ms=7, mew=1.6)
+    rows = solved.deviations()
+    axes.text(
+        0.03,
+        0.97,
+        "%d source columns\n%d core cells\nflux %.2f %% of span\naxis %+.0f, %+.0f mm"
+        % (
+            machine.source_to_grid.shape[1],
+            int(np.asarray(solved.masks.core).sum()),
+            rows["flux sup-norm"],
+            rows["axis radius"],
+            rows["axis height"],
+        ),
+        transform=axes.transAxes,
+        fontsize="x-small",
+        color="0.25",
+        va="top",
+    )
+    axes.set_title(title, fontsize="small")
+    axes.set_xlabel("$R$ [m]")
+    axes.set_ylabel("$Z$ [m]")
+
+
+def _closure_figure(figure, without, structure):
+    """Draw the two machine models the passive closure compares."""
+    axes = figure.subplots(1, 2, sharey=True)
+    _machine_panel(axes[0], without, "driven coils alone")
+    _machine_panel(axes[1], structure, "with the passive structure")
+    for height, label, colour in (
+        (0.10, "stored boundary", "C3"),
+        (0.04, "solved surfaces", "C0"),
+    ):
+        axes[0].text(
+            0.97,
+            height,
+            label,
+            transform=axes[0].transAxes,
+            color=colour,
+            fontsize="x-small",
+            ha="right",
+        )
+    axes[1].set_ylabel("")
+
+
+def _profile_figure(figure, without, structure):
+    """Draw every deviation row of the two models, and what the closure is worth.
+
+    The two upper panels are the reproduction itself, row by row and model by
+    model. The lower one is the attribution: the flux the passive structure
+    puts on the plasma cells, set against the deviation it was supposed to
+    account for. It is a decade short, which is why the closure moves the
+    upper panels so little.
+    """
+    grid = figure.add_gridspec(3, 1, height_ratios=(1.0, 1.0, 0.85))
+    model = (
+        (without, "0.62", "driven coils alone"),
+        (structure, "#2a6099", "with the passive structure"),
+    )
+    table = {label: solved.deviations() for solved, _, label in model}
+    geometric = [name for name in table[model[0][2]] if name not in FRACTIONAL_ROWS]
+    offset = 0.2
+    for position, (names, unit) in enumerate(
+        ((FRACTIONAL_ROWS, "% of reference"), (geometric, "mm"))
+    ):
+        panel = figure.add_subplot(grid[position, 0])
+        centre = np.arange(len(names))
+        for shift, (_solved, colour, label) in zip((-offset, offset), model):
+            values = [table[label][name] for name in names]
+            panel.barh(centre + shift, values, height=0.34, color=colour)
+            for row, value in zip(centre, values):
+                panel.text(
+                    value,
+                    row + shift,
+                    " %+.2f " % value,
+                    fontsize="xx-small",
+                    color=colour,
+                    va="center",
+                    ha="left" if value >= 0.0 else "right",
+                )
+            if position == 0:
+                panel.text(
+                    0.99,
+                    0.2 if shift > 0.0 else 0.06,
+                    label,
+                    transform=panel.transAxes,
+                    color=colour,
+                    fontsize="x-small",
+                    ha="right",
+                )
+        panel.axvline(0.0, color="0.4", lw=0.8)
+        panel.set_yticks(centre, names, fontsize="x-small")
+        panel.invert_yaxis()
+        panel.set_xlabel(unit, fontsize="x-small")
+        panel.tick_params(labelsize="x-small")
+        panel.margins(x=0.22)
+
+    panel = figure.add_subplot(grid[2, 0])
+    case, machine = structure.case, structure.machine
+    scale = [
+        (
+            "passive structure at the cells",
+            100.0 * float(np.max(np.abs(machine.passive_flux))) / abs(case.flux_span),
+            "#2a6099",
+        ),
+        (
+            "stored map's own residual",
+            100.0 * stored_map_residual(case, machine, structure.masks.core),
+            "0.45",
+        ),
+        (
+            "reproduction deviation",
+            table["with the passive structure"]["flux sup-norm"],
+            "C3",
+        ),
+    ]
+    centre = np.arange(len(scale))
+    panel.barh(
+        centre,
+        [value for _, value, _ in scale],
+        height=0.5,
+        color=[colour for _, _, colour in scale],
+    )
+    for row, (_label, value, colour) in zip(centre, scale):
+        panel.text(
+            value * 1.15,
+            row,
+            "%.3f %%" % value,
+            fontsize="x-small",
+            color=colour,
+            va="center",
+        )
+    panel.set_xscale("log")
+    panel.set_yticks(centre, [label for label, _, _ in scale], fontsize="x-small")
+    panel.invert_yaxis()
+    panel.set_xlabel("% of the axis to boundary flux span", fontsize="x-small")
+    panel.tick_params(labelsize="x-small")
+    panel.margins(x=0.35)
+
+
 def _receipt_figure(figure, solved, equilibrium):
     """Draw where the receipts are read and the two fields they are read with.
 
@@ -1529,7 +2106,7 @@ def _receipt_figure(figure, solved, equilibrium):
     analytic = np.sqrt(
         np.asarray(
             machine.poloidal_field_squared(
-                jnp.asarray(case.coil_current), solved.cell_current
+                jnp.asarray(machine.source_current), solved.cell_current
             )
         )
     )
@@ -1573,9 +2150,24 @@ def render_figures(directory: Path = FIGURE_DIRECTORY, cells: int = EVIDENCE_CEL
     import matplotlib.pyplot as plt
 
     directory.mkdir(parents=True, exist_ok=True)
-    solved = _solved(cells)
+    solved = _solved(cells, True)
     _profile, equilibrium = _published(cells)
     written = []
+
+    without = _solved(cells, False)
+    figure = plt.figure(figsize=(9.6, 6.4), constrained_layout=True)
+    _closure_figure(figure, without, solved)
+    path = directory / "dina-closure-reproduction.png"
+    figure.savefig(path, dpi=200)
+    plt.close(figure)
+    written.append(path)
+
+    figure = plt.figure(figsize=(7.0, 7.6), constrained_layout=True)
+    _profile_figure(figure, without, solved)
+    path = directory / "dina-closure-profiles.png"
+    figure.savefig(path, dpi=200)
+    plt.close(figure)
+    written.append(path)
 
     figure = plt.figure(figsize=(11.0, 7.4), constrained_layout=True)
     _reproduction_figure(figure, solved)

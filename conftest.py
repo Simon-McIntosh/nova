@@ -30,8 +30,9 @@ def _imas_data_available() -> bool:
 
 # Test modules whose whole cost is a heavy numerical/integration workload: biot
 # field validation sweeps, jax jit/vmap/grad kernels, signal-store round-trips,
-# structural solves, and pulse-scale integration. The default lane excludes
-# them; `pytest -m "slow or not slow"` runs everything.
+# structural solves, equilibrium reproductions that solve a published reference
+# machine, and pulse-scale integration. The default lane excludes them;
+# `pytest -m "slow or not slow"` runs everything.
 _SLOW_FILES = frozenset(
     {
         "test_biotsavart.py",
@@ -40,6 +41,7 @@ _SLOW_FILES = frozenset(
         "test_decompose.py",
         "test_connectivity_boundary.py",
         "test_equilibrium_forward_solve.py",
+        "test_equilibrium_forward_reference.py",
         "test_equilibrium_moment_boundary.py",
         "test_topology_boundary.py",
         "test_flux_surface_connectivity.py",

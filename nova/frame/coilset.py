@@ -22,6 +22,7 @@ class CoilSet(Biot, Control, Frame):
     coil_polysection_policy: object = ""
     plasma_polysection_policy: object = ""
     inductance_target_policy: object = ""
+    force_target_policy: object = ""
     _configured_route_attrs: dict[str, str] = field(
         init=False, repr=False, default_factory=dict
     )
@@ -31,6 +32,7 @@ class CoilSet(Biot, Control, Frame):
         "coil_polysection_policy",
         "plasma_polysection_policy",
         "inductance_target_policy",
+        "force_target_policy",
     )
 
     def __setattr__(self, name, value):
@@ -42,13 +44,12 @@ class CoilSet(Biot, Control, Frame):
             and not self.__dict__.get("_route_restore", False)
         ):
             from nova.biot.polysection import PolySectionPolicy
-            from nova.biot.target import TargetQuadraturePolicy
+            from nova.biot.target import ForceTargetPolicy, TargetQuadraturePolicy
 
-            resolver = (
-                TargetQuadraturePolicy
-                if name == "inductance_target_policy"
-                else PolySectionPolicy
-            )
+            resolver = {
+                "inductance_target_policy": TargetQuadraturePolicy,
+                "force_target_policy": ForceTargetPolicy,
+            }.get(name, PolySectionPolicy)
             canonical = resolver.resolve(value).key
             if canonical != configured[name]:
                 raise ValueError(
@@ -70,7 +71,7 @@ class CoilSet(Biot, Control, Frame):
     def _restore_route_attrs(self, attrs):
         """Bind canonical routes while constructing or loading one cache identity."""
         from nova.biot.polysection import PolySectionPolicy
-        from nova.biot.target import TargetQuadraturePolicy
+        from nova.biot.target import ForceTargetPolicy, TargetQuadraturePolicy
 
         object.__setattr__(self, "_route_restore", True)
         try:
@@ -87,6 +88,9 @@ class CoilSet(Biot, Control, Frame):
                 "inductance_target_policy": TargetQuadraturePolicy.resolve(
                     self.inductance_target_policy
                 ).key,
+                "force_target_policy": ForceTargetPolicy.resolve(
+                    self.force_target_policy
+                ).key,
             }
             for name, value in canonical.items():
                 setattr(self, name, value)
@@ -101,6 +105,7 @@ class CoilSet(Biot, Control, Frame):
             "coil_polysection_policy": self.coil_polysection_policy,
             "plasma_polysection_policy": self.plasma_polysection_policy,
             "inductance_target_policy": self.inductance_target_policy,
+            "force_target_policy": self.force_target_policy,
         }
 
     @property
@@ -123,6 +128,8 @@ class CoilSet(Biot, Control, Frame):
             }
         if name == "inductance":
             return kwargs | {"target_policy": route_attrs["inductance_target_policy"]}
+        if name == "force":
+            return kwargs | {"target_policy": route_attrs["force_target_policy"]}
         return kwargs
 
     def _check_subframe_route_identity(self):

@@ -3,6 +3,7 @@ import tempfile
 import numpy as np
 import pytest
 
+from nova.biot.target import DEFAULT_FORCE_TARGET_POLICY, ForceTargetPolicy
 from nova.frame.coilset import CoilSet
 from nova.geometry.polygon import Polygon
 
@@ -399,6 +400,49 @@ def test_coil_insert_dict(section):
     coilset.coil.insert({section: (3, 4, 0.05, 0.05)})
     assert coilset.subframe.section.iloc[0] == "polygon"
     assert coilset.subframe.segment.iloc[0] == "polysection"
+
+
+def _force_pair(**route):
+    """Return a two-conductor coilset whose force route is bound at construction."""
+    coilset = CoilSet(nforce=8, dcoil=-2, **route)
+    coilset.coil.insert(8.0, 6.5, 0.65, 0.45, nturn=248, Ic=45e3, name="PFa")
+    coilset.coil.insert(3.9, 7.6, 0.80, 0.60, nturn=553, Ic=-30e3, name="PFb")
+    return coilset
+
+
+def test_default_force_route_is_the_shipped_tiling():
+    """A coilset built without the argument solves the subdivision rule unchanged."""
+    default = _force_pair()
+    assert default.route_attrs["force_target_policy"] == DEFAULT_FORCE_TARGET_POLICY
+    assert default.force.target_policy == DEFAULT_FORCE_TARGET_POLICY
+    default.force.solve()
+    explicit = _force_pair(force_target_policy=ForceTargetPolicy(rule="subdivision"))
+    explicit.force.solve()
+    np.testing.assert_array_equal(default.force.fr, explicit.force.fr)
+    np.testing.assert_array_equal(default.force.fz, explicit.force.fz)
+
+
+def test_the_force_route_reaches_the_operator_and_its_cache_identity():
+    """An opted-in rule binds the operator, the solved metadata and the identity."""
+    policy = ForceTargetPolicy(rule="positive_material", order=4)
+    coilset = _force_pair(force_target_policy=policy)
+    assert coilset.route_attrs["force_target_policy"] == policy.key
+    assert coilset.coilset_attrs["force_target_policy"] == policy.key
+    assert coilset.force.target_policy == policy.key
+    coilset.force.solve()
+    assert coilset.force.data.attrs["force_target_policy"] == policy.key
+    # the fan and the tiling reach the same area mean from different nodes, so
+    # a route that had not travelled would show as bit-equal forces
+    tiling = _force_pair()
+    tiling.force.solve()
+    assert not np.array_equal(coilset.force.fr, tiling.force.fr)
+
+
+def test_the_force_route_is_fixed_after_construction():
+    """A route swap after construction would strand the cached operator."""
+    coilset = _force_pair()
+    with pytest.raises(ValueError):
+        coilset.force_target_policy = ForceTargetPolicy(rule="positive_material")
 
 
 if __name__ == "__main__":

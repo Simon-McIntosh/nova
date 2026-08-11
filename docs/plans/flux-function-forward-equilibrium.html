@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-11">
-<meta name="plan-version" content="15">
+<meta name="plan-version" content="16">
 <meta name="plan-impl" content="0.9">
 </head>
 <body>
@@ -169,9 +169,15 @@ Done-when
     <div class="r-fu-body"><p>Owner decision 2026-08-11: the null-fit precision defaults to double — the float32 axis-fit ladder (2^-22 Wb) capped every forward solve's convergence near 5e-07 relative and made accelerated-route depth host-dependent, while double moves the relaxed floor to ~1e-13 for a 1.1e-07 equilibrium shift. The single-precision switch remains available and is expected to be performance-limited; it gets a full independent study once the full platform is built. Trigger: platform complete (catalog-scale GPU solve capability in place).</p></div>
     <pre class="r-fu-prompt">/reckon-ship flux-function-forward-equilibrium §3</pre>
     </article>
-<article class="r-fu" data-id="f-fffe-005" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-11T06:20:00+00:00" data-recommends-skill="/reckon-ship flux-function-forward-equilibrium §5" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-fffe-005" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-11T06:20:00+00:00" data-recommends-skill="/reckon-ship flux-function-forward-equilibrium §5" data-resolved-at="2026-08-11T17:11:27+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Close the infrastructure defects the demonstration surfaced</h4>
     <div class="r-fu-body"><p>Five bounded repairs, none blocking the plan: the PlasmaWall.boundary / PlasmaGrid.solve first-wall read takes the first hexagon's polygon so the triangles/stencil outputs are wrong and untested; nwall means nodes per wall segment; composite Machine needs per-source dd_version plumbing through ids_attrs; CoilDatabase.group_attrs omits dd_version from the cache identity; two null benchmarks need explicit precision pins since the double default. Separating the DINA reproduction's ~1% machine-model gap also wants the passive structure built as geometry.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship flux-function-forward-equilibrium §5</pre>
+    <p class="r-fu-outcome">Partially closed by the closure wave: the Machine columnar-frame build repaired (b999dac2/5400c5ff — resistivity and current-limit writes on the columnar frame, located datastore errors); the passive structure carried (61122824 — the oblique section reader was the root cause of the pf_passive/VS3 omission) and falsified as the deviation floor (0.093% of span vs 1.4–6.5% deviation, shortfall 10–17× after the measured map gain). Remaining items re-queued in f-fffe-006: the PlasmaWall first-wall read, nwall semantics, per-source dd_version plumbing, the CoilDatabase cache-identity hazard, benchmark precision pins, and the current-distribution question the falsification points at.</p>
+    </article>
+<article class="r-fu" data-id="f-fffe-006" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-11T16:30:00+00:00" data-recommends-skill="/reckon-ship flux-function-forward-equilibrium §5" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Close the remaining infrastructure defects and chase the current-distribution gap</h4>
+    <div class="r-fu-body"><p>Carried from f-fffe-005: the PlasmaWall.boundary/PlasmaGrid.solve first-wall read (takes the first hexagon's polygon; triangles/stencil untested), nwall meaning nodes per segment, per-source dd_version plumbing through ids_attrs, CoilDatabase.group_attrs omitting dd_version from the cache identity, and precision pins for the two null benchmarks. New from the closure falsification: the remaining ~1.3–6.5% reproduction deviation grows under refinement and is an order beyond every excluded conductor — the candidates are how the declared coil-pack currents are distributed within their sections and the reference's own profile/COCOS mapping; also queued: the performance program the H200 profile ranked (assemble couplings through the tiled device route; compile the public entry point as a unit; enable the persistent kernel cache on the solve path; the wall read's lexicographic-key reduction).</p></div>
     <pre class="r-fu-prompt">/reckon-ship flux-function-forward-equilibrium §5</pre>
     </article>
 </section>

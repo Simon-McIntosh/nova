@@ -12,10 +12,14 @@ with skip_import("jax"):
     import jax
     import jax.numpy as jnp
 
+    from nova.biot.greens import hybrid_greens
     from nova.biot.null import Null1D, Null2D
     from nova.biot.target import FluxTarget
+    from nova.equilibrium.conservation import FluxLattice
+    from nova.equilibrium.domain import classify_domains
     from nova.equilibrium.forward_operator import ForwardFluxOperator
-    from nova.equilibrium.topology import Topology
+    from nova.equilibrium.topology import Topology, TopologyState
+    from nova.geometry import select
     from nova.jax.config import Precision, configure_dtypes
 
 
@@ -157,6 +161,234 @@ def test_forward_operator_uses_domain_flux_targets():
     hints = typing.get_type_hints(ForwardFluxOperator)
     assert hints["grid"] is FluxTarget
     assert hints["wall"] is FluxTarget
+
+
+#: A main plasma ring with a weaker divertor ring above and below it. The two
+#: outer rings each raise a saddle between themselves and the plasma, so the
+#: flux map carries two X-points of opposite sense about the axis and a
+#: private-flux pocket under each — the arrangement that makes the axis
+#: connectivity cut a conjunction of more than one half-plane test.
+DOUBLE_NULL_RING = np.array([[1.0, 0.0], [1.0, -0.62], [1.0, 0.62]])
+DOUBLE_NULL_CURRENT = np.array([1.0e6, 5.0e5, 4.0e5])
+
+
+def _ring_flux(coordinate):
+    """Return the poloidal flux the divertor ring set drives on a point set."""
+    columns = np.stack(
+        [
+            hybrid_greens(
+                coordinate[:, 0], coordinate[:, 1], radius, height, 0.06, 0.06
+            )[0]
+            for radius, height in DOUBLE_NULL_RING
+        ],
+        axis=1,
+    )
+    return columns @ DOUBLE_NULL_CURRENT
+
+
+@pytest.fixture(scope="module")
+def diverted():
+    """Return a double-null topology, its flux vector and its material mask."""
+    configure_dtypes()
+    lattice = FluxLattice(np.linspace(0.55, 1.45, 45), np.linspace(-0.75, 0.75, 71))
+    coordinate = lattice.coordinate
+    angle = 2 * np.pi * np.arange(48) / 48
+    wall = np.c_[1.0 + 0.42 * np.cos(angle), 0.62 * np.sin(angle)]
+    topology = Topology(
+        Null2D.from_coordinates(coordinate, hex_stencil(lattice.shape), maxsize=5),
+        Null1D(jnp.asarray(wall)),
+    )
+    inside = jnp.asarray(
+        ((coordinate[:, 0] - 1.0) / 0.42) ** 2 + (coordinate[:, 1] / 0.62) ** 2 <= 1.0
+    )
+    psi = jnp.asarray(np.r_[_ring_flux(coordinate), _ring_flux(wall)])
+    return topology, psi, inside
+
+
+def _traversed_categorize(null, psi_stencil):
+    """Return the null clusters, counting and selecting by explicit traversal.
+
+    The crossing counter is carried along each ring's vertices and the counted
+    rings are walked in turn, which is the arrangement the kernel formulation
+    is required to reproduce value for value rather than merely agree with.
+    """
+    psi_stencil = jnp.asarray(psi_stencil, dtype=null.fit_dtype)
+
+    def zero_cross(carry, value):
+        """Increment the crossing counter at one vertex of one ring."""
+        count, sign, centre = carry
+        step = value > centre
+        change = step != sign
+        count += change
+        return (count, jnp.where(change, step, sign), centre), None
+
+    def count_ring(number, patch):
+        """Return the running null counts and this ring's crossing count."""
+        extremum, saddle = number
+        centre = patch[0]
+        sign = patch[-1] > centre
+        count = jax.lax.scan(zero_cross, (0, sign, centre), patch[1:])[0][0]
+        return (extremum + (count == 0), saddle + (count == 4)), count
+
+    number, count = jax.lax.scan(count_ring, (0, 0), psi_stencil)
+
+    def select_type(_, null_type):
+        """Return the padded cluster selection of one null type."""
+        index = jnp.where(count == null_type, size=null.maxsize)[0]
+        return _, (
+            jnp.concatenate(
+                (
+                    null.local_coordinate_stencil[index],
+                    psi_stencil[index, :, jnp.newaxis],
+                ),
+                axis=-1,
+            ),
+            null.physical_origin[index],
+            null.physical_scale[index],
+        )
+
+    cluster, origin, scale = jax.lax.scan(select_type, (), jnp.array([0, 4]))[1]
+    return jnp.array(number), cluster, origin, scale
+
+
+def _traversed_interpolate(number, cluster, origin, scale):
+    """Return one null type's sub-cell fits, masked by a carried position."""
+
+    def subnull(carry, values):
+        """Fit one cluster and drop it when the padding has been reached."""
+        one, physical_origin, physical_scale = values
+        carry += 1
+        local = select.traced_subnull(one[:, 0], one[:, 1], one[:, 2])
+        physical = physical_origin + local[:2].astype(jnp.float64) * physical_scale
+        return carry, jnp.where(
+            carry <= number,
+            jnp.concatenate((physical, local[2:].astype(jnp.float64))),
+            jnp.full(4, jnp.nan, dtype=jnp.float64),
+        )
+
+    return jax.lax.scan(subnull, 0, (cluster, origin, scale))[1]
+
+
+def _traversed_nulls(null, psi_grid):
+    """Return the extremum and saddle tables by the traversed formulation."""
+    psi_stencil = jnp.asarray(psi_grid, dtype=null.fit_dtype)[null.stencil]
+    number, cluster, origin, scale = _traversed_categorize(null, psi_stencil)
+    return jax.vmap(_traversed_interpolate)(number, cluster, origin, scale)
+
+
+def _traversed_x_mask(topology, data_o, vmap_x):
+    """Return the axis connectivity cut, folded one X-point at a time."""
+
+    def narrow(mask, data_x):
+        """Apply one X-point's half-plane cut to the surviving cells."""
+        return jax.lax.select(
+            mask & jnp.isfinite(data_x[0]),
+            jax.lax.cond(
+                data_x[1] < data_o[1],
+                jnp.greater,
+                jnp.less,
+                topology.grid.coordinate[:, 1],
+                data_x[1],
+            ),
+            mask,
+        ), None
+
+    mask = jnp.ones(topology.grid.node_number, dtype=bool)
+    return jax.lax.scan(narrow, mask, vmap_x)[0]
+
+
+def _traversed_read(topology, psi, polarity, inside_material):
+    """Return the domain labels and topology state by the traversed route."""
+    psi_grid, psi_wall = topology.split_flux_map(psi)
+    vmap_o, vmap_x = _traversed_nulls(topology.grid, psi_grid)
+    data_o = topology.o_point_data(vmap_o, polarity)
+    data_x = topology.x_point_data(vmap_x, polarity, data_o[2])
+    data_w = topology.wall(psi_wall, polarity)
+    data_b = topology.boundary(data_o, vmap_x, data_w, polarity)
+    psi_norm = topology.normalize(data_o[2], data_b[2], psi_grid)
+    psi_lcfs = topology.psi_lcfs(data_o[2], data_b[2])
+    masks = classify_domains(
+        psi_norm,
+        topology.psi_mask(polarity, psi_grid, psi_lcfs),
+        _traversed_x_mask(topology, data_o, vmap_x),
+        inside_material,
+    )
+    state = TopologyState(
+        axis=data_o[:2],
+        axis_flux=data_o[2],
+        boundary=data_b[:2],
+        boundary_flux=data_b[2],
+        x_point=data_x[:2],
+        x_point_flux=data_x[2],
+        wall_point=data_w[:2],
+        wall_point_flux=data_w[2],
+        diverted=jnp.equal(data_b[2], data_x[2]),
+    )
+    return masks, state
+
+
+def test_the_double_null_fixture_exercises_every_branch_of_the_read(diverted):
+    """The fixture carries padded null tables, two X-points and all four labels.
+
+    An identity read is only worth as much as the branches it drives, so the
+    counts that make this map a demanding one are pinned rather than assumed:
+    both null tables are selected below their capacity, the connectivity cut
+    has more than one finite X-point to conjoin, and the label partition is
+    total over four populated domains.
+    """
+    topology, psi, inside = diverted
+    vmap_o, vmap_x = topology.grid(topology.split_flux_map(psi)[0])
+    masks, state = topology.read(psi, 1, inside)
+    label = np.asarray(masks.label)
+
+    assert int(np.sum(np.isfinite(np.asarray(vmap_o)[:, 0]))) == 3
+    assert int(np.sum(np.isfinite(np.asarray(vmap_x)[:, 0]))) == 2
+    assert topology.grid.maxsize == 5
+    assert bool(state.diverted)
+    assert sorted(np.unique(label)) == [0, 1, 2, 3]
+    assert int(np.sum(label == 3)) > 0
+
+
+def test_the_topology_read_is_identical_to_a_traversed_formulation(diverted):
+    """Every quantity the read publishes matches the traversal bit for bit.
+
+    The crossing count, the sub-cell fit selection and the axis connectivity
+    cut are each evaluated over the whole grid at once rather than walked, and
+    every one of those rearrangements is value-preserving by construction: a
+    ring's crossing count depends on no other ring, a cluster's position in the
+    padded selection is known without carrying it, and a half-plane cut can
+    only remove cells. Nothing here is a tolerance — a difference in the last
+    bit of the normalised flux would mean one of those three claims is false.
+    """
+    topology, psi, inside = diverted
+    polarity = 1
+
+    masks, state = topology.read(psi, polarity, inside)
+    reference_masks, reference_state = _traversed_read(topology, psi, polarity, inside)
+
+    np.testing.assert_array_equal(
+        np.asarray(masks.label), np.asarray(reference_masks.label)
+    )
+    np.testing.assert_array_equal(
+        np.asarray(masks.psi_norm), np.asarray(reference_masks.psi_norm)
+    )
+    for field in TopologyState._fields:
+        np.testing.assert_array_equal(
+            np.asarray(getattr(state, field)),
+            np.asarray(getattr(reference_state, field)),
+            err_msg=field,
+        )
+
+
+def test_the_null_tables_are_identical_to_a_traversed_formulation(diverted):
+    """The located nulls themselves match, padding rows included."""
+    topology, psi, _ = diverted
+    psi_grid = topology.split_flux_map(psi)[0]
+
+    for located, reference in zip(
+        topology.grid(psi_grid), _traversed_nulls(topology.grid, psi_grid)
+    ):
+        np.testing.assert_array_equal(np.asarray(located), np.asarray(reference))
 
 
 def test_topology_tree_roundtrip_preserves_null_kernels(topology):

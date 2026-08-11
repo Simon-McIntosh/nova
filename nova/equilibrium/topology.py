@@ -144,25 +144,26 @@ class Topology(Pytree):
 
     @jax.jit
     def x_mask(self, data_o, vmap_x):
-        """Return plasma filament x-point mask."""
-        mask = jnp.ones(self.grid.node_number, dtype=bool)
+        """Return plasma filament x-point mask.
 
-        @jax.jit
-        def update_mask(mask, data_x):
-            mask = jax.lax.select(
-                mask & jnp.isfinite(data_x[0]),
-                jax.lax.cond(
-                    data_x[1] < data_o[1],
-                    jnp.greater,
-                    jnp.less,
-                    self.grid.coordinate[:, 1],
-                    data_x[1],
-                ),
-                mask,
-            )
-            return mask, None
-
-        return jax.lax.scan(update_mask, mask, vmap_x)[0]
+        Each X-point cuts the grid at its own height and keeps the side the
+        magnetic axis lies on, so a cell survives only where it is on the kept
+        side of every one of them: the mask is a conjunction of one half-plane
+        test per X-point. A cut can only ever remove cells, never restore one,
+        which is what lets the tests be taken together rather than in sequence.
+        The padded rows of the fixed-capacity table carry no null and cut
+        nothing.
+        """
+        height = self.grid.coordinate[:, 1]
+        x_height = vmap_x[:, 1]
+        below = (x_height < data_o[1])[:, jnp.newaxis]
+        test = jnp.where(
+            below,
+            height[jnp.newaxis, :] > x_height[:, jnp.newaxis],
+            height[jnp.newaxis, :] < x_height[:, jnp.newaxis],
+        )
+        finite = jnp.isfinite(vmap_x[:, 0])[:, jnp.newaxis]
+        return jnp.all(jnp.where(finite, test, True), axis=0)
 
     @partial(jax.jit, static_argnums=3)
     def psi_lcfs(self, psi_axis, psi_boundary, psi_norm=0.999):

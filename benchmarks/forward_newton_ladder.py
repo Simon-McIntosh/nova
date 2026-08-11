@@ -314,9 +314,35 @@ def read_stages(operator) -> dict[str, Callable]:
         """Gather the flux onto every ring and nothing else."""
         return held(psi, jnp.sum(stencil_flux(psi)))
 
+    def traversed_zero_cross_count(number, patch_array):
+        """Count ring sign changes by the sequential traversal this stage measures.
+
+        The package now counts crossings with one elementwise cyclic kernel, so
+        the nested-scan arrangement whose iteration latency this stage times
+        lives here, in the measurement that owns it.
+        """
+        o_point_number, x_point_number = number
+
+        def zero_cross(carry, value):
+            count, sign, center = carry
+            _sign = value > center
+            sign_change = _sign != sign
+            count += sign_change
+            sign = jnp.where(sign_change, _sign, sign)
+            return (count, sign, center), None
+
+        center = patch_array[0]
+        sign = patch_array[-1] > center
+        count = jax.lax.scan(zero_cross, (0, sign, center), patch_array[1:])[0][0]
+        o_point_number += count == 0
+        x_point_number += count == 4
+        return (o_point_number, x_point_number), count
+
     def crossing_scan(psi):
-        """Add the shipped sequential zero-crossing categorisation."""
-        number, count = jax.lax.scan(null.zero_cross_count, (0, 0), stencil_flux(psi))
+        """Add the sequential zero-crossing categorisation the package retired."""
+        number, count = jax.lax.scan(
+            traversed_zero_cross_count, (0, 0), stencil_flux(psi)
+        )
         return held(psi, jnp.sum(count) + number[0] + number[1])
 
     def crossing_kernel(psi):

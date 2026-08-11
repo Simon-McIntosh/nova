@@ -21,10 +21,13 @@ and a continuation there would have nowhere to act.
 
 A declared continuation is expected to MOVE the solution — it is extra current
 inside the vessel — so the shift is measured and bounded rather than
-suppressed. What must not move is the solve that declares nothing: with a core
+suppressed. What must not move is the source that declares nothing: with a core
 closure whose gradients and slopes both vanish at the separatrix, declaring the
-machinery on both open branches reproduces the undeclared solve exactly, array
-for array.
+machinery on both open branches assembles the same current image the undeclared
+source does, array for array, at whatever flux it is read at. The solve driven
+from that image is compared against the depth the iteration converged to,
+because a compiled map is free to fold the two zero images the declaration now
+sums in into the plasma coupling and move the last bits of the iterate.
 """
 
 from __future__ import annotations
@@ -116,6 +119,22 @@ CONTINUITY_TOLERANCE = 1.0e-4
 #: than a jump to another branch.
 SHIFT_FLOOR = 1.0e-3
 SHIFT_CEILING = 1.0e-1
+#: Multiples of the converged depth — :func:`_converged_depth` — that two
+#: solves of one source may separate by. Declaring a null continuation sums two
+#: identically zero images into the core one, which a compiled map is free to
+#: fold into the plasma coupling contraction; the last-bit move that produces
+#: grows into the neighbourhood of the fixed point each run stalls in, so the
+#: two are read apart against that neighbourhood rather than against a fixed
+#: depth. Flux, cell current and the moments were measured to separate by under
+#: twelve times the depth with the axis fitted in either precision. The two fits
+#: put the depth itself seven decades apart and this ratio within one factor of
+#: itself, which is why the ratio is what is registered.
+ADDITIVE_SEPARATION_MULTIPLE = 100
+#: The same separation read through the conservation ledger, which differences
+#: the flux map twice on the lattice and so carries it amplified: measured at
+#: twenty-four times the depth where the axis fit sets that depth, and well
+#: under it where round-off does.
+CONSERVATION_SEPARATION_MULTIPLE = 300
 
 
 def _terms():
@@ -331,6 +350,41 @@ def diverted():
 def _relative(left, right, scale):
     """Return a sup-norm difference read against one flux scale."""
     return float(jnp.max(jnp.abs(left - right))) / float(scale)
+
+
+def _entrywise_relative(left, right):
+    """Return the largest entrywise relative difference of two receipt rows.
+
+    Each entry is read against its own magnitude, so one bound covers a stack
+    carrying a plasma current beside two dimensionless shape moments.
+    """
+    left, right = np.asarray(left), np.asarray(right)
+    return float(np.max(np.abs(left - right) / np.abs(right)))
+
+
+def _converged_depth(null, *equilibria):
+    """Return the relative flux difference two solves cannot be told apart below.
+
+    Each solve reports the relative residual it stopped at, which is how far
+    from its own fixed point it stands, and two runs of one map are not
+    resolved apart below that. Beneath the residual sits one step of the ladder
+    the axis flux is read on: the source is normalised against that read, so
+    nothing downstream of the normalisation can express a finer difference.
+
+    The step is taken at the fitting null's own dtype rather than at an assumed
+    width, which is what keeps the floor honest when the fit precision changes
+    — a double fit resolves the same axis flux some nine decades more finely,
+    and the residual is then what binds.
+    """
+    reference = equilibria[0]
+    scale = float(jnp.max(jnp.abs(reference.flux)))
+    axis_flux = np.asarray(
+        float(reference.topology.axis_flux), dtype=np.dtype(null.fit_dtype)
+    )
+    return max(
+        float(np.spacing(axis_flux)) / scale,
+        *(float(equilibrium.fixed_point.residual) for equilibrium in equilibria),
+    )
 
 
 def _one_sided_slope(gradient, sense, step=CONTINUITY_STEP):
@@ -837,13 +891,27 @@ def test_declaring_a_continuation_on_an_empty_domain_changes_nothing(
 
 
 def test_the_static_path_is_unchanged_when_no_continuation_is_declared(machine):
-    """Declaring the machinery on a null anchor reproduces the solve exactly.
+    """Declaring the machinery on a null anchor adds nothing to the source.
 
     A core closure whose gradient and slope both vanish at the separatrix is
     continued by identically zero, so the declared solve and the undeclared one
-    are the same physical problem. Their flux maps, current images and
-    observations agree array for array, which is what says the continuation
-    seam adds no arithmetic to a source that does not use it.
+    are the same physical problem. Where that identity can be read directly it
+    is exact: at one trial flux the two sources assemble the same current image
+    and the same write-then-read cycle, array for array, both at the seed and
+    again at a converged map. That is what says the continuation seam adds no
+    arithmetic to a source that does not use it.
+
+    Iterating the map is where the two part company. The declared assembly sums
+    two further images into the core one — both identically zero — and a
+    compiled map is free to fold that sum into the plasma coupling
+    contraction, which moves the last bits of the iterate. That move grows
+    until it fills the neighbourhood of the fixed point each run stalls in: a
+    rung of the axis-flux ladder where the fit is coarse enough to quantise the
+    read, plain round-off where it is not. The converged receipts are therefore
+    compared against the depth the two runs reached rather than bit for bit,
+    which is a bound that follows the fit precision instead of assuming it. The
+    domain labelling still agrees array for array, and the open branches carry
+    exactly no current.
 
     The conservation ledger is the one receipt that legitimately differs: its
     checked set follows the DECLARED support, not the amplitude, so declaring
@@ -855,27 +923,58 @@ def test_the_static_path_is_unchanged_when_no_continuation_is_declared(machine):
         p_prime=_edge_vanishing(3.0 * DRIVE * P_PRIME),
         ff_prime=_edge_vanishing(3.0 * DRIVE * FF_PRIME),
     )
-    undeclared = build(core).solve(seed, route="anderson", evaluations=EVALUATIONS)
-    declared = build(
+    undeclared_profile = build(core)
+    declared_profile = build(
         core,
         common_sol=_policy().extend(core, PlasmaDomain.COMMON_SOL),
         private_flux=_policy(support=PRIVATE_SUPPORT).extend(
             core, PlasmaDomain.PRIVATE_FLUX
         ),
-    ).solve(seed, route="anderson", evaluations=EVALUATIONS)
+    )
+    np.testing.assert_array_equal(
+        np.asarray(declared_profile.operator.cell_current(seed)),
+        np.asarray(undeclared_profile.operator.cell_current(seed)),
+    )
+    np.testing.assert_array_equal(
+        np.asarray(declared_profile.operator(seed)),
+        np.asarray(undeclared_profile.operator(seed)),
+    )
+
+    undeclared = undeclared_profile.solve(
+        seed, route="anderson", evaluations=EVALUATIONS
+    )
+    declared = declared_profile.solve(seed, route="anderson", evaluations=EVALUATIONS)
+    # the identity again at a converged map: the two solves iterate one source,
+    # not two that happen to agree at the seed they were started from
+    np.testing.assert_array_equal(
+        np.asarray(declared_profile.operator.cell_current(undeclared.flux)),
+        np.asarray(undeclared_profile.operator.cell_current(undeclared.flux)),
+    )
 
     assert float(undeclared.fixed_point.residual) < RESIDUAL_TOLERANCE
-    np.testing.assert_array_equal(
-        np.asarray(declared.flux), np.asarray(undeclared.flux)
-    )
-    np.testing.assert_array_equal(
-        np.asarray(declared.cell_current), np.asarray(undeclared.cell_current)
-    )
+    assert float(declared.fixed_point.residual) < RESIDUAL_TOLERANCE
     np.testing.assert_array_equal(
         np.asarray(declared.domains.label), np.asarray(undeclared.domains.label)
     )
-    np.testing.assert_array_equal(
-        np.asarray(declared.moments.stack()), np.asarray(undeclared.moments.stack())
+    flux_scale = jnp.max(jnp.abs(undeclared.flux))
+    depth = _converged_depth(
+        undeclared_profile.operator.topology.grid, undeclared, declared
+    )
+    assert (
+        _relative(declared.flux, undeclared.flux, flux_scale)
+        < ADDITIVE_SEPARATION_MULTIPLE * depth
+    )
+    assert (
+        _relative(
+            declared.cell_current,
+            undeclared.cell_current,
+            jnp.max(jnp.abs(undeclared.cell_current)),
+        )
+        < ADDITIVE_SEPARATION_MULTIPLE * depth
+    )
+    assert (
+        _entrywise_relative(declared.moments.stack(), undeclared.moments.stack())
+        < ADDITIVE_SEPARATION_MULTIPLE * depth
     )
     assert float(declared.ledger.common_sol) == 0.0
     assert float(declared.ledger.private_flux) == 0.0
@@ -884,8 +983,13 @@ def test_the_static_path_is_unchanged_when_no_continuation_is_declared(machine):
     assert int(declared.conservation.checked_cells) > int(
         undeclared.conservation.checked_cells
     )
-    assert float(declared.conservation.relative_grad_shafranov) == float(
-        undeclared.conservation.relative_grad_shafranov
+    assert (
+        abs(
+            float(declared.conservation.relative_grad_shafranov)
+            / float(undeclared.conservation.relative_grad_shafranov)
+            - 1.0
+        )
+        < CONSERVATION_SEPARATION_MULTIPLE * depth
     )
 
 

@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from functools import cached_property
 import itertools
+import os
 import string
 from typing import ClassVar, TYPE_CHECKING
 from warnings import warn
@@ -546,11 +547,12 @@ class FrameData(ABC):
     @staticmethod
     def update_resistivity(index, frame, subframe, resistance):
         """Update frame and subframe resistivity."""
+        # a label selection returns a bare column vector ordered by index, so
+        # each coil's resistivity is read back positionally, not by label
         rho = resistance * frame.loc[index, "area"] / frame.loc[index, "dy"]
         frame.loc[index, "rho"] = rho
-        for name in index:
-            subindex = subframe.frame == name
-            subframe.loc[subindex, "rho"] = rho[name]
+        for name, coil_rho in zip(index, rho, strict=True):
+            subframe.loc[subframe.frame == name, "rho"] = coil_rho
         subframe.update_frame()
 
     @staticmethod
@@ -692,6 +694,60 @@ class CoilDatabase(CoilSet, CoilData):
     machine: str = "iter_md"
     ids_node: str = ""
 
+    def get(self, *args, **kwargs):
+        """Return the source IDS, locating an unreachable datastore first."""
+        self.locate_datastore()
+        return super().get(*args, **kwargs)
+
+    def locate_datastore(self):
+        """Raise a located error when the machine description path is absent.
+
+        Two parameters steer the filesystem lookup without describing any of
+        the machine: ``user`` picks the imasdb root (the shared tree, or a
+        named account's public tree) and the major of ``dd_version`` picks the
+        version subtree beneath it. Neither is visible in the geometry the
+        caller asked for, so a default that does not match the installation
+        resolves to a path that simply is not there. Report the level that is
+        missing beside the parameter that chose it, rather than letting the
+        backend fail on an assembled path.
+        """
+        if self._ids is not None or self.mode != "r":
+            return
+        if f"user={self.user};" not in self.uri:  # not a pulse/run layout
+            return
+        if not os.path.isdir(self.home):
+            root = (
+                "the shared tree under $IMAS_HOME"
+                if self.user == "public"
+                else f"the public tree of account {self.user!r}"
+            )
+            raise FileNotFoundError(
+                f"no imasdb root at {self.home!r} ({root}); "
+                f"the root is selected by user={self.user!r}"
+            )
+        machine_path = os.path.dirname(self.database_path)
+        if not os.path.isdir(machine_path):
+            raise FileNotFoundError(
+                f"no {self.machine!r} database at {machine_path!r}; "
+                f"the database is selected by machine={self.machine!r} "
+                f"under user={self.user!r}"
+            )
+        if not os.path.isdir(self.database_path):
+            majors = sorted(
+                entry for entry in os.listdir(machine_path) if entry.isdigit()
+            )
+            raise FileNotFoundError(
+                f"no data dictionary major {self.dd_version.major} at "
+                f"{self.database_path!r}; the subtree is selected by "
+                f"dd_version={str(self.dd_version)!r} and {machine_path!r} "
+                f"holds major {majors}"
+            )
+        if self.is_empty:
+            raise FileNotFoundError(
+                f"no {self.name!r} entry at {self.ids_path!r}; the entry is "
+                f"selected by pulse={self.pulse} and run={self.run}"
+            )
+
     @cached_property
     def ids_index(self):
         """Return cached ids_index instance."""
@@ -815,10 +871,28 @@ class PoloidalFieldActive(CoilDatabase):
             current_limit_max = ids_loop.current_limit_max
             if len(current_limit_max) > 0:
                 maximum_current[ids_loop.identifier.value] = current_limit_max[-1, 0]
-        self.frame.loc[:, ["Imax"]] = maximum_current
-        self.frame.loc[:, ["Imin"]] = {
-            coil: -limit for coil, limit in maximum_current.items()
-        }
+        self.update_current_limits(maximum_current)
+
+    def update_current_limits(self, maximum_current: dict[str, float]):
+        """Set symmetric per-coil current limits from an identifier mapping.
+
+        Imin and Imax are subspace attributes, so each limit is addressed to a
+        single independent row through the subspace accessor. An identifier
+        that names no inserted coil is a mismatch between the coil array and
+        the geometry built from it, and raises rather than writing nothing.
+        """
+        labels = set(np.asarray(self.frame.subspace.index).tolist())
+        if unknown := sorted(set(maximum_current) - labels):
+            raise KeyError(
+                f"current limits carry identifiers {unknown} that name no "
+                f"inserted coil; frame holds {sorted(labels)}"
+            )
+        for coil, limit in maximum_current.items():
+            self.sLoc[coil, "Imax"] = float(limit)
+            self.sLoc[coil, "Imin"] = -float(limit)
+        # circuit linking rebuilds the subspace from the frame columns, so the
+        # limits are projected back onto the frame before that happens
+        self.frame.update_frame()
 
     def build_circuit(self):
         """Build circuit influence matrix."""

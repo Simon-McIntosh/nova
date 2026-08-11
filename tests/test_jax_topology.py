@@ -306,10 +306,9 @@ def _traversed_read(topology, psi, polarity, inside_material):
     data_w = topology.wall(psi_wall, polarity)
     data_b = topology.boundary(data_o, vmap_x, data_w, polarity)
     psi_norm = topology.normalize(data_o[2], data_b[2], psi_grid)
-    psi_lcfs = topology.psi_lcfs(data_o[2], data_b[2])
     masks = classify_domains(
         psi_norm,
-        topology.psi_mask(polarity, psi_grid, psi_lcfs),
+        topology.psi_mask(polarity, psi_grid, data_b[2]),
         _traversed_x_mask(topology, data_o, vmap_x),
         inside_material,
     )

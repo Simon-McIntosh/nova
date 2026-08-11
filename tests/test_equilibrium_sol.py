@@ -25,7 +25,7 @@ suppressed. What must not move is the source that declares nothing: with a core
 closure whose gradients and slopes both vanish at the separatrix, declaring the
 machinery on both open branches assembles the same current image the undeclared
 source does, array for array, at whatever flux it is read at. The solve driven
-from that image is compared on the ladder its normalisation is resolved on,
+from that image is compared against the depth the iteration converged to,
 because a compiled map is free to fold the two zero images the declaration now
 sums in into the plasma coupling and move the last bits of the iterate.
 """
@@ -64,8 +64,6 @@ with skip_import("jax"):
     from nova.equilibrium.topology import Topology
     from nova.geometry.hexstencil import hex_stencil
     from nova.jax.config import configure_dtypes
-
-    from tests.test_equilibrium_forward_solve import _normalisation_quantum
 
 P_PRIME = -3.0e5
 FF_PRIME = -0.25
@@ -121,20 +119,22 @@ CONTINUITY_TOLERANCE = 1.0e-4
 #: than a jump to another branch.
 SHIFT_FLOOR = 1.0e-3
 SHIFT_CEILING = 1.0e-1
-#: Steps of the axis-flux ladder two solves of one source are allowed to
-#: separate by. The source is normalised against a flux read from a
-#: single-precision sub-cell fit, so a last-bit difference in the iterate can
-#: land that read on a neighbouring rung and shift the whole normalised
-#: profile. Where each run then stops inside the stalled band is decided by
-#: rounding beneath the ladder, so the two separate by a count of steps rather
-#: than agreeing bit for bit: flux, cell current and the moments were measured
-#: to separate by a few steps to a dozen, and the bound is registered an order
-#: above that.
-ADDITIVE_LADDER_STEPS = 100
-#: The same separation read through the conservation ledger. That residual
-#: differences the flux map twice on the lattice, which carries a difference
-#: of one step into it amplified by tens.
-CONSERVATION_LADDER_STEPS = 1000
+#: Multiples of the converged depth — :func:`_converged_depth` — that two
+#: solves of one source may separate by. Declaring a null continuation sums two
+#: identically zero images into the core one, which a compiled map is free to
+#: fold into the plasma coupling contraction; the last-bit move that produces
+#: grows into the neighbourhood of the fixed point each run stalls in, so the
+#: two are read apart against that neighbourhood rather than against a fixed
+#: depth. Flux, cell current and the moments were measured to separate by under
+#: twelve times the depth with the axis fitted in either precision. The two fits
+#: put the depth itself seven decades apart and this ratio within one factor of
+#: itself, which is why the ratio is what is registered.
+ADDITIVE_SEPARATION_MULTIPLE = 100
+#: The same separation read through the conservation ledger, which differences
+#: the flux map twice on the lattice and so carries it amplified: measured at
+#: twenty-four times the depth where the axis fit sets that depth, and well
+#: under it where round-off does.
+CONSERVATION_SEPARATION_MULTIPLE = 300
 
 
 def _terms():
@@ -360,6 +360,31 @@ def _entrywise_relative(left, right):
     """
     left, right = np.asarray(left), np.asarray(right)
     return float(np.max(np.abs(left - right) / np.abs(right)))
+
+
+def _converged_depth(null, *equilibria):
+    """Return the relative flux difference two solves cannot be told apart below.
+
+    Each solve reports the relative residual it stopped at, which is how far
+    from its own fixed point it stands, and two runs of one map are not
+    resolved apart below that. Beneath the residual sits one step of the ladder
+    the axis flux is read on: the source is normalised against that read, so
+    nothing downstream of the normalisation can express a finer difference.
+
+    The step is taken at the fitting null's own dtype rather than at an assumed
+    width, which is what keeps the floor honest when the fit precision changes
+    — a double fit resolves the same axis flux some nine decades more finely,
+    and the residual is then what binds.
+    """
+    reference = equilibria[0]
+    scale = float(jnp.max(jnp.abs(reference.flux)))
+    axis_flux = np.asarray(
+        float(reference.topology.axis_flux), dtype=np.dtype(null.fit_dtype)
+    )
+    return max(
+        float(np.spacing(axis_flux)) / scale,
+        *(float(equilibrium.fixed_point.residual) for equilibrium in equilibria),
+    )
 
 
 def _one_sided_slope(gradient, sense, step=CONTINUITY_STEP):
@@ -879,13 +904,14 @@ def test_the_static_path_is_unchanged_when_no_continuation_is_declared(machine):
     Iterating the map is where the two part company. The declared assembly sums
     two further images into the core one — both identically zero — and a
     compiled map is free to fold that sum into the plasma coupling
-    contraction, which moves the last bits of the iterate. The magnetic axis is
-    fitted in single precision, so a last-bit move can land the flux the source
-    is normalised against on a neighbouring rung of that ladder and leave the
-    two runs stalled at different points inside one band. The converged
-    receipts are therefore compared in steps of the ladder; the domain
-    labelling still agrees array for array, and the open branches carry exactly
-    no current.
+    contraction, which moves the last bits of the iterate. That move grows
+    until it fills the neighbourhood of the fixed point each run stalls in: a
+    rung of the axis-flux ladder where the fit is coarse enough to quantise the
+    read, plain round-off where it is not. The converged receipts are therefore
+    compared against the depth the two runs reached rather than bit for bit,
+    which is a bound that follows the fit precision instead of assuming it. The
+    domain labelling still agrees array for array, and the open branches carry
+    exactly no current.
 
     The conservation ledger is the one receipt that legitimately differs: its
     checked set follows the DECLARED support, not the amplitude, so declaring
@@ -931,10 +957,12 @@ def test_the_static_path_is_unchanged_when_no_continuation_is_declared(machine):
         np.asarray(declared.domains.label), np.asarray(undeclared.domains.label)
     )
     flux_scale = jnp.max(jnp.abs(undeclared.flux))
-    step = _normalisation_quantum(undeclared) / float(flux_scale)
+    depth = _converged_depth(
+        undeclared_profile.operator.topology.grid, undeclared, declared
+    )
     assert (
         _relative(declared.flux, undeclared.flux, flux_scale)
-        < ADDITIVE_LADDER_STEPS * step
+        < ADDITIVE_SEPARATION_MULTIPLE * depth
     )
     assert (
         _relative(
@@ -942,11 +970,11 @@ def test_the_static_path_is_unchanged_when_no_continuation_is_declared(machine):
             undeclared.cell_current,
             jnp.max(jnp.abs(undeclared.cell_current)),
         )
-        < ADDITIVE_LADDER_STEPS * step
+        < ADDITIVE_SEPARATION_MULTIPLE * depth
     )
     assert (
         _entrywise_relative(declared.moments.stack(), undeclared.moments.stack())
-        < ADDITIVE_LADDER_STEPS * step
+        < ADDITIVE_SEPARATION_MULTIPLE * depth
     )
     assert float(declared.ledger.common_sol) == 0.0
     assert float(declared.ledger.private_flux) == 0.0
@@ -961,7 +989,7 @@ def test_the_static_path_is_unchanged_when_no_continuation_is_declared(machine):
             / float(undeclared.conservation.relative_grad_shafranov)
             - 1.0
         )
-        < CONSERVATION_LADDER_STEPS * step
+        < CONSERVATION_SEPARATION_MULTIPLE * depth
     )
 
 

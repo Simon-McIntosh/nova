@@ -1365,7 +1365,13 @@ def render_figure(stages: list[dict], newton: list[dict], output: Path) -> None:
     # stage the whole solve is priced in: the ladder spends one on each primal
     # map evaluation and none on a tangent pass, while every Newton step inside
     # one outer read spends none at all.
-    reference = max(newton, key=lambda item: item["cells"], default=None)
+    # only a run that measured its own convergence can draw one; a run given
+    # its schedule carries no trace and would draw an empty panel
+    reference = max(
+        (item for item in newton if item["adaptive"].get("trace")),
+        key=lambda item: item["cells"],
+        default=None,
+    )
     if reference is not None:
         trace = np.asarray(reference["ladder_trace"], dtype=float)
         measured = trace[np.isfinite(trace)]

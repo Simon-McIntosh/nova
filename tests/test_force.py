@@ -6,6 +6,21 @@ import tempfile
 import numpy as np
 from nova.frame.coilset import CoilSet
 
+# a conductor pair whose vertical force is set by the other coil and whose radial
+# force is dominated by its own section, so both limits of the target rule show
+PAIR = [
+    ("PFa", 8.0, 6.5, 0.65, 0.45, 248.0, 45e3),
+    ("PFb", 3.9, 7.6, 0.80, 0.60, 553.0, -30e3),
+]
+
+
+def conductor_pair(nforce=16, dcoil=-2):
+    """Return the two-conductor coilset the target-rule measurements share."""
+    coilset = CoilSet(nforce=nforce, dcoil=dcoil)
+    for name, x, z, dx, dz, nturn, current in PAIR:
+        coilset.coil.insert(x, z, dx, dz, nturn=nturn, Ic=current, name=name)
+    return coilset
+
 
 @pytest.fixture
 def linked():
@@ -87,6 +102,39 @@ def test_resolution():
     coilset.force.solve(200)
     fr_highres = coilset.force.fr
     assert np.allclose(fr_lowres, fr_highres, rtol=1e-3)
+
+
+def test_totals_do_not_depend_on_the_source_mesh():
+    """Integrating each source section leaves the force free of its subdivision."""
+    reference = conductor_pair(dcoil=-2)
+    reference.force.solve()
+    for dcoil in (-5, -20):
+        coilset = conductor_pair(dcoil=dcoil)
+        coilset.force.solve()
+        np.testing.assert_allclose(coilset.force.fr, reference.force.fr, rtol=1e-12)
+        np.testing.assert_allclose(coilset.force.fz, reference.force.fz, rtol=1e-12)
+        np.testing.assert_allclose(coilset.force.fc, reference.force.fc, rtol=1e-12)
+
+
+def test_moment_arm_turns_about_the_conductor():
+    """An arm divided by the cell would grow without bound as the tiling refines."""
+    for nforce in (1, 4, 16, 64, 256):
+        coilset = conductor_pair(nforce=nforce)
+        coilset.force.solve()
+        assert np.max(np.abs(coilset.force.target.delta_z)) <= 0.5 + 1e-12
+        assert np.max(np.abs(coilset.force.target.delta_r)) <= 0.5 + 1e-12
+
+
+def test_crushing_moment_converges_as_the_tiling_refines():
+    """The first moment has a limit, so successive refinements approach it."""
+    moment = []
+    for nforce in (8, 32, 128, 512):
+        coilset = conductor_pair(nforce=nforce)
+        coilset.force.solve()
+        moment.append(coilset.force.fc)
+    step = np.abs(np.diff(np.asarray(moment), axis=0))
+    assert np.all(step[1] < step[0])
+    assert np.all(step[2] < step[1])
 
 
 if __name__ == "__main__":

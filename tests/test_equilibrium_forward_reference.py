@@ -86,25 +86,30 @@ The route is a root find because the map does not contract.
     non-contraction, which is what selects the route, and not the
     identification of a vertical eigenmode.
 
-    The eager Krylov route is not a substitute. Driven through ``host_krylov``
-    on the same seed, ``scipy.optimize.newton_krylov`` raises ``NoConvergence``
-    on this map both at a tolerance derived from the flux ladder and at one two
-    decades looser, so what fails is its globalisation and not its tolerance.
+    The eager Krylov route agrees where it can run. Driven through
+    ``host_krylov`` on the same seed, :func:`scipy.optimize.newton_krylov`
+    reaches the same equilibrium — the same axis to four decimals, and a flux
+    map within 3.9e-07 Wb of the ladder route, five parts in a billion of the
+    span. Under a single-precision axis fit it instead raises
+    ``NoConvergence``, at a tolerance derived from the flux ladder and at one
+    two decades looser alike: what defeated it there was the noise the fit put
+    under its residual, not its globalisation.
 
-No tolerance below the axis-flux quantum is reachable.
-    The magnetic axis is fitted in the precision the null search carries, and
-    the normalised flux every profile is read against is formed from it, so
-    the spacing of the axis flux in that precision floors every flux
-    comparison downstream. The floor therefore scales with the flux rather
-    than being a fixed number: this case's axis flux is about 83 Wb, which a
-    single-precision fit resolves to 7.6e-06 Wb — 9.4e-08 of the flux span, or
-    9.2e-08 read as a relative residual — where a case whose fluxes are of
-    order one has a floor thirty times finer. A tolerance carried across from
-    one to the other is unreachable. The comparisons below therefore compute
-    the quantum from the fit's own dtype rather than naming a precision, and
-    the Newton budget is read in the same light: it falls four decades over
-    its first five steps, reaches the floor, and spends the rest rattling
-    inside it.
+No solve resolves flux below what its own arithmetic can express.
+    Two floors compete and the coarser one binds. One is a step of the ladder
+    the fitted axis flux lands on, since every profile is evaluated on a
+    normalised flux formed against that value; the other is the round-off the
+    plasma coupling accumulates over a dot product across the cells. Which one
+    binds follows the precision the null search fits at, so this module reads
+    the dtype off the fit rather than naming one — see :func:`flux_resolution`
+    — and the difference is not academic. On this case the axis flux is about
+    83 Wb: fitted in single precision its ladder step is 7.6e-06 Wb, decades
+    above the coupling sum and binding alone, and the root find stalls against
+    it four decades down. Fitted in double, one step falls to a single unit in
+    the last place, the coupling sum binds instead at about 2e-11 Wb, and the
+    same budget runs six decades further. A tolerance carried across from
+    another case, or from another precision, is therefore either unreachable
+    or meaningless, which is why nothing here names an absolute one.
 
 The published shape moments are not the reference's own.
     Recomputing poloidal beta and internal inductance from the stored flux map
@@ -192,9 +197,11 @@ WALL_NODES = 3
 #: Root-find budget. Each Newton step linearises the map once and solves
 #: ``(I - J) s = f`` in a fixed-shape Krylov space, which is what lets it hold
 #: an equilibrium the relaxed iteration cannot — see the vertical drift below.
-#: The budget is generous on purpose: the residual falls four decades over the
-#: first five steps and then reaches the quantum of the axis-flux read, after
-#: which the remaining steps rattle inside that floor rather than descending.
+#: The budget is generous on purpose. How far it gets is set by the arithmetic
+#: rather than by the step count: the residual falls four decades over the
+#: first four steps and then descends as far as the solve can express, which
+#: is the axis-flux ladder under a single-precision fit and the coupling
+#: round-off six decades below it under a double one.
 NEWTON_STEPS = 10
 KRYLOV_ITERATIONS = 30
 #: Relaxed evaluations the vertical drift is measured over, and its step.
@@ -238,6 +245,14 @@ CONVENTION_TOLERANCE = 0.02
 #: Agreement between the package's integral observation operator and an
 #: independent quadrature of the same field on a raster.
 QUADRATURE_TOLERANCE = 0.05
+
+#: How far above the flux resolution the converged residual may sit. Reading
+#: convergence against the resolution rather than against a fixed number is
+#: what makes the pin follow the precision the null search fits at: the same
+#: assertion holds at 0.18 of the resolution under a single-precision fit and
+#: 0.011 under a double one, where the absolute residuals differ by seven
+#: decades.
+RESOLUTION_MARGIN = 10.0
 
 #: Power iterations used to read the dominant eigenvalue of the free-boundary
 #: map at the converged equilibrium. The Rayleigh quotient is within a percent
@@ -683,20 +698,30 @@ def receipt_mesh(machine: HexMachine) -> StencilMesh:
     )
 
 
-def axis_flux_quantum(profile: ForwardProfile, equilibrium) -> float:
-    """Return the finest flux difference [Wb] the topology read can express.
+def flux_resolution(profile: ForwardProfile, equilibrium) -> float:
+    """Return the finest flux difference [Wb] the whole solve can express.
 
-    Every profile is evaluated on a normalised flux formed against the fitted
-    axis flux, so the spacing of that value in the precision the null search
-    fits at is the floor under any flux comparison downstream of it. The dtype
-    is read off the fit rather than assumed, so this follows a change of the
-    null-search precision instead of having to be revised alongside it, and
-    the magnitude is taken because the spacing of a negative value is negative
-    and this case's axis flux is negative.
+    Two floors compete and the coarser one binds. One is a step of the ladder
+    the axis flux lands on: every profile is evaluated on a normalised flux
+    formed against that fitted value, so its spacing in the precision the null
+    search fits at floors everything downstream. The other is the round-off the
+    plasma coupling accumulates — each residual entry is a dot product over the
+    grid's cells, so it carries up to that many units in the last place of the
+    flux scale.
+
+    Which one binds follows the fit precision, so neither is assumed: a single
+    precision fit puts its ladder decades above the coupling sum and binds
+    alone, while a double one puts a step at a single unit in the last place,
+    underneath the sum, and the sum binds instead. The dtype is read off the
+    fit, and the magnitude is taken because the spacing of a negative value is
+    negative and this case's axis flux is negative.
     """
     dtype = np.dtype(profile.operator.grid.null.fit_dtype)
     axis_flux = abs(float(equilibrium.topology.axis_flux))
-    return float(np.spacing(np.asarray(axis_flux, dtype=dtype)))
+    ladder = float(np.spacing(np.asarray(axis_flux, dtype=dtype)))
+    scale = float(jnp.max(jnp.abs(equilibrium.flux)))
+    accumulation = profile.operator.grid.node_number * float(np.spacing(scale))
+    return max(ladder, accumulation)
 
 
 def forward_profile(case: ReferenceCase, machine: HexMachine) -> ForwardProfile:
@@ -991,7 +1016,13 @@ def test_the_relaxed_route_walks_down_the_vertical_instability(solved):
 
     This is why the demonstration is a root find. It is also the reason a
     prescribed-source solve of a real elongated equilibrium cannot be qualified
-    by a residual alone — the vacuum branch has a perfect one.
+    by a residual alone: the run leaves an equilibrium whose residual sits at
+    the solve floor and then CONTRACTS onto the vacuum branch, so the two
+    directions of this one trace — growth away from the physical fixed point,
+    decay onto the trivial one — are the whole statement. Both are read within
+    the trace rather than against the root find's residual, which is a floor
+    set by the arithmetic and moves decades with the precision the axis is
+    fitted at.
     """
     operator = forward_operator(solved.case, solved.machine)
     history = fixed_point.picard(
@@ -1010,8 +1041,12 @@ def test_the_relaxed_route_walks_down_the_vertical_instability(solved):
         jnp.asarray(solved.machine.radius), operator.area, masks
     )
     assert float(jnp.sum(current)) == 0.0
-    # the collapsed branch is a perfectly good fixed point of the same map
-    assert float(history.residual) < float(solved.fixed_point.residual) * 1.0e3
+    # the vacuum branch attracts where the equilibrium repelled: the tail of
+    # the same trace contracts, at the geometric rate a relaxed step gives on
+    # a fixed point it is converging to
+    tail = trace[-(RELAXED_EVALUATIONS // 4) :]
+    assert tail[-1] < tail[0] / 10.0, tail[[0, -1]]
+    assert trace.max() > 10.0 * tail[-1]
 
 
 def test_no_current_appears_outside_the_declared_support(solved):
@@ -1133,6 +1168,12 @@ def test_the_published_solve_runs_on_the_production_mesh(published):
     assert isinstance(profile.lattice, StencilMesh)
     assert profile.lattice.node_count == profile.operator.grid.node_number
     assert float(equilibrium.fixed_point.residual) < RESIDUAL_TOLERANCE
+    # the sharper statement: the root find reaches the floor its own
+    # arithmetic sets, whatever precision the null search is fitting at
+    scale = float(jnp.max(jnp.abs(equilibrium.flux)))
+    residual = float(equilibrium.fixed_point.residual) * scale
+    resolution = flux_resolution(profile, equilibrium)
+    assert residual < RESOLUTION_MARGIN * resolution, (residual, resolution)
     assert bool(equilibrium.finite.passed)
     assert bool(equilibrium.topology.diverted)
     assert abs(float(equilibrium.moments.plasma_current)) > 1.0e7
@@ -1147,9 +1188,9 @@ def test_the_receipt_layer_reads_the_solve_without_changing_it(published, solved
     finest difference anything downstream of the topology read can express.
     """
     profile, equilibrium = published
-    ladder_step = axis_flux_quantum(profile, equilibrium)
+    resolution = flux_resolution(profile, equilibrium)
     deviation = float(jnp.max(jnp.abs(equilibrium.flux - solved.flux)))
-    assert deviation < ladder_step, (deviation, ladder_step)
+    assert deviation < resolution, (deviation, resolution)
     for name in ("plasma_current", "volume", "major_radius"):
         published_value = float(getattr(equilibrium.moments, name))
         operator_value = float(getattr(solved.moments, name))

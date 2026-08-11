@@ -71,9 +71,12 @@ Nova caches expensive calculations as netCDF files. Key classes:
 # 1. Check current state
 git status
 
-# 2. Run linting on Python files only (exclude tests/ and legacy modules)
-uv run ruff check --fix .
-uv run ruff format .
+# 2. Lint PATH-SCOPED over the files you touched — never repo-wide: a
+#    repo-wide fixer rewrites pre-existing unformatted files outside your
+#    scope, and [tool.ruff] excludes tests/ so test files must be named
+#    explicitly to be linted at all
+uv run ruff check --fix <file1> <file2> ...
+uv run ruff format <file1> <file2> ...
 
 # 3. Stage specific files (NEVER use git add -A)
 git add <file1> <file2> ...
@@ -101,6 +104,11 @@ git push
 | `chore`    | Maintenance        |
 
 **Breaking changes**: Add `BREAKING CHANGE:` footer in the body (not `type!:` suffix).
+
+**Body required**: every commit carries a body stating what changed and why —
+the subject-only conventional grammar is the format of the first line, not of
+the whole message. Verify before push:
+`git log -1 --format=%b | grep -q . || echo 'BODYLESS — amend'`.
 
 ### Testing
 
@@ -154,6 +162,30 @@ reachable from its published branch.
 
 Keep the primary checkout on `main`. The Reckon server serves this checkout's
 working tree, so commit and push plan edits in the same session.
+
+## IMAS Data Access (imas-python)
+
+Nova reads and writes IMAS data through imas-python only — the global
+guidelines carry the binding rules (never h5py on IMAS data; open with the
+written DD version; check `homogeneous_time`; `float()` before formatting
+`IDSFloat0D`). Nova-scoped depth:
+
+- **DD version lookup**: for test data, take `dd_version` per dataset from
+  `tests/data-manifest.json`; never guess. When unknown, read
+  `ids_properties.version_put.data_dictionary` from an opened IDS.
+- **`homogeneous_time == 1`**: the time base is `ids.time` at IDS level;
+  per-signal `.time` arrays are empty by design — an empty per-signal time is
+  NOT missing data.
+- **`DBEntry` lifecycle**: the constructor opens the pulse; a subsequent
+  `.open()` raises "already open".
+- **DDv3 `time_slice` iteration** may raise `int() argument must be a
+  string…` — use index-based access (`for i in range(len(eq.time_slice))`).
+- **`IDSNumericArray`**: convert with `np.asarray(...)` (or `.value`); len,
+  shape, and indexing work directly.
+- **Assembling a pulse from standalone `*.h5` files**: `master.h5` needs the
+  `HDF5_BACKEND_VERSION` attribute (numpy bytes `b'1.0'`) and h5py
+  `ExternalLink`s targeting `'/{ids_name}'` inside each file (data sits under
+  a root-level group named after the IDS).
 
 ## Rules
 

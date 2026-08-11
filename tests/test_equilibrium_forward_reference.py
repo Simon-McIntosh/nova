@@ -75,25 +75,53 @@ The passive structure is in the machine, and is not the deviation floor.
     and silently models a different machine. Both are read through the
     parallelogram the entry itself declares.
 
-    What that is worth is measured twice over. Before any solve, the flux the
-    passive currents put on the plasma cells is a matrix-vector product, and it
-    comes to 0.093 percent of the axis to boundary span against the 0.958
-    percent by which the stored map misses being a fixed point of this
-    machine. After the solve, the deviation between the solved and the stored
-    flux map falls from 1.499 to 1.401 percent of that span, and the solved
-    magnetic axis comes from 11.3 mm inboard and 5.4 mm above the stored one to
-    9.6 mm inboard and 3.2 mm above. The two measurements agree, which is
-    itself a result: the free-boundary map amplifies almost nothing here, so
-    what came out is what went in.
+    What that is worth is measured twice over, on the suite mesh. Before any
+    solve, the flux the passive currents put on the plasma cells is a
+    matrix-vector product, and it comes to 0.093 percent of the axis to
+    boundary span against the 0.958 percent by which the stored map misses
+    being a fixed point of this machine. After the solve, the deviation
+    between the solved and the stored flux map falls from 1.499 to 1.401
+    percent of that span, and the solved magnetic axis comes from 11.3 mm
+    inboard and 5.4 mm above the stored one to 9.6 mm inboard and 3.2 mm
+    above. The two measurements agree, which is itself a result: the
+    free-boundary map amplifies almost nothing here, so what came out is what
+    went in. The stabilisation pair, at 65 A against the structure's 14.9 kA,
+    is worth 0.002 percent of the span — a fiftieth of the structure and four
+    decimal places below the deviation.
 
-    The reading is therefore a falsification rather than a closure. The passive
-    currents are real and belong in the machine, but the closure is worth six
-    percent of the deviation it was supposed to explain, so more than nine
-    tenths of that deviation is something else; and since the map does not
-    amplify, no small excluded current elsewhere could be it either. Closing
-    what remains needs a source an order larger than anything the entry still
-    has to give, which points at how the currents that ARE declared are
-    distributed rather than at a conductor that is missing.
+    The pair is worth stating exactly, because 65 A is a circuit current and
+    not an ampere-turn count. The entry declares it as ONE coil carrying one
+    current, with two elements at turn counts +1 and -1: the magnitude travels
+    with the coil and the opposite signs are the whole of the entry's statement
+    that the two branches are wired in anti-series, since it carries no circuit
+    or supply description to say so a second time. One turn per branch makes
+    the ampere-turns numerically the same 65 as the current. Read instead as
+    the four turns per branch a wound in-vessel pair would carry, the drive and
+    everything linear in it — including the flux the pair puts on the plasma
+    cells — scales by four, to 0.008 percent of the span. The pair is
+    negligible under either reading, which is why the module bounds it at four
+    turns rather than settling which the entry meant.
+
+    The reading is therefore a falsification rather than a closure, and it does
+    not depend on the mesh. At 1587 cells the same comparison runs 6.864 to
+    6.484 percent, so the closure is worth six percent of the deviation on the
+    suite mesh and five and a half on the evidence mesh while the deviation
+    itself quadruples. Whatever is missing scales with the refinement the way
+    the machine-model disagreement does and not the way the passive currents
+    do.
+
+    The input-output agreement does not survive the finer mesh, and it does not
+    have to. On the suite mesh the 0.093 percent the structure puts in comes
+    back as a 0.098 point move in the deviation; at 1587 cells 0.096 percent in
+    moves it by 0.380, four times as far, and one cell changes core label
+    between the two models, so part of even that is the sup-norm being taken
+    over a different set of cells. What carries the falsification is therefore
+    the ratio rather than the unit gain: amplified fourfold, a source of the
+    passive structure's size still lands seventeen times short of the
+    deviation, so no small excluded current elsewhere could be the remainder
+    either. Closing what remains needs a source an order larger than anything
+    the entry still has to give, which points at how the currents that ARE
+    declared are distributed rather than at a conductor that is missing.
 
 The route is a root find because the map does not contract.
     An elongated diverted column held at fixed conductor currents is
@@ -216,10 +244,15 @@ CANDIDATE_USERS = ("public", getpass.getuser())
 #: request, so the realised count follows the wall area and the hexagon pitch:
 #: -500 gives 566 cells at a 0.237 m pitch and -1500 gives 1587 at 0.137 m.
 #: The suite runs the coarser of the two and the evidence figure the finer.
-#: Refining does NOT reduce the deviation against the reference, which is what
-#: identifies the deviation as a machine-model difference rather than a
-#: discretisation error — the free-boundary residual of the STORED map under
-#: this machine model is about one percent of the flux span at both.
+#: Refining does not reduce the deviation against the reference, it RAISES it —
+#: the solved flux map misses the stored one by 1.50 % of the span at 566 cells
+#: and 6.86 % at 1587 — which is what identifies the deviation as a
+#: machine-model difference rather than a discretisation error. A
+#: discretisation error would fall. What rises with it is the stored map's own
+#: free-boundary residual under this machine model, 0.96 % to 1.35 %: the
+#: finer mesh resolves more of a disagreement that was always there, and the
+#: solve then slides further along the soft vertical and radial force balance
+#: before it comes to rest.
 SUITE_CELLS = -500
 EVIDENCE_CELLS = -1500
 #: Poloidal field coil filaments per conductor, and wall nodes PER FIRST-WALL
@@ -295,14 +328,33 @@ BOUNDARY_PITCHES = 1.5
 #: by a percent or more.
 AREA_TOLERANCE = 1.0e-5
 #: Ceiling on the flux the passive structure alone puts on the plasma cells,
-#: as a fraction of the axis to boundary span. Measured 9.3e-4 — a tenth of a
-#: percent — on the suite mesh.
+#: as a fraction of the axis to boundary span. Measured 9.3e-4 on the suite
+#: mesh and 9.6e-4 at 1587 cells — a tenth of a percent, and insensitive to
+#: the mesh, because it is a property of the drive rather than of the solve.
 PASSIVE_FLUX_CEILING = 2.0e-3
 #: How far the stored map's own free-boundary residual has to exceed that
 #: contribution for the passive structure to be excluded as the deviation
-#: floor. Measured 10.3 on the suite mesh, so the structure is an order too
-#: small; this pin keeps the claim at "an order" with room to spare.
+#: floor. Measured 10.3 on the suite mesh and 14.1 at 1587 cells, so the
+#: structure is an order too small and grows no closer under refinement; this
+#: pin keeps the claim at "an order" with room to spare.
 PASSIVE_SHORTFALL = 5.0
+
+#: The two elements the in-vessel stabilisation pair is declared as, labelled
+#: the way a two-element coil is labelled below. They are the only driven
+#: elements with a skewed section, so a rectangle-only reader loses the pair
+#: along with the whole passive family.
+STABILISATION_ELEMENTS = ("VS3U", "VS3L")
+#: Ceiling on the flux the stabilisation pair alone puts on the plasma cells, as
+#: a fraction of the axis to boundary span. Measured 2.0e-5 on the suite mesh
+#: and 2.1e-5 at 1587 cells, a fiftieth of what the passive structure carries.
+STABILISATION_FLUX_CEILING = 1.0e-4
+#: Turns per branch the pair is bounded at. The entry declares ONE, and the
+#: bound is written for four so that it also covers a reading in which each
+#: branch carries the four turns of a wound in-vessel pair rather than the
+#: single turn declared. The flux a conductor puts on the cells is linear in
+#: its ampere-turns, so the factor carries straight through and the pin holds
+#: without having to settle which reading the entry meant.
+STABILISATION_TURN_BOUND = 4.0
 
 #: Agreement between the current the tabulated gradients imply on the stored
 #: boundary and the stored plasma current. This is the convention pin, not a
@@ -586,9 +638,18 @@ def _uri(user: str) -> str:
 def _read_active(coils) -> tuple[list[Conductor], list[tuple[str, float]]]:
     """Return the driven conductor elements and any the entry does not place.
 
-    A coil wound in two symmetric packs declares one current and two elements
-    carrying opposite turn signs, so the sign travels with the element and the
-    magnitude with the coil.
+    A coil wound in two packs declares one current and two elements, and the
+    element carries the turn count that current flows through. The sign of that
+    count is the wiring: it travels onto the element's current here, while the
+    magnitude stays a turn count, because the insert takes a signed current and
+    a positive number of turns. The central solenoid's split pack declares both
+    of its elements at +554, the same sense; the stabilisation pair declares +1
+    and -1, opposed.
+
+    That sign is the only place the wiring appears. This entry populates neither
+    ``circuit`` nor ``supply``, so there is no connection matrix to read the
+    anti-series pair from and no second declaration to check the turn signs
+    against.
     """
     placed, unplaced = [], []
     for coil in coils.coil:
@@ -1269,6 +1330,49 @@ def test_every_conductor_the_entry_declares_is_placed(solved):
         )
 
 
+def test_the_stabilisation_pair_carries_the_turns_the_entry_declares(solved):
+    """The pair's turn count, wiring and worth are read off the entry.
+
+    The two in-vessel stabilisation plates are the one place in this entry where
+    a current has to be told apart from an ampere-turn count, and the only
+    driven elements a rectangle-only reader would drop. The coil declares a
+    single current of 65.4 A and two elements at turn counts +1 and -1, so what
+    the machine carries is two branches of one turn at equal magnitude and
+    opposite sign. The opposite signs are the entry's whole statement of the
+    anti-series wiring — it populates no ``circuit`` and no ``supply`` — and the
+    single turn is what makes 65.4 A simultaneously the circuit current and the
+    ampere-turns of either branch, a coincidence that would not survive the four
+    turns per branch a wound pair carries.
+
+    Which reading the entry meant is left open, because nothing here turns on
+    it. The flux the pair puts on the plasma cells is 0.002 % of the axis to
+    boundary span, and what is asserted is that it stays below the passive
+    structure's own contribution even when multiplied by the four turns it is
+    not declared with. The passive structure is in turn an order below the
+    deviation this module measures, which puts the pair four decimal places
+    beneath it under either reading.
+    """
+    case, machine = solved.case, solved.machine
+    pair = [
+        conductor
+        for conductor in case.active
+        if conductor.name in STABILISATION_ELEMENTS
+    ]
+    assert [conductor.name for conductor in pair] == list(STABILISATION_ELEMENTS)
+    assert all(conductor.polygon is not None for conductor in pair)
+    assert {conductor.turns for conductor in pair} == {1.0}, pair
+    assert pair[0].current == -pair[1].current != 0.0, pair
+
+    names = [conductor.name for conductor in case.drive()]
+    columns = np.array([name in STABILISATION_ELEMENTS for name in names])
+    assert columns.sum() == len(STABILISATION_ELEMENTS)
+    flux = machine.source_to_grid[:, columns] @ machine.source_current[columns]
+    peak = float(np.max(np.abs(flux)) / abs(case.flux_span))
+    assert peak < STABILISATION_FLUX_CEILING, peak
+    passive = float(np.max(np.abs(machine.passive_flux)) / abs(case.flux_span))
+    assert STABILISATION_TURN_BOUND * peak < passive, (peak, passive)
+
+
 def test_the_passive_structure_cannot_carry_the_reproduction_gap(solved):
     """The leading candidate for the deviation floor is measured, and is too small.
 
@@ -1317,11 +1421,16 @@ def test_the_passive_closure_moves_the_reproduction_by_a_tenth_of_a_percent():
     a real conductor carrying real current is not a modelling choice. And it
     is not the floor: the closure is worth six percent of the deviation it was
     supposed to explain, so more than nine tenths of that deviation is
-    something else. The free-boundary map amplifies almost nothing here — what
-    the structure contributes to the solution is what it contributed to the
-    drive — which also says the remaining gap cannot be a small excluded
-    current anywhere: closing it needs a source an order larger, and there is
-    none left in the entry to supply one.
+    something else.
+
+    On this mesh the map returns what it is given — the 0.098 points the
+    deviation moves by is the 0.093 percent of span the structure put into the
+    drive — but that unit gain is a suite-mesh reading and not the reason the
+    remaining gap cannot be another small excluded current. At 1587 cells the
+    same contribution moves the deviation four times as far, and a source of
+    this size is STILL seventeen times short there. It is that ratio, not the
+    gain, which says closing the gap needs a source an order larger than
+    anything the entry has left to supply.
     """
     without = _solved(SUITE_CELLS, False).deviations()
     structure = _solved(SUITE_CELLS, True).deviations()
@@ -1682,6 +1791,26 @@ def test_the_differenced_field_agrees_with_the_analytic_cell_field(published, so
 # --------------------------------------------------------------------------
 # evidence figures
 # --------------------------------------------------------------------------
+#: Ink for the machine cross-section panels, following the convention the IMAS
+#: plotting stack draws an equilibrium over a machine with: the computed
+#: surfaces in blue, the stored boundary as a dashed sienna reference against
+#: them, the wall in black, and the conductors as unfilled grey outlines so the
+#: filaments a wound pack is decomposed into stay countable instead of reading
+#: as one solid block. The two families that convention has no colour for get
+#: their own. The vessel is violet, deliberately clear of the red the reference
+#: is drawn in, because a vessel indistinguishable from the stored boundary is
+#: worse than no vessel. The stabilisation pair is a green nothing else uses,
+#: and is ringed as well as filled: two 13 cm plates lying against the wall are
+#: a few pixels at machine scale, and a panel that claims to show every
+#: conductor has to let the reader find them.
+SURFACE_INK = "#3366cc"
+REFERENCE_INK = "#a02c00"
+WALL_INK = "#000000"
+CONDUCTOR_INK = "#888888"
+PASSIVE_INK = "#7b5aa6"
+STABILISATION_INK = "#1b7837"
+
+
 def _mesh_panel(axes, solved):
     """Draw the labelled hexagonal mesh, the solved surfaces and the boundary."""
     case, machine = solved.case, solved.machine
@@ -1874,10 +2003,61 @@ def _machine_panel(axes, solved, title):
     plasma cells, the filaments each wound pack is decomposed into and the
     plates each passive loop is tiled with all appear exactly as the coupling
     integrates them, rather than as markers standing in for them.
+
+    It is called once per conductor family, because patch keywords in that call
+    apply to every polygon it draws and the four families want different ink —
+    the wound packs, the vessel, the stabilisation pair and the plasma cells.
+    The plasma rows are drawn FIRST and need an edge: an opaque mesh drawn last
+    hides any conductor standing inside the first wall, and without an edge a
+    few hundred hexagons merge into a single blob so the mesh the coupling
+    integrates over stops being visible either way. The frame plot also leaves
+    the axes switched off, its house style for a machine schematic; this module
+    labels R and Z, so they go back on.
+
+    The annotation sits in the upper RIGHT because the upper left is where the
+    top poloidal field coil is, and a text box there whites out a conductor the
+    panel exists to show.
     """
     case, machine = solved.case, solved.machine
-    machine.coilset.plot(axes=axes)
+    subframe = machine.coilset.subframe
+    plasma = np.asarray(subframe.loc[:, "plasma"], dtype=bool)
+    owner = np.asarray(subframe.frame, dtype=object)
+    passive = ~plasma & (np.asarray(subframe.part, dtype=object) == "passive")
+    pair = ~plasma & np.array([name in STABILISATION_ELEMENTS for name in owner])
+    machine.coilset.plot(
+        index=plasma,
+        axes=axes,
+        facecolor="#eaf0f8",
+        edgecolor="0.72",
+        linewidth=0.25,
+    )
+    machine.coilset.plot(
+        index=~plasma & ~passive & ~pair,
+        axes=axes,
+        facecolor="none",
+        edgecolor=CONDUCTOR_INK,
+        linewidth=0.4,
+    )
+    if passive.any():
+        machine.coilset.plot(
+            index=passive, axes=axes, facecolor=PASSIVE_INK, edgecolor=PASSIVE_INK
+        )
+    machine.coilset.plot(
+        index=pair, axes=axes, facecolor=STABILISATION_INK, edgecolor=STABILISATION_INK
+    )
+    axes.axis("on")
     axes.set_aspect("equal")
+    for conductor in case.active:
+        if conductor.name in STABILISATION_ELEMENTS:
+            axes.plot(
+                *conductor.polygon.mean(axis=0),
+                "o",
+                color=STABILISATION_INK,
+                mfc="none",
+                ms=9,
+                mew=0.9,
+            )
+    axes.plot(case.wall[:, 0], case.wall[:, 1], "-", color=WALL_INK, lw=1.0)
     axes.tricontour(
         machine.radius,
         machine.node[:, 1],
@@ -1885,18 +2065,18 @@ def _machine_panel(axes, solved, title):
         levels=np.linspace(
             float(solved.topology.axis_flux), float(solved.topology.boundary_flux), 9
         ),
-        colors="C0",
-        linewidths=0.6,
+        colors=SURFACE_INK,
+        linewidths=0.7,
     )
     closed = np.r_[case.boundary, case.boundary[:1]]
-    axes.plot(closed[:, 0], closed[:, 1], "--", color="C3", lw=1.4)
-    axes.plot(*np.asarray(solved.topology.axis), "o", color="C0", ms=5)
-    axes.plot(*case.axis, "x", color="C3", ms=7, mew=1.6)
-    axes.plot(*np.asarray(solved.topology.x_point), "o", color="C0", ms=5)
-    axes.plot(*case.x_point[0], "x", color="C3", ms=7, mew=1.6)
+    axes.plot(closed[:, 0], closed[:, 1], "--", color=REFERENCE_INK, lw=1.6)
+    axes.plot(*np.asarray(solved.topology.axis), "o", color=SURFACE_INK, ms=5)
+    axes.plot(*case.axis, "x", color=REFERENCE_INK, ms=7, mew=1.6)
+    axes.plot(*np.asarray(solved.topology.x_point), "o", color=SURFACE_INK, ms=5)
+    axes.plot(*case.x_point[0], "x", color=REFERENCE_INK, ms=7, mew=1.6)
     rows = solved.deviations()
     axes.text(
-        0.03,
+        0.97,
         0.97,
         "%d source columns\n%d core cells\nflux %.2f %% of span\naxis %+.0f, %+.0f mm"
         % (
@@ -1910,24 +2090,40 @@ def _machine_panel(axes, solved, title):
         fontsize="x-small",
         color="0.25",
         va="top",
+        ha="right",
+        multialignment="right",
+        bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.8, "pad": 2.0},
     )
     axes.set_title(title, fontsize="small")
     axes.set_xlabel("$R$ [m]")
     axes.set_ylabel("$Z$ [m]")
+    axes.tick_params(labelsize="x-small")
 
 
 def _closure_figure(figure, without, structure):
-    """Draw the two machine models the passive closure compares."""
-    axes = figure.subplots(1, 2, sharey=True)
+    """Draw the two machine models the passive closure compares.
+
+    Both panels are held on the SAME limits, taken from the model that reaches
+    further — the one carrying the vessel. Letting each autoscale to its own
+    conductors would draw the two machines at two magnifications, which is the
+    one thing a before-and-after pair must not do.
+
+    The key goes in the lower right of the left panel, the one corner of the
+    machine both models leave empty.
+    """
+    axes = figure.subplots(1, 2, sharex=True, sharey=True)
     _machine_panel(axes[0], without, "driven coils alone")
     _machine_panel(axes[1], structure, "with the passive structure")
-    for height, label, colour in (
-        (0.10, "stored boundary", "C3"),
-        (0.04, "solved surfaces", "C0"),
-    ):
+    key = (
+        ("stored boundary", REFERENCE_INK),
+        ("solved surfaces", SURFACE_INK),
+        ("passive structure", PASSIVE_INK),
+        ("stabilisation pair", STABILISATION_INK),
+    )
+    for position, (label, colour) in enumerate(reversed(key)):
         axes[0].text(
-            0.97,
-            height,
+            0.98,
+            0.015 + 0.04 * position,
             label,
             transform=axes[0].transAxes,
             color=colour,
@@ -1935,6 +2131,15 @@ def _closure_figure(figure, without, structure):
             ha="right",
         )
     axes[1].set_ylabel("")
+    margin = 0.3
+    axes[0].set_xlim(
+        min(axes[1].get_xlim()[0], axes[0].get_xlim()[0]) - margin,
+        max(axes[1].get_xlim()[1], axes[0].get_xlim()[1]) + margin,
+    )
+    axes[0].set_ylim(
+        min(axes[1].get_ylim()[0], axes[0].get_ylim()[0]) - margin,
+        max(axes[1].get_ylim()[1], axes[0].get_ylim()[1]) + margin,
+    )
 
 
 def _profile_figure(figure, without, structure):
@@ -1946,6 +2151,8 @@ def _profile_figure(figure, without, structure):
     account for. It is a decade short, which is why the closure moves the
     upper panels so little.
     """
+    from matplotlib.patches import Patch
+
     grid = figure.add_gridspec(3, 1, height_ratios=(1.0, 1.0, 0.85))
     model = (
         (without, "0.62", "driven coils alone"),
@@ -1972,16 +2179,18 @@ def _profile_figure(figure, without, structure):
                     va="center",
                     ha="left" if value >= 0.0 else "right",
                 )
-            if position == 0:
-                panel.text(
-                    0.99,
-                    0.2 if shift > 0.0 else 0.06,
-                    label,
-                    transform=panel.transAxes,
-                    color=colour,
-                    fontsize="x-small",
-                    ha="right",
-                )
+        if position == 0:
+            # the flux deviation is the widest row here, so the key needs an
+            # opaque box the legend can place clear of the bars
+            panel.legend(
+                handles=[
+                    Patch(facecolor=colour, label=label) for _, colour, label in model
+                ],
+                loc="lower left",
+                fontsize="x-small",
+                framealpha=0.9,
+                edgecolor="none",
+            )
         panel.axvline(0.0, color="0.4", lw=0.8)
         panel.set_yticks(centre, names, fontsize="x-small")
         panel.invert_yaxis()
@@ -2155,7 +2364,7 @@ def render_figures(directory: Path = FIGURE_DIRECTORY, cells: int = EVIDENCE_CEL
     written = []
 
     without = _solved(cells, False)
-    figure = plt.figure(figsize=(9.6, 6.4), constrained_layout=True)
+    figure = plt.figure(figsize=(7.4, 7.4), constrained_layout=True)
     _closure_figure(figure, without, solved)
     path = directory / "dina-closure-reproduction.png"
     figure.savefig(path, dpi=200)

@@ -809,7 +809,6 @@ def adaptive_newton(
     rather than a restatement of a budget. The fixed-schedule route timed
     afterwards runs the counts this returns.
     """
-    import jax
     import jax.numpy as jnp
 
     current = jnp.asarray(bundle.coil_current)
@@ -839,8 +838,13 @@ def adaptive_newton(
         if support_size is None:
             support_size = declared_support_size(operator, identity)
         route = frozen_route(operator, identity)
-        stepper = jax.jit(
-            step_callable(route, driven_support(operator, identity, support_size), step)
+        # Deliberately not compiled. This loop measures how many topology reads
+        # and Newton steps the case needs, not how long they take -- the timing
+        # comes from the fixed-schedule route below. Compiling it would rebuild
+        # an executable on every outer read, because each read closes over a new
+        # frozen identity, and on the larger mesh that compile dwarfs the solve.
+        stepper = step_callable(
+            route, driven_support(operator, identity, support_size), step
         )
         moves: list[float] = []
         for _inner in range(INNER_LIMIT):

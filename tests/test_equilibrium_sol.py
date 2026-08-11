@@ -21,10 +21,13 @@ and a continuation there would have nowhere to act.
 
 A declared continuation is expected to MOVE the solution — it is extra current
 inside the vessel — so the shift is measured and bounded rather than
-suppressed. What must not move is the solve that declares nothing: with a core
+suppressed. What must not move is the source that declares nothing: with a core
 closure whose gradients and slopes both vanish at the separatrix, declaring the
-machinery on both open branches reproduces the undeclared solve exactly, array
-for array.
+machinery on both open branches assembles the same current image the undeclared
+source does, array for array, at whatever flux it is read at. The solve driven
+from that image is compared on the ladder its normalisation is resolved on,
+because a compiled map is free to fold the two zero images the declaration now
+sums in into the plasma coupling and move the last bits of the iterate.
 """
 
 from __future__ import annotations
@@ -61,6 +64,8 @@ with skip_import("jax"):
     from nova.equilibrium.topology import Topology
     from nova.geometry.hexstencil import hex_stencil
     from nova.jax.config import configure_dtypes
+
+    from tests.test_equilibrium_forward_solve import _normalisation_quantum
 
 P_PRIME = -3.0e5
 FF_PRIME = -0.25
@@ -116,6 +121,20 @@ CONTINUITY_TOLERANCE = 1.0e-4
 #: than a jump to another branch.
 SHIFT_FLOOR = 1.0e-3
 SHIFT_CEILING = 1.0e-1
+#: Steps of the axis-flux ladder two solves of one source are allowed to
+#: separate by. The source is normalised against a flux read from a
+#: single-precision sub-cell fit, so a last-bit difference in the iterate can
+#: land that read on a neighbouring rung and shift the whole normalised
+#: profile. Where each run then stops inside the stalled band is decided by
+#: rounding beneath the ladder, so the two separate by a count of steps rather
+#: than agreeing bit for bit: flux, cell current and the moments were measured
+#: to separate by a few steps to a dozen, and the bound is registered an order
+#: above that.
+ADDITIVE_LADDER_STEPS = 100
+#: The same separation read through the conservation ledger. That residual
+#: differences the flux map twice on the lattice, which carries a difference
+#: of one step into it amplified by tens.
+CONSERVATION_LADDER_STEPS = 1000
 
 
 def _terms():
@@ -331,6 +350,16 @@ def diverted():
 def _relative(left, right, scale):
     """Return a sup-norm difference read against one flux scale."""
     return float(jnp.max(jnp.abs(left - right))) / float(scale)
+
+
+def _entrywise_relative(left, right):
+    """Return the largest entrywise relative difference of two receipt rows.
+
+    Each entry is read against its own magnitude, so one bound covers a stack
+    carrying a plasma current beside two dimensionless shape moments.
+    """
+    left, right = np.asarray(left), np.asarray(right)
+    return float(np.max(np.abs(left - right) / np.abs(right)))
 
 
 def _one_sided_slope(gradient, sense, step=CONTINUITY_STEP):
@@ -837,13 +866,26 @@ def test_declaring_a_continuation_on_an_empty_domain_changes_nothing(
 
 
 def test_the_static_path_is_unchanged_when_no_continuation_is_declared(machine):
-    """Declaring the machinery on a null anchor reproduces the solve exactly.
+    """Declaring the machinery on a null anchor adds nothing to the source.
 
     A core closure whose gradient and slope both vanish at the separatrix is
     continued by identically zero, so the declared solve and the undeclared one
-    are the same physical problem. Their flux maps, current images and
-    observations agree array for array, which is what says the continuation
-    seam adds no arithmetic to a source that does not use it.
+    are the same physical problem. Where that identity can be read directly it
+    is exact: at one trial flux the two sources assemble the same current image
+    and the same write-then-read cycle, array for array, both at the seed and
+    again at a converged map. That is what says the continuation seam adds no
+    arithmetic to a source that does not use it.
+
+    Iterating the map is where the two part company. The declared assembly sums
+    two further images into the core one — both identically zero — and a
+    compiled map is free to fold that sum into the plasma coupling
+    contraction, which moves the last bits of the iterate. The magnetic axis is
+    fitted in single precision, so a last-bit move can land the flux the source
+    is normalised against on a neighbouring rung of that ladder and leave the
+    two runs stalled at different points inside one band. The converged
+    receipts are therefore compared in steps of the ladder; the domain
+    labelling still agrees array for array, and the open branches carry exactly
+    no current.
 
     The conservation ledger is the one receipt that legitimately differs: its
     checked set follows the DECLARED support, not the amplitude, so declaring
@@ -855,27 +897,56 @@ def test_the_static_path_is_unchanged_when_no_continuation_is_declared(machine):
         p_prime=_edge_vanishing(3.0 * DRIVE * P_PRIME),
         ff_prime=_edge_vanishing(3.0 * DRIVE * FF_PRIME),
     )
-    undeclared = build(core).solve(seed, route="anderson", evaluations=EVALUATIONS)
-    declared = build(
+    undeclared_profile = build(core)
+    declared_profile = build(
         core,
         common_sol=_policy().extend(core, PlasmaDomain.COMMON_SOL),
         private_flux=_policy(support=PRIVATE_SUPPORT).extend(
             core, PlasmaDomain.PRIVATE_FLUX
         ),
-    ).solve(seed, route="anderson", evaluations=EVALUATIONS)
+    )
+    np.testing.assert_array_equal(
+        np.asarray(declared_profile.operator.cell_current(seed)),
+        np.asarray(undeclared_profile.operator.cell_current(seed)),
+    )
+    np.testing.assert_array_equal(
+        np.asarray(declared_profile.operator(seed)),
+        np.asarray(undeclared_profile.operator(seed)),
+    )
+
+    undeclared = undeclared_profile.solve(
+        seed, route="anderson", evaluations=EVALUATIONS
+    )
+    declared = declared_profile.solve(seed, route="anderson", evaluations=EVALUATIONS)
+    # the identity again at a converged map: the two solves iterate one source,
+    # not two that happen to agree at the seed they were started from
+    np.testing.assert_array_equal(
+        np.asarray(declared_profile.operator.cell_current(undeclared.flux)),
+        np.asarray(undeclared_profile.operator.cell_current(undeclared.flux)),
+    )
 
     assert float(undeclared.fixed_point.residual) < RESIDUAL_TOLERANCE
-    np.testing.assert_array_equal(
-        np.asarray(declared.flux), np.asarray(undeclared.flux)
-    )
-    np.testing.assert_array_equal(
-        np.asarray(declared.cell_current), np.asarray(undeclared.cell_current)
-    )
+    assert float(declared.fixed_point.residual) < RESIDUAL_TOLERANCE
     np.testing.assert_array_equal(
         np.asarray(declared.domains.label), np.asarray(undeclared.domains.label)
     )
-    np.testing.assert_array_equal(
-        np.asarray(declared.moments.stack()), np.asarray(undeclared.moments.stack())
+    flux_scale = jnp.max(jnp.abs(undeclared.flux))
+    step = _normalisation_quantum(undeclared) / float(flux_scale)
+    assert (
+        _relative(declared.flux, undeclared.flux, flux_scale)
+        < ADDITIVE_LADDER_STEPS * step
+    )
+    assert (
+        _relative(
+            declared.cell_current,
+            undeclared.cell_current,
+            jnp.max(jnp.abs(undeclared.cell_current)),
+        )
+        < ADDITIVE_LADDER_STEPS * step
+    )
+    assert (
+        _entrywise_relative(declared.moments.stack(), undeclared.moments.stack())
+        < ADDITIVE_LADDER_STEPS * step
     )
     assert float(declared.ledger.common_sol) == 0.0
     assert float(declared.ledger.private_flux) == 0.0
@@ -884,8 +955,13 @@ def test_the_static_path_is_unchanged_when_no_continuation_is_declared(machine):
     assert int(declared.conservation.checked_cells) > int(
         undeclared.conservation.checked_cells
     )
-    assert float(declared.conservation.relative_grad_shafranov) == float(
-        undeclared.conservation.relative_grad_shafranov
+    assert (
+        abs(
+            float(declared.conservation.relative_grad_shafranov)
+            / float(undeclared.conservation.relative_grad_shafranov)
+            - 1.0
+        )
+        < CONSERVATION_LADDER_STEPS * step
     )
 
 

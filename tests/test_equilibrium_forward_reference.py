@@ -63,18 +63,48 @@ than a restatement of the source.
 
 Two results shaped the rest of the module and are worth stating up front.
 
-The route is a root find because the equilibrium is unstable.
-    An elongated diverted plasma held by fixed conductor currents is
-    axisymmetrically unstable to a vertical displacement. That instability is
-    an eigenvalue of the free-boundary map outside the unit circle, so a
-    relaxed iteration — Picard, or Anderson mixing of it — cannot sit on this
-    equilibrium no matter how it is seeded or damped: it walks the axis
-    downward, the residual grows, and the plasma eventually reaches the wall
-    and switches its own source off. The Newton step solves ``(I - J) s = f``
-    and does not care about the sign of that eigenvalue. Both branches are
-    pinned below, because the collapsed one converges to a BETTER residual than
-    the physical one, and a solve of a real equilibrium therefore cannot be
-    qualified by its residual alone.
+The route is a root find because the map does not contract.
+    An elongated diverted column held at fixed conductor currents is
+    axisymmetrically unstable, and that shows up here as an eigenvalue of the
+    free-boundary map outside the unit circle: power iteration on the exact
+    tangent at the converged equilibrium measures 1.25 on the suite mesh and
+    1.40 at 1587 cells. A step relaxed by :math:`\beta` scales that mode by
+    :math:`(1-\beta) + \beta \lambda`, so no damping rescues a relaxed route —
+    seeded ON the converged state both Picard and Anderson drive the residual
+    back up by three decades, and seeded on the stored map they walk the axis
+    steadily downward until the column reaches the wall and the source, which
+    drives current only on an axis-connected core, switches itself off. The
+    Newton step solves ``(I - J) s = f`` and is indifferent to the sign of that
+    eigenvalue. Both branches are pinned below, because the collapsed one
+    converges to a BETTER residual than the physical one, and a solve of a real
+    equilibrium therefore cannot be qualified by its residual alone.
+
+    What the large-amplitude drift does is vertical, but the dominant
+    eigenvector of the LINEARISED map is not simply a rigid vertical shift:
+    displacing the state along it moves the magnetic axis about twice as far in
+    major radius as in height. The linear statement pinned below is therefore
+    non-contraction, which is what selects the route, and not the
+    identification of a vertical eigenmode.
+
+    The eager Krylov route is not a substitute. Driven through ``host_krylov``
+    on the same seed, ``scipy.optimize.newton_krylov`` raises ``NoConvergence``
+    on this map both at a tolerance derived from the flux ladder and at one two
+    decades looser, so what fails is its globalisation and not its tolerance.
+
+No tolerance below the axis-flux quantum is reachable.
+    The magnetic axis is fitted in the precision the null search carries, and
+    the normalised flux every profile is read against is formed from it, so
+    the spacing of the axis flux in that precision floors every flux
+    comparison downstream. The floor therefore scales with the flux rather
+    than being a fixed number: this case's axis flux is about 83 Wb, which a
+    single-precision fit resolves to 7.6e-06 Wb — 9.4e-08 of the flux span, or
+    9.2e-08 read as a relative residual — where a case whose fluxes are of
+    order one has a floor thirty times finer. A tolerance carried across from
+    one to the other is unreachable. The comparisons below therefore compute
+    the quantum from the fit's own dtype rather than naming a precision, and
+    the Newton budget is read in the same light: it falls four decades over
+    its first five steps, reaches the floor, and spends the rest rattling
+    inside it.
 
 The published shape moments are not the reference's own.
     Recomputing poloidal beta and internal inductance from the stored flux map
@@ -106,6 +136,7 @@ from scipy.constants import mu_0
 from nova.utilities.importmanager import skip_import
 
 with skip_import("jax"):
+    import jax
     import jax.numpy as jnp
 
     from nova.biot.null import Null1D, Null2D
@@ -161,6 +192,9 @@ WALL_NODES = 3
 #: Root-find budget. Each Newton step linearises the map once and solves
 #: ``(I - J) s = f`` in a fixed-shape Krylov space, which is what lets it hold
 #: an equilibrium the relaxed iteration cannot — see the vertical drift below.
+#: The budget is generous on purpose: the residual falls four decades over the
+#: first five steps and then reaches the quantum of the axis-flux read, after
+#: which the remaining steps rattle inside that floor rather than descending.
 NEWTON_STEPS = 10
 KRYLOV_ITERATIONS = 30
 #: Relaxed evaluations the vertical drift is measured over, and its step.
@@ -204,6 +238,19 @@ CONVENTION_TOLERANCE = 0.02
 #: Agreement between the package's integral observation operator and an
 #: independent quadrature of the same field on a raster.
 QUADRATURE_TOLERANCE = 0.05
+
+#: Power iterations used to read the dominant eigenvalue of the free-boundary
+#: map at the converged equilibrium. The Rayleigh quotient is within a percent
+#: of its limit by twenty; the count is fixed rather than run to a tolerance,
+#: so a map whose spectrum does not separate costs the same and cannot hang.
+POWER_ITERATIONS = 40
+#: How far the dominant eigenvalue has to clear one for non-contraction to be
+#: a measurement rather than a rounding artefact. Measured 1.249 on the suite
+#: mesh and 1.401 at 1587 cells.
+CONTRACTION_MARGIN = 1.05
+#: Residual growth the relaxed and mixed routes show over the bounded budget
+#: when seeded on the equilibrium itself. Measured ~6.7e3 and ~8.8e3.
+DRIFT_GROWTH = 10.0
 
 #: Agreement between the published solve and the same map driven one level
 #: down through the operator. Both hand the same seed to the same ladder on
@@ -636,6 +683,22 @@ def receipt_mesh(machine: HexMachine) -> StencilMesh:
     )
 
 
+def axis_flux_quantum(profile: ForwardProfile, equilibrium) -> float:
+    """Return the finest flux difference [Wb] the topology read can express.
+
+    Every profile is evaluated on a normalised flux formed against the fitted
+    axis flux, so the spacing of that value in the precision the null search
+    fits at is the floor under any flux comparison downstream of it. The dtype
+    is read off the fit rather than assumed, so this follows a change of the
+    null-search precision instead of having to be revised alongside it, and
+    the magnitude is taken because the spacing of a negative value is negative
+    and this case's axis flux is negative.
+    """
+    dtype = np.dtype(profile.operator.grid.null.fit_dtype)
+    axis_flux = abs(float(equilibrium.topology.axis_flux))
+    return float(np.spacing(np.asarray(axis_flux, dtype=dtype)))
+
+
 def forward_profile(case: ReferenceCase, machine: HexMachine) -> ForwardProfile:
     """Return the published solve carried on the production hexagonal mesh."""
     return ForwardProfile(
@@ -838,6 +901,60 @@ def test_the_stored_boundary_encloses_the_stored_axis():
 
 
 # --------------------------------------------------------------------------
+# why the route is a root find
+# --------------------------------------------------------------------------
+def test_the_free_boundary_map_does_not_contract_at_the_equilibrium(published):
+    """The route choice is forced by a measured eigenvalue, not by preference.
+
+    A relaxed iteration converges only where the map contracts. Power iteration
+    on the exact tangent at the converged equilibrium returns a dominant
+    eigenvalue ABOVE one, so no amount of damping rescues a relaxed route here:
+    a step relaxed by ``beta`` scales that mode by
+    ``(1 - beta) + beta * lambda``, which exceeds one for every ``beta`` in
+    ``(0, 1]`` once ``lambda`` does. That single number is why the
+    demonstration is a root find, and it is measured rather than assumed.
+
+    The iteration count is fixed rather than run to a tolerance, so a map whose
+    spectrum does not separate costs the same and cannot hang.
+    """
+    profile, equilibrium = published
+    tangent = jax.linearize(profile.flux_map(), equilibrium.flux)[1]
+    generator = np.random.default_rng(11)
+    vector = jnp.asarray(generator.normal(size=equilibrium.flux.shape))
+    vector = vector / jnp.linalg.norm(vector)
+    for _ in range(POWER_ITERATIONS):
+        vector = tangent(vector)
+        vector = vector / jnp.linalg.norm(vector)
+    eigenvalue = float(jnp.dot(vector, tangent(vector)))
+    assert eigenvalue > CONTRACTION_MARGIN, eigenvalue
+    assert (1.0 - RELAXATION) + RELAXATION * eigenvalue > 1.0
+
+
+def test_the_relaxed_routes_leave_the_equilibrium_on_a_bounded_budget(published):
+    """Seeded on the equilibrium itself, both mixed routes walk away from it.
+
+    This is the non-contraction above expressed as a run rather than as an
+    eigenvalue: started ON the converged state, where the residual already sits
+    at the solve floor, the relaxed step and the Anderson mixing of it both
+    drive it back UP by more than three decades. Neither is given a tolerance
+    to chase — the budget is a fixed evaluation count — so the pin cannot hang
+    on a route that was never going to converge.
+    """
+    profile, equilibrium = published
+    mapped = profile.flux_map()
+    for scheme in (fixed_point.picard, fixed_point.anderson):
+        history = scheme(
+            mapped,
+            equilibrium.flux,
+            evaluations=RELAXED_EVALUATIONS,
+            relaxation=RELAXATION,
+        )
+        trace = np.asarray(history.trace)
+        assert trace.size == RELAXED_EVALUATIONS
+        assert trace[-1] / trace[0] > DRIFT_GROWTH, (scheme.__name__, trace[-1])
+
+
+# --------------------------------------------------------------------------
 # the mesh
 # --------------------------------------------------------------------------
 def test_the_plasma_mesh_is_hexagonal_and_wall_trimmed(solved):
@@ -1029,11 +1146,8 @@ def test_the_receipt_layer_reads_the_solve_without_changing_it(published, solved
     single-precision axis fit puts under the normalised flux, which is the
     finest difference anything downstream of the topology read can express.
     """
-    _profile, equilibrium = published
-    # the axis flux of this case is negative and the spacing of a negative
-    # value is negative, so the ladder step is read on the magnitude
-    axis_flux = abs(float(equilibrium.topology.axis_flux))
-    ladder_step = float(np.spacing(np.float32(axis_flux)))
+    profile, equilibrium = published
+    ladder_step = axis_flux_quantum(profile, equilibrium)
     deviation = float(jnp.max(jnp.abs(equilibrium.flux - solved.flux)))
     assert deviation < ladder_step, (deviation, ladder_step)
     for name in ("plasma_current", "volume", "major_radius"):

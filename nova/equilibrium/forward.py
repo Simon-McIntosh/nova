@@ -30,6 +30,33 @@ point at the vacuum field; a globalised Newton step can cross to it. The
 receipt reports the branch it landed on — an empty core and a zero ledger —
 rather than hiding the outcome behind a converged residual.
 
+Which route can reach a fixed point at all is a property of the map. A
+relaxed iteration converges only where the map contracts, and the
+free-boundary map of an elongated column held at fixed conductor currents
+does not: displacing the column vertically moves it into shaping field whose
+decay index is negative there, so the force acts along the displacement
+rather than against it, and the Jacobian of the write-then-read cycle carries
+an eigenvalue outside the unit circle on that mode. ``picard`` and
+``anderson`` mix successive images of that map, so they walk away from such
+an equilibrium however they are damped or seeded, until the column meets the
+wall and the source switches itself off — and the vacuum branch they land on
+converges to a BETTER residual than the equilibrium they left, which is why a
+prescribed-source solve cannot be qualified by its residual alone.
+``newton_krylov`` solves ``(I - J) s = f`` rather than iterating ``g``, and a
+root find is indifferent to the sign of that eigenvalue, so it holds the
+equilibrium. A relaxed route stays the cheaper choice wherever the map does
+contract, which is the limited, low-elongation case, and the residual history
+says which case a caller is in without any extra diagnostic: a relaxed
+residual that GROWS from a good seed is the non-contractive mode, not a bad
+start.
+
+No route resolves flux differences below the quantum of the axis-flux read
+the normalised flux is formed against. That read is fitted in the precision
+the null search carries, so the floor scales with the flux itself rather than
+being a fixed number, and a tolerance carried over from another case can be
+unreachable on this one. A Newton budget that has already reached the floor
+spends its remaining steps rattling inside it rather than descending.
+
 The result is a receipt, not just a flux map: it carries the residual
 history, the axis and separatrix state, the domain-labelled current ledger,
 the integral observations, the conservation residuals, the finite checks,

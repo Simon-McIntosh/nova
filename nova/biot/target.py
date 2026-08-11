@@ -82,6 +82,76 @@ DEFAULT_TARGET_QUADRATURE_POLICY = TargetQuadraturePolicy().key
 
 
 @dataclass(frozen=True)
+class ForceTargetPolicy:
+    """Immutable identity for the rule that averages force density over a section.
+
+    The force a conductor carries is an area integral of the ring force density
+    over the material its current occupies. ``subdivision`` samples that integrand
+    at the centroid of every cell of an exact tiling of the section -- a midpoint
+    rule whose resolution is the operator's segment number -- and is what ships.
+    ``positive_material`` averages over the Gauss fan of
+    :mod:`nova.biot.sectionaverage` instead, reaching the same area mean from a
+    node count set by ``order`` alone.
+
+    The fan spreads one uniform turn density over the whole section, so it serves
+    a conductor whose turns are allocated by area and not a plasma whose cells
+    carry their own turn numbers.
+    """
+
+    rule: Literal["subdivision", "positive_material"] = "subdivision"
+    order: int = 3
+    backend: Literal["numpy"] = "numpy"
+    precision: Literal["float64"] = "float64"
+    device_eligibility: Literal["host"] = "host"
+
+    def __post_init__(self):
+        """Validate every setting that changes the integrated section force."""
+        if self.rule not in ("subdivision", "positive_material"):
+            raise ValueError(f"unsupported force target rule {self.rule!r}")
+        if (
+            isinstance(self.order, bool | np.bool_)
+            or not isinstance(self.order, int | np.integer)
+            or self.order <= 0
+        ):
+            raise ValueError("force target quadrature order must be a positive integer")
+        if (self.backend, self.precision, self.device_eligibility) != (
+            "numpy",
+            "float64",
+            "host",
+        ):
+            raise ValueError(
+                "force target quadrature requires numpy float64 evaluation on the host"
+            )
+        object.__setattr__(self, "order", int(self.order))
+
+    @property
+    def key(self) -> str:
+        """Return the canonical cache identity."""
+        return json.dumps(asdict(self), sort_keys=True, separators=(",", ":"))
+
+    @classmethod
+    def resolve(
+        cls, value: ForceTargetPolicy | Mapping | str | None
+    ) -> ForceTargetPolicy:
+        """Return a validated force policy from memory or persisted metadata."""
+        if value is None or value == "":
+            return cls()
+        if isinstance(value, cls):
+            return value
+        if isinstance(value, str):
+            try:
+                value = json.loads(value)
+            except json.JSONDecodeError as error:
+                raise ValueError("invalid force target policy identity") from error
+        if isinstance(value, Mapping):
+            return cls(**dict(value))
+        raise TypeError(f"cannot resolve force policy from {type(value)}")
+
+
+DEFAULT_FORCE_TARGET_POLICY = ForceTargetPolicy().key
+
+
+@dataclass(frozen=True)
 class TargetQuadrature:
     """Map positive material nodes to logical cells and physical target rows."""
 
@@ -91,7 +161,7 @@ class TargetQuadrature:
     weights: np.ndarray = field(repr=False)
     physical_index: tuple[str, ...]
     physical_plasma: tuple[bool, ...]
-    policy: TargetQuadraturePolicy
+    policy: TargetQuadraturePolicy | ForceTargetPolicy
 
     def __post_init__(self):
         """Validate a contiguous, normalized, strictly positive contraction."""
@@ -327,6 +397,123 @@ def linked_flux_target(
         weights=np.asarray(normalized_weights, dtype=np.float64),
         physical_index=tuple(physical_index),
         physical_plasma=tuple(physical_plasma),
+        policy=policy,
+    )
+
+
+def section_force_target(
+    frame, names, policy: ForceTargetPolicy | Mapping | str | None = None
+) -> TargetQuadrature:
+    """Lay positive material nodes over each named conductor's own section.
+
+    One logical target per conductor, because the force a consumer reads is the
+    section total rather than a field sample. Every node carries its conductor's
+    centre and bounding dimensions, so the vertical first moment turns about the
+    conductor and not about whatever cell a node happens to fall in.
+    """
+    from nova.biot.sectionaverage import section_nodes
+
+    policy = ForceTargetPolicy.resolve(policy)
+    if policy.rule != "positive_material":
+        raise ValueError(
+            "section force nodes require the positive material force target rule"
+        )
+    frame_names = np.asarray(frame.index, dtype=object)
+    position = {str(name): index for index, name in enumerate(frame_names)}
+    polygons = np.asarray(frame["poly"], dtype=object)
+    plasma = np.asarray(frame.plasma, dtype=bool)
+    nturn = np.asarray(frame["nturn"], dtype=float)
+    x = np.asarray(frame["x"], dtype=float)
+    y = np.asarray(frame["y"], dtype=float)
+    z = np.asarray(frame["z"], dtype=float)
+    dx = np.asarray(frame["dx"], dtype=float)
+    dz = np.asarray(frame["dz"], dtype=float)
+
+    logical_data: dict[str, list] = {
+        key: []
+        for key in (
+            "x",
+            "y",
+            "z",
+            "x0",
+            "z0",
+            "dx",
+            "dz",
+            "nturn",
+            "plasma",
+            "frame",
+            "link",
+            "factor",
+        )
+    }
+    node_data: dict[str, list] = {
+        key: [] for key in ("x", "y", "z", "x0", "z0", "dx", "dz")
+    }
+    node_index: list[str] = []
+    logical_index: list[str] = []
+    offsets: list[int] = []
+    normalized_weights: list[float] = []
+
+    for name in names:
+        label = str(name)
+        index = position[label]
+        if plasma[index]:
+            raise NotImplementedError(
+                "section force quadrature spreads one uniform turn density and "
+                f"cannot integrate the plasma frame {label!r}"
+            )
+        material = _shapely_material(polygons[index])
+        points, area_weights = section_nodes(material, order=policy.order)
+        points = np.asarray(points, dtype=np.float64)
+        area_weights = np.asarray(area_weights, dtype=np.float64)
+        weight_sum = float(area_weights.sum())
+        if (
+            points.ndim != 2
+            or points.shape[1] != 2
+            or area_weights.shape != (len(points),)
+            or not np.all(np.isfinite(points))
+            or not np.all(area_weights > 0)
+            or not np.isfinite(weight_sum)
+            or weight_sum <= 0
+        ):
+            raise ValueError("section quadrature must return finite positive nodes")
+
+        offsets.append(len(normalized_weights))
+        normalized_weights.extend((area_weights / weight_sum).tolist())
+        count = len(points)
+        node_data["x"].extend(points[:, 0].tolist())
+        node_data["y"].extend(np.zeros(count).tolist())
+        node_data["z"].extend(points[:, 1].tolist())
+        node_data["x0"].extend([x[index]] * count)
+        node_data["z0"].extend([z[index]] * count)
+        node_data["dx"].extend([dx[index]] * count)
+        node_data["dz"].extend([dz[index]] * count)
+        node_index.extend(f"{label}:q{number}" for number in range(count))
+
+        logical_index.append(label)
+        logical_data["x"].append(x[index])
+        logical_data["y"].append(y[index])
+        logical_data["z"].append(z[index])
+        logical_data["x0"].append(x[index])
+        logical_data["z0"].append(z[index])
+        logical_data["dx"].append(dx[index])
+        logical_data["dz"].append(dz[index])
+        logical_data["nturn"].append(nturn[index])
+        logical_data["plasma"].append(False)
+        logical_data["frame"].append(label)
+        logical_data["link"].append("")
+        logical_data["factor"].append(1.0)
+
+    if not logical_index:
+        raise ValueError("force target contains no conducting material")
+    logical = Target(logical_data, index=logical_index, available=[])
+    return TargetQuadrature(
+        nodes=Target(node_data, index=node_index, available=[]),
+        logical=logical,
+        offsets=np.asarray(offsets, dtype=int),
+        weights=np.asarray(normalized_weights, dtype=np.float64),
+        physical_index=tuple(logical_index),
+        physical_plasma=tuple(False for _ in logical_index),
         policy=policy,
     )
 

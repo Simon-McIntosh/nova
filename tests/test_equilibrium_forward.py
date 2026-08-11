@@ -26,7 +26,9 @@ from __future__ import annotations
 
 import ast
 import dataclasses
+import inspect
 from pathlib import Path
+from typing import get_args
 
 import numpy as np
 import pytest
@@ -50,7 +52,7 @@ with skip_import("jax"):
         toroidal_current_density,
     )
     from nova.equilibrium.domain import DomainMasks, PlasmaDomain
-    from nova.equilibrium.forward import ForwardProfile
+    from nova.equilibrium.forward import ForwardProfile, SolveRoute
     from nova.equilibrium.forward_operator import ForwardFluxOperator
     from nova.equilibrium.observation import (
         MomentEnforcementError,
@@ -539,6 +541,26 @@ def test_the_solve_refuses_enforcement_before_reading_the_profiles():
     with pytest.raises(TypeError):
         profile.solve(np.zeros(nodes + len(angle)), measured=np.zeros(4))
     assert np.asarray(source.core.p_prime.data).tobytes() == before
+
+
+def test_the_solve_defaults_to_the_root_find():
+    """A caller who names no route gets the one the map admits.
+
+    A relaxed iteration converges only where the map contracts, and the
+    free-boundary map of an elongated column held at fixed conductor currents
+    does not: it carries an eigenvalue outside the unit circle — measured
+    between 1.25 and 1.40 on a real diverted case — and a step relaxed by
+    ``beta`` scales that mode by ``(1 - beta) + beta * lambda``, which is above
+    one for every ``beta`` in ``(0, 1]`` once ``lambda`` is. Since most of the
+    equilibria this class is asked for are elongated, the unnamed route is the
+    root find, on the single and the batched entry alike. The relaxed routes
+    stay reachable by name, for the contractive case and for a caller
+    measuring the map iteration itself.
+    """
+    for method in (ForwardProfile.solve, ForwardProfile.solve_batch):
+        default = inspect.signature(method).parameters["route"].default
+        assert default == "newton_krylov", method.__name__
+    assert {"picard", "anderson"}.issubset(set(get_args(SolveRoute)))
 
 
 if __name__ == "__main__":

@@ -44,11 +44,11 @@ converges to a BETTER residual than the equilibrium they left, which is why a
 prescribed-source solve cannot be qualified by its residual alone.
 ``newton_krylov`` solves ``(I - J) s = f`` rather than iterating ``g``, and a
 root find is indifferent to the sign of that eigenvalue, so it holds the
-equilibrium. A relaxed route stays the cheaper choice wherever the map does
-contract, which is the limited, low-elongation case, and the residual history
-says which case a caller is in without any extra diagnostic: a relaxed
-residual that GROWS from a good seed is the non-contractive mode, not a bad
-start.
+equilibrium — which is why it is the default route. A relaxed route stays the
+cheaper choice wherever the map does contract, which is the limited,
+low-elongation case, and the residual history says which case a caller is in
+without any extra diagnostic: a relaxed residual that GROWS from a good seed
+is the non-contractive mode, not a bad start.
 
 No route resolves flux differences below the quantum of the axis-flux read
 the normalised flux is formed against. That read is fitted in the precision
@@ -440,12 +440,27 @@ class ForwardProfile:
         self,
         initial_flux,
         *,
-        route: SolveRoute = "anderson",
+        route: SolveRoute = "newton_krylov",
         current=None,
         enforce: Sequence[str] = (),
         **options,
     ) -> ForwardEquilibrium:
         """Return the equilibrium the prescribed source supports.
+
+        The default route is the root find because the map does not contract
+        at the states this class is usually asked for. An elongated column
+        held at fixed conductor currents is axisymmetrically unstable, and the
+        write-then-read cycle carries that as a Jacobian eigenvalue outside
+        the unit circle — 1.25 to 1.40 measured on a diverted reference case.
+        A step relaxed by ``beta`` scales that mode by
+        ``(1 - beta) + beta * lambda``, which exceeds one for every ``beta``
+        in ``(0, 1]`` once ``lambda`` does, so no damping rescues a relaxed
+        route; ``newton_krylov`` solves ``(I - J) s = f`` instead and is
+        indifferent to the sign of that eigenvalue. ``picard`` and
+        ``anderson`` stay available by name — they are the cheaper choice on a
+        map that does contract, which is the limited, low-elongation case, and
+        they are the only routes that expose the map iteration itself to a
+        caller measuring how it behaves.
 
         ``enforce`` names integral observations the caller wants closed by
         the solve. The declared source has to carry one scalar degree of
@@ -468,7 +483,7 @@ class ForwardProfile:
         self,
         initial_flux,
         *,
-        route: SolveRoute = "anderson",
+        route: SolveRoute = "newton_krylov",
         current=None,
         enforce: Sequence[str] = (),
         **options,

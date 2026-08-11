@@ -38,19 +38,28 @@ total flux
 The mesh is not a raster. Cells are hexagons on a half-offset lattice, trimmed
 where the first wall cuts them, so a wall-clipped cell carries a smaller area
 and a displaced centroid; the six-neighbour rings the grid solve tessellates
-are what the null search reads. That is also why this module drives
-:class:`~nova.equilibrium.forward_operator.ForwardFluxOperator` and the
-observation operators directly rather than
-:class:`~nova.equilibrium.forward.ForwardProfile`: the published receipt layer
-differences its conservation residuals on a uniform structured
-:class:`~nova.equilibrium.conservation.FluxLattice`, which an offset, trimmed,
-variable-area mesh is not. Everything else — the source state, the free-boundary
-map, the shared fixed-point ladder, the domain partition and the integral
-observations — is the public path, unmodified.
+are what the null search reads. Nothing is adapted to that here.
+:class:`~nova.equilibrium.forward.ForwardProfile` is constructed on the
+production mesh through
+:class:`~nova.equilibrium.stencil_mesh.StencilMesh` and its ``solve`` is
+called unmodified, so the source state, the free-boundary map, the shared
+fixed-point ladder, the domain partition, the integral observations AND the
+published conservation, continuation, rotation and normalisation receipts are
+all the public path on the shipped mesh.
 
-The poloidal field the internal inductance integrates is taken from the same
+The same solve is also driven one level down, through
+:class:`~nova.equilibrium.forward_operator.ForwardFluxOperator` and the
+observation operators directly, and the two are required to return the same
+flux map. That cross-check is what separates a receipt layer that reads the
+solve from one that changes it.
+
+The internal inductance is integrated twice over, from two poloidal fields
+that share no arithmetic. The operator path takes the field straight from the
 grid solve that produced the flux coupling, so it is the analytic field of the
-cell polygons rather than a difference of the solved map.
+cell polygons; the published receipt differences the solved map on the ring
+fit instead. Neither is calibrated against the other and they agree to one
+percent, which is what turns the internal inductance into a measurement rather
+than a restatement of the source.
 
 Two results shaped the rest of the module and are worth stating up front.
 
@@ -103,9 +112,15 @@ with skip_import("jax"):
     from nova.biot.target import FluxTarget
     from nova.equilibrium import fixed_point
     from nova.equilibrium.domain import PlasmaDomain
+    from nova.equilibrium.forward import ForwardProfile
     from nova.equilibrium.forward_operator import ForwardFluxOperator
     from nova.equilibrium.observation import current_ledger, observe_moments
     from nova.equilibrium.source import DomainProfile, ForwardSource
+    from nova.equilibrium.stencil_mesh import (
+        RING_CONDITION_LIMIT,
+        StencilMesh,
+        ring_condition,
+    )
     from nova.frame.coilset import CoilSet
     from nova.jax.config import configure_dtypes
 
@@ -189,6 +204,27 @@ CONVENTION_TOLERANCE = 0.02
 #: Agreement between the package's integral observation operator and an
 #: independent quadrature of the same field on a raster.
 QUADRATURE_TOLERANCE = 0.05
+
+#: Agreement between the published solve and the same map driven one level
+#: down through the operator. Both hand the same seed to the same ladder on
+#: the same couplings, so the measured difference is exactly zero and this
+#: tolerance would catch any receipt layer that moved the solution at all.
+ROUTE_AGREEMENT = 1.0e-12
+#: Grad-Shafranov residual the receipt reports on the suite mesh, read against
+#: its own drive. It is a discretisation measure, not an equilibrium one: the
+#: solved map is the coupling image of piecewise-uniform cell currents, so the
+#: elliptic operator of a one-pitch ring recovers the drive only to the
+#: truncation of that ring.
+GRAD_SHAFRANOV_TOLERANCE = 0.08
+#: Agreement between the internal inductance the receipt integrates from
+#: the DIFFERENCED flux map and the one the analytic field of the cell
+#: polygons gives. Measured at 1.0 % on the suite mesh.
+FIELD_INTEGRAL_TOLERANCE = 0.03
+#: The two identically-vanishing residuals, as a fraction of the
+#: Grad-Shafranov one. On a ring fit they sit at the truncation floor of the
+#: second derivative rather than at round-off, so what qualifies them is this
+#: margin below the residual that carries the physics.
+DIVERGENCE_MARGIN = 0.2
 
 FIGURE_DIRECTORY = (
     Path(__file__).resolve().parents[1]
@@ -568,6 +604,47 @@ def forward_operator(case: ReferenceCase, machine: HexMachine) -> ForwardFluxOpe
     )
 
 
+def receipt_mesh(machine: HexMachine) -> StencilMesh:
+    """Return the mesh the published receipts are differentiated on.
+
+    Every ring the fit can carry is handed over, which is a different and
+    weaker selection than the null search uses. The null search is given the
+    regular rings — centre and all six neighbours whole hexagons — because a
+    quadratic fitted on a clipped cell's displaced centroid can report a
+    stationary point the flux map does not have. A DERIVATIVE has no such
+    requirement: the centroid and the flux at it are both exact, so a
+    least-squares quadratic through them is a valid local approximation
+    whatever the neighbourhood looks like, and the only real requirement is
+    that the cluster determine a quadratic at all.
+
+    The difference is not cosmetic. Restricted to the regular rings, 37 of the
+    383 core cells on the suite mesh carry no derivative, all of them at the
+    plasma edge where the poloidal field is largest, and the internal
+    inductance the receipt integrates falls 16 % short — 15 % of that from the
+    missing cells and 1 % from the fit. Selecting on conditioning instead
+    leaves every core cell covered. The limit used is the one the mesh itself
+    enforces, so nothing is excluded here that would not be refused there; the
+    receipts below are unchanged by tightening it to twenty, which is the
+    evidence that this choice is not doing any work of its own.
+    """
+    stencil = np.asarray(machine.stencil)
+    condition = ring_condition(machine.node, stencil)
+    return StencilMesh(
+        coordinate=machine.node,
+        stencil=stencil[condition < RING_CONDITION_LIMIT],
+        area=machine.area,
+    )
+
+
+def forward_profile(case: ReferenceCase, machine: HexMachine) -> ForwardProfile:
+    """Return the published solve carried on the production hexagonal mesh."""
+    return ForwardProfile(
+        operator=forward_operator(case, machine),
+        lattice=receipt_mesh(machine),
+        newton_steps=NEWTON_STEPS,
+    )
+
+
 @dataclass
 class SolvedEquilibrium:
     """One converged solve and the observations that qualify it."""
@@ -674,17 +751,48 @@ def solve(case: ReferenceCase, machine: HexMachine) -> SolvedEquilibrium:
 
 
 @lru_cache(maxsize=2)
-def _solved(cells: int) -> SolvedEquilibrium:
-    """Return the converged solve on one mesh resolution."""
+def _machine(cells: int) -> tuple[ReferenceCase, HexMachine]:
+    """Return the reference and its production mesh at one resolution.
+
+    The coupling assembly dominates the cost of this module, so the operator
+    and the published solve are driven on ONE machine rather than on two
+    identical ones.
+    """
     configure_dtypes()
     case = require_reference()
-    return solve(case, build_machine(case, cells))
+    return case, build_machine(case, cells)
+
+
+@lru_cache(maxsize=2)
+def _solved(cells: int) -> SolvedEquilibrium:
+    """Return the converged solve on one mesh resolution."""
+    return solve(*_machine(cells))
+
+
+@lru_cache(maxsize=2)
+def _published(cells: int):
+    """Return the published solve and its mesh at one resolution."""
+    case, machine = _machine(cells)
+    profile = forward_profile(case, machine)
+    equilibrium = profile.solve(
+        seed_flux(case, machine),
+        route="newton_krylov",
+        gmres_iterations=KRYLOV_ITERATIONS,
+        warmup=0,
+    )
+    return profile, equilibrium
 
 
 @pytest.fixture(scope="module")
 def solved() -> SolvedEquilibrium:
     """Return the converged solve on the suite mesh."""
     return _solved(SUITE_CELLS)
+
+
+@pytest.fixture(scope="module")
+def published():
+    """Return the ForwardProfile solve and its receipts on the suite mesh."""
+    return _published(SUITE_CELLS)
 
 
 # --------------------------------------------------------------------------
@@ -892,6 +1000,120 @@ def test_the_solved_boundary_matches_the_stored_boundary(solved):
 
 
 # --------------------------------------------------------------------------
+# the published solve, unmodified, on the production mesh
+# --------------------------------------------------------------------------
+def test_the_published_solve_runs_on_the_production_mesh(published):
+    """``ForwardProfile.solve`` returns a full receipt on the shipped mesh.
+
+    Nothing about the class is adapted here: it is constructed with the
+    hexagonal mesh in place of a uniform lattice and asked for the same solve.
+    What that buys over driving the operator directly is the receipt layer —
+    the conservation residuals, the continuation and rotation records and the
+    finite check — none of which a raster-bound receipt could produce on an
+    offset, wall-trimmed, variable-area mesh.
+    """
+    profile, equilibrium = published
+    assert isinstance(profile.lattice, StencilMesh)
+    assert profile.lattice.node_count == profile.operator.grid.node_number
+    assert float(equilibrium.fixed_point.residual) < RESIDUAL_TOLERANCE
+    assert bool(equilibrium.finite.passed)
+    assert bool(equilibrium.topology.diverted)
+    assert abs(float(equilibrium.moments.plasma_current)) > 1.0e7
+
+
+def test_the_receipt_layer_reads_the_solve_without_changing_it(published, solved):
+    """The published solve and the operator drive reach one flux map.
+
+    Both hand the same seed to the same ladder, so the two flux maps agree to
+    the last bit; the comparison is stated in flux units against the step the
+    single-precision axis fit puts under the normalised flux, which is the
+    finest difference anything downstream of the topology read can express.
+    """
+    _profile, equilibrium = published
+    # the axis flux of this case is negative and the spacing of a negative
+    # value is negative, so the ladder step is read on the magnitude
+    axis_flux = abs(float(equilibrium.topology.axis_flux))
+    ladder_step = float(np.spacing(np.float32(axis_flux)))
+    deviation = float(jnp.max(jnp.abs(equilibrium.flux - solved.flux)))
+    assert deviation < ladder_step, (deviation, ladder_step)
+    for name in ("plasma_current", "volume", "major_radius"):
+        published_value = float(getattr(equilibrium.moments, name))
+        operator_value = float(getattr(solved.moments, name))
+        assert abs(published_value / operator_value - 1.0) < ROUTE_AGREEMENT, name
+
+
+def test_the_receipt_is_read_where_the_source_is_declared(published):
+    """Residuals come from complete rings inside the declared support.
+
+    The absolute source declares the core alone, so the checked set is the
+    core eroded by the ring width. Every core cell has to carry a complete
+    ring for that erosion to mean what it says — a core cell the mesh could
+    not differentiate would silently leave the support instead of being
+    trimmed from its edge.
+    """
+    profile, equilibrium = published
+    mesh = profile.lattice
+    core = np.asarray(equilibrium.domains.core)
+    carries_ring = np.zeros(mesh.node_count, dtype=bool)
+    carries_ring[mesh.centre] = True
+    assert not (core & ~carries_ring).any(), int((core & ~carries_ring).sum())
+    checked = int(equilibrium.conservation.checked_cells)
+    assert 0 < checked < int(core.sum())
+
+
+def test_the_conservation_receipt_qualifies_the_equilibrium(published):
+    """The physical residual is small and the identical ones are far smaller.
+
+    The Grad-Shafranov residual is the only one of the four a converged but
+    wrong solve can fail, and it is read against its own drive. The two
+    identically-vanishing residuals sit at the truncation floor of the ring
+    fit rather than at round-off — the fitted operators do not commute — so
+    what qualifies them is the margin between the two, not an absolute floor.
+    """
+    _profile, equilibrium = published
+    ledger = equilibrium.conservation
+    grad_shafranov = float(ledger.relative_grad_shafranov)
+    assert grad_shafranov < GRAD_SHAFRANOV_TOLERANCE, grad_shafranov
+    for name in ("relative_divergence_b", "relative_divergence_j"):
+        identical = float(getattr(ledger, name))
+        assert identical < DIVERGENCE_MARGIN * grad_shafranov, (name, identical)
+
+
+def test_the_receipt_records_an_absolute_static_unrotated_source(published):
+    """The records say the solve took no liberty with the supplied profiles.
+
+    An absolute source carries no scalar degree of freedom, so the
+    normalisation record has to report no action taken; the closure is static,
+    so the rotation record carries no angular frequency; and the profiles are
+    declared on the core alone, so no domain is driven under a continuation.
+    Those three together are the statement that the reproduction below is of
+    the supplied profiles and not of a rescaled version of them.
+    """
+    _profile, equilibrium = published
+    assert equilibrium.normalisation.policy_name == "absolute"
+    assert not bool(equilibrium.normalisation.rescaled)
+    assert float(equilibrium.normalisation.amplitude) == 1.0
+    assert equilibrium.rotation.closure_name == "static"
+    assert not bool(equilibrium.rotation.active)
+    assert not bool(equilibrium.continuation.active)
+
+
+def test_the_differenced_field_agrees_with_the_analytic_cell_field(published, solved):
+    """Two independent poloidal fields give the same internal inductance.
+
+    The receipt differentiates the solved flux map on the ring fit. The
+    operator path instead reads the analytic field of the cell polygons
+    straight from the coupling operators — never a difference of the map. The
+    two share no arithmetic, so their agreement measures the ring fit against
+    a Green-function field on the mesh the field was generated on.
+    """
+    _profile, equilibrium = published
+    receipt = float(equilibrium.moments.poloidal_field_integral)
+    analytic = float(solved.moments.poloidal_field_integral)
+    assert abs(receipt / analytic - 1.0) < FIELD_INTEGRAL_TOLERANCE, receipt
+
+
+# --------------------------------------------------------------------------
 # evidence figures
 # --------------------------------------------------------------------------
 def _mesh_panel(axes, solved):
@@ -1078,6 +1300,116 @@ def _instability_figure(figure, solved):
     lower.set_ylabel("magnetic axis $Z$ [m]")
 
 
+def _receipt_figure(figure, solved, equilibrium):
+    """Draw where the receipts are read and the two fields they are read with.
+
+    The left panel is the mesh the published receipt is differentiated on: a
+    cell is shaded by whether it carries a fitted derivative at all and, of
+    those, whether it survives the erosion into the declared support the
+    residuals are reported over. The right panels are the evidence the fit is
+    a derivative operator: the conditioning of every ring against the limit
+    the mesh enforces, and the poloidal field the receipt differences out of
+    the solved map against the analytic field of the cell polygons on the
+    midplane cut, which share no arithmetic.
+    """
+    import matplotlib.pyplot as plt
+
+    from nova.equilibrium.conservation import poloidal_field
+
+    case, machine = solved.case, solved.machine
+    mesh = receipt_mesh(machine)
+    core = np.asarray(equilibrium.domains.core)
+    carries = np.zeros(mesh.node_count, dtype=bool)
+    carries[mesh.centre] = True
+    checked = np.asarray(mesh.erode(jnp.asarray(core), 2)) & np.asarray(mesh.interior())
+
+    grid = figure.add_gridspec(2, 2, width_ratios=(1.05, 1.0))
+    axes = figure.add_subplot(grid[:, 0])
+    axes.set_aspect("equal")
+    marker = (72.0 * 2.2 * solved.pitch / 9.0) ** 2
+    for mask, colour, label in (
+        (~carries, "#e8b0a8", "no fitted derivative"),
+        (carries & ~checked, "0.86", "differentiated"),
+        (checked, "#5588bb", "residuals reported here"),
+    ):
+        axes.scatter(
+            machine.radius[mask],
+            machine.node[mask, 1],
+            s=marker,
+            marker="h",
+            c=colour,
+            linewidths=0,
+            label="%s (%d)" % (label, int(mask.sum())),
+        )
+    axes.plot(case.wall[:, 0], case.wall[:, 1], "-", color="0.35", lw=1.1)
+    closed = np.r_[case.boundary, case.boundary[:1]]
+    axes.plot(closed[:, 0], closed[:, 1], "--", color="C3", lw=1.3)
+    axes.legend(loc="lower left", fontsize="xx-small", frameon=False)
+    axes.set_xlabel("$R$ [m]")
+    axes.set_ylabel("$Z$ [m]")
+    axes.set_title("where the receipt is read", fontsize="small")
+
+    panel = figure.add_subplot(grid[0, 1])
+    panel.hist(mesh.ring_condition, bins=np.logspace(0.6, 3.0, 40), color="0.55")
+    panel.axvline(RING_CONDITION_LIMIT, color="C3", lw=1.2, linestyle="--")
+    panel.text(
+        RING_CONDITION_LIMIT * 0.85,
+        panel.get_ylim()[1] * 0.6,
+        "refused above",
+        color="C3",
+        fontsize="x-small",
+        ha="right",
+    )
+    panel.set_xscale("log")
+    panel.set_yscale("log")
+    panel.set_xlabel("ring fit condition number")
+    panel.set_title(
+        "%d rings, worst %.0f" % (len(mesh.stencil), mesh.ring_condition.max()),
+        fontsize="small",
+    )
+    plt.setp(panel.get_yticklabels(), fontsize="x-small")
+
+    radial, vertical = poloidal_field(mesh, jnp.asarray(solved.grid_flux))
+    fitted = np.sqrt(np.asarray(radial) ** 2 + np.asarray(vertical) ** 2)
+    analytic = np.sqrt(
+        np.asarray(
+            machine.poloidal_field_squared(
+                jnp.asarray(case.coil_current), solved.cell_current
+            )
+        )
+    )
+    height = float(case.axis[1])
+    band = (np.abs(machine.node[:, 1] - height) < solved.pitch) & carries
+    order = np.argsort(machine.radius[band])
+    cut = machine.radius[band][order]
+    panel = figure.add_subplot(grid[1, 1])
+    panel.plot(cut, analytic[band][order], "-", color="C3", lw=1.5)
+    panel.plot(cut, fitted[band][order], "--", color="C0", lw=1.3)
+    panel.text(
+        cut[0],
+        analytic[band][order].max() * 0.92,
+        "cell polygons",
+        color="C3",
+        fontsize="x-small",
+    )
+    panel.text(
+        cut[0],
+        analytic[band][order].max() * 0.78,
+        "differenced map",
+        color="C0",
+        fontsize="x-small",
+    )
+    panel.set_xlabel("$R$ [m]")
+    panel.set_ylabel(r"$|B_p|$ [T]")
+    receipt = float(equilibrium.moments.poloidal_field_integral)
+    panel.set_title(
+        r"$\int B_p^2\,\mathrm{d}V$ agrees to %+.2f %%"
+        % (100.0 * (receipt / float(solved.moments.poloidal_field_integral) - 1.0)),
+        fontsize="small",
+    )
+    plt.setp(panel.get_yticklabels(), fontsize="x-small")
+
+
 def render_figures(directory: Path = FIGURE_DIRECTORY, cells: int = EVIDENCE_CELLS):
     """Write the evidence figures and return the paths written."""
     import matplotlib
@@ -1087,6 +1419,7 @@ def render_figures(directory: Path = FIGURE_DIRECTORY, cells: int = EVIDENCE_CEL
 
     directory.mkdir(parents=True, exist_ok=True)
     solved = _solved(cells)
+    _profile, equilibrium = _published(cells)
     written = []
 
     figure = plt.figure(figsize=(11.0, 7.4), constrained_layout=True)
@@ -1099,6 +1432,13 @@ def render_figures(directory: Path = FIGURE_DIRECTORY, cells: int = EVIDENCE_CEL
     figure = plt.figure(figsize=(7.2, 5.2), constrained_layout=True)
     _instability_figure(figure, solved)
     path = directory / "vertical-drift.png"
+    figure.savefig(path, dpi=200)
+    plt.close(figure)
+    written.append(path)
+
+    figure = plt.figure(figsize=(10.4, 6.6), constrained_layout=True)
+    _receipt_figure(figure, solved, equilibrium)
+    path = directory / "receipt-mesh.png"
     figure.savefig(path, dpi=200)
     plt.close(figure)
     written.append(path)

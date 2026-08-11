@@ -120,76 +120,79 @@ class Null2D(NullBase):
 
     @staticmethod
     @jax.jit
-    def zero_cross_count(number, patch_array):
-        """Count the total number of sign changes when traversing vertex patch.
+    def crossing_count(psi_stencil):
+        """Count the sign changes around the vertex ring of every stencil.
 
             - 0: minima / maxima point
             - 2: regular point
             - 4: saddle point
 
+        The count belongs to each ring alone: its vertices are compared against
+        its own centre, and the traversal is closed — the first vertex follows
+        the last — so the count is the number of sign changes around the cycle.
+        Written that way the whole grid is one elementwise comparison against
+        the same comparison rolled by one vertex.
+
         From On detecting all saddle points in 2D images, A. Kuijper
         """
-        o_point_number, x_point_number = number
-
-        def zero_cross(carry, value):
-            """Increment zero crossing counter and update state."""
-            count, sign, center = carry
-            _sign = value > center
-            sign_change = _sign != sign
-            count += sign_change
-            sign = jnp.where(sign_change, _sign, sign)
-            return (count, sign, center), None
-
-        center = patch_array[0]
-        sign = patch_array[-1] > center
-        count = jax.lax.scan(zero_cross, (0, sign, center), patch_array[1:])[0][0]
-        o_point_number += count == 0
-        x_point_number += count == 4
-        return (o_point_number, x_point_number), count
+        sign = psi_stencil[:, 1:] > psi_stencil[:, :1]
+        return jnp.sum(sign != jnp.roll(sign, 1, axis=1), axis=1)
 
     @jax.jit
     def categorize(self, psi_stencil):
-        """Categorize points in 1d hexagonal grid."""
+        """Categorize points in 1d hexagonal grid.
+
+        The crossing count separates the two null types the fit is taken on,
+        and both selections are drawn from that one count: the extrema first,
+        the saddles second, each padded to ``maxsize`` so the returned clusters
+        carry a fixed shape whatever the flux map holds. Every cluster comes
+        back as its ring's normalized coordinates beside the flux sampled on
+        them, with the physical origin and scale that map a local fit back.
+        """
         psi_stencil = jnp.asarray(psi_stencil, dtype=self.fit_dtype)
-        number, count = jax.lax.scan(self.zero_cross_count, (0, 0), psi_stencil)
-
-        def cluster(_, null_type):
-            index = jnp.where((count == null_type), size=self.maxsize)[0]
-            return (
-                _,
-                (
-                    jnp.concatenate(
-                        (
-                            self.local_coordinate_stencil[index],
-                            psi_stencil[index, :, jnp.newaxis],
-                        ),
-                        axis=-1,
-                    ),
-                    self.physical_origin[index],
-                    self.physical_scale[index],
-                ),
-            )
-
-        clusters, origins, scales = jax.lax.scan(cluster, (), jnp.array([0, 4]))[1]
-        return jnp.array(number), clusters, origins, scales
+        count = self.crossing_count(psi_stencil)
+        number = jnp.array([jnp.sum(count == 0), jnp.sum(count == 4)])
+        index = jnp.stack(
+            [
+                jnp.where(count == null_type, size=self.maxsize)[0]
+                for null_type in (0, 4)
+            ]
+        )
+        cluster = jnp.concatenate(
+            (
+                self.local_coordinate_stencil[index],
+                psi_stencil[index][..., jnp.newaxis],
+            ),
+            axis=-1,
+        )
+        return number, cluster, self.physical_origin[index], self.physical_scale[index]
 
     @jax.jit
     def interpolate(self, number, cluster, origin, scale):
-        """Interpolate subnull from cluster data."""
+        """Interpolate subnull from cluster data.
 
-        def subnull(carry, values):
-            cluster, physical_origin, physical_scale = values
-            carry += 1
-            local = select.traced_subnull(cluster[:, 0], cluster[:, 1], cluster[:, 2])
-            physical = physical_origin + local[:2].astype(jnp.float64) * physical_scale
-            result = jnp.concatenate((physical, local[2:].astype(jnp.float64)))
-            return carry, jnp.where(
-                carry <= number,
-                result,
-                jnp.full(4, jnp.nan, dtype=jnp.float64),
+        The selection is padded to a fixed capacity, and a cluster's position
+        in it is the whole of what distinguishes a located null from the
+        padding. That position is known without traversing the clusters, so
+        each quadratic is fitted independently of the others and the positions
+        past the counted number are replaced by not-a-number.
+        """
+
+        def subnull(one_cluster, physical_origin, physical_scale):
+            """Return one sub-cell null in physical coordinates."""
+            local = select.traced_subnull(
+                one_cluster[:, 0], one_cluster[:, 1], one_cluster[:, 2]
             )
+            physical = physical_origin + local[:2].astype(jnp.float64) * physical_scale
+            return jnp.concatenate((physical, local[2:].astype(jnp.float64)))
 
-        return jax.lax.scan(subnull, 0, (cluster, origin, scale))[1]
+        result = jax.vmap(subnull)(cluster, origin, scale)
+        position = jnp.arange(1, cluster.shape[0] + 1)
+        return jnp.where(
+            (position <= number)[:, jnp.newaxis],
+            result,
+            jnp.full(4, jnp.nan, dtype=jnp.float64),
+        )
 
     def tree_flatten(self):
         """Return flattened pytree."""

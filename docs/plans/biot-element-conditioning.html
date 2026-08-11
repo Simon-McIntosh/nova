@@ -22,7 +22,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-11">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="9">
 <meta name="plan-impl" content="0.95">
 </head>
 <body>
@@ -214,15 +214,15 @@
       </p>
     <p class="r-dec-rat">The speed condition is met: the exact closed form is 5.2× cheaper than the boundary quadrature it replaced (162.9 vs 858–869 µs/pair; 54.5 vs 274.5 s whole-grid) and more accurate — the quadrature converges to it, and the four-corner amplification makes it better conditioned than the corner rule on slender sections. The cost is paid once per operator build (netCDF reload is 183× faster, bit-identical), banded stays an opt-in immutable policy identity for rebuild-heavy studies at 66× lower cost, and on a single H200 the closed form costs what the quadrature costs — a single card suffices; multi-device scaling is academic for biot solves.</p>
     </div>
-<div class="r-dec" data-key="target-rule" data-choice="hybrid" data-by="Simon McIntosh" data-when="2026-08-11T04:23:55+00:00">
+<div class="r-dec" data-key="target-rule" data-choice="section-quadrature" data-by="Simon McIntosh" data-when="2026-08-11T06:01:59+00:00">
     <p class="r-dec-q">Does the operator&#x27;s target-side area average move from uniform
         subdivision onto the section quadrature that already exists?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="section-quadrature">move to the Gauss fan rule in sectionaverage</button>
+      <button class="r-opt chosen" data-value="section-quadrature">move to the Gauss fan rule in sectionaverage</button>
       <button class="r-opt" data-value="keep-subdivision">keep uniform subdivision</button>
-      <button class="r-opt chosen" data-value="hybrid">quadrature for the linked flux, subdivision where force must resolve within a coil</button>
+      <button class="r-opt" data-value="hybrid">quadrature for the linked flux, subdivision where force must resolve within a coil</button>
       </p>
-    <p class="r-dec-rat">Quadrature for the linked flux, subdivision where force must resolve within a coil — as landed. No outsized speed impact: the order-3 positive fan reaches the section average through 36–54 nodes instead of hundreds of subdivided filaments, so the node count falls while reciprocity drives below 1e-9 by order and mesh drift holds under 5e-5 across dcoil −2 to −20. The formal cost-at-equal-accuracy figure remains queued as record completion, not as a gate.</p>
+    <p class="r-dec-rat">Re-locked 2026-08-11 on the force-target study: the Gauss fan becomes the default for BOTH the linked-flux average and the coil force integral — the fan matches thousands of tiled cells at tens of nodes on self-dominated components and ~130× through the operator at equal accuracy, and no caller reads an in-coil force map. One carve-out stands: the plasma force path keeps subdivision, because per-cell turn densities cannot be represented by a single fan and the rule refuses rather than averages. Known inversion on self-cancelling components is accepted and documented.</p>
     </div>
 </section>
 
@@ -284,10 +284,11 @@ Done-when
     <div class="r-fu-body"><p>Five bounded measurements complete the record: a code-path-independent arbiter for bow; an edge-aligned decomposition so the slender rectangle section pins against extended precision; the §4 cost-at-equal-accuracy comparison (benchmarks/coil_section_cost.py exists, no output survives); a hexagonal-section target-rule convergence figure against the double-integral arbiter; and a post-change measurement of §1's 4.32e-04 self-inductance diagonal residual.</p></div>
     <pre class="r-fu-prompt">/reckon-ship biot-element-conditioning §4</pre>
     </article>
-<article class="r-fu" data-id="f-bec-004" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-11T06:40:00+00:00" data-recommends-skill="/reckon-ship biot-element-conditioning §4" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-bec-004" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-11T06:40:00+00:00" data-recommends-skill="/reckon-ship biot-element-conditioning §4" data-resolved-at="2026-08-11T06:01:59+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Owner decision: promote the force-target default onto the fan?</h4>
     <div class="r-fu-body"><p>The force-target study verdict is CAN, with margins wider than linked flux gained (18 fan nodes match 4096 tiled cells on a solenoid's self radial force; ~130× through the operator at equal accuracy) and the locked hybrid decision's premise corrected — no caller reads an in-coil force map; the plasma force path is subdivision's real surviving role and the fan refuses it. The opt-in ForceTargetPolicy is landed and CoilSet-wired; flipping the coil default is a one-line policy change gated on the owner accepting two caveats: the plasma path stays subdivision, and one measured inversion exists on self-cancelling components.</p></div>
     <pre class="r-fu-prompt">/reckon-ship biot-element-conditioning §4</pre>
+    <p class="r-fu-outcome">Owner decision 2026-08-11: flip the coil force default onto the fan; plasma stays subdivision. target-rule re-locked to section-quadrature with the plasma carve-out; the implementation node is dispatched in-session with the value shifts to be reported at its landing.</p>
     </article>
 </section>
 

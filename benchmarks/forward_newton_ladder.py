@@ -90,12 +90,11 @@ from benchmarks.forward_solve_throughput import (  # noqa: E402
     time_call,
 )
 
-#: Outer topology reads and inner Newton steps the fixed-schedule route runs.
-#: Both are budgets rather than tolerances, for the same reason the shipped
-#: ladder carries a fixed step count: a data-dependent exit will not ``vmap``.
-#: The adaptive measurement below reports what the case actually needs, and
-#: these are set from it.
-OUTER_READS = 4
+#: Inner Newton steps the fixed-schedule route falls back to when a run has
+#: measured no schedule of its own. It is a budget rather than a tolerance, for
+#: the same reason the shipped ladder carries a fixed step count: a
+#: data-dependent exit will not ``vmap``. Every reported timing runs the count
+#: the adaptive measurement returned, not this one.
 INNER_STEPS = 4
 
 #: Ceiling on the adaptive loop, which stops on its own convergence test long
@@ -109,9 +108,6 @@ INNER_LIMIT = 12
 #: of the floor is the same margin the shipped solve's own root-find tolerance
 #: is written against.
 RESOLUTION_STEPS = 8.0
-
-#: Ensemble widths the batched check is read at.
-BATCH_WIDTHS = (1, 16, 64, 256)
 
 
 # --------------------------------------------------------------------------

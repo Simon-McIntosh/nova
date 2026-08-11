@@ -950,6 +950,42 @@ def newton_callable(
     return solve_one
 
 
+def kernel_read_ladder(operator):
+    """Return the shipped ladder driven through the vectorised read.
+
+    Everything but the read is the shipped route: the same map, the same step
+    budget, the same Krylov space. Separating this from the shipped ladder is
+    what attributes a speedup to removing the sequential traversal rather than
+    to lagging the topology, and the two effects turn out to be independent.
+    """
+    import jax.numpy as jnp
+
+    from nova.equilibrium import fixed_point
+
+    def solve_one(current, seed):
+        """Return the converged flux one conductor state supports."""
+        external = operator.external(current)
+
+        def mapped(psi):
+            """Return the free-boundary map with the read vectorised."""
+            masks = vectorised_read(operator, psi)[0]
+            cell = operator.source.cell_current(operator.radius, operator.area, masks)
+            return (
+                external
+                + jnp.r_[operator.grid.internal(cell), operator.wall.internal(cell)]
+            )
+
+        return fixed_point.newton_krylov(
+            mapped,
+            seed,
+            newton_steps=NEWTON_STEPS,
+            gmres_iterations=KRYLOV_ITERATIONS,
+            warmup=WARMUP_SWEEPS,
+        )
+
+    return solve_one
+
+
 def measure_jacobian_cost(bundle: SolveBundle, operator) -> dict[str, Any]:
     """Return what forming the frozen Jacobian costs, both ways.
 
@@ -1050,6 +1086,9 @@ def measure_end_to_end(bundle: SolveBundle, operator, adaptive) -> dict[str, Any
             return None
 
     ladder = compile_and_time("ladder", solve_callable(operator), current, seed)
+    ladder_kernel_read = compile_and_time(
+        "ladder_kernel_read", kernel_read_ladder(operator), current, seed
+    )
     newton = compile_and_time(
         "newton",
         newton_callable(operator, support_size, outer=outer, inner=inner),
@@ -1076,6 +1115,12 @@ def measure_end_to_end(bundle: SolveBundle, operator, adaptive) -> dict[str, Any
     scale = float(np.max(np.abs(bundle.reference_flux)))
     for name, result in (
         ("ladder", None if ladder is None else np.asarray(ladder.state)),
+        (
+            "ladder_kernel_read",
+            None
+            if ladder_kernel_read is None
+            else np.asarray(ladder_kernel_read.state),
+        ),
         ("newton", None if newton is None else np.asarray(newton)),
         (
             "newton_shipped_read",
@@ -1098,12 +1143,18 @@ def measure_end_to_end(bundle: SolveBundle, operator, adaptive) -> dict[str, Any
         record.get("newton_seconds"), float
     ):
         record["speedup"] = record["ladder_seconds"] / record["newton_seconds"]
-    if isinstance(record.get("newton_shipped_read_seconds"), float) and isinstance(
-        record.get("newton_seconds"), float
+    # the two effects separate: what removing the sequential traversal buys on
+    # each route, and what lagging the topology buys at each read
+    for name, slow, fast in (
+        ("read_vectorisation_on_newton", "newton_shipped_read", "newton"),
+        ("read_vectorisation_on_ladder", "ladder", "ladder_kernel_read"),
+        ("lagged_topology_on_shipped_read", "ladder", "newton_shipped_read"),
+        ("lagged_topology_on_kernel_read", "ladder_kernel_read", "newton"),
     ):
-        record["read_vectorisation_speedup"] = (
-            record["newton_shipped_read_seconds"] / record["newton_seconds"]
-        )
+        numerator = record.get(f"{slow}_seconds")
+        denominator = record.get(f"{fast}_seconds")
+        if isinstance(numerator, float) and isinstance(denominator, float):
+            record[name] = numerator / denominator
     record["flux_scale"] = scale
     return record
 

@@ -1,4 +1,4 @@
-"""Cover the machine geometry reader seam.
+"""Cover the machine geometry reader seam and coilset construction.
 
 CrossSection dispatches poloidal geometry through a
 :class:`~nova.imas.machine.MachineGeometryReader` provider so an IMAS IDS node
@@ -6,12 +6,27 @@ and a flat tabular source (a FAIR-MAST zarr row, a columnar record) are
 interchangeable. These tests exercise the default IMAS provider on a synthetic
 IDS-shaped node and the packaged :class:`~nova.imas.machine.
 TabularGeometryReader`, and assert both yield the same section.
+
+The remaining tests drive the writes that turn an IDS into a coilset against
+the columnar frame -- per-coil resistivity and current limits -- and the
+datastore location report, all on synthetic frames and empty directory trees
+so they run wherever the package imports.
 """
 
 import numpy as np
+import pytest
 
 from nova.catalog.mast_geometry import EvidenceState, MachineGeometryRegistry
-from nova.imas.machine import CrossSection, Outline, TabularGeometryReader
+from nova.frame.coilset import CoilSet
+from nova.imas.machine import (
+    CoilDatabase,
+    CrossSection,
+    FrameData,
+    Outline,
+    PoloidalFieldActive,
+    TabularGeometryReader,
+    Wall,
+)
 from nova.imas.mast_geometry import (
     DD_VERSION,
     RegistryGeometryReader,
@@ -236,3 +251,142 @@ def test_catalog_ids_validate_reopen_and_preserve_diagnostic_geometry(tmp_path):
     )
     assert not first_saddle.flux.data.has_value
     assert not first_saddle.voltage.data.has_value
+
+
+def _two_coil_set():
+    """Return a coilset holding two multi-turn coils of differing section."""
+    coilset = CoilSet()
+    coilset.turn.insert([4.0, 4.4], [1.0, 1.0], 0.2, 0.3, name="CS1", rho=0)
+    coilset.turn.insert([6.0, 6.6], [-1.0, -1.0], 0.5, 0.4, name="PF1", rho=0)
+    return coilset
+
+
+def test_resistivity_reaches_a_single_inserted_coil():
+    """A one-coil insert is the shape every IDS loop arrives in."""
+    coilset = _two_coil_set()
+    index = coilset.frame.index[1:]
+
+    FrameData.update_resistivity(index, coilset.frame, coilset.subframe, 3.0e-3)
+
+    area, height = (float(coilset.frame.loc[index, attr][0]) for attr in ["area", "dy"])
+    rho = 3.0e-3 * area / height
+    assert np.isclose(float(coilset.frame.loc["PF1", "rho"]), rho)
+    subframe_rho = np.asarray(coilset.subframe["rho"])
+    assert np.allclose(subframe_rho[np.asarray(coilset.subframe.frame) == "PF1"], rho)
+    assert float(coilset.frame.loc["CS1", "rho"]) == 0.0
+
+
+def test_resistivity_is_per_coil_not_broadcast():
+    """Each coil takes its own area / loop-length ratio, matched by position."""
+    coilset = _two_coil_set()
+    index = coilset.frame.index
+
+    FrameData.update_resistivity(index, coilset.frame, coilset.subframe, 3.0e-3)
+
+    area = np.asarray(coilset.frame.loc[index, "area"], dtype=float)
+    height = np.asarray(coilset.frame.loc[index, "dy"], dtype=float)
+    rho = 3.0e-3 * area / height
+    assert rho[0] != rho[1]
+    assert np.allclose(np.asarray(coilset.frame["rho"], dtype=float), rho)
+    subframe_coil = np.asarray(coilset.subframe.frame)
+    for name, value in zip(index, rho, strict=True):
+        assert np.allclose(
+            np.asarray(coilset.subframe["rho"])[subframe_coil == name], value
+        )
+
+
+def test_current_limits_land_symmetrically_on_named_coils():
+    """Imin / Imax are subspace columns reached one independent row at a time."""
+    coilset = CoilSet()
+    coilset.coil.insert([1.0, 2.0, 3.0], 0.0, 0.4, 0.4, label="PF", delta=-1)
+
+    PoloidalFieldActive.update_current_limits(coilset, {"PF0": 10.0, "PF2": 30.0})
+
+    assert np.allclose(np.asarray(coilset.frame["Imax"]), [10.0, 0.0, 30.0])
+    assert np.allclose(np.asarray(coilset.frame["Imin"]), [-10.0, 0.0, -30.0])
+
+
+def test_current_limits_reject_an_unmatched_identifier():
+    """A limit naming no inserted coil is a mismatch, never a silent no-op."""
+    coilset = CoilSet()
+    coilset.coil.insert([1.0, 2.0], 0.0, 0.4, 0.4, label="PF", delta=-1)
+
+    with pytest.raises(KeyError) as error:
+        PoloidalFieldActive.update_current_limits(coilset, {"PF9": 10.0})
+    assert "PF9" in str(error.value)
+
+
+@mark["imas"]
+def test_datastore_report_names_missing_level_and_parameter(monkeypatch, tmp_path):
+    """Each absent level of the resolved path names the parameter that chose it."""
+    monkeypatch.setenv("IMAS_HOME", str(tmp_path))
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "cache"))
+    imasdb = tmp_path / "shared" / "imasdb"
+
+    def locate(**kwargs):
+        with pytest.raises(FileNotFoundError) as error:
+            PoloidalFieldActive(pulse=999999, run=1, user="public", **kwargs)
+        return str(error.value)
+
+    report = locate()
+    assert str(tmp_path / "shared") in report and "user='public'" in report
+
+    imasdb.mkdir(parents=True)
+    report = locate()
+    assert str(imasdb / "iter_md") in report and "machine='iter_md'" in report
+
+    (imasdb / "iter_md" / "3").mkdir(parents=True)
+    report = locate()
+    assert str(imasdb / "iter_md" / "4") in report
+    assert "dd_version=" in report and "['3']" in report
+
+    report = locate(dd_version="3.39.0")
+    assert str(imasdb / "iter_md" / "3" / "999999" / "1") in report
+    assert "pulse=999999" in report and "run=1" in report
+
+
+@mark["imas"]
+def test_cached_coilset_needs_no_reachable_datastore(monkeypatch, tmp_path):
+    """A cache hit is authoritative; the source is located only on a miss."""
+    monkeypatch.setenv("IMAS_HOME", str(tmp_path))
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "cache"))
+
+    class CachedCoilDatabase(CoilDatabase):
+        """Stand in for a coilset whose cached geometry is already stored."""
+
+        def load(self):
+            """Report a cache hit without touching the store."""
+            return self
+
+        def locate_datastore(self):
+            """Fail the test: a cache hit must never reach for the source."""
+            raise AssertionError("cache hit consulted the datastore")
+
+        def build(self):
+            """Fail the test: a cache hit must never rebuild."""
+            raise AssertionError("cache hit rebuilt the coilset")
+
+    assert CachedCoilDatabase(pulse=999999, run=1, name="pf_active").ids is None
+
+
+@mark["imas"]
+def test_wall_boundary_reports_an_absent_source(monkeypatch, tmp_path):
+    """A cached wall coilset still needs its ids before a boundary is read."""
+    monkeypatch.setenv("IMAS_HOME", str(tmp_path))
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "cache"))
+
+    class CachedWall(Wall):
+        """Stand in for a wall whose meshed geometry is already stored."""
+
+        def load(self):
+            """Report a cache hit without touching the store."""
+            return self
+
+        def build(self):
+            """Fail the test: a cache hit must never rebuild."""
+            raise AssertionError("cache hit rebuilt the wall")
+
+    wall = CachedWall(pulse=999999, run=1, user="public")
+    with pytest.raises(FileNotFoundError) as error:
+        wall.boundary
+    assert str(tmp_path / "shared") in str(error.value)

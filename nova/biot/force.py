@@ -1,5 +1,6 @@
 """Solve intergral coil forces."""
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -8,6 +9,11 @@ from nova.biot.biotframe import BiotFrame
 from nova.biot.operate import Operate
 from nova.biot.plot import Plot1D
 from nova.biot.solve import Solve
+from nova.biot.target import (
+    DEFAULT_FORCE_TARGET_POLICY,
+    ForceTargetPolicy,
+    section_force_target,
+)
 from nova.frame.polygrid import PolyTarget
 
 
@@ -15,6 +21,13 @@ from nova.frame.polygrid import PolyTarget
 class Force(Plot1D, Operate):
     """
     Compute coil force interaction matricies.
+
+    The force a conductor carries is an area integral over the material its
+    current occupies, so the target rule is a quadrature rule for that integral.
+    ``target_policy`` selects it: the shipped ``subdivision`` rule samples the
+    integrand at the centroid of every cell of an exact tiling, and
+    ``positive_material`` averages over the Gauss fan of
+    :mod:`nova.biot.sectionaverage` instead.
 
     Parameters
     ----------
@@ -24,12 +37,27 @@ class Force(Plot1D, Operate):
             - < 0: coil segment resolution
             - int >= 0: coil segment number
 
+        This sets the subdivision rule's resolution. Under the positive-material
+        rule the quadrature order sets it and the segment number survives only as
+        the solve trigger.
+
     """
 
     reduce: bool = True
     attrs: list[str] = field(default_factory=lambda: ["Fr", "Fz", "Fc"])
     frame_index: str = "coil"
+    target_policy: ForceTargetPolicy | Mapping | str = DEFAULT_FORCE_TARGET_POLICY
+    _configured_target_policy: str = field(init=False, repr=False, default="")
     target: BiotFrame = field(init=False, repr=False)
+
+    def __post_init__(self):
+        """Freeze the target rule to the owning CoilSet's cache identity."""
+        self._configured_target_policy = ForceTargetPolicy.resolve(
+            self.target_policy
+        ).key
+        self.target_policy = self._configured_target_policy
+        if hasattr(super(), "__post_init__"):
+            super().__post_init__()
 
     def __len__(self):
         """Return force patch number."""
@@ -39,35 +67,48 @@ class Force(Plot1D, Operate):
         """Extract boundary and solve magnetic field around coil perimeter."""
         with self.solve_biot(number) as number:
             if number is not None:
-                self.target = PolyTarget(
-                    *self.frames, index=self.frame_index, delta=-number
-                ).target
-                self.bind_moment_arm()
-                self.data = Solve(
-                    self.subframe,
-                    self.target,
-                    reduce=[True, self.reduce],
-                    turns=[True, True],
-                    attrs=self.attrs,
-                    name=self.name,
-                ).data
-                # insert grid data
-                if self.reduce:
-                    self.data.coords["index"] = (
-                        "target",
-                        self.Loc[self.frame_index, "subref"],
+                policy = ForceTargetPolicy.resolve(self.target_policy)
+                if policy.key != self._configured_target_policy:
+                    raise ValueError(
+                        "force target policy is fixed by its CoilSet constructor"
                     )
-                    self.data.coords["xo"] = "target", self.Loc[self.frame_index, "x"]
-                    self.data.coords["zo"] = "target", self.Loc[self.frame_index, "z"]
-                    self.data.coords["x"] = self.target.x
-                    self.data.coords["z"] = self.target.z
+                if policy.rule == "subdivision":
+                    self.solve_subdivision(number)
                 else:
-                    self.data.coords["index"] = (
-                        "target",
-                        self.loc[self.frame_index, "subref"],
-                    )
-                    self.data.coords["x"] = "target", self.target.x
-                    self.data.coords["z"] = "target", self.target.z
+                    self.solve_section_quadrature(policy)
+                self.data.attrs["force_target_policy"] = policy.key
+
+    def solve_subdivision(self, number):
+        """Sample the force density at the centroid of every cell of a tiling."""
+        self.target = PolyTarget(
+            *self.frames, index=self.frame_index, delta=-number
+        ).target
+        self.bind_moment_arm()
+        self.data = Solve(
+            self.subframe,
+            self.target,
+            reduce=[True, self.reduce],
+            turns=[True, True],
+            attrs=self.attrs,
+            name=self.name,
+        ).data
+        # insert grid data
+        if self.reduce:
+            self.data.coords["index"] = (
+                "target",
+                self.Loc[self.frame_index, "subref"],
+            )
+            self.data.coords["xo"] = "target", self.Loc[self.frame_index, "x"]
+            self.data.coords["zo"] = "target", self.Loc[self.frame_index, "z"]
+            self.data.coords["x"] = self.target.x
+            self.data.coords["z"] = self.target.z
+        else:
+            self.data.coords["index"] = (
+                "target",
+                self.loc[self.frame_index, "subref"],
+            )
+            self.data.coords["x"] = "target", self.target.x
+            self.data.coords["z"] = "target", self.target.z
 
     def bind_moment_arm(self):
         """Measure the moment arm against the conductor rather than the cell.
@@ -91,6 +132,35 @@ class Force(Plot1D, Operate):
         }
         self.target["dx"] = np.array([extent[str(name)][0] for name in parent])
         self.target["dz"] = np.array([extent[str(name)][1] for name in parent])
+
+    def solve_section_quadrature(self, policy):
+        """Average the force density over positive material with the Gauss fan."""
+        if not self.reduce:
+            raise ValueError(
+                "the positive material force rule integrates whole sections and "
+                "cannot resolve force within one; use the subdivision rule"
+            )
+        quadrature = section_force_target(
+            self.frame, self.Loc[self.frame_index, :].index, policy
+        )
+        self.target = quadrature.logical
+        self.data = Solve(
+            self.subframe,
+            quadrature.nodes,
+            reduce=[True, True],
+            turns=[True, True],
+            attrs=self.attrs,
+            name=self.name,
+            target_quadrature=quadrature,
+        ).data
+        self.data.coords["index"] = (
+            "target",
+            self.Loc[self.frame_index, "subref"],
+        )
+        self.data.coords["xo"] = "target", self.Loc[self.frame_index, "x"]
+        self.data.coords["zo"] = "target", self.Loc[self.frame_index, "z"]
+        self.data.coords["x"] = quadrature.nodes.x
+        self.data.coords["z"] = quadrature.nodes.z
 
     @property
     def coil_name(self):

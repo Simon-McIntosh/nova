@@ -4,6 +4,8 @@ import pytest
 import tempfile
 
 import numpy as np
+from nova.biot.force import Force
+from nova.biot.target import ForceTargetPolicy
 from nova.frame.coilset import CoilSet
 
 # a conductor pair whose vertical force is set by the other coil and whose radial
@@ -20,6 +22,18 @@ def conductor_pair(nforce=16, dcoil=-2):
     for name, x, z, dx, dz, nturn, current in PAIR:
         coilset.coil.insert(x, z, dx, dz, nturn=nturn, Ic=current, name=name)
     return coilset
+
+
+def section_quadrature_force(order, dcoil=-2):
+    """Return a force operator solved on the positive material rule."""
+    coilset = conductor_pair(dcoil=dcoil)
+    force = Force(
+        *coilset.frames,
+        name="force",
+        target_policy=ForceTargetPolicy(rule="positive_material", order=order),
+    )
+    force.solve(1)
+    return force
 
 
 @pytest.fixture
@@ -135,6 +149,138 @@ def test_crushing_moment_converges_as_the_tiling_refines():
     step = np.abs(np.diff(np.asarray(moment), axis=0))
     assert np.all(step[1] < step[0])
     assert np.all(step[2] < step[1])
+
+
+def test_section_quadrature_reproduces_the_refined_tiling():
+    """Both rules integrate one quantity, so they meet where both have converged.
+
+    The residual gap is the tiling's, which falls only as the reciprocal of its
+    cell count, so the bound here is set by the coarser of the two rules.
+    """
+    coilset = conductor_pair(nforce=1024)
+    coilset.force.solve()
+    force = section_quadrature_force(order=6)
+    np.testing.assert_allclose(force.fr, coilset.force.fr, rtol=2e-3)
+    np.testing.assert_allclose(force.fz, coilset.force.fz, rtol=2e-3)
+    np.testing.assert_allclose(force.fc, coilset.force.fc, rtol=2e-3)
+
+
+def test_section_quadrature_balances_action_against_reaction():
+    """Two conductors exchange equal and opposite vertical force at any rule.
+
+    The residual sum measures a target rule without needing a reference, and the
+    fan closes it further than the tiling from fewer nodes.
+    """
+    force = section_quadrature_force(order=6)
+    imbalance = abs(force.fz.sum()) / np.max(np.abs(force.fz))
+    assert imbalance < 5e-5
+
+    coilset = conductor_pair(nforce=256)
+    coilset.force.solve()
+    assert len(coilset.force) > len(force)
+    assert abs(coilset.force.fz.sum()) / np.max(np.abs(coilset.force.fz)) > imbalance
+
+
+def test_section_quadrature_converges_with_its_order():
+    """Raising the order drives the rule towards the integral it approximates."""
+    reference = section_quadrature_force(order=12).fr
+    error = [
+        np.max(np.abs(section_quadrature_force(order=order).fr / reference - 1))
+        for order in (2, 4, 6)
+    ]
+    assert error[0] > error[1] > error[2]
+    assert error[2] < 5e-5
+
+
+def test_section_quadrature_holds_the_conductor_turns():
+    """Contracting the nodes must leave each conductor's own turn count intact."""
+    force = section_quadrature_force(order=3)
+    assert np.isclose(force.target.nturn.sum(), sum(row[5] for row in PAIR))
+    assert force.target.index.tolist() == [row[0] for row in PAIR]
+
+
+def test_section_quadrature_is_free_of_the_source_mesh():
+    """The fan's targets are the conductor outlines, not the conducting cells."""
+    coarse = section_quadrature_force(order=4, dcoil=-2)
+    fine = section_quadrature_force(order=4, dcoil=-20)
+    np.testing.assert_allclose(coarse.fr, fine.fr, rtol=1e-12)
+    np.testing.assert_allclose(coarse.fz, fine.fz, rtol=1e-12)
+
+
+def test_default_force_rule_stays_the_tiling():
+    """The shipped route is the subdivision rule, bit for bit."""
+    default = conductor_pair()
+    default.force.solve()
+    coilset = conductor_pair()
+    explicit = Force(
+        *coilset.frames,
+        name="force",
+        target_policy=ForceTargetPolicy(rule="subdivision"),
+    )
+    explicit.solve(16)
+    np.testing.assert_array_equal(default.force.fr, explicit.fr)
+    np.testing.assert_array_equal(default.force.fz, explicit.fz)
+    np.testing.assert_array_equal(default.force.fc, explicit.fc)
+    assert ForceTargetPolicy.resolve(default.force.target_policy).rule == "subdivision"
+
+
+def test_force_records_its_target_rule():
+    """The rule that produced a stored operator must travel with it."""
+    force = section_quadrature_force(order=3)
+    policy = ForceTargetPolicy.resolve(force.data.attrs["force_target_policy"])
+    assert (policy.rule, policy.order) == ("positive_material", 3)
+
+
+def test_force_target_policy_is_fixed_after_construction():
+    """A route swap between construction and solve would break cache identity."""
+    coilset = conductor_pair()
+    force = Force(*coilset.frames, name="force")
+    force.target_policy = ForceTargetPolicy(rule="positive_material")
+    with pytest.raises(ValueError):
+        force.solve(1)
+
+
+def test_section_quadrature_refuses_a_force_map():
+    """The fan integrates whole sections and cannot resolve force within one."""
+    coilset = conductor_pair()
+    force = Force(
+        *coilset.frames,
+        name="force",
+        target_policy=ForceTargetPolicy(rule="positive_material"),
+    )
+    force.reduce = False
+    with pytest.raises(ValueError):
+        force.solve(1)
+
+
+def test_section_quadrature_refuses_a_plasma_frame():
+    """A plasma spreads its turns over its cells, which one uniform fan cannot."""
+    coilset = CoilSet(dplasma=-9, tplasma="hex")
+    coilset.firstwall.insert({"o": [5, 0, 1.2]}, Ic=15e6)
+    force = Force(
+        *coilset.frames,
+        name="force",
+        frame_index="plasma",
+        target_policy=ForceTargetPolicy(rule="positive_material"),
+    )
+    with pytest.raises(NotImplementedError):
+        force.solve(1)
+
+
+@pytest.mark.parametrize(
+    "policy",
+    [
+        {"rule": "midpoint"},
+        {"order": 0},
+        {"order": 2.5},
+        {"precision": "float32"},
+        {"device_eligibility": "device"},
+    ],
+)
+def test_force_target_policy_rejects_an_unsupported_setting(policy):
+    """Every setting that moves the integral belongs to the cache identity."""
+    with pytest.raises(ValueError):
+        ForceTargetPolicy(**policy)
 
 
 if __name__ == "__main__":

@@ -86,20 +86,29 @@ class ForceTargetPolicy:
     """Immutable identity for the rule that averages force density over a section.
 
     The force a conductor carries is an area integral of the ring force density
-    over the material its current occupies. ``subdivision`` samples that integrand
-    at the centroid of every cell of an exact tiling of the section -- a midpoint
-    rule whose resolution is the operator's segment number -- and is what ships.
-    ``positive_material`` averages over the Gauss fan of
-    :mod:`nova.biot.sectionaverage` instead, reaching the same area mean from a
-    node count set by ``order`` alone.
+    over the material its current occupies. ``positive_material`` averages that
+    integrand over the Gauss fan of :mod:`nova.biot.sectionaverage`, reaching the
+    area mean from a node count set by ``order`` alone, and is what ships.
+    ``subdivision`` samples the same integrand at the centroid of every cell of an
+    exact tiling of the section -- a midpoint rule whose resolution is the
+    operator's segment number -- and stays reachable by name.
 
-    The fan spreads one uniform turn density over the whole section, so it serves
-    a conductor whose turns are allocated by area and not a plasma whose cells
-    carry their own turn numbers.
+    ``order`` ships at five because that is the order which holds all three force
+    components at once. On eleven ITER-scale conductors the fan there reaches what
+    an eleven-thousand-cell tiling reaches on the radial force, the vertical force
+    and the crushing moment together, from a twentieth of its nodes; the fourth
+    and sixth orders are thirteen and four times worse on the vertical force,
+    which on the conductors where the two contributions nearly cancel is a small
+    difference of large numbers and so the component that grades a rule hardest.
+
+    The fan spreads one uniform turn density over the whole section, which is what
+    a conductor's turns are. A plasma allocates its turns cell by cell, so a
+    target selection holding plasma material integrates on the tiling instead --
+    :meth:`nova.biot.force.Force.material_rule` makes that switch.
     """
 
-    rule: Literal["subdivision", "positive_material"] = "subdivision"
-    order: int = 3
+    rule: Literal["positive_material", "subdivision"] = "positive_material"
+    order: int = 5
     backend: Literal["numpy"] = "numpy"
     precision: Literal["float64"] = "float64"
     device_eligibility: Literal["host"] = "host"
@@ -460,7 +469,8 @@ def section_force_target(
         if plasma[index]:
             raise NotImplementedError(
                 "section force quadrature spreads one uniform turn density and "
-                f"cannot integrate the plasma frame {label!r}"
+                f"cannot integrate the plasma frame {label!r}; a force operator "
+                "sends a selection holding plasma to the subdivision rule"
             )
         material = _shapely_material(polygons[index])
         points, area_weights = section_nodes(material, order=policy.order)

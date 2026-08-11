@@ -410,13 +410,15 @@ def _force_pair(**route):
     return coilset
 
 
-def test_default_force_route_is_the_shipped_tiling():
-    """A coilset built without the argument solves the subdivision rule unchanged."""
+def test_default_force_route_is_the_section_fan():
+    """A coilset built without the argument solves the shipped fan unchanged."""
     default = _force_pair()
     assert default.route_attrs["force_target_policy"] == DEFAULT_FORCE_TARGET_POLICY
     assert default.force.target_policy == DEFAULT_FORCE_TARGET_POLICY
     default.force.solve()
-    explicit = _force_pair(force_target_policy=ForceTargetPolicy(rule="subdivision"))
+    explicit = _force_pair(
+        force_target_policy=ForceTargetPolicy(rule="positive_material", order=5)
+    )
     explicit.force.solve()
     np.testing.assert_array_equal(default.force.fr, explicit.force.fr)
     np.testing.assert_array_equal(default.force.fz, explicit.force.fz)
@@ -424,7 +426,7 @@ def test_default_force_route_is_the_shipped_tiling():
 
 def test_the_force_route_reaches_the_operator_and_its_cache_identity():
     """An opted-in rule binds the operator, the solved metadata and the identity."""
-    policy = ForceTargetPolicy(rule="positive_material", order=4)
+    policy = ForceTargetPolicy(rule="subdivision")
     coilset = _force_pair(force_target_policy=policy)
     assert coilset.route_attrs["force_target_policy"] == policy.key
     assert coilset.coilset_attrs["force_target_policy"] == policy.key
@@ -433,16 +435,16 @@ def test_the_force_route_reaches_the_operator_and_its_cache_identity():
     assert coilset.force.data.attrs["force_target_policy"] == policy.key
     # the fan and the tiling reach the same area mean from different nodes, so
     # a route that had not travelled would show as bit-equal forces
-    tiling = _force_pair()
-    tiling.force.solve()
-    assert not np.array_equal(coilset.force.fr, tiling.force.fr)
+    fan = _force_pair()
+    fan.force.solve()
+    assert not np.array_equal(coilset.force.fr, fan.force.fr)
 
 
 def test_the_force_route_is_fixed_after_construction():
     """A route swap after construction would strand the cached operator."""
     coilset = _force_pair()
     with pytest.raises(ValueError):
-        coilset.force_target_policy = ForceTargetPolicy(rule="positive_material")
+        coilset.force_target_policy = ForceTargetPolicy(rule="subdivision")
 
 
 if __name__ == "__main__":

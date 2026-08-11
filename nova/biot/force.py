@@ -1,7 +1,7 @@
 """Solve intergral coil forces."""
 
 from collections.abc import Mapping
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 import numpy as np
 
@@ -24,22 +24,23 @@ class Force(Plot1D, Operate):
 
     The force a conductor carries is an area integral over the material its
     current occupies, so the target rule is a quadrature rule for that integral.
-    ``target_policy`` selects it: the shipped ``subdivision`` rule samples the
-    integrand at the centroid of every cell of an exact tiling, and
-    ``positive_material`` averages over the Gauss fan of
-    :mod:`nova.biot.sectionaverage` instead.
+    ``target_policy`` selects it: the shipped ``positive_material`` rule averages
+    the integrand over the Gauss fan of :mod:`nova.biot.sectionaverage`, and
+    ``subdivision`` samples it at the centroid of every cell of an exact tiling
+    instead. A target selection holding plasma material integrates on the tiling
+    whichever rule is named -- see :meth:`material_rule`.
 
     Parameters
     ----------
     nforce : int | -float, optional
-        Coil force segment resoultion. The default is 500.
+        Coil force segment resoultion.
 
             - < 0: coil segment resolution
             - int >= 0: coil segment number
 
-        This sets the subdivision rule's resolution. Under the positive-material
-        rule the quadrature order sets it and the segment number survives only as
-        the solve trigger.
+        This sets the subdivision rule's resolution. Under the shipped rule the
+        quadrature order sets it and the segment number survives only as the
+        solve trigger.
 
     """
 
@@ -72,11 +73,35 @@ class Force(Plot1D, Operate):
                     raise ValueError(
                         "force target policy is fixed by its CoilSet constructor"
                     )
+                policy = self.material_rule(policy)
                 if policy.rule == "subdivision":
                     self.solve_subdivision(number)
                 else:
                     self.solve_section_quadrature(policy)
                 self.data.attrs["force_target_policy"] = policy.key
+
+    @property
+    def target_carries_plasma(self) -> bool:
+        """Return whether the selected force targets hold plasma material."""
+        return bool(
+            np.any(np.asarray(self.Loc[self.frame_index, "plasma"], dtype=bool))
+        )
+
+    def material_rule(self, policy: ForceTargetPolicy) -> ForceTargetPolicy:
+        """Return the target rule the selected material admits.
+
+        The fan spreads one uniform turn density over a whole section, which is
+        what a conductor's turns are. A plasma allocates its turns cell by cell,
+        and its force is the sum of cell forces each weighted by its own turn
+        number, so the section mean the fan returns is not the force the plasma
+        carries. That is a property of the material rather than a limit of the
+        rule, so a selection holding plasma integrates on the tiling whichever
+        rule was named, and the whole selection follows it because one operator
+        carries one rule. The rule that ran is what the solved data records.
+        """
+        if policy.rule == "subdivision" or not self.target_carries_plasma:
+            return policy
+        return replace(policy, rule="subdivision")
 
     def solve_subdivision(self, number):
         """Sample the force density at the centroid of every cell of a tiling."""
@@ -138,7 +163,8 @@ class Force(Plot1D, Operate):
         if not self.reduce:
             raise ValueError(
                 "the positive material force rule integrates whole sections and "
-                "cannot resolve force within one; use the subdivision rule"
+                "cannot resolve force within one; a map inside a section is a "
+                'different quantity, so name ForceTargetPolicy(rule="subdivision")'
             )
         quadrature = section_force_target(
             self.frame, self.Loc[self.frame_index, :].index, policy

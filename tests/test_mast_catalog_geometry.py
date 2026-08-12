@@ -424,6 +424,13 @@ def test_catalog_scan_resumes_from_atomic_fingerprint_checkpoint(
         "physical_snapshot",
         lambda *_args: geometry,
     )
+    monkeypatch.setattr(
+        mast_geometry,
+        "ThreadPoolExecutor",
+        lambda **_kwargs: pytest.fail(
+            "single-worker scans must not create an executor thread"
+        ),
+    )
     checkpoint = tmp_path / "fingerprints.json"
 
     report = mast_geometry.scan_catalog(

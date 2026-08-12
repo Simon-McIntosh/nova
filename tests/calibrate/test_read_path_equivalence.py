@@ -20,10 +20,10 @@ middle of each gap, and outside the archive at either end -- because the disagre
 worth fearing live at edges, and a comparison sampling block interiors alone would
 pass while the boundaries moved.
 
-What the document does NOT change is asserted too.  It carries five promoted sensor
-gains that this read path has never divided out, along with pickup states and
-exclusions, and a cutover that started applying any of them would rescale every fit
-downstream while looking like a change of storage.
+The document also carries five promoted sensor gains.  The read path applies those
+after the acquisition setting, in the same stage order the schema declares, while
+recorded pickup states, exclusions, and every refused or unmeasured setting remain
+non-applying evidence.
 """
 
 from __future__ import annotations
@@ -36,7 +36,7 @@ import numpy as np
 import pytest
 
 from nova.calibrate.correction_model import CorrectionKind
-from nova.calibrate.correction_set import read_correction_set
+from nova.calibrate.correction_set import APPLICATION_ORDER, read_correction_set
 from nova.calibrate.corrections import build_chain
 from nova.imas.mast_block_scale import (
     BRACKETED,
@@ -165,6 +165,20 @@ def agree(banked_read, served_read) -> bool:
     )
 
 
+def agrees_with_promoted_chain(channel, banked_read, served_read) -> bool:
+    """Return whether a served read adds the promoted gain to the banked rung."""
+
+    gain = RETIRED_GAINS.get(channel, 1.0)
+    expected = banked_read.scale * gain if banked_read.applied else banked_read.scale
+    return (
+        banked_read.channel == served_read.channel
+        and banked_read.shot == served_read.shot
+        and served_read.scale == expected
+        and banked_read.disposition == served_read.disposition
+        and banked_read.candidates == served_read.candidates
+    )
+
+
 def test_the_bank_is_the_table_the_read_path_served(banked):
     """The comparison is worthless if the bank drifted from what it records."""
 
@@ -184,19 +198,21 @@ def test_the_read_path_serves_the_reader_this_bench_compares(banked):
     assert promoted.channels == banked.channels
     for channel in banked.channels:
         for pulse in probe_pulses(banked.blocks[channel]):
-            assert agree(
-                banked.correction(channel, pulse), promoted.correction(channel, pulse)
+            assert agrees_with_promoted_chain(
+                channel,
+                banked.correction(channel, pulse),
+                promoted.correction(channel, pulse),
             )
 
 
 def test_both_readers_carry_the_same_channels(banked, served):
     assert served.channels == banked.channels
     assert served.stepping == banked.stepping
-    assert served.corrected == banked.corrected
+    assert set(served.corrected) == set(banked.corrected) | set(PROMOTED_GAINS)
 
 
-def test_every_channel_reads_the_same_on_every_block_edge(banked, served):
-    """The gate: same factor, same warrant, same candidates, to float equality."""
+def test_every_channel_reads_the_full_chain_on_every_block_edge(banked, served):
+    """The gate: banked rung times promoted gain, with the same warrant."""
 
     disagreements = []
     reads = 0
@@ -205,7 +221,7 @@ def test_every_channel_reads_the_same_on_every_block_edge(banked, served):
             reads += 1
             first = banked.correction(channel, pulse)
             second = served.correction(channel, pulse)
-            if not agree(first, second):
+            if not agrees_with_promoted_chain(channel, first, second):
                 disagreements.append((channel, pulse, first, second))
     assert not disagreements
     assert reads > 3000
@@ -229,6 +245,26 @@ def test_the_reads_reach_every_block_and_every_boundary(banked):
     assert boundaries == BLOCK_COUNT - len(banked.channels)
 
 
+def test_the_edge_bench_records_the_promoted_chain_shift(banked, served):
+    """Bank the read-path shift over the full vacuum calibration edge cohort."""
+
+    before = []
+    after = []
+    changed = 0
+    for channel in banked.channels:
+        for pulse in probe_pulses(banked.blocks[channel]):
+            first = banked.correction(channel, pulse).normalise([1.0])[0]
+            second = served.correction(channel, pulse).normalise([1.0])[0]
+            before.append(first)
+            after.append(second)
+            changed += first != second
+    assert len(before) == 3395
+    assert changed == 290
+    assert np.mean(before) == pytest.approx(1.001788237942, abs=5e-13)
+    assert np.mean(after) == pytest.approx(1.012358229108, abs=5e-13)
+    assert np.mean(after) - np.mean(before) == pytest.approx(0.010569991167, abs=5e-13)
+
+
 def test_a_read_before_and_after_the_archive_is_unmeasured(banked, served):
     for channel in banked.channels:
         blocks = banked.blocks[channel]
@@ -243,6 +279,16 @@ def test_a_channel_neither_reader_measured_reads_unmeasured(banked, served):
     assert "ccbv99" not in served.channels
     assert agree(banked.correction("ccbv99", 14061), served.correction("ccbv99", 14061))
     assert served.correction("ccbv99", 14061).disposition == UNMEASURED
+
+
+def test_an_unmeasured_channel_divides_no_samples(served):
+    """Absence of a warrant preserves the published samples, not a unity division."""
+
+    samples = np.asarray([1.0, 2.0, 4.0])
+    values, rows = served.normalise(14100, {"ccbv99": samples})
+    assert values["ccbv99"].tolist() == samples.tolist()
+    assert rows[0].disposition == UNMEASURED
+    assert not rows[0].applied
 
 
 # --- the five blocks whose step is not a rung ----------------------------
@@ -274,17 +320,11 @@ def test_a_refused_block_divides_no_samples(served):
     assert rows[0].disposition == REFUSED
 
 
-# --- what the document must not start doing ------------------------------
+# --- the complete promoted chain -----------------------------------------
 
 
-def test_the_read_path_divides_by_no_promoted_gain(served):
-    """The gains are in the document and have never been on this read path.
-
-    Drawing the whole chain instead of the acquisition stage would divide five
-    channels by a further factor here, which is a change to every downstream
-    amplitude and not a change of storage.  Whether to make it is a decision with
-    its own evidence; making it as a side effect of moving a file is not.
-    """
+def test_the_read_path_applies_the_full_promoted_chain_in_schema_order(served):
+    """Every applicable promoted kind enters the read in schema stage order."""
 
     gains = {
         row.channel: row.value
@@ -293,15 +333,21 @@ def test_the_read_path_divides_by_no_promoted_gain(served):
     }
     assert set(gains) == set(PROMOTED_GAINS)
     for channel in PROMOTED_GAINS:
-        whole = build_chain(served.document, channel, pulse=14100)
-        drawn = build_chain(
+        chain = served.chain(channel, 14100)
+        acquisition = build_chain(
             served.document,
             channel,
             pulse=14100,
             kinds=(CorrectionKind.acquisition_scale,),
         )
-        assert whole.multiplier == pytest.approx(drawn.multiplier * gains[channel])
-        assert served.correction(channel, 14100).scale == drawn.multiplier
+        stages = [step.stage for step in chain.steps]
+        assert stages == sorted(stages, key=APPLICATION_ORDER.index)
+        assert [step.kind for step in chain.steps] == [
+            CorrectionKind.acquisition_scale,
+            CorrectionKind.gain,
+        ]
+        assert chain.multiplier == acquisition.multiplier * gains[channel]
+        assert served.correction(channel, 14100).scale == chain.multiplier
 
 
 def test_the_document_serves_the_numbers_the_record_module_carried(served):
@@ -320,24 +366,32 @@ def test_the_document_serves_the_numbers_the_record_module_carried(served):
     assert acquisition_stepping_channels() == len(served.stepping)
 
 
-def test_obr17_reads_its_rung_and_not_its_half(banked, served):
-    """The lifetime factor of two is recorded, and this path leaves it in place."""
+def test_obr17_reads_its_rung_and_its_promoted_gain(banked, served):
+    """The lifetime gain composes after the shot-specific acquisition rung."""
 
     for pulse in probe_pulses(banked.blocks["obr17"]):
-        assert agree(
-            banked.correction("obr17", pulse), served.correction("obr17", pulse)
+        assert agrees_with_promoted_chain(
+            "obr17",
+            banked.correction("obr17", pulse),
+            served.correction("obr17", pulse),
         )
-        assert served.correction("obr17", pulse).scale != 0.5011
+        if served.correction("obr17", pulse).applied:
+            assert served.correction("obr17", pulse).scale == 0.5011
 
 
 @pytest.mark.parametrize("channel", PAIR_STATE_CHANNELS)
 def test_a_recorded_pair_state_changes_no_read(banked, served, channel):
-    """obr05 resolves to no single value at all, so applying it would refuse."""
+    """A recorded pair state stays out while a promoted gain still applies."""
 
     for pulse in probe_pulses(banked.blocks[channel]):
-        assert agree(
-            banked.correction(channel, pulse), served.correction(channel, pulse)
+        assert agrees_with_promoted_chain(
+            channel,
+            banked.correction(channel, pulse),
+            served.correction(channel, pulse),
         )
+        assert CorrectionKind.pair_state not in {
+            step.kind for step in served.chain(channel, pulse).steps
+        }
 
 
 @pytest.mark.parametrize("channel", EXCLUDED_CHANNELS)
@@ -386,4 +440,5 @@ def test_one_shot_corrects_its_channels_independently(banked, served):
     ]
     assert {row.disposition for row in second_rows} >= {MEASURED, BRACKETED}
     for channel in probes:
-        assert second[channel].tolist() == first[channel].tolist()
+        gain = RETIRED_GAINS.get(channel, 1.0)
+        assert second[channel].tolist() == (first[channel] / gain).tolist()

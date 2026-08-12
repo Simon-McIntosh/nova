@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-12T22:13:20",
+  "updated": "2026-08-12T22:44:07",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -30,6 +30,13 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "019ff744-0a55-7ba2-aefa-7ad33ff66561",
+        "created": "2026-08-12"
+      },
+      {
+        "id": "fffe-infra",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
         "created": "2026-08-12"
       },
       {
@@ -105,6 +112,13 @@
       {
         "id": "publish",
         "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-12"
+      },
+      {
+        "id": "read-ingest",
+        "harness": "claude",
         "role": "implement",
         "session_id": null,
         "created": "2026-08-12"
@@ -1126,9 +1140,217 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260812T201651955322-promotion-route",
+        "plan": "mast-corrected-read-layer",
+        "section": "\u00a73",
+        "node": "promotion-route",
+        "role": "implement",
+        "member": "corrected-chain",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-12T20:16:52Z",
+        "completed_at": "2026-08-12T20:23:54Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 422,
+        "time_budget": "25m",
+        "base_sha": "17d173be8ea287d43de9cceeb9a578056ee77dec",
+        "commits": [
+          "0f878cd678c140f5ea2535162a567dc45cf7741f"
+        ],
+        "changed_lines": {
+          "added": 377,
+          "removed": 9,
+          "files": 3
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/653c361a-8c6e-405b-9035-eb21e04233a8/scratchpad/promotion-route-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff707-955a-7070-9a90-e2284e6049db",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 14219008,
+            "input_tokens": 15441561,
+            "output_tokens": 55106,
+            "reasoning_output_tokens": 17670
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260812T201653057265-corrected-ingest-seam",
+        "plan": "mast-corrected-read-layer",
+        "section": "\u00a73",
+        "node": "corrected-ingest-seam",
+        "role": "implement",
+        "member": "read-ingest",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-12T20:16:53Z",
+        "completed_at": "2026-08-12T20:23:28Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 395,
+        "time_budget": "25m",
+        "base_sha": "17d173be8ea287d43de9cceeb9a578056ee77dec",
+        "commits": [
+          "bd6b5d9c5bdd0a65c0f0df517b574b6c85f3ad07"
+        ],
+        "changed_lines": {
+          "added": 216,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/653c361a-8c6e-405b-9035-eb21e04233a8/scratchpad/corrected-ingest-seam-manifest.md",
+        "scope_changed": false,
+        "session_id": null,
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 2575616,
+            "input_tokens": 2688279,
+            "output_tokens": 14244,
+            "reasoning_output_tokens": 5349
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260812T201656765287-first-wall-read-repair",
+        "plan": "flux-function-forward-equilibrium",
+        "section": "\u00a75",
+        "node": "first-wall-read-repair",
+        "role": "implement",
+        "member": "fffe-infra",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-12T20:16:58Z",
+        "completed_at": "2026-08-12T20:24:02Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 424,
+        "time_budget": "25m",
+        "base_sha": "17d173be8ea287d43de9cceeb9a578056ee77dec",
+        "commits": [
+          "c642af8f08a2998f086cf579e2047bb1f1536418"
+        ],
+        "changed_lines": {
+          "added": 60,
+          "removed": 4,
+          "files": 3
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/653c361a-8c6e-405b-9035-eb21e04233a8/scratchpad/first-wall-read-repair-manifest.md",
+        "scope_changed": false,
+        "session_id": null,
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 3630336,
+            "input_tokens": 3856493,
+            "output_tokens": 13634,
+            "reasoning_output_tokens": 3810
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260812T201655361858-audit-record-residuals",
+        "plan": "biot-element-conditioning",
+        "section": "\u00a74",
+        "node": "audit-record-residuals",
+        "role": "implement",
+        "member": "corner-pole",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-12T20:16:56Z",
+        "completed_at": "2026-08-12T20:30:20Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 804,
+        "time_budget": "25m",
+        "base_sha": "17d173be8ea287d43de9cceeb9a578056ee77dec",
+        "commits": [
+          "bc2a75b58ed437e7773ebdd05a030418e997981f"
+        ],
+        "changed_lines": {
+          "added": 303,
+          "removed": 2,
+          "files": 4
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/653c361a-8c6e-405b-9035-eb21e04233a8/scratchpad/audit-record-residuals-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff724-6bb1-7840-ace7-aa6230408cf8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 45853952,
+            "input_tokens": 46843973,
+            "output_tokens": 125112,
+            "reasoning_output_tokens": 47077
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 56
+    "_version": 62
   }
 }

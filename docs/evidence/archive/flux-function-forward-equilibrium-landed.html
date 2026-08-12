@@ -125,5 +125,35 @@
 
   <p>Surfaced repo defects carried to the closure followup: <code>PlasmaWall.boundary</code>/<code>PlasmaGrid.solve</code> read <code>aloc["plasma","poly"][0]</code> (the first hexagon) where the first wall is meant, so <code>data["triangles"]</code> returns shape (0,3) and neither it nor <code>data["stencil"]</code> is test-covered; <code>nwall</code> means nodes per first-wall segment, not total; the composite <code>Machine</code> needs per-source <code>dd_version</code> plumbing through <code>ids_attrs</code>; <code>CoilDatabase.group_attrs</code> omits <code>dd_version</code> from the cache identity so caches cross DD versions silently; and two benchmark drivers time the fp64 null fit since the precision flip.</p>
 
+  <h2 id="first-wall-read">The first-wall read was returning one hexagon's polygon</h2>
+
+  <p>Commit <code>c642af8f</code>, merged to <code>main</code> (2026-08-12). One of the infrastructure
+  defects the DINA demonstration surfaced. <code>PlasmaWall.boundary</code> and
+  <code>PlasmaGrid.solve</code> took the <em>first hexagon's</em> polygon as the first wall; they now
+  select the superframe first-wall polygon through <code>ALoc</code>, while plasma targets remain
+  selected from tessellated subframe cells through <code>aloc</code>.</p>
+
+  <p><strong>The magnitude says how wrong the old read was.</strong> On the square test geometry:</p>
+
+  <table>
+    <thead><tr><th>Output</th><th>Before</th><th>After</th></tr></thead>
+    <tbody>
+      <tr><td>Wall triangles</td><td>0</td><td>58</td></tr>
+      <tr><td>Target cells covered</td><td>0 of 38</td><td>38 of 38</td></tr>
+      <tr><td>Boundary nodes changed</td><td colspan="2">8 of 8, maximum absolute coordinate delta <strong>4.000 m</strong></td></tr>
+      <tr><td>Stencil rows</td><td>17</td><td>10 — 7 wall-adjacent centres removed, 0 of 10 survivors changed value</td></tr>
+    </tbody>
+  </table>
+
+  <p>The prior read admitted <em>no</em> triangles at all and marked none of the wall-adjacent
+  stencil centres, so the tessellation and stencil outputs were not merely imprecise — they were
+  describing a single cell instead of the wall. That these outputs were untested is what let it
+  stand. A regression now pins the complete square wall, all 58 triangles, all-cell coverage, the
+  exact 10×7 stencil, and <code>nwall=2</code> as 2 nodes per each of 4 wall segments (8 total),
+  which also settles the <code>nwall</code> semantics question the followup raised.</p>
+
+  <p>Related suites stay green: 12 passed across the new pin plus
+  <code>tests/test_plasma.py</code> and <code>tests/test_firstwall.py</code>.</p>
+
 </main></body>
 </html>

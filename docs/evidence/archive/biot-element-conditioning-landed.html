@@ -122,6 +122,66 @@
   mechanism from the pole/boundary-angle amplification removed here. Focused gate: 377 passed,
   3 xfailed, no unexpected failures.</p>
 
+  <h2 id="audit-residuals">The audit record's remaining measurements</h2>
+
+  <p>Commit <code>bc2a75b5</code>, merged to <code>main</code> (2026-08-12). Four measurements the
+  §2 sweep and §4 had to leave open. <strong>No production numeric value was changed by this
+  work</strong> — it is measurement, not repair.</p>
+
+  <h3 id="bow-arbiter">Bow now has a code-path-independent arbiter</h3>
+
+  <p>Wave 6 recorded bow's figure with the qualification that no independent arbiter existed for it.
+  It is now graded against the defining three-dimensional Biot–Savart volume integral over source
+  radius, level and angle — sharing neither the elliptic reduction nor the fixed-node zeta rule, so
+  agreement means something. Worst sampled regime is the far field at
+  <strong>1.84×10⁻¹⁰</strong> relative; the just-outside-end-corner row is 6.80×10⁻¹³. The arbiter
+  itself moved 4.94×10⁻¹² between order 48 and order 64, so it is converged well below what it
+  grades.</p>
+
+  <h3 id="equal-accuracy">Cost at equal accuracy, with the policy selected explicitly</h3>
+
+  <table>
+    <thead><tr><th>Target rule</th><th>Nodes</th><th>Wall time</th><th>Worst live-component error</th></tr></thead>
+    <tbody>
+      <tr><td>order-3 fan, positive material</td><td>18</td><td>0.0679 s</td><td>4.134×10⁻⁴</td></tr>
+      <tr><td>subdivision, 4096 cells requested</td><td>4158 realised</td><td>2.424 s</td><td>3.584×10⁻⁴</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>231× fewer nodes and 35.7× lower wall time at comparable accuracy</strong>, on a login
+  node. The earlier force arbiter's reported 1.087 drift is explained here rather than left
+  hanging: it is dominated entirely by the excluded near-zero self-cancelling F<sub>z</sub>
+  component, and the equal-accuracy mask grades F<sub>r</sub> and F<sub>c</sub>.</p>
+
+  <h3 id="hex-convergence">Hexagonal target-rule convergence</h3>
+
+  <figure>
+    <img src="/nova/figures/biot-element-conditioning/hexagon-target-convergence.png"
+         alt="Relative error of the hexagonal-section target rule against node count, falling from 2.4e-2 at 4 nodes to 8.3e-9 at 100 nodes and flattening at an arbiter floor near 9e-8 beyond">
+    <figcaption>The hexagonal cell — one of §4's two named hard cases — against the independent
+    four-dimensional limit 3.768×10⁻⁵.</figcaption>
+  </figure>
+
+  <table>
+    <thead><tr><th>Order</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr></thead>
+    <tbody>
+      <tr><td>Nodes</td><td>4</td><td>16</td><td>36</td><td>64</td><td>100</td></tr>
+      <tr><td>Relative error</td><td>2.43×10⁻²</td><td>4.26×10⁻⁵</td><td>3.75×10⁻⁶</td><td>1.40×10⁻⁷</td><td>8.30×10⁻⁹</td></tr>
+    </tbody>
+  </table>
+
+  <p>Orders 6 through 8 stop improving — they expose the arbiter's own floor near 9×10⁻⁸, which is
+  recorded rather than mistaken for a convergence limit of the rule.</p>
+
+  <h3 id="self-inductance">The self-inductance diagonal residual after the change</h3>
+
+  <p>§1's 4.32×10⁻⁴ residual, common to every source route, now measures
+  <strong>4.3627×10⁻⁴</strong> at the directly comparable <code>dcoil=−1</code> setting — a
+  <strong>+4.274×10⁻⁶ (+0.989%)</strong> shift, stated rather than absorbed. Refined settings measure
+  2.415×10⁻⁶ at <code>dcoil=−5</code> and 6.224×10⁻⁶ at <code>dcoil=−20</code>, which is consistent
+  with §4's reading that the residual is the target frame's subdivision error rather than any
+  element's.</p>
+
   <h2 id="lane">Suite status and residual record</h2>
   <p>Latest full lane (wave 6, SLURM sun_debug): 4737 passed / 121 skipped / 3 xfailed / 2 failed vs a 4728-passed base — +9, no new failure; both failures are the pre-existing MAST packaged-registry probe-angle items. Three strict xfails stand, each now naming its mechanism and measured ratio (the four-corner amplification and the far-section-average refinement). Queued follow-on: the pole-moment closed-form split. Reconstruction gaps recorded: empty commit-message bodies throughout; 22 of 24 verifier worktrees kept no logs; four surviving greens4 logs measure the rejected candidate kernel (only their zeta and elliptic-point rows are live); no per-wave whole-suite lane counts for waves 1–5.</p>
 

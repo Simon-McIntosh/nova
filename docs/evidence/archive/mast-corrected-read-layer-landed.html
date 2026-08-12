@@ -99,5 +99,50 @@
   work; moving <code>trace_matched_columns</code> onto the explicit raw reader did not change
   them.</p>
 
+  <h2 id="promotion">§3 item 3 — the promotion route</h2>
+
+  <p>Commit <code>0f878cd6</code>, merged to <code>main</code>.
+  <code>mast_acquisition_sweep.py --promote-to</code> now defaults to
+  <code>nova/calibrate/corrections/mast/magnetics.yaml</code> and writes into the correction
+  document rather than a JSON table; the former
+  <code>write_text(json.dumps(table.as_dict()))</code> path is gone.</p>
+
+  <p>The sweep replaces only <code>acquisition_scale</code> records and retains every other
+  correction kind, increments the set's patch version, stamps document
+  <code>generated_by</code>/<code>generated_at</code> and per-record
+  <code>evidence_uri</code>/<code>fitted_at</code>/<code>fitted_by</code>, validates before writing
+  and reloads after. On the banked fixture that is 113 acquisition records — 108 promoted with full
+  provenance, 5 off-ladder records still refused — with the set version stepping 3.4.5 → 3.4.6 and
+  the round-trip engine value preserved at 2.0. Calibrate lane: 249 passed, 2 skipped.</p>
+
+  <p><strong>The production document was deliberately not modified</strong>, because no new
+  measurement was run — the route is proven on a fixture rather than by rewriting the shipped
+  corrections as a side effect of building the route. The existing JSON sweep record also stays: it
+  is the provenance <em>input</em>, not the promoted correction store.</p>
+
+  <h2 id="ingest">§3 item 4 — the corrected ingest seam</h2>
+
+  <p>Commit <code>bd6b5d9c</code>, merged to <code>main</code>.
+  <code>read_corrected_solve_inputs</code> and <code>CorrectedSolveInputs</code> are the documented
+  solve-input contract: float64 time [s], coil currents [A], sensor signals with per-column T/Wb
+  units, and plasma current [A], all on the field clock.</p>
+
+  <p><strong>The entry point has no raw-reader argument and no correction override</strong> — it
+  calls <code>read_shot_waveforms</code> and nothing else, so a consumer cannot opt out of
+  correction by passing a keyword. That is the same structural move as the door guard, applied to
+  the contract rather than the call sites.</p>
+
+  <table>
+    <thead><tr><th>Measure</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>Cutover check</td><td><code>obr01</code> returns [2, 4] from raw [4, 8] with the measured scale-2 disposition</td></tr>
+      <tr><td>Dispositions on shot 15000</td><td>102 of 102 sensors carry one — 65 bracketed/applied, 37 unmeasured/untouched</td></tr>
+      <tr><td>Payload</td><td>936 bytes = 0.914 kB per slice; 7,500 slices, 13 coil-current and 102 sensor columns</td></tr>
+    </tbody>
+  </table>
+
+  <p>Labels, units, dispositions and provenance amortise once per shard rather than per slice, which
+  is what keeps the per-slice figure at the kB scale the GPU catalog's staging assumed.</p>
+
 </main></body>
 </html>

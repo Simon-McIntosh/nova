@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="mast-corrected-read-layer">
   <meta name="plan-title" content="MAST Corrected Read Layer">
   <meta name="plan-summary" content="Every sensor read passes through the correction chain: one door into the MAST field store, the full promoted correction set applied in schema stage order at read time, on-disk data untouched, raw access surviving only as one explicit named object">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="M">
   <meta name="plan-capability-version" content="1.0">
@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-12">
-<meta name="plan-version" content="4">
-<meta name="plan-commits" content="08150c40,60df29bb">
+<meta name="plan-version" content="6">
+<meta name="plan-commits" content="08150c40,60df29bb,0f878cd6,bd6b5d9c">
 <meta name="plan-artifacts" content="docs/evidence/archive/mast-corrected-read-layer-landed.html">
-<meta name="plan-impl" content="0.5">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -139,7 +139,19 @@
       of (document version, channel, pulse, time).</li>
     </ul>
 
-    <h2 id="s3">§3 — Work items</h2>
+    <h2 id="s3">§3 — Work items <span class="badge badge-shipped">✓ landed 2026-08-12</span></h2>
+    <p class="landed-summary"><strong>All four items landed; the plan is complete.</strong> The
+    chain indexes by <code>(target, kind)</code> once at load and composes every promoted kind in
+    schema stage order — shifting 290 of 3,395 banked reads, with <code>obr17</code> +99.56% as the
+    0.50 probe gain finally divided out. Nine sensor-group doors are closed behind
+    <code>read_shot_waveforms</code> with an AST guard proving zero bypasses remain, raw access
+    survives as the single <code>RawArchiveReader</code>, the sweep promotes into the correction
+    document with a version bump and stamped provenance (108 of 113 fixture records; 5 refused), and
+    <code>read_corrected_solve_inputs</code> is the ingest contract with no opt-out argument —
+    102 of 102 sensors carrying dispositions at 0.914 kB per slice. Commits
+    <code>08150c40</code>, <code>60df29bb</code>, <code>0f878cd6</code>, <code>bd6b5d9c</code>.
+    Full record: <a href="/nova/evidence/archive/mast-corrected-read-layer-landed">cumulative
+    evidence</a>.</p>
     <ol>
       <li><strong>Index + widen the chain.</strong> (channel, kind) index at document load;
       chain widened to all promoted kinds in stage order behind
@@ -199,10 +211,11 @@
     <pre class="r-fu-prompt">/reckon-ship mast-corrected-read-layer §3</pre>
     <p class="r-fu-outcome">§3 items 1-2 landed (08150c40, 60df29bb). The chain now indexes by (target, kind) once at load and composes every promoted kind in schema ApplicationStage order, shifting 290 of 3,395 banked reads with obr17 +99.56% as the 0.50 probe gain divided out; refused and unmeasured channels return byte-equivalent. Nine sensor-group doors are closed behind read_shot_waveforms with an AST guard proving zero bypasses outside the door module, and raw access survives as the single explicit RawArchiveReader. Items 3-4 (promotion route into the correction document, corrected ingest seam for the GPU catalog) remain and are carried by f-mcrl-002.</p>
     </article>
-<article class="r-fu" data-id="f-mcrl-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-12" data-recommends-skill="/reckon-ship mast-corrected-read-layer §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mcrl-002" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-12" data-recommends-skill="/reckon-ship mast-corrected-read-layer §3" data-resolved-at="2026-08-12T20:44:54+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Promotion route and the corrected ingest seam (§3 items 3-4)</h4>
     <div class="r-fu-body"><p>The door is closed and the full chain applies, so the two remaining items are the write side and the consumer contract: point <code>nova/scripts/mast_acquisition_sweep.py --promote-to</code> at <code>nova/calibrate/corrections/mast/magnetics.yaml</code> with a set-version bump and stamped provenance instead of a JSON table, and expose the corrected read as the documented input contract for the GPU catalog's solve-ready shard staging so that ingest inherits corrections by construction. This plan cannot ship, and spine-efit-parity stays blocked, until both land.</p></div>
     <pre class="r-fu-prompt">/reckon-ship mast-corrected-read-layer §3</pre>
+    <p class="r-fu-outcome">done — no followup. §3 items 3-4 landed (0f878cd6, bd6b5d9c) and the plan is complete. The sweep promotes into the correction document with a version bump and stamped provenance (108 of 113 fixture records, 5 refused, round-trip preserved), and read_corrected_solve_inputs is the documented solve-input contract with no opt-out argument, 102 of 102 sensors carrying dispositions and 0.914 kB per slice. Together with items 1-2 the guarantee is now structural at every layer: one door, one guard proving no bypass, the full promoted chain in stage order, one named raw reader, and one ingest contract that cannot be handed raw data. The chain closes here: this plan's own work is finished, and the two plans it unblocks — spine-efit-parity and mast-catalog-gpu-solve — have their own lifecycles and are surfaced by roadmap.</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -211,6 +224,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260812-doors" data-who="reckon-ship" data-when="2026-08-12T21:00:00+00:00">
     <div class="r-comment-body">close-the-sensor-doors landed (§3 item 2) — commit 60df29bb; structural-guard gate passed; measure: 9 direct sensor-group reads routed through read_shot_waveforms (4 in flux-loop adjudication, the rest across solve inputs and the error-field screen); an AST guard over nova/imas/mast_*.py reports ZERO direct FIELD_GROUP or literal amb subscripts outside the door module and passes 2/2, failing on any new bypass; RawArchiveReader/RAW_ARCHIVE gives raw access one explicit name and mast_acquisition_sweep.py is migrated onto it, dropping the block_scale opt-out; ShotWaveforms.sensors exposes every shape-compatible amb signal. Scoped consumer lane 165 passed / 5 optional-dependency skips. The two probe-axis failures the node stopped on (+pi/2 vs -pi/2 at shots 15000 and 13500) were attributed by the independent lane gate as the long-standing packaged-registry probe-angle items, present pre-merge and untouched by any merge — not introduced here. Artifacts: /nova/evidence/archive/mast-corrected-read-layer-landed#doors</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260812-items34" data-who="reckon-ship" data-when="2026-08-12T21:40:00+00:00">
+    <div class="r-comment-body">promotion-route and corrected-ingest-seam landed (§3 items 3-4) — commits 0f878cd6, bd6b5d9c; both gates passed. Promotion: --promote-to defaults to the correction document, replaces only acquisition_scale records, bumps the set patch version 3.4.5 -&gt; 3.4.6 and stamps generated_by/generated_at plus per-record evidence_uri/fitted_at/fitted_by; banked fixture promotes 108 of 113 records with 5 off-ladder still refused, round-trip engine value preserved at 2.0, JSON table write path removed, calibrate lane 249 passed / 2 skipped. The production magnetics.yaml was deliberately left unmodified because no new measurement was run. Ingest: read_corrected_solve_inputs/CorrectedSolveInputs takes no raw-reader or override argument and calls only read_shot_waveforms; cutover check returns obr01 [2,4] from raw [4,8] with the measured scale-2 disposition; all 102 sensors on shot 15000 carry dispositions (65 bracketed/applied, 37 unmeasured/untouched); dense payload 936 bytes = 0.914 kB per slice over 7,500 slices. Artifacts: /nova/evidence/archive/mast-corrected-read-layer-landed#promotion and #ingest</div>
 </div>
 </section>
 </main>

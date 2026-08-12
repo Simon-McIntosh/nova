@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-12T20:31:34",
+  "updated": "2026-08-12T20:32:27",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -106,7 +106,7 @@
         "id": "registry",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "019ff73b-a1b5-73a2-9252-011b64d1ab64",
         "created": "2026-08-12"
       },
       {
@@ -640,6 +640,6 @@
       }
     ],
     "holds": [],
-    "_version": 38
+    "_version": 39
   }
 }

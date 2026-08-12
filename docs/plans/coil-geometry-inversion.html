@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-12">
-<meta name="plan-version" content="11">
+<meta name="plan-version" content="13">
 <meta name="plan-impl" content="0.8">
 <meta name="plan-commits" content="81ef6739">
 <meta name="plan-artifacts" content="docs/figures/geometry-recovery/geometry_recovery.npz,docs/figures/geometry-recovery/geometry_recovery_summary.json,docs/figures/geometry-recovery/recovery_ladder.png,docs/figures/geometry-recovery/mast_bounds.png,docs/research/mast-p4p5-geometry-solve.html">
@@ -100,14 +100,19 @@
     (<code>FLAT_EDGE_TILT</code>, regression-pinned) — bypassing it silently corrupts
     tilt/shear gradients 5–26×. Banked:
     <code>~/.cache/nova-mast/geometry-identifiability/</code>.</li>
-    <li><strong>Problem class A — sensor-space (the MAST case).</strong> Recorded currents
-    fixed; minimise the weighted misfit between measured vacuum couplings and modelled
-    couplings over geometry parameters, per coil and jointly. The banked signed couplings
-    (<code>couplings.npz</code>, 41 rows) are the immediate targets; calibrated flux loops
-    join when <code>mast-flux-loop-calibration</code> lands. Identifiability first: the
-    geometry-Jacobian singular spectrum at the real sensor set decides how many geometry
-    modes the array resolves (the current-space answer was rank 10 of 13 — the geometry-space
-    answer bounds what any fit may claim), and regularisation follows from it.</li>
+    <li class="section-landed"><span class="badge badge-shipped">✓ landed 2026-08-12</span>
+    <strong>Problem class A — sensor-space: solved, and the answer is no.</strong> Metric-aware
+    damped Gauss–Newton/LM on exact Jacobians (the locked optimiser), with per-channel floor
+    whitening, 13-column current-nuisance projection and a 10 mm one-noise cutoff; all members
+    drive the 23-cell lattice with per-vertex frozen and near probes kept. <strong>No credible
+    P4/P5 geometry correction is resolvable at this array.</strong> Demanded RMS versus best
+    resolution versus Kirk offset: P4 lower 188.66 / 0.610 / 6.6 mm, P4 upper 26.38 / 2.221 /
+    2.9 mm, P5 lower 2004.25 / 0.054 / 13.1 mm, P5 upper 11.13 / 0.475 / 0.6 mm — every demand
+    two to four orders over both yardsticks, with the independently recomputed far-field
+    survivor collapsing or reversing (+0.93%, −2.38%, −35.73%, +0.09%). Seed-independent to
+    0.00022 µm RMS across four projected Kirk seeds. The survivor is current- or sensor-side;
+    no registry correction issues. Merge <code>e941cfb8</code>; record:
+    <a href="/nova/evidence/archive/coil-geometry-inversion-landed#s4">landed §4</a>.</li>
     <li><strong>Problem class B — flux-map-space.</strong>
     Given fixed coil currents and a target flux map with the plasma contribution subtracted
     (an equilibrium-reconstruction by-product, or the toroidal-harmonic misfit maps), solve
@@ -129,15 +134,15 @@
     alone</em>, developed and scored on MAST as the oracle where our registry geometry is the
     known truth — is unchanged and keeps its full validation ladder; a machine that carries
     real geometry retains its structural edge on the cross-machine metric.</li>
-    <li><strong>Validation ladder, then MAST.</strong> Synthetic recovery throughout: perturb
-    a known geometry, generate exact data (with realistic noise from the measured floors),
-    recover, report bias and resolution limits per parameter class. Then the MAST
-    application: P4/P5 members first (seeded from Kirk's offsets), scored against the
-    surviving-misfit patterns, cross-checked against the provenance plan's linear symmetry
-    scan (which this generalises), with the verdict — geometry correction found and
-    quantified, or bounded as unresolvable at this array — recorded in a research note and,
-    if found, delivered as a machine-description correction through the established
-    registry route.</li>
+    <li class="section-landed"><span class="badge badge-shipped">✓ landed 2026-08-12</span>
+    <strong>Validation ladder — the solver is calibrated, which is what licenses the verdict
+    above.</strong> 4,096 recoveries at the measured noise floors: maximum synthetic mean bias
+    0.27 σ, empirical-to-predicted mode resolution 0.946–1.099, and nominal 95% coverage
+    realised at 93.3–95.5%. The solver recovers what it is given and its error bars mean what
+    they say, so the MAST no-correction result is a measured bound rather than a failure to
+    converge. 38 tests; banked
+    <code>docs/figures/geometry-recovery/</code>; record:
+    <a href="/nova/evidence/archive/coil-geometry-inversion-landed#s3">landed §3</a>.</li>
   </ol>
   <p>Done-when: kernel family audited and refactored with autograd regression tests green;
   identifiability spectrum for MAST geometry modes published; synthetic recovery ladder

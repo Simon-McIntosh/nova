@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="coil-geometry-inversion-landed">
+  <meta name="plan-title" content="Coil Geometry Inversion — Landed Record">
+  <meta name="plan-summary" content="Kernel family made geometry-traceable, parameters and identifiability spectrum published, and the MAST P4/P5 sensor-space solve returned a bounded negative: every demanded correction exceeds both its resolution floor and its measured as-built offset">
+  <meta name="plan-status" content="active">
+  <meta name="plan-evidence-for" content="coil-geometry-inversion">
+  <meta name="plan-verifies" content="coil-geometry-inversion#s2">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>Coil Geometry Inversion — Landed Record | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — The substrate: eight kernel classes, exact geometry Jacobians</h2>
+
+    <p>Merge <code>42dd1816</code>. Every nova coupling operator is differentiable end-to-end
+    with respect to source geometry, each pinned by a three-part regression — value parity
+    against the numpy path, <code>jacfwd</code> against central finite differences, and
+    <code>jacrev</code> against <code>jacfwd</code>. Two elliptic derivative repairs fell out of
+    the work: the third kind's forward mode no longer returns NaN on the unreflected side, and
+    the Carlson degenerate form's slope takes an even series in v&sup2; below ratio 0.1, moving
+    slope error from 3&times;10<sup>&minus;9</sup> to 3&times;10<sup>&minus;15</sup> near small
+    poles at unchanged values and +5.4% cost on the arc path alone. Recorded limitation: where
+    the pole equals the complement exactly, the slope stays finite but 1.2&times;10<sup>&minus;2</sup>
+    relative — pre-existing and test-documented.</p>
+
+    <h2 id="s2">§2 — What the array can and cannot resolve</h2>
+
+    <p>Merge <code>b4521803</code>. The identifiability spectrum at the real MAST sensor set,
+    taken before any solve, is what bounds every claim below it. The resolvable set is
+    rigid+affine: rigid conditioning is O(1), affine O(10&sup3;), and per-vertex freedoms are
+    hopeless — free corners 10&#8312;, free turns 10&sup1;&sup3; — so they are frozen. Leading
+    modes run from 54&nbsp;&micro;m (P5 lower) to 2.2&nbsp;mm (P4 upper) marginalised; tilt and
+    dilation are unresolvable at 15&ndash;180&nbsp;mm.</p>
+
+    <p>Two findings here are load-bearing for anything downstream. Cutting the near-field probes
+    costs &times;3.2&ndash;17.3 in best-mode resolution, so <em>the geometry information lives in
+    the near probes</em> — a solve keeps them and drives the 23-cell lattice rather than
+    excluding them for the hull-smear trap, and a spectrum quoted without that cut is not
+    evidence. And the 18 admitted flux loops carry 20&ndash;290&times; less geometry signal per
+    channel than a probe, because flux is a smoother functional of pack shape than field: they
+    buy two extra affine modes inside 10&nbsp;mm and lift the degenerate directions up to
+    40&times; by breaking the geometry/current degeneracy, but they change no verdict. The
+    geometry solve is probe-carried — the opposite of the harmonic fit, which the loops
+    transform.</p>
+
+    <p>A standing kernel constraint for any solve: a zero-weight flat edge carries no
+    derivative, so tilt and shear Jacobians are taken at mirrored small tilts and averaged
+    (<code>FLAT_EDGE_TILT</code>, regression-pinned). Bypassing it silently corrupts those
+    gradients by 5&ndash;26&times;.</p>
+
+    <h2 id="s3">§3 — The solver is calibrated before it is believed</h2>
+
+    <p>Commit <code>81ef6739</code>, merge <code>e941cfb8</code>. Metric-aware damped
+    Gauss&ndash;Newton / Levenberg&ndash;Marquardt on exact-Jacobian callbacks, with per-channel
+    floor whitening, a 13-column current-nuisance projection, and a 10&nbsp;mm one-noise mode
+    cutoff. The optimiser choice is the locked decision: after freezing per-vertex the parameter
+    count is small and conditioning benign, the exact Jacobian is already in hand, and the
+    normal-equation curvature is where the confidence bounds come from.</p>
+
+    <p>The recovery ladder is what licenses the verdict. Across <strong>4,096 recoveries</strong>
+    at the measured noise floors: maximum synthetic mean bias <strong>0.27&nbsp;&sigma;</strong>,
+    empirical-to-predicted mode resolution <strong>0.946&ndash;1.099</strong>, and nominal 95%
+    coverage realised at <strong>93.3&ndash;95.5%</strong>. The solver recovers what it is given,
+    and its error bars mean what they say.</p>
+
+    <h2 id="s4">§4 — MAST P4/P5: a bounded negative, four ways over</h2>
+
+    <p>No credible P4/P5 geometry correction is resolvable at this array. Each member's demanded
+    RMS correction is compared against two independent yardsticks — the published best resolution
+    at that member, and Kirk's measured as-built case offset:</p>
+
+    <table>
+      <thead>
+        <tr><th>Member</th><th>Demanded RMS</th><th>Best resolution</th><th>Kirk offset</th><th>Survivor change (all / far)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>P4 lower</td><td>188.66 mm</td><td>0.610 mm</td><td>6.6 mm</td><td>+40.73% / +0.93%</td></tr>
+        <tr><td>P4 upper</td><td>26.38 mm</td><td>2.221 mm</td><td>2.9 mm</td><td>+33.57% / &minus;2.38%</td></tr>
+        <tr><td>P5 lower</td><td>2004.25 mm</td><td>0.054 mm</td><td>13.1 mm</td><td>&minus;1103.01% / &minus;35.73%</td></tr>
+        <tr><td>P5 upper</td><td>11.13 mm</td><td>0.475 mm</td><td>0.6 mm</td><td>+2.11% / +0.09%</td></tr>
+      </tbody>
+    </table>
+
+    <p>Every demand exceeds both yardsticks by two to four orders of magnitude — a two-metre
+    displacement on P5 lower is self-refuting at an array whose best mode there is 54&nbsp;&micro;m.
+    The independent check is the far-field survivor, recomputed rather than reused: it collapses
+    or reverses under the correction on every member. Four projected Kirk seeds per member agree
+    within 0.00022&nbsp;&micro;m RMS, so the result is seed-independent and not an optimiser
+    artifact.</p>
+
+    <p><strong>Consequence:</strong> no registry correction issues, and the surviving vacuum
+    misfit is current-side or sensor-side rather than geometry-side. That closes the
+    coil-position hypothesis Kirk's unsurveyed-copper note opened, and it redirects the misfit
+    programme rather than ending it.</p>
+
+    <p>Artifacts: <code>docs/figures/geometry-recovery/geometry_recovery.npz</code> and
+    <code>geometry_recovery_summary.json</code> bank the ladder and the four MAST fits;
+    <code>recovery_ladder.png</code> and <code>mast_bounds.png</code> carry the figures. Tests:
+    38 passed. Full reasoning in
+    <a href="/nova/research/mast-p4p5-geometry-solve">the geometry-solve record</a>.</p>
+
+  </main>
+</body>
+</html>

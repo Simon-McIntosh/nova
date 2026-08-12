@@ -21,9 +21,11 @@
   <title>Toroidal-Harmonic Misfit Maps | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-08">
-<meta name="plan-version" content="3">
-<meta name="plan-impl" content="0.17">
+<meta name="plan-modified" content="2026-08-12">
+<meta name="plan-version" content="4">
+<meta name="plan-impl" content="0.5">
+<meta name="plan-commits" content="a08af0e5,ae037f69">
+<meta name="plan-artifacts" content="nova/imas/mast_misfit_harmonics.py,tests/test_mast_misfit_harmonics.py,docs/research/mast-misfit-harmonic-maps.html,docs/figures/toroidal-harmonics/">
 </head>
 <body>
 <main class="plan-doc">
@@ -105,14 +107,14 @@
 
   <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="probes-only-start" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="probes-only-start" data-choice="wait-for-loops" data-by="reckon-ship" data-when="2026-08-12T18:32:11+00:00">
     <p class="r-dec-q">Start the harmonic fits on probes alone before the loop calibration
       lands, accepting a re-run, or wait for loops so every map is final?</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="probes-first">probes first, re-run with loops</button>
-      <button class="r-opt" data-value="wait-for-loops">wait for calibrated loops</button>
+      <button class="r-opt chosen" data-value="wait-for-loops">wait for calibrated loops</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Settled by what the fit measured rather than by scheduling. The maps were fitted with the 17 admitted loops included, and withholding them costs between 3x and 40,195x in the fit penalty - so a probes-only pass would not have been an early version of this result, it would have been a different and much weaker one that had to be discarded. Recorded at the moment the maps were fit, as f-mth-002 anticipated.</p>
     </div>
 </section>
 
@@ -154,7 +156,7 @@ Done-when
   3. Followup written into plan + this one resolved</pre>
     <p class="r-fu-outcome">§2.1 landed — merge a08af0e5 (commit 9657ee4a). Basis with both radial families in nova/biot/toroidalharmonic.py; recessive second-kind ladder via backward-recurrence ratios; exact filament coefficient law pinned against greens_psi. Synthetic recovery at the real array PASS: flux residual 2.8e-15 T at degree 12; position 31 mm fixed / 5.4 mm iterated at the 387 uT floor; current to 1.5%; 6 of 13 directions resolved at the floor. New load-bearing bound: coil-span projection leaves 35% of a filament pattern and biases position 114-202 mm at zero noise — §2.2 must fit jointly against the raw residual or admit loops. 49 tests; fast lane 4161 passed (5 known env failures: firewalled imas-standard-names extra).</p>
     </article>
-<article class="r-fu" data-id="f-mth-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-08" data-recommends-skill="/reckon-ship mast-misfit-toroidal-harmonics §2.2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mth-002" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-08" data-recommends-skill="/reckon-ship mast-misfit-toroidal-harmonics §2.2" data-resolved-at="2026-08-12T18:32:11+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Build the per-group constraint sets and fit the interior/exterior misfit maps (§2.2–§2.3)</h4>
     <div class="r-fu-body">The basis is validated; the measured trap is that fitting the pre-projected survivor carries a zero-noise position bias up to 202 mm (35% pattern survival after coil-span projection), so the default is the joint harmonics+coil-currents fit against the raw residual, with calibrated loops admitted as they promote (flux-loop calibration landed this session). The probes-only-start decision is effectively mooted by the loop landing — record the choice when the maps are fit. In passing: nova/equilibrium/harmonic.py carries an inner-family-only variant with 1e-4 central-difference fields; layer it onto the new biot module (strict superset) so the duplication does not set.</div>
     <pre class="r-fu-prompt">Project: nova
@@ -184,9 +186,20 @@ Done-when
   2. Interior+exterior expansions fitted (joint-fit default), contoured with
      bootstrap confidence bands; figures committed
   3. Followup written into plan + this one resolved</pre>
+    <p class="r-fu-outcome">Landed via recovery — merge ae037f69. Per-group constraint sets with per-channel noise weights and 17 admitted loops (91–93 real rows); interior and exterior expansions fitted joint against the raw residual as the measured trap required, contoured on a 205x205 grid with shot-resampling confidence. Explained fractions 0.930/0.771/0.766 for P4 lower/P5 lower/P4 upper; determined-area fractions 80/68/59/0 percent; loop withholding costs 3x–40,195x, which retires the probes-only-start decision in favour of wait-for-loops. Verified 33/33 on the module's own lane plus a peer completed full lane at the same base (4893 passed / 2 pre-existing non-harmonic failures). Caveat carried forward: no regression pins the real-data headline numbers.</p>
+    </article>
+<article class="r-fu" data-id="f-mth-003" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-12" data-recommends-skill="/reckon-ship mast-misfit-toroidal-harmonics §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Source fits, toroidal sensitivity accounting and the verdict (§2.4–§2.6), on the regenerated constraint bank</h4>
+    <div class="r-fu-body">The maps are fitted and the flux-loop plan has just regenerated the P4/P5 constraint bank from the 13-of-13 inversion (45 rows over 44 shots in six groups, raw and surviving arrays banked). Remaining: score multi-filament and extended-path source models against the harmonic representation with explained fraction and implied currents in supply-current units; deliver the toroidal sensitivity accounting, including the even-n leakage bound for 180-degree-summed pairs and the odd-n screen on the pair-failure channels; quantify the non-axisymmetric residue that bounds what a 3D busbar run must explain; and record the verdict. Two inputs are newly decisive: coil-geometry-inversion returned a bounded negative, so the survivor is current- or sensor-side rather than geometry-side, and the geometry plan's flux-map class wants these reconciled maps published on a grid with uncertainty. Consider pinning at least the per-group explained fractions as a regression, since nothing currently does.</div>
+    <pre class="r-fu-prompt">/reckon-ship mast-misfit-toroidal-harmonics §2</pre>
     </article>
 </section>
 
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-20260812-mth-023" data-who="reckon-ship" data-when="2026-08-12T18:55:00+00:00">
+    <div class="r-comment-body">§2.2–§2.3 landed — recovered from an abandoned session worktree and integrated as merge ae037f69 (seven commits, head 054129f3); gate passed. RECOVERY NOTE: this work was complete but unintegrated and owned by no live run; it merged with zero textual conflict against 242 intervening commits. Verification measure: the module's own 33 tests pass in 7.82 s on Python 3.14.2 against unmodified source, and a peer node's completed default lane from the identical base 5b10f005 reports 4893 passed / 2 failed, the only failures being pre-existing probe-axis sign assertions in test_mast_solve_inputs.py that traverse no harmonic path. Results: 91–93 real constraint rows with 17 admitted loops; joint-fit explained fractions 0.930 (P4 lower), 0.771 (P5 lower), 0.766 (P4 upper); loop-withholding penalties 3x–40,195x; 205x205 map grid with determined-area fractions 80/68/59/0 percent; best-axisymmetric residual 7.5–28.8 sigma; P4-lower height bounded at Z <= -0.95 m with radius unresolved over 0.60–2.40 m. The headline is negative and useful: two of the three intended localisers do not work and the data shows why, while the third places the strongest survivor below the P4 lower winding. IMPORTANT CAVEAT, measured by the verification node: the 33 tests pin mechanisms and synthetic outcomes only — synthetic source recovery within 0.05 m at explained fraction above 0.99, mapped flux within 5 percent of peak truth, focal-scan coordinates within 0.35 m — and pin NONE of the real-data headline numbers above. Those rest on the research record, not on a regression.</div>
+</div>
+</section>
 </main>
 </body>
 </html>

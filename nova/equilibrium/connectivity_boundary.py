@@ -141,6 +141,8 @@ _WARM_BRACKET_OFFSETS = (-2, -1, 0, 1, 2, 3)
 __all__ = [
     "ConnectivityBoundary",
     "traced_boundary_read",
+    "traced_emit_boundary_read",
+    "traced_iteration_boundary_read",
     "host_boundary_read",
     "host_boundary_read_batch",
     "traced_smooth_boundary_read",
@@ -213,6 +215,23 @@ def _ray_radii(psi2d, rg, zg, ar, az, psi_axis, psi_lcfs, angles, n_ray):
     return jax.vmap(one_angle)(angles)
 
 
+def _linear_flood_fill_core(confined, seed, n_iter):
+    """Reference one-cell-per-pass flood used to time the unaccelerated read."""
+
+    def body(_index, core):
+        return _dilate4(core > 0.5).astype(core.dtype) * confined
+
+    start = seed.astype(jnp.float32) * confined
+    return jax.lax.fori_loop(0, n_iter, body, start)
+
+
+def _flood_fill(confined, seed, n_iter, use_doubling):
+    """Select the production doubling fill or its exact linear reference."""
+    if use_doubling:
+        return flood_fill_core(confined, seed, n_iter)
+    return _linear_flood_fill_core(confined, seed, n_iter)
+
+
 # ---------------------------------------------------------------------------
 # the connectivity boundary read (device kernel)
 # ---------------------------------------------------------------------------
@@ -231,6 +250,7 @@ def _read_ingredients(
     wall_z,
     wall_psi,
     previous_flood_level,
+    use_doubling,
 ) -> dict:
     """Everything the binding needs, up to (but not including) the min/softmin.
 
@@ -285,7 +305,7 @@ def _read_ingredients(
     # tangency is then refined sub-grid below (the brackets straddle the wall, whose
     # sub-cell position is not the mean's implicit half-cell).
     def _alive_region(s):
-        region = flood_fill_core((u <= s) & inside_limiter, seed, n_iter)
+        region = _flood_fill((u <= s) & inside_limiter, seed, n_iter, use_doubling)
         alive = region.reshape(-1)[seed_flat] > 0.5
         return region, alive
 
@@ -419,7 +439,7 @@ def _read_ingredients(
     # rejoin" band) — a candidate null must sit in this band to be ON the axis
     # region's edge, so a same-flux null elsewhere in (or out of) the vessel is
     # rejected.
-    region_at = flood_fill_core((u <= s_flood) & inside_limiter, seed, n_iter)
+    region_at = _flood_fill((u <= s_flood) & inside_limiter, seed, n_iter, use_doubling)
     reach = region_at > 0.5
     for _ in range(2):  # unrolled (static) — reach the wall polygon near the touch
         reach = _dilate4(reach)
@@ -515,7 +535,7 @@ def _read_ingredients(
     }
 
 
-@partial(jax.jit, static_argnums=(6, 7, 8))
+@partial(jax.jit, static_argnums=(6, 7, 8, 15))
 def traced_boundary_read(
     psi2d: jnp.ndarray,
     rg: jnp.ndarray,
@@ -532,6 +552,7 @@ def traced_boundary_read(
     wall_z: jnp.ndarray | None = None,
     wall_psi: jnp.ndarray | None = None,
     previous_flood_level=jnp.nan,
+    use_doubling: bool = True,
 ) -> dict:
     """Connectivity LCFS read from ψ — the device-native ``lcfs_contour``.
 
@@ -567,6 +588,7 @@ def traced_boundary_read(
         wall_z,
         wall_psi,
         previous_flood_level,
+        use_doubling,
     )
     n_iter = ing["n_iter"]
     seed = ing["seed"]
@@ -606,7 +628,7 @@ def traced_boundary_read(
     radii = _ray_radii(psi2d, rg, zg, axis_r, axis_z, psi_axis, psi_lcfs, angles, n_ray)
 
     confined_star = (u <= s_star) & inside_limiter
-    region_star = flood_fill_core(confined_star, seed, n_iter)
+    region_star = _flood_fill(confined_star, seed, n_iter, use_doubling)
     n_core = jnp.sum(region_star)
 
     # --- classify-after: sub-grid axis O-point + emergent X-set ----------------
@@ -691,7 +713,7 @@ def traced_boundary_read(
 _ABSENT_U = 2.0
 
 
-@partial(jax.jit, static_argnums=(6, 7, 8))
+@partial(jax.jit, static_argnums=(6, 7, 8, 16))
 def traced_smooth_boundary_read(
     psi2d: jnp.ndarray,
     rg: jnp.ndarray,
@@ -709,6 +731,7 @@ def traced_smooth_boundary_read(
     wall_psi: jnp.ndarray | None = None,
     temperature=0.01,
     previous_flood_level=jnp.nan,
+    use_doubling: bool = True,
 ) -> dict:
     """The SMOOTH connectivity boundary read — the end-to-end differentiable path.
 
@@ -756,6 +779,7 @@ def traced_smooth_boundary_read(
         wall_z,
         wall_psi,
         previous_flood_level,
+        use_doubling,
     )
     tau = temperature
     psi_axis = ing["psi_axis"]
@@ -795,8 +819,11 @@ def traced_smooth_boundary_read(
     # — the gate is a connectivity SELECTION, like an argmin index — while σ
     # (still centred on s_soft) moves the mask edge smoothly with ψ; a pocket is
     # never axis-connected, so its cells stay at zero weight for any τ.
-    gate = flood_fill_core(
-        (u <= s_soft - tau) & inside_limiter, ing["seed"], ing["n_iter"]
+    gate = _flood_fill(
+        (u <= s_soft - tau) & inside_limiter,
+        ing["seed"],
+        ing["n_iter"],
+        use_doubling,
     )
     core_weight = jax.nn.sigmoid((s_soft - u) / tau) * gate
     n_core_soft = jnp.sum(core_weight)
@@ -821,6 +848,90 @@ def traced_smooth_boundary_read(
         "x_overflow": ing["x_overflow"],
         "x_discarded_score_upper_bound": ing["x_discarded_score_upper_bound"],
         "x_unresolved_count": ing["x_unresolved_count"],
+    }
+
+
+traced_emit_boundary_read = traced_smooth_boundary_read
+
+
+def _coarse_indices(size: int, stride: int):
+    """Return static subsampling indices while retaining both domain edges."""
+    indices = jnp.arange(0, size, stride, dtype=jnp.int32)
+    if (size - 1) % stride:
+        indices = jnp.concatenate([indices, jnp.asarray([size - 1], dtype=jnp.int32)])
+    return indices
+
+
+def _interpolate_grid(field, coarse_r, coarse_z, full_r, full_z):
+    """Bilinearly restore a coarse raster to the solve grid."""
+    along_r = jax.vmap(lambda row: jnp.interp(full_r, coarse_r, row))(field)
+    return jax.vmap(
+        lambda column: jnp.interp(full_z, coarse_z, column),
+        in_axes=1,
+        out_axes=1,
+    )(along_r)
+
+
+@partial(jax.jit, static_argnums=(6, 7, 8, 16, 17))
+def traced_iteration_boundary_read(
+    psi2d: jnp.ndarray,
+    rg: jnp.ndarray,
+    zg: jnp.ndarray,
+    inside_limiter: jnp.ndarray,
+    axis_r,
+    axis_z,
+    n_levels: int = 96,
+    n_bisect: int = 18,
+    n_ray: int = 512,
+    angles: jnp.ndarray | None = None,
+    lcfs_norm=0.999,
+    wall_r: jnp.ndarray | None = None,
+    wall_z: jnp.ndarray | None = None,
+    wall_psi: jnp.ndarray | None = None,
+    temperature=0.01,
+    previous_flood_level=jnp.nan,
+    resolution_stride: int = 2,
+    use_doubling: bool = True,
+) -> dict:
+    """Smooth topology approximation for nonlinear map evaluations.
+
+    The solve field and limiter are sampled on a static, edge-preserving raster;
+    scalar topology values are read there and the smooth core weight is restored
+    to the solve grid by bilinear interpolation.  Final reported state must use
+    :func:`traced_emit_boundary_read`, which is the calibrated full-resolution
+    read.  A stride of one is exactly the full-resolution implementation.
+    """
+    r_index = _coarse_indices(rg.shape[0], resolution_stride)
+    z_index = _coarse_indices(zg.shape[0], resolution_stride)
+    coarse_r = rg[r_index]
+    coarse_z = zg[z_index]
+    coarse_psi = psi2d[z_index[:, None], r_index[None, :]]
+    coarse_inside = inside_limiter[z_index[:, None], r_index[None, :]]
+    result = traced_smooth_boundary_read(
+        coarse_psi,
+        coarse_r,
+        coarse_z,
+        coarse_inside,
+        axis_r,
+        axis_z,
+        n_levels,
+        n_bisect,
+        n_ray,
+        angles,
+        lcfs_norm,
+        wall_r,
+        wall_z,
+        wall_psi,
+        temperature,
+        previous_flood_level,
+        use_doubling,
+    )
+    core_weight = _interpolate_grid(result["core_weight"], coarse_r, coarse_z, rg, zg)
+    return {
+        **result,
+        "core_weight": core_weight,
+        "n_core_soft": jnp.sum(core_weight),
+        "iteration_resolution_stride": jnp.asarray(resolution_stride, dtype=jnp.int32),
     }
 
 

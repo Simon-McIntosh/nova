@@ -31,7 +31,11 @@ import jax
 import jax.numpy as jnp
 
 from nova.equilibrium import ProfileDegrees, ReconstructProfile
-from nova.equilibrium.connectivity_boundary import traced_smooth_boundary_read
+from nova.equilibrium.connectivity_boundary import (
+    traced_emit_boundary_read,
+    traced_iteration_boundary_read,
+    traced_smooth_boundary_read,
+)
 from nova.equilibrium.measurement import Magnetics
 from nova.equilibrium.fixed_point import anderson, newton_krylov, picard
 
@@ -107,6 +111,127 @@ def measure_binding_search(evaluations: int = 6) -> dict[str, float | int | bool
         "cold_seconds_per_evaluation": cold_seconds / evaluations,
         "warm_seconds_per_evaluation": warm_seconds / evaluations,
         "speedup": cold_seconds / warm_seconds,
+    }
+
+
+def measure_topology_read_removals(
+    evaluations: int = 4,
+) -> dict[str, float | int | bool | str]:
+    """Time the coarse warm doubling read against the full cold linear reference."""
+    rg = jnp.linspace(0.2, 1.8, 33)
+    zg = jnp.linspace(-1.1, 1.1, 41)
+    rr, zz = jnp.meshgrid(rg, zg)
+    inside = ((rr - 1.0) / 0.7) ** 2 + (zz / 1.0) ** 2 <= 1.0
+    base = jnp.exp(-(((rr - 1.0) ** 2 + zz**2) / 0.3**2))
+    fields = [
+        base * (1.0 + 2.0e-4 * index * (zz + 0.4)) for index in range(evaluations)
+    ]
+
+    def reference_read(field):
+        return traced_smooth_boundary_read(
+            field,
+            rg,
+            zg,
+            inside,
+            jnp.asarray(1.0),
+            jnp.asarray(0.0),
+            48,
+            10,
+            16,
+            temperature=jnp.asarray(1.0e-3),
+            previous_flood_level=jnp.asarray(jnp.nan),
+            use_doubling=False,
+        )
+
+    def iteration_read(field, previous):
+        return traced_iteration_boundary_read(
+            field,
+            rg,
+            zg,
+            inside,
+            jnp.asarray(1.0),
+            jnp.asarray(0.0),
+            48,
+            10,
+            16,
+            temperature=jnp.asarray(1.0e-3),
+            previous_flood_level=previous,
+            resolution_stride=2,
+        )
+
+    reference_seed = reference_read(fields[0])
+    jax.block_until_ready(reference_seed)
+    iteration_seed = iteration_read(fields[0], reference_seed["s_flood"])
+    jax.block_until_ready(iteration_seed)
+
+    start = time.perf_counter()
+    reference = [reference_read(field) for field in fields]
+    jax.block_until_ready(reference)
+    reference_seconds = time.perf_counter() - start
+
+    start = time.perf_counter()
+    accelerated = []
+    previous = reference_seed["s_flood"]
+    for field in fields:
+        result = iteration_read(field, previous)
+        accelerated.append(result)
+        previous = result["s_flood"]
+    jax.block_until_ready(accelerated)
+    accelerated_seconds = time.perf_counter() - start
+
+    emitted = traced_emit_boundary_read(
+        fields[-1],
+        rg,
+        zg,
+        inside,
+        jnp.asarray(1.0),
+        jnp.asarray(0.0),
+        48,
+        10,
+        16,
+        temperature=jnp.asarray(1.0e-3),
+    )
+    reference_emit = traced_smooth_boundary_read(
+        fields[-1],
+        rg,
+        zg,
+        inside,
+        jnp.asarray(1.0),
+        jnp.asarray(0.0),
+        48,
+        10,
+        16,
+        temperature=jnp.asarray(1.0e-3),
+    )
+    jax.block_until_ready((emitted, reference_emit))
+    emitted_exact = all(
+        np.array_equal(np.asarray(emitted[key]), np.asarray(reference_emit[key]))
+        for key in ("psi_axis", "psi_bnd", "s_soft", "radii", "core_weight")
+    )
+    span = abs(float(reference_emit["psi_out"] - reference_emit["psi_axis"]))
+    iterate_boundary_difference = max(
+        abs(float(fast["psi_bnd"] - full["psi_bnd"])) / span
+        for fast, full in zip(accelerated, reference, strict=True)
+    )
+    iterate_core_difference = max(
+        float(
+            np.max(
+                np.abs(
+                    np.asarray(fast["core_weight"]) - np.asarray(full["core_weight"])
+                )
+            )
+        )
+        for fast, full in zip(accelerated, reference, strict=True)
+    )
+    return {
+        "device": str(jax.devices()[0]),
+        "evaluations": evaluations,
+        "emitted_exact": emitted_exact,
+        "maximum_iterate_boundary_span_fraction": iterate_boundary_difference,
+        "maximum_iterate_core_weight_difference": iterate_core_difference,
+        "reference_seconds_per_evaluation": reference_seconds / evaluations,
+        "accelerated_seconds_per_evaluation": accelerated_seconds / evaluations,
+        "combined_speedup": reference_seconds / accelerated_seconds,
     }
 
 
@@ -225,6 +350,8 @@ def main() -> int:
 
     binding_search = measure_binding_search()
     print("binding search", json.dumps(binding_search, indent=2))
+    topology_read = measure_topology_read_removals()
+    print("topology read removals", json.dumps(topology_read, indent=2))
 
     slices = []
     # benign wells x plasma current, and the shallow-well family
@@ -320,6 +447,7 @@ def main() -> int:
         },
         "damping": damping,
         "binding_search": binding_search,
+        "topology_read": topology_read,
         "wall_seconds": time.time() - start,
     }
     print(json.dumps({k: v for k, v in summary.items() if k != "damping"}, indent=2))

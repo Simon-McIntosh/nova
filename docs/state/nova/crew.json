@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-12T21:31:26",
+  "updated": "2026-08-12T21:34:48",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -79,6 +79,13 @@
         "harness": "claude",
         "role": "implement",
         "session_id": "019ff724-7bb4-7270-836c-b0c7c9e7f7cc",
+        "created": "2026-08-12"
+      },
+      {
+        "id": "lane-health",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
         "created": "2026-08-12"
       },
       {
@@ -904,9 +911,61 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260812T182827047512-registry-cutover",
+        "plan": "mast-flux-loop-calibration",
+        "section": "\u00a72",
+        "node": "registry-cutover",
+        "role": "implement",
+        "member": "registry",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-12T18:28:27Z",
+        "completed_at": "2026-08-12T19:33:55Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3928,
+        "time_budget": "45m",
+        "base_sha": "111f31c349a5e3039b3e5aa64d52da3d9575a067",
+        "commits": [
+          "f8fc19ce"
+        ],
+        "changed_lines": {
+          "added": 63,
+          "removed": 57,
+          "files": 7
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/0738e6b1-3bc0-4082-a69e-59214ef05a7c/scratchpad/registry-cutover-manifest.md",
+        "scope_changed": true,
+        "session_id": "019ff73b-a1b5-73a2-9252-011b64d1ab64",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 20263424,
+            "input_tokens": 20641544,
+            "output_tokens": 46302,
+            "reasoning_output_tokens": 12289
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 50
+    "_version": 52
   }
 }

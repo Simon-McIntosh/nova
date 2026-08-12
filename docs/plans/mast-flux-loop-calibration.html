@@ -20,10 +20,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-12">
-<meta name="plan-version" content="4">
-<meta name="plan-impl" content="0.714">
-<meta name="plan-commits" content="a952f30c">
-<meta name="plan-artifacts" content="~/.cache/nova-mast/flux-loop-inclusion/inversion.json,~/.cache/nova-mast/flux-loop-inclusion/ratios.json,~/.cache/nova-mast/flux-loop-inclusion/constraint_sets.npz,~/.cache/nova-mast/flux-loop-inclusion/summary.json,docs/figures/flux-loop-inclusion/current-space-identifiability.svg,docs/figures/flux-loop-inclusion/p4p5-constraint-sets.svg">
+<meta name="plan-version" content="5">
+<meta name="plan-impl" content="0.857">
+<meta name="plan-commits" content="a952f30c,88001544">
+<meta name="plan-artifacts" content="~/.cache/nova-mast/flux-loop-inclusion/inversion.json,~/.cache/nova-mast/flux-loop-inclusion/ratios.json,~/.cache/nova-mast/flux-loop-inclusion/constraint_sets.npz,~/.cache/nova-mast/flux-loop-inclusion/summary.json,docs/figures/flux-loop-inclusion/current-space-identifiability.svg,docs/figures/flux-loop-inclusion/p4p5-constraint-sets.svg,docs/research/mast-gate-decision-packet.html,docs/figures/gate-decision/measurement-consumption-flow.svg">
 </head>
 <body>
 <main class="plan-doc">
@@ -231,6 +231,9 @@ Done-when
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s2" data-id="c-20260812-flc-025" data-who="reckon-ship" data-when="2026-08-12T18:30:00+00:00">
     <div class="r-comment-body">§2.5 landed — commit a952f30c (merge 38e599b2); gate passed. Measure: current-space rank 10/13 → 13/13 (delta +3) with all 18 calibrated loops admitted, over 369 sustained plasma-free shots (SLURM job 1244815, 00:16:50, exit 0; probe-only arm solved 369, joint arm 351 — 18 shots lacked 100 common finite samples). The probe-only factor-11.684 spectral cliff after mode ten reproduces the old rank 10/13; the 95-row joint operator shows no decade cliff (largest gap 6.406). Rank recovery WITHOUT conditioning improvement: full-space condition 370.699 → 549.319, retained probe condition 8.866. Wiring verdict: P4 moves from not-answerable to answerable and P5 stays answerable, but P2 inner (31.3% spread / 35.4% rank move), P2 outer (525% / 38.3%), P3 (36.5% / 6.89%) and P6 (399% / 0.106%) all remain NOT answerable — at least one pair member exceeds the 10% spread or rank-movement ceiling. Per-direction resolution gains concentrate on P2 (+0.44 to +0.56) and the solenoid (+0.9991); P4/P5 gain ≤ 2e-5. Constraint bank regenerated: 45 P4/P5 rows over 44 shots in six groups, 4,044 finite coefficients in each of the raw and surviving arrays — raw is the required input to the harmonic joint fit. Targeted tests 27 passed; doc audit OK. Artifacts under ~/.cache/nova-mast/flux-loop-inclusion/ with both figures committed.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260812-flc-026" data-who="reckon-ship" data-when="2026-08-12T18:40:00+00:00">
+    <div class="r-comment-body">§2.6 gate decision packet landed — commit 88001544 (merge 62c9b4a1); gate passed. One authored record, docs/research/mast-gate-decision-packet.html, audited OK, with all four consumption questions carrying option-by-option artifact-versus-incumbent consequences and every owner-selection field left BLANK. Quantified for the owner: applying obr17's fitted 0.5011 gain moves the banked mean-square surrogate from artifact 1.0324 to 0.9103 and incumbent 0.9992 to 0.8673 — widening the gap +30%, so it is not a neutral correction and the production median-of-medians stamp still needs a paired re-run. Scoring the calibrated loops buys rank 10/13 to 13/13 at a conditioning cost of 370.699 to 549.319, and the packet states plainly that no production artifact-versus-incumbent loop stamp exists, so the direction and magnitude of that change are UNMEASURED rather than assumed. The pair-failure class is laid out with its evidence — obv03 stepping 1.01 to 0.586 across a bracketed era, obr05 flipping 1.25/0.50 shot-to-shot with the promoted static 1.1043 describing neither state, obr18 at 1.22 — against corrected/flagged/excluded and era/block/static options. Also in this beat: the banked records merged into the correction document (commit 8b15a398, set_version 1.0.0 to 1.1.0, 128 to 160 corrections, 28 gain plus 3 exclusion plus 1 convention added with provenance retained on all 32). That merge is held out of the integrated branch pending a corrective node: four document-pin tests encode the OLD inventory and, worse, one asserts that any valued gain is promoted — which the ten withheld loop rows falsify by design, since they keep measured_value with no consumer-applicable value. The worker was right to refuse to reshape the document to satisfy the pins.</div>
 </div>
 </section>
 </main>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-12T20:32:27",
+  "updated": "2026-08-12T20:37:58",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -26,6 +26,13 @@
         "created": "2026-08-12"
       },
       {
+        "id": "doc-pins",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-12"
+      },
+      {
         "id": "flood-fill",
         "harness": "codex",
         "role": "implement",
@@ -43,7 +50,7 @@
         "id": "gate-packet",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "019ff73b-ed3a-7a90-9342-ccbcf603ed2e",
         "created": "2026-08-12"
       },
       {
@@ -637,9 +644,61 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260812T182845693763-flux-loop-gate-packet",
+        "plan": "mast-flux-loop-calibration",
+        "section": "\u00a72",
+        "node": "flux-loop-gate-packet",
+        "role": "implement",
+        "member": "gate-packet",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-12T18:28:47Z",
+        "completed_at": "2026-08-12T18:36:28Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 461,
+        "time_budget": "45m",
+        "base_sha": "111f31c349a5e3039b3e5aa64d52da3d9575a067",
+        "commits": [
+          "88001544"
+        ],
+        "changed_lines": {
+          "added": 412,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/0738e6b1-3bc0-4082-a69e-59214ef05a7c/scratchpad/flux-loop-gate-packet-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff73b-ed3a-7a90-9342-ccbcf603ed2e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 2922496,
+            "input_tokens": 3137490,
+            "output_tokens": 18637,
+            "reasoning_output_tokens": 4515
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 39
+    "_version": 43
   }
 }

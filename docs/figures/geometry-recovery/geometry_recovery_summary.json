@@ -1,0 +1,351 @@
+{
+  "inputs": {
+    "current_span_sha256": "853d5e57891decc4a719cc27e5b45813330b063abee191e32706b787a2fc84f0",
+    "random_seed": 20260812,
+    "shot": 21978,
+    "spectrum_sha256": "c4b4a12267433e5a6f62e0fecce0ba7407c3379de7520662ad3487cfc0ac862c",
+    "symmetry_sha256": "4c80ae213270603d69d095ebbe5b97fe21a8cf69e019784b0d0b2a1cab758a9a"
+  },
+  "mast": {
+    "p4_lower": {
+      "all_probe_survivor_reduction": 0.4072504396046429,
+      "channels": 76,
+      "correction_rms_mm": 188.6603388732386,
+      "correction_to_kirk_ratio": 28.584899829278577,
+      "correction_to_published_resolution_ratio": 309.250289295109,
+      "far_probe_survivor_reduction": 0.009280607379258954,
+      "kirk_case_offset_mm": 6.6,
+      "kirk_seed_spread_um": 0.00021431025074026292,
+      "lattice_cells": 23,
+      "mode_resolution_um": [
+        71.21276181095429,
+        86.03860855583437,
+        427.6534098630712,
+        1081.99906591938
+      ],
+      "near_channels": 5,
+      "parameter_95pct_mm": {
+        "dilation": 0.3648009897862449,
+        "rigid_r": 0.980470412078873,
+        "rigid_z": 1.0699289279952127,
+        "shear": 1.3637554711623336,
+        "stretch": 1.0173447539419236,
+        "tilt": 0.3489699934825959
+      },
+      "parameters_mm": {
+        "dilation": 26.45405635037559,
+        "rigid_r": 81.44246069971749,
+        "rigid_z": -77.91577038397737,
+        "shear": 142.69641975238673,
+        "stretch": 19.66406316310069,
+        "tilt": 35.40882209002153
+      },
+      "published_best_resolution_um": 610.0571136190766,
+      "reduced_whitened_chi_squared": 233.65756504609416,
+      "resolved_affine_modes": 4
+    },
+    "p4_upper": {
+      "all_probe_survivor_reduction": 0.33566961614317614,
+      "channels": 76,
+      "correction_rms_mm": 26.375731226620317,
+      "correction_to_kirk_ratio": 9.09507973331735,
+      "correction_to_published_resolution_ratio": 11.877621412099028,
+      "far_probe_survivor_reduction": -0.023823359046649895,
+      "kirk_case_offset_mm": 2.9,
+      "kirk_seed_spread_um": 2.0214600439885072e-11,
+      "lattice_cells": 23,
+      "mode_resolution_um": [
+        138.02887369646612,
+        181.46914853631804,
+        1001.468910016619,
+        2272.509151557659
+      ],
+      "near_channels": 8,
+      "parameter_95pct_mm": {
+        "dilation": 0.4372727965265625,
+        "rigid_r": 2.3107977098890222,
+        "rigid_z": 1.8627759867565787,
+        "shear": 3.3679947521049574,
+        "stretch": 1.7707526394578224,
+        "tilt": 0.4638712753431306
+      },
+      "parameters_mm": {
+        "dilation": 2.64457467381626,
+        "rigid_r": 10.219661200008295,
+        "rigid_z": 13.015324676784322,
+        "shear": -19.416060206203497,
+        "stretch": 5.215159124216225,
+        "tilt": -2.2181018783639836
+      },
+      "published_best_resolution_um": 2220.6240047146916,
+      "reduced_whitened_chi_squared": 54.18619056331244,
+      "resolved_affine_modes": 4
+    },
+    "p5_lower": {
+      "all_probe_survivor_reduction": -11.03006277574844,
+      "channels": 74,
+      "correction_rms_mm": 2004.2514445200284,
+      "correction_to_kirk_ratio": 152.99629347481132,
+      "correction_to_published_resolution_ratio": 36969.5151906864,
+      "far_probe_survivor_reduction": -0.3573424969256471,
+      "kirk_case_offset_mm": 13.100000000000001,
+      "kirk_seed_spread_um": 2.0210434917481477e-09,
+      "lattice_cells": 23,
+      "mode_resolution_um": [
+        10.27997901467156,
+        12.080633059480775,
+        24.0583583451965,
+        48.55957307526353,
+        1196.7322376561613,
+        3378.383937230964
+      ],
+      "near_channels": 11,
+      "parameter_95pct_mm": {
+        "dilation": 2.4018265110797112,
+        "rigid_r": 0.0905395530378582,
+        "rigid_z": 0.06680616294794296,
+        "shear": 0.5607413832622227,
+        "stretch": 1.1129124930693994,
+        "tilt": 6.588360751899812
+      },
+      "parameters_mm": {
+        "dilation": 92.69605401031053,
+        "rigid_r": -12.653966976998138,
+        "rigid_z": 13.250284407214634,
+        "shear": -99.14424744965159,
+        "stretch": 340.606189385721,
+        "tilt": 1999.9372267103868
+      },
+      "published_best_resolution_um": 54.21362531215861,
+      "reduced_whitened_chi_squared": 27403.599178143148,
+      "resolved_affine_modes": 6
+    },
+    "p5_upper": {
+      "all_probe_survivor_reduction": 0.021145201337194552,
+      "channels": 76,
+      "correction_rms_mm": 11.12720057301705,
+      "correction_to_kirk_ratio": 18.54533428836175,
+      "correction_to_published_resolution_ratio": 23.439663898848387,
+      "far_probe_survivor_reduction": 0.0009326488248571074,
+      "kirk_case_offset_mm": 0.6,
+      "kirk_seed_spread_um": 1.8624085519914453e-12,
+      "lattice_cells": 23,
+      "mode_resolution_um": [
+        152.12439733600522,
+        191.5536402979544,
+        295.8036193842863,
+        659.4332129580379
+      ],
+      "near_channels": 12,
+      "parameter_95pct_mm": {
+        "dilation": 0.05757690156108468,
+        "rigid_r": 0.33882356680268133,
+        "rigid_z": 0.4229733601832602,
+        "shear": 1.0700444480964515,
+        "stretch": 0.8804150593199696,
+        "tilt": 0.11388487177208867
+      },
+      "parameters_mm": {
+        "dilation": 0.033523312227528995,
+        "rigid_r": -1.9714813133821916,
+        "rigid_z": -0.18535195240395924,
+        "shear": -9.880376077875978,
+        "stretch": -4.614598534415469,
+        "tilt": -0.8679519980016415
+      },
+      "published_best_resolution_um": 474.71672891878535,
+      "reduced_whitened_chi_squared": 21.320569847810262,
+      "resolved_affine_modes": 4
+    }
+  },
+  "synthetic": {
+    "p4_lower": {
+      "affine": {
+        "bias_um_by_rung": [
+          128.76927575500008,
+          83.50390009677207,
+          37.35474918519337,
+          19.842760998223167
+        ],
+        "empirical_to_predicted_resolution": [
+          1.0506003957271084,
+          0.965672625199046,
+          1.0058107825397213,
+          0.9878334809615887
+        ],
+        "max_absolute_bias_sigma": 0.2070008491652873,
+        "normal_95pct_coverage": 0.953125,
+        "resolution_um": [
+          71.21276181095429,
+          86.03860855583437,
+          427.6534098630712,
+          1081.99906591938
+        ],
+        "resolved_modes": 4,
+        "samples_per_rung": 128
+      },
+      "rigid": {
+        "bias_um_by_rung": [
+          11.101134023275703,
+          16.264064738614984,
+          23.801566534569524,
+          13.95093551853121
+        ],
+        "empirical_to_predicted_resolution": [
+          1.0000966072905446,
+          0.9719048799506227
+        ],
+        "max_absolute_bias_sigma": 0.1986528843061105,
+        "normal_95pct_coverage": 0.951171875,
+        "resolution_um": [
+          74.35633389475127,
+          117.39172748126306
+        ],
+        "resolved_modes": 2,
+        "samples_per_rung": 128
+      }
+    },
+    "p4_upper": {
+      "affine": {
+        "bias_um_by_rung": [
+          163.93494685788542,
+          103.20635432168916,
+          182.8831650615714,
+          79.01622556725191
+        ],
+        "empirical_to_predicted_resolution": [
+          0.9746824287641302,
+          1.0122750738215593,
+          0.9787800587445117,
+          0.9837267975216973
+        ],
+        "max_absolute_bias_sigma": 0.16831985799938795,
+        "normal_95pct_coverage": 0.95458984375,
+        "resolution_um": [
+          138.02887369646612,
+          181.46914853631804,
+          1001.468910016619,
+          2272.509151557659
+        ],
+        "resolved_modes": 4,
+        "samples_per_rung": 128
+      },
+      "rigid": {
+        "bias_um_by_rung": [
+          9.647089115454698,
+          7.8498206203078285,
+          43.67188957384864,
+          10.24516244178365
+        ],
+        "empirical_to_predicted_resolution": [
+          1.033381012215081,
+          1.0469364084601018
+        ],
+        "max_absolute_bias_sigma": 0.20225487760180688,
+        "normal_95pct_coverage": 0.9326171875,
+        "resolution_um": [
+          179.74186867303175,
+          199.60395516793554
+        ],
+        "resolved_modes": 2,
+        "samples_per_rung": 128
+      }
+    },
+    "p5_lower": {
+      "affine": {
+        "bias_um_by_rung": [
+          222.6489207727199,
+          252.9298607054268,
+          205.5566019374674,
+          68.32579596641413
+        ],
+        "empirical_to_predicted_resolution": [
+          1.0143687541314443,
+          1.012345477192502,
+          1.0352200021900588,
+          0.9841236705422961,
+          0.9594465920159817,
+          1.0188825822878
+        ],
+        "max_absolute_bias_sigma": 0.16276531508593767,
+        "normal_95pct_coverage": 0.9469401041666666,
+        "resolution_um": [
+          10.27997901467156,
+          12.080633059480775,
+          24.0583583451965,
+          48.55957307526353,
+          1196.7322376561613,
+          3378.383937230964
+        ],
+        "resolved_modes": 6,
+        "samples_per_rung": 128
+      },
+      "rigid": {
+        "bias_um_by_rung": [
+          0.689848633016474,
+          2.0720381792397706,
+          2.9049019354427386,
+          1.7286535821281068
+        ],
+        "empirical_to_predicted_resolution": [
+          0.9729855939350075,
+          0.9881223544312552
+        ],
+        "max_absolute_bias_sigma": 0.1852060230918988,
+        "normal_95pct_coverage": 0.955078125,
+        "resolution_um": [
+          11.583623296865888,
+          12.607240468759146
+        ],
+        "resolved_modes": 2,
+        "samples_per_rung": 128
+      }
+    },
+    "p5_upper": {
+      "affine": {
+        "bias_um_by_rung": [
+          54.44883882876003,
+          84.76440242683236,
+          62.66274705862428,
+          42.292369673950965
+        ],
+        "empirical_to_predicted_resolution": [
+          1.0078367648444841,
+          1.042345436785877,
+          1.0134421646535277,
+          0.9461242399557205
+        ],
+        "max_absolute_bias_sigma": 0.17915327077429988,
+        "normal_95pct_coverage": 0.95166015625,
+        "resolution_um": [
+          152.12439733600522,
+          191.5536402979544,
+          295.8036193842863,
+          659.4332129580379
+        ],
+        "resolved_modes": 4,
+        "samples_per_rung": 128
+      },
+      "rigid": {
+        "bias_um_by_rung": [
+          44.135219933381606,
+          16.10229820869024,
+          26.23806729591444,
+          6.590910391164292
+        ],
+        "empirical_to_predicted_resolution": [
+          1.0104356906693162,
+          1.0985111202941713
+        ],
+        "max_absolute_bias_sigma": 0.26727762137531735,
+        "normal_95pct_coverage": 0.935546875,
+        "resolution_um": [
+          154.13695255233037,
+          204.77358985446588
+        ],
+        "resolved_modes": 2,
+        "samples_per_rung": 128
+      }
+    }
+  }
+}

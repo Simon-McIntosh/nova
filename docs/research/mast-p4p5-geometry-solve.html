@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="mast-p4p5-geometry-solve">
+  <meta name="plan-title" content="MAST P4/P5 sensor-space geometry solve — no credible correction is resolved">
+  <meta name="plan-summary" content="A measured-floor synthetic ladder validates rigid and affine recovery, but the MAST fit demands 11–2004 mm RMS pack motion against 0.054–2.221 mm published best-mode resolutions and 0.6–13.1 mm measured case offsets. Its far-field symmetry-survivor reductions are −35.7% to +0.9%, so the apparent all-probe fits are the banked near-field trap, not credible geometry corrections.">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-evidence-for" content="coil-geometry-inversion">
+  <title>MAST P4/P5 geometry solve | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <h1>No credible P4/P5 geometry correction is resolvable at this array</h1>
+  <p><strong>Bounded negative result.</strong> The exact-Jacobian sensor-space solve converges
+  reproducibly, but its optimum is not a physical coil correction. It demands RMS pack motions
+  of 11.1–2004 mm where the published best-mode resolutions are 0.054–2.221 mm and Kirk's
+  measured case offsets are 0.6–13.1 mm. Removing the probes inside two pack widths then leaves
+  only −35.7% to +0.9% reduction of the independently banked symmetry survivor: three members
+  collapse to essentially zero or worsen, and P5 lower reverses strongly. The array therefore
+  supports no registry geometry change. The surviving signal remains evidence for current or
+  sensor structure that a static axisymmetric pack displacement cannot carry.</p>
+
+  <h2>The solve that was run</h2>
+  <p>Each member drives the described 23-cell winding lattice. The parameters are rigid
+  <var>R</var>/<var>Z</var> translation plus dilation, stretch, shear and tilt; per-turn and
+  per-vertex freedoms stay frozen. The residual is whitened by that drive group's measured
+  probe floors, all admitted probes remain in the optimisation, and the thirteen described
+  coil-response columns are fitted as nuisance current freedoms. The solver works in the
+  deformation Gram metric, uses exact geometry Jacobians, and applies damped Gauss–Newton
+  steps only to singular directions whose local one-noise displacement is at most 10 mm.
+  Kirk magnitudes were projected into the admitted modes as ±<var>R</var> and ±<var>Z</var>
+  seeds; all four seeds return the same solution to within 0.00022 µm RMS.</p>
+
+  <h2>The measured-floor recovery ladder validates the inference machinery</h2>
+  <p>For every member and each rigid/affine class, 128 random perturbations were drawn at each
+  of 0.5, 1, 3 and 10 mm RMS inside the admitted mode space. Exact local-model sensor data were
+  generated and independent normal noise was added at every channel's measured floor. Across
+  4,096 recoveries, maximum mean bias is 0.27 of the predicted one-noise resolution,
+  empirical/predicted resolution ratios span 0.946–1.099, and nominal 95% coverage spans
+  93.3–95.5%. The fit can recover geometry at this array; the MAST result below is a refusal by
+  the data, not a broken optimiser.</p>
+
+  <table>
+    <thead>
+      <tr><th>member</th><th>class</th><th>modes</th><th>one-noise resolution</th><th>largest RMS bias</th><th>max bias / σ</th><th>95% coverage</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>P4 lower</td><td>rigid</td><td>2</td><td>74–117 µm</td><td>23.8 µm</td><td>0.20</td><td>95.1%</td></tr>
+      <tr><td>P4 lower</td><td>affine</td><td>4</td><td>71–1082 µm</td><td>128.8 µm</td><td>0.21</td><td>95.3%</td></tr>
+      <tr><td>P4 upper</td><td>rigid</td><td>2</td><td>180–200 µm</td><td>43.7 µm</td><td>0.20</td><td>93.3%</td></tr>
+      <tr><td>P4 upper</td><td>affine</td><td>4</td><td>138–2273 µm</td><td>182.9 µm</td><td>0.17</td><td>95.5%</td></tr>
+      <tr><td>P5 lower</td><td>rigid</td><td>2</td><td>12–13 µm</td><td>2.9 µm</td><td>0.19</td><td>95.5%</td></tr>
+      <tr><td>P5 lower</td><td>affine</td><td>6</td><td>10–3378 µm</td><td>252.9 µm</td><td>0.16</td><td>94.7%</td></tr>
+      <tr><td>P5 upper</td><td>rigid</td><td>2</td><td>154–205 µm</td><td>44.1 µm</td><td>0.27</td><td>93.6%</td></tr>
+      <tr><td>P5 upper</td><td>affine</td><td>4</td><td>152–659 µm</td><td>84.8 µm</td><td>0.18</td><td>95.2%</td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <img src="/nova/figures/geometry-recovery/recovery_ladder.png"
+         alt="Four panels for the MAST P4 and P5 members showing median rigid and affine recovery error near zero, with central 68 percent bands close to plus or minus one predicted resolution at injected displacements from 0.5 to 10 millimetres"
+         style="max-width:100%;height:auto">
+    <figcaption>Recovery error in units of each resolved mode's predicted one-noise
+    resolution. The median stays near zero and the central 68% band tracks ±1σ across four
+    injection amplitudes. Full truth, recovered parameters and mode resolutions are banked in
+    <code>geometry_recovery.npz</code>.</figcaption>
+  </figure>
+
+  <h2>The MAST optimum is self-refuting</h2>
+  <table>
+    <thead>
+      <tr><th>member</th><th>published best resolution</th><th>demanded RMS</th><th>demand / floor</th><th>Kirk case offset</th><th>all-probe survivor Δ</th><th>far-field survivor Δ</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>P4 lower</td><td>0.610 mm</td><td><strong>188.66 mm</strong></td><td>309×</td><td>6.6 mm</td><td>+40.73%</td><td><strong>+0.93%</strong></td></tr>
+      <tr><td>P4 upper</td><td>2.221 mm</td><td><strong>26.38 mm</strong></td><td>11.9×</td><td>2.9 mm</td><td>+33.57%</td><td><strong>−2.38%</strong></td></tr>
+      <tr><td>P5 lower</td><td>0.054 mm</td><td><strong>2004.25 mm</strong></td><td>36,970×</td><td>13.1 mm</td><td>−1103.01%</td><td><strong>−35.73%</strong></td></tr>
+      <tr><td>P5 upper</td><td>0.475 mm</td><td><strong>11.13 mm</strong></td><td>23.4×</td><td>0.6 mm</td><td>+2.11%</td><td><strong>+0.09%</strong></td></tr>
+    </tbody>
+  </table>
+  <p>The formal local covariance is narrow because the near probes have enormous geometry
+  leverage, but that covariance is conditional on a false static-geometry model: reduced
+  whitened χ² is 21–27,404 and the fitted shapes require motions 9.1–153 times the measured
+  case offsets. P5 lower is the sharpest contradiction. A 2004 mm RMS deformation is 36,970
+  times its published 54 µm best-mode floor, worsens the all-probe survivor by 1103%, and still
+  worsens the far-field survivor by 35.7%. It is not a large correction with high confidence;
+  it is the optimiser proving that no member of the admitted geometry family represents the
+  data.</p>
+
+  <figure>
+    <img src="/nova/figures/geometry-recovery/mast_bounds.png"
+         alt="Left panel compares demanded RMS pack corrections with the published best-mode resolutions and Kirk case offsets; right panel shows all-probe and far-probe symmetry-survivor power reductions, including a strong reversal for P5 lower"
+         style="max-width:100%;height:auto">
+    <figcaption>Left: every optimum sits well above both its measurement floor and its
+    measured-offset scale. Right: the independent symmetry-survivor check removes the apparent
+    near-field benefit; its symmetric-log axis retains the P5-lower reversal without hiding the
+    sub-percent P4-lower and P5-upper results.</figcaption>
+  </figure>
+
+  <h2>Bound and disposition</h2>
+  <ul>
+    <li><strong>Array bound:</strong> after current marginalisation and the near-field
+    robustness requirement, the best resolvable affine directions span 54 µm (P5 lower) to
+    2.221 mm (P4 upper). No coherent P4/P5 correction appears above those floors and inside the
+    0.6–13.1 mm surveyed case-offset envelope.</li>
+    <li><strong>Geometry disposition:</strong> keep the described 23-cell lattices and the
+    established chamfer sides; do not issue a machine-description correction from this solve.</li>
+    <li><strong>Residual disposition:</strong> the all-probe extrema are the already-banked
+    near-field trap. The remaining stable survivor stays with unmodelled current paths or
+    sensor-side structure, not axisymmetric rigid or affine pack geometry.</li>
+  </ul>
+
+  <h2>Evidence and reproducibility</h2>
+  <p>The solver and recovery machinery live in <code>nova/biot/geometrysolve.py</code> and are
+  regression-pinned in <code>tests/test_biotgeometrysolve.py</code>. Banked outputs are
+  <code>docs/figures/geometry-recovery/geometry_recovery.npz</code> (truth, noisy recoveries,
+  modes, resolutions and MAST fits) and <code>geometry_recovery_summary.json</code> (the table
+  values), with random seed 20260812. Inputs: geometry spectrum
+  <code>c4b4a12267433e5a6f62e0fecce0ba7407c3379de7520662ad3487cfc0ac862c</code>, symmetry scan
+  <code>4c80ae213270603d69d095ebbe5b97fe21a8cf69e019784b0d0b2a1cab758a9a</code>, shot 21978
+  level-2 winding cells, and the banked 13-column current span. The research artifact retains
+  the exact input hashes for independent verification.</p>
+
+  <h2>Related records</h2>
+  <ul>
+    <li><a href="/nova/plans/coil-geometry-inversion.html">Coil geometry inversion</a> — the
+    owning plan and the identifiability decisions this solve honours.</li>
+    <li><a href="/nova/research/mast-p4p5-symmetry-verdict.html">P4/P5 symmetry verdict</a> —
+    the independent survivor and near-field-trap scan used as the cross-check.</li>
+  </ul>
+
+</main>
+</body>
+</html>

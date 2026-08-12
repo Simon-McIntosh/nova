@@ -78,6 +78,7 @@ from nova.imas.mast_block_scale import (
     ScaleReader,
 )
 from nova.imas.mast_vacuum_cohort import (
+    COIL_DRIVES,
     CURRENT_GROUP,
     FIELD_GROUP,
     KILO,
@@ -1029,6 +1030,151 @@ def _probe_channel(channel: str) -> bool:
     except CohortError:
         return False
     return True
+
+
+def _solve_sensor_unit(channel: str) -> str:
+    """Return the physical unit of a magnetic sensor admitted to a solve."""
+
+    if _probe_channel(channel):
+        return "T"
+    if _LOOP_CHANNEL_PATTERN.match(channel):
+        return "Wb"
+    raise SolveInputError(f"{channel!r} is not a solve sensor channel")
+
+
+@dataclass(frozen=True)
+class CorrectedSolveInputs:
+    """Dense corrected waveforms ready for slice-wise solve shard staging.
+
+    Channel labels and units are shard metadata and the numeric arrays share their
+    first dimension, one row per time slice.  ``corrections`` is aligned with
+    ``sensor_channels`` and preserves the disposition that says whether each sensor
+    value was corrected; the values alone cannot distinguish an applied unity
+    correction from an unmeasured channel left as published.
+
+    ``bytes_per_slice`` counts the dense numeric payload only: one time, every coil
+    current, every sensor signal, and plasma current.  Channel labels, units,
+    dispositions and provenance are written once per shard rather than repeated for
+    every slice.
+    """
+
+    shot: int
+    time_s: np.ndarray
+    coil_channels: tuple[str, ...]
+    coil_currents_a: np.ndarray
+    sensor_channels: tuple[str, ...]
+    sensor_signals: np.ndarray
+    sensor_units: tuple[str, ...]
+    plasma_current_a: np.ndarray
+    corrections: tuple[ScaleCorrection, ...]
+    provenance: tuple[SignalProvenance, ...] = field(default_factory=tuple)
+
+    @property
+    def slice_count(self) -> int:
+        """Return the number of solve slices in the payload."""
+
+        return int(self.time_s.size)
+
+    @property
+    def bytes_per_slice(self) -> int:
+        """Return the dense numeric bytes one staged solve slice occupies."""
+
+        if self.slice_count == 0:
+            return 0
+        total = (
+            self.time_s.nbytes
+            + self.coil_currents_a.nbytes
+            + self.sensor_signals.nbytes
+            + self.plasma_current_a.nbytes
+        )
+        return int(total // self.slice_count)
+
+    @property
+    def kilobytes_per_slice(self) -> float:
+        """Return the dense numeric payload per slice in binary kilobytes."""
+
+        return self.bytes_per_slice / 1024.0
+
+
+def read_corrected_solve_inputs(
+    shot: int,
+    *,
+    store: Path | str = SHOT_STORE,
+) -> CorrectedSolveInputs:
+    """Return the corrected, solve-ready contract consumed by shard staging.
+
+    The fields are ``time_s`` in seconds; ``coil_currents_a`` in amperes with
+    columns named by ``coil_channels``; ``sensor_signals`` with columns named by
+    ``sensor_channels`` and per-column units in ``sensor_units`` (tesla for
+    poloidal-field probes and weber for flux loops); and ``plasma_current_a`` in
+    amperes.  All numeric arrays are float64 and have one row per field-clock slice.
+
+    This entry point intentionally exposes no raw-reader or correction override.  It
+    obtains every field through :func:`read_shot_waveforms`, the corrected archive
+    door, and returns its applied values with one correction disposition per sensor.
+    Coil currents and plasma current come from that same read already interpolated
+    onto the field clock, so shard staging cannot assemble a partly corrected slice
+    by opening archive groups independently.
+    """
+
+    waveforms = read_shot_waveforms(int(shot), store=store)
+    coil_channels = tuple(
+        drive.family for drive in COIL_DRIVES if drive.family in waveforms.drives
+    )
+    sensor_channels = tuple(
+        channel
+        for channel in sorted(waveforms.sensors)
+        if _probe_channel(channel) or _LOOP_CHANNEL_PATTERN.match(channel)
+    )
+    corrections = {row.channel: row for row in waveforms.scale_corrections}
+    missing_dispositions = sorted(set(sensor_channels) - corrections.keys())
+    if missing_dispositions:
+        raise SolveInputError(
+            "corrected read returned no disposition for sensor channels "
+            f"{missing_dispositions}"
+        )
+
+    time = np.asarray(waveforms.time, dtype=float)
+    coil_currents = np.column_stack(
+        [
+            np.asarray(waveforms.drives[channel], dtype=float)
+            for channel in coil_channels
+        ]
+    )
+    sensor_signals = np.column_stack(
+        [
+            np.asarray(waveforms.sensors[channel], dtype=float)
+            for channel in sensor_channels
+        ]
+    )
+    plasma_current = np.asarray(waveforms.plasma_current, dtype=float)
+    expected = time.shape
+    arrays = {
+        "coil currents": coil_currents,
+        "sensor signals": sensor_signals,
+        "plasma current": plasma_current,
+    }
+    mismatched = {
+        name: values.shape
+        for name, values in arrays.items()
+        if values.shape[0] != time.size
+    }
+    if mismatched:
+        raise SolveInputError(
+            f"solve inputs do not share the field clock {expected}: {mismatched}"
+        )
+    return CorrectedSolveInputs(
+        shot=int(shot),
+        time_s=time,
+        coil_channels=coil_channels,
+        coil_currents_a=coil_currents,
+        sensor_channels=sensor_channels,
+        sensor_signals=sensor_signals,
+        sensor_units=tuple(_solve_sensor_unit(channel) for channel in sensor_channels),
+        plasma_current_a=plasma_current,
+        corrections=tuple(corrections[channel] for channel in sensor_channels),
+        provenance=waveforms.provenance,
+    )
 
 
 def read_solve_inputs(

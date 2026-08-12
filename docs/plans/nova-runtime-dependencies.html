@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="nova">
+<meta name="plan-slug" content="nova-runtime-dependencies">
+<meta name="reckon-type" content="plan">
+<title>nova-runtime-dependencies</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-title" content="Nova Runtime Dependency Surface">
+<meta name="plan-summary" content="Declare what nova actually needs to import: separate the plain JAX runtime the equilibrium package requires from the CUDA build that only GPU hosts want, so no install pulls CUDA it cannot use and no environment is missing a dependency the code imports unconditionally">
+<meta name="plan-status" content="active">
+<meta name="plan-roi" content="mid">
+<meta name="plan-effort" content="S">
+<meta name="plan-sprint" content="S7">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-modified" content="2026-08-12">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="general">
+<meta name="plan-capability-verification" content="strict">
+<meta name="plan-version" content="2">
+</head>
+<body>
+<main class="plan-doc">
+
+    <h2 id="s1">§1 — What the code already requires</h2>
+
+    <p><strong>The optional-JAX story is fiction, and a worker lost twenty-five minutes proving
+    it.</strong> Twenty-one modules under <code>nova/</code> import JAX at module scope, and
+    <strong>sixteen of them are <code>nova/equilibrium/</code></strong> — including
+    <code>forward.py</code> (the public <code>ForwardProfile</code>), <code>profile.py</code>
+    (<code>ReconstructProfile</code>), <code>topology.py</code>, <code>fixed_point.py</code> and
+    <code>connectivity_boundary.py</code>. The physics spine cannot be imported at all without JAX.
+    Only one guarded import exists in the whole package
+    (<code>nova/jax/config.py</code>), so there is no fallback path to speak of.</p>
+
+    <p><strong>But the extra that would declare it pins the wrong thing.</strong> The <code>jax</code>
+    extra is <code>jax[cuda12]&gt;=0.5</code> on linux, so "declare JAX" and "pull ~2.5&nbsp;GB of
+    CUDA wheels" are currently the same request. That is why the plain runtime ended up duplicated
+    inside the <code>test</code> extra instead: <code>test</code> pins its own
+    <code>jax&gt;=0.5</code>, which is the only reason <code>uv run --extra test</code> works at all.
+    Two pins for one dependency, and neither named honestly.</p>
+
+    <h2 id="s2">§2 — Three extras, each naming one thing</h2>
+
+    <table>
+      <thead><tr><th>Extra</th><th>Carries</th><th>Who needs it</th></tr></thead>
+      <tbody>
+        <tr><td><code>jax</code></td><td><code>jax&gt;=0.5</code> — plain, no CUDA</td><td>anyone importing <code>nova.equilibrium</code></td></tr>
+        <tr><td><code>gpu</code></td><td><code>jax[cuda12]&gt;=0.5</code> on linux</td><td>GPU hosts only</td></tr>
+        <tr><td><code>test</code></td><td><code>nova[jax]</code> transitively — no second pin</td><td>the test lane</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong><code>test</code> must keep resolving JAX, or this change re-breaks what it is fixing.</strong>
+    Deleting the pin outright would make <code>uv run --extra test</code> stop supplying JAX — the
+    exact failure that motivated the work. The dependency is therefore moved, not removed:
+    <code>test</code> depends on <code>nova[jax]</code>, which drops the duplicate pin while leaving
+    every existing <code>--extra test</code> invocation working unchanged.</p>
+
+    <p>JAX stays out of <code>[project.dependencies]</code>: a bare <code>import nova</code> and the
+    frame, biot and IMAS surfaces do not need it, and forcing it on every install would trade one
+    dishonest declaration for another.</p>
+
+    <p><em>Done-when:</em> <code>uv run --extra test</code> resolves JAX with no CUDA wheels on a
+    CPU host and the equilibrium suite passes; <code>--extra gpu</code> is what selects the CUDA
+    build; no extra pins JAX twice; the installed jaxlib variant is reported for both compositions.</p>
+
+</main>
+</body>
+</html>

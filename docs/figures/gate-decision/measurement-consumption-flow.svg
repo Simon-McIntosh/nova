@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 360" role="img"
+     aria-labelledby="title description">
+  <title id="title">How calibration-consumption choices move the artifact-versus-incumbent comparison</title>
+  <desc id="description">Four owner-controlled choices alter either the measurements, the sensor rows, or the fitted current subspace before the same residual metric compares artifact and incumbent predictions. Applying the same measurement correction to both arms does not guarantee that their difference remains unchanged.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#555"/>
+    </marker>
+  </defs>
+
+  <g font-family="system-ui, sans-serif" fill="#161616">
+    <text x="480" y="25" text-anchor="middle" font-size="16" font-weight="600">
+      One comparison, four upstream consumption choices
+    </text>
+
+    <g font-size="13">
+      <rect x="20" y="65" width="190" height="54" rx="4" fill="none" stroke="#555"/>
+      <text x="115" y="87" text-anchor="middle" font-weight="600">obr17 gain</text>
+      <text x="115" y="106" text-anchor="middle">raw · divide by 0.5011 · omit</text>
+
+      <rect x="20" y="137" width="190" height="54" rx="4" fill="none" stroke="#555"/>
+      <text x="115" y="159" text-anchor="middle" font-weight="600">calibrated flux loops</text>
+      <text x="115" y="178" text-anchor="middle">score · fit-only · omit</text>
+
+      <rect x="20" y="209" width="190" height="54" rx="4" fill="none" stroke="#555"/>
+      <text x="115" y="231" text-anchor="middle" font-weight="600">pair-failure channels</text>
+      <text x="115" y="250" text-anchor="middle">correct · flag raw · omit</text>
+
+      <rect x="20" y="281" width="190" height="54" rx="4" fill="none" stroke="#555"/>
+      <text x="115" y="303" text-anchor="middle" font-weight="600">gain validity</text>
+      <text x="115" y="322" text-anchor="middle">static · era · shot block</text>
+    </g>
+
+    <g stroke="#555" stroke-width="1.2" fill="none" marker-end="url(#arrow)">
+      <path d="M210 92 H245 Q265 92 265 112 V145 H280"/>
+      <path d="M210 164 H280"/>
+      <path d="M210 236 H245 Q265 236 265 216 V192 H280"/>
+      <path d="M210 308 H250 Q265 308 265 288 V215 H280"/>
+    </g>
+
+    <rect x="280" y="125" width="190" height="110" rx="4" fill="none" stroke="#2166ac" stroke-width="1.5"/>
+    <text x="375" y="153" text-anchor="middle" font-family="system-ui, sans-serif"
+          font-size="14" font-weight="600">gate inputs</text>
+    <text x="375" y="178" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13">measurement amplitudes</text>
+    <text x="375" y="199" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13">included sensor rows</text>
+    <text x="375" y="220" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13">fitted current subspace</text>
+
+    <path d="M470 180 H545" stroke="#555" stroke-width="1.2" fill="none" marker-end="url(#arrow)"/>
+
+    <g font-family="system-ui, sans-serif" font-size="13">
+      <rect x="545" y="83" width="170" height="76" rx="4" fill="none" stroke="#555"/>
+      <text x="630" y="108" text-anchor="middle" font-weight="600">artifact arm</text>
+      <text x="630" y="130" text-anchor="middle">description prediction</text>
+      <text x="630" y="148" text-anchor="middle">minus selected data</text>
+
+      <rect x="545" y="201" width="170" height="76" rx="4" fill="none" stroke="#555"/>
+      <text x="630" y="226" text-anchor="middle" font-weight="600">incumbent arm</text>
+      <text x="630" y="248" text-anchor="middle">EFIT prediction</text>
+      <text x="630" y="266" text-anchor="middle">minus selected data</text>
+    </g>
+
+    <g stroke="#555" stroke-width="1.2" fill="none" marker-end="url(#arrow)">
+      <path d="M715 121 H770 Q790 121 790 141 V158"/>
+      <path d="M715 239 H770 Q790 239 790 219 V202"/>
+    </g>
+
+    <rect x="790" y="145" width="150" height="70" rx="4" fill="none" stroke="#b35806" stroke-width="1.5"/>
+    <text x="865" y="170" text-anchor="middle" font-family="system-ui, sans-serif"
+          font-size="14" font-weight="600">comparison</text>
+    <text x="865" y="193" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13">artifact − incumbent</text>
+
+    <text x="480" y="350" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" fill="#444">
+      Shared corrections move both residuals, but by different amounts when the predictions differ.
+    </text>
+  </g>
+</svg>

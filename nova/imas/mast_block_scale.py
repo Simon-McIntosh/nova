@@ -22,11 +22,11 @@ ordinary setting -- and what the read divides by is the nearest rung of the decl
 ladder to that relative factor: an exact 2, 1/2, root two or its reciprocal.  A
 different anchor would move every rung of one channel by one common factor, and a
 common per-channel factor is what this correction deliberately leaves alone.  The
-channel's overall level, which is
-where any description error sits, is left exactly as it was: promoting a static
-per-channel gain is a separate question that the sensor adjudication owns and
-answered separately.  A block whose relative factor does not land on a rung is
-refused rather than rounded onto one.
+channel's overall level, which is where any description error sits, is not folded
+into the acquisition rung.  A separately promoted sensor gain composes with that
+rung later in the correction chain, retaining the semantic distinction between the
+instrument setting and the channel calibration.  A block whose relative factor does
+not land on a rung is refused rather than rounded onto one.
 
 **A block carries the shots it was measured on, not just its span.**  The cohort
 that measured these settings is a few dozen plasma-free shots scattered over an
@@ -57,11 +57,13 @@ from typing import Any, Iterable, Mapping, Sequence
 import numpy as np
 
 from nova.calibrate.correction_model import (
+    ChannelCorrection,
     CorrectionKind,
     CorrectionSet,
     CorrectionStatus,
 )
-from nova.calibrate.corrections import build_chain
+from nova.calibrate.correction_set import target
+from nova.calibrate.corrections import CorrectionChain, build_chain
 from nova.imas.mast_acquisition_scale import (
     LADDER_TOLERANCE,
     ChannelScaleHistory,
@@ -364,7 +366,7 @@ class ScaleBracket:
 
 @dataclass(frozen=True)
 class ScaleCorrection:
-    """The setting one read divided out, and what warranted it."""
+    """The promoted multiplier one read divided out, and what warranted it."""
 
     channel: str
     shot: int
@@ -385,7 +387,7 @@ class ScaleCorrection:
         return self.disposition != MEASURED
 
     def normalise(self, values: Any) -> np.ndarray:
-        """Return the samples with the acquisition setting removed.
+        """Return the samples with the warranted promoted multiplier removed.
 
         A refused or unmeasured channel comes back untouched rather than divided by
         one, so a consumer cannot tell an applied unity from a refusal by inspecting
@@ -654,22 +656,34 @@ def _channel_settings(
     return {channel: tuple(sorted(rows)) for channel, rows in sorted(grouped.items())}
 
 
+def _promoted_index(
+    document: CorrectionSet,
+) -> dict[tuple[str, CorrectionKind], tuple[ChannelCorrection, ...]]:
+    """Index promoted corrections by their target and semantic kind."""
+
+    grouped: dict[tuple[str, CorrectionKind], list[ChannelCorrection]] = {}
+    for correction in document.corrections:
+        if CorrectionStatus(correction.status) is not CorrectionStatus.promoted:
+            continue
+        key = (target(correction), CorrectionKind(correction.kind))
+        grouped.setdefault(key, []).append(correction)
+    return {key: tuple(rows) for key, rows in grouped.items()}
+
+
 @dataclass(frozen=True)
 class CorrectionSetScales:
-    """Serve the acquisition setting a read divides out, from a correction document.
+    """Serve the promoted correction chain from a correction document.
 
     The same reads :class:`BlockScaleTable` serves, answered from the versioned
     correction set rather than from a table beside this module.  The document is the
     one that also carries the sensor gains, the pickup states and the exclusions, so
     the setting a channel was recorded at stops being a fact only this module knows.
 
-    What divides a signal comes from
+    What corrects a signal comes from
     :func:`~nova.calibrate.corrections.build_chain`, which orders the stages from the
-    schema's own ranks -- this class states which stage it is drawing and never how
-    the stages compose.  It draws the acquisition rung alone: the five promoted sensor
-    gains in the same document are not removed on this path today, and quietly
-    starting to remove them here would change every fit's amplitude while looking like
-    a storage change.
+    schema's own ranks.  The read draws every promoted kind that applies to the
+    channel; narrowing that selection here would make the document's promoted status
+    untrue at the point where samples are served.
 
     ``settings`` indexes the same corrections to answer what warranted a read that
     divided by nothing, which a chain cannot report because the correction it would
@@ -678,6 +692,10 @@ class CorrectionSetScales:
 
     document: CorrectionSet
     settings: Mapping[str, tuple[ChannelSetting, ...]] = field(default_factory=dict)
+    promoted: Mapping[tuple[str, CorrectionKind], tuple[ChannelCorrection, ...]] = (
+        field(default_factory=dict)
+    )
+    chain_documents: Mapping[str, CorrectionSet] = field(default_factory=dict)
 
     @classmethod
     def create(cls, document: CorrectionSet) -> CorrectionSetScales:
@@ -693,7 +711,25 @@ class CorrectionSetScales:
                         f"{second.pulse_start}-{second.pulse_end}, which overlap, so a "
                         "shot in the overlap has two settings"
                     )
-        return cls(document=document, settings=settings)
+        promoted = _promoted_index(document)
+        chain_documents = {
+            channel: document.model_copy(
+                update={
+                    "corrections": [
+                        correction
+                        for kind in CorrectionKind
+                        for correction in promoted.get((channel, kind), ())
+                    ]
+                }
+            )
+            for channel in settings
+        }
+        return cls(
+            document=document,
+            settings=settings,
+            promoted=promoted,
+            chain_documents=chain_documents,
+        )
 
     @property
     def channels(self) -> tuple[str, ...]:
@@ -711,18 +747,20 @@ class CorrectionSetScales:
 
     @property
     def corrected(self) -> tuple[str, ...]:
-        """Return the channels some interval of which a read divides a rung out of."""
+        """Return channels some measured interval of which a read corrects."""
 
         return tuple(
             channel
             for channel in self.channels
             if any(
-                not row.refused and row.rung != 1.0 for row in self.settings[channel]
+                not row.refused
+                and self.correction(channel, row.pulse_start).scale != 1.0
+                for row in self.settings[channel]
             )
         )
 
     def correction(self, channel: str, shot: int) -> ScaleCorrection:
-        """Return the setting a read of this channel on this shot may divide by."""
+        """Return the promoted multiplier a read may divide by at this shot."""
 
         shot = int(shot)
         rows = self.settings.get(channel, ())
@@ -746,6 +784,14 @@ class CorrectionSetScales:
             channel, shot, 1.0, UNMEASURED, candidates=(nearest.rung,)
         )
 
+    def chain(self, channel: str, shot: int) -> CorrectionChain:
+        """Return every promoted correction for a covered channel in stage order."""
+
+        document = self.chain_documents.get(channel)
+        if document is None:
+            return CorrectionChain(channel=channel)
+        return build_chain(document, channel, pulse=int(shot))
+
     def _covered(
         self, channel: str, shot: int, setting: ChannelSetting
     ) -> ScaleCorrection:
@@ -755,15 +801,17 @@ class CorrectionSetScales:
             return ScaleCorrection(
                 channel, shot, 1.0, REFUSED, candidates=(setting.measured_value,)
             )
-        chain = build_chain(
-            self.document,
-            channel,
-            pulse=shot,
-            kinds=(CorrectionKind.acquisition_scale,),
+        chain = self.chain(channel, shot)
+        acquisition = next(
+            step
+            for step in chain.steps
+            if step.kind is CorrectionKind.acquisition_scale
         )
-        step = chain.steps[0]
         return ScaleCorrection(
-            channel, shot, step.value, MEASURED if step.measured else BRACKETED
+            channel,
+            shot,
+            chain.multiplier,
+            MEASURED if acquisition.measured else BRACKETED,
         )
 
     def corrections(
@@ -778,7 +826,7 @@ class CorrectionSetScales:
     def normalise(
         self, shot: int, probes: Mapping[str, np.ndarray]
     ) -> tuple[dict[str, np.ndarray], tuple[ScaleCorrection, ...]]:
-        """Divide one shot's probe channels by the setting each was recorded at."""
+        """Divide one shot's probe channels by every warranted promoted multiplier."""
 
         rows = self.corrections(shot, probes)
         lookup = {row.channel: row for row in rows}
@@ -792,7 +840,7 @@ class CorrectionSetScales:
 
 
 ScaleReader = BlockScaleTable | CorrectionSetScales
-"""What a consumer may be handed to supply a shot's acquisition settings.
+"""What a consumer may be handed to supply a shot's correction multiplier.
 
 Two readers answer the same reads from different sources.  The document is what the
 read path serves by default; a table built from loose blocks is what a sweep holds
@@ -858,7 +906,7 @@ about the channel and not about the near field of one coil.
 
 @cache
 def promoted_block_scales() -> CorrectionSetScales:
-    """Return the settings every read applies unless told otherwise.
+    """Return the promoted correction chains every read applies unless told otherwise.
 
     Read from the machine's correction document, which is also where the sensor
     gains, the pickup states and the exclusions live, so a channel's acquisition

@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-12">
-<meta name="plan-version" content="3">
-<meta name="plan-commits" content="08150c40">
+<meta name="plan-version" content="4">
+<meta name="plan-commits" content="08150c40,60df29bb">
 <meta name="plan-artifacts" content="docs/evidence/archive/mast-corrected-read-layer-landed.html">
-<meta name="plan-impl" content="0.25">
+<meta name="plan-impl" content="0.5">
 </head>
 <body>
   <main class="plan-doc">
@@ -189,7 +189,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-mcrl-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-08" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mcrl-001" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-08" data-recommends-skill="" data-resolved-at="2026-08-12T20:14:47+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Land the single-door corrected reader (§3 items 1–2)</h4>
     <div class="r-fu-body"><p>The engine and document are shipped; this rung wires the
         guarantee: (channel, kind) index, full promoted chain in stage order with the
@@ -197,11 +197,20 @@
         read_shot_waveforms funnel, raw access as one explicit named object, and a guard test
         that fails on any new bypass.</p></div>
     <pre class="r-fu-prompt">/reckon-ship mast-corrected-read-layer §3</pre>
+    <p class="r-fu-outcome">§3 items 1-2 landed (08150c40, 60df29bb). The chain now indexes by (target, kind) once at load and composes every promoted kind in schema ApplicationStage order, shifting 290 of 3,395 banked reads with obr17 +99.56% as the 0.50 probe gain divided out; refused and unmeasured channels return byte-equivalent. Nine sensor-group doors are closed behind read_shot_waveforms with an AST guard proving zero bypasses outside the door module, and raw access survives as the single explicit RawArchiveReader. Items 3-4 (promotion route into the correction document, corrected ingest seam for the GPU catalog) remain and are carried by f-mcrl-002.</p>
+    </article>
+<article class="r-fu" data-id="f-mcrl-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-12" data-recommends-skill="/reckon-ship mast-corrected-read-layer §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Promotion route and the corrected ingest seam (§3 items 3-4)</h4>
+    <div class="r-fu-body"><p>The door is closed and the full chain applies, so the two remaining items are the write side and the consumer contract: point <code>nova/scripts/mast_acquisition_sweep.py --promote-to</code> at <code>nova/calibrate/corrections/mast/magnetics.yaml</code> with a set-version bump and stamped provenance instead of a JSON table, and expose the corrected read as the documented input contract for the GPU catalog's solve-ready shard staging so that ingest inherits corrections by construction. This plan cannot ship, and spine-efit-parity stays blocked, until both land.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship mast-corrected-read-layer §3</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s3" data-id="c-20260812-chain" data-who="reckon-ship" data-when="2026-08-12T18:10:00+00:00">
-    <div class="r-comment-body">promoted-chain-widening landed (§3 item 1) — commit 08150c40; cutover gate passed; measure: promoted corrections indexed once by (target, kind) at load, every applicable step composing in schema APPLICATION_ORDER; on the banked vacuum edge cohort 290 of 3,395 reads changed across the five promoted-gain channels, unit-input normalised mean 1.001788 -> 1.012358 (shift +0.010570); per-channel obr17 +99.56% (the 0.50 probe gain divided out), obv04 +16.67%, obr05 -9.44%, obv05 +5.83%, ccbv35 +5.55%. The gain-exclusion pin was replaced by an acquisition_scale-then-gain order assertion; refused and unmeasured channels return byte-equivalent and untouched rather than divided by 1.0. Calibrate lane 222 passed / 2 skipped. Artifacts: /nova/evidence/archive/mast-corrected-read-layer-landed#gain-shift</div>
+    <div class="r-comment-body">promoted-chain-widening landed (§3 item 1) — commit 08150c40; cutover gate passed; measure: promoted corrections indexed once by (target, kind) at load, every applicable step composing in schema APPLICATION_ORDER; on the banked vacuum edge cohort 290 of 3,395 reads changed across the five promoted-gain channels, unit-input normalised mean 1.001788 -&gt; 1.012358 (shift +0.010570); per-channel obr17 +99.56% (the 0.50 probe gain divided out), obv04 +16.67%, obr05 -9.44%, obv05 +5.83%, ccbv35 +5.55%. The gain-exclusion pin was replaced by an acquisition_scale-then-gain order assertion; refused and unmeasured channels return byte-equivalent and untouched rather than divided by 1.0. Calibrate lane 222 passed / 2 skipped. Artifacts: /nova/evidence/archive/mast-corrected-read-layer-landed#gain-shift</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260812-doors" data-who="reckon-ship" data-when="2026-08-12T21:00:00+00:00">
+    <div class="r-comment-body">close-the-sensor-doors landed (§3 item 2) — commit 60df29bb; structural-guard gate passed; measure: 9 direct sensor-group reads routed through read_shot_waveforms (4 in flux-loop adjudication, the rest across solve inputs and the error-field screen); an AST guard over nova/imas/mast_*.py reports ZERO direct FIELD_GROUP or literal amb subscripts outside the door module and passes 2/2, failing on any new bypass; RawArchiveReader/RAW_ARCHIVE gives raw access one explicit name and mast_acquisition_sweep.py is migrated onto it, dropping the block_scale opt-out; ShotWaveforms.sensors exposes every shape-compatible amb signal. Scoped consumer lane 165 passed / 5 optional-dependency skips. The two probe-axis failures the node stopped on (+pi/2 vs -pi/2 at shots 15000 and 13500) were attributed by the independent lane gate as the long-standing packaged-registry probe-angle items, present pre-merge and untouched by any merge — not introduced here. Artifacts: /nova/evidence/archive/mast-corrected-read-layer-landed#doors</div>
 </div>
 </section>
 </main>

@@ -66,5 +66,38 @@
   rather than divided by 1.0, so a channel that was never measured stays distinguishable from one
   measured at unity. Dedicated array tests cover this and are green.</p>
 
+  <h2 id="doors">§3 item 2 — closing the doors</h2>
+
+  <p>Commit <code>60df29bb</code>, merged to <code>main</code>. Nine direct sensor-group reads now
+  route through <code>read_shot_waveforms</code>: four in
+  <code>mast_flux_loop_adjudication.py</code>, and the remainder across
+  <code>mast_solve_inputs.py</code> and <code>mast_error_field_screen.py</code>.
+  <code>ShotWaveforms.sensors</code> exposes every shape-compatible amb signal so the consumers have
+  no reason to reach past the door, and <code>RawArchiveReader</code> / <code>RAW_ARCHIVE</code>
+  gives read-as-published access one explicit name. <code>mast_acquisition_sweep.py</code> now calls
+  <code>RAW_ARCHIVE.read_shot_waveforms</code> at both raw calibration sites and no longer disables
+  correction through a <code>block_scale</code> keyword.</p>
+
+  <p><strong>The guarantee is enforced structurally, not by convention.</strong> An AST guard walks
+  <code>nova/imas/mast_*.py</code> and reports zero direct <code>FIELD_GROUP</code> or literal
+  <code>amb</code> subscripts outside the door module; it passes 2/2 and fails on any new bypass.
+  This is what converts "corrected by default" into "corrected by construction" — the property the
+  plan exists for, and the one that a later promoted flux-loop gain would silently have broken
+  through the four adjudication sites.</p>
+
+  <p>Scoped consumer lane: 165 passed, 5 optional-dependency skips.</p>
+
+  <p><strong>Two probe-axis failures were attributed rather than assumed.</strong> The node stopped
+  on
+  <code>tests/test_mast_solve_inputs.py::test_each_probe_channel_reads_the_sensor_it_is_mapped_to</code>
+  returning <code>+π/2</code> where the described artifact expects <code>−π/2</code> at shots 15000
+  and 13500, and correctly declined to claim they were pre-existing without evidence. The
+  independent lane gate then settled it: both appear in the pre-merge lane, and none of the merges
+  touches their test or solve-input path — see
+  <a href="/nova/evidence/archive/nova-test-lane-health-landed#lane-baseline">the banked lane</a>.
+  They are the long-standing packaged-registry probe-angle items and remain open under their own
+  work; moving <code>trace_matched_columns</code> onto the explicit raw reader did not change
+  them.</p>
+
 </main></body>
 </html>

@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="nova-test-lane-health-landed">
+  <meta name="plan-title" content="Nova Test Lane Health — Cumulative Evidence">
+  <meta name="plan-summary" content="Landed record of the catalog-scan thread-starvation deadlock: the diagnosis that ruled out a configured limit, the inline single-worker repair, and the sentinel regression that pins it">
+  <meta name="plan-status" content="active">
+  <meta name="plan-evidence-for" content="nova-test-lane-health">
+  <meta name="plan-verifies" content="nova-test-lane-health#s2">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>Nova Test Lane Health — Cumulative Evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+
+  <p>Execution record for <a href="/nova/nova-test-lane-health.html">nova-test-lane-health</a>.</p>
+
+  <h2 id="deadlock">§2 item 1 — the catalog scan in a thread-starved process</h2>
+
+  <p>Commit <code>459cecce</code>, merged to <code>main</code>.</p>
+
+  <h3 id="diagnosis">The diagnosis, and what it ruled out</h3>
+
+  <p>A monolithic <code>pytest -m "slow or not slow"</code> run collected 5,769 tests, parked at 76%
+  for about 18 minutes in the eighteenth catalog-geometry test, and never emitted counts. Two
+  independent <code>py-spy</code> snapshots put the main thread in
+  <code>threading.Thread.start()</code>, reached from <code>ThreadPoolExecutor.map</code> in
+  <code>scan_catalog</code>, <strong>before any executor worker thread was created</strong> — reached
+  from
+  <code>tests/test_mast_catalog_geometry.py::test_catalog_scan_resumes_from_atomic_fingerprint_checkpoint</code>.
+  The same test passed from a fresh process in 16.79&nbsp;s.</p>
+
+  <p><strong>The negative result is what makes the diagnosis usable.</strong> A limit probe on the
+  compute node reported <code>RLIMIT_NPROC=770063</code> and <code>pids.max=max</code>, so this is
+  <em>not</em> a configured process or cgroup PID ceiling, and it is not slow catalog logic. What
+  remains is accumulated suite-process native-thread starvation: by that point in suite order the
+  process can no longer start a thread, and any code path that must start one to make progress
+  stops forever. Ruling out the two cheap explanations is what redirected the fix from "raise a
+  limit" to "stop requiring a thread".</p>
+
+  <h3 id="repair">The repair and its pin</h3>
+
+  <p>A <code>workers=1</code> scan now fingerprints inline without constructing a
+  <code>ThreadPoolExecutor</code> at all; <code>workers&gt;1</code> stays inside a context manager
+  whose exit deterministically shuts its threads down. <strong>The regression test replaces
+  <code>ThreadPoolExecutor</code> with a failing sentinel</strong>, so both the initial and the
+  resumed one-worker scan prove zero executor-thread dependency by construction rather than by
+  timing — a test that cannot pass if the dependency returns.</p>
+
+  <table>
+    <thead><tr><th>Run</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Catalog geometry module alone</td><td>18 passed in 4.76 s</td></tr>
+      <tr><td>Ordered subset, JAX config through catalog geometry, one process</td><td>241 passed in 24.14 s, final summary reached</td></tr>
+    </tbody>
+  </table>
+
+  <p>The ordered subset is the meaningful one: it initialises the JAX and MAST process state that
+  precedes the catalog module in suite order — the state that caused the starvation — and then
+  reaches a final pytest summary instead of parking.</p>
+
+  <h2 id="lane-baseline">The banked lane at tree 567b5c3b</h2>
+
+  <p>Commit <code>1c33c365</code> records the lane in <code>benchmarks/BASELINE.md</code>, measured
+  before the repair above and therefore <strong>process-sharded</strong>. That caveat is recorded in
+  the file itself: sharding removes the cross-test process state, so these figures do not attest
+  that the monolithic lane is healthy.</p>
+
+  <table>
+    <thead><tr><th>Outcome</th><th>Count</th></tr></thead>
+    <tbody>
+      <tr><td>passed</td><td>5,657</td></tr>
+      <tr><td>failed</td><td>3</td></tr>
+      <tr><td>skipped</td><td>107</td></tr>
+      <tr><td>xfailed</td><td>4</td></tr>
+      <tr><td>total outcomes</td><td>5,771</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>All three failures are pre-existing, each shown rather than assumed:</strong></p>
+
+  <ul>
+    <li><code>tests/test_mast_solve_inputs.py::test_each_probe_channel_reads_the_sensor_it_is_mapped_to</code>
+    at shots 15000 and 13500 — the two long-standing packaged-registry probe-angle items; they also
+    appear in the earlier pre-merge lane and none of the four merges touches their test or
+    solve-input path.</li>
+    <li><code>tests/test_equilibrium_forward_reference.py::test_the_passive_closure_moves_the_reproduction_by_a_tenth_of_a_percent</code>
+    — a real-worktree run at <code>1dde8487</code>, the first merge's parent, reproduced the
+    identical internal-inductance value 0.4165026973920516 against its 0.15 bound.</li>
+  </ul>
+
+  <p><strong>Two candidate failures were investigated and correctly not banked.</strong>
+  <code>tests/test_datasource.py::test_shared_attributes</code> failed only under
+  <code>git archive</code> with <code>InvalidGitRepositoryError</code> and passed in a real git
+  worktree — an artefact of the measurement method. A
+  <code>test_a_compiled_kernel_outlives_the_process_that_produced_it</code> failure came from a
+  replacement harness setting <code>JAX_COMPILATION_CACHE_DIR</code>, and was replaced by a clean
+  37.87&nbsp;s exact-test pass. Both distinctions matter: a lane baseline that banks its own
+  instrumentation errors teaches every later reader to distrust it.</p>
+
+</main></body>
+</html>

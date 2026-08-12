@@ -663,7 +663,7 @@ worktree. Its earlier `InvalidGitRepositoryError` came only from running in a
 Git archive with no GitPython-visible worktree metadata, so that artifact is
 not included in the failure count.
 
-### Monolithic lane on the repaired tree — interrupted, no final counts
+### Monolithic lane on the repaired tree — catalog park cleared, native abort
 
 Recorded 2026-08-12 on `sun_debug` node `98dci4-clu-3141` (Intel Xeon Gold
 5220), Python 3.14.2 and pytest 9.1.1, with `TMPDIR=/tmp` and JAX on CPU. One
@@ -671,12 +671,43 @@ process ran `uv run --no-sync pytest -m "slow or not slow"` on integrated main
 at `17d173be8ea287d43de9cceeb9a578056ee77dec`, including the catalog-scan
 repair at `459cecce`.
 
-The process remained active and reached **62%** in **22 min 23 s**, where
-SLURM stopped it at the allocation limit while
-`tests/test_equilibrium_forward_reference.py` was executing. It did not reach
-the former catalog-scan parking test and did not exhibit a stable parked
-interval, so there is no parking stack to record from this attempt. It also did
-not emit a final pytest summary: **monolithic passed/failed/skipped/xfailed
-counts are unavailable**, and this attempt does not attest that the repaired
-monolithic lane completes. Full log:
-`/home/ITER/mcintos/.cache/nova-test-logs/monolithic-lane-proof-17d173be-20260812.log`.
+That bounded attempt remained active and reached **62%** in **22 min 23 s**,
+where SLURM stopped it at the allocation limit while
+`tests/test_equilibrium_forward_reference.py` was executing. A second
+single-process attempt started on integrated main
+`d4ce244da08d995e52364600547feba8a8b64281` with a 55-minute allocation. It
+passed all **18** `tests/test_mast_catalog_geometry.py` cases in suite order and
+continued through the late lane, so the former catalog-geometry parking site is
+cleared on the repaired tree.
+
+The second process did not complete. After **33 min 44 s**, JAX aborted natively
+while compiling an indexed slice in
+`tests/test_topology_boundary.py::test_x_mask_excludes_cells_beyond_null_heights`.
+The process had reached the topology-boundary file after the 97% progress mark;
+it exited 134 before pytest could emit its retained failure report or final
+summary. The compute-visible main checkout also advanced from `d4ce244d` to
+`cb70bdf8` during the execution. Therefore **monolithic
+passed/failed/skipped/xfailed counts remain unavailable**, and neither attempt
+attests that the monolithic lane completes. Full second-attempt log:
+`/home/ITER/mcintos/.cache/nova-test-logs/monolithic-lane-proof-d4ce244d-20260812.log`.
+
+The true-suite-order progress stream recorded six failures in
+`tests/test_biotsavart.py`. Mapping those positions against the collected order
+identifies the six IDs below. Because the native abort suppressed pytest's
+failure section, the operands were recovered once from the same `greens.py`
+and test content in a separate CPU diagnostic; no attribution or repair is
+made here.
+
+| parameterized test suffix | computed `bz` | axial reference |
+|---|---:|---:|
+| `test_axial_vertical_field[rectangle-2.1--3.2]` | 0.0026190589451183808 | 0.002619014424375907 |
+| `test_axial_vertical_field[rectangle-2.1-7.3]` | 0.000335169270357497 | 0.0003350661902035029 |
+| `test_axial_vertical_field[rectangle-7.3--3.2]` | 0.003504639823056415 | 0.00350455738058807 |
+| `test_axial_vertical_field[rectangle-7.3-7.3]` | 0.0016128966798803622 | 0.0016128273677486525 |
+| `test_axial_vertical_field[rectangle-12--3.2]` | 0.002503586218402293 | 0.0025033565218426875 |
+| `test_axial_vertical_field[rectangle-12-7.3]` | 0.0017311163820889922 | 0.0017304562380388905 |
+
+All six are exact IDs under `tests/test_biotsavart.py::`; each failed the same
+default-tolerance `np.isclose(computed_bz, axial_vertical_field(...))`
+assertion. Full operand recovery log:
+`/home/ITER/mcintos/.cache/nova-test-logs/monolithic-lane-proof-biotsavart-assertions.log`.

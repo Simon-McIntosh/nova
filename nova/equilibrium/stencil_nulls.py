@@ -111,13 +111,26 @@ def _shift(field, dz, dr):
 
 
 @jax.jit
-def ring_sign_changes(psi):
-    """Return the legacy scalar-ring sign-change diagnostic at each vertex."""
+def ring_sign_changes(psi, stencil=None):
+    """Return cyclic neighbour sign changes around each candidate centre.
+
+    With no ``stencil``, ``psi`` is a rectangular raster and the historical
+    eight-neighbour result is returned with its border marked ``-1``.  An
+    explicit stencil has shape ``(centres, vertices)`` with the centre index
+    first and an angle-sorted neighbour ring after it; in that form ``psi``
+    carries node values on its last axis.
+    """
+    if stencil is not None:
+        stencil = jnp.asarray(stencil)
+        if stencil.ndim != 2 or stencil.shape[1] < 2:
+            raise ValueError("stencil must have shape (centres, centre-plus-ring)")
+        clusters = psi[..., stencil]
+        ring = clusters[..., 1:] > clusters[..., :1]
+        return jnp.sum(ring != jnp.roll(ring, -1, axis=-1), axis=-1, dtype=jnp.int32)
+
     nz, nr = psi.shape
-    ring = jnp.stack([_shift(psi, dz, dr) > psi for dz, dr in _RING], axis=0)
-    changes = jnp.zeros((nz, nr), dtype=jnp.int32)
-    for index in range(8):
-        changes += (ring[index] != ring[(index + 1) % 8]).astype(jnp.int32)
+    ring = jnp.stack([_shift(psi, dz, dr) > psi for dz, dr in _RING], axis=-1)
+    changes = jnp.sum(ring != jnp.roll(ring, -1, axis=-1), axis=-1, dtype=jnp.int32)
     interior = jnp.zeros((nz, nr), dtype=bool).at[1:-1, 1:-1].set(True)
     return jnp.where(interior, changes, -1)
 

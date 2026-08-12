@@ -90,20 +90,11 @@ from nova.imas.mast_error_field_screen import (
 )
 from nova.imas.mast_fitted_parameters import MIS_SCALED_SHOTS
 from nova.imas.mast_probe_calibration import shot_gains, standoff_table
-from nova.imas.mast_vacuum_cohort import probe_channels, read_shot_waveforms
+from nova.imas.mast_vacuum_cohort import RAW_ARCHIVE, probe_channels
 from nova.imas.mast_vacuum_response import MINIMUM_STANDOFF, ResponseModel
 
 CACHE = Path.home() / ".cache" / "nova-mast"
 """Where the cohort's own records live and this one is written beside them."""
-
-RAW = BlockScaleTable()
-"""The read path with no correction applied.
-
-Named once and passed explicitly to every read in this driver.  The sweep measures
-the setting the archive recorded a channel at, so it has to see what the archive
-published; defaulting to the promoted table would divide the setting out first and
-then measure that the channel is at unity.
-"""
 
 REGISTRY_SHOT = 11766
 """The shot the machine geometry selection is taken at, as the cohort took it."""
@@ -215,7 +206,7 @@ def measure_shot(
         return {}
     refused = screen.refused(drive)
     try:
-        waveforms = read_shot_waveforms(shot, block_scale=RAW)
+        waveforms = RAW_ARCHIVE.read_shot_waveforms(shot)
     except Exception as error:  # noqa: BLE001
         log(f"  {shot}: unreadable ({error})")
         return {}
@@ -475,7 +466,7 @@ def array_shot(shot: int, screen: ErrorFieldScreen) -> dict[str, float]:
     try:
         drive = read_error_field_drive(shot)
         refused = set(screen.refused(drive))
-        waveforms = read_shot_waveforms(shot, block_scale=RAW)
+        waveforms = RAW_ARCHIVE.read_shot_waveforms(shot)
     except Exception as error:  # noqa: BLE001
         log(f"  {shot}: unreadable ({error})")
         return {}

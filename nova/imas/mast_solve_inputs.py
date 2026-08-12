@@ -76,17 +76,18 @@ from nova.imas.machine_evidence import FieldEvidence
 from nova.imas.mast_block_scale import (
     ScaleCorrection,
     ScaleReader,
-    promoted_block_scales,
 )
 from nova.imas.mast_vacuum_cohort import (
     CURRENT_GROUP,
     FIELD_GROUP,
     KILO,
+    RawArchiveReader,
     SHOT_STORE,
     CohortError,
     SignalProvenance,
     parse_probe_channel,
     probe_channels,
+    read_shot_waveforms,
 )
 from nova.io.cocos import IP_LIKE, ONE_LIKE, PSI_LIKE
 from nova.io.sourcemap import (
@@ -1062,7 +1063,7 @@ def read_solve_inputs(
     import zarr
 
     root = Path(store)
-    group = zarr.open_group(f"{root}/{shot}.zarr", mode="r")
+    waveforms = read_shot_waveforms(shot, store=store, block_scale=block_scale)
     clocks: dict[str, np.ndarray] = {}
     samples: dict[str, np.ndarray] = {}
     dropped: dict[str, int] = {}
@@ -1081,18 +1082,33 @@ def read_solve_inputs(
         if not wanted:
             continue
         name = _CLOCK_GROUPS[base]
-        if name not in group:
-            absent.extend(wanted)
-            continue
-        node = group[name]
-        keys = set(node.keys())
-        identity = str(dict(node.attrs).get("uuid", ""))
-        clock = np.asarray(node["time"][...], dtype=float)
+        if base == FIELD_CLOCK:
+            raw_source = waveforms.sensors
+            keys = set(raw_source)
+            clock = waveforms.time
+            identity = next(
+                (
+                    row.group_identity
+                    for row in waveforms.provenance
+                    if row.group == FIELD_GROUP
+                ),
+                "",
+            )
+        else:
+            try:
+                node = zarr.open_group(f"{root}/{shot}.zarr", mode="r")[CURRENT_GROUP]
+            except Exception:  # noqa: BLE001 - group absence is reported below
+                absent.extend(wanted)
+                continue
+            keys = set(node.keys())
+            clock = np.asarray(node["time"][...], dtype=float)
+            identity = str(dict(node.attrs).get("uuid", ""))
+            raw_source = node
         present = [channel for channel in wanted if channel in keys]
         absent.extend(channel for channel in wanted if channel not in keys)
         raw = {}
         for channel in present:
-            values = np.asarray(node[channel][...], dtype=float)
+            values = np.asarray(raw_source[channel], dtype=float)
             if values.shape != clock.shape:
                 misaligned.append(channel)
                 continue
@@ -1110,14 +1126,9 @@ def read_solve_inputs(
                 SignalProvenance(str(root), shot, name, channel, identity)
             )
         available.extend(present)
-    table = promoted_block_scales() if block_scale is None else block_scale
-    probes = {
-        channel: values
-        for channel, values in samples.items()
-        if _probe_channel(channel)
-    }
-    normalised, corrections = table.normalise(shot, probes)
-    samples.update(normalised)
+    corrections = tuple(
+        row for row in waveforms.scale_corrections if row.channel in samples
+    )
     selected = source_map.select(available)
     dataset = tensorize(
         selected,
@@ -1184,13 +1195,14 @@ def trace_matched_columns(
     reconstruction = group[RECONSTRUCTION_GROUP]
     fitted = np.asarray(reconstruction[array_name][...], dtype=float)
     fitted_time = np.asarray(reconstruction["time"][...], dtype=float)
-    field = group[FIELD_GROUP]
-    field_time = np.asarray(field["time"][...], dtype=float)
+    waveforms = RawArchiveReader(store).read_shot_waveforms(shot)
+    field = waveforms.sensors
+    field_time = waveforms.time
     matches: dict[str, tuple[int, float, float]] = {}
     for channel in channels:
         if channel not in field:
             continue
-        values = np.asarray(field[channel][...], dtype=float)
+        values = np.asarray(field[channel], dtype=float)
         if values.shape != field_time.shape:
             continue
         usable = np.isfinite(values) & np.isfinite(field_time)

@@ -23,8 +23,10 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-12">
 <meta name="plan-supersedes" content="imas-ambix:batched-newton-accelerator">
-<meta name="plan-version" content="8">
-<meta name="plan-impl" content="0.5">
+<meta name="plan-version" content="11">
+<meta name="plan-impl" content="0.833">
+<meta name="plan-commits" content="232cf5fa,254ed6fb,f5feee0a">
+<meta name="plan-artifacts" content="benchmarks/flux_surface_flood.py,benchmarks/fixed_point_ladder.py,docs/evidence/archive/spine-boundary-accelerator-landed.html">
 </head>
 <body>
   <main class="plan-doc">
@@ -232,6 +234,17 @@ Done-when
     <pre class="r-fu-prompt">/reckon-ship spine-boundary-accelerator §2</pre>
     </article>
 </section>
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-20260812-flood" data-who="reckon-ship" data-when="2026-08-12T17:55:00+00:00">
+    <div class="r-comment-body">flood-fill-dilation landed — commit 232cf5fa; read-equivalence gate passed; measure: exact array equality against the nr+nz reference on both fixtures and both grids, 2 doubling steps vs the log2(nr+nz) bound of 7.34 and 8.33, replacing 162 and 322 forced iterations, per-evaluation speedup 2.26x at 65x97 and 5.19x at 193x129 (JAX CPU, warm JIT). Behaviour pins green (27 tests). The step count beat the predicted bound on both grids and did not grow with the grid, so the speedup rises with size. Artifacts: benchmarks/flux_surface_flood.py; /nova/evidence/archive/spine-boundary-accelerator-landed#flood-fill</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260812-hexstencil" data-who="reckon-ship" data-when="2026-08-12T18:02:00+00:00">
+    <div class="r-comment-body">hex-stencil-nulls landed — commit 254ed6fb; conditioning gate passed; measure: ring_sign_changes now takes a centre-plus-neighbour index array and consumes the (1,7) angle-sorted hex stencil from PlasmaGrid.loop_neighbour_vertices, returning 4 sign changes on the synthetic saddle; the exactly-determined 6-coefficient sub-null fit on the 7-point cluster has rank 6 and normalised condition number 5.47, so the hex cluster is well-posed and nothing blocks a later default switch on conditioning grounds. Raster path unchanged as the default; 14 passed / 1 skipped (GPU unavailable). Artifacts: /nova/evidence/archive/spine-boundary-accelerator-landed#hex-stencil</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260812-binding" data-who="reckon-ship" data-when="2026-08-12T18:20:00+00:00">
+    <div class="r-comment-body">binding-search-warm-start landed — commit f5feee0a; read-equivalence gate passed; measure: limited and diverted fixtures reproduce the cold s_flood to exact array equality and a FORCED bracket miss reproduces it exactly too, so a miss costs correctness nothing; cold 4.855e-03 s/eval vs warm 2.821e-03 s/eval, speedup 1.72x, 6 search evaluations on a warm hit against 48 cold levels, 6/6 warm hits. All 20 connectivity and topology behaviour pins green. Note the gap: an 8x reduction in search work returns only 1.72x in time, so fixed per-evaluation overhead now dominates and further shrinking the level sweep has little left to win. JAX cpu:0 — not a GPU claim. Artifacts: /nova/evidence/archive/spine-boundary-accelerator-landed#binding-search</div>
+</div>
+</section>
+</main>
 </body>
 </html>

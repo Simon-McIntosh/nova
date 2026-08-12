@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-12T19:29:39",
+  "updated": "2026-08-12T19:57:17",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -22,42 +22,42 @@
         "id": "corrected-chain",
         "harness": "claude",
         "role": "implement",
-        "session_id": null,
+        "session_id": "019ff707-955a-7070-9a90-e2284e6049db",
         "created": "2026-08-12"
       },
       {
         "id": "flood-fill",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "019ff707-7f0a-7cb1-8202-0d566308bf88",
         "created": "2026-08-12"
       },
       {
         "id": "flux-loops",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "019ff706-9a2b-7243-97f3-9e101baa0562",
         "created": "2026-08-12"
       },
       {
         "id": "geometry-solve",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "019ff708-e876-7112-bdf2-12db5e55652a",
         "created": "2026-08-12"
       },
       {
         "id": "harmonics",
         "harness": "claude",
         "role": "implement",
-        "session_id": null,
+        "session_id": "019ff707-6400-7580-8da2-e2a75d8896fe",
         "created": "2026-08-12"
       },
       {
         "id": "hex-stencil",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "019ff707-8995-7c20-8341-70011e4a236e",
         "created": "2026-08-12"
       },
       {
@@ -78,7 +78,7 @@
         "id": "read-wall",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "019ff707-7544-7222-90a7-21b1f9f0024b",
         "created": "2026-08-12"
       },
       {
@@ -89,8 +89,217 @@
         "created": "2026-08-12"
       }
     ],
-    "runs": [],
+    "runs": [
+      {
+        "run_id": "r-20260812T173129610696-flood-fill-dilation",
+        "plan": "spine-boundary-accelerator",
+        "section": "\u00a72",
+        "node": "flood-fill-dilation",
+        "role": "implement",
+        "member": "flood-fill",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-12T17:31:31Z",
+        "completed_at": "2026-08-12T17:53:10Z",
+        "completed_at_source": "promotion_time",
+        "worker_seconds": 1299,
+        "time_budget": "25m",
+        "base_sha": "5b10f00597465fc38e577c2fdc6799604cc09f3b",
+        "commits": [
+          "232cf5fabc8695072361af28cd6a73390e78c8e3"
+        ],
+        "changed_lines": {
+          "added": 215,
+          "removed": 22,
+          "files": 3
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/653c361a-8c6e-405b-9035-eb21e04233a8/scratchpad/flood-fill-dilation-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff707-7f0a-7cb1-8202-0d566308bf88",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 6936576,
+            "input_tokens": 7103384,
+            "output_tokens": 30424,
+            "reasoning_output_tokens": 10565
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260812T173132249666-hex-stencil-nulls",
+        "plan": "spine-boundary-accelerator",
+        "section": "\u00a72",
+        "node": "hex-stencil-nulls",
+        "role": "implement",
+        "member": "hex-stencil",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-12T17:31:33Z",
+        "completed_at": "2026-08-12T17:54:45Z",
+        "completed_at_source": "promotion_time",
+        "worker_seconds": 1392,
+        "time_budget": "25m",
+        "base_sha": "5b10f00597465fc38e577c2fdc6799604cc09f3b",
+        "commits": [
+          "254ed6fb438c8d04c8e230d9fc40aa5efe04a78b"
+        ],
+        "changed_lines": {
+          "added": 62,
+          "removed": 9,
+          "files": 2
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/653c361a-8c6e-405b-9035-eb21e04233a8/scratchpad/hex-stencil-nulls-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff707-8995-7c20-8341-70011e4a236e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 1851136,
+            "input_tokens": 1930025,
+            "output_tokens": 10471,
+            "reasoning_output_tokens": 4146
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260812T173135095758-promoted-chain-widening",
+        "plan": "mast-corrected-read-layer",
+        "section": "\u00a73",
+        "node": "promoted-chain-widening",
+        "role": "implement",
+        "member": "corrected-chain",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-12T17:31:36Z",
+        "completed_at": "2026-08-12T17:55:32Z",
+        "completed_at_source": "promotion_time",
+        "worker_seconds": 1436,
+        "time_budget": "25m",
+        "base_sha": "5b10f00597465fc38e577c2fdc6799604cc09f3b",
+        "commits": [
+          "08150c4059bf9aa2e96cc02c2077fb8744bbadc7"
+        ],
+        "changed_lines": {
+          "added": 165,
+          "removed": 62,
+          "files": 2
+        },
+        "tests_added": 6,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/653c361a-8c6e-405b-9035-eb21e04233a8/scratchpad/promoted-chain-widening-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff707-955a-7070-9a90-e2284e6049db",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 3668224,
+            "input_tokens": 3797416,
+            "output_tokens": 18071,
+            "reasoning_output_tokens": 6265
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260812T173127265871-binding-search-warm-start",
+        "plan": "spine-boundary-accelerator",
+        "section": "\u00a72",
+        "node": "binding-search-warm-start",
+        "role": "implement",
+        "member": "read-wall",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-12T17:31:28Z",
+        "completed_at": "2026-08-12T17:57:17Z",
+        "completed_at_source": "promotion_time",
+        "worker_seconds": 1549,
+        "time_budget": "25m",
+        "base_sha": "5b10f00597465fc38e577c2fdc6799604cc09f3b",
+        "commits": [
+          "f5feee0a4870ca8a9a78c3d4ecb3fe35574d9887"
+        ],
+        "changed_lines": {
+          "added": 245,
+          "removed": 12,
+          "files": 3
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/653c361a-8c6e-405b-9035-eb21e04233a8/scratchpad/binding-search-warm-start-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff707-7544-7222-90a7-21b1f9f0024b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 5021952,
+            "input_tokens": 5271450,
+            "output_tokens": 20559,
+            "reasoning_output_tokens": 8111
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      }
+    ],
     "holds": [],
-    "_version": 14
+    "_version": 25
   }
 }

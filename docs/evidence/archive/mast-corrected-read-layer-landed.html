@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="mast-corrected-read-layer-landed">
+  <meta name="plan-title" content="MAST Corrected Read Layer — Cumulative Evidence">
+  <meta name="plan-summary" content="Landed record of the single-door corrected read: the widened promoted chain in schema stage order, the per-channel arithmetic shift it moved on the banked vacuum cohort, and the disposition semantics held through the cutover">
+  <meta name="plan-status" content="active">
+  <meta name="plan-evidence-for" content="mast-corrected-read-layer">
+  <meta name="plan-verifies" content="mast-corrected-read-layer#s3">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>MAST Corrected Read Layer — Cumulative Evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+
+  <p>Execution record for <a href="/nova/mast-corrected-read-layer.html">mast-corrected-read-layer</a>,
+  the data-side prerequisite of the EFIT parity gate and of the GPU catalog's ingest.</p>
+
+  <h2 id="chain-widening">§3 item 1 — index the document, widen the chain</h2>
+
+  <p>Commit <code>08150c40</code>, merged to <code>main</code>. The MAST read path drew
+  <code>kinds=(acquisition_scale,)</code> alone, so the five promoted gains, the pair states and the
+  exclusions in the same document changed nothing on any read — and a test named
+  <code>test_the_read_path_divides_by_no_promoted_gain</code> actively pinned the gains
+  <em>out</em>, contradicting the schema's own definition of <code>promoted</code>. Promoted
+  corrections are now indexed once by <code>(target, kind)</code> at document load, and
+  channel-scoped chain documents feed <code>build_chain</code> with no kinds restriction, so every
+  applicable step composes in schema <code>APPLICATION_ORDER</code>.</p>
+
+  <p>The pinning test was replaced by its inverse: an assertion that <code>acquisition_scale</code>
+  precedes <code>gain</code> for all five promoted-gain channels. The schema-rank agreement test is
+  green in a 222-pass calibrate lane (2 skipped).</p>
+
+  <h3 id="gain-shift">What applying the gains actually moved</h3>
+
+  <p>The locked <code>read-guarantee</code> decision required the downstream shift be quantified
+  before the pin flipped, not after. On the banked vacuum calibration edge cohort — 3,395
+  edge/boundary reads — 290 reads across the five promoted-gain channels changed value. The
+  unit-input normalised mean moved from 1.001788 to 1.012358, a shift of <strong>+0.010570</strong>.</p>
+
+  <table>
+    <thead><tr><th>Channel</th><th>Reads</th><th>Relative sample shift</th></tr></thead>
+    <tbody>
+      <tr><td><code>obr17</code></td><td>24</td><td>+99.56%</td></tr>
+      <tr><td><code>obv04</code></td><td>36</td><td>+16.67%</td></tr>
+      <tr><td><code>obr05</code></td><td>46</td><td>−9.44%</td></tr>
+      <tr><td><code>obv05</code></td><td>42</td><td>+5.83%</td></tr>
+      <tr><td><code>ccbv35</code></td><td>142</td><td>+5.55%</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>The <code>obr17</code> row is the one to read closely.</strong> A +99.56% shift is the
+  0.50 probe gain being divided out — the channel was reading half the field it should, and every
+  prior analysis over these reads inherited that. This is the correction the vacuum-misfit work
+  identified; it is now applied by construction rather than by a caller remembering to ask. The
+  remaining four sit in the 5–17% band, which is large enough that the corrected and uncorrected
+  cohorts are not interchangeable in any downstream comparison.</p>
+
+  <p><strong>Disposition semantics held.</strong> Refused off-ladder and unmeasured channels retain
+  their non-applying dispositions and byte-equivalent sample values — they are returned untouched
+  rather than divided by 1.0, so a channel that was never measured stays distinguishable from one
+  measured at unity. Dedicated array tests cover this and are green.</p>
+
+</main></body>
+</html>

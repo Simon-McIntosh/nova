@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="spine-boundary-accelerator-landed">
+  <meta name="plan-title" content="Spine Boundary Accelerator — Cumulative Evidence">
+  <meta name="plan-summary" content="Landed record of the read-wall removals and the stencil generalisation: per-removal read-equivalence verdicts, measured per-evaluation speedups, and the sub-null fit conditioning on the hex cluster">
+  <meta name="plan-status" content="active">
+  <meta name="plan-evidence-for" content="spine-boundary-accelerator">
+  <meta name="plan-verifies" content="spine-boundary-accelerator#s2">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>Spine Boundary Accelerator — Cumulative Evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+
+  <p>Execution record for <a href="/nova/spine-boundary-accelerator.html">spine-boundary-accelerator</a>.
+  The earlier rung — the behaviour pins re-banked against synthetic truth, the exact-tangent
+  Newton–Krylov and safeguarded Anderson promoted into the package, and the budget ladder that
+  locked <code>nk-jvp</code> and <code>implicit-fit</code> — is recorded separately in
+  <a href="/nova/spine-accelerator-promotion-landed.html">the promotion record</a>. This document
+  carries the read-wall removals of §2 item 3 and the stencil generalisation of §2 item 4.</p>
+
+  <p><strong>The governing discipline is read-equivalence first, speed second.</strong> Each removal
+  had to reproduce the current read before its speedup counted, so every row below states an
+  equivalence verdict beside its measured number. A removal that were merely faster would not have
+  landed.</p>
+
+  <h2 id="read-wall">§2 item 3 — the read wall</h2>
+
+  <p>The topology read is about 99.7% of every map evaluation, so it — not the accelerator — sets
+  what a batched corpus solve costs. Three independent removals were scoped; two have landed.</p>
+
+  <h3 id="flood-fill">Dilate-by-doubling flood fill</h3>
+
+  <p>Commit <code>232cf5fa</code>, merged to <code>main</code>. The forced one-cell dilation loop in
+  <code>nova/equilibrium/flux_surface_connectivity.py</code> ran a fixed <code>nr+nz</code>
+  iterations regardless of how far the fill actually had to travel. It is replaced by an associative
+  fixed-point segment scan whose propagation depth doubles each step.</p>
+
+  <p><strong>Equivalence: exact.</strong> The scan reaches the identical fixed point as the
+  <code>nr+nz</code> reference — bit-for-bit array equality, not a tolerance — on both committed
+  connectivity fixtures and both benchmark grids. The behaviour pins that guard the boundary push
+  stayed green through the change: marginal-transition continuity, Lipschitz response, topology
+  no-flip, and wall/X-point termination — 27 tests across
+  <code>tests/test_flux_surface_connectivity.py</code>, <code>test_connectivity_boundary.py</code>
+  and <code>test_topology_boundary.py</code>.</p>
+
+  <table>
+    <thead><tr><th>Grid</th><th>Equivalence</th><th>Doubling steps</th><th>log₂(nr+nz)</th><th>Fixed iterations replaced</th><th>Per-evaluation speedup</th></tr></thead>
+    <tbody>
+      <tr><td>65×97 (native)</td><td>exact</td><td>2</td><td>7.34</td><td>162</td><td>2.26×</td></tr>
+      <tr><td>193×129</td><td>exact</td><td>2</td><td>8.33</td><td>322</td><td>5.19×</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>The steps beat the bound, and that is the result worth reading twice.</strong> The plan
+  predicted about log₂(nr+nz) steps — 7.3 and 8.3 on these grids. The measurement is 2 on both. The
+  doubling bound is worst-case over an adversarial fill geometry; a real connectivity region is
+  compact enough that the front closes almost immediately. The speedup therefore grows with grid
+  size (2.26× → 5.19×) while the step count does not, which is the signature of a cost that has
+  stopped scaling with <code>nr+nz</code> altogether.</p>
+
+  <p>Measurements ran on JAX CPU under warm JIT: the installed jaxlib in the worker environment is
+  not CUDA-enabled, so these are CPU per-evaluation ratios and a device run would have to be
+  re-measured before being quoted as throughput.
+  Harness: <code>benchmarks/flux_surface_flood.py</code>.</p>
+
+  <h3 id="binding-search">Warm-started binding search</h3>
+
+  <p>Commit <code>f5feee0a</code>, merged to <code>main</code>. The binding level was rediscovered
+  from cold on every map evaluation by a full 48-level sweep. The preceding flood level is now
+  threaded through the device read and its exact cold-grid bracket reused while it stays local,
+  with the cold sweep retained as the fallback for the first evaluation and for a bracket miss.</p>
+
+  <p><strong>Equivalence: exact, including on the fallback.</strong> The limited and diverted
+  behaviour fixtures reproduce the cold <code>s_flood</code> to exact array equality; a
+  <em>forced</em> bracket miss was exercised as its own test and also reproduced <code>s_flood</code>
+  exactly, which is the case that matters — a warm start is only safe if missing costs correctness
+  nothing. All 20 existing connectivity and topology behaviour pins passed.</p>
+
+  <table>
+    <thead><tr><th>Measure</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>Cold seconds per evaluation</td><td>4.855×10⁻³</td></tr>
+      <tr><td>Warm seconds per evaluation</td><td>2.821×10⁻³</td></tr>
+      <tr><td>Speedup</td><td>1.72×</td></tr>
+      <tr><td>Search evaluations on a warm hit</td><td>6, against 48 cold levels</td></tr>
+      <tr><td>Warm hits over the measured run</td><td>6 of 6 post-compilation evaluations</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>The wall-clock gain is well short of the operation-count gain, and that gap is the
+  finding.</strong> A warm hit does 6 search evaluations instead of 48 — an 8× reduction in work —
+  yet returns only 1.72× in time. The fixed per-evaluation overhead that survives the removal now
+  dominates what the search itself costs, so further shrinking the level sweep has little left to
+  win; the remaining read cost has moved elsewhere. This is also why the node was worth measuring
+  rather than reasoning about: the operation count alone would have overstated the result by
+  roughly a factor of five.</p>
+
+  <p>Timing selected JAX <code>cpu:0</code> because the environment carried no CUDA-enabled jaxlib,
+  so 1.72× is a CPU-specific figure and not a GPU throughput claim.
+  Harness: <code>measure_binding_search()</code> in <code>benchmarks/fixed_point_ladder.py</code>.</p>
+
+  <h2 id="hex-stencil">§2 item 4 — stationary points on the hex rings</h2>
+
+  <p>Commit <code>254ed6fb</code>, merged to <code>main</code>.
+  <code>ring_sign_changes</code> counted sign transitions by rolling a hardcoded 8-neighbour raster
+  ring, which tied the stationary-point search to a rectangular grid even though nova's production
+  plasma mesh is hexagonal and already writes its own angle-sorted neighbour rings. It now accepts
+  an optional centre-plus-neighbour index array and counts cyclic transitions from it directly.</p>
+
+  <p><strong>The default did not move.</strong> The rectangular raster roll remains the path taken
+  when no stencil is supplied, and the full scoped suite stayed green — 14 passed, 1 skipped for an
+  unavailable GPU.</p>
+
+  <table>
+    <thead><tr><th>Measure</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>Hex stencil consumed</td><td><code>(1,7)</code> angle-sorted centre-plus-six from <code>PlasmaGrid.loop_neighbour_vertices</code></td></tr>
+      <tr><td>Sign changes returned on the synthetic saddle</td><td>4 (a saddle, correctly)</td></tr>
+      <tr><td>Sub-null design-matrix rank</td><td>6 of 6 — exactly determined, not rank-deficient</td></tr>
+      <tr><td>Normalised condition number</td><td>5.47</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>The conditioning is the decision-relevant number, and it is benign.</strong> The plan
+  required this be checked before any default switched, because a 6-coefficient quadratic fit on a
+  7-point cluster is exactly determined and therefore has no least-squares slack to absorb a poorly
+  shaped neighbourhood. At 5.47 the normalised design matrix loses well under one decimal digit —
+  the hex cluster is a well-posed geometry for the sub-null fit, not a marginal one. Nothing blocks
+  a future default switch on conditioning grounds; the raster path stays default because no
+  consumer has been rewired yet, which is scope this node did not carry.</p>
+
+</main></body>
+</html>

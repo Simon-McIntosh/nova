@@ -23,7 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-12">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
+<meta name="plan-commits" content="08150c40">
+<meta name="plan-artifacts" content="docs/evidence/archive/mast-corrected-read-layer-landed.html">
+<meta name="plan-impl" content="0.25">
 </head>
 <body>
   <main class="plan-doc">
@@ -196,6 +199,11 @@
     <pre class="r-fu-prompt">/reckon-ship mast-corrected-read-layer §3</pre>
     </article>
 </section>
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s3" data-id="c-20260812-chain" data-who="reckon-ship" data-when="2026-08-12T18:10:00+00:00">
+    <div class="r-comment-body">promoted-chain-widening landed (§3 item 1) — commit 08150c40; cutover gate passed; measure: promoted corrections indexed once by (target, kind) at load, every applicable step composing in schema APPLICATION_ORDER; on the banked vacuum edge cohort 290 of 3,395 reads changed across the five promoted-gain channels, unit-input normalised mean 1.001788 -> 1.012358 (shift +0.010570); per-channel obr17 +99.56% (the 0.50 probe gain divided out), obv04 +16.67%, obr05 -9.44%, obv05 +5.83%, ccbv35 +5.55%. The gain-exclusion pin was replaced by an acquisition_scale-then-gain order assertion; refused and unmeasured channels return byte-equivalent and untouched rather than divided by 1.0. Calibrate lane 222 passed / 2 skipped. Artifacts: /nova/evidence/archive/mast-corrected-read-layer-landed#gain-shift</div>
+</div>
+</section>
+</main>
 </body>
 </html>

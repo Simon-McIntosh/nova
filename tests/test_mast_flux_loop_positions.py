@@ -323,21 +323,19 @@ def test_a_catalog_with_no_active_component_places_nothing_by_proximity():
 
 
 @_needs_store
-def test_the_published_snapshot_still_reproduces_the_packaged_registry():
-    """Identity is pinned by value, so the reader and the file are one statement.
+def test_the_restored_snapshot_reproduces_the_packaged_registry():
+    """Identity is pinned by value, so the reader and file are one statement.
 
-    Placing the loops moves the payload's hash, which is the number consumers
-    select a machine by.  Moving it silently would make the next census read a
-    hardware reconfiguration out of archived sources that cannot change, so the
-    correction stays off the published read until the packaged file is
-    regenerated with it.
+    The explicit legacy read preserves the transcribed coordinates as evidence
+    that restoring the loops moves the physical identity.  The default read uses
+    the restored placement and therefore must reproduce the packaged registry.
     """
 
-    published = physical_snapshot(REPRESENTATIVE_SHOT)
-    placed = physical_snapshot(REPRESENTATIVE_SHOT, place_loops=True)
+    legacy = physical_snapshot(REPRESENTATIVE_SHOT, place_loops=False)
+    restored = physical_snapshot(REPRESENTATIVE_SHOT)
 
-    assert published["magnetics"]["flux_loops"] != placed["magnetics"]["flux_loops"]
-    assert physical_digest(published) != physical_digest(placed)
-    assert physical_digest(published) == next(
+    assert legacy["magnetics"]["flux_loops"] != restored["magnetics"]["flux_loops"]
+    assert physical_digest(legacy) != physical_digest(restored)
+    assert physical_digest(restored) == next(
         iter(MachineGeometryRegistry.default().configurations)
     )

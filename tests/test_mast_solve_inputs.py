@@ -599,7 +599,7 @@ def test_the_loop_join_is_a_property_of_the_configuration(description):
     for shot, join in joins.items():
         assert join == reference, shot
     served = [row for row in reference.values() if row is not None]
-    assert len(served) == len(set(served)) == 39
+    assert len(served) == len(set(served)) == 43
 
 
 @_needs_store
@@ -815,5 +815,5 @@ def test_the_loop_flux_rows_serve_the_measured_total_flux(published_map):
     """Every served loop keeps the Weber it was measured in."""
 
     rows = [row for row in published_map.signals if row.standard_name == LOOP_FLUX_NAME]
-    assert len(rows) == 39
+    assert len(rows) == 43
     assert {row.factor for row in rows} == {1.0}

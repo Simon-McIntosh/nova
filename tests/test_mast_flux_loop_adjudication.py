@@ -268,16 +268,17 @@ def test_the_resolved_join_is_a_bijection_over_the_channel_blocks():
     assert max(rows.values()) == len(rows) - 1
 
 
-def test_the_described_table_has_a_degeneracy_the_join_must_not_use(geometry):
-    """Several described loops share one position, so proximity cannot key a loop.
+def test_every_described_loop_has_a_unique_position(geometry):
+    """The described table contains one distinct position for each of its 44 loops.
 
-    This is the case the resolved join exists for: matching by nearest position
-    would hand every channel at this radius the same loop.
+    The FL_P4L block in the source repeats the P3 lower positions.  Serving that
+    block from the reconstruction's own table removes all four duplicates and
+    lets 43 of the 46 reconstruction loops join a described sensor.
     """
 
     positions = described_loop_positions(geometry)
     unique = {(round(r, 6), round(z, 6)) for r, z in positions}
-    assert len(unique) < len(positions)
+    assert len(unique) == len(positions) == 44
 
 
 def test_reflection_is_a_property_some_families_have_and_others_do_not(geometry):

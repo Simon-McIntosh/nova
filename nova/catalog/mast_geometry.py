@@ -88,6 +88,11 @@ SUPERSEDED_PHYSICAL_DIGESTS = {
         "outboard radial probe family carried the poloidal angle of the axial probe "
         "it shares a position with"
     ),
+    "ca06c8f64481114f": (
+        "recovered before four lower-coil flux-loop positions were restored from "
+        "the reconstruction geometry after the level-2 table repeated another "
+        "coil's coordinates"
+    ),
 }
 """Canonical identities a corrected reading of the same sources has replaced.
 
@@ -1172,7 +1177,7 @@ def physical_snapshot(
     level1_root: Path = DEFAULT_LEVEL1_ROOT,
     level2_root: Path = DEFAULT_LEVEL2_ROOT,
     *,
-    place_loops: bool = False,
+    place_loops: bool = True,
 ) -> dict[str, Any]:
     """Build the canonical physical geometry payload for a complete shot.
 
@@ -1181,15 +1186,11 @@ def physical_snapshot(
     the block whose coordinates were transcribed from another block -- see
     :func:`placed_loop_positions`.
 
-    It is off by default, and the default is the whole point.  This payload's hash
-    is the identity consumers select a machine by and pin by value, so the reader
-    and the packaged file have to remain one statement about the machine: a reader
-    that quietly built a different payload would make the next census report a
-    hardware reconfiguration that never happened.  Moving the loops therefore
-    moves the identity, which is a republication rather than a bug fix, and it
-    happens when the packaged file is regenerated with it.  Until then the
-    correction is available to whatever measures against it and absent from what
-    is published.
+    The restored placement is the published default.  Passing ``False`` retains
+    the level-2 coordinates only for comparisons that measure the transcription
+    error.  This payload's hash is the identity consumers select a machine by and
+    pin by value, so the reader and packaged registry must always be regenerated
+    and published together when the default geometry moves.
     """
 
     level1 = zarr.open_group(str(level1_root / f"{shot}.zarr"), mode="r")

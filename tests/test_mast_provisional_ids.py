@@ -34,8 +34,8 @@ from nova.imas.mast_seed_parameters import (
 )
 from nova.imas.test_utilities import mark
 
-PHYSICAL_DIGEST = "ca06c8f64481114f"
-REGISTRY_DIGEST = "7083e8029c879310d4b811ecc58f5eefdd40b2bfe01b4a1714b177b03a307366"
+PHYSICAL_DIGEST = "b55c5bb005a2cb67"
+REGISTRY_DIGEST = "2a26cc0a3a22e7fb8f42a53ee4c45e639290f0c5587e5f56405772b007f31bfd"
 FIRST_SHOT = 11695
 LAST_SHOT = 30473
 

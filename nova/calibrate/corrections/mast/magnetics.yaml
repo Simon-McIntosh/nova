@@ -1,19 +1,22 @@
 machine: mast
 diagnostic_system: magnetics
 schema_version: 1.0.0
-set_version: 1.0.0
+set_version: 1.1.0
 generated_by: 'mined from the vacuum-floor and misfit calibration records: the promoted and
   withheld channel scales and the acquisition block table from nova/imas/mast_fitted_parameters.py
   and nova/imas/mast_block_scale.json, whose measurement and read-path consequences are recorded
   in docs/research/mast-sensor-adjudication-landed.html and docs/research/mast-block-scale-normalisation-landed.html;
   the pickup pair states and quality states from docs/research/mast-misfit-source-localization.html;
-  the flux convention from nova/imas/mast_solve_inputs.py'
-generated_at: '2026-08-07'
+  the flux convention from nova/imas/mast_solve_inputs.py; and the flux-loop convention,
+  per-channel gain verdicts and position-join exclusions from nova.imas.mast_flux_loop_adjudication,
+  recorded in docs/research/mast-flux-loop-gain-fits.html'
+generated_at: '2026-08-12'
 description: 'Every diagnostic correction the MAST calibration ladder has measured for the
   magnetics system. Gains and acquisition rungs the read path applies; pickup pair states,
-  exclusions and quality states measured but not yet applied; one store-to-solver convention.
-  Offsets are deliberately absent: every fit measures the pre-excitation baseline from the
-  pulse''s own quiet window, so an offset is a per-pulse quantity rather than a set constant.'
+  exclusions and quality states measured but not yet applied; the store-to-solver convention;
+  and the recorded flux-loop convention, per-channel gains and position-join exclusions. Offsets
+  are deliberately absent: every fit measures the pre-excitation baseline from the pulse''s own
+  quiet window, so an offset is a per-pulse quantity rather than a set constant.'
 ladders:
 - name: acquisition_range
   kind: acquisition_scale
@@ -2586,3 +2589,822 @@ corrections:
     it as a convention digit, 13 for the measured loops against 3 for the source and 17 for
     the target, so one algebra hands the measured channel a factor of one and the reconstructed
     flux function a factor of 2*pi'
+- channel: flux_loop
+  kind: convention
+  status: recorded
+  value: 1.0
+  validity:
+  - measured_pulses:
+    - 11884
+    - 30453
+    notes: 'open in both directions: measured on the 306 sustained plasma-free pulses between
+      11884 and 30453'
+  provenance:
+    method: through-origin slope of each loop's recorded flux on the flux the described winding
+      outlines link at that loop's position, the pre-excitation offset removed on the pulse itself;
+      a store in weber against a kernel per radian would return two pi and the reciprocal case
+      one over two pi
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: 'no factor separates the recorded flux from the computed flux: both are the total
+      flux through the loop contour in weber, so the conversion is unity and there is no two pi
+      to place'
+- channel: fl_cc01
+  kind: gain
+  status: recorded
+  value: 0.955486
+  measured_value: 0.9554859354142109
+  uncertainty:
+    lower: 0.9538582519883358
+    upper: 0.957113618840086
+  validity:
+  - measured_pulses:
+    - 11884
+    - 30453
+    notes: measured on 253 of the 306 sustained plasma-free pulses
+  provenance:
+    method: through-origin slope of the recorded flux on the described flux, pooled over pulses
+      with the scatter of the per-pulse slopes as the bound
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: reads 0.9555 +/- 0.0016 of the described flux over 253 shots, which is 0.7% from
+      what the loops read as a set and inside the 2% they agree with each other to; recorded rather
+      than promoted because a scale inside 2% of what every loop reads is the forward model's
+      own residual, and dividing it out one channel at a time would fit the description to itself
+    corroborations:
+    - method: the archive's own forward flux prediction, from a 938-filament 101-circuit model
+        sharing neither the geometry nor the estimator
+      value: 1.0075619869005128
+      evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+      statement: reads 1.0076 against this route's 0.9555
+- channel: fl_cc02
+  kind: gain
+  status: recorded
+  value: 0.96614
+  measured_value: 0.9661399508311308
+  uncertainty:
+    lower: 0.9644689864238658
+    upper: 0.9678109152383958
+  validity:
+  - measured_pulses:
+    - 11884
+    - 30453
+    notes: measured on 139 of the 306 sustained plasma-free pulses
+  provenance:
+    method: through-origin slope of the recorded flux on the described flux, pooled over pulses
+      with the scatter of the per-pulse slopes as the bound
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: reads 0.9661 +/- 0.0017 of the described flux over 139 shots, which is 0.4% from
+      what the loops read as a set and inside the 2% they agree with each other to; recorded rather
+      than promoted because a scale inside 2% of what every loop reads is the forward model's
+      own residual, and dividing it out one channel at a time would fit the description to itself
+    corroborations:
+    - method: the archive's own forward flux prediction, from a 938-filament 101-circuit model
+        sharing neither the geometry nor the estimator
+      value: 1.0193733744066285
+      evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+      statement: reads 1.0194 against this route's 0.9661
+- channel: fl_cc03
+  kind: gain
+  status: recorded
+  value: 0.952938
+  measured_value: 0.952938446594658
+  uncertainty:
+    lower: 0.951464136596382
+    upper: 0.954412756592934
+  validity:
+  - measured_pulses:
+    - 11884
+    - 30453
+    notes: measured on 296 of the 306 sustained plasma-free pulses
+  provenance:
+    method: through-origin slope of the recorded flux on the described flux, pooled over pulses
+      with the scatter of the per-pulse slopes as the bound
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: reads 0.9529 +/- 0.0015 of the described flux over 296 shots, which is 1.0% from
+      what the loops read as a set and inside the 2% they agree with each other to; recorded rather
+      than promoted because a scale inside 2% of what every loop reads is the forward model's
+      own residual, and dividing it out one channel at a time would fit the description to itself
+    corroborations:
+    - method: the archive's own forward flux prediction, from a 938-filament 101-circuit model
+        sharing neither the geometry nor the estimator
+      value: 1.003694144421011
+      evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+      statement: reads 1.0037 against this route's 0.9529
+- channel: fl_cc04
+  kind: gain
+  status: withheld
+  measured_value: 0.9424392862020194
+  uncertainty:
+    lower: 0.9323571797198145
+    upper: 0.9525213926842244
+  validity:
+  - measured_pulses:
+    - 11884
+    - 30453
+    notes: measured on 267 of the 306 sustained plasma-free pulses
+  provenance:
+    method: through-origin slope of the recorded flux on the described flux, pooled over pulses
+      with the scatter of the per-pulse slopes as the bound
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: the cohort splits this channel into 6 acquisition blocks spanning a factor 2.627,
+      so no one gain describes every shot
+    corroborations:
+    - method: the archive's own forward flux prediction, from a 938-filament 101-circuit model
+        sharing neither the geometry nor the estimator
+      value: 1.0100829800507767
+      evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+      statement: reads 1.0101 against this route's 0.9424
+- channel: fl_cc05
+  kind: gain
+  status: recorded
+  value: 0.959969
+  measured_value: 0.9599685434761998
+  uncertainty:
+    lower: 0.9581091527054911
+    upper: 0.9618279342469084
+  validity:
+  - measured_pulses:
+    - 11884
+    - 30453
+    notes: measured on 298 of the 306 sustained plasma-free pulses
+  provenance:
+    method: through-origin slope of the recorded flux on the described flux, pooled over pulses
+      with the scatter of the per-pulse slopes as the bound
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: reads 0.9600 +/- 0.0019 of the described flux over 298 shots, which is 0.2% from
+      what the loops read as a set and inside the 2% they agree with each other to; recorded rather
+      than promoted because a scale inside 2% of what every loop reads is the forward model's
+      own residual, and dividing it out one channel at a time would fit the description to itself
+    corroborations:
+    - method: the archive's own forward flux prediction, from a 938-filament 101-circuit model
+        sharing neither the geometry nor the estimator
+      value: 1.014563942457885
+      evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+      statement: reads 1.0146 against this route's 0.9600
+- channel: fl_cc07
+  kind: gain
+  status: recorded
+  value: 0.958735
+  measured_value: 0.9587352424298635
+  uncertainty:
+    lower: 0.9573399938351423
+    upper: 0.9601304910245847
+  validity:
+  - measured_pulses:
+    - 11884
+    - 30453
+    notes: measured on 294 of the 306 sustained plasma-free pulses
+  provenance:
+    method: through-origin slope of the recorded flux on the described flux, pooled over pulses
+      with the scatter of the per-pulse slopes as the bound
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: reads 0.9587 +/- 0.0014 of the described flux over 294 shots, which is 0.4% from
+      what the loops read as a set and inside the 2% they agree with each other to; recorded rather
+      than promoted because a scale inside 2% of what every loop reads is the forward model's
+      own residual, and dividing it out one channel at a time would fit the description to itself
+    corroborations:
+    - method: the archive's own forward flux prediction, from a 938-filament 101-circuit model
+        sharing neither the geometry nor the estimator
+      value: 1.0160717309120741
+      evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+      statement: reads 1.0161 against this route's 0.9587
+- channel: fl_cc09
+  kind: gain
+  status: recorded
+  value: 0.962309
+  measured_value: 0.9623085735016749
+  uncertainty:
+    lower: 0.9610198547415801
+    upper: 0.9635972922617696
+  validity:
+  - measured_pulses:
+    - 11884
+    - 30453
+    notes: measured on 295 of the 306 sustained plasma-free pulses
+  provenance:
+    method: through-origin slope of the recorded flux on the described flux, pooled over pulses
+      with the scatter of the per-pulse slopes as the bound
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: reads 0.9623 +/- 0.0013 of the described flux over 295 shots, which is 0.0% from
+      what the loops read as a set and inside the 2% they agree with each other to; recorded rather
+      than promoted because a scale inside 2% of what every loop reads is the forward model's
+      own residual, and dividing it out one channel at a time would fit the description to itself
+    corroborations:
+    - method: the archive's own forward flux prediction, from a 938-filament 101-circuit model
+        sharing neither the geometry nor the estimator
+      value: 1.0165274039473688
+      evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+      statement: reads 1.0165 against this route's 0.9623
+- channel: fl_cc10
+  kind: gain
+  status: recorded
+  value: 0.955167
+  measured_value: 0.9551667076171271
+  uncertainty:
+    lower: 0.9547784328054154
+    upper: 0.9555549824288387
+  validity:
+  - measured_pulses:
+    - 11884
+    - 30453
+    notes: measured on 78 of the 306 sustained plasma-free pulses
+  provenance:
+    method: through-origin slope of the recorded flux on the described flux, pooled over pulses
+      with the scatter of the per-pulse slopes as the bound
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: reads 0.9552 +/- 0.0004 of the described flux over 78 shots, which is 0.7% from
+      what the loops read as a set and inside the 2% they agree with each other to; recorded rather
+      than promoted because a scale inside 2% of what every loop reads is the forward model's
+      own residual, and dividing it out one channel at a time would fit the description to itself
+    corroborations:
+    - method: the archive's own forward flux prediction, from a 938-filament 101-circuit model
+        sharing neither the geometry nor the estimator
+      value: 1.0204993824935755
+      evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+      statement: reads 1.0205 against this route's 0.9552
+- channel: fl_p2l_1
+  kind: gain
+  status: withheld
+  measured_value: 0.9956824466590299
+  uncertainty:
+    lower: 0.9937941354610454
+    upper: 0.9975707578570144
+  validity:
+  - measured_pulses:
+    - 11884
+    - 30453
+    notes: measured on 280 of the 306 sustained plasma-free pulses
+  provenance:
+    method: through-origin slope of the recorded flux on the described flux, pooled over pulses
+      with the scatter of the per-pulse slopes as the bound
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: stands 3.5% from what the loops read as a set while the archive's forward prediction
+      puts it only 0.5% from its own, inside the 2% the loops agree to, so one route separates
+      it and the other does not
+    corroborations:
+    - method: the archive's own forward flux prediction, from a 938-filament 101-circuit model
+        sharing neither the geometry nor the estimator
+      value: 1.0120391513853348
+      evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+      statement: reads 1.0120 against this route's 0.9957
+- channel: fl_p2l_3
+  kind: gain
+  status: withheld
+  measured_value: 0.9985739575025403
+  uncertainty:
+    lower: 0.9974123293500665
+    upper: 0.9997355856550141
+  validity:
+  - measured_pulses:
+    - 11884
+    - 30453
+    notes: measured on 254 of the 306 sustained plasma-free pulses
+  provenance:
+    method: through-origin slope of the recorded flux on the described flux, pooled over pulses
+      with the scatter of the per-pulse slopes as the bound
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: stands 3.8% from what the loops read as a set while the archive's forward prediction
+      puts it only 0.6% from its own, inside the 2% the loops agree to, so one route separates
+      it and the other does not
+    corroborations:
+    - method: the archive's own forward flux prediction, from a 938-filament 101-circuit model
+        sharing neither the geometry nor the estimator
+      value: 1.0136387235617978
+      evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+      statement: reads 1.0136 against this route's 0.9986
+- channel: fl_p2l_4
+  kind: gain
+  status: recorded
+  value: 0.963971
+  measured_value: 0.9639713424514326
+  uncertainty:
+    lower: 0.9605954739302749
+    upper: 0.9673472109725902
+  validity:
+  - measured_pulses:
+    - 11884
+    - 30453
+    notes: measured on 143 of the 306 sustained plasma-free pulses
+  provenance:
+    method: through-origin slope of the recorded flux on the described flux, pooled over pulses
+      with the scatter of the per-pulse slopes as the bound
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: reads 0.9640 +/- 0.0034 of the described flux over 143 shots, which is 0.2% from
+      what the loops read as a set and inside the 2% they agree with each other to; recorded rather
+      than promoted because a scale inside 2% of what every loop reads is the forward model's
+      own residual, and dividing it out one channel at a time would fit the description to itself
+    corroborations:
+    - method: the archive's own forward flux prediction, from a 938-filament 101-circuit model
+        sharing neither the geometry nor the estimator
+      value: 0.997936468796497
+      evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+      statement: reads 0.9979 against this route's 0.9640
+- channel: fl_p2u_1
+  kind: gain
+  status: withheld
+  measured_value: 1.0007657249442243
+  uncertainty:
+    lower: 0.9992784452088507
+    upper: 1.0022530046795979
+  validity:
+  - measured_pulses:
+    - 11884
+    - 30453
+    notes: measured on 255 of the 306 sustained plasma-free pulses
+  provenance:
+    method: through-origin slope of the recorded flux on the described flux, pooled over pulses
+      with the scatter of the per-pulse slopes as the bound
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: stands 4.0% from what the loops read as a set while the archive's forward prediction
+      puts it only 0.3% from its own, inside the 2% the loops agree to, so one route separates
+      it and the other does not
+    corroborations:
+    - method: the archive's own forward flux prediction, from a 938-filament 101-circuit model
+        sharing neither the geometry nor the estimator
+      value: 1.0048805154534965
+      evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+      statement: reads 1.0049 against this route's 1.0008
+- channel: fl_p2u_2
+  kind: gain
+  status: withheld
+  measured_value: 1.0014167136887093
+  uncertainty:
+    lower: 0.9990928433670432
+    upper: 1.0037405840103755
+  validity:
+  - measured_pulses:
+    - 11884
+    - 30453
+    notes: measured on 144 of the 306 sustained plasma-free pulses
+  provenance:
+    method: through-origin slope of the recorded flux on the described flux, pooled over pulses
+      with the scatter of the per-pulse slopes as the bound
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: stands 4.1% from what the loops read as a set while the archive's forward prediction
+      puts it only 0.4% from its own, inside the 2% the loops agree to, so one route separates
+      it and the other does not
+    corroborations:
+    - method: the archive's own forward flux prediction, from a 938-filament 101-circuit model
+        sharing neither the geometry nor the estimator
+      value: 1.003572341847188
+      evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+      statement: reads 1.0036 against this route's 1.0014
+- channel: fl_p2u_3
+  kind: gain
+  status: withheld
+  measured_value: 1.0054796438700766
+  uncertainty:
+    lower: 1.003305607747839
+    upper: 1.0076536799923141
+  validity:
+  - measured_pulses:
+    - 11884
+    - 30453
+    notes: measured on 255 of the 306 sustained plasma-free pulses
+  provenance:
+    method: through-origin slope of the recorded flux on the described flux, pooled over pulses
+      with the scatter of the per-pulse slopes as the bound
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: stands 4.5% from what the loops read as a set while the archive's forward prediction
+      puts it only 0.6% from its own, inside the 2% the loops agree to, so one route separates
+      it and the other does not
+    corroborations:
+    - method: the archive's own forward flux prediction, from a 938-filament 101-circuit model
+        sharing neither the geometry nor the estimator
+      value: 1.0132997668531116
+      evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+      statement: reads 1.0133 against this route's 1.0055
+- channel: fl_p2u_4
+  kind: gain
+  status: withheld
+  measured_value: 0.807537188685183
+  uncertainty:
+    lower: 0.7883424724396596
+    upper: 0.8267319049307064
+  validity:
+  - measured_pulses:
+    - 11884
+    - 30453
+    notes: measured on 143 of the 306 sustained plasma-free pulses
+  provenance:
+    method: through-origin slope of the recorded flux on the described flux, pooled over pulses
+      with the scatter of the per-pulse slopes as the bound
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: the cohort splits this channel into 3 acquisition blocks spanning a factor 3.275,
+      so no one gain describes every shot
+    corroborations:
+    - method: the archive's own forward flux prediction, from a 938-filament 101-circuit model
+        sharing neither the geometry nor the estimator
+      value: 0.901292865382954
+      evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+      statement: reads 0.9013 against this route's 0.8075
+- channel: fl_p3l_1
+  kind: gain
+  status: withheld
+  measured_value: 1.0023425881492984
+  uncertainty:
+    lower: 0.9971055305013193
+    upper: 1.0075796457972777
+  validity:
+  - measured_pulses:
+    - 11884
+    - 30453
+    notes: measured on 277 of the 306 sustained plasma-free pulses
+  provenance:
+    method: through-origin slope of the recorded flux on the described flux, pooled over pulses
+      with the scatter of the per-pulse slopes as the bound
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: stands 4.2% from what the loops read as a set while the archive's forward prediction
+      puts it only 0.2% from its own, inside the 2% the loops agree to, so one route separates
+      it and the other does not
+    corroborations:
+    - method: the archive's own forward flux prediction, from a 938-filament 101-circuit model
+        sharing neither the geometry nor the estimator
+      value: 1.0092535317141893
+      evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+      statement: reads 1.0093 against this route's 1.0023
+- channel: fl_p3l_4
+  kind: gain
+  status: withheld
+  measured_value: 0.9425146753279557
+  uncertainty:
+    lower: 0.9395437505884153
+    upper: 0.9454856000674962
+  validity:
+  - measured_pulses:
+    - 11884
+    - 30453
+    notes: measured on 277 of the 306 sustained plasma-free pulses
+  provenance:
+    method: through-origin slope of the recorded flux on the described flux, pooled over pulses
+      with the scatter of the per-pulse slopes as the bound
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: stands 2.0% from what the loops read as a set while the archive's forward prediction
+      puts it only 0.2% from its own, inside the 2% the loops agree to, so one route separates
+      it and the other does not
+    corroborations:
+    - method: the archive's own forward flux prediction, from a 938-filament 101-circuit model
+        sharing neither the geometry nor the estimator
+      value: 1.0094337109745835
+      evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+      statement: reads 1.0094 against this route's 0.9425
+- channel: fl_p3u_1
+  kind: gain
+  status: recorded
+  value: 0.959225
+  measured_value: 0.959225024744194
+  uncertainty:
+    lower: 0.9575701513703482
+    upper: 0.9608798981180399
+  validity:
+  - measured_pulses:
+    - 11884
+    - 30453
+    notes: measured on 298 of the 306 sustained plasma-free pulses
+  provenance:
+    method: through-origin slope of the recorded flux on the described flux, pooled over pulses
+      with the scatter of the per-pulse slopes as the bound
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: reads 0.9592 +/- 0.0017 of the described flux over 298 shots, which is 0.3% from
+      what the loops read as a set and inside the 2% they agree with each other to; recorded rather
+      than promoted because a scale inside 2% of what every loop reads is the forward model's
+      own residual, and dividing it out one channel at a time would fit the description to itself
+    corroborations:
+    - method: the archive's own forward flux prediction, from a 938-filament 101-circuit model
+        sharing neither the geometry nor the estimator
+      value: 0.9995724853888723
+      evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+      statement: reads 0.9996 against this route's 0.9592
+- channel: fl_p3u_4
+  kind: gain
+  status: recorded
+  value: 0.953761
+  measured_value: 0.953761481142237
+  uncertainty:
+    lower: 0.95200347365797
+    upper: 0.955519488626504
+  validity:
+  - measured_pulses:
+    - 11884
+    - 30453
+    notes: measured on 298 of the 306 sustained plasma-free pulses
+  provenance:
+    method: through-origin slope of the recorded flux on the described flux, pooled over pulses
+      with the scatter of the per-pulse slopes as the bound
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: reads 0.9538 +/- 0.0018 of the described flux over 298 shots, which is 0.9% from
+      what the loops read as a set and inside the 2% they agree with each other to; recorded rather
+      than promoted because a scale inside 2% of what every loop reads is the forward model's
+      own residual, and dividing it out one channel at a time would fit the description to itself
+    corroborations:
+    - method: the archive's own forward flux prediction, from a 938-filament 101-circuit model
+        sharing neither the geometry nor the estimator
+      value: 1.0005602881062103
+      evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+      statement: reads 1.0006 against this route's 0.9538
+- channel: fl_p4l_1
+  kind: gain
+  status: recorded
+  value: 0.964247
+  measured_value: 0.9642466381030901
+  uncertainty:
+    lower: 0.9618753249786529
+    upper: 0.9666179512275273
+  validity:
+  - measured_pulses:
+    - 11884
+    - 30453
+    notes: measured on 300 of the 306 sustained plasma-free pulses
+  provenance:
+    method: through-origin slope of the recorded flux on the described flux, pooled over pulses
+      with the scatter of the per-pulse slopes as the bound
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: reads 0.9642 +/- 0.0024 of the described flux over 300 shots, which is 0.2% from
+      what the loops read as a set and inside the 2% they agree with each other to; recorded rather
+      than promoted because a scale inside 2% of what every loop reads is the forward model's
+      own residual, and dividing it out one channel at a time would fit the description to itself
+    corroborations:
+    - method: the archive's own forward flux prediction, from a 938-filament 101-circuit model
+        sharing neither the geometry nor the estimator
+      value: 0.9963892569303816
+      evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+      statement: reads 0.9964 against this route's 0.9642
+- channel: fl_p4l_4
+  kind: gain
+  status: recorded
+  value: 0.964088
+  measured_value: 0.9640879654689817
+  uncertainty:
+    lower: 0.9620392316758498
+    upper: 0.9661366992621135
+  validity:
+  - measured_pulses:
+    - 11884
+    - 30453
+    notes: measured on 300 of the 306 sustained plasma-free pulses
+  provenance:
+    method: through-origin slope of the recorded flux on the described flux, pooled over pulses
+      with the scatter of the per-pulse slopes as the bound
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: reads 0.9641 +/- 0.0020 of the described flux over 300 shots, which is 0.2% from
+      what the loops read as a set and inside the 2% they agree with each other to; recorded rather
+      than promoted because a scale inside 2% of what every loop reads is the forward model's
+      own residual, and dividing it out one channel at a time would fit the description to itself
+    corroborations:
+    - method: the archive's own forward flux prediction, from a 938-filament 101-circuit model
+        sharing neither the geometry nor the estimator
+      value: 1.0003433280328726
+      evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+      statement: reads 1.0003 against this route's 0.9641
+- channel: fl_p4u_4
+  kind: gain
+  status: recorded
+  value: 0.954076
+  measured_value: 0.9540755605457254
+  uncertainty:
+    lower: 0.9527690900750893
+    upper: 0.9553820310163615
+  validity:
+  - measured_pulses:
+    - 11884
+    - 30453
+    notes: measured on 299 of the 306 sustained plasma-free pulses
+  provenance:
+    method: through-origin slope of the recorded flux on the described flux, pooled over pulses
+      with the scatter of the per-pulse slopes as the bound
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: reads 0.9541 +/- 0.0013 of the described flux over 299 shots, which is 0.8% from
+      what the loops read as a set and inside the 2% they agree with each other to; recorded rather
+      than promoted because a scale inside 2% of what every loop reads is the forward model's
+      own residual, and dividing it out one channel at a time would fit the description to itself
+    corroborations:
+    - method: the archive's own forward flux prediction, from a 938-filament 101-circuit model
+        sharing neither the geometry nor the estimator
+      value: 0.9978495295506449
+      evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+      statement: reads 0.9978 against this route's 0.9541
+- channel: fl_p5l_1
+  kind: gain
+  status: withheld
+  measured_value: 0.983271452401095
+  uncertainty:
+    lower: 0.9812183111754144
+    upper: 0.9853245936267757
+  validity:
+  - measured_pulses:
+    - 11884
+    - 30453
+    notes: measured on 303 of the 306 sustained plasma-free pulses
+  provenance:
+    method: through-origin slope of the recorded flux on the described flux, pooled over pulses
+      with the scatter of the per-pulse slopes as the bound
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: stands 2.2% from what the loops read as a set while the archive's forward prediction
+      puts it only 1.9% from its own, inside the 2% the loops agree to, so one route separates
+      it and the other does not
+    corroborations:
+    - method: the archive's own forward flux prediction, from a 938-filament 101-circuit model
+        sharing neither the geometry nor the estimator
+      value: 1.026847248171314
+      evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+      statement: reads 1.0268 against this route's 0.9833
+- channel: fl_p5l_4
+  kind: gain
+  status: recorded
+  value: 0.974117
+  measured_value: 0.9741166489897194
+  uncertainty:
+    lower: 0.9723357181524711
+    upper: 0.9758975798269677
+  validity:
+  - measured_pulses:
+    - 11884
+    - 30453
+    notes: measured on 303 of the 306 sustained plasma-free pulses
+  provenance:
+    method: through-origin slope of the recorded flux on the described flux, pooled over pulses
+      with the scatter of the per-pulse slopes as the bound
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: reads 0.9741 +/- 0.0018 of the described flux over 303 shots, which is 1.2% from
+      what the loops read as a set and inside the 2% they agree with each other to; recorded rather
+      than promoted because a scale inside 2% of what every loop reads is the forward model's
+      own residual, and dividing it out one channel at a time would fit the description to itself
+    corroborations:
+    - method: the archive's own forward flux prediction, from a 938-filament 101-circuit model
+        sharing neither the geometry nor the estimator
+      value: 1.0039352635124057
+      evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+      statement: reads 1.0039 against this route's 0.9741
+- channel: fl_p5u_1
+  kind: gain
+  status: recorded
+  value: 0.967972
+  measured_value: 0.9679721015444291
+  uncertainty:
+    lower: 0.9661788099612846
+    upper: 0.9697653931275737
+  validity:
+  - measured_pulses:
+    - 11884
+    - 30453
+    notes: measured on 299 of the 306 sustained plasma-free pulses
+  provenance:
+    method: through-origin slope of the recorded flux on the described flux, pooled over pulses
+      with the scatter of the per-pulse slopes as the bound
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: reads 0.9680 +/- 0.0018 of the described flux over 299 shots, which is 0.6% from
+      what the loops read as a set and inside the 2% they agree with each other to; recorded rather
+      than promoted because a scale inside 2% of what every loop reads is the forward model's
+      own residual, and dividing it out one channel at a time would fit the description to itself
+    corroborations:
+    - method: the archive's own forward flux prediction, from a 938-filament 101-circuit model
+        sharing neither the geometry nor the estimator
+      value: 1.0072720793427394
+      evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+      statement: reads 1.0073 against this route's 0.9680
+- channel: fl_p5u_4
+  kind: gain
+  status: recorded
+  value: 0.962135
+  measured_value: 0.9621345765764017
+  uncertainty:
+    lower: 0.9598327844737558
+    upper: 0.9644363686790476
+  validity:
+  - measured_pulses:
+    - 11884
+    - 30453
+    notes: measured on 280 of the 306 sustained plasma-free pulses
+  provenance:
+    method: through-origin slope of the recorded flux on the described flux, pooled over pulses
+      with the scatter of the per-pulse slopes as the bound
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: reads 0.9621 +/- 0.0023 of the described flux over 280 shots, which is 0.0% from
+      what the loops read as a set and inside the 2% they agree with each other to; recorded rather
+      than promoted because a scale inside 2% of what every loop reads is the forward model's
+      own residual, and dividing it out one channel at a time would fit the description to itself
+    corroborations:
+    - method: the archive's own forward flux prediction, from a 938-filament 101-circuit model
+        sharing neither the geometry nor the estimator
+      value: 1.001002741800307
+      evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+      statement: reads 1.0010 against this route's 0.9621
+- channel: fl_p6l_1
+  kind: gain
+  status: recorded
+  value: 0.955318
+  measured_value: 0.955318267956938
+  uncertainty:
+    lower: 0.9519186266837129
+    upper: 0.9587179092301631
+  validity:
+  - measured_pulses:
+    - 11884
+    - 30453
+    notes: measured on 156 of the 306 sustained plasma-free pulses
+  provenance:
+    method: through-origin slope of the recorded flux on the described flux, pooled over pulses
+      with the scatter of the per-pulse slopes as the bound
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: reads 0.9553 +/- 0.0034 of the described flux over 156 shots, which is 0.7% from
+      what the loops read as a set and inside the 2% they agree with each other to; recorded rather
+      than promoted because a scale inside 2% of what every loop reads is the forward model's
+      own residual, and dividing it out one channel at a time would fit the description to itself
+    corroborations:
+    - method: the archive's own forward flux prediction, from a 938-filament 101-circuit model
+        sharing neither the geometry nor the estimator
+      value: 1.0090360953864301
+      evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+      statement: reads 1.0090 against this route's 0.9553
+- channel: fl_p6u_1
+  kind: gain
+  status: recorded
+  value: 0.952342
+  measured_value: 0.9523417110120496
+  uncertainty:
+    lower: 0.950377073799926
+    upper: 0.9543063482241732
+  validity:
+  - measured_pulses:
+    - 11884
+    - 30453
+    notes: measured on 279 of the 306 sustained plasma-free pulses
+  provenance:
+    method: through-origin slope of the recorded flux on the described flux, pooled over pulses
+      with the scatter of the per-pulse slopes as the bound
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: reads 0.9523 +/- 0.0020 of the described flux over 279 shots, which is 1.0% from
+      what the loops read as a set and inside the 2% they agree with each other to; recorded rather
+      than promoted because a scale inside 2% of what every loop reads is the forward model's
+      own residual, and dividing it out one channel at a time would fit the description to itself
+    corroborations:
+    - method: the archive's own forward flux prediction, from a 938-filament 101-circuit model
+        sharing neither the geometry nor the estimator
+      value: 0.9935367999329987
+      evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+      statement: reads 0.9935 against this route's 0.9523
+- channel: fl_p5l_3
+  kind: exclusion
+  status: recorded
+  cause: the reconstruction places fl_p5l_3 75 mm from the nearest of the 4 loops the description carries on p5_lower
+  validity:
+  - notes: open in both directions
+  provenance:
+    method: position join between the reconstruction's measured loop table and the described loop
+      set
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: the reconstruction places fl_p5l_3 75 mm from the nearest of the 4 loops the description
+      carries on p5_lower
+- channel: fl_p6u_1
+  kind: exclusion
+  status: recorded
+  cause: the description carries no flux loop on p6_upper, which fl_p6u_1 is mounted on
+  validity:
+  - notes: open in both directions
+  provenance:
+    method: position join between the reconstruction's measured loop table and the described loop
+      set
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: the description carries no flux loop on p6_upper, which fl_p6u_1 is mounted on
+- channel: fl_p6u_2
+  kind: exclusion
+  status: recorded
+  cause: the description carries no flux loop on p6_upper, which fl_p6u_2 is mounted on
+  validity:
+  - notes: open in both directions
+  provenance:
+    method: position join between the reconstruction's measured loop table and the described loop
+      set
+    evidence_uri: docs/research/mast-flux-loop-gain-fits.html
+    fitted_by: nova.imas.mast_flux_loop_adjudication
+    statement: the description carries no flux loop on p6_upper, which fl_p6u_2 is mounted on

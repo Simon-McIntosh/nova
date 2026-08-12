@@ -9,7 +9,12 @@ from nova.utilities.importmanager import skip_import
 with skip_import("jax"):
     import jax.numpy as jnp
 
-    from nova.equilibrium.connectivity_boundary import traced_boundary_read
+    from nova.equilibrium.connectivity_boundary import (
+        traced_boundary_read,
+        traced_emit_boundary_read,
+        traced_iteration_boundary_read,
+        traced_smooth_boundary_read,
+    )
     from nova.jax.config import configure_dtypes
 
 
@@ -70,3 +75,51 @@ def test_first_read_and_bracket_miss_use_the_cold_sweep():
     assert not bool(missed["binding_search_warm"])
     assert int(missed["binding_search_evaluations"]) == 48 + 6
     np.testing.assert_array_equal(missed["s_flood"], cold["s_flood"])
+
+
+def test_coarse_iteration_preserves_the_full_resolution_emit():
+    configure_dtypes()
+    rg, zg, inside, fields = _fixture_fields()
+    field = fields[1]
+    args = (
+        jnp.asarray(field),
+        jnp.asarray(rg),
+        jnp.asarray(zg),
+        jnp.asarray(inside),
+        jnp.asarray(1.0),
+        jnp.asarray(0.0),
+        48,
+        10,
+        32,
+    )
+    full_iteration = traced_smooth_boundary_read(*args, temperature=jnp.asarray(1.0e-3))
+    coarse_iteration = traced_iteration_boundary_read(
+        *args,
+        temperature=jnp.asarray(1.0e-3),
+        previous_flood_level=full_iteration["s_flood"],
+        resolution_stride=2,
+    )
+    emitted = traced_emit_boundary_read(*args, temperature=jnp.asarray(1.0e-3))
+    reference_emit = traced_smooth_boundary_read(*args, temperature=jnp.asarray(1.0e-3))
+
+    for key in ("psi_axis", "psi_bnd", "s_soft", "radii", "core_weight"):
+        np.testing.assert_array_equal(emitted[key], reference_emit[key])
+
+    boundary_span = abs(float(reference_emit["psi_out"] - reference_emit["psi_axis"]))
+    iterate_boundary_difference = (
+        abs(float(coarse_iteration["psi_bnd"] - full_iteration["psi_bnd"]))
+        / boundary_span
+    )
+    iterate_core_difference = float(
+        np.max(
+            np.abs(
+                np.asarray(coarse_iteration["core_weight"])
+                - np.asarray(full_iteration["core_weight"])
+            )
+        )
+    )
+    assert np.isfinite(iterate_boundary_difference)
+    assert np.isfinite(iterate_core_difference)
+    assert iterate_boundary_difference > 0.0
+    assert iterate_core_difference > 0.0
+    assert coarse_iteration["core_weight"].shape == field.shape

@@ -1,4 +1,4 @@
-"""Cost of a finite-cross-section arc grid solve, and the amplitude fold it needs.
+"""Cost and independent accuracy of a finite-cross-section arc grid solve.
 
 Two modes, because they answer different questions and must not share a process:
 
@@ -15,12 +15,19 @@ Two modes, because they answer different questions and must not share a process:
     the amplitude fold the third kind is reduced by.  What the superseded route
     refused, what it silently answered wrong INSIDE the domain it accepted, and
     the reduced value against an elementary reference across the fold boundary.
+
+``audit``
+    the complete Bow element against a direct three-dimensional volume integral
+    that shares neither its elliptic reduction nor its fixed-node zeta rule.
 """
 
+import json
+import pathlib
 import sys
 import time
 
 import numpy as np
+from scipy.constants import mu_0
 
 RADIUS = 3.945
 HEIGHT = 2.0
@@ -28,6 +35,137 @@ SECTION = {"rect": (0, 0, 0.06, 0.03)}
 SEGMENTS = 10
 TARGETS = 2000
 QUARTER_TURN = np.pi / 2
+
+
+def direct_volume_arbiter(
+    targets,
+    order=64,
+    *,
+    radius=RADIUS,
+    height=HEIGHT,
+    width=SECTION["rect"][2],
+    depth=SECTION["rect"][3],
+    start=-0.2,
+    end=0.2,
+):
+    """Integrate the rectangular arc directly over radius, level and angle.
+
+    This is the defining three-dimensional Biot-Savart volume integral.  It shares
+    neither Bow's elliptic reduction nor its fixed-node zeta rule, and therefore
+    grades the complete element rather than comparing two reductions of its rows.
+    The returned columns are ``Ax, Ay, Az, Bx, By, Bz`` in SI units per ampere.
+    """
+    node, weight = np.polynomial.legendre.leggauss(order)
+    source_radius = radius + 0.5 * width * node
+    level = height + 0.5 * depth * node
+    half_sweep = 0.5 * (end - start)
+    angle = 0.5 * (start + end) + half_sweep * node
+    radius_weight = 0.5 * width * weight
+    level_weight = 0.5 * depth * weight
+    angle_weight = half_sweep * weight
+    source_r, source_z, source_phi = np.meshgrid(
+        source_radius, level, angle, indexing="ij"
+    )
+    volume_weight = (
+        radius_weight[:, None, None]
+        * level_weight[None, :, None]
+        * angle_weight[None, None, :]
+        / (width * depth)
+    )
+    source = np.stack(
+        [
+            source_r * np.cos(source_phi),
+            source_r * np.sin(source_phi),
+            source_z,
+        ],
+        axis=-1,
+    )
+    tangent = np.stack(
+        [
+            -source_r * np.sin(source_phi),
+            source_r * np.cos(source_phi),
+            np.zeros_like(source_r),
+        ],
+        axis=-1,
+    )
+    result = []
+    for target in np.asarray(targets, dtype=float):
+        separation = target - source
+        distance = np.linalg.norm(separation, axis=-1)
+        vector = (
+            mu_0
+            / (4.0 * np.pi)
+            * np.sum(
+                volume_weight[..., None] * tangent / distance[..., None],
+                axis=(0, 1, 2),
+            )
+        )
+        field = (
+            mu_0
+            / (4.0 * np.pi)
+            * np.sum(
+                volume_weight[..., None]
+                * np.cross(tangent, separation)
+                / distance[..., None] ** 3,
+                axis=(0, 1, 2),
+            )
+        )
+        result.append(np.concatenate([vector, field]))
+    return np.asarray(result)
+
+
+def bow_arbiter_record() -> dict:
+    """Return Bow's worst sampled error against the direct volume integral."""
+    from nova.biot.biotframe import Source, Target
+    from nova.biot.bow import Bow
+    from nova.frame.coilset import CoilSet
+
+    angle = np.array([-0.2, 0.0, 0.2])
+    radius = 2.0
+    coilset = CoilSet()
+    coilset.winding.insert(
+        np.column_stack(
+            [radius * np.cos(angle), radius * np.sin(angle), np.zeros_like(angle)]
+        ),
+        {"rect": (0.0, 0.0, 0.08, 0.04)},
+        nturn=1,
+        Ic=1,
+        minimum_arc_nodes=3,
+        filament=False,
+        ifttt=False,
+    )
+    frame = coilset.subframe
+    source = Source(
+        {column: np.asarray(frame[column]) for column in frame.columns},
+        index=list(frame.index),
+    )
+    targets = np.array(
+        [
+            [2.5, 0.1, 0.3],
+            [2.045 * np.cos(0.205), 2.045 * np.sin(0.205), 0.025],
+        ]
+    )
+    target = Target({"x": targets[:, 0], "y": targets[:, 1], "z": targets[:, 2]})
+    bow = Bow(source, target, turns=[False, False], reduce=[False, False])
+    measured = np.concatenate([mu_0 * bow.Avector[:, 0], bow.Bvector[:, 0]], axis=-1)
+    reference = direct_volume_arbiter(
+        targets, order=64, radius=radius, height=0.0, width=0.08, depth=0.04
+    )
+    prior = direct_volume_arbiter(
+        targets, order=48, radius=radius, height=0.0, width=0.08, depth=0.04
+    )
+    row_scale = np.max(np.abs(reference), axis=-1)
+    relative = np.max(np.abs(measured - reference), axis=-1) / row_scale
+    refinement = np.max(np.abs(reference - prior), axis=-1) / row_scale
+    return {
+        "targets": targets.tolist(),
+        "production": measured.tolist(),
+        "direct_volume_order_64": reference.tolist(),
+        "production_relative_error": relative.tolist(),
+        "worst_production_relative_error": float(relative.max()),
+        "arbiter_relative_change_48_to_64": refinement.tolist(),
+        "worst_arbiter_relative_change_48_to_64": float(refinement.max()),
+    }
 
 
 def subtracted_angle_third_kind(n, phi, m):
@@ -268,5 +406,10 @@ if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "time"
     if mode == "figure":
         figure(*sys.argv[2:])
+    elif mode == "audit":
+        record = bow_arbiter_record()
+        print(json.dumps(record, indent=1))
+        if len(sys.argv) > 2:
+            pathlib.Path(sys.argv[2]).write_text(json.dumps(record, indent=1))
     else:
         time_grid_solve()

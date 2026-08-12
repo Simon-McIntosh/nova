@@ -463,6 +463,29 @@ def test_the_shipped_order_holds_the_self_term_against_the_brute_force(name):
     assert abs(doubled / limit - 1.0) < 1e-04
 
 
+def test_hexagonal_target_rule_convergence_against_the_double_integral_arbiter():
+    """The plasma-cell fan closes monotonically onto the independent four-D limit.
+
+    Orders one through five use 4, 16, 36, 64 and 100 target nodes.  Their relative
+    self-flux errors are 2.428e-2, 4.262e-5, 3.752e-6, 1.398e-7 and 8.297e-9;
+    higher orders reach the recorded arbiter's own roughly 9e-8 residual instead of
+    defining a more accurate reference from the rule under test.
+    """
+    vertices = SECTIONS["plasma cell"]
+    reference = BRUTE_FORCE_SELF_FLUX["plasma cell"]
+    error = np.array(
+        [
+            abs(averaged_greens([vertices], vertices, order)[0][0] / reference - 1.0)
+            for order in range(1, 6)
+        ]
+    )
+    expected = np.array(
+        [2.4280703e-2, 4.2623666e-5, 3.7520487e-6, 1.3980060e-7, 8.2972853e-9]
+    )
+    np.testing.assert_allclose(error, expected, rtol=2.0e-7, atol=0.0)
+    assert np.all(np.diff(error) < 0.0)
+
+
 def test_the_rule_loses_order_to_the_section_aspect_ratio():
     """The diagnostic that separates a quadrature error from a reference's model.
 

@@ -662,3 +662,21 @@ All three counted failures are pre-existing relative to merges `239d3e2b`,
 worktree. Its earlier `InvalidGitRepositoryError` came only from running in a
 Git archive with no GitPython-visible worktree metadata, so that artifact is
 not included in the failure count.
+
+### Monolithic lane on the repaired tree — interrupted, no final counts
+
+Recorded 2026-08-12 on `sun_debug` node `98dci4-clu-3141` (Intel Xeon Gold
+5220), Python 3.14.2 and pytest 9.1.1, with `TMPDIR=/tmp` and JAX on CPU. One
+process ran `uv run --no-sync pytest -m "slow or not slow"` on integrated main
+at `17d173be8ea287d43de9cceeb9a578056ee77dec`, including the catalog-scan
+repair at `459cecce`.
+
+The process remained active and reached **62%** in **22 min 23 s**, where
+SLURM stopped it at the allocation limit while
+`tests/test_equilibrium_forward_reference.py` was executing. It did not reach
+the former catalog-scan parking test and did not exhibit a stable parked
+interval, so there is no parking stack to record from this attempt. It also did
+not emit a final pytest summary: **monolithic passed/failed/skipped/xfailed
+counts are unavailable**, and this attempt does not attest that the repaired
+monolithic lane completes. Full log:
+`/home/ITER/mcintos/.cache/nova-test-logs/monolithic-lane-proof-17d173be-20260812.log`.

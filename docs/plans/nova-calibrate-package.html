@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="nova-calibrate-package">
   <meta name="plan-title" content="Nova Calibrate Package — promote the diagnostic-calibration machinery to tested, machine-agnostic functionality">
   <meta name="plan-summary" content="The MAST misfit programme built a working calibration toolkit as cache scripts and mast_-prefixed modules: signed coupling regression, per-channel gain fits, free current inversion with identifiability, source-localization scans, differential tests, scale-step detection, and noise-floor measurement. Promote it to a unit-tested nova/calibrate package with machine-agnostic kernels and per-machine adapters, so the next machine gets the whole ladder for the cost of an adapter.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
   <meta name="plan-capability-version" content="1.0">
@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-12">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="7">
 <meta name="plan-impl" content="1.0">
 <meta name="plan-commits" content="623ae5cf,0d1e39d4">
 <meta name="plan-artifacts" content="nova/calibrate/partial.py,nova/calibrate/scale_step.py,nova/calibrate/noise.py,nova/calibrate/pair_state.py,tests/calibrate/">
@@ -115,22 +115,15 @@
     data-availability flags, mirroring the norma-corpus pattern; they never gate the default
     suite.</li>
   </ol>
-  <p class="landed-summary"><span class="badge badge-shipped">✓ landed 2026-08-07 (first slice)</span>
-  Five of the nine capabilities are in (merge <code>623ae5cf</code>):
-  <code>corrections.py</code> (application engine driven off the schema's enum ranks, refusing
-  unordered or unresolved-candidate channels), <code>coupling.py</code>, <code>gain.py</code>,
-  <code>inversion.py</code>, <code>localize.py</code> — arrays-only signatures throughout.
-  Synthetic-truth unit lane 160 passed in 5.75 s, store-free; banked regression pins green
-  (couplings fixture 23 kB, obr17 gain, identifiability spectrum reproduce through the
-  package); full default suite 4148 passed / 0 failed. Remaining below:
-  <code>partial.py</code>, <code>scale_step.py</code>, <code>noise.py</code>,
-  <code>pair_state.py</code>, adapter thinning, and the schema-served constant cutover
-  (tracked in <code>diagnostic-correction-schema</code>).</p>
-  <p>Done-when: <code>nova/calibrate/</code> exists with the nine modules above migrated or
-  implemented, <code>tests/calibrate/</code> mirrors it with synthetic-truth unit tests
-  passing in the default lane, the cache scripts' results reproduce through the package
-  (regression pins green), MAST adapters consume the kernels with no behaviour change to the
-  vacuum-floor gate, and the correction constants are served from schema documents.</p>
+  <p class="landed-summary"><span class="badge badge-shipped">✓ landed 2026-08-12</span>
+  All nine capabilities migrated behind arrays-only signatures across two slices (merges
+  <code>623ae5cf</code>, <code>0d1e39d4</code>). Synthetic-truth unit lane green store-free —
+  exact rungs 0.5/1&#8725;&radic;2/&radic;2/2.0, drift 1.3e-3 within 2%, partial slope 0.37
+  within 0.002, pair-state sequences exact; adapter lane 316 passed with the vacuum-floor gate
+  unchanged; full suite 4893 passed / 2 failed (both pre-existing probe-axis sign assertions in
+  <code>test_mast_solve_inputs.py</code>, owned elsewhere) against the 4148 baseline. MAST
+  adapters shed 1,159 lines to re-exports. Adapter boundary locked arrays-only. Full record:
+  <a href="/nova/evidence/archive/nova-calibrate-package-landed">landed record</a>.</p>
 
   <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>

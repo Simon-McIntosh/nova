@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="nova-calibrate-package-landed">
+  <meta name="plan-title" content="Nova Calibrate Package — Landed Record">
+  <meta name="plan-summary" content="All nine calibration capabilities migrated into nova/calibrate behind arrays-only signatures across two slices; MAST modules thinned to adapters shedding 1159 lines; synthetic-truth unit lane runs store-free">
+  <meta name="plan-status" content="shipped">
+  <meta name="plan-evidence-for" content="nova-calibrate-package">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>Nova Calibrate Package — Landed Record | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — What shipped</h2>
+
+    <p>The calibration ladder the MAST misfit programme built as one-shot cache scripts and
+    <code>mast_</code>-prefixed modules is now a package. All nine capabilities from the
+    migration inventory landed across two slices — <code>623ae5cf</code> then
+    <code>0d1e39d4</code> — every kernel taking arrays and channel metadata only, with no store
+    path and no shot number anywhere in <code>nova/calibrate/</code>.</p>
+
+    <table>
+      <thead>
+        <tr><th>Capability</th><th>Module</th><th>Slice</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Correction storage and read-path application</td><td><code>corrections.py</code></td><td>first</td></tr>
+        <tr><td>Vacuum residual and signed coupling regression</td><td><code>coupling.py</code></td><td>first</td></tr>
+        <tr><td>Per-channel gain and offset fits</td><td><code>gain.py</code></td><td>first</td></tr>
+        <tr><td>Free current inversion and identifiability</td><td><code>inversion.py</code></td><td>first</td></tr>
+        <tr><td>Source-localization scan</td><td><code>localize.py</code></td><td>first</td></tr>
+        <tr><td>Differential / partialled regressor tests</td><td><code>partial.py</code></td><td>second</td></tr>
+        <tr><td>Acquisition scale-step detection</td><td><code>scale_step.py</code></td><td>second</td></tr>
+        <tr><td>Noise floor, drift ramp, quiet-window statistics</td><td><code>noise.py</code></td><td>second</td></tr>
+        <tr><td>Pair-failure state detection</td><td><code>pair_state.py</code></td><td>second</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="s2">§2 — Synthetic truth is the assertion, and it runs without data</h2>
+
+    <p>The unit lane manufactures its own truth, so it needs no mounts. The second slice's 14
+    focused cases ran green store-free in 3.21&nbsp;s, recovering every quantity injected:</p>
+
+    <table>
+      <thead><tr><th>Injected</th><th>Recovered</th></tr></thead>
+      <tbody>
+        <tr><td>Exact ladder rungs 0.5, 1/&radic;2, &radic;2, 2.0</td><td>each rung identified exactly</td></tr>
+        <tr><td>Drift ramp 1.3&times;10<sup>&minus;3</sup></td><td>within 2%, with repeat scatter 2&times;10<sup>&minus;4</sup> within 4%</td></tr>
+        <tr><td>Partial regression slope 0.37 under Frisch&ndash;Waugh residualisation</td><td>within 0.002</td></tr>
+        <tr><td>Stable, mid-life-step and shot-to-shot-flipping pair states</td><td>every sequence classified exactly</td></tr>
+      </tbody>
+    </table>
+
+    <p>The first slice's banked regression pins continue to reproduce through the package — the
+    couplings fixture, the obr17 gain of 0.5011, and one identifiability spectrum — which is what
+    keeps the numbers in the research records honest as the machinery moves beneath them.</p>
+
+    <h2 id="s3">§3 — The adapters got thinner, and the gate did not move</h2>
+
+    <p>The point of the migration is that the MAST modules stop owning physics. They now
+    re-export the package kernels: <code>mast_acquisition_scale.py</code> shed 757 lines and
+    <code>mast_sensor_noise.py</code> 402, against 1,343 lines of new kernel. Behaviour is
+    unchanged where it matters — the adapter lane ran 316 passed / 2 skipped in 6.03&nbsp;s with
+    the vacuum-cohort and block-scale read-path tests untouched, so the vacuum-floor gate is
+    exactly where it was.</p>
+
+    <p>Full default suite: <strong>4893 passed / 2 failed / 121 skipped / 4 xfailed</strong> in
+    1427&nbsp;s, against the 4148-passed baseline the first slice recorded — <strong>+745
+    passes</strong> as the collection expanded.</p>
+
+    <h2 id="s4">§4 — The two failures, and why they are not ours</h2>
+
+    <p>Both failures are store-backed probe-axis sign assertions in
+    <code>tests/test_mast_solve_inputs.py</code>: for shots 15000 and 13500 the reconstructed
+    probe axis comes back at +&pi;/2 where the target is &minus;&pi;/2. They are pre-existing,
+    they traverse no changed calibration path, and they sit in the module whose direct sensor
+    doors <code>mast-corrected-read-layer</code> is closing — so that plan owns the fix. They are
+    recorded here because this suite run is where the evidence was produced, not because this
+    plan caused them.</p>
+
+    <h2 id="s5">§5 — Integration note</h2>
+
+    <p>The block-scale import block conflicted on merge with concurrently landed promoted-chain
+    work. Both intents were preserved: the chain imports stayed, and the ladder symbols
+    (<code>LADDER_TOLERANCE</code>, <code>ChannelScaleHistory</code>, <code>nearest_rung</code>)
+    moved to their new canonical home in <code>nova.calibrate.scale_step</code>, which
+    <code>mast_acquisition_scale</code> re-exports so either import path resolves.</p>
+
+    <p>The adapter-boundary decision is locked <strong>arrays-only</strong>, ratifying what the
+    first slice had already built. Keeping the geometry registry out of the kernels is precisely
+    what makes the unit lane store-free: a registry-aware kernel would have to reach for geometry
+    to build its own responses, putting a store path back inside a numerics module.</p>
+
+  </main>
+</body>
+</html>

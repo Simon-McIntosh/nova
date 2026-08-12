@@ -19,6 +19,7 @@ import argparse
 import hashlib
 import json
 import re
+from collections.abc import Iterator
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from enum import StrEnum
@@ -1392,19 +1393,26 @@ def scan_catalog(
     )
     completed = {row.shot for row in source_rows}
     pending = [shot for shot in shots if shot not in completed]
-    with ThreadPoolExecutor(max_workers=workers) as executor:
-        for row in executor.map(
-            lambda shot: source_fingerprint(shot, level1_root, level2_root),
-            pending,
-        ):
-            source_rows.append(row)
-            if checkpoint_path and len(source_rows) % checkpoint_every == 0:
-                _write_fingerprint_checkpoint(
-                    checkpoint_path,
-                    source_rows,
-                    level1_root,
-                    level2_root,
-                )
+
+    def fingerprint(shot: int) -> SourceFingerprint:
+        return source_fingerprint(shot, level1_root, level2_root)
+
+    def pending_fingerprints() -> Iterator[SourceFingerprint]:
+        if workers == 1:
+            yield from map(fingerprint, pending)
+            return
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            yield from executor.map(fingerprint, pending)
+
+    for row in pending_fingerprints():
+        source_rows.append(row)
+        if checkpoint_path and len(source_rows) % checkpoint_every == 0:
+            _write_fingerprint_checkpoint(
+                checkpoint_path,
+                source_rows,
+                level1_root,
+                level2_root,
+            )
     source_rows.sort(key=lambda row: row.shot)
     if checkpoint_path:
         _write_fingerprint_checkpoint(

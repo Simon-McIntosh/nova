@@ -21,7 +21,9 @@ The measurement side of the ladder sits beside the storage side.
 :mod:`nova.calibrate.coupling` regresses what a sensor reads that the description
 does not predict onto the drives that could have produced it;
 :mod:`nova.calibrate.gain` fits and pools per-channel scales, baselines and drift
-rates; :mod:`nova.calibrate.inversion` solves the sensors for the currents and
+rates; :mod:`nova.calibrate.gain_check` measures per-pulse scales against the exact
+vacuum solution and separates pickup-state shape from scalar gain;
+:mod:`nova.calibrate.inversion` solves the sensors for the currents and
 reports which current combinations they cannot resolve at all;
 :mod:`nova.calibrate.localize` asks where a surviving residual came from by scanning
 candidate sources over the poloidal plane; :mod:`nova.calibrate.windows` splits a
@@ -49,6 +51,7 @@ __all__: list[str] = [
     "corrections",
     "coupling",
     "gain",
+    "gain_check",
     "instrument",
     "inversion",
     "localize",

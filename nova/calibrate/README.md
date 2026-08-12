@@ -2,10 +2,10 @@
 
 This file covers the storage side of the package: the schema a correction is written
 against, the artefacts generated from it, and where instances live. The measurement
-side — `coupling.py`, `gain.py`, `inversion.py`, `localize.py`, `windows.py`,
-`instrument.py`, and the `corrections.py` engine that applies what they establish —
-is oriented in the package docstring in `__init__.py`, and each module's own
-docstring says what it guards against and why.
+side — `coupling.py`, `gain.py`, `gain_check.py`, `inversion.py`, `localize.py`,
+`windows.py`, `instrument.py`, and the `corrections.py` engine that applies what they
+establish — is oriented in the package docstring in `__init__.py`, and each module's
+own docstring says what it guards against and why.
 
 `schema/diagnostic_correction.yaml` is the authored source. `correction_model.py`
 and `schema/diagnostic_correction.schema.json` are generated from it and committed
@@ -90,3 +90,23 @@ extrapolated across more than a second carries its fitted rate error over that g
 which on one archive pulse exceeded the sample noise fifteenfold — scoring against
 scatter alone called 65 of 73 channels non-closing on a machine that had done
 nothing to them.
+
+## Checking gain in vacuum-driven windows
+
+`gain_check.py` contracts each channel's described Green's row with the recorded
+conductor-current array, then fits the measured channel onto that exact vacuum
+prediction over the classifier's driven windows. `fit_pulse_gain_checks` takes the
+channel list plus callbacks for channel samples and response rows; it knows no store,
+machine, current-family names, or channel convention. An optional instrument callback
+supplies the offset and integrator walk already measured by `instrument.py`. Without
+that callback, the samples supplied by the adapter must already have those additive
+terms removed — the gain fit deliberately has no intercept.
+
+A response callback may return either one row or a mapping of pickup-state name to
+row. Each state gets its own scalar fit, so amplitude remains the gain while the
+current-weighted waveform shape selects the pickup state. If two described states
+differ only by an overall scale, the kernel refuses the decision: their residuals
+tie after scalar fitting, which means pair state and gain are not identifiable from
+that pulse. Accepted results are one gain per channel and pulse and feed directly
+into `scale_step.py`; a scale transition is therefore bounded by the two consecutive
+pulse numbers that actually measured it rather than by a curated shot block.

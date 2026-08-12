@@ -38,6 +38,7 @@ from typing import Any, Iterable, Mapping, Sequence
 import numpy as np
 
 from nova.imas.mast_block_scale import (
+    BlockScaleTable,
     ScaleCorrection,
     ScaleReader,
     promoted_block_scales,
@@ -545,14 +546,19 @@ def survey_shot(shot: int, store: Path | str = SHOT_STORE) -> ShotSurvey:
                     multipliers[family] = ratio
 
     try:
-        fields = group[FIELD_GROUP]
+        waveforms = read_shot_waveforms(shot, store=root)
     except Exception:  # noqa: BLE001 - group absence is data, not failure
         absent_groups.append(FIELD_GROUP)
     else:
-        field_identity = str(dict(fields.attrs).get("uuid", ""))
-        field_channels = tuple(
-            sorted(name for name in fields.keys() if _CHANNEL_PATTERN.match(name))
+        field_identity = next(
+            (
+                row.group_identity
+                for row in waveforms.provenance
+                if row.group == FIELD_GROUP
+            ),
+            "",
         )
+        field_channels = tuple(sorted(waveforms.probes))
 
     return ShotSurvey(
         shot=shot,
@@ -850,6 +856,7 @@ class ShotWaveforms:
     time: np.ndarray
     drives: Mapping[str, np.ndarray]
     probes: Mapping[str, np.ndarray]
+    sensors: Mapping[str, np.ndarray]
     plasma_current: np.ndarray
     sample_mask: np.ndarray
     baseline_mask: np.ndarray
@@ -979,16 +986,24 @@ def read_shot_waveforms(
             )
         )
 
-    probes: dict[str, np.ndarray] = {}
+    sensors: dict[str, np.ndarray] = {}
     for channel in sorted(field_keys):
-        if not _CHANNEL_PATTERN.match(channel):
+        if channel == "time":
             continue
-        probes[channel] = np.asarray(fields[channel][...], dtype=float)
+        values = np.asarray(fields[channel][...], dtype=float)
+        if values.shape != time.shape:
+            continue
+        sensors[channel] = values
         provenance.append(
             SignalProvenance(str(root), shot, FIELD_GROUP, channel, field_identity)
         )
     table = promoted_block_scales() if block_scale is None else block_scale
-    probes, corrections = table.normalise(shot, probes)
+    sensors, corrections = table.normalise(shot, sensors)
+    probes = {
+        channel: values
+        for channel, values in sensors.items()
+        if _CHANNEL_PATTERN.match(channel)
+    }
 
     mask = np.ones(time.shape, dtype=bool)
     excluded: list[ExcludedWindow] = []
@@ -1031,6 +1046,7 @@ def read_shot_waveforms(
         time=time,
         drives=drives,
         probes=probes,
+        sensors=sensors,
         plasma_current=plasma,
         sample_mask=mask,
         baseline_mask=quiet,
@@ -1038,6 +1054,29 @@ def read_shot_waveforms(
         provenance=tuple(provenance),
         scale_corrections=corrections,
     )
+
+
+@dataclass(frozen=True)
+class RawArchiveReader:
+    """Explicitly read field signals exactly as the archive published them."""
+
+    store: Path | str = SHOT_STORE
+
+    def read_shot_waveforms(
+        self, shot: int, *, quiescent_ramp_fraction: float = 0.0
+    ) -> ShotWaveforms:
+        """Read a shot without applying any correction document entries."""
+
+        return read_shot_waveforms(
+            shot,
+            store=self.store,
+            quiescent_ramp_fraction=quiescent_ramp_fraction,
+            block_scale=BlockScaleTable(),
+        )
+
+
+RAW_ARCHIVE = RawArchiveReader()
+"""The sole production entry point for archive-as-published field reads."""
 
 
 VESSEL_TIME = 5.0e-3

@@ -60,7 +60,7 @@ from nova.imas.mast_solve_inputs import (
     reconstruction_loop_positions,
     reconstruction_loop_rows,
 )
-from nova.imas.mast_vacuum_cohort import FIELD_GROUP, SHOT_STORE
+from nova.imas.mast_vacuum_cohort import SHOT_STORE, read_shot_waveforms
 from nova.imas.mast_vacuum_response import loop_response_matrix
 
 MIRROR_TOLERANCE = 1.0e-6
@@ -780,10 +780,6 @@ def loop_shot_residuals(
     convention and the kernel's, cancel and cannot decide a position.
     """
 
-    import zarr
-
-    from nova.imas.mast_vacuum_cohort import read_shot_waveforms
-
     disagreeing = [row for row in comparisons if row.described_index is not None]
     if not disagreeing:
         return ()
@@ -804,7 +800,7 @@ def loop_shot_residuals(
     }
 
     waveforms = read_shot_waveforms(shot, store=store)
-    fields = zarr.open_group(f"{Path(store)}/{shot}.zarr", mode="r")[FIELD_GROUP]
+    fields = waveforms.sensors
     samples = np.flatnonzero(waveforms.sample_mask)[::stride]
     quiet = waveforms.baseline_mask
     if samples.size == 0:
@@ -819,7 +815,7 @@ def loop_shot_residuals(
     for index, row in enumerate(disagreeing):
         if row.channel not in fields:
             continue
-        measured = np.asarray(fields[row.channel][...], dtype=float)
+        measured = np.asarray(fields[row.channel], dtype=float)
         if measured.shape != waveforms.time.shape:
             continue
         finite = np.isfinite(measured)
@@ -910,24 +906,20 @@ def measure_loop_scatter(
     probes' floor was measured with, so the two floors are comparable numbers.
     """
 
-    import zarr
-
-    root = Path(store)
     pooled: dict[str, list[float]] = {}
     for shot in shots:
         try:
-            fields = zarr.open_group(f"{root}/{shot}.zarr", mode="r")[FIELD_GROUP]
+            waveforms = read_shot_waveforms(shot, store=store)
         except Exception:  # noqa: BLE001 - a shot the store cannot open is skipped
             continue
-        if "time" not in fields:
-            continue
-        time = np.asarray(fields["time"][...], dtype=float)
+        fields = waveforms.sensors
+        time = waveforms.time
         for channel in sorted(fields.keys()):
             try:
                 parse_loop_channel(channel)
             except SolveInputError:
                 continue
-            values = np.asarray(fields[channel][...], dtype=float)
+            values = np.asarray(fields[channel], dtype=float)
             if values.shape != time.shape:
                 continue
             keep = np.isfinite(values) & np.isfinite(time)
@@ -1033,9 +1025,7 @@ def loop_shot_gains(
     would put its field into the residual and bias the slope.
     """
 
-    import zarr
-
-    from nova.imas.mast_vacuum_cohort import EXCITATION_CURRENT, read_shot_waveforms
+    from nova.imas.mast_vacuum_cohort import EXCITATION_CURRENT
     from nova.imas.mast_vacuum_response import target_standoff
 
     channels = sorted(targets)
@@ -1048,7 +1038,7 @@ def loop_shot_gains(
     weight = np.asarray([float(multipliers[family]) for family in families])
 
     waveforms = read_shot_waveforms(shot, store=store)
-    fields = zarr.open_group(f"{Path(store)}/{shot}.zarr", mode="r")[FIELD_GROUP]
+    fields = waveforms.sensors
     samples = np.flatnonzero(waveforms.sample_mask)[::stride]
     quiet = waveforms.baseline_mask
     if samples.size == 0:
@@ -1067,7 +1057,7 @@ def loop_shot_gains(
     for index, channel in enumerate(channels):
         if channel not in fields:
             continue
-        measured = np.asarray(fields[channel][...], dtype=float)
+        measured = np.asarray(fields[channel], dtype=float)
         if measured.shape != waveforms.time.shape:
             continue
         finite = np.isfinite(measured)
@@ -1118,22 +1108,23 @@ def archive_loop_gains(
     import zarr
 
     group = zarr.open_group(f"{Path(store)}/{shot}.zarr", mode="r")
-    if RECONSTRUCTION_GROUP not in group or FIELD_GROUP not in group:
+    if RECONSTRUCTION_GROUP not in group:
         return {}
     reconstruction = group[RECONSTRUCTION_GROUP]
-    fields = group[FIELD_GROUP]
+    waveforms = read_shot_waveforms(shot, store=store)
+    fields = waveforms.sensors
     if "silop_c" not in reconstruction:
         return {}
     predicted = np.asarray(reconstruction["silop_c"][...], dtype=float)
     clock = np.asarray(reconstruction["time"][...], dtype=float)
-    field_clock = np.asarray(fields["time"][...], dtype=float)
+    field_clock = waveforms.time
     rows = reconstruction_loop_rows()
     result: dict[str, float] = {}
     for channel in channels:
         row = rows.get(channel)
         if row is None or row >= predicted.shape[1] or channel not in fields:
             continue
-        measured = np.asarray(fields[channel][...], dtype=float)
+        measured = np.asarray(fields[channel], dtype=float)
         if measured.shape != field_clock.shape:
             continue
         usable = np.isfinite(measured) & np.isfinite(field_clock)

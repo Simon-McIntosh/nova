@@ -53,15 +53,15 @@ from typing import Any, Iterable, Mapping, Sequence
 
 import numpy as np
 
-from nova.imas.mast_block_scale import ScaleReader, promoted_block_scales
+from nova.imas.mast_block_scale import ScaleReader
 from nova.imas.mast_vacuum_cohort import (
     CURRENT_GROUP,
-    FIELD_GROUP,
     KILO,
     SHOT_STORE,
     CohortError,
     _resample,
     parse_probe_channel,
+    read_shot_waveforms,
 )
 
 ERROR_FIELD_CHANNELS = ("error_field_02", "error_field_05")
@@ -238,10 +238,8 @@ def read_error_field_drive(
     import zarr
 
     root = Path(store)
-    group = zarr.open_group(f"{root}/{shot}.zarr", mode="r")
-    currents = group[CURRENT_GROUP]
-    fields = group[FIELD_GROUP]
-    time = np.asarray(fields["time"][...], dtype=float)
+    currents = zarr.open_group(f"{root}/{shot}.zarr", mode="r")[CURRENT_GROUP]
+    time = read_shot_waveforms(shot, store=store).time
 
     waveforms: dict[str, np.ndarray] = {}
     absent: list[str] = []
@@ -845,15 +843,4 @@ def read_probe_signals(
     acquisition happened to be on.  An empty table reads the archive as published.
     """
 
-    import zarr
-
-    fields = zarr.open_group(f"{Path(store)}/{shot}.zarr", mode="r")[FIELD_GROUP]
-    signals = {}
-    for channel in sorted(fields.keys()):
-        try:
-            parse_probe_channel(channel)
-        except CohortError:
-            continue
-        signals[channel] = np.asarray(fields[channel][...], dtype=float)
-    table = promoted_block_scales() if block_scale is None else block_scale
-    return table.normalise(shot, signals)[0]
+    return read_shot_waveforms(shot, store=store, block_scale=block_scale).probes

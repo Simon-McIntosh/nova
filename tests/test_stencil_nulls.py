@@ -1,8 +1,8 @@
 """Sub-grid stencil null locator — synthetic-field unit tests.
 
-Fast, self-contained (no IMAS data): verifies the whole-grid 8-ring classifier
-(0 → O, 4 → X), the biquadratic sub-grid refinement against a symmetry-known
-X-point, and that the axis position carries a finite ``jax.grad``.
+Fast, self-contained (no IMAS data): verifies the rectangular and hex-ring
+classifiers (0 → O, 4 → X), the biquadratic sub-grid refinement against a
+symmetry-known X-point, and that the axis position carries a finite ``jax.grad``.
 """
 
 from __future__ import annotations
@@ -16,6 +16,8 @@ import numpy as np
 import pytest
 
 from nova.utilities.importmanager import skip_import
+
+HEX_QUADRATIC_CONDITION = 5.47318837498164
 
 with skip_import("jax"):
     import jax
@@ -119,6 +121,44 @@ def test_classifier_finds_o_and_x():
     assert (counts == 4).any(), "no X-point (4 sign changes) classified"
     # the border carries no full ring
     assert (counts[0, :] == -1).all() and (counts[:, 0] == -1).all()
+
+
+def test_hex_plasma_stencil_classifies_saddle_and_has_full_rank_fit():
+    from scipy.spatial import Delaunay
+
+    from nova.biot.plasmagrid import PlasmaGrid
+
+    angles = np.arange(6) * np.pi / 3.0
+    points = np.vstack(([0.0, 0.0], np.column_stack((np.cos(angles), np.sin(angles)))))
+    triangulation = Delaunay(points)
+    boundary = np.unique(triangulation.convex_hull)
+    stencil, centre_index = PlasmaGrid.loop_neighbour_vertices(
+        points, triangulation.vertex_neighbor_vertices, boundary
+    )
+
+    assert stencil.shape == (1, 7)
+    np.testing.assert_array_equal(centre_index, [0])
+    saddle = points[:, 0] ** 2 - points[:, 1] ** 2
+    np.testing.assert_array_equal(
+        np.asarray(ring_sign_changes(jnp.asarray(saddle), jnp.asarray(stencil))), [4]
+    )
+
+    cluster = points[stencil[0]]
+    offsets = cluster - cluster[0]
+    local = offsets / np.max(np.abs(offsets), axis=0)
+    x_coordinate, z_coordinate = local.T
+    design = np.column_stack(
+        (
+            x_coordinate**2,
+            z_coordinate**2,
+            x_coordinate,
+            z_coordinate,
+            x_coordinate * z_coordinate,
+            np.ones_like(x_coordinate),
+        )
+    )
+    assert np.linalg.matrix_rank(design) == 6
+    assert np.linalg.cond(design) == pytest.approx(HEX_QUADRATIC_CONDITION, rel=1.0e-12)
 
 
 def test_axis_is_a_gaussian_peak():

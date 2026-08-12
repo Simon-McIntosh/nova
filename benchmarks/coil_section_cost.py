@@ -51,8 +51,10 @@ import time
 
 import numpy as np
 
+from nova.biot.force import Force
 from nova.biot.polysection import PolySectionPolicy
-from nova.biot.sectionaverage import averaged_greens
+from nova.biot.sectionaverage import averaged_greens, section_nodes
+from nova.biot.target import ForceTargetPolicy
 from nova.frame.coilset import CoilSet
 
 MACHINE = [
@@ -98,6 +100,9 @@ CURRENT = 40e3  # amperes per turn, the scale an ITER PF conductor carries
 
 INDUCTANCE_ENABLED = 1
 """Non-null solve selector; target resolution comes from positive material nodes."""
+
+HEXAGON_SELF_FLUX = 3.767926648e-05
+"""Independent four-dimensional double-integral limit for the audit hexagon."""
 
 
 def sections(names: tuple[str, ...]) -> dict[str, np.ndarray]:
@@ -318,8 +323,120 @@ def figure(record: dict, path: pathlib.Path) -> None:
     plt.savefig(path, dpi=150)
 
 
+def audit_record() -> dict:
+    """Return the independent audit measurements missing from the cost record."""
+    diagonal = [measure_inductance("polysection", "pair", dcoil) for dcoil in DCOIL]
+    angle = np.arange(6) * np.pi / 3.0
+    hexagon = np.c_[6.2 + 0.075 * np.cos(angle), 0.5 + 0.075 * np.sin(angle)]
+    convergence = []
+    for order in range(1, 9):
+        value = averaged_greens([hexagon], hexagon, order)[0][0]
+        convergence.append(
+            {
+                "order": order,
+                "nodes": len(section_nodes(hexagon, order)[1]),
+                "value": float(value),
+                "relative_error": float(abs(value / HEXAGON_SELF_FLUX - 1.0)),
+            }
+        )
+    return {
+        "force_equal_accuracy": equal_accuracy_force_cost(),
+        "diagonal": [
+            {
+                "dcoil": row["dcoil"],
+                "self_max": row["self_max"],
+                "mutual_max": row["mutual_max"],
+                "asymmetry_max": row["asymmetry_max"],
+            }
+            for row in diagonal
+        ],
+        "hexagon": convergence,
+    }
+
+
+def equal_accuracy_force_cost() -> dict:
+    """Compare the fan and subdivision through the operator at equal accuracy.
+
+    The comparison uses the self-dominated radial-force case. The order-three fan
+    and 4096-cell requested subdivision are the first recorded settings on their
+    respective ladders that straddle the same worst live-component error. The
+    arbiter clips a refining lattice to the target material and applies an
+    eighth-order positive rule inside each clipped piece, so neither operator target
+    rule enters its value.
+    """
+    from benchmarks.force_target_rule import arbiter, coilset as force_coilset
+
+    present = (0,)
+    truth, arbiter_drift = arbiter(0, present)
+    live = np.abs(truth) > 1e-6 * np.max(np.abs(truth))
+
+    def solve(policy: ForceTargetPolicy, number: int) -> dict:
+        frames = force_coilset(
+            nforce=number if policy.rule == "subdivision" else 1,
+            present=present,
+        )
+        force = Force(
+            *frames.frames,
+            name="force-cost",
+            target_policy=policy,
+        )
+        elapsed, _ = timed(
+            lambda: force.solve(number if policy.rule == "subdivision" else 1)
+        )
+        value = np.c_[force.fr, force.fz, force.fc][0]
+        relative = np.where(live, np.abs(value - truth) / np.abs(truth), 0.0)
+        return {
+            "rule": policy.rule,
+            "setting": number,
+            "nodes": len(force),
+            "seconds": elapsed,
+            "value": value.tolist(),
+            "relative_error": relative.tolist(),
+            "worst_live_relative_error": float(relative.max()),
+        }
+
+    fan = solve(ForceTargetPolicy(rule="positive_material", order=3), 3)
+    subdivision = solve(ForceTargetPolicy(rule="subdivision"), 4096)
+    return {
+        "arbiter": truth.tolist(),
+        "arbiter_reported_drift": float(arbiter_drift),
+        "live_components": live.tolist(),
+        "fan": fan,
+        "subdivision": subdivision,
+        "node_ratio_subdivision_to_fan": subdivision["nodes"] / fan["nodes"],
+        "time_ratio_subdivision_to_fan": subdivision["seconds"] / fan["seconds"],
+    }
+
+
+def audit_figure(record: dict, path: pathlib.Path) -> None:
+    """Plot hexagonal target-rule error against node count."""
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    nodes = [row["nodes"] for row in record["hexagon"]]
+    error = [row["relative_error"] for row in record["hexagon"]]
+    fig, axis = plt.subplots(figsize=(6.2, 4.2))
+    axis.loglog(nodes, error, "o-")
+    axis.set_xlabel("positive target nodes")
+    axis.set_ylabel("relative self-flux error")
+    axis.set_title("Hexagonal target rule against the double-integral arbiter")
+    axis.grid(True, which="both", alpha=0.25)
+    fig.tight_layout()
+    fig.savefig(path, dpi=160)
+
+
 def main(argv: list[str]) -> None:
     """Run every measurement and write one JSON record."""
+    if len(argv) > 1 and argv[1] == "audit":
+        record = audit_record()
+        print(json.dumps(record, indent=1))
+        if len(argv) > 2:
+            pathlib.Path(argv[2]).write_text(json.dumps(record, indent=1))
+        if len(argv) > 3:
+            audit_figure(record, pathlib.Path(argv[3]))
+        return
     record: dict[str, list] = {
         "cost": [],
         "inductance": [],

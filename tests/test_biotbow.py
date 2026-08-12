@@ -3,6 +3,7 @@
 import numpy as np
 import pytest
 
+from benchmarks.bow_grid_solve import bow_arbiter_record
 from nova.biot.biotframe import Source, Target
 from nova.biot.bow import Bow
 from nova.biot.polybeam import _oriented_loop
@@ -66,3 +67,20 @@ def test_section_area_and_orientation_are_translation_stable(offset):
     first = oriented[1] - oriented[0]
     second = oriented[2] - oriented[1]
     assert first[0] * second[1] - first[1] * second[0] > 0.0
+
+
+def test_bow_matches_the_direct_volume_integral_in_its_worst_sampled_regime():
+    """The complete reduction against the defining three-dimensional integral.
+
+    One target is in the ordinary far field and one is just outside an end-corner
+    of the swept section, where every integration direction varies on the section
+    scale.  The direct Gauss volume integral shares no elliptic or zeta code with
+    Bow.  At 64 nodes per direction its last refinement moves 4.9e-12 relative;
+    Bow's worst row is 1.84e-10 relative, on the far target's vector potential.
+    """
+    record = bow_arbiter_record()
+    assert record["worst_production_relative_error"] == pytest.approx(
+        1.84e-10, rel=0.08
+    )
+    assert record["production_relative_error"][1] < 1.0e-11
+    assert record["worst_arbiter_relative_change_48_to_64"] < 5.0e-12

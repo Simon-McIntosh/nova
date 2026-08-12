@@ -20,8 +20,8 @@
   <title>Nova Calibrate Package | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-07">
-<meta name="plan-version" content="3">
+<meta name="plan-modified" content="2026-08-12">
+<meta name="plan-version" content="4">
 <meta name="plan-impl" content="0.55">
 </head>
 <body>
@@ -132,15 +132,15 @@
 
   <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="adapter-boundary" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="adapter-boundary" data-choice="arrays-only" data-by="Simon McIntosh" data-when="2026-08-12T17:32:29+00:00">
     <p class="r-dec-q">Where exactly does the adapter boundary sit — kernels take response
       matrices only (adapters build them), or kernels may also accept a geometry registry and
       build their own responses?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="arrays-only">arrays-only kernels (adapters build responses)</button>
+      <button class="r-opt chosen" data-value="arrays-only">arrays-only kernels (adapters build responses)</button>
       <button class="r-opt" data-value="registry-aware">registry-aware kernels</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Owner selection 2026-08-12, ratifying what the first migration slice already built (merge 623ae5cf): kernels take arrays plus channel metadata and adapters build the response matrices. Keeping the registry out of the kernels is what makes the unit lane store-free and synthetic — a registry-aware kernel would have to reach for geometry to build its own responses, which is exactly the coupling that would put a store path back into a numerics module.</p>
     </div>
 </section>
 

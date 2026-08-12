@@ -1,0 +1,96 @@
+{
+  "updated": "2026-08-12T19:29:39",
+  "project": "nova",
+  "doc": "crew",
+  "data": {
+    "members": [
+      {
+        "id": "calibrate-kernels",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-12"
+      },
+      {
+        "id": "corner-pole",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-12"
+      },
+      {
+        "id": "corrected-chain",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-12"
+      },
+      {
+        "id": "flood-fill",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-12"
+      },
+      {
+        "id": "flux-loops",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-12"
+      },
+      {
+        "id": "geometry-solve",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-12"
+      },
+      {
+        "id": "harmonics",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-12"
+      },
+      {
+        "id": "hex-stencil",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-12"
+      },
+      {
+        "id": "loop-records",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-12"
+      },
+      {
+        "id": "read-layer",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-12"
+      },
+      {
+        "id": "read-wall",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-12"
+      },
+      {
+        "id": "vacuum-windows",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-12"
+      }
+    ],
+    "runs": [],
+    "holds": [],
+    "_version": 14
+  }
+}

@@ -19,6 +19,7 @@ import pytest
 from nova.catalog.mast_geometry import MachineGeometryRegistry
 from nova.imas.machine_drive import ChannelDrive, DriveMap
 from nova.imas.machine_evidence import FieldEvidence, Uncertainty
+from nova.imas.mast_block_scale import BRACKETED, MEASURED, ScaleCorrection
 from nova.imas.mast_geometry import REPRESENTATIVE_SHOT, publish_refined_artifact
 from nova.imas.mast_solve_input_ids import (
     build_solve_input_map,
@@ -52,6 +53,7 @@ from nova.imas.mast_solve_inputs import (
     pack_total_residuals,
     parse_loop_channel,
     probe_field_signals,
+    read_corrected_solve_inputs,
     read_solve_inputs,
     reconstruction_loop_positions,
     reconstruction_loop_rows,
@@ -61,6 +63,7 @@ from nova.imas.mast_solve_inputs import (
     trace_matched_columns,
     unmapped_current_blocked,
 )
+from nova.imas.mast_vacuum_cohort import ShotWaveforms
 from nova.io.cocos import IP_LIKE, ONE_LIKE, PSI_LIKE
 from nova.utilities.importmanager import mark_import
 
@@ -314,6 +317,73 @@ def test_the_plasma_current_row_scales_the_unit_and_nothing_else():
     assert row.target_path == "magnetics/ip/data"
     assert row.factor == pytest.approx(1.0e3)
     assert "Rogowski" in row.statement
+
+
+def test_the_shard_contract_carries_corrected_values_and_their_dispositions(
+    monkeypatch, tmp_path
+):
+    """The staging door returns corrected sensors and the warrant for each value."""
+
+    time = np.array([0.0, 1.0])
+    raw_probe = np.array([4.0, 8.0])
+    waveforms = ShotWaveforms(
+        shot=42,
+        time=time,
+        drives={
+            "sol": np.array([100.0, 200.0]),
+            "p2_inner_lower": np.array([300.0, 400.0]),
+        },
+        probes={"obr01": raw_probe / 2.0},
+        sensors={
+            "fl_cc01": np.array([0.03, 0.04]),
+            "obr01": raw_probe / 2.0,
+            "timesec": time,
+        },
+        plasma_current=np.array([500.0, 600.0]),
+        sample_mask=np.ones(2, dtype=bool),
+        baseline_mask=np.ones(2, dtype=bool),
+        scale_corrections=(
+            ScaleCorrection("fl_cc01", 42, 1.0, BRACKETED),
+            ScaleCorrection("obr01", 42, 2.0, MEASURED),
+            ScaleCorrection("timesec", 42, 1.0, BRACKETED),
+        ),
+    )
+    calls = []
+
+    def corrected_door(shot, *, store):
+        calls.append((shot, store))
+        return waveforms
+
+    monkeypatch.setattr(
+        "nova.imas.mast_solve_inputs.read_shot_waveforms", corrected_door
+    )
+    inputs = read_corrected_solve_inputs(42, store=tmp_path)
+
+    assert calls == [(42, tmp_path)]
+    assert inputs.coil_channels == ("sol", "p2_inner_lower")
+    assert inputs.sensor_channels == ("fl_cc01", "obr01")
+    assert inputs.sensor_units == ("Wb", "T")
+    assert np.array_equal(inputs.sensor_signals[:, 1], raw_probe / 2.0)
+    assert not np.array_equal(inputs.sensor_signals[:, 1], raw_probe)
+    assert [row.disposition for row in inputs.corrections] == [BRACKETED, MEASURED]
+    assert [row.applied for row in inputs.corrections] == [True, True]
+    assert inputs.bytes_per_slice == 6 * np.dtype(float).itemsize
+    assert inputs.kilobytes_per_slice == pytest.approx(0.046875)
+
+
+@_needs_store
+def test_a_recorded_shot_reports_a_dense_corrected_payload_per_slice():
+    """The archive contract is dense, aligned and sized for shard planning."""
+
+    inputs = read_corrected_solve_inputs(JOIN_SHOT)
+    assert inputs.slice_count == inputs.coil_currents_a.shape[0]
+    assert inputs.slice_count == inputs.sensor_signals.shape[0]
+    assert inputs.slice_count == inputs.plasma_current_a.size
+    assert inputs.coil_currents_a.shape[1] == len(inputs.coil_channels)
+    assert inputs.sensor_signals.shape[1] == len(inputs.sensor_channels)
+    assert [row.channel for row in inputs.corrections] == list(inputs.sensor_channels)
+    assert inputs.kilobytes_per_slice == pytest.approx(inputs.bytes_per_slice / 1024.0)
+    assert inputs.kilobytes_per_slice > 0.0
 
 
 # --- the loop position join ------------------------------------------------

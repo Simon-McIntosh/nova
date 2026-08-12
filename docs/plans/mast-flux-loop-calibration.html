@@ -19,9 +19,11 @@
   <title>MAST Flux-Loop Calibration and Inclusion | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-08">
-<meta name="plan-version" content="3">
-<meta name="plan-impl" content="0.67">
+<meta name="plan-modified" content="2026-08-12">
+<meta name="plan-version" content="4">
+<meta name="plan-impl" content="0.714">
+<meta name="plan-commits" content="a952f30c">
+<meta name="plan-artifacts" content="~/.cache/nova-mast/flux-loop-inclusion/inversion.json,~/.cache/nova-mast/flux-loop-inclusion/ratios.json,~/.cache/nova-mast/flux-loop-inclusion/constraint_sets.npz,~/.cache/nova-mast/flux-loop-inclusion/summary.json,docs/figures/flux-loop-inclusion/current-space-identifiability.svg,docs/figures/flux-loop-inclusion/p4p5-constraint-sets.svg">
 </head>
 <body>
 <main class="plan-doc">
@@ -226,6 +228,11 @@ Done-when
     </article>
 </section>
 
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-20260812-flc-025" data-who="reckon-ship" data-when="2026-08-12T18:30:00+00:00">
+    <div class="r-comment-body">§2.5 landed — commit a952f30c (merge 38e599b2); gate passed. Measure: current-space rank 10/13 → 13/13 (delta +3) with all 18 calibrated loops admitted, over 369 sustained plasma-free shots (SLURM job 1244815, 00:16:50, exit 0; probe-only arm solved 369, joint arm 351 — 18 shots lacked 100 common finite samples). The probe-only factor-11.684 spectral cliff after mode ten reproduces the old rank 10/13; the 95-row joint operator shows no decade cliff (largest gap 6.406). Rank recovery WITHOUT conditioning improvement: full-space condition 370.699 → 549.319, retained probe condition 8.866. Wiring verdict: P4 moves from not-answerable to answerable and P5 stays answerable, but P2 inner (31.3% spread / 35.4% rank move), P2 outer (525% / 38.3%), P3 (36.5% / 6.89%) and P6 (399% / 0.106%) all remain NOT answerable — at least one pair member exceeds the 10% spread or rank-movement ceiling. Per-direction resolution gains concentrate on P2 (+0.44 to +0.56) and the solenoid (+0.9991); P4/P5 gain ≤ 2e-5. Constraint bank regenerated: 45 P4/P5 rows over 44 shots in six groups, 4,044 finite coefficients in each of the raw and surviving arrays — raw is the required input to the harmonic joint fit. Targeted tests 27 passed; doc audit OK. Artifacts under ~/.cache/nova-mast/flux-loop-inclusion/ with both figures committed.</div>
+</div>
+</section>
 </main>
 </body>
 </html>

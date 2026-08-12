@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-12T19:57:17",
+  "updated": "2026-08-12T20:26:00",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -61,7 +61,21 @@
         "created": "2026-08-12"
       },
       {
+        "id": "integration-gate",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-12"
+      },
+      {
         "id": "loop-records",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-12"
+      },
+      {
+        "id": "packaging",
         "harness": "claude",
         "role": "implement",
         "session_id": null,
@@ -297,9 +311,165 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260812T173031648405-flux-loop-inversion",
+        "plan": "mast-flux-loop-calibration",
+        "section": "\u00a72",
+        "node": "flux-loop-inversion",
+        "role": "implement",
+        "member": "flux-loops",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-12T17:30:32Z",
+        "completed_at": "2026-08-12T18:25:10Z",
+        "completed_at_source": "promotion_time",
+        "worker_seconds": 3278,
+        "time_budget": "60m",
+        "base_sha": "5b10f00597465fc38e577c2fdc6799604cc09f3b",
+        "commits": [
+          "a952f30c"
+        ],
+        "changed_lines": {
+          "added": 4641,
+          "removed": 8,
+          "files": 6
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/0738e6b1-3bc0-4082-a69e-59214ef05a7c/scratchpad/flux-loop-inversion-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff706-9a2b-7243-97f3-9e101baa0562",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 22585856,
+            "input_tokens": 23213471,
+            "output_tokens": 71648,
+            "reasoning_output_tokens": 21705
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260812T173109683946-calibrate-kernels",
+        "plan": "nova-calibrate-package",
+        "section": "\u00a72",
+        "node": "calibrate-kernels",
+        "role": "implement",
+        "member": "calibrate-kernels",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-12T17:31:10Z",
+        "completed_at": "2026-08-12T18:26:00Z",
+        "completed_at_source": "promotion_time",
+        "worker_seconds": 3290,
+        "time_budget": "60m",
+        "base_sha": "5b10f00597465fc38e577c2fdc6799604cc09f3b",
+        "commits": [
+          "0d1e39d4"
+        ],
+        "changed_lines": {
+          "added": 1635,
+          "removed": 1066,
+          "files": 12
+        },
+        "tests_added": 14,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/0738e6b1-3bc0-4082-a69e-59214ef05a7c/scratchpad/calibrate-kernels-manifest.md",
+        "scope_changed": false,
+        "session_id": null,
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 19553792,
+            "input_tokens": 19933628,
+            "output_tokens": 30650,
+            "reasoning_output_tokens": 8697
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260812T173302141029-geometry-solve",
+        "plan": "coil-geometry-inversion",
+        "section": "\u00a72",
+        "node": "geometry-solve",
+        "role": "implement",
+        "member": "geometry-solve",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-12T17:33:03Z",
+        "completed_at": "2026-08-12T18:26:00Z",
+        "completed_at_source": "promotion_time",
+        "worker_seconds": 3177,
+        "time_budget": "60m",
+        "base_sha": "1dde8487807fb6bf379a26fd8ea356e323819b3f",
+        "commits": [
+          "81ef6739"
+        ],
+        "changed_lines": {
+          "added": 981,
+          "removed": 0,
+          "files": 7
+        },
+        "tests_added": 7,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/0738e6b1-3bc0-4082-a69e-59214ef05a7c/scratchpad/geometry-solve-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff708-e876-7112-bdf2-12db5e55652a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 5316736,
+            "input_tokens": 5627127,
+            "output_tokens": 49443,
+            "reasoning_output_tokens": 13546
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 25
+    "_version": 30
   }
 }

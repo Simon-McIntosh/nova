@@ -21,8 +21,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-12">
-<meta name="plan-version" content="4">
-<meta name="plan-impl" content="0.55">
+<meta name="plan-version" content="5">
+<meta name="plan-impl" content="1.0">
+<meta name="plan-commits" content="623ae5cf,0d1e39d4">
+<meta name="plan-artifacts" content="nova/calibrate/partial.py,nova/calibrate/scale_step.py,nova/calibrate/noise.py,nova/calibrate/pair_state.py,tests/calibrate/">
 </head>
 <body>
 <main class="plan-doc">
@@ -183,7 +185,7 @@ Done-when
   3. Followup written into plan + this one resolved</pre>
     <p class="r-fu-outcome">First migration slice landed, wider than scoped (merge 623ae5cf): corrections application engine plus coupling, gain, inversion, and localize kernels with arrays-only signatures; synthetic-truth lane 160 passed store-free; banked pins reproduce (couplings fixture, obr17 gain 0.5011, identifiability spectrum); full suite 4148 passed / 0 failed with all extras. Adapter-boundary decision implemented per section 2 prose (arrays-only) - decision block left open for the owner to lock.</p>
     </article>
-<article class="r-fu" data-id="f-ncp-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-07" data-recommends-skill="/reckon-ship nova-calibrate-package" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ncp-002" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-07" data-recommends-skill="/reckon-ship nova-calibrate-package" data-resolved-at="2026-08-12T18:26:23+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Migrate the remaining four capabilities (partial, scale_step, noise, pair_state) and thin the MAST adapters onto the kernels</h4>
     <div class="r-fu-body">Five of nine capabilities are in. Remaining: partial.py (Frisch-Waugh differential tests), scale_step.py (block-scale detection), noise.py (quiet-window statistics), pair_state.py (0.5/1.5 gain-state detection), then the adapter thinning so mast_ modules feed the kernels with no behaviour change to the vacuum-floor gate. The schema-served constant cutover is tracked separately in diagnostic-correction-schema f-dcs-002.</div>
     <pre class="r-fu-prompt">Project: nova
@@ -209,9 +211,20 @@ Done-when
   2. MAST adapters consume the kernels with no behaviour change to the
      vacuum-floor gate (full suite green, all extras)
   3. Followup written into plan + this one resolved</pre>
+    <p class="r-fu-outcome">Landed — commit 0d1e39d4 (merge 0e093f9a). partial.py, scale_step.py, noise.py and pair_state.py migrated with arrays-only signatures; 14 synthetic-truth cases green store-free (exact rungs 0.5/1-over-root-2/root-2/2.0; drift 1.3e-3 within 2%; partial slope 0.37 within 0.002; pair-state sequences exact). MAST adapters thinned to compatibility re-exports (mast_acquisition_scale -757 lines, mast_sensor_noise -402) with the vacuum-floor gate unchanged: adapter lane 316 passed / 2 skipped. Full suite 4893 passed / 2 failed against the 4148 baseline; both failures are pre-existing store-backed probe-axis sign assertions in tests/test_mast_solve_inputs.py (shots 15000, 13500) on no changed calibration path, routed to the plan owning that module. The adapter-boundary decision is locked arrays-only, ratifying what shipped.</p>
+    </article>
+<article class="r-fu" data-id="f-ncp-003" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-12" data-recommends-skill="/reckon-ship mast-corrected-read-layer" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Probe-axis sign disagreement in the MAST solve-input sensor map (foreign-owner: mast-corrected-read-layer)</h4>
+    <div class="r-fu-body">The full-suite run behind the second calibrate slice surfaced two store-backed failures in tests/test_mast_solve_inputs.py: the reconstructed probe axis is +pi/2 where the target is -pi/2, for shots 15000 and 13500. They are pre-existing, traverse no calibration path, and sit in the module whose direct sensor doors mast-corrected-read-layer is closing, so that plan owns the fix. Recorded here only because this suite run is where the evidence was produced.</div>
+    <pre class="r-fu-prompt">/reckon-ship mast-corrected-read-layer</pre>
     </article>
 </section>
 
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s3" data-id="c-20260812-ncp-002" data-who="reckon-ship" data-when="2026-08-12T18:35:00+00:00">
+    <div class="r-comment-body">Second migration slice landed — commit 0d1e39d4 (merge 0e093f9a); gate passed. All nine §1 capabilities are now in the package: partial.py (Frisch–Waugh residualisation of target and regressor over the same controls), scale_step.py, noise.py and pair_state.py join the five from the first slice, all arrays-only. Measure: 14 focused synthetic-truth cases green store-free in 3.21 s — exact rungs 0.5, 1/√2, √2, 2.0 recovered; injected drift 1.3e-3 recovered within 2% with scatter 2e-4 within 4%; partial slope 0.37 recovered within 0.002; stable, mid-life-step and flipping pair-state sequences recovered exactly. Adapter lane 316 passed / 2 skipped in 6.03 s with the vacuum-cohort and block-scale read-path tests unchanged, so the vacuum-floor gate is untouched. Full default suite 4893 passed / 2 failed / 121 skipped in 1427 s against the 4148-passed baseline (+745 passes). The 2 failures are pre-existing and out-of-scope: store-backed probe-axis sign assertions in tests/test_mast_solve_inputs.py for shots 15000 and 13500 (+π/2 reconstructed versus -π/2 target), traversing no changed calibration path — routed as a followup to the read-layer plan that owns that module. Adapter thinning: mast_acquisition_scale.py shed 757 lines and mast_sensor_noise.py 402, both now re-exporting the package kernels. Integration note: the block-scale import block conflicted with the concurrently landed promoted-chain work and was resolved preserving both intents.</div>
+</div>
+</section>
 </main>
 </body>
 </html>

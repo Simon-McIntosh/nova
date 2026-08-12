@@ -21,8 +21,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-12">
-<meta name="plan-version" content="10">
-<meta name="plan-impl" content="0.4">
+<meta name="plan-version" content="11">
+<meta name="plan-impl" content="0.8">
+<meta name="plan-commits" content="81ef6739">
+<meta name="plan-artifacts" content="docs/figures/geometry-recovery/geometry_recovery.npz,docs/figures/geometry-recovery/geometry_recovery_summary.json,docs/figures/geometry-recovery/recovery_ladder.png,docs/figures/geometry-recovery/mast_bounds.png,docs/research/mast-p4p5-geometry-solve.html">
 </head>
 <body>
 <main class="plan-doc">
@@ -228,7 +230,7 @@ Done-when
   3. Followup written into plan + this one resolved</pre>
     <p class="r-fu-outcome">§2.2 + the §2.3 identifiability-first slice landed - merge b4521803 (commits 7c39ea23, 84ea50ea). Parameter blocks with pinned Jacobians (30 tests); spectrum at the real array published with figures. Verdict: solve rigid+affine only (rigid cond O(1), affine O(1e3); per-vertex freeze - free corners 1e8, free turns 1e13); leading modes rigid_z/rigid_r at 54 um (p5_lower) to 2.2 mm (p4_upper) marginalised; tilt/dilation unresolvable. Near-field cut costs x3.2-17.3 - keep near probes, drive the 23-cell lattice. Loops buy ~nothing for geometry (0.2-2.3% of probes' whitened signal) - the geometry solve is probe-carried, opposite to the harmonics fit. Fast lane 4260 passed at the 5-failure env baseline. Optimiser evidence for the owner: small parameter count + exact jacfwd + benign conditioning on the resolvable set favours Gauss-Newton/LM; decision stays open.</p>
     </article>
-<article class="r-fu" data-id="f-cgi-003" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-08" data-recommends-skill="/reckon-ship coil-geometry-inversion §2.3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-cgi-003" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-08" data-recommends-skill="/reckon-ship coil-geometry-inversion §2.3" data-resolved-at="2026-08-12T18:26:48+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Run the sensor-space P4/P5 solve on the resolvable modes, inside the synthetic recovery ladder (§2.3 completion + §2.5 start)</h4>
     <div class="r-fu-body">The spectrum fixes the solve's shape: rigid+affine per coil (per-vertex frozen), near-field probes kept with the 23-cell lattice driven, loops optional (they carry ~no geometry signal). Synthetic recovery first - perturb known geometry, exact data + measured floors, recover, report bias per mode - then the MAST P4/P5 solve seeded from Kirk Table 1, scored against the surviving-misfit patterns and cross-checked against the symmetry scan (which it generalises). Optimiser decision still the owner's; the spectrum's conditioning evidence favours Gauss-Newton/LM on jacfwd.</div>
     <pre class="r-fu-prompt">Project: nova
@@ -259,6 +261,12 @@ Done-when
      surviving patterns; verdict recorded - geometry correction found and
      quantified, or bounded unresolvable at this array
   3. Followup written into plan + this one resolved</pre>
+    <p class="r-fu-outcome">Landed — commit 81ef6739 (merge e941cfb8). Synthetic recovery ladder banked at the measured floors: 4,096 recoveries, max mean bias 0.27 sigma, empirical/predicted resolution 0.946–1.099, 95% nominal coverage realised 93.3–95.5%. Kirk-seeded MAST P4/P5 sensor-space solve run on the resolvable rigid+affine set with per-vertex frozen and near probes kept. Verdict is a bounded negative: demanded RMS 188.66 mm (P4L), 26.38 mm (P4U), 2004.25 mm (P5L), 11.13 mm (P5U) against resolution floors of 0.610/2.221/0.054/0.475 mm and Kirk offsets of 6.6/2.9/13.1/0.6 mm, with the independent far-field survivor collapsing or reversing (+0.93%/-2.38%/-35.73%/+0.09%). No credible geometry correction is resolvable at this array; no registry correction issues; the survivor is current- or sensor-side. Seed-independent to 0.00022 um RMS across four projected Kirk seeds. Record: docs/research/mast-p4p5-geometry-solve.html.</p>
+    </article>
+<article class="r-fu" data-id="f-cgi-004" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-12" data-recommends-skill="/reckon-ship coil-geometry-inversion" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Problem class B — flux-map-space solve on the published maps (§2.4)</h4>
+    <div class="r-fu-body">Sensor-space is closed with a bounded negative verdict, so the remaining implementation is the flux-map-space class: given fixed currents and a plasma-subtracted target flux map, solve the coil set's geometry to match it on its grid. Two consumers are now ready — the toroidal-harmonic reconciled misfit maps published on a grid with uncertainty, and the challenge-facing DIII-D work (validate the shipped per-shot conductor geometry against label-derived fields through the identifiability spectrum, then infer the wall and passive structure that do not ship). The calibrated solver and its coverage ladder carry over unchanged.</div>
+    <pre class="r-fu-prompt">/reckon-ship coil-geometry-inversion §2</pre>
     </article>
 </section>
 
@@ -268,6 +276,11 @@ Done-when
     <span class="r-research-title"><a href="https://fusion-equilibrium-challenge.sophelio.io/">Sophelio Fusion Equilibrium Challenge — DIII-D + MAST, coil currents and flux maps published, geometry and magnetics withheld; phase 1 closes 2026-10-18</a></span></div>
 <div class="r-research" data-id="r-cgi-002" data-type="doc" data-source="docs/research/sophelio-challenge-geometry-sourcing.html" data-added-by="Simon McIntosh" data-when="2026-08-11" data-url="/nova/sophelio-challenge-geometry-sourcing.html">
     <span class="r-research-title"><a href="/nova/sophelio-challenge-geometry-sourcing.html">Sophelio challenge geometry sourcing — verified dataset schema: conductor geometry and Thomson chords SHIP per shot; wall and passive structure do not; re-anchoring rationale for this plan</a></span></div>
+</section>
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-20260812-cgi-023" data-who="reckon-ship" data-when="2026-08-12T18:38:00+00:00">
+    <div class="r-comment-body">§2.3 sensor-space solve and §2.5 recovery ladder landed — commit 81ef6739 (merge e941cfb8); gate passed. Solver is metric-aware damped Gauss–Newton/LM per the locked decision, with exact-Jacobian callbacks, per-channel floor whitening, 13-column current-nuisance projection and a 10 mm one-noise mode cutoff; all members drive the described 23-cell lattice with per-vertex and per-turn modes frozen and near probes retained. Ladder measure: 4,096 measured-floor recoveries — maximum synthetic mean bias 0.27 sigma, empirical/predicted mode resolution 0.946–1.099, nominal 95% coverage realised at 93.3–95.5%. The solver is therefore calibrated, which is what makes the MAST verdict trustworthy. VERDICT: no credible P4/P5 geometry correction is resolvable at this array, and no registry correction should issue. Demanded RMS versus published best resolution and Kirk offset — P4 lower 188.66 mm vs 0.610 mm and 6.6 mm (all/far survivor +40.73%/+0.93%); P4 upper 26.38 mm vs 2.221 mm and 2.9 mm (+33.57%/-2.38%); P5 lower 2004.25 mm vs 0.054 mm and 13.1 mm (-1103.01%/-35.73%); P5 upper 11.13 mm vs 0.475 mm and 0.6 mm (+2.11%/+0.09%). Every demand exceeds both its resolution floor and its measured as-built offset by two to four orders, and the independently recomputed far-field survivor collapses or reverses under the correction — so the survivor remains current- or sensor-side, not geometry. Four projected Kirk seeds per member agree within 0.00022 um RMS, so the result is seed-independent. Tests 38 passed; doc audit OK.</div>
+</div>
 </section>
 </main>
 </body>

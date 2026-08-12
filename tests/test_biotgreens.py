@@ -1276,10 +1276,9 @@ def test_the_rectangular_section_routes_agree_through_the_quadrature_switch():
 
 @pytest.mark.xfail(
     strict=True,
-    reason="the four-corner combination amplifies corner roundoff by the ratio of "
-    "the widest corner term to the section value -- 9.4e02 for this thick section "
-    "and 1.5e04 for the thin one, so 2e-12 is below what the arrangement can hold; "
-    "test_the_section_combination_amplifies_the_widest_corner_term measures it",
+    reason="the remaining finite zeta and complete-kind corner channels differ "
+    "between NumPy and compiled CPU arithmetic beyond the cross-route bound; "
+    "the pole-boundary cancellation is pinned independently below",
 )
 @pytest.mark.parametrize("da,dz", [(0.1, 0.08), (0.02, 0.02)])
 def test_section_corner_rule_is_coherent_across_both_switch_boundaries(da, dz):
@@ -1352,9 +1351,8 @@ def test_section_corner_rule_is_coherent_across_both_switch_boundaries(da, dz):
 
 @pytest.mark.xfail(
     strict=True,
-    reason="same four-corner amplification as the switch-boundary case: the widest "
-    "corner term is ~1e03 times the section value here, so the reduction cannot "
-    "reach a converged positive average to 2e-12",
+    reason="the finite corner channels remain about 7e-12 from this material-rule "
+    "comparison; the pole-boundary cancellation and mpmath fan are pinned below",
 )
 def test_far_section_average_matches_a_refined_value_and_tangent():
     """The corner reduction must match a converged positive source average."""
@@ -1413,27 +1411,74 @@ def test_far_section_average_matches_a_refined_value_and_tangent():
     assert _set_deviation(candidate_tangent, refined_tangent) < 2e-12
 
 
+def _conditioned_flux_terms(rs, zs, r, z):
+    """Return the corner-scale pieces the conditioned flux coefficient adds."""
+    from nova.biot.greens import _scaled_pole_residual, _split_corner_poles, _zeta
+
+    gamma = zs - z
+    radial_gap = rs - r
+    b = rs + r
+    a = np.hypot(gamma, b)
+    c = np.hypot(gamma, r)
+    radius_sum = r + c
+    complement = (gamma**2 + radial_gap**2) / a**2
+    parameter = 4.0 * r * rs / a**2
+    poles = {
+        1: (radius_sum / gamma) ** 2,
+        2: (gamma / radius_sum) ** 2,
+        3: (radial_gap / b) ** 2,
+    }
+    divergence, boundary, _ = _split_corner_poles(np, rs, r, gamma, a, b, c, radius_sum)
+    radius_remainder = radial_gap - gamma**2 / radius_sum
+    moment = c * (2.0 * r**2 - gamma**2) / (2.0 * r)
+    scales = {
+        1: (rs + c) * moment * 2.0 * r * radius_sum / gamma / (6.0 * a * r),
+        2: radius_remainder * (2.0 * r / radius_sum) * moment * gamma / (6.0 * a * r),
+        3: rs / b * radial_gap * (3.0 * r**2 - rs**2) * gamma / (6.0 * a * r),
+    }
+    pole_terms = tuple(
+        _scaled_pole_residual(
+            np,
+            poles[pole],
+            complement,
+            divergence[pole],
+            scales[pole],
+        )
+        for pole in (1, 2, 3)
+    )
+    first, second = complete_kind(complement)
+    elliptic_weight = (
+        parameter * (4.0 * gamma**2 + 3.0 * rs**2 - 5.0 * r**2) / (4.0 * r)
+    )
+    return (
+        boundary,
+        *pole_terms,
+        gamma * r * _zeta(rs, r, gamma),
+        gamma * a / (6.0 * r) * elliptic_weight * first,
+        -gamma * a / (6.0 * r) * 2.0 * rs * second,
+    )
+
+
 @pytest.mark.parametrize(
-    ("da", "dz", "amplification"),
-    [(0.1, 0.08, 9.37e2), (0.02, 0.02, 1.46e4), (0.002, 0.1, 3.42e4)],
+    ("da", "dz", "before", "after"),
+    [
+        (0.1, 0.08, 9.37e2, 10.7),
+        (0.02, 0.02, 1.46e4, 41.4),
+        (0.002, 0.1, 3.42e4, 481.0),
+    ],
     ids=["compact", "thin-square", "slender"],
 )
 def test_the_section_combination_amplifies_the_widest_corner_term(
-    da, dz, amplification
+    da, dz, before, after
 ):
     """What the four-corner rule costs, and which cancellation sets it.
 
     The section value is a second difference of the corner antiderivative over the
-    section's own corners, and the antiderivative's widest single term is
-    ``amplification`` times that difference.  The cancellation behind that ratio is
-    identifiable: the boundary angle ``cphi`` and the third-kind pole moments each
-    survive the four-corner combination at about twice this ratio and cancel against
-    each other, leaving the section value.  It is the same cancellation the corner
-    planes rely on -- the one the docstring of :func:`corner_fields` sets out -- now
-    taken over a whole section instead of across one plane.  A corner value therefore
-    arrives with an absolute rounding set by that widest term, and the combination
-    divides it by the section value, so the section's achievable relative precision
-    is ``eps`` times this ratio rather than ``eps``.
+    section's own corners.  In the direct formula the boundary angle ``cphi`` and the
+    third-kind pole moments each survive the four-corner combination at about twice
+    the reported ratio and cancel against each other, leaving the section value.
+    The conditioned formula takes their homogeneous parts off symbolically and only
+    presents the finite residuals to the four-corner difference.
 
     The ratio is geometry, not roundoff, which is why it is pinned to a few percent:
     it grows as the section shrinks against its own radius, so a slender winding pack
@@ -1442,14 +1487,10 @@ def test_the_section_combination_amplifies_the_widest_corner_term(
     the flux error tracks ``eps`` times this ratio to within a factor of two at both
     ends of a fifteenfold span in the ratio.
 
-    Splitting the combination across the antiderivative's own terms does NOT recover
-    it -- measured, the term-by-term arrangement lands within a factor of two of the
-    summed one, because the two cancelling terms are individually large whichever
-    order they are combined in.  Removing it needs the pole moments' divergent part
-    taken off against ``cphi`` in closed form, so that what is evaluated is already
-    the residual; until then the two strict expected failures above record the
-    consequence.  The gap asserted here is between the kernel's grouping and the
-    paper's, which is a sample of that rounding rather than a bound on it.
+    Merely splitting the alternating sum across the antiderivative's direct terms
+    does not recover the digits because the two cancelling terms remain individually
+    large.  The second ratio pins the actual conditioned grouping: its widest terms
+    are the smooth zeta and complete-kind contributions, not the pole divergence.
     """
     a, z0 = 6.2, 0.37
     target_r = np.array([a])
@@ -1463,9 +1504,14 @@ def test_the_section_combination_amplifies_the_widest_corner_term(
 
     section = abs(combine(reference[0])[0])
     widest = float(np.max(envelope[0]))
-    assert widest / section == pytest.approx(amplification, rel=0.05)
+    assert widest / section == pytest.approx(before, rel=0.05)
     gap = abs(combine(kernel[0])[0] - combine(reference[0])[0]) / section
-    assert gap < 10.0 * _ULP * amplification
+    assert gap < 10.0 * _ULP * before
+
+    conditioned = _conditioned_flux_terms(*stacks)
+    conditioned_widest = max(float(np.max(np.abs(term))) for term in conditioned)
+    assert conditioned_widest / section == pytest.approx(after, rel=0.02)
+    assert conditioned_widest < widest / 50.0
 
 
 #: Area means of the ring kernel over a rectangular section, in extended precision.
@@ -1481,12 +1527,9 @@ def test_the_section_combination_amplifies_the_widest_corner_term(
 #: headroom.  Every digit shown is stable under refinement of both rule directions
 #: (2e-18 or better for the interior targets, exactly for the far one).
 #:
-#: The recorded gaps are what the four-corner combination costs, and they track
-#: ``eps`` times the amplification measured in
-#: ``test_the_section_combination_amplifies_the_widest_corner_term``: 9.4e02 predicts
-#: 2.1e-13 against 4.3e-13 measured, 1.5e04 predicts 3.2e-12 against 2.9e-12.  Two
-#: independent measurements of the same arrangement fault, so the tolerances below are
-#: the arrangement's own floor and not a fitted number.
+#: The recorded bounds include the independently refined quadrature uncertainty and
+#: the residual corner arithmetic.  The compact and thin centroid values therefore
+#: pin the cancellation without fitting their tolerances to one implementation.
 _SECTION_REFERENCE = (
     (
         (6.2, 0.37, 0.1, 0.08),
@@ -1540,6 +1583,21 @@ def test_the_rectangle_section_matches_an_extended_precision_average(
     """
     values = cylinder_greens(np.array([target[0]]), np.array([target[1]]), *geometry)
     assert _set_deviation([value[0] for value in values], reference) < recorded
+
+
+def test_the_slender_rectangle_matches_an_edge_aligned_extended_precision_average():
+    """The narrow winding-pack regime agrees with an independent singular fan.
+
+    An edge-aligned Duffy fan evaluated the ring kernel at 40 decimal digits.  Its
+    44- and 64-node refinements differ by 4.8e-12 relative; the production result is
+    3.7e-12 from the finer value, so 6e-12 conservatively covers both uncertainties.
+    """
+    reference = 4.5843981237720546010726015353447226166e-5
+    psi = cylinder_greens(np.array([6.2]), np.array([0.37]), 6.2, 0.37, 0.002, 0.1)[0][
+        0
+    ]
+    relative_error = abs(psi / reference - 1.0)
+    assert relative_error < 6.0e-12
 
 
 def test_the_section_radial_field_vanishes_on_its_own_centroid_level():

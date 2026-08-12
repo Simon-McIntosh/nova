@@ -66,12 +66,12 @@ and both differences are what being traceable costs:
   preserving the section cancellation without a data-shaped graph.
 
 Off the filament the point routes agree to 2e-15 of the regime's own scale, and
-the bare corner antiderivatives agree to 1e-14.  Alternating four-corner section
-sums can amplify that corner roundoff beyond 2e-12 for thin sections; the strict
-section tests retain that limitation as an expected failure until a positive
-material rule also preserves one-sided boundary tangents.  On the filament both
-point routes expose the physical singularity: ``psi = inf`` and both field
-components are ``nan``.
+the bare corner antiderivatives agree to 1e-14.  The corner rule removes the
+three third-kind pole moments' homogeneous parts against the signed boundary
+angle before taking its alternating four-corner sum.  This keeps thin-section
+roundoff tied to finite residuals while preserving one-sided boundary tangents.
+On the filament both point routes expose the physical singularity: ``psi = inf``
+and both field components are ``nan``.
 
 The three loop-specific elliptic combinations take one descending Landen step
 through ``k^2 = 15/16`` and evaluate the resulting small parameter with exact
@@ -88,7 +88,13 @@ from fractions import Fraction
 import numpy as np
 import scipy.special  # type: ignore[import-untyped]
 
-from nova.biot.completeelliptic import complete_kind, complete_pole
+from nova.biot.completeelliptic import (
+    TRIPS as COMPLETE_ELLIPTIC_TRIPS,
+    _accumulate,
+    _descent,
+    complete_kind,
+    complete_pole,
+)
 from nova.biot.zeta import traced_zeta, zeta
 
 MU0 = 4.0e-7 * np.pi
@@ -96,6 +102,7 @@ MU0 = 4.0e-7 * np.pi
 
 _ELLIPTIC_CONDITIONED_LIMIT = 15.0 / 16.0
 _ELLIPTIC_SERIES_TERMS = 40
+_POLE_SPLIT_ASPECT_FLOOR = 2.0**-10
 
 
 def _elliptic_series_coefficients(terms):
@@ -460,8 +467,160 @@ def _zeta(rs: np.ndarray, r: np.ndarray, gamma: np.ndarray) -> np.ndarray:
     return zeta(rs, r, gamma, np.pi / 2.0, coherent_axis=-1)
 
 
+def _product_offset(xp, *offsets):
+    """Return ``prod(1 + offset) - 1`` without subtracting from one."""
+    result = xp.zeros_like(offsets[0])
+    for offset in offsets:
+        result = result + offset + result * offset
+    return result
+
+
+def _scaled_pole_residual(xp, pole, complement, divergence, scale):
+    """Return ``scale * (Pi - divergence)`` without forming a large ``Pi``."""
+    live = (pole > 0.0) & (complement > 0.0)
+    held_pole = xp.where(live, pole, 1.0)
+    held_scale = xp.where(live, scale, 0.0)
+    radicals, arithmetic = _descent(complement, xp, COMPLETE_ELLIPTIC_TRIPS)
+    scaled_pole = _accumulate(
+        radicals,
+        arithmetic,
+        held_pole,
+        held_scale,
+        held_scale,
+        xp,
+    )
+    return xp.where(live, scaled_pole - held_scale * divergence, 0.0)
+
+
+def _split_corner_poles(
+    xp,
+    rs,
+    r,
+    gamma,
+    a,
+    b,
+    c,
+    radius_sum,
+):
+    """Separate the three pole moments from their cancelling boundary angle.
+
+    As a source corner approaches a target, the three pole complements are
+    ``p1 = ((r + c)/gamma)^2``, ``p2 = 1/p1`` and
+    ``p3 = ((rs - r)/(rs + r))^2``.  Their homogeneous parts are a far-pole
+    ``pi/(2 sqrt(p1))`` and two near-pole terms whose complementary angles add
+    exactly to ``pi/2``.  After the reduction's coefficients are applied, their
+    constant parts are exactly the signed right angle in ``cphi``.
+
+    Return the homogeneous pole moments and the boundary-angle residual after
+    their coefficient-weighted limits cancel symbolically.  The scaled pole
+    evaluator removes each homogeneous moment before it reaches the rectangle's
+    four-corner difference, so that difference never sees the individually
+    order-``r^2`` terms.
+    """
+    radial_gap = rs - r
+    live = (gamma != 0.0) & (radial_gap != 0.0)
+    held_gamma = xp.where(live, gamma, 1.0)
+    held_gap = xp.where(live, radial_gap, 1.0)
+    absolute_gamma = xp.abs(held_gamma)
+    absolute_gap = xp.abs(held_gap)
+
+    near_angle = xp.arctan2(absolute_gap * radius_sum, absolute_gamma * b)
+    radial_angle = xp.arctan2(absolute_gamma * b, absolute_gap * radius_sum)
+    common = radius_sum * b / (absolute_gamma * absolute_gap)
+    divergent = {
+        1: 0.5 * np.pi * absolute_gamma / radius_sum,
+        2: common * near_angle,
+        3: common * radial_angle,
+    }
+    # c - r and a - b as rationalised differences.  Each coefficient is its
+    # homogeneous corner limit times products of ``1+d``; _product_offset returns
+    # the residual directly instead of recreating and subtracting the large limits.
+    radial_lift = gamma * gamma / radius_sum
+    span_lift = gamma * gamma / (a + b)
+    moment_offset = _product_offset(
+        xp,
+        radial_lift / r,
+        -(gamma * gamma) / (2.0 * r * r),
+    )
+    first_flux = (
+        r
+        * r
+        / 6.0
+        * _product_offset(
+            xp,
+            (radial_lift - span_lift) / a,
+            radial_lift / r,
+            -(gamma * gamma) / (2.0 * r * r),
+        )
+    )
+    near_flux = (
+        r
+        * r
+        / 3.0
+        * _product_offset(
+            xp,
+            -span_lift / a,
+            moment_offset,
+            -radial_lift / held_gap,
+        )
+    )
+    radial_flux = (
+        r
+        * r
+        / 3.0
+        * _product_offset(
+            xp,
+            radial_gap / r,
+            radial_lift / (2.0 * r),
+            -radial_gap / r - radial_gap * radial_gap / (2.0 * r * r),
+            -(radial_gap + span_lift) / a,
+        )
+    )
+    signed_angle = xp.sign(gamma) * xp.sign(radial_gap)
+    flux_boundary = xp.sign(gamma) * np.pi * first_flux + signed_angle * (
+        near_angle * near_flux + radial_angle * radial_flux
+    )
+
+    first_vertical = (
+        r
+        / 2.0
+        * _product_offset(
+            xp,
+            radial_lift / r,
+            (radial_lift - span_lift) / a,
+        )
+    )
+    near_vertical = r * _product_offset(
+        xp,
+        radial_lift / r,
+        -span_lift / a,
+        -radial_lift / held_gap,
+    )
+    radial_vertical = r * _product_offset(
+        xp,
+        radial_gap / r,
+        radial_lift / (2.0 * r),
+        -(radial_gap + span_lift) / a,
+    )
+    vertical_boundary = xp.sign(gamma) * np.pi * first_vertical + signed_angle * (
+        near_angle * near_vertical + radial_angle * radial_vertical
+    )
+
+    cphi = (
+        -1.0 / 3.0 * r**2 * np.pi / 2.0 * xp.sign(gamma) * (xp.sign(radial_gap) + 1.0)
+    )
+    return (
+        divergent,
+        xp.where(live, flux_boundary, cphi),
+        xp.where(live, vertical_boundary, 3.0 / r * cphi),
+    )
+
+
 def corner_fields(
-    rs: np.ndarray, zs: np.ndarray, r: np.ndarray, z: np.ndarray
+    rs: np.ndarray,
+    zs: np.ndarray,
+    r: np.ndarray,
+    z: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Antiderivative coefficients (Aphi_hat, Br_hat, Bz_hat) at one corner set.
 
@@ -549,28 +708,76 @@ def corner_fields(
     # product, one power of gamma taken off each of them and carried here instead.
     # Every use of either pole carries at least one, which is why the two P/Q
     # families below hold the reduction's own coefficients with a gamma removed.
-    far = np.where(level, 0.0, -2.0 * r * radius_sum / held * pi3[1])
-    near = gamma * pi3[2]
-    third = gamma * pi3[3]
-
     # 3 r^2 - c^2 is 2 r^2 - gamma^2, which is the same two terms without the
     # target radius appearing in both of them
     moment = c * (2.0 * r**2 - gamma**2) / (2.0 * r)
+    divergence, cphi, dz_coef = _split_corner_poles(
+        np, rs, r, gamma, a, b, c, radius_sum
+    )
+    far = np.where(level, 0.0, -2.0 * r * radius_sum / held * pi3[1])
+    near = gamma * pi3[2]
     qr = {
         1: (rs + c) * gamma * c / r * far,
         2: radius_gap * np2_2 * gamma * c / r * near,
         3: np.zeros_like(r),
     }
-    qz = {
-        1: (rs + c) * -2.0 * c * far,
-        2: radius_gap * -2.0 * c * np2_2 * near,
-        3: b * (rs - r) * np2_3 * third,
+    flux_scale = {
+        1: np.where(
+            level,
+            0.0,
+            (rs + c) * moment * 2.0 * r * radius_sum / held / (6.0 * a * r),
+        ),
+        2: radius_gap * np2_2 * moment * gamma / (6.0 * a * r),
+        3: rs / b * (rs - r) * (3.0 * r**2 - rs**2) * gamma / (6.0 * a * r),
     }
-    pphi = {
-        1: (rs + c) * moment * far,
-        2: radius_gap * np2_2 * moment * near,
-        3: -rs / b * (rs - r) * (3.0 * r**2 - rs**2) * third,
+    vertical_scale = {
+        1: np.where(
+            level,
+            0.0,
+            (rs + c) * 4.0 * c * r * radius_sum / held / (4.0 * a * r),
+        ),
+        2: radius_gap * 2.0 * c * np2_2 * gamma / (4.0 * a * r),
+        3: b * (rs - r) * np2_3 * gamma / (4.0 * a * r),
     }
+
+    flux_pole_terms = tuple(
+        _scaled_pole_residual(
+            np,
+            pole[p],
+            complement,
+            divergence[p],
+            flux_scale[p],
+        )
+        for p in (1, 2, 3)
+    )
+    vertical_pole_terms = tuple(
+        _scaled_pole_residual(
+            np,
+            pole[p],
+            complement,
+            divergence[p],
+            vertical_scale[p],
+        )
+        for p in (1, 2, 3)
+    )
+    flux_poles = sum(flux_pole_terms)
+    vertical_poles = sum(vertical_pole_terms)
+    split_live = np.minimum(np.abs(gamma), np.abs(rs - r)) >= (
+        _POLE_SPLIT_ASPECT_FLOOR * np.maximum(np.abs(gamma), np.abs(rs - r))
+    )
+    raw_cphi = (
+        -1.0 / 3.0 * r**2 * np.pi / 2.0 * np.sign(gamma) * (np.sign(rs - r) + 1.0)
+    )
+    flux_channel = np.where(
+        split_live,
+        cphi + flux_poles,
+        raw_cphi + sum(flux_scale[p] * pi3[p] for p in (1, 2, 3)),
+    )
+    vertical_channel = np.where(
+        split_live,
+        dz_coef + vertical_poles,
+        3.0 / r * raw_cphi + sum(vertical_scale[p] * pi3[p] for p in (1, 2, 3)),
+    )
 
     def p_sum(coef: dict[int, np.ndarray]) -> np.ndarray:
         out = np.zeros_like(coef[1])
@@ -578,19 +785,16 @@ def corner_fields(
             out += (-1.0) ** p * coef[p]
         return out
 
-    # exact signs, no dead-band: cphi's jump is cancelled by the two pole moments'
-    # own, and a band that zeroes one of the three without the others reintroduces
-    # the jump at the band's edge instead of at the plane.  np.sign is already zero
-    # on the plane, which is the value the cancellation asks for.
-    cphi = -1.0 / 3.0 * r**2 * np.pi / 2.0 * np.sign(gamma) * (np.sign(rs - r) + 1.0)
-    dz_coef = 3.0 / r * cphi
+    # Near either corner plane the direct expression is already well-conditioned:
+    # only one pole is singular and its coefficient supplies the exact zero.  Where
+    # both corner offsets are material, the homogeneous split prevents their three
+    # finite limits from reaching the rectangle difference separately.
     zeta = _zeta(rs, r, gamma)
 
     aphi_hat = (
-        cphi
+        flux_channel
         + gamma * r * zeta
         + gamma * a / (6.0 * r) * (u_coef * ellip_k - 2.0 * rs * ellip_e)
-        + 1.0 / (6.0 * a * r) * p_sum(pphi)
     )
     br_hat = (
         r * zeta
@@ -598,10 +802,9 @@ def corner_fields(
         - 1.0 / (4.0 * a * r) * p_sum(qr)
     )
     bz_hat = (
-        dz_coef
+        vertical_channel
         + 2.0 * gamma * zeta
         - a / (2.0 * r) * 1.5 * gamma * k2 * ellip_k
-        - 1.0 / (4.0 * a * r) * p_sum(qz)
     )
     return aphi_hat, br_hat, bz_hat
 
@@ -642,26 +845,74 @@ def traced_corner_fields(xp, rs, zs, r, z):
     np2_2 = 2.0 * r / radius_sum
     np2_3 = 4.0 * r * rs / b**2
 
+    moment = c * (2.0 * r**2 - gamma**2) / (2.0 * r)
+    divergence, cphi, dz_coef = _split_corner_poles(
+        xp, rs, r, gamma, a, b, c, radius_sum
+    )
     far = xp.where(level, 0.0, -2.0 * r * radius_sum / held * pi3[1])
     near = gamma * pi3[2]
-    third = gamma * pi3[3]
-
-    moment = c * (2.0 * r**2 - gamma**2) / (2.0 * r)
     qr = {
         1: (rs + c) * gamma * c / r * far,
         2: radius_gap * np2_2 * gamma * c / r * near,
         3: xp.zeros_like(r),
     }
-    qz = {
-        1: (rs + c) * -2.0 * c * far,
-        2: radius_gap * -2.0 * c * np2_2 * near,
-        3: b * (rs - r) * np2_3 * third,
+    flux_scale = {
+        1: xp.where(
+            level,
+            0.0,
+            (rs + c) * moment * 2.0 * r * radius_sum / held / (6.0 * a * r),
+        ),
+        2: radius_gap * np2_2 * moment * gamma / (6.0 * a * r),
+        3: rs / b * (rs - r) * (3.0 * r**2 - rs**2) * gamma / (6.0 * a * r),
     }
-    pphi = {
-        1: (rs + c) * moment * far,
-        2: radius_gap * np2_2 * moment * near,
-        3: -rs / b * (rs - r) * (3.0 * r**2 - rs**2) * third,
+    vertical_scale = {
+        1: xp.where(
+            level,
+            0.0,
+            (rs + c) * 4.0 * c * r * radius_sum / held / (4.0 * a * r),
+        ),
+        2: radius_gap * 2.0 * c * np2_2 * gamma / (4.0 * a * r),
+        3: b * (rs - r) * np2_3 * gamma / (4.0 * a * r),
     }
+
+    flux_pole_terms = tuple(
+        _scaled_pole_residual(
+            xp,
+            pole[p],
+            complement,
+            divergence[p],
+            flux_scale[p],
+        )
+        for p in (1, 2, 3)
+    )
+    vertical_pole_terms = tuple(
+        _scaled_pole_residual(
+            xp,
+            pole[p],
+            complement,
+            divergence[p],
+            vertical_scale[p],
+        )
+        for p in (1, 2, 3)
+    )
+    flux_poles = sum(flux_pole_terms)
+    vertical_poles = sum(vertical_pole_terms)
+    split_live = xp.minimum(xp.abs(gamma), xp.abs(rs - r)) >= (
+        _POLE_SPLIT_ASPECT_FLOOR * xp.maximum(xp.abs(gamma), xp.abs(rs - r))
+    )
+    raw_cphi = (
+        -1.0 / 3.0 * r**2 * np.pi / 2.0 * xp.sign(gamma) * (xp.sign(rs - r) + 1.0)
+    )
+    flux_channel = xp.where(
+        split_live,
+        cphi + flux_poles,
+        raw_cphi + sum(flux_scale[p] * pi3[p] for p in (1, 2, 3)),
+    )
+    vertical_channel = xp.where(
+        split_live,
+        dz_coef + vertical_poles,
+        3.0 / r * raw_cphi + sum(vertical_scale[p] * pi3[p] for p in (1, 2, 3)),
+    )
 
     def p_sum(coef):
         out = xp.zeros_like(coef[1])
@@ -669,15 +920,12 @@ def traced_corner_fields(xp, rs, zs, r, z):
             out = out + (-1.0) ** p * coef[p]
         return out
 
-    cphi = -1.0 / 3.0 * r**2 * np.pi / 2.0 * xp.sign(gamma) * (xp.sign(rs - r) + 1.0)
-    dz_coef = 3.0 / r * cphi
     zeta = traced_zeta(xp, rs, r, gamma, np.pi / 2.0, coherent_axis=-1)
 
     aphi_hat = (
-        cphi
+        flux_channel
         + gamma * r * zeta
         + gamma * a / (6.0 * r) * (u_coef * ellip_k - 2.0 * rs * ellip_e)
-        + 1.0 / (6.0 * a * r) * p_sum(pphi)
     )
     br_hat = (
         r * zeta
@@ -685,10 +933,9 @@ def traced_corner_fields(xp, rs, zs, r, z):
         - 1.0 / (4.0 * a * r) * p_sum(qr)
     )
     bz_hat = (
-        dz_coef
+        vertical_channel
         + 2.0 * gamma * zeta
         - a / (2.0 * r) * 1.5 * gamma * k2 * ellip_k
-        - 1.0 / (4.0 * a * r) * p_sum(qz)
     )
     return aphi_hat, br_hat, bz_hat
 

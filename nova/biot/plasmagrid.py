@@ -75,7 +75,7 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
         target = Target(
             {attr: self.aloc["plasma", attr] for attr in ["x", "z", "poly"]}
         )
-        wall = self.aloc["plasma", "poly"][0].poly.boundary
+        wall = self.ALoc["plasma", "poly"][0].poly.boundary
         self.data = Solve(
             self.subframe,
             target,

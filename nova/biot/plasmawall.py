@@ -63,11 +63,11 @@ class PlasmaWall(Limiter, Point):
 
     @property
     def boundary(self):
-        """Return first wall boundary."""
-        return self.aloc["plasma", "poly"][0].boundary
+        """Return the full first-wall boundary, not a tessellated plasma cell."""
+        return self.ALoc["plasma", "poly"][0].boundary
 
     def solve(self, number=None, boundary=None):
-        """Solve Biot wall-pannel nodes with a delta subpannel spacing."""
+        """Solve wall-panel nodes; ``number``/``nwall`` is nodes per segment."""
         if boundary is None:
             boundary = self.boundary
         with self.solve_biot(number) as number:

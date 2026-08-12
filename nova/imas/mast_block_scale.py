@@ -64,7 +64,7 @@ from nova.calibrate.correction_model import (
 )
 from nova.calibrate.correction_set import target
 from nova.calibrate.corrections import CorrectionChain, build_chain
-from nova.imas.mast_acquisition_scale import (
+from nova.calibrate.scale_step import (
     LADDER_TOLERANCE,
     ChannelScaleHistory,
     nearest_rung,

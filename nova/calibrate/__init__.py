@@ -28,6 +28,10 @@ candidate sources over the poloidal plane; :mod:`nova.calibrate.windows` splits 
 pulse into the intervals whose field is known without solving anything;
 :mod:`nova.calibrate.instrument` measures what a channel reads across those
 intervals and whether its integrator returns to the baseline it left; and
+:mod:`nova.calibrate.partial` measures a regressor after shared level drives are
+removed; :mod:`nova.calibrate.scale_step` and :mod:`nova.calibrate.pair_state`
+resolve discrete acquisition states; :mod:`nova.calibrate.noise` measures sensor
+floors and drift from waveform arrays; and
 :mod:`nova.calibrate.corrections` applies what those fits established, in the order
 the schema fixes.
 
@@ -48,5 +52,9 @@ __all__: list[str] = [
     "instrument",
     "inversion",
     "localize",
+    "noise",
+    "pair_state",
+    "partial",
+    "scale_step",
     "windows",
 ]

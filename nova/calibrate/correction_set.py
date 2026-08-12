@@ -25,7 +25,8 @@ every read rather than on authoring alone.
 from __future__ import annotations
 
 import math
-from collections.abc import Iterator
+from collections.abc import Iterable, Iterator
+from datetime import date
 from pathlib import Path
 
 import yaml
@@ -163,6 +164,77 @@ def load_correction_set(path: Path | str) -> CorrectionSet:
         ) from error
     validate_correction_set(document)
     return document
+
+
+def _increment_set_version(version: str) -> str:
+    """Return the next patch version of a correction set."""
+
+    major, minor, patch = (int(part) for part in version.split("."))
+    return f"{major}.{minor}.{patch + 1}"
+
+
+def write_correction_set(path: Path | str, document: CorrectionSet) -> None:
+    """Validate and write a correction document as canonical YAML."""
+
+    validate_correction_set(document)
+    payload = document.model_dump(mode="json", by_alias=True, exclude_none=True)
+    Path(path).write_text(
+        yaml.safe_dump(payload, sort_keys=False, allow_unicode=True, width=100)
+    )
+
+
+def replace_correction_kind(
+    path: Path | str,
+    kind: CorrectionKind,
+    replacements: Iterable[ChannelCorrection],
+    *,
+    generated_by: str,
+    generated_at: date | None = None,
+) -> CorrectionSet:
+    """Replace one measured correction kind and write a bumped document.
+
+    The replacement occupies the original kind's position so the document remains
+    legible by measurement family.  Validation happens before and after the write:
+    callers never receive a document that was accepted only in memory.
+    """
+
+    path = Path(path)
+    document = load_correction_set(path)
+    wanted = CorrectionKind(kind)
+    rows = list(replacements)
+    wrong = [row for row in rows if CorrectionKind(row.kind) is not wanted]
+    if wrong:
+        raise CorrectionSetError(
+            f"cannot replace {wanted.value} with corrections of another kind"
+        )
+
+    original = list(document.corrections)
+    positions = [
+        index
+        for index, correction in enumerate(original)
+        if CorrectionKind(correction.kind) is wanted
+    ]
+    insertion = positions[0] if positions else len(original)
+    before = [
+        correction
+        for index, correction in enumerate(original)
+        if index < insertion and CorrectionKind(correction.kind) is not wanted
+    ]
+    after = [
+        correction
+        for index, correction in enumerate(original)
+        if index >= insertion and CorrectionKind(correction.kind) is not wanted
+    ]
+    updated = document.model_copy(
+        update={
+            "set_version": _increment_set_version(document.set_version),
+            "generated_by": generated_by,
+            "generated_at": generated_at or date.today(),
+            "corrections": [*before, *rows, *after],
+        }
+    )
+    write_correction_set(path, updated)
+    return load_correction_set(path)
 
 
 def read_correction_set(machine: str, diagnostic_system: str) -> CorrectionSet:

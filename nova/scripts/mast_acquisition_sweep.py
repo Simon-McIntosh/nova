@@ -58,10 +58,19 @@ import argparse
 import collections
 import json
 import math
+from datetime import date
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 
-
+from nova.calibrate.correction_model import (
+    ChannelCorrection,
+    CorrectionKind,
+    CorrectionSet,
+    CorrectionStatus,
+    Provenance,
+    ValidityInterval,
+)
+from nova.calibrate.correction_set import replace_correction_kind
 from nova.catalog.mast_geometry import MachineGeometryRegistry
 from nova.imas.mast_acquisition_scale import (
     acquisition_record,
@@ -95,6 +104,17 @@ from nova.imas.mast_vacuum_response import MINIMUM_STANDOFF, ResponseModel
 
 CACHE = Path.home() / ".cache" / "nova-mast"
 """Where the cohort's own records live and this one is written beside them."""
+
+MAST_CORRECTION_DOCUMENT = (
+    Path(__file__).parents[1] / "calibrate" / "corrections" / "mast" / "magnetics.yaml"
+)
+"""The versioned correction document the measured acquisition record enters."""
+
+PROMOTION_RECORD = CACHE / "mast_block_scale_sweep.json"
+"""Evidence record written by the promotion pass before the document is updated."""
+
+PROMOTION_PRODUCER = "nova.scripts.mast_acquisition_sweep"
+"""Stable producer stamped on the document and every promoted correction."""
 
 REGISTRY_SHOT = 11766
 """The shot the machine geometry selection is taken at, as the cohort took it."""
@@ -451,6 +471,77 @@ def _table_from(
     )
 
 
+def acquisition_corrections(
+    table: BlockScaleTable,
+    *,
+    evidence_uri: Path | str,
+    fitted_at: date,
+) -> list[ChannelCorrection]:
+    """Translate every measured acquisition block into a schema correction."""
+
+    evidence = str(evidence_uri)
+    rows = []
+    for channel in table.channels:
+        for block in table.blocks[channel]:
+            promoted = block.on_ladder
+            rows.append(
+                ChannelCorrection(
+                    channel=block.channel,
+                    kind=CorrectionKind.acquisition_scale,
+                    status=(
+                        CorrectionStatus.promoted
+                        if promoted
+                        else CorrectionStatus.refused
+                    ),
+                    value=float(block.rung) if promoted else None,
+                    measured_value=float(block.scale),
+                    ladder="acquisition_range",
+                    validity=[
+                        ValidityInterval(
+                            pulse_start=block.first_shot,
+                            pulse_end=block.last_shot,
+                            measured_pulses=list(block.shots),
+                        )
+                    ],
+                    provenance=Provenance(
+                        method=block.route or table.route or PROMOTED_ROUTE,
+                        evidence_uri=evidence,
+                        fitted_at=fitted_at,
+                        fitted_by=PROMOTION_PRODUCER,
+                        statement=(
+                            f"measured response ratio {block.scale:.16g}; "
+                            + (
+                                f"promoted acquisition rung {block.rung:.16g}"
+                                if promoted
+                                else "refused because it misses the acquisition ladder"
+                            )
+                        ),
+                    ),
+                )
+            )
+    return rows
+
+
+def promote_acquisition_corrections(
+    table: BlockScaleTable,
+    path: Path | str = MAST_CORRECTION_DOCUMENT,
+    *,
+    evidence_uri: Path | str = PROMOTION_RECORD,
+    fitted_at: date | None = None,
+) -> CorrectionSet:
+    """Write a measured table into the versioned MAST correction document."""
+
+    stamp = fitted_at or date.today()
+    rows = acquisition_corrections(table, evidence_uri=evidence_uri, fitted_at=stamp)
+    return replace_correction_kind(
+        path,
+        CorrectionKind.acquisition_scale,
+        rows,
+        generated_by=PROMOTION_PRODUCER,
+        generated_at=stamp,
+    )
+
+
 def array_shot(shot: int, screen: ErrorFieldScreen) -> dict[str, float]:
     """Return each channel's amplitude relative to the array on one shot.
 
@@ -697,15 +788,18 @@ def run_promote(arguments: argparse.Namespace) -> None:
             )
         record["narrowing"] = report
 
-    (CACHE / "mast_block_scale_sweep.json").write_text(
-        json.dumps(record, indent=1, sort_keys=True)
-    )
+    PROMOTION_RECORD.write_text(json.dumps(record, indent=1, sort_keys=True))
     log("wrote mast_block_scale_sweep.json")
     if arguments.promote_to:
-        Path(arguments.promote_to).write_text(
-            json.dumps(table.as_dict(), indent=1, sort_keys=True)
+        document = promote_acquisition_corrections(
+            table,
+            arguments.promote_to,
+            evidence_uri=PROMOTION_RECORD,
         )
-        log(f"wrote the promoted table to {arguments.promote_to}")
+        log(
+            f"promoted {sum(len(rows) for rows in table.blocks.values())} acquisition "
+            f"records into {arguments.promote_to} as set {document.set_version}"
+        )
 
 
 RUNG_COLOURS = {
@@ -1017,7 +1111,11 @@ def main(argv: Iterable[str] | None = None) -> None:
 
     promote = passes.add_parser("promote", help="assemble and report the table")
     promote.add_argument(
-        "--promote-to", default="", help="write the table to this path"
+        "--promote-to",
+        nargs="?",
+        type=Path,
+        const=MAST_CORRECTION_DOCUMENT,
+        help="promote into this correction document (the MAST document by default)",
     )
     promote.set_defaults(handler=run_promote)
 

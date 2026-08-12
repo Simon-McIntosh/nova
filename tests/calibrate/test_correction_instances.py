@@ -99,19 +99,22 @@ def test_the_document_covers_every_measured_kind(instance):
     counts = {}
     for row in instance.corrections:
         counts[row.kind] = counts.get(row.kind, 0) + 1
+    assert instance.set_version == "1.1.0"
+    assert len(instance.corrections) == 160
     assert counts == {
-        "gain": 6,
+        "gain": 34,
         "acquisition_scale": 113,
         "pair_state": 3,
         "quality": 3,
-        "exclusion": 2,
-        "convention": 1,
+        "exclusion": 5,
+        "convention": 2,
     }
 
 
-def test_the_read_path_applies_the_gains_the_rungs_and_the_convention(instance):
+def test_the_read_path_applies_only_promoted_corrections(instance):
     rows = list(applied(instance))
     assert len(rows) == 114
+    assert {row.status for row in rows} == {"promoted"}
     ranks = [APPLICATION_ORDER.index(stage(row)) for row in rows]
     assert ranks == sorted(ranks)
     assert {stage(row) for row in rows} == {
@@ -206,13 +209,23 @@ def test_the_lifetime_half_carries_its_independent_routes(instance):
     assert (0.488, 0.514) in [(span.lower, span.upper) for span in spans]
 
 
-def test_the_withheld_scale_is_recorded_with_the_reason_it_was_refused(instance):
-    row = only(instance, "gain", "obv11")
-    assert row.status == "withheld"
-    assert row.value is None
-    assert row.measured_value == pytest.approx(0.924757, abs=1e-06)
-    assert (row.uncertainty.lower, row.uncertainty.upper) == (0.869, 1.065)
-    assert "7.4" in row.cause
+def test_withheld_gains_keep_measurements_without_consumer_values(instance):
+    pickup = only(instance, "gain", "obv11")
+    assert pickup.status == "withheld"
+    assert pickup.value is None
+    assert pickup.measured_value == pytest.approx(0.924757, abs=1e-06)
+    assert (pickup.uncertainty.lower, pickup.uncertainty.upper) == (0.869, 1.065)
+    assert "7.4" in pickup.cause
+
+    rows = [
+        row
+        for row in select(instance, "gain")
+        if row.channel.startswith("fl_") and row.status == "withheld"
+    ]
+    assert len(rows) == 10
+    assert all(row.measured_value is not None for row in rows)
+    assert all(row.value is None for row in rows)
+    assert not any(row in list(applied(instance)) for row in rows)
 
 
 # --------------------------------------------------------------------------
@@ -289,11 +302,14 @@ def test_the_outlier_is_suspect_rather_than_excluded(instance):
 # --------------------------------------------------------------------------
 
 
-def test_the_flux_convention_is_a_measured_two_pi_on_the_loop_group(instance):
+def test_recorded_flux_loop_convention_coexists_with_promoted_channel_group(instance):
     rows = select(instance, "convention")
-    assert len(rows) == 1
-    row = rows[0]
-    assert row.channel is None and row.channel_group == "flux_loop"
-    assert row.value == math.tau
-    assert row.status == "promoted"
-    assert row.provenance.corroborations[0].value == math.tau
+    assert len(rows) == 2
+    promoted = next(row for row in rows if row.status == "promoted")
+    recorded = next(row for row in rows if row.status == "recorded")
+    assert promoted.channel is None and promoted.channel_group == "flux_loop"
+    assert promoted.value == math.tau
+    assert promoted.provenance.corroborations[0].value == math.tau
+    assert recorded.channel == "flux_loop" and recorded.channel_group is None
+    assert recorded.value == 1.0
+    assert recorded not in list(applied(instance))

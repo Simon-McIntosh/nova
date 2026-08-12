@@ -1164,6 +1164,77 @@ class LoopGainDisposition(StrEnum):
 
 
 @dataclass(frozen=True, order=True)
+class AdmittedLoopTarget:
+    """One calibrated loop admitted to a noise-whitened current inversion."""
+
+    channel: str
+    r: float
+    z: float
+    scatter: float
+    described: bool
+
+    def validate(self) -> None:
+        """Reject a target that cannot provide a finite inversion row."""
+
+        if self.r <= 0.0 or not math.isfinite(self.r) or not math.isfinite(self.z):
+            raise LoopAdjudicationError(
+                f"loop {self.channel!r} needs a finite position at positive radius"
+            )
+        if self.scatter <= 0.0 or not math.isfinite(self.scatter):
+            raise LoopAdjudicationError(
+                f"loop {self.channel!r} needs a finite positive noise floor"
+            )
+
+
+def admitted_loop_targets(
+    verdicts: Iterable[LoopGainVerdict],
+    positions: Mapping[str, Sequence[float | bool]],
+    scatter: Mapping[str, float],
+) -> tuple[AdmittedLoopTarget, ...]:
+    """Join admitted gain verdicts to positions and measured noise floors.
+
+    A loop that is measurable at a reconstruction position remains admissible
+    even when the machine description has no named counterpart; ``described``
+    carries that provenance instead of silently dropping the row.  Corrected or
+    excluded verdicts do not enter this as-published admission route.
+    """
+
+    targets = []
+    for verdict in sorted(verdicts, key=lambda row: row.channel):
+        if verdict.disposition is not LoopGainDisposition.ADMITTED:
+            continue
+        position = positions.get(verdict.channel)
+        if position is None or len(position) != 3:
+            raise LoopAdjudicationError(
+                f"admitted loop {verdict.channel!r} has no (r, z, described) position"
+            )
+        target = AdmittedLoopTarget(
+            channel=verdict.channel,
+            r=float(position[0]),
+            z=float(position[1]),
+            described=bool(position[2]),
+            scatter=float(scatter.get(verdict.channel, math.nan)),
+        )
+        target.validate()
+        targets.append(target)
+    return tuple(targets)
+
+
+def admitted_loop_response(
+    geometry: Mapping[str, Any],
+    targets: Sequence[AdmittedLoopTarget],
+    *,
+    families: Sequence[str] | None = None,
+) -> np.ndarray:
+    """Return the current response rows for calibrated admitted loops."""
+
+    for target in targets:
+        target.validate()
+    positions = np.asarray([[target.r, target.z] for target in targets], dtype=float)
+    return loop_response_matrix(geometry, positions, families=families)
+
+
+@dataclass(frozen=True, order=True)
 class LoopGainVerdict:
     """One loop channel's pooled gain and whether it may be admitted as published.
 

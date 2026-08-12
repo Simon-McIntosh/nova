@@ -21,9 +21,10 @@ worth fearing live at edges, and a comparison sampling block interiors alone wou
 pass while the boundaries moved.
 
 The document also carries five promoted sensor gains.  The read path applies those
-after the acquisition setting, in the same stage order the schema declares, while
-recorded pickup states, exclusions, and every refused or unmeasured setting remain
-non-applying evidence.
+after the acquisition setting, in the same stage order the schema declares.  A
+measured flux-loop gain may carry a candidate value while remaining recorded rather
+than promoted; recorded gains, pickup states, exclusions, and every refused or
+unmeasured setting remain non-applying evidence.
 """
 
 from __future__ import annotations
@@ -77,9 +78,6 @@ RETIRED_GAINS = {
     "ccbv35": 0.9474,
 }
 """The promoted scales as the record module carried them before the document did."""
-
-RETIRED_WITHHELD = ("obv11",)
-"""The refused scale as that module carried it."""
 
 RETIRED_STEPPING = 19
 """Channels it recorded as stepping, and the count the document must still give."""
@@ -329,9 +327,18 @@ def test_the_read_path_applies_the_full_promoted_chain_in_schema_order(served):
     gains = {
         row.channel: row.value
         for row in served.document.corrections
-        if CorrectionKind(row.kind) is CorrectionKind.gain and row.value is not None
+        if CorrectionKind(row.kind) is CorrectionKind.gain and row.status == "promoted"
     }
+    recorded = [
+        row
+        for row in served.document.corrections
+        if CorrectionKind(row.kind) is CorrectionKind.gain
+        and row.status == "recorded"
+        and row.value is not None
+    ]
     assert set(gains) == set(PROMOTED_GAINS)
+    assert len(recorded) == 18
+    assert not set(gains) & {row.channel for row in recorded}
     for channel in PROMOTED_GAINS:
         chain = served.chain(channel, 14100)
         acquisition = build_chain(
@@ -350,8 +357,8 @@ def test_the_read_path_applies_the_full_promoted_chain_in_schema_order(served):
         assert served.correction(channel, 14100).scale == chain.multiplier
 
 
-def test_the_document_serves_the_numbers_the_record_module_carried(served):
-    """The four quantities that were literals in nova.imas, now read from here.
+def test_the_document_serves_retired_literals_and_new_withheld_evidence(served):
+    """The retired literals remain stable while measured evidence may expand.
 
     Float equality on the gains: each is the four-decimal constant the adjudication
     promoted, and the document carries the unrounded ratio separately, so a reader
@@ -360,7 +367,20 @@ def test_the_document_serves_the_numbers_the_record_module_carried(served):
     """
 
     assert promoted_channel_scales() == RETIRED_GAINS
-    assert withheld_channel_scales() == RETIRED_WITHHELD
+    withheld = set(withheld_channel_scales())
+    assert "obv11" in withheld
+    loop_rows = [
+        row
+        for row in served.document.corrections
+        if CorrectionKind(row.kind) is CorrectionKind.gain
+        and row.status == "withheld"
+        and row.channel.startswith("fl_")
+    ]
+    assert len(loop_rows) == 10
+    assert {row.channel for row in loop_rows} <= withheld
+    assert all(
+        row.measured_value is not None and row.value is None for row in loop_rows
+    )
     assert acquisition_stepping_channels() == RETIRED_STEPPING
     assert acquisition_off_ladder_channels() == RETIRED_OFF_LADDER
     assert acquisition_stepping_channels() == len(served.stepping)

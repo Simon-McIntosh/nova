@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import importlib.util
 import inspect
+import math
 
 import numpy as np
 
@@ -195,13 +196,57 @@ def test_flood_fill_core_matches_ndimage_label():
     seed = np.zeros_like(confined)
     seed[ia, ja] = True
 
-    core = np.asarray(
-        fsc.flood_fill_core(jnp.asarray(confined), jnp.asarray(seed), rg.size + zg.size)
-    ).astype(bool)
+    core, steps = fsc.flood_fill_core_with_steps(
+        jnp.asarray(confined), jnp.asarray(seed), rg.size + zg.size
+    )
+    core = np.asarray(core).astype(bool)
     labels, _ = ndimage.label(confined)
     ref = labels == labels[ia, ja]
     assert np.array_equal(core, ref)
     assert not core[7, 4]  # the disconnected pocket is correctly excluded
+    assert int(steps) <= math.ceil(math.log2(rg.size + zg.size))
+
+
+def test_doubling_fill_matches_fixed_iteration_fixtures_exactly():
+    """Doubling and one-cell dilation reach exactly the same fixed point."""
+
+    def fixed_iteration_fill(confined, seed):
+        core = seed & confined
+        for _ in range(sum(confined.shape)):
+            up = np.zeros_like(core)
+            down = np.zeros_like(core)
+            left = np.zeros_like(core)
+            right = np.zeros_like(core)
+            up[1:, :] = core[:-1, :]
+            down[:-1, :] = core[1:, :]
+            left[:, 1:] = core[:, :-1]
+            right[:, :-1] = core[:, 1:]
+            core = (core | up | down | left | right) & confined
+        return core
+
+    fixtures = []
+    psi, rg, zg, inside = _solovev_psi()
+    psi_n = psi / -1.0
+    ellipse = (psi_n < 1.0) & inside
+    ellipse[5:10, 3:6] = True
+    fixtures.append((ellipse, (np.abs(zg).argmin(), np.abs(rg - 0.9).argmin())))
+
+    corridor = np.zeros((49, 73), dtype=bool)
+    corridor[8:41, 6:31] = True
+    corridor[22:27, 31:58] = True
+    corridor[13:36, 58:67] = True
+    corridor[3:9, 48:55] = True  # disconnected pocket above the corridor
+    fixtures.append((corridor, (24, 12)))
+
+    for confined, seed_index in fixtures:
+        seed = np.zeros_like(confined)
+        seed[seed_index] = True
+        fixed = fixed_iteration_fill(confined, seed)
+        doubled, steps = fsc.flood_fill_core_with_steps(
+            jnp.asarray(confined), jnp.asarray(seed), sum(confined.shape)
+        )
+        assert np.array_equal(np.asarray(doubled).astype(bool), fixed)
+        assert int(steps) <= math.ceil(math.log2(sum(confined.shape)))
 
 
 if __name__ == "__main__":

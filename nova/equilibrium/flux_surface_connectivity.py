@@ -9,12 +9,12 @@ squares / level-set extraction at all.
 
 Two device primitives:
 
-1. **connectivity core weight** — a fixed-iteration flood-fill from the axis
-   cell over the confined level set {ψ_N < 1 ∧ inside-limiter}, by iterated
-   4-neighbour dilation intersected with the confined set
-   (:func:`jax.lax.fori_loop`).  It selects the axis-connected core and rejects
-   any disconnected private pocket at comparable flux by CONNECTIVITY, never by
-   ψ height or sign-of-Z — the same rule as
+1. **connectivity core weight** — a dilate-by-doubling flood-fill from the axis
+   cell over the confined level set {ψ_N < 1 ∧ inside-limiter}.  Associative
+   scans double the reachable distance along uninterrupted row and column
+   segments, and the fill stops at its fixed point.  It selects the
+   axis-connected core and rejects any disconnected private pocket at comparable
+   flux by CONNECTIVITY, never by ψ height or sign-of-Z — the same rule as
    :mod:`nova.equilibrium.connectivity_boundary`, but as a fixed-shape
    device kernel rather than ``scipy.ndimage.label``.
 
@@ -52,40 +52,93 @@ from functools import partial
 import jax
 import jax.numpy as jnp
 
-from nova.equilibrium.morphology import _dilate4
+from nova.equilibrium.morphology import _dilate4 as _dilate4
+
 
 _SQRT2 = 2.0**0.5
 
 __all__ = [
     "flood_fill_core",
+    "flood_fill_core_with_steps",
     "traced_flux_surface_bins",
 ]
 
 
 # ---------------------------------------------------------------------------
-# connectivity core weight — fixed-iteration flood-fill (device kernel)
+# connectivity core weight — dilate-by-doubling flood-fill (device kernel)
 # ---------------------------------------------------------------------------
+
+
+def _compose_segment_reach(left, right):
+    """Compose boolean reach maps for adjacent segments.
+
+    Each pair ``(reached, open_)`` represents ``reached | (open_ & incoming)``.
+    Composition is associative, so :func:`jax.lax.associative_scan` evaluates a
+    complete row or column with logarithmic propagation depth.
+    """
+    reached_left, open_left = left
+    reached_right, open_right = right
+    return (
+        reached_right | (open_right & reached_left),
+        open_right & open_left,
+    )
+
+
+def _fill_segments(core: jnp.ndarray, confined: jnp.ndarray, axis: int) -> jnp.ndarray:
+    """Fill every confined segment on ``axis`` touched by ``core``."""
+    elements = (core & confined, confined)
+    forward = jax.lax.associative_scan(_compose_segment_reach, elements, axis=axis)[0]
+    backward = jax.lax.associative_scan(
+        _compose_segment_reach, elements, axis=axis, reverse=True
+    )[0]
+    return (forward | backward) & confined
+
+
+@partial(jax.jit, static_argnums=(2,))
+def flood_fill_core_with_steps(
+    confined: jnp.ndarray, seed: jnp.ndarray, n_iter: int
+) -> tuple[jnp.ndarray, jnp.ndarray]:
+    """Return the axis-connected component and doubling-step count.
+
+    ``confined`` and ``seed`` are ``(nz, nr)`` boolean fields. ``n_iter`` remains
+    a static safety cap and must be at least the component's grid diameter
+    (``nr + nz`` is sufficient).  One step closes every reached row segment and
+    then every reached column segment.  The associative scans double their reach
+    internally, while the outer loop stops as soon as the component is unchanged.
+
+    The returned core is the float 0/1 component containing the seed, never a
+    disconnected pocket.  The scalar step count is an execution diagnostic.
+    """
+
+    start = seed & confined
+
+    def condition(state):
+        step, core, previous = state
+        return (step < n_iter) & jnp.any(core != previous)
+
+    def body(state):
+        step, core, _previous = state
+        row_filled = _fill_segments(core, confined, axis=1)
+        next_core = _fill_segments(row_filled, confined, axis=0)
+        return step + 1, next_core, core
+
+    step, core, _previous = jax.lax.while_loop(
+        condition,
+        body,
+        (jnp.asarray(0, dtype=jnp.int32), start, jnp.zeros_like(start)),
+    )
+    # Exact 0/1 connectivity weights need no double-precision storage.  Their
+    # products promote to the solved field's selected compute dtype.
+    return core.astype(jnp.float32), step
 
 
 @partial(jax.jit, static_argnums=(2,))
 def flood_fill_core(
     confined: jnp.ndarray, seed: jnp.ndarray, n_iter: int
 ) -> jnp.ndarray:
-    """Axis-connected component of ``confined`` grown from ``seed`` in ``n_iter`` steps.
-
-    ``confined`` and ``seed`` are ``(nz, nr)`` boolean fields; ``n_iter`` (static)
-    must be at least the core's grid diameter so the fill saturates
-    (``nr + nz`` is always sufficient).  Returns the float 0/1 core weight — the
-    connected component containing the seed, never a disconnected pocket.
-    """
-
-    def body(_i, core):
-        return _dilate4(core) & confined
-
-    core = jax.lax.fori_loop(0, n_iter, body, seed & confined)
-    # Exact 0/1 connectivity weights need no double-precision storage.  Their
-    # products promote to the solved field's selected compute dtype.
-    return core.astype(jnp.float32)
+    """Return the seed-connected component of ``confined`` as float 0/1 weights."""
+    core, _steps = flood_fill_core_with_steps(confined, seed, n_iter)
+    return core
 
 
 # ---------------------------------------------------------------------------

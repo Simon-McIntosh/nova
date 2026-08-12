@@ -78,6 +78,50 @@
   <p>Measured against a lattice-refined clipped-fan arbiter validated three independent ways (self-consistency ≤7e-10; Newton's third law to every digit; the constant-current energy gradient agreeing to 7.3e-07 with fourth-order stencil convergence): on a solenoid module's self-dominated radial force, <strong>18 fan nodes match 4096 tiled cells (227×)</strong>; action-reaction balance reaches at 256 fan nodes what 8192 tiled cells reach (32×); through the operator on eleven ITER-scale conductors, fan p=8 costs 2.8 s where the accuracy-equivalent tiling costs 371 s (~130×). The self term is where the fan wins most — the integrand is analytic inside the section and the midpoint rule's constant is largest exactly there. One measured inversion: on a component that is a near-total self-field cancellation (vertical force on a voided section) the tiling is 5× better at equal nodes. <strong>The shipped default stays subdivision</strong>; the fan is an opt-in <code>ForceTargetPolicy</code> frozen into the cache identity, refusals over silent approximation, 17 pinning tests.</p>
   <p><strong>A divergent shipped value was found and fixed on the default path</strong>: <code>Fc</code>, the crushing first moment, normalised its arm by the tile-cell height instead of the conductor height and grew without bound under refinement (−861 → −16,927 MN across nforce 4→1024; plotted by <code>nova/imas/matrix.py</code>, asserted nowhere, which is how it survived). Fixed by binding each target row's arm to its parent conductor — Fr/Fz unchanged, convergence now pinned. The moment-arm code path has exactly one importer and one consumer, so the fix is contained.</p>
 
+  <h2 id="pole-split">The four-corner amplification removed by a closed-form pole split</h2>
+
+  <p>Commit <code>92dcf184</code>, merged to <code>main</code> (2026-08-12). The queued follow-on
+  from wave 6 is closed. The rectangle corner rule's section value is a second difference, and its
+  widest corner term exceeded that value by up to 3.4×10⁴ on slender sections, capping achievable
+  precision at <code>eps × ratio</code> however accurately the terms themselves were computed. The
+  per-term rearrangement had already been measured and ruled out; the working fix scales each
+  complete third-kind moment inside the existing fixed-trip descent, subtracts its closed-form
+  homogeneous limit, and combines the coefficient residual with the boundary angle
+  <em>before</em> the four-corner difference. <strong>No quadrature nodes were added</strong> —
+  this is the algebra treatment the arc reduction had, applied where adding nodes buys nothing.</p>
+
+  <table>
+    <thead><tr><th>Section</th><th>Widest-corner / section, before</th><th>After</th><th>Reduction</th><th>Agreement with the mpmath fan</th></tr></thead>
+    <tbody>
+      <tr><td>compact</td><td>936.6</td><td>10.70</td><td>87.5×</td><td>8.57×10⁻¹³</td></tr>
+      <tr><td>thin square</td><td>14633.3</td><td>41.41</td><td>353.4×</td><td>1.74×10⁻¹²</td></tr>
+      <tr><td>slender</td><td>34205.9</td><td>481.0</td><td>71.1×</td><td>3.64×10⁻¹²</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>The arbiter was built to be independent, and it converged.</strong> An edge-aligned,
+  singularity-subtracted mpmath fan was refined 20 → 30 → 44 → 64 nodes, moving
+  4.5843971145×10⁻⁵ → 4.5843981231×10⁻⁵ → 4.5843981238×10⁻⁵ → 4.5843981238×10⁻⁵, with 4.8×10⁻¹²
+  relative movement on the last refinement. The production section flux then agrees with it to
+  roughly 10⁻¹² across all three geometries. The edge-aligned decomposition also answers the
+  slender-section pin that wave 6 had to leave open for want of exactly this arbiter.</p>
+
+  <p><strong>Shipped values moved, and the movement is stated rather than absorbed.</strong>
+  Centroid ψ changed by −1.806×10⁻¹⁷ compact (−4.31×10⁻¹³ relative), −2.492×10⁻¹⁶ thin square
+  (−4.65×10⁻¹²) and −2.543×10⁻¹⁵ slender (−5.55×10⁻¹¹) against the parent commit. These are at the
+  scale the amplification was masking, which is the expected signature of a conditioning fix rather
+  than a behaviour change. New slender regression pins reference 4.5843981237720546×10⁻⁵ under a
+  conservative 6×10⁻¹² relative bound.</p>
+
+  <p><strong>What remains, stated plainly:</strong> a 71–353× reduction is not elimination — the
+  slender section still carries a 481× corner-to-section ratio, so precision there is bounded near
+  <code>eps × 481</code> rather than <code>eps × 3.4e4</code>. One-plane limits deliberately retain
+  the direct, well-conditioned form and do not use the split. Three pre-existing strict xfails on
+  the finite zeta and complete-kind host-versus-compiled corner channels stand unchanged (4.44×10⁻¹²
+  compact B<sub>z</sub>, 1.55×10⁻¹¹ thin flux, 6.92×10⁻¹² refined-material); they are a separate
+  mechanism from the pole/boundary-angle amplification removed here. Focused gate: 377 passed,
+  3 xfailed, no unexpected failures.</p>
+
   <h2 id="lane">Suite status and residual record</h2>
   <p>Latest full lane (wave 6, SLURM sun_debug): 4737 passed / 121 skipped / 3 xfailed / 2 failed vs a 4728-passed base — +9, no new failure; both failures are the pre-existing MAST packaged-registry probe-angle items. Three strict xfails stand, each now naming its mechanism and measured ratio (the four-corner amplification and the far-section-average refinement). Queued follow-on: the pole-moment closed-form split. Reconstruction gaps recorded: empty commit-message bodies throughout; 22 of 24 verifier worktrees kept no logs; four surviving greens4 logs measure the rejected candidate kernel (only their zeta and elliptic-point rows are live); no per-wave whole-suite lane counts for waves 1–5.</p>
 

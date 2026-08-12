@@ -21,9 +21,10 @@
   <title>Conditioning Audit of Every Biot Element | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-11">
-<meta name="plan-version" content="10">
-<meta name="plan-impl" content="0.95">
+<meta name="plan-modified" content="2026-08-12">
+<meta name="plan-version" content="11">
+<meta name="plan-impl" content="0.97">
+<meta name="plan-commits" content="4ed5fcd1,25435a82,f13aaa02,21b0f0bd,5520ee3c,5c410d01,92dcf184">
 </head>
 <body>
   <main class="plan-doc">
@@ -274,10 +275,11 @@ Done-when
      written and this one resolved.</pre>
     <p class="r-fu-outcome">Both seeded faults closed in the conditioned-elements wave (4ed5fcd1) by rearrangement with pinning tests: K−E now 1.4e-16 at k²~1e-9 vs mpmath 120 dps (was 1e-3 of field scale); _R_FLOOR deleted, brackets held before evaluation, warning gone under -W error. Every §2 registry element and kernel carries a recorded worst-regime figure against an independent arbiter with a holding test — two stated qualifications (bow lacks a code-path-independent arbiter; the 50:1 slender rectangle is unpinned pending an edge-aligned arbiter). Suite green: 4737 passed / 2 known pre-existing MAST failures. Full record: /nova/evidence/archive/biot-element-conditioning-landed</p>
     </article>
-<article class="r-fu" data-id="f-bec-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-11T04:30:00+00:00" data-recommends-skill="/reckon-ship biot-element-conditioning §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-bec-002" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-11T04:30:00+00:00" data-recommends-skill="/reckon-ship biot-element-conditioning §2" data-resolved-at="2026-08-12T19:32:20+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Remove the four-corner amplification by a closed-form pole split</h4>
     <div class="r-fu-body"><p>The rectangle corner rule's section value is a second difference whose widest corner term exceeds it by up to 3.4e4 (slender sections), capping precision at eps×ratio. The per-term rearrangement was measured and ruled out; the working fix takes the third-kind pole moments' divergent part off against the boundary angle in closed form, needing the exact large-|n| behaviour of all three characteristics. Gate: the mpmath target-side fan arbiter.</p></div>
     <pre class="r-fu-prompt">/reckon-ship biot-element-conditioning §2</pre>
+    <p class="r-fu-outcome">Closed by commit 92dcf184. Amplification reduced 87.5x / 353.4x / 71.1x across compact, thin-square and slender sections (936.6->10.70, 14633.3->41.41, 34205.9->481.0), with production flux agreeing with an independent edge-aligned mpmath fan to ~1e-12 and shipped centroid psi moving only 1.8e-17 to 2.5e-15 absolute. Fixed by scaling each complete third-kind moment inside the existing descent, subtracting its closed-form homogeneous limit and combining the coefficient residual with the boundary angle before the four-corner difference — no quadrature nodes added. The mpmath fan built for this node is also the arbiter f-bec-003's slender-section pin needed, so that followup's scope shrinks accordingly. Evidence: /nova/evidence/archive/biot-element-conditioning-landed#pole-split</p>
     </article>
 <article class="r-fu" data-id="f-bec-003" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-11T04:30:00+00:00" data-recommends-skill="/reckon-ship biot-element-conditioning §4" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Close the audit residuals: bow arbiter, slender-section pin, and the §4 measurements</h4>
@@ -297,6 +299,11 @@ Done-when
     </article>
 </section>
 
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-20260812-polesplit" data-who="reckon-ship" data-when="2026-08-12T20:15:00+00:00">
+    <div class="r-comment-body">corner-pole-split landed — commit 92dcf184; mpmath fan arbiter gate passed; measure: widest-corner-term to section-value ratio reduced compact 936.6 -> 10.70 (87.5x), thin-square 14633.3 -> 41.41 (353.4x), slender 34205.9 -> 481.0 (71.1x); production section flux agrees with the independent edge-aligned singularity-subtracted mpmath fan to 8.57e-13 / 1.74e-12 / 3.64e-12 relative, the fan itself converged to 4.8e-12 relative movement at 64 nodes. Fixed by rearrangement with no quadrature nodes added. Shipped centroid psi moved -1.806e-17 compact (-4.31e-13 rel), -2.492e-16 thin-square (-4.65e-12), -2.543e-15 slender (-5.55e-11), reported not absorbed. The edge-aligned decomposition also supplies the slender-section arbiter f-bec-003 was waiting on. Residual: 481x is a reduction not an elimination, so slender precision is bounded near eps*481; three pre-existing strict xfails on a separate mechanism stand. Focused gate 377 passed / 3 xfailed. Scope was extended mid-flight to nova/biot/greens.py and tests/test_biotgreens.py, where the corner rule actually lives. Artifacts: /nova/evidence/archive/biot-element-conditioning-landed#pole-split</div>
+</div>
+</section>
+</main>
 </body>
 </html>

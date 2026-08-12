@@ -614,3 +614,51 @@ use one large-tile H200 by default; shard only an already-large ring build whose
 remaining wall justifies the extra devices. Straight prisms, filament arcs,
 rectangular bows and cylinders remain host routes until they acquire a
 fixed-shape packed driver and a measured crossover.
+
+## Integrated pytest suite — exact-tree process-sharded baseline
+
+Recorded 2026-08-12 on `sun_debug` node `98dci4-clu-3141` (Intel Xeon Gold
+5220), Python 3.14.2 and pytest 9.1.1, with `TMPDIR=/tmp` and JAX on CPU. The
+checkout was a real detached Git worktree at
+`567b5c3b1ed4325e15f0d83a080fc60e0112db8d`. Source files were distributed
+across fresh processes, each invoking
+`uv run --no-sync pytest -m "slow or not slow" <shard paths>`.
+
+| outcome | count |
+|---|---:|
+| passed | **5,657** |
+| failed | **3** |
+| skipped | **107** |
+| xfailed (reported separately) | **4** |
+| total collected outcomes | **5,771** |
+
+**These figures are aggregated across process shards and therefore do not
+attest that the monolithic lane is healthy.** The monolithic process parked in
+`threading.Thread.start()` while `scan_catalog` entered
+`ThreadPoolExecutor.map`; the counting aggregate retains three completed
+source-file shards and divides the native-aborted shard's source files among
+four fresh processes. The full wrapper log, including every shard, the aborted
+attempt and the authoritative reconciliation, is
+`/home/ITER/mcintos/.cache/nova-test-logs/integration-suite-gate-567b5c3b-sharded.log`.
+
+One replacement process set `JAX_COMPILATION_CACHE_DIR` to isolate native cache
+writes. That override invalidated the result of
+`tests/test_biottiledbackend.py::test_a_compiled_kernel_outlives_the_process_that_produced_it`
+by superseding the test-owned cache directory. The result is excluded: the test
+had passed in the original shard before that process later aborted, and it
+passed independently in 37.87 s without the override. The authoritative counts
+above make the corresponding one-failure-to-one-pass correction.
+
+All three counted failures are pre-existing relative to merges `239d3e2b`,
+`b061c090`, `718eddac` and `0f77581d`:
+
+| test id | classification and evidence |
+|---|---|
+| `tests/test_mast_solve_inputs.py::test_each_probe_channel_reads_the_sensor_it_is_mapped_to[15000]` | Pre-existing packaged-registry probe-angle failure; the earlier pre-merge lane names the same ID, and none of the four merges changes this test or its solve-input path. |
+| `tests/test_mast_solve_inputs.py::test_each_probe_channel_reads_the_sensor_it_is_mapped_to[13500]` | Pre-existing packaged-registry probe-angle failure; the earlier pre-merge lane names the same ID, and none of the four merges changes this test or its solve-input path. |
+| `tests/test_equilibrium_forward_reference.py::test_the_passive_closure_moves_the_reproduction_by_a_tenth_of_a_percent` | Pre-existing: an independent real-worktree run at `1dde8487`, the first merge's parent, reproduced the same `internal inductance` assertion (`0.4165026973920516 < 0.15`). |
+
+`tests/test_datasource.py::test_shared_attributes` passed in the real Git
+worktree. Its earlier `InvalidGitRepositoryError` came only from running in a
+Git archive with no GitPython-visible worktree metadata, so that artifact is
+not included in the failure count.

@@ -70,7 +70,7 @@ from nova.imas.mast_vacuum_response import (
 )
 
 REFINED_SEMANTIC_IDENTITY = (
-    "sha256:ec2f7c6015ac4b193e2f9bb4594b2a90e7ff9650bb5566d214c3aec39f179c88"
+    "sha256:8df7a0a6c3f6162dbe0f226660bc069f37de8eb69f0f7c80bbfedc2bd4be220c"
 )
 """Semantic address of the refined revision this worktree authors.
 
@@ -81,10 +81,10 @@ field has changed while the conductor geometry has not, so
 change in either is a fault rather than an update.
 """
 
-PHYSICAL_DIGEST = "ca06c8f64481114f"
+PHYSICAL_DIGEST = "b55c5bb005a2cb67"
 """Conductor geometry the refinement must not disturb."""
 
-REGISTRY_DIGEST = "7083e8029c879310d4b811ecc58f5eefdd40b2bfe01b4a1714b177b03a307366"
+REGISTRY_DIGEST = "2a26cc0a3a22e7fb8f42a53ee4c45e639290f0c5587e5f56405772b007f31bfd"
 """Registry identity the refinement must not disturb."""
 
 DRIVEN_COLUMNS = 21

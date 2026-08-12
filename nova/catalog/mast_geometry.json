@@ -1,6 +1,6 @@
 {
   "configurations": {
-    "ca06c8f64481114f": {
+    "b55c5bb005a2cb67": {
       "authoring_gaps": [
         "active turns, polarity, and circuit topology are not sourced",
         "passive material, resistance, and electrical topology are not sourced",
@@ -763,16 +763,6 @@
             ],
             [
               1.0354,
-              -1.1036,
-              6.28319
-            ],
-            [
-              1.0354,
-              -1.08309,
-              6.28319
-            ],
-            [
-              1.0354,
               -1.08309,
               6.28319
             ],
@@ -789,16 +779,6 @@
             [
               1.163,
               -1.1036,
-              6.28319
-            ],
-            [
-              1.163,
-              -1.1036,
-              6.28319
-            ],
-            [
-              1.163,
-              -1.08259,
               6.28319
             ],
             [
@@ -824,6 +804,16 @@
             [
               1.4001,
               1.16579,
+              6.28319
+            ],
+            [
+              1.4005,
+              -1.15943,
+              6.28319
+            ],
+            [
+              1.4005,
+              -1.14403,
               6.28319
             ],
             [
@@ -864,6 +854,16 @@
             [
               1.593,
               1.05579,
+              6.28319
+            ],
+            [
+              1.5984,
+              -1.06943,
+              6.28319
+            ],
+            [
+              1.5984,
+              -1.04443,
               6.28319
             ],
             [
@@ -7549,7 +7549,7 @@
           ]
         }
       },
-      "physical_digest": "ca06c8f64481114f"
+      "physical_digest": "b55c5bb005a2cb67"
     }
   },
   "dd_version": "4.1.1",
@@ -7703,7 +7703,8 @@
     "source_census_angle_unit": "degree for diagnostic positions and orientations; radian for flux-loop span",
     "source_census_physical_digest": "67f789d3d8b40135",
     "superseded_physical_digests": {
-      "76cf833561e602a7": "recovered before two source-reading corrections: every coil-case plate exchanged its radial and vertical extents about its own centre, and the outboard radial probe family carried the poloidal angle of the axial probe it shares a position with"
+      "76cf833561e602a7": "recovered before two source-reading corrections: every coil-case plate exchanged its radial and vertical extents about its own centre, and the outboard radial probe family carried the poloidal angle of the axial probe it shares a position with",
+      "ca06c8f64481114f": "recovered before four lower-coil flux-loop positions were restored from the reconstruction geometry after the level-2 table repeated another coil's coordinates"
     }
   },
   "ranges": [
@@ -7711,26 +7712,26 @@
       "evidence": "inherited",
       "first_shot": 11695,
       "last_shot": 11765,
-      "physical_digest": "ca06c8f64481114f"
+      "physical_digest": "b55c5bb005a2cb67"
     },
     {
       "evidence": "observed",
       "first_shot": 11766,
       "last_shot": 30471,
-      "physical_digest": "ca06c8f64481114f"
+      "physical_digest": "b55c5bb005a2cb67"
     },
     {
       "evidence": "inherited",
       "first_shot": 30472,
       "last_shot": 30473,
-      "physical_digest": "ca06c8f64481114f"
+      "physical_digest": "b55c5bb005a2cb67"
     }
   ],
-  "registry_digest": "7083e8029c879310d4b811ecc58f5eefdd40b2bfe01b4a1714b177b03a307366",
+  "registry_digest": "2a26cc0a3a22e7fb8f42a53ee4c45e639290f0c5587e5f56405772b007f31bfd",
   "representation_aliases": {
-    "1cb6f2ee742c4ee4": "ca06c8f64481114f",
-    "9425ae4a8bf3bc15": "ca06c8f64481114f",
-    "edd753d282903679": "ca06c8f64481114f"
+    "1cb6f2ee742c4ee4": "b55c5bb005a2cb67",
+    "9425ae4a8bf3bc15": "b55c5bb005a2cb67",
+    "edd753d282903679": "b55c5bb005a2cb67"
   },
   "schema": "nova-machine-geometry-registry",
   "tolerances": {

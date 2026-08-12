@@ -323,9 +323,9 @@ def test_toroidal_field_detail_is_absent_without_blocking_the_forward_model(
 
 
 def test_seeding_leaves_the_physical_identity_untouched(geometry, ledger) -> None:
-    assert physical_digest(dict(geometry)) == "ca06c8f64481114f"
+    assert physical_digest(dict(geometry)) == "b55c5bb005a2cb67"
     assert ledger.records
-    assert physical_digest(dict(geometry)) == "ca06c8f64481114f"
+    assert physical_digest(dict(geometry)) == "b55c5bb005a2cb67"
 
 
 def test_proposed_standard_names_point_at_real_dictionary_paths() -> None:

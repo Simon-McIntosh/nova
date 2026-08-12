@@ -152,13 +152,13 @@ def test_packaged_registry_identity_is_pinned_by_value() -> None:
     registry = MachineGeometryRegistry.default()
     configuration = next(iter(registry.configurations.values()))
 
-    assert configuration.physical_digest == "ca06c8f64481114f"
-    assert physical_digest(dict(configuration.geometry)) == "ca06c8f64481114f"
+    assert configuration.physical_digest == "b55c5bb005a2cb67"
+    assert physical_digest(dict(configuration.geometry)) == "b55c5bb005a2cb67"
     assert registry.registry_digest == (
-        "7083e8029c879310d4b811ecc58f5eefdd40b2bfe01b4a1714b177b03a307366"
+        "2a26cc0a3a22e7fb8f42a53ee4c45e639290f0c5587e5f56405772b007f31bfd"
     )
     assert {shot_range.physical_digest for shot_range in registry.ranges} == {
-        "ca06c8f64481114f"
+        "b55c5bb005a2cb67"
     }
 
 
@@ -167,11 +167,15 @@ def test_registry_records_the_identity_it_replaced() -> None:
 
     superseded = registry.provenance["superseded_physical_digests"]
 
-    assert set(superseded) == {"76cf833561e602a7"}
+    assert set(superseded) == {"76cf833561e602a7", "ca06c8f64481114f"}
     assert "76cf833561e602a7" not in registry.configurations
-    statement = superseded["76cf833561e602a7"]
-    assert "radial and vertical extents" in statement
-    assert "poloidal angle" in statement
+    assert "ca06c8f64481114f" not in registry.configurations
+    source_reading = superseded["76cf833561e602a7"]
+    assert "radial and vertical extents" in source_reading
+    assert "poloidal angle" in source_reading
+    loop_placement = superseded["ca06c8f64481114f"]
+    assert "flux-loop positions" in loop_placement
+    assert "reconstruction geometry" in loop_placement
 
 
 def test_outboard_radial_probes_measure_the_radial_component() -> None:

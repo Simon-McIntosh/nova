@@ -20,9 +20,11 @@
   <title>Vacuum Signature Extraction | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-08">
-<meta name="plan-version" content="3">
-<meta name="plan-impl" content="0.4">
+<meta name="plan-modified" content="2026-08-12">
+<meta name="plan-version" content="4">
+<meta name="plan-impl" content="0.6">
+<meta name="plan-commits" content="e59d976a,e75101ce">
+<meta name="plan-artifacts" content="nova/calibrate/windows.py,nova/calibrate/instrument.py,nova/calibrate/gain_check.py,~/.cache/nova-mast/vacuum-signatures/">
 </head>
 <body>
 <main class="plan-doc">
@@ -163,6 +165,11 @@ Done-when
     </article>
 </section>
 
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-20260812-vse-023" data-who="reckon-ship" data-when="2026-08-12T19:05:00+00:00">
+    <div class="r-comment-body">§2.3 opportunistic gain checks landed — commit e75101ce (merge 6a3d18f2); gate passed. Machine-agnostic kernel in nova/calibrate/gain_check.py opening no store: it takes time, recorded-current arrays, driven windows, channel names and signal/Green-response callbacks, forms the exact prediction as recorded currents times the described response row, and fits through-origin after additive instrument removal. Measure, 7 store-free synthetic cases in the 244-passed calibrate lane: an injected gain of 1.083 recovered within 5e-4 relative with shape agreement above 0.999; an injected x2 scale transition bounded by before_shot 5103 and after_shot 5104 — exactly the pulse at which it was introduced, which is the pulse-number precision this section exists to buy; a both-members gain change 1.0 to 1.2 correctly held in the same response state while the following pulse's single-member change kept gain 1.2, so a pair-state change is separated from a gain change rather than confounded; and scale-only candidate states refused outright as pair-state/gain confounding. Candidate pickup states are selected by current-weighted waveform shape after fitting independent scalar gains, with a 0.05 signal-normalised separation floor. The archive sweep (§2.4) is deliberately not in this node.</div>
+</div>
+</section>
 </main>
 </body>
 </html>

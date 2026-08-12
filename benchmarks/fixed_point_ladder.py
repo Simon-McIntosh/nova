@@ -27,9 +27,11 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+import jax
 import jax.numpy as jnp
 
 from nova.equilibrium import ProfileDegrees, ReconstructProfile
+from nova.equilibrium.connectivity_boundary import traced_smooth_boundary_read
 from nova.equilibrium.measurement import Magnetics
 from nova.equilibrium.fixed_point import anderson, newton_krylov, picard
 
@@ -47,6 +49,65 @@ LABELS = {
 }
 
 NR = NZ = 17
+
+
+def measure_binding_search(evaluations: int = 6) -> dict[str, float | int | bool]:
+    """Time cold and state-threaded reads on one smooth sweep trajectory."""
+    rg = jnp.linspace(0.2, 1.8, 33)
+    zg = jnp.linspace(-1.1, 1.1, 41)
+    rr, zz = jnp.meshgrid(rg, zg)
+    inside = ((rr - 1.0) / 0.7) ** 2 + (zz / 1.0) ** 2 <= 1.0
+    base = jnp.exp(-(((rr - 1.0) ** 2 + zz**2) / 0.3**2))
+    fields = [
+        base * (1.0 + 2.0e-4 * index * (zz + 0.4)) for index in range(evaluations)
+    ]
+
+    def read(field, previous):
+        return traced_smooth_boundary_read(
+            field,
+            rg,
+            zg,
+            inside,
+            jnp.asarray(1.0),
+            jnp.asarray(0.0),
+            48,
+            10,
+            16,
+            previous_flood_level=previous,
+        )
+
+    cold_seed = read(fields[0], jnp.asarray(jnp.nan))
+    jax.block_until_ready(cold_seed)
+    warm_seed = read(fields[0], cold_seed["s_flood"])
+    jax.block_until_ready(warm_seed)
+
+    start = time.perf_counter()
+    cold = [read(field, jnp.asarray(jnp.nan)) for field in fields]
+    jax.block_until_ready(cold)
+    cold_seconds = time.perf_counter() - start
+
+    start = time.perf_counter()
+    warm = []
+    previous = cold_seed["s_flood"]
+    for field in fields:
+        result = read(field, previous)
+        warm.append(result)
+        previous = result["s_flood"]
+    jax.block_until_ready(warm)
+    warm_seconds = time.perf_counter() - start
+
+    cold_levels = np.asarray([result["s_flood"] for result in cold])
+    warm_levels = np.asarray([result["s_flood"] for result in warm])
+    exact_equal = bool(np.array_equal(cold_levels, warm_levels))
+    warm_hits = int(sum(bool(result["binding_search_warm"]) for result in warm))
+    return {
+        "evaluations": evaluations,
+        "warm_hits": warm_hits,
+        "exact_equal": exact_equal,
+        "cold_seconds_per_evaluation": cold_seconds / evaluations,
+        "warm_seconds_per_evaluation": warm_seconds / evaluations,
+        "speedup": cold_seconds / warm_seconds,
+    }
 
 
 def build_machine(degrees: ProfileDegrees) -> ReconstructProfile:
@@ -162,6 +223,9 @@ def main() -> int:
     OUTPUT.mkdir(parents=True, exist_ok=True)
     start = time.time()
 
+    binding_search = measure_binding_search()
+    print("binding search", json.dumps(binding_search, indent=2))
+
     slices = []
     # benign wells x plasma current, and the shallow-well family
     for coil in (-6.0e3, -1.0e4, -1.4e4, -2.0e3, -4.0e3):
@@ -255,6 +319,7 @@ def main() -> int:
             for name in COLORS
         },
         "damping": damping,
+        "binding_search": binding_search,
         "wall_seconds": time.time() - start,
     }
     print(json.dumps({k: v for k, v in summary.items() if k != "damping"}, indent=2))

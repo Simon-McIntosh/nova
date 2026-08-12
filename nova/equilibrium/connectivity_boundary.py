@@ -133,6 +133,11 @@ _X_FLUX_BAND = 0.05
 #: ψ_N tolerance for an X-point to be reported as sitting ON the boundary ring.
 _X_ON_RING_U = 0.02
 
+# Coarse-grid offsets probed around the preceding binding level.  The asymmetric
+# upper reach covers both sides of the two-sided flood mean while retaining the
+# exact grid points used by the cold sweep.
+_WARM_BRACKET_OFFSETS = (-2, -1, 0, 1, 2, 3)
+
 __all__ = [
     "ConnectivityBoundary",
     "traced_boundary_read",
@@ -225,6 +230,7 @@ def _read_ingredients(
     wall_r,
     wall_z,
     wall_psi,
+    previous_flood_level,
 ) -> dict:
     """Everything the binding needs, up to (but not including) the min/softmin.
 
@@ -283,28 +289,93 @@ def _read_ingredients(
         alive = region.reshape(-1)[seed_flat] > 0.5
         return region, alive
 
-    def valid_inner(s):
+    def validity(s):
         region, alive = _alive_region(s)
-        touch = jnp.sum(region * wall_ring.astype(region.dtype)) > 0.5
-        return alive & (~touch)
+        inner_touch = jnp.sum(region * wall_ring.astype(region.dtype)) > 0.5
+        reach = _dilate4(region > 0.5) & outside & (u <= s)
+        outer_touch = jnp.sum(reach.astype(region.dtype)) > 0.5
+        return alive & (~inner_touch), alive & (~outer_touch)
+
+    def valid_inner(s):
+        return validity(s)[0]
 
     def valid_outer(s):
-        region, alive = _alive_region(s)
-        reach = _dilate4(region > 0.5) & outside & (u <= s)
-        touch = jnp.sum(reach.astype(region.dtype)) > 0.5
-        return alive & (~touch)
+        return validity(s)[1]
 
     s_grid = jnp.linspace(0.0, 1.0, n_levels + 1)[1:]  # (n_levels,) in (0, 1]
-    idxs = jnp.arange(n_levels)
+    idxs = jnp.arange(n_levels, dtype=jnp.int32)
 
-    def _bracket(valid_fn):
-        vk = jax.vmap(valid_fn)(s_grid)
+    def _bracket_from_grid(vk):
         last = jnp.max(jnp.where(vk, idxs, -1))
         lo0 = jnp.where(last >= 0, s_grid[jnp.clip(last, 0, n_levels - 1)], 0.0)
         hi0 = jnp.where(
             last < n_levels - 1, s_grid[jnp.clip(last + 1, 0, n_levels - 1)], 1.0
         )
         return last, lo0, hi0
+
+    def _cold_brackets(_):
+        valid_inner_grid, valid_outer_grid = jax.vmap(validity)(s_grid)
+        inner = _bracket_from_grid(valid_inner_grid)
+        outer = _bracket_from_grid(valid_outer_grid)
+        return (
+            *inner,
+            *outer,
+            jnp.asarray(False),
+            jnp.asarray(n_levels, dtype=jnp.int32),
+        )
+
+    def _warm_brackets(previous_level):
+        offsets = jnp.asarray(_WARM_BRACKET_OFFSETS, dtype=jnp.int32)
+        centre = jnp.floor(previous_level * n_levels).astype(jnp.int32)
+        level_numbers = centre + offsets
+        active = (level_numbers >= 1) & (level_numbers <= n_levels)
+        safe_numbers = jnp.clip(level_numbers, 1, n_levels)
+        levels = s_grid[safe_numbers - 1]
+        valid_inner_local, valid_outer_local = jax.vmap(validity)(levels)
+
+        def local_bracket(valid_local):
+            valid_local = valid_local & active
+            last_number = jnp.max(jnp.where(valid_local, level_numbers, 0))
+            last = last_number - 1
+            lo0 = jnp.where(
+                last_number > 0,
+                s_grid[jnp.clip(last, 0, n_levels - 1)],
+                0.0,
+            )
+            hi_number = jnp.where(last_number > 0, last_number + 1, 1)
+            hi0 = jnp.where(
+                last_number >= n_levels,
+                1.0,
+                s_grid[jnp.clip(hi_number - 1, 0, n_levels - 1)],
+            )
+            lower_known = (last_number > 0) | jnp.any(active & (level_numbers == 1))
+            upper_known = (last_number >= n_levels) | jnp.any(
+                active & (level_numbers == hi_number) & (~valid_local)
+            )
+            return last, lo0, hi0, lower_known & upper_known
+
+        inner = local_bracket(valid_inner_local)
+        outer = local_bracket(valid_outer_local)
+        warm_hit = inner[3] & outer[3]
+
+        def use_warm(_):
+            return (
+                inner[0],
+                inner[1],
+                inner[2],
+                outer[0],
+                outer[1],
+                outer[2],
+                jnp.asarray(True),
+                jnp.asarray(len(_WARM_BRACKET_OFFSETS), dtype=jnp.int32),
+            )
+
+        def use_cold(_):
+            cold = _cold_brackets(None)
+            extra = jnp.asarray(len(_WARM_BRACKET_OFFSETS), dtype=jnp.int32)
+            return (*cold[:-1], cold[-1] + extra)
+
+        return jax.lax.cond(warm_hit, use_warm, use_cold, operand=None)
 
     def _refine(valid_fn, lo0, hi0):
         def body(_i, carry):
@@ -316,8 +387,21 @@ def _read_ingredients(
         lo, _hi = jax.lax.fori_loop(0, n_bisect, body, (lo0, hi0))
         return lo
 
-    last_in, lo_in, hi_in = _bracket(valid_inner)
-    _last_out, lo_out, hi_out = _bracket(valid_outer)
+    (
+        last_in,
+        lo_in,
+        hi_in,
+        _last_out,
+        lo_out,
+        hi_out,
+        binding_search_warm,
+        binding_search_evaluations,
+    ) = jax.lax.cond(
+        jnp.isfinite(previous_flood_level),
+        _warm_brackets,
+        _cold_brackets,
+        operand=previous_flood_level,
+    )
     found = last_in >= 0
     s_in = _refine(valid_inner, lo_in, hi_in)
     s_out = _refine(valid_outer, lo_out, hi_out)
@@ -415,6 +499,8 @@ def _read_ingredients(
         "u": u,
         "found": found,
         "s_flood": s_flood,
+        "binding_search_warm": binding_search_warm,
+        "binding_search_evaluations": binding_search_evaluations,
         "u_wall_c": u_wall_c,
         "u_x_c": u_x_c,
         "x_bind_valid": x_bind_valid,
@@ -445,6 +531,7 @@ def traced_boundary_read(
     wall_r: jnp.ndarray | None = None,
     wall_z: jnp.ndarray | None = None,
     wall_psi: jnp.ndarray | None = None,
+    previous_flood_level=jnp.nan,
 ) -> dict:
     """Connectivity LCFS read from ψ — the device-native ``lcfs_contour``.
 
@@ -479,6 +566,7 @@ def traced_boundary_read(
         wall_r,
         wall_z,
         wall_psi,
+        previous_flood_level,
     )
     n_iter = ing["n_iter"]
     seed = ing["seed"]
@@ -565,6 +653,9 @@ def traced_boundary_read(
         "psi_bnd": jnp.where(found, psi_bnd, jnp.nan),
         "psi_lcfs": jnp.where(found, psi_lcfs, jnp.nan),
         "s_star": jnp.where(found, s_star, jnp.nan),
+        "s_flood": jnp.where(found, s_flood, jnp.nan),
+        "binding_search_warm": ing["binding_search_warm"],
+        "binding_search_evaluations": ing["binding_search_evaluations"],
         "radii": jnp.where(found, radii, jnp.nan),
         "n_core_cells": n_core,
         # classify-after diagnostics (never feed ψ_N)
@@ -617,6 +708,7 @@ def traced_smooth_boundary_read(
     wall_z: jnp.ndarray | None = None,
     wall_psi: jnp.ndarray | None = None,
     temperature=0.01,
+    previous_flood_level=jnp.nan,
 ) -> dict:
     """The SMOOTH connectivity boundary read — the end-to-end differentiable path.
 
@@ -663,6 +755,7 @@ def traced_smooth_boundary_read(
         wall_r,
         wall_z,
         wall_psi,
+        previous_flood_level,
     )
     tau = temperature
     psi_axis = ing["psi_axis"]
@@ -715,6 +808,9 @@ def traced_smooth_boundary_read(
         "psi_bnd": jnp.where(found, psi_bnd, jnp.nan),
         "psi_lcfs": jnp.where(found, psi_lcfs, jnp.nan),
         "s_soft": jnp.where(found, s_soft, jnp.nan),
+        "s_flood": jnp.where(found, s_flood, jnp.nan),
+        "binding_search_warm": ing["binding_search_warm"],
+        "binding_search_evaluations": ing["binding_search_evaluations"],
         "radii": jnp.where(found, radii, jnp.nan),
         "core_weight": core_weight,
         "n_core_soft": n_core_soft,

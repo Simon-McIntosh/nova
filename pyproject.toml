@@ -69,10 +69,8 @@ fenics = ["gmsh>=4.12", "pygmsh>=7.1"]
 interchange = ["openpyxl>=3.1.5", "pandas>=2.2"]
 mast = ["intake>=2", "scikit-learn>=1.5"]
 naka = ["beautifulsoup4>=4.12", "mechanize>=0.4"]
-jax = [
-  "jax[cuda12]>=0.5; sys_platform == 'linux'",
-  "jax>=0.5; sys_platform != 'linux'",
-]
+jax = ["jax>=0.5"]
+gpu = ["jax[cuda12]>=0.5; sys_platform == 'linux'"]
 matplotlib = ["matplotlib>=3.10", "seaborn>=0.13"]
 numba = ["numba>=0.61"]
 # LinkML authoring toolchain: generates the Pydantic models and the JSON-Schema
@@ -80,7 +78,7 @@ numba = ["numba>=0.61"]
 # reading a correction document needs none of this.
 schema = ["linkml>=1.9"]
 test = [
-  "jax>=0.5",
+  "nova-stella[jax]",
   "matplotlib>=3.10",
   "meshio>=5.3.4",
   "networkx",

@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-title" content="Nova Runtime Dependency Surface">
 <meta name="plan-summary" content="Declare what nova actually needs to import: separate the plain JAX runtime the equilibrium package requires from the CUDA build that only GPU hosts want, so no install pulls CUDA it cannot use and no environment is missing a dependency the code imports unconditionally">
-<meta name="plan-status" content="active">
+<meta name="plan-status" content="shipped">
 <meta name="plan-roi" content="mid">
 <meta name="plan-effort" content="S">
 <meta name="plan-sprint" content="S7">
@@ -20,7 +20,10 @@
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="general">
 <meta name="plan-capability-verification" content="strict">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
+<meta name="plan-commits" content="b3e410c7">
+<meta name="plan-artifacts" content="docs/evidence/archive/nova-runtime-dependencies-landed.html">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
 <main class="plan-doc">
@@ -68,6 +71,19 @@
     CPU host and the equilibrium suite passes; <code>--extra gpu</code> is what selects the CUDA
     build; no extra pins JAX twice; the installed jaxlib variant is reported for both compositions.</p>
 
+<section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-nrd-001" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-12" data-recommends-skill="/reckon-ship mast-catalog-gpu-solve" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Declare the GPU extra where the H200 lane installs from</h4>
+    <div class="r-fu-body"><p>The gpu extra now exists but nothing yet selects it: the H200 lane and any CUDA-enabled worker environment still install through whatever composition they used before, so a device run can silently land on the CPU jaxlib — which is exactly what made three of this sprint's speedup figures CPU-only. Point the GPU install path at --extra gpu and record the resolved jaxlib variant, so a device claim is verifiable from the environment rather than assumed. Owned by the catalog plan because that is where the device lane is defined.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship mast-catalog-gpu-solve</pre>
+    </article>
+</section>
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-20260812-jaxextras" data-who="reckon-ship" data-when="2026-08-12T19:20:00+00:00">
+    <div class="r-comment-body">jax-runtime-extras landed — commit b3e410c7; resolution gate passed; measure: --extra test resolves jax==0.11.0 and jaxlib==0.11.0 with 0 CUDA-specific distributions, --extra gpu adds jax-cuda12-plugin and jax-cuda12-pjrt for 15 CUDA-specific distributions; uv lock --check resolved 292 packages; under CUDA_VISIBLE_DEVICES='' and JAX_PLATFORMS=cpu the test composition imported nova.equilibrium.fixed_point and passed 9/9 in 14.09 s; test declares nova-stella[jax] with zero direct JAX pins. Artifacts: /nova/evidence/archive/nova-runtime-dependencies-landed#resolution</div>
+</div>
+</section>
 </main>
 </body>
 </html>

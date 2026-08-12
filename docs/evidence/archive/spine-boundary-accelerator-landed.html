@@ -106,6 +106,52 @@
   so 1.72× is a CPU-specific figure and not a GPU throughput claim.
   Harness: <code>measure_binding_search()</code> in <code>benchmarks/fixed_point_ladder.py</code>.</p>
 
+  <h3 id="coarse-read">Coarse-resolution iteration read</h3>
+
+  <p>Commit <code>ed5ed052</code>, merged to <code>main</code>. The boundary push now iterates on an
+  edge-preserving stride-2 read that restores the smooth core weight to the solve grid, while
+  <code>traced_emit_boundary_read</code> remains the calibrated full-resolution read taken only at
+  emit.</p>
+
+  <p><strong>Equivalence holds where it is contractual, and the iterate is where it does not.</strong>
+  The emitted <code>psi_axis</code>, <code>psi_bnd</code>, <code>s_soft</code>, radii and
+  <code>core_weight</code> reproduce the full-resolution reference to <em>exact array equality</em>.
+  The coarse iterate itself does not, and the difference is large rather than marginal: a maximum
+  boundary-flux difference of <strong>3.39×10⁻³ of the field span</strong> and a maximum cellwise
+  core-weight difference of <strong>0.985</strong>. Both are reported here at magnitude rather than
+  absorbed into a tolerance, because the second number deserves to be read directly.</p>
+
+  <p><strong>What that pairing means.</strong> A near-unity cellwise core-weight difference during
+  iteration alongside a bit-exact emitted result says the fixed point is insensitive to the read
+  resolution used to reach it — the coarse read moves the path, not the destination. That is the
+  property the removal relies on, and it is a stronger claim than a small iterate difference would
+  have been, because it is demonstrated at a difference large enough that agreement could not be
+  coincidental. It also marks the limit of the evidence: the guarantee is on the emitted quantities
+  under the pins exercised here, not a proof that no configuration can converge elsewhere.</p>
+
+  <h3 id="combined">The three removals together</h3>
+
+  <table>
+    <thead><tr><th>Measure</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>Reference seconds per evaluation</td><td>8.821×10⁻³</td></tr>
+      <tr><td>Accelerated seconds per evaluation</td><td>1.514×10⁻³</td></tr>
+      <tr><td><strong>Combined speedup</strong></td><td><strong>5.82×</strong></td></tr>
+      <tr><td>Emitted result</td><td>exact</td></tr>
+      <tr><td>Behaviour pins</td><td>20 passed, unchanged</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>The ≥5× removal path the plan carried from the ambix measurement is met at 5.82×</strong>
+  — coarse-resolution read, warm bracket and doubling fill compounded, measured by
+  <code>measure_topology_read_removals()</code> over 4 post-compilation evaluations. Since the read
+  was about 99.7% of every map evaluation, this is close to a 5.8× reduction in the cost of the map
+  itself.</p>
+
+  <p>Measured on JAX <code>cpu:0</code>. The environment saw an NVIDIA GPU but carried no
+  CUDA-enabled jaxlib, so this is a CPU per-evaluation result and explicitly not an H200 throughput
+  claim; device laddering belongs to <code>mast-catalog-gpu-solve</code>.</p>
+
   <h2 id="hex-stencil">§2 item 4 — stationary points on the hex rings</h2>
 
   <p>Commit <code>254ed6fb</code>, merged to <code>main</code>.

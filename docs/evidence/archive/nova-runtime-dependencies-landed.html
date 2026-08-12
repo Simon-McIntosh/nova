@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="nova-runtime-dependencies-landed">
+  <meta name="plan-title" content="Nova Runtime Dependencies — Cumulative Evidence">
+  <meta name="plan-summary" content="Landed record of the JAX extra split: the resolved distribution sets for the test and gpu compositions, counted rather than asserted">
+  <meta name="plan-status" content="active">
+  <meta name="plan-evidence-for" content="nova-runtime-dependencies">
+  <meta name="plan-verifies" content="nova-runtime-dependencies#s2">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>Nova Runtime Dependencies — Cumulative Evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+
+  <p>Execution record for <a href="/nova/nova-runtime-dependencies.html">nova-runtime-dependencies</a>.</p>
+
+  <h2 id="extra-split">§2 — the three extras</h2>
+
+  <p>Commit <code>b3e410c7</code>, merged to <code>main</code>. Eight lines of
+  <code>pyproject.toml</code> and a lock refresh.</p>
+
+  <table>
+    <thead><tr><th>Extra</th><th>Declares</th></tr></thead>
+    <tbody>
+      <tr><td><code>jax</code></td><td><code>jax&gt;=0.5</code> — one portable pin, no CUDA</td></tr>
+      <tr><td><code>gpu</code></td><td><code>jax[cuda12]&gt;=0.5</code> on linux, and nothing else</td></tr>
+      <tr><td><code>test</code></td><td><code>nova-stella[jax]</code> — zero direct JAX pins</td></tr>
+    </tbody>
+  </table>
+
+  <h3 id="resolution">What each composition actually resolves</h3>
+
+  <p><strong>The claim is counted, not asserted.</strong> Both compositions were exported and their
+  distributions counted, which is the only way to show a negative like "no CUDA wheels":</p>
+
+  <table>
+    <thead><tr><th>Composition</th><th>JAX distributions</th><th>CUDA-specific distributions</th></tr></thead>
+    <tbody>
+      <tr><td><code>--extra test</code></td><td><code>jax==0.11.0</code>, <code>jaxlib==0.11.0</code></td><td><strong>0</strong></td></tr>
+      <tr><td><code>--extra gpu</code></td><td>the same two, plus <code>jax-cuda12-plugin</code> and <code>jax-cuda12-pjrt</code></td><td><strong>15</strong></td></tr>
+    </tbody>
+  </table>
+
+  <p><code>uv lock --check</code> resolved 292 packages and passed. Under
+  <code>CUDA_VISIBLE_DEVICES=''</code> and <code>JAX_PLATFORMS=cpu</code>, the
+  <code>--extra test</code> environment imported <code>nova.equilibrium.fixed_point</code> and passed
+  9 of 9 tests in 14.09&nbsp;s — so the extra that carries no CUDA still carries enough to import the
+  spine, which was the whole point.</p>
+
+  <p><strong>The <code>test</code> extra keeps working unchanged.</strong> Every existing
+  <code>uv run --extra test</code> invocation still resolves JAX, now transitively through
+  <code>nova-stella[jax]</code> rather than through a second copy of the pin. That mattered: the
+  duplicate pin was the only reason the test lane had JAX at all, and deleting it outright would
+  have reproduced the environment failure that prompted this work.</p>
+
+  <p>JAX remains out of <code>[project.dependencies]</code>. A bare <code>import nova</code> and the
+  frame, biot and IMAS surfaces do not need it, so declaring it globally would have replaced one
+  inaccurate declaration with another.</p>
+
+</main></body>
+</html>

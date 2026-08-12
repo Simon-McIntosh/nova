@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="spine-boundary-accelerator">
   <meta name="plan-title" content="Spine Boundary Push and Solve Acceleration">
   <meta name="plan-summary" content="Make the differentiable LCFS boundary push the pinned, accelerated core of the nova spine: re-bank the unported behaviour tests, promote the exact-tangent Newton-Krylov and Anderson machinery into the package, remove the topology-read wall, and generalise the stationary-point stencil to nova&#x27;s native hex rings">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
   <meta name="plan-capability-version" content="1.0">
@@ -23,9 +23,9 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-12">
 <meta name="plan-supersedes" content="imas-ambix:batched-newton-accelerator">
-<meta name="plan-version" content="11">
-<meta name="plan-impl" content="0.833">
-<meta name="plan-commits" content="232cf5fa,254ed6fb,f5feee0a">
+<meta name="plan-version" content="13">
+<meta name="plan-impl" content="1.0">
+<meta name="plan-commits" content="232cf5fa,254ed6fb,f5feee0a,ed5ed052">
 <meta name="plan-artifacts" content="benchmarks/flux_surface_flood.py,benchmarks/fixed_point_ladder.py,docs/evidence/archive/spine-boundary-accelerator-landed.html">
 </head>
 <body>
@@ -92,7 +92,19 @@
       the accelerator-primary decision weighs.</figcaption>
     </figure>
 
-    <h2 id="s2">§2 — Work items <span class="badge badge-shipped">items 1–2 ✓ landed 2026-08-08</span></h2>
+    <h2 id="s2">§2 — Work items <span class="badge badge-shipped">✓ landed 2026-08-12</span></h2>
+    <p class="landed-summary"><strong>All items landed; the plan is complete.</strong> The three
+    read-wall removals each cleared their own equivalence check and compound to
+    <strong>5.82×</strong> per map evaluation (8.821→1.514 ms), meeting the ≥5× path carried from
+    ambix: doubling flood fill exact-equal in 2 steps against 162/322 forced iterations, warm-started
+    binding search exact even on a forced bracket miss, and a coarse iteration read whose emitted
+    values are bit-identical despite a 0.985 cellwise iterate difference — the fixed point is
+    insensitive to the resolution used to reach it. <code>ring_sign_changes</code> now takes a
+    stencil array and consumes the hex <code>(1,7)</code> ring at fit rank 6, condition 5.47, raster
+    default unchanged. 20 behaviour pins green throughout (commits <code>232cf5fa</code>,
+    <code>f5feee0a</code>, <code>ed5ed052</code>, <code>254ed6fb</code>; JAX cpu:0 — device
+    laddering belongs to <code>mast-catalog-gpu-solve</code>). Full record:
+    <a href="/nova/evidence/archive/spine-boundary-accelerator-landed">cumulative evidence</a>.</p>
     <p class="landed-summary"><strong>Items 1–2 landed</strong> (commits <code>a6a8dfc8</code>,
     <code>68be04a0</code>, <code>68e0dd5f</code>): the five behaviour pins re-banked against
     synthetic truth (wall tangency to 5e-17 of span, saddle flux to 3e-6, transition continuity
@@ -228,10 +240,11 @@ Done-when
   3. Full suite green; followup for §2 items 3-5 written; this one resolved.</pre>
     <p class="r-fu-outcome">Landed in a6a8dfc8 (behaviour pins + Topology.boundary shadow-rule fix), 68be04a0 (nova.jax.fixed_point NK/Anderson/Picard + least_squares_map seam + profile_relaxation + solved-axis fix), 68e0dd5f (budget ladder + fixed-shape degradation branch). Pins: exact wall tangency to 5e-17 of span, saddle flux to 3e-6, transition continuity 0.005 vs classify-first 0.077, Lipschitz max 0.014, zero mid-band X-slot flips; Topology.boundary latent defect found and fixed (any finite x-point stole the binding from a confined-most wall tangency). Ladder: NK/Anderson median 6e-14 vs Picard 7e-10 at 40 evaluations; both decisions locked (nk-jvp; implicit-fit, retiring the item-5 KKT lift).</p>
     </article>
-<article class="r-fu" data-id="f-sba-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-08" data-recommends-skill="/reckon-ship spine-boundary-accelerator §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-sba-002" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-08" data-recommends-skill="/reckon-ship spine-boundary-accelerator §2" data-resolved-at="2026-08-12T18:30:31+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Remove the read wall and generalise the stencil (§2 items 3-4)</h4>
     <div class="r-fu-body"><p>The accelerators are in and pinned; the remaining wall is the topology read itself (~99.7% of every map evaluation). Land the three read-cost removals with read-equivalence checks, then parameterise ring_sign_changes on a stencil array for nova's hex rings. Item 5 (coupled KKT state) is retired by the implicit-fit decision.</p></div>
     <pre class="r-fu-prompt">/reckon-ship spine-boundary-accelerator §2</pre>
+    <p class="r-fu-outcome">done — no followup. All of §2 items 3-4 landed and the plan is complete (item 5 retired by the implicit-fit lock). Three read removals, each with its own equivalence check: doubling flood fill exact-equal in 2 steps vs 162/322 forced iterations (2.26x, 5.19x); warm-started binding search exact including on a forced bracket miss (1.72x from an 8x work reduction, locating the residual cost outside the level sweep); coarse iteration read with exact emitted values against a 0.985 cellwise iterate difference. Combined 5.82x per evaluation on JAX cpu:0, meeting the &gt;=5x target. ring_sign_changes now takes a stencil array and consumes the (1,7) hex ring at fit rank 6, condition 5.47, raster default unchanged. 20 behaviour pins green throughout. Commits 232cf5fa, f5feee0a, ed5ed052, 254ed6fb. Evidence: /nova/evidence/archive/spine-boundary-accelerator-landed. The chain closes here: the successor work is spine-efit-parity, which is its own plan with its own lifecycle and is surfaced by roadmap; this plan carries no residual work of its own. Device laddering belongs to mast-catalog-gpu-solve.</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -243,6 +256,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260812-binding" data-who="reckon-ship" data-when="2026-08-12T18:20:00+00:00">
     <div class="r-comment-body">binding-search-warm-start landed — commit f5feee0a; read-equivalence gate passed; measure: limited and diverted fixtures reproduce the cold s_flood to exact array equality and a FORCED bracket miss reproduces it exactly too, so a miss costs correctness nothing; cold 4.855e-03 s/eval vs warm 2.821e-03 s/eval, speedup 1.72x, 6 search evaluations on a warm hit against 48 cold levels, 6/6 warm hits. All 20 connectivity and topology behaviour pins green. Note the gap: an 8x reduction in search work returns only 1.72x in time, so fixed per-evaluation overhead now dominates and further shrinking the level sweep has little left to win. JAX cpu:0 — not a GPU claim. Artifacts: /nova/evidence/archive/spine-boundary-accelerator-landed#binding-search</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260812-coarse" data-who="reckon-ship" data-when="2026-08-12T19:05:00+00:00">
+    <div class="r-comment-body">coarser-iteration-read landed — commit ed5ed052; read-equivalence gate passed; measure: emitted psi_axis, psi_bnd, s_soft, radii and core_weight reproduce the full-resolution reference to EXACT array equality, while the coarse iterate differs by up to 3.39e-03 of the field span in boundary flux and 0.985 cellwise in core weight, reported at magnitude rather than absorbed. Combined across all three removals: 8.821e-03 -&gt; 1.514e-03 s/eval, speedup 5.82x, meeting the &gt;=5x path the plan carried from the ambix measurement; 20 behaviour pins green. JAX cpu:0, not a GPU claim. The large iterate difference beside a bit-exact emit is the substantive finding: the fixed point is insensitive to the read resolution used to reach it. Artifacts: /nova/evidence/archive/spine-boundary-accelerator-landed#combined</div>
 </div>
 </section>
 </main>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-12T20:26:00",
+  "updated": "2026-08-12T20:31:34",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -15,7 +15,7 @@
         "id": "corner-pole",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "019ff724-6bb1-7840-ace7-aa6230408cf8",
         "created": "2026-08-12"
       },
       {
@@ -37,6 +37,13 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "019ff706-9a2b-7243-97f3-9e101baa0562",
+        "created": "2026-08-12"
+      },
+      {
+        "id": "gate-packet",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
         "created": "2026-08-12"
       },
       {
@@ -64,7 +71,7 @@
         "id": "integration-gate",
         "harness": "claude",
         "role": "implement",
-        "session_id": null,
+        "session_id": "019ff724-7bb4-7270-836c-b0c7c9e7f7cc",
         "created": "2026-08-12"
       },
       {
@@ -78,7 +85,7 @@
         "id": "packaging",
         "harness": "claude",
         "role": "implement",
-        "session_id": null,
+        "session_id": "019ff724-5f93-7e50-8eac-d19fff817e40",
         "created": "2026-08-12"
       },
       {
@@ -93,6 +100,13 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "019ff707-7544-7222-90a7-21b1f9f0024b",
+        "created": "2026-08-12"
+      },
+      {
+        "id": "registry",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
         "created": "2026-08-12"
       },
       {
@@ -467,9 +481,165 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260812T180256407658-coarser-iteration-read",
+        "plan": "spine-boundary-accelerator",
+        "section": "\u00a72",
+        "node": "coarser-iteration-read",
+        "role": "implement",
+        "member": "read-wall",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-12T18:02:58Z",
+        "completed_at": "2026-08-12T18:15:32Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 754,
+        "time_budget": "25m",
+        "base_sha": "567b5c3b1ed4325e15f0d83a080fc60e0112db8d",
+        "commits": [
+          "ed5ed052"
+        ],
+        "changed_lines": {
+          "added": 301,
+          "removed": 9,
+          "files": 3
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/653c361a-8c6e-405b-9035-eb21e04233a8/scratchpad/coarser-iteration-read-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff707-7544-7222-90a7-21b1f9f0024b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 11234816,
+            "input_tokens": 11710424,
+            "output_tokens": 36618,
+            "reasoning_output_tokens": 13690
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260812T180301056003-jax-runtime-extras",
+        "plan": "nova-runtime-dependencies",
+        "section": "\u00a72",
+        "node": "jax-runtime-extras",
+        "role": "implement",
+        "member": "packaging",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-12T18:03:03Z",
+        "completed_at": "2026-08-12T18:13:28Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 625,
+        "time_budget": "25m",
+        "base_sha": "567b5c3b1ed4325e15f0d83a080fc60e0112db8d",
+        "commits": [
+          "b3e410c7163b84c3c70b759a5c65a9f73d45c1dc"
+        ],
+        "changed_lines": {
+          "added": 9,
+          "removed": 9,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/653c361a-8c6e-405b-9035-eb21e04233a8/scratchpad/jax-runtime-extras-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff724-5f93-7e50-8eac-d19fff817e40",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 2506496,
+            "input_tokens": 2597474,
+            "output_tokens": 12428,
+            "reasoning_output_tokens": 5754
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260812T173122886803-harmonics-verify",
+        "plan": "mast-misfit-toroidal-harmonics",
+        "section": "\u00a72",
+        "node": "harmonics-verify",
+        "role": "implement",
+        "member": "harmonics",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-12T17:31:24Z",
+        "completed_at": "2026-08-12T18:28:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3414,
+        "time_budget": "45m",
+        "base_sha": "5b10f00597465fc38e577c2fdc6799604cc09f3b",
+        "commits": [
+          "ae037f69"
+        ],
+        "changed_lines": {
+          "added": 0,
+          "removed": 0,
+          "files": 0
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/0738e6b1-3bc0-4082-a69e-59214ef05a7c/scratchpad/harmonics-verify-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff707-6400-7580-8da2-e2a75d8896fe",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 7291904,
+            "input_tokens": 7570697,
+            "output_tokens": 25971,
+            "reasoning_output_tokens": 9821
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 30
+    "_version": 38
   }
 }

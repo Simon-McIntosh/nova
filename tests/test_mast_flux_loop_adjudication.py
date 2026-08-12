@@ -29,9 +29,14 @@ from nova.imas.mast_flux_loop_adjudication import (
     MIRROR_TOLERANCE,
     SEPARATION_MARGIN,
     CandidateFit,
+    LoopAdjudicationError,
+    LoopGainDisposition,
+    LoopGainVerdict,
     LoopComparison,
     LoopDisposition,
     LoopShotResidual,
+    admitted_loop_response,
+    admitted_loop_targets,
     build_ledger,
     described_loop_positions,
     dispose,
@@ -40,13 +45,31 @@ from nova.imas.mast_flux_loop_adjudication import (
     mirror_pairs,
 )
 from nova.imas.mast_solve_inputs import reconstruction_loop_rows
-from nova.imas.mast_vacuum_response import ResponseError
+from nova.imas.mast_vacuum_response import ResponseError, current_space_resolution
 
 REPRESENTATIVE_SHOT = 11766
 """Registry selection the loop tables are read from."""
 
 SCATTER = 1.0e-4
 """Webers of quiescent scatter the synthetic channels are given."""
+
+
+def gain_verdict(channel: str, gain: float = 1.0) -> LoopGainVerdict:
+    """Build a steady loop verdict for inversion-admission tests."""
+
+    return LoopGainVerdict(
+        channel=channel,
+        gain=gain,
+        standard_error=0.001,
+        shot_count=100,
+        block_count=1,
+        block_span=1.0,
+        archive_gain=1.0,
+        shape_agreement=0.99,
+        described=True,
+        reference=1.0,
+        archive_reference=1.0,
+    )
 
 
 @pytest.fixture(scope="module")
@@ -443,3 +466,88 @@ def test_the_ledger_record_round_trips_through_json(geometry):
     record = ledger.as_dict()
     assert json.loads(json.dumps(record, sort_keys=True)) == record
     assert record["decision_margin"] == DECISION_MARGIN
+
+
+# --- admission to the current inversion --------------------------------
+
+
+def test_only_as_published_verdicts_enter_the_loop_inversion():
+    """Excluded channels stay out while a reconstruction-only pose stays visible."""
+
+    admitted = gain_verdict("fl_p4l_1")
+    reconstruction_only = gain_verdict("fl_p6u_1")
+    excluded = gain_verdict("fl_p2u_1", gain=1.2)
+    assert admitted.disposition is LoopGainDisposition.ADMITTED
+    assert reconstruction_only.disposition is LoopGainDisposition.ADMITTED
+    assert excluded.disposition is LoopGainDisposition.EXCLUDED
+
+    targets = admitted_loop_targets(
+        [excluded, reconstruction_only, admitted],
+        {
+            "fl_p2u_1": (0.45, 1.58, True),
+            "fl_p4l_1": (1.60, -1.04, True),
+            "fl_p6u_1": (1.40, 0.89, False),
+        },
+        {
+            "fl_p2u_1": SCATTER,
+            "fl_p4l_1": 2.0 * SCATTER,
+            "fl_p6u_1": 3.0 * SCATTER,
+        },
+    )
+    assert [target.channel for target in targets] == ["fl_p4l_1", "fl_p6u_1"]
+    assert targets[0].described
+    assert not targets[1].described
+
+
+def test_an_admitted_loop_without_a_noise_floor_is_refused():
+    """Noise whitening cannot silently assign equal weight to an unmeasured loop."""
+
+    with pytest.raises(LoopAdjudicationError, match="positive noise floor"):
+        admitted_loop_targets(
+            [gain_verdict("fl_p4l_1")],
+            {"fl_p4l_1": (1.60, -1.04, True)},
+            {},
+        )
+
+
+def test_admitted_loop_response_keeps_every_target_row(geometry):
+    """A described and a reconstruction-only loop both constrain the same currents."""
+
+    targets = admitted_loop_targets(
+        [gain_verdict("fl_p4l_1"), gain_verdict("fl_p6u_1")],
+        {
+            "fl_p4l_1": (1.60, -1.04, True),
+            "fl_p6u_1": (1.40, 0.89, False),
+        },
+        {"fl_p4l_1": SCATTER, "fl_p6u_1": SCATTER},
+    )
+    families = tuple(sorted(geometry["active_components"]))
+    response = admitted_loop_response(geometry, targets, families=families)
+    assert response.shape == (2, len(families))
+    assert np.all(np.isfinite(response))
+
+
+def test_current_space_rank_uses_the_measured_spectral_cliff():
+    """A decade drop retains the directions above it and exposes the lost one."""
+
+    families = ("first", "second", "third", "fourth")
+    response = np.diag([100.0, 50.0, 20.0, 1.0])
+    result = current_space_resolution(response, np.ones(4), families)
+    assert result.algebraic_rank == 4
+    assert result.rank == 3
+    assert result.spectral_gap == pytest.approx(20.0)
+    assert result.per_direction["first"] == pytest.approx(1.0)
+    assert result.per_direction["fourth"] == pytest.approx(0.0)
+
+
+def test_a_complementary_sensor_row_recovers_the_missing_current_direction():
+    """Rows measuring another functional can remove the cliff without a prior."""
+
+    families = ("first", "second", "third", "fourth")
+    probes = np.diag([100.0, 50.0, 20.0, 1.0])
+    loops = np.asarray([[0.0, 0.0, 0.0, 19.0]])
+    joint = current_space_resolution(np.vstack([probes, loops]), np.ones(5), families)
+    assert joint.rank == joint.algebraic_rank == 4
+    assert joint.spectral_gap < 10.0
+    assert joint.per_direction == pytest.approx({family: 1.0 for family in families})
+    assert joint.resolution({"third": 1.0, "fourth": -1.0}) == pytest.approx(1.0)

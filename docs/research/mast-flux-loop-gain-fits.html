@@ -6,14 +6,14 @@
   <meta name="docs-project" content="nova">
   <meta name="reckon-type" content="research">
   <meta name="plan-slug" content="mast-flux-loop-gain-fits">
-  <meta name="plan-title" content="MAST flux loops carry no unknown gain — the 2-pi question answered, the copied P4-lower block restored, and the join lifted from 39 to 43 channels">
-  <meta name="plan-summary" content="The convention that kept the flux loops out of every MAST vacuum fit does not exist: the store's recorded flux and the polygon kernel's computed flux are both the total flux through the loop contour in weber, and the fitted ratio is 0.96 rather than 6.28 or 0.159 on all 28 channels that publish data across 306 sustained plasma-free pulses. No loop carries a per-channel gain either. The channels scatter about their own set median with a standard deviation of 1.9%, and the six that sit furthest out are not singled out by the archive's independent forward prediction, which places them within 0.6% of its own set — so what separates them is the description's forward model, not the instrument. Two channels do step: fl_cc04 and fl_p2u_4 split into six and three acquisition blocks spanning factors of 2.6 and 3.3, exactly the range-setting fault the probe channels carry, and they are withheld. Separately, the level-2 catalog's four FL_P4L loop positions were the FL_P3L block verbatim; a flux loop is a fixture on a coil, and every one of the 44 named loops is nearest the coil its own name identifies except those four, which sit 17 times further from P4 lower than from P3 lower. Restoring them from the reconstruction's own table lifts the position join from 39 of 46 channels to 43 and removes four duplicated described positions.">
+  <meta name="plan-title" content="MAST flux loops carry no unknown gain and restore the structural current rank from 10 of 13 to 13 of 13">
+  <meta name="plan-summary" content="Eighteen calibrated flux loops are now admitted as published to the MAST free-current inversion. Their noise-whitened response removes the probe-only spectral cliff and raises the interpreted current-space rank from 10 of 13 to 13 of 13. The full 369-shot cohort gives 369 probe-only solves and 351 joint solves. Structural resolution becomes complete in all named directions, most materially in the four P2 conductors and the solenoid, but full-cohort current-ratio stability says P2, P3 and P6 wiring is still not answerable; P4 becomes answerable and P5 remains answerable. Forty-five P4/P5 constraint rows across 44 shots are banked with both the raw nominal-current gap and the surviving free-current residual. The admission rests on the calibration result: the store and kernel both carry total loop flux in weber, no 2-pi factor or per-channel gain promotes, and the copied P4-lower positions are restored from the reconstruction table.">
   <meta name="plan-status" content="reference">
   <meta name="plan-owner" content="Simon McIntosh">
-  <meta name="plan-recorded-at" content="2026-08-08">
+  <meta name="plan-recorded-at" content="2026-08-12">
   <meta name="plan-evidence-for" content="mast-flux-loop-calibration">
   <meta name="plan-informs" content="mast-misfit-toroidal-harmonics">
-  <meta name="plan-verdict" content="The flux loops are admissible. The 2-pi convention is measured and absent — the fitted ratio is 0.96, three-quarters of an order from either rival convention — so no factor is applied at either candidate site and the open decision about where to apply one has nothing to apply. Eighteen of 28 channels are admitted as published; ten are withheld, two for acquisition-block steps and eight for a departure only the description route sees. Zero gains promote. The four FL_P4L positions are restored at the level-2 read, validated by a falsification the wrong positions cannot survive: one scale fits every pulse at the restored position and the copied position needs scales from 0.44 to 2.72 across pulses that drove four different coils. What remains unexplained is a 3.8% common deficit between the described flux and every loop, which the archive's own model does not carry and which the measured coil-case currents do not account for.">
+  <meta name="plan-verdict" content="The 18 admissible loops restore the structural free-current rank from 10 of 13 to 13 of 13, a delta of three. The probe-only operator has a factor-11.684 cliff after its tenth singular mode; the joint 95-row operator has no decade cliff, with its largest gap 6.406, so all 13 algebraically independent directions are retained. The full-space condition number is 549.319, so the recovered weakest direction remains poorly conditioned. Per-shot ratios do not make P2, P3 or P6 wiring answerable: at least one member of every pair exceeds the 10% spread or rank-movement ceiling. P4 changes from unanswered to answered and P5 remains answered. The 45 P4/P5 constraint rows are banked for the downstream joint harmonic and coil-current fit. Calibration remains as measured: no convention factor and no per-channel gain is applied.">
   <title>MAST flux-loop gain fits | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -22,8 +22,8 @@
 <main class="plan-doc">
 
   <header>
-    <span class="badge badge-active">recorded 2026-08-08</span>
-    <h1>The flux loops carry no unknown gain</h1>
+    <span class="badge badge-active">recorded 2026-08-12</span>
+    <h1>The flux loops carry no unknown gain and restore the structural current rank</h1>
     <p>Every MAST vacuum fit so far has excluded the flux loops, because a factor of 2&pi;
     between the store's convention and the kernel's could not be ruled out and one unknown row
     gain corrupts every inverted current. That exclusion cost the programme the rank the probe
@@ -39,6 +39,13 @@
     onto a coil, so the coil it sits nearest is the coil its name identifies</strong>, and that
     relation holds for all 44 named level-2 loops and all 46 reconstruction rows with exactly
     four exceptions.</p>
+    <p>The admission has now been exercised, not merely declared. Adding the 18 calibrated
+    rows to the same noise-whitened free-current operator lifts the current-space rank from
+    <strong>10 of 13 to 13 of 13</strong>. That is a structural identifiability result, not a
+    wiring verdict: the full-cohort shot solves still leave P2, P3 and P6 ratios too unstable
+    to distinguish their upper/lower wiring. The distinction is material &mdash; the loops
+    remove the operator null space, while the pulse evidence decides whether a particular
+    wiring inference is repeatable.</p>
   </header>
 
   <section class="quick-status">
@@ -91,9 +98,127 @@
           so it belongs to the forward model rather than to the instrument; it does not
           track the measured coil-case currents.</td>
         </tr>
+        <tr>
+          <td>What do the 18 admitted loops do to current-space rank?</td>
+          <td><strong>10/13 &rarr; 13/13; rank delta +3.</strong></td>
+          <td>The 77 probe rows have a factor-11.684 spectral cliff after mode ten. The
+          95-row joint operator has no decade cliff; its largest adjacent drop is 6.406.
+          All 13 algebraic directions are therefore retained.</td>
+        </tr>
+        <tr>
+          <td>Does full rank answer the P2/P3/P6 wiring?</td>
+          <td><strong>No. None of those pair families clears the shot-stability gate.</strong></td>
+          <td>Across the complete 369-shot traversal, at least one member of every P2, P3
+          and P6 pair exceeds 10% relative spread or retained-rank movement. P4 changes from
+          unanswered to answered; P5 remains answered.</td>
+        </tr>
+        <tr>
+          <td>What survives for the P4/P5 localization fit?</td>
+          <td><strong>45 constraint rows from 44 shots.</strong></td>
+          <td>The bank retains both the raw nominal-current gap and the residual after the
+          free-current solve. The raw rows are the input to a joint harmonics plus
+          coil-current fit; the surviving rows measure what the free-current arm absorbed.</td>
+        </tr>
       </tbody>
     </table>
   </section>
+
+  <h2>What the 18 admitted loops change in current space</h2>
+  <p>The comparison changes only the sensor rows. Both arms use the same 13 active-current
+  families, geometry, 369-shot sustained vacuum cohort, case-current subtraction and measured
+  sensor noise. The baseline has 77 probes; the joint operator appends 18 loops for 95
+  structural rows. The job traversed every shot in 16&nbsp;min&nbsp;50&nbsp;s on four CPU cores.
+  The probe arm solved all 369 shots and the joint arm solved 351; 18 joint shots did not
+  retain the minimum 100 common finite samples after the loop rows were added and therefore
+  contribute no per-shot ratio.</p>
+  <p>The rank rule is fixed by the observed probe spectrum: retain modes above a decade-scale
+  cliff, or retain the full algebraic rank when no such cliff exists. The probe-only gap is
+  11.684 after mode ten, reproducing the established 10/13 baseline. With the loops, the
+  largest gap is 6.406 and all 13 modes remain. The full-space condition number changes from
+  370.699 to 549.319 (the retained probe subspace is 8.866), so the result is
+  <strong>rank recovery, not conditioning improvement</strong>: the thirteenth direction is
+  measurable but weak.</p>
+
+  <table>
+    <thead><tr><th>current direction</th><th>probes only</th><th>probes + loops</th><th>delta</th></tr></thead>
+    <tbody>
+      <tr><td>P2 inner lower</td><td>0.465443</td><td>1.000000</td><td>+0.534557</td></tr>
+      <tr><td>P2 inner upper</td><td>0.443558</td><td>1.000000</td><td>+0.556442</td></tr>
+      <tr><td>P2 outer lower</td><td>0.535309</td><td>1.000000</td><td>+0.464691</td></tr>
+      <tr><td>P2 outer upper</td><td>0.556004</td><td>1.000000</td><td>+0.443996</td></tr>
+      <tr><td>P3 lower</td><td>0.999152</td><td>1.000000</td><td>+0.000848</td></tr>
+      <tr><td>P3 upper</td><td>0.999671</td><td>1.000000</td><td>+0.000329</td></tr>
+      <tr><td>P4 lower</td><td>0.999980</td><td>1.000000</td><td>+0.000020</td></tr>
+      <tr><td>P4 upper</td><td>0.999997</td><td>1.000000</td><td>+0.000003</td></tr>
+      <tr><td>P5 lower</td><td>0.999999</td><td>1.000000</td><td>+0.000001</td></tr>
+      <tr><td>P5 upper</td><td>1.000000</td><td>1.000000</td><td>+0.000000</td></tr>
+      <tr><td>P6 lower</td><td>0.999994</td><td>1.000000</td><td>+0.000006</td></tr>
+      <tr><td>P6 upper</td><td>0.999994</td><td>1.000000</td><td>+0.000006</td></tr>
+      <tr><td>Solenoid</td><td>0.000900</td><td>1.000000</td><td>+0.999100</td></tr>
+    </tbody>
+  </table>
+  <p>Each number is the diagonal of the projector onto the retained right-singular subspace,
+  so it is the fraction of that named unit-current direction visible to the sensor set. Pair
+  common and difference directions tell the same structural story: the P2 inner pair moves
+  from 0.455/0.454 to 1.000/1.000 and the P2 outer pair from 0.545/0.547 to
+  1.000/1.000. P3 and P6 were already above 0.999 in this projection, which is why their
+  wiring question must be decided by repeatability across pulses rather than rank alone.</p>
+
+  <figure>
+    <img src="/nova/figures/flux-loop-inclusion/current-space-identifiability.svg"
+         alt="Three-panel comparison of the probe-only and joint current operators: the relative singular spectrum changes from rank ten of thirteen to rank thirteen of thirteen, all per-direction resolved fractions reach one, and P2, P3 and P6 per-shot spread or rank movement remains above the answerability ceiling for at least one pair member.">
+    <figcaption>Left: the probe-only decade cliff and the 13-mode joint spectrum. Centre:
+    resolution of each named current direction. Right: the worst of relative shot spread and
+    last-mode movement for the P2, P3 and P6 conductors; a pair is answerable only when both
+    members lie below 0.1.</figcaption>
+  </figure>
+
+  <h3>Structural resolution is necessary, but the wiring verdict remains empirical</h3>
+  <table>
+    <thead><tr><th>pair</th><th>probe-only maximum spread / rank move</th><th>joint maximum spread / rank move</th><th>joint qualifying shots</th><th>verdict</th></tr></thead>
+    <tbody>
+      <tr><td>P2 inner</td><td>1047% / 49.8%</td><td>31.3% / 35.4%</td><td>127 lower; 14 upper</td><td><strong>not answerable</strong></td></tr>
+      <tr><td>P2 outer</td><td>697% / 48.2%</td><td>525% / 38.3%</td><td>75 lower; 12 upper</td><td><strong>not answerable</strong></td></tr>
+      <tr><td>P3</td><td>35.5% / 35.3%</td><td>36.5% / 6.89%</td><td>29 lower; 33 upper</td><td><strong>not answerable</strong></td></tr>
+      <tr><td>P6</td><td>3197% / 49.2%</td><td>399% / 0.106%</td><td>77 lower; 70 upper</td><td><strong>not answerable</strong></td></tr>
+    </tbody>
+  </table>
+  <p>The joint arm materially stabilizes several rank-sensitive ratios, but the stated test
+  requires <em>both</em> relative spread and movement under removal of the last retained mode
+  to be at most 10% for both pair members. P2 fails on an upper member in each sub-family, P3
+  fails on shot spread, and P6 fails overwhelmingly on shot spread. There is therefore no
+  defensible positive P2/P3/P6 wiring answer in this cohort. As a cross-check on the gate, P4
+  changes from unanswered in the probe arm to answered in the joint arm, while P5 is answered
+  in both.</p>
+
+  <h3>P4/P5 constraint rows bank both sides of the free-current solve</h3>
+  <p>The localization bank contains 45 independently conditioned drive rows across 44 shots:
+  22 for P4 and 23 for P5. Every row carries 95 sensor slots, with 4&nbsp;044 finite probe or
+  loop coefficients in each of the raw and surviving arrays. The table reports RMS coupling
+  divided by the measured noise and by ampere-turn.</p>
+  <table>
+    <thead><tr><th>drive group</th><th>rows</th><th>probe raw &rarr; surviving</th><th>loop raw &rarr; surviving</th></tr></thead>
+    <tbody>
+      <tr><td>P4 lower</td><td>13</td><td>8.38e-4 &rarr; 5.38e-4</td><td>2.19e-4 &rarr; 5.99e-4</td></tr>
+      <tr><td>P4 pair</td><td>3</td><td>3.83e-4 &rarr; 3.59e-4</td><td>9.92e-5 &rarr; 1.15e-4</td></tr>
+      <tr><td>P4 upper</td><td>6</td><td>7.89e-4 &rarr; 4.77e-4</td><td>4.23e-4 &rarr; 6.41e-4</td></tr>
+      <tr><td>P5 lower</td><td>12</td><td>1.19e-3 &rarr; 6.92e-4</td><td>2.54e-3 &rarr; 5.53e-4</td></tr>
+      <tr><td>P5 pair</td><td>4</td><td>3.87e-4 &rarr; 3.38e-4</td><td>7.28e-4 &rarr; 2.63e-4</td></tr>
+      <tr><td>P5 upper</td><td>7</td><td>1.62e-3 &rarr; 3.77e-4</td><td>3.40e-3 &rarr; 8.33e-4</td></tr>
+    </tbody>
+  </table>
+  <p>The raw nominal-current gap is the correct downstream input because a joint harmonic and
+  coil-current fit must see the discrepancy before the free-current arm absorbs it. The
+  surviving array is banked alongside it as the diagnostic of that absorption; it is not a
+  substitute response for the joint fit.</p>
+  <figure>
+    <img src="/nova/figures/flux-loop-inclusion/p4p5-constraint-sets.svg"
+         alt="Bar charts of noise-normalized P4 and P5 probe and loop constraint RMS before and after the free-current solve for lower, paired and upper drives.">
+    <figcaption>The regenerated P4/P5 constraint sets. Grey bars are the nominal-current gap
+    and green bars the surviving residual. A surviving coefficient can exceed its raw value
+    when the unconstrained current fit redistributes a coupled error; both arrays are retained
+    so the downstream model does not confuse redistribution with absence.</figcaption>
+  </figure>
 
   <h2>The copied block, and the relation that catches it</h2>
   <p>The level-2 catalog names its 44 flux loops in <code>flux_loop_geometry_channel</code> and
@@ -290,7 +415,9 @@
     <li><strong>To the inversion:</strong> 18 loop channels are admissible as published, with
     no gain applied and no convention factor. Seventeen of them reach a described sensor;
     <code>fl_p6u_1</code> is measurable but not describable until the catalog carries a
-    P6-upper loop.</li>
+    P6-upper loop. The admission and noise-whitened current-space decomposition are now
+    reusable library operations, and the measured outcome is rank 13/13 rather than the
+    probe-only 10/13.</li>
     <li><strong>To the open decision on where a convention factor is corrected:</strong> there
     is no factor. The read path and the machine-description artifact would each apply 1.0, so
     the decision has nothing to apply and can be closed by evidence rather than by choosing a
@@ -312,6 +439,12 @@
     convention record, 28 gain records (18 recorded, 10 withheld) and three exclusions &mdash;
     rather than merged into <code>nova/calibrate/corrections/mast/magnetics.yaml</code>, whose
     <code>set_version</code> is a coordinated bump.</li>
+    <li><strong>To the P4/P5 localization fit:</strong> use
+    <code>~/.cache/nova-mast/flux-loop-inclusion/constraint_sets.npz</code>. Its
+    <code>raw</code> array is the default constraint for a joint harmonic and coil-current
+    solve; <code>surviving</code> is the comparison after the free-current solve. The file also
+    carries the 95-channel response, noise floors, drive groups, shot identities, spans and
+    conditioning checks needed to reproduce the weighting.</li>
   </ul>
 
   <h2>Caveats</h2>
@@ -351,6 +484,15 @@
   11766. The relation, the restored positions and the join accounting are pinned in
   <code>tests/test_mast_flux_loop_positions.py</code>; the convention, the falsification and
   the verdict criteria in <code>tests/test_mast_flux_loop_gains.py</code>.</p>
+  <p>The admitted-loop comparison is banked separately under
+  <code>~/.cache/nova-mast/flux-loop-inclusion/</code>. The HOME-visible staged source and
+  <code>run_joint_inversion.py</code> produced <code>inversion.json</code> (rank,
+  per-direction resolution and wiring taxonomy), <code>ratios.json</code> (per-shot current
+  ratios) and <code>constraint_sets.npz</code> (P4/P5 raw and surviving arrays). The compute
+  receipt is <code>sacct.log</code>, the complete run output is <code>full.log</code>, and
+  <code>make_evidence.py</code> produced <code>summary.json</code> and the two SVG figures in
+  <code>docs/figures/flux-loop-inclusion/</code>. The reusable admission and rank rules are
+  pinned in <code>tests/test_mast_flux_loop_adjudication.py</code>.</p>
 
   <h2>Related records</h2>
   <ul>

@@ -102,6 +102,16 @@ anti-correlated.  Measured on this cohort, the estimates it removes are the ones
 scattering over thousands of turns while the ones it keeps agree to a few percent.
 """
 
+MINIMUM_IDENTIFIABILITY_GAP = 10.0
+"""Spectral drop that separates measured current directions from the null space.
+
+The MAST probe operator has a factor 11.7 drop between its tenth and eleventh
+singular values while every earlier adjacent ratio is below two.  A decade is
+therefore the smallest gap that reads that observed cliff without manufacturing
+one from the gentle ordering inside either side.  Operators with no decade drop
+retain their full algebraic rank.
+"""
+
 
 class ResponseError(ValueError):
     """Raised when a vacuum response cannot be assembled or identified."""
@@ -265,6 +275,149 @@ def loop_response_matrix(
             flux, _, _ = polygon_greens(radius, height, vertices)
             response[:, column] += (area / total) * flux
     return response
+
+
+@dataclass(frozen=True)
+class CurrentSpaceResolution:
+    """Identifiable current subspace of a noise-whitened sensor response.
+
+    ``projection`` maps an arbitrary current direction onto the retained right
+    singular vectors.  Its diagonal is the fraction of each named conductor's
+    unit direction that the sensor set resolves; :meth:`resolution` applies the
+    same measure to pair-common and pair-difference directions used for wiring
+    questions.
+    """
+
+    families: tuple[str, ...]
+    singular_values: np.ndarray
+    algebraic_rank: int
+    rank: int
+    spectral_gap: float
+    projection: np.ndarray
+    sensor_count: int
+
+    @property
+    def condition(self) -> float:
+        """Return the condition number over every algebraically nonzero mode."""
+
+        if self.algebraic_rank == 0:
+            return math.inf
+        return float(
+            self.singular_values[0] / self.singular_values[self.algebraic_rank - 1]
+        )
+
+    @property
+    def retained_condition(self) -> float:
+        """Return the condition number inside the interpreted measured subspace."""
+
+        if self.rank == 0:
+            return math.inf
+        return float(self.singular_values[0] / self.singular_values[self.rank - 1])
+
+    @property
+    def per_direction(self) -> dict[str, float]:
+        """Return the resolved fraction of every named conductor direction."""
+
+        return {
+            family: float(self.projection[index, index])
+            for index, family in enumerate(self.families)
+        }
+
+    def resolution(self, direction: Mapping[str, float]) -> float:
+        """Return the fraction of a named current combination that is resolved."""
+
+        unknown = sorted(set(direction) - set(self.families))
+        if unknown:
+            raise ResponseError(f"current direction names unknown families {unknown}")
+        vector = np.asarray(
+            [float(direction.get(family, 0.0)) for family in self.families],
+            dtype=float,
+        )
+        norm = float(vector @ vector)
+        if norm <= 0.0:
+            raise ResponseError("current direction must contain a nonzero weight")
+        return float(vector @ self.projection @ vector / norm)
+
+    def as_dict(self) -> dict[str, Any]:
+        """Return the canonical JSON representation."""
+
+        return {
+            "algebraic_rank": self.algebraic_rank,
+            "condition": self.condition,
+            "families": list(self.families),
+            "per_direction": self.per_direction,
+            "rank": self.rank,
+            "retained_condition": self.retained_condition,
+            "sensor_count": self.sensor_count,
+            "singular_values": [float(value) for value in self.singular_values],
+            "spectral_gap": self.spectral_gap,
+        }
+
+
+def current_space_resolution(
+    response: np.ndarray,
+    noise: Sequence[float],
+    families: Sequence[str],
+    *,
+    minimum_gap: float = MINIMUM_IDENTIFIABILITY_GAP,
+) -> CurrentSpaceResolution:
+    """Measure the current directions a sensor response resolves above its cliff.
+
+    Rows may mix field probes and flux loops because each is divided by its own
+    measured noise floor before decomposition.  The resulting rows all mean
+    signal-to-noise per ampere-turn, even though their physical units differ.
+    A decade-scale singular-value cliff truncates the interpreted subspace; if
+    no such cliff exists, every algebraically independent direction is retained.
+    """
+
+    matrix = np.asarray(response, dtype=float)
+    order = tuple(families)
+    floors = np.asarray(noise, dtype=float)
+    if matrix.ndim != 2 or matrix.shape[1] != len(order):
+        raise ResponseError(
+            f"response has shape {matrix.shape}, expected (sensors, {len(order)})"
+        )
+    if floors.shape != (matrix.shape[0],):
+        raise ResponseError(
+            f"noise has shape {floors.shape}, expected ({matrix.shape[0]},)"
+        )
+    if len(set(order)) != len(order):
+        raise ResponseError("current-space family names must be unique")
+    if not np.all(np.isfinite(matrix)):
+        raise ResponseError("current-space response must be finite")
+    if not np.all(np.isfinite(floors)) or np.any(floors <= 0.0):
+        raise ResponseError("every admitted sensor needs a finite positive noise floor")
+    if minimum_gap <= 1.0 or not math.isfinite(minimum_gap):
+        raise ResponseError(
+            "the identifiability gap must be finite and larger than one"
+        )
+
+    whitened = matrix / floors[:, None]
+    _, values, right = np.linalg.svd(whitened, full_matrices=True)
+    tolerance = (
+        max(whitened.shape) * np.finfo(values.dtype).eps * values[0]
+        if values.size
+        else 0.0
+    )
+    algebraic_rank = int(np.count_nonzero(values > tolerance))
+    rank = algebraic_rank
+    spectral_gap = 1.0
+    if algebraic_rank > 1:
+        gaps = values[: algebraic_rank - 1] / values[1:algebraic_rank]
+        split = int(np.argmax(gaps))
+        spectral_gap = float(gaps[split])
+        if spectral_gap >= minimum_gap:
+            rank = split + 1
+    projection = right[:rank].T @ right[:rank]
+    return CurrentSpaceResolution(
+        families=order,
+        singular_values=np.asarray(values, dtype=float),
+        algebraic_rank=algebraic_rank,
+        rank=rank,
+        spectral_gap=spectral_gap,
+        projection=np.asarray(projection, dtype=float),
+        sensor_count=matrix.shape[0],
+    )
 
 
 def target_standoff(

@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="mast-gate-decision-packet">
+  <meta name="plan-title" content="MAST calibration-consumption gate decision packet">
+  <meta name="plan-summary" content="Four owner decisions remain open: whether to score obr17 through its measured 0.5011 gain, whether calibrated flux loops enter the score, how pair-failure channels enter the sensor set, and whether their gains are static or pulse-scoped. The packet states the evidence and the artifact-versus-incumbent consequence of every option without choosing one.">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-recorded-at" content="2026-08-12">
+  <meta name="plan-evidence-for" content="mast-flux-loop-calibration">
+  <meta name="plan-informs" content="mast-vacuum-floor-recovery">
+  <meta name="plan-verdict" content="Decision packet complete; all four calibration-consumption choices remain open for the gate owner. obr17 correction improves both absolute residual arms but widens their mean-square comparison by 30 percent in the banked surrogate. Eighteen calibrated loops recover current-space rank from 10 of 13 to 13 of 13 while worsening full-space conditioning from 370.699 to 549.319. Pair-failure evidence rules out one lifetime-static scale for obv03 and obr05; any consumption policy must use validity-scoped gains or refuse unresolved states.">
+  <title>MAST calibration-consumption gate decision packet | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <header>
+    <span class="badge badge-active">owner decision packet · 2026-08-12</span>
+    <h1>Which measured calibrations does the vacuum gate consume?</h1>
+    <p>Four choices now sit between measured calibration evidence and the frozen
+    artifact-versus-incumbent comparison. This record does not choose among them. It makes the
+    evidence, the admissible options, and the comparison discontinuity explicit so the gate owner
+    can lock a policy without mistaking a scoring choice for a physics result.</p>
+  </header>
+
+  <section class="quick-status" aria-labelledby="packet-state">
+    <h2 id="packet-state">Packet state</h2>
+    <table>
+      <thead>
+        <tr><th>consumption question</th><th>measured fact</th><th>decision state</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Score <code>obr17</code> through its gain?</td>
+          <td><strong>0.5011</strong>, lifetime-stable and mechanism-backed</td>
+          <td><strong>open — owner</strong></td>
+        </tr>
+        <tr>
+          <td>Score the calibrated flux loops?</td>
+          <td><strong>rank 10/13 → 13/13</strong>; condition 370.699 → 549.319</td>
+          <td><strong>open — owner</strong></td>
+        </tr>
+        <tr>
+          <td>How does the pair-failure class enter?</td>
+          <td><code>obv03</code>, <code>obr05</code>, and <code>obr18</code> do not share one
+          lifetime-static state</td>
+          <td><strong>open — owner</strong></td>
+        </tr>
+        <tr>
+          <td>What validity grain replaces a static gain?</td>
+          <td>era-scoped where stable; shot-block or abstention where it is not</td>
+          <td><strong>open — owner</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <figure>
+    <img src="/nova/figures/gate-decision/measurement-consumption-flow.svg"
+         alt="Four calibration-consumption choices feed measurement amplitudes, sensor rows, and the fitted-current subspace before artifact and incumbent residuals are compared.">
+    <figcaption>Each choice is upstream of both arms. Applying the same correction to the same
+    measured channel does not preserve the artifact-minus-incumbent difference: the two predictions
+    are different, so their residuals move by different amounts. Every option that changes a gate
+    input therefore needs one paired re-stamp at a single commit; none licenses a tolerance change.</figcaption>
+  </figure>
+
+  <section id="score-obr17">
+    <h2>Decision: score <code>obr17</code> through its fitted gain?</h2>
+    <p><span class="badge badge-open">owner decision open</span></p>
+    <p><code>obr17</code> is not an unexplained description residual. Its promoted gain is
+    <strong>0.5011</strong> (unrounded fit 0.5011125727424951; supported interval
+    [0.5011, 0.5037]), a third independent route gives 0.5023 ± 0.0007, and pulse-by-pulse values
+    remain 0.488–0.514 from pulse 15000 to 30420. The mechanism is published: a MAST equilibrium
+    pickup channel averages two coils 180° apart toroidally, so losing one member produces a
+    half-amplitude channel. One factor removes 88.3% of this channel's residual amplitude on the
+    artifact arm and 88.5% on the incumbent.</p>
+
+    <table>
+      <thead>
+        <tr><th>owner option</th><th>artifact-versus-incumbent consequence</th><th>what it asserts</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Apply 0.5011 to the scored measurement</strong></td>
+          <td>On the banked pooled mean-square surrogate, artifact 1.0324 → 0.9103
+          (−11.8%) and incumbent 0.9992 → 0.8673 (−13.2%); the gap widens from +0.0332
+          to +0.0430, <strong>+30%</strong>. Both absolute arms improve, but the incumbent
+          improves more.</td>
+          <td>The gate consumes the measured instrument calibration and begins a new comparable
+          stamp series from a paired re-baseline.</td>
+        </tr>
+        <tr>
+          <td><strong>Keep scoring the published amplitude</strong></td>
+          <td>The historical score definition and existing stamp continuity remain unchanged, as
+          does the current +0.0332 surrogate gap. Both arms continue to carry a known half-amplitude
+          sensor defect that contributes 22.6% and 25.0% of their pooled misfit.</td>
+          <td>Comparability with the banked ladder takes precedence over consuming a promoted gain.</td>
+        </tr>
+        <tr>
+          <td><strong>Omit <code>obr17</code> from the score</strong></td>
+          <td>The same surrogate becomes artifact 0.9149 (−11.4%) and incumbent 0.8715
+          (−12.8%); the gap is +0.0434, <strong>+31%</strong>. The gate loses a measured channel
+          rather than correcting it.</td>
+          <td>The known-fault row is refused, and the sensor-set discontinuity is recorded in a
+          paired re-baseline.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p><strong>Bound on these numbers:</strong> the table is a mean-square pooling computed from the
+    banked per-channel decomposition, not the production gate's median-of-medians stamp metric.
+    It establishes direction and scale of the trade, not a replacement stamp. The chosen option
+    must be executed through the committed gate entry point on both arms.</p>
+  </section>
+
+  <section id="score-loops">
+    <h2>Decision: do calibrated flux loops enter the score?</h2>
+    <p><span class="badge badge-open">owner decision open</span></p>
+    <p>Eighteen flux loops are admissible <strong>as published</strong>: neither a per-channel gain
+    nor a 2π convention factor is applied. Appending them to the 77 probe rows creates a 95-row
+    current operator. The probe-only spectrum has a factor-11.684 cliff after mode ten; the joint
+    spectrum has no decade cliff (largest gap 6.406), so retained current-space rank changes from
+    <strong>10 of 13 to 13 of 13</strong>. This is rank recovery, not conditioning improvement:
+    full-space condition number rises from <strong>370.699 to 549.319</strong>. The probe arm solved
+    369 sustained plasma-free shots; the joint arm solved 351 because 18 shots lacked 100 common
+    finite samples after the loop rows were added.</p>
+
+    <table>
+      <thead>
+        <tr><th>owner option</th><th>artifact-versus-incumbent consequence</th><th>structural consequence</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Append loops to the fitted operator and scored residual</strong></td>
+          <td>The comparison expands from probe field only to probe field plus linked flux. Both
+          arms are re-fitted and judged against 18 additional physical rows, so their absolute
+          scores and difference may move. No paired production stamp exists yet; the sign and
+          magnitude are therefore <strong>unmeasured</strong>, not implied by the rank gain.</td>
+          <td>Retained rank becomes 13/13 at condition 549.319; the weakest recovered direction is
+          measurable but remains poorly conditioned.</td>
+        </tr>
+        <tr>
+          <td><strong>Use loops in the current fit but score probes only</strong></td>
+          <td>The score keeps the same 77 reported rows, while both arms inherit currents constrained
+          by 18 additional loop rows. Any movement is indirect through the fitted currents; a fresh
+          paired stamp is still required.</td>
+          <td>The rank benefit is consumed without adding loop residuals to the pooled score. This
+          separates identifiability from the headline metric.</td>
+        </tr>
+        <tr>
+          <td><strong>Keep loops outside the gate</strong></td>
+          <td>The artifact-versus-incumbent comparison remains probe-only and directly continuous
+          with existing stamps.</td>
+          <td>Rank remains 10/13 at full-space condition 370.699; the loop evidence stays a sidecar
+          and does not repair the gate's structural blind directions.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>The loop decision cannot be inferred from “13/13”: conditioning becomes worse, and adding
+    rows changes the estimand. Conversely, the increase to 549.319 does not erase the measured
+    rank recovery. The owner is choosing which quantity the gate should certify.</p>
+  </section>
+
+  <section id="pair-failure-class">
+    <h2>Decision: how does the pair-failure channel class enter?</h2>
+    <p><span class="badge badge-open">owner decision open</span></p>
+    <p>The 180°-pair mechanism that explains <code>obr17</code> predicts a class, not an isolated
+    correction. The archive contains three distinct temporal shapes:</p>
+    <table>
+      <thead>
+        <tr><th>channel</th><th>measured state</th><th>what a single static gain would erase</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>obv03</code></td>
+          <td><strong>1.01 → 0.586</strong> mid-life; the boundary is bracketed between pulses
+          19258 and 19995. An independent route measures the same step ratio, 0.585 versus 0.580.</td>
+          <td>The transition from a both-member state to a single-member state.</td>
+        </tr>
+        <tr>
+          <td><code>obr05</code></td>
+          <td><strong>1.25 ↔ 0.50</strong> shot-to-shot.</td>
+          <td>The promoted static <strong>1.1043</strong> describes no observed pulse and mixes two
+          discrete states.</td>
+        </tr>
+        <tr>
+          <td><code>obr18</code></td>
+          <td><strong>1.22</strong> in the pair-state survey.</td>
+          <td>Whether this level is stable over the gate cohort; it must be carried with its measured
+          support rather than generalized beyond it.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table>
+      <thead>
+        <tr><th>owner option</th><th>artifact-versus-incumbent consequence</th><th>failure behaviour</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Consume only a resolved state; refuse unresolved rows</strong></td>
+          <td>Both arms use corrected measurements only where the state is supported. Sensor
+          membership can vary by pulse, so pooling weights and the artifact-minus-incumbent gap
+          can change with cohort composition; one paired re-baseline must record it.</td>
+          <td><code>obv03</code> can use its bracketed eras. <code>obr05</code> is absent unless a
+          shot's 1.25/0.50 state is independently resolved. <code>obr18</code> is limited to the
+          support on which 1.22 was measured.</td>
+        </tr>
+        <tr>
+          <td><strong>Score the published values and attach quality flags</strong></td>
+          <td>The current comparison remains numerically continuous, but it retains pulse-dependent
+          instrument amplitude as if it were description error in both arms. The apparent gap can
+          change merely because the cohort contains different failure-state fractions.</td>
+          <td>No state inference enters arithmetic; flags preserve the known evidence for downstream
+          interpretation.</td>
+        </tr>
+        <tr>
+          <td><strong>Exclude the entire class from scoring</strong></td>
+          <td>Both arms lose the same named rows, changing pooled weights and possibly their
+          difference. This is a sensor-set re-baseline, not a calibration correction.</td>
+          <td>No unresolved pair state can contaminate the score, at the cost of discarding valid
+          intervals and reducing measurement coverage.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="gain-validity">
+    <h2>Decision: does a pulse-scoped model replace one static gain?</h2>
+    <p><span class="badge badge-open">owner decision open</span></p>
+    <p>The evidence settles one scientific boundary: a lifetime-static scale is not a faithful
+    model for the pair-failure class. It can represent the lifetime-stable <code>obr17</code>, but
+    not <code>obv03</code>'s mid-life step and not <code>obr05</code>'s pulse-to-pulse flips. The
+    remaining owner decision is whether the gate consumes validity-scoped corrections or refuses
+    the affected measurements.</p>
+
+    <table>
+      <thead>
+        <tr><th>owner option</th><th>artifact-versus-incumbent consequence</th><th>evidence fit</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Per-era gains, with unresolved shots refused</strong></td>
+          <td>A gate pulse is normalized by the era containing it; both arms receive the same
+          measurement change. The score series begins at an explicit re-baseline, and later era
+          transitions do not silently change calibration.</td>
+          <td>Directly supports <code>obv03</code>'s 1.01 and 0.586 intervals. It cannot represent
+          <code>obr05</code> where no stable era exists.</td>
+        </tr>
+        <tr>
+          <td><strong>Per-shot-block gains or resolved pair states</strong></td>
+          <td>Each scored block uses its measured state. This is the most cohort-sensitive option:
+          row availability and correction factors can vary shot by shot, so paired stamps must also
+          report coverage and excluded rows.</td>
+          <td>Can represent <code>obv03</code> and <code>obr05</code> only when each selected state is
+          independently supported; unresolved 1.25/0.50 shots must not be averaged.</td>
+        </tr>
+        <tr>
+          <td><strong>Retain one static gain</strong></td>
+          <td>Arithmetic and cohort shape remain simple, but the comparison mixes measurement states
+          into both residual arms. For <code>obr05</code>, applying 1.1043 systematically corrects
+          neither the 1.25 nor the 0.50 shots, so a change in state prevalence can masquerade as a
+          change in artifact quality.</td>
+          <td>Contradicted for <code>obv03</code> and <code>obr05</code>; scientifically admissible only
+          for channels shown stable over the full scored support.</td>
+        </tr>
+        <tr>
+          <td><strong>Apply no pair-state gains and exclude affected rows</strong></td>
+          <td>The comparison avoids modeling state while changing the sensor set and its weights.
+          Historical continuity ends at the paired re-baseline.</td>
+          <td>Conservative when the gate cannot resolve validity without guessing.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="execution-contract">
+    <h2>What is fixed whichever options the owner selects</h2>
+    <ol>
+      <li><strong>Both arms consume exactly the same measurement policy.</strong> No correction is
+      artifact-only or incumbent-only.</li>
+      <li><strong>No tolerance changes.</strong> A scoring-policy discontinuity is recorded by one
+      paired artifact/incumbent re-stamp at a single commit, not absorbed into the budget.</li>
+      <li><strong>Coverage is part of the result.</strong> Every stamp reports included channels,
+      included shots, refused states, and whether loops were fit-only or scored.</li>
+      <li><strong>Gain means divide the recorded waveform by the measured multiplier.</strong> The
+      record retains raw values, applied values, validity intervals, provenance, and set identity.</li>
+      <li><strong>No unsupported interpolation.</strong> The unmeasured <code>obv03</code> transition
+      remains bracketed, and an unresolved <code>obr05</code> state remains unresolved.</li>
+    </ol>
+  </section>
+
+  <section id="owner-record">
+    <h2>Owner record to fill</h2>
+    <p>All four fields deliberately remain blank in this packet. The gate owner may choose options
+    independently, provided the fixed execution contract above is preserved.</p>
+    <table>
+      <thead><tr><th>decision</th><th>selected option</th><th>rationale / authority</th></tr></thead>
+      <tbody>
+        <tr><td><code>obr17</code> consumption</td><td>________________</td><td>________________</td></tr>
+        <tr><td>flux-loop scoring</td><td>________________</td><td>________________</td></tr>
+        <tr><td>pair-failure class treatment</td><td>________________</td><td>________________</td></tr>
+        <tr><td>gain validity grain</td><td>________________</td><td>________________</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="evidence">
+    <h2>Evidence and reproducibility</h2>
+    <ul>
+      <li><a href="/nova/research/mast-vacuum-misfit-separation.html">Vacuum misfit
+      separation</a>: <code>obr17</code> mechanism, fitted-gain arithmetic, and the +30% surrogate
+      comparison effect. Banked arrays: <code>~/.cache/nova-mast/misfit-hunt/</code>.</li>
+      <li><a href="/nova/research/calibration-foundations-landed.html">Calibration
+      foundations</a>: promoted gain provenance, pair-state records, and correction semantics.</li>
+      <li><a href="/nova/research/mast-misfit-source-localization.html">Misfit source
+      localization</a>: the measured <code>obv03</code>, <code>obr05</code>, and <code>obr18</code>
+      pair-failure class.</li>
+      <li><a href="/nova/research/mast-flux-loop-gain-fits.html">Flux-loop gain fits and
+      inclusion</a>: 18 admitted loops, 10/13 → 13/13 rank, 370.699 → 549.319 conditioning,
+      shot coverage, and banked constraint sets. Artifacts:
+      <code>~/.cache/nova-mast/flux-loop-inclusion/</code>.</li>
+      <li><a href="/nova/research/mast-vacuum-floor-closure-landed.html">Vacuum-floor
+      closure</a>: the frozen comparison, per-channel decomposition, and stamp-metric caveat.</li>
+    </ul>
+  </section>
+
+</main>
+</body>
+</html>

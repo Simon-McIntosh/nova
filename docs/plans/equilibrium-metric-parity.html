@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="equilibrium-metric-parity">
+  <meta name="plan-title" content="Equilibrium Metric Parity — every derived quantity, from the same flux map">
+  <meta name="plan-summary" content="Validate nova&#x27;s whole derived-quantity chain against a reference equilibrium&#x27;s own metrics computed from the same flux map: safety factor, flux-surface averages, volumes and areas, boundary geometry and integral moments, implementing in nova whatever the reference computes and nova does not">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="8.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-context" content="extended">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint" content="S7">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-depends-on" content="efit-map-inversion">
+  <meta name="plan-blocks" content="efit-forward-parity,flux-function-forward-transport">
+  <title>Equilibrium Metric Parity | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-13">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — The metric layer is testable on its own, and has never been tested</h2>
+
+    <p><strong>Given one flux map, two codes should compute the same safety factor, the same volumes and
+    the same flux-surface averages.</strong> That comparison isolates the derived-quantity chain
+    completely: no solver runs, no sources are prescribed, no boundary condition is imposed. Both answers
+    exist for the same input — nova computes its record from the stored map, EFIT's own values sit beside
+    it in the same file — so every disagreement is attributable to one code's post-processing rather than
+    to a difference in equilibrium.</p>
+
+    <p>That property is what makes this rung worth its own plan rather than a section of the forward
+    demonstration. <code>efit-forward-parity</code> compares <code>I_p</code>, <code>β_p</code> and
+    <code>l_i</code> between a solved map and a reference map — but those are <em>metrics</em>, so a
+    disagreement there has two possible causes and no way to separate them: the solve produced a
+    different field, or the two codes measure the same field differently. Validating the metric layer
+    first collapses that ambiguity, which is why this plan blocks the forward one.</p>
+
+    <p><strong>Nova already computes most of this, which sets the shape of the work.</strong>
+    <code>nova/equilibrium/flux_surface_geometry.py</code> carries a
+    <code>FluxSurfaceGeometry</code> record read from one converged flux map, landed at
+    <code>b0af2d23</code> with 13 columns measured 5–130× inside pre-registered tolerances:</p>
+
+    <div style="overflow-x:auto">
+    <table>
+      <thead><tr><th>Group</th><th>Nova's record carries</th></tr></thead>
+      <tbody>
+        <tr><td>coordinates</td><td><code>psi_norm</code>, <code>poloidal_flux</code>, <code>toroidal_flux</code>, <code>rho_tor</code>, <code>rho_tor_norm</code></td></tr>
+        <tr><td>volumes and areas</td><td><code>volume</code>, <code>area</code>, <code>volume_derivative</code>, <code>volume_flux_derivative</code></td></tr>
+        <tr><td>field and winding</td><td><code>field_function</code>, <code>safety_factor</code></td></tr>
+        <tr><td>flux-surface averages</td><td><code>inverse_square_radius</code>, <code>gradient_rho</code>, <code>gradient_rho_squared</code>, <code>gradient_rho_squared_over_radius_squared</code></td></tr>
+        <tr><td>scalars</td><td><code>boundary_rho_tor</code>, <code>vacuum_field</code>, <code>reference_radius</code>, <code>axis_flux</code>, <code>boundary_flux</code>, <code>magnetic_axis</code></td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <p>So this is mostly a comparison, with implementation confined to whatever the reference computes and
+    nova does not. That balance is worth stating up front because it is the opposite of the usual
+    assumption: the risk here is not missing machinery, it is unexamined agreement.</p>
+
+    <h2 id="s2">§2 — Census the reference's derived set, then pair it up</h2>
+
+    <p>The forward-input census established what the store holds for <em>driving</em> a solve. This is the
+    complementary census: what the store holds that nova's record could be scored against. Known present
+    already are <code>efm/psi_norm</code>, <code>efm/psi_axis</code>, <code>efm/psi_boundary</code>,
+    <code>efm/magnetic_axis_{r,z}</code>, <code>efm/lcfs_{r,z}</code>, both x-point pairs,
+    <code>efm/plasma_current_{x,c}</code>, <code>efm/ppsi_c</code>, <code>efm/fpsi_c</code>, and the
+    vacuum-field entries <code>bvac_val</code>, <code>bvac_r</code> and <code>irod</code>; safety factor
+    is present and carries a sign flip into COCOS 17. The census must enumerate the rest — volumes,
+    areas, elongation and triangularity, stored energy, poloidal and toroidal beta, internal inductance,
+    boundary geometry, and any flux-surface average the file carries — with units, shape and flux
+    coordinate for each.</p>
+
+    <p><strong>Pairing is where the real work sits, and it is not mechanical.</strong> Two codes rarely
+    define a metric on the same coordinate, over the same domain, with the same normalisation. A safety
+    factor on normalised poloidal flux is not the same array as one on normalised toroidal flux even when
+    both are called <code>q</code>. A volume enclosed to the LCFS is not a volume enclosed to the last
+    closed grid contour. So each pair carries an explicit statement of coordinate, domain and
+    normalisation, and a resampling rule where the coordinates differ — and a metric that cannot be
+    paired without inventing a convention is reported as unpaired rather than compared on a guess.</p>
+
+    <p><em>Done-when:</em> every derived quantity the store carries is listed with units, shape and flux
+    coordinate; each is paired with its nova counterpart or explicitly marked absent-in-nova or
+    unpairable-with-reason; and the count of each class is reported.</p>
+
+    <h2 id="s3">§3 — Compare from the same map</h2>
+
+    <p>Drive <code>FluxSurfaceGeometry</code> from the stored flux map — the same map EFIT derived its own
+    values from — and compare column by column. Every comparison uses the conventions declared in
+    <code>efit-map-inversion</code>: source COCOS 3, ψ ×2π into COCOS 17, <code>q</code> ×(−1), and the
+    per-shot plasma-current sign check rather than a single assumption.</p>
+
+    <p>The plasma domain is the stored LCFS interior, for the same reason it is in the sibling plans: the
+    decomposition measured 10.08 MA of absolute current outside a 0.925 MA plasma, so a surface family
+    traced without that boundary would integrate conductor current into plasma volumes. A flux-surface
+    average is an integral over a surface, and a surface that leaks past the separatrix silently
+    contaminates every column derived from it.</p>
+
+    <p><em>Done-when:</em> each paired quantity is reported as a signed relative difference profile with
+    its median and interquartile range across surfaces, on at least one slice per frozen shot; the
+    comparison names which differences are convention artefacts resolved by a declared transform and
+    which are genuine numerical disagreement; and any quantity whose disagreement exceeds the tolerance
+    class its nova counterpart was landed against is called out with the surface positions where it does
+    so.</p>
+
+    <h2 id="s4">§4 — Implement what the reference computes and nova does not</h2>
+
+    <p>Whatever §2 marks absent-in-nova becomes implementation here, added to the record rather than
+    computed in a comparison script — the point is a capability, not a one-off answer. Each addition
+    lands with the same discipline the existing 13 columns carry: a convention-pinned definition, a
+    tolerance it is measured against, and a test holding it.</p>
+
+    <p><strong>Two independent checks are available for anything added and should be used rather than
+    trusting the reference.</strong> Analytic equilibria give exact values for several of these
+    quantities, and nova already carries Solov'ev and rotating references from the static and rotation
+    rungs; and internal consistency binds the set — <code>volume_derivative</code> must integrate to
+    <code>volume</code>, the safety factor must be consistent with <code>field_function</code> and
+    <code>inverse_square_radius</code> on the same surfaces. A quantity that matches EFIT but fails its
+    own analytic or internal check is not validated, it is coincidentally agreeing, and the distinction
+    matters because the reference is a code with its own conventions rather than ground truth.</p>
+
+    <h2 id="s5">§5 — The transport consumer, which is why this is a capability</h2>
+
+    <p><strong>This set is the geometry input of the transport forward solve, not only a validation
+    artifact.</strong> <code>flux-function-forward-equilibrium</code> §5 already declares the
+    flux-surface-averaged geometry record — <code>V′</code>, the <code>⟨1/R²⟩</code> and
+    diffusion-coefficient metrics, <code>F</code> and <code>q</code> on the toroidal-flux coordinate — a
+    public output contract of <code>ForwardProfile</code>, consumed by
+    <a href="/nova/flux-function-forward-transport.html">flux-function-forward-transport</a> and supplied
+    at both interval endpoints so the moving-grid term is correct.</p>
+
+    <p>So validating these columns against an independent code, on real machine data rather than
+    manufactured fixtures, is what lets the transport work stand on them — and it is what makes the
+    decomposition and metric routines reusable for training one-dimensional transport equations in the
+    competition entry, where the geometry has to be derived from stored equilibria rather than from
+    nova's own solves. A metric validated only against nova's own analytic fixtures is validated against
+    nova's own conventions; this rung is the first time an outside code checks them.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="metric-disagreement-tolerance" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">What tolerance does a paired metric have to meet? The existing record&#x27;s columns
+        were landed 5–130× inside pre-registered analytic tolerances, but a cross-code comparison on real
+        data has no such basis and the reference is not ground truth.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="inherit-analytic-class">inherit each column&#x27;s own analytic tolerance class</button>
+      <button class="r-opt" data-value="report-only-first-pass">report distributions unbounded on the first pass, register tolerances from the measured spread</button>
+      <button class="r-opt" data-value="cross-source-budget">score under the cross-source budget class used for geometry comparisons</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-emp-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship equilibrium-metric-parity §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Census the reference&#x27;s derived quantities and pair them against nova&#x27;s record</h4>
+    <div class="r-fu-body"><p>Nova's <code>FluxSurfaceGeometry</code> already carries fifteen profile columns and six scalars — safety factor, volume and area with both derivatives, field function, inverse-square radius and three gradient-rho averages, on poloidal flux, toroidal flux and rho_tor coordinates — landed at <code>b0af2d23</code> with thirteen of them measured 5–130x inside pre-registered tolerances. What does not exist is the pairing: which of these the reference also computes, on what coordinate, over what domain, with what normalisation. Enumerate every derived quantity the efm store carries (volumes, areas, elongation, triangularity, stored energy, betas, internal inductance, boundary geometry, safety factor, any flux-surface average) with units, shape and flux coordinate, then pair each against its nova counterpart or mark it absent-in-nova or unpairable with a reason. Do not compare a pair whose coordinate or domain differs until the resampling rule is stated — a q on normalised poloidal flux is not the array a q on normalised toroidal flux is, and agreeing by accident is worse than reporting unpaired. Conventions come from efit-map-inversion: source COCOS 3, psi x2pi, q x(-1), and the per-shot plasma-current sign check rather than one assumption.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship equilibrium-metric-parity §2</pre>
+    </article>
+</section>
+  </main>
+</body>
+</html>

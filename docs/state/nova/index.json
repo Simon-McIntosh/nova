@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-13T15:41:42",
+  "updated": "2026-08-13T15:54:07",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -403,6 +403,20 @@
                 "risk": "elevated"
               }
             }
+          },
+          {
+            "slug": "equilibrium-metric-parity",
+            "why_now": "Given one flux map two codes should compute the same q, volumes and flux-surface averages, and that comparison isolates the derived-quantity chain with no solver in the loop. It also collapses an ambiguity in the forward gate, where an I_p or l_i disagreement could be either a different field or a different way of measuring the same field. Nova already carries fifteen profile columns and six scalars in FluxSurfaceGeometry, validated only against its own analytic fixtures, so this is the first time an outside code checks its conventions - and the same record is the geometry input for training one-dimensional transport equations in the competition entry.",
+            "done_when": "Every derived quantity the reference store carries is enumerated with units, shape and flux coordinate and paired against nova's record or marked absent-in-nova or unpairable with a reason; each paired quantity compared from the SAME stored map on the stored-LCFS interior and reported as a signed relative difference profile with median and interquartile range per frozen shot, separating convention artefacts from genuine numerical disagreement; whatever the reference computes and nova does not is implemented into the record with a convention-pinned definition, a tolerance and a test, cross-checked against analytic equilibria and internal consistency rather than against the reference alone.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "context": "extended",
+                "verification": "strict"
+              }
+            }
           }
         ],
         "starts": "2026-08-10",
@@ -652,6 +666,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 35
+    "_version": 36
   }
 }

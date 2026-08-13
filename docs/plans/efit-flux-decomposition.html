@@ -101,11 +101,29 @@
     sensor locations, so this rung extends a proven operator to a grid rather than writing a second
     vacuum-prediction path.</p>
 
-    <p><strong>Which current vector is a firewall question, not a convenience.</strong>
-    <code>efm/fcoil_x</code> is the experimental input; <code>efm/fcoil_c</code> is EFIT's own fitted
-    output. Driving our external field from EFIT's fitted currents would import part of EFIT's solution
-    into a comparison meant to be independent of it — the same concern the structural referee firewall
-    exists to protect. The decision is carried in <code>efit-map-inversion</code>; this plan consumes it.</p>
+    <p><strong>The external field is driven from EFIT's fitted currents, <code>efm/fcoil_c</code>, and
+    this is not a firewall breach.</strong> The firewall exists to stop EFIT's solution leaking into a
+    <em>fit</em> that is then scored against EFIT, which would be circular. Nothing here is fitted: the
+    question is whether nova's forward solve, given identical sources and currents, produces the same
+    field. Since the stored map was produced with <code>fcoil_c</code>, driving our external field from
+    the experimental <code>fcoil_x</code> instead would confound a solver difference with an input
+    difference — the experimental vector makes the comparison weaker, not more independent. The DINA
+    demonstration that already succeeded used its reference's own declared currents for the same reason.</p>
+
+    <p>Report the <code>fcoil_x</code> figure beside it where that is cheap. The difference between the
+    two vectors quantifies how far EFIT moved the currents from experiment, which bears directly on the
+    vacuum-field question this plan exists to settle: a residual that shrinks under fitted currents but
+    survives under experimental ones is a statement about the current measurement rather than about our
+    field model.</p>
+
+    <p><strong>These routines have value beyond this diagnosis, which raises the bar on how they are
+    written.</strong> Separating the plasma term from a stored flux map is what yields flux-surface-averaged
+    geometry, and that geometry is the input to training one-dimensional transport equations for the
+    competition entry — the same record
+    <a href="/nova/flux-function-forward-transport.html">flux-function-forward-transport</a> consumes as a
+    public output contract of <code>ForwardProfile</code>. So the decomposition should be built as a
+    reusable capability with the reference read behind an adapter, not as a one-slice diagnostic script
+    that happens to answer this question.</p>
 
     <h2 id="s4">§4 — The residual and the current it implies</h2>
 

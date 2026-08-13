@@ -25,7 +25,7 @@
 <meta name="plan-commits" content="213458a2,69c7f92a">
 <meta name="plan-artifacts" content="benchmarks/efit_forward_input_census.py,benchmarks/efit_affine_extraction.py">
 <meta name="plan-impl" content="0.35">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
@@ -86,13 +86,28 @@
     conductor vectors number 70, 69, 67, 61, 73 and 57 across the frozen six — <strong>397 rows,
     exactly the usable geometry count</strong>. Nothing is lost by requiring the full forward input set.</p>
 
-    <p><strong>The file declares no COCOS.</strong> Per-radian flux units plus data-derived signs on all
-    six shots give <code>e_Bp = 0</code>, <code>σ_Bp = −1</code>, <code>σ_ρθφ = −1</code>, compatible
-    with source COCOS 3; <code>σ_RφZ</code> cannot be determined from these scalar arrays and remains an
-    external frame declaration. Conversion into nova's COCOS 17 is then ψ ×2π, <code>Ip</code> and
-    <code>B0</code> unchanged, <code>q</code> ×(−1), and <code>pprime</code>/<code>ffprime</code> ÷2π.
-    A sign error here corrupts every downstream comparison silently, so §2 closes on an explicit
-    declaration rather than an inference.</p>
+    <p><strong>The file declares no COCOS, so the frame is declared externally: MAST is COCOS 3.</strong>
+    The census's data-derived digits agree independently — per-radian flux units plus signs on all six
+    shots give <code>e_Bp = 0</code>, <code>σ_Bp = −1</code>, <code>σ_ρθφ = −1</code> — and the
+    declaration settles <code>σ_RφZ</code>, which the stored scalars cannot determine. Conversion into
+    nova's COCOS 17 is ψ ×2π, <code>Ip</code> and <code>B0</code> unchanged, <code>q</code> ×(−1), and
+    <code>pprime</code>/<code>ffprime</code> ÷2π.</p>
+
+    <p><strong>The declaration does not settle the sign of plasma current, and that must be checked
+    rather than assumed.</strong> An <code>Ip</code> sign flip — between the machine's recording
+    convention and COCOS, or between campaign eras — would invert the plasma term and everything derived
+    from it while leaving every magnitude plausible, which is the failure mode that survives review.
+    MAST has already produced exactly this class of trap in this programme: 19 magnetics channels carry
+    discrete unnormalised acquisition scales stepping by 1/2, 1/√2, √2 and 2 across shot blocks, and
+    they manufactured phantom campaign physics until they were divided out on the read path. A sign
+    convention that moved across eras behaves the same way.</p>
+
+    <p>So the check is per shot, not once: sign agreement between
+    <code>efm/plasma_current_x</code>, <code>efm/plasma_current_c</code>, the Δ*-derived masked integral,
+    and the declared COCOS 3 frame, reported for every frozen shot. The prototype gives one datum in the
+    right direction already — on shot 21978 slice 46 the masked derived current is +925091.932 A against
+    a stored +925345.938 A, agreeing in sign and to −2.74e-04 in magnitude — but one slice of one shot is
+    not a campaign-wide guarantee.</p>
 
     <h2 id="s3">§3 — Topology and boundary from the given map</h2>
 
@@ -184,27 +199,27 @@
         normalised-flux threshold is not equivalent: it selects on a value, and private-flux and
         exterior regions can sit below one.</p>
     </div>
-<div class="r-dec" data-key="source-cocos-declaration" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="source-cocos-declaration" data-choice="declare-cocos-3" data-by="Simon McIntosh" data-when="2026-08-13T14:05:00+00:00">
     <p class="r-dec-q">The efm file declares no COCOS. Data-derived digits are compatible with
         source COCOS 3, but σ_RφZ is undeterminable from the stored scalars. Do we declare
         COCOS 3 externally on the strength of the derived digits, or gate the ladder on documentary
         confirmation of the frame?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="declare-cocos-3">declare source COCOS 3 with the derived digits recorded as its basis</button>
+      <button class="r-opt chosen" data-value="declare-cocos-3">declare source COCOS 3 with the derived digits recorded as its basis</button>
       <button class="r-opt" data-value="require-documentary-confirmation">gate on documentary confirmation of the frame</button>
       <button class="r-opt" data-value="tabulate-both-frames">carry both frame readings until a downstream check discriminates</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Owner declaration 2026-08-13: MAST is COCOS 3. The census&#x27;s data-derived digits agree (e_Bp = 0, sigma_Bp = -1, sigma_rho_theta_phi = -1 on all six shots), so the declaration and the derived evidence are consistent and sigma_RphiZ is settled by the declaration rather than left undeterminable. ONE CAUTION CARRIED WITH IT, and it is not a formality: check for convention changes with respect to the SIGN OF PLASMA CURRENT rather than assuming the declaration fixes it once. An Ip sign flip between the machine&#x27;s recording convention and COCOS, or between campaign eras, would silently invert the plasma term and every quantity derived from it while leaving magnitudes plausible. MAST has already demonstrated era-dependent convention hazards in this programme: 19 magnetics channels carry discrete unnormalised acquisition scales stepping by 1/2, 1/sqrt2, sqrt2 and 2 across shot blocks, which produced phantom campaign physics until they were divided out on the read path. A sign convention that moved across eras is the same class of trap. The check is therefore per shot, not once: agreement in sign between plasma_current_x, plasma_current_c, the delta_star-derived masked integral, and the declared COCOS 3 frame, reported for every frozen shot.</p>
     </div>
-<div class="r-dec" data-key="conductor-current-source" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="conductor-current-source" data-choice="fitted-fcoil-c" data-by="Simon McIntosh" data-when="2026-08-13T14:05:00+00:00">
     <p class="r-dec-q">The store carries conductor currents twice: efm/fcoil_x as
         experimental input and efm/fcoil_c as EFIT&#x27;s own fitted output. Which drives our
         external field?</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="experimental-fcoil-x">the experimental input, fcoil_x</button>
-      <button class="r-opt" data-value="fitted-fcoil-c">EFIT&#x27;s fitted output, fcoil_c</button>
+      <button class="r-opt chosen" data-value="fitted-fcoil-c">EFIT&#x27;s fitted output, fcoil_c</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Owner direction 2026-08-13: use the fitted EFIT currents. This is not a firewall issue. The firewall exists to stop EFIT&#x27;s SOLUTION leaking into a FIT that is then scored against EFIT, which would be circular; here nothing is fitted, and the question is whether nova&#x27;s forward solve, given identical sources and currents, produces the same field. Driving from fcoil_x would confound a solver difference with an input difference, because EFIT&#x27;s stored map was produced with fcoil_c - so the experimental vector makes the comparison weaker, not more independent. It also matches the DINA demonstration that already succeeded, which used that reference&#x27;s own declared coil currents. A secondary motive stands on its own: the flux-map decomposition routines have value beyond diagnosing this failure, as the plasma-term separation feeds flux-surface-averaged geometry for training one-dimensional transport equations in the competition entry. Where it is cheap, report the fcoil_x figure beside the fcoil_c one - the difference quantifies how far EFIT moved the currents from experiment, which is itself relevant to the vacuum-field question.</p>
     </div>
 </section>
 

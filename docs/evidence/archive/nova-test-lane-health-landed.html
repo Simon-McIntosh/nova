@@ -320,6 +320,45 @@
   as results would have manufactured 50 false regressions. <strong>No test was fixed, skipped,
   xfailed, disabled or changed</strong> — all 50 remain enabled.</p>
 
+  <h2 id="constructor-repair">The failing set drops from fifty to three</h2>
+
+  <p>Commit <code>5d003a26</code>. Gate passed, measured by re-run rather than inspection: each of the
+  50 classified ids was executed again in a fresh process, giving <strong>47 passed and exactly 3
+  failed</strong>. Python 3.14.2, pytest 9.1.1.</p>
+
+  <p>Six synthetic <code>ShotWaveforms</code> constructions across five test modules now supply the
+  <code>sensors</code> mapping the production type requires. The production field stayed required — no
+  source was changed to accommodate the tests, and nothing was skipped, xfailed, disabled, or had an
+  assertion relaxed.</p>
+
+  <p><strong>The three that remain are the pre-existing failures, named:</strong></p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Test</th><th>Observed</th></tr></thead>
+    <tbody>
+      <tr><td><code>test_equilibrium_forward_reference.py::test_the_passive_closure_moves_the_reproduction_by_a_tenth_of_a_percent</code></td><td>internal inductance 0.4165026973920738 against a 0.15 bound</td></tr>
+      <tr><td><code>test_mast_solve_inputs.py::test_each_probe_channel_reads_the_sensor_it_is_mapped_to[15000]</code></td><td>probe-to-sensor mapping</td></tr>
+      <tr><td><code>test_mast_solve_inputs.py::test_each_probe_channel_reads_the_sensor_it_is_mapped_to[13500]</code></td><td>probe-to-sensor mapping</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>The first of those three is not independent of this session's other work.</strong> Its
+  name asserts that the passive closure moves the reproduction by a tenth of a percent, and the
+  passive-response measurement banked under
+  <a href="/nova/evidence/archive/flux-function-forward-equilibrium-landed#passive-li-response">flux-function-forward-equilibrium</a>
+  found exactly that order — the passive-inclusive l_i deviation is &minus;0.135266%, with the closure
+  worth 0.904734074 pp. So this test may be encoding a pre-passive expectation against a quantity that
+  has since been measured properly, rather than reporting a defect. That belongs to the plan that owns
+  the measurement, not to this one, and it is routed there rather than adjudicated here.</p>
+
+  <p>One method note repeated from the classification node because it recurred: the first verification
+  attempt resolved user-level Python 3.11 under <code>uv run --no-sync pytest</code> and produced
+  collection errors. It was stopped and excluded, and the valid run explicitly verified the
+  interpreter, pytest version, and that <code>nova</code> imported from the assigned worktree. The
+  invalid attempt is retained on disk and excluded from the counts.</p>
+
   <h2 id="measurement-provenance">A banked figure must name the tree it measured</h2>
 
   <p>Commit <code>7b15ed64</code>. Gate passed: 3/3 tests, Python 3.14.2.</p>

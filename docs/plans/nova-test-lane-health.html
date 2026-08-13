@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-title" content="Nova Test Lane Health">
 <meta name="plan-summary" content="Make the whole suite completable in one process: remove the catalog-scan thread deadlock that parks the lane at 76 percent, so a full-lane count is obtainable without sharding around it">
-<meta name="plan-status" content="active">
+<meta name="plan-status" content="shipped">
 <meta name="plan-roi" content="high">
 <meta name="plan-effort" content="S">
 <meta name="plan-sprint" content="S7">
@@ -21,10 +21,10 @@
 <meta name="plan-capability-class" content="general">
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
-<meta name="plan-version" content="11">
-<meta name="plan-commits" content="459cecce,1c33c365,80c3b507,a5e1245c,eb242d80,d6998319,dc618673,7b15ed64,cc1f8f2c,ee5f7e02">
+<meta name="plan-version" content="14">
+<meta name="plan-commits" content="459cecce,1c33c365,80c3b507,a5e1245c,eb242d80,d6998319,dc618673,7b15ed64,cc1f8f2c,ee5f7e02,5d003a26">
 <meta name="plan-artifacts" content="docs/evidence/archive/nova-test-lane-health-landed.html,benchmarks/BASELINE.md,benchmarks/lane_resource_accumulation.py,benchmarks/measurement_provenance.py">
-<meta name="plan-impl" content="0.97">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
 <main class="plan-doc">
@@ -50,80 +50,46 @@
     that found it had to fall back to process sharding and record that its figures do not attest to
     the monolithic lane's health.</p>
 
-    <h2 id="s2">§2 — Work items</h2>
-    <ol>
-      <li><strong>Make the scan survive a thread-starved process.</strong> Establish what exhausts
-      thread creation by that point in suite order — leaked executors, unjoined threads, or a
-      resource limit — and make <code>scan_catalog</code> execute correctly regardless: a
-      single-worker scan runs inline rather than through an executor, and any executor it does
-      create is deterministically shut down. Fix the leak at its source when the source is nova's
-      own; where the leak is a test's, close it there.</li>
-      <li><strong>Prove the lane completes.</strong> One monolithic
-      <code>pytest -m "slow or not slow"</code> run reaches a final summary with counts, on the same
-      SHA class that previously deadlocked.</li>
-    </ol>
+    <h2 id="s2"><span class="badge badge-shipped">✓ landed 2026-08-13</span> §2 — Work items</h2>
+    <p class="landed-summary">
+      Item 1: <code>scan_catalog</code> fingerprints inline at <code>workers=1</code> and shuts any
+      executor down deterministically (<code>459cecce</code>); the ordered subset that used to park
+      reached 241 passed in 24.14 s, and a failing sentinel replaces
+      <code>ThreadPoolExecutor</code> so the dependency cannot silently return.
+      Item 2: the monolithic lane now emits counts — <strong>50 failed, 5655 passed, 141 skipped,
+      4 xfailed in 2012.90 s</strong>, all 5,842 tests in one process
+      (<code>cc1f8f2c</code>). The starvation mechanism is named as retained JAX/XLA CPU compilation,
+      by measurement rather than argument. Full record:
+      <a href="/nova/evidence/archive/nova-test-lane-health-landed#monolithic-count">monolithic count</a>
+      and <a href="/nova/evidence/archive/nova-test-lane-health-landed#resource-owner">resource owner</a>.
+    </p>
 
-    <p><em>Done-when:</em> the deadlocking test passes in suite order in a monolithic run; the full
-    lane emits final passed/failed/skipped counts in one process; the mechanism that exhausted
-    thread creation is named in the evidence record rather than worked around silently.</p>
+    <h2 id="s3"><span class="badge badge-shipped">✓ landed 2026-08-13</span> §3 — Bound the compilation retention</h2>
 
-    <h2 id="s3">§3 — Bound the compilation retention, now that it is named</h2>
+    <p class="landed-summary">
+      Releasing compiled executables at a ceiling, checked every 100 tests and naming no individual
+      test, replaced monotonic growth with a bounded population: live executables max <strong>933 of
+      1,024</strong> against 4,221-and-monotonic before, native threads max <strong>262 of 300</strong>
+      against +226 before, four releases fired, and the run compiled <em>more</em> times (7,595 vs
+      6,001) while holding far fewer. The lane reached <code>process_exit</code> with a final summary;
+      the tail-isolation fallback was not needed, so the single-process property survives.
+      Commit <code>cc1f8f2c</code>; full record:
+      <a href="/nova/evidence/archive/nova-test-lane-health-landed#monolithic-count">monolithic count</a>.
+    </p>
 
-    <p><strong>The owner is measured, so the repair is no longer a guess between candidates.</strong>
-    A frozen monolithic run holds 4,221 live executables and 212 retained native-only XLA-class
-    threads at abort, and heap plus anonymous native mappings explain 97.9% of its RSS growth. The
-    paired control settles what it is <em>not</em>: Python-managed threads grew by 14 against 212
-    native, so Python executor leakage is excluded, and configured PID ceilings were excluded
-    earlier.</p>
+    <h2 id="s4"><span class="badge badge-shipped">✓ landed 2026-08-13</span> §4 — Fifty failures the monolithic count made visible</h2>
 
-    <p>Two facts constrain what a repair may be. <code>jax.clear_caches()</code> returned 2.5 MiB of
-    892 MiB, so cache eviction at a call site is not a repair — it addresses about 0.3% of the
-    retention. And the abort <em>moves</em> when the lane changes: it has already relocated from
-    <code>test_x_mask_excludes_cells_beyond_null_heights</code> to
-    <code>test_batched_primary_points_match_per_slice</code>, both compiling under
-    <code>backend_compile_and_load</code>. So a fix pinned to either test name would be measuring the
-    lane's current shape rather than bounding the resource, and a third site will appear as the suite
-    grows.</p>
-
-    <p>The lever is therefore the retention itself: cap or evict compiled-executable and native-thread
-    retention across a long-lived suite process, so the count stops growing without capping the number
-    of tests. Isolating the JAX-heavy tail into its own process remains available as the fallback, but
-    it is explicitly second choice — it buys a count by giving up the single-process property §1 exists
-    to obtain, and would leave the accumulation unbounded for any future long-lived process.</p>
-
-    <p><em>Done-when:</em> live-executable count and retained native-thread count are sampled across
-    a frozen monolithic run and both stay under a stated ceiling to the end of the run instead of
-    growing monotonically; the run reaches a final pytest summary and its passed/failed/skipped/xfailed
-    counts are banked with the frozen SHA the provenance stamp requires; and if a ceiling cannot hold
-    without shrinking coverage, the measured reason is recorded and the tail-isolation fallback is
-    taken deliberately rather than by default.</p>
-
-    <h2 id="s4">§4 — Fifty failures the monolithic count made visible</h2>
-
-    <p><strong>The count exists, and it is not green.</strong> The first monolithic run reports
-    50 failed against 5,655 passed. That number could not be seen before: while the lane could not
-    finish, every failure past the abort point was invisible, and the only prior figure — 3 failures
-    against 5,657 passed — came from a process-sharded run that is now explicitly labelled
-    unattributable in <code>BASELINE.md</code>.</p>
-
-    <p><strong>So 50 against 3 is not yet a regression, and must not be reported as one.</strong>
-    Three readings are live and they are not equivalent: the sharded run's per-shard processes may
-    simply never have reached these tests; sharding may have masked failures by giving each shard a
-    fresh interpreter, in which case some of the 50 are suite-order effects rather than defects in the
-    tests themselves; or genuine regressions landed in the intervening commits. The first two are
-    properties of the old measurement, the third is a property of the code, and only a comparison run
-    can separate them.</p>
-
-    <p>The failures stay enabled while this is settled. A failing test in a lane summary directs
-    effort; a disabled one is invisible, and the whole point of obtaining the count was to stop
-    working blind.</p>
-
-    <p><em>Done-when:</em> each of the 50 failures is classified as a suite-order effect, a
-    pre-existing failure the sharded run never reached, or a genuine regression with the commit that
-    introduced it, by re-running the failing ids in a fresh process and comparing against their
-    in-suite result; the classification is banked with counts per class against the frozen SHA; and
-    <code>BASELINE.md</code> records the monolithic figure as the reference the next run is compared
-    to, superseding the unattributable sharded entry.</p>
+    <p class="landed-summary">
+      Classified in fresh processes against the sharded baseline: <strong>47 regression / 3
+      pre-existing-known / 0 pre-existing-unseen / 0 suite-order-effect</strong>. The 47 are one cause
+      — <code>60df29bb</code> added a required <code>ShotWaveforms</code> field without updating test
+      constructors — and were repaired, dropping the fresh-process failing set from 50 to exactly 3
+      by re-run. Zero suite-order effects retires the idea that sharding was hiding failures.
+      Commits <code>ee5f7e02</code>, <code>5d003a26</code>; full record:
+      <a href="/nova/evidence/archive/nova-test-lane-health-landed#failure-classification">classification</a>
+      and <a href="/nova/evidence/archive/nova-test-lane-health-landed#constructor-repair">repair</a>.
+      The 3 remaining are enabled and routed to the plans that own them.
+    </p>
 
 <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
@@ -151,6 +117,16 @@
     <pre class="r-fu-prompt">/reckon-ship nova-test-lane-health §2</pre>
     <p class="r-fu-outcome">Closed across d6998319/dc618673 (attribution) and cc1f8f2c (bound). Owner named by measurement: retained JAX/XLA CPU compilation, with Python-managed thread growth of 14 against 212 native excluding executor leakage. Bounded rather than isolated: live executables max 933 of a 1024 ceiling against 4221-and-monotonic before, native threads max 262 of 300 against +226 before, four releases, and the lane reached a final summary. The tail-isolation fallback was not needed.</p>
     </article>
+<article class="r-fu" data-id="f-ntlh-005" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship flux-function-forward-equilibrium §6" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Re-examine the passive-closure reproduction bound against the measured closure</h4>
+    <div class="r-fu-body"><p><strong>Exemption: foreign-owner — flux-function-forward-equilibrium owns the measurement this test asserts against.</strong> One of the three failures left enabled after the constructor repair is <code>tests/test_equilibrium_forward_reference.py::test_the_passive_closure_moves_the_reproduction_by_a_tenth_of_a_percent</code>, observing internal inductance 0.4165026973920738 against a 0.15 bound. Its name asserts the passive closure moves the reproduction by a tenth of a percent, and that quantity has since been measured properly: the passive-inclusive l_i deviation is &minus;0.135266% with the closure worth 0.904734074 pp, against an active-only &minus;1.04%. So the bound may be encoding a pre-passive expectation rather than reporting a defect. Deciding that needs the plan owning the passive-response measurement and its two labelled configuration rows, not the lane plan. The test stays enabled meanwhile.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship flux-function-forward-equilibrium §6</pre>
+    </article>
+<article class="r-fu" data-id="f-ntlh-006" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship mast-corrected-read-layer" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">The probe-to-sensor mapping failures outlive their shipped plan</h4>
+    <div class="r-fu-body"><p><strong>Exemption: foreign-owner — mast-corrected-read-layer owns the probe-to-sensor mapping.</strong> The other two enabled failures are <code>tests/test_mast_solve_inputs.py::test_each_probe_channel_reads_the_sensor_it_is_mapped_to</code> at [15000] and [13500]. They are long-standing: earlier gates recorded them as the two pre-existing probe-orientation failures in fenced files, and the classification confirmed they fail in a fresh process rather than being suite-order effects. They belong to the corrected read layer, not to lane health.</p><p><strong>Note the ownership problem rather than papering over it:</strong> mast-corrected-read-layer is status shipped, so no active plan carries this work. Resolving it therefore starts with a decision the lane plan cannot make — reopen that plan to cover the mapping defect, or accept the two failures as a recorded permanent exception with a stated reason. Read its current state before assuming either, and do not reopen a shipped plan without that judgement.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship mast-corrected-read-layer</pre>
+    </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s2" data-id="c-20260812-deadlock" data-who="reckon-ship" data-when="2026-08-12T20:50:00+00:00">
@@ -173,6 +149,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260813-failureclass" data-who="reckon-ship" data-when="2026-08-13T10:15:00+00:00">
     <div class="r-comment-body">lane-failure-classification landed - commit ee5f7e02; gate PASSED 50/50 ids collected exactly one test and reached a final pytest summary. Classification frozen at c1e20bc8, Python 3.14.2, pytest 9.1.1, nova.__file__ verified inside the worker's own worktree, SLURM 1245273. RESULT: 47 regression / 3 pre-existing-known / 0 pre-existing-unseen / 0 suite-order-effect = 50, every id named under exactly one class. THE 47 ARE ONE CAUSE WITH A NAMED COMMIT: all fail identically with 'ShotWaveforms.__init__() missing required sensors argument'; commit 60df29bb added that required field between the sharded and monolithic SHAs without updating the test constructors. So 50 against 3 IS a regression for 47 of it, and it is one mechanical defect rather than broad decay. ZERO SUITE-ORDER EFFECTS retires a hypothesis rather than confirming one - sharding was NOT masking failures behind fresh interpreters; the old 3-failure figure was low because the sharded run predated 60df29bb. The three pre-existing failures reproduce exactly: an equilibrium internal-inductance assertion at 0.4165026973920738 against a 0.15 bound, and both packaged-registry probe-angle ids. METHOD: the classification tree differs from the measured cc1f8f2c only in nova/imas/mast_parity_gate.py and tests/test_parity_gate.py, neither among the 50 ids nor their tested modules, and both SHAs are banked rather than one implied. Two earlier invalid attempts are retained on disk but EXCLUDED from classification - an unsynced worktree fell through to system Python 3.11 giving 50 collection errors on 3.14 syntax, then a pytest-less synced environment gave 50 pre-collection errors; reporting either as results would have manufactured 50 false regressions. No test was fixed, skipped, xfailed, disabled or changed - all 50 remain enabled. The 47-test constructor repair is carried as its own node. Artifacts: /nova/evidence/archive/nova-test-lane-health-landed#failure-classification</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260813-constructorrepair" data-who="reckon-ship" data-when="2026-08-13T10:40:00+00:00">
+    <div class="r-comment-body">shot-waveforms-constructor-repair landed - commit 5d003a26; gate PASSED, measured by re-run rather than inspection: all 50 classified ids re-executed in fresh processes gave 47 passed and exactly 3 failed, so the failing set dropped from 50 to 3. Six synthetic ShotWaveforms constructions across five test modules now supply the sensors mapping the production type requires. The production field STAYED required - no source changed to accommodate tests, and nothing was skipped, xfailed, disabled or assertion-relaxed. THE THREE REMAINING ARE THE PRE-EXISTING FAILURES, NAMED: test_equilibrium_forward_reference.py::test_the_passive_closure_moves_the_reproduction_by_a_tenth_of_a_percent at internal inductance 0.4165026973920738 against a 0.15 bound, and test_mast_solve_inputs.py::test_each_probe_channel_reads_the_sensor_it_is_mapped_to at [15000] and [13500]. THE FIRST IS NOT INDEPENDENT OF THIS SESSION'S OTHER WORK: its name asserts the passive closure moves the reproduction by a tenth of a percent, and the passive-response measurement found exactly that order - passive-inclusive l_i deviation -0.135266% with the closure worth 0.904734074 pp. So it may encode a pre-passive expectation against a quantity since measured properly rather than reporting a defect; that belongs to the plan owning the measurement and is routed there rather than adjudicated here. Method note that recurred: the first verification attempt resolved user-level Python 3.11 under uv run --no-sync pytest and produced collection errors; it was stopped, excluded, retained on disk, and the valid run verified interpreter, pytest version and that nova imported from the assigned worktree. Artifacts: /nova/evidence/archive/nova-test-lane-health-landed#constructor-repair</div>
 </div>
 </section>
 </main>

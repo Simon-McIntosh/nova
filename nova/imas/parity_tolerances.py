@@ -25,6 +25,7 @@ class ScorecardField(enum.StrEnum):
     X_POINT_DISTANCE_M = "x_point_distance_m"
     TOPOLOGY_CLASS_AGREEMENT_FRACTION = "topology_class_agreement_fraction"
     PROFILE_RESIDUAL_RMS = "profile_residual_rms"
+    FIXED_POINT_DEFECT = "fixed_point_defect"
     MAGNETICS_RESIDUAL_WHITENED_RMS = "magnetics_residual_whitened_rms"
     CONVERGED_FRACTION = "converged_fraction"
     CONFINED_FRACTION = "confined_fraction"
@@ -144,6 +145,18 @@ def _common_tolerances() -> dict[str, MetricTolerance]:
                 "the deterministic reproduction spread was zero"
             ),
             evidence=REFERENCE_STAMP,
+        ),
+        ScorecardField.FIXED_POINT_DEFECT: MetricTolerance(
+            field=ScorecardField.FIXED_POINT_DEFECT,
+            bound=1.0e-8,
+            direction=BoundDirection.AT_MOST,
+            unit="relative sup norm",
+            basis=(
+                "the profile accelerator's existing strict convergence criterion, "
+                "applied to max|g(x)-x|/max|g(x)| without substituting the "
+                "cross-substrate current-reproduction bound"
+            ),
+            evidence="nova/equilibrium/fixed_point.py",
         ),
         ScorecardField.CONVERGED_FRACTION: MetricTolerance(
             field=ScorecardField.CONVERGED_FRACTION,

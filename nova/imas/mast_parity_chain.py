@@ -24,8 +24,10 @@ from typing import Any, Mapping, Protocol
 import jax
 import jax.numpy as jnp
 import numpy as np
+from scipy.constants import mu_0
 
 from nova.equilibrium.fixed_point import newton_krylov
+from nova.equilibrium.convention import TOTAL_FLUX_FACTOR
 from nova.equilibrium.measurement import SliceMeasurement
 from nova.imas.mast_solve_inputs import (
     CorrectedSolveInputs,
@@ -158,6 +160,9 @@ class PhysicsScores:
 
     profile_residual: np.ndarray
     whitened_raw_magnetics_residual: np.ndarray
+    fixed_point_defect: np.ndarray = field(
+        default_factory=lambda: np.empty(0, dtype=float)
+    )
 
 
 @dataclass(frozen=True)
@@ -389,6 +394,109 @@ def _raw_magnetics_residuals(
     return np.asarray(jnp.stack(residuals))
 
 
+def _profile_reproduction_residuals(
+    profile_solver: Any,
+    source_current: np.ndarray,
+    inputs: CorrectedSolveInputs,
+    scale: np.ndarray,
+    mask: np.ndarray,
+    flux: np.ndarray,
+) -> np.ndarray:
+    """Compare Nova profile current with an independent grid-operator read.
+
+    Each row is ``RMS(j_phi_nova - j_phi_grid) / max(abs(j_phi_grid))``.
+    ``j_phi_nova`` comes from the fitted profile basis, while ``j_phi_grid``
+    is read independently by applying the structured-grid Grad--Shafranov
+    operator to the plasma-generated part of the solved flux.  Only interior
+    in-limiter cells with a complete central-difference stencil are scored.
+    """
+
+    grid_r = np.asarray(profile_solver.grid_r, dtype=float)
+    grid_z = np.asarray(profile_solver.grid_z, dtype=float)
+    grid_shape = (grid_z.size, grid_r.size)
+    if grid_r.ndim != 1 or grid_z.ndim != 1 or min(grid_shape) < 3:
+        return np.full(inputs.slice_count, np.nan)
+    radial_step = np.diff(grid_r)
+    vertical_step = np.diff(grid_z)
+    if not (
+        np.all(radial_step > 0.0)
+        and np.all(vertical_step > 0.0)
+        and np.allclose(radial_step, radial_step[0], rtol=1.0e-12)
+        and np.allclose(vertical_step, vertical_step[0], rtol=1.0e-12)
+    ):
+        raise ValueError("profile reproduction requires a uniform structured grid")
+
+    cell_area = np.asarray(profile_solver.cell_area, dtype=float)
+    inside = np.asarray(profile_solver.inside_limiter, dtype=bool)
+    if cell_area.shape != (grid_r.size * grid_z.size,):
+        raise ValueError("cell_area does not match the profile grid")
+    if inside.shape != grid_shape:
+        raise ValueError("inside_limiter does not match the profile grid")
+
+    interior = np.zeros(grid_shape, dtype=bool)
+    interior[1:-1, 1:-1] = True
+    keep = interior & inside
+    radius = grid_r[np.newaxis, :]
+    residuals: list[float] = []
+    for index, state in enumerate(np.asarray(flux)):
+        source = jnp.asarray(
+            source_current[index], dtype=profile_solver.source_to_grid.dtype
+        )
+        plasma = jnp.asarray(
+            inputs.plasma_current_a[index], dtype=profile_solver.source_to_grid.dtype
+        )
+        measured = jnp.asarray(
+            inputs.sensor_signals[index], dtype=profile_solver.source_to_grid.dtype
+        )
+        scales = jnp.asarray(scale, dtype=profile_solver.source_to_grid.dtype)
+        measured_mask = jnp.asarray(mask[index], dtype=bool)
+        state_array = jnp.asarray(state, dtype=profile_solver.source_to_grid.dtype)
+        basis, _labels = profile_solver._profile_basis(state_array)
+        coefficients = profile_solver._least_squares_coefficients(
+            basis, source, plasma, measured, scales, measured_mask
+        )
+        nova_current_density = np.asarray(basis @ coefficients) / cell_area
+
+        vacuum_flux = np.asarray(profile_solver.source_to_grid @ source)
+        plasma_flux = (np.asarray(state) - vacuum_flux).reshape(grid_shape)
+        radial_first = (plasma_flux[:, 2:] - plasma_flux[:, :-2]) / (
+            2.0 * radial_step[0]
+        )
+        radial_second = (
+            plasma_flux[:, 2:] - 2.0 * plasma_flux[:, 1:-1] + plasma_flux[:, :-2]
+        ) / radial_step[0] ** 2
+        vertical_second = (
+            plasma_flux[2:, :] - 2.0 * plasma_flux[1:-1, :] + plasma_flux[:-2, :]
+        ) / vertical_step[0] ** 2
+        delta_star = (
+            radial_second[1:-1]
+            - radial_first[1:-1] / radius[:, 1:-1]
+            + vertical_second[:, 1:-1]
+        )
+        grid_current_density = np.full(grid_shape, np.nan)
+        grid_current_density[1:-1, 1:-1] = -delta_star / (
+            TOTAL_FLUX_FACTOR * mu_0 * radius[:, 1:-1]
+        )
+        finite = (
+            keep
+            & np.isfinite(grid_current_density)
+            & np.isfinite(nova_current_density.reshape(grid_shape))
+        )
+        reference = grid_current_density[finite]
+        if not reference.size:
+            residuals.append(float("nan"))
+            continue
+        reference_scale = float(np.max(np.abs(reference)))
+        if not np.isfinite(reference_scale) or reference_scale <= 0.0:
+            residuals.append(float("nan"))
+            continue
+        difference = (
+            nova_current_density.reshape(grid_shape)[finite] - reference
+        ) / reference_scale
+        residuals.append(float(np.sqrt(np.mean(np.square(difference)))))
+    return np.asarray(residuals)
+
+
 def _lcfs_distance(seed: Any, solved_lcfs: np.ndarray) -> float:
     """Return symmetric nearest-point distance between seed and solved boundaries."""
 
@@ -410,15 +518,28 @@ def _lcfs_distance(seed: Any, solved_lcfs: np.ndarray) -> float:
 def _convergence_fraction(trace: np.ndarray, final: np.ndarray) -> np.ndarray:
     """Return the fractional residual reduction from first to final read."""
 
-    first = np.array(
-        [row[np.flatnonzero(np.isfinite(row))[0]] for row in trace], dtype=float
+    trace_array = np.asarray(trace, dtype=float)
+    final_array = np.asarray(final, dtype=float)
+    if trace_array.ndim != 2 or trace_array.shape[0] != final_array.shape[0]:
+        raise ValueError("residual trace rows must match the final residual row count")
+    finite = np.isfinite(trace_array)
+    has_finite = np.any(finite, axis=1)
+    first_index = np.argmax(finite, axis=1)
+    first = np.full(final_array.shape, np.nan, dtype=float)
+    rows = np.flatnonzero(has_finite)
+    first[rows] = trace_array[rows, first_index[rows]]
+    ratio = np.divide(
+        final_array,
+        first,
+        out=np.ones_like(final_array, dtype=float),
+        where=has_finite & np.isfinite(final_array) & (first > 0.0),
     )
-    ratio = np.divide(final, first, out=np.ones_like(final), where=first > 0.0)
     return np.clip(1.0 - ratio, 0.0, 1.0)
 
 
 def _registered_scorecard_metrics(
     solve: AcceleratedProfileSolve,
+    profile_reproduction: np.ndarray,
     raw_residual: np.ndarray,
     topology: TopologyLabels,
     temporal: np.ndarray,
@@ -446,7 +567,10 @@ def _registered_scorecard_metrics(
                 reference_dependent
             ),
             ScorecardField.PROFILE_RESIDUAL_RMS.value: float(
-                np.sqrt(np.mean(np.square(solve.residual)))
+                np.median(profile_reproduction)
+            ),
+            ScorecardField.FIXED_POINT_DEFECT.value: float(
+                np.max(np.abs(solve.residual))
             ),
             ScorecardField.MAGNETICS_RESIDUAL_WHITENED_RMS.value: float(
                 np.sqrt(np.mean(np.square(raw_residual)))
@@ -505,6 +629,9 @@ def run_parity_chain(
     raw_residual = _raw_magnetics_residuals(
         profile_solver, source_current, inputs, scale, mask, solve.flux
     )
+    profile_reproduction = _profile_reproduction_residuals(
+        profile_solver, source_current, inputs, scale, mask, solve.flux
+    )
     if temporal_scorer is None:
         temporal = np.full(inputs.slice_count, np.nan)
     else:
@@ -534,8 +661,9 @@ def run_parity_chain(
             ),
         ),
         physics=PhysicsScores(
-            profile_residual=np.asarray(solve.residual),
+            profile_residual=profile_reproduction,
             whitened_raw_magnetics_residual=raw_residual,
+            fixed_point_defect=np.asarray(solve.residual),
         ),
         solve_health=SolveHealthScores(
             convergence_fraction=_convergence_fraction(solve.trace, solve.residual),
@@ -545,7 +673,12 @@ def run_parity_chain(
         ),
         temporal=TemporalScores(current_diffusion_flux_ledger_consistency=temporal),
         registered_metrics=_registered_scorecard_metrics(
-            solve, raw_residual, topology, temporal, accelerator
+            solve,
+            profile_reproduction,
+            raw_residual,
+            topology,
+            temporal,
+            accelerator,
         ),
         magnetics_budget=magnetics_budget,
     )

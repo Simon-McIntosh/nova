@@ -240,6 +240,53 @@
   truncated by a time fence is not a smaller measurement of the same thing, it is a different claim.
   How many of the 7,500 slices are physically supported remains the open number the gate needs.</p>
 
+  <h2 id="support-tally">The gate scores real slices, and shot 21978 fails</h2>
+
+  <p>Commits <code>7ddeb717</code>, <code>de672204</code>, <code>c058f214</code>. Gate passed —
+  11/11 tests, complete coverage proven. Artifact:
+  <code>shot-21978-scorecard.json</code>,
+  <code>sha256:b51374387847c0d9…</code>, plus 30 atomic partition files. SLURM 1245163 scored 13
+  partitions and retry allocation 1245219 recovered the remaining 17.</p>
+
+  <p><strong>After four attempts that scored nothing, the gate has a cohort.</strong> Scoring the
+  shot in 30 atomic 250-slice partitions across a compute allowance made the full sweep obtainable
+  without shrinking anything: <code>min_cells</code> stayed 5, the grid stayed at the registered
+  33&times;49, and <strong>all 7,500 source indices from 0 to 7,499 occur exactly once</strong> — the
+  coverage claim is checked, not asserted. Two banking repairs were needed along the way, both
+  in the direction of keeping data rather than dropping it: nonconverged score rows are retained, and
+  empty reference intervals are banked.</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Class</th><th>Slices</th><th>Share of 7,500</th></tr></thead>
+    <tbody>
+      <tr><td><strong>scored</strong></td><td><strong>1,659</strong></td><td>22.1%</td></tr>
+      <tr><td>moment-supported but no reference within time tolerance</td><td>2,523</td><td>33.6%</td></tr>
+      <tr><td><code>current-centroid-outside-limiter</code></td><td>2,956</td><td>39.4%</td></tr>
+      <tr><td><code>seed-disc-insufficient-supported-cells</code></td><td>316</td><td>4.2%</td></tr>
+      <tr><td><code>flood-seed-outside-vessel</code></td><td>46</td><td>0.6%</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>4,182 of 7,500 slices (55.8%) are physically supported for moment seeding</strong> —
+  1,659 scored plus 2,523 dropped after solving for want of an aligned EFIT row. The typed
+  physically-unsupported total is 3,318, dominated by the current centroid lying outside the limiter,
+  which is what a pre-pulse or post-disruption record looks like. This is the number the gate had
+  never produced, and it settles the earlier reading: the four failed attempts were not hitting
+  physics or grid limits, they were hitting slice selection, and rather more than a third of a MAST
+  shot record carries no seedable plasma. <strong>No fourth <code>UnsupportedSlice</code> condition
+  appeared across all 7,500 slices</strong>, so the three authorised conditions are the complete set
+  on this shot.</p>
+
+  <p><strong>Verdict on shot 21978: FAIL, under unchanged registered tolerances.</strong> No
+  tolerance was widened, no proxy metric substituted, and no partition dropped to improve the
+  outcome. The honest-negative discipline applies exactly as pre-registered: a failing gate is a
+  recorded verdict that holds the GPU catalog, not a bound to revisit. This is one shot of the frozen
+  six and does not include the pre-registered held-out extension, so it is <em>not</em> the plan's
+  parity verdict — it is the first real evidence that the assembled chain scores, and what it scores
+  does not currently clear the bar.</p>
+
   <h2 id="topology-agreement">The limited/diverted disagreement was a grid artifact</h2>
 
   <p>Commits <code>bdaf0844</code>, <code>73336ac0</code>. Both gates passed.</p>

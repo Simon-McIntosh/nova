@@ -21,10 +21,10 @@
 <meta name="plan-capability-class" content="general">
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
-<meta name="plan-version" content="8">
-<meta name="plan-commits" content="459cecce,1c33c365,80c3b507,a5e1245c,eb242d80,d6998319,dc618673,7b15ed64">
+<meta name="plan-version" content="10">
+<meta name="plan-commits" content="459cecce,1c33c365,80c3b507,a5e1245c,eb242d80,d6998319,dc618673,7b15ed64,cc1f8f2c">
 <meta name="plan-artifacts" content="docs/evidence/archive/nova-test-lane-health-landed.html,benchmarks/BASELINE.md,benchmarks/lane_resource_accumulation.py,benchmarks/measurement_provenance.py">
-<meta name="plan-impl" content="0.88">
+<meta name="plan-impl" content="0.95">
 </head>
 <body>
 <main class="plan-doc">
@@ -98,12 +98,40 @@
     without shrinking coverage, the measured reason is recorded and the tail-isolation fallback is
     taken deliberately rather than by default.</p>
 
+    <h2 id="s4">§4 — Fifty failures the monolithic count made visible</h2>
+
+    <p><strong>The count exists, and it is not green.</strong> The first monolithic run reports
+    50 failed against 5,655 passed. That number could not be seen before: while the lane could not
+    finish, every failure past the abort point was invisible, and the only prior figure — 3 failures
+    against 5,657 passed — came from a process-sharded run that is now explicitly labelled
+    unattributable in <code>BASELINE.md</code>.</p>
+
+    <p><strong>So 50 against 3 is not yet a regression, and must not be reported as one.</strong>
+    Three readings are live and they are not equivalent: the sharded run's per-shard processes may
+    simply never have reached these tests; sharding may have masked failures by giving each shard a
+    fresh interpreter, in which case some of the 50 are suite-order effects rather than defects in the
+    tests themselves; or genuine regressions landed in the intervening commits. The first two are
+    properties of the old measurement, the third is a property of the code, and only a comparison run
+    can separate them.</p>
+
+    <p>The failures stay enabled while this is settled. A failing test in a lane summary directs
+    effort; a disabled one is invisible, and the whole point of obtaining the count was to stop
+    working blind.</p>
+
+    <p><em>Done-when:</em> each of the 50 failures is classified as a suite-order effect, a
+    pre-existing failure the sharded run never reached, or a genuine regression with the commit that
+    introduced it, by re-running the failing ids in a fresh process and comparing against their
+    in-suite result; the classification is banked with counts per class against the frozen SHA; and
+    <code>BASELINE.md</code> records the monolithic figure as the reference the next run is compared
+    to, superseding the unattributable sharded entry.</p>
+
 <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-ntlh-001" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-12" data-recommends-skill="/reckon-ship nova-test-lane-health §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ntlh-001" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-12" data-recommends-skill="/reckon-ship nova-test-lane-health §2" data-resolved-at="2026-08-13T09:24:03+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Prove the monolithic lane completes on the repaired tree (§2 item 2)</h4>
     <div class="r-fu-body"><p>Item 1 removed the executor dependency and demonstrated it on the ordered subset that used to park, but the whole-lane claim is still outstanding: the banked 5,657/3/107/4 figures were taken before the repair and are process-sharded, which by their own recorded caveat does not attest to monolithic-lane health. Run one monolithic pytest -m 'slow or not slow' on the integrated SHA and record whether it reaches a final summary and with what counts. If it parks somewhere new, that is the next starvation site and the same diagnosis applies.</p></div>
     <pre class="r-fu-prompt">/reckon-ship nova-test-lane-health §2</pre>
+    <p class="r-fu-outcome">Closed by cc1f8f2c. One monolithic unsharded pytest -m 'slow or not slow' run from a frozen detached worktree reached its final summary: 50 failed, 5655 passed, 141 skipped, 4 xfailed in 2012.90s, all 5842 selected tests completed. Counts banked with the frozen SHA the provenance stamp requires. It did not park somewhere new - the retention bound held to the end of the run.</p>
     </article>
 <article class="r-fu" data-id="f-ntlh-002" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship nova-test-lane-health §2" data-resolved-at="2026-08-13T05:44:49+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Diagnose the native JAX abort at the topology-boundary test</h4>
@@ -117,10 +145,11 @@
     <pre class="r-fu-prompt">/reckon-ship nova-test-lane-health §2</pre>
     <p class="r-fu-outcome">Closed by 7b15ed64. The frozen-worktree method is now enforced rather than documented: a stamp requires the full HEAD SHA with empty git status --porcelain output and matching pre/post SHAs from a detached worktree, refused for a dirty or non-repository path (3/3 tests). 13 unattributable historical entries labelled as such, 0 figures altered.</p>
     </article>
-<article class="r-fu" data-id="f-ntlh-004" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship nova-test-lane-health §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ntlh-004" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship nova-test-lane-health §2" data-resolved-at="2026-08-13T09:24:03+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Bound the accumulating native-resource owner across the lane</h4>
     <div class="r-fu-body"><p>Two lane failures now share one cause: the catalog scan parked in <code>Thread.start()</code> and the topology-boundary test aborts in <code>pthread_create</code>, both because a long-lived suite process can no longer obtain a native thread, and neither because of a configured ceiling. Patching call sites individually will not converge — a third will appear as the lane grows. Measure resident and virtual memory plus retained native threads across a frozen monolithic run, attribute the accumulation to its owner (retained JAX compilations are a candidate at 407 → 892 MB over 256 compilations, but were not sufficient alone), and either bound it or isolate the JAX-heavy tail into its own process. A cache clear in a single test is not a repair: it released 2.5 MB of 892 MB.</p></div>
     <pre class="r-fu-prompt">/reckon-ship nova-test-lane-health §2</pre>
+    <p class="r-fu-outcome">Closed across d6998319/dc618673 (attribution) and cc1f8f2c (bound). Owner named by measurement: retained JAX/XLA CPU compilation, with Python-managed thread growth of 14 against 212 native excluding executor leakage. Bounded rather than isolated: live executables max 933 of a 1024 ceiling against 4221-and-monotonic before, native threads max 262 of 300 against +226 before, four releases, and the lane reached a final summary. The tail-isolation fallback was not needed.</p>
     </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
@@ -138,6 +167,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260813-provenance" data-who="reckon-ship" data-when="2026-08-13T08:10:00+00:00">
     <div class="r-comment-body">measurement-provenance landed - commit 7b15ed64; gate PASSED 3/3 on Python 3.14.2. This closes f-ntlh-003 by making attribution structural rather than a convention to remember. measurement_provenance.py resolves the full 40-character HEAD SHA plus whether git status --porcelain emits any line, and refuses a stamp otherwise; verified three ways - empty porcelain output produced the exact HEAD stamp, one modified tracked file set has_porcelain_output=true and raised MeasurementProvenanceError, and a non-repository path raised the same. BASELINE.md's method section now requires MATCHING pre- and post-run SHAs from a detached worktree, so a tree that moves mid-measurement fails the check rather than yielding a figure nobody can place - which is exactly what happened when the monolithic attempt ran against the primary checkout as it advanced d4ce244d -&gt; cb70bdf8. 13 existing entries are labelled UNATTRIBUTABLE rather than deleted (12 historical top-level groups naming no full SHA, plus the mutable monolithic attempt); the one process-sharded entry that recorded its exact tree keeps its SHA. 0 benchmark figures changed or re-run: the value is that a reader can tell which numbers are placeable, and silently dropping the rest would have destroyed that distinction as thoroughly as leaving them implying attribution. Artifacts: /nova/evidence/archive/nova-test-lane-health-landed#measurement-provenance</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260813-monolithiccount" data-who="reckon-ship" data-when="2026-08-13T08:58:00+00:00">
+    <div class="r-comment-body">lane-retention-bound landed - commit cc1f8f2c; gate PASSED; SLURM job 1245158. THE WHOLE LANE COMPLETED IN ONE PROCESS FOR THE FIRST TIME. Exact final line: '50 failed, 5655 passed, 141 skipped, 4 xfailed, 117 warnings in 2012.90s (0:33:32)'. All 5842 selected tests completed in a single unsharded pytest -m 'slow or not slow' run from a frozen detached worktree at cc1f8f2c with a clean tree, crossing the 4200-test point where thread creation previously died. NO collection reduction, NO sharding, and the JAX-heavy-tail process-isolation fallback was NOT used - the section's second choice stayed unused, so the single-process property survives. The repair bounds retention rather than any call site, which is what the moved abort demanded: releasing compiled executables when the live count crosses a ceiling, checked every 100 completed tests, naming no individual test. Live executables went from 4221-and-monotonic to max 933 against a 1024 ceiling, final 459; retained native threads from +226-and-monotonic to max 262 against a 300 ceiling, final 261; four releases fired (3251-&gt;0, 1354-&gt;0, final 1123-&gt;0). Note the run compiled MORE times than the aborting one - 7595 against 6001 - while holding far fewer executables, which is exactly the bounded-not-accumulated distinction a call-site clear could not reach at 2.5 MiB of 892 MiB. TWO THINGS THIS IS NOT: not a green lane - 50 ordinary failures are visible, left enabled, and set batch exit 1; the prior 3-failure figure came from a process-sharded run now labelled unattributable, so 50 against 3 is NOT established as a regression and is carried as its own section. And the skip count carries one stated caveat: the authoritative pytest line reports 141 while summary.json's runtest-hook field reports 133, because 8 skips occurred during collection - the pytest line plus its stamped SHA are the banked figures. Artifacts: /nova/evidence/archive/nova-test-lane-health-landed#monolithic-count</div>
 </div>
 </section>
 </main>

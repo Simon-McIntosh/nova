@@ -229,6 +229,51 @@
   configurable interval, and supports a deliberate pre-test park with separate GC and JAX-cache
   controls when the process survives to reach it.</p>
 
+  <h2 id="monolithic-count">The whole lane completes in one process — the first monolithic count</h2>
+
+  <p>Commit <code>cc1f8f2c</code>. Gate passed. Frozen pre/post SHA
+  <code>cc1f8f2c722b2b8ceb40e697798f3af1a4159558</code>, worktree clean, SLURM job 1245158.
+  Artifacts under <code>~/.cache/nova-lane-retention-bound/cc1f8f2c/run/</code>.</p>
+
+  <p><strong>The exact final line, which this repository has never previously obtained:</strong></p>
+
+  <pre>50 failed, 5655 passed, 141 skipped, 4 xfailed, 117 warnings in 2012.90s (0:33:32)</pre>
+
+  <p>All 5,842 selected tests completed in a single unsharded
+  <code>pytest -m "slow or not slow"</code> process, crossing the 4,200-test point where thread
+  creation previously died. No collection reduction, no sharding, and <strong>the JAX-heavy-tail
+  process isolation fallback was not used</strong> — the §3 second choice stayed unused, so the
+  single-process property §1 exists to obtain is intact.</p>
+
+  <p>The repair addresses the retention rather than any call site, which is what the moved abort
+  demanded. Releasing compiled executables when the live count crosses a ceiling, checked every 100
+  completed tests and naming no individual test:</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Quantity</th><th>Before the bound</th><th>Under the bound</th><th>Ceiling</th></tr></thead>
+    <tbody>
+      <tr><td>live executables</td><td>4,221 and monotonic</td><td>933 max, 459 final</td><td>1,024</td></tr>
+      <tr><td>retained native threads</td><td>+226 and monotonic</td><td>262 max, 261 final</td><td>300</td></tr>
+      <tr><td>compilations</td><td>6,001 (at abort)</td><td>7,595 (whole run)</td><td>—</td></tr>
+      <tr><td>endpoint</td><td>SIGABRT at ~73%</td><td><code>process_exit</code>, final summary</td><td>—</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>Four releases fired, observed as 3,251&rarr;0, 1,354&rarr;0 and a final 1,123&rarr;0. Note the
+  run compiled <em>more</em> times than the aborting one (7,595 against 6,001) while holding far
+  fewer executables — the population is now bounded rather than accumulated, which is the distinction
+  a call-site cache clear could not achieve at 2.5 MiB of 892 MiB.</p>
+
+  <p><strong>Two things this count is not.</strong> It is not a green lane: 50 ordinary test failures
+  are visible and set the batch exit code to 1. They are left enabled, and reconciling them is
+  separate work — the earlier 3-failure figure came from a process-sharded run now labelled
+  unattributable, so 50 against 3 is not yet established as a regression. And the skip count needs
+  one caveat stated rather than buried: the authoritative pytest line reports 141 skips while
+  <code>summary.json</code>'s runtest-hook field reports 133, because eight skips occurred during
+  collection. The pytest line and its stamped SHA are the banked figures.</p>
+
   <h2 id="measurement-provenance">A banked figure must name the tree it measured</h2>
 
   <p>Commit <code>7b15ed64</code>. Gate passed: 3/3 tests, Python 3.14.2.</p>

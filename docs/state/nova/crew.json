@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-13T10:34:42",
+  "updated": "2026-08-13T11:23:09",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2764,9 +2764,113 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260813T083628322940-parity-support-tally",
+        "plan": "spine-efit-parity",
+        "section": "\u00a73",
+        "node": "parity-support-tally",
+        "role": "implement",
+        "member": "parity-gate",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-13T08:36:30Z",
+        "completed_at": "2026-08-13T09:06:47Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1817,
+        "time_budget": "60m",
+        "base_sha": "9de1840ca301774c8b6e3f498b282af76369f1ec",
+        "commits": [
+          "c058f214"
+        ],
+        "changed_lines": {
+          "added": 491,
+          "removed": 21,
+          "files": 2
+        },
+        "tests_added": 11,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/7df8edeb-58a6-40f6-a85b-4f1edca55e25/scratchpad/parity-support-tally-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff9f0-e230-7e31-89ba-5240b76a2cce",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 33262336,
+            "input_tokens": 33989412,
+            "output_tokens": 84971,
+            "reasoning_output_tokens": 26715
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260813T083636395397-lane-retention-bound",
+        "plan": "nova-test-lane-health",
+        "section": "\u00a73",
+        "node": "lane-retention-bound",
+        "role": "implement",
+        "member": "lane-jax",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-13T08:36:38Z",
+        "completed_at": "2026-08-13T09:21:04Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2666,
+        "time_budget": "60m",
+        "base_sha": "9de1840ca301774c8b6e3f498b282af76369f1ec",
+        "commits": [
+          "cc1f8f2c"
+        ],
+        "changed_lines": {
+          "added": 211,
+          "removed": 13,
+          "files": 4
+        },
+        "tests_added": 12,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/7df8edeb-58a6-40f6-a85b-4f1edca55e25/scratchpad/lane-retention-bound-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ffa09-f5a4-7703-a08f-bcd0c8756140",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 41474048,
+            "input_tokens": 42262195,
+            "output_tokens": 92943,
+            "reasoning_output_tokens": 22056
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 104
+    "_version": 106
   }
 }

@@ -762,8 +762,10 @@ def corner_fields(
     )
     flux_poles = sum(flux_pole_terms)
     vertical_poles = sum(vertical_pole_terms)
-    split_live = np.minimum(np.abs(gamma), np.abs(rs - r)) >= (
-        _POLE_SPLIT_ASPECT_FLOOR * np.maximum(np.abs(gamma), np.abs(rs - r))
+    corner_offset = np.maximum(np.abs(gamma), np.abs(rs - r))
+    split_live = (corner_offset <= r) & (
+        np.minimum(np.abs(gamma), np.abs(rs - r))
+        >= _POLE_SPLIT_ASPECT_FLOOR * corner_offset
     )
     raw_cphi = (
         -1.0 / 3.0 * r**2 * np.pi / 2.0 * np.sign(gamma) * (np.sign(rs - r) + 1.0)
@@ -786,9 +788,13 @@ def corner_fields(
         return out
 
     # Near either corner plane the direct expression is already well-conditioned:
-    # only one pole is singular and its coefficient supplies the exact zero.  Where
-    # both corner offsets are material, the homogeneous split prevents their three
-    # finite limits from reaching the rectangle difference separately.
+    # only one pole is singular and its coefficient supplies the exact zero.  The
+    # homogeneous split is also local to a source corner: outside one target radius
+    # its residual products contain large reciprocal offsets, while none of the
+    # three pole moments is near its divergent corner limit.  The direct expression
+    # is the conditioned form there.  Inside that neighbourhood, with both offsets
+    # material, the split prevents three finite limits from reaching the rectangle
+    # difference separately.
     zeta = _zeta(rs, r, gamma)
 
     aphi_hat = (
@@ -897,8 +903,10 @@ def traced_corner_fields(xp, rs, zs, r, z):
     )
     flux_poles = sum(flux_pole_terms)
     vertical_poles = sum(vertical_pole_terms)
-    split_live = xp.minimum(xp.abs(gamma), xp.abs(rs - r)) >= (
-        _POLE_SPLIT_ASPECT_FLOOR * xp.maximum(xp.abs(gamma), xp.abs(rs - r))
+    corner_offset = xp.maximum(xp.abs(gamma), xp.abs(rs - r))
+    split_live = (corner_offset <= r) & (
+        xp.minimum(xp.abs(gamma), xp.abs(rs - r))
+        >= _POLE_SPLIT_ASPECT_FLOOR * corner_offset
     )
     raw_cphi = (
         -1.0 / 3.0 * r**2 * np.pi / 2.0 * xp.sign(gamma) * (xp.sign(rs - r) + 1.0)

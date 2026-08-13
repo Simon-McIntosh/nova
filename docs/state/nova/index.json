@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-13T08:47:42",
+  "updated": "2026-08-13T12:58:44",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -569,6 +569,11 @@
         "when": "2026-08-13",
         "who": "Simon McIntosh (via reckon-create)",
         "what": "S11 created \u2014 retire nova's bespoke machine-description packaging once imas-ambix S22 serves the same descriptions. Investigation closed the outward-republication question negatively: the artifact tooling writes a local content-addressed cache, oci_artifact_reference takes its repository from the caller with only a test placeholder in-repo, and the account holds no machine-description package, so f-flc-004 is retired rather than executed. The geometry landed this session (44 unique loop positions, join 39 to 43) is kept and migrates to the MAST map; only the wrapper is removed."
+      },
+      {
+        "when": "2026-08-13",
+        "who": "reckon-ship",
+        "what": "S7 executed: 15 worker nodes across 6 waves, all commits merged to main, every session worktree reclaimed. THE SPRINT'S CENTRAL QUESTION IS ANSWERED AND THE ANSWER IS NEGATIVE. The frozen six-shot gate scored end to end for the first time - 45,000 corrected slices, every source index exactly once, 180 atomic partitions, 9,573 slices scored - and returned FAIL on ten of twelve registered metrics with converged_fraction and fixed_point_defect at exactly ZERO. No scored slice on any of the six shots reached the solver's convergence criterion, which subordinates the geometry failures: a position measured on an unconverged flux map is a consequence, not an independent finding. The only two passes are the two metrics that do not require the fixed point to close - the CurrentDiffusion flux ledger at fraction 1 and throughput at 1. Mechanism: the assembled chain reads, seeds, batches, labels and transports correctly, and the GS fit does not converge on real measured magnetics. THE GPU CATALOG (S8) IS EXPLICITLY HELD - the pre-registered meaning of this result under the locked qualified-magnetics bar, whose magnetics allowance never applies because the strict metrics fail on their own. No tolerance was changed, no proxy substituted, and no partition dropped, including through a compute incident that cost 105 of 180 partitions. nova-test-lane-health SHIPPED at 100%: the whole suite now completes in ONE process for the first time in the repository's history - 50 failed, 5655 passed, 141 skipped, 4 xfailed in 2012.90 s, all 5,842 tests - after the starvation owner was named by measurement as retained JAX/XLA CPU compilation (212 of 226 retained threads native-only against 14 Python-managed as the excluding control; 4,221 live executables) and bounded to max 933 of a 1,024 ceiling; the 50 failures then classified 47 regression / 3 pre-existing / 0 suite-order, the 47 traced to one commit adding a required ShotWaveforms field without updating test constructors, and repaired to leave exactly 3. spine-efit-parity and flux-function-forward-equilibrium both stand at 99% with only trigger-deferred work and one active node. Other durable gains: a typed UnsupportedSlice contract that made the 7,500-slice support tally obtainable (4,182 of 7,500 physically supported - more than half a MAST record carries no seedable plasma, which retroactively explains four zero-score attempts as slice selection); the scorecard registry separated into twelve fields so the registered j-phi reproduction and the accelerator fixed-point defect stop being compared as one quantity, with every prior bound byte-identical; the l_i baseline settled as a passive-configuration IMPROVEMENT of 7.688559x rather than a drift, with the asymmetry recorded (passives move l_i by 0.9 pp and I_p by 0.03 pp); and verified reads of the shared machine artifact made concurrency-safe by canonicalizing the four HDF5 superblock consistency-flag bytes, 0/20 to 20/20 trials, narrowness proven against all 2,044 other bytes and published digests unchanged. NOT DONE, with reasons recorded rather than left silent: the pre-registered held-out extension is deliberately unspent because it guards against overfitting a PASS and there is none to generalise; the H200 performance program is deferred on the same logic that holds the catalog; and the convergence failure itself has no owning plan, since spine-boundary-accelerator is shipped and its locking evidence was synthetic self-consistent magnetics - the very case the section-6 measurement identified as the predicted failure mode."
       }
     ],
     "blockers": [
@@ -601,6 +606,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 33
+    "_version": 34
   }
 }

@@ -23,9 +23,9 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-13">
-<meta name="plan-impl" content="0.6">
-<meta name="plan-version" content="3">
-<meta name="plan-commits" content="ee60c7d2,27baad59,b46bc103,99dfc6a6">
+<meta name="plan-impl" content="0.7">
+<meta name="plan-version" content="4">
+<meta name="plan-commits" content="ee60c7d2,27baad59,b46bc103,99dfc6a6,41ddd617,9eb129e4">
 <meta name="plan-artifacts" content="nova/imas/mast_parity_chain.py,nova/imas/parity_tolerances.py,nova/imas/mast_efit_referee.py">
 </head>
 <body>
@@ -200,6 +200,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260813-referee" data-who="reckon-ship" data-when="2026-08-13T06:30:00+00:00">
     <div class="r-comment-body">scorecard-verdict-wiring and efit-referee-layer landed — commits b46bc103, 99dfc6a6; both gates passed. Wiring: the chain normalises the complete registered metric map and takes all 11 verdicts from the registry before storing them, emitting exactly SCORECARD_FIELDS with no missing or unknown names; an injected unregistered field is rejected; 7/7 parity lane green. Crucially it left reference-dependent geometry comparisons as explicit NaN with FAILING verdicts until a referee supplied them, so seed-relative observables could not be mislabelled as parity metrics. Referee: the firewall is structural rather than procedural — the efm reader opens only AFTER solve completion, catalogue arrays are opened mode=r and copied into non-writeable arrays, and a test asserts the EFIT object and its axis values are absent from solve arguments. Usable raw reference slices per frozen shot: 21978:70, 21983:69, 21985:67, 21986:61, 21989:73, 22086:57 (397 total). All four reference-dependent fields are now finite on the pilot, which reads axis 0.002 m, LCFS 0.002 m, x-point 0.004 m, topology agreement 1.0. NOTE for the gate run: those pilot axis and LCFS figures sit ABOVE their registered bounds of 1.01344e-03 m and 3.3047e-04 m, so a geometry failure is a live possibility and the honest-negative discipline applies — the bound is not to be widened after the fact. 8/8 referee tests green.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260813-gateattempt" data-who="reckon-ship" data-when="2026-08-13T06:05:00+00:00">
+    <div class="r-comment-body">parity-gate-frozen-six and parity-transport-leg BLOCKED, gates not-run — commits 41ddd617, 9eb129e4 merged for their harnesses. Live result stated exactly: 0 of 6 shots completed, 0 slices scored, all six named incomplete. Root cause is a real gap, not a worker failure: run_parity_chain takes moment_solver, profile_solver and topology_labeler as injected components and the repository has no production factory wiring them to the MAST classes; a production temporal_scorer is likewise absent, so the eleventh metric stays an explicit failing NaN. This is a scoping error of mine — parity-chain-assembly's done-when was demonstrable on a pilot but not sufficient, exactly the exclusivity-not-sufficiency trap, and its pilot ran on injected components rather than production ones. What did land is real: per-slice banking enforces all 11 registered field names and scores a non-finite metric as a FAILURE rather than a skip; unaligned and unusable EFIT rows retain explicit causes; per-shot summaries record available/scored/skipped counts and per-metric pass fractions; figure production for flux-map overlays, boundary-distance distributions and residual decomposition is implemented and unit-tested. The transport harness scores the ordered cohort against the registered 0.004 bound retaining resistive and inductive consumption terms, and its /tmp metrics are labelled synthetic contract validation only, explicitly NOT physical shot results. No tolerance was changed and none is authorised. production-chain-factory is dispatched to close the gap.</div>
 </div>
 </section>
 </main>

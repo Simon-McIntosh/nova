@@ -71,13 +71,18 @@ ARBITER_ORDER = 8
 COMPONENT = ("Fr", "Fz", "Fc")
 
 
-def coilset(nforce=1, dcoil=-3, present=None):
+def coilset(nforce=1, dcoil=-3, present=None, force_target_policy=None):
     """Return the conductors both rules are measured on.
 
     ``present`` selects which of them exist, so dropping every conductor but one
     leaves the term a section contributes to its own force.
     """
-    frames = CoilSet(nforce=nforce, dcoil=dcoil)
+    route = (
+        {}
+        if force_target_policy is None
+        else {"force_target_policy": force_target_policy}
+    )
+    frames = CoilSet(nforce=nforce, dcoil=dcoil, **route)
     for index, (name, x, z, dx, dz, nturn, current) in enumerate(GEOMETRY):
         if present is not None and index not in present:
             continue
@@ -160,7 +165,11 @@ def arbiter(index, present):
 
 def solve_tiling(nforce, present):
     """Return the force triple, node count and solve time of the tiling rule."""
-    frames = coilset(nforce, present=present)
+    frames = coilset(
+        nforce,
+        present=present,
+        force_target_policy=ForceTargetPolicy(rule="subdivision"),
+    )
     start = time.perf_counter()
     frames.force.solve()
     elapsed = time.perf_counter() - start

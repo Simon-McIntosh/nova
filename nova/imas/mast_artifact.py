@@ -42,6 +42,13 @@ _OCI_REPOSITORY_PATTERN = re.compile(
 _OCI_TAG_PATTERN = re.compile(r"[A-Za-z0-9_][A-Za-z0-9._-]{0,127}")
 _PORTABLE_COMPONENT_PATTERN = re.compile(r"[A-Za-z0-9_][A-Za-z0-9._-]*")
 _SHOT_RANGE_EVIDENCE_STATES = frozenset({"observed", "inherited", "missing"})
+_HDF5_SIGNATURE = b"\x89HDF\r\n\x1a\n"
+_HDF5_CONSISTENCY_FIELDS = {
+    0: (20, 4),
+    1: (20, 4),
+    2: (11, 1),
+    3: (11, 1),
+}
 _WINDOWS_DEVICE_NAMES = frozenset(
     {"CON", "PRN", "AUX", "NUL"}
     | {f"COM{index}" for index in range(1, 10)}
@@ -63,7 +70,44 @@ def _sha256_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def _hdf5_consistency_field(
+    descriptor: int,
+    size: int,
+    path: Path,
+) -> tuple[int, int] | None:
+    """Locate the transient file-consistency field in an HDF5 superblock.
+
+    HDF5 permits a user block before the superblock, but only at byte zero or
+    at powers of two starting at 512.  Superblock versions zero and one carry
+    a four-byte consistency field; versions two and three carry a one-byte
+    field.  No user-block byte or other superblock byte is excluded.
+    """
+
+    offset = 0
+    while offset + len(_HDF5_SIGNATURE) <= size:
+        signature = os.pread(descriptor, len(_HDF5_SIGNATURE), offset)
+        if signature == _HDF5_SIGNATURE:
+            version_bytes = os.pread(descriptor, 1, offset + len(_HDF5_SIGNATURE))
+            if len(version_bytes) != 1:
+                raise MachineArtifactError(f"truncated HDF5 superblock in {path}")
+            version = version_bytes[0]
+            try:
+                relative_offset, width = _HDF5_CONSISTENCY_FIELDS[version]
+            except KeyError as error:
+                raise MachineArtifactError(
+                    f"unsupported HDF5 superblock version {version} in {path}"
+                ) from error
+            field_offset = offset + relative_offset
+            if field_offset + width > size:
+                raise MachineArtifactError(f"truncated HDF5 superblock in {path}")
+            return field_offset, width
+        offset = 512 if offset == 0 else offset * 2
+    return None
+
+
 def _file_identity(path: Path) -> tuple[str, int]:
+    """Return content identity with only HDF5 open-state flags canonicalized."""
+
     digest = hashlib.sha256()
     size = 0
     flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
@@ -75,8 +119,20 @@ def _file_identity(path: Path) -> tuple[str, int]:
     if not S_ISREG(metadata.st_mode):
         os.close(descriptor)
         raise MachineArtifactError(f"artifact path is not a regular file: {path}")
+    consistency_field = _hdf5_consistency_field(descriptor, metadata.st_size, path)
     with os.fdopen(descriptor, "rb") as stream:
         for block in iter(lambda: stream.read(1024 * 1024), b""):
+            if consistency_field is not None:
+                field_offset, field_width = consistency_field
+                block_stop = size + len(block)
+                overlap_start = max(size, field_offset)
+                overlap_stop = min(block_stop, field_offset + field_width)
+                if overlap_start < overlap_stop:
+                    canonical = bytearray(block)
+                    canonical[overlap_start - size : overlap_stop - size] = b"\x00" * (
+                        overlap_stop - overlap_start
+                    )
+                    block = canonical
             digest.update(block)
             size += len(block)
     return digest.hexdigest(), size

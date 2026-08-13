@@ -28,9 +28,6 @@ import time
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_PARK_NODE = (
-    "tests/test_topology_boundary.py::test_x_mask_excludes_cells_beyond_null_heights"
-)
 MIB = 1024 * 1024
 
 _OUTPUT_PATH: Path | None = None
@@ -40,6 +37,7 @@ _COMPLETED = 0
 _COMPILE_CALLS = 0
 _LAST_NODE = ""
 _FINALIZED_NODEIDS: set[str] = set()
+_OUTCOMES: Counter[str] = Counter()
 
 
 def _read_key_values(path: Path) -> dict[str, str]:
@@ -160,6 +158,7 @@ def _jax_totals() -> dict[str, int | str]:
             "pjit_cache_entries": 0,
         }
     try:
+        from nova.jax.config import compilation_release_history
         from jax._src import pjit, util, xla_bridge
     except ImportError:
         return {
@@ -183,8 +182,10 @@ def _jax_totals() -> dict[str, int | str]:
             "live_executables": 0,
             "python_cache_entries": cache_entries,
             "pjit_cache_entries": 0,
+            "retention_releases": len(compilation_release_history()),
         }
     backend = xla_bridge.get_backend()
+    releases = compilation_release_history()
     return {
         "platform": backend.platform,
         "compile_calls": _COMPILE_CALLS,
@@ -195,6 +196,9 @@ def _jax_totals() -> dict[str, int | str]:
             pjit._cpp_pjit_cache_fun_only.size()
             + pjit._cpp_pjit_cache_explicit_attributes.size()
         ),
+        "retention_releases": len(releases),
+        "last_release_before": releases[-1].before if releases else 0,
+        "last_release_after": releases[-1].after if releases else 0,
     }
 
 
@@ -280,12 +284,22 @@ def pytest_collection_finish(session: Any) -> None:
 
 def pytest_runtest_logreport(report: Any) -> None:
     global _COMPLETED, _LAST_NODE
-    terminal = report.when == "call" or report.skipped
+    terminal = report.when == "call" or (
+        report.when == "setup" and (report.skipped or report.failed)
+    )
     if _OUTPUT_PATH is None or not terminal or report.nodeid in _FINALIZED_NODEIDS:
         return
     _FINALIZED_NODEIDS.add(report.nodeid)
     _COMPLETED += 1
     _LAST_NODE = report.nodeid
+    if report.skipped and getattr(report, "wasxfail", False):
+        _OUTCOMES["xfailed"] += 1
+    elif report.skipped:
+        _OUTCOMES["skipped"] += 1
+    elif report.failed:
+        _OUTCOMES["failed"] += 1
+    else:
+        _OUTCOMES["passed"] += 1
     if _COMPLETED % _INTERVAL == 0:
         _write_record(_snapshot("fixed_interval", report.nodeid))
 
@@ -309,10 +323,14 @@ def pytest_runtest_setup(item: Any) -> None:
 
 
 def pytest_sessionfinish(session: Any, exitstatus: int) -> None:
-    del session
     if _OUTPUT_PATH is not None:
         record = _snapshot("session_finish")
         record["pytest_exit_status"] = exitstatus
+        record["collected_tests"] = session.testscollected
+        record["outcomes"] = {
+            outcome: _OUTCOMES.get(outcome, 0)
+            for outcome in ("passed", "failed", "skipped", "xfailed")
+        }
         _write_record(record)
 
 
@@ -328,7 +346,13 @@ def _nested_delta(
     )
 
 
-def _summarise(samples_path: Path, returncode: int, commit: str) -> dict[str, Any]:
+def _summarise(
+    samples_path: Path,
+    returncode: int,
+    commit: str,
+    live_executable_ceiling: int,
+    native_thread_ceiling: int,
+) -> dict[str, Any]:
     samples = [json.loads(line) for line in samples_path.read_text().splitlines()]
     start = samples[0]
     park_sample = next(
@@ -336,6 +360,16 @@ def _summarise(samples_path: Path, returncode: int, commit: str) -> dict[str, An
         None,
     )
     endpoint = park_sample or samples[-1]
+    fixed_samples = [
+        row for row in samples if row["reason"] in {"fixed_interval", "session_finish"}
+    ]
+    max_live_executables = max(
+        (int(row["jax"].get("live_executables", 0)) for row in fixed_samples),
+        default=0,
+    )
+    max_native_threads = max(
+        (int(row["native_threads"]) for row in fixed_samples), default=0
+    )
     post_gc = next(
         (row for row in samples if row["reason"] == "park_post_gc_control"), None
     )
@@ -448,6 +482,16 @@ def _summarise(samples_path: Path, returncode: int, commit: str) -> dict[str, An
         "commit": commit,
         "command": "pytest -m 'slow or not slow'",
         "pytest_returncode": returncode,
+        "collected_tests": endpoint.get("collected_tests"),
+        "outcomes": endpoint.get("outcomes"),
+        "ceilings": {
+            "live_executables": live_executable_ceiling,
+            "native_threads": native_thread_ceiling,
+            "max_sampled_live_executables": max_live_executables,
+            "max_sampled_native_threads": max_native_threads,
+            "live_executables_held": (max_live_executables <= live_executable_ceiling),
+            "native_threads_held": max_native_threads <= native_thread_ceiling,
+        },
         "endpoint_reason": "diagnostic_park" if park_sample else "process_exit",
         "completed_tests_at_endpoint": endpoint["completed_tests"],
         "last_completed_nodeid": endpoint["nodeid"],
@@ -524,9 +568,9 @@ def _run(arguments: argparse.Namespace) -> int:
     command_path = output_dir / "command.json"
     summary_path = output_dir / "summary.json"
 
-    commit = subprocess.check_output(
-        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
-    ).strip()
+    from benchmarks.measurement_provenance import measurement_stamp
+
+    commit = measurement_stamp(ROOT)
     branch = subprocess.run(
         ["git", "symbolic-ref", "--quiet", "--short", "HEAD"],
         cwd=ROOT,
@@ -560,6 +604,8 @@ def _run(arguments: argparse.Namespace) -> int:
                 "interval": arguments.interval,
                 "park_before": arguments.park_before,
                 "jax_platforms": environment["JAX_PLATFORMS"],
+                "live_executable_ceiling": arguments.live_executable_ceiling,
+                "native_thread_ceiling": arguments.native_thread_ceiling,
             },
             indent=2,
             sort_keys=True,
@@ -583,7 +629,17 @@ def _run(arguments: argparse.Namespace) -> int:
 
     if not samples_path.exists() or not samples_path.read_text().strip():
         raise SystemExit(f"pytest produced no resource samples; see {pytest_path}")
-    summary = _summarise(samples_path, returncode, commit)
+    post_commit = measurement_stamp(ROOT)
+    if post_commit != commit:
+        raise SystemExit(f"measurement checkout moved from {commit} to {post_commit}")
+    summary = _summarise(
+        samples_path,
+        returncode,
+        commit,
+        arguments.live_executable_ceiling,
+        arguments.native_thread_ceiling,
+    )
+    summary["post_measurement_commit"] = post_commit
     summary["artifacts"] = {
         "command": str(command_path),
         "pytest_log": str(pytest_path),
@@ -591,18 +647,31 @@ def _run(arguments: argparse.Namespace) -> int:
     }
     summary_path.write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n")
     print(json.dumps(summary, sort_keys=True))
+    ceilings = summary["ceilings"]
+    if not ceilings["live_executables_held"] or not ceilings["native_threads_held"]:
+        return 87
     return 0 if returncode in {0, 86} else returncode
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--interval", type=int, default=100)
-    parser.add_argument("--park-before", default=DEFAULT_PARK_NODE)
+    parser.add_argument(
+        "--park-before",
+        default="",
+        help="optional node-id prefix for a deliberate diagnostic stop",
+    )
     parser.add_argument("--timeout-seconds", type=int, default=2700)
+    parser.add_argument("--live-executable-ceiling", type=int, default=1024)
+    parser.add_argument("--native-thread-ceiling", type=int, default=300)
     parser.add_argument("--output-dir", type=Path, default=Path("lane-resource-logs"))
     arguments = parser.parse_args()
     if arguments.interval <= 0:
         parser.error("--interval must be positive")
+    if arguments.live_executable_ceiling <= 0:
+        parser.error("--live-executable-ceiling must be positive")
+    if arguments.native_thread_ceiling <= 0:
+        parser.error("--native-thread-ceiling must be positive")
     return _run(arguments)
 
 

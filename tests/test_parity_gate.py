@@ -14,6 +14,7 @@ from nova.imas.mast_parity_gate import (
     SlicePartitionReport,
     ProductionShotScore,
     SkippedSlice,
+    aggregate_frozen_shot_reports,
     aggregate_scorecard_partitions,
     bank_frozen_scorecard,
     print_frozen_gate_report,
@@ -239,13 +240,13 @@ def test_seed_preparation_catches_only_typed_unsupported_slices():
         )
 
 
-def _partition_report(start, stop, *, scored_indices=()):
+def _partition_report(start, stop, *, shot=21978, scored_indices=()):
     scored_set = set(scored_indices)
     metrics = {field: 0.0 for field in SCORECARD_FIELDS}
     verdicts = {field: False for field in SCORECARD_FIELDS}
     return SlicePartitionReport(
         generated_at="2026-08-13T00:00:00+00:00",
-        shot=21978,
+        shot=shot,
         available_slices=4,
         slice_start=start,
         slice_stop=stop,
@@ -255,7 +256,7 @@ def _partition_report(start, stop, *, scored_indices=()):
         magnetics_budget=str(MagneticsBudgetClass.SOURCE_CUTOVER),
         scored_slices=tuple(
             ScoredSlice(
-                shot=21978,
+                shot=shot,
                 slice_index=index,
                 time_s=0.01 * index,
                 reference_time_s=0.01 * index,
@@ -267,7 +268,7 @@ def _partition_report(start, stop, *, scored_indices=()):
         ),
         skipped_slices=tuple(
             SkippedSlice(
-                shot=21978,
+                shot=shot,
                 slice_index=index,
                 time_s=0.01 * index,
                 cause="seed-disc-insufficient-supported-cells",
@@ -319,6 +320,71 @@ def test_partition_aggregation_rejects_a_coverage_gap(tmp_path):
         aggregate_scorecard_partitions(
             (first, second), artifact_path=tmp_path / "scorecard.json"
         )
+
+
+def _bank_test_shot_report(tmp_path, shot):
+    partition_paths = []
+    for start, stop in ((0, 2), (2, 4)):
+        path = tmp_path / f"partition-{shot}-{start}.json"
+        gate_module._bank_report(
+            _partition_report(
+                start,
+                stop,
+                shot=shot,
+                scored_indices=tuple(range(start, stop)),
+            ),
+            path,
+        )
+        partition_paths.append(path)
+    report_path = tmp_path / f"shot-{shot}.json"
+    aggregate_scorecard_partitions(
+        tuple(partition_paths), artifact_path=report_path, shot=shot
+    )
+    return report_path
+
+
+def test_frozen_cohort_aggregation_banks_each_shot_and_metric_verdict(tmp_path):
+    first = _bank_test_shot_report(tmp_path, 21978)
+    second = _bank_test_shot_report(tmp_path, 21983)
+    artifact = tmp_path / "cohort.json"
+
+    report = aggregate_frozen_shot_reports(
+        (first, second), artifact_path=artifact, shots=(21978, 21983)
+    )
+
+    assert report.completed_shots == (21978, 21983)
+    assert report.not_attempted_shots == ()
+    assert report.status == "fail"
+    assert len(report.scored_slices) == 8
+    assert len(report.partitions) == 4
+    assert {partition.shot for partition in report.partitions} == {21978, 21983}
+    assert set(report.verdict_by_metric) == SCORECARD_FIELDS
+    assert all(not verdict for verdict in report.verdict_by_metric.values())
+    for summary in report.shot_summaries:
+        assert summary.available_slices == 4
+        assert summary.scored_slices == 4
+        assert summary.skipped_slices == 0
+        assert set(summary.verdict_by_metric) == SCORECARD_FIELDS
+    banked = json.loads(artifact.read_text())
+    assert banked["requested_shots"] == [21978, 21983]
+    assert banked["radial_points"] == 33
+    assert banked["vertical_points"] == 49
+    assert banked["min_cells"] == 5
+
+
+def test_frozen_cohort_names_unbanked_shots_not_attempted(tmp_path):
+    first = _bank_test_shot_report(tmp_path, 21978)
+
+    report = aggregate_frozen_shot_reports(
+        (first,),
+        artifact_path=tmp_path / "partial.json",
+        shots=(21978, 21983),
+    )
+
+    assert report.status == "incomplete"
+    assert report.completed_shots == (21978,)
+    assert report.incomplete_shots == (21983,)
+    assert report.not_attempted_shots == (21983,)
 
 
 def test_nonfinite_trace_is_retained_as_zero_convergence():

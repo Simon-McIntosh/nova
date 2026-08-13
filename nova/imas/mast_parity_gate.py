@@ -111,12 +111,14 @@ class ShotSummary:
     skipped_slices: int
     skip_causes: Mapping[str, int]
     pass_fraction_by_metric: Mapping[str, float]
+    verdict_by_metric: Mapping[str, bool] = dataclass_field(default_factory=dict)
 
 
 @dataclass(frozen=True)
 class PartitionCoverage:
     """One disjoint source-slice interval contributing to a complete report."""
 
+    shot: int
     slice_start: int
     slice_stop: int
     scored_slices: int
@@ -145,6 +147,7 @@ class FrozenGateReport:
     radial_points: int | None = None
     vertical_points: int | None = None
     min_cells: int | None = None
+    verdict_by_metric: Mapping[str, bool] = dataclass_field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -468,6 +471,7 @@ def _score_result(
         if shot is None or available_slices is None:
             raise ValueError("an empty shot result requires shot and coverage counts")
         pass_fractions = {field: float("nan") for field in sorted(SCORECARD_FIELDS)}
+        verdicts = {field: False for field in sorted(SCORECARD_FIELDS)}
         causes = Counter(row.cause for row in initial_skips)
         summary = ShotSummary(
             shot=int(shot),
@@ -476,6 +480,7 @@ def _score_result(
             skipped_slices=len(initial_skips),
             skip_causes=dict(sorted(causes.items())),
             pass_fraction_by_metric=pass_fractions,
+            verdict_by_metric=verdicts,
         )
         return [], list(initial_skips), summary
 
@@ -532,6 +537,10 @@ def _score_result(
         )
         for field in sorted(SCORECARD_FIELDS)
     }
+    verdicts = {
+        field: bool(scored) and all(row.verdicts[field] for row in scored)
+        for field in sorted(SCORECARD_FIELDS)
+    }
     causes = Counter(row.cause for row in skipped)
     summary = ShotSummary(
         shot=int(scorecard.shot),
@@ -544,6 +553,7 @@ def _score_result(
         skipped_slices=len(skipped),
         skip_causes=dict(sorted(causes.items())),
         pass_fraction_by_metric=pass_fractions,
+        verdict_by_metric=verdicts,
     )
     return scored, skipped, summary
 
@@ -717,6 +727,7 @@ def aggregate_scorecard_partitions(
         skipped.extend(report.skipped_slices)
         coverage.append(
             PartitionCoverage(
+                shot=report.shot,
                 slice_start=report.slice_start,
                 slice_stop=report.slice_stop,
                 scored_slices=len(report.scored_slices),
@@ -741,6 +752,10 @@ def aggregate_scorecard_partitions(
         )
         for field in sorted(SCORECARD_FIELDS)
     }
+    verdicts = {
+        field: bool(scored) and all(row.verdicts[field] for row in scored)
+        for field in sorted(SCORECARD_FIELDS)
+    }
     causes = Counter(row.cause for row in skipped)
     summary = ShotSummary(
         shot=int(shot),
@@ -749,6 +764,7 @@ def aggregate_scorecard_partitions(
         skipped_slices=len(skipped),
         skip_causes=dict(sorted(causes.items())),
         pass_fraction_by_metric=pass_fractions,
+        verdict_by_metric=verdicts,
     )
     status = (
         "pass"
@@ -773,9 +789,167 @@ def aggregate_scorecard_partitions(
         radial_points=int(radial_points),
         vertical_points=int(vertical_points),
         min_cells=int(min_cells),
+        verdict_by_metric=verdicts,
     )
     _bank_report(report, Path(artifact_path))
     return report
+
+
+def _read_shot_report(path: Path) -> FrozenGateReport:
+    """Read an atomically banked single-shot report for cohort aggregation."""
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    return FrozenGateReport(
+        generated_at=str(payload["generated_at"]),
+        requested_shots=tuple(int(shot) for shot in payload["requested_shots"]),
+        completed_shots=tuple(int(shot) for shot in payload["completed_shots"]),
+        incomplete_shots=tuple(int(shot) for shot in payload["incomplete_shots"]),
+        not_attempted_shots=tuple(int(shot) for shot in payload["not_attempted_shots"]),
+        magnetics_budget=str(payload["magnetics_budget"]),
+        status=str(payload["status"]),
+        scored_slices=tuple(ScoredSlice(**row) for row in payload["scored_slices"]),
+        skipped_slices=tuple(SkippedSlice(**row) for row in payload["skipped_slices"]),
+        shot_summaries=tuple(ShotSummary(**row) for row in payload["shot_summaries"]),
+        pass_fraction_by_metric=payload["pass_fraction_by_metric"],
+        run_errors={int(shot): error for shot, error in payload["run_errors"].items()},
+        figures=tuple(str(path) for path in payload["figures"]),
+        partitions=tuple(PartitionCoverage(**row) for row in payload["partitions"]),
+        radial_points=int(payload["radial_points"]),
+        vertical_points=int(payload["vertical_points"]),
+        min_cells=int(payload["min_cells"]),
+        verdict_by_metric=payload["verdict_by_metric"],
+    )
+
+
+def aggregate_frozen_shot_reports(
+    shot_report_paths: tuple[Path | str, ...],
+    *,
+    artifact_path: Path | str,
+    shots: tuple[int, ...] = FROZEN_SHOTS,
+    radial_points: int = 33,
+    vertical_points: int = 49,
+    min_cells: int = 5,
+) -> FrozenGateReport:
+    """Bank a cohort only after validating every completed shot's exact coverage."""
+
+    requested = tuple(int(shot) for shot in shots)
+    if len(requested) != len(set(requested)):
+        raise ValueError("requested frozen shots must be unique")
+    by_shot: dict[int, FrozenGateReport] = {}
+    for source_path in shot_report_paths:
+        path = Path(source_path)
+        report = _read_shot_report(path)
+        if len(report.requested_shots) != 1:
+            raise ValueError(f"shot report {path} must request exactly one shot")
+        shot = report.requested_shots[0]
+        if shot not in requested:
+            raise ValueError(f"shot report {path} carries unrequested shot {shot}")
+        if shot in by_shot:
+            raise ValueError(f"multiple reports were supplied for shot {shot}")
+        expected_metadata = (radial_points, vertical_points, min_cells)
+        observed_metadata = (
+            report.radial_points,
+            report.vertical_points,
+            report.min_cells,
+        )
+        if observed_metadata != expected_metadata:
+            raise ValueError(
+                f"shot report {path} metadata {observed_metadata} must be "
+                f"{expected_metadata}"
+            )
+        if (
+            report.completed_shots != (shot,)
+            or report.incomplete_shots
+            or report.not_attempted_shots
+            or report.run_errors
+            or len(report.shot_summaries) != 1
+        ):
+            raise ValueError(
+                f"shot report {path} is not a completed single-shot result"
+            )
+        summary = report.shot_summaries[0]
+        if summary.shot != shot:
+            raise ValueError(f"shot report {path} summary names shot {summary.shot}")
+        if (
+            set(summary.pass_fraction_by_metric) != SCORECARD_FIELDS
+            or set(summary.verdict_by_metric) != SCORECARD_FIELDS
+            or set(report.pass_fraction_by_metric) != SCORECARD_FIELDS
+            or set(report.verdict_by_metric) != SCORECARD_FIELDS
+        ):
+            raise ValueError(f"shot report {path} does not cover the registry exactly")
+        rows = (*report.scored_slices, *report.skipped_slices)
+        indices = [row.slice_index for row in rows]
+        if (
+            summary.available_slices != len(rows)
+            or summary.scored_slices != len(report.scored_slices)
+            or summary.skipped_slices != len(report.skipped_slices)
+            or sorted(indices) != list(range(summary.available_slices))
+            or len(indices) != len(set(indices))
+            or any(row.shot != shot for row in rows)
+        ):
+            raise ValueError(f"shot report {path} does not cover every source row once")
+        expected_start = 0
+        for partition in report.partitions:
+            if partition.shot != shot or partition.slice_start != expected_start:
+                raise ValueError(f"shot report {path} has discontinuous partitions")
+            if (
+                partition.scored_slices + partition.skipped_slices
+                != partition.slice_stop - partition.slice_start
+            ):
+                raise ValueError(f"shot report {path} has an incomplete partition")
+            expected_start = partition.slice_stop
+        if expected_start != summary.available_slices:
+            raise ValueError(f"shot report {path} partition coverage is incomplete")
+        by_shot[shot] = report
+
+    completed = tuple(shot for shot in requested if shot in by_shot)
+    not_attempted = tuple(shot for shot in requested if shot not in by_shot)
+    reports = tuple(by_shot[shot] for shot in completed)
+    budgets = {report.magnetics_budget for report in reports}
+    if len(budgets) > 1:
+        raise ValueError(f"shot reports carry mixed magnetics budgets: {budgets}")
+    scored = tuple(row for report in reports for row in report.scored_slices)
+    skipped = tuple(row for report in reports for row in report.skipped_slices)
+    summaries = tuple(report.shot_summaries[0] for report in reports)
+    partitions = tuple(report.partitions for report in reports)
+    flat_partitions = tuple(row for group in partitions for row in group)
+    pass_fractions = {
+        field: (
+            float(np.mean([row.verdicts[field] for row in scored]))
+            if scored
+            else float("nan")
+        )
+        for field in sorted(SCORECARD_FIELDS)
+    }
+    verdicts = {
+        field: bool(scored) and all(row.verdicts[field] for row in scored)
+        for field in sorted(SCORECARD_FIELDS)
+    }
+    status = (
+        "incomplete" if not_attempted else "pass" if all(verdicts.values()) else "fail"
+    )
+    cohort = FrozenGateReport(
+        generated_at=datetime.now(UTC).isoformat(),
+        requested_shots=requested,
+        completed_shots=completed,
+        incomplete_shots=not_attempted,
+        not_attempted_shots=not_attempted,
+        magnetics_budget=next(iter(budgets), "not-scored"),
+        status=status,
+        scored_slices=scored,
+        skipped_slices=skipped,
+        shot_summaries=summaries,
+        pass_fraction_by_metric=pass_fractions,
+        run_errors={},
+        figures=(),
+        partitions=flat_partitions,
+        radial_points=int(radial_points),
+        vertical_points=int(vertical_points),
+        min_cells=int(min_cells),
+        verdict_by_metric=verdicts,
+    )
+    _bank_report(cohort, Path(artifact_path))
+    return cohort
 
 
 def _normalised_metric(
@@ -993,6 +1167,10 @@ def bank_frozen_scorecard(
         )
         for field in sorted(SCORECARD_FIELDS)
     }
+    verdicts = {
+        field: bool(scored) and all(row.verdicts[field] for row in scored)
+        for field in sorted(SCORECARD_FIELDS)
+    }
     report = FrozenGateReport(
         generated_at=datetime.now(UTC).isoformat(),
         requested_shots=tuple(int(shot) for shot in shots),
@@ -1007,6 +1185,7 @@ def bank_frozen_scorecard(
         pass_fraction_by_metric=pass_fractions,
         run_errors=dict(sorted(errors.items())),
         figures=figures,
+        verdict_by_metric=verdicts,
     )
     _bank_report(report, Path(artifact_path))
     return report
@@ -1025,12 +1204,14 @@ def print_frozen_gate_report(report: FrozenGateReport) -> None:
             f"skip_causes={dict(summary.skip_causes)}"
         )
         for field, fraction in summary.pass_fraction_by_metric.items():
-            print(f"  {field}: {fraction:.12g}")
+            verdict = "pass" if summary.verdict_by_metric[field] else "fail"
+            print(f"  {field}: {fraction:.12g} ({verdict})")
     for shot, error in report.run_errors.items():
         print(f"shot {shot}: run_error={error}")
     print("overall_pass_fraction_by_metric:")
     for field, fraction in report.pass_fraction_by_metric.items():
-        print(f"  {field}: {fraction:.12g}")
+        verdict = "pass" if report.verdict_by_metric[field] else "fail"
+        print(f"  {field}: {fraction:.12g} ({verdict})")
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -1047,6 +1228,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--slice-start", type=int)
     parser.add_argument("--slice-stop", type=int)
     parser.add_argument("--aggregate-partitions", nargs="+", type=Path)
+    parser.add_argument("--aggregate-shot-reports", nargs="+", type=Path)
     return parser
 
 
@@ -1054,6 +1236,15 @@ def main() -> None:
     """Run and bank the production frozen-cohort scorecard."""
 
     args = _parser().parse_args()
+    if args.aggregate_shot_reports:
+        report = aggregate_frozen_shot_reports(
+            tuple(args.aggregate_shot_reports),
+            artifact_path=args.artifact_path,
+            radial_points=args.radial_points,
+            vertical_points=args.vertical_points,
+        )
+        print_frozen_gate_report(report)
+        return
     if args.aggregate_partitions:
         report = aggregate_scorecard_partitions(
             tuple(args.aggregate_partitions),
@@ -1118,6 +1309,7 @@ __all__ = [
     "SlicePartitionReport",
     "ShotSummary",
     "SkippedSlice",
+    "aggregate_frozen_shot_reports",
     "aggregate_scorecard_partitions",
     "bank_production_partition",
     "bank_frozen_scorecard",

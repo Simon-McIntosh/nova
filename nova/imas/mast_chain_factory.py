@@ -33,6 +33,7 @@ from nova.transport.current_diffusion import (
 
 DEFAULT_RADIAL_POINTS = 33
 DEFAULT_VERTICAL_POINTS = 49
+BOUNDARY_RADIAL_SAMPLES = 512
 
 
 @dataclass(frozen=True)
@@ -64,24 +65,35 @@ class MastTopologyLabeler:
     grid: _Grid
     axis_seed: tuple[float, float]
 
-    def boundary_reads(self, flux) -> tuple[object, ...]:
-        """Return the connectivity diagnostics underlying each label row."""
+    def boundary_reads(self, flux) -> tuple[tuple[object, np.ndarray], ...]:
+        """Return each connectivity read and the centre of its boundary rays."""
 
         maps = np.asarray(flux, dtype=float).reshape(
             -1, self.grid.zg.size, self.grid.rg.size
         )
-        return tuple(
-            host_boundary_read(
+        reads = []
+        for psi in maps:
+            initial = host_boundary_read(
                 psi,
                 self.grid,
                 self.axis_seed,
                 n_levels=48,
                 n_bisect=12,
-                n_ray=len(LCFS_ANGLES),
+                n_ray=BOUNDARY_RADIAL_SAMPLES,
                 angles=LCFS_ANGLES,
             )
-            for psi in maps
-        )
+            ray_centre = np.asarray(initial.axis, dtype=float)
+            read = host_boundary_read(
+                psi,
+                self.grid,
+                tuple(ray_centre),
+                n_levels=48,
+                n_bisect=12,
+                n_ray=BOUNDARY_RADIAL_SAMPLES,
+                angles=LCFS_ANGLES,
+            )
+            reads.append((read, ray_centre))
+        return tuple(reads)
 
     def __call__(self, flux) -> TopologyLabels:
         """Label every leading-axis flux map with Nova's connectivity read."""
@@ -98,9 +110,11 @@ class MastTopologyLabeler:
         private_masks = []
         excluded_masks = []
         radius, height = np.meshgrid(self.grid.rg, self.grid.zg)
-        for psi, read in zip(maps, self.boundary_reads(maps), strict=True):
+        for psi, (read, ray_centre) in zip(
+            maps, self.boundary_reads(maps), strict=True
+        ):
             axis = np.asarray(read.axis, dtype=float)
-            ring = axis + np.column_stack(
+            ring = ray_centre + np.column_stack(
                 [
                     read.radii * np.cos(LCFS_ANGLES),
                     read.radii * np.sin(LCFS_ANGLES),

@@ -24,9 +24,9 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-13">
-<meta name="plan-version" content="22">
+<meta name="plan-version" content="24">
 <meta name="plan-impl" content="0.99">
-<meta name="plan-commits" content="f07e8b05,ebd322ae,1a2de9c7,b0af2d23,c90d173c,6d138035,eed0825b,a929c778,b999dac2,5400c5ff,61122824,c642af8f,16bf140e,cc92defd,cc761f57">
+<meta name="plan-commits" content="f07e8b05,ebd322ae,1a2de9c7,b0af2d23,c90d173c,6d138035,eed0825b,a929c778,b999dac2,5400c5ff,61122824,c642af8f,16bf140e,cc92defd,cc761f57,9b7bfb06">
 <meta name="plan-artifacts" content="docs/evidence/archive/flux-function-forward-equilibrium-landed.html,tests/test_null_benchmark_precision.py,benchmarks/dina_pack_current_distribution.py">
 </head>
 <body>
@@ -92,23 +92,30 @@
     <code>p′</code>/<code>FF′</code> and flux convention are interpreted on the way into the solve,
     rather than anything about how the conductors are represented.</p>
 
-    <p><strong>A separate defect surfaced while measuring that, and it is the more urgent one.</strong>
-    The live as-declared rerun reproduces l_i at &minus;0.135266% where the banked demonstration
-    recorded &minus;1.04% — a material drift on the same pulse, run, slice, mesh, profiles and
-    convention, while the two current distributions measured against each other in that same run
-    differ by only 0.014911 percentage points. So the drift is not the distribution and is not
-    measurement noise: something in the solve path or the reference read has changed since the
-    demonstration was banked, and the banked l_i row is therefore not safe to present as current.
-    I_p, &beta;_p and the axis position all reproduce close to their banked values, which narrows it
-    to the l_i definition or the internal-inductance integral rather than the field solution.</p>
+    <p class="landed-summary"><span class="badge badge-shipped">✓ baseline settled 2026-08-13</span>
+    The l_i figure that looked like a moved baseline was two physical configurations, not drift:
+    declared passives account for 99.981886% of the 0.904734074 pp change and <em>improve</em> l_i
+    reproduction 7.688559&times; (&minus;1.04% active-only &rarr; &minus;0.135266% passive-inclusive),
+    with a changed definition (4.4e-16), domain (byte-identical 1,131-cell mask) and reference read
+    (13/13 arrays exact) each excluded by measurement. Both rows are kept and labelled by
+    configuration. Commit <code>9b7bfb06</code>; full record:
+    <a href="/nova/evidence/archive/flux-function-forward-equilibrium-landed#passive-li-response">passive l_i response</a>.</p>
 
-    <p><em>Done-when:</em> the l_i difference between the banked demonstration and the current tree
-    is attributed to a named cause — a changed l_i definition, a changed internal-inductance
-    integration domain, a changed reference read, or a genuine solve change — with the measurement
-    that distinguishes them; the banked evidence row is then either reaffirmed with its original
-    figure or corrected in place with the reason recorded. Only after that is the profile/COCOS
-    mapping candidate worth pursuing, since chasing a 1.3–6.5% gap against a baseline that has
-    itself moved cannot be conclusive.</p>
+    <p><strong>The asymmetry that result exposed is worth carrying forward.</strong> Passives move l_i
+    by 0.9 pp while moving I_p by 0.03 pp and the axis by 2.3 mm — so the same conductors that are
+    30&times; too small to be the I_p/&beta;_p/axis deviation floor carry nearly all of the internal
+    inductance. Internal inductance responds to how current redistributes, not to its total. Any
+    remaining chase of the deviation should therefore expect the surviving candidate to act on the
+    integrated quantities rather than on the current distribution, which is consistent with it being
+    the reference's profile and flux-convention mapping.</p>
+
+    <p><em>Done-when:</em> the deviation remaining after the passive-inclusive baseline is attributed
+    to the reference's profile/COCOS mapping or that candidate is excluded in turn — by re-deriving
+    DINA's stored <code>p′</code>/<code>FF′</code> and total-flux convention independently of the
+    current reader and re-solving with the re-derived mapping, reporting the change in I_p,
+    &beta;_p, l_i and axis position against the passive-inclusive figures rather than against the
+    superseded active-only row. A candidate excluded here leaves no named cause, which is itself a
+    reportable result and should be stated as such rather than left implicit.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -226,6 +233,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20260813-packcurrent" data-who="reckon-ship" data-when="2026-08-13T07:58:00+00:00">
     <div class="r-comment-body">pack-current-distribution landed - commit cc761f57; gate PASSED; SLURM job 1245067, 23m06s, exit 0. VERDICT: within-pack current placement is EXCLUDED as the dominant cause of the DINA reproduction gap. Two physically declared distributions on the identical 1587-cell hex mesh, pulse 135011/run 7/slice 353 at 338.9276 s, DD 3.39.0, same stored absolute p-prime and FF-prime, Phi_nova = -psi_IMAS convention, passive drive and fixed-budget Newton-Krylov route: the as-declared continuum against a finite-section equal-current turn lattice built only from each rectangular pack's declared outline and turn count, retaining the fractional terminal turn and balancing unused outer-corner sites, with the one-turn VS3 pair and all passives unchanged. Measured shifts continuum -&gt; turn-resolved: I_p -1.12406% -&gt; -1.11578% (0.008277 pp better, 0.7198% of banked deviation), beta_p +2.23699% -&gt; +2.25305% (0.016060 pp worse, 0.7435%), l_i -0.135266% -&gt; -0.150177% (0.014911 pp worse, 1.4338%), axis 41.2372 -&gt; 40.7096 mm (0.52765 mm better, 1.1992%). External-flux response of the redistribution is 0.0631153 Wb = 0.0780225% of reference span. Maximum response is 1.4338% of a 1.3-6.5% gap, so this cannot be the cause; by elimination the reference's own profile/COCOS mapping is the surviving candidate. ONE QUALIFICATION NOT SMOOTHED OVER: the live as-declared rerun's l_i is -0.135266% against the banked -1.04%, a material drift even though the distribution delta is only 0.014911 pp. The exclusion verdict is unaffected because it rests on two distributions measured in the same run, but the banked l_i row must not be presented as current until the drift is reconciled - carried as a new section rather than a followup, since it is this plan's own work. Artifacts: /nova/evidence/archive/flux-function-forward-equilibrium-landed#pack-current-placement</div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-20260813-passiveli" data-who="reckon-ship" data-when="2026-08-13T09:50:00+00:00">
+    <div class="r-comment-body">li-baseline-reconciliation landed - commit 9b7bfb06; gate PASSED. THE l_i GAP IS NOT A DEFECT, A DRIFT, OR A REGRESSION - it is two different physical configurations, and the current one is BETTER. The banked demonstration solved an active-only machine; the current tree includes the declared passive conductors. Passives account for 0.904570189 of the 0.904734074 pp change (99.981886%) after subtracting the +0.000163885 pp from current-code changes on an identical active-only machine, and they IMPROVE absolute l_i reproduction by 7.688559x, from -1.04% to -0.135265926%. Three alternatives excluded quantitatively: the field-integral definition reproduces the banked raw l_i to 4.4e-16 (excludes a changed definition); topology labels and the 1,131-cell core mask are byte-identical (excludes a changed domain); and all 13 live reference inputs - scalars, axis, boundary, profiles, grid and the full 65x129 flux map - are byte-identical at maximum absolute difference 0.0 (excludes a changed reference read). THE PHYSICALLY INTERESTING RESULT IS THE ASYMMETRY: l_i +0.904734074 pp against I_p only +0.030011433 pp, beta_p +0.076823733 pp and axis -2.330148552 mm. That reconciles two findings which look contradictory and are not - the passive structure contributes only 0.093% of the reference flux span, correctly falsifying it as the I_p/beta_p/axis deviation floor at a 30x shortfall, while internal inductance is a different observable sensitive to how current redistributes rather than its total, and there passives carry nearly the whole change. Both findings stand. BOTH CONFIGURATION ROWS ARE KEPT, EXPLICITLY LABELLED: banked -1.04% is the active-only demonstration and stays valid for that configuration; the passive-inclusive current-tree figure is -0.135266%. Neither overwrites the other, because collapsing them would destroy the asymmetry that is the actual finding. The profile/COCOS mapping is now the sole surviving deviation candidate and is worth pursuing against a baseline that no longer moves. Artifacts: /nova/evidence/archive/flux-function-forward-equilibrium-landed#passive-li-response</div>
 </div>
 </section>
 </main>

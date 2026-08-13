@@ -311,6 +311,50 @@
   agreement is set to 0.0, and both verdicts fail while the slice stays scored. 3/3 aligned slices
   scored, 10/10 tests.</p>
 
+  <h2 id="metric-identity">§6 — the two residuals are separated, and the registry grows to twelve</h2>
+
+  <p>Commit <code>a23fdcdb</code>. Gate passed — 37/37 across the chain, tolerance, gate, referee and
+  flux-ledger suites.</p>
+
+  <p>The convergence measurement found <code>profile_residual_rms</code> being populated by the
+  solver's fixed-point defect while its registered bound describes a cross-substrate current
+  reproduction — two different quantities compared as one. That is now closed at the definition
+  rather than by adjusting either number:</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Field</th><th>Quantity</th><th>Bound</th></tr></thead>
+    <tbody>
+      <tr><td><code>profile_residual_rms</code></td><td>median per-slice RMS of <code>(j_φ_nova &minus; j_φ_grid)/max|j_φ_grid|</code></td><td>0.075868, unchanged</td></tr>
+      <tr><td><code>fixed_point_defect</code></td><td>max per-slice <code>max|g(x)&minus;x|/max|g(x)|</code></td><td>the solver's existing strict 1e-8</td></tr>
+      <tr><td><code>magnetics_residual_whitened_rms</code></td><td>whitened raw-magnetics RMS</td><td>0.7987932587351543 source-cutover, unchanged</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>The registry now carries <strong>twelve</strong> fields, and every pre-existing bound is
+  byte-for-byte identical — this node corrected which quantity is compared to which bound, never a
+  bound. Three tests hold the separation: a formula-level test applies an independent structured-grid
+  Grad-Shafranov read and verifies the normalised current-density RMS; a same-slice fixture proves
+  <code>profile_residual_rms=0.020</code>, <code>fixed_point_defect=0.003</code> and
+  <code>magnetics=0.100</code> are distinct, and fails if the accelerator defect is ever written into
+  the profile field; and the whitened magnetics stays its own field and figure channel rather than
+  being folded into either.</p>
+
+  <p><strong>The sensor-scale finding is now enforced, not just recorded.</strong> Full-shot whitening
+  is computed before interval selection and carried through seed classification and the supported-chain
+  diagnostic path. A pinned fixture rejects a slice-local scale of 3.0 in favour of the full-shot
+  46.676189504571454 — the concrete form of the 2&times;2 result that a slice-local scale alone turned
+  a 3.176e-03 defect into a near-unity one on identical data. In the same pass
+  <code>_convergence_fraction</code> stopped assuming every trace row is finite: a non-finite row now
+  yields zero convergence instead of an indexing failure for callers outside the production gate.</p>
+
+  <p><strong>Consequence for the shot-21978 verdict above.</strong> That FAIL was computed before this
+  separation, so its profile-residual component compared the fixed-point defect against a current-
+  reproduction bound. The verdict is not withdrawn — it was correct against the registry as it then
+  stood — but it must be recomputed under the twelve-field registry before any shot's result is read
+  as a physics statement about that metric, and before the remaining five frozen shots are scored.</p>
+
   <h2 id="convergence">§6 — the sensor scale is the convergence cause, and the bound was the wrong quantity</h2>
 
   <p>Commit <code>4c2c1796</code>. Gate passed. Artifact: a 62,856-byte measurement record carrying

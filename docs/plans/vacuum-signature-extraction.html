@@ -20,11 +20,11 @@
   <title>Vacuum Signature Extraction | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-12">
-<meta name="plan-version" content="4">
-<meta name="plan-impl" content="0.6">
-<meta name="plan-commits" content="e59d976a,e75101ce">
-<meta name="plan-artifacts" content="nova/calibrate/windows.py,nova/calibrate/instrument.py,nova/calibrate/gain_check.py,~/.cache/nova-mast/vacuum-signatures/">
+<meta name="plan-modified" content="2026-08-13">
+<meta name="plan-version" content="5">
+<meta name="plan-impl" content="0.8">
+<meta name="plan-commits" content="e59d976a,e75101ce,5ed0da48">
+<meta name="plan-artifacts" content="nova/calibrate/windows.py,nova/calibrate/instrument.py,nova/calibrate/gain_check.py,nova/calibrate/sweep.py,~/.cache/nova-mast/vacuum-signatures/archive/signature_store.json,~/.cache/nova-mast/vacuum-signatures/archive/signature_series.npz,~/.cache/nova-mast/vacuum-signatures/archive/transition_catalogue.json,~/.cache/nova-mast/vacuum-signatures/archive/recorded_corrections.yaml,docs/research/mast-vacuum-signatures.html">
 </head>
 <body>
 <main class="plan-doc">
@@ -163,11 +163,19 @@ Done-when
   3. Corrections emitted in schema form; findings in a research note
   4. Followup written into plan + this one resolved</pre>
     </article>
+<article class="r-fu" data-id="f-vse-003" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship vacuum-signature-extraction §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Find a discriminating transition observable, then re-derive the catalogue — or record that pulse precision is unobtainable</h4>
+    <div class="r-fu-body">The sweep is banked at full archive scale and the transition catalogue is on HOLD because the scalar gain series confounds three causes: an acquisition-state step, a drive or pair-state change, and a response-model change all move it. 0 of 37 established switches reach adjacent-pulse precision and 1,445 apparent blocks appear where 37 are expected. The work is to find an observable that separates those causes — candidates include the pair-state classifier's own state sequence, which is already built and is blind to acquisition scale, and the ratio between simultaneously-driven channels, which cancels a common response-model error — then re-derive the catalogue against the 37 known switches as the falsification set. An honest outcome here may be that adjacent-pulse precision is not obtainable from vacuum windows at all, in which case that bound is the deliverable and the section closes on it. Do not promote a boundary from the confounded series to make the catalogue look complete.</div>
+    <pre class="r-fu-prompt">/reckon-ship vacuum-signature-extraction §2</pre>
+    </article>
 </section>
 
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s2" data-id="c-20260812-vse-023" data-who="reckon-ship" data-when="2026-08-12T19:05:00+00:00">
     <div class="r-comment-body">§2.3 opportunistic gain checks landed — commit e75101ce (merge 6a3d18f2); gate passed. Machine-agnostic kernel in nova/calibrate/gain_check.py opening no store: it takes time, recorded-current arrays, driven windows, channel names and signal/Green-response callbacks, forms the exact prediction as recorded currents times the described response row, and fits through-origin after additive instrument removal. Measure, 7 store-free synthetic cases in the 244-passed calibrate lane: an injected gain of 1.083 recovered within 5e-4 relative with shape agreement above 0.999; an injected x2 scale transition bounded by before_shot 5103 and after_shot 5104 — exactly the pulse at which it was introduced, which is the pulse-number precision this section exists to buy; a both-members gain change 1.0 to 1.2 correctly held in the same response state while the following pulse's single-member change kept gain 1.2, so a pair-state change is separated from a gain change rather than confounded; and scale-only candidate states refused outright as pair-state/gain confounding. Candidate pickup states are selected by current-weighted waveform shape after fitting independent scalar gains, with a 0.05 signal-normalised separation floor. The archive sweep (§2.4) is deliberately not in this node.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260813-vse-024" data-who="reckon-ship" data-when="2026-08-13T08:05:00+00:00">
+    <div class="r-comment-body">§2.4 archive sweep landed — commit 5ed0da48; gate FAILED, and recorded as such rather than relaxed. THE SWEEP ITSELF SUCCEEDED at full scale: all 17,111 pulse directories (11,695–30,473) covered in 35 deterministic chunks with every requested identity visited once and zero partial files; SLURM jobs 1245008 and 1245013 completed 35/35 tasks at exit 0, maximum kernel duration 1,578.8 s and maximum elapsed 26:45 against the 59-minute debug wall. 15,139 pulses measured, 1,972 explicit refusals. Banked: 1,092,847 offset and drift fits, 33,351 far-field gain fits, and 1,676 schema-valid recorded-only correction records. THE TRANSITION CLAIM IS REFUTED: exact adjacent-pulse precision was reached on 0 of 37 established switches, only 5 of 37 are even ordered, and obv03 has no single ordered boundary — changed-state evidence appears at pulse 19,337 while old-state evidence persists through 19,857. A raw scalar gain series finds 1,445 apparent blocks, which is far too many to promote any boundary safely. MECHANISM: the present observable cannot separate an acquisition-state change from a drive or pair-state change or from a response-model change, so apparent blocks are a mixture. The node was right to refuse; the fault is in the section's own premise, which assumed pulse-number precision was obtainable from this series rather than treating it as the thing to measure. The research record carries an explicit HOLD.</div>
 </div>
 </section>
 </main>

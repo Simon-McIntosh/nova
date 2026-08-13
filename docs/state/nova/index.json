@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-12T22:47:34",
+  "updated": "2026-08-13T08:47:42",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -453,6 +453,29 @@
         "starts": "2026-08-21",
         "ends": "2026-09-04",
         "description": "Move MAST-specific non-axisymmetric geometry, drive semantics, passive screening and vacuum taring into Nova after the native 3D substrate ships."
+      },
+      {
+        "id": "S11",
+        "status": "planned",
+        "theme": "Retire the bespoke machine-description packaging",
+        "items": [
+          {
+            "slug": "machine-description-retirement",
+            "why_now": "The producer replaces all three surfaces generically, and maintaining a second implementation of description packaging inside the solver is the cost of not retiring them; the consumer coupling that would break is already visible and fixable in the same beat.",
+            "done_when": "Description equivalence demonstrated numerically through the producer first \u2014 the same 44 unique loop positions and the same 43-of-46 solve-input join \u2014 then every surface in the removal inventory deleted, the consumer's geometry source and identity constant migrated in coordination, the outward republication followup retired with its reason recorded, and the full suite green at its accepted failure set with no new failure.",
+            "status": "pending",
+            "capability": {
+              "version": "1.0",
+              "class": "general",
+              "requirements": {
+                "verification": "strict"
+              }
+            }
+          }
+        ],
+        "starts": "2026-09-14",
+        "ends": "2026-09-27",
+        "description": "Nova is a physics solver; producing and packaging machine description is not its job. Once the map-driven producer in imas-ambix serves MAST descriptions, remove the three surfaces that grew here only because nothing else carried the geometry: the nova-machine-geometry-registry schema with its physical and registry digests, the content-addressed artifact caches and the OCI reference helper nothing publishes through, and the machine-specific solve-input IDS builder. The geometry itself is kept and migrates into the MAST map. The digest scheme goes because it answers 'is this the same machine' as a single global question, which a machine whose geometry changes across and within campaigns cannot satisfy \u2014 which is why it needed a coordinated cutover every time the description moved."
       }
     ],
     "active_sprint_id": "S6",
@@ -541,6 +564,11 @@
         "when": "2026-08-11",
         "who": "Simon McIntosh",
         "what": "Sprint S10 created for the Sophelio-challenge forward stack (diiid-forward-onboarding). Premise correction recorded on coil-geometry-inversion: the challenge dataset ships conductor geometry and Thomson chords; wall and passive structure remain externally sourced."
+      },
+      {
+        "when": "2026-08-13",
+        "who": "Simon McIntosh (via reckon-create)",
+        "what": "S11 created \u2014 retire nova's bespoke machine-description packaging once imas-ambix S22 serves the same descriptions. Investigation closed the outward-republication question negatively: the artifact tooling writes a local content-addressed cache, oci_artifact_reference takes its repository from the caller with only a test placeholder in-repo, and the account holds no machine-description package, so f-flc-004 is retired rather than executed. The geometry landed this session (44 unique loop positions, join 39 to 43) is kept and migrates to the MAST map; only the wrapper is removed."
       }
     ],
     "blockers": [
@@ -573,6 +601,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 32
+    "_version": 33
   }
 }

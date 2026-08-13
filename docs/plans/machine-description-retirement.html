@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="machine-description-retirement">
+  <meta name="plan-title"     content="Retire the Bespoke Machine-Description Layer">
+  <meta name="plan-summary"   content="Remove nova's hand-rolled description packaging — the registry schema and its digests, the content-addressed artifact caches, the OCI reference helper and the machine-specific solve-input IDS builder — once the ambix map-driven producer serves the same descriptions, keeping the geometry and retiring only the wrapper.">
+  <meta name="plan-status"    content="draft">
+  <meta name="plan-roi"       content="mid">
+  <meta name="plan-effort"    content="M">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="general">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint"    content="S11">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-depends-on" content="imas-ambix:machine-map-transform-engine">
+  <title>Retire the Bespoke Machine-Description Layer | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Nova is a physics solver; producing data is not its job</h2>
+    <p>Nova grew a description-packaging layer because something had to carry the MAST geometry
+    and nothing else did. That layer is now three separable things, and all three are better
+    served elsewhere: a bespoke registry schema with its own digest scheme, a content-addressed
+    artifact cache with an OCI reference helper that nothing publishes through, and a
+    machine-specific builder that loads one machine's shot into IDSs. The map-driven producer in
+    <code>imas-ambix</code> replaces all three generically, so this plan removes them rather than
+    maintaining a second implementation.</p>
+    <p><strong>The geometry is not what is being retired.</strong> The conductor and sensor
+    description — including the restored P4-lower loop positions that made all 44 described loop
+    positions unique and lifted the solve-input join from 39 to 43 of 46 reconstruction loops —
+    is real, validated physics and migrates intact into the MAST <em>map</em>. What goes is the
+    wrapper around it.</p>
+
+    <h2 id="s2">§2 — Why the digest scheme in particular has to go</h2>
+    <p><code>physical_digest</code> was built to answer "is this the same machine?" as a single
+    global question. For a machine whose geometry changes across and within campaigns that
+    question has no answer, which is why the scheme has needed a coordinated cutover every time
+    the description moved — each one touching the packaged registry, five or more digest pin
+    files, a published tag, and a downstream consumer's pinned constant. The replacement asserts
+    determinism, partition consistency and visible change instead, all of which remain true of a
+    machine that moves.</p>
+    <p>Retiring the scheme also retires the outward republication step that never ran. It was
+    authorised, and then investigation established there was nothing to republish: the artifact
+    tooling writes a local content-addressed cache, <code>oci_artifact_reference</code> takes its
+    repository from the caller with the only concrete string in-repo being a test placeholder, and
+    the account's twelve container packages include no machine-description package. The correct
+    disposition is retirement, not execution.</p>
+
+    <h2 id="s3">§3 — Removal inventory</h2>
+    <table>
+      <thead><tr><th>Surface</th><th>Disposition</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>nova/catalog/mast_geometry.json</code> — the <code>nova-machine-geometry-registry</code> schema, physical and registry digests, representation aliases</td>
+          <td>geometry migrates to the MAST map; the schema and digest fields are deleted</td>
+        </tr>
+        <tr>
+          <td><code>nova/imas/mast_artifact.py</code> — content-addressed authoring, verification and <code>oci_artifact_reference</code></td>
+          <td>deleted with the four <code>~/.cache/mast-artifact-*</code> caches</td>
+        </tr>
+        <tr>
+          <td><code>nova/imas/mast_solve_input_ids.py</code> — machine-specific shot load into IDSs</td>
+          <td>replaced by the map-driven producer; deleted</td>
+        </tr>
+        <tr>
+          <td><code>MAST_PHYSICAL_DIGEST</code> in the consumer's identity test, and <code>MachineGeometryRegistry.default()</code> as its geometry source</td>
+          <td>moves in the same beat, coordinated with the owning repository</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>Nova keeps what it is for: the Green's-function kernels, the geometry parametrisation and
+    solver, the calibration package, and the frame and biot machinery that consume a description
+    someone else produced.</p>
+
+    <h2 id="s4">§4 — Sequencing and the consumer coupling</h2>
+    <p>This plan cannot start before the producer serves MAST descriptions, which is why it
+    depends on the ambix plan rather than merely following it. The coupling to fix in the same
+    beat is real and currently silent: the consumer imports
+    <code>nova.catalog.mast_geometry.MachineGeometryRegistry</code> directly and pins a digest
+    constant, while its dependency on nova is a git SHA that has drifted 202 commits behind. A
+    deletion here breaks that import unless the consumer moves with it.</p>
+    <p><em>Done-when:</em> every surface in the §3 inventory removed with the geometry verified
+    equivalent through the producer beforehand — the same 44 unique loop positions and the same
+    43-of-46 join, demonstrated numerically, not asserted; the consumer's geometry source and
+    identity test migrated in coordination; the outward republication followup retired with its
+    reason recorded; and the full suite green at its accepted failure set with no new failure.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="removal-style" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Clean deletion in one beat, or a deprecation window where both the
+          registry and the producer serve descriptions?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="clean-deletion">clean deletion once equivalence is demonstrated</button>
+          <button class="r-opt" data-value="deprecation-window">deprecation window with both paths live</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-mdr-001" data-status="open"
+               data-capability-version="1.0" data-capability-class="general"
+               data-capability-verification="strict"
+               data-written-by="reckon-create" data-written-at="2026-08-13"
+               data-recommends-skill="/reckon-ship machine-description-retirement §4">
+        <h4 class="r-fu-title">Demonstrate description equivalence through the producer before deleting anything</h4>
+        <div class="r-fu-body"><p>The gate that makes the removal safe rather than hopeful:
+        drive the ambix producer's MAST map and show it yields the same description nova's
+        registry serves today — all 44 described loop positions unique, the solve-input join at
+        43 of 46, and the conductor geometry numerically identical. A demonstrated equivalence is
+        what turns the §3 inventory from a deletion into a migration. Nothing is removed under
+        this followup.</p></div>
+        <pre class="r-fu-prompt">/reckon-ship machine-description-retirement §4</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

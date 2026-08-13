@@ -10,6 +10,7 @@ otherwise aligned row is a scored failure rather than a silent omission.
 
 from __future__ import annotations
 
+import argparse
 import json
 import math
 from collections import Counter
@@ -20,7 +21,13 @@ from typing import Any, Callable, Mapping
 
 import numpy as np
 
-from nova.imas.mast_efit_referee import FROZEN_SHOTS, RefereedParityResult
+from nova.imas.mast_chain_factory import build_mast_parity_chain
+from nova.imas.mast_efit_referee import (
+    FROZEN_SHOTS,
+    RefereedParityResult,
+    run_refereed_parity_chain,
+)
+from nova.imas.mast_solve_inputs import SHOT_STORE
 from nova.imas.parity_tolerances import (
     SCORECARD_FIELDS,
     MagneticsBudgetClass,
@@ -75,13 +82,46 @@ class FrozenGateReport:
     requested_shots: tuple[int, ...]
     completed_shots: tuple[int, ...]
     incomplete_shots: tuple[int, ...]
+    not_attempted_shots: tuple[int, ...]
     magnetics_budget: str
     status: str
     scored_slices: tuple[ScoredSlice, ...]
     skipped_slices: tuple[SkippedSlice, ...]
     shot_summaries: tuple[ShotSummary, ...]
+    pass_fraction_by_metric: Mapping[str, float]
     run_errors: Mapping[int, str]
     figures: tuple[str, ...]
+
+
+def score_production_shot(
+    shot: int,
+    *,
+    artifact_cache: Path | str,
+    artifact_digest: str,
+    store: Path | str = SHOT_STORE,
+    radial_points: int = 33,
+    vertical_points: int = 49,
+) -> RefereedParityResult:
+    """Score one shot using only components returned by the production factory."""
+
+    components = build_mast_parity_chain(
+        int(shot),
+        artifact_cache=artifact_cache,
+        artifact_digest=artifact_digest,
+        store=store,
+        radial_points=radial_points,
+        vertical_points=vertical_points,
+    )
+    return run_refereed_parity_chain(
+        int(shot),
+        moment_solver=components.moment_solver,
+        profile_solver=components.profile_solver,
+        topology_labeler=components.topology_labeler,
+        temporal_scorer=components.temporal_scorer,
+        magnetics_budget=MagneticsBudgetClass.SOURCE_CUTOVER,
+        store=store,
+        referee_store=store,
+    )
 
 
 def _slice_metrics(result: RefereedParityResult, index: int) -> dict[str, float]:
@@ -313,13 +353,38 @@ def _write_figures(
 
 
 def bank_frozen_scorecard(
-    scorer: Callable[[int], RefereedParityResult],
+    scorer: Callable[[int], RefereedParityResult] | None = None,
     *,
     shots: tuple[int, ...] = FROZEN_SHOTS,
     artifact_path: Path | str = DEFAULT_ARTIFACT,
     figure_dir: Path | str = DEFAULT_FIGURE_DIR,
+    artifact_cache: Path | str | None = None,
+    artifact_digest: str | None = None,
+    store: Path | str = SHOT_STORE,
+    radial_points: int = 33,
+    vertical_points: int = 49,
+    max_shots: int | None = None,
 ) -> FrozenGateReport:
     """Score every requested shot, bank coverage, and name every failed run."""
+
+    if scorer is None:
+        if artifact_cache is None or artifact_digest is None:
+            raise ValueError(
+                "production scoring requires artifact_cache and artifact_digest"
+            )
+
+        def scorer(shot: int) -> RefereedParityResult:
+            return score_production_shot(
+                shot,
+                artifact_cache=artifact_cache,
+                artifact_digest=artifact_digest,
+                store=store,
+                radial_points=radial_points,
+                vertical_points=vertical_points,
+            )
+
+    if max_shots is not None and max_shots < 0:
+        raise ValueError("max_shots must be non-negative")
 
     scored: list[ScoredSlice] = []
     skipped: list[SkippedSlice] = []
@@ -328,7 +393,11 @@ def bank_frozen_scorecard(
     errors: dict[int, str] = {}
     budgets: set[str] = set()
 
+    attempted: list[int] = []
     for shot in shots:
+        if max_shots is not None and len(attempted) >= max_shots:
+            break
+        attempted.append(int(shot))
         try:
             result = scorer(int(shot))
             if int(result.scorecard.shot) != int(shot):
@@ -349,6 +418,7 @@ def bank_frozen_scorecard(
         raise ValueError(f"shots were scored with mixed magnetics budgets: {budgets}")
     completed = tuple(shot for shot in shots if shot in results)
     incomplete = tuple(shot for shot in shots if shot not in results)
+    not_attempted = tuple(shot for shot in shots if shot not in attempted)
     figures = _write_figures(results, scored, Path(figure_dir))
     if incomplete:
         status = "incomplete"
@@ -356,21 +426,82 @@ def bank_frozen_scorecard(
         status = "pass"
     else:
         status = "fail"
+    pass_fractions = {
+        field: (
+            float(np.mean([row.verdicts[field] for row in scored]))
+            if scored
+            else float("nan")
+        )
+        for field in sorted(SCORECARD_FIELDS)
+    }
     report = FrozenGateReport(
         generated_at=datetime.now(UTC).isoformat(),
         requested_shots=tuple(int(shot) for shot in shots),
         completed_shots=completed,
         incomplete_shots=incomplete,
+        not_attempted_shots=not_attempted,
         magnetics_budget=next(iter(budgets), "not-scored"),
         status=status,
         scored_slices=tuple(scored),
         skipped_slices=tuple(skipped),
         shot_summaries=tuple(summaries),
+        pass_fraction_by_metric=pass_fractions,
         run_errors=dict(sorted(errors.items())),
         figures=figures,
     )
     _bank_report(report, Path(artifact_path))
     return report
+
+
+def print_frozen_gate_report(report: FrozenGateReport) -> None:
+    """Print cohort coverage and every registered metric pass fraction."""
+
+    print(f"status: {report.status}")
+    print(f"completed_shots: {list(report.completed_shots)}")
+    print(f"not_attempted_shots: {list(report.not_attempted_shots)}")
+    for summary in report.shot_summaries:
+        print(
+            f"shot {summary.shot}: available={summary.available_slices} "
+            f"scored={summary.scored_slices} skipped={summary.skipped_slices} "
+            f"skip_causes={dict(summary.skip_causes)}"
+        )
+        for field, fraction in summary.pass_fraction_by_metric.items():
+            print(f"  {field}: {fraction:.12g}")
+    for shot, error in report.run_errors.items():
+        print(f"shot {shot}: run_error={error}")
+    print("overall_pass_fraction_by_metric:")
+    for field, fraction in report.pass_fraction_by_metric.items():
+        print(f"  {field}: {fraction:.12g}")
+
+
+def _parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--artifact-cache", type=Path, required=True)
+    parser.add_argument("--artifact-digest", required=True)
+    parser.add_argument("--store", type=Path, default=SHOT_STORE)
+    parser.add_argument("--artifact-path", type=Path, default=DEFAULT_ARTIFACT)
+    parser.add_argument("--figure-dir", type=Path, default=DEFAULT_FIGURE_DIR)
+    parser.add_argument("--radial-points", type=int, default=33)
+    parser.add_argument("--vertical-points", type=int, default=49)
+    parser.add_argument("--max-shots", type=int)
+    return parser
+
+
+def main() -> None:
+    """Run and bank the production frozen-cohort scorecard."""
+
+    args = _parser().parse_args()
+    report = bank_frozen_scorecard(
+        artifact_path=args.artifact_path,
+        figure_dir=args.figure_dir,
+        artifact_cache=args.artifact_cache,
+        artifact_digest=args.artifact_digest,
+        store=args.store,
+        radial_points=args.radial_points,
+        vertical_points=args.vertical_points,
+        max_shots=args.max_shots,
+    )
+    print_frozen_gate_report(report)
 
 
 __all__ = [
@@ -381,4 +512,11 @@ __all__ = [
     "ShotSummary",
     "SkippedSlice",
     "bank_frozen_scorecard",
+    "main",
+    "print_frozen_gate_report",
+    "score_production_shot",
 ]
+
+
+if __name__ == "__main__":
+    main()

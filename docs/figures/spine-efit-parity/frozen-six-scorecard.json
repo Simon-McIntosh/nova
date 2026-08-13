@@ -1,7 +1,7 @@
 {
   "completed_shots": [],
   "figures": [],
-  "generated_at": "2026-08-13T06:02:57.863284+00:00",
+  "generated_at": "2026-08-13T06:40:39.083149+00:00",
   "incomplete_shots": [
     21978,
     21983,
@@ -11,6 +11,26 @@
     22086
   ],
   "magnetics_budget": "not-scored",
+  "not_attempted_shots": [
+    21983,
+    21985,
+    21986,
+    21989,
+    22086
+  ],
+  "pass_fraction_by_metric": {
+    "confined_fraction": null,
+    "converged_fraction": null,
+    "current_diffusion_flux_ledger_rms_fraction": null,
+    "iteration_count": null,
+    "lcfs_distance_m": null,
+    "magnetic_axis_distance_m": null,
+    "magnetics_residual_whitened_rms": null,
+    "profile_residual_rms": null,
+    "throughput_slices_per_core_s": null,
+    "topology_class_agreement_fraction": null,
+    "x_point_distance_m": null
+  },
   "requested_shots": [
     21978,
     21983,
@@ -20,12 +40,7 @@
     22086
   ],
   "run_errors": {
-    "21978": "TypeError: run_parity_chain() missing 3 required keyword-only arguments: 'moment_solver', 'profile_solver', and 'topology_labeler'",
-    "21983": "TypeError: run_parity_chain() missing 3 required keyword-only arguments: 'moment_solver', 'profile_solver', and 'topology_labeler'",
-    "21985": "TypeError: run_parity_chain() missing 3 required keyword-only arguments: 'moment_solver', 'profile_solver', and 'topology_labeler'",
-    "21986": "TypeError: run_parity_chain() missing 3 required keyword-only arguments: 'moment_solver', 'profile_solver', and 'topology_labeler'",
-    "21989": "TypeError: run_parity_chain() missing 3 required keyword-only arguments: 'moment_solver', 'profile_solver', and 'topology_labeler'",
-    "22086": "TypeError: run_parity_chain() missing 3 required keyword-only arguments: 'moment_solver', 'profile_solver', and 'topology_labeler'"
+    "21978": "ValueError: seed disc holds 4 cells, below min_cells=5"
   },
   "scored_slices": [],
   "shot_summaries": [],

@@ -5,8 +5,13 @@ from types import SimpleNamespace
 
 import numpy as np
 
+import nova.imas.mast_parity_gate as gate_module
 from nova.imas.mast_efit_referee import FROZEN_SHOTS
-from nova.imas.mast_parity_gate import bank_frozen_scorecard
+from nova.imas.mast_parity_gate import (
+    bank_frozen_scorecard,
+    print_frozen_gate_report,
+    score_production_shot,
+)
 from nova.imas.parity_tolerances import (
     SCORECARD_FIELDS,
     MagneticsBudgetClass,
@@ -65,6 +70,7 @@ def test_bank_covers_all_six_shots_and_all_registered_fields(tmp_path):
 
     assert report.completed_shots == FROZEN_SHOTS
     assert report.incomplete_shots == ()
+    assert report.not_attempted_shots == ()
     assert report.status == "fail"
     assert len(report.scored_slices) == 12
     assert len(report.skipped_slices) == 6
@@ -86,6 +92,7 @@ def test_bank_covers_all_six_shots_and_all_registered_fields(tmp_path):
     assert banked["requested_shots"] == list(FROZEN_SHOTS)
     assert banked["incomplete_shots"] == []
     assert len(banked["scored_slices"]) == 12
+    assert set(banked["pass_fraction_by_metric"]) == SCORECARD_FIELDS
     assert banked["scored_slices"][-1]["metrics"]["x_point_distance_m"] is None
     assert {path.name for path in figures.iterdir()} == {
         "boundary-distance-distributions.svg",
@@ -132,3 +139,85 @@ def test_failed_shot_is_named_while_remaining_shots_continue(tmp_path):
     assert report.run_errors == {
         21986: "FileNotFoundError: referee catalogue unavailable"
     }
+
+
+def test_shot_budget_names_unattempted_remainder_and_prints_overall_fractions(
+    tmp_path, capsys
+):
+    report = bank_frozen_scorecard(
+        _scored_result,
+        artifact_path=tmp_path / "scorecard.json",
+        figure_dir=tmp_path / "figures",
+        max_shots=2,
+    )
+
+    print_frozen_gate_report(report)
+    output = capsys.readouterr().out
+
+    assert report.completed_shots == FROZEN_SHOTS[:2]
+    assert report.not_attempted_shots == FROZEN_SHOTS[2:]
+    assert report.incomplete_shots == FROZEN_SHOTS[2:]
+    assert "not_attempted_shots: [21985, 21986, 21989, 22086]" in output
+    assert "overall_pass_fraction_by_metric:" in output
+    for field in SCORECARD_FIELDS:
+        assert f"  {field}:" in output
+
+
+def test_production_scorer_passes_only_factory_components_to_refereed_chain(
+    monkeypatch,
+):
+    components = SimpleNamespace(
+        moment_solver=object(),
+        profile_solver=object(),
+        topology_labeler=object(),
+        temporal_scorer=object(),
+    )
+    calls = []
+
+    def build(shot, **arguments):
+        calls.append(("build", shot, arguments))
+        return components
+
+    expected = object()
+
+    def run(shot, **arguments):
+        calls.append(("run", shot, arguments))
+        return expected
+
+    monkeypatch.setattr(gate_module, "build_mast_parity_chain", build)
+    monkeypatch.setattr(gate_module, "run_refereed_parity_chain", run)
+
+    result = score_production_shot(
+        21978,
+        artifact_cache="/machine",
+        artifact_digest="sha256:" + "a" * 64,
+        store="/shots",
+        radial_points=17,
+        vertical_points=25,
+    )
+
+    assert result is expected
+    assert calls[0] == (
+        "build",
+        21978,
+        {
+            "artifact_cache": "/machine",
+            "artifact_digest": "sha256:" + "a" * 64,
+            "store": "/shots",
+            "radial_points": 17,
+            "vertical_points": 25,
+        },
+    )
+    assert calls[1] == (
+        "run",
+        21978,
+        {
+            "moment_solver": components.moment_solver,
+            "profile_solver": components.profile_solver,
+            "topology_labeler": components.topology_labeler,
+            "temporal_scorer": components.temporal_scorer,
+            "magnetics_budget": MagneticsBudgetClass.SOURCE_CUTOVER,
+            "store": "/shots",
+            "referee_store": "/shots",
+        },
+    )

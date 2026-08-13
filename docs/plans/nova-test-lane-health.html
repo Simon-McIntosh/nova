@@ -16,13 +16,13 @@
 <meta name="plan-effort" content="S">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-owner" content="Simon McIntosh">
-<meta name="plan-modified" content="2026-08-12">
+<meta name="plan-modified" content="2026-08-13">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="general">
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
-<meta name="plan-version" content="3">
-<meta name="plan-commits" content="459cecce,1c33c365">
+<meta name="plan-version" content="4">
+<meta name="plan-commits" content="459cecce,1c33c365,80c3b507,a5e1245c">
 <meta name="plan-artifacts" content="docs/evidence/archive/nova-test-lane-health-landed.html,benchmarks/BASELINE.md">
 <meta name="plan-impl" content="0.5">
 </head>
@@ -74,10 +74,23 @@
     <div class="r-fu-body"><p>Item 1 removed the executor dependency and demonstrated it on the ordered subset that used to park, but the whole-lane claim is still outstanding: the banked 5,657/3/107/4 figures were taken before the repair and are process-sharded, which by their own recorded caveat does not attest to monolithic-lane health. Run one monolithic pytest -m 'slow or not slow' on the integrated SHA and record whether it reaches a final summary and with what counts. If it parks somewhere new, that is the next starvation site and the same diagnosis applies.</p></div>
     <pre class="r-fu-prompt">/reckon-ship nova-test-lane-health §2</pre>
     </article>
+<article class="r-fu" data-id="f-ntlh-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship nova-test-lane-health §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Diagnose the native JAX abort at the topology-boundary test</h4>
+    <div class="r-fu-body"><p>Behind the cleared catalog parking site sits a second wall: a monolithic run reaches 97% and then dies with <code>Fatal Python error: Aborted</code> (exit 134) inside <code>tests/test_topology_boundary.py::test_x_mask_excludes_cells_beyond_null_heights</code>, while JAX compiles and loads an indexed slice — <code>backend_compile_and_load → compile_or_get_cached → pjit → lax.slice</code>. It is a native abort, so pytest cannot report it and no summary is emitted. This is a different mechanism from the thread starvation item 1 fixed, and it is the remaining thing between the repo and a monolithic lane count. Likely candidates to separate: compilation-cache state accumulated across the suite, memory pressure at that point in the run, or a genuine XLA fault on that slice shape — the first two are suite-order effects like the last one was, the third is not.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship nova-test-lane-health §2</pre>
+    </article>
+<article class="r-fu" data-id="f-ntlh-003" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship nova-test-lane-health §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Measure the lane from a frozen worktree, never the primary checkout</h4>
+    <div class="r-fu-body"><p>The monolithic attempt ran against the mutable primary checkout, which advanced from <code>d4ce244d</code> to <code>cb70bdf8</code> while it executed because the orchestrating session was pushing. Even a clean finish could not then have named the tree it measured. Any lane measurement intended to be banked must run from a detached worktree frozen at one SHA for the whole process — not a <code>git archive</code> either, which is what produced the spurious <code>InvalidGitRepositoryError</code> in the sharded run. Make that the recorded method wherever BASELINE.md entries are produced, so the next measurement is attributable by construction.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship nova-test-lane-health §2</pre>
+    </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s2" data-id="c-20260812-deadlock" data-who="reckon-ship" data-when="2026-08-12T20:50:00+00:00">
-    <div class="r-comment-body">catalog-scan-deadlock landed (item 1) — commit 459cecce; ordered-subset gate passed; measure: the ordered one-process subset from tests/test_jax_config.py through tests/test_mast_catalog_geometry.py reached a final summary at 241 passed in 24.14 s, where the monolithic run previously parked; catalog module alone 18 passed in 4.76 s. Mechanism named and two cheap explanations ruled out: RLIMIT_NPROC=770063 and pids.max=max, so it is accumulated suite-process native-thread starvation, not a configured ceiling and not slow catalog logic. workers=1 now fingerprints inline with no ThreadPoolExecutor; workers>1 shuts down deterministically; the regression replaces ThreadPoolExecutor with a failing sentinel so the dependency cannot silently return. Lane baseline banked separately at 1c33c365: 5,657 passed / 3 failed / 107 skipped / 4 xfailed of 5,771, all three failures proven pre-existing, process-sharded and labelled as such. Artifacts: /nova/evidence/archive/nova-test-lane-health-landed#deadlock</div>
+    <div class="r-comment-body">catalog-scan-deadlock landed (item 1) — commit 459cecce; ordered-subset gate passed; measure: the ordered one-process subset from tests/test_jax_config.py through tests/test_mast_catalog_geometry.py reached a final summary at 241 passed in 24.14 s, where the monolithic run previously parked; catalog module alone 18 passed in 4.76 s. Mechanism named and two cheap explanations ruled out: RLIMIT_NPROC=770063 and pids.max=max, so it is accumulated suite-process native-thread starvation, not a configured ceiling and not slow catalog logic. workers=1 now fingerprints inline with no ThreadPoolExecutor; workers&gt;1 shuts down deterministically; the regression replaces ThreadPoolExecutor with a failing sentinel so the dependency cannot silently return. Lane baseline banked separately at 1c33c365: 5,657 passed / 3 failed / 107 skipped / 4 xfailed of 5,771, all three failures proven pre-existing, process-sharded and labelled as such. Artifacts: /nova/evidence/archive/nova-test-lane-health-landed#deadlock</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260813-monolithic" data-who="reckon-ship" data-when="2026-08-13T05:40:00+00:00">
+    <div class="r-comment-body">monolithic-lane-proof did NOT produce a count — gate not-run, recorded as a negative result rather than retried into a claim. Commits 80c3b507, a5e1245c. What it proves: in one process in true suite order tests/test_mast_catalog_geometry.py completed 18/18 and pytest continued past 97%, so item 1's repair holds on the whole lane and not just the ordered subset. What stopped it: a native abort, Fatal Python error / exit 134, after 33 min 44 s inside tests/test_topology_boundary.py::test_x_mask_excludes_cells_beyond_null_heights while JAX compiled an indexed slice (backend_compile_and_load -> compile_or_get_cached -> pjit -> lax.slice) — a different mechanism at a different site from the thread starvation, and not a Python-level failure pytest could report. No passed/failed/skipped/xfailed counts are claimed, for two independent reasons: no final summary was emitted, and the run used the mutable primary checkout which advanced d4ce244d -> cb70bdf8 mid-run as this session pushed, so no count could have named one tree anyway. The run's diagnostic value was recovered: it mapped six true-order failure positions to exact test_biotsavart ids with operands, which is what let the attribution node prove the pole split caused them, and it correctly made no repair to the tree it was measuring. Artifacts: /nova/evidence/archive/nova-test-lane-health-landed#monolithic-attempt</div>
 </div>
 </section>
 </main>

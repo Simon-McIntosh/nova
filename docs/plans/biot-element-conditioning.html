@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="biot-element-conditioning">
   <meta name="plan-title" content="Conditioning Audit of Every Biot Element">
   <meta name="plan-summary" content="Audit each biot element for catastrophic cancellation and accuracy loss, give every one the treatment the arc reduction already had, and settle the source-side route and target-side integration rule on measurement">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
   <meta name="plan-capability-version" content="1.0">
@@ -21,10 +21,10 @@
   <title>Conditioning Audit of Every Biot Element | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-12">
-<meta name="plan-version" content="12">
-<meta name="plan-impl" content="0.99">
-<meta name="plan-commits" content="4ed5fcd1,25435a82,f13aaa02,21b0f0bd,5520ee3c,5c410d01,92dcf184,bc2a75b5">
+<meta name="plan-modified" content="2026-08-13">
+<meta name="plan-version" content="13">
+<meta name="plan-impl" content="1.0">
+<meta name="plan-commits" content="4ed5fcd1,25435a82,f13aaa02,21b0f0bd,5520ee3c,5c410d01,92dcf184,bc2a75b5,c18d3bdb,bf552c2d">
 <meta name="plan-artifacts" content="docs/evidence/archive/biot-element-conditioning-landed.html,docs/figures/biot-element-conditioning/hexagon-target-convergence.png,benchmarks/coil_section_cost.py,benchmarks/bow_grid_solve.py">
 </head>
 <body>
@@ -294,21 +294,26 @@ Done-when
     <pre class="r-fu-prompt">/reckon-ship biot-element-conditioning §4</pre>
     <p class="r-fu-outcome">Owner decision 2026-08-11: flip the coil force default onto the fan; plasma stays subdivision. target-rule re-locked to section-quadrature with the plasma carve-out; the implementation node is dispatched in-session with the value shifts to be reported at its landing.</p>
     </article>
-<article class="r-fu" data-id="f-bec-005" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-11T07:00:00+00:00" data-recommends-skill="/reckon-ship biot-element-conditioning §4" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-bec-005" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-11T07:00:00+00:00" data-recommends-skill="/reckon-ship biot-element-conditioning §4" data-resolved-at="2026-08-13T05:28:36+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Build the plasma force target as plasma cells carrying their own turns</h4>
     <div class="r-fu-body"><p>Pre-existing and newly visible: with force_index='plasma', PolyTarget hands the plasma's subframe rows to Target.insert as if they were a polygon and raises — the plasma force path builds under NEITHER rule (the fan's refusal masked it; no live caller exists; a strict xfail pins it). The locked carve-out intends plasma force on subdivision; the repair belongs in nova/frame/polygrid.py and is a design question — a plasma force target wants the plasma's own cells as rows carrying their per-cell turn numbers, not a re-tiling.</p></div>
     <pre class="r-fu-prompt">/reckon-ship biot-element-conditioning §4</pre>
+    <p class="r-fu-outcome">done — no followup for this plan. The plasma force target repair belongs to the plasma force path, not to the conditioning audit: the locked target-rule carve-out already states that plasma keeps subdivision because per-cell turn densities cannot be represented by a single fan, and the strict xfail pins the current refusal so it cannot regress silently. The design work (plasma cells as rows carrying their own turn numbers, in nova/frame/polygrid.py) is equilibrium-mesh work whose lifecycle belongs with the forward-equilibrium plan's infrastructure queue rather than with an element conditioning audit; no live caller exists, so nothing is blocked by leaving it there.</p>
     </article>
-<article class="r-fu" data-id="f-bec-006" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-12" data-recommends-skill="/reckon-ship biot-element-conditioning §4" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-bec-006" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-12" data-recommends-skill="/reckon-ship biot-element-conditioning §4" data-resolved-at="2026-08-13T05:28:36+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Repair the force-tiling benchmark&#x27;s inherited target policy</h4>
     <div class="r-fu-body"><p>Surfaced by the audit rerun: <code>benchmarks/force_target_rule.py::solve_tiling</code> now inherits the positive-material default since the target-rule flip, so its printed tile ladder silently repeats the fan result at 100 nodes instead of measuring subdivision. The banked <code>coil_section_cost</code> comparison is unaffected because it selects the policy explicitly; this legacy driver does not. Select <code>ForceTargetPolicy(rule="subdivision")</code> explicitly so the ladder measures what its name says.</p></div>
     <pre class="r-fu-prompt">/reckon-ship biot-element-conditioning §4</pre>
+    <p class="r-fu-outcome">Closed by commit bf552c2d. solve_tiling now passes ForceTargetPolicy(rule='subdivision') explicitly through benchmark coilset construction. Before: all six tile rungs repeated 100 realised nodes with identical Fr/Fz/Fc errors 4.5816e-05 / 2.1363e-05 / 4.4760e-05. After: realised nodes vary 2, 8, 30, 123, 499, 2100 across requested tiles 1, 4, 16, 64, 256, 1024, with Fr error falling 7.005e-01 to 6.096e-04 and Fc error 1.000e+00 to 1.343e-03 — a converging ladder rather than a constant. Focused force tests 30 passed / 1 xfailed.</p>
     </article>
 </section>
 
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s2" data-id="c-20260812-polesplit" data-who="reckon-ship" data-when="2026-08-12T20:15:00+00:00">
     <div class="r-comment-body">corner-pole-split landed — commit 92dcf184; mpmath fan arbiter gate passed; measure: widest-corner-term to section-value ratio reduced compact 936.6 -&gt; 10.70 (87.5x), thin-square 14633.3 -&gt; 41.41 (353.4x), slender 34205.9 -&gt; 481.0 (71.1x); production section flux agrees with the independent edge-aligned singularity-subtracted mpmath fan to 8.57e-13 / 1.74e-12 / 3.64e-12 relative, the fan itself converged to 4.8e-12 relative movement at 64 nodes. Fixed by rearrangement with no quadrature nodes added. Shipped centroid psi moved -1.806e-17 compact (-4.31e-13 rel), -2.492e-16 thin-square (-4.65e-12), -2.543e-15 slender (-5.55e-11), reported not absorbed. The edge-aligned decomposition also supplies the slender-section arbiter f-bec-003 was waiting on. Residual: 481x is a reduction not an elimination, so slender precision is bounded near eps*481; three pre-existing strict xfails on a separate mechanism stand. Focused gate 377 passed / 3 xfailed. Scope was extended mid-flight to nova/biot/greens.py and tests/test_biotgreens.py, where the corner rule actually lives. Artifacts: /nova/evidence/archive/biot-element-conditioning-landed#pole-split</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260813-regression" data-who="reckon-ship" data-when="2026-08-13T05:30:00+00:00">
+    <div class="r-comment-body">biotsavart-regression landed — commit c18d3bdb; attribution and repair gate passed. The pole split (92dcf184) had regressed six tests/test_biotsavart.py::test_axial_vertical_field cases, invisible to its own focused gate because that gate did not include test_biotsavart. Causality proven by tree rather than inferred: loading every nova module from 92dcf184 gives 6 failures / 12 passes on the same 18 parameters, and from parent 567b5c3b all 18 pass. Mechanism: the residual-product form is conditioned only near a source corner, so a far-axis target gets large reciprocal offsets even with no pole near its divergent limit. Repair selects the split only where the largest radial/vertical corner offset is within the target radius, in host and traced paths, keeping the direct channel elsewhere. Deliberate value changes -4.181e-08 to -6.602e-07 absolute, worst relative 3.81e-04, all six reported. tests/test_biotsavart.py now 179 passed; the arbiter suite is unchanged at 40 passed / 3 xfailed, so the 87x/353x/71x cancellation gain is preserved. Artifacts: /nova/evidence/archive/biot-element-conditioning-landed#pole-split-regression</div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260812-auditres" data-who="reckon-ship" data-when="2026-08-12T21:45:00+00:00">
     <div class="r-comment-body">audit-record-residuals landed — commit bc2a75b5; measurement gate passed; no production numeric value changed. Bow now graded against the defining 3D Biot-Savart volume integral (shares neither the elliptic reduction nor the zeta rule): worst sampled regime 1.84e-10 far field, 6.80e-13 just outside the end corner, arbiter converged to 4.94e-12 between orders 48 and 64 — this closes wave 6's stated qualification that bow lacked an independent arbiter. Cost at equal accuracy with each target policy selected explicitly: order-3 fan 18 nodes / 0.0679 s / 4.134e-04 worst live-component error vs subdivision 4158 realised nodes / 2.424 s / 3.584e-04 — 231x fewer nodes, 35.7x lower wall time; the force arbiter's 1.087 drift is dominated by the excluded near-zero self-cancelling Fz. Hexagonal target-rule convergence against the independent 4D limit 3.768e-05: 2.43e-02 (4 nodes) to 8.30e-09 (100), with orders 6-8 exposing the arbiter's own ~9e-08 floor rather than a limit of the rule. Post-change self-inductance diagonal residual 4.3627e-04 at dcoil=-1, a +4.274e-06 (+0.989%) shift from the cited 4.32e-04; 2.415e-06 at dcoil=-5 and 6.224e-06 at dcoil=-20. Artifacts: /nova/evidence/archive/biot-element-conditioning-landed#audit-residuals, docs/figures/biot-element-conditioning/hexagon-target-convergence.png</div>

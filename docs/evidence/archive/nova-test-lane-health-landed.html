@@ -94,6 +94,38 @@
     identical internal-inductance value 0.4165026973920516 against its 0.15 bound.</li>
   </ul>
 
+  <h2 id="monolithic-attempt">The monolithic run: parking site cleared, a second wall behind it</h2>
+
+  <p>Commits <code>80c3b507</code> and <code>a5e1245c</code>. <strong>The repair works and the lane
+  still does not finish.</strong> Both halves of that sentence are the result.</p>
+
+  <p><strong>What is proven:</strong> in a single process, in true suite order,
+  <code>tests/test_mast_catalog_geometry.py</code> completed <strong>18 of 18</strong> and pytest
+  continued past the <strong>97%</strong> mark. The former <code>Thread.start()</code> parking site
+  is passed, so §2 item 1 is demonstrated end to end rather than only on the ordered subset.</p>
+
+  <p><strong>What stopped it:</strong> a native abort — <code>Fatal Python error: Aborted</code>,
+  exit 134 — after 33 min 44 s, inside
+  <code>tests/test_topology_boundary.py::test_x_mask_excludes_cells_beyond_null_heights</code> while
+  JAX compiled and loaded an indexed slice
+  (<code>backend_compile_and_load → compile_or_get_cached → pjit → lax.slice</code>). This is a
+  different mechanism from the thread starvation, at a different site, and it is not a Python-level
+  failure that pytest could report.</p>
+
+  <p><strong>No counts are claimed, for two independent reasons</strong>, and both are recorded
+  rather than glossed. Pytest emitted no final summary, so there is nothing honest to bank. And the
+  run executed against the mutable primary checkout, which advanced from <code>d4ce244d</code> to
+  <code>cb70bdf8</code> mid-run as this session pushed — so even a completed count would not have
+  named one tree. <strong>The method needs a frozen worktree at a fixed SHA</strong>, which is the
+  more useful finding of the two: a lane measurement taken against a moving checkout cannot be
+  attributed however cleanly it finishes.</p>
+
+  <p>The run's diagnostic value was recovered rather than discarded: it mapped the six
+  true-order failure positions to exact
+  <code>tests/test_biotsavart.py::test_axial_vertical_field</code> ids with their operands, which is
+  what let the attribution node prove the pole split caused them. It made no repair, correctly —
+  changing the tree it was measuring would have destroyed the measurement.</p>
+
   <p><strong>Two candidate failures were investigated and correctly not banked.</strong>
   <code>tests/test_datasource.py::test_shared_attributes</code> failed only under
   <code>git archive</code> with <code>InvalidGitRepositoryError</code> and passed in a real git

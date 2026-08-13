@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-12T22:48:14",
+  "updated": "2026-08-13T07:27:55",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -1362,9 +1362,269 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260812T204314828119-biotsavart-regression",
+        "plan": "biot-element-conditioning",
+        "section": "\u00a72",
+        "node": "biotsavart-regression",
+        "role": "implement",
+        "member": "corner-pole",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-12T20:43:16Z",
+        "completed_at": "2026-08-12T20:55:16Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 720,
+        "time_budget": "25m",
+        "base_sha": "17d173be8ea287d43de9cceeb9a578056ee77dec",
+        "commits": [
+          "c18d3bdba6046b8ae67606563e373d54eb385bd7"
+        ],
+        "changed_lines": {
+          "added": 15,
+          "removed": 7,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/653c361a-8c6e-405b-9035-eb21e04233a8/scratchpad/biotsavart-regression-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff724-6bb1-7840-ace7-aa6230408cf8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 53185792,
+            "input_tokens": 54335020,
+            "output_tokens": 139022,
+            "reasoning_output_tokens": 51625
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260812T204815141077-parity-chain-assembly",
+        "plan": "spine-efit-parity",
+        "section": "\u00a73",
+        "node": "parity-chain-assembly",
+        "role": "implement",
+        "member": "read-ingest",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-12T20:48:16Z",
+        "completed_at": "2026-08-12T20:58:41Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 625,
+        "time_budget": "25m",
+        "base_sha": "cb70bdf88a1f1ab0ebc338626831ee78d5fe6140",
+        "commits": [
+          "ee60c7d2"
+        ],
+        "changed_lines": {
+          "added": 680,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/653c361a-8c6e-405b-9035-eb21e04233a8/scratchpad/parity-chain-assembly-manifest.md",
+        "scope_changed": false,
+        "session_id": null,
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 3971328,
+            "input_tokens": 4139483,
+            "output_tokens": 26742,
+            "reasoning_output_tokens": 9588
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260812T204835076147-parity-tolerance-registration",
+        "plan": "spine-efit-parity",
+        "section": "\u00a73",
+        "node": "parity-tolerance-registration",
+        "role": "implement",
+        "member": "parity-tolerances",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-12T20:48:36Z",
+        "completed_at": "2026-08-12T20:58:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 613,
+        "time_budget": "25m",
+        "base_sha": "cb70bdf88a1f1ab0ebc338626831ee78d5fe6140",
+        "commits": [
+          "27baad59"
+        ],
+        "changed_lines": {
+          "added": 421,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/653c361a-8c6e-405b-9035-eb21e04233a8/scratchpad/parity-tolerance-registration-manifest.md",
+        "scope_changed": false,
+        "session_id": null,
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 5288192,
+            "input_tokens": 5462586,
+            "output_tokens": 22743,
+            "reasoning_output_tokens": 8831
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260812T204816601252-force-tiling-policy",
+        "plan": "biot-element-conditioning",
+        "section": "\u00a74",
+        "node": "force-tiling-policy",
+        "role": "implement",
+        "member": "biot-bench",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-12T20:48:17Z",
+        "completed_at": "2026-08-12T21:03:28Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 911,
+        "time_budget": "25m",
+        "base_sha": "cb70bdf88a1f1ab0ebc338626831ee78d5fe6140",
+        "commits": [
+          "bf552c2d"
+        ],
+        "changed_lines": {
+          "added": 12,
+          "removed": 3,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/653c361a-8c6e-405b-9035-eb21e04233a8/scratchpad/force-tiling-policy-manifest.md",
+        "scope_changed": false,
+        "session_id": null,
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 4448256,
+            "input_tokens": 4566445,
+            "output_tokens": 10619,
+            "reasoning_output_tokens": 3440
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260812T201654091920-monolithic-lane-proof",
+        "plan": "nova-test-lane-health",
+        "section": "\u00a72",
+        "node": "monolithic-lane-proof",
+        "role": "implement",
+        "member": "integration-gate",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-12T20:16:54Z",
+        "completed_at": "2026-08-12T21:23:58Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4024,
+        "time_budget": "25m",
+        "base_sha": "17d173be8ea287d43de9cceeb9a578056ee77dec",
+        "commits": [
+          "a5e1245c0ab0fddc5919cfc135c18bc13bba3e17"
+        ],
+        "changed_lines": {
+          "added": 49,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "not-run",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/653c361a-8c6e-405b-9035-eb21e04233a8/scratchpad/monolithic-lane-proof-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff724-7bb4-7270-836c-b0c7c9e7f7cc",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 103597312,
+            "input_tokens": 104954320,
+            "output_tokens": 132819,
+            "reasoning_output_tokens": 43960
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 64
+    "_version": 69
   }
 }

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="mast-vacuum-signatures">
+  <meta name="plan-title" content="MAST archive vacuum signatures">
+  <meta name="plan-summary" content="A raw-level archive sweep banks per-pulse offsets, drift, and opportunistic gains, with every unreadable shot retained as a refusal and all correction records left unpromoted.">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-evidence-for" content="vacuum-signature-extraction">
+  <title>MAST archive vacuum signatures | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <h1>MAST archive vacuum signatures</h1>
+  <p class="lead">The raw level-1 archive was swept pulse by pulse. Quiet windows identify
+  additive offset and integrator drift; plasma-free driven windows compare the recorded coil
+  currents with the exact Green-response columns to make opportunistic gain measurements. The
+  bank is evidence, not calibration authority: every emitted correction has
+  <code>recorded</code> status.</p>
+
+  <h2>Coverage and scheduler evidence</h2>
+  <table>
+    <thead><tr><th>measure</th><th>achieved</th></tr></thead>
+    <tbody>
+      <tr><td>store pulse directories requested</td><td>17,111</td></tr>
+      <tr><td>pulses measured / explicit refusals</td><td>15,139 / 1,972</td></tr>
+      <tr><td>per-channel offset and drift fits</td><td>1,092,847</td></tr>
+      <tr><td>far-field driven gain fits</td><td>33,351</td></tr>
+      <tr><td>chunks / longest chunk wall</td><td>35 / 1,578.80 s</td></tr>
+    </tbody>
+  </table>
+  <p>The sweep used 500-shot deterministic chunks on the debug partition. Runner,
+  pulse manifest, and Green inputs were staged under <code>~/.cache/nova-mast</code>, which is
+  visible to compute nodes, and each task exported <code>TMPDIR=/tmp</code>. Complete JSON was
+  installed atomically; missing store groups and malformed pulses remain enumerated in the
+  signature-store failure ledger instead of disappearing from the denominator.</p>
+
+  <figure>
+    <img src="/nova/figures/vacuum-signatures/archive-coverage.png"
+         alt="MAST archive channel-fit coverage and drift histories by pulse">
+    <figcaption>Actual per-pulse coverage and absolute drift-rate histories. The horizontal
+    axis is archive pulse identity, not a compressed cohort index.</figcaption>
+  </figure>
+
+  <h2>Transition catalogue</h2>
+  <p><strong>HOLD — the exact-transition measure did not pass.</strong> The established block
+  table contains 37 acquisition-scale switches. The pulse-by-pulse gain series ordered only
+  5 of 37 and narrowed <strong>0 of 37</strong> to adjacent pulse numbers. For
+  <code>obv03</code>, five driven measurements lie in the 19,258–19,995 bracket, but the two
+  expected states interleave: a changed-state measurement appears at pulse 19,337 while an
+  old-state measurement persists through pulse 19,857. That is evidence against claiming a
+  single exact boundary from this observable, not permission to choose one. Assignment uses
+  the established before/after scale levels only to identify the two states; recorded archive
+  measurements decide whether an ordered boundary exists.</p>
+
+  <figure>
+    <img src="/nova/figures/vacuum-signatures/signature-histories.png"
+         alt="Measured MAST gain and offset histories with obv03 highlighted">
+    <figcaption>Measured gain histories, led by <code>obv03</code>, and representative offset
+    histories. These are raw-archive signatures, so acquisition steps remain visible.</figcaption>
+  </figure>
+
+  <h2>Artifacts and interpretation boundary</h2>
+  <p>The durable bank contains <code>signature_series.npz</code> for dense channel time series,
+  <code>signature_store.json</code> for chunk and refusal provenance,
+  <code>transition_catalogue.json</code> for measured and established-boundary transitions, and
+  <code>recorded_corrections.yaml</code> with 1,676 schema-validated records.
+  It was produced from the raw read path so an already-promoted block correction could not
+  erase the transition being measured. Gain fitting is admitted only for probes at least two
+  winding-pack widths from every energised coil; near-field channels still contribute their
+  quiet-window instrument terms. No correction in this research record is promoted to the
+  diagnostic read path.</p>
+
+</main>
+</body>
+</html>

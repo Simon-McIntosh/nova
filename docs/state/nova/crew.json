@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-13T09:19:07",
+  "updated": "2026-08-13T09:23:33",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2393,9 +2393,61 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260813T065034882235-geometry-flux-map",
+        "plan": "coil-geometry-inversion",
+        "section": "\u00a72",
+        "node": "geometry-flux-map",
+        "role": "implement",
+        "member": "geometry-solve",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-13T06:50:36Z",
+        "completed_at": "2026-08-13T07:23:22Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1966,
+        "time_budget": "60m",
+        "base_sha": "cc475ef87e88184d38bb387c18a33cd2f6517aee",
+        "commits": [
+          "42ae9f60"
+        ],
+        "changed_lines": {
+          "added": 717,
+          "removed": 6,
+          "files": 7
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/0738e6b1-3bc0-4082-a69e-59214ef05a7c/scratchpad/geometry-flux-map-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff708-e876-7112-bdf2-12db5e55652a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 12025088,
+            "input_tokens": 12929339,
+            "output_tokens": 86839,
+            "reasoning_output_tokens": 23137
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 92
+    "_version": 93
   }
 }

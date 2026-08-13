@@ -53,7 +53,7 @@ from nova.geometry.hexstencil import hex_stencil
 from nova.equilibrium.flux_surface_connectivity import _dilate4
 from nova.biot.null import Null2D
 from nova.equilibrium.stencil_nulls import (
-    _refine_at,
+    _refine_selected_vertices,
     magnetic_axis_subgrid,
     ring_sign_changes,
     xpoint_candidates,
@@ -74,6 +74,18 @@ TARGET_SECONDS = 3600.0
 TARGET_BYTES_PER_SECOND = ARCHIVE_BYTES / TARGET_SECONDS
 TARGET_H200S = 8
 TARGET_L2_SHOTS = 11573
+
+
+def _print_field_null_precision(*working_dtypes: Any) -> None:
+    """Print the JAX x64 capability and every dtype used by a null fit."""
+    configure_dtypes()
+    for dtype in dict.fromkeys(np.dtype(value).name for value in working_dtypes):
+        print(
+            "FIELD_NULL_PRECISION "
+            f"x64_enabled={bool(jax.config.x64_enabled)} working_dtype={dtype}",
+            flush=True,
+        )
+
 
 BLOCK = tuple((dz, dr) for dz in (-1, 0, 1) for dr in (-1, 0, 1))
 DESIGN = np.asarray(
@@ -247,7 +259,10 @@ def _pack_refined(subs, axis_found, x_slot):
 def _shared_classifier_svd_field(psi, rg, zg, inside):
     """Share classification while retaining the current tiny-SVD fit."""
     rows, cols, axis_found, x_slot = _selection(psi, inside)
-    subs = jax.vmap(lambda row, col: _refine_at(psi, rg, zg, row, col))(rows, cols)
+    subs = jnp.stack(
+        _refine_selected_vertices(psi, rg, zg, rows, cols),
+        axis=-1,
+    )
     return _pack_refined(subs, axis_found, x_slot)
 
 
@@ -1548,12 +1563,15 @@ def main() -> None:
     merge.add_argument("--memory-probe", type=Path, required=True)
     merge.add_argument("--evidence-dir", type=Path, required=True)
     merge.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    subparsers.add_parser("precision")
     args = parser.parse_args()
     if args.command == "measure":
+        _print_field_null_precision(np.float32, np.float64)
         _write_json(args.partial, measure(args.platform))
     elif args.command == "measure-memory":
+        _print_field_null_precision(np.float32)
         _write_json(args.partial, measure_memory(args.platform))
-    else:
+    elif args.command == "combine":
         _write_json(
             args.output,
             combine(
@@ -1563,6 +1581,8 @@ def main() -> None:
                 args.evidence_dir,
             ),
         )
+    else:
+        _print_field_null_precision(np.float32, np.float64)
 
 
 if __name__ == "__main__":

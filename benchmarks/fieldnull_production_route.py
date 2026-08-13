@@ -61,6 +61,17 @@ TIMING_CAPACITY = 8
 AUDIT_CAPACITY = 64
 
 
+def _print_field_null_precision(*working_dtypes: Any) -> None:
+    """Print the JAX x64 capability and every dtype used by a null fit."""
+    configure_dtypes()
+    for dtype in dict.fromkeys(np.dtype(value).name for value in working_dtypes):
+        print(
+            "FIELD_NULL_PRECISION "
+            f"x64_enabled={bool(jax.config.x64_enabled)} working_dtype={dtype}",
+            flush=True,
+        )
+
+
 def _strict(value: Any) -> Any:
     """Return JSON-safe Python values, replacing nonfinite floats with null."""
     if isinstance(value, dict):
@@ -628,12 +639,16 @@ def _arguments() -> argparse.Namespace:
     assembly.add_argument("--cpu", type=Path, required=True)
     assembly.add_argument("--gpu", type=Path, required=True)
     assembly.add_argument("--output", type=Path, required=True)
+    subparsers.add_parser("precision")
     return parser.parse_args()
 
 
 def main() -> None:
     arguments = _arguments()
-    if arguments.command == "measure":
+    if arguments.command == "precision":
+        _print_field_null_precision(np.float64)
+    elif arguments.command == "measure":
+        _print_field_null_precision(np.float64)
         _write(arguments.output, measure(arguments.platform))
     else:
         _write(arguments.output, assemble(arguments.cpu, arguments.gpu))

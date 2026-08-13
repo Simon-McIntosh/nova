@@ -702,6 +702,133 @@ worktree. Its earlier `InvalidGitRepositoryError` came only from running in a
 Git archive with no GitPython-visible worktree metadata, so that artifact is
 not included in the failure count.
 
+## Integrated pytest suite — exact-tree monolithic reference
+
+Recorded 2026-08-13 on `sun_debug` node `98dci4-clu-3141` (Intel Xeon Gold
+5220), Python 3.14.2 and pytest 9.1.1, with `TMPDIR=/tmp` and JAX on CPU. One
+process ran `uv run --no-sync pytest -m "slow or not slow"` from a clean,
+detached Git worktree frozen at
+`cc1f8f2c722b2b8ceb40e697798f3af1a4159558`. All 5,842 selected tests reached
+the final pytest summary in 2,012.90 seconds:
+
+| outcome | count |
+|---|---:|
+| passed | **5,655** |
+| failed | **50** |
+| skipped | **141** |
+| xfailed (reported separately) | **4** |
+
+This monolithic figure is the reference for the next integrated lane run. It
+supersedes the process-sharded figure above for regression comparisons; the
+sharded record remains as historical evidence, but does not attest to
+single-process health. The full monolithic log is
+`/home/ITER/mcintos/.cache/nova-lane-retention-bound/cc1f8f2c/run/monolithic-pytest.log`.
+
+### Fresh-process classification of all 50 failures
+
+Each exact failing ID was run once in its own fresh process with
+`uv run --no-sync pytest -m "slow or not slow" <test-id>`. The 50 processes
+were scheduled four at a time under SLURM job 1245273 after one
+`uv sync --extra test` in the worker worktree. Every process used Python
+3.14.2 and pytest 9.1.1, collected exactly one test, reached a final summary,
+and failed. The classification worktree was clean and frozen at
+`c1e20bc8a25a3925f5ef875fdee6bb1da4ffcef2`; `nova.__file__` resolved inside
+that worktree. Relative to the monolithic SHA, the only source or test changes
+were `nova/imas/mast_parity_gate.py` and `tests/test_parity_gate.py`, neither of
+which is among these IDs or their tested modules. This makes the frozen worker
+tree a valid stand-in for classifying the monolithic failures without importing
+the mutable primary checkout.
+
+| classification | count |
+|---|---:|
+| suite-order effect: passes fresh, failed monolithically | **0** |
+| pre-existing known: failed fresh and in the sharded baseline | **3** |
+| pre-existing unseen: failed fresh and was not reported by the sharded baseline | **0** |
+| regression: failed fresh after passing in the sharded baseline | **47** |
+| **classified total** | **50** |
+
+#### Suite-order effects — 0
+
+None.
+
+#### Pre-existing known failures — 3
+
+- `tests/test_equilibrium_forward_reference.py::test_the_passive_closure_moves_the_reproduction_by_a_tenth_of_a_percent`
+- `tests/test_mast_solve_inputs.py::test_each_probe_channel_reads_the_sensor_it_is_mapped_to[15000]`
+- `tests/test_mast_solve_inputs.py::test_each_probe_channel_reads_the_sensor_it_is_mapped_to[13500]`
+
+The fresh equilibrium run reproduced `internal inductance` at
+`0.4165026973920738 < 0.15`; the two solve-input cases reproduced their
+packaged-registry probe-angle mismatch. These are the same three authoritative
+failures counted by the sharded baseline.
+
+#### Pre-existing unseen failures — 0
+
+None. The old sharded collection log contains all 50 exact IDs.
+
+#### Regressions — 47
+
+All 47 fresh failures below report
+`ShotWaveforms.__init__() missing 1 required positional argument: 'sensors'`.
+The sharded baseline collected and passed each ID. Commit
+`60df29bbfe8b232844329dc6711975cde343f0b1` added the required `sensors` field
+to `ShotWaveforms` after the sharded baseline and before the monolithic SHA,
+without updating these test constructors.
+
+- `tests/test_mast_calibration_cohort.py::test_a_shot_matching_its_published_turns_reads_unit_amplitude`
+- `tests/test_mast_calibration_cohort.py::test_a_half_scale_shot_is_refused_rather_than_fitted`
+- `tests/test_mast_calibration_cohort.py::test_a_uniform_amplitude_leaves_the_field_shape_untouched`
+- `tests/test_mast_calibration_cohort.py::test_a_shot_driving_no_published_coil_is_refused_not_scored`
+- `tests/test_mast_calibration_cohort.py::test_the_floor_is_the_scatter_and_not_the_drift`
+- `tests/test_mast_calibration_cohort.py::test_the_pooled_floor_is_a_quadratic_mean`
+- `tests/test_mast_calibration_cohort.py::test_a_family_floor_pools_only_its_own_channels`
+- `tests/test_mast_calibration_cohort.py::test_a_channel_with_too_few_samples_reports_no_floor`
+- `tests/test_mast_calibration_cohort.py::test_repeat_scatter_divides_out_the_supply_and_keeps_the_rest`
+- `tests/test_mast_calibration_cohort.py::test_repeat_scatter_needs_two_readable_shots`
+- `tests/test_mast_passive_decay_modes.py::TestTransientReading::test_the_window_opens_after_the_switch_off`
+- `tests/test_mast_passive_decay_modes.py::TestTransientReading::test_the_standing_offset_is_removed`
+- `tests/test_mast_passive_decay_modes.py::TestTransientReading::test_the_noise_floor_is_measured_per_channel`
+- `tests/test_mast_passive_decay_modes.py::TestTransientReading::test_a_refused_channel_never_enters_the_pattern`
+- `tests/test_mast_passive_decay_modes.py::TestTransientReading::test_a_channel_with_no_samples_is_dropped`
+- `tests/test_mast_passive_decay_modes.py::TestTransientReading::test_too_few_channels_is_refused`
+- `tests/test_mast_passive_decay_modes.py::TestTransientReading::test_a_still_ramping_drive_is_visible_in_the_residual`
+- `tests/test_mast_passive_decay_modes.py::TestTransientReading::test_a_drive_that_never_stops_opens_no_window`
+- `tests/test_mast_passive_decay_modes.py::TestTransientReading::test_a_shot_that_drove_nothing_is_refused`
+- `tests/test_mast_passive_decay_modes.py::TestTransientReading::test_the_residual_drive_is_carried_as_a_modelled_column`
+- `tests/test_mast_passive_decay_modes.py::TestTransientReading::test_a_steady_drive_earns_no_column`
+- `tests/test_mast_passive_decay_modes.py::TestTransientReading::test_the_drive_share_measures_what_the_coil_explains`
+- `tests/test_mast_passive_decay_modes.py::TestTransientReading::test_the_record_reports_what_it_read`
+- `tests/test_mast_probe_calibration.py::test_a_probe_reading_high_returns_its_own_scale`
+- `tests/test_mast_probe_calibration.py::test_a_rotated_probe_is_recovered_from_its_neighbour_and_not_the_model`
+- `tests/test_mast_probe_calibration.py::test_one_coil_misrepresented_at_one_probe_is_excitation_selective`
+- `tests/test_mast_probe_calibration.py::test_the_criterion_separates_the_two_planted_causes`
+- `tests/test_mast_probe_calibration.py::test_a_coil_that_does_not_dominate_returns_no_gain`
+- `tests/test_mast_probe_calibration.py::test_a_correction_that_fits_its_own_shots_must_still_predict`
+- `tests/test_mast_probe_calibration.py::test_the_record_round_trips_through_json`
+- `tests/test_mast_vacuum_refinement.py::test_response_scales_with_current_and_turns`
+- `tests/test_mast_vacuum_refinement.py::test_a_clean_single_coil_shot_recovers_its_turn_count`
+- `tests/test_mast_vacuum_refinement.py::test_polarity_is_recovered_with_the_turn_count`
+- `tests/test_mast_vacuum_refinement.py::test_an_up_down_pair_driven_together_still_separates`
+- `tests/test_mast_vacuum_refinement.py::test_two_packs_sharing_a_waveform_and_a_place_are_refused`
+- `tests/test_mast_vacuum_refinement.py::test_an_unseen_coil_is_refused_rather_than_fitted`
+- `tests/test_mast_vacuum_refinement.py::test_aggregate_reports_spread_across_shots`
+- `tests/test_mast_vacuum_refinement.py::test_fitted_turns_predict_a_shot_they_were_not_fitted_on`
+- `tests/test_mast_vacuum_refinement.py::test_a_shot_without_a_baseline_window_is_refused`
+- `tests/test_mast_winding_lattice.py::test_an_exact_model_leaves_no_residual`
+- `tests/test_mast_winding_lattice.py::test_missing_samples_do_not_bias_the_amplitude`
+- `tests/test_mast_winding_lattice.py::test_a_planted_layout_is_recovered`
+- `tests/test_mast_winding_lattice.py::test_a_planted_displacement_is_recovered`
+- `tests/test_mast_winding_lattice.py::test_planted_channel_gains_are_recovered_off_the_far_field`
+- `tests/test_mast_winding_lattice.py::test_channel_deltas_report_every_probe_both_ways`
+- `tests/test_mast_winding_lattice.py::test_a_layout_needs_a_coil_the_response_carries`
+- `tests/test_mast_winding_lattice.py::test_a_coil_with_no_promoted_weight_is_refused`
+
+The complete fresh-process wrapper log is
+`/home/ITER/mcintos/.cache/nova-lane-failure-classification/c1e20bc8-synced/fresh-process-results.log`;
+the machine-readable process results are beside it in
+`fresh-process-results.tsv`. No failing test was fixed, skipped, xfailed,
+disabled or otherwise changed during classification.
+
 ### Monolithic lane on the repaired tree — catalog park cleared, native abort
 
 **UNATTRIBUTABLE — the measuring checkout advanced during the run, so no one

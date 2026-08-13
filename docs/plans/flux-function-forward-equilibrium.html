@@ -24,9 +24,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-13">
-<meta name="plan-version" content="19">
-<meta name="plan-impl" content="0.97">
-<meta name="plan-commits" content="f07e8b05,ebd322ae,1a2de9c7,b0af2d23,c90d173c,6d138035,eed0825b,a929c778,b999dac2,5400c5ff,61122824,c642af8f,16bf140e">
+<meta name="plan-version" content="22">
+<meta name="plan-impl" content="0.99">
+<meta name="plan-commits" content="f07e8b05,ebd322ae,1a2de9c7,b0af2d23,c90d173c,6d138035,eed0825b,a929c778,b999dac2,5400c5ff,61122824,c642af8f,16bf140e,cc92defd,cc761f57">
+<meta name="plan-artifacts" content="docs/evidence/archive/flux-function-forward-equilibrium-landed.html,tests/test_null_benchmark_precision.py,benchmarks/dina_pack_current_distribution.py">
 </head>
 <body>
   <main class="plan-doc">
@@ -77,6 +78,37 @@
     <p>The source/result types and analytic fixtures can land while the boundary accelerator finishes. Closing the plan requires the accelerated topology read and the Ambix interface contract. This plan does not fit profile coefficients, train a closure model, infer a state from diagnostics, design coil currents, model non-axisymmetric fields, or claim a sheath/neutral/halo-current closure.</p>
     <p>The first useful integration is a one-slice static absolute-source solve, followed by batched static ensemble members, rotation, and then topology-qualified SOL continuation. The SOL continuation is an optional, strictly additive extension: the bulk plasma solve's correctness always takes priority, and an undeclared continuation leaves the static path byte-identical. The physical motivation for extending the flux-function parametrization beyond <code>psi_N = 1</code> is that real SOL current — mixed poloidal/toroidal, connecting between the divertor plates — must itself satisfy force balance and hence the GS constraint, exactly as the confined plasma does. Field-aligned SOL current is deferred until the material-boundary return path and sheath closure are physically specified.</p>
     <p><strong>The solved flux map has a second consumer beyond the Ambix seam.</strong> The flux-surface-averaged geometry record assembled from it — <code>V′</code>, the <code>⟨1/R²⟩</code> and diffusion-coefficient metrics, <code>F</code> and <code>q</code> on the toroidal-flux coordinate — is the geometry input of the transport forward solve (<a href="/nova/flux-function-forward-transport.html">flux-function-forward-transport</a>), and the transport-evolved <code>p′</code> and <code>FF′</code> return through the same typed flux-function state as a first-class source for this solve. The geometry record is therefore a public output contract of <code>ForwardProfile</code>, convention-pinned exactly like the field itself and supplied at both interval endpoints so the transport moving-grid term is correct.</p>
+
+    <h2 id="s6">§6 — The surviving deviation candidate, and a baseline that moved</h2>
+
+    <p><strong>Two of the three candidates for the DINA reproduction gap are now measured and
+    excluded, which leaves exactly one.</strong> The passive structure was falsified as the
+    deviation floor at 0.093% of span against a 1.4–6.5% deviation. Within-pack current placement
+    was then measured directly: resolving every rectangular pack into a finite-section equal-current
+    turn lattice moves the deviation by at most 1.4338% of itself, with an external-flux response of
+    0.0631153 Wb — 0.078% of the reference span. Neither can produce the observed gap, and the gap
+    grows under refinement, so it is not discretisation either. <strong>The surviving candidate is
+    the reference's own profile and COCOS mapping</strong> — how DINA's stored
+    <code>p′</code>/<code>FF′</code> and flux convention are interpreted on the way into the solve,
+    rather than anything about how the conductors are represented.</p>
+
+    <p><strong>A separate defect surfaced while measuring that, and it is the more urgent one.</strong>
+    The live as-declared rerun reproduces l_i at &minus;0.135266% where the banked demonstration
+    recorded &minus;1.04% — a material drift on the same pulse, run, slice, mesh, profiles and
+    convention, while the two current distributions measured against each other in that same run
+    differ by only 0.014911 percentage points. So the drift is not the distribution and is not
+    measurement noise: something in the solve path or the reference read has changed since the
+    demonstration was banked, and the banked l_i row is therefore not safe to present as current.
+    I_p, &beta;_p and the axis position all reproduce close to their banked values, which narrows it
+    to the l_i definition or the internal-inductance integral rather than the field solution.</p>
+
+    <p><em>Done-when:</em> the l_i difference between the banked demonstration and the current tree
+    is attributed to a named cause — a changed l_i definition, a changed internal-inductance
+    integration domain, a changed reference read, or a genuine solve change — with the measurement
+    that distinguishes them; the banked evidence row is then either reaffirmed with its original
+    figure or corrected in place with the reason recorded. Only after that is the profile/COCOS
+    mapping candidate worth pursuing, since chasing a 1.3–6.5% gap against a baseline that has
+    itself moved cannot be conclusive.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -188,6 +220,12 @@ Done-when
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20260813-ddversion" data-who="reckon-ship" data-when="2026-08-13T06:15:00+00:00">
     <div class="r-comment-body">dd-version-cache-identity landed — commit 16bf140e; identity gate passed 2/2. A composite Machine at DD 3.42.0 retains sources at 3.40.0 and 4.1.1 independently through ids_attrs rather than inheriting the machine version, and CoilDatabase.group_attrs now folds the canonical dd_version string into the cache identity — two otherwise-identical requests at different versions produced 2 distinct groups and 2 cold builds with neither serving the other, while a repeat at 3.40.0 warm-loaded its own payload. Operational consequence recorded rather than glossed: EVERY existing CoilDatabase cache key changes, and composite Machine keys change wherever a source carries an independent pin, so cached operators rebuild once. Relevant lane 40 passed / 19 live-data skips / 0 failed. Scoping correction: nova/database/coildatabase.py does not exist here; the live CoilDatabase is in nova/imas/machine.py and the node stayed within its assigned paths. Artifacts: /nova/evidence/archive/flux-function-forward-equilibrium-landed#dd-version-identity</div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20260813-nullprecision" data-who="reckon-ship" data-when="2026-08-13T07:52:00+00:00">
+    <div class="r-comment-body">null-benchmark-precision-pins landed - commit cc92defd; gate PASSED. Measure: 7/7 field-null benchmarks declare FIELD_NULL_PRECISION across 9 emitted lines, all reporting x64_enabled=True; 7/7 tests green in 30.27 s. fp64-only from stencil_null_route, null_stack_route, fieldnull_production_route, fieldnull_candidate_audit and select_precision_contract; fp32 AND fp64 from fieldnull_precision_audit and fieldnull_gpu_throughput. The family is enumerated explicitly and omitting the printer from any member's measurement entry point fails a source-call assertion, so a new field-null benchmark cannot join without declaring. The locked double default was NOT changed - this records the resolved precision rather than choosing one, which is what makes a banked figure attributable after the fact. Two incidental findings kept rather than papered over: bow_grid_solve.py was reviewed and deliberately excluded because it runs an arc Biot-Savart grid solve and fits no field null; and fieldnull_gpu_throughput.py carried a stale _refine_at import that made it unimportable, now stacking the current vectorized _refine_selected_vertices result to preserve its candidate-by-four-value contract (smoke returns shape (9,5), one finite candidate row), while fieldnull_precision_audit.py was rejecting x64 capability AFTER enabling it for its own fp64 reference and now requires it. This closes the precision-pin item of f-fffe-006. Artifacts: /nova/evidence/archive/flux-function-forward-equilibrium-landed#null-precision-declaration</div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20260813-packcurrent" data-who="reckon-ship" data-when="2026-08-13T07:58:00+00:00">
+    <div class="r-comment-body">pack-current-distribution landed - commit cc761f57; gate PASSED; SLURM job 1245067, 23m06s, exit 0. VERDICT: within-pack current placement is EXCLUDED as the dominant cause of the DINA reproduction gap. Two physically declared distributions on the identical 1587-cell hex mesh, pulse 135011/run 7/slice 353 at 338.9276 s, DD 3.39.0, same stored absolute p-prime and FF-prime, Phi_nova = -psi_IMAS convention, passive drive and fixed-budget Newton-Krylov route: the as-declared continuum against a finite-section equal-current turn lattice built only from each rectangular pack's declared outline and turn count, retaining the fractional terminal turn and balancing unused outer-corner sites, with the one-turn VS3 pair and all passives unchanged. Measured shifts continuum -&gt; turn-resolved: I_p -1.12406% -&gt; -1.11578% (0.008277 pp better, 0.7198% of banked deviation), beta_p +2.23699% -&gt; +2.25305% (0.016060 pp worse, 0.7435%), l_i -0.135266% -&gt; -0.150177% (0.014911 pp worse, 1.4338%), axis 41.2372 -&gt; 40.7096 mm (0.52765 mm better, 1.1992%). External-flux response of the redistribution is 0.0631153 Wb = 0.0780225% of reference span. Maximum response is 1.4338% of a 1.3-6.5% gap, so this cannot be the cause; by elimination the reference's own profile/COCOS mapping is the surviving candidate. ONE QUALIFICATION NOT SMOOTHED OVER: the live as-declared rerun's l_i is -0.135266% against the banked -1.04%, a material drift even though the distribution delta is only 0.014911 pp. The exclusion verdict is unaffected because it rests on two distributions measured in the same run, but the banked l_i row must not be presented as current until the drift is reconciled - carried as a new section rather than a followup, since it is this plan's own work. Artifacts: /nova/evidence/archive/flux-function-forward-equilibrium-landed#pack-current-placement</div>
 </div>
 </section>
 </main>

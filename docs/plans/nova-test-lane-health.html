@@ -21,10 +21,10 @@
 <meta name="plan-capability-class" content="general">
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
-<meta name="plan-version" content="5">
-<meta name="plan-commits" content="459cecce,1c33c365,80c3b507,a5e1245c,eb242d80">
-<meta name="plan-artifacts" content="docs/evidence/archive/nova-test-lane-health-landed.html,benchmarks/BASELINE.md">
-<meta name="plan-impl" content="0.75">
+<meta name="plan-version" content="8">
+<meta name="plan-commits" content="459cecce,1c33c365,80c3b507,a5e1245c,eb242d80,d6998319,dc618673,7b15ed64">
+<meta name="plan-artifacts" content="docs/evidence/archive/nova-test-lane-health-landed.html,benchmarks/BASELINE.md,benchmarks/lane_resource_accumulation.py,benchmarks/measurement_provenance.py">
+<meta name="plan-impl" content="0.88">
 </head>
 <body>
 <main class="plan-doc">
@@ -67,6 +67,37 @@
     lane emits final passed/failed/skipped counts in one process; the mechanism that exhausted
     thread creation is named in the evidence record rather than worked around silently.</p>
 
+    <h2 id="s3">§3 — Bound the compilation retention, now that it is named</h2>
+
+    <p><strong>The owner is measured, so the repair is no longer a guess between candidates.</strong>
+    A frozen monolithic run holds 4,221 live executables and 212 retained native-only XLA-class
+    threads at abort, and heap plus anonymous native mappings explain 97.9% of its RSS growth. The
+    paired control settles what it is <em>not</em>: Python-managed threads grew by 14 against 212
+    native, so Python executor leakage is excluded, and configured PID ceilings were excluded
+    earlier.</p>
+
+    <p>Two facts constrain what a repair may be. <code>jax.clear_caches()</code> returned 2.5 MiB of
+    892 MiB, so cache eviction at a call site is not a repair — it addresses about 0.3% of the
+    retention. And the abort <em>moves</em> when the lane changes: it has already relocated from
+    <code>test_x_mask_excludes_cells_beyond_null_heights</code> to
+    <code>test_batched_primary_points_match_per_slice</code>, both compiling under
+    <code>backend_compile_and_load</code>. So a fix pinned to either test name would be measuring the
+    lane's current shape rather than bounding the resource, and a third site will appear as the suite
+    grows.</p>
+
+    <p>The lever is therefore the retention itself: cap or evict compiled-executable and native-thread
+    retention across a long-lived suite process, so the count stops growing without capping the number
+    of tests. Isolating the JAX-heavy tail into its own process remains available as the fallback, but
+    it is explicitly second choice — it buys a count by giving up the single-process property §1 exists
+    to obtain, and would leave the accumulation unbounded for any future long-lived process.</p>
+
+    <p><em>Done-when:</em> live-executable count and retained native-thread count are sampled across
+    a frozen monolithic run and both stay under a stated ceiling to the end of the run instead of
+    growing monotonically; the run reaches a final pytest summary and its passed/failed/skipped/xfailed
+    counts are banked with the frozen SHA the provenance stamp requires; and if a ceiling cannot hold
+    without shrinking coverage, the measured reason is recorded and the tail-isolation fallback is
+    taken deliberately rather than by default.</p>
+
 <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
 <article class="r-fu" data-id="f-ntlh-001" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-12" data-recommends-skill="/reckon-ship nova-test-lane-health §2" data-resolved-at="" data-resolved-by="">
@@ -80,10 +111,11 @@
     <pre class="r-fu-prompt">/reckon-ship nova-test-lane-health §2</pre>
     <p class="r-fu-outcome">Cause established by commit eb242d80 and recorded; the repair is deliberately NOT here. Memory pressure during native CPU-JIT resource acquisition, reproduced under constrained address space with pthread_create failing, with the intrinsic-fault and cache-corruption hypotheses both excluded by their own control runs. The finding reframes the plan: this abort and the catalog parking site are one accumulating resource owner seen at two call sites, so the remaining work is to bound that owner rather than to patch either site. Carried by f-ntlh-004.</p>
     </article>
-<article class="r-fu" data-id="f-ntlh-003" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship nova-test-lane-health §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ntlh-003" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship nova-test-lane-health §2" data-resolved-at="2026-08-13T08:32:26+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Measure the lane from a frozen worktree, never the primary checkout</h4>
     <div class="r-fu-body"><p>The monolithic attempt ran against the mutable primary checkout, which advanced from <code>d4ce244d</code> to <code>cb70bdf8</code> while it executed because the orchestrating session was pushing. Even a clean finish could not then have named the tree it measured. Any lane measurement intended to be banked must run from a detached worktree frozen at one SHA for the whole process — not a <code>git archive</code> either, which is what produced the spurious <code>InvalidGitRepositoryError</code> in the sharded run. Make that the recorded method wherever BASELINE.md entries are produced, so the next measurement is attributable by construction.</p></div>
     <pre class="r-fu-prompt">/reckon-ship nova-test-lane-health §2</pre>
+    <p class="r-fu-outcome">Closed by 7b15ed64. The frozen-worktree method is now enforced rather than documented: a stamp requires the full HEAD SHA with empty git status --porcelain output and matching pre/post SHAs from a detached worktree, refused for a dirty or non-repository path (3/3 tests). 13 unattributable historical entries labelled as such, 0 figures altered.</p>
     </article>
 <article class="r-fu" data-id="f-ntlh-004" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship nova-test-lane-health §2" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Bound the accumulating native-resource owner across the lane</h4>
@@ -99,7 +131,13 @@
     <div class="r-comment-body">monolithic-lane-proof did NOT produce a count — gate not-run, recorded as a negative result rather than retried into a claim. Commits 80c3b507, a5e1245c. What it proves: in one process in true suite order tests/test_mast_catalog_geometry.py completed 18/18 and pytest continued past 97%, so item 1's repair holds on the whole lane and not just the ordered subset. What stopped it: a native abort, Fatal Python error / exit 134, after 33 min 44 s inside tests/test_topology_boundary.py::test_x_mask_excludes_cells_beyond_null_heights while JAX compiled an indexed slice (backend_compile_and_load -&gt; compile_or_get_cached -&gt; pjit -&gt; lax.slice) — a different mechanism at a different site from the thread starvation, and not a Python-level failure pytest could report. No passed/failed/skipped/xfailed counts are claimed, for two independent reasons: no final summary was emitted, and the run used the mutable primary checkout which advanced d4ce244d -&gt; cb70bdf8 mid-run as this session pushed, so no count could have named one tree anyway. The run's diagnostic value was recovered: it mapped six true-order failure positions to exact test_biotsavart ids with operands, which is what let the attribution node prove the pole split caused them, and it correctly made no repair to the tree it was measuring. Artifacts: /nova/evidence/archive/nova-test-lane-health-landed#monolithic-attempt</div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260813-abortcause" data-who="reckon-ship" data-when="2026-08-13T06:10:00+00:00">
-    <div class="r-comment-body">topology-compile-abort landed — commit eb242d80; three-condition separation gate passed. Cause named as memory pressure during native CPU-JIT resource acquisition, by experiment not argument: fresh process exit 0 (excludes an intrinsic XLA fault on the slice shape), after 256 unrelated cached compilations exit 0 but peak RSS 407.5 -> 892.2 MB (excludes cache corruption as sufficient cause while showing it contributes), and constrained to 8 MiB address-space headroom exit 134/SIGABRT with 'LLVM ERROR: pthread_create failed: Resource temporarily unavailable' — a reproduction. The preserved monolithic stack independently symbolizes as llvm::report_fatal_error -> RuntimeDyldImpl::emitSection -> xla::cpu::JitCompiler::TaskDispatcher against JAX's 'Unable to allocate section memory!'. SYNTHESIS: this is the catalog deadlock's sibling, not a second unrelated bug — both are a long-lived suite process unable to obtain a native thread (one blocks in Thread.start, one aborts in pthread_create), and the earlier probe already excluded a configured ceiling. No test-local workaround was applied because moving the host-side slice only relocates the abort and jax.clear_caches() released 2.5 MB of 892 MB; either would have hidden lane-level pressure behind a green test. Artifacts: /nova/evidence/archive/nova-test-lane-health-landed#abort-cause</div>
+    <div class="r-comment-body">topology-compile-abort landed — commit eb242d80; three-condition separation gate passed. Cause named as memory pressure during native CPU-JIT resource acquisition, by experiment not argument: fresh process exit 0 (excludes an intrinsic XLA fault on the slice shape), after 256 unrelated cached compilations exit 0 but peak RSS 407.5 -&gt; 892.2 MB (excludes cache corruption as sufficient cause while showing it contributes), and constrained to 8 MiB address-space headroom exit 134/SIGABRT with 'LLVM ERROR: pthread_create failed: Resource temporarily unavailable' — a reproduction. The preserved monolithic stack independently symbolizes as llvm::report_fatal_error -&gt; RuntimeDyldImpl::emitSection -&gt; xla::cpu::JitCompiler::TaskDispatcher against JAX's 'Unable to allocate section memory!'. SYNTHESIS: this is the catalog deadlock's sibling, not a second unrelated bug — both are a long-lived suite process unable to obtain a native thread (one blocks in Thread.start, one aborts in pthread_create), and the earlier probe already excluded a configured ceiling. No test-local workaround was applied because moving the host-side slice only relocates the abort and jax.clear_caches() released 2.5 MB of 892 MB; either would have hidden lane-level pressure behind a green test. Artifacts: /nova/evidence/archive/nova-test-lane-health-landed#abort-cause</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260813-resourceowner" data-who="reckon-ship" data-when="2026-08-13T08:04:00+00:00">
+    <div class="r-comment-body">lane-resource-attribution landed - commits d6998319, dc618673; gate PASSED. OWNER NAMED: retained JAX/XLA CPU compilation and runtime state, not catalog code, not Python executor leakage, not a configured PID ceiling, not an intrinsic topology slice fault. A frozen detached monolithic run collected 5,815 items and checkpointed through completed test 4,200 before reproducing SIGABRT at ~73%. Growth run-start to last pre-abort sample: +9,116.9 MiB RSS, +24,064.9 MiB virtual, +226 native threads. THE ATTRIBUTION RESTS ON A PAIRED CONTROL, not on the size of one number: 212 of 226 retained threads (93.8%) were native-only - +104 inherited python3 native workers, +36 llvm-worker-*, +36 tf_XLAEigen, +36 tf_foreach - while Python-managed threads were only 14 of 226 (6.2%), which is what excludes Python executor leakage. Address space: anonymous native mappings 17,864.2 MiB (74.2%) and heap incl. retained compiled objects 5,280.8 MiB (21.9%); RSS 3,637.8 MiB (39.9%) and 5,288.9 MiB (58.0%); together 97.9% of RSS and 96.2% of virtual growth. Largest reservation classes 82 x ~63 MiB = 5,165.3 MiB, 73 x ~64 MiB = 4,662.7 MiB, 198 x ~8 MiB stack-class = 1,584.5 MiB. Retained compilation measured directly at 6,001 compile calls and 4,221 live executables. TWO HONEST LIMITS: the abort has MOVED to tests/test_jax_topology.py::test_batched_primary_points_match_per_slice while backend_compile_and_load compiles a vmapped pjit - different site, same native compile/acquisition mechanism; and the run aborted before its planned in-process GC/cache-clear park, so the report records an exit endpoint with no fabricated end controls. NO final pytest counts exist and none are claimed. The harness refuses a non-detached checkout, logs the exact SHA and command, and samples at a configurable interval. The node deliberately made NO repair and did not shard the lane, so f-ntlh-004 stays open for the bounding repair, now carried as a section. Artifacts: /nova/evidence/archive/nova-test-lane-health-landed#resource-owner</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260813-provenance" data-who="reckon-ship" data-when="2026-08-13T08:10:00+00:00">
+    <div class="r-comment-body">measurement-provenance landed - commit 7b15ed64; gate PASSED 3/3 on Python 3.14.2. This closes f-ntlh-003 by making attribution structural rather than a convention to remember. measurement_provenance.py resolves the full 40-character HEAD SHA plus whether git status --porcelain emits any line, and refuses a stamp otherwise; verified three ways - empty porcelain output produced the exact HEAD stamp, one modified tracked file set has_porcelain_output=true and raised MeasurementProvenanceError, and a non-repository path raised the same. BASELINE.md's method section now requires MATCHING pre- and post-run SHAs from a detached worktree, so a tree that moves mid-measurement fails the check rather than yielding a figure nobody can place - which is exactly what happened when the monolithic attempt ran against the primary checkout as it advanced d4ce244d -&gt; cb70bdf8. 13 existing entries are labelled UNATTRIBUTABLE rather than deleted (12 historical top-level groups naming no full SHA, plus the mutable monolithic attempt); the one process-sharded entry that recorded its exact tree keeps its SHA. 0 benchmark figures changed or re-run: the value is that a reader can tell which numbers are placeable, and silently dropping the rest would have destroyed that distinction as thoroughly as leaving them implying attribution. Artifacts: /nova/evidence/archive/nova-test-lane-health-landed#measurement-provenance</div>
 </div>
 </section>
 </main>

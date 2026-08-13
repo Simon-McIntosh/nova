@@ -170,5 +170,90 @@
   37.87&nbsp;s exact-test pass. Both distinctions matter: a lane baseline that banks its own
   instrumentation errors teaches every later reader to distrust it.</p>
 
+  <h2 id="resource-owner">The accumulation owner is retained JAX/XLA CPU compilation</h2>
+
+  <p>Commits <code>d6998319</code>, <code>dc618673</code>. Gate passed. Artifacts under
+  <code>~/.cache/nova-lane-resource-attribution/d6998319/run/</code>:
+  <code>command.json</code> (frozen SHA and exact command), <code>resource-samples.jsonl</code>
+  (44 samples at fixed 100-test intervals), <code>summary.json</code> (attribution report).</p>
+
+  <p>Two lane failures shared one suspected cause — the catalog scan parking in
+  <code>Thread.start()</code> and the topology-boundary test aborting in
+  <code>pthread_create</code> — and patching either call site would not converge while the owner
+  stayed unnamed. A frozen detached monolithic <code>pytest -m "slow or not slow"</code> collected
+  5,815 items and emitted checkpoints through completed test 4,200 before reproducing SIGABRT at
+  about 73%.</p>
+
+  <p><strong>Growth from run start to the last pre-abort checkpoint: +9,116.9 MiB RSS,
+  +24,064.9 MiB virtual memory, +226 native threads.</strong> The attribution rests on a paired
+  control rather than on the size of any single number:</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Retained thread class</th><th>Count</th><th>Share of +226</th></tr></thead>
+    <tbody>
+      <tr><td>native-only (XLA class), total</td><td>212</td><td>93.8%</td></tr>
+      <tr><td>— inherited <code>python3</code> native workers</td><td>+104</td><td></td></tr>
+      <tr><td>— <code>llvm-worker-*</code></td><td>+36</td><td></td></tr>
+      <tr><td>— <code>tf_XLAEigen</code></td><td>+36</td><td></td></tr>
+      <tr><td>— <code>tf_foreach</code></td><td>+36</td><td></td></tr>
+      <tr><td>Python-managed (the control)</td><td>14</td><td>6.2%</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>Python-managed threads at 6.2% is what <strong>excludes Python executor leakage as the
+  owner</strong> — the hypothesis the catalog repair might have suggested. On the address-space side,
+  anonymous native mappings account for 17,864.2 MiB (74.2%) and heap including retained compiled
+  objects 5,280.8 MiB (21.9%); the RSS split is 3,637.8 MiB (39.9%) and 5,288.9 MiB (58.0%). Together
+  heap and anonymous mappings explain 97.9% of RSS growth and 96.2% of virtual-memory growth. The
+  largest reservation classes are 82 &times; ~63 MiB = 5,165.3 MiB, 73 &times; ~64 MiB =
+  4,662.7 MiB, and 198 &times; ~8 MiB stack-class mappings = 1,584.5 MiB. Retained JAX compilation
+  was measured directly: <strong>6,001 compile calls and 4,221 live executables</strong> held at the
+  last sample.</p>
+
+  <p>The earlier controls remain in force and are not restated as new evidence: a fresh topology
+  process exits 0 (excluding an intrinsic slice fault), 256 cached compilations raise peak RSS
+  407.5 &rarr; 892.2 MiB but still exit 0 (so retention contributes without being sufficient alone),
+  8 MiB of address-space headroom reproduces exit 134, configured PID ceilings were already
+  excluded, and <code>jax.clear_caches()</code> returned 2.5 MiB of 892 MiB — which is why cache
+  eviction is not offered as the repair.</p>
+
+  <p>Two honest limits. The abort has <em>moved</em>, now landing in
+  <code>tests/test_jax_topology.py::test_batched_primary_points_match_per_slice</code> while
+  <code>backend_compile_and_load</code> compiles a vmapped pjit — a different site, the same native
+  compile/acquisition mechanism. And this run aborted before its planned in-process GC/cache-clear
+  park, so the report records an exit endpoint with no end-of-run controls fabricated to fill the
+  gap. <strong>No final pytest counts exist and none are claimed.</strong> The harness itself is
+  reusable: it refuses a non-detached checkout, logs the exact SHA and command, samples at a
+  configurable interval, and supports a deliberate pre-test park with separate GC and JAX-cache
+  controls when the process survives to reach it.</p>
+
+  <h2 id="measurement-provenance">A banked figure must name the tree it measured</h2>
+
+  <p>Commit <code>7b15ed64</code>. Gate passed: 3/3 tests, Python 3.14.2.</p>
+
+  <p>The monolithic attempt ran against the mutable primary checkout, which advanced
+  <code>d4ce244d</code> &rarr; <code>cb70bdf8</code> mid-run because the orchestrating session was
+  pushing. Even a clean finish could not then have named the tree it measured — the figure would
+  have been unattributable by construction rather than by oversight. That is now structural instead
+  of a convention someone has to remember.</p>
+
+  <p><code>benchmarks/measurement_provenance.py</code> resolves the full 40-character HEAD SHA and
+  whether <code>git status --porcelain</code> emits any line, and refuses to produce a stamp
+  otherwise. Verified three ways: a repository with empty porcelain output produced its exact HEAD
+  stamp; one modified tracked file set <code>has_porcelain_output=true</code> and raised
+  <code>MeasurementProvenanceError</code>; a non-repository path raised the same. The method section
+  in <code>BASELINE.md</code> now requires matching pre- and post-run SHAs from a detached worktree,
+  so a tree that moves mid-measurement fails the check rather than producing a figure nobody can
+  place.</p>
+
+  <p><strong>Thirteen existing entries are labelled unattributable rather than deleted:</strong>
+  twelve historical top-level measurement groups that name no full SHA, plus the mutable monolithic
+  attempt. The one process-sharded entry that recorded its exact tree keeps its full SHA. No
+  benchmark figure was changed or re-run — the point is that a reader can now tell which numbers are
+  placeable, and silently dropping the rest would have destroyed that distinction as thoroughly as
+  leaving them implying attribution.</p>
+
 </main></body>
 </html>

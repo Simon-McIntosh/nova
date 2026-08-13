@@ -187,5 +187,95 @@
   <code>CoilDatabase</code> class is defined in <code>nova/imas/machine.py</code>, and the work
   stayed inside its assigned paths.</p>
 
+  <h2 id="null-precision-declaration">Every field-null benchmark declares its resolved precision</h2>
+
+  <p>Commit <code>cc92defd</code>. Gate passed: 7/7 tests, 7/7 benchmark configurations declaring a
+  precision across 9 emitted lines.</p>
+
+  <p>The null-fit precision default was locked to double after the float32 axis-fit ladder
+  (2<sup>&minus;22</sup> Wb) capped every forward solve's convergence near 5e-07 relative. That
+  decision left a gap: a benchmark's recorded numbers did not say which precision produced them, so
+  a figure could not be attributed to a precision after the fact. Each member of the field-null
+  family now prints <code>FIELD_NULL_PRECISION x64_enabled=&lt;bool&gt;
+  working_dtype=&lt;dtype&gt;</code> before it fits or records, with a no-cost precision-only
+  configuration for attribution checks.</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Benchmark</th><th>Declares</th></tr></thead>
+    <tbody>
+      <tr><td><code>stencil_null_route</code></td><td>fp64 only</td></tr>
+      <tr><td><code>null_stack_route</code></td><td>fp64 only</td></tr>
+      <tr><td><code>fieldnull_production_route</code></td><td>fp64 only</td></tr>
+      <tr><td><code>fieldnull_candidate_audit</code></td><td>fp64 only</td></tr>
+      <tr><td><code>select_precision_contract</code></td><td>fp64 only</td></tr>
+      <tr><td><code>fieldnull_precision_audit</code></td><td>fp32 and fp64</td></tr>
+      <tr><td><code>fieldnull_gpu_throughput</code></td><td>fp32 and fp64</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>All seven reported <code>x64_enabled=True</code>. The family is enumerated explicitly in the
+  test, and omitting the precision printer from any member's measurement entry point fails a
+  source-call assertion — so a new field-null benchmark cannot join without declaring. No precision
+  selector and no default changed: this records the resolved precision, it does not choose one.</p>
+
+  <p>Two incidental findings, both kept rather than papered over.
+  <code>bow_grid_solve.py</code> was reviewed and deliberately left untouched: it runs an arc
+  Biot-Savart grid solve and fits no field null, so it is not a family member.
+  <code>fieldnull_gpu_throughput.py</code> carried a stale <code>_refine_at</code> import that made
+  it unimportable; it now stacks the current vectorised <code>_refine_selected_vertices</code>
+  result to preserve its candidate-by-four-value contract, verified by a smoke returning shape
+  (9, 5) with one finite candidate row. And <code>fieldnull_precision_audit.py</code> was rejecting
+  x64 capability <em>after</em> enabling it for its own fp64 reference; it now requires that
+  capability instead.</p>
+
+  <h2 id="pack-current-placement">Within-pack current placement is excluded as the deviation's cause</h2>
+
+  <p>Commit <code>cc761f57</code>. Gate passed. SLURM job 1245067, 23m06s, exit 0. Artifact:
+  <code>dina-pack-current-distribution.json</code>.</p>
+
+  <p>The hex demonstration reproduced DINA 135011/7 slice 353 to I_p &minus;1.15%, &beta;_p +2.16%,
+  l_i &minus;1.04%, axis 44 mm, and the residual <em>grows under refinement</em> — so it is a
+  machine-model gap rather than discretisation. Every excluded conductor was an order too small; the
+  passive structure was falsified as the floor at 0.093% of span against a 1.4–6.5% deviation. Two
+  candidates remained: how declared coil-pack currents are distributed inside their conductor
+  sections, and the reference's own profile/COCOS mapping. This node measured the first.</p>
+
+  <p>Two physically declared distributions were compared on the identical 1587-cell hex mesh, pulse
+  135011 / run 7 / slice 353 at 338.9276 s, DD 3.39.0, stored absolute p&prime; and FF&prime;,
+  &Phi;_nova = &minus;&psi;_IMAS total-flux convention, passive drive, and the same fixed-budget
+  Newton–Krylov route: the live as-declared continuum, with each element's ampere-turns spread
+  uniformly over its declared conductor section; and a finite-section equal-current turn lattice
+  derived only from each rectangular pack's declared outline and turn count, retaining the declared
+  fractional terminal turn and balancing unused outer-corner sites. The one-turn VS3 pair and all
+  passive conductors were unchanged.</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Metric</th><th>Continuum</th><th>Turn-resolved</th><th>Shift</th><th>Share of banked deviation</th></tr></thead>
+    <tbody>
+      <tr><td>I_p</td><td>&minus;1.12406%</td><td>&minus;1.11578%</td><td>0.008277 pp better</td><td>0.7198%</td></tr>
+      <tr><td>&beta;_p</td><td>+2.23699%</td><td>+2.25305%</td><td>0.016060 pp worse</td><td>0.7435%</td></tr>
+      <tr><td>l_i</td><td>&minus;0.135266%</td><td>&minus;0.150177%</td><td>0.014911 pp worse</td><td>1.4338%</td></tr>
+      <tr><td>axis position</td><td>41.2372 mm</td><td>40.7096 mm</td><td>0.52765 mm better</td><td>1.1992%</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>Verdict: within-pack turn resolution is excluded as the dominant cause.</strong> The
+  largest response is 1.4338% of the banked deviation (l_i); the external-flux response of the
+  redistribution is 0.0631153 Wb, or 0.0780225% of the reference span. It improves I_p and axis
+  position slightly while slightly worsening &beta;_p and l_i — a redistribution of that magnitude
+  cannot account for a 1.3–6.5% gap. By elimination the reference's own profile/COCOS mapping is now
+  the surviving candidate.</p>
+
+  <p><strong>One qualification the node raised and which is not smoothed over.</strong> The live
+  as-declared rerun itself reads &minus;1.12406% / +2.23699% / &minus;0.135266% / 41.2372 mm, so the
+  live l_i has drifted materially from the banked &minus;1.04% even though the distribution delta is
+  only 0.014911 pp. The exclusion verdict is unaffected — it rests on the difference between two
+  distributions measured in the same run — but the banked l_i row must not be presented as current
+  until that drift is reconciled.</p>
+
 </main></body>
 </html>

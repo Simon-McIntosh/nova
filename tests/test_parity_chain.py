@@ -1,9 +1,10 @@
 """End-to-end contract for the corrected reconstruction-chain entry point."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 import jax.numpy as jnp
 import numpy as np
+import pytest
 
 import nova.imas.mast_parity_chain as chain_module
 from nova.imas.mast_parity_chain import (
@@ -12,6 +13,7 @@ from nova.imas.mast_parity_chain import (
     run_parity_chain,
 )
 from nova.imas.mast_solve_inputs import CorrectedSolveInputs
+from nova.imas.parity_tolerances import SCORECARD_FIELDS
 from nova.jax.config import Precision
 
 
@@ -135,6 +137,14 @@ def test_pilot_shot_runs_the_scored_chain_end_to_end(monkeypatch):
     """One entry point returns all four score groups beside a batched solve."""
 
     monkeypatch.setattr(chain_module, "read_corrected_solve_inputs", corrected_inputs)
+    registry_calls = []
+    registry_verdicts = chain_module.scorecard_verdicts
+
+    def record_registry_call(metrics, magnetics_budget):
+        registry_calls.append((set(metrics), magnetics_budget))
+        return registry_verdicts(metrics, magnetics_budget)
+
+    monkeypatch.setattr(chain_module, "scorecard_verdicts", record_registry_call)
     moment = MomentSolver()
     settings = AcceleratorSettings(
         newton_steps=1,
@@ -163,6 +173,9 @@ def test_pilot_shot_runs_the_scored_chain_end_to_end(monkeypatch):
 
     groups = result.scorecard.as_dict()
     assert {"geometry", "physics", "solve_health", "temporal"} <= groups.keys()
+    assert set(groups["registered_metrics"]) == SCORECARD_FIELDS
+    assert set(groups["verdicts"]) == SCORECARD_FIELDS
+    assert registry_calls == [(SCORECARD_FIELDS, result.scorecard.magnetics_budget)]
     assert groups["geometry"]["magnetic_axis_m"].shape == (SLICE_COUNT, 2)
     assert groups["geometry"]["lcfs_m"].shape == (SLICE_COUNT, 8, 2)
     assert groups["geometry"]["x_point_m"].shape == (SLICE_COUNT, 2)
@@ -183,3 +196,28 @@ def test_pilot_shot_runs_the_scored_chain_end_to_end(monkeypatch):
     assert result.solve.trace.shape == (SLICE_COUNT, settings.evaluation_count)
     assert np.all(np.isfinite(result.solve.flux))
     assert np.all(result.solve.residual < 1.0e-8)
+
+
+def test_scorecard_refuses_an_unregistered_metric(monkeypatch):
+    """An unknown metric cannot reach an accepted scorecard or verdict map."""
+
+    monkeypatch.setattr(chain_module, "read_corrected_solve_inputs", corrected_inputs)
+    result = run_parity_chain(
+        PILOT_SHOT,
+        moment_solver=MomentSolver(),
+        profile_solver=ProfileSolver(),
+        topology_labeler=label_topology,
+        temporal_scorer=flux_ledger,
+        accelerator=AcceleratorSettings(
+            newton_steps=1,
+            gmres_iterations=GRID_SIZE,
+            warmup=2,
+            relaxation=0.5,
+        ),
+        store="/pilot",
+    )
+    metrics = dict(result.scorecard.registered_metrics)
+    metrics["unregistered_metric"] = 0.0
+
+    with pytest.raises(ValueError, match="unregistered fields"):
+        replace(result.scorecard, registered_metrics=metrics)

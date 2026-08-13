@@ -15,10 +15,11 @@ same ``vmap`` of the exact-tangent Newton--Krylov route.
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from time import perf_counter
-from typing import Any, Protocol
+from types import MappingProxyType
+from typing import Any, Mapping, Protocol
 
 import jax
 import jax.numpy as jnp
@@ -31,6 +32,11 @@ from nova.imas.mast_solve_inputs import (
     read_corrected_solve_inputs,
 )
 from nova.imas.mast_vacuum_cohort import SHOT_STORE
+from nova.imas.parity_tolerances import (
+    MagneticsBudgetClass,
+    ScorecardField,
+    scorecard_verdicts,
+)
 
 
 @dataclass(frozen=True)
@@ -181,6 +187,19 @@ class SliceScorecard:
     physics: PhysicsScores
     solve_health: SolveHealthScores
     temporal: TemporalScores
+    registered_metrics: Mapping[str, float]
+    magnetics_budget: MagneticsBudgetClass = MagneticsBudgetClass.SAME_SOURCE
+    verdicts: Mapping[str, bool] = field(init=False)
+
+    def __post_init__(self) -> None:
+        """Validate and adjudicate the complete registered metric schema."""
+
+        metrics = {
+            str(name): float(value) for name, value in self.registered_metrics.items()
+        }
+        verdicts = scorecard_verdicts(metrics, self.magnetics_budget)
+        object.__setattr__(self, "registered_metrics", MappingProxyType(metrics))
+        object.__setattr__(self, "verdicts", verdicts)
 
     @property
     def slice_count(self) -> int:
@@ -198,6 +217,8 @@ class SliceScorecard:
             "physics": asdict(self.physics),
             "solve_health": asdict(self.solve_health),
             "temporal": asdict(self.temporal),
+            "registered_metrics": dict(self.registered_metrics),
+            "verdicts": dict(self.verdicts),
         }
 
 
@@ -396,6 +417,51 @@ def _convergence_fraction(trace: np.ndarray, final: np.ndarray) -> np.ndarray:
     return np.clip(1.0 - ratio, 0.0, 1.0)
 
 
+def _registered_scorecard_metrics(
+    solve: AcceleratedProfileSolve,
+    raw_residual: np.ndarray,
+    topology: TopologyLabels,
+    temporal: np.ndarray,
+    accelerator: AcceleratorSettings,
+) -> Mapping[str, float]:
+    """Reduce emitted observations to the registered shot-level metric schema.
+
+    Geometry comparisons require the independent reference reconstruction, which
+    is intentionally absent from this chain.  Those fields remain explicit NaNs
+    and therefore receive failing verdicts until the referee layer supplies the
+    comparisons; they are never replaced by seed-relative proxy scores.
+    """
+
+    reference_dependent = float("nan")
+    core = np.asarray(topology.core_mask, dtype=bool).reshape(solve.slice_count, -1)
+    confined = np.any(core, axis=1)
+    converged = np.isfinite(solve.residual) & (solve.residual < 1.0e-8)
+    throughput = solve.slice_count / max(solve.elapsed_s, np.finfo(float).tiny)
+    return MappingProxyType(
+        {
+            ScorecardField.MAGNETIC_AXIS_DISTANCE_M.value: reference_dependent,
+            ScorecardField.LCFS_DISTANCE_M.value: reference_dependent,
+            ScorecardField.X_POINT_DISTANCE_M.value: reference_dependent,
+            ScorecardField.TOPOLOGY_CLASS_AGREEMENT_FRACTION.value: (
+                reference_dependent
+            ),
+            ScorecardField.PROFILE_RESIDUAL_RMS.value: float(
+                np.sqrt(np.mean(np.square(solve.residual)))
+            ),
+            ScorecardField.MAGNETICS_RESIDUAL_WHITENED_RMS.value: float(
+                np.sqrt(np.mean(np.square(raw_residual)))
+            ),
+            ScorecardField.CONVERGED_FRACTION.value: float(np.mean(converged)),
+            ScorecardField.CONFINED_FRACTION.value: float(np.mean(confined)),
+            ScorecardField.ITERATION_COUNT.value: float(accelerator.evaluation_count),
+            ScorecardField.THROUGHPUT_SLICES_PER_CORE_S.value: float(throughput),
+            ScorecardField.CURRENT_DIFFUSION_FLUX_LEDGER_RMS_FRACTION.value: float(
+                np.sqrt(np.mean(np.square(temporal)))
+            ),
+        }
+    )
+
+
 def run_parity_chain(
     shot: int,
     *,
@@ -405,6 +471,7 @@ def run_parity_chain(
     temporal_scorer: TemporalScorer | None = None,
     sensor_scale: np.ndarray | None = None,
     accelerator: AcceleratorSettings = AcceleratorSettings(),
+    magnetics_budget: MagneticsBudgetClass = MagneticsBudgetClass.SAME_SOURCE,
     store: Path | str = SHOT_STORE,
 ) -> ParityChainResult:
     """Reconstruct and score every corrected slice of one MAST shot.
@@ -477,6 +544,10 @@ def run_parity_chain(
             throughput_slices_per_second=np.full(inputs.slice_count, throughput),
         ),
         temporal=TemporalScores(current_diffusion_flux_ledger_consistency=temporal),
+        registered_metrics=_registered_scorecard_metrics(
+            solve, raw_residual, topology, temporal, accelerator
+        ),
+        magnetics_budget=magnetics_budget,
     )
     return ParityChainResult(inputs, seeds, solve, topology, scorecard)
 

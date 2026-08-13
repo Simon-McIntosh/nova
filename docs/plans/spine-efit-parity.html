@@ -23,9 +23,9 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-13">
-<meta name="plan-impl" content="0.75">
-<meta name="plan-version" content="5">
-<meta name="plan-commits" content="ee60c7d2,27baad59,b46bc103,99dfc6a6,41ddd617,9eb129e4,125c00a2">
+<meta name="plan-impl" content="0.85">
+<meta name="plan-version" content="6">
+<meta name="plan-commits" content="ee60c7d2,27baad59,b46bc103,99dfc6a6,41ddd617,9eb129e4,125c00a2,bdaf0844,73336ac0">
 <meta name="plan-artifacts" content="nova/imas/mast_parity_chain.py,nova/imas/parity_tolerances.py,nova/imas/mast_efit_referee.py">
 </head>
 <body>
@@ -206,6 +206,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260813-factory" data-who="reckon-ship" data-when="2026-08-13T06:20:00+00:00">
     <div class="r-comment-body">production-chain-factory landed but its gate is not-run — commit 125c00a2. The factory works: it returns ReconstructMoment, the accelerated ReconstructProfile, MastTopologyLabeler and MastCurrentDiffusion built from corrected reads plus a verified content-addressed artifact, with a 4/4 production-type assertion and the EFIT firewall test unchanged. A REAL corrected slice of shot 21978 reconstructed end to end at t=0.24500 s on a 33x49 grid. The gate did not close because the reconstruction classified that slice LIMITED and supplied no x-point (x_point=[nan,nan]) where EFIT calls it diverted, so the fail-closed referee raised rather than scoring; the same happened on a compact 17x25 grid. This is potentially the parity result itself rather than an obstacle — topology-class agreement is one of the eleven registered metrics and exists to catch exactly this disagreement. Two nodes now split the question so that neither can hide the other: limited-diverted-disagreement searches the reconstructed flux map for a saddle INDEPENDENTLY of the labeler and repairs only if the labeler missed one that exists, and referee-scores-absent-xpoint makes a missing x-point a recorded FAILING metric rather than an exception so the disagreement is scored instead of blocking. No tolerance was widened and no proxy metric was substituted at any point.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260813-topology" data-who="reckon-ship" data-when="2026-08-13T06:35:00+00:00">
+    <div class="r-comment-body">limited-diverted-disagreement and referee-scores-absent-xpoint landed — commits bdaf0844, 73336ac0; both gates passed. VERDICT: the limited classification was a grid-resolution artifact, not a physics disagreement. At the factory's previous default (25,17) the production null kernel returned candidate_count=0 while an independent SciPy bicubic gradient-root and Hessian-sign search — which never calls the labeler — found saddles present; raising the default to (49,33) makes both agree at one x-point, R=1.22492 m, Z=0.35977 m, psi=6.83653e-03 Wb, on corrected slice 1963 (t=0.242600 s) aligned to EFIT row 46 (t=0.245000 s). EFIT was used only to confirm the named row is diverted and never entered reconstruction. TWO CAVEATS the node stated and I am not smoothing over: boundary-push termination still reads 'x-point saddle remained unresolved' with boundary_resolved=false despite the emitted x-point, and the profile residual on that diagnostic slice was about 1.0055 against a registered bound of 0.075868 — so this establishes topology-label presence and count agreement ONLY, not geometry parity and not solve convergence. The referee node now scores a one-sided x-point absence instead of raising: the distance stays NaN with no proxy substituted, the responsible side is recorded as reconstruction-x-point-absent or referee-x-point-absent, topology agreement is set to 0.0, and both verdicts fail while the slice stays scored (3/3 aligned slices scored, 10/10 tests). Its reported 'pre-existing syntax error at nova/database/datafile.py:40' is a FALSE ALARM: 'except FileNotFoundError, OSError' is valid PEP 758 syntax on the project's Python 3.14.2 and parses cleanly; that worker's environment was on an older interpreter.</div>
 </div>
 </section>
 </main>

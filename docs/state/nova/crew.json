@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-13T16:18:39",
+  "updated": "2026-08-13T16:25:43",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -3596,9 +3596,113 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260813T140825856191-topology-boundary-scoring",
+        "plan": "efit-map-inversion",
+        "section": "\u00a73",
+        "node": "topology-boundary-scoring",
+        "role": "implement",
+        "member": "topology-parity",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-13T14:08:28Z",
+        "completed_at": "2026-08-13T14:22:07Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 819,
+        "time_budget": "25m",
+        "base_sha": "5bd5fd29b948ef41e426e8319f1a5ae2c0779759",
+        "commits": [
+          "f42249857d04e6c057219ce936cadcdda09b8fd9"
+        ],
+        "changed_lines": {
+          "added": 505,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/bac59e2b-995a-430c-bf2d-55dd3126adcf/scratchpad/topology-boundary-scoring-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ffb73-f8a9-7f02-b9ee-19586af8c6e8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 5627904,
+            "input_tokens": 5801541,
+            "output_tokens": 27108,
+            "reasoning_output_tokens": 7240
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260813T142009469741-third-term-separation",
+        "plan": "efit-map-inversion",
+        "section": "\u00a75",
+        "node": "third-term-separation",
+        "role": "implement",
+        "member": "solve-convergence",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-13T14:20:12Z",
+        "completed_at": "2026-08-13T14:25:13Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 301,
+        "time_budget": "25m",
+        "base_sha": "abe6db55828ec2a39eb32e872a7202da2b284ee8",
+        "commits": [
+          "d5c3d14c850b3ad3b186deb3c8f119b1438b2a64"
+        ],
+        "changed_lines": {
+          "added": 280,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/bac59e2b-995a-430c-bf2d-55dd3126adcf/scratchpad/third-term-separation-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ffa72-15c7-78b1-bee8-5f074cebc901",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 16585216,
+            "input_tokens": 17417294,
+            "output_tokens": 82665,
+            "reasoning_output_tokens": 19462
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 124
+    "_version": 126
   }
 }

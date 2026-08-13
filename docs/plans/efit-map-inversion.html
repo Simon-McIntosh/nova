@@ -22,10 +22,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-13">
-<meta name="plan-commits" content="213458a2,69c7f92a,bab09d10">
-<meta name="plan-artifacts" content="benchmarks/efit_forward_input_census.py,benchmarks/efit_affine_extraction.py,benchmarks/efit_current_sign_census.py">
-<meta name="plan-impl" content="0.6">
-<meta name="plan-version" content="3">
+<meta name="plan-commits" content="213458a2,69c7f92a,bab09d10,f4224985,d5c3d14c">
+<meta name="plan-artifacts" content="benchmarks/efit_forward_input_census.py,benchmarks/efit_affine_extraction.py,benchmarks/efit_current_sign_census.py,benchmarks/efit_topology_boundary_score.py,benchmarks/efit_third_term_separation.py">
+<meta name="plan-impl" content="0.83">
+<meta name="plan-version" content="5">
 </head>
 <body>
   <main class="plan-doc">
@@ -71,19 +71,23 @@
       </p>
     </section>
 
-    <h2 id="s3">§3 — Topology and boundary from the given map</h2>
-
-    <p>Run nova's own topology and boundary machinery on the stored flux map and score it against the
-    stored geometry from the same slice. Both answers are in the file, so this isolates our reader with
-    no solver involved: axis position, LCFS distance, x-point position and count, and the
-    limited/diverted class. The existing gate reported pilot axis and LCFS figures of 0.002 m against
-    registered bounds of 1.01344e-03 m and 3.3047e-04 m — but those came from a reconstruction, so they
-    conflate reader error with fit error. Here they cannot.</p>
-
-    <p><em>Done-when:</em> on at least one slice per frozen shot, nova's extracted axis, LCFS and
-    x-point positions are reported against the stored values with signed distances, and the topology
-    class agrees or the disagreement is named with the grid resolution at which it resolves — the
-    (25,17) → (49,33) precedent showed a class disagreement that was purely a resolution artefact.</p>
+    <section id="s3" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-13</span>
+        <h2>§3 — Topology and boundary from the given map</h2>
+      </header>
+      <p class="landed-summary">
+        Scored the native boundary reader against stored geometry with no solver in the path, on one
+        deterministic slice per frozen shot. Axis PASS 6/6 (worst 8.68e-04 m vs 1.01344e-03 m), x-point
+        position and count PASS 6/6 (worst 2.25e-03 m vs 1.4e-02 m, 2/2 each), topology class PASS 6/6 at
+        1.0 all diverted/diverted on the stored (65,65) grid — no resolution ladder needed.
+        <strong>LCFS FAIL 5/6</strong>, worst mean absolute 7.61e-04 m against the 3.3047e-04 m bound,
+        unwidened; the offsets change sign across shots, so the 0.999 ray convention is not the whole
+        cause. Leading candidate is the chain factory's axis-centre mismatch — §6.
+        Full record: <a href="/nova/evidence/archive/efit-map-inversion-landed#topology-boundary-score">§3 landed</a>
+        (commit <code>f4224985</code>).
+      </p>
+    </section>
 
     <h2 id="s4">§4 — Current density and flux functions on the LCFS interior</h2>
 
@@ -118,29 +122,52 @@
     domain was being read as though it were a flux-function profile. That is why the mask is locked as a
     decision below and not left to implementation taste.</p>
 
-    <h2 id="s5">§5 — Whether two terms are enough</h2>
+    <section id="s5" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-13</span>
+        <h2>§5 — Whether two terms are enough</h2>
+      </header>
+      <p class="landed-summary">
+        <strong>Numerical, decided on the sign test rather than the count.</strong> Equalising cell
+        population did <em>not</em> reduce significance (11/24 → 12/24), so the easy evidence never
+        appeared; the physical criterion failed instead — the significant coefficients split exactly
+        6 positive to 6 negative, and no single rotation profile can alternate sign that way. Two-term
+        model stands, no rotation forward input promoted, interpretability floor 39 cells.
+        Full record: <a href="/nova/evidence/archive/efit-map-inversion-landed#third-term-separation">§5 landed</a>
+        (commit <code>d5c3d14c</code>).
+      </p>
+    </section>
 
-    <p><strong>They are not, in about half the bins.</strong> Refitting each bin with a third
-    <code>R⁴</code> column resolved that coefficient above its own standard error in
-    <strong>11 of 24 bins</strong>, reducing scatter by a median 1.171796e-02. An <code>R⁴</code> term in
-    <code>R j_φ</code> is the signature of a pressure that depends explicitly on major radius — toroidal
-    rotation, for which nova already carries a locked isothermal closure and banked rotating references.</p>
+    <h2 id="s6">§6 — The boundary read casts its rays about one centre and reports a ring about another</h2>
 
-    <p>But three readings fit that evidence and they are not equivalent, so this section is a
-    separation, not an implementation. The term may be <em>physical</em> (EFIT fitted a rotation or
-    otherwise R-dependent source); it may be <em>numerical</em> (thin bins near the axis and near the
-    boundary hold few cells over a short R² lever, so a third column absorbs noise); or it may be
-    <em>geometric</em> (near-boundary bins clipped by the mask sample an asymmetric part of each
-    surface). The scatter distribution is consistent with the second: the maximum two-term scatter
-    fraction is 0.571 against a median of 0.014, so a small number of bins dominate.</p>
+    <p><strong>§3 isolated a production defect, and it is the leading candidate for the only geometry
+    metric that failed.</strong> <code>nova/imas/mast_chain_factory.py</code> asks the connectivity kernel
+    for ray radii about the fixed machine-centre <code>axis_seed</code>, then constructs the reported ring
+    around <code>read.axis</code>. Kernel ray radii are defined about the axis they were supplied, so the
+    two centres have to be the same one; when they are not, the emitted boundary is a ring of correct radii
+    drawn about the wrong point.</p>
 
-    <p><em>Done-when:</em> the 11 bins are identified by flux-surface position and cell population, and
-    the physical reading is separated from the numerical one by a measurement — refitting under a
-    binning that equalises cell population, and testing whether the recovered <code>R⁴</code>
-    coefficient is consistent in sign and magnitude with a single rotation profile across bins rather
-    than scattering as noise would. If it is physical, the recovered rotation parametrisation is
-    reported as a third forward input; if numerical, the two-term model stands with the bin-population
-    floor recorded.</p>
+    <p>The magnitude is measured, not assumed. §3's node hit this in its own first prototype and recorded
+    roughly <strong>0.10–0.14 m symmetric LCFS errors</strong> from the centre mismatch. It then worked
+    around the defect by repeating the read about the extracted axis, which is why its final figures are
+    at the 1e-04 m scale — production still carries the fault, so any caller that does not know to repeat
+    the read inherits the large error.</p>
+
+    <p><strong>The sign evidence fits this cause and excludes the obvious alternative.</strong> Nova's
+    emitted LCFS ray is a documented 0.999 boundary-span surface, which predicts a uniform inward bias;
+    but the measured offsets change sign across shots (two of six sit outside the stored polygon), and a
+    convention offset cannot do that. A centre displacement can, because it moves the ring toward the
+    stored boundary on one side and away on the other.</p>
+
+    <p>Two shots also return <code>boundary_resolved=false</code> with x fit states [1,2] despite a correct
+    topology class and a close x-point pair. Whether that survives the centre repair is part of what this
+    section measures — it may be the same fault seen through the saddle fit.</p>
+
+    <p><em>Done-when:</em> the reported ring is constructed about the same centre the ray radii were cast
+    about, with a test pinning that the two agree; the six-shot LCFS mean absolute distance is re-scored
+    against the unchanged 3.3047e-04 m registered bound and reported per shot with its sign; and the
+    <code>boundary_resolved=false</code> state on shots 21983 and 21985 is either cleared or reported as
+    surviving with its own cause. The bound is not to be widened whatever the outcome.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -187,15 +214,22 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-emi-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship efit-map-inversion §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-emi-001" data-status="resolved" data-written-by="reckon-create" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship efit-map-inversion §3" data-resolved-at="2026-08-13T14:24:09+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Score topology and boundary extraction against the stored geometry (§3)</h4>
     <div class="r-fu-body"><p>§2's census and §4's masked flux-function recovery are both landed as prototypes (<code>213458a2</code>, <code>69c7f92a</code>): profiles are stored, 397 forward-usable rows match the geometry count, the plasma current closes to −2.74e-04 on the masked interior, and derived current density correlates 0.999920 with the stored field. What is not measured is §3 — running nova's own topology and boundary machinery on the stored flux map and scoring axis, LCFS, x-point and topology class against the stored values from the same slice. This isolates the reader with no solver in the loop, which is what makes the existing gate's 0.002 m pilot axis and LCFS figures uninterpretable: they conflate reader error with fit error. Extend to at least one slice per frozen shot. Two open decisions gate the wider ladder rather than this section: the source COCOS declaration and whether <code>fcoil_x</code> or <code>fcoil_c</code> drives the external field.</p></div>
     <pre class="r-fu-prompt">/reckon-ship efit-map-inversion §3</pre>
+    <p class="r-fu-outcome">Topology and boundary scored - commit f4224985; node gate PASSED, GEOMETRY VERDICT QUALIFIED FAIL. The section separated exactly what it existed to separate: with no solver in the path, the reader REPRODUCES the axis, the x-point pair and the topology class, and MISSES the LCFS. Axis PASS 6/6, worst 8.6785179e-04 m against the 1.01344e-03 m bound. X-point position PASS 6/6, worst 2.2508648e-03 m against 1.4e-02 m, with count 2/2 on every shot. Topology class PASS 6/6 at 1.0, all diverted/diverted, EVERY CLASS RESOLVED ON THE STORED (65,65) GRID so no resolution ladder was needed or claimed - materially unlike the earlier limited/diverted episode, which was a pure resolution artefact. LCFS FAIL 5/6, worst mean absolute 7.6068799e-04 m against the 3.3047e-04 m bound, and the bound was not widened. THE LCFS SIGNED OFFSETS CHANGE SIGN ACROSS SHOTS (-4.49e-04, -3.97e-04, -3.97e-04, +4.97e-04, -3.05e-04, +6.50e-04), which rules out the expected explanation: nova's emitted ray is a documented 0.999 boundary-span surface, so a uniform inward bias was predicted, but two shots sit OUTSIDE the stored polygon and a convention offset cannot do that. Firewall held by construction - stored axis, LCFS and x-points were scoring-side only and never inputs to the connectivity read; slice selection was deterministic on the largest absolute finite plasma_current_c among rows with a live map, stored axis and declared LCFS. Two diagnostics retained rather than smoothed: shots 21983 and 21985 return boundary_resolved=false with x fit states [1,2] despite a correct class and close x-point pair. A PRODUCTION DEFECT found outside the fence is the leading candidate for the LCFS failure and becomes this plan's own new section rather than a followup: nova/imas/mast_chain_factory.py asks the connectivity kernel for ray radii about the fixed machine-centre axis_seed but builds the reported ring around read.axis, and the node's own prototype measured roughly 0.10-0.14 m symmetric LCFS errors from that mismatch. Record at /nova/evidence/archive/efit-map-inversion-landed#topology-boundary-score</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s2" data-id="c-20260813-signcensus" data-who="reckon-ship" data-when="2026-08-13T14:20:00+00:00">
     <div class="r-comment-body">plasma-current-sign-census landed - commit bab09d10; gate PASSED. THE CARRIED COCOS CAUTION IS DISCHARGED: 6/6 frozen shots agree across all four signs and the disagreement list is empty. Measure: on the common usable slice 46, efm/plasma_current_x, efm/plasma_current_c and the delta_star-derived stored-LCFS-masked integral are all positive on every shot, matching the declared COCOS 3 frame's +1 forward-current expectation with Ip unchanged by the source-to-target conversion. Maximum absolute signed relative closure across the cohort is 2.952859461e-04 (21985), against 2.744983e-04 on the 21978 control which reproduced the banked +925091.932 A derived vs +925345.9375 A stored exactly. So the affine node's single-slice closure was not a lucky slice - it is stable to within about 4e-05 across six shots. Integration path recorded: delta_star applied to total flux Phi=2pi*psi, mu0*jphi=-delta_star(Phi)/(2piR), integrated over operator cells inside the stored LCFS only. QUALIFICATION KEPT rather than smoothed over: this establishes one usable slice per shot, NOT every row's temporal sign stability - a convention that moved within a shot would not be caught by this measurement. Artifact benchmarks/efit_current_sign_census.py, 328 lines; findings JSON 8,094 bytes sha256 be421a5f. Record at /nova/evidence/archive/efit-map-inversion-landed#current-sign-census</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260813-topologyscore" data-who="reckon-ship" data-when="2026-08-13T14:50:00+00:00">
+    <div class="r-comment-body">topology-boundary-scoring landed - commit f4224985; worker 819 s; artifact benchmarks/efit_topology_boundary_score.py 505 lines, six-shot score JSON 21,735 bytes. Headline: axis PASS 6/6 (worst 8.6785179e-04 m vs 1.01344e-03 m), x-point position and count PASS 6/6 (worst 2.2508648e-03 m vs 1.4e-02 m, 2/2 each shot), topology class PASS 6/6 at 1.0 all diverted/diverted on the stored (65,65) grid, LCFS FAIL 5/6 (worst mean absolute 7.6068799e-04 m vs 3.3047e-04 m). Sign-changing LCFS offsets exclude the 0.999 ray convention as the sole cause. Leading candidate is the mast_chain_factory axis-centre mismatch, carried as a new section. Record at /nova/evidence/archive/efit-map-inversion-landed#topology-boundary-score</div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20260813-thirdterm" data-who="reckon-ship" data-when="2026-08-13T15:00:00+00:00">
+    <div class="r-comment-body">third-term-separation landed - commit d5c3d14c; gate PASSED; worker 301 s. VERDICT NUMERICAL, AND IT WAS DECIDED ON THE HARDER TEST. Equalising cell population was expected to reduce the significant-bin count and DID NOT: 11/24 went to 12/24, so the convenient evidence for the numerical reading never appeared and a separation resting on that count alone would have had to call the term physical. The physical criterion failed decisively instead - under equal population (39-40 cells per bin) the R^4 coefficients span -28,130.836 to +212,634.549 with 9 positive and 15 negative overall, and the SIGNIFICANT SUBSET SPLITS EXACTLY 6 POSITIVE AND 6 NEGATIVE. A single rotation profile cannot alternate coefficient sign across surfaces, so the two-term model stands and NO candidate rotation parametrisation is promoted as a third forward input. Control reproduces the masked affine result exactly: two-term scatter over fitted magnitude min 3.007982e-03, q25 4.907834e-03, median 1.399630e-02, q75 3.905780e-02, max 5.710340e-01 - confirming this is a reinterpretation of the same fit rather than a different measurement, with all 938 interior cells assigned exactly once under both partitions. Interpretability floor stated as 39 cells, explicitly as a conservative bound and not a claim that 39 cells guarantees physical resolution; at 39-40 cells formal significance is still insufficient without cross-bin sign consistency. Record at /nova/evidence/archive/efit-map-inversion-landed#third-term-separation</div>
 </div>
 </section>
 </main>

@@ -100,6 +100,68 @@
   shot, not every row's temporal sign stability. A convention that moved <em>within</em> a shot would not
   be caught by this measurement.</p>
 
+  <h2 id="topology-boundary-score">§3 — topology and boundary, scored with no solver in the loop</h2>
+
+  <p>Commit <code>f4224985</code>; gate passed, geometry verdict <strong>qualified FAIL</strong>. Artifact
+  <code>benchmarks/efit_topology_boundary_score.py</code> (505 lines); six-shot score JSON 21,735 bytes.
+  Worker time 819 s.</p>
+
+  <p><strong>This is what §3 existed to separate, and it separates cleanly: the reader reproduces the
+  axis, the x-point pair and the topology class, and misses the LCFS.</strong> The earlier gate's 0.002 m
+  pilot figures could not say which half was at fault because a fit sat in the path; here nothing does.</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Metric</th><th>Registered bound</th><th>Worst measured</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td>magnetic axis distance</td><td>1.01344e-03 m</td><td>8.6785179e-04 m</td><td><strong>PASS 6/6</strong></td></tr>
+      <tr><td>LCFS mean absolute distance</td><td>3.3047e-04 m</td><td>7.6068799e-04 m</td><td><strong>FAIL 5/6</strong></td></tr>
+      <tr><td>x-point distance (unordered pair match)</td><td>1.4e-02 m</td><td>2.2508648e-03 m</td><td><strong>PASS 6/6</strong></td></tr>
+      <tr><td>x-point count</td><td>exact</td><td>2/2 every shot</td><td><strong>PASS 6/6</strong></td></tr>
+      <tr><td>topology class agreement</td><td>1.0</td><td>1.0, all diverted/diverted</td><td><strong>PASS 6/6</strong></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>Every class resolved on the stored (65,65) source grid, so no resolution ladder was needed
+  or claimed.</strong> That is a substantive difference from the earlier limited/diverted episode, where
+  the class disagreement turned out to be a pure resolution artefact — here there is no disagreement to
+  explain away.</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Shot</th><th>slice, t (s)</th><th>axis dR, dZ (m)</th><th>LCFS signed (m)</th><th>x-point max (m)</th><th><code>boundary_resolved</code></th></tr></thead>
+    <tbody>
+      <tr><td>21978</td><td>69, 0.3599999845</td><td>−8.1116756e-04, −6.6428688e-05</td><td>−4.4885915e-04</td><td>1.8130561e-03</td><td>true</td></tr>
+      <tr><td>21983</td><td>63, 0.3299999833</td><td>−7.4969724e-04, −1.8846850e-05</td><td>−3.9663293e-04</td><td>1.6022658e-03</td><td><strong>false</strong>, x fit states [1,2]</td></tr>
+      <tr><td>21985</td><td>58, 0.3100000024</td><td>−6.7669697e-04, −2.0592771e-04</td><td>−3.9717508e-04</td><td>1.9543546e-03</td><td><strong>false</strong>, x fit states [1,2]</td></tr>
+      <tr><td>21986</td><td>42, 0.2299999893</td><td>−8.5203443e-04, −1.8915517e-05</td><td><strong>+4.9691222e-04</strong></td><td>2.2508648e-03</td><td>true</td></tr>
+      <tr><td>21989</td><td>73, 0.3849999905</td><td>−7.2105451e-04, +1.1136155e-04</td><td>−3.0522555e-04 <em>(only pass)</em></td><td>1.4546871e-03</td><td>true</td></tr>
+      <tr><td>22086</td><td>53, 0.2800000012</td><td>−8.6741657e-04, −2.7481463e-05</td><td><strong>+6.5025215e-04</strong></td><td>1.7996327e-03</td><td>true</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>The LCFS signed offsets change sign across shots, which rules out the obvious explanation.</strong>
+  Nova's emitted LCFS ray is a documented 0.999 boundary-span surface, so a uniform inward bias was the
+  expected artefact — but two shots sit <em>outside</em> the stored polygon. A convention offset cannot do
+  that, so something else is moving the boundary.</p>
+
+  <p>The read was firewalled by construction: stored axis, LCFS and x-points were scoring-side values only
+  and never inputs to the connectivity read. Slice selection was deterministic — the largest absolute
+  finite <code>efm/plasma_current_c</code> among rows carrying a live flux map, a stored axis and a
+  declared LCFS. <code>host_boundary_read</code> ran on the stored 65×65 map with the stored limiter as
+  material geometry, 96 levels, 18 bisections, 512 rays. No bound was widened and no extrapolation applied.</p>
+
+  <p><strong>A production defect was found outside the node's fence and is the leading candidate for the
+  LCFS failure.</strong> <code>nova/imas/mast_chain_factory.py</code> asks the connectivity kernel for ray
+  radii about the fixed machine-centre <code>axis_seed</code> but constructs the reported ring around
+  <code>read.axis</code>. Kernel ray radii are defined about the supplied axis, so the two centres must
+  agree. In the node's own initial prototype that mismatch produced roughly 0.10–0.14 m symmetric LCFS
+  errors; the benchmark worked around it by repeating the read about the extracted axis, and production
+  still carries it. Two shots also return <code>boundary_resolved=false</code> despite a correct class and
+  close x-point pair, which is retained as a diagnostic rather than worded into an unconditional pass.</p>
+
   <h2 id="affine-recovery">§4 — current density and flux functions on the LCFS interior</h2>
 
   <p>Commit <code>69c7f92a</code>; gate passed. Artifact
@@ -141,6 +203,50 @@
   geometric (mask-clipped near-boundary surfaces) is not settled by this measurement. The scatter
   distribution is consistent with the numerical reading — maximum two-term scatter fraction 0.571
   against a median of 0.014, so a small number of bins dominate.</p>
+
+  <h2 id="third-term-separation">§5 — the third term is numerical, and the sign test is what says so</h2>
+
+  <p>Commit <code>d5c3d14c</code>; gate passed. Artifact
+  <code>benchmarks/efit_third_term_separation.py</code> (280 lines). Worker time 301 s. Shot 21978
+  slice 46, all 938 LCFS-interior cells assigned exactly once under both partitions.</p>
+
+  <p><strong>The convenient evidence did not appear, and the verdict still went numerical on a stronger
+  test.</strong> Equalising cell population was expected to reduce the count of bins resolving an
+  <code>R⁴</code> coefficient above its own standard error. It did not: the count went
+  <strong>11/24 → 12/24</strong>. Had the separation rested on that count alone it would have had to
+  report the term as physical.</p>
+
+  <p><strong>The physical criterion fails decisively instead: a single rotation profile cannot alternate
+  the coefficient's sign.</strong> Under equal population the coefficients span −28,130.836 to
+  +212,634.549 with <strong>9 positive and 15 negative</strong> overall, and the significant subset
+  splits <strong>exactly 6 positive and 6 negative</strong>. An R-dependent pressure from toroidal
+  rotation would carry a consistent sign across surfaces. So the two-term model stands and
+  <strong>no candidate rotation parametrisation is promoted as a third forward input</strong>.</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Partition</th><th>Bin population</th><th>Significant bins</th><th>Sign split, significant subset</th></tr></thead>
+    <tbody>
+      <tr><td>fixed-width, 24 bins</td><td>29–94 cells</td><td>11 / 24</td><td>—</td></tr>
+      <tr><td>equal-population, 24 bins</td><td>39–40 cells</td><td>12 / 24</td><td><strong>6 positive / 6 negative</strong></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>The control reproduces the masked affine result exactly — two-term scatter over fitted magnitude
+  min 3.007982e-03, q25 4.907834e-03, median <strong>1.399630e-02</strong>, q75 3.905780e-02, max
+  <strong>5.710340e-01</strong> — confirming the equal-population run is a reinterpretation of the same
+  fit rather than a different measurement.</p>
+
+  <p>Equal-population binning is a stable sort of the identical interior cells by normalised flux followed
+  by an even split into the same 24 bins, so the intervention changes only the partition. Every bin reports
+  its flux range, population, coefficient, standard error, coefficient-to-error ratio, sign, significance,
+  two-term scatter, R² and three-term scatter reduction under both partitions.</p>
+
+  <p><strong>Interpretability floor: 39 cells</strong> — the minimum population the intervention produced.
+  Below it a third coefficient is not interpreted; at 39–40 cells formal significance is still insufficient
+  without cross-bin sign consistency. The node was explicit that this is a conservative floor and not a
+  claim that 39 cells guarantees physical resolution.</p>
 
   <h2 id="superseded-census">A superseded sibling node, recorded so the gap is not read as lost work</h2>
 

@@ -10,8 +10,11 @@ import nova.imas.mast_parity_gate as gate_module
 from nova.equilibrium.moment import UnsupportedSlice
 from nova.imas.mast_efit_referee import FROZEN_SHOTS
 from nova.imas.mast_parity_gate import (
+    ScoredSlice,
+    SlicePartitionReport,
     ProductionShotScore,
     SkippedSlice,
+    aggregate_scorecard_partitions,
     bank_frozen_scorecard,
     print_frozen_gate_report,
     score_production_shot,
@@ -146,6 +149,7 @@ def test_unsupported_first_slice_is_skipped_and_later_slices_are_scored(tmp_path
                 ),
             ),
             magnetics_budget=MagneticsBudgetClass.SOURCE_CUTOVER,
+            min_cells=5,
         )
 
     report = bank_frozen_scorecard(
@@ -216,6 +220,119 @@ def test_seed_preparation_catches_only_typed_unsupported_slices():
         )
 
 
+def _partition_report(start, stop, *, scored_indices=()):
+    scored_set = set(scored_indices)
+    metrics = {field: 0.0 for field in SCORECARD_FIELDS}
+    verdicts = {field: False for field in SCORECARD_FIELDS}
+    return SlicePartitionReport(
+        generated_at="2026-08-13T00:00:00+00:00",
+        shot=21978,
+        available_slices=4,
+        slice_start=start,
+        slice_stop=stop,
+        radial_points=33,
+        vertical_points=49,
+        min_cells=5,
+        magnetics_budget=str(MagneticsBudgetClass.SOURCE_CUTOVER),
+        scored_slices=tuple(
+            ScoredSlice(
+                shot=21978,
+                slice_index=index,
+                time_s=0.01 * index,
+                reference_time_s=0.01 * index,
+                metrics=metrics,
+                verdicts=verdicts,
+            )
+            for index in range(start, stop)
+            if index in scored_set
+        ),
+        skipped_slices=tuple(
+            SkippedSlice(
+                shot=21978,
+                slice_index=index,
+                time_s=0.01 * index,
+                cause="seed-disc-insufficient-supported-cells",
+            )
+            for index in range(start, stop)
+            if index not in scored_set
+        ),
+    )
+
+
+def test_partition_aggregation_requires_exact_coverage_and_banks_boundaries(tmp_path):
+    first = tmp_path / "partition-0.json"
+    second = tmp_path / "partition-1.json"
+    artifact = tmp_path / "scorecard.json"
+    gate_module._bank_report(_partition_report(0, 2, scored_indices=(1,)), first)
+    gate_module._bank_report(_partition_report(2, 4, scored_indices=(2, 3)), second)
+
+    report = aggregate_scorecard_partitions((first, second), artifact_path=artifact)
+
+    assert report.completed_shots == (21978,)
+    assert report.shot_summaries[0].available_slices == 4
+    assert report.shot_summaries[0].scored_slices == 3
+    assert report.shot_summaries[0].skipped_slices == 1
+    assert [row.slice_index for row in report.scored_slices] == [1, 2, 3]
+    assert [(row.slice_start, row.slice_stop) for row in report.partitions] == [
+        (0, 2),
+        (2, 4),
+    ]
+    assert (report.radial_points, report.vertical_points, report.min_cells) == (
+        33,
+        49,
+        5,
+    )
+    banked = json.loads(artifact.read_text())
+    assert banked["partitions"][0]["artifact"] == str(first.resolve())
+    assert banked["radial_points"] == 33
+    assert banked["vertical_points"] == 49
+    assert banked["min_cells"] == 5
+    assert not artifact.with_suffix(".json.tmp").exists()
+
+
+def test_partition_aggregation_rejects_a_coverage_gap(tmp_path):
+    first = tmp_path / "partition-0.json"
+    second = tmp_path / "partition-1.json"
+    gate_module._bank_report(_partition_report(0, 1), first)
+    gate_module._bank_report(_partition_report(2, 4), second)
+
+    with pytest.raises(ValueError, match="expected slice 1, found 2"):
+        aggregate_scorecard_partitions(
+            (first, second), artifact_path=tmp_path / "scorecard.json"
+        )
+
+
+def test_nonfinite_trace_is_retained_as_zero_convergence():
+    trace = np.array([[np.nan, np.nan], [4.0, 2.0]])
+    final = np.array([np.nan, 1.0])
+
+    fraction = gate_module._scorecard_convergence_fraction(trace, final)
+
+    np.testing.assert_allclose(fraction, [0.0, 0.75])
+
+
+def test_completed_chain_with_no_reference_rows_remains_available_for_skipping(
+    monkeypatch,
+):
+    geometry = SimpleNamespace(usable_slice_count=0)
+    chain = SimpleNamespace(
+        scorecard=SimpleNamespace(time_s=np.array([0.1])), topology=object()
+    )
+    referee = object()
+    monkeypatch.setattr(gate_module, "compare_reference_geometry", lambda *_a: geometry)
+    monkeypatch.setattr(
+        gate_module,
+        "score_with_efit_referee",
+        lambda *_a: pytest.fail("empty reference comparison must not be reduced"),
+    )
+
+    result = gate_module._score_completed_chain(chain, referee)
+
+    assert result.chain is chain
+    assert result.referee is referee
+    assert result.geometry_scores is geometry
+
+
 def test_failed_shot_is_named_while_remaining_shots_continue(tmp_path):
     def scorer(shot):
         if shot == 21986:
@@ -262,7 +379,7 @@ def test_production_scorer_passes_only_factory_components_to_refereed_chain(
     monkeypatch,
 ):
     components = SimpleNamespace(
-        moment_solver=object(),
+        moment_solver=SimpleNamespace(config=SimpleNamespace(min_cells=5)),
         profile_solver=object(),
         topology_labeler=object(),
         temporal_scorer=object(),
@@ -281,7 +398,14 @@ def test_production_scorer_passes_only_factory_components_to_refereed_chain(
     referee = object()
     expected = object()
 
-    def prepare(shot, received_inputs, moment_solver, profile_solver):
+    def prepare(
+        shot,
+        received_inputs,
+        moment_solver,
+        profile_solver,
+        *,
+        source_slice_offset,
+    ):
         calls.append(
             (
                 "prepare",
@@ -289,6 +413,7 @@ def test_production_scorer_passes_only_factory_components_to_refereed_chain(
                 received_inputs,
                 moment_solver,
                 profile_solver,
+                source_slice_offset,
             )
         )
         return (1, 2), seeds, (), scale
@@ -307,7 +432,7 @@ def test_production_scorer_passes_only_factory_components_to_refereed_chain(
     monkeypatch.setattr(gate_module, "read_efit_referee", lambda *_a, **_k: referee)
     monkeypatch.setattr(
         gate_module,
-        "score_with_efit_referee",
+        "_score_completed_chain",
         lambda received_chain, received_referee: (
             expected if (received_chain, received_referee) == (chain, referee) else None
         ),
@@ -339,9 +464,10 @@ def test_production_scorer_passes_only_factory_components_to_refereed_chain(
     assert calls[1] == (
         "prepare",
         21978,
-        inputs,
+        supported_inputs,
         components.moment_solver,
         components.profile_solver,
+        0,
     )
     assert calls[2] == (
         "run",

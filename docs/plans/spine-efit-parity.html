@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-13">
 <meta name="plan-impl" content="0.85">
-<meta name="plan-version" content="7">
+<meta name="plan-version" content="8">
 <meta name="plan-commits" content="ee60c7d2,27baad59,b46bc103,99dfc6a6,41ddd617,9eb129e4,125c00a2,bdaf0844,73336ac0,43e2a091">
 <meta name="plan-artifacts" content="nova/imas/mast_parity_chain.py,nova/imas/parity_tolerances.py,nova/imas/mast_efit_referee.py">
 </head>
@@ -127,6 +127,50 @@
     adjudicated against its pre-registered tolerance; the scorecard record lands with figures;
     the verdict (parity / qualified / fail with mechanism) is written into this plan and the GPU
     catalog plan is unblocked or explicitly held.</p>
+
+    <h2 id="s6">§6 — The solve does not converge on real slices, and that gates everything</h2>
+
+    <p><strong>The chain runs the full reconstruction, not a topology read of a stored
+    map.</strong> <code>run_parity_chain</code> builds
+    <code>profile_solver.least_squares_map(...)</code> per slice and drives it through
+    <code>newton_krylov</code> — the exact-tangent NK locked as <code>accelerator-primary</code> —
+    <code>vmap</code>ped over the leading slice axis. So every number the gate reports comes from a
+    GS reconstruction fitted to the measured magnetics.</p>
+
+    <p><strong>On the one real slice measured so far, that solve did not converge.</strong> Shot
+    21978 at <code>t = 0.2426 s</code> returned a profile residual of about <strong>1.0055</strong>
+    against a registered bound of <strong>0.075868</strong> — a factor of thirteen out, and a
+    residual near unity means essentially no reduction from the seed. The boundary push reported
+    <code>x-point saddle remained unresolved</code> with <code>boundary_resolved = false</code>
+    even while emitting an x-point.</p>
+
+    <p><strong>This subordinates the topology finding rather than being separate from it.</strong>
+    The grid-floor repair made the labeler and an independent saddle search agree at one x-point —
+    but on a flux map that is not a converged equilibrium. Agreement about where a saddle sits in an
+    unconverged map is not yet evidence about the machine, so §3's topology-class metric cannot be
+    interpreted until this closes.</p>
+
+    <p><strong>The leading hypothesis is in the accelerator's own locking evidence.</strong>
+    <code>accelerator-primary</code> was locked on a ladder of <em>synthetic, self-consistent</em>
+    magnetics, where NK reached a median residual near 6e-14. Its rationale already records the
+    exception: the two ladder slices that defeated all three schemes carried data that "never became
+    self-consistent", which was read at the time as a data-consistency problem rather than a solver
+    one. Real measured MAST magnetics are exactly the case where self-consistency with the model is
+    the open question — so a scheme validated only on self-consistent synthetic data landing at
+    residual 1.0 on real data is the predicted symptom, not a surprise. Competing explanations that
+    must be separated from it: an unconverged or badly scaled seed from
+    <code>ReconstructMoment</code>; the fixed <code>AcceleratorSettings</code> budget
+    (<code>newton_steps</code>, <code>gmres_iterations</code>, <code>relaxation</code>,
+    <code>step_cap</code>) being too small for real data; a whitening or sensor-scale mismatch
+    making the residual incomparable to its registered bound; and the unresolved boundary binding
+    feeding a bad mask back into the fit.</p>
+
+    <p><em>Done-when:</em> the residual's behaviour on real slices is characterised against
+    evaluation count and against the seed, the dominant cause is named with the measurement that
+    separates it from the alternatives, and either the solve reaches its registered convergence
+    bound on a real slice or the reason it cannot is recorded as a physics finding with its
+    magnitude. A gate run scored over unconverged slices is not a parity verdict and must not be
+    presented as one.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-13T08:33:55",
+  "updated": "2026-08-13T08:44:27",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2178,9 +2178,61 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260813T063410591297-parity-gate-rerun",
+        "plan": "spine-efit-parity",
+        "section": "\u00a73",
+        "node": "parity-gate-rerun",
+        "role": "implement",
+        "member": "parity-gate",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-13T06:34:12Z",
+        "completed_at": "2026-08-13T06:43:55Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 583,
+        "time_budget": "25m",
+        "base_sha": "dba5114219a361f49d18189c1c365b553b646685",
+        "commits": [
+          "43e2a0913cc4a80140f7a0e9cc3003abf496f590"
+        ],
+        "changed_lines": {
+          "added": 252,
+          "removed": 10,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "not-run",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/653c361a-8c6e-405b-9035-eb21e04233a8/scratchpad/parity-gate-rerun-manifest.md",
+        "scope_changed": false,
+        "session_id": null,
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 3409152,
+            "input_tokens": 3535319,
+            "output_tokens": 19798,
+            "reasoning_output_tokens": 8020
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 86
+    "_version": 87
   }
 }

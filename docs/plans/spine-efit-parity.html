@@ -24,8 +24,8 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-13">
 <meta name="plan-impl" content="0.85">
-<meta name="plan-version" content="6">
-<meta name="plan-commits" content="ee60c7d2,27baad59,b46bc103,99dfc6a6,41ddd617,9eb129e4,125c00a2,bdaf0844,73336ac0">
+<meta name="plan-version" content="7">
+<meta name="plan-commits" content="ee60c7d2,27baad59,b46bc103,99dfc6a6,41ddd617,9eb129e4,125c00a2,bdaf0844,73336ac0,43e2a091">
 <meta name="plan-artifacts" content="nova/imas/mast_parity_chain.py,nova/imas/parity_tolerances.py,nova/imas/mast_efit_referee.py">
 </head>
 <body>
@@ -209,6 +209,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260813-topology" data-who="reckon-ship" data-when="2026-08-13T06:35:00+00:00">
     <div class="r-comment-body">limited-diverted-disagreement and referee-scores-absent-xpoint landed — commits bdaf0844, 73336ac0; both gates passed. VERDICT: the limited classification was a grid-resolution artifact, not a physics disagreement. At the factory's previous default (25,17) the production null kernel returned candidate_count=0 while an independent SciPy bicubic gradient-root and Hessian-sign search — which never calls the labeler — found saddles present; raising the default to (49,33) makes both agree at one x-point, R=1.22492 m, Z=0.35977 m, psi=6.83653e-03 Wb, on corrected slice 1963 (t=0.242600 s) aligned to EFIT row 46 (t=0.245000 s). EFIT was used only to confirm the named row is diverted and never entered reconstruction. TWO CAVEATS the node stated and I am not smoothing over: boundary-push termination still reads 'x-point saddle remained unresolved' with boundary_resolved=false despite the emitted x-point, and the profile residual on that diagnostic slice was about 1.0055 against a registered bound of 0.075868 — so this establishes topology-label presence and count agreement ONLY, not geometry parity and not solve convergence. The referee node now scores a one-sided x-point absence instead of raising: the distance stays NaN with no proxy substituted, the responsible side is recorded as reconstruction-x-point-absent or referee-x-point-absent, topology agreement is set to 0.0, and both verdicts fail while the slice stays scored (3/3 aligned slices scored, 10/10 tests). Its reported 'pre-existing syntax error at nova/database/datafile.py:40' is a FALSE ALARM: 'except FileNotFoundError, OSError' is valid PEP 758 syntax on the project's Python 3.14.2 and parses cleanly; that worker's environment was on an older interpreter.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260813-rerun" data-who="reckon-ship" data-when="2026-08-13T06:45:00+00:00">
+    <div class="r-comment-body">parity-gate-rerun FAILED, gate not-run — commit 43e2a091 merged for its banking path. Physical result stated exactly: 0 of 6 shots completed, 0 of 45,000 available corrected slices scored (each requested shot carries 7,500 corrected input slices); shot 21978 attempted, the other five explicitly recorded as not_attempted; all 11 cohort pass fractions null because no physical slice reached adjudication. Cause: the run used the compact 17x25 grid to fit the worker budget and failed before reconstruction with ValueError: seed disc holds 4 cells, below min_cells=5. What did land is the production banking path itself — bank_frozen_scorecard now drives the factory components with no injected doubles, preserves the EFIT-after-solve firewall, selects the registered source-cutover magnetics budget, banks cohort-wide fractions for all 11 fields, and distinguishes attempted from not-attempted shots. The worker's leaning is adopted and is the right one: run the REGISTERED DEFAULT grid rather than repair a compact-grid seed path, because shrinking the grid to fit a worker budget changes the physics being measured. parity-gate-production-run is dispatched at the default grid from a $HOME-visible worktree, since SLURM compute nodes cannot see /run/user (node-local tmpfs). No tolerance changed and no synthetic score was substituted at any point.</div>
 </div>
 </section>
 </main>

@@ -329,5 +329,53 @@
   measurement is not superseded by a measurement of a different configuration, and collapsing them
   would have destroyed the asymmetry that is the actual finding.</p>
 
+  <h2 id="reference-mapping-excluded">The last candidate is excluded, and no named cause remains</h2>
+
+  <p>Commit <code>a6366ec9</code>. Gate passed. SLURM sun_debug 1245563, 9m36s, exit 0. Artifact:
+  <code>dina-reference-mapping.json</code>.</p>
+
+  <p>DINA 135011 / run 7 / slice 353 was opened <em>directly</em> through imas-python at DD 3.39.0,
+  without going through the reproduction reader, and its convention composed from documented digits:
+  DDv3 COCOS 11 (+1, 1, +1, +1) into Nova COCOS 17 (&minus;1, 1, +1, +1) gives a total-flux factor
+  &minus;1, plasma-current and F factors +1, a conventional derivative factor &minus;1, and therefore
+  +1 on Nova's negative-gradient <code>p′</code>/<code>FF′</code>.</p>
+
+  <p><strong>The independent derivation and the current reader are bit-identical.</strong> Axis total
+  flux, boundary total flux, normalised flux, <code>p′</code>, <code>FF′</code> and the full
+  65&times;129 total-flux map all agree with every signed minimum, maximum and mean difference exactly
+  0.0 and every maximum absolute difference exactly 0.0. The flux exponent was discriminated
+  independently rather than assumed: a current integral gives &minus;14,995,895.091 A for the
+  total-flux candidate, +0.0235746% from the stored &minus;14,992,360.697 A, against
+  &minus;2,386,670.830 A for the per-radian candidate — 84.08% off. Re-solving on the same
+  passive-inclusive 1,587-cell mesh moves the baseline by +1.9e-10 pp in I_p, +2.2e-10 pp in
+  &beta;_p, +3.9e-10 pp in l_i and &minus;2.5e-11 mm in axis distance; the largest response is
+  <strong>2.868881e-7%</strong> of a baseline quantity.</p>
+
+  <p><strong>So the reference profile and COCOS mapping is excluded, and with it the last named
+  candidate.</strong> Stated plainly rather than softened: <em>no named cause remains for the
+  passive-inclusive reproduction deviation.</em></p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Candidate</th><th>Disposition</th><th>Measured bound</th></tr></thead>
+    <tbody>
+      <tr><td>discretisation</td><td>excluded</td><td>the deviation grows under refinement</td></tr>
+      <tr><td>excluded conductors / passive structure</td><td>falsified as the floor</td><td>0.093% of span against 1.4–6.5%</td></tr>
+      <tr><td>within-pack current placement</td><td>excluded</td><td>≤ 1.4338% of the deviation</td></tr>
+      <tr><td>reference profile / COCOS mapping</td><td>excluded</td><td>bit-identical; 2.868881e-7% response</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>What the exclusions jointly imply is worth stating, because it redirects the question.</strong>
+  Every input to the solve is now proven bit-identical to the reference's own stored quantities, and
+  every representation of the conductors has been measured and found too small. A residual that
+  survives all of that and <em>grows under refinement</em> is not a difference in what the two codes
+  were given — it is a difference between the two models. That points at the reference equilibrium
+  itself, or at a force-balance term one code carries and the other does not, rather than at anything
+  in Nova's reading of DINA. Naming it would require treating DINA's solution as the object under test
+  rather than as the truth, which is a different investigation from this one and should not be started
+  under the assumption that a cause is still hiding on Nova's side of the seam.</p>
+
 </main></body>
 </html>

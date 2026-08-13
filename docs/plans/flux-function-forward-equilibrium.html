@@ -24,10 +24,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-13">
-<meta name="plan-version" content="25">
-<meta name="plan-impl" content="0.99">
-<meta name="plan-commits" content="f07e8b05,ebd322ae,1a2de9c7,b0af2d23,c90d173c,6d138035,eed0825b,a929c778,b999dac2,5400c5ff,61122824,c642af8f,16bf140e,cc92defd,cc761f57,9b7bfb06">
-<meta name="plan-artifacts" content="docs/evidence/archive/flux-function-forward-equilibrium-landed.html,tests/test_null_benchmark_precision.py,benchmarks/dina_pack_current_distribution.py">
+<meta name="plan-version" content="26">
+<meta name="plan-impl" content="1.0">
+<meta name="plan-commits" content="f07e8b05,ebd322ae,1a2de9c7,b0af2d23,c90d173c,6d138035,eed0825b,a929c778,b999dac2,5400c5ff,61122824,c642af8f,16bf140e,cc92defd,cc761f57,9b7bfb06,a6366ec9">
+<meta name="plan-artifacts" content="docs/evidence/archive/flux-function-forward-equilibrium-landed.html,tests/test_null_benchmark_precision.py,benchmarks/dina_pack_current_distribution.py,benchmarks/dina_reference_mapping.py">
 </head>
 <body>
   <main class="plan-doc">
@@ -79,43 +79,30 @@
     <p>The first useful integration is a one-slice static absolute-source solve, followed by batched static ensemble members, rotation, and then topology-qualified SOL continuation. The SOL continuation is an optional, strictly additive extension: the bulk plasma solve's correctness always takes priority, and an undeclared continuation leaves the static path byte-identical. The physical motivation for extending the flux-function parametrization beyond <code>psi_N = 1</code> is that real SOL current — mixed poloidal/toroidal, connecting between the divertor plates — must itself satisfy force balance and hence the GS constraint, exactly as the confined plasma does. Field-aligned SOL current is deferred until the material-boundary return path and sheath closure are physically specified.</p>
     <p><strong>The solved flux map has a second consumer beyond the Ambix seam.</strong> The flux-surface-averaged geometry record assembled from it — <code>V′</code>, the <code>⟨1/R²⟩</code> and diffusion-coefficient metrics, <code>F</code> and <code>q</code> on the toroidal-flux coordinate — is the geometry input of the transport forward solve (<a href="/nova/flux-function-forward-transport.html">flux-function-forward-transport</a>), and the transport-evolved <code>p′</code> and <code>FF′</code> return through the same typed flux-function state as a first-class source for this solve. The geometry record is therefore a public output contract of <code>ForwardProfile</code>, convention-pinned exactly like the field itself and supplied at both interval endpoints so the transport moving-grid term is correct.</p>
 
-    <h2 id="s6">§6 — The surviving deviation candidate, and a baseline that moved</h2>
+    <h2 id="s6"><span class="badge badge-shipped">✓ landed 2026-08-13</span> §6 — The deviation candidates are exhausted</h2>
 
-    <p><strong>Two of the three candidates for the DINA reproduction gap are now measured and
-    excluded, which leaves exactly one.</strong> The passive structure was falsified as the
-    deviation floor at 0.093% of span against a 1.4–6.5% deviation. Within-pack current placement
-    was then measured directly: resolving every rectangular pack into a finite-section equal-current
-    turn lattice moves the deviation by at most 1.4338% of itself, with an external-flux response of
-    0.0631153 Wb — 0.078% of the reference span. Neither can produce the observed gap, and the gap
-    grows under refinement, so it is not discretisation either. <strong>The surviving candidate is
-    the reference's own profile and COCOS mapping</strong> — how DINA's stored
-    <code>p′</code>/<code>FF′</code> and flux convention are interpreted on the way into the solve,
-    rather than anything about how the conductors are represented.</p>
+    <p class="landed-summary">
+      All four named candidates for the DINA reproduction deviation are now excluded by measurement:
+      discretisation (it grows under refinement), passive structure (0.093% of span against 1.4–6.5%),
+      within-pack current placement (&le;1.4338%), and the reference profile/COCOS mapping
+      (<strong>bit-identical</strong> derivation, 2.868881e-7% response). The l_i figure that looked
+      like a moved baseline was a passive-configuration <em>improvement</em> of 7.688559&times;, not
+      drift. <strong>No named cause remains.</strong> Commits <code>cc761f57</code>,
+      <code>9b7bfb06</code>, <code>a6366ec9</code>; full record:
+      <a href="/nova/evidence/archive/flux-function-forward-equilibrium-landed#reference-mapping-excluded">candidates exhausted</a>
+      and <a href="/nova/evidence/archive/flux-function-forward-equilibrium-landed#passive-li-response">passive l_i response</a>.
+    </p>
 
-    <p class="landed-summary"><span class="badge badge-shipped">✓ baseline settled 2026-08-13</span>
-    The l_i figure that looked like a moved baseline was two physical configurations, not drift:
-    declared passives account for 99.981886% of the 0.904734074 pp change and <em>improve</em> l_i
-    reproduction 7.688559&times; (&minus;1.04% active-only &rarr; &minus;0.135266% passive-inclusive),
-    with a changed definition (4.4e-16), domain (byte-identical 1,131-cell mask) and reference read
-    (13/13 arrays exact) each excluded by measurement. Both rows are kept and labelled by
-    configuration. Commit <code>9b7bfb06</code>; full record:
-    <a href="/nova/evidence/archive/flux-function-forward-equilibrium-landed#passive-li-response">passive l_i response</a>.</p>
-
-    <p><strong>The asymmetry that result exposed is worth carrying forward.</strong> Passives move l_i
-    by 0.9 pp while moving I_p by 0.03 pp and the axis by 2.3 mm — so the same conductors that are
-    30&times; too small to be the I_p/&beta;_p/axis deviation floor carry nearly all of the internal
-    inductance. Internal inductance responds to how current redistributes, not to its total. Any
-    remaining chase of the deviation should therefore expect the surviving candidate to act on the
-    integrated quantities rather than on the current distribution, which is consistent with it being
-    the reference's profile and flux-convention mapping.</p>
-
-    <p><em>Done-when:</em> the deviation remaining after the passive-inclusive baseline is attributed
-    to the reference's profile/COCOS mapping or that candidate is excluded in turn — by re-deriving
-    DINA's stored <code>p′</code>/<code>FF′</code> and total-flux convention independently of the
-    current reader and re-solving with the re-derived mapping, reporting the change in I_p,
-    &beta;_p, l_i and axis position against the passive-inclusive figures rather than against the
-    superseded active-only row. A candidate excluded here leaves no named cause, which is itself a
-    reportable result and should be stated as such rather than left implicit.</p>
+    <p><strong>Where that leaves the question, because an exhausted candidate list is a redirection
+    rather than a dead end.</strong> Every input to the solve is proven bit-identical to the
+    reference's own stored quantities, and every representation of the conductors has been measured and
+    found an order too small. A residual that survives all of that and grows under refinement is not a
+    difference in what the two codes were given — it is a difference between the two models. The next
+    named candidate therefore has to be the reference equilibrium itself, or a force-balance term one
+    code carries and the other does not. That means treating DINA's solution as the object under test
+    rather than as the truth, which inverts the demonstration's premise and is a separate
+    investigation. It should not be opened under the assumption that a cause is still hiding on Nova's
+    side of the seam, because four measurements now say it is not.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -237,6 +224,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20260813-passiveli" data-who="reckon-ship" data-when="2026-08-13T09:50:00+00:00">
     <div class="r-comment-body">li-baseline-reconciliation landed - commit 9b7bfb06; gate PASSED. THE l_i GAP IS NOT A DEFECT, A DRIFT, OR A REGRESSION - it is two different physical configurations, and the current one is BETTER. The banked demonstration solved an active-only machine; the current tree includes the declared passive conductors. Passives account for 0.904570189 of the 0.904734074 pp change (99.981886%) after subtracting the +0.000163885 pp from current-code changes on an identical active-only machine, and they IMPROVE absolute l_i reproduction by 7.688559x, from -1.04% to -0.135265926%. Three alternatives excluded quantitatively: the field-integral definition reproduces the banked raw l_i to 4.4e-16 (excludes a changed definition); topology labels and the 1,131-cell core mask are byte-identical (excludes a changed domain); and all 13 live reference inputs - scalars, axis, boundary, profiles, grid and the full 65x129 flux map - are byte-identical at maximum absolute difference 0.0 (excludes a changed reference read). THE PHYSICALLY INTERESTING RESULT IS THE ASYMMETRY: l_i +0.904734074 pp against I_p only +0.030011433 pp, beta_p +0.076823733 pp and axis -2.330148552 mm. That reconciles two findings which look contradictory and are not - the passive structure contributes only 0.093% of the reference flux span, correctly falsifying it as the I_p/beta_p/axis deviation floor at a 30x shortfall, while internal inductance is a different observable sensitive to how current redistributes rather than its total, and there passives carry nearly the whole change. Both findings stand. BOTH CONFIGURATION ROWS ARE KEPT, EXPLICITLY LABELLED: banked -1.04% is the active-only demonstration and stays valid for that configuration; the passive-inclusive current-tree figure is -0.135266%. Neither overwrites the other, because collapsing them would destroy the asymmetry that is the actual finding. The profile/COCOS mapping is now the sole surviving deviation candidate and is worth pursuing against a baseline that no longer moves. Artifacts: /nova/evidence/archive/flux-function-forward-equilibrium-landed#passive-li-response</div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-20260813-mappingexcluded" data-who="reckon-ship" data-when="2026-08-13T13:20:00+00:00">
+    <div class="r-comment-body">reference-mapping-candidate landed - commit a6366ec9; gate PASSED; SLURM sun_debug 1245563, 9m36s, exit 0. THE LAST NAMED CANDIDATE IS EXCLUDED AND NO NAMED CAUSE REMAINS. DINA 135011/run 7/slice 353 was opened DIRECTLY through imas-python at DD 3.39.0 without the reproduction reader, and its convention composed from documented digits: DDv3 COCOS 11 (+1,1,+1,+1) into Nova COCOS 17 (-1,1,+1,+1) gives total-flux factor -1, plasma-current and F factors +1, conventional derivative factor -1, hence +1 on Nova's negative-gradient p-prime/FF-prime. The independent derivation and the current reader are BIT-IDENTICAL: axis total flux, boundary total flux, normalised flux, p-prime, FF-prime and the full 65x129 total-flux map all agree with every signed min, max and mean difference exactly 0.0 and every maximum absolute difference exactly 0.0. The flux exponent was discriminated independently rather than assumed - a current integral gives -14,995,895.091 A for the total-flux candidate, +0.0235746% from the stored -14,992,360.697 A, against -2,386,670.830 A for the per-radian candidate at 84.08% off. Re-solving on the same passive-inclusive 1587-cell mesh moves the baseline by +1.9e-10 pp in I_p, +2.2e-10 pp in beta_p, +3.9e-10 pp in l_i and -2.5e-11 mm in axis; largest response 2.868881e-7% of a baseline quantity. ALL FOUR CANDIDATES ARE NOW EXCLUDED BY MEASUREMENT: discretisation (the deviation grows under refinement), passive structure (0.093% of span against 1.4-6.5%), within-pack current placement (<=1.4338%), and the reference mapping (bit-identical). WHAT THAT JOINTLY IMPLIES REDIRECTS THE QUESTION: every input to the solve is proven bit-identical to the reference's own stored quantities and every conductor representation has been measured and found too small, so a residual surviving all of that AND growing under refinement is not a difference in what the two codes were given - it is a difference between the two models. That points at the reference equilibrium itself, or a force-balance term one code carries and the other does not, rather than at anything in Nova's reading of DINA. Naming it means treating DINA's solution as the object under test rather than as truth, which is a different investigation and must not be started assuming a cause still hides on Nova's side of the seam. Infrastructure note recurring for the third time this session: an initial launch 1245562 never executed because compute could not open a /run/user log path, and the same run succeeded from /home-visible staging. Artifacts: /nova/evidence/archive/flux-function-forward-equilibrium-landed#reference-mapping-excluded</div>
 </div>
 </section>
 </main>

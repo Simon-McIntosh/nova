@@ -23,9 +23,9 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-13">
-<meta name="plan-impl" content="0.98">
-<meta name="plan-version" content="17">
-<meta name="plan-commits" content="ee60c7d2,27baad59,b46bc103,99dfc6a6,41ddd617,9eb129e4,125c00a2,bdaf0844,73336ac0,43e2a091,f39af125,4c2c1796,dc62e52c,7ddeb717,de672204,c058f214,a23fdcdb,41fb859d">
+<meta name="plan-impl" content="0.99">
+<meta name="plan-version" content="19">
+<meta name="plan-commits" content="ee60c7d2,27baad59,b46bc103,99dfc6a6,41ddd617,9eb129e4,125c00a2,bdaf0844,73336ac0,43e2a091,f39af125,4c2c1796,dc62e52c,7ddeb717,de672204,c058f214,a23fdcdb,41fb859d,faac79e8">
 <meta name="plan-artifacts" content="nova/imas/mast_parity_chain.py,nova/imas/parity_tolerances.py,nova/imas/mast_efit_referee.py,docs/evidence/archive/spine-efit-parity-landed.html">
 </head>
 <body>
@@ -106,27 +106,41 @@
       the GPU catalog will batch — parity proven on the eager path alone would not transfer.</li>
     </ul>
 
-    <h2 id="s3">§3 — Work items</h2>
-    <ol>
-      <li><strong>Assemble the chain</strong> behind one entry point: corrected reads → moment
-      seed → accelerated profile solve → topology labels, with the per-slice scorecard emitted
-      beside the solve.</li>
-      <li><strong>Register the tolerances</strong> from measured spreads (committed stamps,
-      substrate-swap floors, sensor-displacement pricing) before the first scored run; document
-      each bound's basis.</li>
-      <li><strong>Run the gate:</strong> the frozen six + the held-out extension; bank the
-      per-shot, per-slice scorecard with figures (flux-map overlays, boundary distance
-      distributions, residual decompositions per channel group).</li>
-      <li><strong>Transport leg:</strong> CurrentDiffusion flux-ledger consistency on the gated
-      shots; verdict recorded per shot.</li>
-      <li><strong>Adjudicate:</strong> pass/fail per registered tolerance; a qualified verdict
-      states exactly which metric failed, by how much, and what mechanism explains it — the
-      honest-negative discipline is in force.</li>
-    </ol>
-    <p><em>Done-when:</em> the assembled spine chain scores the full gate with every metric
-    adjudicated against its pre-registered tolerance; the scorecard record lands with figures;
-    the verdict (parity / qualified / fail with mechanism) is written into this plan and the GPU
-    catalog plan is unblocked or explicitly held.</p>
+    <h2 id="s3"><span class="badge badge-shipped">✓ landed 2026-08-13</span> §3 — Work items</h2>
+
+    <p class="landed-summary">
+      Chain assembled behind one entry point, 12 tolerances registered with measured bases before any
+      scoring, referee firewalled structurally, and the frozen six scored end to end:
+      <strong>45,000 slices, 9,573 scored, verdict FAIL on ten of twelve metrics</strong> with
+      <code>converged_fraction</code> and <code>fixed_point_defect</code> at exactly zero. The flux
+      ledger and throughput are the only passes — the two metrics not requiring the fixed point to
+      close. Mechanism: the chain assembles, batches and transports correctly; the GS fit does not
+      converge on real measured magnetics. <strong>The GPU catalog is held.</strong>
+      Commits <code>ee60c7d2</code>…<code>41fb859d</code>; full record:
+      <a href="/nova/evidence/archive/spine-efit-parity-landed#frozen-six-verdict">frozen-six verdict</a>,
+      <a href="/nova/evidence/archive/spine-efit-parity-landed#support-tally">support tally</a>,
+      <a href="/nova/evidence/archive/spine-efit-parity-landed#typed-unsupported-slice">typed slice contract</a>.
+    </p>
+
+    <h2 id="s8">§8 — The held-out extension waits on convergence, deliberately</h2>
+
+    <p><strong>The pre-registered held-out extension (shots 11794, 12417, 27000, 22500) has not been
+    scored, and this records why rather than leaving it silently unrun.</strong> Its stated purpose in
+    §2 is to show that a result is not tuned to the frozen six. That guards against overfitting a
+    <em>pass</em>. The frozen six did not pass: convergence and fixed-point defect are at exactly zero
+    on every shot, so there is no fitted result whose generality the extension could test.</p>
+
+    <p>Scoring four more shots would cost another 120 partitions of allocated compute to confirm that a
+    solver which converges nowhere also converges nowhere else. It would not change the verdict, would
+    not change that the catalog is held, and would consume the extension's one-time value — it was
+    drawn once and pre-registered precisely so it could not be re-drawn after seeing results, so
+    spending it against a FAIL forfeits it for the run that eventually needs it.</p>
+
+    <p><em>Trigger:</em> the solve reaches its registered convergence bound on real measured slices.
+    The extension is then scored against the same twelve-field registry, unchanged and un-redrawn, as
+    the generality check on a result that actually exists. Until then it stays pre-registered and
+    unspent. <strong>This is a scope judgement on pre-registered work and is stated here to be
+    overruled if the owner wants the extension scored now regardless.</strong></p>
 
     <h2 id="s6">§6 — The solve does not converge on real slices, and that gates everything</h2>
 
@@ -251,10 +265,11 @@ Done-when
      resolved.</pre>
     <p class="r-fu-outcome">§3 items 1-2 landed (ee60c7d2, 27baad59). The chain runs end to end on a pilot shot emitting its per-slice scorecard, and the full tolerance set is registered with each bound's measured basis plus a once-drawn held-out extension pinned by seed. The parity-bar decision was locked to qualified-magnetics BEFORE any scoring, so the bar is pre-registered rather than chosen after seeing a result. Items 3-5 — the gate run, the transport leg and adjudication — are carried by f-sep-002.</p>
     </article>
-<article class="r-fu" data-id="f-sep-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship spine-efit-parity §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-sep-002" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship spine-efit-parity §3" data-resolved-at="2026-08-13T10:55:21+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Run the gate, the transport leg, and adjudicate (§3 items 3-5)</h4>
     <div class="r-fu-body"><p>The chain and the registered tolerances are in and the bar is locked, so the remaining work is the scored run itself: the frozen six-shot set plus the pre-registered held-out extension (shots 11794, 12417, 27000, 22500), banking the per-shot per-slice scorecard with figures — flux-map overlays, boundary distance distributions, residual decompositions per channel group; CurrentDiffusion flux-ledger consistency per gated shot; then pass/fail per registered tolerance under the locked qualified-magnetics bar, with a qualified verdict naming exactly which metric failed, by how much, and the mechanism. One integration item carried from the tolerance node: the chain must call scorecard_verdicts and emit the registered ScorecardField names before a scorecard is accepted — it was fenced out of both nodes. The honest-negative discipline is in force: a failing gate is a recorded verdict that holds the GPU catalog, not a tolerance to widen.</p></div>
     <pre class="r-fu-prompt">/reckon-ship spine-efit-parity §3</pre>
+    <p class="r-fu-outcome">Gate run, transport leg and adjudication delivered; the held-out extension is deliberately deferred to §8. VERDICT: FAIL on ten of twelve registered metrics across the frozen six (45,000 slices, 9,573 scored, 180 atomic partitions, every source index once). converged_fraction and fixed_point_defect are at exactly ZERO, so no scored slice on any shot reached the solver criterion - which subordinates the geometry failures, since a position on an unconverged map is a consequence not a finding. The only passes are the two metrics not requiring the fixed point to close: CurrentDiffusion flux ledger at fraction 1 (the transport leg's result) and throughput at 1. Mechanism named: the chain assembles, batches and transports correctly and the GS fit does not converge on real measured magnetics, reproducing the §6 sensor-scale finding at cohort scale. The pattern is identical on all six shots, so it is systematic. No tolerance changed, no proxy substituted, no partition dropped. THE GPU CATALOG IS EXPLICITLY HELD - the pre-registered meaning of this result under the locked qualified-magnetics bar, whose magnetics allowance never applies because the strict metrics fail on their own. Commit 41fb859d; record at /nova/evidence/archive/spine-efit-parity-landed#frozen-six-verdict.</p>
     </article>
 <article class="r-fu" data-id="f-sep-003" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship spine-efit-parity §6" data-resolved-at="2026-08-13T09:42:34+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Separate the parity metric identity from the fixed-point defect</h4>
@@ -267,6 +282,11 @@ Done-when
     <div class="r-fu-body"><p>Three distinct <code>ValueError</code> geometry conditions have surfaced from <code>ReconstructMoment</code> on real slices, one per attempt, and a fourth is likely: unsupported seed-disc cell count, current centroid outside the limiter, and a flood seed landing in wall material with no axis-connected plasma. Catching them by string or by bare <code>ValueError</code> is unsafe — the second would hide numerical and programming defects behind a skip. Raise a typed unsupported-slice exception from the moment layer for physically-unsupported geometry, carrying the condition that fired, and have the gate skip exactly that type while every other error still fails the run. Then bank shot 21978 and report how many of its 7,500 slices are supported, which is the number the gate has never yet produced.</p></div>
     <pre class="r-fu-prompt">/reckon-ship spine-efit-parity §3</pre>
     <p class="r-fu-outcome">Implementation closed by dc62e52c (26/26): UnsupportedSlice is a structured ValueError subtype raised for three authorized physical conditions, caught by type at the gate, with every other ValueError still failing loudly and no fourth condition appearing in a full 25-minute real run. The tally half is NOT closed - shot 21978's 7,500-slice support count did not complete inside the fence and no partial figure was accepted; it is carried by the parity-support-tally node with a compute allowance.</p>
+    </article>
+<article class="r-fu" data-id="f-sep-005" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship spine-efit-parity §8" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">The convergence failure needs an owner, and it is not this plan</h4>
+    <div class="r-fu-body"><p><strong>Exemption: foreign-owner — the solve's convergence behaviour belongs to the accelerator, not to the plan that measures it.</strong> The gate has done its job: it proved the assembled chain scores and that the GS fit reaches its convergence criterion on no scored slice of any frozen shot. Fixing that is accelerator work, and <code>spine-boundary-accelerator</code> is status shipped — so no active plan currently owns it.</p><p>The evidence already points at the mechanism rather than leaving it open. <code>accelerator-primary</code> was locked on a ladder of synthetic, self-consistent magnetics where NK reached a median residual near 6e-14, and its own rationale recorded the exception that the two ladder slices which defeated all three schemes carried data that never became self-consistent. The §6 measurement then isolated the sensor scale as the dominant cause on real slices, with a full-shot scale giving 3.176e-03 and a slice-local scale giving non-finite or near-unity on identical data — and full-shot whitening is now enforced ahead of interval selection, yet cohort convergence is still zero. So the remaining question is whether the accelerator's locking evidence generalises to real measured magnetics at all, which is a plan-sized question rather than a section.</p><p><strong>This needs a plan created before it can be shipped</strong>, which is a decision for the owner: reopen <code>spine-boundary-accelerator</code>, or author a new plan for convergence on measured data. §8 of this plan holds the pre-registered held-out extension against that work landing.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship spine-efit-parity §8</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -311,6 +331,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20260813-metricidentity" data-who="reckon-ship" data-when="2026-08-13T09:40:00+00:00">
     <div class="r-comment-body">parity-metric-identity landed - commit a23fdcdb; gate PASSED 37/37 across the chain, tolerance, gate, referee and flux-ledger suites. The two-quantities-as-one defect is closed at the DEFINITION, not by adjusting either number. profile_residual_rms is now populated only from the median per-slice RMS of (j_phi_nova - j_phi_grid)/max|j_phi_grid| against its unchanged 0.075868 bound; fixed_point_defect is a separately registered field carrying max per-slice max|g(x)-x|/max|g(x)| against the solver's existing strict 1e-8; magnetics_residual_whitened_rms stays independent at its unchanged 0.7987932587351543 source-cutover bound. The registry now holds TWELVE fields and every pre-existing bound is byte-for-byte identical - this corrected which quantity is compared to which bound, never a bound. Three tests hold it: a formula-level test applying an independent structured-grid Grad-Shafranov read to verify the normalised current-density RMS; a same-slice fixture proving profile=0.020, fixed-point=0.003 and magnetics=0.100 are distinct which FAILS if the accelerator defect is written into the profile field; and the whitened magnetics kept as its own field and figure channel. THE SENSOR-SCALE FINDING IS NOW ENFORCED rather than merely recorded: full-shot whitening is computed before interval selection and carried through seed classification and the supported-chain diagnostic path, with a pinned fixture rejecting a slice-local 3.0 in favour of the full-shot 46.676189504571454. _convergence_fraction no longer assumes finite trace rows - a non-finite row yields zero convergence instead of an indexing failure, which folds in the tally node's out-of-scope follow_on. CONSEQUENCE FOR THE 21978 VERDICT: that FAIL was computed before this separation, so its profile-residual component compared the fixed-point defect against a current-reproduction bound. It is not withdrawn - it was correct against the registry as it then stood - but it MUST be recomputed under the twelve-field registry before that metric is read as a physics statement and before the remaining five frozen shots are scored. Artifacts: /nova/evidence/archive/spine-efit-parity-landed#metric-identity</div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-20260813-artifactconcurrency" data-who="reckon-ship" data-when="2026-08-13T12:55:00+00:00">
+    <div class="r-comment-body">artifact-read-concurrency landed - commit faac79e8; gate PASSED 4/4 concurrency tests in 90.10 s plus 61/61 artifact regression tests. Scope was extended mid-node to nova/imas/mast_artifact.py on the worker's request, which was correct: it had established that changing only machine.py cannot affect resolve_machine_artifact or open_description verification, and it asked rather than reaching outside the fence. THE CAUSE WAS DETERMINISTIC, NOT AN UNLUCKY RACE - pre-fix failure rate 20/20. HDF5's version-zero superblock begins at byte 1024 and bytes 1044-1047 hold the file-consistency flags, which HDF5 sets while any handle is open; the observed mutation is exactly byte 1044 going 0 to 1 and reverting on close. A raw whole-file digest of an HDF5 container therefore can never be a stable identity while concurrent readers exist, which is what cancelled SLURM 1245311 after three checksum races and forced 105 of 180 partitions to be recomputed in private caches. MEASURED: verification under four concurrent opens went 0/20 to 20/20 succeeding, while the raw master digest STILL mismatches 20/20 - the mutation was not suppressed and the fix does not pretend it stopped. A four-partition run now completes against ONE shared artifact with no private per-task copy and no checksum retry. Only the four consistency-flag bytes are canonicalized, and manifest creation and reader verification both call the same _file_identity so the two cannot disagree; verification stays mandatory for manifest, inventory, sizes and canonical per-file digests. NARROWNESS PROVEN EXHAUSTIVELY: a synthetic-image test rejects a change to every one of the 2,044 bytes outside the four-byte field, so widening the exemption would fail the suite - that is what keeps this from trading a deterministic failure for an undetectable one. NO RE-PUBLICATION REQUIRED, and this was checked rather than hoped for: closed consistency flags are already zero, so the manifest master.h5 sha256, the new canonical identity and the closed raw sha256 all remain 488c3db17800f4667b118efd54f3f33230b58c778202ab7581e8e2d87eeb84b0, and no cache-key migration follows - unlike the dd_version identity change which did move every key. Artifacts: /nova/evidence/archive/spine-efit-parity-landed#artifact-concurrency</div>
 </div>
 </section>
 </main>

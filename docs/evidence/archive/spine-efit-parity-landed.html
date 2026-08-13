@@ -311,6 +311,48 @@
   agreement is set to 0.0, and both verdicts fail while the slice stays scored. 3/3 aligned slices
   scored, 10/10 tests.</p>
 
+  <h2 id="artifact-concurrency">§7 — four bytes made the shared artifact unverifiable in parallel</h2>
+
+  <p>Commit <code>faac79e8</code>. Gate passed — 4/4 concurrency tests in 90.10 s, 61/61 artifact
+  regression tests. Scope was extended mid-node to <code>nova/imas/mast_artifact.py</code>.</p>
+
+  <p><strong>The cause was deterministic, not a race anyone was unlucky with: the pre-fix failure rate
+  was 20/20.</strong> HDF5's version-zero superblock begins at byte 1024, and bytes 1044–1047 hold the
+  file-consistency flags. HDF5 sets them while any handle is open — the observed mutation is exactly
+  byte 1044 going 0 &rarr; 1 and reverting on close. A raw whole-file digest of an HDF5 container is
+  therefore never a stable identity while concurrent readers exist, which is why partitioned scoring
+  cancelled SLURM 1245311 after three checksum races and had to recompute 105 of 180 partitions in
+  private per-task caches.</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Measurement</th><th>Pre-fix</th><th>Post-fix</th></tr></thead>
+    <tbody>
+      <tr><td>verification under 4 concurrent opens, 20 trials</td><td>0/20 succeed</td><td><strong>20/20 succeed</strong></td></tr>
+      <tr><td>raw master digest during concurrent open</td><td>mismatches</td><td>still mismatches 20/20</td></tr>
+      <tr><td>4-partition run on one shared artifact</td><td>required a private cache per task</td><td>completes, no private copy, no retry</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>That second row is the point: the mutation was not suppressed, and the fix does not pretend it
+  stopped happening. Only the four consistency-flag bytes are canonicalized when deriving file
+  identity, and manifest creation and reader verification both call the same
+  <code>_file_identity</code>, so the two can no longer disagree. Verification stays mandatory for the
+  manifest, the file inventory, sizes and canonical per-file digests.</p>
+
+  <p><strong>The narrowness is proven exhaustively rather than asserted.</strong> A synthetic-image
+  test rejects a change to every one of the 2,044 bytes outside the four-byte field — so widening the
+  exemption would fail the suite, which is the property that keeps this from trading a deterministic
+  failure for an undetectable one.</p>
+
+  <p><strong>No re-publication is required, and this was checked rather than hoped for.</strong>
+  Closed consistency flags are already zero, so the manifest <code>master.h5</code> sha256, the new
+  canonical identity, and the closed raw sha256 all remain
+  <code>488c3db17800f4667b118efd54f3f33230b58c778202ab7581e8e2d87eeb84b0</code>. Existing published
+  artifact digests stay valid and no cache-key migration follows — unlike the dd_version identity
+  change, which did force every cache key to move.</p>
+
   <h2 id="frozen-six-verdict">The frozen six-shot gate: FAIL, ten of twelve metrics</h2>
 
   <p>Commit <code>41fb859d</code>. Gate passed — 15/15 gate tests, 39/39 across the parity suites.

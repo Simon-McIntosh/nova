@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-13T09:15:35",
+  "updated": "2026-08-13T09:19:07",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -141,7 +141,7 @@
         "id": "parity-gate",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "019ff9f0-e230-7e31-89ba-5240b76a2cce",
         "created": "2026-08-13"
       },
       {
@@ -2396,6 +2396,6 @@
       }
     ],
     "holds": [],
-    "_version": 91
+    "_version": 92
   }
 }

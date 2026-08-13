@@ -5,7 +5,24 @@ python 3.14 · asv 0.6.6 (`asv run --quick -E existing`) · recorded 2026-07-24.
 Timings are single-round `--quick` figures intended as order-of-magnitude
 references; re-run on a quiet node before reading small deltas as regressions.
 
+## Measurement provenance method
+
+Every benchmark suite or test-lane result banked here must be measured from a
+detached worktree at one commit. Run
+`benchmarks.measurement_provenance.measurement_stamp` immediately before and
+after the measurement, require the two full SHAs to match, and record that SHA
+beside the result. The helper refuses to stamp a path that is not a Git worktree
+or for which `git status --porcelain` emits any line. A checkout that changes
+during the measurement therefore cannot produce a bankable result.
+
+The historical entries below remain useful as order-of-magnitude context, but
+an entry that does not explicitly name its measured full commit SHA is
+**unattributable**. Its figure is retained rather than silently implying that it
+belongs to the repository state surrounding this document.
+
 ## biotoperate (asv)
+
+**UNATTRIBUTABLE — no measured commit SHA was recorded.**
 
 | benchmark | time |
 |---|---|
@@ -19,6 +36,8 @@ references; re-run on a quiet node before reading small deltas as regressions.
 
 ## framespace (asv)
 
+**UNATTRIBUTABLE — no measured commit SHA was recorded.**
+
 | benchmark | time |
 |---|---|
 | GetCurrent.time_getattr | 40.4 µs |
@@ -30,12 +49,16 @@ references; re-run on a quiet node before reading small deltas as regressions.
 
 ## framesetloc (asv, indexer sweep, µs)
 
+**UNATTRIBUTABLE — no measured commit SHA was recorded.**
+
 Get item: loc 31.1 / sloc 6.1 / aloc 25.5 / saloc 3.1 (Ic); nturn loc 7.3 / aloc 3.8; x loc 8.0.
 Get subitem: loc 44.8 / sloc 11.2 / aloc 29.3 / saloc 6.0 (Ic); nturn loc 31.0 / aloc 7.3; x loc 37.3.
 Set item: sloc 28.6 / saloc 18.0 (Ic); nturn loc 24.4 / aloc 20.3; x loc 26.5.
 Set subitem: sloc 13.6 / saloc 5.5 (Ic); nturn loc 50.6 / aloc 18.9; x loc 49.8.
 
 ## Standalone scripts
+
+**UNATTRIBUTABLE — no measured commit SHA was recorded.**
 
 | script | result |
 |---|---|
@@ -44,6 +67,8 @@ Set subitem: sloc 13.6 / saloc 5.5 (Ic); nturn loc 50.6 / aloc 18.9; x loc 49.8.
 | io_ingest.py — AL full-get vs warm zarr re-read | 981.6 ms vs 6.9 ms (**142×**) |
 
 ## zeta quadrature — fixed-node rules vs uniform midpoint
+
+**UNATTRIBUTABLE — no measured commit SHA was recorded.**
 
 Recorded 2026-07-25, same machine and python as above. **Methodology:** every
 figure is a FRESH python process, first run, one variant per process — repeating
@@ -74,6 +99,8 @@ doubles, 8.4 s at 2**19, 0.53 s at 2**16 on the 200k-element kernel).
 
 ## bow grid solve — the genuine finite-section winding build
 
+**UNATTRIBUTABLE — no measured commit SHA was recorded.**
+
 Recorded 2026-07-27 on sun_debug node 98dci4-clu-3141, one core, fresh process
 per run, first run, `TMPDIR=/tmp`, `JAX_PLATFORMS=cpu`; driver
 `benchmarks/bow_grid_solve.py`. The winding, the imports and the coilset are all
@@ -92,6 +119,8 @@ a quarter turn, which is where a target on the arc's own end plane lands, used t
 abort — see `tests/test_biotoperate.py`.
 
 ## coupling kernel cost per pair — compute node, fresh process, median of 3
+
+**UNATTRIBUTABLE — no measured commit SHA was recorded.**
 
 Recorded 2026-07-25 (sun_debug node; login-node timings showed 5× spread and
 were discarded). Drivers: `benchmarks/kernel_cost.py` / `kernel_cost_table.py`;
@@ -304,6 +333,8 @@ no parallel assembly and no device at all.
 
 ## tiled backend — one JAX trace on CPU and GPU vs the process pool
 
+**UNATTRIBUTABLE — no measured commit SHA was recorded.**
+
 Recorded 2026-07-25. Driver: `benchmarks/tiled_backend.py`. Same operator
 throughout: 320 hex cells × their own centres = 102,400 pairs, 64 tiles of
 40×40, exact-everywhere 16×48 rule, block 16; median of 3 fresh processes.
@@ -463,6 +494,8 @@ compile once rather than once a build.
 
 ## three-band polygon-section coupling (opt-in: `PolySectionPolicy(arrangement="banded")`)
 
+**UNATTRIBUTABLE — no measured commit SHA was recorded.**
+
 Recorded 2026-07-25 (sun_debug node; drivers were throwaway — acceptance
 sweeps live in `tests/test_biotbandedcoupling.py`). Bands by distance to the
 section contour: 16×48 rule inside 2.2 contour radii, 8×24 to the far seam,
@@ -523,6 +556,8 @@ source columns batched into one call, which the per-column dispatch does not do.
 
 ## FrameSpace operator overhead by geometry and batch width
 
+**UNATTRIBUTABLE — no measured commit SHA was recorded.**
+
 Recorded 2026-07-29 on one `sun_debug` node. Driver:
 `benchmarks/frame_operator_overhead.py`; one source, geometry and clouds built
 outside the timer, one warm call followed by the median of three. This reproduces
@@ -550,6 +585,8 @@ dense operator construction is a packed array boundary that bypasses xarray,
 not a special geometry cache inside the interactive frame API.
 
 ## Finite-arc geometry bands and equivalent-filament placement
+
+**UNATTRIBUTABLE — no measured commit SHA was recorded.**
 
 Recorded 2026-07-29 on the same node. Drivers:
 `benchmarks/arc_operator_dispatch.py placement` and `wall --targets 4096`.
@@ -580,6 +617,8 @@ sweep stops at 80 section radii, beyond every selected seam, rather than
 mistaking reference cancellation for filament error.
 
 ## GPU geometry dispatch and pair-block sharding
+
+**UNATTRIBUTABLE — no measured commit SHA was recorded.**
 
 Recorded 2026-07-29 on `98dci4-gpu-0003` (H200 NVL). Drivers:
 `benchmarks/arc_operator_dispatch.py gpu` and
@@ -664,6 +703,9 @@ Git archive with no GitPython-visible worktree metadata, so that artifact is
 not included in the failure count.
 
 ### Monolithic lane on the repaired tree — catalog park cleared, native abort
+
+**UNATTRIBUTABLE — the measuring checkout advanced during the run, so no one
+frozen SHA owns this diagnostic attempt.**
 
 Recorded 2026-08-12 on `sun_debug` node `98dci4-clu-3141` (Intel Xeon Gold
 5220), Python 3.14.2 and pytest 9.1.1, with `TMPDIR=/tmp` and JAX on CPU. One

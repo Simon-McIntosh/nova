@@ -23,10 +23,10 @@
   <title>Flux-Function-Constrained Forward Equilibrium | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-12">
-<meta name="plan-version" content="18">
-<meta name="plan-impl" content="0.96">
-<meta name="plan-commits" content="f07e8b05,ebd322ae,1a2de9c7,b0af2d23,c90d173c,6d138035,eed0825b,a929c778,b999dac2,5400c5ff,61122824,c642af8f">
+<meta name="plan-modified" content="2026-08-13">
+<meta name="plan-version" content="19">
+<meta name="plan-impl" content="0.97">
+<meta name="plan-commits" content="f07e8b05,ebd322ae,1a2de9c7,b0af2d23,c90d173c,6d138035,eed0825b,a929c778,b999dac2,5400c5ff,61122824,c642af8f,16bf140e">
 </head>
 <body>
   <main class="plan-doc">
@@ -185,6 +185,9 @@ Done-when
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s5" data-id="c-20260812-firstwall" data-who="reckon-ship" data-when="2026-08-12T21:50:00+00:00">
     <div class="r-comment-body">first-wall-read-repair landed — commit c642af8f; regression gate passed; measure: PlasmaWall.boundary and PlasmaGrid.solve now select the superframe first-wall polygon through ALoc instead of the first hexagon's, with plasma targets still from tessellated subframe cells through aloc. On the square test geometry the wall tessellation went from 0 to 58 triangles and 0/38 to 38/38 target cells covered; all 8 sampled boundary nodes changed, maximum absolute coordinate delta 4.000 m; stencils went 17 to 10 rows by removing 7 wall-adjacent centres with 0/10 survivors changing value. The prior read admitted no triangles and marked none of the wall-adjacent centres, so these outputs described one cell rather than the wall — they were untested, which is what let it stand. The regression pins the complete wall, all 58 triangles, the exact 10x7 stencil, and nwall=2 as 2 nodes per each of 4 wall segments (8 total), settling the nwall semantics question. Related suites green: 12 passed. Artifacts: /nova/evidence/archive/flux-function-forward-equilibrium-landed#first-wall-read</div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20260813-ddversion" data-who="reckon-ship" data-when="2026-08-13T06:15:00+00:00">
+    <div class="r-comment-body">dd-version-cache-identity landed — commit 16bf140e; identity gate passed 2/2. A composite Machine at DD 3.42.0 retains sources at 3.40.0 and 4.1.1 independently through ids_attrs rather than inheriting the machine version, and CoilDatabase.group_attrs now folds the canonical dd_version string into the cache identity — two otherwise-identical requests at different versions produced 2 distinct groups and 2 cold builds with neither serving the other, while a repeat at 3.40.0 warm-loaded its own payload. Operational consequence recorded rather than glossed: EVERY existing CoilDatabase cache key changes, and composite Machine keys change wherever a source carries an independent pin, so cached operators rebuild once. Relevant lane 40 passed / 19 live-data skips / 0 failed. Scoping correction: nova/database/coildatabase.py does not exist here; the live CoilDatabase is in nova/imas/machine.py and the node stayed within its assigned paths. Artifacts: /nova/evidence/archive/flux-function-forward-equilibrium-landed#dd-version-identity</div>
 </div>
 </section>
 </main>

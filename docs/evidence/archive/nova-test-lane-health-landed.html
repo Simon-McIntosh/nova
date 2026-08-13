@@ -126,6 +126,41 @@
   what let the attribution node prove the pole split caused them. It made no repair, correctly —
   changing the tree it was measuring would have destroyed the measurement.</p>
 
+  <h2 id="abort-cause">The abort is memory pressure, and it is the deadlock's sibling</h2>
+
+  <p>Commit <code>eb242d80</code>. Three candidate causes were separated by experiment rather than
+  argued, each run as its own child process with its exit status recorded:</p>
+
+  <table>
+    <thead><tr><th>Condition</th><th>Exit</th><th>Peak RSS</th><th>What it rules on</th></tr></thead>
+    <tbody>
+      <tr><td>Fresh process, that test alone</td><td>0</td><td>407.5 MB</td><td>Excludes an intrinsic XLA fault on the slice shape</td></tr>
+      <tr><td>After 256 unrelated cached compilations</td><td>0</td><td>892.2 MB</td><td>Excludes cache-state corruption as a <em>sufficient</em> cause — though it nearly doubles RSS</td></tr>
+      <tr><td>8 MiB of address-space headroom</td><td><strong>134 / SIGABRT</strong></td><td>—</td><td><strong>Reproduces it</strong>, with <code>LLVM ERROR: pthread_create failed: Resource temporarily unavailable</code></td></tr>
+    </tbody>
+  </table>
+
+  <p>Independently, the preserved monolithic crash stack symbolizes as
+  <code>llvm::report_fatal_error → llvm::RuntimeDyldImpl::emitSection →
+  xla::cpu::JitCompiler::TaskDispatcher</code>, and the linked JAX library carries the
+  section-emission fatal <code>Unable to allocate section memory!</code>. Cause:
+  <strong>exhausted native compiler resources during CPU-JIT acquisition</strong>, not erroneous
+  slice semantics.</p>
+
+  <p><strong>This is the same failure as the catalog deadlock, at a different call site.</strong>
+  That one parked forever in <code>threading.Thread.start()</code> with no worker thread created;
+  this one aborts in <code>pthread_create</code> with <em>Resource temporarily unavailable</em>.
+  Both are a long-lived suite process that can no longer obtain a native thread — one blocks, one
+  dies, and the earlier probe already established it is not a configured ceiling
+  (<code>RLIMIT_NPROC=770063</code>, <code>pids.max=max</code>). Treating them as two bugs would mean
+  fixing call sites one at a time as the lane grows; they share an accumulating owner that has not
+  yet been named.</p>
+
+  <p><strong>No test-local workaround was applied, deliberately.</strong> Changing the host-side
+  slice moves the abort to the next JAX compilation, and <code>jax.clear_caches()</code> released
+  only about 2.5 MB of the measured 892 MB — neither is a bounded repair, and either would have
+  hidden the lane-level pressure behind a green test.</p>
+
   <p><strong>Two candidate failures were investigated and correctly not banked.</strong>
   <code>tests/test_datasource.py::test_shared_attributes</code> failed only under
   <code>git archive</code> with <code>InvalidGitRepositoryError</code> and passed in a real git

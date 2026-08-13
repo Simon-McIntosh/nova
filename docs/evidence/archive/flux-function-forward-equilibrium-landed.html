@@ -155,5 +155,37 @@
   <p>Related suites stay green: 12 passed across the new pin plus
   <code>tests/test_plasma.py</code> and <code>tests/test_firstwall.py</code>.</p>
 
+  <h2 id="dd-version-identity">Per-source data-dictionary version identity</h2>
+
+  <p>Commit <code>16bf140e</code>, merged to <code>main</code>. Two of the demonstration's
+  infrastructure defects, closed together because they are the same mistake at two layers: a
+  composite machine assumed one DD version, and the coil-database cache key did not mention the
+  version at all.</p>
+
+  <p>Composite geometry descriptors now preserve each source's explicit or IDS-derived
+  <code>dd_version</code>, serialise it through machine metadata, and inherit the machine's version
+  only where a source carries no independent pin. <code>CoilDatabase.group_attrs</code> folds the
+  canonical version string into the cache identity.</p>
+
+  <table>
+    <thead><tr><th>Proof</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Machine at DD 3.42.0 holding sources at 3.40.0 and 4.1.1</td><td>Both sources retain their own version independently</td></tr>
+      <tr><td>Otherwise-identical requests at two versions</td><td>2 distinct cache groups, 2 cold builds — neither served the other's entry</td></tr>
+      <tr><td>Repeated request at 3.40.0</td><td>Warm load, retaining its own 3.40.0 payload</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Operational consequence, stated because it is not free:</strong> every existing
+  <code>CoilDatabase</code> cache key changes, since the version is newly folded into the group
+  attributes. Composite machine keys also change wherever a source carries an independent version.
+  Cached operators will rebuild once — which is the correct trade against silently serving a coil
+  set assembled under a different data dictionary.</p>
+
+  <p>Relevant lane: 40 passed, 19 live-data skips, 0 failed. One scoping correction from the node:
+  <code>nova/database/coildatabase.py</code> does not exist in this checkout — the live
+  <code>CoilDatabase</code> class is defined in <code>nova/imas/machine.py</code>, and the work
+  stayed inside its assigned paths.</p>
+
 </main></body>
 </html>

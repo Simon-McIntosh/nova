@@ -4,10 +4,14 @@ import numpy as np
 import pytest
 
 from nova.biot.geometrysolve import (
+    FluxMapFunctional,
     nuisance_basis,
     project_nuisance,
     solve_geometry,
+    solve_flux_map,
     solve_linear_geometry,
+    solve_linear_flux_map,
+    synthetic_flux_map_recovery_ladder,
     synthetic_recovery_ladder,
 )
 
@@ -123,6 +127,96 @@ def test_the_recovery_ladder_banks_truth_and_noise_limited_estimates():
         ladder.amplitudes[:, None],
     )
     assert np.linalg.norm(ladder.bias, axis=1).max() < 1e-3
+
+
+def test_a_flux_map_uses_only_supported_cells_and_their_uncertainty():
+    """The gridded adapter preserves masking, whitening and nuisance projection."""
+    target = np.array([[2.004, 2.0], [1.996, np.nan]])
+    uncertainty = np.array([[0.1, 0.1], [0.1, 0.1]])
+    jacobian = np.array([[[1.0], [0.0]], [[-1.0], [1000.0]]])
+    nuisance = np.ones(target.shape)
+    fit = solve_linear_flux_map(
+        jacobian.reshape(-1, 1),
+        target,
+        uncertainty,
+        np.zeros(1),
+        np.eye(1),
+        nuisance_maps=nuisance,
+        resolution_limit=1.0,
+    )
+    assert fit.parameters[0] == pytest.approx(0.004)
+    assert fit.predicted.shape == (3,)
+
+
+def test_a_nonlinear_flux_model_reuses_the_geometry_core():
+    """Map callbacks retain their grid shape while the common core iterates."""
+    radius, height = np.meshgrid([0.4, 0.9, 1.4], [-0.5, 0.3])
+
+    def model(parameters):
+        shift, scale = parameters
+        argument = scale * radius + shift * height
+        predicted = np.sin(argument)
+        jacobian = np.stack(
+            [height * np.cos(argument), radius * np.cos(argument)], axis=-1
+        )
+        return predicted, jacobian
+
+    truth = np.array([0.08, 1.12])
+    target, _ = model(truth)
+    fit = solve_flux_map(
+        model,
+        target,
+        np.full(target.shape, 1e-3),
+        np.array([-0.1, 0.8]),
+        np.eye(2),
+        resolution_limit=1.0,
+    )
+    assert fit.converged
+    assert np.allclose(fit.parameters, truth, atol=1e-8)
+
+
+def test_the_flux_map_ladder_reports_noise_limited_recovery():
+    """Synthetic map recovery banks the same bias and resolution terms."""
+    jacobian = np.zeros((3, 4, 3))
+    jacobian[0, 0, 0] = 1000.0
+    jacobian[1, 1, 1] = 500.0
+    jacobian[2, 2, 2] = 2.0
+    mask = np.zeros((3, 4), dtype=bool)
+    mask[0, 0] = mask[1, 1] = mask[2, 2] = True
+    ladder = synthetic_flux_map_recovery_ladder(
+        jacobian,
+        np.ones((3, 4)),
+        np.eye(3),
+        np.array([0.002, 0.006]),
+        mask=mask,
+        resolution_limit=0.01,
+        samples=32,
+        seed=4,
+    )
+    assert ladder.truth.shape == (2, 32, 3)
+    assert ladder.resolved_modes.shape == (2, 3)
+    assert np.max(np.abs(ladder.truth[..., 2])) < 1e-15
+    assert np.linalg.norm(ladder.bias, axis=1).max() < 1e-3
+
+
+def test_flux_map_shapes_are_validated_before_the_solver_runs():
+    """Targets, uncertainties, masks and Jacobians retain one grid contract."""
+    with pytest.raises(ValueError, match="two-dimensional"):
+        FluxMapFunctional.from_maps(np.ones(4), np.ones(4))
+    with pytest.raises(ValueError, match="target shape"):
+        FluxMapFunctional.from_maps(np.ones((2, 2)), np.ones((2, 3)))
+
+    def wrong_shape(parameters):
+        return np.ones((2, 2)), np.ones((2, 2, parameters.size + 1))
+
+    with pytest.raises(ValueError, match="flux jacobian"):
+        solve_flux_map(
+            wrong_shape,
+            np.ones((2, 2)),
+            np.ones((2, 2)),
+            np.zeros(1),
+            np.eye(1),
+        )
 
 
 @pytest.mark.parametrize(

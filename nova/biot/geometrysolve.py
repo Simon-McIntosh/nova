@@ -75,6 +75,88 @@ class RecoveryLadder:
         return self.error.mean(axis=1)
 
 
+@dataclass(frozen=True)
+class FluxMapFunctional:
+    """A gridded flux target and the cells that contribute to its objective.
+
+    ``target`` and ``uncertainty`` have the same two-dimensional grid shape.
+    The mask defaults to every cell with a finite target and finite positive
+    uncertainty.  Flattening happens only at the boundary to the generic
+    least-squares core; callers and model callbacks continue to exchange maps.
+    """
+
+    target: Array
+    uncertainty: Array
+    mask: Array
+
+    @classmethod
+    def from_maps(cls, target, uncertainty, mask=None) -> FluxMapFunctional:
+        """Validate maps and return their finite, positive-uncertainty cells."""
+        target = np.asarray(target, dtype=float)
+        uncertainty = np.asarray(uncertainty, dtype=float)
+        if target.ndim != 2:
+            raise ValueError(f"flux target must be two-dimensional, got {target.shape}")
+        if uncertainty.shape != target.shape:
+            raise ValueError(
+                "flux uncertainty must have the target shape, got "
+                f"{uncertainty.shape} against {target.shape}"
+            )
+        usable = np.isfinite(target) & np.isfinite(uncertainty) & (uncertainty > 0.0)
+        if mask is not None:
+            mask = np.asarray(mask, dtype=bool)
+            if mask.shape != target.shape:
+                raise ValueError(
+                    f"flux mask must have the target shape, got {mask.shape}"
+                )
+            usable &= mask
+        if not np.any(usable):
+            raise ValueError("flux map has no finite cells with positive uncertainty")
+        return cls(target, uncertainty, usable)
+
+    @property
+    def shape(self) -> tuple[int, int]:
+        """Return the two-dimensional grid shape."""
+        return self.target.shape
+
+    @property
+    def cells(self) -> int:
+        """Return the number of cells contributing to the objective."""
+        return int(self.mask.sum())
+
+    def values(self, array, name: str) -> Array:
+        """Return selected cells from one map after checking its shape."""
+        array = np.asarray(array, dtype=float)
+        if array.shape != self.shape:
+            raise ValueError(
+                f"{name} must have flux-map shape {self.shape}, got {array.shape}"
+            )
+        return array[self.mask]
+
+    def jacobian(self, array, parameters: int) -> Array:
+        """Return selected rows from a map Jacobian ``grid + (parameters,)``."""
+        array = np.asarray(array, dtype=float)
+        expected = (*self.shape, parameters)
+        if array.shape != expected:
+            raise ValueError(
+                f"flux jacobian must have shape {expected}, got {array.shape}"
+            )
+        return array[self.mask]
+
+    def nuisance(self, maps) -> Array | None:
+        """Return selected gridded nuisance columns, or no nuisance span."""
+        if maps is None:
+            return None
+        maps = np.asarray(maps, dtype=float)
+        if maps.shape == self.shape:
+            maps = maps[..., None]
+        if maps.ndim != 3 or maps.shape[:2] != self.shape:
+            raise ValueError(
+                "flux nuisance maps must have shape grid or grid + (columns,), "
+                f"got {maps.shape}"
+            )
+        return maps[self.mask]
+
+
 def _as_vector(value, name: str) -> Array:
     array = np.asarray(value, dtype=float)
     if array.ndim != 1:
@@ -266,6 +348,69 @@ def solve_linear_geometry(
     return solve_geometry(model, target, noise, initial, gram, **kwargs)
 
 
+def solve_flux_map(
+    model_jacobian: ModelJacobian,
+    target,
+    uncertainty,
+    initial,
+    gram,
+    *,
+    mask=None,
+    nuisance_maps=None,
+    **kwargs,
+) -> GeometryFit:
+    """Fit geometry to a flux map using its pointwise uncertainty.
+
+    ``model_jacobian(parameters)`` returns a predicted map and a Jacobian with
+    shape ``map.shape + (n_parameters,)``.  This adapter selects the supported
+    cells and hands their vectors to :func:`solve_geometry`; no optimisation or
+    projection arithmetic is duplicated here.
+    """
+    functional = FluxMapFunctional.from_maps(target, uncertainty, mask)
+    parameter_count = _as_vector(initial, "initial").size
+
+    def vector_model(parameters):
+        predicted, jacobian = model_jacobian(parameters)
+        return (
+            functional.values(predicted, "predicted flux"),
+            functional.jacobian(jacobian, parameter_count),
+        )
+
+    return solve_geometry(
+        vector_model,
+        functional.values(functional.target, "flux target"),
+        functional.values(functional.uncertainty, "flux uncertainty"),
+        initial,
+        gram,
+        nuisance_span=functional.nuisance(nuisance_maps),
+        **kwargs,
+    )
+
+
+def solve_linear_flux_map(
+    jacobian,
+    target,
+    uncertainty,
+    initial,
+    gram,
+    **kwargs,
+) -> GeometryFit:
+    """Fit a banked local flux-map model through :func:`solve_flux_map`."""
+    jacobian = np.asarray(jacobian, dtype=float)
+    shape = np.asarray(target).shape
+    if jacobian.ndim == 2 and jacobian.shape[0] == np.prod(shape):
+        jacobian = jacobian.reshape(*shape, jacobian.shape[-1])
+    if jacobian.ndim != 3 or jacobian.shape[:2] != shape:
+        raise ValueError(
+            f"flux jacobian must have shape grid + (parameters,), got {jacobian.shape}"
+        )
+
+    def model(parameters):
+        return jacobian @ parameters, jacobian
+
+    return solve_flux_map(model, target, uncertainty, initial, gram, **kwargs)
+
+
 def synthetic_recovery_ladder(
     jacobian,
     noise,
@@ -336,12 +481,46 @@ def synthetic_recovery_ladder(
     )
 
 
+def synthetic_flux_map_recovery_ladder(
+    jacobian,
+    uncertainty,
+    gram,
+    amplitudes,
+    *,
+    mask=None,
+    nuisance_maps=None,
+    **kwargs,
+) -> RecoveryLadder:
+    """Recover known perturbations through the gridded flux-map functional."""
+    uncertainty = np.asarray(uncertainty, dtype=float)
+    functional = FluxMapFunctional.from_maps(
+        np.zeros(uncertainty.shape), uncertainty, mask
+    )
+    jacobian = np.asarray(jacobian, dtype=float)
+    if jacobian.ndim != 3 or jacobian.shape[:2] != functional.shape:
+        raise ValueError(
+            f"flux jacobian must have shape grid + (parameters,), got {jacobian.shape}"
+        )
+    return synthetic_recovery_ladder(
+        jacobian[functional.mask],
+        functional.uncertainty[functional.mask],
+        gram,
+        amplitudes,
+        nuisance_span=functional.nuisance(nuisance_maps),
+        **kwargs,
+    )
+
+
 __all__ = [
+    "FluxMapFunctional",
     "GeometryFit",
     "RecoveryLadder",
     "nuisance_basis",
     "project_nuisance",
     "solve_geometry",
+    "solve_flux_map",
     "solve_linear_geometry",
+    "solve_linear_flux_map",
+    "synthetic_flux_map_recovery_ladder",
     "synthetic_recovery_ladder",
 ]

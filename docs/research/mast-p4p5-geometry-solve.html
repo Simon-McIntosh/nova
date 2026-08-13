@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="research">
   <meta name="plan-slug" content="mast-p4p5-geometry-solve">
   <meta name="plan-title" content="MAST P4/P5 sensor-space geometry solve — no credible correction is resolved">
-  <meta name="plan-summary" content="A measured-floor synthetic ladder validates rigid and affine recovery, but the MAST fit demands 11–2004 mm RMS pack motion against 0.054–2.221 mm published best-mode resolutions and 0.6–13.1 mm measured case offsets. Its far-field symmetry-survivor reductions are −35.7% to +0.9%, so the apparent all-probe fits are the banked near-field trap, not credible geometry corrections.">
+  <meta name="plan-summary" content="Sensor and flux-map functionals both pass measured-uncertainty recovery ladders: their maximum biases are 0.27 and 0.21 sigma, with 93.3–95.5% and 93.3–95.8% coverage. The real sensor solve demands 11–2004 mm RMS pack motion, while reconciled harmonic maps induce 20–37 mm geometry-equivalent bias on three members and leave P5 upper unresolved. Neither functional supports a credible geometry correction.">
   <meta name="plan-status" content="reference">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-evidence-for" content="coil-geometry-inversion">
@@ -74,6 +74,87 @@
     <code>geometry_recovery.npz</code>.</figcaption>
   </figure>
 
+  <h2>The flux-map functional passes the same recovery test</h2>
+  <p>The second data functional accepts a two-dimensional plasma-subtracted flux target, one
+  uncertainty per cell and an optional support mask. Predicted maps and their exact geometry
+  Jacobians keep their grid shape at the public boundary; supported cells are flattened only
+  before entering the existing damped Gauss–Newton solver. The metric decomposition,
+  resolvable-mode truncation and nuisance projection are therefore the same implementation as
+  the sensor solve, not a parallel optimiser. For these maps the described drive current stays
+  fixed and only the arbitrary constant flux gauge is projected as a nuisance.</p>
+
+  <p>The map ladder uses the reconciled archive's shot-resampling uncertainty and support on a
+  26×26 exact-node sampling of its 205×205 published grid. Taking every eighth node avoids
+  counting strongly correlated adjacent pixels as independent; it does not interpolate or
+  alter the cell values. The same four amplitudes and 128 draws per rung give another 4,096
+  recoveries. Maximum mean bias is 0.21σ, empirical/predicted resolution ratios span
+  0.947–1.068, and normal 95% coverage spans 93.3–95.8%. On the common terms requested, that
+  improves on the sensor ladder's 0.27σ maximum bias and matches its 93.3–95.5% coverage
+  range.</p>
+
+  <table>
+    <thead>
+      <tr><th>member</th><th>class</th><th>modes</th><th>map-mode resolution</th><th>max bias / σ</th><th>95% coverage</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>P4 lower</td><td>rigid</td><td>2</td><td>0.619–1.554 mm</td><td>0.18</td><td>95.8%</td></tr>
+      <tr><td>P4 lower</td><td>affine</td><td>2</td><td>0.617–1.542 mm</td><td>0.10</td><td>93.7%</td></tr>
+      <tr><td>P4 upper</td><td>rigid</td><td>2</td><td>0.975–1.843 mm</td><td>0.16</td><td>94.6%</td></tr>
+      <tr><td>P4 upper</td><td>affine</td><td>3</td><td>0.973–6.208 mm</td><td>0.21</td><td>94.4%</td></tr>
+      <tr><td>P5 lower</td><td>rigid</td><td>2</td><td>1.725–2.510 mm</td><td>0.15</td><td>94.7%</td></tr>
+      <tr><td>P5 lower</td><td>affine</td><td>3</td><td>1.714–9.205 mm</td><td>0.21</td><td>94.5%</td></tr>
+      <tr><td>P5 upper</td><td>rigid</td><td>2</td><td>3.419–4.814 mm</td><td>0.12</td><td>93.3%</td></tr>
+      <tr><td>P5 upper</td><td>affine</td><td>3</td><td>3.416–9.717 mm</td><td>0.20</td><td>95.6%</td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <img src="/nova/figures/geometry-recovery/flux_map_recovery.png"
+         alt="Four panels for the P4 and P5 members showing flux-map recovery error near zero with central uncertainty bands around one predicted resolution across the four injected displacement amplitudes"
+         style="max-width:100%;height:auto">
+    <figcaption>The gridded functional recovers known rigid and affine perturbations without
+    material bias. Bands are the central 68% of errors over all resolved modes; dashed lines
+    mark ±1 predicted one-noise resolution.</figcaption>
+  </figure>
+
+  <h2>The reconciled harmonic maps do not become geometry corrections</h2>
+  <p>The published reconciled misfit flux per ampere-turn, after plasma subtraction and joint
+  harmonic reconciliation, was then supplied as the real target. Its 16th–84th percentile
+  shot-resampling half-band supplies the per-cell uncertainty. A geometry-equivalent bias is
+  the RMS pack displacement that would be spuriously inferred if this surviving harmonic
+  structure were forced into the admitted affine geometry family.</p>
+
+  <table>
+    <thead>
+      <tr><th>member</th><th>supported / determined cells</th><th>modes</th><th>map-mode resolution</th><th>geometry-equivalent bias</th><th>bias / best resolution</th><th>checkerboard fits</th><th>power explained</th><th>residual bias / RMS</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>P4 lower</td><td>396 / 312 (78.8%)</td><td>2</td><td>0.617–1.542 mm</td><td><strong>20.47 mm</strong></td><td>33.2×</td><td>17.81–24.88 mm</td><td>65.4%</td><td>−0.80σ / 1.71σ</td></tr>
+      <tr><td>P4 upper</td><td>395 / 234 (59.2%)</td><td>3</td><td>0.973–6.208 mm</td><td><strong>37.20 mm</strong></td><td>38.2×</td><td>19.40–41.23 mm</td><td>68.5%</td><td>−0.51σ / 0.97σ</td></tr>
+      <tr><td>P5 lower</td><td>389 / 263 (67.6%)</td><td>3</td><td>1.714–9.205 mm</td><td><strong>36.08 mm</strong></td><td>21.1×</td><td>18.84–22.62 mm</td><td>26.8%</td><td>−1.43σ / 1.94σ</td></tr>
+      <tr><td>P5 upper</td><td>396 / 0 (0.0%)</td><td>3</td><td>3.416–9.717 mm</td><td><strong>2.81 mm</strong></td><td>0.82×</td><td>1.17–1.82 mm</td><td>3.3%</td><td>−0.10σ / 0.13σ</td></tr>
+    </tbody>
+  </table>
+
+  <p>P4 lower, P4 upper and P5 lower would require 20.47–37.20 mm RMS corrections,
+  21.1–38.2 times their best map-mode resolutions. Their split-grid fits move materially,
+  especially P4 upper, while P5 lower retains a −1.43σ residual mean after explaining only
+  26.8% of the whitened map power. P5 upper gives the complementary bound: no sampled cell is
+  determined above its band, only 3.3% of power is explained, and its 2.81 mm apparent motion
+  is below the 3.42 mm best resolution. Thus three targets force implausibly large,
+  grid-sensitive corrections and the fourth is unresolvable. The map functional independently
+  preserves the sensor-space verdict.</p>
+
+  <figure>
+    <img src="/nova/figures/geometry-recovery/flux_map_bias.png"
+         alt="Geometry-equivalent bias from each reconciled harmonic map compared with the best map-mode resolution and four checkerboard grid splits, beside explained map power and residual bias"
+         style="max-width:100%;height:auto">
+    <figcaption>Left: the full-grid geometry-equivalent bias, four disjoint checkerboard
+    sensitivity fits and the best admitted map-mode resolution. Right: whitened power explained
+    and the remaining mean residual in per-cell uncertainty units. The split sensitivity and
+    residual structure distinguish model mismatch from synthetic recovery noise.</figcaption>
+  </figure>
+
   <h2>The MAST optimum is self-refuting</h2>
   <table>
     <thead>
@@ -121,13 +202,15 @@
   <h2>Evidence and reproducibility</h2>
   <p>The solver and recovery machinery live in <code>nova/biot/geometrysolve.py</code> and are
   regression-pinned in <code>tests/test_biotgeometrysolve.py</code>. Banked outputs are
-  <code>docs/figures/geometry-recovery/geometry_recovery.npz</code> (truth, noisy recoveries,
-  modes, resolutions and MAST fits) and <code>geometry_recovery_summary.json</code> (the table
-  values), with random seed 20260812. Inputs: geometry spectrum
+  <code>docs/figures/geometry-recovery/geometry_recovery.npz</code> (sensor and map truth,
+  noisy recoveries, modes, resolutions and real fits) and
+  <code>geometry_recovery_summary.json</code> (the table values). Sensor recovery uses random
+  seed 20260812; map recovery uses 20260813. Inputs: geometry spectrum
   <code>c4b4a12267433e5a6f62e0fecce0ba7407c3379de7520662ad3487cfc0ac862c</code>, symmetry scan
   <code>4c80ae213270603d69d095ebbe5b97fe21a8cf69e019784b0d0b2a1cab758a9a</code>, shot 21978
-  level-2 winding cells, and the banked 13-column current span. The research artifact retains
-  the exact input hashes for independent verification.</p>
+  level-2 winding cells, the banked 13-column current span, and reconciled harmonic maps
+  <code>bf1fbf07f246589e664a2582af4de23b5e04ff4795364042ceda1398d4e49a99</code>.
+  The research artifact retains these input hashes for independent verification.</p>
 
   <h2>Related records</h2>
   <ul>
@@ -135,6 +218,9 @@
     owning plan and the identifiability decisions this solve honours.</li>
     <li><a href="/nova/research/mast-p4p5-symmetry-verdict.html">P4/P5 symmetry verdict</a> —
     the independent survivor and near-field-trap scan used as the cross-check.</li>
+    <li><a href="/nova/research/mast-misfit-harmonic-maps.html">Toroidal harmonic maps</a> —
+    the reconciled plasma-subtracted flux targets, uncertainty bands and support consumed by
+    the map solve.</li>
   </ul>
 
 </main>

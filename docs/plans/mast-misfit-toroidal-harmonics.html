@@ -22,7 +22,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-13">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="6">
 <meta name="plan-impl" content="0.83">
 <meta name="plan-commits" content="a08af0e5,ae037f69,22ea4269">
 <meta name="plan-artifacts" content="nova/imas/mast_misfit_harmonics.py,tests/test_mast_misfit_harmonics.py,docs/research/mast-misfit-harmonic-maps.html,docs/figures/toroidal-harmonics/">
@@ -104,6 +104,47 @@
   <p>Done-when: synthetic recovery validated; per-group misfit flux maps with confidence bands
   published as figures; source fits scored and ranked; non-axisymmetric residue quantified; a
   research record collapses the findings and hands named candidates onward.</p>
+
+  <h2 id="s3">§3 — A second instrument has landed on the same conductor</h2>
+
+  <p><strong>An unrelated data path now implicates P4 lower, and the verdict in §2.6 has to account
+  for it.</strong> Decomposing a stored EFIT flux map into plasma, external and residual terms —
+  work owned by <a href="/nova/efit-flux-decomposition.html">efit-flux-decomposition</a> — leaves a
+  residual whose Grad–Shafranov operator is an implied missing-current density. On shot 21978
+  slice 46 that residual current peaks at <strong>1.660757 MA/m² at R = 1.53834 m,
+  Z = −1.15313 m, inside <code>p4_lower</code></strong>, carrying 10.947 kA signed and 181.809 kA
+  absolute. The same run vindicated most of the vacuum model: the recorded conductor currents
+  cancel 96.5548% of the native-grid exterior signal, taking 10.080 MA down to 347 kA.</p>
+
+  <p>That is a different instrument answering the same question. This plan localises from 77 probes
+  and calibrated loops; that one localises from a two-dimensional flux map produced by an outside
+  code. They share no sensor, no calibration chain and no response model, so agreement between them
+  is not a consistency check that either could have passed alone. It also sits well with what §2's
+  own evidence already concluded — <code>coil-geometry-inversion</code> returned a bounded negative,
+  so the survivor is current- or sensor-side rather than geometry-side, and a residual
+  <em>current</em> localised inside the conductor is exactly a current-side signature.</p>
+
+  <p><strong>Two things this does not yet establish, and neither is a formality.</strong> The
+  decomposition's own operator round trip <em>failed</em> its bound — 5.152549e-03 of the stored flux
+  span against a required 1e-6 — so that run is explicitly diagnostic rather than validated, and a
+  localisation drawn through a defective coupling path could move when the path is fixed. And the
+  bilinear grid interpolation carries 4.162463% of the flux span against a residual RMS of 3.797384%,
+  so on the interpolated grid the residual is comparable to its own interpolation error. The
+  96.5548% cancellation was measured on the native grid and is the trustworthy figure; the localised
+  peak was not.</p>
+
+  <p>Note also what this does <em>not</em> do: it does not beat this plan's resolving power. §2.1
+  measured harmonic filament recovery at 5.4 mm with the placement iterated and 31 mm fixed-focus,
+  with two filaments separable at 100–200 mm. The flux-map residual's value here is independence,
+  not precision — the 1.5–2.3 m figure that closed the feeder hunt was the bound on localising a
+  <em>ring's</em> radius, which is a different problem from placing a filament.</p>
+
+  <p><em>Done-when:</em> the flux-map localisation is either confirmed as a physical result — repeated
+  across slices and shots, with the coupling round trip inside its bound and the interpolation
+  confound controlled or eliminated by working on the native grid — or recorded as an artefact of the
+  defective operator path, with which of the two it is stated plainly. §2.6's verdict then cites both
+  instruments where they agree and names the disagreement where they do not, rather than resting on
+  the magnetics alone.</p>
 
   <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -206,6 +247,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260813-mth-024" data-who="reckon-ship" data-when="2026-08-13T07:15:00+00:00">
     <div class="r-comment-body">§2.4 source fits and §2.5 toroidal sensitivity accounting landed — commit 22ea4269; gate passed. Multi-filament (2/3/4-ring) and tied signed extended-path models scored against the harmonic representation on the regenerated bank, six groups over 91–94 constraint rows with 3/6/13 P4 pair/upper/lower shots and 4/7/12 P5 pair/upper/lower. Implied currents are reported in supply units (source A per drive A, the fitted per-ampere-turn value times 23 drive turns). RESIDUE, stated as a bound rather than a measurement: the whitened power fraction left by the selected harmonic representation is 0.0280 (P4 lower), 0.3617 (P4 pair), 0.3839 (P4 upper), 0.0204 (P5 lower), 0.000583 (P5 pair), 0.4294 (P5 upper). The worker is explicit that this is a LOWER bound on what a three-dimensional account must carry and still contains pooled-shot systematics — it is not a clean non-axisymmetric measurement, and the lower groups (P4/P5 lower, both ~2%) behave very differently from the upper and pair groups (36–43%). PARITY ACCOUNTING: a healthy 180-degree sum cancels every odd n exactly while preserving all even coefficients; for a uniform 20-degree feeder footprint the retained healthy-pair fractions are n2 0.9798, n4 0.9207, n6 0.8270, and a failed single member retains n1 0.9949, n3 0.9549, n5 0.8778. The honest limit: WITHOUT a measured localised-tail width the leakage bound is 1.0 in both parities — the bound is vacuous until the width is measured, which is a real negative rather than a number to quote. Correction coils are bounded out separately: R-squared below 0.0005 caps amplitude correlation below 0.0224. Flux loops see n=0 only and none of the 36 n-resolving saddle loops enter the bank, which is why the residue cannot yet be split from systematics. Tests 39 passed (33 pre-existing plus 6 new source-fit contracts); the standing caveat holds — the tests pin mechanisms and synthetic recovery, and pin none of the real-bank headline values above.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260813-crossinstrument" data-who="reckon-ship" data-when="2026-08-13T14:40:00+00:00">
+    <div class="r-comment-body">CROSS-INSTRUMENT CORROBORATION RECORDED - an unrelated data path implicates P4 lower. Decomposing a stored EFIT flux map into plasma, external and residual terms (commit 8fffa5c7, owned by efit-flux-decomposition in S7) leaves a residual whose Grad-Shafranov operator is an implied missing-current density. On shot 21978 slice 46 it peaks at 1.660757 MA/m2 at R=1.53834 m, Z=-1.15313 m, INSIDE p4_lower, carrying 10.947 kA signed and 181.809 kA absolute. The same run vindicated most of the vacuum model: recorded conductor currents cancel 96.5548% of the native-grid exterior signal, 10.080 MA down to 347 kA. This shares no sensor, no calibration chain and no response model with this plan's 77-probe harmonic localiser, so the agreement is not a check either could have passed alone - and it fits what section 2 already concluded, since coil-geometry-inversion's bounded negative puts the survivor current- or sensor-side and a residual CURRENT inside the conductor is a current-side signature. TWO LIMITS, BOTH MATERIAL: the decomposition's operator round trip FAILED at 5.152549e-03 of stored span against a 1e-6 bound, so that run is diagnostic only and a localisation drawn through a defective coupling path may move once it is fixed; and bilinear interpolation carries 4.162463% of span against a 3.797384% residual RMS, so the interpolated-grid residual is comparable to its own interpolation error. The 96.5548% cancellation was native-grid and is trustworthy; the localised peak was not. ALSO A CORRECTION TO AN OVERCLAIM I MADE: this does not beat this plan's resolving power. Section 2.1 measured harmonic filament recovery at 5.4 mm iterated and 31 mm fixed-focus with two filaments separable at 100-200 mm; the 1.5-2.3 m figure that closed the feeder hunt bounded localising a RING's radius, a different problem. The flux-map residual's value is independence, not precision.</div>
 </div>
 </section>
 </main>

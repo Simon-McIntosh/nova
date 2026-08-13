@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-13">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 <meta name="plan-commits" content="8fffa5c7">
 <meta name="plan-artifacts" content="benchmarks/efit_flux_decomposition.py">
 <meta name="plan-impl" content="0.4">
@@ -197,6 +197,11 @@
     <h4 class="r-fu-title">Decompose one slice under the LCFS mask and read the residual</h4>
     <div class="r-fu-body"><p>The exterior signal is already quantified by the sibling plan: 2783 cells outside the stored LCFS carry −9.605046 MA signed and 10.080226 MA absolute against a 0.925 MA plasma current. The leading hypothesis is the ordinary one — that most of it is the real poloidal field coil current, correctly recovered by <code>delta_star</code>, in which case reconstructing the external field from <code>fcoil_x</code> should cancel most of it and the residual is negligible. A superseded unmasked probe measured an external term at 1.2726 of the flux span and a residual sup-norm at 1.2156, which if reproduced under the mask would mean our external field does not reproduce the reference's. Run §2–§4 on one slice: the round trip against its 1e-6 bound, the external term from <code>fcoil_x</code> reusing <code>mast_vacuum_response.py</code> and the <code>gain_check.py</code> prediction form, the residual reported without any threshold, and <code>delta_star</code> of the residual localised against the named conductors. Report the interpolation error separately — the unmasked probe put it at 4.16e-02 of the flux span, larger than several effects this ladder resolves, so it must not be mistaken for a missing conductor.</p></div>
     <pre class="r-fu-prompt">/reckon-ship efit-flux-decomposition §2</pre>
+    </article>
+<article class="r-fu" data-id="f-efd-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship efit-flux-decomposition §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Confirm or retract the P4-lower localisation, and report it back to the misfit verdict</h4>
+    <div class="r-fu-body"><p>The first masked decomposition put the residual current peak at 1.660757 MA/m2, R=1.53834 m, Z=-1.15313 m, inside <code>p4_lower</code> — the same conductor the 77-probe harmonic localiser implicates from a completely separate sensor and calibration chain. That agreement is worth a great deal <em>if it survives</em>, and two measured facts say it may not: the coupling round trip failed at 5.152549e-03 of stored span against its 1e-6 bound, so the localisation was drawn through a path known to be defective; and bilinear interpolation carries 4.162463% of the flux span against a residual RMS of 3.797384%, so on the interpolated grid the residual is comparable to its own interpolation error.</p><p>Settle it: fix or bypass the coupling defect, work on the native 65x65 grid so no interpolation enters the localisation at all, drive the external term from <code>fcoil_c</code> as the locked decision requires with the <code>fcoil_x</code> figure reported beside it, and repeat across slices and shots rather than one slice of one shot. Then state plainly whether the P4-lower peak is a physical result or an artefact of the defective operator path. Report the outcome into <code>mast-misfit-toroidal-harmonics</code> §3 either way — that plan's verdict is one node from closing and must cite both instruments where they agree and name the disagreement where they do not. A retraction is as useful there as a confirmation, because a verdict resting on a corroboration that later evaporates is worse than one resting on magnetics alone.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship efit-flux-decomposition §4</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

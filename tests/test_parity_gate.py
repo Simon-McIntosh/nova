@@ -45,7 +45,11 @@ def _scored_result(shot: int, *, missing_reference: bool = True):
         time_s=time,
         slice_count=count,
         magnetics_budget=MagneticsBudgetClass.SOURCE_CUTOVER,
-        physics=SimpleNamespace(whitened_raw_magnetics_residual=np.full(count, 0.1)),
+        physics=SimpleNamespace(
+            profile_residual=np.array([0.02, 0.03, 0.04]),
+            fixed_point_defect=np.full(count, 1.0e-10),
+            whitened_raw_magnetics_residual=np.full(count, 0.1),
+        ),
         solve_health=SimpleNamespace(
             iteration_count=np.full(count, 8),
             throughput_slices_per_second=np.ones(count),
@@ -126,6 +130,21 @@ def test_nonfinite_metric_is_a_scored_failure_not_a_skip(tmp_path):
     failed = report.scored_slices[-1]
     assert np.isnan(failed.metrics[ScorecardField.X_POINT_DISTANCE_M.value])
     assert not failed.verdicts[ScorecardField.X_POINT_DISTANCE_M.value]
+
+
+def test_profile_reproduction_and_fixed_point_defect_remain_distinct():
+    result = _scored_result(21978, missing_reference=False)
+    result.chain.solve.residual[:] = [0.003, 0.004, 0.005]
+
+    metrics = gate_module._slice_metrics(result, 0)
+
+    assert metrics[ScorecardField.PROFILE_RESIDUAL_RMS.value] == pytest.approx(0.02)
+    assert metrics[ScorecardField.FIXED_POINT_DEFECT.value] == pytest.approx(0.003)
+    assert metrics[ScorecardField.MAGNETICS_RESIDUAL_WHITENED_RMS.value] == 0.1
+    assert (
+        metrics[ScorecardField.PROFILE_RESIDUAL_RMS.value]
+        != metrics[ScorecardField.FIXED_POINT_DEFECT.value]
+    )
 
 
 def test_unsupported_first_slice_is_skipped_and_later_slices_are_scored(tmp_path):
@@ -390,7 +409,10 @@ def test_production_scorer_passes_only_factory_components_to_refereed_chain(
         calls.append(("build", shot, arguments))
         return components
 
-    inputs = SimpleNamespace(slice_count=3)
+    inputs = SimpleNamespace(
+        slice_count=3,
+        sensor_signals=np.array([[1.0, 2.0], [2.0, 4.0], [100.0, 200.0]]),
+    )
     supported_inputs = object()
     seeds = (object(), object())
     scale = np.ones(2)
@@ -405,6 +427,7 @@ def test_production_scorer_passes_only_factory_components_to_refereed_chain(
         profile_solver,
         *,
         source_slice_offset,
+        sensor_scale,
     ):
         calls.append(
             (
@@ -414,6 +437,7 @@ def test_production_scorer_passes_only_factory_components_to_refereed_chain(
                 moment_solver,
                 profile_solver,
                 source_slice_offset,
+                sensor_scale,
             )
         )
         return (1, 2), seeds, (), scale
@@ -468,6 +492,7 @@ def test_production_scorer_passes_only_factory_components_to_refereed_chain(
         components.moment_solver,
         components.profile_solver,
         0,
+        pytest.approx(np.std(inputs.sensor_signals, axis=0)),
     )
     assert calls[2] == (
         "run",
@@ -480,3 +505,53 @@ def test_production_scorer_passes_only_factory_components_to_refereed_chain(
             "sensor_scale": scale,
         },
     )
+
+
+def test_production_slice_uses_full_shot_sensor_scale(monkeypatch):
+    components = SimpleNamespace(
+        moment_solver=SimpleNamespace(config=SimpleNamespace(min_cells=5)),
+        profile_solver=object(),
+        topology_labeler=object(),
+        temporal_scorer=object(),
+    )
+    inputs = gate_module.CorrectedSolveInputs(
+        shot=21978,
+        time_s=np.array([0.1, 0.2, 0.3]),
+        coil_channels=("coil",),
+        coil_currents_a=np.ones((3, 1)),
+        sensor_channels=("sensor",),
+        sensor_signals=np.array([[1.0], [3.0], [101.0]]),
+        sensor_units=("T",),
+        plasma_current_a=np.ones(3),
+        corrections=(),
+    )
+    observed = {}
+
+    def prepare(_shot, selected, _moment, _profile, **arguments):
+        observed["selected"] = selected
+        observed["scale"] = arguments["sensor_scale"]
+        return (), (), (), arguments["sensor_scale"]
+
+    monkeypatch.setattr(
+        gate_module, "build_mast_parity_chain", lambda *_args, **_kwargs: components
+    )
+    monkeypatch.setattr(
+        gate_module, "read_corrected_solve_inputs", lambda *_args, **_kwargs: inputs
+    )
+    monkeypatch.setattr(gate_module, "_supported_moment_seeds", prepare)
+
+    score_production_shot(
+        21978,
+        artifact_cache="/machine",
+        artifact_digest="sha256:" + "a" * 64,
+        store="/shots",
+        slice_start=1,
+        slice_stop=2,
+    )
+
+    expected_full_shot = gate_module._sensor_scales(inputs.sensor_signals, None)
+    selected_local = gate_module._sensor_scales(
+        observed["selected"].sensor_signals, None
+    )
+    np.testing.assert_allclose(observed["scale"], expected_full_shot)
+    assert not np.allclose(observed["scale"], selected_local)

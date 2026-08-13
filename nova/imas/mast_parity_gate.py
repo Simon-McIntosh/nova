@@ -2,7 +2,7 @@
 
 The reconstruction and EFIT reads remain separated by
 ``run_refereed_parity_chain``.  This module only consumes its completed result,
-expands the shot-level scorecard into the eleven registered metrics for every
+expands the shot-level scorecard into every registered metric for each
 aligned slice, and persists both machine-readable evidence and compact figures.
 An unavailable reference row is a recorded skip; a non-finite metric on an
 otherwise aligned row is a scored failure rather than a silent omission.
@@ -40,9 +40,11 @@ from nova.imas.mast_parity_chain import (
     SolveHealthScores,
     TemporalScores,
     _accelerated_profile_solve,
+    _convergence_fraction,
     _lcfs_distance,
     _pack_source_currents,
     _raw_magnetics_residuals,
+    _profile_reproduction_residuals,
     _registered_scorecard_metrics,
     _sensor_scales,
 )
@@ -169,11 +171,12 @@ def _supported_moment_seeds(
     profile_solver: Any,
     *,
     source_slice_offset: int = 0,
+    sensor_scale: np.ndarray | None = None,
 ) -> tuple[tuple[int, ...], tuple[Any, ...], tuple[SkippedSlice, ...], np.ndarray]:
     """Attempt every corrected slice and retain only supported moment seeds."""
 
     source_current = _pack_source_currents(profile_solver, inputs)
-    scale = _sensor_scales(inputs.sensor_signals, None)
+    scale = _sensor_scales(inputs.sensor_signals, sensor_scale)
     vacuum_sensor = source_current @ np.asarray(profile_solver.source_to_sensor).T
     vacuum_flux = source_current @ np.asarray(profile_solver.source_to_grid).T
     mask = np.isfinite(inputs.sensor_signals)
@@ -226,23 +229,7 @@ def _select_inputs(
 def _scorecard_convergence_fraction(trace: np.ndarray, final: np.ndarray) -> np.ndarray:
     """Reduce residual traces while retaining non-convergence as a failed score."""
 
-    trace_array = np.asarray(trace, dtype=float)
-    final_array = np.asarray(final, dtype=float)
-    if trace_array.ndim != 2 or trace_array.shape[0] != final_array.shape[0]:
-        raise ValueError("residual trace rows must match the final residual row count")
-    finite = np.isfinite(trace_array)
-    has_finite = np.any(finite, axis=1)
-    first_index = np.argmax(finite, axis=1)
-    first = np.full(final_array.shape, np.nan, dtype=float)
-    rows = np.flatnonzero(has_finite)
-    first[rows] = trace_array[rows, first_index[rows]]
-    ratio = np.divide(
-        final_array,
-        first,
-        out=np.ones_like(final_array, dtype=float),
-        where=has_finite & np.isfinite(final_array) & (first > 0.0),
-    )
-    return np.clip(1.0 - ratio, 0.0, 1.0)
+    return _convergence_fraction(trace, final)
 
 
 def _run_supported_chain(
@@ -285,6 +272,14 @@ def _run_supported_chain(
         mask,
         solve.flux,
     )
+    profile_reproduction = _profile_reproduction_residuals(
+        profile_solver,
+        source_current,
+        inputs,
+        sensor_scale,
+        mask,
+        solve.flux,
+    )
     temporal = np.asarray(temporal_scorer(inputs, solve.flux), dtype=float)
     if temporal.shape != (inputs.slice_count,):
         raise ValueError(
@@ -309,8 +304,9 @@ def _run_supported_chain(
             ),
         ),
         physics=PhysicsScores(
-            profile_residual=np.asarray(solve.residual),
+            profile_residual=profile_reproduction,
             whitened_raw_magnetics_residual=raw_residual,
+            fixed_point_defect=np.asarray(solve.residual),
         ),
         solve_health=SolveHealthScores(
             convergence_fraction=_scorecard_convergence_fraction(
@@ -322,7 +318,12 @@ def _run_supported_chain(
         ),
         temporal=TemporalScores(current_diffusion_flux_ledger_consistency=temporal),
         registered_metrics=_registered_scorecard_metrics(
-            solve, raw_residual, topology, temporal, accelerator
+            solve,
+            profile_reproduction,
+            raw_residual,
+            topology,
+            temporal,
+            accelerator,
         ),
         magnetics_budget=magnetics_budget,
     )
@@ -371,6 +372,7 @@ def score_production_shot(
             f"slice interval [{start}, {stop}) must lie within "
             f"[0, {inputs.slice_count})"
         )
+    full_shot_scale = _sensor_scales(inputs.sensor_signals, None)
     selected_inputs = _select_inputs(inputs, tuple(range(start, stop)))
     indices, seeds, skipped, scale = _supported_moment_seeds(
         int(shot),
@@ -378,6 +380,7 @@ def score_production_shot(
         components.moment_solver,
         components.profile_solver,
         source_slice_offset=start,
+        sensor_scale=full_shot_scale,
     )
     result = None
     if indices:
@@ -411,7 +414,10 @@ def _slice_metrics(result: RefereedParityResult, index: int) -> dict[str, float]
     scorecard = result.scorecard
     geometry = result.geometry_scores
     chain = result.chain
-    residual = float(np.asarray(chain.solve.residual)[index])
+    fixed_point_defect = float(np.asarray(chain.solve.residual)[index])
+    profile_residual = float(
+        np.asarray(scorecard.physics.profile_residual, dtype=float)[index]
+    )
     core = np.asarray(chain.topology.core_mask, dtype=bool)[index]
     metrics = {
         ScorecardField.MAGNETIC_AXIS_DISTANCE_M.value: float(
@@ -424,12 +430,13 @@ def _slice_metrics(result: RefereedParityResult, index: int) -> dict[str, float]
         ScorecardField.TOPOLOGY_CLASS_AGREEMENT_FRACTION.value: float(
             geometry.topology_class_agreement[index]
         ),
-        ScorecardField.PROFILE_RESIDUAL_RMS.value: abs(residual),
+        ScorecardField.PROFILE_RESIDUAL_RMS.value: abs(profile_residual),
+        ScorecardField.FIXED_POINT_DEFECT.value: abs(fixed_point_defect),
         ScorecardField.MAGNETICS_RESIDUAL_WHITENED_RMS.value: float(
             scorecard.physics.whitened_raw_magnetics_residual[index]
         ),
         ScorecardField.CONVERGED_FRACTION.value: float(
-            math.isfinite(residual) and residual < 1.0e-8
+            math.isfinite(fixed_point_defect) and fixed_point_defect < 1.0e-8
         ),
         ScorecardField.CONFINED_FRACTION.value: float(np.any(core)),
         ScorecardField.ITERATION_COUNT.value: float(
@@ -843,22 +850,29 @@ def _write_figures(
 
     residual_fields = (
         ScorecardField.PROFILE_RESIDUAL_RMS.value,
+        ScorecardField.FIXED_POINT_DEFECT.value,
         ScorecardField.MAGNETICS_RESIDUAL_WHITENED_RMS.value,
         ScorecardField.CURRENT_DIFFUSION_FLUX_LEDGER_RMS_FRACTION.value,
     )
     residual_figure, residual_axis = plt.subplots(figsize=(8.0, 4.0))
     positions = np.arange(len(completed), dtype=float)
-    width = 0.24
+    width = 0.19
     budget = results[completed[0]].scorecard.magnetics_budget
     for offset, (field, label) in enumerate(
-        zip(residual_fields, ("profile", "magnetics", "transport"), strict=True)
+        zip(
+            residual_fields,
+            ("profile", "fixed point", "magnetics", "transport"),
+            strict=True,
+        )
     ):
         values = _normalised_metric(rows, field, budget)
         by_shot = [
             float(np.nanmedian(values[[row.shot == shot for row in rows]]))
             for shot in completed
         ]
-        residual_axis.bar(positions + (offset - 1) * width, by_shot, width, label=label)
+        residual_axis.bar(
+            positions + (offset - 1.5) * width, by_shot, width, label=label
+        )
     residual_axis.axhline(1.0, color="black", linewidth=1.0, linestyle="--")
     residual_axis.set_xticks(positions, [str(shot) for shot in completed])
     residual_axis.set_ylabel("median / registered tolerance")

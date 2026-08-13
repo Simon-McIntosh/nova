@@ -44,6 +44,26 @@ def test_magnetics_budget_classes_change_only_the_measured_residual_bound():
     } == {field: tolerance for field, tolerance in cutover.items() if field != residual}
 
 
+def test_metric_identity_keeps_every_existing_bound_and_registers_solver_health():
+    tolerances = registered_tolerances()
+    expected = {
+        ScorecardField.MAGNETIC_AXIS_DISTANCE_M: 0.00101344,
+        ScorecardField.LCFS_DISTANCE_M: 0.00033047,
+        ScorecardField.X_POINT_DISTANCE_M: 0.014,
+        ScorecardField.TOPOLOGY_CLASS_AGREEMENT_FRACTION: 1.0,
+        ScorecardField.PROFILE_RESIDUAL_RMS: 0.075868,
+        ScorecardField.MAGNETICS_RESIDUAL_WHITENED_RMS: 0.747504115002785,
+        ScorecardField.CONVERGED_FRACTION: 1.0,
+        ScorecardField.CONFINED_FRACTION: 1.0,
+        ScorecardField.ITERATION_COUNT: 8.0,
+        ScorecardField.THROUGHPUT_SLICES_PER_CORE_S: 0.1886677065919248,
+        ScorecardField.CURRENT_DIFFUSION_FLUX_LEDGER_RMS_FRACTION: 0.004,
+    }
+
+    assert {field: tolerances[field].bound for field in expected} == expected
+    assert tolerances[ScorecardField.FIXED_POINT_DEFECT].bound == 1.0e-8
+
+
 def test_a_scorecard_cannot_be_scored_with_missing_or_unregistered_metrics():
     complete = {
         field: tolerance.bound for field, tolerance in PARITY_TOLERANCES.items()

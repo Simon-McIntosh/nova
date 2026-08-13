@@ -53,6 +53,8 @@ class ProfileSolver:
     precision = Precision.DOUBLE
 
     def __init__(self):
+        self.grid_r = jnp.asarray([1.0, 2.0])
+        self.grid_z = jnp.asarray([-1.0, 1.0])
         self.source_to_grid = jnp.asarray(
             [[1.0e-5, 0.0], [0.0, 1.0e-5], [1.0e-5, 0.0], [0.0, 1.0e-5]]
         )
@@ -145,6 +147,12 @@ def test_pilot_shot_runs_the_scored_chain_end_to_end(monkeypatch):
         return registry_verdicts(metrics, magnetics_budget)
 
     monkeypatch.setattr(chain_module, "scorecard_verdicts", record_registry_call)
+    reproduction = np.array([0.011, 0.022, 0.033])
+    monkeypatch.setattr(
+        chain_module,
+        "_profile_reproduction_residuals",
+        lambda *_args: reproduction,
+    )
     moment = MomentSolver()
     settings = AcceleratorSettings(
         newton_steps=1,
@@ -181,6 +189,7 @@ def test_pilot_shot_runs_the_scored_chain_end_to_end(monkeypatch):
     assert groups["geometry"]["x_point_m"].shape == (SLICE_COUNT, 2)
     assert groups["geometry"]["diverted"].shape == (SLICE_COUNT,)
     assert groups["physics"]["profile_residual"].shape == (SLICE_COUNT,)
+    assert groups["physics"]["fixed_point_defect"].shape == (SLICE_COUNT,)
     assert groups["physics"]["whitened_raw_magnetics_residual"].shape == (SLICE_COUNT,)
     assert groups["solve_health"]["convergence_fraction"].shape == (SLICE_COUNT,)
     assert groups["solve_health"]["confinement_fraction"].shape == (SLICE_COUNT,)
@@ -196,6 +205,78 @@ def test_pilot_shot_runs_the_scored_chain_end_to_end(monkeypatch):
     assert result.solve.trace.shape == (SLICE_COUNT, settings.evaluation_count)
     assert np.all(np.isfinite(result.solve.flux))
     assert np.all(result.solve.residual < 1.0e-8)
+    np.testing.assert_allclose(groups["physics"]["profile_residual"], reproduction)
+    np.testing.assert_allclose(
+        groups["physics"]["fixed_point_defect"], result.solve.residual
+    )
+    assert result.scorecard.registered_metrics["profile_residual_rms"] == pytest.approx(
+        np.median(reproduction)
+    )
+    assert result.scorecard.registered_metrics["fixed_point_defect"] == pytest.approx(
+        np.max(np.abs(result.solve.residual))
+    )
+    assert result.scorecard.registered_metrics["profile_residual_rms"] != pytest.approx(
+        result.scorecard.registered_metrics["fixed_point_defect"]
+    )
+
+
+def test_nonfinite_trace_row_reports_zero_convergence():
+    trace = np.array([[np.nan, np.nan], [4.0, 2.0]])
+    final = np.array([np.nan, 1.0])
+
+    fraction = chain_module._convergence_fraction(trace, final)
+
+    np.testing.assert_allclose(fraction, [0.0, 0.75])
+
+
+def test_profile_reproduction_is_current_density_rms_against_grid_read():
+    grid_r = np.linspace(1.0, 2.0, 5)
+    grid_z = np.linspace(-1.0, 1.0, 5)
+    radius, _height = np.meshgrid(grid_r, grid_z)
+    current_density = 7.0
+    plasma_flux = (
+        -chain_module.TOTAL_FLUX_FACTOR
+        * chain_module.mu_0
+        * current_density
+        * radius**3
+        / 3.0
+    )
+
+    class CurrentReadSolver:
+        def __init__(self):
+            self.grid_r = jnp.asarray(grid_r)
+            self.grid_z = jnp.asarray(grid_z)
+            self.cell_area = jnp.ones(grid_r.size * grid_z.size)
+            self.inside_limiter = jnp.ones((grid_z.size, grid_r.size), dtype=bool)
+            self.source_to_grid = jnp.zeros((grid_r.size * grid_z.size, 1))
+
+        def _profile_basis(self, _flux):
+            return jnp.zeros((grid_r.size * grid_z.size, 1)), {}
+
+        def _least_squares_coefficients(self, *_args):
+            return jnp.zeros(1)
+
+    inputs = replace(
+        corrected_inputs(PILOT_SHOT, store="/pilot"),
+        time_s=np.array([0.1]),
+        coil_currents_a=np.zeros((1, 2)),
+        sensor_signals=np.zeros((1, 2)),
+        plasma_current_a=np.array([1.0]),
+    )
+    radial_step = grid_r[1] - grid_r[0]
+    grid_current = current_density * (1.0 - radial_step**2 / (3.0 * grid_r[1:-1] ** 2))
+    expected = np.sqrt(np.mean(np.square(grid_current))) / np.max(grid_current)
+
+    observed = chain_module._profile_reproduction_residuals(
+        CurrentReadSolver(),
+        np.zeros((1, 1)),
+        inputs,
+        np.ones(2),
+        np.ones((1, 2), dtype=bool),
+        plasma_flux.reshape(1, -1),
+    )
+
+    np.testing.assert_allclose(observed, [expected], rtol=1.0e-12)
 
 
 def test_scorecard_refuses_an_unregistered_metric(monkeypatch):

@@ -277,8 +277,16 @@ def test_partition_aggregation_requires_exact_coverage_and_banks_boundaries(tmp_
         (0, 2),
         (2, 4),
     ]
+    assert (report.radial_points, report.vertical_points, report.min_cells) == (
+        33,
+        49,
+        5,
+    )
     banked = json.loads(artifact.read_text())
     assert banked["partitions"][0]["artifact"] == str(first.resolve())
+    assert banked["radial_points"] == 33
+    assert banked["vertical_points"] == 49
+    assert banked["min_cells"] == 5
     assert not artifact.with_suffix(".json.tmp").exists()
 
 
@@ -292,6 +300,15 @@ def test_partition_aggregation_rejects_a_coverage_gap(tmp_path):
         aggregate_scorecard_partitions(
             (first, second), artifact_path=tmp_path / "scorecard.json"
         )
+
+
+def test_nonfinite_trace_is_retained_as_zero_convergence():
+    trace = np.array([[np.nan, np.nan], [4.0, 2.0]])
+    final = np.array([np.nan, 1.0])
+
+    fraction = gate_module._scorecard_convergence_fraction(trace, final)
+
+    np.testing.assert_allclose(fraction, [0.0, 0.75])
 
 
 def test_failed_shot_is_named_while_remaining_shots_continue(tmp_path):

@@ -39,7 +39,6 @@ from nova.imas.mast_parity_chain import (
     SolveHealthScores,
     TemporalScores,
     _accelerated_profile_solve,
-    _convergence_fraction,
     _lcfs_distance,
     _pack_source_currents,
     _raw_magnetics_residuals,
@@ -140,6 +139,9 @@ class FrozenGateReport:
     run_errors: Mapping[int, str]
     figures: tuple[str, ...]
     partitions: tuple[PartitionCoverage, ...] = ()
+    radial_points: int | None = None
+    vertical_points: int | None = None
+    min_cells: int | None = None
 
 
 @dataclass(frozen=True)
@@ -220,6 +222,28 @@ def _select_inputs(
     )
 
 
+def _scorecard_convergence_fraction(trace: np.ndarray, final: np.ndarray) -> np.ndarray:
+    """Reduce residual traces while retaining non-convergence as a failed score."""
+
+    trace_array = np.asarray(trace, dtype=float)
+    final_array = np.asarray(final, dtype=float)
+    if trace_array.ndim != 2 or trace_array.shape[0] != final_array.shape[0]:
+        raise ValueError("residual trace rows must match the final residual row count")
+    finite = np.isfinite(trace_array)
+    has_finite = np.any(finite, axis=1)
+    first_index = np.argmax(finite, axis=1)
+    first = np.full(final_array.shape, np.nan, dtype=float)
+    rows = np.flatnonzero(has_finite)
+    first[rows] = trace_array[rows, first_index[rows]]
+    ratio = np.divide(
+        final_array,
+        first,
+        out=np.ones_like(final_array, dtype=float),
+        where=has_finite & np.isfinite(final_array) & (first > 0.0),
+    )
+    return np.clip(1.0 - ratio, 0.0, 1.0)
+
+
 def _run_supported_chain(
     inputs: CorrectedSolveInputs,
     seeds: tuple[Any, ...],
@@ -288,7 +312,9 @@ def _run_supported_chain(
             whitened_raw_magnetics_residual=raw_residual,
         ),
         solve_health=SolveHealthScores(
-            convergence_fraction=_convergence_fraction(solve.trace, solve.residual),
+            convergence_fraction=_scorecard_convergence_fraction(
+                solve.trace, solve.residual
+            ),
             confinement_fraction=confinement,
             iteration_count=np.full(inputs.slice_count, accelerator.evaluation_count),
             throughput_slices_per_second=np.full(inputs.slice_count, throughput),
@@ -723,6 +749,9 @@ def aggregate_scorecard_partitions(
         run_errors={},
         figures=(),
         partitions=tuple(coverage),
+        radial_points=int(radial_points),
+        vertical_points=int(vertical_points),
+        min_cells=int(min_cells),
     )
     _bank_report(report, Path(artifact_path))
     return report

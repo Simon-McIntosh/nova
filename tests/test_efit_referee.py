@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -145,6 +146,63 @@ def test_reference_geometry_replaces_every_nan_scorecard_field():
         1.0
     )
     assert all(np.isfinite(metrics[field.value]) for field in ScorecardField)
+
+
+@pytest.mark.parametrize(
+    ("missing_side", "expected_cause"),
+    [
+        ("reconstruction", "reconstruction-x-point-absent"),
+        ("referee", "referee-x-point-absent"),
+    ],
+)
+def test_absent_x_point_is_scored_as_an_explicit_topology_failure(
+    missing_side,
+    expected_cause,
+):
+    """A one-sided x-point remains a scored slice with two failing metrics."""
+
+    chain = _chain_result()
+    reference = _referee()
+    row = 0
+    if missing_side == "reconstruction":
+        x_point_m = chain.topology.x_point_m.copy()
+        x_point_m[row] = np.nan
+        diverted = chain.topology.diverted.copy()
+        diverted[row] = False
+        chain = replace(
+            chain,
+            topology=replace(
+                chain.topology,
+                x_point_m=x_point_m,
+                diverted=diverted,
+            ),
+        )
+    else:
+        x_points_m = reference.x_points_m.copy()
+        x_points_m[row] = np.nan
+        diverted = reference.diverted.copy()
+        diverted[row] = False
+        reference = replace(
+            reference,
+            x_points_m=x_points_m,
+            diverted=diverted,
+        )
+
+    scored = score_with_efit_referee(chain, reference)
+    geometry = scored.geometry_scores
+
+    assert scored.usable_reference_slices == chain.scorecard.slice_count
+    assert geometry.usable_reference[row]
+    assert np.isnan(geometry.x_point_distance_m[row])
+    assert geometry.x_point_distance_failure_cause[row] == expected_cause
+    assert geometry.topology_class_agreement[row] == 0.0
+    assert np.isnan(
+        scored.scorecard.registered_metrics[ScorecardField.X_POINT_DISTANCE_M.value]
+    )
+    assert not scored.scorecard.verdicts[ScorecardField.X_POINT_DISTANCE_M.value]
+    assert not scored.scorecard.verdicts[
+        ScorecardField.TOPOLOGY_CLASS_AGREEMENT_FRACTION.value
+    ]
 
 
 def test_referee_is_opened_only_after_the_solve_and_never_reaches_solve_inputs(

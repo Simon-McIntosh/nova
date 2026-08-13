@@ -104,7 +104,7 @@ class EfitReferee:
 
 @dataclass(frozen=True)
 class ReferenceGeometryScores:
-    """Per-slice comparisons and their finite shot-level reductions."""
+    """Per-slice comparisons and their shot-level reductions."""
 
     reference_index: np.ndarray
     reference_time_s: np.ndarray
@@ -112,6 +112,7 @@ class ReferenceGeometryScores:
     magnetic_axis_distance_m: np.ndarray
     lcfs_distance_m: np.ndarray
     x_point_distance_m: np.ndarray
+    x_point_distance_failure_cause: np.ndarray
     topology_class_agreement: np.ndarray
 
     @property
@@ -132,7 +133,9 @@ class ReferenceGeometryScores:
                 self.lcfs_distance_m, "LCFS distance"
             ),
             ScorecardField.X_POINT_DISTANCE_M.value: _finite_median(
-                self.x_point_distance_m, "x-point distance"
+                self.x_point_distance_m,
+                "x-point distance",
+                failure_causes=self.x_point_distance_failure_cause,
             ),
             ScorecardField.TOPOLOGY_CLASS_AGREEMENT_FRACTION.value: _finite_mean(
                 self.topology_class_agreement, "topology-class agreement"
@@ -273,9 +276,16 @@ def _boundary_distance(first: np.ndarray, second: np.ndarray) -> float:
     )
 
 
-def _finite_median(values: np.ndarray, name: str) -> float:
+def _finite_median(
+    values: np.ndarray,
+    name: str,
+    *,
+    failure_causes: np.ndarray | None = None,
+) -> float:
     """Reduce a finite metric or refuse to manufacture a missing score."""
 
+    if failure_causes is not None and np.any(np.asarray(failure_causes, dtype=str)):
+        return float("nan")
     finite = np.asarray(values, dtype=float)
     finite = finite[np.isfinite(finite)]
     if finite.size == 0:
@@ -312,6 +322,7 @@ def compare_reference_geometry(
     axis_distance = np.full(time.shape, np.nan)
     lcfs_distance = np.full(time.shape, np.nan)
     x_point_distance = np.full(time.shape, np.nan)
+    x_point_failure_cause = np.full(time.shape, "", dtype="U32")
     topology_agreement = np.full(time.shape, np.nan)
     solved_axis = np.asarray(topology.magnetic_axis_m, dtype=float)
     solved_lcfs = np.asarray(topology.lcfs_m, dtype=float)
@@ -332,17 +343,19 @@ def compare_reference_geometry(
         topology_agreement[solve_row] = float(
             bool(solved_diverted[solve_row]) == reference_diverted
         )
-        if not solved_diverted[solve_row] and not reference_diverted:
+        candidates = referee.x_points_m[reference_row]
+        candidates = candidates[_valid_points(candidates)]
+        solved_x_point_valid = bool(_valid_points(solved_x_point[solve_row]))
+        if not solved_x_point_valid and candidates.size:
+            x_point_failure_cause[solve_row] = "reconstruction-x-point-absent"
+        elif solved_x_point_valid and not candidates.size:
+            x_point_failure_cause[solve_row] = "referee-x-point-absent"
+        elif not solved_diverted[solve_row] and not reference_diverted:
             x_point_distance[solve_row] = 0.0
         elif solved_diverted[solve_row] and reference_diverted:
-            candidates = referee.x_points_m[reference_row]
-            candidates = candidates[_valid_points(candidates)]
-            if _valid_points(solved_x_point[solve_row]) and candidates.size:
-                x_point_distance[solve_row] = float(
-                    np.min(
-                        np.linalg.norm(candidates - solved_x_point[solve_row], axis=1)
-                    )
-                )
+            x_point_distance[solve_row] = float(
+                np.min(np.linalg.norm(candidates - solved_x_point[solve_row], axis=1))
+            )
 
     return ReferenceGeometryScores(
         reference_index=_readonly(index, dtype=int),
@@ -351,6 +364,7 @@ def compare_reference_geometry(
         magnetic_axis_distance_m=_readonly(axis_distance),
         lcfs_distance_m=_readonly(lcfs_distance),
         x_point_distance_m=_readonly(x_point_distance),
+        x_point_distance_failure_cause=_readonly(x_point_failure_cause, dtype=str),
         topology_class_agreement=_readonly(topology_agreement),
     )
 

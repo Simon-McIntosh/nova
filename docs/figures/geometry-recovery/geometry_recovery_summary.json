@@ -1,4 +1,356 @@
 {
+  "flux_map": {
+    "input": {
+      "grid_shape": [
+        205,
+        205
+      ],
+      "grid_stride": 8,
+      "nuisance": "constant flux gauge",
+      "path": "/home/ITER/mcintos/.cache/nova-mast/toroidal-harmonics/maps.npz",
+      "random_seed": 20260813,
+      "sampled_shape": [
+        26,
+        26
+      ],
+      "sampling": "every eighth published node in both axes; no interpolation",
+      "sha256": "bf1fbf07f246589e664a2582af4de23b5e04ff4795364042ceda1398d4e49a99",
+      "uncertainty": "shot-resampling 16th-to-84th percentile half-band"
+    },
+    "real_target": {
+      "p4_lower": {
+        "bias_to_best_resolution": 33.15659717134242,
+        "checkerboard_bias_mm": [
+          18.892129901129902,
+          17.808920293041027,
+          24.88145200726853,
+          23.41430742400044
+        ],
+        "checkerboard_bias_spread_mm": 3.428908899093419,
+        "determined_fraction": 0.7878787878787878,
+        "geometry_equivalent_bias_mm": 20.468338086639136,
+        "mode_resolution_um": [
+          617.3232428184798,
+          1542.2929962775504
+        ],
+        "parameter_95pct_mm": {
+          "dilation": 0.05055092940387816,
+          "rigid_r": 2.5597837895276796,
+          "rigid_z": 1.9767023206632073,
+          "shear": 0.35921482374068964,
+          "stretch": 0.08566523601555501,
+          "tilt": 0.012837809814359545
+        },
+        "parameters_mm": {
+          "dilation": -0.12284241451729992,
+          "rigid_r": -9.299077441215337,
+          "rigid_z": -18.176558475732797,
+          "shear": -0.5981774019014339,
+          "stretch": 1.2972593211935135,
+          "tilt": -0.04843120387626055
+        },
+        "residual_bias_sigma": -0.7986781000700306,
+        "residual_rms_sigma": 1.7130463788776238,
+        "resolved_affine_modes": 2,
+        "sampled_determined_cells": 312,
+        "sampled_supported_cells": 396,
+        "whitened_power_explained": 0.653927663251753
+      },
+      "p4_upper": {
+        "bias_to_best_resolution": 38.237811479593745,
+        "checkerboard_bias_mm": [
+          19.965679245915638,
+          41.23474221455044,
+          20.111150295087615,
+          19.400897437852738
+        ],
+        "checkerboard_bias_spread_mm": 10.708799155814006,
+        "determined_fraction": 0.5924050632911393,
+        "geometry_equivalent_bias_mm": 37.20125286784042,
+        "mode_resolution_um": [
+          972.8917903079649,
+          1836.2719157283245,
+          6208.209283164113
+        ],
+        "parameter_95pct_mm": {
+          "dilation": 2.266609873867525,
+          "rigid_r": 3.160203096740843,
+          "rigid_z": 2.5847337433845685,
+          "shear": 10.382105833234263,
+          "stretch": 5.14482498853647,
+          "tilt": 1.4191720005307225
+        },
+        "parameters_mm": {
+          "dilation": -6.23315802438941,
+          "rigid_r": -8.594640047870106,
+          "rigid_z": 17.57775194905736,
+          "shear": 27.306772406434266,
+          "stretch": -12.519880825082351,
+          "tilt": -3.689650326456226
+        },
+        "residual_bias_sigma": -0.5066305010647174,
+        "residual_rms_sigma": 0.9679996374491687,
+        "resolved_affine_modes": 3,
+        "sampled_determined_cells": 234,
+        "sampled_supported_cells": 395,
+        "whitened_power_explained": 0.685151512691383
+      },
+      "p5_lower": {
+        "bias_to_best_resolution": 21.05492158534325,
+        "checkerboard_bias_mm": [
+          20.108393258353598,
+          22.617656309157297,
+          21.041625910057792,
+          18.83571355657519
+        ],
+        "checkerboard_bias_spread_mm": 1.5926929495248903,
+        "determined_fraction": 0.6760925449871465,
+        "geometry_equivalent_bias_mm": 36.0782356263356,
+        "mode_resolution_um": [
+          1713.529802526093,
+          2485.5343561316,
+          9204.832546460244
+        ],
+        "parameter_95pct_mm": {
+          "dilation": 0.418746031854909,
+          "rigid_r": 4.794582565275321,
+          "rigid_z": 3.7550823751825173,
+          "shear": 13.043347687458049,
+          "stretch": 12.251180777936012,
+          "tilt": 0.7702816435683351
+        },
+        "parameters_mm": {
+          "dilation": -0.7042470604838058,
+          "rigid_r": 1.3136987437557774,
+          "rigid_z": -22.441863088741076,
+          "shear": -21.352996589960632,
+          "stretch": 18.225964362778498,
+          "tilt": -1.2442966798466615
+        },
+        "residual_bias_sigma": -1.4337912682058203,
+        "residual_rms_sigma": 1.9407056095975157,
+        "resolved_affine_modes": 3,
+        "sampled_determined_cells": 263,
+        "sampled_supported_cells": 389,
+        "whitened_power_explained": 0.26790219491713174
+      },
+      "p5_upper": {
+        "bias_to_best_resolution": 0.8230466096700431,
+        "checkerboard_bias_mm": [
+          1.1986350520326599,
+          1.1702518455404753,
+          1.3823149408974644,
+          1.8163924041617379
+        ],
+        "checkerboard_bias_spread_mm": 0.29819731668190025,
+        "determined_fraction": 0.0,
+        "geometry_equivalent_bias_mm": 2.8113890249982725,
+        "mode_resolution_um": [
+          3415.8320950077787,
+          4796.233260393195,
+          9717.252185287922
+        ],
+        "parameter_95pct_mm": {
+          "dilation": 18.661231363871497,
+          "rigid_r": 9.110645656451206,
+          "rigid_z": 7.063130357347321,
+          "shear": 0.8053888264117378,
+          "stretch": 3.221255399869974,
+          "tilt": 0.3500188882066521
+        },
+        "parameters_mm": {
+          "dilation": 2.514646537143994,
+          "rigid_r": 0.5580083914730682,
+          "rigid_z": -1.0126355360580723,
+          "shear": 0.08120627968166709,
+          "stretch": -0.4380740696173331,
+          "tilt": -0.04720955088892118
+        },
+        "residual_bias_sigma": -0.10330893954317655,
+        "residual_rms_sigma": 0.13108646922612682,
+        "resolved_affine_modes": 3,
+        "sampled_determined_cells": 0,
+        "sampled_supported_cells": 396,
+        "whitened_power_explained": 0.03283227652468035
+      }
+    },
+    "synthetic": {
+      "p4_lower": {
+        "affine": {
+          "bias_um_by_rung": [
+            139.33366329590066,
+            26.382151927996635,
+            43.09060422129297,
+            157.41358068696542
+          ],
+          "empirical_to_predicted_resolution": [
+            1.0447067263415493,
+            0.9939608210968756
+          ],
+          "max_absolute_bias_sigma": 0.10114771928117125,
+          "normal_95pct_coverage": 0.9365234375,
+          "resolution_um": [
+            617.3232428184798,
+            1542.2929962775504
+          ],
+          "resolved_modes": 2,
+          "samples_per_rung": 128
+        },
+        "rigid": {
+          "bias_um_by_rung": [
+            87.64957420488074,
+            281.37703150189134,
+            73.68771884601897,
+            45.616996516995265
+          ],
+          "empirical_to_predicted_resolution": [
+            0.99182954827422,
+            1.0119670885101761
+          ],
+          "max_absolute_bias_sigma": 0.17940998788169923,
+          "normal_95pct_coverage": 0.9580078125,
+          "resolution_um": [
+            619.1939762326349,
+            1553.522603006075
+          ],
+          "resolved_modes": 2,
+          "samples_per_rung": 128
+        }
+      },
+      "p4_upper": {
+        "affine": {
+          "bias_um_by_rung": [
+            180.00094645875404,
+            388.1848170655062,
+            276.63847932147115,
+            264.2567495683119
+          ],
+          "empirical_to_predicted_resolution": [
+            1.030486864668359,
+            0.9992561622330978,
+            1.0013766247659173
+          ],
+          "max_absolute_bias_sigma": 0.20791278904325453,
+          "normal_95pct_coverage": 0.9440104166666666,
+          "resolution_um": [
+            972.8917903079649,
+            1836.2719157283245,
+            6208.209283164113
+          ],
+          "resolved_modes": 3,
+          "samples_per_rung": 128
+        },
+        "rigid": {
+          "bias_um_by_rung": [
+            289.66291645777665,
+            237.86371802960966,
+            181.78021025713602,
+            291.17188580048844
+          ],
+          "empirical_to_predicted_resolution": [
+            0.9844507415121209,
+            1.030044670953282
+          ],
+          "max_absolute_bias_sigma": 0.1578823209426186,
+          "normal_95pct_coverage": 0.9462890625,
+          "resolution_um": [
+            975.3226559188597,
+            1842.9175141907729
+          ],
+          "resolved_modes": 2,
+          "samples_per_rung": 128
+        }
+      },
+      "p5_lower": {
+        "affine": {
+          "bias_um_by_rung": [
+            458.00478099171113,
+            526.4336362763723,
+            1180.6682124121905,
+            1279.1241907224853
+          ],
+          "empirical_to_predicted_resolution": [
+            1.0356423532537058,
+            1.0001797842616558,
+            1.0268852540245956
+          ],
+          "max_absolute_bias_sigma": 0.2059593588813449,
+          "normal_95pct_coverage": 0.9453125,
+          "resolution_um": [
+            1713.529802526093,
+            2485.5343561316,
+            9204.832546460244
+          ],
+          "resolved_modes": 3,
+          "samples_per_rung": 128
+        },
+        "rigid": {
+          "bias_um_by_rung": [
+            253.7539531927095,
+            374.6455361626781,
+            210.3401580246768,
+            365.6876925918845
+          ],
+          "empirical_to_predicted_resolution": [
+            1.0096775127452116,
+            1.0570901984028693
+          ],
+          "max_absolute_bias_sigma": 0.14924174169323517,
+          "normal_95pct_coverage": 0.947265625,
+          "resolution_um": [
+            1725.4464244241635,
+            2510.320710551676
+          ],
+          "resolved_modes": 2,
+          "samples_per_rung": 128
+        }
+      },
+      "p5_upper": {
+        "affine": {
+          "bias_um_by_rung": [
+            744.5326511835075,
+            1968.788610865043,
+            574.2476613595654,
+            1237.044065716894
+          ],
+          "empirical_to_predicted_resolution": [
+            0.9827071486805677,
+            1.026990904594855,
+            0.9473998413990288
+          ],
+          "max_absolute_bias_sigma": 0.20076835309853758,
+          "normal_95pct_coverage": 0.9557291666666666,
+          "resolution_um": [
+            3415.8320950077787,
+            4796.233260393195,
+            9717.252185287922
+          ],
+          "resolved_modes": 3,
+          "samples_per_rung": 128
+        },
+        "rigid": {
+          "bias_um_by_rung": [
+            278.3946368290356,
+            398.7737465208156,
+            127.89402631021738,
+            591.2770775280742
+          ],
+          "empirical_to_predicted_resolution": [
+            1.0157880816882696,
+            1.0676619417993136
+          ],
+          "max_absolute_bias_sigma": 0.12053090012502114,
+          "normal_95pct_coverage": 0.9326171875,
+          "resolution_um": [
+            3419.2245831387354,
+            4813.902093170804
+          ],
+          "resolved_modes": 2,
+          "samples_per_rung": 128
+        }
+      }
+    }
+  },
   "inputs": {
     "current_span_sha256": "853d5e57891decc4a719cc27e5b45813330b063abee191e32706b787a2fc84f0",
     "random_seed": 20260812,

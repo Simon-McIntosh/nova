@@ -1,0 +1,34 @@
+{
+  "completed_shots": [],
+  "figures": [],
+  "generated_at": "2026-08-13T06:02:57.863284+00:00",
+  "incomplete_shots": [
+    21978,
+    21983,
+    21985,
+    21986,
+    21989,
+    22086
+  ],
+  "magnetics_budget": "not-scored",
+  "requested_shots": [
+    21978,
+    21983,
+    21985,
+    21986,
+    21989,
+    22086
+  ],
+  "run_errors": {
+    "21978": "TypeError: run_parity_chain() missing 3 required keyword-only arguments: 'moment_solver', 'profile_solver', and 'topology_labeler'",
+    "21983": "TypeError: run_parity_chain() missing 3 required keyword-only arguments: 'moment_solver', 'profile_solver', and 'topology_labeler'",
+    "21985": "TypeError: run_parity_chain() missing 3 required keyword-only arguments: 'moment_solver', 'profile_solver', and 'topology_labeler'",
+    "21986": "TypeError: run_parity_chain() missing 3 required keyword-only arguments: 'moment_solver', 'profile_solver', and 'topology_labeler'",
+    "21989": "TypeError: run_parity_chain() missing 3 required keyword-only arguments: 'moment_solver', 'profile_solver', and 'topology_labeler'",
+    "22086": "TypeError: run_parity_chain() missing 3 required keyword-only arguments: 'moment_solver', 'profile_solver', and 'topology_labeler'"
+  },
+  "scored_slices": [],
+  "shot_summaries": [],
+  "skipped_slices": [],
+  "status": "incomplete"
+}

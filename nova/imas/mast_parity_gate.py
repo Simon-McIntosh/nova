@@ -14,20 +14,43 @@ import argparse
 import json
 import math
 from collections import Counter
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field as dataclass_field, replace
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Callable, Mapping
 
 import numpy as np
 
+from nova.equilibrium.measurement import SliceMeasurement
+from nova.equilibrium.moment import UnsupportedSlice
 from nova.imas.mast_chain_factory import build_mast_parity_chain
 from nova.imas.mast_efit_referee import (
     FROZEN_SHOTS,
     RefereedParityResult,
-    run_refereed_parity_chain,
+    read_efit_referee,
+    score_with_efit_referee,
 )
-from nova.imas.mast_solve_inputs import SHOT_STORE
+from nova.imas.mast_parity_chain import (
+    AcceleratorSettings,
+    GeometryScores,
+    ParityChainResult,
+    PhysicsScores,
+    SliceScorecard,
+    SolveHealthScores,
+    TemporalScores,
+    _accelerated_profile_solve,
+    _convergence_fraction,
+    _lcfs_distance,
+    _pack_source_currents,
+    _raw_magnetics_residuals,
+    _registered_scorecard_metrics,
+    _sensor_scales,
+)
+from nova.imas.mast_solve_inputs import (
+    SHOT_STORE,
+    CorrectedSolveInputs,
+    read_corrected_solve_inputs,
+)
 from nova.imas.parity_tolerances import (
     SCORECARD_FIELDS,
     MagneticsBudgetClass,
@@ -60,6 +83,19 @@ class SkippedSlice:
     slice_index: int
     time_s: float
     cause: str
+    details: Mapping[str, Any] = dataclass_field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class ProductionShotScore:
+    """Supported reconstruction rows plus corrected-input-only seed skips."""
+
+    shot: int
+    available_slices: int
+    source_slice_indices: tuple[int, ...]
+    result: RefereedParityResult | None
+    skipped_slices: tuple[SkippedSlice, ...]
+    magnetics_budget: MagneticsBudgetClass
 
 
 @dataclass(frozen=True)
@@ -93,6 +129,146 @@ class FrozenGateReport:
     figures: tuple[str, ...]
 
 
+def _supported_moment_seeds(
+    shot: int,
+    inputs: CorrectedSolveInputs,
+    moment_solver: Any,
+    profile_solver: Any,
+) -> tuple[tuple[int, ...], tuple[Any, ...], tuple[SkippedSlice, ...], np.ndarray]:
+    """Attempt every corrected slice and retain only supported moment seeds."""
+
+    source_current = _pack_source_currents(profile_solver, inputs)
+    scale = _sensor_scales(inputs.sensor_signals, None)
+    vacuum_sensor = source_current @ np.asarray(profile_solver.source_to_sensor).T
+    vacuum_flux = source_current @ np.asarray(profile_solver.source_to_grid).T
+    mask = np.isfinite(inputs.sensor_signals)
+    indices: list[int] = []
+    seeds: list[Any] = []
+    skipped: list[SkippedSlice] = []
+    for index, time_s in enumerate(np.asarray(inputs.time_s, dtype=float)):
+        measurement = SliceMeasurement(
+            measured=inputs.sensor_signals[index],
+            vacuum=vacuum_sensor[index],
+            mask=mask[index],
+            scale=scale,
+            plasma_current=float(inputs.plasma_current_a[index]),
+            vacuum_flux=vacuum_flux[index],
+        )
+        try:
+            seed = moment_solver.solve(measurement)
+        except UnsupportedSlice as error:
+            skipped.append(
+                SkippedSlice(
+                    shot=int(shot),
+                    slice_index=index,
+                    time_s=float(time_s),
+                    cause=error.condition,
+                    details=error.details,
+                )
+            )
+            continue
+        indices.append(index)
+        seeds.append(seed)
+    return tuple(indices), tuple(seeds), tuple(skipped), scale
+
+
+def _select_inputs(
+    inputs: CorrectedSolveInputs, indices: tuple[int, ...]
+) -> CorrectedSolveInputs:
+    """Select corrected solve rows while preserving their channel metadata."""
+
+    rows = np.asarray(indices, dtype=int)
+    return replace(
+        inputs,
+        time_s=np.asarray(inputs.time_s)[rows],
+        coil_currents_a=np.asarray(inputs.coil_currents_a)[rows],
+        sensor_signals=np.asarray(inputs.sensor_signals)[rows],
+        plasma_current_a=np.asarray(inputs.plasma_current_a)[rows],
+    )
+
+
+def _run_supported_chain(
+    inputs: CorrectedSolveInputs,
+    seeds: tuple[Any, ...],
+    *,
+    profile_solver: Any,
+    topology_labeler: Any,
+    temporal_scorer: Any,
+    sensor_scale: np.ndarray,
+    accelerator: AcceleratorSettings = AcceleratorSettings(),
+    magnetics_budget: MagneticsBudgetClass = MagneticsBudgetClass.SOURCE_CUTOVER,
+) -> ParityChainResult:
+    """Run the unchanged batch solve for rows with valid moment seeds."""
+
+    source_current = _pack_source_currents(profile_solver, inputs)
+    mask = np.isfinite(inputs.sensor_signals)
+    initial_flux = np.stack([np.asarray(seed.flux).reshape(-1) for seed in seeds])
+    expected = (inputs.slice_count, np.asarray(profile_solver.source_to_grid).shape[0])
+    if initial_flux.shape != expected:
+        raise ValueError(
+            f"moment seed flux shape {initial_flux.shape} must be {expected}"
+        )
+    solve = _accelerated_profile_solve(
+        profile_solver,
+        source_current,
+        inputs,
+        sensor_scale,
+        mask,
+        initial_flux,
+        accelerator,
+    )
+    topology = topology_labeler(np.asarray(solve.flux))
+    topology.validate(inputs.slice_count)
+    raw_residual = _raw_magnetics_residuals(
+        profile_solver,
+        source_current,
+        inputs,
+        sensor_scale,
+        mask,
+        solve.flux,
+    )
+    temporal = np.asarray(temporal_scorer(inputs, solve.flux), dtype=float)
+    if temporal.shape != (inputs.slice_count,):
+        raise ValueError(
+            f"temporal scorer shape {temporal.shape} must be ({inputs.slice_count},)"
+        )
+    core = np.asarray(topology.core_mask, dtype=bool)
+    confinement = core.reshape(inputs.slice_count, -1).mean(axis=1)
+    throughput = inputs.slice_count / max(solve.elapsed_s, np.finfo(float).tiny)
+    scorecard = SliceScorecard(
+        shot=int(inputs.shot),
+        time_s=np.asarray(inputs.time_s),
+        geometry=GeometryScores(
+            magnetic_axis_m=np.asarray(topology.magnetic_axis_m),
+            lcfs_m=np.asarray(topology.lcfs_m),
+            x_point_m=np.asarray(topology.x_point_m),
+            diverted=np.asarray(topology.diverted, dtype=bool),
+            seed_to_solved_lcfs_distance_m=np.asarray(
+                [
+                    _lcfs_distance(seed, topology.lcfs_m[index])
+                    for index, seed in enumerate(seeds)
+                ]
+            ),
+        ),
+        physics=PhysicsScores(
+            profile_residual=np.asarray(solve.residual),
+            whitened_raw_magnetics_residual=raw_residual,
+        ),
+        solve_health=SolveHealthScores(
+            convergence_fraction=_convergence_fraction(solve.trace, solve.residual),
+            confinement_fraction=confinement,
+            iteration_count=np.full(inputs.slice_count, accelerator.evaluation_count),
+            throughput_slices_per_second=np.full(inputs.slice_count, throughput),
+        ),
+        temporal=TemporalScores(current_diffusion_flux_ledger_consistency=temporal),
+        registered_metrics=_registered_scorecard_metrics(
+            solve, raw_residual, topology, temporal, accelerator
+        ),
+        magnetics_budget=magnetics_budget,
+    )
+    return ParityChainResult(inputs, seeds, solve, topology, scorecard)
+
+
 def score_production_shot(
     shot: int,
     *,
@@ -101,8 +277,8 @@ def score_production_shot(
     store: Path | str = SHOT_STORE,
     radial_points: int = 33,
     vertical_points: int = 49,
-) -> RefereedParityResult:
-    """Score one shot using only components returned by the production factory."""
+) -> ProductionShotScore:
+    """Score supported corrected slices using only production components."""
 
     components = build_mast_parity_chain(
         int(shot),
@@ -112,15 +288,30 @@ def score_production_shot(
         radial_points=radial_points,
         vertical_points=vertical_points,
     )
-    return run_refereed_parity_chain(
-        int(shot),
-        moment_solver=components.moment_solver,
-        profile_solver=components.profile_solver,
-        topology_labeler=components.topology_labeler,
-        temporal_scorer=components.temporal_scorer,
+    inputs = read_corrected_solve_inputs(int(shot), store=store)
+    indices, seeds, skipped, scale = _supported_moment_seeds(
+        int(shot), inputs, components.moment_solver, components.profile_solver
+    )
+    result = None
+    if indices:
+        supported_inputs = _select_inputs(inputs, indices)
+        chain = _run_supported_chain(
+            supported_inputs,
+            seeds,
+            profile_solver=components.profile_solver,
+            topology_labeler=components.topology_labeler,
+            temporal_scorer=components.temporal_scorer,
+            sensor_scale=scale,
+        )
+        referee = read_efit_referee(int(shot), store=store)
+        result = score_with_efit_referee(chain, referee)
+    return ProductionShotScore(
+        shot=int(shot),
+        available_slices=inputs.slice_count,
+        source_slice_indices=indices,
+        result=result,
+        skipped_slices=skipped,
         magnetics_budget=MagneticsBudgetClass.SOURCE_CUTOVER,
-        store=store,
-        referee_store=store,
     )
 
 
@@ -167,15 +358,45 @@ def _slice_metrics(result: RefereedParityResult, index: int) -> dict[str, float]
 
 
 def _score_result(
-    result: RefereedParityResult,
+    result: RefereedParityResult | None,
+    *,
+    shot: int | None = None,
+    source_slice_indices: tuple[int, ...] | None = None,
+    initial_skips: tuple[SkippedSlice, ...] = (),
+    available_slices: int | None = None,
 ) -> tuple[list[ScoredSlice], list[SkippedSlice], ShotSummary]:
     """Score all aligned slices and retain every unaligned row with its cause."""
+
+    if result is None:
+        if shot is None or available_slices is None:
+            raise ValueError("an empty shot result requires shot and coverage counts")
+        pass_fractions = {field: float("nan") for field in sorted(SCORECARD_FIELDS)}
+        causes = Counter(row.cause for row in initial_skips)
+        summary = ShotSummary(
+            shot=int(shot),
+            available_slices=int(available_slices),
+            scored_slices=0,
+            skipped_slices=len(initial_skips),
+            skip_causes=dict(sorted(causes.items())),
+            pass_fraction_by_metric=pass_fractions,
+        )
+        return [], list(initial_skips), summary
 
     scorecard = result.scorecard
     geometry = result.geometry_scores
     scored: list[ScoredSlice] = []
-    skipped: list[SkippedSlice] = []
-    for index, time_s in enumerate(np.asarray(scorecard.time_s, dtype=float)):
+    skipped = list(initial_skips)
+    if source_slice_indices is None:
+        source_slice_indices = tuple(range(scorecard.slice_count))
+    if len(source_slice_indices) != scorecard.slice_count:
+        raise ValueError("source slice indices do not match the scorecard rows")
+    for index, (slice_index, time_s) in enumerate(
+        zip(
+            source_slice_indices,
+            np.asarray(scorecard.time_s, dtype=float),
+            strict=True,
+        )
+    ):
         if not bool(geometry.usable_reference[index]):
             reference_index = int(geometry.reference_index[index])
             cause = (
@@ -186,7 +407,7 @@ def _score_result(
             skipped.append(
                 SkippedSlice(
                     shot=int(scorecard.shot),
-                    slice_index=index,
+                    slice_index=int(slice_index),
                     time_s=float(time_s),
                     cause=cause,
                 )
@@ -198,7 +419,7 @@ def _score_result(
         scored.append(
             ScoredSlice(
                 shot=int(scorecard.shot),
-                slice_index=index,
+                slice_index=int(slice_index),
                 time_s=float(time_s),
                 reference_time_s=float(geometry.reference_time_s[index]),
                 metrics=metrics,
@@ -217,7 +438,11 @@ def _score_result(
     causes = Counter(row.cause for row in skipped)
     summary = ShotSummary(
         shot=int(scorecard.shot),
-        available_slices=int(scorecard.slice_count),
+        available_slices=(
+            int(scorecard.slice_count)
+            if available_slices is None
+            else int(available_slices)
+        ),
         scored_slices=len(scored),
         skipped_slices=len(skipped),
         skip_causes=dict(sorted(causes.items())),
@@ -353,7 +578,7 @@ def _write_figures(
 
 
 def bank_frozen_scorecard(
-    scorer: Callable[[int], RefereedParityResult] | None = None,
+    scorer: Callable[[int], RefereedParityResult | ProductionShotScore] | None = None,
     *,
     shots: tuple[int, ...] = FROZEN_SHOTS,
     artifact_path: Path | str = DEFAULT_ARTIFACT,
@@ -390,6 +615,7 @@ def bank_frozen_scorecard(
     skipped: list[SkippedSlice] = []
     summaries: list[ShotSummary] = []
     results: dict[int, RefereedParityResult] = {}
+    completed_set: set[int] = set()
     errors: dict[int, str] = {}
     budgets: set[str] = set()
 
@@ -399,25 +625,50 @@ def bank_frozen_scorecard(
             break
         attempted.append(int(shot))
         try:
-            result = scorer(int(shot))
-            if int(result.scorecard.shot) != int(shot):
-                raise ValueError(
-                    f"scorer returned shot {result.scorecard.shot} for request {shot}"
+            outcome = scorer(int(shot))
+            if isinstance(outcome, ProductionShotScore):
+                if int(outcome.shot) != int(shot):
+                    raise ValueError(
+                        f"scorer returned shot {outcome.shot} for request {shot}"
+                    )
+                shot_scored, shot_skipped, summary = _score_result(
+                    outcome.result,
+                    shot=outcome.shot,
+                    source_slice_indices=outcome.source_slice_indices,
+                    initial_skips=outcome.skipped_slices,
+                    available_slices=outcome.available_slices,
                 )
-            shot_scored, shot_skipped, summary = _score_result(result)
+                budget = outcome.magnetics_budget
+                figure_result = outcome.result
+            else:
+                result = outcome
+                if int(result.scorecard.shot) != int(shot):
+                    raise ValueError(
+                        "scorer returned shot "
+                        f"{result.scorecard.shot} for request {shot}"
+                    )
+                shot_scored, shot_skipped, summary = _score_result(result)
+                budget = result.scorecard.magnetics_budget
+                figure_result = result
+            if int(summary.shot) != int(shot):
+                raise ValueError(
+                    f"score summary returned shot {summary.shot} for request {shot}"
+                )
         except Exception as error:  # continue so the bank names every uncovered shot
             errors[int(shot)] = f"{type(error).__name__}: {error}"
             continue
-        results[int(shot)] = result
-        budgets.add(str(result.scorecard.magnetics_budget))
+        completed_set.add(int(shot))
+        if figure_result is not None:
+            results[int(shot)] = figure_result
+        budgets.add(str(budget))
         scored.extend(shot_scored)
         skipped.extend(shot_skipped)
         summaries.append(summary)
 
     if len(budgets) > 1:
         raise ValueError(f"shots were scored with mixed magnetics budgets: {budgets}")
-    completed = tuple(shot for shot in shots if shot in results)
-    incomplete = tuple(shot for shot in shots if shot not in results)
+    completed = tuple(shot for shot in shots if shot in completed_set)
+    incomplete = tuple(shot for shot in shots if shot not in completed_set)
     not_attempted = tuple(shot for shot in shots if shot not in attempted)
     figures = _write_figures(results, scored, Path(figure_dir))
     if incomplete:

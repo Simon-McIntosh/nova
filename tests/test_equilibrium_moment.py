@@ -10,6 +10,7 @@ stage which swings the boundary.
 
 import numpy as np
 import pytest
+from types import SimpleNamespace
 
 from nova.equilibrium.measurement import Magnetics, SliceMeasurement
 from nova.equilibrium.moment import (
@@ -17,6 +18,7 @@ from nova.equilibrium.moment import (
     MomentConfig,
     MomentOrder,
     ReconstructMoment,
+    UnsupportedSlice,
     build_moment_basis,
     limiter_radial_extent,
     moment_terms,
@@ -128,10 +130,7 @@ def test_the_rogowski_anchor_pins_the_total_current():
     """Out of span, the hard anchor still holds the total current exactly."""
     read, _ = synthetic_read(seed=1)
     blob = np.exp(
-        -(
-            ((read.cells.r - read.major_radius) / 0.25) ** 2
-            + (read.cells.z / 0.3) ** 2
-        )
+        -(((read.cells.r - read.major_radius) / 0.25) ** 2 + (read.cells.z / 0.3) ** 2)
     )
     cell_current = blob / blob.sum() * 6.0e5
     slice_data = measurement(read.sensor_coupling, cell_current, plasma_current=6.0e5)
@@ -201,6 +200,61 @@ def test_uniform_disc_seed_spreads_the_plasma_current_evenly():
     assert np.isclose(cell_current.sum(), 1.2e5)
     assert np.allclose(cell_current[inside], cell_current[inside][0])
     assert np.all(np.hypot(read.cells.r - 0.9, read.cells.z)[inside] < 0.3)
+
+
+def test_unsupported_seed_disc_carries_its_support_counts():
+    read, _ = synthetic_read()
+
+    with pytest.raises(UnsupportedSlice) as caught:
+        read.uniform_disc(0.9, 0.0, 0.01, 1.2e5)
+
+    assert caught.value.condition == "seed-disc-insufficient-supported-cells"
+    assert caught.value.details["supported_cell_count"] == 1
+    assert caught.value.details["minimum_cell_count"] == 5
+
+
+def test_centroid_outside_limiter_carries_position_and_radial_support():
+    read, _ = synthetic_read()
+    read.grid = SimpleNamespace(
+        limiter_r=np.array([0.2, 1.8, 1.8, 0.2, 0.2]),
+        limiter_z=np.array([-1.5, -1.5, 1.5, 1.5, -1.5]),
+    )
+
+    with pytest.raises(UnsupportedSlice) as caught:
+        read.self_sized_seed(object(), (2.0, 0.0))
+
+    assert caught.value.condition == "current-centroid-outside-limiter"
+    assert caught.value.details == {
+        "centroid_r_m": 2.0,
+        "centroid_z_m": 0.0,
+        "limiter_inboard_r_m": 0.2,
+        "limiter_outboard_r_m": 1.8,
+        "supported_minor_distance_m": pytest.approx(-0.2),
+    }
+
+
+def test_flood_seed_outside_vessel_carries_position_and_grid_index():
+    read, _ = synthetic_read()
+    read.grid = SimpleNamespace(
+        rg=np.array([0.5, 1.0, 1.5]),
+        zg=np.array([-0.5, 0.0, 0.5]),
+        inside_limiter=np.array(
+            [[False, False, False], [False, True, False], [False, False, False]]
+        ),
+    )
+
+    with pytest.raises(UnsupportedSlice) as caught:
+        read.push_out(np.zeros((3, 3)), (1.5, 0.5))
+
+    assert caught.value.condition == "flood-seed-outside-vessel"
+    assert caught.value.details == {
+        "centroid_r_m": 1.5,
+        "centroid_z_m": 0.5,
+        "grid_row": 2,
+        "grid_column": 2,
+        "grid_r_m": 1.5,
+        "grid_z_m": 0.5,
+    }
 
 
 def test_limiter_extent_of_a_rectangular_vessel():

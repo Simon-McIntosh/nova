@@ -164,6 +164,7 @@ def synthetic_shot(
         time=time,
         drives=drives,
         probes=probes_out,
+        sensors=probes_out,
         plasma_current=np.zeros_like(time),
         sample_mask=np.ones(time.shape, dtype=bool),
         baseline_mask=time < -0.05,

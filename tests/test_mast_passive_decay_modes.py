@@ -565,6 +565,7 @@ def switched_shot(
         time=time,
         drives={"p4_upper": current},
         probes=probes,
+        sensors=probes,
         plasma_current=np.zeros_like(time),
         sample_mask=np.ones(time.shape, dtype=bool),
         baseline_mask=time < -0.05,

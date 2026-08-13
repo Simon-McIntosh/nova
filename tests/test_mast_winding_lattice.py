@@ -146,6 +146,7 @@ def synthetic_shot(
         time=time,
         drives=drives,
         probes=probes,
+        sensors=probes,
         plasma_current=np.zeros_like(time),
         sample_mask=np.ones(time.shape, dtype=bool),
         baseline_mask=time < -0.05,
@@ -458,9 +459,7 @@ def test_planted_channel_gains_are_recovered_off_the_far_field(model, baseline):
             seed=index,
         )
         moments.append(
-            reduce_shot(
-                waveforms, model, family, {family: 23.0}, scatter_for(model)
-            )
+            reduce_shot(waveforms, model, family, {family: 23.0}, scatter_for(model))
         )
     calibration = calibrate_array(moments, baseline)
     for channel, value in planted.items():
@@ -550,7 +549,13 @@ def test_a_coil_with_no_promoted_weight_is_refused(model, baseline):
 
     waveforms = synthetic_shot(model, baseline, {"p5_upper": 8.0e3, "p4_lower": 6.0e3})
     with pytest.raises(LatticeError):
-        reduce_shot(waveforms, model, "p5_upper", {"p5_upper": 23.0}, scatter_for(model))
+        reduce_shot(
+            waveforms,
+            model,
+            "p5_upper",
+            {"p5_upper": 23.0},
+            scatter_for(model),
+        )
 
 
 def test_a_degenerate_grid_or_fill_is_refused():

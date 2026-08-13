@@ -768,9 +768,14 @@ class CoilDatabase(CoilSet, CoilData):
         """
         Return group attrs.
 
-        Extends :func:`~nova.imas.database.CoilData`.
+        Extends :func:`~nova.imas.database.CoilData`. The data dictionary
+        version is part of the compiled coil geometry identity, preventing a
+        request made under one schema from loading an entry built under
+        another.
         """
-        return self.coilset_attrs | self.ids_attrs
+        return (
+            self.coilset_attrs | self.ids_attrs | {"dd_version": str(self.dd_version)}
+        )
 
 
 @dataclass
@@ -1277,15 +1282,35 @@ class Geometry(IdsBase):
         wall=Wall,
         elm=ELM,
     )
+    source_attrs: ClassVar[tuple[str, ...]] = (
+        *IdsBase.database_attrs,
+        "dd_version",
+    )
 
     def __post_init__(self):
         """Map geometry parameters to dict attributes."""
         self.set_filename()
         for attr, geometry in self.geometry.items():
-            ids_attrs = self.get_ids_attrs(getattr(self, attr), geometry)
+            source = getattr(self, attr)
+            ids_attrs = self.get_ids_attrs(source, geometry)
+            ids_attrs = self._carry_source_dd_version(source, ids_attrs)
             setattr(self, attr, ids_attrs)
         if hasattr(super(), "__post_init__"):
             super().__post_init__()
+
+    def _carry_source_dd_version(self, source, ids_attrs):
+        """Attach the source-specific data dictionary version to its descriptor."""
+        if not isinstance(ids_attrs, dict):
+            return ids_attrs
+        if "dd_version" in ids_attrs:
+            return ids_attrs | {"dd_version": str(ids_attrs["dd_version"])}
+        if isinstance(source, IdsBase):
+            dd_version = source.dd_version
+        elif "ids" in ids_attrs:
+            dd_version = Database(ids=ids_attrs["ids"]).ids_dd_version
+        else:
+            return ids_attrs
+        return ids_attrs | {"dd_version": str(dd_version)}
 
     def set_filename(self):
         """Set filename when all geometry attrs are str or False."""
@@ -1356,7 +1381,9 @@ class Machine(CoilSet, Geometry, CoilData):  # Diagnostics,
             if isinstance(attrs, int | bytes | str):  # ids input
                 metadata[geometry] = attrs
                 continue
-            metadata[geometry] = ",".join([str(attrs[attr]) for attr in attrs])
+            metadata[geometry] = ",".join(
+                str(attrs[attr]) for attr in self.source_attrs if attr in attrs
+            )
         return metadata
 
     @metadata.setter
@@ -1376,21 +1403,27 @@ class Machine(CoilSet, Geometry, CoilData):  # Diagnostics,
             if isinstance(metadata[attr], np.integer):
                 setattr(self, attr, metadata[attr])
                 continue
+            source_attrs = self.source_attrs[: len(metadata[attr].split(","))]
             values = [
-                self._format_dataset_attrs(attr) for attr in metadata[attr].split(",")
+                self._format_dataset_attrs(name, value)
+                for name, value in zip(
+                    source_attrs, metadata[attr].split(","), strict=True
+                )
             ]
-            setattr(self, attr, dict(zip(IdsBase.database_attrs, values)))
+            setattr(self, attr, dict(zip(source_attrs, values, strict=True)))
         assert self.group == self.hash_attrs(self.group_attrs)
 
     @staticmethod
-    def _format_dataset_attrs(attr: str) -> str | int | float:
-        """Return formated attr. Try int conversion except return str."""
-        if "." in attr:
-            return float(attr)
+    def _format_dataset_attrs(name: str, value: str) -> str | int | float:
+        """Restore numeric source attributes while preserving DD versions."""
+        if name == "dd_version":
+            return value
+        if "." in value:
+            return float(value)
         try:
-            return int(attr)
+            return int(value)
         except ValueError:
-            return attr
+            return value
 
     @property
     def group_attrs(self) -> dict:
@@ -1427,6 +1460,7 @@ class Machine(CoilSet, Geometry, CoilData):  # Diagnostics,
         for attr, geometry in self.geometry.items():
             geometry_attrs = getattr(self, attr)
             if isinstance(geometry_attrs, dict):
+                geometry_attrs = {"dd_version": str(self.dd_version)} | geometry_attrs
                 coilset = geometry(
                     **geometry_attrs, **self.frameset_attrs, **self.route_attrs
                 )

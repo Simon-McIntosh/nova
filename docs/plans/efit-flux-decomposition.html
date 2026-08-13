@@ -23,7 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-13">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
+<meta name="plan-commits" content="8fffa5c7">
+<meta name="plan-artifacts" content="benchmarks/efit_flux_decomposition.py">
+<meta name="plan-impl" content="0.4">
 </head>
 <body>
   <main class="plan-doc">
@@ -65,7 +68,7 @@
         <line x1="180" y1="102" x2="180" y2="126" stroke="#0a6" stroke-dasharray="3 2"/>
         <line x1="520" y1="102" x2="520" y2="126" stroke="#c22" stroke-dasharray="3 2"/>
         <text x="180" y="140" text-anchor="middle" font-size="11" fill="#064">never contaminated by conductors</text>
-        <text x="520" y="140" text-anchor="middle" font-size="11" fill="#911">reconstruct from fcoil_x</text>
+        <text x="520" y="140" text-anchor="middle" font-size="11" fill="#911">reconstruct from fcoil_c</text>
 
         <line x1="520" y1="150" x2="520" y2="168" stroke="#555"/><polygon points="520,168 516,161 524,161" fill="#555"/>
         <text x="520" y="184" text-anchor="middle" font-size="11.5" fill="#111">residual = stored − plasma − external</text>
@@ -92,7 +95,7 @@
     effects this ladder is trying to resolve</em>. Any interpolation must therefore be named and its own
     error reported separately, so an interpolation artefact is never attributed to a missing conductor.</p>
 
-    <h2 id="s3">§3 — The external term, from the experimental currents</h2>
+    <h2 id="s3">§3 — The external term, from the fitted currents</h2>
 
     <p>Reconstruct the external contribution on the same grid from the recorded conductor currents,
     reusing the described-response machinery in <code>nova/imas/mast_vacuum_response.py</code> and the
@@ -196,6 +199,11 @@
     <pre class="r-fu-prompt">/reckon-ship efit-flux-decomposition §2</pre>
     </article>
 </section>
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s4" data-id="c-20260813-decompprobe" data-who="reckon-ship" data-when="2026-08-13T14:20:00+00:00">
+    <div class="r-comment-body">First masked decomposition landed as a probe - commit 8fffa5c7; shot 21978 slice 46 at 0.24499999 s. FOUR RESULTS, AND THE VACUUM FIELD IS LARGELY EXONERATED WHILE OUR OPERATOR IS NOT. (1) THE ROUND TRIP FAILS: 5.152548851e-3 of stored span against the 1e-6 bound, so the coupling-operator or grid path is defective and this decomposition is diagnostic only, not a validated boundary condition. That is the honest gate failure and it is ours, not the reference's. (2) The exterior receipt independently reproduces the affine node to the ampere: -9,605,045.714913 A signed and 10,080,225.951117 A absolute, -10.38x and 10.89x the stored 925,345.9375 A plasma current. (3) THE EXTERNAL FIELD SUBSTANTIALLY VALIDATES: driving 13 geometry-validated active circuits through loop_response_matrix and the gain-check drive-times-response form cancels 96.554825% of the native-grid exterior absolute current, leaving 347,281 A - so most of that 10 MA IS the real coils, correctly recovered, which was the leading hypothesis. On the interpolated nova grid cancellation drops to 80.178433%, leaving 161,147 A. (4) THE SURVIVING RESIDUAL LOCALISES IN P4 LOWER: unthresholded residual 8.717128% sup and 3.797384% RMS of span; residual delta_star gives 10,946.849 A signed and 181,809.098 A absolute, peaking at 1,660,756.548 A/m2 at R=1.53833375 m, Z=-1.153125 m, inside p4_lower. An INDEPENDENT INSTRUMENT has landed on the conductor the magnetics misfit maps already implicated - see mast-misfit-localization-maps, where the P4-lower survivor was stable at +0.92 split-half, and mast-p4p5-feeder-candidates-null, where the conductor hunt closed null. Two unrelated data paths agreeing on one conductor is worth more than either alone. CAVEAT KEPT IN VIEW: bilinear EFIT-to-nova-to-EFIT interpolation error is 4.162463% of span over 3422 overlap points, larger than the 3.797% residual RMS though smaller than the 8.717% sup, so the interpolated-grid figures are partly artefact and the 96.55% native-grid cancellation is the more trustworthy number. NOTE ON SCOPE: this probe used fcoil_x throughout, on my instruction before the owner locked fcoil_c; efm/fcoil_c was never read. The fcoil_x cancellation is therefore the experimental-current reading and is worth keeping as the comparison the locked decision asks for, but the primary measurement must be redone on fcoil_c. No residual threshold, fit, exclusion or current tuning was applied.</div>
+</div>
+</section>
+</main>
 </body>
 </html>

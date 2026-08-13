@@ -311,6 +311,28 @@ def test_nonfinite_trace_is_retained_as_zero_convergence():
     np.testing.assert_allclose(fraction, [0.0, 0.75])
 
 
+def test_completed_chain_with_no_reference_rows_remains_available_for_skipping(
+    monkeypatch,
+):
+    geometry = SimpleNamespace(usable_slice_count=0)
+    chain = SimpleNamespace(
+        scorecard=SimpleNamespace(time_s=np.array([0.1])), topology=object()
+    )
+    referee = object()
+    monkeypatch.setattr(gate_module, "compare_reference_geometry", lambda *_a: geometry)
+    monkeypatch.setattr(
+        gate_module,
+        "score_with_efit_referee",
+        lambda *_a: pytest.fail("empty reference comparison must not be reduced"),
+    )
+
+    result = gate_module._score_completed_chain(chain, referee)
+
+    assert result.chain is chain
+    assert result.referee is referee
+    assert result.geometry_scores is geometry
+
+
 def test_failed_shot_is_named_while_remaining_shots_continue(tmp_path):
     def scorer(shot):
         if shot == 21986:
@@ -410,7 +432,7 @@ def test_production_scorer_passes_only_factory_components_to_refereed_chain(
     monkeypatch.setattr(gate_module, "read_efit_referee", lambda *_a, **_k: referee)
     monkeypatch.setattr(
         gate_module,
-        "score_with_efit_referee",
+        "_score_completed_chain",
         lambda received_chain, received_referee: (
             expected if (received_chain, received_referee) == (chain, referee) else None
         ),

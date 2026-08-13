@@ -27,6 +27,7 @@ from nova.imas.mast_chain_factory import build_mast_parity_chain
 from nova.imas.mast_efit_referee import (
     FROZEN_SHOTS,
     RefereedParityResult,
+    compare_reference_geometry,
     read_efit_referee,
     score_with_efit_referee,
 )
@@ -328,6 +329,19 @@ def _run_supported_chain(
     return ParityChainResult(inputs, seeds, solve, topology, scorecard)
 
 
+def _score_completed_chain(
+    chain: ParityChainResult, referee: Any
+) -> RefereedParityResult:
+    """Score reference rows or retain an explicit empty comparison for skipping."""
+
+    geometry = compare_reference_geometry(
+        chain.scorecard.time_s, chain.topology, referee
+    )
+    if geometry.usable_slice_count:
+        return score_with_efit_referee(chain, referee)
+    return RefereedParityResult(chain, referee, geometry)
+
+
 def score_production_shot(
     shot: int,
     *,
@@ -379,7 +393,7 @@ def score_production_shot(
             sensor_scale=scale,
         )
         referee = read_efit_referee(int(shot), store=store)
-        result = score_with_efit_referee(chain, referee)
+        result = _score_completed_chain(chain, referee)
     return ProductionShotScore(
         shot=int(shot),
         available_slices=inputs.slice_count,

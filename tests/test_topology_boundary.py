@@ -11,6 +11,11 @@ close with an end-to-end ``update`` on a raster grid.
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+import subprocess
+import sys
+
 import numpy as np
 import pytest
 
@@ -135,6 +140,32 @@ def test_x_mask_excludes_cells_beyond_null_heights(topology):
 
     unmasked = np.asarray(topology.x_mask(data_o, jnp.asarray([NAN_ROW, NAN_ROW])))
     assert unmasked.all()
+
+
+def test_native_compile_probe_preserves_child_exit_statuses(tmp_path):
+    script = Path(__file__).parents[1] / "benchmarks" / "topology_boundary_compile.py"
+    completed = subprocess.run(
+        [
+            sys.executable,
+            str(script),
+            "--warmup-compilations",
+            "4",
+            "--memory-headroom-mib",
+            "8",
+            "--output-dir",
+            str(tmp_path),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=180,
+        check=False,
+    )
+    assert completed.returncode == 0, completed.stderr
+    summary = json.loads((tmp_path / "summary.json").read_text())
+    statuses = {
+        result["condition"]: result["exit_status"] for result in summary["results"]
+    }
+    assert statuses == {"fresh": 0, "warm-cache": 0, "constrained-memory": 134}
 
 
 def test_psi_lcfs_is_the_normalized_flux_interpolant(topology):

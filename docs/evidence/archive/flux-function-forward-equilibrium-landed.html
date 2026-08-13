@@ -329,6 +329,38 @@
   measurement is not superseded by a measurement of a different configuration, and collapsing them
   would have destroyed the asymmetry that is the actual finding.</p>
 
+  <h2 id="closure-bound-observables">One ceiling for every observable was the wrong shape</h2>
+
+  <p>Commit <code>1d89007a</code>. Gate passed — the target test passes in 226.70 s against
+  <strong>unchanged production code</strong>.</p>
+
+  <p>A long-standing failure,
+  <code>test_the_passive_closure_moves_the_reproduction_by_a_tenth_of_a_percent</code>, observed
+  0.4165026973920738 against a 0.15 bound. <strong>The test assertion was wrong; production is not
+  implicated.</strong> The old loop evaluated <code>abs(structure[name] &minus; without[name]) &lt;
+  0.15</code> over every observable in turn — so for internal inductance the 0.4165 figure is the
+  coarse-suite <em>closure delta in percentage points</em>. Identifying that quantity is what settles
+  it, and two candidates are excluded by their own magnitudes: it is not raw internal inductance,
+  which is the dimensionless 0.797870793326622 on the active-only replay, and it is not a reproduction
+  deviation, which is &minus;0.135265926%.</p>
+
+  <p><strong>The test was encoding the very error the passive-response measurement identified.</strong>
+  Applying one flux-scale ceiling to every observable assumes they respond alike, and they do not: the
+  banked closure moves internal inductance by +0.904734074 pp while moving I_p by 0.030011433 pp. A
+  0.15 pp ceiling on l_i closure therefore contradicts the measured passive response — the bound was
+  not merely tight, it described the wrong physics for that one row.</p>
+
+  <p>The corrected test keeps 0.15 where it belongs, on the flux-map reproduction move the test name
+  actually describes (measured 0.098 pp on the suite mesh), holds plasma-current and poloidal-beta
+  closure moves under that same flux-scale ceiling, and asserts internal inductance against its own
+  measured behaviour: the passive-inclusive absolute deviation must <em>improve</em>, while its
+  coarse-suite closure delta must exceed 0.15 pp and stay below the banked 0.904734074 pp response. The
+  asymmetry is now a property the suite enforces rather than one it trips over.</p>
+
+  <p>One method note kept because it is the right instinct: the node's first invocation collected the
+  test but selected 0 under the default marker expression, and it retained that run as
+  <em>non-evidence</em> rather than counting it as a pass.</p>
+
   <h2 id="reference-mapping-excluded">The last candidate is excluded, and no named cause remains</h2>
 
   <p>Commit <code>a6366ec9</code>. Gate passed. SLURM sun_debug 1245563, 9m36s, exit 0. Artifact:

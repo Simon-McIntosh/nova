@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-13T13:20:23",
+  "updated": "2026-08-13T14:25:20",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -3232,9 +3232,61 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260813T121408920488-passive-closure-bound-review",
+        "plan": "flux-function-forward-equilibrium",
+        "section": "\u00a76",
+        "node": "passive-closure-bound-review",
+        "role": "implement",
+        "member": "fffe-infra",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-13T12:14:12Z",
+        "completed_at": "2026-08-13T12:24:51Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 639,
+        "time_budget": "35m",
+        "base_sha": "ecd4507ea92be2056813321cc97ce9d4aa4a8f50",
+        "commits": [
+          "1d89007a"
+        ],
+        "changed_lines": {
+          "added": 32,
+          "removed": 10,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/7df8edeb-58a6-40f6-a85b-4f1edca55e25/scratchpad/passive-closure-bound-review-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ffa0a-0c52-7e22-a0ab-1d02b10ced07",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 16820736,
+            "input_tokens": 17252294,
+            "output_tokens": 42027,
+            "reasoning_output_tokens": 16543
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 115
+    "_version": 116
   }
 }

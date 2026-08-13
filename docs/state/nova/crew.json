@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-13T07:44:09",
+  "updated": "2026-08-13T07:55:15",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -131,11 +131,25 @@
         "created": "2026-08-12"
       },
       {
+        "id": "parity-gate",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-13"
+      },
+      {
         "id": "parity-tolerances",
         "harness": "claude",
         "role": "implement",
         "session_id": null,
         "created": "2026-08-12"
+      },
+      {
+        "id": "parity-transport",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-13"
       },
       {
         "id": "publish",
@@ -1838,9 +1852,61 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260813T054122088580-efit-referee-layer",
+        "plan": "spine-efit-parity",
+        "section": "\u00a73",
+        "node": "efit-referee-layer",
+        "role": "implement",
+        "member": "efit-referee",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-13T05:41:22Z",
+        "completed_at": "2026-08-13T05:53:15Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 713,
+        "time_budget": "25m",
+        "base_sha": "d650491280911e85dabc9887bff4ddfc57fc305e",
+        "commits": [
+          "99dfc6a6fdd3c3dab79701c672bbcb64a2af67c3"
+        ],
+        "changed_lines": {
+          "added": 650,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 8,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/653c361a-8c6e-405b-9035-eb21e04233a8/scratchpad/efit-referee-layer-manifest.md",
+        "scope_changed": false,
+        "session_id": null,
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 4051456,
+            "input_tokens": 4203915,
+            "output_tokens": 24840,
+            "reasoning_output_tokens": 8517
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 76
+    "_version": 79
   }
 }

@@ -1,9 +1,16 @@
 {
-  "updated": "2026-08-12T22:44:07",
+  "updated": "2026-08-12T22:48:14",
   "project": "nova",
   "doc": "crew",
   "data": {
     "members": [
+      {
+        "id": "biot-bench",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-12"
+      },
       {
         "id": "calibrate-kernels",
         "harness": "codex",
@@ -107,6 +114,13 @@
         "harness": "claude",
         "role": "implement",
         "session_id": "019ff724-5f93-7e50-8eac-d19fff817e40",
+        "created": "2026-08-12"
+      },
+      {
+        "id": "parity-tolerances",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
         "created": "2026-08-12"
       },
       {
@@ -1351,6 +1365,6 @@
       }
     ],
     "holds": [],
-    "_version": 62
+    "_version": 64
   }
 }

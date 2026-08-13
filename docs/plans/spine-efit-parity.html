@@ -4,24 +4,27 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="nova">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="spine-efit-parity">
-  <meta name="plan-title"     content="Spine Reconstruction Parity vs EFIT">
-  <meta name="plan-summary"   content="Prove the nova physics spine reconstructs MAST equilibria comparably to the existing EFIT solutions — GS-balanced flux maps through the accelerated boundary-push solve plus 1D current-diffusion consistency, on corrected reads, scored against the firewalled EFIT referee — before any ML-assisted step and before the GPU catalog run">
-  <meta name="plan-status"    content="active">
-  <meta name="plan-roi"       content="high">
-  <meta name="plan-effort"    content="L">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="spine-efit-parity">
+  <meta name="plan-title" content="Spine Reconstruction Parity vs EFIT">
+  <meta name="plan-summary" content="Prove the nova physics spine reconstructs MAST equilibria comparably to the existing EFIT solutions — GS-balanced flux maps through the accelerated boundary-push solve plus 1D current-diffusion consistency, on corrected reads, scored against the firewalled EFIT referee — before any ML-assisted step and before the GPU catalog run">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="L">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
   <meta name="plan-capability-verification" content="strict">
-  <meta name="plan-sprint"    content="S7">
-  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-sprint" content="S7">
+  <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-depends-on" content="spine-boundary-accelerator,mast-corrected-read-layer">
-  <meta name="plan-blocks"    content="mast-catalog-gpu-solve">
+  <meta name="plan-blocks" content="mast-catalog-gpu-solve">
   <title>Spine Reconstruction Parity vs EFIT | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-13">
+<meta name="plan-impl" content="0.0">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -124,31 +127,28 @@
     catalog plan is unblocked or explicitly held.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="parity-bar" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">What bar unblocks the GPU catalog: parity on every registered metric,
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="parity-bar" data-choice="qualified-magnetics" data-by="Simon McIntosh" data-when="2026-08-13T05:24:52+00:00">
+    <p class="r-dec-q">What bar unblocks the GPU catalog: parity on every registered metric,
         or parity on geometry/solve-health with a qualified allowance on the raw-magnetics
-        residual (where the referee's own fitted calibration gives it a structural edge)?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="all-metrics">every registered metric</button>
-          <button class="r-opt" data-value="qualified-magnetics">geometry + health strict; magnetics under the cross-source budget</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+        residual (where the referee&#x27;s own fitted calibration gives it a structural edge)?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="all-metrics">every registered metric</button>
+      <button class="r-opt chosen" data-value="qualified-magnetics">geometry + health strict; magnetics under the cross-source budget</button>
+      </p>
+    <p class="r-dec-rat">Owner selection 2026-08-12: geometry, solve-health, profile-residual and the CurrentDiffusion temporal leg are scored strictly; the whitened raw-magnetics residual is judged under the cross-source budget class, with its margin recorded either way. The referee is not neutral on that one metric: efm carries a magnetics-fitted solenoid calibration, so reproducing the measured magnetics grades nova against EFIT&#x27;s own fit rather than against the machine. The S5 vacuum-floor ladder is the measured precedent — it failed its same-source clause by +0.023 sigma while passing source-cutover 15 of 15, and the gap decomposed onto channels sitting 91-253x above their own noise floors. Scoring magnetics strictly would therefore risk holding the GPU catalog on evidence that cannot separate a spine defect from the incumbent&#x27;s calibration advantage. Everything else stays strict, so the allowance buys no slack on geometry or convergence.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-sep-001" data-status="open"
-               data-capability-version="1.0" data-capability-class="orchestrator"
-               data-capability-reasoning="deep" data-capability-verification="strict"
-               data-written-by="reckon-create" data-written-at="2026-08-08">
-        <h4 class="r-fu-title">Assemble the scored chain and register the tolerances (§3 items 1–2)</h4>
-        <div class="r-fu-body"><p>Runnable once the boundary-accelerator behaviour pins and the
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-sep-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="reckon-create" data-written-at="2026-08-08" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Assemble the scored chain and register the tolerances (§3 items 1–2)</h4>
+    <div class="r-fu-body"><p>Runnable once the boundary-accelerator behaviour pins and the
         corrected-read door land: one entry point from corrected measurements to scored
         reconstruction, with every tolerance pre-registered from measured spreads before the
         first scored run.</p></div>
-        <pre class="r-fu-prompt">Project: nova
+    <pre class="r-fu-prompt">Project: nova
 Plan:    spine-efit-parity (http://127.0.0.1:8765/nova/spine-efit-parity.html)
 Section: §3 items 1-2
 Capability: orchestrator
@@ -181,8 +181,13 @@ Done-when
      drawn once and pre-registered.
   3. Suite green; followup for the gate run (§3 items 3-5) written; this one
      resolved.</pre>
-      </article>
-    </section>
-  </main>
+    </article>
+</section>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="decisions" data-id="c-20260812-paritybar" data-who="reckon-ship" data-when="2026-08-12T21:05:00+00:00">
+    <div class="r-comment-body">parity-bar locked to qualified-magnetics before the first scored run, so the bar is pre-registered rather than chosen after seeing the result. The tolerance-registration node dispatched in the same wave must record the cross-source budget class for the raw-magnetics residual alongside the strict tolerances for every other metric.</div>
+</div>
+</section>
+</main>
 </body>
 </html>

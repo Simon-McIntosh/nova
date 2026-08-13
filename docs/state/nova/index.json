@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-11T21:29:00",
+  "updated": "2026-08-12T22:47:34",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -337,6 +337,31 @@
                 "risk": "elevated"
               }
             }
+          },
+          {
+            "slug": "nova-runtime-dependencies",
+            "why_now": "The equilibrium package imports JAX unconditionally in sixteen modules while the extra that would declare it pins the CUDA build, so the plain runtime was duplicated inside the test extra and a worker lost a cycle to the resulting environment gap.",
+            "done_when": "The jax extra carries the portable runtime, a gpu extra carries the CUDA build, test resolves it transitively with no second pin, and both compositions have their resolved distributions counted.",
+            "capability": {
+              "version": "1.0",
+              "class": "general",
+              "requirements": {
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "nova-test-lane-health",
+            "why_now": "Two full-lane attempts parked at 62 and 76 percent with the main thread stuck starting a thread in the catalog scan, so no monolithic pass count can be obtained and every full-suite-green claim in the repo is sharded, partial, or stale.",
+            "done_when": "The thread-starvation mechanism is named, a single-worker scan no longer needs to start a thread, and one monolithic run reaches a final summary with counts banked.",
+            "capability": {
+              "version": "1.0",
+              "class": "general",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
           }
         ],
         "starts": "2026-08-10",
@@ -548,6 +573,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 31
+    "_version": 32
   }
 }

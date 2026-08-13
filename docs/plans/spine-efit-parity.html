@@ -23,9 +23,9 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-13">
-<meta name="plan-impl" content="0.7">
-<meta name="plan-version" content="4">
-<meta name="plan-commits" content="ee60c7d2,27baad59,b46bc103,99dfc6a6,41ddd617,9eb129e4">
+<meta name="plan-impl" content="0.75">
+<meta name="plan-version" content="5">
+<meta name="plan-commits" content="ee60c7d2,27baad59,b46bc103,99dfc6a6,41ddd617,9eb129e4,125c00a2">
 <meta name="plan-artifacts" content="nova/imas/mast_parity_chain.py,nova/imas/parity_tolerances.py,nova/imas/mast_efit_referee.py">
 </head>
 <body>
@@ -203,6 +203,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260813-gateattempt" data-who="reckon-ship" data-when="2026-08-13T06:05:00+00:00">
     <div class="r-comment-body">parity-gate-frozen-six and parity-transport-leg BLOCKED, gates not-run — commits 41ddd617, 9eb129e4 merged for their harnesses. Live result stated exactly: 0 of 6 shots completed, 0 slices scored, all six named incomplete. Root cause is a real gap, not a worker failure: run_parity_chain takes moment_solver, profile_solver and topology_labeler as injected components and the repository has no production factory wiring them to the MAST classes; a production temporal_scorer is likewise absent, so the eleventh metric stays an explicit failing NaN. This is a scoping error of mine — parity-chain-assembly's done-when was demonstrable on a pilot but not sufficient, exactly the exclusivity-not-sufficiency trap, and its pilot ran on injected components rather than production ones. What did land is real: per-slice banking enforces all 11 registered field names and scores a non-finite metric as a FAILURE rather than a skip; unaligned and unusable EFIT rows retain explicit causes; per-shot summaries record available/scored/skipped counts and per-metric pass fractions; figure production for flux-map overlays, boundary-distance distributions and residual decomposition is implemented and unit-tested. The transport harness scores the ordered cohort against the registered 0.004 bound retaining resistive and inductive consumption terms, and its /tmp metrics are labelled synthetic contract validation only, explicitly NOT physical shot results. No tolerance was changed and none is authorised. production-chain-factory is dispatched to close the gap.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260813-factory" data-who="reckon-ship" data-when="2026-08-13T06:20:00+00:00">
+    <div class="r-comment-body">production-chain-factory landed but its gate is not-run — commit 125c00a2. The factory works: it returns ReconstructMoment, the accelerated ReconstructProfile, MastTopologyLabeler and MastCurrentDiffusion built from corrected reads plus a verified content-addressed artifact, with a 4/4 production-type assertion and the EFIT firewall test unchanged. A REAL corrected slice of shot 21978 reconstructed end to end at t=0.24500 s on a 33x49 grid. The gate did not close because the reconstruction classified that slice LIMITED and supplied no x-point (x_point=[nan,nan]) where EFIT calls it diverted, so the fail-closed referee raised rather than scoring; the same happened on a compact 17x25 grid. This is potentially the parity result itself rather than an obstacle — topology-class agreement is one of the eleven registered metrics and exists to catch exactly this disagreement. Two nodes now split the question so that neither can hide the other: limited-diverted-disagreement searches the reconstructed flux map for a saddle INDEPENDENTLY of the labeler and repairs only if the labeler missed one that exists, and referee-scores-absent-xpoint makes a missing x-point a recorded FAILING metric rather than an exception so the disagreement is scored instead of blocking. No tolerance was widened and no proxy metric was substituted at any point.</div>
 </div>
 </section>
 </main>

@@ -274,6 +274,52 @@
   <code>summary.json</code>'s runtest-hook field reports 133, because eight skips occurred during
   collection. The pytest line and its stamped SHA are the banked figures.</p>
 
+  <h2 id="failure-classification">Forty-seven of the fifty failures are one regression</h2>
+
+  <p>Commit <code>ee5f7e02</code>. Gate passed — 50/50 ids collected exactly one test and reached a
+  final pytest summary. Classification run frozen at
+  <code>c1e20bc8a25a3925f5ef875fdee6bb1da4ffcef2</code>, Python 3.14.2, pytest 9.1.1, with
+  <code>nova.__file__</code> verified inside the worker's own worktree.</p>
+
+  <p>Each of the 50 ids was re-run in a separate fresh process under SLURM 1245273 and classified
+  against the sharded baseline's collection and result logs. The four classes are exhaustive and
+  disjoint, and every id is named under exactly one:</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Class</th><th>Count</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><strong>regression</strong></td><td><strong>47</strong></td><td>passed in the sharded baseline, fails both monolithically and fresh</td></tr>
+      <tr><td>pre-existing-known</td><td>3</td><td>the sharded baseline collected and also failed it</td></tr>
+      <tr><td>pre-existing-unseen</td><td>0</td><td>fails fresh, baseline never reached it</td></tr>
+      <tr><td>suite-order-effect</td><td>0</td><td>passes fresh, fails in suite</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>The 47 are a single cause with a named commit.</strong> All fail identically with
+  <code>ShotWaveforms.__init__() missing required 'sensors' argument</code>. Commit
+  <code>60df29bb</code> added that required field between the sharded and monolithic SHAs without
+  updating the test constructors. So the answer to "is 50 against 3 a regression?" is yes, 47 of it
+  is, and it is one mechanical defect rather than a broad decay.</p>
+
+  <p><strong>Zero suite-order effects is the more surprising result</strong>, and it retires a
+  hypothesis rather than confirming one: sharding was <em>not</em> masking failures by handing each
+  shard a fresh interpreter. The old 3-failure figure was low because the sharded run predated
+  <code>60df29bb</code>, not because sharding hid anything. The three pre-existing failures reproduce
+  exactly — an equilibrium internal-inductance assertion at 0.4165026973920738 against a 0.15 bound,
+  and both packaged-registry probe-angle ids.</p>
+
+  <p>Two method notes. The classification tree differs from the measured
+  <code>cc1f8f2c</code> only in <code>nova/imas/mast_parity_gate.py</code> and
+  <code>tests/test_parity_gate.py</code>, neither among the 50 ids nor their tested modules, so it is a
+  valid stand-in — and both SHAs are banked rather than one being implied. And the two earlier invalid
+  attempts are retained on disk but excluded from classification: an unsynced worktree fell through to
+  system Python 3.11 and produced 50 collection errors on 3.14 syntax, then a synced-but-pytest-less
+  environment produced 50 pre-collection errors. Neither yielded a usable outcome, and reporting them
+  as results would have manufactured 50 false regressions. <strong>No test was fixed, skipped,
+  xfailed, disabled or changed</strong> — all 50 remain enabled.</p>
+
   <h2 id="measurement-provenance">A banked figure must name the tree it measured</h2>
 
   <p>Commit <code>7b15ed64</code>. Gate passed: 3/3 tests, Python 3.14.2.</p>

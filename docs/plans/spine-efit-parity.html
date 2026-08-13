@@ -23,9 +23,9 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-13">
-<meta name="plan-impl" content="0.96">
-<meta name="plan-version" content="15">
-<meta name="plan-commits" content="ee60c7d2,27baad59,b46bc103,99dfc6a6,41ddd617,9eb129e4,125c00a2,bdaf0844,73336ac0,43e2a091,f39af125,4c2c1796,dc62e52c,7ddeb717,de672204,c058f214,a23fdcdb">
+<meta name="plan-impl" content="0.98">
+<meta name="plan-version" content="17">
+<meta name="plan-commits" content="ee60c7d2,27baad59,b46bc103,99dfc6a6,41ddd617,9eb129e4,125c00a2,bdaf0844,73336ac0,43e2a091,f39af125,4c2c1796,dc62e52c,7ddeb717,de672204,c058f214,a23fdcdb,41fb859d">
 <meta name="plan-artifacts" content="nova/imas/mast_parity_chain.py,nova/imas/parity_tolerances.py,nova/imas/mast_efit_referee.py,docs/evidence/archive/spine-efit-parity-landed.html">
 </head>
 <body>
@@ -172,6 +172,28 @@
     magnitude. A gate run scored over unconverged slices is not a parity verdict and must not be
     presented as one.</p>
 
+    <h2 id="s7">§7 — The machine artifact is not safe to open in parallel</h2>
+
+    <p><strong>Partitioned scoring is now how every cohort is measured, and it races on the shared
+    machine artifact.</strong> Opening the HDF5 artifact concurrently transiently changes its on-disk
+    checksum while another process is verifying it, so a verifying reader sees a digest that does not
+    match and fails. This is not hypothetical or rare: it cancelled SLURM 1245311 after three
+    occurrences, discarding 105 of 180 partitions that then had to be recomputed under
+    1245426 with a private per-task cache as the workaround.</p>
+
+    <p>The workaround is what makes this worth fixing rather than living with. A private cache per task
+    means every parallel reader materialises its own copy of the artifact, which multiplies both
+    staging time and disk against the partition count — affordable at 30 partitions, and the wrong
+    shape for the GPU catalog, whose whole premise is many workers sharing one verified machine
+    description. The content-addressed artifact exists precisely so that readers can trust one copy.</p>
+
+    <p><em>Done-when:</em> a test opens the artifact from several processes at once while a verifying
+    reader runs, and the verification succeeds every time over repeated trials where the current path
+    fails; the digest a reader verifies is computed from immutable content rather than from a file
+    whose access metadata a concurrent open can alter; and a partitioned scoring run completes against
+    a single shared artifact with no private per-task cache and no checksum retry. Do not weaken or
+    skip verification to remove the race — an unverified artifact is a worse outcome than a slow one.</p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="parity-bar" data-choice="qualified-magnetics" data-by="Simon McIntosh" data-when="2026-08-13T05:24:52+00:00">
@@ -280,6 +302,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260813-supporttally" data-who="reckon-ship" data-when="2026-08-13T08:50:00+00:00">
     <div class="r-comment-body">parity-support-tally landed - commits 7ddeb717, de672204, c058f214; gate PASSED 11/11. THE GATE FINALLY HAS A COHORT, AND SHOT 21978 FAILS. Scoring in 30 atomic 250-slice partitions across SLURM 1245163 (13 partitions) plus retry allocation 1245219 (17 recovered) made the full sweep obtainable without shrinking anything: min_cells stayed 5, the grid stayed at the registered 33x49, and ALL 7500 source indices 0-7499 occur exactly once, so coverage is checked rather than asserted. Artifact sha256:b51374387847c0d9. THE NUMBER THE GATE NEVER HAD: available=7500, scored=1659 (22.1%), skipped=5841. Breakdown - moment-supported but no reference within time tolerance 2523 (33.6%), current-centroid-outside-limiter 2956 (39.4%), seed-disc-insufficient-supported-cells 316 (4.2%), flood-seed-outside-vessel 46 (0.6%). Physically supported for moment seeding = 4182 of 7500 (55.8%) = 1659 scored + 2523 post-solve no-reference; typed physically-unsupported total 3318. This settles the earlier reading: the four failed attempts were hitting SLICE SELECTION, not physics or grid limits, and more than a third of a MAST shot record carries no seedable plasma - the centroid-outside-limiter dominance is what a pre-pulse or post-disruption record looks like. NO FOURTH UnsupportedSlice condition appeared across all 7500 slices, so the three authorized conditions are the complete set on this shot. VERDICT: FAIL under UNCHANGED registered tolerances. No tolerance widened, no proxy substituted, no partition dropped to improve the outcome. This is ONE shot of the frozen six and excludes the pre-registered held-out extension, so it is NOT the plan's parity verdict - f-sep-002 stays open for the remaining five shots plus the extension. Two banking repairs landed alongside, both keeping data rather than dropping it: nonconverged score rows retained, empty reference intervals banked. Artifacts: /nova/evidence/archive/spine-efit-parity-landed#support-tally</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260813-frozensixverdict" data-who="reckon-ship" data-when="2026-08-13T10:05:00+00:00">
+    <div class="r-comment-body">parity-gate-frozen-six-scored landed - commit 41fb859d; gate PASSED 15/15 gate tests, 39/39 across the parity suites. THIS IS THE FROZEN-SET PARITY VERDICT: FAIL, ten of twelve registered metrics. All 6/6 shots completed with none not_attempted, each covering its full 7500 corrected slices with every source index exactly once, in 30 atomic 250-slice partitions per shot (180 total). Cohort available=45000 scored=9573 skipped=35427 at the registered 33x49 grid, min_cells=5, artifact sha256:44f71af8. Artifact frozen-six-scorecard.json, 23,704,704 bytes, sha256:7c396be7ff3aa6ce. PASS: current_diffusion_flux_ledger_rms_fraction=1, throughput_slices_per_core_s=1. FAIL: confined_fraction=0.8167, profile_residual_rms=0.7528, topology_class_agreement_fraction=0.2861, x_point_distance_m=0.2680, and at exactly ZERO - converged_fraction, fixed_point_defect, iteration_count, lcfs_distance_m, magnetic_axis_distance_m, magnetics_residual_whitened_rms. THE MECHANISM IS THE SHAPE, NOT THE COUNT: converged_fraction and fixed_point_defect at zero mean NO scored slice on ANY of the six shots reached the solver's convergence criterion, which subordinates every geometry metric - an axis or LCFS position measured on an unconverged flux map is a consequence, not an independent finding. The two metrics that pass are exactly the two that do not require the fixed point to close. Read together: the assembled chain runs, batches and transports correctly, and the GS fit does not converge on real measured magnetics. This is the section-6 convergence finding reproduced at cohort scale and consistent with the sensor-scale result, the accelerator having been locked on synthetic self-consistent magnetics. Per-shot the field-level pattern is IDENTICAL across all six, so it is systematic rather than shot-specific. A fifth skip cause appeared that one shot could not show: reference-geometry-unusable, 5 slices across four shots. The 21978 recompute moved to 1696 scored from 1659, so the earlier single-shot verdict is SUPERSEDED by this cohort rather than carried forward. CONSEQUENCE: THE GPU CATALOG STAYS HELD - the pre-registered meaning of this result under the locked qualified-magnetics bar, where the strict metrics fail on their own and the magnetics allowance is irrelevant. No tolerance changed, no proxy substituted, no completed partition dropped - including through a compute incident where SLURM 1245311 was cancelled after three concurrent shared-artifact checksum races having produced 75 durable partitions, and 1245426 recomputed exactly the 105 missing in private per-task caches, 105/105. Artifacts: /nova/evidence/archive/spine-efit-parity-landed#frozen-six-verdict</div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20260813-convergence" data-who="reckon-ship" data-when="2026-08-13T07:20:00+00:00">
     <div class="r-comment-body">real-slice-convergence landed — commit 4c2c1796; gate passed. TWO FINDINGS, AND BOTH CORRECT PART OF THIS SECTION'S OWN FRAMING. (1) DOMINANT CAUSE IS THE SENSOR SCALE, not inconsistent data, not the seed, not the budget. A crossed 2x2 intervention over {full-shot, slice-local} scale and {full-shot, slice-local} seed, holding corrected measurements and the 20-evaluation budget fixed on slices 1961-1965 of shot 21978: full-shot scale + full-shot seed finite 5/5 median 3.176e-03; full-shot scale + slice-local seed finite 5/5 median 2.687e-03, which EXCLUDES the seed; slice-local scale + full-shot seed NON-FINITE 5/5, so the scale alone is sufficient; slice-local scale + slice-local seed finite 3/5 median 1.00552523, reproducing the reported failure exactly. Identical measured data, so inconsistent data is excluded as the dominant cause. Budget excluded too: the same 20 evaluations give 2.71e-03 (Anderson), 3.18e-03 (NK) and 1.27e-02 (Picard) at full-shot scale. (2) REGISTRY MISMATCH — my §6 framing compared two different quantities. The registered 0.075868 is NOT a fixed-point bound: its provenance defines it as the median RMS of (j_phi_nova - j_phi_grid)/max|j_phi_grid|, a cross-substrate current reproduction, whereas the accelerator residual is max|g(x)-x|/max|g(x)|, a fixed-point defect. The norm-only conversion gives a five-slice Newton median of 1.048e-03, but it still lacks the independent grid-current profile and is therefore NOT physically comparable to the bound. WHAT IS NOT EXCUSED: the production-scale whitened raw-magnetics RMS stays high (median seed 2.286, Newton 2.069), so a data/model mismatch remains a separate live physical finding and is explicitly not worded into a pass; and no scheme reaches the solver's strict 1e-8 criterion, so whether more budget closes the residual 2e-03 to 1.3e-02 defect is open. No tolerance and no accelerator setting was changed. Artifact: the 62,856-byte measurement record with every residual position on the evaluation axis.</div>

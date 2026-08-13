@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-13T11:42:49",
+  "updated": "2026-08-13T12:17:46",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2972,9 +2972,113 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260813T094731046030-parity-gate-frozen-six-scored",
+        "plan": "spine-efit-parity",
+        "section": "\u00a73",
+        "node": "parity-gate-frozen-six-scored",
+        "role": "implement",
+        "member": "parity-gate",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-13T09:47:33Z",
+        "completed_at": "2026-08-13T10:15:28Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1675,
+        "time_budget": "60m",
+        "base_sha": "bb0e767cfc9c8a3363f16f0c7123da3cd2325d84",
+        "commits": [
+          "41fb859d"
+        ],
+        "changed_lines": {
+          "added": 264,
+          "removed": 6,
+          "files": 2
+        },
+        "tests_added": 15,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/7df8edeb-58a6-40f6-a85b-4f1edca55e25/scratchpad/parity-gate-frozen-six-scored-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff9f0-e230-7e31-89ba-5240b76a2cce",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 51395328,
+            "input_tokens": 52381699,
+            "output_tokens": 113955,
+            "reasoning_output_tokens": 32356
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260813T092653368988-lane-failure-classification",
+        "plan": "nova-test-lane-health",
+        "section": "\u00a74",
+        "node": "lane-failure-classification",
+        "role": "implement",
+        "member": "integration-gate",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-13T09:26:55Z",
+        "completed_at": "2026-08-13T09:56:58Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1803,
+        "time_budget": "50m",
+        "base_sha": "c1e20bc8a25a3925f5ef875fdee6bb1da4ffcef2",
+        "commits": [
+          "ee5f7e02"
+        ],
+        "changed_lines": {
+          "added": 127,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/7df8edeb-58a6-40f6-a85b-4f1edca55e25/scratchpad/lane-failure-classification-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff724-7bb4-7270-836c-b0c7c9e7f7cc",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 110057984,
+            "input_tokens": 111891800,
+            "output_tokens": 161458,
+            "reasoning_output_tokens": 51932
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 109
+    "_version": 111
   }
 }

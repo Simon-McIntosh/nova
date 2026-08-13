@@ -311,6 +311,105 @@
   agreement is set to 0.0, and both verdicts fail while the slice stays scored. 3/3 aligned slices
   scored, 10/10 tests.</p>
 
+  <h2 id="frozen-six-verdict">The frozen six-shot gate: FAIL, ten of twelve metrics</h2>
+
+  <p>Commit <code>41fb859d</code>. Gate passed — 15/15 gate tests, 39/39 across the parity suites.
+  Artifact: <code>frozen-six-scorecard.json</code>, 23,704,704 bytes,
+  <code>sha256:7c396be7ff3aa6ce…</code>, plus six atomic shot banks and 180 partition files.</p>
+
+  <p><strong>This is the plan's parity verdict for the frozen benchmark set, and the spine does not
+  currently reach parity with EFIT.</strong> All six shots completed — none not_attempted — each
+  covering its full 7,500 corrected slices with every source index appearing exactly once, scored in
+  30 atomic 250-slice partitions per shot, 180 in total. Cohort: 45,000 available, 9,573 scored,
+  35,427 skipped, at the registered 33&times;49 grid with <code>min_cells=5</code> and machine
+  artifact <code>sha256:44f71af8…</code>.</p>
+
+  <figure>
+    <svg viewBox="0 0 860 150" role="img" style="max-width:100%;height:auto;font-family:system-ui">
+      <text x="430" y="16" text-anchor="middle" font-size="13" font-weight="600" fill="#111">Where 45,000 corrected slices go</text>
+      <rect x="20" y="34" width="820" height="26" fill="none" stroke="#555" stroke-width="1"/>
+      <text x="430" y="51" text-anchor="middle" font-size="11.5" fill="#111">available 45,000</text>
+
+      <rect x="20" y="72" width="385.4" height="26" fill="#e8f4ee" stroke="#0a6" stroke-width="1.2"/>
+      <text x="212" y="89" text-anchor="middle" font-size="11.5" fill="#064">moment-supported 20,605 (45.8%)</text>
+      <rect x="405.4" y="72" width="434.6" height="26" fill="#fbeceb" stroke="#c22" stroke-width="1"/>
+      <text x="622" y="89" text-anchor="middle" font-size="11.5" fill="#911">physically unsupported 24,395 (54.2%)</text>
+
+      <rect x="20" y="110" width="174.5" height="26" fill="#d6ebe0" stroke="#0a6" stroke-width="1.5"/>
+      <text x="107" y="127" text-anchor="middle" font-size="11.5" font-weight="600" fill="#053">scored 9,573</text>
+      <rect x="194.5" y="110" width="210.9" height="26" fill="#fff8e5" stroke="#e90" stroke-width="1"/>
+      <text x="300" y="127" text-anchor="middle" font-size="11" fill="#850">no aligned reference 11,027</text>
+      <line x1="405.4" y1="98" x2="405.4" y2="110" stroke="#0a6" stroke-dasharray="2 2"/>
+    </svg>
+    <figcaption>Only 21.3% of the corrected record reaches adjudication. The larger loss is physical —
+    more than half of every shot carries no seedable plasma — and the second is reference alignment,
+    not a solver failure.</figcaption>
+  </figure>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Registered metric</th><th>Cohort pass fraction</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td><code>current_diffusion_flux_ledger_rms_fraction</code></td><td>1</td><td><strong>PASS</strong></td></tr>
+      <tr><td><code>throughput_slices_per_core_s</code></td><td>1</td><td><strong>PASS</strong></td></tr>
+      <tr><td><code>confined_fraction</code></td><td>0.816671889690</td><td>FAIL</td></tr>
+      <tr><td><code>profile_residual_rms</code></td><td>0.752846547582</td><td>FAIL</td></tr>
+      <tr><td><code>topology_class_agreement_fraction</code></td><td>0.286117204638</td><td>FAIL</td></tr>
+      <tr><td><code>x_point_distance_m</code></td><td>0.268045544761</td><td>FAIL</td></tr>
+      <tr><td><code>converged_fraction</code></td><td>0</td><td>FAIL</td></tr>
+      <tr><td><code>fixed_point_defect</code></td><td>0</td><td>FAIL</td></tr>
+      <tr><td><code>iteration_count</code></td><td>0</td><td>FAIL</td></tr>
+      <tr><td><code>lcfs_distance_m</code></td><td>0</td><td>FAIL</td></tr>
+      <tr><td><code>magnetic_axis_distance_m</code></td><td>0</td><td>FAIL</td></tr>
+      <tr><td><code>magnetics_residual_whitened_rms</code></td><td>0</td><td>FAIL</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>The mechanism is named by the shape of the failure, not by the count of it.</strong>
+  <code>converged_fraction</code> and <code>fixed_point_defect</code> are at <em>zero</em> — no scored
+  slice on any of the six shots reached the solver's convergence criterion. That subordinates every
+  geometry metric: <code>magnetic_axis_distance_m</code> and <code>lcfs_distance_m</code> also sit at
+  zero, but a position measured on an unconverged flux map is not evidence about the machine, so those
+  are consequences rather than independent findings. The two metrics that pass are the two that do not
+  depend on the fixed point closing — the CurrentDiffusion flux ledger at fraction 1 and throughput at
+  fraction 1. Read together: <strong>the assembled chain runs, batches and transports correctly, and
+  the GS fit does not converge on real measured magnetics.</strong> This is the §6 convergence finding
+  reproduced at cohort scale, and it is consistent with the sensor-scale result — the accelerator was
+  locked on synthetic self-consistent magnetics and reaches residual near unity on real data.</p>
+
+  <p>Per-shot, the pattern is identical — flux ledger and throughput PASS, the other ten FAIL — which
+  makes it a systematic property of the chain rather than a shot-specific artifact:</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Shot</th><th>Scored</th><th>Skipped</th><th>centroid outside limiter</th><th>no reference</th><th>seed disc</th><th>flood seed</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td>21978</td><td>1,696</td><td>5,804</td><td>3,664</td><td>1,574</td><td>442</td><td>123</td><td>fail</td></tr>
+      <tr><td>21983</td><td>1,676</td><td>5,824</td><td>4,053</td><td>927</td><td>729</td><td>113</td><td>fail</td></tr>
+      <tr><td>21985</td><td>1,618</td><td>5,882</td><td>3,170</td><td>2,216</td><td>348</td><td>148</td><td>fail</td></tr>
+      <tr><td>21986</td><td>1,459</td><td>6,041</td><td>3,803</td><td>1,706</td><td>392</td><td>139</td><td>fail</td></tr>
+      <tr><td>21989</td><td>1,775</td><td>5,725</td><td>3,764</td><td>1,364</td><td>435</td><td>161</td><td>fail</td></tr>
+      <tr><td>22086</td><td>1,349</td><td>6,151</td><td>2,689</td><td>3,240</td><td>171</td><td>51</td><td>fail</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>A fifth skip cause appeared at cohort scale that one shot could not show:
+  <code>reference-geometry-unusable</code>, 5 slices across four shots. The 21978 recompute also moved
+  its own figures — 1,696 scored against the 1,659 recorded before the residual-identity separation,
+  with the skip distribution shifting as full-shot whitening moved ahead of interval selection — so the
+  earlier single-shot verdict is superseded by this cohort rather than carried forward.</p>
+
+  <p><strong>Consequence: the GPU catalog stays held.</strong> That is the pre-registered meaning of
+  this result under the locked <code>qualified-magnetics</code> bar. Geometry, solve-health and the
+  profile residual were to be scored strictly, and they fail; the magnetics allowance is irrelevant
+  here because the strict metrics already fail on their own. No tolerance was changed, no proxy metric
+  substituted, and no completed partition dropped or overwritten to improve a verdict — including
+  through a compute incident: SLURM 1245311 produced 75 durable partitions before cancellation after
+  three concurrent shared-artifact checksum races, and 1245426 recomputed exactly the 105 missing
+  partitions in private per-task caches, completing 105/105.</p>
+
   <h2 id="metric-identity">§6 — the two residuals are separated, and the registry grows to twelve</h2>
 
   <p>Commit <code>a23fdcdb</code>. Gate passed — 37/37 across the chain, tolerance, gate, referee and

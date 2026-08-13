@@ -4,11 +4,29 @@ import os
 
 import pytest
 
+from nova.jax.config import bound_compilation_retention
+
 # Force a non-interactive matplotlib backend before any test module imports
 # pyplot, so plotting tests never open a window or block on a GUI event loop
 # in the fast lane or in headless CI. setdefault leaves an explicit override
 # (e.g. MPLBACKEND set by a developer) untouched.
 os.environ.setdefault("MPLBACKEND", "Agg")
+
+_RETENTION_CHECK_INTERVAL = 100
+_LIVE_EXECUTABLE_CEILING = 1024
+_completed_nodeids: set[str] = set()
+
+
+@pytest.hookimpl(tryfirst=True)
+def pytest_runtest_logreport(report):
+    """Bound JAX compilation retention at fixed completed-test intervals."""
+    terminal = report.when == "call" or report.skipped
+    if not terminal or report.nodeid in _completed_nodeids:
+        return
+
+    _completed_nodeids.add(report.nodeid)
+    if len(_completed_nodeids) % _RETENTION_CHECK_INTERVAL == 0:
+        bound_compilation_retention(_LIVE_EXECUTABLE_CEILING)
 
 
 def _imas_data_available() -> bool:

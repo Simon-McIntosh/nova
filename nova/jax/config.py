@@ -6,7 +6,9 @@ separate fp32 and fp64 variants without changing configuration around a solve.
 ``auto`` is resolved by the solver or operator that owns the numerical contract.
 """
 
+from dataclasses import dataclass
 from enum import StrEnum
+import gc
 
 
 class Precision(StrEnum):
@@ -17,9 +19,77 @@ class Precision(StrEnum):
     DOUBLE = "float64"
 
 
-__all__ = ["Precision", "configure_dtypes", "resolve_precision"]
+__all__ = [
+    "CompilationRelease",
+    "Precision",
+    "bound_compilation_retention",
+    "compilation_release_history",
+    "configure_dtypes",
+    "resolve_precision",
+]
 
 _dtypes_configured = False
+
+
+@dataclass(frozen=True)
+class CompilationRelease:
+    """Executable counts around one threshold-triggered cache release."""
+
+    before: int
+    after: int
+    collected_objects: int
+
+
+_compilation_releases: list[CompilationRelease] = []
+
+
+def compilation_release_history() -> tuple[CompilationRelease, ...]:
+    """Return cache-release measurements accumulated by this process."""
+    return tuple(_compilation_releases)
+
+
+def _live_executable_count() -> int:
+    """Return loaded executable count without initialising a JAX backend."""
+    import sys
+
+    if "jax" not in sys.modules:
+        return 0
+
+    from jax._src import xla_bridge
+
+    if not xla_bridge.backends_are_initialized():
+        return 0
+    return len(xla_bridge.get_backend().live_executables())
+
+
+def bound_compilation_retention(
+    live_executable_ceiling: int,
+) -> CompilationRelease | None:
+    """Release process-wide JAX caches after they cross ``ceiling``.
+
+    The check is safe before JAX import and backend initialisation.  Collection
+    is deliberately threshold-driven: reusable compiled functions remain hot
+    below the bound, while a long-lived process cannot retain an unbounded set
+    of loaded executables through JAX's staging and dispatch caches.
+    """
+    if live_executable_ceiling < 1:
+        raise ValueError("live executable ceiling must be positive")
+
+    before = _live_executable_count()
+    if before <= live_executable_ceiling:
+        return None
+
+    import jax
+
+    jax.clear_caches()
+    collected = gc.collect()
+    release = CompilationRelease(
+        before=before,
+        after=_live_executable_count(),
+        collected_objects=collected,
+    )
+    _compilation_releases.append(release)
+    return release
 
 
 def configure_dtypes() -> None:

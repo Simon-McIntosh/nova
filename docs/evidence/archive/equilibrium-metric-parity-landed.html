@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="equilibrium-metric-parity-landed">
+  <meta name="plan-title" content="Equilibrium Metric Parity — Cumulative Evidence">
+  <meta name="plan-summary" content="Landed record of pairing nova's flux-surface geometry record against the reference store's derived quantities: the class counts, the four profile pairings that carry a resampling rule, and the finding that the store holds no explicit flux-surface average at all">
+  <meta name="plan-status" content="active">
+  <meta name="plan-evidence-for" content="equilibrium-metric-parity">
+  <meta name="plan-verifies" content="equilibrium-metric-parity#s2">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>Equilibrium Metric Parity — Cumulative Evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+
+  <p>Execution record for
+  <a href="/nova/equilibrium-metric-parity.html">equilibrium-metric-parity</a>. This rung isolates the
+  derived-quantity chain: no solver runs, no sources are prescribed, no boundary condition is imposed,
+  and both answers exist for the same stored input.</p>
+
+  <h2 id="derived-quantity-census">§2 — the census, and what it says cannot be compared</h2>
+
+  <p>Commit <code>8868a7f9</code>; gate passed. Artifact
+  <code>benchmarks/efit_derived_quantity_census.py</code> (640 lines). Worker time 465 s.</p>
+
+  <p>164 store arrays were reviewed per shot and split into 74 derived quantities and 90 explicitly
+  excluded non-derived arrays. All six frozen shots expose the identical 164-array schema, and the script
+  fails closed on any unreviewed or missing path rather than silently narrowing its own coverage.</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Side</th><th>Class</th><th>Count</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="4">reference store</td><td>paired</td><td>17</td></tr>
+      <tr><td>absent-in-nova</td><td>47</td></tr>
+      <tr><td>unpairable, with the convention that would have to be invented</td><td>10</td></tr>
+      <tr><td><strong>total derived</strong></td><td><strong>74</strong></td></tr>
+      <tr><td rowspan="3">nova <code>FluxSurfaceGeometry</code></td><td>matched</td><td>11</td></tr>
+      <tr><td>unmatched</td><td>10</td></tr>
+      <tr><td><strong>total (15 profiles + 6 scalars)</strong></td><td><strong>21</strong></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>The store holds no explicit flux-surface average at all.</strong> That survived a review of
+  every one of the 164 paths, and it is the finding that most changes what the next rungs can claim:
+  nova's <code>inverse_square_radius</code> and its three gradient-rho averages have no reference
+  counterpart to be scored against. They can only be checked against analytic equilibria and against
+  internal consistency — which is exactly the discipline §4 already requires, and now the only discipline
+  available for those four columns.</p>
+
+  <p>Also unmatched on nova's side: the toroidal-flux coordinate and radius, toroidal flux, both volume
+  derivatives, and the boundary toroidal radius.</p>
+
+  <h3 id="profile-pairings">The four profile pairings, each with its resampling rule stated</h3>
+
+  <p>Reference profile geometry sits on source COCOS 3 normalised poloidal flux. Each pair is resampled
+  by monotone linear interpolation against <code>FluxSurfaceGeometry.psi_norm</code> with no
+  extrapolation:</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Reference</th><th>Nova</th><th>Transform</th></tr></thead>
+    <tbody>
+      <tr><td><code>efm/areap_c</code></td><td><code>area</code></td><td>resample only</td></tr>
+      <tr><td><code>efm/fpsi_c</code></td><td><code>field_function</code></td><td>resample only</td></tr>
+      <tr><td><code>efm/qpsi_c</code></td><td><code>safety_factor</code></td><td>resample, ×(−1) into COCOS 17</td></tr>
+      <tr><td><code>efm/volp_c</code></td><td><code>volume</code></td><td>resample only</td></tr>
+      <tr><td><code>efm/psi_axis</code>, <code>efm/psi_boundary</code></td><td><code>axis_flux</code>, <code>boundary_flux</code></td><td>×2π out of Wb/rad</td></tr>
+      <tr><td><code>efm/bvac_val</code>, <code>efm/bvac_r</code></td><td><code>vacuum_field</code>, <code>reference_radius</code></td><td>direct</td></tr>
+      <tr><td>magnetic-axis components</td><td><code>magnetic_axis</code></td><td>direct</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>The 47 absent-in-nova quantities the store does carry include elongation and triangularity as both
+  profiles and scalars, plasma thermal and magnetic energies, poloidal and toroidal betas with their
+  diamagnetic variants, internal inductance, LCFS vertices, perimeter and intercepts, resonant-surface
+  radii, field-volume integrals, the current centroid, x-points and Shafranov quantities.</p>
+
+  <p>The 10 unpairable entries are unpairable for a stated reason in each case: comparison would require
+  a boundary-detection, diamagnetic-calibration, axis-stencil or Shafranov-integrand convention that the
+  store does not record. Reporting them unpaired is the plan's own instruction — agreeing by accident on
+  an invented convention is worse than reporting no pair.</p>
+
+</main></body>
+</html>

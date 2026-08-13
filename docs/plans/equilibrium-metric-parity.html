@@ -24,7 +24,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-13">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
+<meta name="plan-commits" content="8868a7f9">
+<meta name="plan-artifacts" content="benchmarks/efit_derived_quantity_census.py">
+<meta name="plan-impl" content="0.33">
 </head>
 <body>
   <main class="plan-doc">
@@ -162,12 +165,18 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-emp-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship equilibrium-metric-parity §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-emp-001" data-status="resolved" data-written-by="reckon-create" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship equilibrium-metric-parity §2" data-resolved-at="2026-08-13T14:17:39+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Census the reference&#x27;s derived quantities and pair them against nova&#x27;s record</h4>
     <div class="r-fu-body"><p>Nova's <code>FluxSurfaceGeometry</code> already carries fifteen profile columns and six scalars — safety factor, volume and area with both derivatives, field function, inverse-square radius and three gradient-rho averages, on poloidal flux, toroidal flux and rho_tor coordinates — landed at <code>b0af2d23</code> with thirteen of them measured 5–130x inside pre-registered tolerances. What does not exist is the pairing: which of these the reference also computes, on what coordinate, over what domain, with what normalisation. Enumerate every derived quantity the efm store carries (volumes, areas, elongation, triangularity, stored energy, betas, internal inductance, boundary geometry, safety factor, any flux-surface average) with units, shape and flux coordinate, then pair each against its nova counterpart or mark it absent-in-nova or unpairable with a reason. Do not compare a pair whose coordinate or domain differs until the resampling rule is stated — a q on normalised poloidal flux is not the array a q on normalised toroidal flux is, and agreeing by accident is worse than reporting unpaired. Conventions come from efit-map-inversion: source COCOS 3, psi x2pi, q x(-1), and the per-shot plasma-current sign check rather than one assumption.</p></div>
     <pre class="r-fu-prompt">/reckon-ship equilibrium-metric-parity §2</pre>
+    <p class="r-fu-outcome">Census and pairing landed - commit 8868a7f9; gate PASSED; worker 465 s. 164 store arrays reviewed per shot, split into 74 derived quantities and 90 explicitly excluded non-derived arrays, with all six frozen shots exposing the identical 164-array schema and the script failing closed on any unreviewed or missing path rather than narrowing its own coverage. Reference classes: paired 17, absent-in-nova 47, unpairable 10, summing to 74. Nova side: 15 profiles + 6 scalars = 21, matched 11, unmatched 10. THE FINDING THAT CHANGES WHAT THE NEXT RUNGS CAN CLAIM: the store holds NO explicit flux-surface average anywhere in its 164 paths, so nova's inverse_square_radius and its three gradient-rho averages have no reference counterpart at all and can only be checked against analytic equilibria and internal consistency - which is the discipline S4 already required and is now the ONLY discipline available for those four columns. Also unmatched on nova's side: toroidal-flux coordinate and radius, toroidal flux, both volume derivatives, boundary toroidal radius. Four profile pairings carry a stated resampling rule - areap_c/fpsi_c/qpsi_c/volp_c against area/field_function/safety_factor/volume by monotone linear interpolation on FluxSurfaceGeometry.psi_norm with no extrapolation, q x(-1) into COCOS 17; psi_axis/psi_boundary pair after x2pi out of Wb/rad; bvac_val/bvac_r and the magnetic-axis components pair directly. The 10 unpairable entries each name the convention that would have to be invented - boundary detection, diamagnetic calibration, axis stencil or Shafranov integrand - and are reported unpaired rather than compared on a guess. Record at /nova/evidence/archive/equilibrium-metric-parity-landed#derived-quantity-census</p>
     </article>
 </section>
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-20260813-derivedcensus" data-who="reckon-ship" data-when="2026-08-13T14:30:00+00:00">
+    <div class="r-comment-body">derived-quantity-census landed - commit 8868a7f9; gate PASSED. Measure: 164 reviewed store arrays per shot -> 74 derived (paired 17, absent-in-nova 47, unpairable 10) + 90 excluded non-derived; nova side exactly 21 fields (15 profiles + 6 scalars), matched 11, unmatched 10; class counts close on both sides. Negative result carried forward rather than buried: EFM exposes no explicit flux-surface-average array after review of all 164 paths, so the four flux-surface-average columns nova carries are unscoreable against this reference and fall back on analytic and internal-consistency checks only. Artifact benchmarks/efit_derived_quantity_census.py, 640 lines. Record at /nova/evidence/archive/equilibrium-metric-parity-landed#derived-quantity-census</div>
+</div>
+</section>
+</main>
 </body>
 </html>

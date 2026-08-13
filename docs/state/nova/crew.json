@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-13T15:55:24",
+  "updated": "2026-08-13T16:18:39",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -211,7 +211,7 @@
         "id": "topology-parity",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "019ffb73-f8a9-7f02-b9ee-19586af8c6e8",
         "created": "2026-08-13"
       },
       {
@@ -3440,9 +3440,165 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260813T140825856171-plasma-current-sign-census",
+        "plan": "efit-map-inversion",
+        "section": "\u00a72",
+        "node": "plasma-current-sign-census",
+        "role": "implement",
+        "member": "efit-referee",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-13T14:08:28Z",
+        "completed_at": "2026-08-13T14:14:08Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 340,
+        "time_budget": "25m",
+        "base_sha": "5bd5fd29b948ef41e426e8319f1a5ae2c0779759",
+        "commits": [
+          "bab09d10419611d116e4e36a842af3deae16d9af"
+        ],
+        "changed_lines": {
+          "added": 328,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/bac59e2b-995a-430c-bf2d-55dd3126adcf/scratchpad/plasma-current-sign-census-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ffb42-5d8a-7972-a213-5e64bec221f3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 8181248,
+            "input_tokens": 8586658,
+            "output_tokens": 32455,
+            "reasoning_output_tokens": 5851
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260813T140825856127-derived-quantity-census",
+        "plan": "equilibrium-metric-parity",
+        "section": "\u00a72",
+        "node": "derived-quantity-census",
+        "role": "implement",
+        "member": "geometry-solve",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-13T14:08:28Z",
+        "completed_at": "2026-08-13T14:16:13Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 465,
+        "time_budget": "25m",
+        "base_sha": "5bd5fd29b948ef41e426e8319f1a5ae2c0779759",
+        "commits": [
+          "8868a7f945ea293dcb34c10c916900d711a7d7d1"
+        ],
+        "changed_lines": {
+          "added": 640,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/bac59e2b-995a-430c-bf2d-55dd3126adcf/scratchpad/derived-quantity-census-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff708-e876-7112-bdf2-12db5e55652a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 15886848,
+            "input_tokens": 16971789,
+            "output_tokens": 105695,
+            "reasoning_output_tokens": 26764
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260813T140825856212-roundtrip-operator-identity",
+        "plan": "efit-flux-decomposition",
+        "section": "\u00a72",
+        "node": "roundtrip-operator-identity",
+        "role": "implement",
+        "member": "chain-factory",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-13T14:08:28Z",
+        "completed_at": "2026-08-13T14:17:05Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 517,
+        "time_budget": "25m",
+        "base_sha": "5bd5fd29b948ef41e426e8319f1a5ae2c0779759",
+        "commits": [
+          "971c06e5553a0099fda3ec7e97cccbd6d5b829c1"
+        ],
+        "changed_lines": {
+          "added": 334,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/bac59e2b-995a-430c-bf2d-55dd3126adcf/scratchpad/roundtrip-operator-identity-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ffaa2-8b1b-7803-98c5-c43c48e3f9a6",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 26481664,
+            "input_tokens": 27767646,
+            "output_tokens": 94293,
+            "reasoning_output_tokens": 29079
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 120
+    "_version": 124
   }
 }

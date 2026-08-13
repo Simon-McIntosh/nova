@@ -72,6 +72,53 @@
   than the 8.717% sup-norm. The interpolated-grid figures are therefore partly artefact, and the 96.55%
   native-grid cancellation is the more trustworthy number.</p>
 
+  <h2 id="roundtrip-accounting">§2 — the round-trip error, accounted for stage by stage</h2>
+
+  <p>Commit <code>971c06e5</code>. Artifact <code>benchmarks/efit_roundtrip_identity.py</code>
+  (334 lines). Worker time 517 s. Shot 21978 slice 46, artifact
+  <code>sha256:44f71af8…</code>.</p>
+
+  <p><strong>The node's own measure is met and the plan's identity bound is not.</strong> The
+  discrepancy is reproduced exactly at 0.008467436183 Wb = <strong>5.152548851e-3 of span</strong>
+  against the 1e-6 bound, and the error map now closes vectorially with
+  <strong>zero unexplained remainder</strong> and a closure sup fraction of 0. The bound stays failed;
+  it was neither weakened nor redefined.</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Stage</th><th>Contribution</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td>finite-cell Green ↔ conservation <code>delta_star</code> pair</td><td>signed <strong>1.865846318e-3</strong> of span</td><td>at the max-error coordinate R = 1.265715 m, Z = 0.076875 m</td></tr>
+      <tr><td>mandatory LCFS remasking</td><td>signed <strong>3.286702533e-3</strong> of span</td><td>removes 3,362.628 A signed / 4,442.233 A absolute of recovered exterior current</td></tr>
+      <tr><td><strong>sum at that coordinate</strong></td><td><strong>5.152548851e-3</strong></td><td>exactly the measured total</td></tr>
+      <tr><td>drive packing + <code>plasma_to_grid</code> contraction</td><td>0</td><td>independently rewritten and byte-numerically identical to the public drive</td></tr>
+      <tr><td>COCOS 3 Wb/rad → COCOS 17 total-Wb conversion</td><td>2.056897820e-7 of span</td><td>negligible; the convention is not the defect</td></tr>
+      <tr><td>grid interoperation</td><td>2.712239960e-3 of span</td><td>counterfactual path difference, <em>excluded</em> from the exact repeat-error sum</td></tr>
+      <tr><td>bilinear EFIT→nova→EFIT flux interpolation</td><td>4.162463354e-2 of span</td><td>separate receipt over 3,422 overlap points, never folded into another stage</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>The two dominant stages' <em>separate</em> global sup fractions are 2.034417830e-3 and
+  3.995299357e-3, and they are deliberately not added because their suprema fall at different
+  coordinates — a detail that matters, because adding them would manufacture a total the field does not
+  have.</p>
+
+  <p><strong>The defective stage is named: incompatibility between the finite-cell Green coupling and the
+  discrete conservation <code>delta_star</code> operator on nova's grid, amplified by the mandatory LCFS
+  remasking.</strong> <code>delta_star</code> recovery differs from the supplied current by
+  2.821503582e-2 peak and 7.620079859e-3 RMS relative to the peak input cell current. No third exact
+  discrete inverse exists, so the pair contribution cannot be assigned uniquely to the Green coupling or
+  to <code>delta_star</code> alone.</p>
+
+  <p><strong>What follows is a scope statement rather than a repair.</strong> The node reports that no
+  benchmark-only correction can make the two physical operators mutual inverses without changing the
+  implementation it exists to measure. The 1e-6 identity therefore asks two independently discretised
+  operators — one an integral coupling, one a finite-difference differential — to compose to the identity
+  at a tolerance that is not a property discretisations of that pair generally have. Whether that makes
+  the operator pair defective or the bound mis-specified is the open question this measurement hands
+  upward; it is not resolved here, and the bound is not moved in the meantime.</p>
+
   <p><strong>Scope note on the current vector.</strong> This probe used <code>efm/fcoil_x</code>
   throughout, on orchestrator instruction issued before the owner locked <code>efm/fcoil_c</code>;
   <code>efm/fcoil_c</code> was never read. The <code>fcoil_x</code> cancellation is worth keeping as

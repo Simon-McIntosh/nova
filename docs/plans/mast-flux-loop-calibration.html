@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="mast-flux-loop-calibration">
   <meta name="plan-title" content="MAST Flux-Loop Calibration and Inclusion">
   <meta name="plan-summary" content="Fit every MAST flux loop&#x27;s gain against the exact vacuum flux, adjudicate the suspected 2-pi store convention, and admit calibrated loops to the current inversion, the misfit maps, and the residual gate — recovering the rank the probe array lacks.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="M">
   <meta name="plan-capability-version" content="1.0">
@@ -19,9 +19,9 @@
   <title>MAST Flux-Loop Calibration and Inclusion | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-12">
-<meta name="plan-version" content="6">
-<meta name="plan-impl" content="0.93">
+<meta name="plan-modified" content="2026-08-13">
+<meta name="plan-version" content="7">
+<meta name="plan-impl" content="1.0">
 <meta name="plan-commits" content="a952f30c,88001544,8b15a398,ae1166dc,f8fc19ce">
 <meta name="plan-artifacts" content="~/.cache/nova-mast/flux-loop-inclusion/inversion.json,~/.cache/nova-mast/flux-loop-inclusion/ratios.json,~/.cache/nova-mast/flux-loop-inclusion/constraint_sets.npz,~/.cache/nova-mast/flux-loop-inclusion/summary.json,docs/figures/flux-loop-inclusion/current-space-identifiability.svg,docs/figures/flux-loop-inclusion/p4p5-constraint-sets.svg,docs/research/mast-gate-decision-packet.html,docs/figures/gate-decision/measurement-consumption-flow.svg">
 </head>
@@ -200,7 +200,7 @@ Done-when
   5. Followup written into plan + this one resolved</pre>
     <p class="r-fu-outcome">§2.5 and §2.6 landed — commits a952f30c (inversion), 8b15a398 + ae1166dc (correction records and their pins), 88001544 (gate packet). Loops admitted: current-space rank 10/13 to 13/13 over 369 sustained plasma-free shots, the probe-only factor-11.684 cliff after mode ten replaced by a largest gap of 6.406; rank recovered WITHOUT conditioning improvement (370.699 to 549.319). P4 becomes answerable and P5 stays answerable; P2 inner, P2 outer, P3 and P6 remain not answerable, each with a pair member past the 10% spread or rank-movement ceiling. Constraint bank regenerated: 45 P4/P5 rows over 44 shots in six groups. Correction document merged 128 to 160 rows at set_version 1.1.0 with provenance retained on all 32, and its pins repaired to assert the recorded-versus-promoted invariant rather than a frozen inventory (tests/calibrate 237 passed / 0 failed). Gate packet authored with all four owner selections left blank and each option's consequence measured — obr17 at 0.5011 widens the artifact-incumbent gap +30%, and the loops' production effect is stated as unmeasured rather than assumed.</p>
     </article>
-<article class="r-fu" data-id="f-flc-003" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-08" data-recommends-skill="/reckon-ship mast-flux-loop-calibration" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-flc-003" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-08" data-recommends-skill="/reckon-ship mast-flux-loop-calibration" data-resolved-at="2026-08-13T06:49:09+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Republish the registry with the restored P4-lower loop positions (digest cutover, owner-involved)</h4>
     <div class="r-fu-body">The level-2 read fix is landed and tested behind place_loops with the packaged default deliberately unchanged - the payload hash is the identity consumers pin. The republication node regenerates mast_geometry.json, flips the place_loops default (the one-word part), updates the five digest/join-pin test files (test_mast_catalog_geometry, test_mast_provisional_ids, test_mast_seed_parameters, test_mast_vacuum_refinement, test_mast_solve_inputs join 39→43), republishes the OCI artifact tag under the new physical digest, and bumps the imas-ambix MAST_PHYSICAL_DIGEST pin. Outward-facing: needs owner authorisation (precedent: the 76cf833561e602a7 → ca06c8f64481114f cutover ran as its own node). Until it runs, the production solve-input map joins 39 channels.</div>
     <pre class="r-fu-prompt">Project: nova
@@ -226,11 +226,18 @@ Done-when
   3. OCI artifact republished under the new physical digest; imas-ambix
      MAST_PHYSICAL_DIGEST pin bumped in coordination with that repo
   4. Followup written into plan + this one resolved</pre>
+    <p class="r-fu-outcome">In-repo half landed — commit f8fc19ce (merge 9d13f5ea). mast_geometry.json regenerated and the place_loops default flipped, so physical_snapshot serves the restored P4-lower positions; all 44 described loop positions are unique and the solve-input join and served loop-flux row count both move 39 to 43 of 46. Five digest and join pin files updated, plus two invariant tests whose premises the cutover dissolves. Full suite 4910 passed / 2 failed, the two being the pre-existing probe-axis sign assertions. New identity: physical digest b55c5bb005a2cb67 superseding ca06c8f64481114f, registry digest 2a26cc0a3a22e7fb8f42a53ee4c45e639290f0c5587e5f56405772b007f31bfd. The outward half is separated into f-flc-004 and retired there.</p>
     </article>
-<article class="r-fu" data-id="f-flc-004" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-12" data-recommends-skill="/reckon-ship mast-flux-loop-calibration" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-flc-004" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-12" data-recommends-skill="/reckon-ship mast-flux-loop-calibration" data-resolved-at="2026-08-13T06:49:09+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Publish the new machine identity outward: OCI artifact tag and the imas-ambix pin</h4>
     <div class="r-fu-body">OWNER-AUTHORISED 2026-08-12 for both the tag and the pin. The in-repo cutover has landed (f8fc19ce) with the full suite at its accepted 2-failure state, so the remaining work is the outward half only: republish the OCI artifact under physical digest b55c5bb005a2cb67 (superseding ca06c8f64481114f), complete registry digest 2a26cc0a3a22e7fb8f42a53ee4c45e639290f0c5587e5f56405772b007f31bfd, and bump MAST_PHYSICAL_DIGEST in imas-ambix in coordination with that repository. The ambix half is a second checkout and therefore its own node there, not a write scope reachable from a nova worktree. Until both run, published consumers still resolve the superseded digest and join 39 channels while this repository serves 43.</div>
     <pre class="r-fu-prompt">/reckon-ship mast-flux-loop-calibration</pre>
+    <p class="r-fu-outcome">RETIRED, not executed — the premise was false. Owner authorisation was given, and investigation then established there is nothing to republish: the artifact tooling's CLI publishes only to a local content-addressed cache, oci_artifact_reference takes its repository from the caller with the sole concrete string in-repo being the test placeholder ghcr.io/example/mast-md, and the authenticated account holds twelve container packages with no machine-description package among them. The claim that published consumers resolve a superseded digest does not survive contact with the registry; the real consumption path is the packaged registry imported through a git pin. The node stopped at its safety gate rather than pushing to a guessed namespace, and is recorded gate not-run. Ownership moves to machine-description-retirement and to imas-ambix S22.</p>
+    </article>
+<article class="r-fu" data-id="f-flc-005" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship machine-description-retirement" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Carry the corrected loop geometry into the map-driven producer (foreign-owner: machine-description-retirement)</h4>
+    <div class="r-fu-body">This plan's physics is complete and its packaging is not this plan's to fix. The corrected description — 44 unique described loop positions, the 43-of-46 solve-input join, and the 18 loops admitted as published — must arrive intact in the MAST map that the imas-ambix producer drives, and nova's registry, digest scheme and artifact caches are removed only after that equivalence is demonstrated numerically. Owned by machine-description-retirement, which holds the equivalence gate; recorded here so the geometry's provenance stays traceable from the plan that established it.</div>
+    <pre class="r-fu-prompt">/reckon-ship machine-description-retirement</pre>
     </article>
 </section>
 
@@ -243,6 +250,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260812-flc-027" data-who="reckon-ship" data-when="2026-08-12T19:45:00+00:00">
     <div class="r-comment-body">Registry cutover landed — commit f8fc19ce (merge 9d13f5ea); gate passed. Owner authorisation for the outward-facing republication was given 2026-08-12, which took f-flc-003 out of its authority-required exemption; this node is the IN-REPO half only and published nothing outward. physical_snapshot now defaults to the restored P4-lower positions, with place_loops=False preserved as the explicit legacy comparison rather than deleted. Measure: all 44 described loop positions are unique — the FL_P4L block no longer duplicates the P3-lower coordinates — and the solve-input join and served loop-flux row count both move 39 to 43 of 46 reconstruction loops. Full suite 4910 passed / 2 failed / 121 skipped in 900 s, the two being exactly the pre-existing probe-axis sign assertions for shots 15000 and 13500, with no new failure. NEW MACHINE IDENTITY — physical digest b55c5bb005a2cb67, superseding ca06c8f64481114f; complete registry digest 2a26cc0a3a22e7fb8f42a53ee4c45e639290f0c5587e5f56405772b007f31bfd; refined-artifact semantic identity pin sha256:8df7a0a6c3f6162dbe0f226660bc069f37de8eb69f0f7c80bbfedc2bd4be220c. Scope widened twice mid-flight, both granted and both the same shape: a test asserting the very premise the cutover dissolves — first the default-versus-place_loops inequality, then the duplicate-position assertion — each rewritten to the restored invariant rather than skipped. Recorded as scope-changed so it is excluded from estimate calibration. The suite also OOM-killed twice before landing; cause was orchestrator-side tmpfs worktree pressure, not this node.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260813-flc-028" data-who="reckon-ship" data-when="2026-08-13T08:55:00+00:00">
+    <div class="r-comment-body">Plan closed at 100%. All six §2 items plus the in-repo registry cutover landed across commits a952f30c, 8b15a398, ae1166dc, 88001544 and f8fc19ce. The one piece of scope that did not execute is recorded as a retirement rather than a gap: the outward OCI republication describes a distribution channel that does not exist, and the surrounding packaging is being replaced by the map-driven producer in imas-ambix S22 with nova's side removed by machine-description-retirement. The physics stands on its own — loops admitted, rank 10/13 to 13/13, P4 wiring answerable, constraint bank regenerated, and the described loop geometry corrected and unique.</div>
 </div>
 </section>
 </main>

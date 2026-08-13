@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-13T12:58:44",
+  "updated": "2026-08-13T15:41:42",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -362,6 +362,47 @@
                 "verification": "strict"
               }
             }
+          },
+          {
+            "slug": "efit-map-inversion",
+            "why_now": "The parity chain fitted magnetics instead of being given the reference's sources, so nothing yet proves nova can even read a stored EFIT equilibrium correctly; every quantity needed has a known-good answer in the file, and the LCFS-masked prototype already closes plasma current to -2.7e-04 against -42.9% unmasked.",
+            "done_when": "Store contents and conventions declared with a COCOS decision locked; topology, axis, LCFS and x-point extracted from the given flux map and scored against the stored geometry per frozen shot; current density and flux functions recovered on the stored-LCFS interior with plasma-current closure and per-bin agreement against stored profiles; the additional-term question separated into physical or numerical by measurement.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "efit-flux-decomposition",
+            "why_now": "The stored-LCFS mask quantified 10.08 MA of absolute current outside a 0.925 MA plasma, and a superseded unmasked probe put the external term at 1.27 and the residual at 1.22 of the flux span; a free-boundary forward solve takes the external field as its boundary condition, so this either validates that field or names the vacuum-field defect.",
+            "done_when": "The plasma-coupling round trip meets its 1e-6 flux-span bound or the operator defect is named; the external term is reconstructed from the experimental conductor currents through the existing described-response path; the residual is reported unbounded as sup-norm and RMS fractions; delta_star of the residual is quantified and localised against the named conductors with interpolation error reported separately; a verdict states whether the external field can serve as a free-boundary boundary condition.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
+          },
+          {
+            "slug": "efit-forward-parity",
+            "why_now": "This is the demonstration the sprint's theme actually names and the one nova owes as a forward physics model: the free-boundary Grad-Shafranov fixed point given a reference's own flux functions and conductor currents. It has never been run, and the frozen-six reconstruction gate it replaces cannot answer it because that gate fitted magnetics.",
+            "done_when": "The frozen six scored from both seeding conditions on flux-map sup-norm and RMS, axis, LCFS, x-point, topology class, I_p, beta_p, l_i and the fixed-point defect, with no measurement anywhere in the path; pass/fail against the carried-over registered tolerances; verdict on whether the free-boundary fixed point reproduces the reference; the GPU catalog unblocked or held on that verdict rather than on the reconstruction result.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "context": "extended",
+                "verification": "strict",
+                "risk": "elevated"
+              }
+            }
           }
         ],
         "starts": "2026-08-10",
@@ -574,6 +615,11 @@
         "when": "2026-08-13",
         "who": "reckon-ship",
         "what": "S7 executed: 15 worker nodes across 6 waves, all commits merged to main, every session worktree reclaimed. THE SPRINT'S CENTRAL QUESTION IS ANSWERED AND THE ANSWER IS NEGATIVE. The frozen six-shot gate scored end to end for the first time - 45,000 corrected slices, every source index exactly once, 180 atomic partitions, 9,573 slices scored - and returned FAIL on ten of twelve registered metrics with converged_fraction and fixed_point_defect at exactly ZERO. No scored slice on any of the six shots reached the solver's convergence criterion, which subordinates the geometry failures: a position measured on an unconverged flux map is a consequence, not an independent finding. The only two passes are the two metrics that do not require the fixed point to close - the CurrentDiffusion flux ledger at fraction 1 and throughput at 1. Mechanism: the assembled chain reads, seeds, batches, labels and transports correctly, and the GS fit does not converge on real measured magnetics. THE GPU CATALOG (S8) IS EXPLICITLY HELD - the pre-registered meaning of this result under the locked qualified-magnetics bar, whose magnetics allowance never applies because the strict metrics fail on their own. No tolerance was changed, no proxy substituted, and no partition dropped, including through a compute incident that cost 105 of 180 partitions. nova-test-lane-health SHIPPED at 100%: the whole suite now completes in ONE process for the first time in the repository's history - 50 failed, 5655 passed, 141 skipped, 4 xfailed in 2012.90 s, all 5,842 tests - after the starvation owner was named by measurement as retained JAX/XLA CPU compilation (212 of 226 retained threads native-only against 14 Python-managed as the excluding control; 4,221 live executables) and bounded to max 933 of a 1,024 ceiling; the 50 failures then classified 47 regression / 3 pre-existing / 0 suite-order, the 47 traced to one commit adding a required ShotWaveforms field without updating test constructors, and repaired to leave exactly 3. spine-efit-parity and flux-function-forward-equilibrium both stand at 99% with only trigger-deferred work and one active node. Other durable gains: a typed UnsupportedSlice contract that made the 7,500-slice support tally obtainable (4,182 of 7,500 physically supported - more than half a MAST record carries no seedable plasma, which retroactively explains four zero-score attempts as slice selection); the scorecard registry separated into twelve fields so the registered j-phi reproduction and the accelerator fixed-point defect stop being compared as one quantity, with every prior bound byte-identical; the l_i baseline settled as a passive-configuration IMPROVEMENT of 7.688559x rather than a drift, with the asymmetry recorded (passives move l_i by 0.9 pp and I_p by 0.03 pp); and verified reads of the shared machine artifact made concurrency-safe by canonicalizing the four HDF5 superblock consistency-flag bytes, 0/20 to 20/20 trials, narrowness proven against all 2,044 other bytes and published digests unchanged. NOT DONE, with reasons recorded rather than left silent: the pre-registered held-out extension is deliberately unspent because it guards against overfitting a PASS and there is none to generalise; the H200 performance program is deferred on the same logic that holds the catalog; and the convergence failure itself has no owning plan, since spine-boundary-accelerator is shipped and its locking evidence was synthetic self-consistent magnetics - the very case the section-6 measurement identified as the predicted failure mode."
+      },
+      {
+        "when": "2026-08-13",
+        "who": "reckon-ship",
+        "what": "S7 scope corrected on owner direction after a premise error was caught. The frozen-six parity gate was driving ReconstructProfile.least_squares_map through newton_krylov - a whitened least-squares fit to measured magnetics with a hard measured-current equality - so it inferred the flux functions rather than being given them and scored a fitted state against EFIT. That is an inverse solve, outside the forward class nova's own locked matrix assigns it, and its converged_fraction=0 is a fit failing to converge rather than the Grad-Shafranov fixed point failing. The intended demonstration - the free-boundary fixed point given a reference's own flux functions and conductor currents, with no measurement in the path - has never been run. Three plans added to carry it: efit-map-inversion (read the reference correctly), efit-flux-decomposition (validate the external field that is the free-boundary condition), efit-forward-parity (the demonstration itself, replacing the reconstruction gate as the parity claim and inheriting the mast-catalog-gpu-solve block). Evidence already landed from three probe nodes: efm DOES store pprime [time,65] Pa-rad/Wb and ffprime [time,65] T-rad on a 65-point uniform psi_norm, with 397 forward-usable rows exactly matching the usable geometry count, so a forward solve can be driven from stored values; no COCOS is declared in the file, derived digits are compatible with source COCOS 3 with sigma_RphiZ undeterminable. Owner direction to mask the plasma current with the given LCFS is locked as a decision and was decisive - unmasked, 1421 cells closed plasma current at -42.88%; masked to the stored 151-vertex boundary, 938 cells close at -0.0275%, a factor of about 1560, with derived current density correlating 0.999920 against the stored field. The mask also isolates the exterior signal as a measurable diagnostic: -9.605 MA signed and 10.080 MA absolute outside the plasma. The R^4 rotation term is resolved above its own standard error in 11 of 24 bins, so two terms do not suffice everywhere and the physical-versus-numerical separation is its own section."
       }
     ],
     "blockers": [
@@ -606,6 +652,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 34
+    "_version": 35
   }
 }

@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="efit-map-inversion">
+  <meta name="plan-title" content="EFIT Map Inversion — recover the reference&#x27;s own description from its flux map">
+  <meta name="plan-summary" content="Prove nova can read a stored EFIT equilibrium correctly before comparing against it: extract topology and boundary from the given flux map, recover the toroidal current density and flux functions on the LCFS interior by affine regression, and close the plasma current against the stored value">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="4.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint" content="S7">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-blocks" content="efit-flux-decomposition,efit-forward-parity">
+  <title>EFIT Map Inversion | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-13">
+<meta name="plan-commits" content="213458a2,69c7f92a">
+<meta name="plan-artifacts" content="benchmarks/efit_forward_input_census.py,benchmarks/efit_affine_extraction.py">
+<meta name="plan-impl" content="0.35">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Read the reference before scoring against it</h2>
+
+    <p><strong>The parity chain built so far does not test nova's forward model.</strong>
+    <code>run_parity_chain</code> drives <code>ReconstructProfile.least_squares_map(...)</code> through
+    <code>newton_krylov</code>: it forms <code>target = measured − source_to_sensor @ source_current</code>,
+    whitens by a per-sensor scale, and carries a hard measured-current equality. That is an inverse
+    solve which <em>infers</em> the flux functions from magnetics. nova's own locked contract puts that
+    outside the forward class — <code>flux-function-forward-equilibrium</code> §2 requires the forward
+    solve to have "no magnetic measurements, no whitening matrix, no priors and no least-squares
+    coefficient update". So the frozen-six verdict measures a reconstruction, and its
+    <code>converged_fraction = 0</code> is a least-squares fit failing to converge, not the
+    Grad–Shafranov fixed point failing.</p>
+
+    <p>The demonstration that belongs in nova is the forward one: give the solve prescribed flux
+    functions and conductor currents, find the free-boundary fixed point, and compare the field to the
+    reference. That needs the reference's own sources as <em>inputs</em>, which the chain never had —
+    which is precisely why it fitted them instead.</p>
+
+    <p><strong>This plan is the first rung: prove we can read a stored EFIT equilibrium correctly.</strong>
+    Every quantity here has a known-good answer already in the file, so each check is a comparison
+    against truth rather than against another solve. If we cannot recover EFIT's own current density
+    and flux functions from EFIT's own flux map, then no comparison built on top of that reading means
+    anything — and the geometry metrics in the existing gate are uninterpretable for the same reason.</p>
+
+    <h2 id="s2">§2 — What the store actually holds</h2>
+
+    <p>Censused directly from <code>/work/projects/imas_gpu/mast/level1/shots/&lt;shot&gt;.zarr/efm</code>
+    rather than assumed. <strong>The flux-function profiles are present and do not need deriving</strong>,
+    which means a forward solve can be driven from stored values and the affine recovery in §4 becomes an
+    independent cross-check rather than the only route:</p>
+
+    <div style="overflow-x:auto">
+    <table>
+      <thead><tr><th>Quantity</th><th>Path</th><th>Shape</th><th>Units</th></tr></thead>
+      <tbody>
+        <tr><td>pressure gradient</td><td><code>efm/pprime</code></td><td>[time, 65]</td><td>Pa·rad/Wb</td></tr>
+        <tr><td>toroidal-field function gradient</td><td><code>efm/ffprime</code></td><td>[time, 65]</td><td>T·rad</td></tr>
+        <tr><td>pressure</td><td><code>efm/ppsi_c</code></td><td>[time, 65]</td><td>Pa</td></tr>
+        <tr><td><code>F = R B_φ</code></td><td><code>efm/fpsi_c</code></td><td>[time, 65]</td><td>T·m</td></tr>
+        <tr><td>flux coordinate</td><td><code>efm/psi_norm</code></td><td>65 uniform, 0→1</td><td>—</td></tr>
+        <tr><td>poloidal flux map</td><td><code>efm/psirz</code></td><td>[time, 65, 129] → 65×65 live</td><td>Wb/rad</td></tr>
+        <tr><td>conductor currents (experimental)</td><td><code>efm/fcoil_x</code></td><td>[time, 101]</td><td>A</td></tr>
+        <tr><td>conductor currents (EFIT-fitted)</td><td><code>efm/fcoil_c</code></td><td>[time, 101]</td><td>A</td></tr>
+        <tr><td>filament / circuit maps</td><td><code>efm/fcoil_{circ,r,z,turns,xmult}</code></td><td>—</td><td>—</td></tr>
+        <tr><td>plasma current</td><td><code>efm/plasma_current_{x,c}</code></td><td>[time]</td><td>A</td></tr>
+        <tr><td>axis / boundary</td><td><code>efm/psi_axis</code>, <code>psi_boundary</code>, <code>magnetic_axis_{r,z}</code>, <code>lcfs_{r,z}</code>, both x-point pairs</td><td>—</td><td>—</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <p><code>psirz</code> is stored padded to 129 radial entries but carries exactly 65 finite columns
+    per row, giving a 65×65 live plane on <code>efm/gridz</code> × <code>efm/gridr</code>. Coverage is
+    complete where geometry is: rows carrying flux functions <em>and</em> a finite map <em>and</em> both
+    conductor vectors number 70, 69, 67, 61, 73 and 57 across the frozen six — <strong>397 rows,
+    exactly the usable geometry count</strong>. Nothing is lost by requiring the full forward input set.</p>
+
+    <p><strong>The file declares no COCOS.</strong> Per-radian flux units plus data-derived signs on all
+    six shots give <code>e_Bp = 0</code>, <code>σ_Bp = −1</code>, <code>σ_ρθφ = −1</code>, compatible
+    with source COCOS 3; <code>σ_RφZ</code> cannot be determined from these scalar arrays and remains an
+    external frame declaration. Conversion into nova's COCOS 17 is then ψ ×2π, <code>Ip</code> and
+    <code>B0</code> unchanged, <code>q</code> ×(−1), and <code>pprime</code>/<code>ffprime</code> ÷2π.
+    A sign error here corrupts every downstream comparison silently, so §2 closes on an explicit
+    declaration rather than an inference.</p>
+
+    <h2 id="s3">§3 — Topology and boundary from the given map</h2>
+
+    <p>Run nova's own topology and boundary machinery on the stored flux map and score it against the
+    stored geometry from the same slice. Both answers are in the file, so this isolates our reader with
+    no solver involved: axis position, LCFS distance, x-point position and count, and the
+    limited/diverted class. The existing gate reported pilot axis and LCFS figures of 0.002 m against
+    registered bounds of 1.01344e-03 m and 3.3047e-04 m — but those came from a reconstruction, so they
+    conflate reader error with fit error. Here they cannot.</p>
+
+    <p><em>Done-when:</em> on at least one slice per frozen shot, nova's extracted axis, LCFS and
+    x-point positions are reported against the stored values with signed distances, and the topology
+    class agrees or the disagreement is named with the grid resolution at which it resolves — the
+    (25,17) → (49,33) precedent showed a class disagreement that was purely a resolution artefact.</p>
+
+    <h2 id="s4">§4 — Current density and flux functions on the LCFS interior</h2>
+
+    <p>The Grad–Shafranov relation run backwards recovers the source from the field.
+    <code>nova/equilibrium/conservation.py</code> supplies <code>delta_star</code> with the convention
+    documented in place: <code>μ₀ j_φ = −Δ*Φ / (2π R)</code>. Multiplying the current-density expression
+    by R makes it affine in R², so per flux surface a straight regression returns both flux functions:</p>
+
+    <p><code>R j_φ = R² p′(ψ) + FF′(ψ)/μ₀</code> — slope <code>p′</code>, intercept <code>FF′/μ₀</code>.</p>
+
+    <p><strong>The prototype measurement already landed, and it establishes the rung.</strong> On shot
+    21978 slice 46 (t = 0.244999990 s), the stored 151-vertex LCFS partitions the 61×61 operator
+    interior into 938 plasma cells and 2783 exterior cells. Over 24 fixed bins with zero exclusions:</p>
+
+    <div style="overflow-x:auto">
+    <table>
+      <thead><tr><th>Check</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>plasma current, masked interior vs stored</td><td><strong>−2.744983e-04</strong> signed relative (925091.932 A vs 925345.938 A)</td></tr>
+        <tr><td>derived vs stored current density, 938 cells</td><td>normalised RMS 3.643585e-03, correlation 0.999920274</td></tr>
+        <tr><td><code>p′</code> vs stored, per bin</td><td>median −1.046718e-03, IQR [−1.134120e-02, +1.098024e-02]</td></tr>
+        <tr><td><code>FF′</code> vs stored, per bin</td><td>median +4.601016e-04, IQR [−8.376971e-03, +5.611287e-03]</td></tr>
+        <tr><td>two-term scatter / fitted magnitude</td><td>median 1.399630e-02 (min 3.007982e-03, q75 3.905780e-02, max 5.710340e-01)</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <p><strong>The LCFS mask is what makes this work, and its effect is measured rather than argued.</strong>
+    The same prototype without the mask admitted 1421 cells and closed the plasma current at
+    <strong>−42.88%</strong>; masking to the stored boundary admits 938 and closes at
+    <strong>−0.0275%</strong> — a factor of about 1560. Conductor current living outside the plasma
+    domain was being read as though it were a flux-function profile. That is why the mask is locked as a
+    decision below and not left to implementation taste.</p>
+
+    <h2 id="s5">§5 — Whether two terms are enough</h2>
+
+    <p><strong>They are not, in about half the bins.</strong> Refitting each bin with a third
+    <code>R⁴</code> column resolved that coefficient above its own standard error in
+    <strong>11 of 24 bins</strong>, reducing scatter by a median 1.171796e-02. An <code>R⁴</code> term in
+    <code>R j_φ</code> is the signature of a pressure that depends explicitly on major radius — toroidal
+    rotation, for which nova already carries a locked isothermal closure and banked rotating references.</p>
+
+    <p>But three readings fit that evidence and they are not equivalent, so this section is a
+    separation, not an implementation. The term may be <em>physical</em> (EFIT fitted a rotation or
+    otherwise R-dependent source); it may be <em>numerical</em> (thin bins near the axis and near the
+    boundary hold few cells over a short R² lever, so a third column absorbs noise); or it may be
+    <em>geometric</em> (near-boundary bins clipped by the mask sample an asymmetric part of each
+    surface). The scatter distribution is consistent with the second: the maximum two-term scatter
+    fraction is 0.571 against a median of 0.014, so a small number of bins dominate.</p>
+
+    <p><em>Done-when:</em> the 11 bins are identified by flux-surface position and cell population, and
+    the physical reading is separated from the numerical one by a measurement — refitting under a
+    binning that equalises cell population, and testing whether the recovered <code>R⁴</code>
+    coefficient is consistent in sign and magnitude with a single rotation profile across bins rather
+    than scattering as noise would. If it is physical, the recovered rotation parametrisation is
+    reported as a third forward input; if numerical, the two-term model stands with the bin-population
+    floor recorded.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="plasma-domain-mask" data-choice="stored-lcfs-interior" data-by="Simon McIntosh" data-when="2026-08-13T13:20:00+00:00">
+    <p class="r-dec-q">Over what domain are plasma-side quantities — the flux-function regression and
+        the plasma-current integral — computed from a recovered current density?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="stored-lcfs-interior">the stored LCFS interior only</button>
+      <button class="r-opt" data-value="normalised-flux-threshold">every cell with psi_N &lt;= 1</button>
+      <button class="r-opt" data-value="whole-grid">the whole operator interior</button>
+      </p>
+    <p class="r-dec-rat">Owner direction 2026-08-13: mask the plasma current with the given LCFS for
+        both the Δ* solve and the flux-function coefficient calculation, so missing conductors cannot
+        pollute the solve. Measured: the unmasked prototype admitted 1421 cells and closed the plasma
+        current at −42.88%, while the stored-LCFS mask admits 938 and closes at −0.0275%. The mask does
+        double duty — it keeps conductor current out of the plasma-side fit, and it isolates the
+        exterior Δ* signal as a quantified missing-conductor diagnostic rather than discarding it. A
+        normalised-flux threshold is not equivalent: it selects on a value, and private-flux and
+        exterior regions can sit below one.</p>
+    </div>
+<div class="r-dec" data-key="source-cocos-declaration" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">The efm file declares no COCOS. Data-derived digits are compatible with
+        source COCOS 3, but σ_RφZ is undeterminable from the stored scalars. Do we declare
+        COCOS 3 externally on the strength of the derived digits, or gate the ladder on documentary
+        confirmation of the frame?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="declare-cocos-3">declare source COCOS 3 with the derived digits recorded as its basis</button>
+      <button class="r-opt" data-value="require-documentary-confirmation">gate on documentary confirmation of the frame</button>
+      <button class="r-opt" data-value="tabulate-both-frames">carry both frame readings until a downstream check discriminates</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="conductor-current-source" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">The store carries conductor currents twice: efm/fcoil_x as
+        experimental input and efm/fcoil_c as EFIT&#x27;s own fitted output. Which drives our
+        external field?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="experimental-fcoil-x">the experimental input, fcoil_x</button>
+      <button class="r-opt" data-value="fitted-fcoil-c">EFIT&#x27;s fitted output, fcoil_c</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-emi-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship efit-map-inversion §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Score topology and boundary extraction against the stored geometry (§3)</h4>
+    <div class="r-fu-body"><p>§2's census and §4's masked flux-function recovery are both landed as prototypes (<code>213458a2</code>, <code>69c7f92a</code>): profiles are stored, 397 forward-usable rows match the geometry count, the plasma current closes to −2.74e-04 on the masked interior, and derived current density correlates 0.999920 with the stored field. What is not measured is §3 — running nova's own topology and boundary machinery on the stored flux map and scoring axis, LCFS, x-point and topology class against the stored values from the same slice. This isolates the reader with no solver in the loop, which is what makes the existing gate's 0.002 m pilot axis and LCFS figures uninterpretable: they conflate reader error with fit error. Extend to at least one slice per frozen shot. Two open decisions gate the wider ladder rather than this section: the source COCOS declaration and whether <code>fcoil_x</code> or <code>fcoil_c</code> drives the external field.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship efit-map-inversion §3</pre>
+    </article>
+</section>
+  </main>
+</body>
+</html>

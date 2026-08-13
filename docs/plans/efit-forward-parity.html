@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="efit-forward-parity">
+  <meta name="plan-title" content="EFIT Forward Parity — the fixed-point free-boundary solve against a reference equilibrium">
+  <meta name="plan-summary" content="Demonstrate that nova&#x27;s free-boundary Grad-Shafranov fixed point reproduces a reference EFIT equilibrium when given that reference&#x27;s own flux functions and conductor currents — a forward solve with no measurements, no whitening and no fitted coefficients">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="6.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-context" content="extended">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-sprint" content="S7">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-depends-on" content="efit-map-inversion,efit-flux-decomposition">
+  <meta name="plan-blocks" content="mast-catalog-gpu-solve">
+  <title>EFIT Forward Parity | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-13">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — The demonstration nova owes, and the one it made instead</h2>
+
+    <p><strong>nova is a forward physics model.</strong> Its locked class matrix puts prescribed sources
+    to equilibrium flux in <code>ForwardProfile</code>, measurements to a fitted profile state in
+    <code>ReconstructProfile</code>, and shape targets to conductor currents in
+    <code>InverseDesign</code>. The parity claim that matters for a forward model is therefore: given a
+    reference equilibrium's own flux functions and conductor currents, does the free-boundary
+    Grad–Shafranov fixed point reproduce its field?</p>
+
+    <p><strong>That has never been run.</strong> The existing chain drove
+    <code>ReconstructProfile.least_squares_map(...)</code> through <code>newton_krylov</code> — a
+    whitened least-squares fit to measured magnetics with a hard measured-current equality. It inferred
+    the flux functions rather than being given them, which is why it needed no reference profiles, and it
+    scored a fitted state against EFIT. Its <code>converged_fraction = 0</code> across all six frozen
+    shots is a fit failing to converge; it is not evidence about the Grad–Shafranov fixed point. The two
+    metrics that passed — the CurrentDiffusion flux ledger and throughput — are the two that never
+    depended on the fit closing.</p>
+
+    <figure>
+      <svg viewBox="0 0 720 200" role="img" style="max-width:100%;height:auto;font-family:system-ui">
+        <text x="360" y="16" text-anchor="middle" font-size="13" font-weight="600" fill="#111">Two different problems, one of which nova owns</text>
+
+        <text x="16" y="46" font-size="11.5" font-weight="600" fill="#911">what ran</text>
+        <rect x="100" y="32" width="126" height="34" fill="none" stroke="#c22"/>
+        <text x="163" y="53" text-anchor="middle" font-size="11" fill="#111">measured magnetics</text>
+        <line x1="226" y1="49" x2="256" y2="49" stroke="#555"/><polygon points="256,49 249,45.5 249,52.5" fill="#555"/>
+        <rect x="256" y="32" width="150" height="34" fill="none" stroke="#c22"/>
+        <text x="331" y="47" text-anchor="middle" font-size="11" fill="#111">ReconstructProfile</text>
+        <text x="331" y="61" text-anchor="middle" font-size="10.5" fill="#911">least squares, whitened</text>
+        <line x1="406" y1="49" x2="436" y2="49" stroke="#555"/><polygon points="436,49 429,45.5 429,52.5" fill="#555"/>
+        <rect x="436" y="32" width="120" height="34" fill="none" stroke="#c22"/>
+        <text x="496" y="53" text-anchor="middle" font-size="11" fill="#111">fitted profiles</text>
+        <line x1="556" y1="49" x2="586" y2="49" stroke="#555"/><polygon points="586,49 579,45.5 579,52.5" fill="#555"/>
+        <rect x="586" y="32" width="118" height="34" fill="none" stroke="#b60"/>
+        <text x="645" y="53" text-anchor="middle" font-size="11" fill="#111">scored vs EFIT</text>
+
+        <text x="16" y="126" font-size="11.5" font-weight="600" fill="#064">what this plan runs</text>
+        <rect x="100" y="112" width="126" height="34" fill="none" stroke="#0a6"/>
+        <text x="163" y="127" text-anchor="middle" font-size="11" fill="#111">EFIT p′, FF′</text>
+        <text x="163" y="141" text-anchor="middle" font-size="10.5" fill="#064">+ fcoil_x currents</text>
+        <line x1="226" y1="129" x2="256" y2="129" stroke="#555"/><polygon points="256,129 249,125.5 249,132.5" fill="#555"/>
+        <rect x="256" y="112" width="150" height="34" fill="none" stroke="#0a6"/>
+        <text x="331" y="127" text-anchor="middle" font-size="11" fill="#111">ForwardProfile</text>
+        <text x="331" y="141" text-anchor="middle" font-size="10.5" fill="#064">free-boundary fixed point</text>
+        <line x1="406" y1="129" x2="436" y2="129" stroke="#555"/><polygon points="436,129 429,125.5 429,132.5" fill="#555"/>
+        <rect x="436" y="112" width="120" height="34" fill="none" stroke="#0a6"/>
+        <text x="496" y="133" text-anchor="middle" font-size="11" fill="#111">solved flux map</text>
+        <line x1="556" y1="129" x2="586" y2="129" stroke="#555"/><polygon points="586,129 579,125.5 579,132.5" fill="#555"/>
+        <rect x="586" y="112" width="118" height="34" fill="none" stroke="#b60"/>
+        <text x="645" y="133" text-anchor="middle" font-size="11" fill="#111">compared to EFIT</text>
+
+        <text x="360" y="180" text-anchor="middle" font-size="11" fill="#555">No measurement enters the lower path. Nothing is fitted, so convergence means what it says.</text>
+      </svg>
+      <figcaption>The upper path infers sources from magnetics and grades the inference; the lower path is
+      handed the sources and tests only the solve. Both compare to EFIT, but only the lower one is a
+      statement about nova's forward model.</figcaption>
+    </figure>
+
+    <h2 id="s2">§2 — What the solve is given</h2>
+
+    <p><code>ForwardProfile.solve(initial_flux, *, route="newton_krylov", current=...)</code> takes a trial
+    flux and conductor currents, with the prescribed flux functions carried on its source state. Every
+    input exists in the reference file, censused directly rather than assumed:</p>
+
+    <div style="overflow-x:auto">
+    <table>
+      <thead><tr><th>Solve input</th><th>Reference source</th><th>Conversion into COCOS 17</th></tr></thead>
+      <tbody>
+        <tr><td>pressure gradient <code>p′</code></td><td><code>efm/pprime</code> [time,65], Pa·rad/Wb</td><td>÷2π</td></tr>
+        <tr><td><code>FF′</code></td><td><code>efm/ffprime</code> [time,65], T·rad</td><td>÷2π</td></tr>
+        <tr><td>flux coordinate</td><td><code>efm/psi_norm</code>, 65 uniform 0→1</td><td>—</td></tr>
+        <tr><td>conductor currents</td><td><code>efm/fcoil_x</code> [time,101], A, with <code>fcoil_{circ,r,z,turns,xmult}</code></td><td>unchanged</td></tr>
+        <tr><td>trial flux / seed</td><td><code>efm/psirz</code>, or a neutral seed — see §3</td><td>×2π</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <p>397 rows across the frozen six carry the complete forward input set — flux functions, a finite
+    map, and both conductor vectors — which is exactly the usable geometry count, so requiring full
+    forward inputs costs no coverage.</p>
+
+    <p><strong>Free-boundary means the boundary condition is the external field</strong>, which is why
+    this plan depends on <code>efit-flux-decomposition</code>. If our conductor model does not reproduce
+    the reference's external flux, the fixed point is being asked to close against the wrong boundary and
+    a deviation cannot be attributed to the solve. The decomposition's verdict on whether the external
+    field is fit to serve as a boundary condition is this plan's entry gate.</p>
+
+    <h2 id="s3">§3 — Seeding, and not smuggling the answer in</h2>
+
+    <p><strong>Seeding from the reference's own flux map would weaken the claim.</strong> A fixed point
+    started at the answer can converge in zero meaningful iterations and reproduce it trivially; the
+    demonstration would then show only that EFIT's map is a fixed point of our operator to within the
+    convergence tolerance, which is a weaker statement than reproducing it from elsewhere. Conversely a
+    neutral seed may not converge at all on an axisymmetrically unstable state — the measured map
+    eigenvalue on a diverted reference case is 1.25 to 1.40, which is why <code>newton_krylov</code> is
+    the default route and no relaxed route rescues it.</p>
+
+    <p>So the seed is a declared axis of the demonstration, not an implementation detail: report the
+    comparison from a reference seed <em>and</em> from a moment-seeded or neutral start, and state the
+    iteration counts for each. The reference-seeded run bounds how close the operator's fixed point sits
+    to EFIT's map; the independently-seeded run is the one that carries the parity claim.</p>
+
+    <h2 id="s4">§4 — What is compared, and against what</h2>
+
+    <p>The comparison is field-to-field and moment-to-moment against the reference, with no measurement
+    anywhere in it. The metric set is a subset of the registered twelve, minus everything that only
+    means something for a fit:</p>
+
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Compared</th><th>Against</th><th>Carried over from the existing registry</th></tr></thead>
+        <tbody>
+          <tr><td>flux map, sup-norm and RMS as a fraction of the flux span</td><td><code>efm/psirz</code></td><td>new — the existing gate never compared fields</td></tr>
+          <tr><td>magnetic axis position</td><td><code>efm/magnetic_axis_{r,z}</code></td><td>yes, 1.01344e-03 m</td></tr>
+          <tr><td>LCFS distance</td><td><code>efm/lcfs_{r,z}</code></td><td>yes, 3.3047e-04 m</td></tr>
+          <tr><td>x-point position and topology class</td><td>stored x-point pairs</td><td>yes, 0.014 m and agreement ≥ 1.0</td></tr>
+          <tr><td><code>I_p</code>, <code>β_p</code>, <code>l_i</code></td><td><code>efm/plasma_current_x</code> and derived moments</td><td>new — the DINA demonstration's metric set</td></tr>
+          <tr><td>fixed-point defect and iteration count</td><td>the solver's own criterion</td><td>yes, separated field at 1e-8</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p><strong>Two registered metrics do not carry over, and saying so is part of the correction.</strong>
+    The whitened raw-magnetics residual and the <code>qualified-magnetics</code> bar exist to referee a
+    magnetics comparison, and a forward solve makes none — no measurement enters it. They stay valid for
+    whatever reconstruction work owns that comparison; they are simply not part of a forward parity
+    verdict. <code>profile_residual_rms</code> also changes meaning: with the flux functions prescribed
+    rather than fitted, the cross-substrate current reproduction it measures becomes a check on the
+    source evaluation rather than on a fit.</p>
+
+    <p><strong>The calibrated expectation comes from the demonstration that already worked.</strong>
+    <code>ForwardProfile</code> reproduced DINA 135011/7 slice 353 on a production 1587-cell hexagonal
+    ITER mesh to <code>I_p</code> −1.12%, <code>β_p</code> +2.24%, <code>l_i</code> −0.135% and axis
+    41.2 mm, with the residual growing under refinement and all four candidate causes since excluded by
+    measurement. This plan is that same pattern pointed at a second reference, so a deviation of order a
+    percent is the expected outcome rather than a failure — and the DINA experience says the interesting
+    question will be whether the residual grows under refinement here too.</p>
+
+    <p><em>Done-when:</em> the frozen six are scored on the metric set above from both seeding
+    conditions, per-slice and per-shot, with pass/fail against the carried-over registered tolerances and
+    reported deviations for the new field and moment metrics; the verdict states whether the free-boundary
+    fixed point reproduces the reference within those bounds; and the GPU catalog is unblocked or held on
+    that verdict rather than on the reconstruction result it is currently held on.</p>
+
+    <h2 id="s5">§5 — What this replaces, and what it does not</h2>
+
+    <p>This plan supersedes the frozen-six reconstruction gate as the parity claim for nova. That gate's
+    result is not withdrawn — it is a real measurement of an inverse fit, and its banked record stands —
+    but it is not evidence about the forward model and must not be cited as such. In particular the
+    accelerator hypothesis raised from it, that <code>accelerator-primary</code>'s synthetic
+    self-consistent locking evidence may not generalise to real data, was drawn from a least-squares fit's
+    convergence and cannot be tested by one; if the forward fixed point converges here on the same
+    machine and slices, that hypothesis is substantially weakened without the accelerator being touched.</p>
+
+    <p>What this plan does not do: it does not fit profile coefficients, infer a state from diagnostics,
+    or claim anything about reconstruction quality. Reconstruction against measured magnetics is a real
+    capability with real value — it is simply Ambix's side of the seam in the intended architecture, and
+    <code>ReconstructProfile</code> remains nova's implementation of it for callers who want it.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="forward-parity-seed" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Which seeding condition carries the parity claim: the reference&#x27;s own flux map,
+        an independent moment seed, or both reported side by side?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="both-reported">both, with the independent seed carrying the claim</button>
+      <button class="r-opt" data-value="reference-seed">the reference map, as the tightest available start</button>
+      <button class="r-opt" data-value="independent-seed-only">an independent seed only</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="magnetics-metrics-in-forward-gate" data-choice="excluded-from-forward-verdict" data-by="Simon McIntosh" data-when="2026-08-13T13:20:00+00:00">
+    <p class="r-dec-q">Do the whitened raw-magnetics residual and the qualified-magnetics bar form
+        part of a forward parity verdict?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="excluded-from-forward-verdict">excluded — a forward solve reads no measurement</button>
+      <button class="r-opt" data-value="carried-as-diagnostic">carried as a reported diagnostic</button>
+      </p>
+    <p class="r-dec-rat">Owner direction 2026-08-13: nova is a forward physics model, not an inverse
+        solver. A forward solve consumes prescribed sources and conductor currents and reads no magnetics,
+        so a whitened magnetics residual has no input to score and the cross-source budget that referees
+        it has nothing to referee. Both stay valid for reconstruction work and are retained in the
+        registry for that use; they are excluded from this plan&#x27;s verdict rather than deleted.</p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-efp-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship efit-forward-parity §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Run one forward slice from the reference&#x27;s own sources</h4>
+    <div class="r-fu-body"><p>Every input is confirmed present: <code>efm/pprime</code> and <code>efm/ffprime</code> [time,65] on a 65-point uniform <code>psi_norm</code>, <code>efm/fcoil_x</code> [time,101] with its filament and circuit maps, and 397 rows across the frozen six carrying the complete set. Drive <code>ForwardProfile.solve</code> on one MAST slice with those prescribed sources and the experimental conductor currents, converting into COCOS 17 by ψ ×2π and pprime/ffprime ÷2π, and compare the solved flux map to <code>efm/psirz</code> as a sup-norm and RMS fraction of the flux span, with axis, LCFS, x-point, <code>I_p</code>, <code>β_p</code> and <code>l_i</code> beside it. Report both seeding conditions with iteration counts, since a reference-seeded run bounds how close EFIT's map sits to our fixed point while an independently-seeded run is what carries the claim. No measurement enters this node — if a whitening matrix, a sensor read or a least-squares update appears anywhere in the path, the node is wrong rather than merely failing. This is entry-gated on the decomposition's verdict that the external field is fit to serve as a free-boundary boundary condition; if that verdict is negative, report the blocker rather than solving against a boundary known to be wrong.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship efit-forward-parity §2</pre>
+    </article>
+</section>
+  </main>
+</body>
+</html>

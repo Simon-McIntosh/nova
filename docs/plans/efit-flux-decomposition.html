@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="efit-flux-decomposition">
+  <meta name="plan-title" content="EFIT Flux Decomposition — separate plasma, external and residual flux">
+  <meta name="plan-summary" content="Split a stored EFIT flux map into the plasma term our coupling operator reproduces, the external term our conductor model reproduces, and a residual; then read the residual&#x27;s Grad-Shafranov operator as an implied missing current and localise it">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="4.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint" content="S7">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-depends-on" content="efit-map-inversion">
+  <meta name="plan-blocks" content="efit-forward-parity">
+  <title>EFIT Flux Decomposition | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-13">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — There is ten times the plasma current outside the plasma</h2>
+
+    <p><strong>Masking the recovered current density to the stored LCFS did not discard the exterior
+    signal — it quantified it.</strong> On shot 21978 slice 46 the 2783 operator-interior cells outside
+    the boundary carry a Δ* signal of <strong>−9.605046 MA signed, 10.080226 MA absolute</strong>,
+    against a plasma current of <strong>0.925 MA</strong>. That is an order of magnitude more current
+    outside the plasma than inside it.</p>
+
+    <p><strong>The ordinary explanation is that this is real and correctly recovered.</strong> The
+    poloidal field coils sit outside the LCFS and inside the grid; Δ*ψ evaluated there returns their
+    current density, and MAST's coil set carries ampere-turns of exactly this order. On that reading the
+    exterior signal is a validation of the operator, and reconstructing the external field from the
+    recorded conductor currents should cancel most of it.</p>
+
+    <p><strong>The superseded unmasked probe suggests it may not cancel.</strong> That run — not valid
+    evidence for the masked contract, and reported here only as the reason this plan exists — measured an
+    external term at 1.2726 of the stored flux span and a residual sup-norm at 1.2156 of it. If a
+    masked, mask-consistent repeat reproduces figures of that size, our external field does not reproduce
+    the reference's, and every free-boundary forward solve built on it inherits the error. That is the
+    vacuum-field problem this plan exists to confirm or clear.</p>
+
+    <figure>
+      <svg viewBox="0 0 700 210" role="img" style="max-width:100%;height:auto;font-family:system-ui">
+        <text x="350" y="16" text-anchor="middle" font-size="13" font-weight="600" fill="#111">What the LCFS mask separates, on shot 21978 slice 46</text>
+        <rect x="30" y="38" width="300" height="58" fill="none" stroke="#0a6" stroke-width="1.4"/>
+        <text x="180" y="58" text-anchor="middle" font-size="11.5" fill="#111">inside the stored LCFS — 938 cells</text>
+        <text x="180" y="74" text-anchor="middle" font-size="11" fill="#555">0.925 MA · closes to −2.7e-04</text>
+        <text x="180" y="89" text-anchor="middle" font-size="11" fill="#555">plasma term, flux functions</text>
+
+        <rect x="370" y="38" width="300" height="58" fill="none" stroke="#c22" stroke-width="1.4"/>
+        <text x="520" y="58" text-anchor="middle" font-size="11.5" fill="#111">outside it — 2783 cells</text>
+        <text x="520" y="74" text-anchor="middle" font-size="11" fill="#555">−9.605 MA signed · 10.080 MA absolute</text>
+        <text x="520" y="89" text-anchor="middle" font-size="11" fill="#555">conductors, real or missing</text>
+
+        <line x1="180" y1="102" x2="180" y2="126" stroke="#0a6" stroke-dasharray="3 2"/>
+        <line x1="520" y1="102" x2="520" y2="126" stroke="#c22" stroke-dasharray="3 2"/>
+        <text x="180" y="140" text-anchor="middle" font-size="11" fill="#064">never contaminated by conductors</text>
+        <text x="520" y="140" text-anchor="middle" font-size="11" fill="#911">reconstruct from fcoil_x</text>
+
+        <line x1="520" y1="150" x2="520" y2="168" stroke="#555"/><polygon points="520,168 516,161 524,161" fill="#555"/>
+        <text x="520" y="184" text-anchor="middle" font-size="11.5" fill="#111">residual = stored − plasma − external</text>
+        <text x="520" y="200" text-anchor="middle" font-size="11" fill="#555">Δ* of it is the implied missing current</text>
+      </svg>
+      <figcaption>The mask does double duty: the interior stays a clean plasma domain while the exterior
+      becomes a measurable conductor signal. The residual, and its Grad–Shafranov operator, is what
+      remains after both modelled terms are removed.</figcaption>
+    </figure>
+
+    <h2 id="s2">§2 — The operator round trip, which carries a bound</h2>
+
+    <p>Before any residual can be read, the coupling operator must be shown to invert its own forward
+    map. Derive <code>j_φ</code> from the stored flux via <code>delta_star</code>, mask it to the stored
+    LCFS interior, drive nova's plasma-current-to-grid coupling with it, and require the reconstructed
+    plasma flux to differ from the masked round trip by at most <strong>1e-6 of the stored flux
+    span</strong>. This is a pure self-consistency identity with no physics in it: exceeding the bound
+    means the coupling operator, the grid interoperation, or the convention conversion is defective, and
+    a residual computed on top of a defective operator is meaningless.</p>
+
+    <p>Grid interoperation is a named risk rather than an afterthought. The store's live plane is 65×65 on
+    <code>efm/gridz</code> × <code>efm/gridr</code> and nova's grid need not coincide; the superseded
+    probe reported an interpolation error of 4.16e-02 of the flux span, which is <em>larger than most
+    effects this ladder is trying to resolve</em>. Any interpolation must therefore be named and its own
+    error reported separately, so an interpolation artefact is never attributed to a missing conductor.</p>
+
+    <h2 id="s3">§3 — The external term, from the experimental currents</h2>
+
+    <p>Reconstruct the external contribution on the same grid from the recorded conductor currents,
+    reusing the described-response machinery in <code>nova/imas/mast_vacuum_response.py</code> and the
+    prediction form already proven in <code>nova/calibrate/gain_check.py</code> — that path forms an
+    exact vacuum prediction as recorded currents times a described response row and is validated at
+    sensor locations, so this rung extends a proven operator to a grid rather than writing a second
+    vacuum-prediction path.</p>
+
+    <p><strong>Which current vector is a firewall question, not a convenience.</strong>
+    <code>efm/fcoil_x</code> is the experimental input; <code>efm/fcoil_c</code> is EFIT's own fitted
+    output. Driving our external field from EFIT's fitted currents would import part of EFIT's solution
+    into a comparison meant to be independent of it — the same concern the structural referee firewall
+    exists to protect. The decision is carried in <code>efit-map-inversion</code>; this plan consumes it.</p>
+
+    <h2 id="s4">§4 — The residual and the current it implies</h2>
+
+    <p>Report <code>stored − masked plasma − external</code> as a sup-norm and a root-mean-square, each
+    as a fraction of the stored flux span. <strong>These figures carry no threshold and none may be
+    applied.</strong> A large residual is the informative outcome of this plan and must not be reduced by
+    fitting, by masking beyond the stated LCFS mask, or by excluding regions.</p>
+
+    <p>Then apply <code>delta_star</code> to the residual. Because Δ* returns a current density from a
+    flux, the residual's operator <em>is</em> a map of the current our model does not carry: report its
+    peak in A/m², its integral in A, and the R,Z coordinates of its largest magnitude relative to the
+    named conductors. A residual current that localises on a known conductor is a current-magnitude or
+    turns error; one that localises on the vessel wall is a passive-structure omission; one that
+    localises where no conductor exists is either a geometry error or an artefact, and the interpolation
+    figure from §2 is what discriminates the last case.</p>
+
+    <p><em>Done-when:</em> the round trip meets its 1e-6 bound or the operator defect is named; the
+    external term and the residual are reported as fractions of the flux span; and the residual's implied
+    current is quantified and localised, with a stated verdict on whether the external field is fit to
+    serve as a free-boundary boundary condition.</p>
+
+    <h2 id="s5">§5 — Handing a plasma-subtracted map to the geometry solve</h2>
+
+    <p><strong>The repair route already exists and has been waiting for this input.</strong>
+    <a href="/nova/coil-geometry-inversion.html">coil-geometry-inversion</a> defines two problem classes,
+    the second of which is "flux-map-space (currents fixed, match a plasma-subtracted flux map)" — and a
+    plasma-subtracted flux map is exactly what §2–§4 produce. Its Green's kernels are already verified
+    autograd-able with respect to coil geometry (jacfwd against finite differences to 1e-6), so if the
+    residual localises on a conductor, solving for that conductor's position or current is a gradient
+    optimisation on machinery that is already built.</p>
+
+    <p><em>Trigger:</em> a residual that survives §4 with an implied current localised on or near a named
+    conductor. The handoff is the plasma-subtracted map plus the residual current field; the solve itself
+    belongs to that plan, not this one. If instead the external reconstruction cancels the exterior signal
+    and the residual is negligible, this section closes as unnecessary and that is the better outcome —
+    it would mean the vacuum field is sound and the forward demonstration can proceed directly.</p>
+
+    <p>Two neighbouring plans are informed by whatever this measures, and neither duplicates it.
+    <a href="/nova/vacuum-signature-extraction.html">vacuum-signature-extraction</a> extracts
+    <em>instrument</em> terms from vacuum time-windows in sensor signals; its archive sweep is currently
+    held because its observable "cannot separate an acquisition-state change from a drive or pair-state
+    change or from a response-model change", and this plan measures that third confound independently,
+    from a different instrument and on a 2D map.
+    <a href="/nova/mast-misfit-toroidal-harmonics.html">mast-misfit-toroidal-harmonics</a> built
+    source-free harmonic maps of the <em>magnetics</em> misfit; the Δ* residual here is the same idea
+    applied to a flux map, and a conductor implicated by both is implicated twice over.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="residual-threshold-policy" data-choice="report-unbounded" data-by="Simon McIntosh" data-when="2026-08-13T13:20:00+00:00">
+    <p class="r-dec-q">Should the residual carry a pass/fail bound like the other gates in this
+        programme?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="report-unbounded">report it unbounded; the figure is the deliverable</button>
+      <button class="r-opt" data-value="pre-register-bound">pre-register a bound and score against it</button>
+      </p>
+    <p class="r-dec-rat">The round trip in §2 is an operator identity and carries a real bound at
+        1e-6 of the flux span. The residual is not of that kind: its magnitude is the measurement this
+        plan exists to obtain, and a pre-registered bound would create an incentive to reduce it by
+        masking or region exclusion — the exact contamination the LCFS-mask decision was made to prevent.
+        A large residual holds downstream work by being reported, not by failing a threshold.</p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-efd-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship efit-flux-decomposition §2" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Decompose one slice under the LCFS mask and read the residual</h4>
+    <div class="r-fu-body"><p>The exterior signal is already quantified by the sibling plan: 2783 cells outside the stored LCFS carry −9.605046 MA signed and 10.080226 MA absolute against a 0.925 MA plasma current. The leading hypothesis is the ordinary one — that most of it is the real poloidal field coil current, correctly recovered by <code>delta_star</code>, in which case reconstructing the external field from <code>fcoil_x</code> should cancel most of it and the residual is negligible. A superseded unmasked probe measured an external term at 1.2726 of the flux span and a residual sup-norm at 1.2156, which if reproduced under the mask would mean our external field does not reproduce the reference's. Run §2–§4 on one slice: the round trip against its 1e-6 bound, the external term from <code>fcoil_x</code> reusing <code>mast_vacuum_response.py</code> and the <code>gain_check.py</code> prediction form, the residual reported without any threshold, and <code>delta_star</code> of the residual localised against the named conductors. Report the interpolation error separately — the unmasked probe put it at 4.16e-02 of the flux span, larger than several effects this ladder resolves, so it must not be mistaken for a missing conductor.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship efit-flux-decomposition §2</pre>
+    </article>
+</section>
+  </main>
+</body>
+</html>

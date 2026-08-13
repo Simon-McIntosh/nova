@@ -31,6 +31,10 @@ from nova.transport.current_diffusion import (
 )
 
 
+DEFAULT_RADIAL_POINTS = 33
+DEFAULT_VERTICAL_POINTS = 49
+
+
 @dataclass(frozen=True)
 class MastParityChainComponents:
     """The four production components consumed by ``run_parity_chain``."""
@@ -60,6 +64,25 @@ class MastTopologyLabeler:
     grid: _Grid
     axis_seed: tuple[float, float]
 
+    def boundary_reads(self, flux) -> tuple[object, ...]:
+        """Return the connectivity diagnostics underlying each label row."""
+
+        maps = np.asarray(flux, dtype=float).reshape(
+            -1, self.grid.zg.size, self.grid.rg.size
+        )
+        return tuple(
+            host_boundary_read(
+                psi,
+                self.grid,
+                self.axis_seed,
+                n_levels=48,
+                n_bisect=12,
+                n_ray=len(LCFS_ANGLES),
+                angles=LCFS_ANGLES,
+            )
+            for psi in maps
+        )
+
     def __call__(self, flux) -> TopologyLabels:
         """Label every leading-axis flux map with Nova's connectivity read."""
 
@@ -75,16 +98,7 @@ class MastTopologyLabeler:
         private_masks = []
         excluded_masks = []
         radius, height = np.meshgrid(self.grid.rg, self.grid.zg)
-        for psi in maps:
-            read = host_boundary_read(
-                psi,
-                self.grid,
-                self.axis_seed,
-                n_levels=48,
-                n_bisect=12,
-                n_ray=len(LCFS_ANGLES),
-                angles=LCFS_ANGLES,
-            )
+        for psi, read in zip(maps, self.boundary_reads(maps), strict=True):
             axis = np.asarray(read.axis, dtype=float)
             ring = axis + np.column_stack(
                 [
@@ -254,8 +268,8 @@ def build_mast_parity_chain(
     artifact_cache: Path | str,
     artifact_digest: str,
     store: Path | str = SHOT_STORE,
-    radial_points: int = 17,
-    vertical_points: int = 25,
+    radial_points: int = DEFAULT_RADIAL_POINTS,
+    vertical_points: int = DEFAULT_VERTICAL_POINTS,
 ) -> MastParityChainComponents:
     """Build the four production components from corrected reads and one artifact."""
 
@@ -304,6 +318,8 @@ def build_mast_parity_chain(
 
 
 __all__ = [
+    "DEFAULT_RADIAL_POINTS",
+    "DEFAULT_VERTICAL_POINTS",
     "MastCurrentDiffusion",
     "MastParityChainComponents",
     "MastTopologyLabeler",

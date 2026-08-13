@@ -513,6 +513,97 @@ def test_both_bands_are_fitted_and_scored_across(constraint, focus):
     assert all(value["error"] >= 0.0 for value in scores.values())
 
 
+# --- physical source models -------------------------------------------------
+
+
+def test_a_ring_source_column_reads_field_and_flux_in_their_own_units(constraint):
+    """A filament column follows the same two sensor functionals as harmonics."""
+    column = mh.ring_source_design(constraint, [SOURCE])[:, 0]
+    probes = ~constraint.reads_flux
+    loops = constraint.reads_flux
+    poses = np.column_stack(
+        [
+            constraint.r[probes],
+            constraint.z[probes],
+            constraint.radial_cosine[probes],
+            constraint.axial_sine[probes],
+        ]
+    )
+    np.testing.assert_allclose(column[probes], projected_field(poses, SOURCE))
+    np.testing.assert_allclose(
+        column[loops], greens_psi(constraint.r[loops], constraint.z[loops], *SOURCE)
+    )
+
+
+def test_a_source_fit_reports_current_and_supply_multiple(constraint):
+    """A known filament's amplitude is recovered in both current conventions."""
+    design = mh.ring_source_design(constraint, [SOURCE])
+    target = 3.0e-3 * design[:, 0]
+    fit = mh.fit_source_model(
+        constraint,
+        design,
+        labels=("filament",),
+        target=target,
+        supply_turns=23.0,
+    )
+    assert fit.currents[0] == pytest.approx(3.0e-3)
+    assert fit.supply_multiples[0] == pytest.approx(0.069)
+    assert fit.explained > 1.0 - 1.0e-12
+
+
+def test_a_fixed_path_keeps_its_supply_and_return_currents_tied(constraint):
+    """An opposed route is one fitted column, not two unrelated filaments."""
+    path = ((1.35, -1.1, 1.0), (2.0, -1.1, -1.0))
+    column = mh.path_source_design(constraint, [path])
+    rings = mh.ring_source_design(constraint, np.asarray(path)[:, :2])
+    np.testing.assert_allclose(column[:, 0], rings @ np.array([1.0, -1.0]))
+    fit = mh.fit_source_model(constraint, column, target=0.04 * column[:, 0])
+    assert fit.currents[0] == pytest.approx(0.04)
+
+
+def test_greedy_filament_models_recover_a_two_ring_target(constraint):
+    """The bounded search finds both carried rings and remains monotone to four."""
+    candidates = np.array([SOURCE, (0.72, 0.45), (0.35, -0.8), (1.95, 0.9), (1.1, 1.3)])
+    design = mh.ring_source_design(constraint, candidates)
+    target = design[:, :2] @ np.array([0.003, -0.0015])
+    fits = mh.greedy_ring_fits(
+        constraint,
+        candidates,
+        target=target,
+        counts=(2, 3, 4),
+        supply_turns=23.0,
+    )
+    assert fits[2].explained > 1.0 - 1.0e-12
+    assert fits[2].explained <= fits[3].explained + 1.0e-12
+    assert fits[3].explained <= fits[4].explained + 1.0e-12
+    assert len(fits[4].currents) == 4
+
+
+def test_a_raw_source_fit_keeps_described_currents_free(constraint):
+    """Raw-data residue includes the same free described columns as harmonic fits."""
+    design = mh.ring_source_design(constraint, [SOURCE])
+    target = 0.002 * design[:, 0] + constraint.described @ np.asarray(COIL_SHARE)
+    raw = dataclasses.replace(constraint, value=target)
+    fit = mh.fit_source_model(raw, design, carry_described=True, supply_turns=23.0)
+    assert fit.currents[0] == pytest.approx(0.002, abs=1.0e-10)
+    np.testing.assert_allclose(fit.coil_currents, COIL_SHARE, atol=1.0e-10)
+    assert fit.residual < 1.0e-8
+
+
+def test_a_summed_pair_rejects_odd_modes_and_keeps_even_leakage():
+    """Pair health decides parity visibility independently of source strength."""
+    response = mh.toroidal_pair_sensitivity(np.deg2rad(20.0), maximum_mode=6)
+    np.testing.assert_allclose(response.summed_pair_fraction[1::2], 0.0, atol=0.0)
+    np.testing.assert_allclose(
+        response.summed_pair_fraction[::2], response.source_fraction[::2]
+    )
+    np.testing.assert_allclose(
+        response.single_member_fraction, response.source_fraction
+    )
+    assert response.summed_pair_fraction[2] > 0.97
+    assert response.single_member_fraction[1] > 0.99
+
+
 # --- reading a bank ---------------------------------------------------------
 
 

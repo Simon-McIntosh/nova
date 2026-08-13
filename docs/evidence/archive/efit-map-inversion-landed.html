@@ -31,12 +31,29 @@
   the affine recovery below becomes an independent cross-check rather than the only route to the
   sources.</p>
 
-  <p>Exact store paths, shapes and units are tabulated in
-  <a href="/nova/efit-map-inversion.html#s2">the plan's store-contents section</a>. Row coverage is the
-  figure worth repeating here: rows carrying flux functions <em>and</em> a finite flux map <em>and</em>
-  both conductor vectors number <strong>70, 69, 67, 61, 73 and 57</strong> across the frozen six —
-  <strong>397 rows, exactly the usable geometry count</strong>. Requiring the complete forward input
-  set therefore costs no coverage at all.</p>
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Quantity</th><th>Path</th><th>Shape</th><th>Units</th></tr></thead>
+    <tbody>
+      <tr><td>pressure gradient</td><td><code>efm/pprime</code></td><td>[time, 65]</td><td>Pa·rad/Wb</td></tr>
+      <tr><td>toroidal-field function gradient</td><td><code>efm/ffprime</code></td><td>[time, 65]</td><td>T·rad</td></tr>
+      <tr><td>pressure</td><td><code>efm/ppsi_c</code></td><td>[time, 65]</td><td>Pa</td></tr>
+      <tr><td><code>F = R B_φ</code></td><td><code>efm/fpsi_c</code></td><td>[time, 65]</td><td>T·m</td></tr>
+      <tr><td>flux coordinate</td><td><code>efm/psi_norm</code></td><td>65 uniform, 0→1</td><td>—</td></tr>
+      <tr><td>poloidal flux map</td><td><code>efm/psirz</code></td><td>[time, 65, 129] → 65×65 live</td><td>Wb/rad</td></tr>
+      <tr><td>conductor currents (experimental)</td><td><code>efm/fcoil_x</code></td><td>[time, 101]</td><td>A</td></tr>
+      <tr><td>conductor currents (EFIT-fitted)</td><td><code>efm/fcoil_c</code></td><td>[time, 101]</td><td>A</td></tr>
+      <tr><td>filament / circuit maps</td><td><code>efm/fcoil_{circ,r,z,turns,xmult}</code></td><td>—</td><td>—</td></tr>
+      <tr><td>plasma current</td><td><code>efm/plasma_current_{x,c}</code></td><td>[time]</td><td>A</td></tr>
+      <tr><td>axis / boundary</td><td><code>efm/psi_axis</code>, <code>psi_boundary</code>, <code>magnetic_axis_{r,z}</code>, <code>lcfs_{r,z}</code>, both x-point pairs</td><td>—</td><td>—</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>Row coverage is the figure worth repeating: rows carrying flux functions <em>and</em> a finite flux
+  map <em>and</em> both conductor vectors number <strong>70, 69, 67, 61, 73 and 57</strong> across the
+  frozen six — <strong>397 rows, exactly the usable geometry count</strong>. Requiring the complete
+  forward input set therefore costs no coverage at all.</p>
 
   <p><code>psirz</code> is stored padded to 129 radial entries and carries exactly 65 finite columns
   per row, giving a 65×65 live plane on <code>efm/gridz</code> × <code>efm/gridr</code>.</p>
@@ -48,9 +65,40 @@
   ψ ×2π, <code>Ip</code> and <code>B0</code> unchanged, <code>q</code> ×(−1), and
   <code>pprime</code>/<code>ffprime</code> ÷2π.</p>
 
-  <p><em>Carried caution, recorded rather than closed:</em> the declaration does not settle the sign of
-  plasma current. A per-shot sign check across the store's two recorded currents, the operator-derived
-  masked integral and the declared frame is the outstanding half of this section.</p>
+  <h2 id="current-sign-census">§2 — the plasma-current sign, checked per shot rather than once</h2>
+
+  <p>Commit <code>bab09d10</code>; gate passed. Artifact
+  <code>benchmarks/efit_current_sign_census.py</code> (328 lines). Findings JSON 8,094 bytes,
+  sha256 <code>be421a5f…</code>.</p>
+
+  <p><strong>The carried caution is discharged: all four signs agree on all six frozen shots, and the
+  disagreement list is empty.</strong> The declared COCOS 3 frame expects a positive forward current and
+  the source-to-target conversion leaves <code>Ip</code> unchanged; every stored channel and the
+  operator-derived masked integral is positive on the common usable slice 46.</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Shot</th><th><code>plasma_current_x</code> (A)</th><th><code>plasma_current_c</code> (A)</th><th>Δ*-derived, masked (A)</th><th>signed closure</th></tr></thead>
+    <tbody>
+      <tr><td>21978</td><td>+925843.625</td><td>+925345.9375</td><td>+925091.931619</td><td>−2.744983e-04</td></tr>
+      <tr><td>21983</td><td>+931952.1875</td><td>+928750.75</td><td>+928509.849053</td><td>−2.593817e-04</td></tr>
+      <tr><td>21985</td><td>+932461.4375</td><td>+927687.9375</td><td>+927414.004290</td><td><strong>−2.952859e-04</strong></td></tr>
+      <tr><td>21986</td><td>+881585.9375</td><td>+874260.4375</td><td>+874028.758021</td><td>−2.650005e-04</td></tr>
+      <tr><td>21989</td><td>+919616.25</td><td>+917653.125</td><td>+917404.380837</td><td>−2.710656e-04</td></tr>
+      <tr><td>22086</td><td>+927092.625</td><td>+925288.9375</td><td>+925049.454346</td><td>−2.588199e-04</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>Maximum absolute signed relative closure across the cohort is <strong>2.952859461e-04</strong>, so
+  the affine recovery's single-slice figure was not a lucky slice — the closure is stable to within about
+  4e-05 across six shots. The integration applies
+  <code>nova.equilibrium.conservation.delta_star</code> to the total flux Φ = 2π ψ, forms
+  <code>μ₀ j_φ = −Δ*Φ / (2π R)</code>, and integrates only operator cells inside the stored LCFS.</p>
+
+  <p><em>Qualification the node stated and which is kept:</em> this establishes one usable slice per
+  shot, not every row's temporal sign stability. A convention that moved <em>within</em> a shot would not
+  be caught by this measurement.</p>
 
   <h2 id="affine-recovery">§4 — current density and flux functions on the LCFS interior</h2>
 

@@ -22,10 +22,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-13">
-<meta name="plan-commits" content="213458a2,69c7f92a">
-<meta name="plan-artifacts" content="benchmarks/efit_forward_input_census.py,benchmarks/efit_affine_extraction.py">
-<meta name="plan-impl" content="0.35">
-<meta name="plan-version" content="2">
+<meta name="plan-commits" content="213458a2,69c7f92a,bab09d10">
+<meta name="plan-artifacts" content="benchmarks/efit_forward_input_census.py,benchmarks/efit_affine_extraction.py,benchmarks/efit_current_sign_census.py">
+<meta name="plan-impl" content="0.6">
+<meta name="plan-version" content="3">
 </head>
 <body>
   <main class="plan-doc">
@@ -54,60 +54,22 @@
     and flux functions from EFIT's own flux map, then no comparison built on top of that reading means
     anything — and the geometry metrics in the existing gate are uninterpretable for the same reason.</p>
 
-    <h2 id="s2">§2 — What the store actually holds</h2>
-
-    <p>Censused directly from <code>/work/projects/imas_gpu/mast/level1/shots/&lt;shot&gt;.zarr/efm</code>
-    rather than assumed. <strong>The flux-function profiles are present and do not need deriving</strong>,
-    which means a forward solve can be driven from stored values and the affine recovery in §4 becomes an
-    independent cross-check rather than the only route:</p>
-
-    <div style="overflow-x:auto">
-    <table>
-      <thead><tr><th>Quantity</th><th>Path</th><th>Shape</th><th>Units</th></tr></thead>
-      <tbody>
-        <tr><td>pressure gradient</td><td><code>efm/pprime</code></td><td>[time, 65]</td><td>Pa·rad/Wb</td></tr>
-        <tr><td>toroidal-field function gradient</td><td><code>efm/ffprime</code></td><td>[time, 65]</td><td>T·rad</td></tr>
-        <tr><td>pressure</td><td><code>efm/ppsi_c</code></td><td>[time, 65]</td><td>Pa</td></tr>
-        <tr><td><code>F = R B_φ</code></td><td><code>efm/fpsi_c</code></td><td>[time, 65]</td><td>T·m</td></tr>
-        <tr><td>flux coordinate</td><td><code>efm/psi_norm</code></td><td>65 uniform, 0→1</td><td>—</td></tr>
-        <tr><td>poloidal flux map</td><td><code>efm/psirz</code></td><td>[time, 65, 129] → 65×65 live</td><td>Wb/rad</td></tr>
-        <tr><td>conductor currents (experimental)</td><td><code>efm/fcoil_x</code></td><td>[time, 101]</td><td>A</td></tr>
-        <tr><td>conductor currents (EFIT-fitted)</td><td><code>efm/fcoil_c</code></td><td>[time, 101]</td><td>A</td></tr>
-        <tr><td>filament / circuit maps</td><td><code>efm/fcoil_{circ,r,z,turns,xmult}</code></td><td>—</td><td>—</td></tr>
-        <tr><td>plasma current</td><td><code>efm/plasma_current_{x,c}</code></td><td>[time]</td><td>A</td></tr>
-        <tr><td>axis / boundary</td><td><code>efm/psi_axis</code>, <code>psi_boundary</code>, <code>magnetic_axis_{r,z}</code>, <code>lcfs_{r,z}</code>, both x-point pairs</td><td>—</td><td>—</td></tr>
-      </tbody>
-    </table>
-    </div>
-
-    <p><code>psirz</code> is stored padded to 129 radial entries but carries exactly 65 finite columns
-    per row, giving a 65×65 live plane on <code>efm/gridz</code> × <code>efm/gridr</code>. Coverage is
-    complete where geometry is: rows carrying flux functions <em>and</em> a finite map <em>and</em> both
-    conductor vectors number 70, 69, 67, 61, 73 and 57 across the frozen six — <strong>397 rows,
-    exactly the usable geometry count</strong>. Nothing is lost by requiring the full forward input set.</p>
-
-    <p><strong>The file declares no COCOS, so the frame is declared externally: MAST is COCOS 3.</strong>
-    The census's data-derived digits agree independently — per-radian flux units plus signs on all six
-    shots give <code>e_Bp = 0</code>, <code>σ_Bp = −1</code>, <code>σ_ρθφ = −1</code> — and the
-    declaration settles <code>σ_RφZ</code>, which the stored scalars cannot determine. Conversion into
-    nova's COCOS 17 is ψ ×2π, <code>Ip</code> and <code>B0</code> unchanged, <code>q</code> ×(−1), and
-    <code>pprime</code>/<code>ffprime</code> ÷2π.</p>
-
-    <p><strong>The declaration does not settle the sign of plasma current, and that must be checked
-    rather than assumed.</strong> An <code>Ip</code> sign flip — between the machine's recording
-    convention and COCOS, or between campaign eras — would invert the plasma term and everything derived
-    from it while leaving every magnitude plausible, which is the failure mode that survives review.
-    MAST has already produced exactly this class of trap in this programme: 19 magnetics channels carry
-    discrete unnormalised acquisition scales stepping by 1/2, 1/√2, √2 and 2 across shot blocks, and
-    they manufactured phantom campaign physics until they were divided out on the read path. A sign
-    convention that moved across eras behaves the same way.</p>
-
-    <p>So the check is per shot, not once: sign agreement between
-    <code>efm/plasma_current_x</code>, <code>efm/plasma_current_c</code>, the Δ*-derived masked integral,
-    and the declared COCOS 3 frame, reported for every frozen shot. The prototype gives one datum in the
-    right direction already — on shot 21978 slice 46 the masked derived current is +925091.932 A against
-    a stored +925345.938 A, agreeing in sign and to −2.74e-04 in magnitude — but one slice of one shot is
-    not a campaign-wide guarantee.</p>
+    <section id="s2" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-13</span>
+        <h2>§2 — What the store actually holds</h2>
+      </header>
+      <p class="landed-summary">
+        Censused the store rather than assuming it: the flux-function profiles are present and need no
+        deriving, and 397 rows across the frozen six carry the complete forward input set — exactly the
+        usable geometry count, so full forward inputs cost no coverage. Source COCOS 3 declared, with
+        e_Bp = 0, σ_Bp = −1, σ_ρθφ = −1 derived independently on all six shots.
+        The carried plasma-current caution is discharged: 6/6 shots agree across all four signs, zero
+        disagreements, maximum closure 2.952859e-04.
+        Full record: <a href="/nova/evidence/archive/efit-map-inversion-landed#forward-input-census">§2 landed</a>
+        (commits <code>213458a2</code>, <code>bab09d10</code>).
+      </p>
+    </section>
 
     <h2 id="s3">§3 — Topology and boundary from the given map</h2>
 
@@ -231,6 +193,11 @@
     <pre class="r-fu-prompt">/reckon-ship efit-map-inversion §3</pre>
     </article>
 </section>
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-20260813-signcensus" data-who="reckon-ship" data-when="2026-08-13T14:20:00+00:00">
+    <div class="r-comment-body">plasma-current-sign-census landed - commit bab09d10; gate PASSED. THE CARRIED COCOS CAUTION IS DISCHARGED: 6/6 frozen shots agree across all four signs and the disagreement list is empty. Measure: on the common usable slice 46, efm/plasma_current_x, efm/plasma_current_c and the delta_star-derived stored-LCFS-masked integral are all positive on every shot, matching the declared COCOS 3 frame's +1 forward-current expectation with Ip unchanged by the source-to-target conversion. Maximum absolute signed relative closure across the cohort is 2.952859461e-04 (21985), against 2.744983e-04 on the 21978 control which reproduced the banked +925091.932 A derived vs +925345.9375 A stored exactly. So the affine node's single-slice closure was not a lucky slice - it is stable to within about 4e-05 across six shots. Integration path recorded: delta_star applied to total flux Phi=2pi*psi, mu0*jphi=-delta_star(Phi)/(2piR), integrated over operator cells inside the stored LCFS only. QUALIFICATION KEPT rather than smoothed over: this establishes one usable slice per shot, NOT every row's temporal sign stability - a convention that moved within a shot would not be caught by this measurement. Artifact benchmarks/efit_current_sign_census.py, 328 lines; findings JSON 8,094 bytes sha256 be421a5f. Record at /nova/evidence/archive/efit-map-inversion-landed#current-sign-census</div>
+</div>
+</section>
+</main>
 </body>
 </html>

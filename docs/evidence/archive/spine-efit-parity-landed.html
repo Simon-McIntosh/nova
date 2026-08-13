@@ -200,6 +200,46 @@
   metrics are labelled synthetic contract validation only and are explicitly not physical shot
   results.</p>
 
+  <h2 id="typed-unsupported-slice">The unsupported slice becomes a type, not a string</h2>
+
+  <p>Commit <code>dc62e52c</code>. Focused gate passed — 26/26 tests in 22.85 s. <strong>The node's
+  own gate is NOT met: the 7,500-slice tally it required did not complete inside the 25-minute
+  fence, so no supported/skipped counts exist and none are inferred.</strong></p>
+
+  <p>Enumerating the geometry conditions by message string had failed three times in a row, and a
+  bare <code>ValueError</code> catch would have hidden numerical and programming defects behind a
+  skip. <code>UnsupportedSlice</code> is now a structured <code>ValueError</code> subtype carrying a
+  stable <code>condition</code> plus numeric <code>details</code>, raised by
+  <code>ReconstructMoment</code> for exactly three authorised physical conditions:</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Condition</th><th>Details carried</th></tr></thead>
+    <tbody>
+      <tr><td><code>seed-disc-insufficient-supported-cells</code></td><td>supported and minimum cell counts, centroid coordinates, seed radius</td></tr>
+      <tr><td><code>current-centroid-outside-limiter</code></td><td>centroid coordinates, limiter inboard/outboard extents, supported minor distance</td></tr>
+      <tr><td><code>flood-seed-outside-vessel</code></td><td>centroid coordinates, grid row/column, grid coordinates</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>The gate catches exactly <code>UnsupportedSlice</code>, preserves its structured details in each
+  banked skip, aggregates by condition, and retains the original 7,500-row source indices so later
+  scores stay addressable. Every ordinary <code>ValueError</code> still propagates to the shot-level
+  failure bank — proven by a negative test in which <code>ValueError: linear algebra defect</code>
+  passes through unchanged. The unit contract holds: a shot whose first source slice is unsupported
+  still scores source indices 1, 2 and 3. <code>min_cells</code> remains 5 and the registered 33&times;49
+  defaults are unchanged; slice classification reads corrected inputs and moment geometry only,
+  before any EFIT read.</p>
+
+  <p><strong>What the fence cost, stated rather than papered over.</strong> The real shot-21978 run
+  used the registered defaults and the mounted content-addressed artifact, stayed CPU-active with
+  stable memory for the full 25 minutes, and exposed <em>no fourth</em> unsupported condition — but
+  it was still inside host-side seed classification when stopped at exit 130. Banking is atomic, so
+  no scorecard was written. The worker declined to report a partial count, which is correct: a tally
+  truncated by a time fence is not a smaller measurement of the same thing, it is a different claim.
+  How many of the 7,500 slices are physically supported remains the open number the gate needs.</p>
+
   <h2 id="topology-agreement">The limited/diverted disagreement was a grid artifact</h2>
 
   <p>Commits <code>bdaf0844</code>, <code>73336ac0</code>. Both gates passed.</p>

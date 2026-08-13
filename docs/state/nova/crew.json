@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-13T10:31:55",
+  "updated": "2026-08-13T10:34:42",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2712,9 +2712,61 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260813T070538088234-per-slice-failure-isolation",
+        "plan": "spine-efit-parity",
+        "section": "\u00a73",
+        "node": "per-slice-failure-isolation",
+        "role": "implement",
+        "member": "parity-gate",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-13T07:05:40Z",
+        "completed_at": "2026-08-13T07:52:09Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2789,
+        "time_budget": "25m",
+        "base_sha": "3fa95fcf3c96416f639e1ba714964cd5bba1a500",
+        "commits": [
+          "dc62e52c"
+        ],
+        "changed_lines": {
+          "added": 422,
+          "removed": 38,
+          "files": 2
+        },
+        "tests_added": 26,
+        "gate": "not-run",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/653c361a-8c6e-405b-9035-eb21e04233a8/scratchpad/per-slice-failure-isolation-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff9f0-e230-7e31-89ba-5240b76a2cce",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 19017728,
+            "input_tokens": 19372506,
+            "output_tokens": 43313,
+            "reasoning_output_tokens": 13949
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 103
+    "_version": 104
   }
 }

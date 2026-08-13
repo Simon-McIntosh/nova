@@ -331,10 +331,11 @@ def _nested_delta(
 def _summarise(samples_path: Path, returncode: int, commit: str) -> dict[str, Any]:
     samples = [json.loads(line) for line in samples_path.read_text().splitlines()]
     start = samples[0]
-    park = next(
+    park_sample = next(
         (row for row in reversed(samples) if row["reason"] == "park_pre_control"),
-        samples[-1],
+        None,
     )
+    endpoint = park_sample or samples[-1]
     post_gc = next(
         (row for row in samples if row["reason"] == "park_post_gc_control"), None
     )
@@ -344,7 +345,7 @@ def _summarise(samples_path: Path, returncode: int, commit: str) -> dict[str, An
     )
 
     mapping_candidates = []
-    categories = sorted(set(start["mappings"]) | set(park["mappings"]))
+    categories = sorted(set(start["mappings"]) | set(endpoint["mappings"]))
     for category in categories:
         if category == "all":
             continue
@@ -352,10 +353,10 @@ def _summarise(samples_path: Path, returncode: int, commit: str) -> dict[str, An
             {
                 "candidate": category,
                 "resident_delta_bytes": _nested_delta(
-                    park["mappings"], start["mappings"], category, "rss"
+                    endpoint["mappings"], start["mappings"], category, "rss"
                 ),
                 "virtual_delta_bytes": _nested_delta(
-                    park["mappings"], start["mappings"], category, "size"
+                    endpoint["mappings"], start["mappings"], category, "size"
                 ),
             }
         )
@@ -363,33 +364,33 @@ def _summarise(samples_path: Path, returncode: int, commit: str) -> dict[str, An
 
     anonymous_size_growth = []
     size_classes = sorted(
-        set(start["anonymous_mapping_sizes"]) | set(park["anonymous_mapping_sizes"])
+        set(start["anonymous_mapping_sizes"]) | set(endpoint["anonymous_mapping_sizes"])
     )
     for size_class in size_classes:
         anonymous_size_growth.append(
             {
                 "size_class": size_class,
                 "mapping_count_delta": _nested_delta(
-                    park["anonymous_mapping_sizes"],
+                    endpoint["anonymous_mapping_sizes"],
                     start["anonymous_mapping_sizes"],
                     size_class,
                     "count",
                 ),
                 "virtual_delta_bytes": _nested_delta(
-                    park["anonymous_mapping_sizes"],
+                    endpoint["anonymous_mapping_sizes"],
                     start["anonymous_mapping_sizes"],
                     size_class,
                     "size",
                 ),
                 "resident_delta_bytes": _nested_delta(
-                    park["anonymous_mapping_sizes"],
+                    endpoint["anonymous_mapping_sizes"],
                     start["anonymous_mapping_sizes"],
                     size_class,
                     "rss",
                 ),
             }
         )
-    retained_threads = _delta(park, start, "native_only_threads")
+    retained_threads = _delta(endpoint, start, "native_only_threads")
     reservation_owner = max(
         anonymous_size_growth, key=lambda row: row["virtual_delta_bytes"]
     )
@@ -402,8 +403,8 @@ def _summarise(samples_path: Path, returncode: int, commit: str) -> dict[str, An
     controls: dict[str, Any] = {}
     if post_gc is not None:
         controls["garbage_collection"] = {
-            "resident_released_bytes": -_delta(post_gc, park, "resident_bytes"),
-            "virtual_released_bytes": -_delta(post_gc, park, "virtual_bytes"),
+            "resident_released_bytes": -_delta(post_gc, endpoint, "resident_bytes"),
+            "virtual_released_bytes": -_delta(post_gc, endpoint, "virtual_bytes"),
         }
     if post_gc is not None and post_jax is not None:
         controls["jax_cache_clear"] = {
@@ -420,22 +421,91 @@ def _summarise(samples_path: Path, returncode: int, commit: str) -> dict[str, An
             ),
         }
 
+    thread_name_deltas = {
+        name: count - start["thread_names"].get(name, 0)
+        for name, count in endpoint["thread_names"].items()
+        if count - start["thread_names"].get(name, 0)
+    }
+    xla_thread_names = {
+        name: count
+        for name, count in thread_name_deltas.items()
+        if name.startswith("llvm-worker-")
+        or name.startswith("tf_")
+        or name == "python3"
+    }
+    resident_growth = _delta(endpoint, start, "resident_bytes")
+    virtual_growth = _delta(endpoint, start, "virtual_bytes")
+    thread_growth = _delta(endpoint, start, "native_threads")
+    python_thread_growth = _delta(endpoint, start, "python_threads")
+    heap_candidate = next(
+        row for row in mapping_candidates if row["candidate"] == "heap"
+    )
+    anonymous_candidate = next(
+        row for row in mapping_candidates if row["candidate"] == "anonymous"
+    )
+
     return {
         "commit": commit,
         "command": "pytest -m 'slow or not slow'",
         "pytest_returncode": returncode,
-        "completed_tests_at_park": park["completed_tests"],
-        "park_nodeid": park["nodeid"],
-        "elapsed_seconds_at_park": park["elapsed_seconds"],
+        "endpoint_reason": "diagnostic_park" if park_sample else "process_exit",
+        "completed_tests_at_endpoint": endpoint["completed_tests"],
+        "last_completed_nodeid": endpoint["nodeid"],
+        "elapsed_seconds_at_endpoint": endpoint["elapsed_seconds"],
         "growth": {
-            "resident_bytes": _delta(park, start, "resident_bytes"),
-            "virtual_bytes": _delta(park, start, "virtual_bytes"),
-            "native_threads": _delta(park, start, "native_threads"),
-            "native_only_threads": _delta(park, start, "native_only_threads"),
-            "jax_compile_calls": _delta(park["jax"], start["jax"], "compile_calls"),
+            "resident_bytes": resident_growth,
+            "virtual_bytes": virtual_growth,
+            "native_threads": thread_growth,
+            "native_only_threads": retained_threads,
+            "python_threads": python_thread_growth,
+            "jax_compile_calls": _delta(endpoint["jax"], start["jax"], "compile_calls"),
             "jax_live_executables": _delta(
-                park["jax"], start["jax"], "live_executables"
+                endpoint["jax"], start["jax"], "live_executables"
             ),
+        },
+        "attribution": {
+            "single_largest_owner": "JAX/XLA CPU compilation and runtime state",
+            "retained_thread_name_deltas": thread_name_deltas,
+            "xla_native_thread_name_deltas": xla_thread_names,
+            "candidates": [
+                {
+                    **heap_candidate,
+                    "candidate": "heap including retained compiled objects",
+                    "resident_growth_share": (
+                        heap_candidate["resident_delta_bytes"] / resident_growth
+                    ),
+                    "virtual_growth_share": (
+                        heap_candidate["virtual_delta_bytes"] / virtual_growth
+                    ),
+                    "jax_live_executables": endpoint["jax"]["live_executables"],
+                },
+                {
+                    **anonymous_candidate,
+                    "candidate": "anonymous native mappings",
+                    "resident_growth_share": (
+                        anonymous_candidate["resident_delta_bytes"] / resident_growth
+                    ),
+                    "virtual_growth_share": (
+                        anonymous_candidate["virtual_delta_bytes"] / virtual_growth
+                    ),
+                },
+                {
+                    "candidate": "Python-managed threads",
+                    "retained_threads": python_thread_growth,
+                    "retained_thread_share": (
+                        python_thread_growth / thread_growth if thread_growth else 0.0
+                    ),
+                    "control": "threading.active_count versus /proc native count",
+                },
+                {
+                    "candidate": "native-only threads",
+                    "retained_threads": retained_threads,
+                    "retained_thread_share": (
+                        retained_threads / thread_growth if thread_growth else 0.0
+                    ),
+                    "control": "native count minus threading.active_count",
+                },
+            ],
         },
         "mapping_candidates": mapping_candidates,
         "anonymous_mapping_size_growth": anonymous_size_growth,

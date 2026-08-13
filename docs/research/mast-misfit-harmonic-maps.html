@@ -7,13 +7,13 @@
   <meta name="reckon-type" content="research">
   <meta name="plan-slug" content="mast-misfit-harmonic-maps">
   <meta name="plan-title" content="Harmonic maps of the MAST vacuum misfit — the flux the array determines, the two localisers that fail, and the one that puts the P4-lower survivor below its own winding">
-  <meta name="plan-summary" content="Per drive group the surviving P4/P5 vacuum misfit is expanded in toroidal harmonics against 91-93 constraint rows — 74-76 signed probe field projections plus 17 admitted flux loops, whitened by per-channel noise — with the thirteen described coil currents carried as free unknowns rather than projected out. The enclosed family beats the external one decisively on the lower groups (0.863 against 0.412 of whitened power on P4 lower, over 0.342 for the coil columns alone) and not at all on the upper ones. Projecting the coil span out first, the shortcut the basis section warned about, costs between a tenth and everything: 0.783 falls to 0.033 on P5 upper. Withholding the flux loops does not degrade the fit but destroys it where the loops sit, missing by 3x to 40195x what predicting zero would cost, so the loops are a requirement rather than an improvement; neither sensor band alone predicts the other either. Two localisers fail and are recorded as failures: the difference between the two families' flux maps peaks beside whatever focal circle it is given — tracking it to a median of 0.10-0.23 m over six placements spanning the machine, while reading as a confident 13.9-sigma find at the placement used — and the single-source read does not converge. What works is the family contrast scanned over focal-circle placement, which puts the P4-lower survivor below the P4 lower winding — bounded above at Z = -0.95, unbounded in radius across the whole 0.60-2.40 m scan — a resolution that independently reproduces the 1.5-2.3 m bound the conductor hunt reached by a different route.">
+  <meta name="plan-summary" content="Per drive group the surviving P4/P5 vacuum misfit is expanded against 91-94 jointly fitted probe and flux-loop rows with thirteen described coil currents free. Two-to-four-ring models can reproduce 69.4-100.0% of that harmonic representation, but every group requires more than one full 23-turn supply current, reaching 1036 supply currents and commonly using opposing near-coincident rings. Established extended paths explain only 8.3-51.5% and also all exceed one supply current. Scored directly on the raw constraint bank, the best four-ring model leaves 21.5-86.0% of whitened power and 15.6-146.8 sigma. No physical axisymmetric candidate is identified: the survivor is non-axisymmetric, contains shot systematics, or lies beyond the array's resolving power. A healthy 180-degree pair rejects odd toroidal modes exactly but retains even leakage: a 20-degree feeder footprint carries 98.0% at n=2, 92.1% at n=4 and 82.7% at n=6, while a failed single member retains 99.5%, 95.5% and 87.8% at odd n=1, 3 and 5.">
   <meta name="plan-status" content="reference">
   <meta name="plan-owner" content="Simon McIntosh">
-  <meta name="plan-recorded-at" content="2026-08-08">
+  <meta name="plan-recorded-at" content="2026-08-13">
   <meta name="plan-evidence-for" content="mast-misfit-toroidal-harmonics">
   <meta name="plan-informs" content="mast-nonaxisymmetric-physics">
-  <meta name="plan-verdict" content="The maps land and the localisation does not close. Reconciled misfit flux is published per drive group on a 205x205 grid with a shot-resampling band, and the fraction of that plane the band leaves standing runs from 80% on P4 lower through 68% and 59% on P5 lower and P4 upper to nothing at all on P5 upper. The joint fit against the raw coupling is vindicated on real data at every group, and the calibrated flux loops are established as load-bearing rather than optional. The strongest survivor is placed below the P4 lower winding and excluded from the upper half and the centre column, but its radius is unresolved across the entire scan, and after the best axisymmetric expansion 7.5 to 28.8 sigma of whitened residual remains — a lower bound on what a non-axisymmetric account must carry. One filament does not fit the coefficient sequence, so the multi-filament and extended-path fits are still to be scored.">
+  <meta name="plan-verdict" content="No localised physical source survives the current accounting. Multi-ring models interpolate the harmonic maps only with greater-than-supply currents and cancellations, established extended paths have poor reach and unphysical currents, and the best raw-data four-ring fit leaves 21.5-86.0% of whitened power. The residue is therefore a measured lower bound for a non-axisymmetric account to carry, but shot systematics remain inseparable from it and the present probe-plus-flux-loop array cannot resolve a unique three-dimensional source. Healthy 180-degree sums screen odd modes, not even modes; pair-failure channels recover the odd-mode screen but require gain-aware toroidal data before attribution.">
   <title>MAST misfit harmonic maps | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -21,7 +21,7 @@
 <body>
 <main class="plan-doc">
 
-  <p class="doc-meta">recorded 2026-08-08</p>
+  <p class="doc-meta">recorded 2026-08-13</p>
 
   <h1>Harmonic maps of the vacuum misfit: what the array determines, and where it stops</h1>
 
@@ -258,7 +258,93 @@
   the constraint that stops the expansion running away where nothing else holds it. The same
   reading applies to the bands: each is comfortable on itself and useless across.</p>
 
-  <h2>What is banked, and what is left open</h2>
+  <h2>Source fits: high harmonic reach, impossible currents</h2>
+
+  <figure>
+    <img src="/nova/figures/toroidal-harmonics/source_model_scores.svg"
+         alt="Explained harmonic fraction and raw-data residue for multi-ring and extended-path source models in all six drive groups.">
+    <figcaption>Left: two-to-four independently fitted rings can interpolate much of the harmonic
+    representation, but the labels report the largest fitted current in units of one 23-turn
+    supply current. Every group exceeds one supply current and the strongest apparent fits use
+    large opposing currents on nearby rings. Middle: one-amplitude established return paths do
+    not rescue the interpretation. Right: when the four-ring model and thirteen described coil
+    currents are fitted jointly to the raw constraints, substantial whitened power remains.</figcaption>
+  </figure>
+
+  <table>
+    <thead>
+      <tr>
+        <th>drive group</th>
+        <th>shots</th>
+        <th>2 / 3 / 4 rings: explained; largest |supply|</th>
+        <th>best established path: explained; supply</th>
+        <th>raw four-ring residue; sigma</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>P4 lower</td><td>13</td><td>0.973; 807.9 / 0.978; 655.6 / 0.981; 841.6</td><td>case&ndash;vessel: 0.267; +202.2</td><td>0.281; 31.5</td></tr>
+      <tr><td>P4 pair</td><td>3</td><td>0.964; 36.0 / 0.979; 35.8 / 0.980; 40.7</td><td>P5-lower case&ndash;vessel: 0.083; +27.7</td><td>0.558; 136.6</td></tr>
+      <tr><td>P4 upper</td><td>6</td><td>0.973; 6.8 / 0.976; 6.7 / 0.979; 8.4</td><td>pack&ndash;port band: 0.191; &minus;5.7</td><td>0.373; 15.6</td></tr>
+      <tr><td>P5 lower</td><td>12</td><td>1.000; 1035.6 / 1.000; 1013.2 / 1.000; 1012.1</td><td>pack&ndash;port band: 0.157; +597.2</td><td>0.860; 146.8</td></tr>
+      <tr><td>P5 pair</td><td>4</td><td>0.999; 325.0 / 0.999; 324.7 / 0.999; 322.3</td><td>P5-upper case&ndash;vessel: 0.515; +1062.8</td><td>0.215; 44.4</td></tr>
+      <tr><td>P5 upper</td><td>7</td><td>0.694; 1.90 / 0.710; 1.86 / 0.744; 1.83</td><td>pack&ndash;port band: 0.200; +1.83</td><td>0.432; 21.0</td></tr>
+    </tbody>
+  </table>
+
+  <p>The ring sites are drawn from the established machine candidate catalogue, and the extended
+  paths tie all of their signed ring constituents to one amplitude. Current is first fitted as
+  source ampere-turn per drive ampere-turn and then multiplied by 23 turns, so a reported value
+  of one is one whole supply current. The near-perfect lower-group fits are therefore not source
+  identifications: P4 lower, for example, asks the case upper-wall and pack upper-face rings for
+  +842 and &minus;628 supply currents. P5 lower asks its winding-interior ring for +1012. No
+  candidate is physically admissible.</p>
+
+  <p>The lower bound passed to a three-dimensional account is the power outside the selected
+  harmonic representation: 2.8% (P4 lower), 36.2% (P4 pair), 38.4% (P4 upper), 2.0% (P5 lower),
+  0.06% (P5 pair) and 42.9% (P5 upper). These are not claims that every residual sample is a
+  toroidal field: pooled-shot systematics remain in the same number. The direct raw-data fit is
+  the stronger physical rejection, leaving 21.5&ndash;86.0% even after the four source currents and
+  all described coil currents are free.</p>
+
+  <h2>Toroidal sensitivity: pair sums reject odd modes only</h2>
+
+  <table>
+    <thead>
+      <tr><th>toroidal mode</th><th>20&deg; feeder footprint</th><th>healthy 180&deg; pair sum</th><th>one surviving member</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>n = 0</td><td>1.000</td><td>1.000</td><td>1.000</td></tr>
+      <tr><td>n = 1</td><td>0.995</td><td>0</td><td>0.995</td></tr>
+      <tr><td>n = 2</td><td>0.980</td><td>0.980</td><td>0.980</td></tr>
+      <tr><td>n = 3</td><td>0.955</td><td>0</td><td>0.955</td></tr>
+      <tr><td>n = 4</td><td>0.921</td><td>0.921</td><td>0.921</td></tr>
+      <tr><td>n = 5</td><td>0.878</td><td>0</td><td>0.878</td></tr>
+      <tr><td>n = 6</td><td>0.827</td><td>0.827</td><td>0.827</td></tr>
+    </tbody>
+  </table>
+
+  <p>A diametric pair averages a mode with its value at &phi; + &pi;: all odd modes cancel
+  exactly and all even modes survive. For a uniform 20&deg; feeder footprint the table gives the
+  top-hat Fourier coefficient relative to n = 0. Thus a healthy sum can still leak 98.0% of n =
+  2, 92.1% of n = 4 and 82.7% of n = 6. Without a measured toroidal width for a localised P4
+  tail, the honest source-independent upper bound is 100% for every even mode. A failed member
+  restores the odd screen: n = 1, 3 and 5 retain 99.5%, 95.5% and 87.8% for that same feeder
+  footprint, with a 100% width-free upper bound.</p>
+
+  <p>The known pair-failure channels are obr17, obv03, obr05, obr18 and obv10. They are useful
+  odd-mode screens only after their per-era gains are applied; obr17 remains excluded here for
+  its established half gain. The correction-coil search found R<sup>2</sup> &lt; 0.0005, an
+  amplitude-correlation ceiling of 2.24%, so those coils cannot account for a detected odd
+  component. Flux loops contribute n = 0 only. The 36 saddle loops are the available
+  n-resolving set, but no saddle data enter this constraint bank, so a unique three-dimensional
+  attribution is beyond the present array rather than silently assigned to a conductor.</p>
+
+  <p><strong>Verdict.</strong> No localised axisymmetric candidate survives both reach and
+  current accounting. The remaining signal is non-axisymmetric, contains unresolved pooled-shot
+  structure, or lies beyond the array's spatial resolution. The data do not distinguish those
+  cases without gain-aware pair-failure and saddle-loop measurements.</p>
+
+  <h2>What is banked</h2>
 
   <ul>
     <li><code>~/.cache/nova-mast/toroidal-harmonics/loop_couplings.npz</code> &mdash; 41
@@ -271,22 +357,23 @@
     <li>Scripts beside them: <code>loop_couplings.py</code> (store read),
     <code>maps.py</code> (fits and scans), <code>map_figures.py</code> (figures from the bank,
     recomputing nothing).</li>
-    <li>Code: <code>nova/imas/mast_misfit_harmonics.py</code> with 33 tests in
+    <li>Code: <code>nova/imas/mast_misfit_harmonics.py</code> with 39 tests in
     <code>tests/test_mast_misfit_harmonics.py</code>, pinned against a synthetic filament hidden
-    under a coil set sized to the same share of whitened power the real groups show.</li>
+    under a coil set sized to the same share of whitened power the real groups show, plus
+    source-current conversion, tied-path, greedy multi-ring and pair-parity contracts.</li>
   </ul>
 
-  <p>Both maps were fitted on probes <em>and</em> loops; the plan's open question of whether to
-  start on probes alone is answered by the right-hand panel above rather than by a schedule, and
+  <p>Both maps were fitted on probes <em>and</em> loops; whether to start on probes alone is
+  answered by the right-hand panel above rather than by a schedule, and
   every number in this record uses the joint probes-plus-loops set with the coil currents free.</p>
 
-  <p>Left open for the sections that follow: the residual is 7.5&ndash;28.8 sigma after the best
-  axisymmetric expansion, which bounds from below what a non-axisymmetric account must carry;
-  the single-source read does not converge, so the multi-filament and extended-path fits are
-  still to be scored; and the reconciled maps are published on a grid with a band, which is the
-  form the flux-map problem class of <code>coil-geometry-inversion</code> can consume
-  directly &mdash; with the caveat, now measured, that the determined fraction runs from 80%
-  on P4 lower down to nothing at all on P5 upper.</p>
+  <p>The tests pin the algebraic contracts and synthetic recovery, not the real-data headline
+  values in the tables: those depend on the regenerated constraint bank at
+  <code>~/.cache/nova-mast/flux-loop-inclusion/constraint_sets.npz</code>. In particular, the
+  tests do not pin the per-group explained fractions, inferred currents, raw residue, shot
+  counts, candidate identities, 20&deg; feeder assumption, correction-coil bound or pair-failure
+  channel list. Those measured inputs are recorded here so changes to the bank remain visible
+  rather than being mistaken for unit-test regressions.</p>
 
   <p class="note">One defect found in passing and not fixed here, being outside this node's write
   scope: <code>ring_legendre_first</code> and <code>ring_legendre_second</code> raise

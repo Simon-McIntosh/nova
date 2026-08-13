@@ -61,6 +61,7 @@ from dataclasses import dataclass, field
 import numpy as np
 
 from nova.biot import toroidalharmonic as th
+from nova.biot.greens import greens_bz_br, greens_psi
 
 CENTRE_COLUMN_RADIUS = 0.5
 """Radius separating the two sensor bands [m].
@@ -387,6 +388,34 @@ class MisfitFit:
         width = self.coefficients.size // len(self.families)
         start = self.families.index(family) * width
         return slice(start, start + width)
+
+
+@dataclass(frozen=True)
+class SourceModelFit:
+    """A constrained source model scored in one constraint set.
+
+    ``currents`` are source amperes per ampere-turn of the drive used to form
+    the coupling.  ``supply_multiples`` converts them to source-supply amperes
+    per drive-supply ampere using the drive winding's turn count.
+    """
+
+    labels: tuple[str, ...]
+    currents: np.ndarray
+    supply_multiples: np.ndarray
+    explained: float
+    residual: float
+    prediction: np.ndarray
+    coil_currents: np.ndarray = field(default_factory=lambda: np.empty(0))
+
+
+@dataclass(frozen=True)
+class ToroidalPairSensitivity:
+    """Fourier amplitudes seen by a healthy pair and by one surviving member."""
+
+    mode: np.ndarray
+    source_fraction: np.ndarray
+    summed_pair_fraction: np.ndarray
+    single_member_fraction: np.ndarray
 
 
 def _explained(design, data, weight, coefficients) -> float:
@@ -892,6 +921,204 @@ def band_agreement(
     return fits, scores
 
 
+def ring_source_design(
+    constraint: ConstraintSet,
+    rings,
+) -> np.ndarray:
+    """Return sensor columns for axisymmetric filament rings [sensor unit/A].
+
+    Each row of ``rings`` is ``(radius, height)``.  Probe rows read the field
+    projected on their sensitive axis; toroidally closed loops read linked
+    flux.  The result can be fitted directly to a measured constraint or to
+    the sensor-space prediction of a harmonic representation.
+    """
+    rings = np.asarray(rings, dtype=np.float64).reshape(-1, 2)
+    design = np.empty((constraint.rows, rings.shape[0]), dtype=np.float64)
+    flux = constraint.reads_flux
+    for column, (radius, height) in enumerate(rings):
+        if flux.any():
+            design[flux, column] = greens_psi(
+                constraint.r[flux], constraint.z[flux], radius, height
+            )
+        if (~flux).any():
+            axial, radial = greens_bz_br(
+                constraint.r[~flux], constraint.z[~flux], radius, height
+            )
+            design[~flux, column] = (
+                constraint.radial_cosine[~flux] * radial
+                + constraint.axial_sine[~flux] * axial
+            )
+    return design
+
+
+def path_source_design(constraint: ConstraintSet, paths) -> np.ndarray:
+    """Return fixed-current path columns assembled from signed filament rings.
+
+    A path is an iterable of ``(radius, height, turns)`` rows.  Its one fitted
+    amplitude multiplies every constituent, so an opposed supply-and-return
+    route cannot improve its score by assigning unrelated currents to its two
+    sides.
+    """
+    columns = []
+    for path in paths:
+        parts = np.asarray(path, dtype=np.float64).reshape(-1, 3)
+        column = ring_source_design(constraint, parts[:, :2]) @ parts[:, 2]
+        columns.append(column)
+    if not columns:
+        return np.empty((constraint.rows, 0), dtype=np.float64)
+    return np.column_stack(columns)
+
+
+def fit_source_model(
+    constraint: ConstraintSet,
+    design: np.ndarray,
+    *,
+    labels=(),
+    target=None,
+    supply_turns: float = 1.0,
+    carry_described: bool = False,
+) -> SourceModelFit:
+    """Fit source columns and report their whitened reach and current.
+
+    Set ``target`` to the harmonic block's sensor-space prediction to score a
+    physical model against the harmonic representation.  Leave it unset and
+    set ``carry_described`` to fit a source to the raw constraint while the
+    described coil currents remain free.  These are different measurements:
+    the first says how much axisymmetric mapped structure the source carries;
+    the second says what remains in the actual sensor rows after that source.
+    """
+    design = np.asarray(design, dtype=np.float64)
+    if design.ndim != 2 or design.shape[0] != constraint.rows:
+        raise MisfitMapError(
+            f"source design {design.shape} against {constraint.rows} rows"
+        )
+    if design.shape[1] == 0:
+        raise MisfitMapError("a source model needs at least one column")
+    if target is None:
+        target = constraint.value
+    else:
+        target = np.asarray(target, dtype=np.float64)
+    if target.shape != (constraint.rows,):
+        raise MisfitMapError(
+            f"source target {target.shape} against {constraint.rows} rows"
+        )
+    blocks = [design]
+    if carry_described:
+        blocks.append(constraint.described)
+    combined = np.column_stack(blocks)
+    weighted = combined * constraint.weight[:, None]
+    solution, *_ = np.linalg.lstsq(weighted, target * constraint.weight, rcond=None)
+    source_count = design.shape[1]
+    source_current = solution[:source_count]
+    prediction = design @ source_current
+    if carry_described:
+        prediction = prediction + constraint.described @ solution[source_count:]
+    residual = constraint.weight * (prediction - target)
+    total = float(np.sum((constraint.weight * target) ** 2))
+    explained = (
+        float(1.0 - np.sum(residual**2) / total) if total > 0.0 else float("nan")
+    )
+    names = (
+        tuple(labels)
+        if labels
+        else tuple(f"source_{index}" for index in range(source_count))
+    )
+    if len(names) != source_count:
+        raise MisfitMapError(f"{len(names)} labels for {source_count} source columns")
+    return SourceModelFit(
+        labels=names,
+        currents=source_current,
+        supply_multiples=source_current * float(supply_turns),
+        explained=explained,
+        residual=float(np.sqrt(np.mean(residual**2))),
+        prediction=prediction,
+        coil_currents=solution[source_count:] if carry_described else np.empty(0),
+    )
+
+
+def greedy_ring_fits(
+    constraint: ConstraintSet,
+    candidates,
+    *,
+    target,
+    counts=(2, 3, 4),
+    supply_turns: float = 1.0,
+) -> dict[int, SourceModelFit]:
+    """Select filament rings greedily and return the requested model sizes.
+
+    Forward selection refits every retained current at each step.  It is used
+    as a bounded source-model comparison, not as a claim that the selected
+    points are individually localised: correlated rings can exchange large
+    opposing currents while preserving nearly the same field.
+    """
+    candidates = np.asarray(candidates, dtype=np.float64).reshape(-1, 2)
+    requested = tuple(sorted({int(count) for count in counts}))
+    if not requested or requested[0] < 1:
+        raise MisfitMapError("source counts must be positive")
+    all_columns = ring_source_design(constraint, candidates)
+    finite = np.isfinite(all_columns).all(axis=0)
+    candidates = candidates[finite]
+    all_columns = all_columns[:, finite]
+    if all_columns.shape[1] < requested[-1]:
+        raise MisfitMapError(
+            f"{all_columns.shape[1]} finite candidates for {requested[-1]} rings"
+        )
+    selected: list[int] = []
+    fits: dict[int, SourceModelFit] = {}
+    for count in range(1, requested[-1] + 1):
+        best = None
+        for candidate in range(all_columns.shape[1]):
+            if candidate in selected:
+                continue
+            trial = selected + [candidate]
+            labels = tuple(
+                "ring(%.3f,%+.3f)" % tuple(candidates[index]) for index in trial
+            )
+            fit = fit_source_model(
+                constraint,
+                all_columns[:, trial],
+                labels=labels,
+                target=target,
+                supply_turns=supply_turns,
+            )
+            if best is None or fit.explained > best[0].explained:
+                best = fit, candidate
+        assert best is not None
+        fit, chosen = best
+        selected.append(chosen)
+        if count in requested:
+            fits[count] = fit
+    return fits
+
+
+def toroidal_pair_sensitivity(
+    angular_width: float,
+    *,
+    maximum_mode: int = 6,
+) -> ToroidalPairSensitivity:
+    """Return normalized Fourier visibility of a localized toroidal source.
+
+    The source is a uniform angular run of width ``angular_width`` radians.
+    Its normalized Fourier coefficient is ``sinc(n width / 2)``.  Averaging
+    sensors separated by pi multiplies that coefficient by
+    ``(1 + (-1)**n) / 2``: every odd mode is exactly rejected, while every
+    even mode aliases into the nominally axisymmetric reading.  If one member
+    fails, the recorded single-coil signal regains the full coefficient.
+    """
+    width = float(angular_width)
+    if not 0.0 < width <= 2.0 * np.pi:
+        raise MisfitMapError("angular width must lie in (0, 2*pi]")
+    mode = np.arange(int(maximum_mode) + 1)
+    fraction = np.sinc(mode * width / (2.0 * np.pi))
+    pair = fraction * (1.0 + (-1.0) ** mode) / 2.0
+    return ToroidalPairSensitivity(
+        mode=mode,
+        source_fraction=fraction,
+        summed_pair_fraction=pair,
+        single_member_fraction=fraction.copy(),
+    )
+
+
 __all__ = [
     "CENTRE_COLUMN_RADIUS",
     "FOCAL_OFFSET",
@@ -900,6 +1127,8 @@ __all__ = [
     "MisfitFit",
     "MisfitMapError",
     "SensorClass",
+    "SourceModelFit",
+    "ToroidalPairSensitivity",
     "assemble",
     "band_agreement",
     "bank_shots",
@@ -908,17 +1137,22 @@ __all__ = [
     "family_contrast",
     "fit_jointly",
     "fit_projected",
+    "fit_source_model",
     "flux_map",
     "harmonic_design",
     "iterate_focus",
     "place_focus",
     "pooled_noise",
+    "path_source_design",
+    "ring_source_design",
+    "greedy_ring_fits",
     "SourceRead",
     "resample_maps",
     "resample_shots",
     "rows_converge",
     "select_degree",
     "supported_mask",
+    "toroidal_pair_sensitivity",
     "scan_focus",
     "sensor_class",
 ]

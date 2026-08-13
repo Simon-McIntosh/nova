@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-13T14:25:20",
+  "updated": "2026-08-13T15:55:24",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -57,7 +57,7 @@
         "id": "efit-referee",
         "harness": "claude",
         "role": "implement",
-        "session_id": null,
+        "session_id": "019ffb42-5d8a-7972-a213-5e64bec221f3",
         "created": "2026-08-13"
       },
       {
@@ -3284,9 +3284,165 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260813T131415756405-efit-forward-input-census",
+        "plan": "spine-efit-parity",
+        "section": "\u00a76",
+        "node": "efit-forward-input-census",
+        "role": "implement",
+        "member": "efit-referee",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-13T13:14:17Z",
+        "completed_at": "2026-08-13T13:23:35Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 558,
+        "time_budget": "45m",
+        "base_sha": "39df530b5454d72d3af1cc62c3a623004631df80",
+        "commits": [
+          "213458a2"
+        ],
+        "changed_lines": {
+          "added": 493,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/7df8edeb-58a6-40f6-a85b-4f1edca55e25/scratchpad/efit-forward-input-census-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ffb42-5d8a-7972-a213-5e64bec221f3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 3787520,
+            "input_tokens": 3964778,
+            "output_tokens": 21175,
+            "reasoning_output_tokens": 4944
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260813T132901597065-efit-affine-extraction",
+        "plan": "spine-efit-parity",
+        "section": "\u00a76",
+        "node": "efit-affine-extraction",
+        "role": "implement",
+        "member": "solve-convergence",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-13T13:29:04Z",
+        "completed_at": "2026-08-13T13:33:56Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 292,
+        "time_budget": "50m",
+        "base_sha": "39df530b5454d72d3af1cc62c3a623004631df80",
+        "commits": [
+          "69c7f92a"
+        ],
+        "changed_lines": {
+          "added": 457,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/7df8edeb-58a6-40f6-a85b-4f1edca55e25/scratchpad/efit-affine-extraction-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ffa72-15c7-78b1-bee8-5f074cebc901",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 14702336,
+            "input_tokens": 15366726,
+            "output_tokens": 71179,
+            "reasoning_output_tokens": 18569
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260813T132921333122-efit-flux-decomposition",
+        "plan": "spine-efit-parity",
+        "section": "\u00a76",
+        "node": "efit-flux-decomposition",
+        "role": "implement",
+        "member": "chain-factory",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-13T13:29:23Z",
+        "completed_at": "2026-08-13T13:51:56Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1353,
+        "time_budget": "50m",
+        "base_sha": "39df530b5454d72d3af1cc62c3a623004631df80",
+        "commits": [
+          "8fffa5c7"
+        ],
+        "changed_lines": {
+          "added": 640,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/7df8edeb-58a6-40f6-a85b-4f1edca55e25/scratchpad/efit-flux-decomposition-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ffaa2-8b1b-7803-98c5-c43c48e3f9a6",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 20838656,
+            "input_tokens": 21900207,
+            "output_tokens": 80837,
+            "reasoning_output_tokens": 25696
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 116
+    "_version": 120
   }
 }

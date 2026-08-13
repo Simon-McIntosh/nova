@@ -63,6 +63,20 @@ from nova.equilibrium.measurement import (
 )
 
 
+class UnsupportedSlice(ValueError):
+    """A corrected slice cannot form a physically supported moment seed."""
+
+    def __init__(self, condition: str, **details: int | float):
+        self.condition = str(condition)
+        self.details = dict(details)
+        rendered = ", ".join(
+            f"{name}={value}" for name, value in sorted(self.details.items())
+        )
+        super().__init__(
+            f"{self.condition}: {rendered}" if rendered else self.condition
+        )
+
+
 class MomentOrder(IntEnum):
     """Maximum monomial degree of the current-moment ladder.
 
@@ -589,9 +603,13 @@ class ReconstructMoment:
         )
         count = int(inside.sum())
         if count < self.config.min_cells:
-            raise ValueError(
-                f"seed disc holds {count} cells, below min_cells="
-                f"{self.config.min_cells}"
+            raise UnsupportedSlice(
+                "seed-disc-insufficient-supported-cells",
+                supported_cell_count=count,
+                minimum_cell_count=int(self.config.min_cells),
+                centroid_r_m=float(r0),
+                centroid_z_m=float(z0),
+                seed_radius_m=float(radius),
             )
         cell_current = np.zeros(self.cells.number)
         cell_current[inside] = float(plasma_current) / count
@@ -622,6 +640,21 @@ class ReconstructMoment:
         """
         from nova.equilibrium.connectivity_boundary import host_boundary_read
 
+        inside = np.asarray(self.grid.inside_limiter, dtype=bool)
+        grid_r = np.asarray(self.grid.rg, dtype=float)
+        grid_z = np.asarray(self.grid.zg, dtype=float)
+        row = int(np.argmin(np.abs(grid_z - float(centre[1]))))
+        column = int(np.argmin(np.abs(grid_r - float(centre[0]))))
+        if not inside[row, column]:
+            raise UnsupportedSlice(
+                "flood-seed-outside-vessel",
+                centroid_r_m=float(centre[0]),
+                centroid_z_m=float(centre[1]),
+                grid_row=row,
+                grid_column=column,
+                grid_r_m=float(grid_r[column]),
+                grid_z_m=float(grid_z[row]),
+            )
         read = host_boundary_read(flux, self.grid, centre, lcfs_norm=1.0)
         return read if read.found else None
 
@@ -680,7 +713,14 @@ class ReconstructMoment:
         )
         minor_distance = min(centre[0] - limiter_inboard, limiter_outboard - centre[0])
         if minor_distance <= 0.0:
-            raise ValueError("current centroid lies outside the limiter")
+            raise UnsupportedSlice(
+                "current-centroid-outside-limiter",
+                centroid_r_m=float(centre[0]),
+                centroid_z_m=float(centre[1]),
+                limiter_inboard_r_m=float(limiter_inboard),
+                limiter_outboard_r_m=float(limiter_outboard),
+                supported_minor_distance_m=float(minor_distance),
+            )
 
         radius = config.seed_radius_fraction * minor_distance
         read = None

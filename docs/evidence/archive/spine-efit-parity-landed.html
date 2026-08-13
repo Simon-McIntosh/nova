@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="spine-efit-parity-landed">
+  <meta name="plan-title" content="Spine Reconstruction Parity vs EFIT — Cumulative Evidence">
+  <meta name="plan-summary" content="Landed record of the assembled parity chain: the registered tolerances, the structural EFIT firewall, the four successive gate attempts and where each stopped, the topology-label verdict, and the sensor-scale cause of the real-slice convergence failure">
+  <meta name="plan-status" content="active">
+  <meta name="plan-evidence-for" content="spine-efit-parity">
+  <meta name="plan-verifies" content="spine-efit-parity#s3">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>Spine Reconstruction Parity vs EFIT — Cumulative Evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+
+  <p>Execution record for <a href="/nova/spine-efit-parity.html">spine-efit-parity</a>. No parity
+  verdict has been reached: the gate has never yet scored a physical slice. What is recorded below
+  is the machinery that is in and proven, and the four successive attempts to run the gate — each
+  of which stopped at a different stage of the chain, and each of which is reported at the point it
+  actually reached rather than at the point it was aiming for.</p>
+
+  <h2 id="chain-and-tolerances">§3 items 1–2 — the chain and the registered tolerances</h2>
+
+  <p>Commits <code>ee60c7d2</code>, <code>27baad59</code>. Both gates passed.</p>
+
+  <p>One entry point runs corrected reads through the moment seed, the accelerated profile solve and
+  the topology labels, emitting the per-slice scorecard beside the reconstruction on the
+  fixed-shape <code>vmap</code>-safe path, with the <code>efm</code> referee read nowhere in the
+  chain. Related lane: 46 passed / 5 skipped, with two pre-existing probe-orientation failures in
+  fenced files.</p>
+
+  <p>All eleven scorecard fields carry finite bounds with a documented measured basis, registered
+  <em>before</em> the first scored run:</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Metric</th><th>Registered bound</th><th>Class</th></tr></thead>
+    <tbody>
+      <tr><td>magnetic-axis distance</td><td>&le; 1.01344e-03 m</td><td>strict</td></tr>
+      <tr><td>LCFS distance</td><td>&le; 3.3047e-04 m</td><td>strict</td></tr>
+      <tr><td>X-point distance</td><td>&le; 0.014 m</td><td>strict</td></tr>
+      <tr><td>topology-class agreement</td><td>&ge; 1.0</td><td>strict</td></tr>
+      <tr><td>profile residual RMS</td><td>&le; 0.075868</td><td>strict</td></tr>
+      <tr><td>convergence fraction</td><td>&ge; 1.0</td><td>strict</td></tr>
+      <tr><td>confinement fraction</td><td>&ge; 1.0</td><td>strict</td></tr>
+      <tr><td>iteration count</td><td>&le; 8</td><td>strict</td></tr>
+      <tr><td>throughput</td><td>&ge; 0.18867 slices/(core s)</td><td>strict</td></tr>
+      <tr><td>CurrentDiffusion flux-ledger RMS fraction</td><td>&le; 0.004</td><td>strict</td></tr>
+      <tr><td>whitened raw-magnetics RMS</td><td>0.7475041150 same-source / 0.7987932587 source-cutover</td><td>cross-source budget</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>The two magnetics classes carry the locked <code>qualified-magnetics</code> bar. 1% clears the
+  7.3e-4 substrate-swap floor but stays under the 1.65% price of a 10 mm sensor displacement; 7.93%
+  decomposes exactly as 2.85% column propagation + 3.37% solve feedback + 1.71% stated-weight
+  calibration asymmetry. The held-out extension was drawn once from seed 20260812 — shots 11794,
+  12417, 27000, 22500 across three campaign fingerprints and both field polarities, disjoint from
+  the frozen six. <code>validate_scorecard_fields</code> and <code>scorecard_verdicts</code> refuse
+  to score an unregistered metric.</p>
+
+  <h2 id="verdict-wiring-and-referee">Verdict wiring and the structural EFIT firewall</h2>
+
+  <p>Commits <code>b46bc103</code>, <code>99dfc6a6</code>. Both gates passed.</p>
+
+  <p>The chain normalises the complete registered metric map and takes all eleven verdicts from the
+  registry before storing them, emitting exactly <code>SCORECARD_FIELDS</code> with no missing or
+  unknown names; an injected unregistered field is rejected. Reference-dependent geometry
+  comparisons were left as explicit NaN with <em>failing</em> verdicts until a referee supplied
+  them, so seed-relative observables could not be mislabelled as parity metrics.</p>
+
+  <p><strong>The firewall is structural, not procedural.</strong> The <code>efm</code> reader opens
+  only after solve completion; catalogue arrays are opened <code>mode=r</code> and copied into
+  non-writeable arrays; a test asserts the EFIT object and its axis values are absent from solve
+  arguments. Usable raw reference slices per frozen shot: 21978:70, 21983:69, 21985:67, 21986:61,
+  21989:73, 22086:57 — 397 total. 8/8 referee tests green.</p>
+
+  <p>Recorded at the time as a live risk rather than smoothed over: the pilot's axis and LCFS
+  figures (0.002 m each) sit <em>above</em> their registered bounds of 1.01344e-03 m and
+  3.3047e-04 m, so a geometry failure is a live possibility and the bound is not to be widened
+  after the fact.</p>
+
+  <h2 id="gate-attempts">Four gate attempts, and where each one stopped</h2>
+
+  <p>No attempt has scored a physical slice. Each stopped further along the chain than the last,
+  and the sequence of stopping points is itself the finding: the obstacles were real gaps in the
+  assembled chain, discovered only by driving production components on real data.</p>
+
+  <figure>
+    <svg viewBox="0 0 880 250" role="img" style="max-width:100%;height:auto;font-family:system-ui">
+      <text x="440" y="18" text-anchor="middle" font-size="13" font-weight="600" fill="#111">Where each gate attempt stopped along the chain</text>
+      <g font-size="10.5" fill="#555">
+        <rect x="20" y="42" width="140" height="40" fill="none" stroke="#0a6" stroke-width="1.2"/>
+        <text x="90" y="60" text-anchor="middle" font-size="11.5" fill="#111">corrected reads</text>
+        <text x="90" y="74" text-anchor="middle">45,000 slices</text>
+        <rect x="185" y="42" width="140" height="40" fill="none" stroke="#555"/>
+        <text x="255" y="60" text-anchor="middle" font-size="11.5" fill="#111">moment seed</text>
+        <text x="255" y="74" text-anchor="middle">min_cells=5</text>
+        <rect x="350" y="42" width="140" height="40" fill="none" stroke="#555"/>
+        <text x="420" y="60" text-anchor="middle" font-size="11.5" fill="#111">profile solve</text>
+        <text x="420" y="74" text-anchor="middle">accelerated NK</text>
+        <rect x="515" y="42" width="140" height="40" fill="none" stroke="#555"/>
+        <text x="585" y="60" text-anchor="middle" font-size="11.5" fill="#111">topology labels</text>
+        <rect x="680" y="42" width="170" height="40" fill="none" stroke="#b60" stroke-width="1.5"/>
+        <text x="765" y="60" text-anchor="middle" font-size="11.5" fill="#111">EFIT referee</text>
+        <text x="765" y="74" text-anchor="middle">scored, never fitted</text>
+      </g>
+      <line x1="160" y1="62" x2="183" y2="62" stroke="#111"/><polygon points="183,62 176,58.5 176,65.5" fill="#111"/>
+      <line x1="325" y1="62" x2="348" y2="62" stroke="#111"/><polygon points="348,62 341,58.5 341,65.5" fill="#111"/>
+      <line x1="490" y1="62" x2="513" y2="62" stroke="#111"/><polygon points="513,62 506,58.5 506,65.5" fill="#111"/>
+      <line x1="655" y1="62" x2="678" y2="62" stroke="#111"/><polygon points="678,62 671,58.5 671,65.5" fill="#111"/>
+
+      <g font-size="10.5">
+        <line x1="90" y1="88" x2="90" y2="112" stroke="#c22" stroke-dasharray="3 2"/>
+        <circle cx="90" cy="118" r="4" fill="#c22"/>
+        <text x="90" y="136" text-anchor="middle" fill="#c22" font-weight="600">frozen-six</text>
+        <text x="90" y="149" text-anchor="middle" fill="#555">no production</text>
+        <text x="90" y="161" text-anchor="middle" fill="#555">factory existed</text>
+
+        <line x1="255" y1="88" x2="255" y2="140" stroke="#c22" stroke-dasharray="3 2"/>
+        <circle cx="255" cy="146" r="4" fill="#c22"/>
+        <text x="255" y="164" text-anchor="middle" fill="#c22" font-weight="600">rerun · production-run</text>
+        <text x="255" y="177" text-anchor="middle" fill="#555">seed disc 4 then 1 cell</text>
+        <text x="255" y="189" text-anchor="middle" fill="#555">— slice 0 is pre-pulse</text>
+
+        <line x1="420" y1="88" x2="420" y2="168" stroke="#e90" stroke-dasharray="3 2"/>
+        <circle cx="420" cy="174" r="4" fill="#e90"/>
+        <text x="420" y="192" text-anchor="middle" fill="#a60" font-weight="600">residual 1.0055</text>
+        <text x="420" y="205" text-anchor="middle" fill="#555">bound 0.075868</text>
+
+        <line x1="585" y1="88" x2="585" y2="196" stroke="#0a6" stroke-dasharray="3 2"/>
+        <circle cx="585" cy="202" r="4" fill="#0a6"/>
+        <text x="585" y="220" text-anchor="middle" fill="#076" font-weight="600">one x-point, agreed</text>
+        <text x="585" y="233" text-anchor="middle" fill="#555">at 49&times;33, two methods</text>
+
+        <line x1="765" y1="88" x2="765" y2="212" stroke="#999" stroke-dasharray="3 2"/>
+        <circle cx="765" cy="218" r="4" fill="#999"/>
+        <text x="765" y="236" text-anchor="middle" fill="#666">never reached with</text>
+        <text x="765" y="248" text-anchor="middle" fill="#666">a scoreable cohort</text>
+      </g>
+    </svg>
+    <figcaption>Each attempt is placed at the stage it actually reached. The moment seed is where
+    two attempts died on slice selection, not on physics; the profile solve is where the residual
+    finding lives; the topology stage is the one place a positive agreement was established.</figcaption>
+  </figure>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Attempt</th><th>Commit</th><th>Grid</th><th>Stopped on</th><th>What landed anyway</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>frozen-six + transport leg</td><td><code>41ddd617</code>, <code>9eb129e4</code></td><td>—</td>
+        <td>no production factory wired the injected components to the MAST classes</td>
+        <td>per-slice banking enforcing all 11 field names; non-finite scored as failure, not skip; figure production unit-tested</td>
+      </tr>
+      <tr>
+        <td>production-chain-factory</td><td><code>125c00a2</code></td><td>33&times;49 / 17&times;25</td>
+        <td>slice classified LIMITED with no x-point where EFIT calls it diverted; fail-closed referee raised</td>
+        <td>the factory itself: 4/4 production-type assertion, one real slice of 21978 reconstructed end to end at t=0.24500 s</td>
+      </tr>
+      <tr>
+        <td>parity-gate-rerun</td><td><code>43e2a091</code></td><td>17&times;25</td>
+        <td><code>seed disc holds 4 cells, below min_cells=5</code></td>
+        <td>the production banking path: no injected doubles, firewall preserved, cohort fractions for all 11 fields, attempted vs not-attempted distinguished</td>
+      </tr>
+      <tr>
+        <td>parity-gate-production-run</td><td><code>f39af125</code></td><td>33&times;49 registered</td>
+        <td><code>seed disc holds 1 cells</code> — the count went <em>down</em> on a finer grid</td>
+        <td>SLURM job 1245001 on 98dci4-gpu-0003, CudaDevice(id=0) confirmed, checkout frozen at <code>e2e104e4</code>, artifact <code>sha256:44f71af8…</code></td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>The cell count falling from 4 to 1 as the grid refined is what identified the real
+  defect.</strong> That cannot be a resolution effect on a fixed physical disc. The banker starts at
+  slice 0 of 7,500 — the pre-pulse record, where there is no plasma to seed — while every earlier
+  successful reconstruction had been a deliberately chosen mid-shot slice. So this was slice
+  selection, not physics and not the grid, compounded by the production chain having no per-slice
+  failure isolation: one unsupported slice aborted a whole shot before any scoreable slice was
+  banked.</p>
+
+  <p>Three distinct <code>ValueError</code> geometry conditions then surfaced from
+  <code>ReconstructMoment</code>, one per attempt: unsupported seed-disc cell count; current
+  centroid outside the limiter; and a flood seed at R=1.5731 m, Z=1.9400 m landing in wall material
+  with no axis-connected plasma to grow. Enumerating them by string was a losing game, and a bare
+  <code>ValueError</code> catch would have hidden numerical and programming defects behind a skip.
+  The recorded decision is to raise a <em>typed</em> unsupported-slice exception from the moment
+  layer for physically-unsupported geometry, which the gate skips by type while every other error
+  keeps failing loudly. The failing axis cell at Z=1.94 m in wall material is consistent with these
+  being pre-pulse slices with no plasma at all.</p>
+
+  <p>No tolerance was changed, no grid was shrunk to make a run fit, and no synthetic score was
+  substituted at any point across the four attempts. The transport harness's <code>/tmp</code>
+  metrics are labelled synthetic contract validation only and are explicitly not physical shot
+  results.</p>
+
+  <h2 id="topology-agreement">The limited/diverted disagreement was a grid artifact</h2>
+
+  <p>Commits <code>bdaf0844</code>, <code>73336ac0</code>. Both gates passed.</p>
+
+  <p><strong>Verdict: the limited classification was a grid-resolution artifact, not a physics
+  disagreement.</strong> At the factory's previous default of (25,17) the production null kernel
+  returned <code>candidate_count=0</code>, while an independent SciPy bicubic gradient-root and
+  Hessian-sign search — which never calls the labeler — found saddles present. Raising the default
+  to (49,33) makes both agree at one x-point: R=1.22492 m, Z=0.35977 m,
+  psi=6.83653e-03 Wb, on corrected slice 1963 (t=0.242600 s) aligned to EFIT row 46 (t=0.245000 s).
+  EFIT was used only to confirm the named row is diverted, and never entered reconstruction.</p>
+
+  <p>Two caveats stated at the time and not smoothed over: boundary-push termination still reads
+  <code>x-point saddle remained unresolved</code> with <code>boundary_resolved=false</code> despite
+  the emitted x-point, and the profile residual on that diagnostic slice was about 1.0055 against a
+  registered bound of 0.075868. <strong>This establishes topology-label presence and count
+  agreement only — not geometry parity and not solve convergence.</strong></p>
+
+  <p>The referee now scores a one-sided x-point absence instead of raising: the distance stays NaN
+  with no proxy substituted, the responsible side is recorded as
+  <code>reconstruction-x-point-absent</code> or <code>referee-x-point-absent</code>, topology
+  agreement is set to 0.0, and both verdicts fail while the slice stays scored. 3/3 aligned slices
+  scored, 10/10 tests.</p>
+
+  <h2 id="convergence">§6 — the sensor scale is the convergence cause, and the bound was the wrong quantity</h2>
+
+  <p>Commit <code>4c2c1796</code>. Gate passed. Artifact: a 62,856-byte measurement record carrying
+  every residual position on the evaluation axis.</p>
+
+  <p><strong>Finding 1 — the dominant cause is the sensor scale.</strong> Not inconsistent data, not
+  the seed, not the budget. A crossed 2&times;2 intervention over {full-shot, slice-local} scale and
+  {full-shot, slice-local} seed, holding corrected measurements and the 20-evaluation budget fixed
+  on slices 1961–1965 of shot 21978:</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Sensor scale</th><th>Seed</th><th>Finite</th><th>Median residual</th></tr></thead>
+    <tbody>
+      <tr><td>full-shot</td><td>full-shot</td><td>5/5</td><td>3.176e-03</td></tr>
+      <tr><td>full-shot</td><td>slice-local</td><td>5/5</td><td>2.687e-03</td></tr>
+      <tr><td>slice-local</td><td>full-shot</td><td>0/5</td><td>non-finite</td></tr>
+      <tr><td>slice-local</td><td>slice-local</td><td>3/5</td><td>1.00552523</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>The third row excludes the seed and shows the scale alone is sufficient to destroy convergence;
+  the fourth reproduces the originally reported failure exactly. The measured data is identical
+  across all four cells, so inconsistent data is excluded as the dominant cause. Budget is excluded
+  too: the same 20 evaluations give 2.71e-03 (Anderson), 3.18e-03 (NK) and 1.27e-02 (Picard) at
+  full-shot scale.</p>
+
+  <p><strong>Finding 2 — the §6 framing compared two different quantities.</strong> The registered
+  0.075868 is <em>not</em> a fixed-point bound: its provenance defines it as the median RMS of
+  <code>(j_phi_nova &minus; j_phi_grid)/max|j_phi_grid|</code>, a cross-substrate current
+  reproduction. The accelerator residual is <code>max|g(x)&minus;x|/max|g(x)|</code>, a fixed-point
+  defect. The norm-only conversion gives a five-slice Newton median of 1.048e-03, but it still lacks
+  the independent grid-current profile and is therefore <strong>not physically comparable to the
+  bound</strong>.</p>
+
+  <p><strong>What is not excused.</strong> The production-scale whitened raw-magnetics RMS stays
+  high — median 2.286 at the seed, 2.069 after Newton — so a data/model mismatch remains a separate
+  live physical finding and is explicitly not worded into a pass. And no scheme reaches the solver's
+  strict 1e-8 criterion, so whether more budget closes the 2e-03 to 1.3e-02 defect is open. No
+  tolerance and no accelerator setting was changed.</p>
+
+</main></body>
+</html>

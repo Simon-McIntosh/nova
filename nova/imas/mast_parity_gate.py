@@ -96,6 +96,7 @@ class ProductionShotScore:
     result: RefereedParityResult | None
     skipped_slices: tuple[SkippedSlice, ...]
     magnetics_budget: MagneticsBudgetClass
+    min_cells: int
 
 
 @dataclass(frozen=True)
@@ -108,6 +109,17 @@ class ShotSummary:
     skipped_slices: int
     skip_causes: Mapping[str, int]
     pass_fraction_by_metric: Mapping[str, float]
+
+
+@dataclass(frozen=True)
+class PartitionCoverage:
+    """One disjoint source-slice interval contributing to a complete report."""
+
+    slice_start: int
+    slice_stop: int
+    scored_slices: int
+    skipped_slices: int
+    artifact: str
 
 
 @dataclass(frozen=True)
@@ -127,6 +139,24 @@ class FrozenGateReport:
     pass_fraction_by_metric: Mapping[str, float]
     run_errors: Mapping[int, str]
     figures: tuple[str, ...]
+    partitions: tuple[PartitionCoverage, ...] = ()
+
+
+@dataclass(frozen=True)
+class SlicePartitionReport:
+    """Durable score rows for one disjoint interval of a production shot."""
+
+    generated_at: str
+    shot: int
+    available_slices: int
+    slice_start: int
+    slice_stop: int
+    radial_points: int
+    vertical_points: int
+    min_cells: int
+    magnetics_budget: str
+    scored_slices: tuple[ScoredSlice, ...]
+    skipped_slices: tuple[SkippedSlice, ...]
 
 
 def _supported_moment_seeds(
@@ -134,6 +164,8 @@ def _supported_moment_seeds(
     inputs: CorrectedSolveInputs,
     moment_solver: Any,
     profile_solver: Any,
+    *,
+    source_slice_offset: int = 0,
 ) -> tuple[tuple[int, ...], tuple[Any, ...], tuple[SkippedSlice, ...], np.ndarray]:
     """Attempt every corrected slice and retain only supported moment seeds."""
 
@@ -145,14 +177,15 @@ def _supported_moment_seeds(
     indices: list[int] = []
     seeds: list[Any] = []
     skipped: list[SkippedSlice] = []
-    for index, time_s in enumerate(np.asarray(inputs.time_s, dtype=float)):
+    for input_index, time_s in enumerate(np.asarray(inputs.time_s, dtype=float)):
+        source_index = source_slice_offset + input_index
         measurement = SliceMeasurement(
-            measured=inputs.sensor_signals[index],
-            vacuum=vacuum_sensor[index],
-            mask=mask[index],
+            measured=inputs.sensor_signals[input_index],
+            vacuum=vacuum_sensor[input_index],
+            mask=mask[input_index],
             scale=scale,
-            plasma_current=float(inputs.plasma_current_a[index]),
-            vacuum_flux=vacuum_flux[index],
+            plasma_current=float(inputs.plasma_current_a[input_index]),
+            vacuum_flux=vacuum_flux[input_index],
         )
         try:
             seed = moment_solver.solve(measurement)
@@ -160,14 +193,14 @@ def _supported_moment_seeds(
             skipped.append(
                 SkippedSlice(
                     shot=int(shot),
-                    slice_index=index,
+                    slice_index=source_index,
                     time_s=float(time_s),
                     cause=error.condition,
                     details=error.details,
                 )
             )
             continue
-        indices.append(index)
+        indices.append(source_index)
         seeds.append(seed)
     return tuple(indices), tuple(seeds), tuple(skipped), scale
 
@@ -277,8 +310,10 @@ def score_production_shot(
     store: Path | str = SHOT_STORE,
     radial_points: int = 33,
     vertical_points: int = 49,
+    slice_start: int = 0,
+    slice_stop: int | None = None,
 ) -> ProductionShotScore:
-    """Score supported corrected slices using only production components."""
+    """Score one corrected-input interval using only production components."""
 
     components = build_mast_parity_chain(
         int(shot),
@@ -289,12 +324,26 @@ def score_production_shot(
         vertical_points=vertical_points,
     )
     inputs = read_corrected_solve_inputs(int(shot), store=store)
+    stop = inputs.slice_count if slice_stop is None else int(slice_stop)
+    start = int(slice_start)
+    if start < 0 or stop <= start or stop > inputs.slice_count:
+        raise ValueError(
+            f"slice interval [{start}, {stop}) must lie within "
+            f"[0, {inputs.slice_count})"
+        )
+    selected_inputs = _select_inputs(inputs, tuple(range(start, stop)))
     indices, seeds, skipped, scale = _supported_moment_seeds(
-        int(shot), inputs, components.moment_solver, components.profile_solver
+        int(shot),
+        selected_inputs,
+        components.moment_solver,
+        components.profile_solver,
+        source_slice_offset=start,
     )
     result = None
     if indices:
-        supported_inputs = _select_inputs(inputs, indices)
+        supported_inputs = _select_inputs(
+            selected_inputs, tuple(index - start for index in indices)
+        )
         chain = _run_supported_chain(
             supported_inputs,
             seeds,
@@ -312,6 +361,7 @@ def score_production_shot(
         result=result,
         skipped_slices=skipped,
         magnetics_budget=MagneticsBudgetClass.SOURCE_CUTOVER,
+        min_cells=int(components.moment_solver.config.min_cells),
     )
 
 
@@ -465,7 +515,7 @@ def _json_value(value: Any) -> Any:
     return value
 
 
-def _bank_report(report: FrozenGateReport, path: Path) -> None:
+def _bank_report(report: Any, path: Path) -> None:
     """Write the scorecard atomically as strict, deterministic JSON."""
 
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -475,6 +525,207 @@ def _bank_report(report: FrozenGateReport, path: Path) -> None:
         encoding="utf-8",
     )
     temporary.replace(path)
+
+
+def bank_production_partition(
+    shot: int,
+    *,
+    slice_start: int,
+    slice_stop: int,
+    artifact_path: Path | str,
+    artifact_cache: Path | str,
+    artifact_digest: str,
+    store: Path | str = SHOT_STORE,
+    radial_points: int = 33,
+    vertical_points: int = 49,
+) -> SlicePartitionReport:
+    """Score and durably bank every row in one source-slice interval."""
+
+    outcome = score_production_shot(
+        int(shot),
+        artifact_cache=artifact_cache,
+        artifact_digest=artifact_digest,
+        store=store,
+        radial_points=radial_points,
+        vertical_points=vertical_points,
+        slice_start=slice_start,
+        slice_stop=slice_stop,
+    )
+    scored, skipped, _summary = _score_result(
+        outcome.result,
+        shot=outcome.shot,
+        source_slice_indices=outcome.source_slice_indices,
+        initial_skips=outcome.skipped_slices,
+        available_slices=outcome.available_slices,
+    )
+    expected_indices = set(range(int(slice_start), int(slice_stop)))
+    observed_indices = {row.slice_index for row in scored}
+    observed_indices.update(row.slice_index for row in skipped)
+    if observed_indices != expected_indices or len(scored) + len(skipped) != len(
+        expected_indices
+    ):
+        raise RuntimeError(
+            "partition rows do not cover their source interval exactly once"
+        )
+    report = SlicePartitionReport(
+        generated_at=datetime.now(UTC).isoformat(),
+        shot=int(shot),
+        available_slices=outcome.available_slices,
+        slice_start=int(slice_start),
+        slice_stop=int(slice_stop),
+        radial_points=int(radial_points),
+        vertical_points=int(vertical_points),
+        min_cells=outcome.min_cells,
+        magnetics_budget=str(outcome.magnetics_budget),
+        scored_slices=tuple(scored),
+        skipped_slices=tuple(skipped),
+    )
+    _bank_report(report, Path(artifact_path))
+    return report
+
+
+def _read_partition(path: Path) -> SlicePartitionReport:
+    """Read a strict partition artifact into its typed representation."""
+
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    return SlicePartitionReport(
+        generated_at=str(payload["generated_at"]),
+        shot=int(payload["shot"]),
+        available_slices=int(payload["available_slices"]),
+        slice_start=int(payload["slice_start"]),
+        slice_stop=int(payload["slice_stop"]),
+        radial_points=int(payload["radial_points"]),
+        vertical_points=int(payload["vertical_points"]),
+        min_cells=int(payload["min_cells"]),
+        magnetics_budget=str(payload["magnetics_budget"]),
+        scored_slices=tuple(ScoredSlice(**row) for row in payload["scored_slices"]),
+        skipped_slices=tuple(SkippedSlice(**row) for row in payload["skipped_slices"]),
+    )
+
+
+def aggregate_scorecard_partitions(
+    partition_paths: tuple[Path | str, ...],
+    *,
+    artifact_path: Path | str,
+    shot: int = 21978,
+    radial_points: int = 33,
+    vertical_points: int = 49,
+    min_cells: int = 5,
+) -> FrozenGateReport:
+    """Atomically bank a shot only when partitions cover every source row once."""
+
+    paths = tuple(Path(path) for path in partition_paths)
+    if not paths:
+        raise ValueError("at least one partition artifact is required")
+    reports = sorted(
+        ((path, _read_partition(path)) for path in paths),
+        key=lambda item: item[1].slice_start,
+    )
+    available_values = {report.available_slices for _path, report in reports}
+    if len(available_values) != 1:
+        raise ValueError("partition artifacts disagree on available slice count")
+    available = available_values.pop()
+    expected_start = 0
+    budgets: set[str] = set()
+    scored: list[ScoredSlice] = []
+    skipped: list[SkippedSlice] = []
+    coverage: list[PartitionCoverage] = []
+    for path, report in reports:
+        observed_metadata = (
+            report.shot,
+            report.radial_points,
+            report.vertical_points,
+            report.min_cells,
+        )
+        expected_metadata = (int(shot), radial_points, vertical_points, min_cells)
+        if observed_metadata != expected_metadata:
+            raise ValueError(
+                f"partition {path} metadata {observed_metadata} must be "
+                f"{expected_metadata}"
+            )
+        if report.slice_start != expected_start:
+            raise ValueError(
+                f"partition coverage expected slice {expected_start}, "
+                f"found {report.slice_start}"
+            )
+        if report.slice_stop <= report.slice_start:
+            raise ValueError(f"partition {path} has an empty or reversed interval")
+        rows = (*report.scored_slices, *report.skipped_slices)
+        observed_indices = [row.slice_index for row in rows]
+        expected_indices = list(range(report.slice_start, report.slice_stop))
+        if sorted(observed_indices) != expected_indices or len(observed_indices) != len(
+            set(observed_indices)
+        ):
+            raise ValueError(
+                f"partition {path} does not cover its interval exactly once"
+            )
+        for row in report.scored_slices:
+            if (
+                set(row.metrics) != SCORECARD_FIELDS
+                or set(row.verdicts) != SCORECARD_FIELDS
+            ):
+                raise ValueError(f"partition {path} carries an invalid scorecard row")
+        budgets.add(report.magnetics_budget)
+        scored.extend(report.scored_slices)
+        skipped.extend(report.skipped_slices)
+        coverage.append(
+            PartitionCoverage(
+                slice_start=report.slice_start,
+                slice_stop=report.slice_stop,
+                scored_slices=len(report.scored_slices),
+                skipped_slices=len(report.skipped_slices),
+                artifact=str(path.resolve()),
+            )
+        )
+        expected_start = report.slice_stop
+    if expected_start != available:
+        raise ValueError(
+            f"partition coverage stops at {expected_start}, expected {available}"
+        )
+    if len(budgets) != 1:
+        raise ValueError(f"partitions carry mixed magnetics budgets: {budgets}")
+    if len(scored) + len(skipped) != available:
+        raise RuntimeError("aggregated rows do not equal the available slice count")
+    pass_fractions = {
+        field: (
+            float(np.mean([row.verdicts[field] for row in scored]))
+            if scored
+            else float("nan")
+        )
+        for field in sorted(SCORECARD_FIELDS)
+    }
+    causes = Counter(row.cause for row in skipped)
+    summary = ShotSummary(
+        shot=int(shot),
+        available_slices=available,
+        scored_slices=len(scored),
+        skipped_slices=len(skipped),
+        skip_causes=dict(sorted(causes.items())),
+        pass_fraction_by_metric=pass_fractions,
+    )
+    status = (
+        "pass"
+        if scored and all(all(row.verdicts.values()) for row in scored)
+        else "fail"
+    )
+    report = FrozenGateReport(
+        generated_at=datetime.now(UTC).isoformat(),
+        requested_shots=(int(shot),),
+        completed_shots=(int(shot),),
+        incomplete_shots=(),
+        not_attempted_shots=(),
+        magnetics_budget=budgets.pop(),
+        status=status,
+        scored_slices=tuple(sorted(scored, key=lambda row: row.slice_index)),
+        skipped_slices=tuple(sorted(skipped, key=lambda row: row.slice_index)),
+        shot_summaries=(summary,),
+        pass_fraction_by_metric=pass_fractions,
+        run_errors={},
+        figures=(),
+        partitions=tuple(coverage),
+    )
+    _bank_report(report, Path(artifact_path))
+    return report
 
 
 def _normalised_metric(
@@ -727,14 +978,18 @@ def print_frozen_gate_report(report: FrozenGateReport) -> None:
 
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--artifact-cache", type=Path, required=True)
-    parser.add_argument("--artifact-digest", required=True)
+    parser.add_argument("--artifact-cache", type=Path)
+    parser.add_argument("--artifact-digest")
     parser.add_argument("--store", type=Path, default=SHOT_STORE)
     parser.add_argument("--artifact-path", type=Path, default=DEFAULT_ARTIFACT)
     parser.add_argument("--figure-dir", type=Path, default=DEFAULT_FIGURE_DIR)
     parser.add_argument("--radial-points", type=int, default=33)
     parser.add_argument("--vertical-points", type=int, default=49)
     parser.add_argument("--max-shots", type=int)
+    parser.add_argument("--shot", type=int)
+    parser.add_argument("--slice-start", type=int)
+    parser.add_argument("--slice-stop", type=int)
+    parser.add_argument("--aggregate-partitions", nargs="+", type=Path)
     return parser
 
 
@@ -742,6 +997,47 @@ def main() -> None:
     """Run and bank the production frozen-cohort scorecard."""
 
     args = _parser().parse_args()
+    if args.aggregate_partitions:
+        report = aggregate_scorecard_partitions(
+            tuple(args.aggregate_partitions),
+            artifact_path=args.artifact_path,
+            shot=21978 if args.shot is None else args.shot,
+            radial_points=args.radial_points,
+            vertical_points=args.vertical_points,
+        )
+        print_frozen_gate_report(report)
+        return
+    partition_requested = args.slice_start is not None or args.slice_stop is not None
+    if partition_requested:
+        if args.slice_start is None or args.slice_stop is None or args.shot is None:
+            raise ValueError(
+                "partition scoring requires --shot, --slice-start and --slice-stop"
+            )
+        if args.artifact_cache is None or args.artifact_digest is None:
+            raise ValueError(
+                "partition scoring requires --artifact-cache and --artifact-digest"
+            )
+        partition = bank_production_partition(
+            args.shot,
+            slice_start=args.slice_start,
+            slice_stop=args.slice_stop,
+            artifact_path=args.artifact_path,
+            artifact_cache=args.artifact_cache,
+            artifact_digest=args.artifact_digest,
+            store=args.store,
+            radial_points=args.radial_points,
+            vertical_points=args.vertical_points,
+        )
+        print(
+            f"shot {partition.shot} [{partition.slice_start}, "
+            f"{partition.slice_stop}): scored={len(partition.scored_slices)} "
+            f"skipped={len(partition.skipped_slices)} "
+            "skip_causes="
+            f"{dict(Counter(row.cause for row in partition.skipped_slices))}"
+        )
+        return
+    if args.artifact_cache is None or args.artifact_digest is None:
+        raise ValueError("production scoring requires artifact cache and digest")
     report = bank_frozen_scorecard(
         artifact_path=args.artifact_path,
         figure_dir=args.figure_dir,
@@ -759,9 +1055,14 @@ __all__ = [
     "DEFAULT_ARTIFACT",
     "DEFAULT_FIGURE_DIR",
     "FrozenGateReport",
+    "PartitionCoverage",
+    "ProductionShotScore",
     "ScoredSlice",
+    "SlicePartitionReport",
     "ShotSummary",
     "SkippedSlice",
+    "aggregate_scorecard_partitions",
+    "bank_production_partition",
     "bank_frozen_scorecard",
     "main",
     "print_frozen_gate_report",

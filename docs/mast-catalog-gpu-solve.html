@@ -8,17 +8,17 @@
   <meta name="plan-slug" content="mast-catalog-gpu-solve">
   <meta name="plan-title" content="MAST Catalog GPU Solve — full-catalog equilibria in ~1 hour on 8×H200">
   <meta name="plan-summary" content="Nova&#x27;s short-term capability goal: reconstruct equilibria for ALL timesteps of all 11,573 MAST L2 shots in ~1 hour on the 8×H200 node — batched jitted reconstruction (moment seed → profile solve → topology labels), multi-device sharding, streaming zarr IO, labeled outputs persisted.">
-  <meta name="plan-status" content="blocked">
+  <meta name="plan-status" content="pending">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
   <meta name="plan-owner" content="Simon McIntosh">
-  <meta name="plan-depends-on" content="physics-spine-adoption,mast-corrected-read-layer,spine-efit-parity">
+  <meta name="plan-depends-on" content="physics-spine-adoption,mast-corrected-read-layer,efit-forward-parity">
   <title>MAST Catalog GPU Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-sprint" content="S8">
-<meta name="plan-modified" content="2026-08-08">
-<meta name="plan-version" content="5">
+<meta name="plan-modified" content="2026-08-13">
+<meta name="plan-version" content="6">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-capability-reasoning" content="deep">
@@ -246,6 +246,11 @@ Done-when
     <span class="r-research-title"><a href="/nova/physics-spine-transition-audit.html">Physics Spine Transition Audit</a></span></div>
 <div class="r-research" data-id="r-mast-source-resolution" data-type="resolution-plan" data-source="Nova catalog evidence plus UKAEA machine-description, vacuum-calibration and equilibrium literature" data-added-by="reckon-edit" data-when="2026-08-02" data-url="/nova/mast-source-resolution.html">
     <span class="r-research-title"><a href="/nova/mast-source-resolution.html">MAST source-resolution programme</a></span></div>
+</section>
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s1" data-id="c-20260813-gatetransfer" data-who="reckon-ship" data-when="2026-08-13T14:55:00+00:00">
+    <div class="r-comment-body">GATE TRANSFERRED: this plan's parity prerequisite moves from spine-efit-parity to efit-forward-parity. The reason is a scope correction rather than a re-planning preference. spine-efit-parity's frozen-six gate drove ReconstructProfile.least_squares_map through newton_krylov - a whitened least-squares fit to measured magnetics with a hard measured-current equality - so it inferred the flux functions rather than being given them and scored a fitted state against EFIT. Its verdict is a real result about an inverse reconstruction, and it FAILED ten of twelve metrics with converged_fraction at exactly zero, but a fit failing to converge says nothing about whether the Grad-Shafranov fixed point reproduces a reference equilibrium. Holding a catalog of forward solves on a reconstruction result is holding it on the wrong evidence. efit-forward-parity runs the demonstration that actually gates this work: ForwardProfile given a reference's own pprime/ffprime and conductor currents, free-boundary fixed point, no measurement anywhere in the path, compared field-to-field and moment-to-moment. It is itself gated behind efit-map-inversion (prove the reference is read correctly), efit-flux-decomposition (prove the external field can serve as a free-boundary condition) and equilibrium-metric-parity (prove the derived-quantity chain agrees, so an I_p or l_i disagreement is not ambiguous between a different field and a different way of measuring it). The catalog therefore stays held, on better-founded evidence and behind a shorter measured path - the four-plan ladder's critical path is 5.3 worker-hours. Persisted status also corrected from the non-schema 'blocked' to 'pending'; blocked-ness is derived from the dependency graph rather than stored.</div>
+</div>
 </section>
 </main>
 </body>

@@ -22,10 +22,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-13">
-<meta name="plan-commits" content="213458a2,69c7f92a,bab09d10,f4224985,d5c3d14c">
-<meta name="plan-artifacts" content="benchmarks/efit_forward_input_census.py,benchmarks/efit_affine_extraction.py,benchmarks/efit_current_sign_census.py,benchmarks/efit_topology_boundary_score.py,benchmarks/efit_third_term_separation.py">
-<meta name="plan-impl" content="0.83">
-<meta name="plan-version" content="5">
+<meta name="plan-commits" content="213458a2,69c7f92a,bab09d10,f4224985,d5c3d14c,52200074">
+<meta name="plan-artifacts" content="benchmarks/efit_forward_input_census.py,benchmarks/efit_affine_extraction.py,benchmarks/efit_current_sign_census.py,benchmarks/efit_topology_boundary_score.py,benchmarks/efit_third_term_separation.py,nova/imas/mast_chain_factory.py,tests/imas/test_mast_chain_factory_axis_centre.py">
+<meta name="plan-impl" content="0.75">
+<meta name="plan-version" content="7">
 </head>
 <body>
   <main class="plan-doc">
@@ -169,6 +169,33 @@
     <code>boundary_resolved=false</code> state on shots 21983 and 21985 is either cleared or reported as
     surviving with its own cause. The bound is not to be widened whatever the outcome.</p>
 
+    <h2 id="s7">§7 — The boundary read has two residual failure modes, on disjoint shots</h2>
+
+    <p><strong>§6's repair took LCFS from PASS 1/6 to PASS 4/6 and left two distinct things unexplained,
+    on non-overlapping shots.</strong> Recording them together is not a claim they share a cause — the
+    disjoint shot sets are the reason to suspect they do not.</p>
+
+    <p><strong>The surviving LCFS failures are 21986 and 22086, at +5.0945212e-04 m and +4.6611127e-04 m
+    against the 3.3047e-04 m bound.</strong> These are exactly the two shots whose emitted boundary sits
+    <em>outside</em> the stored polygon, and every negative-offset shot now passes. A shared sign across
+    both survivors is a pattern, not a scatter of near-misses, so the diagnosis starts there: what makes
+    the ray reach past the stored boundary on these two and not the other four. The 0.999 boundary-span
+    convention biases inward, so it cannot be the cause of an outward offset.</p>
+
+    <p><strong>The unresolved x-point fit is 21983 and 21985</strong>, both reporting
+    <code>boundary_resolved=false</code> with x fit states [1,2] and one candidate that never reaches the
+    resolved state — while the diverted class is correct and both stored x-points are recovered to within
+    2e-03 m. §6 established that centre alignment and radial search depth do not change candidate
+    refinement, so this is a null-fit limitation and not a residue of the ring-centre defect.</p>
+
+    <p><em>Done-when:</em> the outward LCFS offset on 21986 and 22086 is attributed to a named mechanism
+    with the measurement that distinguishes it from the alternatives, and either the two shots meet the
+    unchanged 3.3047e-04 m bound or the reason they cannot is recorded as a finding with its magnitude;
+    and separately, the condition that leaves the binding x-point candidate at fit state 1 on 21983 and
+    21985 is named, with a statement of whether it affects any quantity beyond the
+    <code>boundary_resolved</code> diagnostic itself. The registered bound is not to be widened under
+    either outcome.</p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="plasma-domain-mask" data-choice="stored-lcfs-interior" data-by="Simon McIntosh" data-when="2026-08-13T13:20:00+00:00">
@@ -230,6 +257,12 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20260813-thirdterm" data-who="reckon-ship" data-when="2026-08-13T15:00:00+00:00">
     <div class="r-comment-body">third-term-separation landed - commit d5c3d14c; gate PASSED; worker 301 s. VERDICT NUMERICAL, AND IT WAS DECIDED ON THE HARDER TEST. Equalising cell population was expected to reduce the significant-bin count and DID NOT: 11/24 went to 12/24, so the convenient evidence for the numerical reading never appeared and a separation resting on that count alone would have had to call the term physical. The physical criterion failed decisively instead - under equal population (39-40 cells per bin) the R^4 coefficients span -28,130.836 to +212,634.549 with 9 positive and 15 negative overall, and the SIGNIFICANT SUBSET SPLITS EXACTLY 6 POSITIVE AND 6 NEGATIVE. A single rotation profile cannot alternate coefficient sign across surfaces, so the two-term model stands and NO candidate rotation parametrisation is promoted as a third forward input. Control reproduces the masked affine result exactly: two-term scatter over fitted magnitude min 3.007982e-03, q25 4.907834e-03, median 1.399630e-02, q75 3.905780e-02, max 5.710340e-01 - confirming this is a reinterpretation of the same fit rather than a different measurement, with all 938 interior cells assigned exactly once under both partitions. Interpretability floor stated as 39 cells, explicitly as a conservative bound and not a claim that 39 cells guarantees physical resolution; at 39-40 cells formal significance is still insufficient without cross-bin sign consistency. Record at /nova/evidence/archive/efit-map-inversion-landed#third-term-separation</div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-20260813-centrerepair" data-who="reckon-ship" data-when="2026-08-13T15:30:00+00:00">
+    <div class="r-comment-body">boundary-read-axis-centre landed - commit 52200074; gate PASSED, LCFS STILL A QUALIFIED FAIL, BOUND NOT WIDENED. Scope widened mid-flight to a second defect in the same owned module, so the run is excluded from effort calibration. CENTRE DEFECT REPAIRED: boundary_reads now takes an initial sub-grid axis from axis_seed, REPEATS the connectivity read with that extracted axis as the ray centre, returns that requested centre beside the read, and builds the ring about that exact centre (ring = ray_centre + ... rather than read.axis + ...). The fixture deliberately makes the refined read report a DIFFERENT axis and asserts the ring mean still equals the centre passed to the ray cast, so it FAILS under the former construction rather than merely passing under the new one. SECOND DEFECT FOUND DURING THE RESCORE AND IT IS THE LARGER: production passed n_ray=len(LCFS_ANGLES)=8, but n_ray is RADIAL SAMPLING DEPTH PER ANGULAR OUTPUT, not the angle count - with centres aligned but 8 radial samples, LCFS mean absolute distances were 8.2242554e-02 to 1.0383490e-01 m, two orders above the bound. Production now uses 512 radial samples with the same eight fixed output angles, 0.999 boundary-span convention, 48 levels, 12 bisections, and the test pins that radial sampling is not collapsed back to the angular count. LCFS goes PASS 1/6 to PASS 4/6, worst 7.6068799e-04 to 5.0945212e-04 m against the unchanged 3.3047e-04 m bound. Per shot pre -&gt; post signed: 21978 -4.4885915e-04 -&gt; -3.0215695e-04 PASS; 21983 -3.9663293e-04 -&gt; -1.2733781e-04 PASS; 21985 -3.9717508e-04 -&gt; -2.9496775e-04 PASS; 21986 +4.9691222e-04 -&gt; +5.0945212e-04 FAIL; 21989 -3.0522555e-04 -&gt; -2.4077980e-04 PASS; 22086 +6.5025215e-04 -&gt; +4.6611127e-04 FAIL. THE TWO SURVIVORS ARE EXACTLY THE TWO POSITIVE-OFFSET SHOTS - the ones whose emitted boundary sits OUTSIDE the stored polygon - and every negative-offset shot now passes, which is a coherent pattern rather than a scatter of near-misses and is the natural starting point for diagnosing them. No parameter was tuned against those two residuals. Non-LCFS invariants did not regress and the post-repair maxima match the pre-repair passing values exactly: axis PASS 6/6 worst 8.6785179e-04 m, x-point position PASS 6/6 worst 2.2508648e-03 m, count 2/2 each, class agreement 1.0 all diverted/diverted. boundary_resolved=false survives on 21983 and 21985 with x fit states [1,2]; diagnosed as a distinct null-fit limitation rather than the ring-centre defect, since centre alignment and radial depth do not change candidate refinement. COST NOTED RATHER THAN HIDDEN: two connectivity reads per flux map instead of one, and 64-fold radial sampling - a real throughput change on a batched path. Record at /nova/evidence/archive/efit-map-inversion-landed#boundary-centre-repair</div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-20260813-residualmodes" data-who="reckon-ship" data-when="2026-08-13T15:35:00+00:00">
+    <div class="r-comment-body">Section opened from the centre repair's own follow-ons rather than deferred as followups, because both belong to this plan. Two residual failure modes on DISJOINT shot sets, which is the reason not to assume a shared cause: (1) LCFS still fails on 21986 at +5.0945212e-04 m and 22086 at +4.6611127e-04 m against the unchanged 3.3047e-04 m bound, and these are exactly the two shots whose emitted boundary sits OUTSIDE the stored polygon while every negative-offset shot now passes - the 0.999 boundary-span convention biases inward so it cannot produce an outward offset; (2) 21983 and 21985 report boundary_resolved=false with x fit states [1,2] and one candidate never reaching the resolved state, while the diverted class is correct and both stored x-points are recovered to within 2e-03 m. The centre repair established that centre alignment and radial depth do not change candidate refinement, so (2) is a null-fit limitation and not a residue of the ring-centre defect. Two nodes, disjoint write paths so they can run concurrently. impl corrected from 1.0 to 0.75: the plan is not complete while this section is open.</div>
 </div>
 </section>
 </main>

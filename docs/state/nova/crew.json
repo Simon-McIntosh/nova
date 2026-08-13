@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-13T16:25:43",
+  "updated": "2026-08-13T16:37:46",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -3700,9 +3700,165 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260813T142729221809-operator-consistency-order",
+        "plan": "efit-flux-decomposition",
+        "section": "\u00a72",
+        "node": "operator-consistency-order",
+        "role": "implement",
+        "member": "chain-factory",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-13T14:27:31Z",
+        "completed_at": "2026-08-13T14:35:44Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 493,
+        "time_budget": "25m",
+        "base_sha": "bf9a3eee6c4852f0697c29831f0892cd183a54d5",
+        "commits": [
+          "e25d1eb44ff6c18e4f25dd5bd0fbd42f4cdd7c24"
+        ],
+        "changed_lines": {
+          "added": 314,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/bac59e2b-995a-430c-bf2d-55dd3126adcf/scratchpad/operator-consistency-order-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ffaa2-8b1b-7803-98c5-c43c48e3f9a6",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 28847104,
+            "input_tokens": 30465299,
+            "output_tokens": 107543,
+            "reasoning_output_tokens": 32061
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260813T142729221745-boundary-read-axis-centre",
+        "plan": "efit-map-inversion",
+        "section": "\u00a76",
+        "node": "boundary-read-axis-centre",
+        "role": "implement",
+        "member": "topology-parity",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-13T14:27:31Z",
+        "completed_at": "2026-08-13T14:36:08Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 517,
+        "time_budget": "25m",
+        "base_sha": "bf9a3eee6c4852f0697c29831f0892cd183a54d5",
+        "commits": [
+          "52200074e0d1a5e1c7270c8b8144b11db48fe132"
+        ],
+        "changed_lines": {
+          "added": 71,
+          "removed": 9,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/bac59e2b-995a-430c-bf2d-55dd3126adcf/scratchpad/boundary-read-axis-centre-manifest.md",
+        "scope_changed": true,
+        "session_id": "019ffb73-f8a9-7f02-b9ee-19586af8c6e8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 11558400,
+            "input_tokens": 11917259,
+            "output_tokens": 40229,
+            "reasoning_output_tokens": 10334
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260813T142109754458-metric-parity-comparison",
+        "plan": "equilibrium-metric-parity",
+        "section": "\u00a73",
+        "node": "metric-parity-comparison",
+        "role": "implement",
+        "member": "geometry-solve",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-13T14:21:12Z",
+        "completed_at": "2026-08-13T14:37:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 966,
+        "time_budget": "25m",
+        "base_sha": "1973ee0a878cc2b87ecb72932e145639cd2a875d",
+        "commits": [
+          "19261655d069d887010cad4925cba93a883a61fd"
+        ],
+        "changed_lines": {
+          "added": 496,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/bac59e2b-995a-430c-bf2d-55dd3126adcf/scratchpad/metric-parity-comparison-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff708-e876-7112-bdf2-12db5e55652a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 21541120,
+            "input_tokens": 23056680,
+            "output_tokens": 139594,
+            "reasoning_output_tokens": 34125
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 126
+    "_version": 129
   }
 }

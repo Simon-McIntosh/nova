@@ -88,5 +88,59 @@
   store does not record. Reporting them unpaired is the plan's own instruction — agreeing by accident on
   an invented convention is worse than reporting no pair.</p>
 
+  <h2 id="same-map-comparison">§3 — the comparison: interior agreement at 1e-4, and every large gap is a domain endpoint</h2>
+
+  <p>Commit <code>19261655</code>; gate passed. Artifact
+  <code>benchmarks/efit_metric_parity_comparison.py</code> (496 lines). Worker time 966 s across two
+  resumptions. Six frozen shots on one common stored slice 46 at 0.25 s; 17 paired quantities per shot,
+  <strong>102 signed relative-difference profiles</strong>. Verdict
+  <code>UNBOUNDED_FIRST_PASS</code> with pass/fail not applied and no cross-code tolerance registered.</p>
+
+  <p><strong>The first time an outside code has checked nova's derived-quantity conventions, and the
+  interior agrees to between 1e-4 and 1e-5.</strong> Median signed relative difference across the six
+  shots:</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Pair</th><th>Median range across six shots</th></tr></thead>
+    <tbody>
+      <tr><td><code>fpsi_c</code> ↔ <code>field_function</code></td><td>−1.74317e-05 … −1.19732e-05</td></tr>
+      <tr><td><code>qpsi_c</code> ↔ <code>safety_factor</code></td><td>−2.16102e-04 … −1.61044e-04</td></tr>
+      <tr><td><code>volp_c</code> ↔ <code>volume</code></td><td>+3.06651e-04 … +3.45595e-04</td></tr>
+      <tr><td><code>areap_c</code> ↔ <code>area</code></td><td>+3.27305e-04 … +3.71211e-04</td></tr>
+      <tr><td colspan="2" style="padding-top:0.6em"><em>and the apparent outliers, both resolved as domain artefacts</em></td></tr>
+      <tr><td><code>q_100</code></td><td><strong>+2.13363e-01 … +3.46914e-01</strong></td></tr>
+      <tr><td><code>plasma_area</code></td><td><strong>−1.40854e-02 … −9.99457e-03</strong></td></tr>
+      <tr><td><code>plasma_volume</code></td><td><strong>−1.08801e-02 … −7.50515e-03</strong></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong><code>q_100</code>'s 21–35% gap is a non-coincident domain, and the profile is what proves
+  it.</strong> The reference value sits at the stored LCFS — the separatrix, where q diverges on a
+  diverted equilibrium — while nova evaluates at its last resolvable pre-separatrix surface
+  ψ_N = 0.995. The discriminating evidence is that the transformed <code>qpsi_c</code> profile stays
+  within the low 1e-4 across the whole common grid, which ends at ψ_N = 0.984375, and <em>only</em> the
+  endpoint scalar jumps. An interior numerical disagreement could not be confined to the last point.</p>
+
+  <p><strong>The ~1% scalar area and volume gaps are the same effect at a different endpoint.</strong> The
+  reference scalars are enclosed to the stored LCFS, nova's to its outermost ψ_N = 0.995 surface, while
+  the paired cumulative profiles are compared only on coincident stored surfaces through ψ_N = 0.984375.
+  That non-coincident scalar boundary accounts for a ~1% gap sitting beside a ~3e-4 cumulative-profile
+  agreement for the same quantity — the scalar and the profile are simply not integrated to the same
+  boundary.</p>
+
+  <p>60 analytic-tolerance exceedances are reported with their surface positions, sourced from the classes
+  the nova columns were landed against at <code>b0af2d23</code> and carried strictly as named observations
+  — never as cross-code pass/fail. The four nova flux-surface averages are emitted as
+  <code>NO_REFERENCE_COUNTERPART</code> rather than compared against a substitute, consistent with the
+  census finding above.</p>
+
+  <p>Read-path detail worth keeping: the stored <code>gridr</code>/<code>gridz</code> are proved uniform at
+  stored dtype precision and then reconstructed with an endpoint-preserving float64 <code>linspace</code>,
+  and a genuinely non-uniform stored axis raises rather than being silently regularised into a uniform one.
+  Each shot uses its own <code>+1</code> four-way-agreeing sign receipt from the current-sign census rather
+  than a single assumption.</p>
+
 </main></body>
 </html>

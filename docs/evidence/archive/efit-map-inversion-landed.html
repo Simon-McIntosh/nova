@@ -248,6 +248,67 @@
   without cross-bin sign consistency. The node was explicit that this is a conservative floor and not a
   claim that 39 cells guarantees physical resolution.</p>
 
+  <h2 id="boundary-centre-repair">§6 — two production defects in the boundary read, and what survived fixing them</h2>
+
+  <p>Commit <code>52200074</code>; gate passed, LCFS still a qualified FAIL. Changed
+  <code>nova/imas/mast_chain_factory.py</code> and added
+  <code>tests/imas/test_mast_chain_factory_axis_centre.py</code>. Worker time 517 s. Scope widened
+  mid-flight to a second defect in the same owned module, so this run is excluded from effort
+  calibration.</p>
+
+  <p><strong>The centre defect, repaired.</strong> <code>MastTopologyLabeler.boundary_reads</code> now
+  takes an initial sub-grid axis from <code>axis_seed</code>, <em>repeats</em> the connectivity read with
+  that extracted axis as the ray centre, returns that requested centre beside the read, and builds the
+  reported ring about that exact centre — <code>ring = ray_centre + …</code> rather than
+  <code>ring = read.axis + …</code>. The regression fixture deliberately makes the refined read report a
+  <em>different</em> axis and asserts the ring mean still equals the centre passed to the ray cast, so it
+  fails under the former construction rather than merely passing under the new one.</p>
+
+  <p><strong>A second defect surfaced during the rescore and is the larger of the two.</strong> Production
+  passed <code>n_ray = len(LCFS_ANGLES) = 8</code>, but <code>n_ray</code> is <em>radial sampling depth
+  per angular output</em>, not the number of angles. With the centres aligned but only 8 radial samples,
+  LCFS mean absolute distances were <strong>8.2242554e-02 to 1.0383490e-01 m</strong> — two orders above
+  the bound. Production now uses 512 radial samples while keeping the same eight fixed output angles, the
+  0.999 boundary-span convention, 48 flux levels and 12 bisections; the test pins that radial sampling is
+  not collapsed back to the angular count.</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Shot</th><th>LCFS signed, pre (m)</th><th>LCFS signed, post (m)</th><th>post absolute</th><th>verdict vs 3.3047e-04 m</th></tr></thead>
+    <tbody>
+      <tr><td>21978</td><td>−4.4885915e-04</td><td>−3.0215695e-04</td><td>3.0215695e-04</td><td>PASS</td></tr>
+      <tr><td>21983</td><td>−3.9663293e-04</td><td>−1.2733781e-04</td><td>1.2733781e-04</td><td>PASS</td></tr>
+      <tr><td>21985</td><td>−3.9717508e-04</td><td>−2.9496775e-04</td><td>2.9496775e-04</td><td>PASS</td></tr>
+      <tr><td>21986</td><td>+4.9691222e-04</td><td>+5.0945212e-04</td><td>5.0945212e-04</td><td><strong>FAIL</strong></td></tr>
+      <tr><td>21989</td><td>−3.0522555e-04</td><td>−2.4077980e-04</td><td>2.4077980e-04</td><td>PASS</td></tr>
+      <tr><td>22086</td><td>+6.5025215e-04</td><td>+4.6611127e-04</td><td>4.6611127e-04</td><td><strong>FAIL</strong></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>LCFS improves from PASS 1/6 to PASS 4/6</strong>, worst case 7.6068799e-04 → 5.0945212e-04 m
+  against the unchanged 3.3047e-04 m bound. It remains a qualified FAIL on 21986 and 22086, the bound was
+  not widened, and no parameter was tuned against those two residuals.</p>
+
+  <p><strong>The two survivors are exactly the two positive-offset shots</strong> — the ones whose emitted
+  boundary sits <em>outside</em> the stored polygon. Every negative-offset shot now passes. That the
+  surviving failures share a sign is a coherent pattern and the natural starting point for diagnosing
+  them, rather than a scatter of unrelated near-misses.</p>
+
+  <p>Non-LCFS invariants did not regress, and the post-repair maxima match the pre-repair passing values
+  exactly: axis PASS 6/6 worst 8.6785179e-04 m, x-point position PASS 6/6 worst 2.2508648e-03 m, x-point
+  count 2/2 every shot, topology class agreement 1.0 with all six diverted/diverted.</p>
+
+  <p><code>boundary_resolved=false</code> survives on 21983 and 21985, both with x fit states [1,2] and one
+  unresolved x candidate. The node's diagnosis is that centre alignment and radial search depth do not
+  change candidate refinement, so this is a distinct null-fit limitation rather than the ring-centre
+  defect — the diverted class is correct and both stored x-points are recovered closely, but the binding
+  x-point fit has not reached the kernel's resolved state.</p>
+
+  <p><em>Cost noted rather than hidden:</em> the repair performs two connectivity reads per flux map
+  instead of one, and raises radial sampling 64-fold. Correctness came first here, but that is a real
+  throughput change on a batched path.</p>
+
   <h2 id="superseded-census">A superseded sibling node, recorded so the gap is not read as lost work</h2>
 
   <p>A node dispatched as <code>efit-content-census</code> asked the same question as the forward-input

@@ -70,6 +70,17 @@ RECTANGULAR_RING = (
 HEXAGONAL_RING = ((-1, 0), (0, -1), (1, -1), (1, 0), (0, 1), (-1, 1))
 
 
+def _print_field_null_precision(*working_dtypes: Any) -> None:
+    """Print the JAX x64 capability and every dtype used by a null fit."""
+    configure_dtypes()
+    for dtype in dict.fromkeys(np.dtype(value).name for value in working_dtypes):
+        print(
+            "FIELD_NULL_PRECISION "
+            f"x64_enabled={bool(jax.config.x64_enabled)} working_dtype={dtype}",
+            flush=True,
+        )
+
+
 def _git_revision() -> str:
     """Return the measured source revision."""
     return subprocess.run(
@@ -730,8 +741,8 @@ def _json_ready(value):
 
 def main(argv: list[str] | None = None) -> int:
     """Run the measurement once and write the evidence bundle."""
-    configure_dtypes()
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--precision-only", action="store_true")
     parser.add_argument(
         "--platforms",
         default="cpu,gpu",
@@ -745,6 +756,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--json", type=Path, default=JSON_PATH)
     parser.add_argument("--svg", type=Path, default=SVG_PATH)
     args = parser.parse_args(argv)
+
+    _print_field_null_precision(np.float64)
+    if args.precision_only:
+        return 0
 
     requested = [name.strip() for name in args.platforms.split(",") if name.strip()]
     devices = []

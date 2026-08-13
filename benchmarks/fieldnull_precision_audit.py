@@ -84,6 +84,17 @@ CLASS_PROBABILITY = 13
 ROOT_RESIDUAL_SNR = 14
 
 
+def _print_field_null_precision(*working_dtypes: Any) -> None:
+    """Print the JAX x64 capability and every dtype used by a null fit."""
+    configure_dtypes()
+    for dtype in dict.fromkeys(np.dtype(value).name for value in working_dtypes):
+        print(
+            "FIELD_NULL_PRECISION "
+            f"x64_enabled={bool(jax.config.x64_enabled)} working_dtype={dtype}",
+            flush=True,
+        )
+
+
 @dataclass
 class CaseSet:
     """Numerical inputs, independent truths, and aggregation labels."""
@@ -1503,8 +1514,8 @@ def measure(label: str, expected_platform: str):
     backend = jax.default_backend()
     if backend != expected_platform:
         raise RuntimeError(f"expected {expected_platform!r}, observed {backend!r}")
-    if jax.config.jax_enable_x64:
-        raise RuntimeError("audit must begin with fp64 disabled")
+    if not jax.config.jax_enable_x64:
+        raise RuntimeError("audit requires x64 capability for its fp64 reference")
     cases_by_name = {
         "exact_quadratic": core_cases(),
         "nonquadratic": nonquadratic_cases(),
@@ -1761,6 +1772,7 @@ def _parser() -> argparse.ArgumentParser:
     assemble_parser.add_argument("--inputs", nargs="+", type=Path, required=True)
     assemble_parser.add_argument("--output", type=Path, required=True)
     subparsers.add_parser("smoke")
+    subparsers.add_parser("precision")
     return parser
 
 
@@ -1768,6 +1780,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     """Run an allocated measurement, assemble captures, or smoke-test kernels."""
     arguments = _parser().parse_args(argv)
     if arguments.mode == "measure":
+        _print_field_null_precision(np.float32, np.float64)
         record = measure(arguments.label, arguments.expect_platform)
         arguments.output.write_text(
             json.dumps(record, indent=2, allow_nan=False) + "\n"
@@ -1779,8 +1792,11 @@ def main(argv: Sequence[str] | None = None) -> None:
     elif arguments.mode == "assemble":
         report = assemble(arguments.inputs, arguments.output)
         print("ASSEMBLED runs=%d output=%s" % (len(report["runs"]), arguments.output))
-    else:
+    elif arguments.mode == "smoke":
+        _print_field_null_precision(np.float32, np.float64)
         smoke()
+    else:
+        _print_field_null_precision(np.float32, np.float64)
 
 
 if __name__ == "__main__":

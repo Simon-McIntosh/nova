@@ -21,12 +21,29 @@ import numpy as np
 
 from nova.biot.null import Null2D
 from nova.geometry.hexstencil import hex_stencil
-from nova.jax.config import Precision, configure_dtypes
+from nova.jax.config import Precision, configure_dtypes, resolve_precision
 
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT = ROOT / "docs/figures/jax-dissolution/select_precision_contract.json"
 REPEATS = 7
+
+
+def _automatic_fit_dtype() -> np.dtype:
+    """Return the dtype selected by the current null-fit automatic policy."""
+    precision = resolve_precision(Precision.AUTOMATIC, Precision.DOUBLE)
+    return np.dtype(np.float32 if precision is Precision.SINGLE else np.float64)
+
+
+def _print_field_null_precision(*working_dtypes: Any) -> None:
+    """Print the JAX x64 capability and every dtype used by a null fit."""
+    configure_dtypes()
+    for dtype in dict.fromkeys(np.dtype(value).name for value in working_dtypes):
+        print(
+            "FIELD_NULL_PRECISION "
+            f"x64_enabled={bool(jax.config.x64_enabled)} working_dtype={dtype}",
+            flush=True,
+        )
 
 
 def _strict(value: Any) -> Any:
@@ -274,11 +291,16 @@ def main() -> None:
     assemble_parser.add_argument("--cpu", type=Path, required=True)
     assemble_parser.add_argument("--gpu", type=Path, required=True)
     assemble_parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    subparsers.add_parser("precision")
     args = parser.parse_args()
     if args.command == "measure":
         payload = measure(args.platform)
-    else:
+        _print_field_null_precision(*(row["fit_dtype"] for row in payload["precision"]))
+    elif args.command == "assemble":
         payload = assemble(args.cpu, args.gpu)
+    else:
+        _print_field_null_precision(_automatic_fit_dtype(), np.float64)
+        return
     _write(args.output, payload)
 
 

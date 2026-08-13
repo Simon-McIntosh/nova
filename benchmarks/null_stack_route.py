@@ -83,6 +83,18 @@ FULL_TARGET_SIZES = (256, 1024, 4096, 16384)
 QUICK_TARGET_SIZES = (256, 1024)
 MAX_NULLS = 8
 
+
+def _print_field_null_precision(*working_dtypes: Any) -> None:
+    """Print the JAX x64 capability and every dtype used by a null fit."""
+    configure_dtypes()
+    for dtype in dict.fromkeys(np.dtype(value).name for value in working_dtypes):
+        print(
+            "FIELD_NULL_PRECISION "
+            f"x64_enabled={bool(jax.config.x64_enabled)} working_dtype={dtype}",
+            flush=True,
+        )
+
+
 ROOT = Path(
     os.environ.get("NOVA_BENCH_SOURCE_ROOT", Path(__file__).resolve().parents[1])
 ).resolve()
@@ -1103,6 +1115,7 @@ def main() -> None:
     measure_parser = subparsers.add_parser("measure")
     measure_parser.add_argument("--profile", choices=("quick", "full"), default="full")
     measure_parser.add_argument("--output", type=Path, required=True)
+    subparsers.add_parser("precision")
     merge_parser = subparsers.add_parser("merge")
     merge_parser.add_argument("--cpu", type=Path, required=True)
     merge_parser.add_argument("--gpu", type=Path)
@@ -1110,7 +1123,12 @@ def main() -> None:
     merge_parser.add_argument("--output-svg", type=Path, required=True)
     args = parser.parse_args()
 
+    if args.command == "precision":
+        _print_field_null_precision(np.float64)
+        return
+
     if args.command == "measure":
+        _print_field_null_precision(np.float64)
         report = measure(args.profile)
         args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
         print(json.dumps(report, indent=2, sort_keys=True))

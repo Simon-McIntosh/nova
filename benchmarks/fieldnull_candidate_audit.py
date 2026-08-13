@@ -72,6 +72,21 @@ NULL_PLACEMENTS = {
 BACKGROUND_VARIANTS = ("none", "linear_quadratic")
 
 
+def _print_field_null_precision(*working_dtypes: Any) -> None:
+    """Print the JAX x64 capability and every dtype used by a null fit."""
+    import jax
+
+    from nova.jax.config import configure_dtypes
+
+    configure_dtypes()
+    for dtype in dict.fromkeys(np.dtype(value).name for value in working_dtypes):
+        print(
+            "FIELD_NULL_PRECISION "
+            f"x64_enabled={bool(jax.config.x64_enabled)} working_dtype={dtype}",
+            flush=True,
+        )
+
+
 def _git_revision() -> str:
     """Return the source revision being measured."""
     if revision := os.environ.get("NOVA_AUDIT_REVISION"):
@@ -1661,7 +1676,9 @@ def _merge_reports(cpu_path: Path, gpu_path: Path) -> dict[str, Any]:
 
 def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--mode", choices=("full", "device", "merge"), required=True)
+    parser.add_argument(
+        "--mode", choices=("full", "device", "merge", "precision"), required=True
+    )
     parser.add_argument("--platform", choices=("cpu", "gpu"))
     parser.add_argument("--cpu-report", type=Path)
     parser.add_argument("--gpu-report", type=Path)
@@ -1671,13 +1688,18 @@ def _parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = _parse_args()
+    if args.mode == "precision":
+        _print_field_null_precision(np.float64)
+        return
     if args.mode == "full":
         if args.platform is None:
             raise SystemExit("--platform is required in full mode")
+        _print_field_null_precision(np.float64)
         report = _full_report(args.platform)
     elif args.mode == "device":
         if args.platform is None:
             raise SystemExit("--platform is required in device mode")
+        _print_field_null_precision(np.float64)
         report = _device_report(args.platform)
     else:
         if args.cpu_report is None or args.gpu_report is None:

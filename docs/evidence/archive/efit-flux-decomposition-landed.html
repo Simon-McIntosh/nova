@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="efit-flux-decomposition-landed">
+  <meta name="plan-title" content="EFIT Flux Decomposition — Cumulative Evidence">
+  <meta name="plan-summary" content="Landed record of splitting a stored EFIT flux map: the failed operator round trip, the 96.6% external-field cancellation that largely exonerates the vacuum field, and the surviving residual localising inside P4 lower">
+  <meta name="plan-status" content="active">
+  <meta name="plan-evidence-for" content="efit-flux-decomposition">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>EFIT Flux Decomposition — Cumulative Evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+
+  <p>Execution record for <a href="/nova/efit-flux-decomposition.html">efit-flux-decomposition</a>.
+  The residual figures here carry no threshold and none was applied: no fit, no exclusion, no masking
+  beyond the locked stored-LCFS mask, and no current tuning.</p>
+
+  <h2 id="first-masked-decomposition">§2–§4 — the first masked decomposition, as a probe</h2>
+
+  <p>Commit <code>8fffa5c7</code>. Artifact <code>benchmarks/efit_flux_decomposition.py</code>. Shot
+  21978 slice 46, t = 0.24499999 s. <strong>Diagnostic only — the §2 round trip failed its bound, so
+  this is not a validated boundary condition.</strong></p>
+
+  <p><strong>The round trip fails, and the defect is ours rather than the reference's.</strong> The
+  masked plasma round trip differs by <strong>5.152548851e-3 of the stored flux span against a 1e-6
+  bound</strong> — a factor of about 5150. §2 states the consequence plainly: a residual computed on top
+  of a defective operator is meaningless, so every figure below is read as diagnostic rather than as a
+  measurement of the reference.</p>
+
+  <p><strong>The exterior receipt reproduces the affine node to the ampere.</strong> The 2783
+  operator-interior cells outside the stored LCFS carry <strong>−9,605,045.714913 A signed and
+  10,080,225.951117 A absolute</strong> — −10.38× and 10.89× the stored 925,345.9375 A plasma current.
+  Two independently written paths agreeing to the ampere is what makes the exterior signal a measurement
+  rather than an artifact of one script.</p>
+
+  <p><strong>The external field substantially validates: the leading hypothesis was right.</strong>
+  Driving 13 geometry-validated active circuits through <code>loop_response_matrix</code> and the
+  gain-check drive-times-response form cancels <strong>96.554825%</strong> of the native-grid exterior
+  absolute current, leaving 347,281 A. On the interpolated nova grid cancellation drops to
+  <strong>80.178433%</strong>, leaving 161,147 A. So most of that 10 MA <em>is</em> the real poloidal
+  field coil current, correctly recovered by <code>delta_star</code>.</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Quantity</th><th>Native efm grid</th><th>Interpolated nova grid</th></tr></thead>
+    <tbody>
+      <tr><td>exterior absolute current cancelled</td><td>96.554825%</td><td>80.178433%</td></tr>
+      <tr><td>uncancelled remainder</td><td>347,281 A</td><td>161,147 A</td></tr>
+      <tr><td>residual, sup-norm of flux span</td><td colspan="2">8.717128%</td></tr>
+      <tr><td>residual, RMS of flux span</td><td colspan="2">3.797384%</td></tr>
+      <tr><td>residual Δ*, signed / absolute</td><td colspan="2">10,946.849 A / 181,809.098 A</td></tr>
+      <tr><td>bilinear interpolation error (3422 overlap points)</td><td colspan="2">4.162463% of span</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>The surviving residual localises inside P4 lower.</strong> Residual <code>delta_star</code>
+  peaks at <strong>1,660,756.548 A/m² at R = 1.53833375 m, Z = −1.153125 m</strong>, inside
+  <code>p4_lower</code>. An independent instrument has landed on the conductor the magnetics misfit maps
+  already implicated: the P4-lower survivor was stable at +0.92 split-half in the localisation maps, and
+  the separate conductor hunt closed null. Two unrelated data paths agreeing on one conductor is worth
+  more than either alone.</p>
+
+  <p><strong>Caveat kept in view rather than smoothed over.</strong> Bilinear EFIT→nova→EFIT
+  interpolation error is 4.162463% of span — <em>larger</em> than the 3.797% residual RMS though smaller
+  than the 8.717% sup-norm. The interpolated-grid figures are therefore partly artefact, and the 96.55%
+  native-grid cancellation is the more trustworthy number.</p>
+
+  <p><strong>Scope note on the current vector.</strong> This probe used <code>efm/fcoil_x</code>
+  throughout, on orchestrator instruction issued before the owner locked <code>efm/fcoil_c</code>;
+  <code>efm/fcoil_c</code> was never read. The <code>fcoil_x</code> cancellation is worth keeping as
+  exactly the experimental-current comparison the locked decision asks to be reported alongside, but the
+  primary measurement is owed on <code>fcoil_c</code>.</p>
+
+</main></body>
+</html>

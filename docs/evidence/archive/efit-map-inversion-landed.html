@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="efit-map-inversion-landed">
+  <meta name="plan-title" content="EFIT Map Inversion — Cumulative Evidence">
+  <meta name="plan-summary" content="Landed record of reading a stored EFIT equilibrium correctly: the forward-input census with its data-derived convention digits, and the LCFS-masked affine recovery of the current density and flux functions with its measured plasma-current closure">
+  <meta name="plan-status" content="active">
+  <meta name="plan-evidence-for" content="efit-map-inversion">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>EFIT Map Inversion — Cumulative Evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+
+  <p>Execution record for <a href="/nova/efit-map-inversion.html">efit-map-inversion</a>. Every check
+  here compares against a known-good answer already stored in the reference file, so each result is a
+  comparison against truth rather than against another solve.</p>
+
+  <h2 id="forward-input-census">§2 — the store's forward inputs, censused rather than assumed</h2>
+
+  <p>Commit <code>213458a2</code>; gate passed. Artifact
+  <code>benchmarks/efit_forward_input_census.py</code> (493 lines).</p>
+
+  <p><strong>The flux-function profiles are present and do not need deriving.</strong> That is the
+  result which changes the shape of the ladder: a forward solve can be driven from stored values, and
+  the affine recovery below becomes an independent cross-check rather than the only route to the
+  sources.</p>
+
+  <p>Exact store paths, shapes and units are tabulated in
+  <a href="/nova/efit-map-inversion.html#s2">the plan's store-contents section</a>. Row coverage is the
+  figure worth repeating here: rows carrying flux functions <em>and</em> a finite flux map <em>and</em>
+  both conductor vectors number <strong>70, 69, 67, 61, 73 and 57</strong> across the frozen six —
+  <strong>397 rows, exactly the usable geometry count</strong>. Requiring the complete forward input
+  set therefore costs no coverage at all.</p>
+
+  <p><code>psirz</code> is stored padded to 129 radial entries and carries exactly 65 finite columns
+  per row, giving a 65×65 live plane on <code>efm/gridz</code> × <code>efm/gridr</code>.</p>
+
+  <p><strong>The file declares no COCOS, and the census's data-derived digits agree with the owner's
+  external declaration of COCOS 3</strong> — per-radian flux units plus signs on all six shots give
+  <code>e_Bp = 0</code>, <code>σ_Bp = −1</code>, <code>σ_ρθφ = −1</code>. The declaration settles
+  <code>σ_RφZ</code>, which the stored scalars cannot determine. Conversion into nova's COCOS 17 is
+  ψ ×2π, <code>Ip</code> and <code>B0</code> unchanged, <code>q</code> ×(−1), and
+  <code>pprime</code>/<code>ffprime</code> ÷2π.</p>
+
+  <p><em>Carried caution, recorded rather than closed:</em> the declaration does not settle the sign of
+  plasma current. A per-shot sign check across the store's two recorded currents, the operator-derived
+  masked integral and the declared frame is the outstanding half of this section.</p>
+
+  <h2 id="affine-recovery">§4 — current density and flux functions on the LCFS interior</h2>
+
+  <p>Commit <code>69c7f92a</code>; gate passed. Artifact
+  <code>benchmarks/efit_affine_extraction.py</code>.</p>
+
+  <p>Multiplying the Grad–Shafranov current-density expression by R makes it affine in R², so a straight
+  per-surface regression returns both flux functions:
+  <code>R j_φ = R² p′(ψ) + FF′(ψ)/μ₀</code> — slope <code>p′</code>, intercept <code>FF′/μ₀</code>.
+  The operator is <code>delta_star</code> in <code>nova/equilibrium/conservation.py</code> with the
+  convention documented in place, <code>μ₀ j_φ = −Δ*Φ / (2π R)</code>.</p>
+
+  <p>Measured on shot 21978 slice 46 (t = 0.244999990 s). The stored 151-vertex LCFS partitions the
+  61×61 operator interior into 938 plasma cells and 2783 exterior cells; 24 fixed bins, zero
+  exclusions:</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Check</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>plasma current, masked interior vs stored</td><td><strong>−2.744983e-04</strong> signed relative (925091.932 A vs 925345.938 A)</td></tr>
+      <tr><td>derived vs stored current density, 938 cells</td><td>normalised RMS 3.643585e-03, correlation 0.999920274</td></tr>
+      <tr><td><code>p′</code> vs stored, per bin</td><td>median −1.046718e-03, IQR [−1.134120e-02, +1.098024e-02]</td></tr>
+      <tr><td><code>FF′</code> vs stored, per bin</td><td>median +4.601016e-04, IQR [−8.376971e-03, +5.611287e-03]</td></tr>
+      <tr><td>two-term scatter / fitted magnitude</td><td>median 1.399630e-02 (min 3.007982e-03, q75 3.905780e-02, max 5.710340e-01)</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>The mask's effect is measured, not argued.</strong> The same prototype without it admitted
+  1421 cells and closed the plasma current at <strong>−42.88%</strong>; masking to the stored boundary
+  admits 938 and closes at <strong>−0.0275%</strong> — a factor of about 1560. Conductor current living
+  outside the plasma domain was being read as though it were a flux-function profile, which is why the
+  stored-LCFS interior is a locked decision rather than implementation taste.</p>
+
+  <p><strong>Two terms are not enough in about half the bins.</strong> Refitting each bin with a third
+  <code>R⁴</code> column resolved that coefficient above its own standard error in <strong>11 of 24
+  bins</strong>, reducing scatter by a median 1.171796e-02. Whether that term is physical (an
+  R-dependent pressure, i.e. toroidal rotation), numerical (thin bins over a short R² lever) or
+  geometric (mask-clipped near-boundary surfaces) is not settled by this measurement. The scatter
+  distribution is consistent with the numerical reading — maximum two-term scatter fraction 0.571
+  against a median of 0.014, so a small number of bins dominate.</p>
+
+  <h2 id="superseded-census">A superseded sibling node, recorded so the gap is not read as lost work</h2>
+
+  <p>A node dispatched as <code>efit-content-census</code> asked the same question as the forward-input
+  census above and delivered nothing: it was routed at a read-only sandbox tier, which made both its
+  fenced benchmark and its mandatory manifest impossible to write. It reported that correctly as a
+  decision brief rather than failing silently. Its goal is fully covered by <code>213458a2</code>, so it
+  was not redispatched.</p>
+
+  <p>The transferable finding is a routing one: a node whose delivery contract requires a manifest on
+  disk cannot be run at a read-only tier, whatever its investigative character.</p>
+
+</main></body>
+</html>

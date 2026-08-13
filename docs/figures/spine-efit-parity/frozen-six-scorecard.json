@@ -1,7 +1,7 @@
 {
   "completed_shots": [],
   "figures": [],
-  "generated_at": "2026-08-13T06:40:39.083149+00:00",
+  "generated_at": "2026-08-13T06:52:24.078960+00:00",
   "incomplete_shots": [
     21978,
     21983,
@@ -40,7 +40,7 @@
     22086
   ],
   "run_errors": {
-    "21978": "ValueError: seed disc holds 4 cells, below min_cells=5"
+    "21978": "ValueError: seed disc holds 1 cells, below min_cells=5"
   },
   "scored_slices": [],
   "shot_summaries": [],

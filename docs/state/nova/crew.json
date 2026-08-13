@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-13T09:14:56",
+  "updated": "2026-08-13T09:15:35",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -2341,9 +2341,61 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260813T065002497739-harmonic-source-fits",
+        "plan": "mast-misfit-toroidal-harmonics",
+        "section": "\u00a72",
+        "node": "harmonic-source-fits",
+        "role": "implement",
+        "member": "harmonics",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-13T06:50:04Z",
+        "completed_at": "2026-08-13T07:07:46Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1062,
+        "time_budget": "60m",
+        "base_sha": "cc475ef87e88184d38bb387c18a33cd2f6517aee",
+        "commits": [
+          "22ea4269"
+        ],
+        "changed_lines": {
+          "added": 2115,
+          "removed": 16,
+          "files": 4
+        },
+        "tests_added": 6,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/0738e6b1-3bc0-4082-a69e-59214ef05a7c/scratchpad/harmonic-source-fits-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff707-6400-7580-8da2-e2a75d8896fe",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 14221312,
+            "input_tokens": 14839359,
+            "output_tokens": 63125,
+            "reasoning_output_tokens": 18723
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 90
+    "_version": 91
   }
 }

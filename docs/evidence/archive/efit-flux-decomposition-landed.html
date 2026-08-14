@@ -327,6 +327,57 @@
   boundary cells, with the boundary quadrature error estimate held below 9.971e-8 A on every grid — four
   orders below the effect being measured.</p>
 
+  <h2 id="cell-current-representation">§2 — ranking the fix: clipping wins, and high-order quadrature loses its order</h2>
+
+  <p>Commit <code>92399e7a</code>; gate passed. Artifact
+  <code>benchmarks/efit_cell_current_representation.py</code> (625 lines). Worker time 583 s; measurement
+  under SLURM <code>all_debug</code> 1245995, 45 s at 32 workers, MaxRSS 554,632 KiB, Python 3.14.2. One
+  forced <code>cylinder_greens</code> coupling per grid, no filament branch, so the kernel is exact for every
+  variant and only the current rule differs. The centroid baseline reproduces the banked series to within
+  1.8e-10 relative.</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Rule</th><th>sup at 67×103</th><th>fitted order (R²)</th><th>boundary cells zeroed</th><th>j / ψ_N per cell</th></tr></thead>
+    <tbody>
+      <tr><td>centroid (production)</td><td>9.102053091e-3</td><td>1.724 (0.985)</td><td>32 / 70 / 93 / 128</td><td>1 / 1</td></tr>
+      <tr><td>cell corners</td><td>6.288629993e-3</td><td>1.751 (0.923)</td><td><strong>0 / 0 / 0 / 0</strong></td><td>4 / 4</td></tr>
+      <tr><td>Gauss-2</td><td>3.094136502e-3</td><td>1.732 (0.896)</td><td>9 / 24 / 43 / 59</td><td>4 / 4</td></tr>
+      <tr><td>Gauss-4</td><td>3.040944471e-3</td><td><strong>1.031</strong> (0.851)</td><td>1 / 10 / 14 / 27</td><td>16 / 16</td></tr>
+      <tr><td><strong>separatrix-clipped</strong></td><td><strong>2.235201860e-3</strong></td><td><strong>2.034 (0.99977)</strong></td><td><strong>0 / 0 / 0 / 0</strong></td><td>~12.9 / 4</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>Clipping is the only rule with both zero misses and clean second-order convergence</strong>, at
+  R² 0.99977 — the tightest fit of any measurement in this ladder.</p>
+
+  <p><strong>Corner sampling never zeroes a live cell, which was not the expected result.</strong> Because
+  corners are <em>extremal</em>, at least one always falls inside the separatrix when the cell intersects it.
+  Interior Gauss points do not have that property, and consequently <strong>Gauss-2 and Gauss-4 miss more
+  boundary cells than corner sampling does</strong> — 59 and 27 respectively at the finest grid against
+  corners' zero. A cheap vertex rule beats a higher-order interior rule at the one thing that matters most
+  here.</p>
+
+  <p><strong>Gauss-4 is the cautionary case: more accurate at coarse resolution and not converging.</strong>
+  It beats Gauss-2 and corners on the three coarser grids, then its fitted order collapses to
+  <strong>1.031</strong> while the boundary cells it misses grow 1 → 10 → 14 → 27. That is the expected
+  behaviour of high-order quadrature applied across a discontinuous integrand: accurate by cancellation at
+  one resolution, with no convergence to claim. Order is the wrong lever; the domain cut is the right one.</p>
+
+  <p><strong>Every rule is free at solve time.</strong> All five change only the current vector and require
+  <em>zero</em> additional Biot or Green evaluations beyond the single shared exact matrix. Clipping's ~12.9
+  j evaluations per cell (32 per interior cell, ~31 per boundary cell, none outside) is an O(N) preprocess
+  against an O(N²) product — at 1617 cells that is ~21k scalar evaluations against ~2.6M coupling
+  multiplications.</p>
+
+  <p><strong>The remaining dipole is not small, and it does not shrink with refinement.</strong> After cell
+  totals are repaired by clipping, the current-weighted centroid still sits well off the geometric centre —
+  offset as a fraction of cell width: median 0.2391 / 0.2722 / 0.2506 / 0.2423, RMS 0.2950 / 0.3202 /
+  0.3443 / 0.3374, sup 0.5653 / 0.6075 / 0.6614 / 0.6532. Being scale-invariant as a fraction, this is a
+  persistent source-location error rather than one refinement removes, so the three-matrix dipole correction
+  is worth its precompute.</p>
+
   <p><strong>Scope note on the current vector.</strong> This probe used <code>efm/fcoil_x</code>
   throughout, on orchestrator instruction issued before the owner locked <code>efm/fcoil_c</code>;
   <code>efm/fcoil_c</code> was never read. The <code>fcoil_x</code> cancellation is worth keeping as

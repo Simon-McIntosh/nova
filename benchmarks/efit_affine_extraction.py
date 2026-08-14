@@ -35,6 +35,8 @@ DEFAULT_SHOT = 21978
 DEFAULT_SLICE_INDEX = 46
 DEFAULT_BIN_COUNT = 24
 MINIMUM_FITTED_BINS = 20
+FROZEN_SHOTS = (21978, 21983, 21985, 21986, 21989, 22086)
+THIRD_TERM_CELL_FLOOR = 39
 
 
 def _uniform_axis(values: np.ndarray, name: str) -> np.ndarray:
@@ -437,10 +439,132 @@ def extract_flux_functions(
     }
 
 
+def _cohort_profile_summary(
+    comparison: dict[str, Any], control: dict[str, float]
+) -> dict[str, Any]:
+    """Summarise one pointwise profile comparison against the control spread."""
+
+    distribution = comparison["signed_relative_difference_distribution"]
+    q25 = float(distribution["q25"])
+    median = float(distribution["median"])
+    q75 = float(distribution["q75"])
+    width = q75 - q25
+    control_magnitude = max(abs(control["median"]), np.finfo(np.float64).tiny)
+    control_width = control["q75"] - control["q25"]
+    return {
+        "signed_relative_median": median,
+        "signed_relative_q25": q25,
+        "signed_relative_q75": q75,
+        "signed_relative_iqr_width": width,
+        "median_absolute_magnitude_factor_vs_control": abs(median) / control_magnitude,
+        "iqr_width_factor_vs_control": width / control_width,
+        "median_within_control_iqr": control["q25"] <= median <= control["q75"],
+    }
+
+
+def extract_affine_cohort(
+    store: Path = SHOT_STORE,
+    shots: tuple[int, ...] = FROZEN_SHOTS,
+    slice_index: int = DEFAULT_SLICE_INDEX,
+    bin_count: int = DEFAULT_BIN_COUNT,
+) -> dict[str, Any]:
+    """Run the landed affine extraction on one common slice per frozen shot."""
+
+    reports = [
+        extract_flux_functions(store, shot, slice_index, bin_count) for shot in shots
+    ]
+    control_report = next(
+        (report for report in reports if report["source"]["shot"] == DEFAULT_SHOT),
+        None,
+    )
+    if control_report is None:
+        raise ValueError(f"cohort must contain control shot {DEFAULT_SHOT}")
+    control_profiles = {
+        field: control_report["stored_profile_comparison"][field][
+            "signed_relative_difference_distribution"
+        ]
+        for field in ("pprime", "ffprime")
+    }
+
+    rows = []
+    departures = []
+    for report in reports:
+        shot = int(report["source"]["shot"])
+        populations = [int(row["cell_count"]) for row in report["bins"]]
+        below_floor = [
+            int(row["bin_index"])
+            for row in report["bins"]
+            if row["cell_count"] < THIRD_TERM_CELL_FLOOR
+        ]
+        profiles = {
+            field: _cohort_profile_summary(
+                report["stored_profile_comparison"][field],
+                control_profiles[field],
+            )
+            for field in ("pprime", "ffprime")
+        }
+        row = {
+            "shot": shot,
+            "slice_index": int(report["source"]["slice_index"]),
+            "time_s": float(report["source"]["time_s"]),
+            "is_control": shot == DEFAULT_SHOT,
+            "interior_cell_count": int(report["current_integral"]["plasma_cell_count"]),
+            "fitted_bin_count": len(report["bins"]),
+            "excluded_bin_count": len(report["excluded_bins"]),
+            "bin_population": _distribution(populations),
+            "bins_below_third_term_cell_floor": below_floor,
+            "bin_count_below_third_term_cell_floor": len(below_floor),
+            "profiles": profiles,
+        }
+        rows.append(row)
+        if shot != DEFAULT_SHOT:
+            for field, summary in profiles.items():
+                if not summary["median_within_control_iqr"]:
+                    departures.append(
+                        {
+                            "shot": shot,
+                            "profile": field,
+                            "median": summary["signed_relative_median"],
+                            "control_q25": control_profiles[field]["q25"],
+                            "control_q75": control_profiles[field]["q75"],
+                            "median_absolute_magnitude_factor_vs_control": summary[
+                                "median_absolute_magnitude_factor_vs_control"
+                            ],
+                            "iqr_width_factor_vs_control": summary[
+                                "iqr_width_factor_vs_control"
+                            ],
+                        }
+                    )
+
+    return {
+        "method": {
+            "shots": list(shots),
+            "common_slice_index": slice_index,
+            "control_shot": DEFAULT_SHOT,
+            "bin_count": bin_count,
+            "binning": "fixed width over 0 <= psi_normalised <= 1",
+            "plasma_mask": "stored EFIT LCFS interior",
+            "third_term_cell_floor": THIRD_TERM_CELL_FLOOR,
+            "departure_rule": "shot median lies outside the control IQR",
+        },
+        "shots": rows,
+        "cohort": {
+            "shot_count": len(rows),
+            "agreement_consistent_with_control_spread": not departures,
+            "departures": departures,
+            "shots_with_bins_below_third_term_cell_floor": [
+                row["shot"]
+                for row in rows
+                if row["bin_count_below_third_term_cell_floor"] > 0
+            ],
+        },
+    }
+
+
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--store", type=Path, default=SHOT_STORE)
-    parser.add_argument("--shot", type=int, default=DEFAULT_SHOT)
+    parser.add_argument("--shots", type=int, nargs="+", default=FROZEN_SHOTS)
     parser.add_argument("--slice-index", type=int, default=DEFAULT_SLICE_INDEX)
     parser.add_argument("--bins", type=int, default=DEFAULT_BIN_COUNT)
     return parser
@@ -448,7 +572,9 @@ def _parser() -> argparse.ArgumentParser:
 
 def main() -> None:
     args = _parser().parse_args()
-    report = extract_flux_functions(args.store, args.shot, args.slice_index, args.bins)
+    report = extract_affine_cohort(
+        args.store, tuple(args.shots), args.slice_index, args.bins
+    )
     json.dump(report, fp=sys.stdout, indent=2, allow_nan=False)
     print()
 

@@ -309,6 +309,48 @@
   instead of one, and raises radial sampling 64-fold. Correctness came first here, but that is a real
   throughput change on a batched path.</p>
 
+  <h3 id="affine-recovery-cohort">§4 — the cohort extension, and the one shot that departs</h3>
+
+  <p>Commit <code>52d83997</code>; gate passed. Extended
+  <code>benchmarks/efit_affine_extraction.py</code> (+128 lines). Worker time 259 s. Six frozen shots on
+  the common slice 46, calling the landed extraction path unchanged so the same mask, current recovery and
+  24 equal-width bins apply throughout.</p>
+
+  <p><strong>All six shots fit 24/24 bins with zero exclusions, and the control reproduces exactly.</strong>
+  Consistency is defined without a tuned tolerance: a shot departs when its median falls outside the banked
+  control's IQR. Under that rule <strong>only 21986's <code>p′</code> departs</strong>, and no
+  <code>FF′</code> median departs on any shot.</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Shot</th><th>cells</th><th><code>p′</code> median</th><th><code>p′</code> IQR</th><th><code>FF′</code> median</th></tr></thead>
+    <tbody>
+      <tr><td>21978 <em>(control)</em></td><td>938</td><td>−1.046718e-03</td><td>[−1.134120e-02, +1.098024e-02]</td><td>+4.601016e-04</td></tr>
+      <tr><td>21983</td><td>947</td><td>−8.666135e-04</td><td>[−6.394052e-03, +1.225912e-02]</td><td>−6.755621e-05</td></tr>
+      <tr><td>21985</td><td>928</td><td>+3.149416e-03</td><td>[−5.474137e-03, +1.153986e-02]</td><td>−1.582242e-03</td></tr>
+      <tr><td><strong>21986</strong></td><td>830</td><td><strong>+1.893261e-02</strong></td><td>[−1.591521e-03, +3.780440e-02]</td><td>−3.047035e-03</td></tr>
+      <tr><td>21989</td><td>911</td><td>+2.101641e-03</td><td>[−1.706474e-02, +1.263010e-02]</td><td>−1.146799e-03</td></tr>
+      <tr><td>22086</td><td>943</td><td>−4.893549e-03</td><td>[−9.823050e-03, +1.052822e-02]</td><td>+8.757307e-05</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>21986's median is <strong>18.0875949×</strong> the control's magnitude with a
+  <strong>1.7649359×</strong> wider IQR, and it carries the smallest interior at 830 cells against
+  911–947 elsewhere.</p>
+
+  <p><strong>An observation, not yet a conclusion: 21986 is also one of the two shots whose stored LCFS sits
+  outside its own map contour.</strong> The offset attribution put that discrepancy at +4.6945689193e-04 m
+  on this shot. Whether the boundary inconsistency and the <code>p′</code> departure are one fault or two is
+  untested — the node was explicit that it does not determine whether the departure is reference physics or
+  another archive inconsistency, and the outward polygon direction would enclose <em>more</em> area rather
+  than the smaller interior actually observed, so the two do not connect trivially.</p>
+
+  <p>Bin populations (min/q25/median/q75/max): 21978 27/30/34/42.75/94; 21983 22/27/35.5/43.5/104;
+  21985 19/26/34.5/45.5/94; 21986 20/25.75/31/42/71; 21989 24/27/34.5/40.75/83; 22086 26/31/33.5/41.75/91.
+  <strong>Every shot carries bins below the 39-cell third-term interpretation floor</strong>, each named by
+  index in the artifact so no below-floor third-column result can be silently interpreted.</p>
+
   <h2 id="lcfs-outward-offset">§7 — the surviving LCFS failure is the reference's, not ours</h2>
 
   <p>Commit <code>bb41f265</code>; gate passed. Artifact

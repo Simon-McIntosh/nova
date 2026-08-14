@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-14T09:47:08",
+  "updated": "2026-08-14T10:02:46",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4012,9 +4012,113 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260814T074817281619-affine-recovery-cohort",
+        "plan": "efit-map-inversion",
+        "section": "\u00a74",
+        "node": "affine-recovery-cohort",
+        "role": "implement",
+        "member": "solve-convergence",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-14T07:48:19Z",
+        "completed_at": "2026-08-14T07:52:38Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 259,
+        "time_budget": "25m",
+        "base_sha": "931215e35ee15298eb8f88df6196caca734c6a74",
+        "commits": [
+          "52d83997a52a9fde40eac707861d1b592685d690"
+        ],
+        "changed_lines": {
+          "added": 128,
+          "removed": 2,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/bac59e2b-995a-430c-bf2d-55dd3126adcf/scratchpad/affine-recovery-cohort-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ffa72-15c7-78b1-bee8-5f074cebc901",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 18868736,
+            "input_tokens": 19914337,
+            "output_tokens": 90996,
+            "reasoning_output_tokens": 20512
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260814T074358888007-analytic-roundtrip-floor",
+        "plan": "efit-flux-decomposition",
+        "section": "\u00a72",
+        "node": "analytic-roundtrip-floor",
+        "role": "implement",
+        "member": "chain-factory",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-14T07:44:01Z",
+        "completed_at": "2026-08-14T08:02:37Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1116,
+        "time_budget": "25m",
+        "base_sha": "eca08829dbbbe0e4484ea73154cf4aa2fc5fff61",
+        "commits": [
+          "1164a8e81e2c0f99d17e8e3030714a24b84b91f7"
+        ],
+        "changed_lines": {
+          "added": 391,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/bac59e2b-995a-430c-bf2d-55dd3126adcf/scratchpad/analytic-roundtrip-floor-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ffaa2-8b1b-7803-98c5-c43c48e3f9a6",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 39581184,
+            "input_tokens": 41633634,
+            "output_tokens": 137794,
+            "reasoning_output_tokens": 42870
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 132
+    "_version": 134
   }
 }

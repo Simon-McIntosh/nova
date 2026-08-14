@@ -158,6 +158,63 @@
   discretisation limit, not at any working resolution. No bound was registered, moved or applied by this
   node, and the plan's 1e-6 identity stands exactly as written pending an owner decision.</p>
 
+  <h2 id="analytic-roundtrip">§2 — on an exact field: no floor, 1e-6 infeasible, and the coupling carries it</h2>
+
+  <p>Commits <code>d5010799</code>, <code>1164a8e8</code>; gate passed, verdict
+  <strong>STILL_CONVERGING</strong>. Artifact
+  <code>benchmarks/efit_analytic_roundtrip_floor.py</code> (391 lines). Worker time 1116 s.</p>
+
+  <p><strong>This run removes the reference entirely.</strong> An exact moderate-rotation analytic
+  equilibrium, flux and current evaluated in closed form at every node — no stored map, no interpolation
+  anywhere in the path — and the grid series includes 67×103, <em>finer</em> than the stored 65×65, which
+  the earlier convergence study never reached.</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Grid</th><th>Cells</th><th>h (m)</th><th>Composition, of analytic span</th><th>Δ* alone, of peak current</th><th>Ratio</th></tr></thead>
+    <tbody>
+      <tr><td>23×35</td><td>805</td><td>0.075851995</td><td>1.320394289e-2</td><td>3.440703836e-4</td><td>38.376×</td></tr>
+      <tr><td>37×57</td><td>2109</td><td>0.046052997</td><td>3.819717157e-3</td><td>1.317008034e-4</td><td>29.003×</td></tr>
+      <tr><td>51×79</td><td>4029</td><td>0.033063690</td><td>2.005611454e-3</td><td>6.763097753e-5</td><td>29.655×</td></tr>
+      <tr><td>67×103</td><td>6901</td><td>0.025283998</td><td>1.176524998e-3</td><td>3.941900585e-5</td><td>29.847×</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>Three results, and each answers a question the stored-data study could not.</strong></p>
+
+  <p><strong>1. There is no floor.</strong> The composition converges monotonically at observed order
+  <strong>2.197033799</strong>, standard error 0.100329202, R² 0.995846601, and is still improving at the
+  finest grid. The 1.176524998e-3 point is not a limit. Nothing in the operator pair is broken.</p>
+
+  <p><strong>2. 1e-6 is infeasible rather than merely unmet.</strong> The unchanged bound extrapolates to
+  h = 0.001034423 m — <strong>24.4426× finer linearly, about 4,122,946 cells</strong>. The all-to-all Green
+  composition scales quadratically in cell count, so that run is outside any reasonable budget, not just
+  outside a worker fence. The extrapolation is the feasibility result; no direct run is required or was
+  attempted.</p>
+
+  <p><strong>3. The residual is the coupling's, not the difference operator's — by a factor of ~30 at every
+  resolution.</strong> The ratio settles at 38.376×, 29.003×, 29.655×, 29.847×. Because it is
+  <em>flat</em> rather than growing, the two terms converge at similar order and the coupling simply carries
+  a ~30× larger constant. A near-constant excess is the signature of a dropped constant term rather than a
+  lower-order scheme — which is what makes the far-field treatment in <code>hybrid_greens</code> the first
+  place to look.</p>
+
+  <p><strong>And the attribution question is settled: it is ours.</strong> With flux and current exact and
+  no stored map anywhere, the failure to reach 1e-6 belongs to nova's operator pair and cannot be charged to
+  the stored reference's own truncation. The 5.152548851e-3 measured on EFIT data is therefore not explained
+  by the input field's quality.</p>
+
+  <p>Path recorded for reproducibility: nova's centre-plus-six-neighbour least-squares quadratic hex-ring
+  <code>delta_star</code> stencil against rectangular finite sections of width = pitch and
+  height = √3/2 × pitch, through production <code>hybrid_greens</code>. No bound was registered or moved;
+  the 1e-6 identity stands unchanged.</p>
+
+  <p><em>Scoping correction owned by the orchestrator:</em> this node was first dispatched with a done-when
+  demanding a binary verdict — reaches 1e-6, or floors above it. Those do not exhaust the possibilities and
+  the measured series fell in neither, so the worker stopped rather than mislabel an improving point as a
+  floor. That refusal was correct and the malformed verdict space was the orchestrator's error.</p>
+
   <p><strong>Scope note on the current vector.</strong> This probe used <code>efm/fcoil_x</code>
   throughout, on orchestrator instruction issued before the owner locked <code>efm/fcoil_c</code>;
   <code>efm/fcoil_c</code> was never read. The <code>fcoil_x</code> cancellation is worth keeping as

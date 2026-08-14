@@ -22,10 +22,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-14">
-<meta name="plan-commits" content="213458a2,69c7f92a,bab09d10,f4224985,d5c3d14c,52200074,bb41f265,26c8e9cf">
+<meta name="plan-commits" content="213458a2,69c7f92a,bab09d10,f4224985,d5c3d14c,52200074,bb41f265,26c8e9cf,52d83997">
 <meta name="plan-artifacts" content="benchmarks/efit_forward_input_census.py,benchmarks/efit_affine_extraction.py,benchmarks/efit_current_sign_census.py,benchmarks/efit_topology_boundary_score.py,benchmarks/efit_third_term_separation.py,nova/imas/mast_chain_factory.py,tests/imas/test_mast_chain_factory_axis_centre.py,benchmarks/efit_lcfs_outward_offset.py,benchmarks/efit_xpoint_fit_state.py">
-<meta name="plan-impl" content="0.89">
-<meta name="plan-version" content="9">
+<meta name="plan-impl" content="0.9">
+<meta name="plan-version" content="10">
 </head>
 <body>
   <main class="plan-doc">
@@ -265,6 +265,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260814-cohortgap" data-who="reckon-ship" data-when="2026-08-14T06:15:00+00:00">
     <div class="r-comment-body">SECTION STAYS OPEN, and saying why rather than closing the plan on a partial measurement. The sign census extended PLASMA-CURRENT CLOSURE to all six frozen shots (worst 2.952859461e-04), but the PER-BIN p-prime and FF-prime agreement against the stored profiles is still only measured on shot 21978 slice 46 - median -1.046718e-03 and +4.601016e-04 with their IQRs, from a single slice of a single shot. The sprint item's done-when asks for per-bin agreement against stored profiles, so a cohort extension is owed before this plan can reach a terminal status. Dispatching affine-recovery-cohort to extend the per-bin comparison to one slice per frozen shot on the same masked interior, reusing the landed extraction path rather than writing a second one.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260814-affinecohort" data-who="reckon-ship" data-when="2026-08-14T06:55:00+00:00">
+    <div class="r-comment-body">affine-recovery-cohort landed - commit 52d83997; gate PASSED; worker 259 s. Per-bin agreement is now a cohort result rather than one slice. All 6/6 shots fit 24/24 fixed-width bins with ZERO exclusions on the common slice 46, calling the landed extraction path unchanged so mask, delta_star recovery and binning are identical to the control. Shot 21978 reproduces the banked control exactly: 938 cells, pprime median -1.046718e-03 IQR [-1.134120e-02,+1.098024e-02], ffprime median +4.601016e-04 IQR [-8.376971e-03,+5.611287e-03]. Consistency was defined WITHOUT a tuned tolerance - a shot departs when its median falls outside the banked control IQR - and under that rule ONLY 21986 pprime departs, with NO ffprime departure on any shot. Per shot (cells, pprime median, ffprime median): 21983 947, -8.666135e-04, -6.755621e-05; 21985 928, +3.149416e-03, -1.582242e-03; 21986 830, +1.893261e-02, -3.047035e-03; 21989 911, +2.101641e-03, -1.146799e-03; 22086 943, -4.893549e-03, +8.757307e-05. 21986's median is 18.0875949x the control magnitude with a 1.7649359x wider IQR and the smallest interior at 830 cells against 911-947 elsewhere. OBSERVATION HELD SHORT OF A CONCLUSION: 21986 is ALSO one of the two shots whose stored LCFS sits outside its own map contour, at +4.6945689193e-04 m. Whether the boundary inconsistency and the pprime departure are one fault or two is UNTESTED, and they do not connect trivially - an outward polygon would enclose MORE area, not the smaller interior observed. The node was explicit that it does not determine whether the departure is reference physics or another archive inconsistency. Bin populations per shot are reported and EVERY shot carries bins below the 39-cell third-term interpretation floor, each named by index so no below-floor third-column result is silently interpreted. Record at /nova/evidence/archive/efit-map-inversion-landed#affine-recovery-cohort</div>
 </div>
 </section>
 </main>

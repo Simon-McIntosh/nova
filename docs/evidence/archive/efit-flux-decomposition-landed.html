@@ -215,6 +215,54 @@
   the measured series fell in neither, so the worker stopped rather than mislabel an improving point as a
   floor. That refusal was correct and the malformed verdict space was the orchestrator's error.</p>
 
+  <h2 id="coupling-variant-attribution">§2 — the kernel choice is only 11.7% of it</h2>
+
+  <p>Commit <code>c63ab4d7</code>; gate passed. Artifact
+  <code>benchmarks/efit_filament_truncation_contribution.py</code> (446 lines). Worker time 938 s; the
+  measurement itself ran 3m28s. Shot 21978 slice 46, four grids, four coupling variants, all built from the
+  existing public kernels with no production module touched.</p>
+
+  <p><strong>This overturns an inference drawn from the analytic run, and the arithmetic is why.</strong>
+  The analytic node reported the composition ~30× worse than <code>delta_star</code> alone, but those two
+  figures carry <em>different normalisations</em> — composition as a fraction of flux span, Δ* as a fraction
+  of peak current — so their ratio is not an attribution. This node decomposes the <em>same</em> quantity
+  and finds the coupling kernel is the minority term.</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Grid</th><th>far-field fraction</th><th>production</th><th>quadrupole</th><th>forced exact section</th></tr></thead>
+    <tbody>
+      <tr><td>17×25</td><td>0.923083737</td><td>8.719693412e-3</td><td>8.133883394e-3</td><td>8.133566454e-3</td></tr>
+      <tr><td>25×37</td><td>0.963148576</td><td>3.614339425e-3</td><td>3.248149091e-3</td><td>3.248223625e-3</td></tr>
+      <tr><td>33×49 <em>(control)</em></td><td>0.978238712</td><td>2.034417834e-3</td><td>1.796345231e-3</td><td>1.796454516e-3</td></tr>
+      <tr><td>41×61</td><td>0.986132856</td><td>1.307998208e-3</td><td>1.134058816e-3</td><td>1.134161594e-3</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>The quadrupole removes 11.70224716% of the control pair error; forcing the exact section removes
+  11.69687535%.</strong> The quadrupole captures <strong>1.000459252</strong> of the exact coupling excess —
+  it recovers essentially all of what exactness buys, differing from the forced section by
+  −1.092850919e-07 of span, only −6.083376499e-05 relative. So the far-field filament truncation is real,
+  bounded, and now quantified: about one part in nine of the pair error.</p>
+
+  <p><strong>The other 88.29775284% survives an exact kernel</strong> and falls at order
+  2.148591292, 95% interval [1.980605531, 2.316577053]. The node reads that as difference-stencil
+  truncation. That reading is an inference from the exponent alone, and the exponent cannot separate
+  stencil truncation from the piecewise-constant cell current or from the rectangle-for-hexagon section
+  substitution — all three are O(h²). Those two remain under measurement.</p>
+
+  <p><strong>A practical reversal on cost.</strong> Primitive evaluations per pair at the 33×49 control:
+  production 1.065283864, quadrupole 4.978238712, forced exact section <strong>4</strong>. Because the
+  far-field fraction is 97.8%, the moment filament pays ~5 evaluations on almost every pair — <em>more</em>
+  than simply forcing the exact section, which is also marginally more accurate. If one is going to pay
+  four-to-five evaluations, the exact kernel is the better buy; the moment filament's advantage would only
+  appear where the near-field fraction is high.</p>
+
+  <p><em>Confirming a docstring claim:</em> rectangular cells have zero third moments, so the order-2 and
+  order-3 moment matrices are <strong>bit-identical</strong> at every grid and both cost five far-field ring
+  evaluations. The skew term is free and buys nothing for a rectangle.</p>
+
   <p><strong>Scope note on the current vector.</strong> This probe used <code>efm/fcoil_x</code>
   throughout, on orchestrator instruction issued before the owner locked <code>efm/fcoil_c</code>;
   <code>efm/fcoil_c</code> was never read. The <code>fcoil_x</code> cancellation is worth keeping as

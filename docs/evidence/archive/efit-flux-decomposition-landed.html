@@ -263,6 +263,70 @@
   order-3 moment matrices are <strong>bit-identical</strong> at every grid and both cost five far-field ring
   evaluations. The skew term is free and buys nothing for a rectangle.</p>
 
+  <h2 id="constant-current-attribution">§2 — the dominant term is the constant-current assumption, and the round trip has been hiding it by cancellation</h2>
+
+  <p>Commit <code>6f8fd170</code>; gate passed. Artifact
+  <code>benchmarks/efit_constant_current_attribution.py</code> (495 lines). Worker time 659 s; the
+  measurement ran under SLURM <code>all_debug</code> job 1245986, 41 s at 32 workers, MaxRSS 8,527,484 KiB.
+  <code>cylinder_greens</code> was forced on <em>every</em> source-target pair in both assemblies, so the
+  kernel is exact on both sides and only the current representation differs.</p>
+
+  <p><strong>The isolated constant-current effect is larger than the whole composition error, at every
+  grid.</strong> That is the finding, and it reframes every round-trip number recorded above.</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Grid</th><th>constant-current effect, sup</th><th>composition error</th><th>ratio</th></tr></thead>
+    <tbody>
+      <tr><td>23×35</td><td>5.850582681e-2</td><td>1.320394289e-2</td><td><strong>4.431×</strong></td></tr>
+      <tr><td>37×57</td><td>2.105271145e-2</td><td>3.819717157e-3</td><td><strong>5.512×</strong></td></tr>
+      <tr><td>51×79</td><td>1.199637781e-2</td><td>2.005611454e-3</td><td><strong>5.981×</strong></td></tr>
+      <tr><td>67×103</td><td>9.102053091e-3</td><td>1.176524998e-3</td><td><strong>7.736×</strong></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>Because one term exceeds the total, the round-trip terms cancel rather than add.</strong> The
+  small composition figures are therefore <em>not</em> evidence of small errors — they are the net of larger,
+  partially opposing contributions. And the corollary the node states plainly: <strong>a kernel-only change
+  cannot remove this source term</strong>. Urankar everywhere, the quadrupole correction and any ζ
+  refinement all leave it untouched.</p>
+
+  <p><strong>The mechanism is the boundary cells, and the centroid rule fails on them completely.</strong>
+  32, 70, 93 and 128 boundary-intersecting cells respectively carry exact integrated current while
+  <em>their centroids lie outside the plasma</em> — so the centroid-inside rule assigns them zero current
+  where the true current is finite. Per-nonzero-cell relative sup is <strong>1.0</strong>: a 100% error on
+  every one of those cells.</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Grid</th><th>sup Δcurrent / peak cell current</th><th>RMS / RMS</th><th>L1 / L1</th><th>signed total-current error</th></tr></thead>
+    <tbody>
+      <tr><td>23×35</td><td>0.507460963</td><td>0.163698431</td><td>0.066939344</td><td>+1.04145%</td></tr>
+      <tr><td>37×57</td><td>0.476138515</td><td>0.115252531</td><td>0.036359198</td><td>−0.35815%</td></tr>
+      <tr><td>51×79</td><td>0.481453054</td><td>0.093247480</td><td>0.024797930</td><td>+0.13914%</td></tr>
+      <tr><td>67×103</td><td>0.479061162</td><td>0.077514852</td><td>0.017886816</td><td>+0.19522%</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>Net current nearly closes while local current is out by half the peak.</strong> The signed
+  total-current error stays inside ±1.05% and does not improve monotonically, while the sup difference holds
+  near 0.48 of peak cell current at every resolution. A plasma-current closure check therefore cannot detect
+  this — which is worth stating against the −2.74e-04 closure banked earlier in the ladder, because that
+  figure is compatible with exactly this defect.</p>
+
+  <p><strong>It converges more slowly than everything else measured.</strong> Sup fitted order
+  <strong>1.724425155</strong> ± 0.151688757, R² 0.984760224 — below second order, as a boundary-set effect
+  should be. RMS order 1.929573048 ± 0.562357872, R² 0.854791140, with the finest RMS point non-monotone and
+  qualified as such by the node rather than smoothed. Median per-cell relative error falls
+  1.148937214e-4 → 1.213193413e-5.</p>
+
+  <p>Method detail that makes the comparison trustworthy: the integrated assembly uses the closed-form
+  full-cell antiderivative for interior cells and adaptive integration of the exact plasma intersection for
+  boundary cells, with the boundary quadrature error estimate held below 9.971e-8 A on every grid — four
+  orders below the effect being measured.</p>
+
   <p><strong>Scope note on the current vector.</strong> This probe used <code>efm/fcoil_x</code>
   throughout, on orchestrator instruction issued before the owner locked <code>efm/fcoil_c</code>;
   <code>efm/fcoil_c</code> was never read. The <code>fcoil_x</code> cancellation is worth keeping as

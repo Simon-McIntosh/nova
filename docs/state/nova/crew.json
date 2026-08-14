@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-14T10:11:34",
+  "updated": "2026-08-14T10:17:20",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -8,7 +8,7 @@
         "id": "biot-bench",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "019fff4e-9a1b-7652-ac96-f324479b9f67",
         "created": "2026-08-12"
       },
       {
@@ -4168,9 +4168,61 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260814T080605914376-constant-current-attribution",
+        "plan": "efit-flux-decomposition",
+        "section": "\u00a72",
+        "node": "constant-current-attribution",
+        "role": "implement",
+        "member": "biot-bench",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-14T08:06:08Z",
+        "completed_at": "2026-08-14T08:17:07Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 659,
+        "time_budget": "25m",
+        "base_sha": "4d485360a51af655fad9a3f885960d1cbcc3aa0e",
+        "commits": [
+          "6f8fd170e1ac3d668e42d5e9b4f9ebf88710d498"
+        ],
+        "changed_lines": {
+          "added": 495,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/bac59e2b-995a-430c-bf2d-55dd3126adcf/scratchpad/constant-current-attribution-manifest.md",
+        "scope_changed": false,
+        "session_id": "019fff4e-9a1b-7652-ac96-f324479b9f67",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 4433920,
+            "input_tokens": 4566374,
+            "output_tokens": 24614,
+            "reasoning_output_tokens": 9408
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 136
+    "_version": 138
   }
 }

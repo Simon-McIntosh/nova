@@ -218,7 +218,7 @@ def _measure_resolution(
     )
 
     consecutive = []
-    for lower, upper in zip(orders, orders[1:], strict=True):
+    for lower, upper in zip(orders, orders[1:]):
         consecutive.append(
             {
                 "lower_requested_nodes": lower,

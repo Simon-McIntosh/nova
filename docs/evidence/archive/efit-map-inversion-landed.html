@@ -309,6 +309,70 @@
   instead of one, and raises radial sampling 64-fold. Correctness came first here, but that is a real
   throughput change on a batched path.</p>
 
+  <h2 id="lcfs-outward-offset">§7 — the surviving LCFS failure is the reference's, not ours</h2>
+
+  <p>Commit <code>bb41f265</code>; gate passed. Artifact
+  <code>benchmarks/efit_lcfs_outward_offset.py</code> (574 lines). Worker time 588 s. Six shots,
+  eight output angles each, at production 48 levels / 12 bisections <em>and</em> refined 96 / 18.</p>
+
+  <p><strong>Named mechanism: the stored LCFS coordinates are not on the registered contour of the stored
+  flux map.</strong> Correlation of the signed radial offset against that polygon-to-contour discrepancy is
+  <strong>+0.9879637914</strong>. Against the two alternatives it is essentially zero — inverse x-point
+  distance <strong>−0.0815138951</strong>, inverse limiter clearance <strong>−0.0327061330</strong>. So it
+  is neither x-point proximity nor limiter proximity.</p>
+
+  <p><strong>It is not numerical convergence either: refining 48/12 → 96/18 leaves all six shots
+  bit-identical.</strong> The two failure excesses stay at 1.7898212365e-04 m (21986) and
+  1.3564127488e-04 m (22086) above the 3.3047e-04 m bound, and the pass count is 4/6 at both settings.</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Shot</th><th>stored polygon → map contour</th><th>registered → selected contour</th><th>selected contour → ray</th></tr></thead>
+    <tbody>
+      <tr><td>21986</td><td><strong>+4.6945689193e-04 m</strong></td><td>+6.6324848834e-05 m</td><td>+5.9038790744e-05 m</td></tr>
+      <tr><td>22086</td><td><strong>+5.6384570787e-04 m</strong></td><td>−4.5959142994e-05 m</td><td>+2.2096761854e-05 m</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>The dominant term is an order of magnitude above everything nova contributes. All eight angles are
+  outward on each failing shot and all eight inward on each passing shot, with the largest two angular
+  sectors carrying 0.4143911173 and 0.4172314160 of the total absolute offset — a ring-wide sign with
+  angular modulation, not isolated sectors.</p>
+
+  <p><strong>And the 0.999 ray convention is exonerated by direction.</strong> It moves the target
+  <em>inward</em>, so it partially opposes an outward residual and cannot cause one; a 1.0 ray target would
+  not repair these two shots. The registered bound was not widened and no setting was tuned against the
+  failing pair — both settings were applied to all six shots and reported for all six.</p>
+
+  <h2 id="xpoint-fit-state">§7 — the unresolved x-point fit is metadata only</h2>
+
+  <p>Commit <code>26c8e9cf</code>; gate passed. Artifact
+  <code>benchmarks/efit_xpoint_fit_state.py</code> (406 lines); report 40,983 bytes,
+  sha256 <code>606e4917…</code>. Read-only on production, on the CUDA path (JAX 0.11.0, NVIDIA L4,
+  x64 enabled) because that reproduces the frozen production result.</p>
+
+  <p><strong>The halt condition is named exactly.</strong> On 21983 and 21985 the binding candidate's
+  two-member cluster has signed member-index sum −2 but requires a <strong>containment radius of 39
+  cells</strong>, beyond the kernel's maximum certified nested-loop radius of <strong>2</strong>. Cluster-index
+  certification therefore returns false and the certified cluster signed index stays <strong>0</strong>
+  instead of the required saddle index −1. Resolved control 21978 has containment radius 1, member-index
+  sum −1, and certified index −1.</p>
+
+  <p>Every other refinement gate passes on both shots: native, fit and confidence indices −1, scale support
+  3, class margins 26.368476289477382 and 23.001370507497057 against a minimum of 16, root support
+  0.8155269622802734 and 0.8610254526138306 against a maximum of 1.</p>
+
+  <p><strong>The decisive check is the counterfactual: forcing only the candidate state to resolved changes
+  <code>boundary_resolved</code> and nothing else.</strong> X-point positions, primary x-point, LCFS radii,
+  LCFS positions, topology class, core mask, common-SOL mask, private-flux mask and excluded-material mask
+  are <strong>bitwise identical</strong> across all six shots, maximum difference <strong>0.0</strong>. So the
+  passing x-point and topology-class results on those two shots are trustworthy as reported, and
+  <code>boundary_resolved=false</code> is diagnostic metadata rather than a defect in any emitted quantity.</p>
+
+  <p><em>Qualification retained:</em> the CPU fallback leaves 21985 unresolved but resolves 21983, so this
+  discrete certification metadata is backend-sensitive.</p>
+
   <h2 id="superseded-census">A superseded sibling node, recorded so the gap is not read as lost work</h2>
 
   <p>A node dispatched as <code>efit-content-census</code> asked the same question as the forward-input

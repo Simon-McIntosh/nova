@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-13T16:37:46",
+  "updated": "2026-08-14T09:47:08",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -3856,9 +3856,165 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260813T144457642152-lcfs-outward-offset",
+        "plan": "efit-map-inversion",
+        "section": "\u00a77",
+        "node": "lcfs-outward-offset",
+        "role": "implement",
+        "member": "topology-parity",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-13T14:45:00Z",
+        "completed_at": "2026-08-13T14:54:48Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 588,
+        "time_budget": "25m",
+        "base_sha": "eca08829dbbbe0e4484ea73154cf4aa2fc5fff61",
+        "commits": [
+          "bb41f26520c35766f97b7d4c2918022e15d43057"
+        ],
+        "changed_lines": {
+          "added": 574,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/bac59e2b-995a-430c-bf2d-55dd3126adcf/scratchpad/lcfs-outward-offset-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ffb73-f8a9-7f02-b9ee-19586af8c6e8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 13914368,
+            "input_tokens": 14443919,
+            "output_tokens": 59986,
+            "reasoning_output_tokens": 15036
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260813T144457642130-xpoint-fit-state",
+        "plan": "efit-map-inversion",
+        "section": "\u00a77",
+        "node": "xpoint-fit-state",
+        "role": "implement",
+        "member": "flood-fill",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-13T14:45:00Z",
+        "completed_at": "2026-08-13T15:03:36Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1116,
+        "time_budget": "25m",
+        "base_sha": "eca08829dbbbe0e4484ea73154cf4aa2fc5fff61",
+        "commits": [
+          "26c8e9cf4dc70ca8f1dc2b04048abc0acac7005c"
+        ],
+        "changed_lines": {
+          "added": 406,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/bac59e2b-995a-430c-bf2d-55dd3126adcf/scratchpad/xpoint-fit-state-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff707-7f0a-7cb1-8202-0d566308bf88",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 23329792,
+            "input_tokens": 23812760,
+            "output_tokens": 61285,
+            "reasoning_output_tokens": 19676
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260813T144457642250-absent-quantity-triage",
+        "plan": "equilibrium-metric-parity",
+        "section": "\u00a74",
+        "node": "absent-quantity-triage",
+        "role": "implement",
+        "member": "registry",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-13T14:45:00Z",
+        "completed_at": "2026-08-13T14:53:11Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 491,
+        "time_budget": "25m",
+        "base_sha": "eca08829dbbbe0e4484ea73154cf4aa2fc5fff61",
+        "commits": [
+          "225140d14fc0d3428b1053ee9e6d1f5a51515591"
+        ],
+        "changed_lines": {
+          "added": 581,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/bac59e2b-995a-430c-bf2d-55dd3126adcf/scratchpad/absent-quantity-triage-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff73b-a1b5-73a2-9252-011b64d1ab64",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 23012608,
+            "input_tokens": 23686097,
+            "output_tokens": 63197,
+            "reasoning_output_tokens": 16277
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 129
+    "_version": 132
   }
 }

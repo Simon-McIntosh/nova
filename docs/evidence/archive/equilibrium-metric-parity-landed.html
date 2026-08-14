@@ -136,6 +136,53 @@
   <code>NO_REFERENCE_COUNTERPART</code> rather than compared against a substitute, consistent with the
   census finding above.</p>
 
+  <h3 id="absent-quantity-triage">§4 — what the record should gain: nothing</h3>
+
+  <p>Commit <code>225140d1</code>; gate passed. Artifact
+  <code>benchmarks/efit_absent_quantity_triage.py</code> (581 lines). Worker time 491 s. All 47 census
+  entries closed, every cited symbol verified by opening the file, every absence search returning zero
+  hits.</p>
+
+  <p><strong>The section's premise turns out to be empty, and that is the result.</strong> §4 says
+  "whatever §2 marks absent-in-nova becomes implementation here." Triaged against the declared transport
+  contract, that set is <strong>zero</strong>:</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Class</th><th>Count</th></tr></thead>
+    <tbody>
+      <tr><td>NEEDED-BY-CONTRACT</td><td><strong>0</strong></td></tr>
+      <tr><td>COMPUTED-ELSEWHERE in nova</td><td>26</td></tr>
+      <tr><td>GENUINELY-ABSENT and unneeded</td><td>21</td></tr>
+      <tr><td><strong>total</strong></td><td><strong>47</strong></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>The declaring contract is
+  <a href="/nova/flux-function-forward-equilibrium.html#s5">flux-function-forward-equilibrium §5</a>, which
+  names V′, the inverse-square-radius and diffusion-coefficient surface averages, F and safety factor on
+  the toroidal-flux coordinate. <strong>None of the 47 is one of them</strong> — F and q were already
+  paired by the census, while V′ and the surface-average metrics are nova-side fields with no reference
+  counterpart at all. So the reference offers nova <strong>no additions</strong> the transport contract
+  needs.</p>
+
+  <p><strong>What it does offer is 11 valid cross-checks of computations nova already has</strong> — not 11
+  additions. Fifteen further existing computations are <em>not</em> valid cross-checks: their conventions
+  are incompatible or unstated, their x-point ordering is unstated, or their boundary domain is
+  non-coincident. That last class is the same effect the comparison above measured — reference boundary
+  scalars enclose to the stored LCFS while nova stops at ψ_N = 0.995, which is why a ~1% scalar mismatch
+  sits beside ~3e-4 interior-profile agreement.</p>
+
+  <p>The 21 genuinely absent entries each carry a zero-hit definition-search receipt over all nova Python
+  sources, so "absent" is evidenced rather than assumed.</p>
+
+  <p><strong>Consequence: convention-pinning is prerequisite work, not comparison work.</strong>
+  β_p, l_i, rotational pressure, thermal energy and x-point identity cannot be compared until their
+  conventions are pinned, and LCFS-derived scalars cannot be compared until both codes evaluate on a
+  coincident boundary. Nothing from these 47 should be added to <code>FluxSurfaceGeometry</code> for the
+  transport contract's sake.</p>
+
   <p>Read-path detail worth keeping: the stored <code>gridr</code>/<code>gridz</code> are proved uniform at
   stored dtype precision and then reconstructed with an endpoint-preserving float64 <code>linspace</code>,
   and a genuinely non-uniform stored axis raises rather than being silently regularised into a uniform one.

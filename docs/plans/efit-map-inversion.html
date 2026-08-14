@@ -21,11 +21,11 @@
   <title>EFIT Map Inversion | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-13">
-<meta name="plan-commits" content="213458a2,69c7f92a,bab09d10,f4224985,d5c3d14c,52200074">
-<meta name="plan-artifacts" content="benchmarks/efit_forward_input_census.py,benchmarks/efit_affine_extraction.py,benchmarks/efit_current_sign_census.py,benchmarks/efit_topology_boundary_score.py,benchmarks/efit_third_term_separation.py,nova/imas/mast_chain_factory.py,tests/imas/test_mast_chain_factory_axis_centre.py">
-<meta name="plan-impl" content="0.75">
-<meta name="plan-version" content="7">
+<meta name="plan-modified" content="2026-08-14">
+<meta name="plan-commits" content="213458a2,69c7f92a,bab09d10,f4224985,d5c3d14c,52200074,bb41f265,26c8e9cf">
+<meta name="plan-artifacts" content="benchmarks/efit_forward_input_census.py,benchmarks/efit_affine_extraction.py,benchmarks/efit_current_sign_census.py,benchmarks/efit_topology_boundary_score.py,benchmarks/efit_third_term_separation.py,nova/imas/mast_chain_factory.py,tests/imas/test_mast_chain_factory_axis_centre.py,benchmarks/efit_lcfs_outward_offset.py,benchmarks/efit_xpoint_fit_state.py">
+<meta name="plan-impl" content="0.89">
+<meta name="plan-version" content="9">
 </head>
 <body>
   <main class="plan-doc">
@@ -169,32 +169,25 @@
     <code>boundary_resolved=false</code> state on shots 21983 and 21985 is either cleared or reported as
     surviving with its own cause. The bound is not to be widened whatever the outcome.</p>
 
-    <h2 id="s7">§7 — The boundary read has two residual failure modes, on disjoint shots</h2>
-
-    <p><strong>§6's repair took LCFS from PASS 1/6 to PASS 4/6 and left two distinct things unexplained,
-    on non-overlapping shots.</strong> Recording them together is not a claim they share a cause — the
-    disjoint shot sets are the reason to suspect they do not.</p>
-
-    <p><strong>The surviving LCFS failures are 21986 and 22086, at +5.0945212e-04 m and +4.6611127e-04 m
-    against the 3.3047e-04 m bound.</strong> These are exactly the two shots whose emitted boundary sits
-    <em>outside</em> the stored polygon, and every negative-offset shot now passes. A shared sign across
-    both survivors is a pattern, not a scatter of near-misses, so the diagnosis starts there: what makes
-    the ray reach past the stored boundary on these two and not the other four. The 0.999 boundary-span
-    convention biases inward, so it cannot be the cause of an outward offset.</p>
-
-    <p><strong>The unresolved x-point fit is 21983 and 21985</strong>, both reporting
-    <code>boundary_resolved=false</code> with x fit states [1,2] and one candidate that never reaches the
-    resolved state — while the diverted class is correct and both stored x-points are recovered to within
-    2e-03 m. §6 established that centre alignment and radial search depth do not change candidate
-    refinement, so this is a null-fit limitation and not a residue of the ring-centre defect.</p>
-
-    <p><em>Done-when:</em> the outward LCFS offset on 21986 and 22086 is attributed to a named mechanism
-    with the measurement that distinguishes it from the alternatives, and either the two shots meet the
-    unchanged 3.3047e-04 m bound or the reason they cannot is recorded as a finding with its magnitude;
-    and separately, the condition that leaves the binding x-point candidate at fit state 1 on 21983 and
-    21985 is named, with a statement of whether it affects any quantity beyond the
-    <code>boundary_resolved</code> diagnostic itself. The registered bound is not to be widened under
-    either outcome.</p>
+    <section id="s7" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-14</span>
+        <h2>§7 — The boundary read has two residual failure modes, on disjoint shots</h2>
+      </header>
+      <p class="landed-summary">
+        <strong>Both resolved, and neither is a nova defect.</strong> The outward LCFS offset on 21986 and
+        22086 is the reference's own inconsistency — its stored LCFS polygon sits off the contour of its
+        stored flux map, correlation +0.988, against −0.082 for x-point proximity and −0.033 for limiter
+        clearance, and bit-identical under 96/18 refinement. The unresolved x-point fit on 21983 and 21985
+        is a certification halt (containment radius 39 cells against a certified maximum of 2) that a
+        forced-resolved counterfactual proves changes <em>no</em> emitted quantity — every position, radius,
+        class and mask bitwise identical, max difference 0.0.
+        Full records:
+        <a href="/nova/evidence/archive/efit-map-inversion-landed#lcfs-outward-offset">offset</a> ·
+        <a href="/nova/evidence/archive/efit-map-inversion-landed#xpoint-fit-state">fit state</a>
+        (commits <code>bb41f265</code>, <code>26c8e9cf</code>).
+      </p>
+    </section>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -263,6 +256,15 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-20260813-residualmodes" data-who="reckon-ship" data-when="2026-08-13T15:35:00+00:00">
     <div class="r-comment-body">Section opened from the centre repair's own follow-ons rather than deferred as followups, because both belong to this plan. Two residual failure modes on DISJOINT shot sets, which is the reason not to assume a shared cause: (1) LCFS still fails on 21986 at +5.0945212e-04 m and 22086 at +4.6611127e-04 m against the unchanged 3.3047e-04 m bound, and these are exactly the two shots whose emitted boundary sits OUTSIDE the stored polygon while every negative-offset shot now passes - the 0.999 boundary-span convention biases inward so it cannot produce an outward offset; (2) 21983 and 21985 report boundary_resolved=false with x fit states [1,2] and one candidate never reaching the resolved state, while the diverted class is correct and both stored x-points are recovered to within 2e-03 m. The centre repair established that centre alignment and radial depth do not change candidate refinement, so (2) is a null-fit limitation and not a residue of the ring-centre defect. Two nodes, disjoint write paths so they can run concurrently. impl corrected from 1.0 to 0.75: the plan is not complete while this section is open.</div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-20260814-lcfsmechanism" data-who="reckon-ship" data-when="2026-08-14T06:00:00+00:00">
+    <div class="r-comment-body">lcfs-outward-offset landed - commit bb41f265; gate PASSED; worker 588 s. THE SURVIVING LCFS FAILURE IS THE REFERENCE'S, NOT OURS. Named mechanism: the stored LCFS coordinates are not on the registered contour of the stored flux map. Correlation of the signed radial offset with that polygon-to-contour discrepancy is +0.9879637914, against essentially zero for both alternatives - inverse x-point distance -0.0815138951 and inverse limiter clearance -0.0327061330. NOT NUMERICAL CONVERGENCE EITHER: refining 48 levels/12 bisections to 96/18 leaves all six shots BIT-IDENTICAL, pass count 4/6 at both settings, and the excesses stay 1.7898212365e-04 m on 21986 and 1.3564127488e-04 m on 22086 above the 3.3047e-04 m bound. Radial decomposition on 21986: +4.6945689193e-04 m stored-polygon-to-map, +6.6324848834e-05 m registered-to-selected contour, +5.9038790744e-05 m selected-contour-to-ray; on 22086: +5.6384570787e-04 m, -4.5959142994e-05 m, +2.2096761854e-05 m. The dominant term is an order of magnitude above everything nova contributes. All eight angles are outward on each failing shot and all eight inward on each passing shot, largest two sectors carrying 0.4143911173 and 0.4172314160 of the total absolute offset - a ring-wide sign with angular modulation rather than isolated sectors. THE 0.999 RAY CONVENTION IS EXONERATED BY DIRECTION: it moves the target inward, so it partially opposes an outward residual and cannot cause one, and a 1.0 ray target would not repair these shots. No bound widened; both settings were applied to all six shots and reported for all six rather than tuned against the failing pair. Record at /nova/evidence/archive/efit-map-inversion-landed#lcfs-outward-offset</div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-20260814-xpointstate" data-who="reckon-ship" data-when="2026-08-14T06:10:00+00:00">
+    <div class="r-comment-body">xpoint-fit-state landed - commit 26c8e9cf; gate PASSED; worker 1116 s; read-only on production, CUDA path (JAX 0.11.0, NVIDIA L4, x64) because that reproduces the frozen production result. HALT CONDITION NAMED EXACTLY: on 21983 and 21985 the binding candidate's two-member cluster has signed member-index sum -2 but requires a containment radius of 39 CELLS, beyond the kernel's maximum certified nested-loop radius of 2, so cluster-index certification returns false and the certified cluster signed index stays 0 instead of the required saddle index -1. Resolved control 21978 has containment radius 1, member-index sum -1, certified index -1. Every other refinement gate passes on both shots: native/fit/confidence indices -1, scale support 3, class margins 26.368476289477382 and 23.001370507497057 against minimum 16, root support 0.8155269622802734 and 0.8610254526138306 against maximum 1. THE DECISIVE CHECK IS THE COUNTERFACTUAL AND IT CLEARS THE REPORTED RESULTS: forcing ONLY the candidate state to resolved flips boundary_resolved and changes nothing else - x-point positions, primary x-point, LCFS radii and positions, topology class, core mask, common-SOL mask, private-flux mask and excluded-material mask are BITWISE IDENTICAL across all six shots at maximum difference 0.0. So boundary_resolved=false is diagnostic metadata rather than a defect in any emitted quantity, and the passing x-point and topology-class results on those two shots are trustworthy as reported. QUALIFICATION RETAINED: the CPU fallback resolves 21983 but not 21985, so this discrete certification metadata is backend-sensitive. Section 7 is closed by this and the offset attribution; no follow-ons from either. Record at /nova/evidence/archive/efit-map-inversion-landed#xpoint-fit-state</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260814-cohortgap" data-who="reckon-ship" data-when="2026-08-14T06:15:00+00:00">
+    <div class="r-comment-body">SECTION STAYS OPEN, and saying why rather than closing the plan on a partial measurement. The sign census extended PLASMA-CURRENT CLOSURE to all six frozen shots (worst 2.952859461e-04), but the PER-BIN p-prime and FF-prime agreement against the stored profiles is still only measured on shot 21978 slice 46 - median -1.046718e-03 and +4.601016e-04 with their IQRs, from a single slice of a single shot. The sprint item's done-when asks for per-bin agreement against stored profiles, so a cohort extension is owed before this plan can reach a terminal status. Dispatching affine-recovery-cohort to extend the per-bin comparison to one slice per frozen shot on the same masked interior, reusing the landed extraction path rather than writing a second one.</div>
 </div>
 </section>
 </main>

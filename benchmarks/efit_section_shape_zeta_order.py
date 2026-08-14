@@ -29,17 +29,18 @@ from typing import Any
 
 import numpy as np
 
+from benchmarks.efit_analytic_roundtrip_floor import (
+    ANALYTIC_CASE,
+    GRID_SEQUENCE,
+    IDENTITY_FRACTION,
+    _hex_mesh,
+)
 from nova.biot.greens import hybrid_greens, second_moments
 from nova.biot.polygonanalytic import polygon_analytic_greens
 from nova.equilibrium.convention import TOTAL_FLUX_FACTOR
-from nova.equilibrium.stencil_mesh import StencilMesh
-from nova.geometry.hexstencil import hex_stencil
+from nova.jax.config import configure_dtypes
 from tests.rotating_equilibrium_references import reference_cases
 
-ANALYTIC_CASE = "moderate-rotation-conventional"
-IDENTITY_FRACTION = 1.0e-6
-GRID_SEQUENCE = ((23, 35), (37, 57), (51, 79), (67, 103))
-DOMAIN_HEIGHT_FACTOR = 1.2
 POLYGON_DEFAULT_NODES = 128
 QUADRATURE_NODE_SEQUENCE = (32, 64, 128, 256, 785, 1570)
 PRODUCTION_STANDOFF = 3.0
@@ -49,35 +50,6 @@ COMPOSITION_ERROR_FRACTIONS = {
     (51, 79): 2.005611454e-3,
     (67, 103): 1.176524998e-3,
 }
-
-
-def _hex_mesh(
-    radial_count: int, vertical_count: int, major_radius: float, half_height: float
-) -> tuple[StencilMesh, float, float]:
-    """Return the analytic round trip's fixed-extent hexagonal centroid mesh."""
-
-    vertical_extent = 2.0 * DOMAIN_HEIGHT_FACTOR * half_height
-    pitch = vertical_extent / ((vertical_count - 1) * np.sqrt(3.0) / 2.0)
-    radial_index, vertical_index = np.indices((radial_count, vertical_count))
-    radial_centre = 0.5 * (radial_count - 1)
-    vertical_centre = 0.5 * (vertical_count - 1)
-    radius = major_radius + pitch * (
-        radial_index - radial_centre + 0.5 * (vertical_index - vertical_centre)
-    )
-    height = pitch * np.sqrt(3.0) / 2.0 * (vertical_index - vertical_centre)
-    coordinate = np.column_stack((radius.ravel(), height.ravel()))
-    section_width = pitch
-    section_height = pitch * np.sqrt(3.0) / 2.0
-    area = np.full(len(coordinate), section_width * section_height)
-    return (
-        StencilMesh(
-            coordinate=coordinate,
-            stencil=hex_stencil((radial_count, vertical_count)),
-            area=area,
-        ),
-        section_width,
-        section_height,
-    )
 
 
 def _regular_hexagon(radius: float, height: float, pitch: float) -> np.ndarray:
@@ -302,6 +274,7 @@ def _measure_resolution(
 def measure_section_shape_and_order() -> dict[str, Any]:
     """Return the full section-shape and polygon-order evidence receipt."""
 
+    configure_dtypes()
     orders = QUADRATURE_NODE_SEQUENCE
     resolutions = [
         _measure_resolution(radial_count, vertical_count, orders)

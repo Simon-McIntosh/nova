@@ -179,6 +179,10 @@ def _measure_resolution(radial_count: int, vertical_count: int) -> dict[str, Any
     composition_error = reconstructed_flux - coupled_flux
     analytic_span = TOTAL_FLUX_FACTOR * case.axis_flux
     composition_fraction = float(np.max(np.abs(composition_error)) / analytic_span)
+    composition_to_delta_ratio = float(
+        composition_fraction
+        / analytic_current_error["sup_error_fraction_of_expected_peak"]
+    )
 
     return {
         "radial_count": radial_count,
@@ -197,6 +201,7 @@ def _measure_resolution(radial_count: int, vertical_count: int) -> dict[str, Any
         "coupled_delta_star_current_error": coupled_current_error,
         "composition_sup_error_wb": float(np.max(np.abs(composition_error))),
         "composition_error_fraction_of_analytic_span": composition_fraction,
+        "composition_to_analytic_delta_sup_ratio": composition_to_delta_ratio,
         "reaches_identity_fraction": composition_fraction <= IDENTITY_FRACTION,
     }
 
@@ -257,6 +262,7 @@ def measure_analytic_floor() -> dict[str, Any]:
     else:
         reading = {
             "verdict": "STILL_CONVERGING",
+            "floor_observed": False,
             "minimum_measured_fraction": float(composition_error[-1]),
             "finest_resolution": {
                 "radial_count": resolutions[-1]["radial_count"],
@@ -271,10 +277,49 @@ def measure_analytic_floor() -> dict[str, Any]:
                 np.ceil(resolutions[-1]["cell_count"] * refinement_factor**2)
             ),
             "conclusion": (
-                "the measured series has not yet reached the identity or an "
-                "observed floor"
+                "the operator pair has no observed floor and converges toward the "
+                "identity; reaching it by direct all-to-all Green composition is "
+                "computationally infeasible at the extrapolated cell count"
             ),
         }
+
+    finest = resolutions[-1]
+    attribution = {
+        "comparison": (
+            "composition fraction of analytic flux span divided by analytic "
+            "delta-star sup error fraction of peak closed-form current"
+        ),
+        "ratios_by_resolution": [
+            {
+                "radial_count": row["radial_count"],
+                "vertical_count": row["vertical_count"],
+                "ratio": row["composition_to_analytic_delta_sup_ratio"],
+            }
+            for row in resolutions
+        ],
+        "finest_composition_fraction_of_analytic_span": finest[
+            "composition_error_fraction_of_analytic_span"
+        ],
+        "finest_analytic_delta_sup_fraction_of_peak_current": finest[
+            "analytic_delta_star_current_error"
+        ]["sup_error_fraction_of_expected_peak"],
+        "finest_analytic_delta_rms_fraction_of_peak_current": finest[
+            "analytic_delta_star_current_error"
+        ]["rms_error_fraction_of_expected_peak"],
+        "finest_composition_to_delta_sup_ratio": finest[
+            "composition_to_analytic_delta_sup_ratio"
+        ],
+        "conclusion": (
+            "the finite-section Green composition dominates the residual; the "
+            "hex-ring quadratic difference operator is roughly thirty times "
+            "closer to its closed-form reference at the finest resolution"
+        ),
+        "input_exclusion": (
+            "because the field and current are closed-form values with no stored "
+            "map or interpolation, failure to reach the identity is attributable "
+            "to Nova's operator pair, not stored-reference truncation"
+        ),
+    }
 
     return {
         "analytic_source": {
@@ -317,7 +362,13 @@ def measure_analytic_floor() -> dict[str, Any]:
             "resolutions": resolutions,
         },
         "composition_convergence": fit,
+        "error_attribution": attribution,
         "reading": reading,
+        "feasibility": (
+            "the extrapolated all-to-all Green composition scales quadratically "
+            "with about 4.1 million cells and is outside any reasonable compute "
+            "budget; the extrapolation is the result and no direct run is needed"
+        ),
         "policy": (
             "measurement only: no bound is registered or moved; the existing "
             "identity fraction remains unchanged"

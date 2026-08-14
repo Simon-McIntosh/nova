@@ -378,6 +378,42 @@
   persistent source-location error rather than one refinement removes, so the three-matrix dipole correction
   is worth its precompute.</p>
 
+  <h2 id="section-shape-and-quadrature">§2 — section shape is ~3.5%, and the ζ quadrature is exonerated outright</h2>
+
+  <p>Commits <code>1e94285a</code>, <code>c62e14df</code>, <code>8d98a57e</code>; gate passed. Artifact
+  <code>benchmarks/efit_section_shape_zeta_order.py</code> (362 lines). Worker time 2137 s across a
+  resumption; the measurement itself ran 1295 s.</p>
+
+  <p><strong>Substituting a rectangle for the true hexagon costs a stable ~3.5%.</strong> True-hex minus
+  production-rectangle flux, as a fraction of the analytic span: sup 3.571347076e-4, 1.346549523e-4,
+  7.025191858e-5, 4.094809130e-5; RMS 9.112760837e-5, 3.088419077e-5, 1.475827417e-5, 8.198296398e-6. Against
+  the full composition sup that is <strong>2.70%, 3.53%, 3.50%, 3.48%</strong> — a near-constant share on the
+  three finer grids, consistent with a constant-factor contribution rather than a lower-order floor.</p>
+
+  <p><strong>The geometry explains the direction cleanly.</strong> Area-normalised second moments in
+  pitch² units: regular hexagon (I<sub>rr</sub>, I<sub>zz</sub>, I<sub>rz</sub>) = (5/72, 5/72, 0) =
+  (0.069444, 0.069444, 0); equal-pitch rectangle = (1/12, 1/16, 0) = (0.083333, 0.0625, 0). The rectangle
+  carries a <strong>20% larger radial</strong> and <strong>10% smaller vertical</strong> second moment, with
+  only round-off in the cross moments.</p>
+
+  <p><strong>The ζ quadrature is not implicated, by a margin of six orders.</strong> Sweeping the Part V
+  residual nodes over 32, 64, 128, 256, 785→784, 1570, the worst consecutive sup changes are
+  2.606901448e-4, 1.172536612e-7, 3.208777266e-13, 2.469279500e-13, 6.423984948e-13 of span. Everything from
+  128 upward sits at numerical saturation. The 128-node default's residual against 1570 is at worst
+  <strong>7.703637605e-13</strong> — about <strong>53 million times below</strong> the smallest section-shape
+  term and about <strong>1.3 million times below</strong> the identity bound itself.</p>
+
+  <p><strong>A source correction worth recording, because it renames the knob.</strong>
+  <code>nova/biot/polygonanalytic.py</code> defaults the Part V residuals to <strong>128</strong> requested
+  nodes. The 785 figure documented in <code>nova/biot/polygon.py</code> describes the separate
+  <em>rectangle-reference</em> ζ rule, not the Part V polygon default; passing 785 to the two-panel Part V API
+  realises 784 nodes. The sweep bracketed 785 with 1570 regardless, so the conclusion holds either way.</p>
+
+  <p><strong>These terms must not be summed with the kernel term.</strong> The section-shape contribution sits
+  <em>inside</em> the independently measured 88.29775284% that survives an exact kernel, alongside the
+  cell-current representation; it is not additive with the separately bounded 11.70224716% far-field kernel
+  term.</p>
+
   <p><strong>Scope note on the current vector.</strong> This probe used <code>efm/fcoil_x</code>
   throughout, on orchestrator instruction issued before the owner locked <code>efm/fcoil_c</code>;
   <code>efm/fcoil_c</code> was never read. The <code>fcoil_x</code> cancellation is worth keeping as

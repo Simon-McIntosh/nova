@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-15T13:19:42",
+  "updated": "2026-08-15T13:31:00",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4532,9 +4532,61 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260815T111910127415-triangle-refinement-prototype",
+        "plan": "efit-flux-decomposition",
+        "section": "\u00a76",
+        "node": "triangle-refinement-prototype",
+        "role": "implement",
+        "member": "flood-fill",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-15T11:19:14Z",
+        "completed_at": "2026-08-15T11:30:26Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 672,
+        "time_budget": "25m",
+        "base_sha": "ee7ecc291419a42e1f19ce7c63613aa19eb80977",
+        "commits": [
+          "766ab2b4a7dc25645ea07936edefb6f4e9ea3a61"
+        ],
+        "changed_lines": {
+          "added": 481,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/bac59e2b-995a-430c-bf2d-55dd3126adcf/scratchpad/triangle-refinement-prototype-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff707-7f0a-7cb1-8202-0d566308bf88",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 28993792,
+            "input_tokens": 29643132,
+            "output_tokens": 84905,
+            "reasoning_output_tokens": 26944
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 144
+    "_version": 145
   }
 }

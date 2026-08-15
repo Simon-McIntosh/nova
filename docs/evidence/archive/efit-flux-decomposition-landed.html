@@ -488,6 +488,34 @@
   and 32 for the reference. Per cell the contraction is one connectivity gather plus one fixed-weight dot;
   the weight table is built once.</p>
 
+  <h2 id="triangle-refinement-prototype">§6 — the triangle hierarchy is beautifully traceable and first-order</h2>
+
+  <p>Commit <code>766ab2b4</code>; gate passed. Artifact
+  <code>benchmarks/efit_triangle_refinement_prototype.py</code>. Worker time 672 s. Flat-top hex tilings at
+  circumradii 0.12/0.08/0.06/0.04 m; each hexagon pre-split once into 6 triangles and each into 4 midpoint
+  sub-triangles; the hierarchical all-nodes-inside rule applied per iteration.</p>
+
+  <p><strong>The discard rule costs an order, and it shows in both area and flux.</strong> Retained area
+  undercounts one-sidedly at −8.79e-2 → −2.85e-2 signed relative, fitting order
+  <strong>1.019</strong> (R² 0.9997) — against the repaired clip's 6.6e-16 conservation. Flux error against
+  the converged exact reference (whose own drift is 2.0e-6 of span): sup <strong>0.1359 → 0.0444 of
+  span</strong>, order <strong>1.002</strong>. Discarding partial sub-triangles is an O(h) boundary
+  treatment however fine the hierarchy.</p>
+
+  <p><strong>What the prototype does prove is the execution model.</strong> The fixed-shape
+  <code>jax.jit</code> mask-and-gather contraction retraced <strong>exactly once over 20 moving-separatrix
+  iterations</strong> on both backends — CPU median 0.360 ms, NVIDIA L4 median 0.463 ms per iteration (at
+  this 48-target size, launch overhead erases any GPU claim). Boundary-band coupling memory extrapolates to
+  4.17–9.00× the one-column-per-cell baseline on the production 1587-cell mesh (84–181 MB against 20 MB).
+  SOL extension is natural: assign J(ψ_N&gt;1) to the complementary discarded-child mask through the same
+  fixed columns, shapes unchanged.</p>
+
+  <p><em>Reading:</em> as specified, the hierarchy loses on accuracy to every clipped method at first order
+  while costing 4–9× memory; its value is the demonstrated one-trace moving-boundary execution pattern,
+  which any winning method should reuse. A fractional-weight variant (per-sub-triangle inside fractions
+  rather than discard) would recover conservation, at which point it converges toward the clip it is
+  approximating.</p>
+
   <p><strong>Scope note on the current vector.</strong> This probe used <code>efm/fcoil_x</code>
   throughout, on orchestrator instruction issued before the owner locked <code>efm/fcoil_c</code>;
   <code>efm/fcoil_c</code> was never read. The <code>fcoil_x</code> cancellation is worth keeping as

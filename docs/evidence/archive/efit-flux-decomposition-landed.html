@@ -469,6 +469,25 @@
   pair evaluations per iteration at 128 boundary cells × 6901 targets, 2,649,984 to rebuild all three
   blocks — which is what forfeiting fixed matrices means.</p>
 
+  <h2 id="interior-stencil-quadrature">§6 — the interior stencil: degree-3 exact from values the mesh already shares</h2>
+
+  <p>Commit <code>c45490c7</code>; gate passed. Artifact
+  <code>benchmarks/efit_interior_stencil_quadrature.py</code>. Worker time 696 s.</p>
+
+  <p><strong>The weights are closed-form and need no edge midpoints.</strong> Cell-average rules exact
+  through total degree 3 (verified to 2.2e-16 on every monomial; a radial fourth power proves degree 4 is
+  not exact): <strong>rectangle — 2/3 centroid + 1/12 per corner; regular hexagon — 7/12 centroid + 5/72 per
+  vertex.</strong></p>
+
+  <p><strong>Measured on interior cells, the stencil sits four orders below the centroid rule at 2–3
+  amortised j evaluations per cell.</strong> Finest-grid sup error, rectangle: centroid 20.99 A/m² →
+  stencil <strong>1.116e-3 A/m²</strong> (the 32-point reference is at its numerical floor ~6e-8). Hexagon:
+  17.49 → <strong>1.023e-3 A/m²</strong>. Fitted orders: centroid 1.894, stencil <strong>3.764 sup / 3.917
+  RMS</strong> — a degree-3 rule converging as it should. Evaluation economy: shared nodes give 2.02–2.07
+  evaluations per cell amortised on the rectangle and 3.05–3.14 on the hexagon, against 1 for centroid-only
+  and 32 for the reference. Per cell the contraction is one connectivity gather plus one fixed-weight dot;
+  the weight table is built once.</p>
+
   <p><strong>Scope note on the current vector.</strong> This probe used <code>efm/fcoil_x</code>
   throughout, on orchestrator instruction issued before the owner locked <code>efm/fcoil_c</code>;
   <code>efm/fcoil_c</code> was never read. The <code>fcoil_x</code> cancellation is worth keeping as

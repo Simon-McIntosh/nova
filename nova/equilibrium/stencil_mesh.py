@@ -47,6 +47,7 @@ reported.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import NamedTuple
 
 import jax
 import jax.numpy as jnp
@@ -54,7 +55,14 @@ import numpy as np
 
 from nova.equilibrium.conservation import STENCIL_MARGIN
 
-__all__ = ["RING_CONDITION_LIMIT", "StencilMesh", "ring_condition"]
+__all__ = [
+    "RING_CONDITION_LIMIT",
+    "CellCurrentMoments",
+    "InteriorCurrentMomentStencil",
+    "StencilMesh",
+    "cell_average_weights",
+    "ring_condition",
+]
 
 #: Largest normalised design-matrix condition number a ring may carry. A
 #: regular hexagonal ring sits at 5.5 and irregular ones climb slowly, so the
@@ -66,6 +74,89 @@ RING_CONDITION_LIMIT = 1.0e3
 
 #: Coefficients of the fitted quadratic, in design-matrix column order.
 _VALUE, _RADIAL, _VERTICAL, _RADIAL_CURVATURE, _CROSS, _VERTICAL_CURVATURE = range(6)
+
+
+def cell_average_weights(vertex_count: int) -> np.ndarray:
+    """Return centroid-and-vertex weights exact through total degree three.
+
+    Rectangles use two thirds of the centroid value and one twelfth from each
+    corner. Regular hexagons use seven twelfths of the centroid value and five
+    seventy-seconds from each corner. Both rules include the constant exactly;
+    other polygon families need a separately derived rule and are rejected.
+    """
+    if vertex_count == 4:
+        return np.array([2.0 / 3.0, *(1.0 / 12.0,) * 4], dtype=np.float64)
+    if vertex_count == 6:
+        return np.array([7.0 / 12.0, *(5.0 / 72.0,) * 6], dtype=np.float64)
+    raise ValueError(
+        "degree-three cell averages support rectangles and regular hexagons"
+    )
+
+
+class CellCurrentMoments(NamedTuple):
+    """Current and first moments about each fixed cell centroid."""
+
+    cell_current: jax.Array
+    radial_moment: jax.Array
+    vertical_moment: jax.Array
+
+
+@dataclass(frozen=True)
+class InteriorCurrentMomentStencil:
+    """Fixed gather and contraction for interior cell-current moments.
+
+    The value pool contains cell-centroid evaluations followed by evaluations
+    at the shared polygon nodes. Each call gathers that pool once and applies
+    one contraction whose rows are the cell-average rule and the fitted radial
+    and vertical derivative rules. Geometry construction supplies the weights;
+    no geometry-dependent work occurs in an iteration.
+    """
+
+    gather_index: np.ndarray = field(repr=False)
+    contraction_weight: np.ndarray = field(repr=False)
+    centre: np.ndarray = field(repr=False)
+    cell_count: int
+    shared_node_count: int
+
+    def __post_init__(self):
+        """Store compact contiguous geometry arrays for repeated contractions."""
+        object.__setattr__(
+            self,
+            "gather_index",
+            np.ascontiguousarray(self.gather_index, dtype=np.intp),
+        )
+        object.__setattr__(
+            self,
+            "contraction_weight",
+            np.ascontiguousarray(self.contraction_weight, dtype=np.float64),
+        )
+        object.__setattr__(
+            self, "centre", np.ascontiguousarray(self.centre, dtype=np.intp)
+        )
+
+    def __call__(self, centroid_current_density, shared_node_current_density):
+        """Return the three moment-vector entries for one current-density field."""
+        centroid_value = jnp.asarray(centroid_current_density)
+        shared_value = jnp.asarray(shared_node_current_density)
+        if centroid_value.shape != (self.cell_count,):
+            raise ValueError("one current-density value is needed per cell centroid")
+        if shared_value.shape != (self.shared_node_count,):
+            raise ValueError("one current-density value is needed per shared node")
+        if centroid_value.dtype != shared_value.dtype:
+            shared_value = shared_value.astype(centroid_value.dtype)
+        value_pool = jnp.concatenate([centroid_value, shared_value])
+        gathered = value_pool[self.gather_index]
+        entries = jnp.einsum(
+            "rks,rs->rk",
+            jnp.asarray(self.contraction_weight, dtype=value_pool.dtype),
+            gathered,
+        )
+        vectors = (
+            jnp.zeros((3, self.cell_count), dtype=entries.dtype)
+            .at[:, self.centre]
+            .set(entries.T)
+        )
+        return CellCurrentMoments(*vectors)
 
 
 def _quadratic_design(local: np.ndarray) -> np.ndarray:
@@ -219,6 +310,57 @@ class StencilMesh:
             self._scatter(self._apply(self.vertical_weight, values)),
         )
 
+    def current_moment_stencil(
+        self, cell_node, second_moment
+    ) -> InteriorCurrentMomentStencil:
+        """Build the fixed interior operator for cell-current moments.
+
+        ``cell_node`` maps every cell to its four rectangle corners or six
+        regular-hexagon corners in a shared node pool. ``second_moment`` holds
+        the area-normalised radial and vertical central second moments in
+        square metres. The resulting callable evaluates no geometry: it reads
+        centroid and shared-node current densities and returns full-cell
+        vectors, with zero entries for cells lacking a complete fitted ring.
+        """
+        cell_node = np.ascontiguousarray(cell_node, dtype=np.intp)
+        if cell_node.ndim != 2 or cell_node.shape[0] != self.node_count:
+            raise ValueError("cell-node indices must have shape (cells, corners)")
+        average_weight = cell_average_weights(cell_node.shape[1])
+        if cell_node.size and cell_node.min() < 0:
+            raise ValueError("cell-node indices must be non-negative")
+        moment = np.asarray(second_moment, dtype=np.float64)
+        try:
+            moment = np.broadcast_to(moment, (self.node_count, 2))
+        except ValueError as error:
+            raise ValueError(
+                "radial and vertical second moments are needed per cell"
+            ) from error
+
+        centre = self.centre
+        ring_width = self.stencil.shape[1]
+        node_index = self.node_count + cell_node[centre]
+        gather_index = np.concatenate([self.stencil, node_index], axis=1)
+        weight = np.zeros(
+            (len(centre), 3, ring_width + cell_node.shape[1]), dtype=np.float64
+        )
+        area = self.area[centre]
+        weight[:, 0, 0] = area * average_weight[0]
+        weight[:, 0, ring_width:] = area[:, np.newaxis] * average_weight[1:]
+        weight[:, 1, :ring_width] = (
+            area[:, np.newaxis] * moment[centre, :1] * self.radial_weight
+        )
+        weight[:, 2, :ring_width] = (
+            area[:, np.newaxis] * moment[centre, 1:] * self.vertical_weight
+        )
+        shared_node_count = int(cell_node.max()) + 1 if cell_node.size else 0
+        return InteriorCurrentMomentStencil(
+            gather_index=gather_index,
+            contraction_weight=weight,
+            centre=centre,
+            cell_count=self.node_count,
+            shared_node_count=shared_node_count,
+        )
+
     def delta_star(self, flux) -> jax.Array:
         """Return the elliptic operator value [Wb/m^2] of one flux map.
 
@@ -230,7 +372,7 @@ class StencilMesh:
         return self._scatter(self._apply(self.elliptic_weight, values))
 
     def erode(self, mask, margin: int) -> jax.Array:
-        """Return a cell mask shrunk by ``margin`` ring steps."""
+        """Return a cell mask shrunk by ``margin`` successive ring erosions."""
         eroded = jnp.asarray(mask, dtype=bool)
         for _ in range(margin):
             eroded = self._scatter(jnp.all(eroded[self.stencil], axis=1))

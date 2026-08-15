@@ -516,6 +516,48 @@
   rather than discard) would recover conservation, at which point it converges toward the clip it is
   approximating.</p>
 
+  <h2 id="boundary-method-comparison">§6 — the verdict: fixed linear blocks over a conservative clip</h2>
+
+  <p>Commit <code>e5acd9a6</code>; gate passed. Artifact
+  <code>benchmarks/efit_boundary_method_comparison.py</code>. Worker time 1858 s. Precondition held: the
+  repaired clip stayed conservative at ≤6.6e-16 on every grid; the converged exact reference's own drift
+  fell to 7.8e-8 of span at the finest grid, well below every separation it adjudicates.</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Arm</th><th>sup at 67×103, of span</th><th>fitted order (R²)</th><th>per-iteration cost</th></tr></thead>
+    <tbody>
+      <tr><td>production centroid</td><td>9.724559062e-3</td><td>1.797 (0.930)</td><td>0 Green · 1 matvec</td></tr>
+      <tr><td>repaired clipped centroid</td><td>6.641216063e-4</td><td>1.997 (0.999989)</td><td>0 Green · 1 matvec</td></tr>
+      <tr><td>moving current-centroid filament</td><td>7.670355774e-3</td><td>1.331 (0.878)</td><td><strong>72–266 Green</strong> · 1 matvec</td></tr>
+      <tr><td><strong>fixed linear blocks G₀/G_R/G_Z</strong></td><td><strong>1.239092403e-4</strong></td><td>1.922 (0.9996)</td><td><strong>0 Green · 3 matvecs</strong></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>The fixed linear blocks win on every axis that matters.</strong> 78× below production, 5.4×
+  below plain clipping, <strong>61.9× below the moving filament</strong> — which pays 266 per-step Green
+  evaluations for the privilege of losing, because a point filament at zero standoff drops every section
+  moment exactly where the coupling is strongest, and its order degrades to 1.33 with visible
+  non-monotonicity. The blocks were built once by true midpoint subdivision of the full fixed sections
+  (contraction drift 2.3e-5 of span at the finest grid, below every separation), with the clipped zeroth and
+  first moments riding in three per-iteration vectors: zero Green evaluations, three matrix-vector
+  products, fixed shapes throughout.</p>
+
+  <p><strong>The re-audit the area gate demanded shifts the banked clipped figures by −71%.</strong> Under
+  the conservative clip the clipped-centroid series falls from 2.104e-2 / 7.755e-3 / 3.981e-3 / 2.235e-3 to
+  5.965e-3 / 2.188e-3 / 1.136e-3 / 6.641e-4 — the T-junction defect was inflating the clipped errors about
+  3.5×, and the corrected rule now converges at order 1.997 with R² 0.999989.</p>
+
+  <p><strong>SOL extensibility falls out of the same structure:</strong> a J(ψ_N&gt;1) support adds exterior
+  zeroth and first moments to the same three vectors, with no new coupling blocks.</p>
+
+  <p><em>Standing follow-on:</em> the winning arm's exact closed-form G_R/G_Z blocks — already established as
+  one harmonic order plus two weighted companions — await a production write scope in
+  <code>nova/biot/polygonanalytic.py</code>; the subdivision-built blocks are the benchmark stand-in, valid
+  because build cost is architecture-irrelevant. The moving point filament is not to be promoted for
+  near-field boundary cells.</p>
+
   <p><strong>Scope note on the current vector.</strong> This probe used <code>efm/fcoil_x</code>
   throughout, on orchestrator instruction issued before the owner locked <code>efm/fcoil_c</code>;
   <code>efm/fcoil_c</code> was never read. The <code>fcoil_x</code> cancellation is worth keeping as

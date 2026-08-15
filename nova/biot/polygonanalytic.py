@@ -1525,7 +1525,9 @@ def polygon_analytic_field_moments(
     finite difference or a source quadrature.  Central companions are formed once
     about the polygon area centroid, then translated algebraically.
     """
-    from nova.jax.config import configure_dtypes, release_compilation_memory
+    import gc
+
+    from nova.jax.config import configure_dtypes
 
     configure_dtypes()
     import jax
@@ -1561,7 +1563,8 @@ def polygon_analytic_field_moments(
         return jnp.stack([row[0] for row in rows])
 
     derivative = np.asarray(jax.vmap(jax.jacfwd(one_target))(coordinates))
-    release_compilation_memory()
+    jax.clear_caches()
+    gc.collect()
     radius = np.abs(signed_flat)
     radial_central = -derivative[:, :, 1] / (2.0 * np.pi * signed_flat[:, None])
     vertical_central = derivative[:, :, 0] / (2.0 * np.pi * radius[:, None])

@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="plasma-edge-current-representation">
+  <meta name="plan-title" content="Plasma Edge Current Representation — exact moments against fixed kernels">
+  <meta name="plan-summary" content="Carry each plasma cell's current as a linear field about its fixed centroid: nine exact Part V blocks (flux and both field components, each with radial and vertical moment companions), a conservative separatrix clip whose patch areas match the LCFS shoelace area at machine precision, and a degree-3 stencil for interior averages and gradients — so current gradients and clipped boundary support ride in three per-iteration vectors against matrices built once">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="8.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-sprint" content="S7">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-blocks" content="efit-forward-parity">
+  <title>Plasma Edge Current Representation | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — The measured basis and the goal</h2>
+
+    <p><strong>Every design choice in this plan was selected by measurement, not preference.</strong> The
+    edge-current attribution ladder (evidence:
+    <a href="/nova/evidence/archive/efit-flux-decomposition-landed">efit-flux-decomposition landed record</a>)
+    established: the centroid-inside source rule is 4–8× the whole composition error, with boundary cells
+    whose centroids fall outside assigned zero current at 100% per-cell error while net current closes to
+    ±1%; separatrix clipping repairs cell totals at order 2.03 (R² 0.99977) once the clip is conservative;
+    the surviving current-weighted centroid offset is 0.24–0.65 cell widths and scale-invariant; the fixed
+    linear-block arm wins the method comparison at <strong>1.239e-4 of span</strong> — 78× below production,
+    61.9× below a moving filament that pays up to 266 per-step Green evaluations; Urankar Part V admits the
+    linear extension with one more harmonic order plus two weighted arsinh companions at a 1.0× moment-build
+    multiplier; and the interior degree-3 stencil sits four orders below the centroid rule at 2–3 shared
+    evaluations per cell.</p>
+
+    <p><strong>The goal:</strong> nova's plasma current close to the separatrix must agree with analytic
+    solutions well enough that H-mode equilibria — where the current gradient concentrates in exactly the
+    cells the separatrix crosses — can be solved with confidence. Coarse meshes must remain usable: the
+    demonstration gate in §6 is deliberately posed at coarse pitch with a steep edge gradient.</p>
+
+    <h2 id="s2">§2 — The representation contract</h2>
+
+    <p>Each plasma cell carries current density as a linear field about its <em>fixed geometric
+    centroid</em>: j(R,Z) = j₀ + j_R·(R−R_c) + j_Z·(Z−Z_c). Every target quantity is then three
+    matrix-vector products:</p>
+
+    <p><code>ψ = G₀·I + G_R·M_R + G_Z·M_Z</code> — and identically for <code>B_R</code> and
+    <code>B_Z</code> with their own kernel blocks.</p>
+
+    <figure>
+      <svg viewBox="0 0 720 150" role="img" style="max-width:100%;height:auto;font-family:system-ui">
+        <text x="120" y="20" text-anchor="middle" font-size="12" font-weight="600" fill="#111">built once (geometry)</text>
+        <rect x="30" y="32" width="180" height="88" fill="none" stroke="#06c" stroke-width="1.4"/>
+        <text x="120" y="54" text-anchor="middle" font-size="11.5" fill="#111">G₀, G_R, G_Z</text>
+        <text x="120" y="72" text-anchor="middle" font-size="11" fill="#555">per kernel: ψ, B_R, B_Z</text>
+        <text x="120" y="90" text-anchor="middle" font-size="11" fill="#555">nine fixed blocks</text>
+        <text x="120" y="108" text-anchor="middle" font-size="11" fill="#555">exact everywhere, Part V</text>
+        <text x="360" y="20" text-anchor="middle" font-size="12" font-weight="600" fill="#111">per iteration (O(N))</text>
+        <rect x="270" y="32" width="180" height="88" fill="none" stroke="#0a6" stroke-width="1.4"/>
+        <text x="360" y="54" text-anchor="middle" font-size="11.5" fill="#111">I, M_R, M_Z</text>
+        <text x="360" y="72" text-anchor="middle" font-size="11" fill="#555">interior: stencil + gradient</text>
+        <text x="360" y="90" text-anchor="middle" font-size="11" fill="#555">boundary: clip moments</text>
+        <text x="360" y="108" text-anchor="middle" font-size="11" fill="#555">zero Green evaluations</text>
+        <line x1="450" y1="76" x2="510" y2="76" stroke="#555"/><polygon points="510,76 503,72 503,80" fill="#555"/>
+        <rect x="510" y="32" width="180" height="88" fill="none" stroke="#555" stroke-width="1.4"/>
+        <text x="600" y="60" text-anchor="middle" font-size="11.5" fill="#111">three matvecs per kernel</text>
+        <text x="600" y="80" text-anchor="middle" font-size="11" fill="#555">fixed shapes, one trace</text>
+        <text x="600" y="100" text-anchor="middle" font-size="11" fill="#555">ψ, B_R, B_Z at all targets</text>
+      </svg>
+      <figcaption>The first moments about fixed centroids carry both physical effects in one vector entry:
+      an interior current gradient contributes j_R·A·I_rr, a clipped boundary cell contributes its support's
+      centroid shift — no branching in the solve.</figcaption>
+    </figure>
+
+    <p><strong>Inclusion is by intersection, never by centroid:</strong> any cell the separatrix enters
+    participates, with its clipped support integrated. <strong>Conservation is exact:</strong> the sum of
+    patch areas equals the shoelace area of the piecewise-linear LCFS built from the same edge crossings at
+    machine precision — the property whose violation the area gate caught at 4e-5 and whose repair took it
+    to 6.6e-16. <strong>The matrices never move:</strong> per-iteration work is node evaluations of j plus
+    moment assembly plus matvecs; per-step Green evaluations are zero by construction.</p>
+
+    <h2 id="s3">§3 — Kernel blocks: Part V companions for ψ, B_R and B_Z</h2>
+
+    <p>Implement the exact first-moment companions G_R = ⟨(R−R_c)·K⟩ and G_Z = ⟨(Z−Z_c)·K⟩ over the full
+    fixed polygon section, for the flux kernel and for both field kernels — the full plasma interaction
+    stack. The feasibility measurement located the extension: one harmonic order beyond the current eight
+    plus one-degree-higher weighted companions to the two surviving arsinh residual integrals, with the
+    expensive elliptic and pole moment stack shared (1.0× moment-build multiplier; 3× storage and
+    contraction). The filament-derivative shortcut is valid only beyond 2.0 section radii and must not
+    carry self or neighbour terms. Plasma blocks are built exact-everywhere — build cost is
+    architecture-irrelevant — which also removes the separately measured 11.7% far-field filament term
+    from G₀.</p>
+
+    <p><em>TDD gates:</em> tests written first and observed red; closed-form blocks pinned against
+    converged midpoint-subdivision references on near and far target sets; reduction to the uniform kernel
+    at zero moments; the translation identity (shifting the expansion point by d changes G_R by −d_R·G₀)
+    held to near machine precision; hexagon symmetry zeros held.</p>
+
+    <h2 id="s4">§4 — The clip and the moments in the solve path</h2>
+
+    <p>A production module computes, per iteration: cell inclusion by intersection; the clipped support of
+    every boundary cell using shared atomic edge crossings (the T-junction defect is a pinned regression);
+    and the closed-form zeroth and first moments of a linear j over each clipped polygon about the fixed
+    centroid. Moments are continuous functions of the flux map — the centroid-inside rule's on/off cell
+    switching, a candidate cause of the frozen-six convergence failure, is structurally removed. Arrays are
+    bounded and padded so the contraction traces once; the triangle prototype's one-trace moving-separatrix
+    pattern is the model.</p>
+
+    <h2 id="s5">§5 — Interior average and gradient from shared nodes</h2>
+
+    <p>j is evaluated once per node and centroid; each interior cell's zeroth moment is the degree-3
+    fixed-weight average (hexagon: 7/12 centroid + 5/72 per vertex — measured order 3.76, four orders below
+    the centroid rule at ~3 amortised evaluations per cell), and its first moments are j_R·A·I_rr,
+    j_Z·A·I_zz with the gradient taken from the stencil mesh's existing fitted ring weights and the fixed
+    cell second moments (hexagon I_rr = I_zz = 5/72·pitch²). One gather and one fixed-weight contraction
+    per cell.</p>
+
+    <h2 id="s6">§6 — Demonstration: coarse mesh, steep edge gradient</h2>
+
+    <p>The applicability gate, posed the hard way: on deliberately coarse plasma meshes, with an analytic
+    equilibrium carrying a steep edge current gradient — a pedestal-like j(ψ_N) concentrating variation in
+    the outermost cells — reproduce ψ, B_R and B_Z against converged references, and show the error
+    against mesh pitch beside the production centroid rule so the coarse-mesh advantage is quantified
+    rather than claimed. The conservation assertion and the any-intersection inclusion rule run inside this
+    demonstration as live checks, not as separate claims.</p>
+
+    <p><em>Done-when:</em> flux and both field components reported as sup and RMS fractions of their
+    reference spans across at least three pitches and two gradient steepnesses, with fitted orders; the
+    representation beats the production rule by a stated factor at the coarsest pitch; patch-area
+    conservation holds at 1e-12 on every case; a moving-separatrix iteration loop retraces once and its
+    per-iteration wall time is reported on CPU and the available CUDA device.</p>
+
+    <h2 id="s7">§7 — SOL current</h2>
+
+    <p><em>Trigger-deferred.</em> J(ψ_N&gt;1) ≠ 0 adds the exterior support's zeroth and first moments to
+    the same three vectors, with no new coupling blocks. Trigger: a locked SOL current closure at the
+    flux-function level (the physical specification belongs to the forward-equilibrium plan's SOL
+    continuation, not here).</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="boundary-method-selection" data-choice="fixed-linear-blocks" data-by="Simon McIntosh" data-when="2026-08-15T14:30:00+00:00">
+    <p class="r-dec-q">Which boundary-cell current method does production adopt?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="fixed-linear-blocks">fixed linear-moment blocks over a conservative clip</button>
+      <button class="r-opt" data-value="moving-filament">a filament at the clipped patch's current centre, re-solved each step</button>
+      <button class="r-opt" data-value="triangle-hierarchy">a-priori two-level triangle refinement with node-inside masking</button>
+      </p>
+    <p class="r-dec-rat">Owner selection 2026-08-15, on the measured comparison: fixed blocks reach
+        1.239e-4 of span at order 1.92 with zero per-step Green evaluations and three matvecs; the moving
+        filament pays 72–266 Green evaluations per step and still loses by 61.9× because a point filament
+        at zero standoff drops every section moment where coupling is strongest; the triangle hierarchy's
+        discard rule is first-order in both area and flux and forfeits conservation by construction. The
+        hierarchy's one-trace execution pattern is retained as the tracing model.</p>
+    </div>
+<div class="r-dec" data-key="cell-inclusion-rule" data-choice="any-intersection" data-by="Simon McIntosh" data-when="2026-08-15T14:30:00+00:00">
+    <p class="r-dec-q">When does a cell participate in the plasma current calculation?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="any-intersection">whenever any part of the cell lies inside the LCFS</button>
+      <button class="r-opt" data-value="centroid-inside">when the cell centroid lies inside</button>
+      </p>
+    <p class="r-dec-rat">Owner direction 2026-08-15: any plasma cell that enters the LCFS is included.
+        Measured basis: the centroid rule assigned zero current to 32/70/93/128 boundary cells whose true
+        current is finite — a 100% per-cell error invisible to net-current closure, which stayed within
+        ±1.05% throughout. It also made the current a discontinuous function of the flux map.</p>
+    </div>
+<div class="r-dec" data-key="patch-area-conservation" data-choice="exact-shoelace-match" data-by="Simon McIntosh" data-when="2026-08-15T14:30:00+00:00">
+    <p class="r-dec-q">What conservation property must the patch calculation satisfy?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="exact-shoelace-match">the patch-area sum equals the LCFS polygon's shoelace area at machine precision</button>
+      <button class="r-opt" data-value="convergent-only">area agreement within a convergent tolerance</button>
+      </p>
+    <p class="r-dec-rat">Owner direction 2026-08-15: exact, no leading-order disagreement. The assertion
+        is against the piecewise-linear LCFS built from the same edge crossings — a partition property that
+        holds at machine precision or the clip is defective (the T-junction defect it caught measured
+        4e-5). The polygon-versus-analytic-curve area difference is a separate geometric O(h²) term,
+        reported beside the assertion and never inside it.</p>
+    </div>
+<div class="r-dec" data-key="field-target-scope" data-choice="full-stack" data-by="Simon McIntosh" data-when="2026-08-15T14:30:00+00:00">
+    <p class="r-dec-q">Which target kernels receive the moment companions?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="full-stack">ψ, B_R and B_Z — the full plasma interaction stack</button>
+      <button class="r-opt" data-value="flux-only">the flux kernel only, fields later</button>
+      </p>
+    <p class="r-dec-rat">Owner direction 2026-08-15: capture the full plasma interaction stack. Field
+        consistency matters wherever the boundary read, force balance or sensor rows consume the same
+        representation; nine blocks total. Coil and conductor operators are untouched — they are never
+        clipped and carry declared currents.</p>
+    </div>
+<div class="r-dec" data-key="development-discipline" data-choice="tdd" data-by="Simon McIntosh" data-when="2026-08-15T14:30:00+00:00">
+    <p class="r-dec-q">What development discipline governs the implementation?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="tdd">test-driven: tests written first, observed red, then made green</button>
+      <button class="r-opt" data-value="test-after">implementation first, tests after</button>
+      </p>
+    <p class="r-dec-rat">Owner direction 2026-08-15. Every node's manifest states the red-then-green
+        order for its named tests; a node whose tests never ran red has not demonstrated they test
+        anything.</p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-pecr-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-15" data-recommends-skill="/reckon-ship plasma-edge-current-representation" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Implement the representation: blocks, clip, stencil, then the coarse-mesh demonstration</h4>
+    <div class="r-fu-body"><p>All decisions are locked and every design number is measured. §3–§5 are
+        independent write scopes (kernel companions in <code>nova/biot/polygonanalytic.py</code>; the clip
+        and moment module in <code>nova/equilibrium</code>; the stencil weights on the mesh) and can run as
+        one wave; the §6 demonstration and the solve-path wiring follow once all three land. TDD throughout;
+        the conservation assertion and any-intersection inclusion run as live checks inside the
+        demonstration.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship plasma-edge-current-representation</pre>
+    </article>
+</section>
+  </main>
+</body>
+</html>

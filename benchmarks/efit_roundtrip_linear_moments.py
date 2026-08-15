@@ -29,6 +29,10 @@ from benchmarks.efit_analytic_roundtrip_floor import (
     _hex_mesh,
     _recovered_density,
 )
+from benchmarks.efit_boundary_method_comparison import (
+    _cell_polygons,
+    _current_moments,
+)
 from benchmarks.efit_constant_current_attribution import (
     ANALYTIC_CASE,
     GRID_SEQUENCE,
@@ -48,6 +52,7 @@ from nova.equilibrium.conservation import FluxLattice
 from nova.equilibrium.convention import TOTAL_FLUX_FACTOR
 from nova.equilibrium.separatrix_clip import AtomicCellMesh
 from nova.equilibrium.stencil_mesh import StencilMesh
+from nova.equilibrium.wall_mask import inside_polygon
 from nova.imas.mast_chain_factory import build_mast_parity_chain
 from nova.imas.mast_solve_inputs import SHOT_STORE
 from nova.jax.config import configure_dtypes
@@ -58,10 +63,12 @@ DEFAULT_SHOT = 21978
 DEFAULT_SLICE = 46
 DEFAULT_ARTIFACT_CACHE = Path.home() / ".cache" / "mast-artifact-ef"
 DEFAULT_ARTIFACT_DIGEST = (
-    "b41c076e1fb7e16dabe3bada2f5d890125a857c400ce7599dfa488e8ebef90e4"
+    "sha256:b41c076e1fb7e16dabe3bada2f5d890125a857c400ce7599dfa488e8ebef90e4"
 )
 EFIT_CONTROL_FRACTION = 5.152548851e-3
 CONTROL_RELATIVE_TOLERANCE = 2.0e-7
+COARSE_PRODUCTION_FORWARD_FRACTION = 6.542230468e-2
+COARSE_LINEAR_FORWARD_FRACTION = 1.010285525e-3
 
 
 def _rectangles(
@@ -197,16 +204,14 @@ def _coupling_blocks(
     return blocks
 
 
-def _linear_vectors(
+def _full_cell_vectors(
     mesh: StencilMesh,
-    atomic: AtomicCellMesh,
-    clipped,
     centroid_density: np.ndarray,
     shared_density: np.ndarray,
     width: float,
     height: float,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Assemble full-cell stencil and clipped-boundary current moments."""
+    """Assemble degree-three current moments on every stencil-valid cell."""
     shared_nodes, cell_node = _shared_corners(
         _rectangles(mesh.coordinate, width, height)
     )
@@ -218,21 +223,40 @@ def _linear_vectors(
     )
     interior_operator = mesh.current_moment_stencil(cell_node, second_mean)
     interior = interior_operator(centroid_density, shared_density)
+    return (
+        np.asarray(interior.cell_current),
+        12.0 * np.asarray(interior.radial_moment) / width**2,
+        12.0 * np.asarray(interior.vertical_moment) / height**2,
+    )
+
+
+def _linear_vectors(
+    mesh: StencilMesh,
+    clipped,
+    centroid_density: np.ndarray,
+    shared_density: np.ndarray,
+    width: float,
+    height: float,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Assemble full-cell stencil and clipped-boundary current moments."""
+    interior = _full_cell_vectors(mesh, centroid_density, shared_density, width, height)
     gradient = np.column_stack(mesh.gradient(centroid_density))
     boundary = clipped.linear_current_moments(centroid_density, gradient)
     use_boundary = clipped.boundary
     use_interior = clipped.included & ~use_boundary
-    current = np.where(
-        use_boundary, boundary.current, np.asarray(interior.cell_current)
+    current = np.where(use_boundary, boundary.current, interior[0])
+    radial_coefficient = np.where(
+        use_boundary, 12.0 * boundary.radial / width**2, interior[1]
     )
-    radial = np.where(use_boundary, boundary.radial, np.asarray(interior.radial_moment))
-    vertical = np.where(
-        use_boundary, boundary.vertical, np.asarray(interior.vertical_moment)
+    vertical_coefficient = np.where(
+        use_boundary, 12.0 * boundary.vertical / height**2, interior[2]
     )
     current = np.where(use_boundary | use_interior, current, 0.0)
-    radial = np.where(use_boundary | use_interior, radial, 0.0)
-    vertical = np.where(use_boundary | use_interior, vertical, 0.0)
-    return current, 12.0 * radial / width**2, 12.0 * vertical / height**2
+    radial_coefficient = np.where(use_boundary | use_interior, radial_coefficient, 0.0)
+    vertical_coefficient = np.where(
+        use_boundary | use_interior, vertical_coefficient, 0.0
+    )
+    return current, radial_coefficient, vertical_coefficient
 
 
 def _contract(blocks: np.ndarray, vectors: tuple[np.ndarray, ...]) -> np.ndarray:
@@ -276,6 +300,56 @@ def _interpolate_density(
     return np.nan_to_num(values)
 
 
+def _source_vector_audit(
+    case,
+    mesh: StencilMesh,
+    width: float,
+    height: float,
+    clipped,
+    vectors: tuple[np.ndarray, np.ndarray, np.ndarray],
+) -> dict[str, Any]:
+    """Compare the coarse-grid source vectors with the established reference."""
+    polygons, classes = _cell_polygons(case, mesh.coordinate, width, height)
+    current, radial, vertical, _centres = _current_moments(
+        case, mesh.coordinate, polygons
+    )
+    computed_radial = vectors[1] * width**2 / 12.0
+    computed_vertical = vectors[2] * height**2 / 12.0
+    selected = vectors[0] != 0.0
+    boundary = classes == "boundary"
+
+    def compare(mask: np.ndarray) -> dict[str, float | int]:
+        return {
+            "cell_count": int(np.count_nonzero(mask)),
+            "current_sup_difference_a": float(
+                np.max(np.abs(vectors[0][mask] - current[mask]))
+            ),
+            "current_rms_difference_a": float(
+                np.sqrt(np.mean((vectors[0][mask] - current[mask]) ** 2))
+            ),
+            "radial_moment_sup_difference_a_m": float(
+                np.max(np.abs(computed_radial[mask] - radial[mask]))
+            ),
+            "vertical_moment_sup_difference_a_m": float(
+                np.max(np.abs(computed_vertical[mask] - vertical[mask]))
+            ),
+        }
+
+    return {
+        "reference": (
+            "converged clipped-current quadrature from the boundary-method comparison"
+        ),
+        "boundary_cell_count_matches": bool(
+            np.count_nonzero(clipped.boundary) == np.count_nonzero(boundary)
+        ),
+        "all_nonzero_cells": compare(selected),
+        "boundary_cells": compare(boundary),
+        "signed_total_current_difference_a": float(
+            np.sum(vectors[0]) - np.sum(current)
+        ),
+    }
+
+
 def _analytic_resolution(radial_count: int, vertical_count: int, workers: int):
     configure_dtypes()
     case = reference_cases()[ANALYTIC_CASE]
@@ -295,16 +369,20 @@ def _analytic_resolution(radial_count: int, vertical_count: int, workers: int):
         case.toroidal_current_density(corner[:, 0], corner[:, 1])
     )
     vectors = _linear_vectors(
-        mesh, atomic, clipped, centroid_density, corner_density, width, height
+        mesh, clipped, centroid_density, corner_density, width, height
     )
     blocks = _coupling_blocks(mesh, cells, width, height, workers)
     linear_flux = _contract(blocks, vectors)
     recovered = _recovered_density(mesh, linear_flux)
     recovered_corner = _interpolate_density(mesh.coordinate, recovered, corner)
-    repeated_vectors = _linear_vectors(
-        mesh, atomic, clipped, recovered, recovered_corner, width, height
+    repeated_vectors = _full_cell_vectors(
+        mesh, recovered, recovered_corner, width, height
     )
     repeated_linear_flux = _contract(blocks, repeated_vectors)
+    remasked_vectors = _linear_vectors(
+        mesh, clipped, recovered, recovered_corner, width, height
+    )
+    remasked_linear_flux = _contract(blocks, remasked_vectors)
 
     plasma = case.contains(mesh.coordinate[:, 0], mesh.coordinate[:, 1])
     driven_density = np.where(plasma, centroid_density, 0.0)
@@ -316,6 +394,7 @@ def _analytic_resolution(radial_count: int, vertical_count: int, workers: int):
     dense_production_repeat = blocks[3] @ (production_recovered * mesh.cell_area)
     span = float(TOTAL_FLUX_FACTOR * case.axis_flux)
     linear_error = _errors(linear_flux - repeated_linear_flux, span)
+    remasked_error = _errors(linear_flux - remasked_linear_flux, span)
     production_error = _errors(production_flux - production_repeat, span)
     banked = REFERENCE_COMPOSITION_FRACTIONS[
         GRID_SEQUENCE.index((radial_count, vertical_count))
@@ -356,6 +435,35 @@ def _analytic_resolution(radial_count: int, vertical_count: int, workers: int):
             abs(clipped.patch_area_sum - clipped.contour_area) / clipped.contour_area
         ),
         "linear_representation": linear_error,
+        "repeat_support_diagnostic": {
+            "recovery_semantics": (
+                "carry delta-star recovery on every stencil-valid cell without "
+                "a second LCFS mask, matching the analytic production control"
+            ),
+            "double_remask_counterfactual": remasked_error,
+            "corrected_over_double_remask_sup_ratio": float(
+                linear_error["sup_fraction_of_span"]
+                / remasked_error["sup_fraction_of_span"]
+            ),
+            "initial_total_current_a": float(np.sum(vectors[0])),
+            "corrected_repeat_total_current_a": float(np.sum(repeated_vectors[0])),
+            "double_remask_repeat_total_current_a": float(np.sum(remasked_vectors[0])),
+            "initial_boundary_current_a": float(np.sum(vectors[0][clipped.boundary])),
+            "corrected_repeat_boundary_current_a": float(
+                np.sum(repeated_vectors[0][clipped.boundary])
+            ),
+            "double_remask_repeat_boundary_current_a": float(
+                np.sum(remasked_vectors[0][clipped.boundary])
+            ),
+            "corrected_repeat_exterior_current_a": float(
+                np.sum(repeated_vectors[0][~clipped.included])
+            ),
+        },
+        "source_vector_audit": (
+            _source_vector_audit(case, mesh, width, height, clipped, vectors)
+            if (radial_count, vertical_count) == GRID_SEQUENCE[0]
+            else None
+        ),
         "centroid_production_control": {
             **production_error,
             "banked_sup_fraction_of_span": banked,
@@ -446,11 +554,30 @@ def _efit_measurement(
         )
         - boundary_flux
     )
+    finite_node_flux = np.isfinite(signed_node_flux)
+    exterior_level = -max(
+        float(np.max(np.abs(signed_node_flux[finite_node_flux]))), 1.0
+    )
+    signed_node_flux = np.where(finite_node_flux, signed_node_flux, exterior_level)
+    stored_component = inside_polygon(
+        atomic.node_coordinates[:, 0],
+        atomic.node_coordinates[:, 1],
+        stored.lcfs_radius_m,
+        stored.lcfs_height_m,
+    )
+    suppressed_positive_nodes = int(
+        np.count_nonzero((signed_node_flux > 0.0) & ~stored_component)
+    )
+    signed_node_flux = np.where(
+        stored_component, signed_node_flux, -np.abs(signed_node_flux)
+    )
     clipped = atomic.clip(signed_node_flux)
+    if not clipped.contour_closed or not np.isfinite(clipped.contour_area):
+        raise AssertionError("EFIT clip did not produce a closed finite contour")
     corner, _cell_node = _shared_corners(cells)
     corner_density = density_interpolator(np.column_stack((corner[:, 1], corner[:, 0])))
     vectors = _linear_vectors(
-        mesh, atomic, clipped, centroid_density, corner_density, width, height
+        mesh, clipped, centroid_density, corner_density, width, height
     )
     blocks = _coupling_blocks(mesh, cells, width, height, workers)
     linear_flux = _contract(blocks, vectors)
@@ -460,9 +587,13 @@ def _efit_measurement(
     recovered = np.where(np.asarray(mesh.interior(2)), recovered, 0.0)
     recovered_corner = _interpolate_density(mesh.coordinate, recovered, corner)
     repeated_vectors = _linear_vectors(
-        mesh, atomic, clipped, recovered, recovered_corner, width, height
+        mesh, clipped, recovered, recovered_corner, width, height
     )
     repeated_linear_flux = _contract(blocks, repeated_vectors)
+    unmasked_vectors = _full_cell_vectors(
+        mesh, recovered, recovered_corner, width, height
+    )
+    unmasked_linear_flux = _contract(blocks, unmasked_vectors)
 
     banked_control = account_round_trip(
         shot=shot,
@@ -504,17 +635,59 @@ def _efit_measurement(
         raise AssertionError(
             "EFIT production control did not reproduce its banked value"
         )
+    linear_error = _errors(linear_flux - repeated_linear_flux, span)
+    unmasked_error = _errors(linear_flux - unmasked_linear_flux, span)
     return {
         "shot": shot,
         "slice": slice_index,
         "time_s": stored.time_s,
-        "grid": [len(height_axis), len(radius)],
+        "grid": [len(radius), len(height_axis)],
         "stored_flux_span_wb": span,
         "boundary_cell_count": int(np.count_nonzero(clipped.boundary)),
+        "level_component_selection": {
+            "authority": "stored LCFS polygon",
+            "suppressed_positive_nodes_outside_lcfs": suppressed_positive_nodes,
+            "contour_closed": bool(clipped.contour_closed),
+        },
         "clip_relative_area_residual": float(
             abs(clipped.patch_area_sum - clipped.contour_area) / clipped.contour_area
         ),
-        "linear_representation": _errors(linear_flux - repeated_linear_flux, span),
+        "linear_representation": linear_error,
+        "ranking_against_control": {
+            "masked_linear_over_centroid_sup_ratio": float(
+                linear_error["sup_fraction_of_span"]
+                / control_error["sup_fraction_of_span"]
+            ),
+            "unmasked_linear_over_centroid_sup_ratio": float(
+                unmasked_error["sup_fraction_of_span"]
+                / control_error["sup_fraction_of_span"]
+            ),
+            "reading": (
+                "the mandatory stored-LCFS remask reverses the EFIT ranking; "
+                "without that remask the fixed linear representation remains "
+                "below the centroid control"
+            ),
+        },
+        "repeat_support_diagnostic": {
+            "recovery_semantics": (
+                "reapply the LCFS support after delta-star recovery, matching the "
+                "mandatory remask in the EFIT production control"
+            ),
+            "unmasked_counterfactual": unmasked_error,
+            "initial_total_current_a": float(np.sum(vectors[0])),
+            "masked_repeat_total_current_a": float(np.sum(repeated_vectors[0])),
+            "unmasked_repeat_total_current_a": float(np.sum(unmasked_vectors[0])),
+            "initial_boundary_current_a": float(np.sum(vectors[0][clipped.boundary])),
+            "masked_repeat_boundary_current_a": float(
+                np.sum(repeated_vectors[0][clipped.boundary])
+            ),
+            "unmasked_repeat_boundary_current_a": float(
+                np.sum(unmasked_vectors[0][clipped.boundary])
+            ),
+            "unmasked_repeat_exterior_current_a": float(
+                np.sum(unmasked_vectors[0][~clipped.included])
+            ),
+        },
         "centroid_production_control": {
             **control_error,
             "banked_sup_fraction_of_span": EFIT_CONTROL_FRACTION,
@@ -525,11 +698,9 @@ def _efit_measurement(
     }
 
 
-def measure(arguments: argparse.Namespace) -> dict[str, Any]:
-    configure_dtypes()
-    analytic = [
-        _analytic_resolution(nr, nz, arguments.workers) for nr, nz in GRID_SEQUENCE
-    ]
+def _analytic_bank(workers: int) -> dict[str, Any]:
+    """Return the analytic grid bank and the prebank assembly check."""
+    analytic = [_analytic_resolution(nr, nz, workers) for nr, nz in GRID_SEQUENCE]
     cell_size = np.asarray([row["characteristic_cell_size_m"] for row in analytic])
     sup = np.asarray(
         [row["linear_representation"]["sup_fraction_of_span"] for row in analytic]
@@ -548,8 +719,44 @@ def measure(arguments: argparse.Namespace) -> dict[str, Any]:
             "interior": "degree-three centroid-and-shared-corner current moments",
             "boundary": "shared-crossing conservative clip with exact linear moments",
             "coupling": "exact fixed polygon flux blocks G0, GR, GZ",
+            "analytic_repeat_support": (
+                "unmasked delta-star recovery on all stencil-valid cells, matching "
+                "the analytic production control"
+            ),
+            "efit_repeat_support": "mandatory LCFS remask, matching the EFIT control",
             "identity_bound": IDENTITY_FRACTION,
             "bound_changed_or_applied": False,
+        },
+        "prebank_assembly_check": {
+            "grid": analytic[0]["grid"],
+            "source_vectors": analytic[0]["source_vector_audit"],
+            "forward_ranking_from_boundary_method_comparison": {
+                "production_centroid_sup_fraction_of_span": (
+                    COARSE_PRODUCTION_FORWARD_FRACTION
+                ),
+                "fixed_linear_sup_fraction_of_span": (COARSE_LINEAR_FORWARD_FRACTION),
+                "linear_improvement_factor": float(
+                    COARSE_PRODUCTION_FORWARD_FRACTION / COARSE_LINEAR_FORWARD_FRACTION
+                ),
+            },
+            "roundtrip_ranking": {
+                "centroid_production_sup_fraction_of_span": analytic[0][
+                    "centroid_production_control"
+                ]["sup_fraction_of_span"],
+                "fixed_linear_sup_fraction_of_span": analytic[0][
+                    "linear_representation"
+                ]["sup_fraction_of_span"],
+                "linear_over_centroid_ratio": float(
+                    analytic[0]["linear_representation"]["sup_fraction_of_span"]
+                    / analytic[0]["centroid_production_control"]["sup_fraction_of_span"]
+                ),
+            },
+            "repeat_support": analytic[0]["repeat_support_diagnostic"],
+            "conclusion": (
+                "the apparent ranking inversion was a second-mask assembly defect; "
+                "the corrected analytic repeat retains recovered boundary and "
+                "exterior stencil currents exactly as its control does"
+            ),
         },
         "analytic": {
             "case": ANALYTIC_CASE,
@@ -562,15 +769,39 @@ def measure(arguments: argparse.Namespace) -> dict[str, Any]:
                 "finest_sup_over_bound": float(sup[-1] / IDENTITY_FRACTION),
             },
         },
-        "efit": _efit_measurement(
-            arguments.shot,
-            arguments.slice,
-            arguments.store,
-            arguments.artifact_cache,
-            arguments.artifact_digest,
-            arguments.workers,
-        ),
     }
+
+
+def _efit_bank(arguments: argparse.Namespace) -> dict[str, Any]:
+    """Return the requested stored-slice measurement."""
+    return _efit_measurement(
+        arguments.shot,
+        arguments.slice,
+        arguments.store,
+        arguments.artifact_cache,
+        arguments.artifact_digest,
+        arguments.workers,
+    )
+
+
+def _read_bank(path: Path) -> dict[str, Any]:
+    """Read one completed partial bank for assembly without recomputation."""
+    return json.loads(path.read_text())
+
+
+def measure(arguments: argparse.Namespace) -> dict[str, Any]:
+    configure_dtypes()
+    analytic = (
+        _read_bank(arguments.analytic_results)
+        if arguments.analytic_results is not None
+        else _analytic_bank(arguments.workers)
+    )
+    efit = (
+        _read_bank(arguments.efit_results)
+        if arguments.efit_results is not None
+        else _efit_bank(arguments)
+    )
+    return {**analytic, "efit": efit}
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -581,11 +812,24 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--artifact-cache", type=Path, default=DEFAULT_ARTIFACT_CACHE)
     parser.add_argument("--artifact-digest", default=DEFAULT_ARTIFACT_DIGEST)
     parser.add_argument("--workers", type=int, default=min(os.cpu_count() or 1, 32))
+    parser.add_argument("--analytic-only", action="store_true")
+    parser.add_argument("--efit-only", action="store_true")
+    parser.add_argument("--analytic-results", type=Path)
+    parser.add_argument("--efit-results", type=Path)
     return parser
 
 
 def main() -> None:
-    print(json.dumps(measure(_parser().parse_args()), indent=2, sort_keys=True))
+    arguments = _parser().parse_args()
+    if arguments.analytic_only and arguments.efit_only:
+        raise ValueError("analytic-only and efit-only are mutually exclusive")
+    if arguments.analytic_only:
+        result = _analytic_bank(arguments.workers)
+    elif arguments.efit_only:
+        result = _efit_bank(arguments)
+    else:
+        result = measure(arguments)
+    print(json.dumps(result, indent=2, sort_keys=True))
 
 
 if __name__ == "__main__":

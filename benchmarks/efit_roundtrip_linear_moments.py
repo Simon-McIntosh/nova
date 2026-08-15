@@ -67,6 +67,8 @@ DEFAULT_ARTIFACT_DIGEST = (
 )
 EFIT_CONTROL_FRACTION = 5.152548851e-3
 CONTROL_RELATIVE_TOLERANCE = 2.0e-7
+EFIT_MASKED_CONTROL_RATIO = 2.08758329834
+EFIT_UNMASKED_CONTROL_RATIO = 0.686454739323
 COARSE_PRODUCTION_FORWARD_FRACTION = 6.542230468e-2
 COARSE_LINEAR_FORWARD_FRACTION = 1.010285525e-3
 
@@ -263,6 +265,13 @@ def _contract(blocks: np.ndarray, vectors: tuple[np.ndarray, ...]) -> np.ndarray
     return sum(
         block @ vector for block, vector in zip(blocks[:3], vectors, strict=True)
     )
+
+
+def _restrict_vectors(
+    vectors: tuple[np.ndarray, ...], admitted: np.ndarray
+) -> tuple[np.ndarray, ...]:
+    """Retain fixed-section moment vectors only on admitted source cells."""
+    return tuple(np.where(admitted, vector, 0.0) for vector in vectors)
 
 
 def _fit_order(cell_size: np.ndarray, error: np.ndarray) -> dict[str, float]:
@@ -594,6 +603,12 @@ def _efit_measurement(
         mesh, recovered, recovered_corner, width, height
     )
     unmasked_linear_flux = _contract(blocks, unmasked_vectors)
+    admitted_full_vectors = _restrict_vectors(unmasked_vectors, clipped.included)
+    admitted_full_flux = _contract(blocks, admitted_full_vectors)
+    centroid_admitted_vectors = _restrict_vectors(repeated_vectors, nova_lcfs)
+    centroid_admitted_flux = _contract(blocks, centroid_admitted_vectors)
+    boundary_dropped_vectors = _restrict_vectors(repeated_vectors, ~clipped.boundary)
+    boundary_dropped_flux = _contract(blocks, boundary_dropped_vectors)
 
     banked_control = account_round_trip(
         shot=shot,
@@ -637,6 +652,66 @@ def _efit_measurement(
         )
     linear_error = _errors(linear_flux - repeated_linear_flux, span)
     unmasked_error = _errors(linear_flux - unmasked_linear_flux, span)
+    admitted_full_error = _errors(linear_flux - admitted_full_flux, span)
+    exterior_cut = admitted_full_flux - unmasked_linear_flux
+    boundary_reclip = repeated_linear_flux - admitted_full_flux
+    admission_change = centroid_admitted_flux - repeated_linear_flux
+    boundary_discard = boundary_dropped_flux - repeated_linear_flux
+    candidates = {
+        "exterior_stencil_current_cut": {
+            **_errors(exterior_cut, span),
+            "removed_cell_count": int(np.count_nonzero(~clipped.included)),
+            "removed_current_a": float(np.sum(unmasked_vectors[0][~clipped.included])),
+            "role": "exact masked-minus-unmasked term",
+        },
+        "boundary_cells_clipped_twice": {
+            **_errors(boundary_reclip, span),
+            "affected_cell_count": int(np.count_nonzero(clipped.boundary)),
+            "removed_current_a": float(
+                np.sum(admitted_full_vectors[0][clipped.boundary])
+                - np.sum(repeated_vectors[0][clipped.boundary])
+            ),
+            "role": "exact masked-minus-unmasked term",
+        },
+        "centroid_instead_of_any_intersection_admission": {
+            **_errors(admission_change, span),
+            "discarded_boundary_cell_count": int(
+                np.count_nonzero(clipped.boundary & ~nova_lcfs)
+            ),
+            "removed_current_a": float(
+                np.sum(repeated_vectors[0][clipped.boundary & ~nova_lcfs])
+            ),
+            "role": "alternative admission-rule counterfactual",
+        },
+        "all_clipped_boundary_support_discarded": {
+            **_errors(boundary_discard, span),
+            "discarded_boundary_cell_count": int(np.count_nonzero(clipped.boundary)),
+            "removed_current_a": float(np.sum(repeated_vectors[0][clipped.boundary])),
+            "role": "boundary-support-loss counterfactual",
+        },
+    }
+    exact_terms = (
+        "exterior_stencil_current_cut",
+        "boundary_cells_clipped_twice",
+    )
+    dominant_term = max(
+        exact_terms, key=lambda name: candidates[name]["sup_fraction_of_span"]
+    )
+    closure = (
+        repeated_linear_flux - unmasked_linear_flux - exterior_cut - boundary_reclip
+    )
+    masked_ratio = float(
+        linear_error["sup_fraction_of_span"] / control_error["sup_fraction_of_span"]
+    )
+    unmasked_ratio = float(
+        unmasked_error["sup_fraction_of_span"] / control_error["sup_fraction_of_span"]
+    )
+    for measured, banked, label in (
+        (masked_ratio, EFIT_MASKED_CONTROL_RATIO, "masked"),
+        (unmasked_ratio, EFIT_UNMASKED_CONTROL_RATIO, "unmasked"),
+    ):
+        if abs(measured / banked - 1.0) > CONTROL_RELATIVE_TOLERANCE:
+            raise AssertionError(f"EFIT {label} linear ratio did not reproduce")
     return {
         "shot": shot,
         "slice": slice_index,
@@ -654,13 +729,17 @@ def _efit_measurement(
         ),
         "linear_representation": linear_error,
         "ranking_against_control": {
-            "masked_linear_over_centroid_sup_ratio": float(
-                linear_error["sup_fraction_of_span"]
-                / control_error["sup_fraction_of_span"]
+            "masked_linear_over_centroid_sup_ratio": masked_ratio,
+            "banked_masked_linear_over_centroid_sup_ratio": (EFIT_MASKED_CONTROL_RATIO),
+            "masked_ratio_relative_reproduction_error": float(
+                masked_ratio / EFIT_MASKED_CONTROL_RATIO - 1.0
             ),
-            "unmasked_linear_over_centroid_sup_ratio": float(
-                unmasked_error["sup_fraction_of_span"]
-                / control_error["sup_fraction_of_span"]
+            "unmasked_linear_over_centroid_sup_ratio": unmasked_ratio,
+            "banked_unmasked_linear_over_centroid_sup_ratio": (
+                EFIT_UNMASKED_CONTROL_RATIO
+            ),
+            "unmasked_ratio_relative_reproduction_error": float(
+                unmasked_ratio / EFIT_UNMASKED_CONTROL_RATIO - 1.0
             ),
             "reading": (
                 "the mandatory stored-LCFS remask reverses the EFIT ranking; "
@@ -687,6 +766,37 @@ def _efit_measurement(
             "unmasked_repeat_exterior_current_a": float(
                 np.sum(unmasked_vectors[0][~clipped.included])
             ),
+        },
+        "remask_mechanism": {
+            "candidate_effects": candidates,
+            "exact_masked_minus_unmasked_closure_fraction_of_span": float(
+                np.max(np.abs(closure)) / span
+            ),
+            "dominant_exact_term": dominant_term,
+            "dominant_exact_term_sup_fraction_of_span": candidates[dominant_term][
+                "sup_fraction_of_span"
+            ],
+            "dominant_over_exterior_cut_sup_ratio": float(
+                candidates[dominant_term]["sup_fraction_of_span"]
+                / candidates["exterior_stencil_current_cut"]["sup_fraction_of_span"]
+            ),
+            "masked_once_composition_error": admitted_full_error,
+            "masked_once_over_centroid_sup_ratio": float(
+                admitted_full_error["sup_fraction_of_span"]
+                / control_error["sup_fraction_of_span"]
+            ),
+            "finding": (
+                "the ranking inversion is caused primarily by clipping recovered "
+                "boundary moments a second time, not by the required removal of "
+                "exterior stencil current"
+            ),
+            "recommendation": (
+                "compare the composition masked, because the plasma term must not "
+                "admit exterior delta-star current; apply that support restriction "
+                "once by removing exterior cells while retaining full recovered "
+                "boundary moments, rather than clipping the boundary moments again"
+            ),
+            "bound_changed_or_applied": False,
         },
         "centroid_production_control": {
             **control_error,

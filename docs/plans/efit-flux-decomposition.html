@@ -174,6 +174,69 @@
     source-free harmonic maps of the <em>magnetics</em> misfit; the Δ* residual here is the same idea
     applied to a flux map, and a conductor implicated by both is implicated twice over.</p>
 
+    <h2 id="s6">§6 — Edge current representation: agreement with analytic solutions at the separatrix</h2>
+
+    <p><strong>Owner directive 2026-08-15.</strong> The §2 attribution ladder localised the dominant source
+    error to the cells the separatrix crosses: the centroid-inside rule is 4–8× the whole composition error,
+    separatrix clipping repairs cell totals with clean second-order convergence, and the surviving
+    current-weighted centroid offset is 0.24–0.65 cell widths and scale-invariant. This section turns that
+    diagnosis into a representation the solve can carry. The goal is stated plainly: nova's handling of
+    plasma current flowing close to the edge must demonstrate very good agreement with analytic solutions,
+    or the confident solution of H-mode plasmas — where the current gradient concentrates at exactly these
+    cells — is not possible.</p>
+
+    <p><strong>The architecture constraint every candidate answers to.</strong> The interaction matrices are
+    computed once and cached; an equilibrium iteration re-evaluates fixed matrices against new current
+    vectors and masks, and never rebuilds a coupling. This is why the plasma is masked rather than remeshed.
+    A candidate must therefore state exactly what changes per iteration — vectors and masks are free,
+    per-step Green evaluations are permitted only where counted and justified, and per-step matrix builds are
+    disqualifying. Build cost for anything precomputed is explicitly not a concern while the geometry stays
+    fixed.</p>
+
+    <p><strong>Rung 1, the gate: area conservation, asserted before any current work.</strong> The sum of
+    filament patch areas — full cell areas inside, clipped areas on boundary cells, zero outside — must equal
+    the poloidal area enclosed by the piecewise-linear LCFS built from the same edge crossings
+    <em>exactly</em>, at machine precision, with no leading-order disagreement. The separate polygon-versus-
+    analytic-curve area difference is a geometric term with its own convergence order and must be reported
+    beside the assertion, never folded into it. The boundary-method comparison does not open until this
+    gate passes.</p>
+
+    <p><strong>Rung 2: interior cells, a fixed-stencil quadrature on values the mesh already shares.</strong>
+    j(ψ_N) is evaluated once at every mesh node and centroid, then each cell's average is a fixed-weight
+    contraction over its own centroid and edge nodes, indexed by the connectivity — one gather and one
+    weighted sum, traceable, with the node values shared between neighbouring cells. Weights are derived
+    once from the cell geometry with a stated polynomial exactness degree.</p>
+
+    <p><strong>Rung 3: boundary cells, three candidates compared on accuracy, per-iteration cost,
+    traceability and SOL extensibility.</strong>
+    (1) <em>Moving filament:</em> compute the clipped patch's current centre each step and place a fast
+    filament there — exact placement of the leading moment, per-step Green evaluations counted against it,
+    higher moments ignored.
+    (2) <em>Fixed dipole matrices:</em> the source-position derivative blocks G_R, G_Z are evaluated once at
+    the fixed cell centroids, and the changing boundary rides entirely in the per-iteration vectors
+    (I, I·δR, I·δZ) computed from the clip — three matrix-vector products, zero per-step Green evaluations.
+    The precomputability question is settled by construction: the matrices never move because the expansion
+    point is the fixed centroid; only the moments update. The linearisation error at offsets up to 0.65 cell
+    widths is the number to measure.
+    (3) <em>A-priori triangle refinement:</em> split each hexagonal cell into 6 triangles and each again into
+    4, precompute coupling columns at the fixed sub-triangle centroids for the boundary band, and per
+    iteration assign currents by a node-inside mask at each level — fixed shapes throughout, so traceable;
+    memory growth and the mask logic are the costs to measure, on CPU and GPU.
+    All three must state how they extend to J(ψ_N &gt; 1) ≠ 0, since SOL current is a declared future
+    requirement.</p>
+
+    <p><strong>Rung 4: the Urankar linear-current extension.</strong> Investigate whether Part V's
+    antiderivative and moment recursions admit a current density varying linearly across the polygon
+    section, yielding exact fixed blocks (G₀, G_R, G_Z) per cell with the linear coefficients riding in
+    per-iteration vectors. If the structure admits it, this is the kernel-exact form of candidate (2) and
+    subsumes it for interior cells; the equivalence or its failure is to be established numerically, not
+    argued. Clipping options — the linear edge cut now in use, a curved cut, and the sub-triangulation of
+    candidate (3) — are assessed inside the rungs that consume them.</p>
+
+    <p><em>Standing note:</em> the §2 identity-bound decision stays deferred while the round trip is a net of
+    cancelling terms; it is re-posed once this representation lands and the round trip measures a single
+    term.</p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="residual-threshold-policy" data-choice="report-unbounded" data-by="Simon McIntosh" data-when="2026-08-13T13:20:00+00:00">

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="plasma-edge-current-representation-landed">
+  <meta name="plan-title" content="Plasma Edge Current Representation — Cumulative Evidence">
+  <meta name="plan-summary" content="Landed record of the linear edge-current representation: the exact kernel moment blocks, the conservative separatrix clip with its clipped moments, the degree-3 interior stencil, and the coarse-mesh steep-gradient demonstration">
+  <meta name="plan-status" content="active">
+  <meta name="plan-evidence-for" content="plasma-edge-current-representation">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>Plasma Edge Current Representation — Cumulative Evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+
+  <p>Execution record for
+  <a href="/nova/plasma-edge-current-representation.html">plasma-edge-current-representation</a>.
+  The design numbers this implementation answers to were all measured by the
+  <a href="/nova/evidence/archive/efit-flux-decomposition-landed">flux-decomposition attribution ladder</a>;
+  each section here records one production node against its own pins.</p>
+
+  <h2 id="interior-stencil-moments">§5 — interior cell average and gradient moments from shared nodes</h2>
+
+  <p>Commit <code>444d4d7d</code>; gate passed; worker 528 s; TDD with the red collection run preserved.
+  Artifacts: <code>nova/equilibrium/stencil_mesh.py</code> (+146 lines),
+  <code>tests/test_equilibrium_stencil_mesh.py</code> (+210 lines, 6 new named tests, suite 35/35).</p>
+
+  <p><strong>The closed-form weights hold at machine precision and the contraction is exactly one gather
+  and one dot.</strong> Cell-average rules exact through total degree 3 — maximum absolute monomial error
+  2.665e-15 on the rectangle (2/3 centroid + 1/12 per corner) and 1.110e-15 on the regular hexagon
+  (7/12 centroid + 5/72 per vertex) — with the pinned radial quartic non-exact at 2.001e-3 and 1.834e-3,
+  so the rule cannot silently claim a degree it does not have. First moments ride the existing fitted
+  ring-weight gradient times <code>area × second_moment</code>, the hexagon second moments pinned to
+  5/72·pitch²; on an analytic linear field the maximum errors are 1.665e-16 (cell current),
+  2.060e-18 (radial moment) and 1.870e-18 (vertical moment). The JAXPR of the fixed
+  <code>InteriorCurrentMomentStencil</code> contains exactly one gather and one
+  <code>dot_general</code> per call; cells without a complete fitted ring emit zeros rather than
+  partial values.</p>
+
+  <p><strong>Shared nodes amortise as designed.</strong> Bulk cost is 3.0 j evaluations per
+  regular-hexagon cell (one centroid plus six vertices shared three ways; 3.098 measured on a finite
+  41×41 patch including boundary overhead) and 2.0 per rectangle — against 1 for the centroid rule the
+  stencil replaces at four orders better interior accuracy (the ladder's measured orders: centroid 1.894,
+  stencil 3.764 sup).</p>
+
+</main></body>
+</html>

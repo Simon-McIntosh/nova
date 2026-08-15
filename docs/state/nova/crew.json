@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-15T13:50:54",
+  "updated": "2026-08-15T23:10:42",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -52,6 +52,13 @@
         "role": "implement",
         "session_id": "019ff744-0a55-7ba2-aefa-7ad33ff66561",
         "created": "2026-08-12"
+      },
+      {
+        "id": "edge-clip",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a00738-f48f-7150-97d1-17307a705e4b",
+        "created": "2026-08-15"
       },
       {
         "id": "efit-referee",
@@ -138,6 +145,13 @@
         "created": "2026-08-12"
       },
       {
+        "id": "moment-blocks",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a00738-dbe8-7d62-a6fa-c0ff2c23dd6b",
+        "created": "2026-08-15"
+      },
+      {
         "id": "packaging",
         "harness": "claude",
         "role": "implement",
@@ -206,6 +220,13 @@
         "role": "implement",
         "session_id": "019ffa72-15c7-78b1-bee8-5f074cebc901",
         "created": "2026-08-13"
+      },
+      {
+        "id": "stencil-weights",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a00738-4206-7582-b3b5-e5ed51fa5e91",
+        "created": "2026-08-15"
       },
       {
         "id": "topology-parity",
@@ -4636,9 +4657,61 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260815T205840364235-interior-stencil-moments",
+        "plan": "plasma-edge-current-representation",
+        "section": "\u00a75",
+        "node": "interior-stencil-moments",
+        "role": "implement",
+        "member": "stencil-weights",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-15T20:58:42Z",
+        "completed_at": "2026-08-15T21:07:30Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 528,
+        "time_budget": "25m",
+        "base_sha": "a44dfdd22c8dc3ddf2ba04348ae48d62b636bd7d",
+        "commits": [
+          "444d4d7d"
+        ],
+        "changed_lines": {
+          "added": 353,
+          "removed": 3,
+          "files": 2
+        },
+        "tests_added": 6,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/interior-stencil-moments-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00738-4206-7582-b3b5-e5ed51fa5e91",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 3204864,
+            "input_tokens": 3334960,
+            "output_tokens": 19969,
+            "reasoning_output_tokens": 7847
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 146
+    "_version": 153
   }
 }

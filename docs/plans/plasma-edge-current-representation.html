@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="plasma-edge-current-representation">
   <meta name="plan-title" content="Plasma Edge Current Representation — exact moments against fixed kernels">
-  <meta name="plan-summary" content="Carry each plasma cell's current as a linear field about its fixed centroid: nine exact Part V blocks (flux and both field components, each with radial and vertical moment companions), a conservative separatrix clip whose patch areas match the LCFS shoelace area at machine precision, and a degree-3 stencil for interior averages and gradients — so current gradients and clipped boundary support ride in three per-iteration vectors against matrices built once">
+  <meta name="plan-summary" content="Carry each plasma cell&#x27;s current as a linear field about its fixed centroid: nine exact Part V blocks (flux and both field components, each with radial and vertical moment companions), a conservative separatrix clip whose patch areas match the LCFS shoelace area at machine precision, and a degree-3 stencil for interior averages and gradients — so current gradients and clipped boundary support ride in three per-iteration vectors against matrices built once">
   <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="8.0">
@@ -22,6 +22,11 @@
   <title>Plasma Edge Current Representation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-15">
+<meta name="plan-commits" content="444d4d7d">
+<meta name="plan-artifacts" content="docs/evidence/archive/plasma-edge-current-representation-landed.html,nova/equilibrium/stencil_mesh.py,tests/test_equilibrium_stencil_mesh.py">
+<meta name="plan-impl" content="0.14">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -151,15 +156,15 @@
     <p class="r-dec-q">Which boundary-cell current method does production adopt?</p>
     <p class="r-dec-opts">
       <button class="r-opt chosen" data-value="fixed-linear-blocks">fixed linear-moment blocks over a conservative clip</button>
-      <button class="r-opt" data-value="moving-filament">a filament at the clipped patch's current centre, re-solved each step</button>
+      <button class="r-opt" data-value="moving-filament">a filament at the clipped patch&#x27;s current centre, re-solved each step</button>
       <button class="r-opt" data-value="triangle-hierarchy">a-priori two-level triangle refinement with node-inside masking</button>
       </p>
     <p class="r-dec-rat">Owner selection 2026-08-15, on the measured comparison: fixed blocks reach
         1.239e-4 of span at order 1.92 with zero per-step Green evaluations and three matvecs; the moving
         filament pays 72–266 Green evaluations per step and still loses by 61.9× because a point filament
-        at zero standoff drops every section moment where coupling is strongest; the triangle hierarchy's
+        at zero standoff drops every section moment where coupling is strongest; the triangle hierarchy&#x27;s
         discard rule is first-order in both area and flux and forfeits conservation by construction. The
-        hierarchy's one-trace execution pattern is retained as the tracing model.</p>
+        hierarchy&#x27;s one-trace execution pattern is retained as the tracing model.</p>
     </div>
 <div class="r-dec" data-key="cell-inclusion-rule" data-choice="any-intersection" data-by="Simon McIntosh" data-when="2026-08-15T14:30:00+00:00">
     <p class="r-dec-q">When does a cell participate in the plasma current calculation?</p>
@@ -175,7 +180,7 @@
 <div class="r-dec" data-key="patch-area-conservation" data-choice="exact-shoelace-match" data-by="Simon McIntosh" data-when="2026-08-15T14:30:00+00:00">
     <p class="r-dec-q">What conservation property must the patch calculation satisfy?</p>
     <p class="r-dec-opts">
-      <button class="r-opt chosen" data-value="exact-shoelace-match">the patch-area sum equals the LCFS polygon's shoelace area at machine precision</button>
+      <button class="r-opt chosen" data-value="exact-shoelace-match">the patch-area sum equals the LCFS polygon&#x27;s shoelace area at machine precision</button>
       <button class="r-opt" data-value="convergent-only">area agreement within a convergent tolerance</button>
       </p>
     <p class="r-dec-rat">Owner direction 2026-08-15: exact, no leading-order disagreement. The assertion
@@ -201,7 +206,7 @@
       <button class="r-opt chosen" data-value="tdd">test-driven: tests written first, observed red, then made green</button>
       <button class="r-opt" data-value="test-after">implementation first, tests after</button>
       </p>
-    <p class="r-dec-rat">Owner direction 2026-08-15. Every node's manifest states the red-then-green
+    <p class="r-dec-rat">Owner direction 2026-08-15. Every node&#x27;s manifest states the red-then-green
         order for its named tests; a node whose tests never ran red has not demonstrated they test
         anything.</p>
     </div>
@@ -220,6 +225,11 @@
     <pre class="r-fu-prompt">/reckon-ship plasma-edge-current-representation</pre>
     </article>
 </section>
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s5" data-id="c-20260815-interiorstencil" data-who="reckon-ship" data-when="2026-08-15T21:15:00+00:00">
+    <div class="r-comment-body">interior-stencil-moments landed - commit 444d4d7d, merged 1fae30ea; gate PASSED; worker 528 s; TDD red observed before implementation (6 named tests). Degree-3 cell-average weights exact per monomial to 2.665e-15 (rectangle 2/3 + 1/12x4) and 1.110e-15 (hexagon 7/12 + 5/72x6) with the radial quartic pinned NON-exact at 2.001e-3 / 1.834e-3; first moments j_R*A*I_rr and j_Z*A*I_zz from the existing fitted ring gradient with hexagon I_rr=I_zz pinned to 5/72*pitch^2, linear-field errors at 1.7e-16 / 2.1e-18 / 1.9e-18; the JAXPR of the fixed contraction holds exactly 1 gather + 1 dot_general per call and ring-incomplete cells emit zeros; amortisation measured 3.0 j evaluations per hexagon cell bulk (3.098 on a finite 41x41 patch), 2.0 per rectangle. Suite 35/35 on the integrated main. The other two wave nodes stopped honestly and continue on their own members: flux-moment-blocks holds a clean tree because the exact weighted Part V antiderivatives are not in the plan or feasibility artifact and its converged Gauss references (G0 4.2e-12, GR 2.0e-09, GZ 5.6e-11 vs Richardson) are preserved as pin targets, not delivered as the implementation; separatrix-clip is 6/7 green with machine-precision conservation on three grids and one open-contour failure on the coarse 15x17 fixture, stopped at the two-failure trigger with a four-field brief. Record at /nova/evidence/archive/plasma-edge-current-representation-landed#interior-stencil-moments</div>
+</div>
+</section>
+</main>
 </body>
 </html>

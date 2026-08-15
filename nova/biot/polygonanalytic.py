@@ -1553,6 +1553,57 @@ def _central_flux_target_derivatives(
     return derivative
 
 
+@lru_cache(maxsize=8)
+def _reflection_plane_field_companions(
+    target_r: tuple[float, ...],
+    reflection_axis: float,
+    vertices: tuple[tuple[float, float], ...],
+    nodes: int,
+) -> np.ndarray:
+    """Differentiate only the two field companions surviving reflection parity."""
+    import gc
+
+    from nova.jax.config import configure_dtypes
+
+    configure_dtypes()
+    import jax
+    import jax.numpy as jnp
+
+    section = np.asarray(vertices, dtype=np.float64)
+    area_centroid = _section_centroid(section)
+
+    def surviving_moments(coordinate):
+        rows = _central_flux_moments_namespace(
+            jnp,
+            coordinate[0:1],
+            coordinate[1:2],
+            section,
+            area_centroid,
+            nodes,
+        )
+        return jnp.stack((rows[2][0], rows[1][0]))
+
+    def surviving_derivatives(coordinate):
+        _, tangent = jax.linearize(surviving_moments, coordinate)
+        vertical_direction = tangent(jnp.asarray([0.0, 1.0]))[0]
+        radial_direction = tangent(jnp.asarray([1.0, 0.0]))[1]
+        return jnp.stack((vertical_direction, radial_direction))
+
+    differentiate = jax.jit(jax.vmap(surviving_derivatives))
+    blocks = []
+    for one_r in target_r:
+        coordinate = jnp.asarray(
+            np.asarray([[np.abs(one_r), reflection_axis]], dtype=np.float64)
+        )
+        blocks.append(np.asarray(differentiate(coordinate)))
+    derivative = np.concatenate(blocks, axis=0)
+    del differentiate
+    jax.clear_caches()
+    gc.collect()
+    derivative.setflags(write=False)
+    return derivative
+
+
 def polygon_analytic_field_moments(
     target_r: np.ndarray,
     target_z: np.ndarray,
@@ -1588,28 +1639,49 @@ def polygon_analytic_field_moments(
     signed_flat = signed.ravel()
     if np.any(signed_flat == 0.0):
         raise ValueError("field moment blocks require nonzero target radius")
-    derivative = _central_flux_target_derivatives(
-        tuple(float(value) for value in signed_flat),
-        tuple(float(value) for value in z),
-        tuple(tuple(float(value) for value in vertex) for vertex in vertices),
-        nodes,
-    )
     radius = np.abs(signed_flat)
-    radial_central = -derivative[:, :, 1] / (2.0 * np.pi * signed_flat[:, None])
-    vertical_central = derivative[:, :, 0] / (2.0 * np.pi * radius[:, None])
-
     _, uniform_radial, uniform_vertical = polygon_analytic_greens(
         signed, height, vertices, nodes=nodes
     )
-    radial_central[:, 0] = uniform_radial.ravel()
-    vertical_central[:, 0] = uniform_vertical.ravel()
-
     reflection = _horizontal_reflection(vertices)
-    if reflection is not None:
-        reflection_axis, _ = reflection
-        on_plane = z == reflection_axis
+    reflection_axis = reflection[0] if reflection is not None else np.nan
+    on_plane = z == reflection_axis
+    off_plane = ~on_plane
+    radial_central = np.empty((len(z), 3), dtype=np.float64)
+    vertical_central = np.empty((len(z), 3), dtype=np.float64)
+
+    if np.any(off_plane):
+        derivative = _central_flux_target_derivatives(
+            tuple(float(value) for value in signed_flat[off_plane]),
+            tuple(float(value) for value in z[off_plane]),
+            tuple(tuple(float(value) for value in vertex) for vertex in vertices),
+            nodes,
+        )
+        radial_central[off_plane] = -derivative[:, :, 1] / (
+            2.0 * np.pi * signed_flat[off_plane, None]
+        )
+        vertical_central[off_plane] = derivative[:, :, 0] / (
+            2.0 * np.pi * radius[off_plane, None]
+        )
+        radial_central[off_plane, 0] = uniform_radial.ravel()[off_plane]
+        vertical_central[off_plane, 0] = uniform_vertical.ravel()[off_plane]
+
+    if np.any(on_plane):
+        surviving = _reflection_plane_field_companions(
+            tuple(float(value) for value in signed_flat[on_plane]),
+            float(reflection_axis),
+            tuple(tuple(float(value) for value in vertex) for vertex in vertices),
+            nodes,
+        )
         radial_central[on_plane, 0] = 0.0
         radial_central[on_plane, 1] = 0.0
+        radial_central[on_plane, 2] = -surviving[:, 0] / (
+            2.0 * np.pi * signed_flat[on_plane]
+        )
+        vertical_central[on_plane, 0] = uniform_vertical.ravel()[on_plane]
+        vertical_central[on_plane, 1] = surviving[:, 1] / (
+            2.0 * np.pi * radius[on_plane]
+        )
         vertical_central[on_plane, 2] = (
             reflection_axis - area_centroid[1]
         ) * vertical_central[on_plane, 0]

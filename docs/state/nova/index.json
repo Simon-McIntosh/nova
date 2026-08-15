@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-13T15:54:07",
+  "updated": "2026-08-15T22:46:16",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -417,6 +417,21 @@
                 "verification": "strict"
               }
             }
+          },
+          {
+            "slug": "plasma-edge-current-representation",
+            "status": "active",
+            "why_now": "The edge-current attribution measured the centroid-inside source rule at four to eight times the whole composition error with boundary cells at 100% per-cell error invisible to net-current closure, and the method ladder selected fixed linear-moment blocks over a conservative clip at 1.24e-4 of span with zero per-step Green evaluations; efit-forward-parity consumes this representation, and H-mode current gradients concentrate in exactly the cells the separatrix crosses.",
+            "done_when": "Nine exact Part V blocks (flux and both field components, each with radial and vertical moment companions) landed TDD with closed-form pins; any-intersection cell inclusion and machine-precision patch-area conservation against the same-crossing LCFS shoelace area asserted in production tests; interior degree-3 stencil and gradient moments wired into the moment vectors; coarse-mesh steep-edge-gradient demonstration banked for flux and both fields against converged references with the production rule beside it, retracing once with a moving separatrix.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict",
+                "risk": "elevated"
+              }
+            }
           }
         ],
         "starts": "2026-08-10",
@@ -666,6 +681,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 36
+    "_version": 37
   }
 }

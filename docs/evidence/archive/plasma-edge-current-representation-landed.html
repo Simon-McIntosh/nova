@@ -23,6 +23,32 @@
   <a href="/nova/evidence/archive/efit-flux-decomposition-landed">flux-decomposition attribution ladder</a>;
   each section here records one production node against its own pins.</p>
 
+  <h2 id="separatrix-clip">§4 — the conservative clip and its linear-current moments</h2>
+
+  <p>Commit <code>acea51cb</code>; gate passed; worker 1171 s across one resumption; TDD with the red
+  collection run preserved. Artifacts: <code>nova/equilibrium/separatrix_clip.py</code> (443 lines),
+  <code>tests/test_equilibrium_separatrix_clip.py</code> (147 lines, 8 tests), metrics JSON on the session
+  scratchpad.</p>
+
+  <p><strong>Conservation holds at machine precision on every grid because shared edges atomise
+  once.</strong> <code>AtomicCellMesh</code> splits overlapping collinear edges into shared atomic
+  segments before any interpolation, caches every non-endpoint crossing by undirected atomic edge, and
+  canonicalises exact-zero endpoints to one shared node identity — so adjacent cells cannot disagree
+  about a crossing, which is the T-junction defect class pinned by regression. Patch-area minus
+  same-crossing shoelace residuals: 2.22e-16, 2.22e-16, 2.22e-16, 4.44e-16 m² across the four grids
+  (relative 1.6e-16–3.2e-16), with centroid-outside included cells 12/32/30/46 proving the
+  any-intersection rule live. The separate polygon-versus-analytic geometric term is reported beside the
+  assertion (−1.8e-2 to −2.5e-3 signed relative), never inside it.</p>
+
+  <p><strong>The one blocking failure was a real topology defect, not the fixture.</strong> The resumed
+  inspection proved the coarse 15×17 contour never exited its tiling (all 32 crossing edges two-owned,
+  minimum node level 4.38e-3, every crossing-graph degree two): the defect was two zero-area tangential
+  cells whose collinear boundary links were discarded, and retaining those links closes topology without
+  assigning current support. An exact-zero four-vertex diamond regression pins the corner-degenerate
+  class. <code>ClippedSupports</code> carries fixed-capacity padded vertices with exact area, first- and
+  second-area moments about fixed centroids; <code>linear_current_moments</code> contracts density and
+  gradient into the per-iteration zeroth and first current moments.</p>
+
   <h2 id="interior-stencil-moments">§5 — interior cell average and gradient moments from shared nodes</h2>
 
   <p>Commit <code>444d4d7d</code>; gate passed; worker 528 s; TDD with the red collection run preserved.

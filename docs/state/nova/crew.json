@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-15T23:10:42",
+  "updated": "2026-08-15T23:27:50",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4709,9 +4709,61 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260815T205925625753-separatrix-clip",
+        "plan": "plasma-edge-current-representation",
+        "section": "\u00a74",
+        "node": "separatrix-clip",
+        "role": "implement",
+        "member": "edge-clip",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-15T20:59:27Z",
+        "completed_at": "2026-08-15T21:18:58Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1171,
+        "time_budget": "25m",
+        "base_sha": "a44dfdd22c8dc3ddf2ba04348ae48d62b636bd7d",
+        "commits": [
+          "acea51cb"
+        ],
+        "changed_lines": {
+          "added": 590,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 8,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/separatrix-clip-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00738-f48f-7150-97d1-17307a705e4b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 4842496,
+            "input_tokens": 5112339,
+            "output_tokens": 37437,
+            "reasoning_output_tokens": 14781
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 153
+    "_version": 154
   }
 }

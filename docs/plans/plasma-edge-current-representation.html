@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-15">
-<meta name="plan-commits" content="444d4d7d">
-<meta name="plan-artifacts" content="docs/evidence/archive/plasma-edge-current-representation-landed.html,nova/equilibrium/stencil_mesh.py,tests/test_equilibrium_stencil_mesh.py">
-<meta name="plan-impl" content="0.14">
-<meta name="plan-version" content="1">
+<meta name="plan-commits" content="444d4d7d,acea51cb">
+<meta name="plan-artifacts" content="docs/evidence/archive/plasma-edge-current-representation-landed.html,nova/equilibrium/stencil_mesh.py,tests/test_equilibrium_stencil_mesh.py,nova/equilibrium/separatrix_clip.py,tests/test_equilibrium_separatrix_clip.py">
+<meta name="plan-impl" content="0.29">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
@@ -228,6 +228,9 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s5" data-id="c-20260815-interiorstencil" data-who="reckon-ship" data-when="2026-08-15T21:15:00+00:00">
     <div class="r-comment-body">interior-stencil-moments landed - commit 444d4d7d, merged 1fae30ea; gate PASSED; worker 528 s; TDD red observed before implementation (6 named tests). Degree-3 cell-average weights exact per monomial to 2.665e-15 (rectangle 2/3 + 1/12x4) and 1.110e-15 (hexagon 7/12 + 5/72x6) with the radial quartic pinned NON-exact at 2.001e-3 / 1.834e-3; first moments j_R*A*I_rr and j_Z*A*I_zz from the existing fitted ring gradient with hexagon I_rr=I_zz pinned to 5/72*pitch^2, linear-field errors at 1.7e-16 / 2.1e-18 / 1.9e-18; the JAXPR of the fixed contraction holds exactly 1 gather + 1 dot_general per call and ring-incomplete cells emit zeros; amortisation measured 3.0 j evaluations per hexagon cell bulk (3.098 on a finite 41x41 patch), 2.0 per rectangle. Suite 35/35 on the integrated main. The other two wave nodes stopped honestly and continue on their own members: flux-moment-blocks holds a clean tree because the exact weighted Part V antiderivatives are not in the plan or feasibility artifact and its converged Gauss references (G0 4.2e-12, GR 2.0e-09, GZ 5.6e-11 vs Richardson) are preserved as pin targets, not delivered as the implementation; separatrix-clip is 6/7 green with machine-precision conservation on three grids and one open-contour failure on the coarse 15x17 fixture, stopped at the two-failure trigger with a four-field brief. Record at /nova/evidence/archive/plasma-edge-current-representation-landed#interior-stencil-moments</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260815-separatrixclip" data-who="reckon-ship" data-when="2026-08-15T21:50:00+00:00">
+    <div class="r-comment-body">separatrix-clip landed - commit acea51cb, merged on main; gate PASSED; worker 1171 s across one resumption; TDD red observed before implementation. CONSERVATION AT MACHINE PRECISION ON EVERY GRID: patch-area minus same-crossing shoelace residuals 2.22e-16 / 2.22e-16 / 2.22e-16 / 4.44e-16 m2 (relative 1.6e-16 to 3.2e-16) against the 1e-12 requirement, with the geometric polygon-vs-analytic term reported separately (-1.8e-2 to -2.5e-3) and never inside the assertion. Any-intersection is live: 12/32/30/46 centroid-outside cells included per grid. The T-junction class is pinned by regression through AtomicCellMesh, which atomises overlapping collinear edges once, caches crossings by undirected atomic edge, and canonicalises exact-zero endpoints to one shared node. THE RESUMPTION'S BLOCKING FAILURE WAS A REAL DEFECT, NOT THE FIXTURE: inspection proved the coarse 15x17 contour never exited its tiling (32/32 crossing edges two-owned, minimum node level 4.38e-3, all degrees two); the cause was two zero-area tangential cells whose collinear boundary links were discarded, and retaining them closes topology without assigning current support - a corner-degenerate class now pinned by an exact-zero diamond regression. ClippedSupports carries fixed-capacity padded vertices with exact area and first/second moments about fixed centroids; linear_current_moments contracts density and gradient into the per-iteration vectors. Remaining for this section: the continuity-under-perturbed-map and one-trace contraction pins, dispatched as their own node. 8/8 green on the integrated main. Record at /nova/evidence/archive/plasma-edge-current-representation-landed#separatrix-clip</div>
 </div>
 </section>
 </main>

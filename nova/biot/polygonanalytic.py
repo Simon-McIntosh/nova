@@ -163,6 +163,7 @@ from nova.biot.rangefunction import (
 __all__ = [
     "packed_analytic_greens",
     "polygon_analytic_flux",
+    "polygon_analytic_flux_moments",
     "polygon_analytic_greens",
 ]
 
@@ -171,7 +172,7 @@ __all__ = [
 # two over a denominator whose derivative is degree one.  One more is carried so
 # the root moments, which fold each harmonic onto its neighbours, reach the same
 # order as the plain ones.
-_HARMONICS = 8
+_HARMONICS = 9
 
 # Nodes for the two arsinh integrals the reduction leaves numerical, split evenly
 # between the two graded panels.  What they resolve is the O(1) variation between the
@@ -190,6 +191,24 @@ _PANEL = (0.0, QUARTER)
 # built once out of scalars rather than once per column.
 _RING_SLOPE_OVER_RADIUS_SQUARED = range_function([], -4.0, 4.0)
 _VARIABLE = range_function([], -1.0, 1.0)
+
+
+def _oscillatory_primitive(weight: list) -> list:
+    """Return ``P`` where the zero-mean weight integrates to ``sin(2a) P``.
+
+    The flux moments raise the existing arsinh weights by one harmonic order.
+    Through order four, ``sin(2 n a) = sin(2a) U_(n-1)(cos(2a))`` gives the
+    bounded harmonic coefficients below directly.
+    """
+    padded = weight + [0.0 * weight[0]] * (5 - len(weight))
+    if len(padded) > 5:
+        raise ValueError("arsinh weight exceeds the flux-moment harmonic order")
+    return [
+        0.5 * padded[1] + padded[3] / 6.0,
+        0.5 * padded[2] + padded[4] / 4.0,
+        padded[3] / 3.0,
+        padded[4] / 4.0,
+    ]
 
 
 class _Vertex:
@@ -370,6 +389,74 @@ class _Vertex:
             sine_squared_times(across_the_range(core)), self.ring
         )
         return 4.0 * u * r * first, 4.0 * r * first, 4.0 * u * self.ring_residual
+
+    def against_first_arsinh(self, weight: tuple):
+        """Return ``integral weight arsinh(beta1) da`` over the quarter range.
+
+        The mean retains the one residual quadrature.  Every oscillatory harmonic
+        is integrated by parts; its antiderivative is ``sin(2a) P(cos(2a))`` and
+        therefore vanishes at both ends.  The remaining derivative is rational
+        over ``G^2 D`` and uses the corner's existing ring split and moment stack.
+        """
+        series = across_the_range(weight)
+        mean = series[0]
+        primitive = _oscillatory_primitive(series)
+        derivative_numerator = total(
+            self.ring_squared,
+            scaled(product(self.edge_radius, self.cosine), -self.radius),
+        )
+        core = product(sine_squared_times(primitive), derivative_numerator)
+        return mean * self.ring_residual + (
+            2.0 * self.radius / self.span
+        ) * self.across(core, self.ring)
+
+    def flux_moment_residuals(self, expansion_r: float, target_z_minus_expansion_z):
+        """Return the corner-only first-arsinh parts of ``(G_R, G_Z)``.
+
+        Both incident live edges see the same corner coordinate and therefore the
+        same weighted term.  It cancels around an unbroken contour and survives
+        only where a dropped horizontal edge leaves a signed corner count.
+        """
+        r = self.radius
+        u = self.level
+        one = self.one
+        source_cosine = scaled(self.cosine, r)
+        sine_squared = total(
+            self.ring_squared,
+            range_function([], -u * u * one, -u * u * one),
+        )
+        radial_coefficient = total(
+            scaled(
+                total(
+                    product(
+                        source_cosine,
+                        total(
+                            source_cosine,
+                            range_function([], -expansion_r * one, -expansion_r * one),
+                        ),
+                    ),
+                    scaled(sine_squared, -0.5),
+                ),
+                u,
+            ),
+            range_function([], -(u**3) * one / 6.0, -(u**3) * one / 6.0),
+        )
+        vertical_coefficient = product(
+            source_cosine,
+            scaled(self.ring_squared, 0.5),
+        )
+        # The remaining vertical translation is the corner's base flux term:
+        # (z_target - z_c) g, whose first-arsinh part is already assembled by
+        # ``arsinh_terms``.  Keep it separate so the exact same arithmetic carries
+        # the uniform reduction and its translation identity.
+        radial = 4.0 * self.against_first_arsinh(
+            product(self.cosine, radial_coefficient)
+        )
+        vertical = 4.0 * self.against_first_arsinh(
+            product(self.cosine, vertical_coefficient)
+        )
+        base_flux = self.arsinh_terms()[0]
+        return radial, vertical + target_z_minus_expansion_z * base_flux
 
 
 class _Edge:
@@ -682,6 +769,237 @@ class _Edge:
         )
         return flux, radial, vertical
 
+    def flux_and_moment_terms(
+        self,
+        vertex: _Vertex,
+        expansion_r: float,
+        target_z_minus_expansion_z,
+    ):
+        """Return the endpoint integrals for ``(G_0, G_R, G_Z)``.
+
+        At fixed toroidal angle let ``Q = D + C asinh(X/G)`` be the radial
+        primitive of the flux surface integrand, with ``C = r cos(phi)``.  The
+        vertical source moment needs ``integral u Q du``; the radial one first
+        integrates ``(r' - R_c) r'/D`` in ``r'``.  Reducing those primitives gives
+        only ``D``, ``D^3``, the existing two arsinh functions and the existing
+        arctangent.  Their polynomial weights are one order deeper than the
+        uniform row, so they contract against the same channel at one additional
+        harmonic.
+        """
+        xp = self.xp
+        one = vertex.one
+        r = self.radius
+        u = vertex.level
+        b1 = self.slope
+        a = vertex.span
+        a0 = self.axial_slope
+        a02 = self.squared_slope
+        r1 = self.plane_radius_value
+        outer = vertex.cosine
+        source_cosine = scaled(outer, r)
+
+        def constant(value):
+            return range_function([], value * one, value * one)
+
+        gamma = range_function([], u + b1 * vertex.offset, u + b1 * vertex.radius_sum)
+        plane = vertex.split(self.plane_squared)
+        plane_residual = self._second_residual(vertex)
+        plane_derivative = product(gamma, self.edge_slope)
+        arctan_numerator = range_function(
+            [-4.0 * b1 * r * r], u * self.plane_offset, u * (r1 + r)
+        )
+        arctan_slope_over_radius = range_function(
+            [], -2.0 * u + 4.0 * b1 * r, -2.0 * u - 4.0 * b1 * r
+        )
+        over_ring = product(arctan_numerator, _RING_SLOPE_OVER_RADIUS_SQUARED)
+        over_plane = product(arctan_numerator, self.edge_slope_over_radius)
+
+        def against_second_arsinh(weight):
+            series = across_the_range(weight)
+            primitive = _oscillatory_primitive(series)
+            core = sine_squared_times(primitive)
+            return (
+                series[0] * plane_residual
+                + (2.0 * b1 * r / (a0 * a)) * vertex.plain(core)
+                + (0.5 / (a0 * a))
+                * vertex.across(product(core, plane_derivative), plane)
+            )
+
+        at_zero = 0.5 * np.pi * xp.sign(u * (r1 + r))
+        at_half = xp.where(
+            vertex.parameter_complement > 0.0,
+            0.5 * np.pi * xp.sign(u * self.plane_offset),
+            -xp.arctan(b1) * one,
+        )
+
+        def against_arctan(weighting):
+            primitive = [0.0] + [
+                coefficient / (order + 1.0)
+                for order, coefficient in enumerate(weighting)
+            ]
+            upper = sum(primitive)
+            lower = sum(
+                coefficient * (-1.0) ** order
+                for order, coefficient in enumerate(primitive)
+            )
+            boundary = -0.5 * (lower * at_half - upper * at_zero)
+            weight = range_function([], 0.0, 0.0)
+            for coefficient in reversed(primitive):
+                weight = total(
+                    product(weight, _VARIABLE),
+                    range_function([], coefficient, coefficient),
+                )
+            return boundary + (0.25 / a) * (
+                2.0 * vertex.plain(product(weight, arctan_slope_over_radius))
+                - r * vertex.across(product(weight, over_ring), vertex.ring)
+                - vertex.across(product(weight, over_plane), plane)
+            )
+
+        base_flux = (
+            (2.0 * a / a02) * vertex.against_root(product(outer, gamma))
+            + 4.0
+            * against_second_arsinh(
+                scaled(
+                    product(
+                        outer,
+                        total(
+                            self.plane_squared,
+                            scaled(product(outer, self.plane_radius), 2.0 * a02 * r),
+                        ),
+                    ),
+                    0.5 / (a02 * a0),
+                )
+            )
+            - 4.0 * r * r * against_arctan([0.0 * one, 0.0 * one, one])
+        )
+
+        sine_squared = total(vertex.ring_squared, constant(-(u**2)))
+        distance_squared = total(
+            vertex.ring_squared, product(vertex.edge_radius, vertex.edge_radius)
+        )
+
+        vertical_root_weight = total(
+            scaled(product(outer, distance_squared), 1.0 / (3.0 * a02)),
+            scaled(
+                product(outer, product(self.plane_radius, gamma)),
+                -b1 / (2.0 * a02 * a02),
+            ),
+            scaled(
+                product(outer, product(source_cosine, self.plane_radius)),
+                1.0 / (2.0 * a02),
+            ),
+        )
+        vertical_arsinh_weight = scaled(
+            product(
+                outer,
+                product(
+                    self.plane_squared,
+                    total(
+                        scaled(
+                            self.plane_radius,
+                            -b1 / (2.0 * a02 * a02 * a0),
+                        ),
+                        scaled(source_cosine, -b1 / (2.0 * a0**3)),
+                    ),
+                ),
+            ),
+            1.0,
+        )
+        vertical_moment = (
+            target_z_minus_expansion_z * base_flux
+            + 4.0 * a * vertex.against_root(vertical_root_weight)
+            + 4.0 * against_second_arsinh(vertical_arsinh_weight)
+        )
+
+        radial_offset = total(
+            scaled(self.plane_radius, 0.5),
+            scaled(source_cosine, 2.0),
+            constant(-expansion_r),
+        )
+        radial_root_weight = total(
+            scaled(
+                product(outer, product(radial_offset, gamma)),
+                1.0 / (2.0 * a02),
+            ),
+            scaled(product(outer, distance_squared), b1 / (6.0 * a02)),
+            scaled(
+                product(outer, product(self.plane_radius, gamma)),
+                -(3.0 * b1 * b1 + 1.0) / (12.0 * a02 * a02),
+            ),
+            scaled(
+                product(outer, product(self.plane_radius, self.plane_radius)),
+                b1 / (3.0 * a02 * a02),
+            ),
+            scaled(product(outer, sine_squared), b1 / (6.0 * a02)),
+        )
+
+        radial_arsinh_weight = total(
+            scaled(
+                product(outer, product(radial_offset, self.plane_squared)),
+                1.0 / (2.0 * a0**3),
+            ),
+            scaled(
+                product(
+                    outer,
+                    product(self.plane_radius, self.plane_squared),
+                ),
+                -(b1 * b1) / (4.0 * a02 * a02 * a0),
+            ),
+            scaled(
+                product(
+                    outer,
+                    product(
+                        total(
+                            product(
+                                source_cosine,
+                                total(source_cosine, constant(-expansion_r)),
+                            ),
+                            scaled(sine_squared, -0.5),
+                        ),
+                        self.plane_radius,
+                    ),
+                ),
+                1.0 / a0,
+            ),
+            scaled(
+                product(
+                    outer,
+                    product(
+                        self.plane_radius,
+                        total(
+                            scaled(
+                                product(self.plane_radius, self.plane_radius),
+                                b1 * b1,
+                            ),
+                            scaled(self.plane_squared, -0.5),
+                        ),
+                    ),
+                ),
+                -1.0 / (6.0 * a02 * a02 * a0),
+            ),
+            scaled(
+                product(
+                    outer,
+                    product(self.plane_radius, sine_squared),
+                ),
+                -(b1 * b1) / (6.0 * a0**3) + 1.0 / (6.0 * a0),
+            ),
+        )
+        radial_moment = (
+            4.0 * a * vertex.against_root(radial_root_weight)
+            + 4.0 * against_second_arsinh(radial_arsinh_weight)
+            + 4.0
+            * against_arctan(
+                [
+                    0.0 * one,
+                    -(r**3) / 3.0,
+                    r * r * expansion_r,
+                    4.0 * r**3 / 3.0,
+                ]
+            )
+        )
+        return base_flux, radial_moment, vertical_moment
+
 
 def _edge_terms(r, z, edge, which, nodes):
     """Return ``(W_psi, W_r, W_z)`` for one edge at one of its two limits.
@@ -920,6 +1238,202 @@ def polygon_analytic_flux(
 ) -> np.ndarray:
     """Return psi [Wb/A] alone, for a caller that does not want the field."""
     return polygon_analytic_greens(target_r, target_z, vertices, nodes=nodes)[0]
+
+
+def _section_centroid(vertices: np.ndarray) -> np.ndarray:
+    """Return the polygon area centroid in a translation-conditioned frame."""
+    section = np.asarray(vertices, dtype=np.float64)
+    if section.ndim != 2 or section.shape[1] != 2 or len(section) < 3:
+        raise ValueError("vertices must have shape (n, 2) with n at least three")
+    origin = section[0]
+    local = section - origin
+    following = np.roll(local, -1, axis=0)
+    cross = local[:, 0] * following[:, 1] - following[:, 0] * local[:, 1]
+    signed_twice_area = cross.sum()
+    if not np.isfinite(signed_twice_area) or signed_twice_area == 0.0:
+        raise ValueError("polygon section must have positive finite area")
+    return origin + np.sum((local + following) * cross[:, None], axis=0) / (
+        3.0 * signed_twice_area
+    )
+
+
+def _horizontal_reflection(vertices: np.ndarray) -> tuple[float, np.ndarray] | None:
+    """Return a round-off-close horizontal reflection of a polygon, if present."""
+    section = np.asarray(vertices, dtype=np.float64)
+    axis = 0.5 * (np.max(section[:, 1]) + np.min(section[:, 1]))
+    scale = max(float(np.ptp(section[:, 0])), float(np.ptp(section[:, 1])), 1.0)
+    tolerance = 32.0 * np.finfo(np.float64).eps * scale
+    indices = np.arange(len(section))
+    for offset in range(len(section)):
+        partner = (offset - indices) % len(section)
+        radial_error = np.max(np.abs(section[:, 0] - section[partner, 0]))
+        vertical_error = np.max(
+            np.abs(section[:, 1] + section[partner, 1] - 2.0 * axis)
+        )
+        if max(radial_error, vertical_error) <= tolerance:
+            return axis, partner
+    return None
+
+
+def _condition_vertical_contour_sum(
+    vertices: np.ndarray,
+    centre_z: float,
+    target_z: np.ndarray,
+    live: np.ndarray,
+    flux_terms: list[np.ndarray],
+    vertical_terms: list[np.ndarray],
+    unconditioned: np.ndarray,
+) -> np.ndarray:
+    """Pair reflection-related edge terms on the symmetry plane.
+
+    For a mirror pair, the source-coordinate part odd about the reflection axis
+    cancels algebraically.  Its vertical central moment is therefore the pair's
+    uniform term times the offset between that axis and the area centroid.  This
+    uses contour geometry alone; it never inspects or thresholds the accumulated
+    value.
+    """
+    reflection = _horizontal_reflection(vertices)
+    if reflection is None or not np.all(live):
+        return unconditioned
+    axis, vertex_partner = reflection
+    on_axis = target_z == axis
+    if not np.any(on_axis):
+        return unconditioned
+
+    conditioned = np.zeros_like(unconditioned)
+    consumed = np.zeros(len(vertices), dtype=bool)
+    for index in range(len(vertices)):
+        if consumed[index]:
+            continue
+        partner = int(vertex_partner[(index + 1) % len(vertices)])
+        consumed[index] = True
+        consumed[partner] = True
+        pair_flux = flux_terms[index]
+        pair_vertical = vertical_terms[index]
+        if partner != index:
+            pair_flux = pair_flux + flux_terms[partner]
+            pair_vertical = pair_vertical + vertical_terms[partner]
+        pair_vertical = np.where(on_axis, (axis - centre_z) * pair_flux, pair_vertical)
+        conditioned = conditioned + pair_vertical
+    return np.where(on_axis, conditioned, unconditioned)
+
+
+def polygon_analytic_flux_moments(
+    target_r: np.ndarray,
+    target_z: np.ndarray,
+    vertices: np.ndarray,
+    *,
+    expansion_point: np.ndarray | tuple[float, float] | None = None,
+    nodes: int = _NODES,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Return the exact fixed-section flux blocks ``(G_0, G_R, G_Z)``.
+
+    The companions are the area means of ``(R - R_c) K_psi`` and
+    ``(Z - Z_c) K_psi`` in m Wb/A.  The uniform and both weighted rows share one
+    Part V corner channel, pole family and pair of graded residual builds.  The
+    default expansion point is the polygon's area centroid.
+    """
+    area_centroid = _section_centroid(vertices)
+    requested_centre = (
+        area_centroid
+        if expansion_point is None
+        else np.asarray(expansion_point, dtype=np.float64)
+    )
+    if requested_centre.shape != (2,) or not np.all(np.isfinite(requested_centre)):
+        raise ValueError("expansion_point must be a finite (R, Z) pair")
+    edges, weights, norm = pack_section(vertices)
+    signed = np.asarray(target_r, dtype=np.float64)
+    height = np.asarray(target_z, dtype=np.float64)
+    shape = signed.shape
+    r = np.abs(signed).ravel()
+    z = np.broadcast_to(height, shape).ravel()
+    axis = r == 0.0
+    if np.any(axis):
+        rows = [np.zeros_like(r), np.zeros_like(r), np.zeros_like(r)]
+        off_axis = ~axis
+        if np.any(off_axis):
+            computed = polygon_analytic_flux_moments(
+                signed.ravel()[off_axis],
+                z[off_axis],
+                vertices,
+                expansion_point=requested_centre,
+                nodes=nodes,
+            )
+            for row, values in zip(rows, computed, strict=True):
+                row[off_axis] = values
+        return tuple(row.reshape(shape) for row in rows)
+
+    flux = np.zeros_like(r)
+    radial_moment = np.zeros_like(r)
+    vertical_moment = np.zeros_like(r)
+    target_z_minus_expansion_z = z - area_centroid[1]
+    sides = len(edges)
+    live = weights != 0.0
+    flux_terms = [np.zeros_like(r) for _ in range(sides)]
+    vertical_terms = [np.zeros_like(r) for _ in range(sides)]
+    chain = live.astype(np.int64) - np.roll(live, 1).astype(np.int64)
+    last_read: dict[int, int] = {}
+    for index in np.flatnonzero(live):
+        last_read[int(index)] = int(index)
+        last_read[int(index + 1) % sides] = int(index)
+    corners: dict[int, _Vertex] = {}
+
+    def corner_part(index: int, corner_r: float, corner_z: float) -> _Vertex:
+        if index not in corners:
+            corners[index] = _Vertex(
+                r, z, corner_r, corner_z, nodes, residual=bool(chain[index])
+            )
+        return corners[index]
+
+    for index in range(sides):
+        if not live[index]:
+            continue
+        ra, za, rb, zb = edges[index]
+        lower = corner_part(index, ra, za)
+        upper = corner_part((index + 1) % sides, rb, zb)
+        edge = _Edge(r, z, edges[index], nodes)
+        high = edge.flux_and_moment_terms(
+            upper, area_centroid[0], target_z_minus_expansion_z
+        )
+        low = edge.flux_and_moment_terms(
+            lower, area_centroid[0], target_z_minus_expansion_z
+        )
+        flux_terms[index] = low[0] - high[0]
+        vertical_terms[index] = low[2] - high[2]
+        flux = flux + flux_terms[index]
+        radial_moment = radial_moment + low[1] - high[1]
+        vertical_moment = vertical_moment + vertical_terms[index]
+        for corner in dict.fromkeys((index, (index + 1) % sides)):
+            if last_read[corner] != index:
+                continue
+            if chain[corner]:
+                one_flux = corners[corner].arsinh_terms()[0]
+                one_radial, one_vertical = corners[corner].flux_moment_residuals(
+                    area_centroid[0], target_z_minus_expansion_z
+                )
+                flux = flux + chain[corner] * one_flux
+                radial_moment = radial_moment + chain[corner] * one_radial
+                vertical_moment = vertical_moment + chain[corner] * one_vertical
+            del corners[corner]
+    vertical_moment = _condition_vertical_contour_sum(
+        vertices,
+        area_centroid[1],
+        z,
+        live,
+        flux_terms,
+        vertical_terms,
+        vertical_moment,
+    )
+    scale = 0.5 * norm * r
+    uniform = scale * flux
+    radial_central = scale * radial_moment
+    vertical_central = scale * vertical_moment
+    displacement = requested_centre - area_centroid
+    return (
+        uniform.reshape(shape),
+        (radial_central - displacement[0] * uniform).reshape(shape),
+        (vertical_central - displacement[1] * uniform).reshape(shape),
+    )
 
 
 def packed_analytic_greens(

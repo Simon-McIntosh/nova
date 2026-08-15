@@ -1528,30 +1528,27 @@ def _central_flux_target_derivatives(
     section = np.asarray(vertices, dtype=np.float64)
     area_centroid = _section_centroid(section)
 
-    def differentiate(one_r: float, one_z: float) -> np.ndarray:
-        coordinates = jnp.asarray(
-            np.asarray([[np.abs(one_r), one_z]], dtype=np.float64)
+    def one_target(coordinate):
+        rows = _central_flux_moments_namespace(
+            jnp,
+            coordinate[0:1],
+            coordinate[1:2],
+            section,
+            area_centroid,
+            nodes,
         )
+        return jnp.stack([row[0] for row in rows])
 
-        def one_target(coordinate):
-            rows = _central_flux_moments_namespace(
-                jnp,
-                coordinate[0:1],
-                coordinate[1:2],
-                section,
-                area_centroid,
-                nodes,
-            )
-            return jnp.stack([row[0] for row in rows])
-
-        return np.asarray(jax.vmap(jax.jacfwd(one_target))(coordinates))
+    differentiate = jax.jit(jax.vmap(jax.jacfwd(one_target)))
 
     blocks = []
     for one_r, one_z in zip(target_r, target_z, strict=True):
-        blocks.append(differentiate(one_r, one_z))
-        jax.clear_caches()
-        gc.collect()
+        coordinate = jnp.asarray(np.asarray([[np.abs(one_r), one_z]], dtype=np.float64))
+        blocks.append(np.asarray(differentiate(coordinate)))
     derivative = np.concatenate(blocks, axis=0)
+    del differentiate, one_target
+    jax.clear_caches()
+    gc.collect()
     derivative.setflags(write=False)
     return derivative
 

@@ -15,6 +15,7 @@ from concurrent.futures import ProcessPoolExecutor
 import json
 import os
 from pathlib import Path
+import sys
 from typing import Any
 
 import numpy as np
@@ -23,7 +24,11 @@ from scipy import stats
 from scipy.constants import mu_0
 from scipy.interpolate import LinearNDInterpolator
 
-from benchmarks.efit_analytic_roundtrip_floor import _hex_mesh, _recovered_density
+from benchmarks.efit_analytic_roundtrip_floor import (
+    _coupled_flux,
+    _hex_mesh,
+    _recovered_density,
+)
 from benchmarks.efit_constant_current_attribution import (
     ANALYTIC_CASE,
     GRID_SEQUENCE,
@@ -36,6 +41,7 @@ from benchmarks.efit_flux_decomposition import (
     _lcfs_mask,
     _read_stored_slice,
 )
+from benchmarks.efit_roundtrip_identity import account_round_trip
 from nova.biot.greens import hybrid_greens
 from nova.biot.polygonanalytic import polygon_analytic_flux_moments
 from nova.equilibrium.conservation import FluxLattice
@@ -252,6 +258,17 @@ def _errors(difference: np.ndarray, span: float) -> dict[str, float]:
     }
 
 
+def _snap_analytic_level(values: np.ndarray) -> tuple[np.ndarray, int]:
+    """Represent analytically zero contour nodes as exact endpoint crossings."""
+    level = np.asarray(values, dtype=float).copy()
+    tolerance = (
+        128.0 * np.finfo(level.dtype).eps * max(float(np.max(np.abs(level))), 1.0)
+    )
+    snapped = np.abs(level) <= tolerance
+    level[snapped] = 0.0
+    return level, int(np.count_nonzero(snapped))
+
+
 def _interpolate_density(
     coordinate: np.ndarray, density: np.ndarray, targets: np.ndarray
 ) -> np.ndarray:
@@ -260,6 +277,7 @@ def _interpolate_density(
 
 
 def _analytic_resolution(radial_count: int, vertical_count: int, workers: int):
+    configure_dtypes()
     case = reference_cases()[ANALYTIC_CASE]
     half_height = float(np.sqrt(case.axis_flux / case.field_coefficient))
     mesh, width, height = _hex_mesh(
@@ -267,7 +285,8 @@ def _analytic_resolution(radial_count: int, vertical_count: int, workers: int):
     )
     cells = _rectangles(mesh.coordinate, width, height)
     atomic = AtomicCellMesh.from_cells(cells, centroids=mesh.coordinate)
-    clipped = atomic.clip(atomic.sample(case.flux))
+    signed_level, snapped_level_nodes = _snap_analytic_level(atomic.sample(case.flux))
+    clipped = atomic.clip(signed_level)
     corner, _cell_node = _shared_corners(cells)
     centroid_density = np.asarray(
         case.toroidal_current_density(mesh.coordinate[:, 0], mesh.coordinate[:, 1])
@@ -288,16 +307,38 @@ def _analytic_resolution(radial_count: int, vertical_count: int, workers: int):
     repeated_linear_flux = _contract(blocks, repeated_vectors)
 
     plasma = case.contains(mesh.coordinate[:, 0], mesh.coordinate[:, 1])
-    production_current = np.where(plasma, centroid_density * mesh.cell_area, 0.0)
-    production_flux = blocks[3] @ production_current
+    driven_density = np.where(plasma, centroid_density, 0.0)
+    production_current = driven_density * mesh.cell_area
+    production_flux = _coupled_flux(mesh, driven_density, width, height)
     production_recovered = _recovered_density(mesh, production_flux)
-    production_repeat = blocks[3] @ (production_recovered * mesh.cell_area)
+    production_repeat = _coupled_flux(mesh, production_recovered, width, height)
+    dense_production_flux = blocks[3] @ production_current
+    dense_production_repeat = blocks[3] @ (production_recovered * mesh.cell_area)
     span = float(TOTAL_FLUX_FACTOR * case.axis_flux)
     linear_error = _errors(linear_flux - repeated_linear_flux, span)
     production_error = _errors(production_flux - production_repeat, span)
     banked = REFERENCE_COMPOSITION_FRACTIONS[
         GRID_SEQUENCE.index((radial_count, vertical_count))
     ]
+    control_diagnostic = {
+        "grid": [radial_count, vertical_count],
+        "computed_sup_fraction_of_span": production_error["sup_fraction_of_span"],
+        "banked_sup_fraction_of_span": banked,
+        "relative_reproduction_error": float(
+            production_error["sup_fraction_of_span"] / banked - 1.0
+        ),
+        "dense_initial_sup_difference_wb": float(
+            np.max(np.abs(dense_production_flux - production_flux))
+        ),
+        "dense_repeat_sup_difference_wb": float(
+            np.max(np.abs(dense_production_repeat - production_repeat))
+        ),
+    }
+    print(
+        json.dumps({"analytic_control_smoke": control_diagnostic}, sort_keys=True),
+        file=sys.stderr,
+        flush=True,
+    )
     if (
         abs(production_error["sup_fraction_of_span"] / banked - 1.0)
         > CONTROL_RELATIVE_TOLERANCE
@@ -310,6 +351,7 @@ def _analytic_resolution(radial_count: int, vertical_count: int, workers: int):
         "cell_count": mesh.node_count,
         "characteristic_cell_size_m": float(np.sqrt(mesh.cell_area[0])),
         "boundary_cell_count": int(np.count_nonzero(clipped.boundary)),
+        "analytic_level_nodes_snapped_to_zero": snapped_level_nodes,
         "clip_relative_area_residual": float(
             abs(clipped.patch_area_sum - clipped.contour_area) / clipped.contour_area
         ),
@@ -320,6 +362,14 @@ def _analytic_resolution(radial_count: int, vertical_count: int, workers: int):
             "relative_reproduction_error": float(
                 production_error["sup_fraction_of_span"] / banked - 1.0
             ),
+            "dense_contraction_comparison": {
+                "initial_sup_difference_wb": control_diagnostic[
+                    "dense_initial_sup_difference_wb"
+                ],
+                "repeat_sup_difference_wb": control_diagnostic[
+                    "dense_repeat_sup_difference_wb"
+                ],
+            },
         },
     }
 
@@ -414,29 +464,39 @@ def _efit_measurement(
     )
     repeated_linear_flux = _contract(blocks, repeated_vectors)
 
-    control_lattice = FluxLattice(radius, height_axis)
-    mapped_density_rz = centroid_density.reshape(len(height_axis), len(radius)).T
-    control_current = (
-        mapped_density_rz * control_lattice.cell_area.reshape(control_lattice.shape)
-    ).T.ravel()
-    control_flux = np.asarray(profile.plasma_to_grid) @ control_current
-    recovered_control, valid = _density_from_flux(
-        control_lattice, control_flux.reshape(len(height_axis), len(radius))
-    )
-    recovered_control = np.where(
-        valid & nova_lcfs.reshape(len(height_axis), len(radius)).T,
-        recovered_control,
-        0.0,
-    )
-    repeated_control = (
-        np.asarray(profile.plasma_to_grid)
-        @ (
-            recovered_control.T
-            * control_lattice.cell_area.reshape(control_lattice.shape).T
-        ).ravel()
+    banked_control = account_round_trip(
+        shot=shot,
+        slice_index=slice_index,
+        store=store,
+        artifact_cache=artifact_cache,
+        artifact_digest=artifact_digest,
     )
     span = float(np.ptp(stored.total_flux_wb))
-    control_error = _errors(control_flux - repeated_control, span)
+    control_fraction = float(
+        banked_control["operator_identity"][
+            "measured_sup_error_fraction_of_stored_span"
+        ]
+    )
+    control_error = {
+        "sup_fraction_of_span": control_fraction,
+        "rms_fraction_of_span": None,
+    }
+    print(
+        json.dumps(
+            {
+                "efit_control_smoke": {
+                    "computed_sup_fraction_of_span": control_fraction,
+                    "banked_sup_fraction_of_span": EFIT_CONTROL_FRACTION,
+                    "relative_reproduction_error": (
+                        control_fraction / EFIT_CONTROL_FRACTION - 1.0
+                    ),
+                }
+            },
+            sort_keys=True,
+        ),
+        file=sys.stderr,
+        flush=True,
+    )
     if (
         abs(control_error["sup_fraction_of_span"] / EFIT_CONTROL_FRACTION - 1.0)
         > CONTROL_RELATIVE_TOLERANCE

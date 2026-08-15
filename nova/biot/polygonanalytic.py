@@ -1436,6 +1436,168 @@ def polygon_analytic_flux_moments(
     )
 
 
+def _central_flux_moments_namespace(
+    xp,
+    target_r,
+    target_z,
+    vertices: np.ndarray,
+    area_centroid: np.ndarray,
+    nodes: int,
+):
+    """Evaluate central flux moments in an array namespace for differentiation."""
+    edges, weights, norm = pack_section(vertices)
+    r = xp.asarray(target_r)
+    z = xp.asarray(target_z)
+    flux = xp.zeros_like(r)
+    radial_moment = xp.zeros_like(r)
+    vertical_moment = xp.zeros_like(r)
+    target_z_minus_centroid_z = z - area_centroid[1]
+    sides = len(edges)
+    live = weights != 0.0
+    chain = live.astype(np.int64) - np.roll(live, 1).astype(np.int64)
+    last_read: dict[int, int] = {}
+    for index in np.flatnonzero(live):
+        last_read[int(index)] = int(index)
+        last_read[int(index + 1) % sides] = int(index)
+    corners: dict[int, _Vertex] = {}
+
+    def corner_part(index: int, corner_r: float, corner_z: float) -> _Vertex:
+        if index not in corners:
+            corners[index] = _Vertex(
+                r,
+                z,
+                corner_r,
+                corner_z,
+                nodes,
+                residual=bool(chain[index]),
+                xp=xp,
+            )
+        return corners[index]
+
+    for index in range(sides):
+        if not live[index]:
+            continue
+        ra, za, rb, zb = edges[index]
+        lower = corner_part(index, ra, za)
+        upper = corner_part((index + 1) % sides, rb, zb)
+        edge = _Edge(r, z, edges[index], nodes, xp=xp)
+        high = edge.flux_and_moment_terms(
+            upper, area_centroid[0], target_z_minus_centroid_z
+        )
+        low = edge.flux_and_moment_terms(
+            lower, area_centroid[0], target_z_minus_centroid_z
+        )
+        flux = flux + low[0] - high[0]
+        radial_moment = radial_moment + low[1] - high[1]
+        vertical_moment = vertical_moment + low[2] - high[2]
+        for corner in dict.fromkeys((index, (index + 1) % sides)):
+            if last_read[corner] != index:
+                continue
+            if chain[corner]:
+                one_flux = corners[corner].arsinh_terms()[0]
+                one_radial, one_vertical = corners[corner].flux_moment_residuals(
+                    area_centroid[0], target_z_minus_centroid_z
+                )
+                flux = flux + chain[corner] * one_flux
+                radial_moment = radial_moment + chain[corner] * one_radial
+                vertical_moment = vertical_moment + chain[corner] * one_vertical
+            del corners[corner]
+    scale = 0.5 * norm * r
+    return scale * flux, scale * radial_moment, scale * vertical_moment
+
+
+def polygon_analytic_field_moments(
+    target_r: np.ndarray,
+    target_z: np.ndarray,
+    vertices: np.ndarray,
+    *,
+    expansion_point: np.ndarray | tuple[float, float] | None = None,
+    nodes: int = _NODES,
+) -> tuple[
+    tuple[np.ndarray, np.ndarray, np.ndarray],
+    tuple[np.ndarray, np.ndarray, np.ndarray],
+]:
+    """Return exact ``(G_0, G_R, G_Z)`` blocks for ``B_R`` and ``B_Z``.
+
+    Each field row is the analytic target derivative of the corresponding
+    closed-form flux row.  Forward-mode differentiation therefore traverses the
+    same Part V harmonic, pole and graded-residual channel without a target-space
+    finite difference or a source quadrature.  Central companions are formed once
+    about the polygon area centroid, then translated algebraically.
+    """
+    from nova.jax.config import configure_dtypes, release_compilation_memory
+
+    configure_dtypes()
+    import jax
+    import jax.numpy as jnp
+
+    area_centroid = _section_centroid(vertices)
+    requested_centre = (
+        area_centroid
+        if expansion_point is None
+        else np.asarray(expansion_point, dtype=np.float64)
+    )
+    if requested_centre.shape != (2,) or not np.all(np.isfinite(requested_centre)):
+        raise ValueError("expansion_point must be a finite (R, Z) pair")
+
+    signed = np.asarray(target_r, dtype=np.float64)
+    height = np.asarray(target_z, dtype=np.float64)
+    shape = signed.shape
+    z = np.broadcast_to(height, shape).ravel()
+    signed_flat = signed.ravel()
+    if np.any(signed_flat == 0.0):
+        raise ValueError("field moment blocks require nonzero target radius")
+    coordinates = jnp.asarray(np.column_stack((np.abs(signed_flat), z)))
+
+    def one_target(coordinate):
+        rows = _central_flux_moments_namespace(
+            jnp,
+            coordinate[0:1],
+            coordinate[1:2],
+            vertices,
+            area_centroid,
+            nodes,
+        )
+        return jnp.stack([row[0] for row in rows])
+
+    derivative = np.asarray(jax.vmap(jax.jacfwd(one_target))(coordinates))
+    release_compilation_memory()
+    radius = np.abs(signed_flat)
+    radial_central = -derivative[:, :, 1] / (2.0 * np.pi * signed_flat[:, None])
+    vertical_central = derivative[:, :, 0] / (2.0 * np.pi * radius[:, None])
+
+    _, uniform_radial, uniform_vertical = polygon_analytic_greens(
+        signed, height, vertices, nodes=nodes
+    )
+    radial_central[:, 0] = uniform_radial.ravel()
+    vertical_central[:, 0] = uniform_vertical.ravel()
+
+    reflection = _horizontal_reflection(vertices)
+    if reflection is not None:
+        reflection_axis, _ = reflection
+        on_plane = z == reflection_axis
+        radial_central[on_plane, 0] = 0.0
+        radial_central[on_plane, 1] = 0.0
+        vertical_central[on_plane, 2] = (
+            reflection_axis - area_centroid[1]
+        ) * vertical_central[on_plane, 0]
+
+    displacement = requested_centre - area_centroid
+    radial = (
+        radial_central[:, 0],
+        radial_central[:, 1] - displacement[0] * radial_central[:, 0],
+        radial_central[:, 2] - displacement[1] * radial_central[:, 0],
+    )
+    vertical = (
+        vertical_central[:, 0],
+        vertical_central[:, 1] - displacement[0] * vertical_central[:, 0],
+        vertical_central[:, 2] - displacement[1] * vertical_central[:, 0],
+    )
+    return tuple(row.reshape(shape) for row in radial), tuple(
+        row.reshape(shape) for row in vertical
+    )
+
+
 def packed_analytic_greens(
     xp,
     target_r,

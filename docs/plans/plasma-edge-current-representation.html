@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-15">
-<meta name="plan-commits" content="444d4d7d,acea51cb">
-<meta name="plan-artifacts" content="docs/evidence/archive/plasma-edge-current-representation-landed.html,nova/equilibrium/stencil_mesh.py,tests/test_equilibrium_stencil_mesh.py,nova/equilibrium/separatrix_clip.py,tests/test_equilibrium_separatrix_clip.py">
-<meta name="plan-impl" content="0.29">
-<meta name="plan-version" content="2">
+<meta name="plan-commits" content="444d4d7d,acea51cb,bdd3120b,ca000f36,1a9bc9ff">
+<meta name="plan-artifacts" content="docs/evidence/archive/plasma-edge-current-representation-landed.html,nova/equilibrium/stencil_mesh.py,tests/test_equilibrium_stencil_mesh.py,nova/equilibrium/separatrix_clip.py,tests/test_equilibrium_separatrix_clip.py,nova/biot/polygonanalytic.py,tests/test_biotpolygonmoments.py">
+<meta name="plan-impl" content="0.57">
+<meta name="plan-version" content="6">
 </head>
 <body>
   <main class="plan-doc">
@@ -109,24 +109,37 @@
     at zero moments; the translation identity (shifting the expansion point by d changes G_R by −d_R·G₀)
     held to near machine precision; hexagon symmetry zeros held.</p>
 
-    <h2 id="s4">§4 — The clip and the moments in the solve path</h2>
+    <section id="s4" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-15</span>
+        <h2>§4 — The clip and the moments in the solve path</h2>
+      </header>
+      <p class="landed-summary">
+        <code>nova/equilibrium/separatrix_clip.py</code>: atomic shared-edge crossings with canonical
+        exact-zero corners conserve patch area at 2.2e-16–4.4e-16 m² on every grid; clipped zeroth and
+        first moments about fixed centroids move continuously at first order (ε-doubling ratio 1.99998)
+        where the centroid rule jumps by 1e6×; the padded jit contraction traces once over a moving
+        separatrix, x64 enforced at the entry point. 11/11 tests, all TDD.
+        Full records: <a href="/nova/evidence/archive/plasma-edge-current-representation-landed#separatrix-clip">clip</a> ·
+        <a href="/nova/evidence/archive/plasma-edge-current-representation-landed#clipped-moment-pins">pins</a>
+        (commits <code>acea51cb</code>, <code>1a9bc9ff</code>).
+      </p>
+    </section>
 
-    <p>A production module computes, per iteration: cell inclusion by intersection; the clipped support of
-    every boundary cell using shared atomic edge crossings (the T-junction defect is a pinned regression);
-    and the closed-form zeroth and first moments of a linear j over each clipped polygon about the fixed
-    centroid. Moments are continuous functions of the flux map — the centroid-inside rule's on/off cell
-    switching, a candidate cause of the frozen-six convergence failure, is structurally removed. Arrays are
-    bounded and padded so the contraction traces once; the triangle prototype's one-trace moving-separatrix
-    pattern is the model.</p>
-
-    <h2 id="s5">§5 — Interior average and gradient from shared nodes</h2>
-
-    <p>j is evaluated once per node and centroid; each interior cell's zeroth moment is the degree-3
-    fixed-weight average (hexagon: 7/12 centroid + 5/72 per vertex — measured order 3.76, four orders below
-    the centroid rule at ~3 amortised evaluations per cell), and its first moments are j_R·A·I_rr,
-    j_Z·A·I_zz with the gradient taken from the stencil mesh's existing fitted ring weights and the fixed
-    cell second moments (hexagon I_rr = I_zz = 5/72·pitch²). One gather and one fixed-weight contraction
-    per cell.</p>
+    <section id="s5" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-15</span>
+        <h2>§5 — Interior average and gradient from shared nodes</h2>
+      </header>
+      <p class="landed-summary">
+        Degree-3 shared-node weights land in <code>StencilMesh</code> exact per monomial to 2.7e-15
+        (rectangle 2/3 + 1/12×4; hexagon 7/12 + 5/72×6) with the quartic non-exactness pinned; first
+        moments ride the fitted ring gradient and 5/72·pitch² second moments; the JAXPR holds exactly one
+        gather and one dot per call at 3.0 amortised evaluations per hexagon cell. 35/35 tests, TDD.
+        Full record: <a href="/nova/evidence/archive/plasma-edge-current-representation-landed#interior-stencil-moments">§5 landed</a>
+        (commit <code>444d4d7d</code>).
+      </p>
+    </section>
 
     <h2 id="s6">§6 — Demonstration: coarse mesh, steep edge gradient</h2>
 
@@ -231,6 +244,12 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260815-separatrixclip" data-who="reckon-ship" data-when="2026-08-15T21:50:00+00:00">
     <div class="r-comment-body">separatrix-clip landed - commit acea51cb, merged on main; gate PASSED; worker 1171 s across one resumption; TDD red observed before implementation. CONSERVATION AT MACHINE PRECISION ON EVERY GRID: patch-area minus same-crossing shoelace residuals 2.22e-16 / 2.22e-16 / 2.22e-16 / 4.44e-16 m2 (relative 1.6e-16 to 3.2e-16) against the 1e-12 requirement, with the geometric polygon-vs-analytic term reported separately (-1.8e-2 to -2.5e-3) and never inside the assertion. Any-intersection is live: 12/32/30/46 centroid-outside cells included per grid. The T-junction class is pinned by regression through AtomicCellMesh, which atomises overlapping collinear edges once, caches crossings by undirected atomic edge, and canonicalises exact-zero endpoints to one shared node. THE RESUMPTION'S BLOCKING FAILURE WAS A REAL DEFECT, NOT THE FIXTURE: inspection proved the coarse 15x17 contour never exited its tiling (32/32 crossing edges two-owned, minimum node level 4.38e-3, all degrees two); the cause was two zero-area tangential cells whose collinear boundary links were discarded, and retaining them closes topology without assigning current support - a corner-degenerate class now pinned by an exact-zero diamond regression. ClippedSupports carries fixed-capacity padded vertices with exact area and first/second moments about fixed centroids; linear_current_moments contracts density and gradient into the per-iteration vectors. Remaining for this section: the continuity-under-perturbed-map and one-trace contraction pins, dispatched as their own node. 8/8 green on the integrated main. Record at /nova/evidence/archive/plasma-edge-current-representation-landed#separatrix-clip</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260815-momentpins" data-who="reckon-ship" data-when="2026-08-15T22:25:00+00:00">
+    <div class="r-comment-body">clipped-moment-pins landed - commit 1a9bc9ff, merged on main; gate PASSED; worker 418 s; TDD red observed before implementation (3 named tests). CONTINUITY IS MEASURED, NOT ASSERTED: under an epsilon=1e-5 flux perturbation all 56 boundary cells move in both moment orders and doubling epsilon scales the response by 1.9999825 / 1.9999878 - first order. The counterexample quantifies what any-intersection removes: at epsilon=1e-6 the centroid-selected current JUMPS 8.0 A while the clipped current changes 8.000000000674e-6 A, a 1e6 discontinuity beside an exactly linear response - this is the structural removal of the on/off cell switching named as a frozen-six convergence candidate. padded_linear_current_moments consumes the fixed-capacity padded supports under jax.jit: 12 moving-separatrix iterations keep shapes (459,12,2)/(459,), trace EXACTLY ONCE, and agree with host moments to 6.9e-18. PRODUCTION REQUIREMENT SURFACED AND ENFORCED: x64 is mandatory at the entry point - float32 returned 7.63e-6 for the analytic 8e-6 change and broke the scaling ratio (2.007 for 2.0). Section 4 CLOSES with this node; suite 11/11 on the integrated main. Record at /nova/evidence/archive/plasma-edge-current-representation-landed#clipped-moment-pins</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260815-fluxmoments" data-who="reckon-ship" data-when="2026-08-15T22:10:00+00:00">
+    <div class="r-comment-body">flux-moment-blocks landed - commits bdd3120b + ca000f36, merged on main; gate PASSED; worker 2339 s across two honest budget stops; TDD red observed before implementation. THE WEIGHTED PART V ANTIDERIVATIVES NOW EXIST EXPLICITLY - they were in no plan or feasibility artifact, and the node's first stop was its refusal to deliver a passing Gauss-quadrature prototype as the exact shared-stack implementation. polygon_analytic_flux_moments returns exact fixed-polygon G0/GR/GZ for the flux kernel through closed H_Z/H_R edge antiderivatives, one more harmonic on the shared channel, and coordinate-weighted companions of both surviving graded arsinh residuals. Verified at three independent levels: primitive derivatives vs central difference 6.3e-12 to 7.9e-11; endpoint values vs 1600-node direct quadrature worst 1.3e-12; blocks vs Richardson-extrapolated midpoint subdivision G0 4.19e-12 / GR 7.69e-10 / GZ 3.89e-09 near and far, below the 3e-8 gate. THE EXACT IDENTITIES ARE ALGEBRAIC, NOT NUMERICAL: the second stop measured 3.1e-17 lost to endpoint cancellation, and the fix builds central moments once and translates after the contour sum - translation residual GR 6.88e-22, GZ exactly 0.0 (gate 3e-21); hexagon GZ symmetry 1.11e-22 via geometric odd-parity pairing, never value thresholding; zero coefficients reproduce the uniform kernel BIT-FOR-BIT. Remaining in this section: the B_R/B_Z companions, next node on the same member. Record at /nova/evidence/archive/plasma-edge-current-representation-landed#flux-moment-blocks</div>
 </div>
 </section>
 </main>

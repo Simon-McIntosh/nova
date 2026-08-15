@@ -23,6 +23,34 @@
   <a href="/nova/evidence/archive/efit-flux-decomposition-landed">flux-decomposition attribution ladder</a>;
   each section here records one production node against its own pins.</p>
 
+  <h2 id="flux-moment-blocks">§3 — exact flux-kernel moment blocks, derived then conditioned</h2>
+
+  <p>Commits <code>bdd3120b</code> (derivation and implementation) and <code>ca000f36</code>
+  (assembly conditioning); gate passed; worker 2339 s across two resumptions; TDD with the red
+  collection run preserved. Artifacts: <code>nova/biot/polygonanalytic.py</code> (+516 lines),
+  <code>tests/test_biotpolygonmoments.py</code> (126 lines, 4 tests).</p>
+
+  <p><strong>The weighted Part V edge antiderivatives now exist explicitly — they were in no plan or
+  feasibility artifact before this node derived them.</strong> The flux kernel's
+  <code>polygon_analytic_flux_moments</code> returns exact fixed-polygon G₀, G_R and G_Z through closed
+  antiderivatives H_Z and H_R over the edge parameter, a ninth harmonic on the shared channel, and
+  coordinate-weighted companions of both surviving graded arsinh residuals — sharing the elliptic/pole
+  stack as the feasibility study promised. Verification is independent at three levels: fixed-angle
+  primitive derivatives against a central difference (6.3e-12–7.9e-11 relative), reduced endpoint values
+  against 1600-node direct angle quadrature (worst 1.3e-12), and the block values against
+  Richardson-extrapolated midpoint subdivision on near and far target sets (G₀ 4.19e-12,
+  G_R 7.69e-10, G_Z 3.89e-09 maximum relative, below the 3e-8 gate).</p>
+
+  <p><strong>The exact identities are enforced by construction, not fought through cancellation.</strong>
+  The first assembly evaluated at the requested expansion point and lost 3.1e-17 absolute to endpoint
+  cancellation — an honest two-failure stop. The conditioning fix builds the contour blocks once about
+  the polygon area centroid and applies the (requested_centre − area_centroid)·G₀ shift after the
+  contour sum, making translation algebraic: residuals G_R 6.88e-22 and G_Z exactly 0.0 against a 3e-21
+  gate. Reflection-paired hexagon edges accumulate their vertical term from the exact odd-parity
+  identity by geometry, never by value thresholding: hexagon G_Z 1.11e-22 absolute. Zero moment
+  coefficients reproduce the existing uniform flux kernel bit-for-bit. B_R/B_Z companions follow as
+  their own node on the same session.</p>
+
   <h2 id="separatrix-clip">§4 — the conservative clip and its linear-current moments</h2>
 
   <p>Commit <code>acea51cb</code>; gate passed; worker 1171 s across one resumption; TDD with the red
@@ -48,6 +76,23 @@
   class. <code>ClippedSupports</code> carries fixed-capacity padded vertices with exact area, first- and
   second-area moments about fixed centroids; <code>linear_current_moments</code> contracts density and
   gradient into the per-iteration zeroth and first current moments.</p>
+
+  <h2 id="clipped-moment-pins">§4 — the per-iteration properties, pinned</h2>
+
+  <p>Commit <code>1a9bc9ff</code>; gate passed; worker 418 s; TDD with the red collection run preserved.
+  Artifacts: <code>nova/equilibrium/separatrix_clip.py</code> (+125 lines),
+  <code>tests/test_equilibrium_separatrix_clip.py</code> (+123 lines, 3 new tests, suite 11/11).</p>
+
+  <p><strong>The moments are continuous where the centroid rule jumps, and the contraction traces
+  once.</strong> Under an ε=1e-5 flux perturbation all 56 boundary cells move in both moment orders, and
+  doubling ε scales the response by 1.99998 — first-order continuity measured, not asserted. The
+  counterexample quantifies what the any-intersection rule removes: at ε=1e-6 the centroid-selected
+  current jumps by 8.0 A while the clipped current changes by 8.000000000674e-6 A — a factor-1e6
+  discontinuity beside an exactly linear response. <code>padded_linear_current_moments</code> consumes the
+  fixed-capacity padded supports under <code>jax.jit</code>: 12 moving-separatrix iterations keep shapes
+  (459,12,2)/(459,), trace exactly once, and agree with host moments to 6.9e-18. One production
+  requirement surfaced and is enforced at the entry point: x64 is mandatory — float32 returned 7.63e-6
+  for the analytic 8e-6 change and destroyed the scaling ratio (2.007 for 2.0).</p>
 
   <h2 id="interior-stencil-moments">§5 — interior cell average and gradient moments from shared nodes</h2>
 

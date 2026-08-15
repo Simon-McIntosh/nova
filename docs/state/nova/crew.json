@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-15T23:27:50",
+  "updated": "2026-08-15T23:41:03",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4761,9 +4761,113 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260815T205919394288-flux-moment-blocks",
+        "plan": "plasma-edge-current-representation",
+        "section": "\u00a73",
+        "node": "flux-moment-blocks",
+        "role": "implement",
+        "member": "moment-blocks",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-15T20:59:21Z",
+        "completed_at": "2026-08-15T21:38:20Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2339,
+        "time_budget": "25m",
+        "base_sha": "a44dfdd22c8dc3ddf2ba04348ae48d62b636bd7d",
+        "commits": [
+          "ca000f36"
+        ],
+        "changed_lines": {
+          "added": 641,
+          "removed": 1,
+          "files": 2
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/flux-moment-blocks-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00738-dbe8-7d62-a6fa-c0ff2c23dd6b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 12440064,
+            "input_tokens": 12956903,
+            "output_tokens": 80649,
+            "reasoning_output_tokens": 38494
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260815T212856573508-clipped-moment-pins",
+        "plan": "plasma-edge-current-representation",
+        "section": "\u00a74",
+        "node": "clipped-moment-pins",
+        "role": "implement",
+        "member": "edge-clip",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-15T21:28:58Z",
+        "completed_at": "2026-08-15T21:35:56Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 418,
+        "time_budget": "25m",
+        "base_sha": "c90110c01887b7ffe0317f98d87de002ddc56843",
+        "commits": [
+          "1a9bc9ff"
+        ],
+        "changed_lines": {
+          "added": 246,
+          "removed": 2,
+          "files": 2
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/clipped-moment-pins-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00738-f48f-7150-97d1-17307a705e4b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 9664000,
+            "input_tokens": 10045341,
+            "output_tokens": 53703,
+            "reasoning_output_tokens": 20371
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 154
+    "_version": 156
   }
 }

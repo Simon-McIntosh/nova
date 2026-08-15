@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-15T13:04:57",
+  "updated": "2026-08-15T13:17:17",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4376,9 +4376,113 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260815T110748873111-clipped-area-conservation",
+        "plan": "efit-flux-decomposition",
+        "section": "\u00a76",
+        "node": "clipped-area-conservation",
+        "role": "implement",
+        "member": "biot-bench",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-15T11:07:51Z",
+        "completed_at": "2026-08-15T11:15:57Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 486,
+        "time_budget": "25m",
+        "base_sha": "7f046af1fcc965f89c4bdcd5ae2bbf7bae7b3622",
+        "commits": [
+          "80dd9ebe84accece68ee9bc04141cf58f4c1d2fe"
+        ],
+        "changed_lines": {
+          "added": 359,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/bac59e2b-995a-430c-bf2d-55dd3126adcf/scratchpad/clipped-area-conservation-manifest.md",
+        "scope_changed": false,
+        "session_id": "019fff4e-9a1b-7652-ac96-f324479b9f67",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 13096448,
+            "input_tokens": 13603562,
+            "output_tokens": 60467,
+            "reasoning_output_tokens": 18843
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260815T110714187885-linear-current-urankar",
+        "plan": "efit-flux-decomposition",
+        "section": "\u00a76",
+        "node": "linear-current-urankar",
+        "role": "implement",
+        "member": "corner-pole",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-15T11:07:18Z",
+        "completed_at": "2026-08-15T11:16:03Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 525,
+        "time_budget": "25m",
+        "base_sha": "7f046af1fcc965f89c4bdcd5ae2bbf7bae7b3622",
+        "commits": [
+          "17d14f95d2460735d75b651ee2a752b0a2b00188"
+        ],
+        "changed_lines": {
+          "added": 337,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/bac59e2b-995a-430c-bf2d-55dd3126adcf/scratchpad/linear-current-urankar-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff724-6bb1-7840-ace7-aa6230408cf8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 56572672,
+            "input_tokens": 58017506,
+            "output_tokens": 157603,
+            "reasoning_output_tokens": 58360
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 141
+    "_version": 143
   }
 }

@@ -414,6 +414,61 @@
   cell-current representation; it is not additive with the separately bounded 11.70224716% far-field kernel
   term.</p>
 
+  <h2 id="area-conservation-gate">§6 — the area gate: the clip was broken, and is now conservative at machine precision</h2>
+
+  <p>Commit <code>80dd9ebe</code>; gate <strong>passed after a repair the assertion forced</strong>. Artifact
+  <code>benchmarks/efit_clipped_area_conservation.py</code>. Worker time 486 s.</p>
+
+  <p><strong>The copied clip failed conservation at leading order</strong> — relative residuals
+  5.136504009e-6, 1.721189620e-5, 4.010062126e-5, 2.739743297e-5 across the four grids. Named defect:
+  inconsistent shared-edge crossings. The half-offset mesh makes horizontal interfaces T-junctions, so
+  adjacent unsplit cell edges interpolate the <em>same</em> contour crossing from <em>different</em>
+  endpoint pairs — radial crossing disagreements up to 3.929128528e-3 m. The repair splits every horizontal
+  edge at the neighbouring row boundary so each shared atomic segment interpolates from identical endpoint
+  fluxes.</p>
+
+  <p><strong>Post-repair, conservation holds at machine precision:</strong> residuals 2.631941695e-16,
+  5.254494060e-16, 6.564786384e-16, 5.250731221e-16 against the 1e-12 requirement; largest single-cell
+  residual ~3e-16 m². Boundary cells 72 / 130 / 198 / 266; clipped boundary area 0.2087 → 0.0844 m².
+  Separately, the polygon-vs-analytic-LCFS area (1.6920132230 m²) runs −2.781781188e-3 → −2.839230893e-4
+  at fitted order <strong>2.081309025</strong> (R² 0.999937) — the geometric term, reported beside the
+  assertion and never inside it.</p>
+
+  <p><em>Consequence recorded:</em> the representation ladder's clipped-current figures were computed with
+  the T-junction clip and are to be re-audited under shared atomic crossings before serving as production
+  guidance.</p>
+
+  <h2 id="linear-current-urankar">§6 — Urankar admits linear current, and the filament-derivative dipole is a far-field method only</h2>
+
+  <p>Commit <code>17d14f95</code>; gate passed. Artifact
+  <code>benchmarks/efit_linear_current_urankar.py</code>. Worker time 525 s. Read-only under
+  <code>nova/</code>; the 512×512 subdivision reference drifts 1.8e-7 from 256×256, so it stands as the
+  converged truth.</p>
+
+  <p><strong>Feasible: the Part V structure admits j = j₀ + j_R(R−R_c) + j_Z(Z−Z_c).</strong> The exact
+  blocks are G_R = area-mean((R−R_c)·K_ψ) and G_Z likewise; source-coordinate multiplication raises the
+  edge/range numerator degree by one, which reduces to <strong>one more harmonic order beyond the current
+  eight</strong> plus one-degree-higher weighted companions to the two surviving arsinh residual integrals.
+  Two extra blocks, three stored blocks total (3.0× storage and contraction), and the expensive
+  elliptic/pole moment stack is shared — <strong>1.0× moment-build multiplier</strong>, 3.0× only as an
+  unshared ceiling. Not implemented today; a production write scope in
+  <code>nova/biot/polygonanalytic.py</code> is the follow-on.</p>
+
+  <p><strong>The equivalence with filament-derivative dipole matrices fails in the near field.</strong>
+  Against converged subdivision, the moment-filament form differs by 3.927286541e-3 at 0.125 section radii,
+  1.113e-3 at 1.0 radius, and only reaches the 1e-3 criterion from <strong>2.0 section radii</strong>
+  onward (3.804e-4 at 2, 2.138e-5 at 8). Neighbouring cells sit at one-to-two radii, so
+  <strong>derivative-of-filament matrices cannot carry the self and neighbour terms</strong> — the exact
+  linear blocks are required there, with the filament form valid as the far-field economy. This is the
+  same near/far structure <code>hybrid_greens</code> already encodes for the uniform kernel.</p>
+
+  <p><strong>Architecture confirmed:</strong> G₀, G_R, G_Z are fixed matrices; per iteration only three
+  per-cell coefficient vectors change (uniform, radial and vertical linear coefficients, with boundary-cell
+  clipped moments riding in them); per-step Green evaluations are exactly zero. The clipped-exact
+  alternative is priced rather than dismissed: Part V on each clipped polygon costs 883,328 uniform-kernel
+  pair evaluations per iteration at 128 boundary cells × 6901 targets, 2,649,984 to rebuild all three
+  blocks — which is what forfeiting fixed matrices means.</p>
+
   <p><strong>Scope note on the current vector.</strong> This probe used <code>efm/fcoil_x</code>
   throughout, on orchestrator instruction issued before the owner locked <code>efm/fcoil_c</code>;
   <code>efm/fcoil_c</code> was never read. The <code>fcoil_x</code> cancellation is worth keeping as

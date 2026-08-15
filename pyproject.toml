@@ -111,11 +111,13 @@ viz = [
 
 [dependency-groups]
 dev = [
+  "nova-stella[jax]",
   # Code formatting and linting
   "black>=23.0.0",
   "ruff>=0",
   "mypy>=1.15.0,<1.17.0",
   "pre-commit>=4.2.0",
+  "pytest",
   "tqdm-stubs>=0.2.1",
   # Benchmark harness (asv suite under benchmarks/)
   "asv>=0.6",

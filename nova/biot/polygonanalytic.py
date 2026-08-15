@@ -140,6 +140,8 @@ Sign and unit conventions, and the ``psi [Wb/A]`` normalisation, are those of
 
 from __future__ import annotations
 
+from functools import lru_cache
+
 import numpy as np
 
 from nova.biot.elliptic import (
@@ -162,6 +164,7 @@ from nova.biot.rangefunction import (
 
 __all__ = [
     "packed_analytic_greens",
+    "polygon_analytic_field_moments",
     "polygon_analytic_flux",
     "polygon_analytic_flux_moments",
     "polygon_analytic_greens",
@@ -1506,6 +1509,53 @@ def _central_flux_moments_namespace(
     return scale * flux, scale * radial_moment, scale * vertical_moment
 
 
+@lru_cache(maxsize=8)
+def _central_flux_target_derivatives(
+    target_r: tuple[float, ...],
+    target_z: tuple[float, ...],
+    vertices: tuple[tuple[float, float], ...],
+    nodes: int,
+) -> np.ndarray:
+    """Differentiate central flux triplets once per immutable interaction row."""
+    import gc
+
+    from nova.jax.config import configure_dtypes
+
+    configure_dtypes()
+    import jax
+    import jax.numpy as jnp
+
+    section = np.asarray(vertices, dtype=np.float64)
+    area_centroid = _section_centroid(section)
+
+    def differentiate(one_r: float, one_z: float) -> np.ndarray:
+        coordinates = jnp.asarray(
+            np.asarray([[np.abs(one_r), one_z]], dtype=np.float64)
+        )
+
+        def one_target(coordinate):
+            rows = _central_flux_moments_namespace(
+                jnp,
+                coordinate[0:1],
+                coordinate[1:2],
+                section,
+                area_centroid,
+                nodes,
+            )
+            return jnp.stack([row[0] for row in rows])
+
+        return np.asarray(jax.vmap(jax.jacfwd(one_target))(coordinates))
+
+    blocks = []
+    for one_r, one_z in zip(target_r, target_z, strict=True):
+        blocks.append(differentiate(one_r, one_z))
+        jax.clear_caches()
+        gc.collect()
+    derivative = np.concatenate(blocks, axis=0)
+    derivative.setflags(write=False)
+    return derivative
+
+
 def polygon_analytic_field_moments(
     target_r: np.ndarray,
     target_z: np.ndarray,
@@ -1525,14 +1575,6 @@ def polygon_analytic_field_moments(
     finite difference or a source quadrature.  Central companions are formed once
     about the polygon area centroid, then translated algebraically.
     """
-    import gc
-
-    from nova.jax.config import configure_dtypes
-
-    configure_dtypes()
-    import jax
-    import jax.numpy as jnp
-
     area_centroid = _section_centroid(vertices)
     requested_centre = (
         area_centroid
@@ -1549,22 +1591,12 @@ def polygon_analytic_field_moments(
     signed_flat = signed.ravel()
     if np.any(signed_flat == 0.0):
         raise ValueError("field moment blocks require nonzero target radius")
-    coordinates = jnp.asarray(np.column_stack((np.abs(signed_flat), z)))
-
-    def one_target(coordinate):
-        rows = _central_flux_moments_namespace(
-            jnp,
-            coordinate[0:1],
-            coordinate[1:2],
-            vertices,
-            area_centroid,
-            nodes,
-        )
-        return jnp.stack([row[0] for row in rows])
-
-    derivative = np.asarray(jax.vmap(jax.jacfwd(one_target))(coordinates))
-    jax.clear_caches()
-    gc.collect()
+    derivative = _central_flux_target_derivatives(
+        tuple(float(value) for value in signed_flat),
+        tuple(float(value) for value in z),
+        tuple(tuple(float(value) for value in vertex) for vertex in vertices),
+        nodes,
+    )
     radius = np.abs(signed_flat)
     radial_central = -derivative[:, :, 1] / (2.0 * np.pi * signed_flat[:, None])
     vertical_central = derivative[:, :, 0] / (2.0 * np.pi * radius[:, None])

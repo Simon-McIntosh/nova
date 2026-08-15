@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-15T23:41:03",
+  "updated": "2026-08-16T01:09:02",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -4865,9 +4865,61 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260815T215026215166-roundtrip-linear-moments",
+        "plan": "efit-flux-decomposition",
+        "section": "\u00a72",
+        "node": "roundtrip-linear-moments",
+        "role": "implement",
+        "member": "edge-clip",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-15T21:50:28Z",
+        "completed_at": "2026-08-15T23:07:11Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4603,
+        "time_budget": "25m",
+        "base_sha": "df67d3c279b2bc9f309bedc28281f7a66c1c0cef",
+        "commits": [
+          "a25b3b3c"
+        ],
+        "changed_lines": {
+          "added": 836,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/roundtrip-linear-moments-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00738-f48f-7150-97d1-17307a705e4b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 52864000,
+            "input_tokens": 53961154,
+            "output_tokens": 150322,
+            "reasoning_output_tokens": 51192
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 156
+    "_version": 157
   }
 }

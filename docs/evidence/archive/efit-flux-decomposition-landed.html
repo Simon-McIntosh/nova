@@ -564,5 +564,38 @@
   exactly the experimental-current comparison the locked decision asks to be reported alongside, but the
   primary measurement is owed on <code>fcoil_c</code>.</p>
 
+
+  <h2 id="roundtrip-linear-moments">§2 — the round trip under the linear representation measures a single term</h2>
+
+  <p>Commits <code>4b72c52f</code>, <code>8c264255</code>, <code>a25b3b3c</code>; gate passed; worker
+  4603 s across two resumptions; SLURM all_debug 1249079 (9m49s, 36 workers) and 1249086 (1m06s).
+  Artifact <code>benchmarks/efit_roundtrip_linear_moments.py</code> (836 lines); findings JSON sha256
+  3855f4c3c7c2f052, analytic bank ca32eb4bb5afe5b3, EFIT bank 1f64a149765076ed.</p>
+
+  <p><strong>The representation removes the cancelling term, and what remains is one clean second-order
+  error.</strong> Every centroid-production control reproduces by construction through the banked
+  <code>_coupled_flux</code> path (relative differences −3.4e-10 to +2.4e-10 on the analytic ladder,
+  +2.9e-8 on EFIT). Under the linear representation — exact fixed flux moment blocks over the
+  conservative clip with the degree-3 interior stencil — the analytic composition error is sup
+  1.101156e-2 / 3.524502e-3 / 1.782915e-3 / 1.030061e-3 of span across 23×35→67×103 at fitted order
+  2.156 (SE 0.045, R² 0.99913), RMS order 2.285. The conservative clip conserved to ≤3.9e-16 at
+  72/130/194/266 boundary cells. <strong>The 1e-6 identity remains infeasible at working resolution
+  under any representation measured</strong>: the finest grid sits 1030× above it and the extrapolation
+  reaches 1e-6 only at h ≈ 1.02e-3 m — 24.7× finer linearly, on an O(N²) Green composition.</p>
+
+  <p><strong>Two defects were caught by controls rather than banked.</strong> A first smoke carried a
+  0.274% float32 drift (an entry point bypassing <code>configure_dtypes</code>), and the initial linear
+  arm read 1.589e-1 of span — a ranking inversion against the boundary-method precedent traced to a
+  defective second LCFS clip in the repeat path (boundary current cut 203125.8 → 146700.5 A); matching
+  the control's unmasked delta-star recovery restored 1.101e-2, or 0.834× the centroid control. On the
+  stored EFIT slice the same-flux level carries a second contour component reaching the finite tiling;
+  selecting the stored-LCFS component suppressed 215 exterior nodes and conserved to residual 0.</p>
+
+  <p><strong>The mask interaction is the open semantic question, quantified for the owner.</strong> On
+  shot 21978 slice 46, the mandatory LCFS remask makes the linear round trip 2.088× the centroid control
+  (sup 1.0756e-2 vs 5.1525e-3 of span), while the unmasked fixed-block counterfactual is 0.686× the
+  control (3.537e-3). The masked result is therefore not promoted as an identity repair; the remask
+  mechanism is measured separately before the fcoil_c primary measurement opens.</p>
+
 </main></body>
 </html>

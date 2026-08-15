@@ -5,7 +5,10 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from nova.equilibrium.separatrix_clip import AtomicCellMesh
+from nova.equilibrium.separatrix_clip import (
+    AtomicCellMesh,
+    padded_linear_current_moments,
+)
 
 
 def _staggered_rectangles(
@@ -145,3 +148,121 @@ def test_linear_current_moments_use_the_clipped_support_about_fixed_centroid():
     )
     assert moments.current[0] == pytest.approx(3.0 * 0.5 + 5.0 * 0.125)
     assert moments.first[0] == pytest.approx([3.0 * 0.125 + 5.0 / 24.0, 7.0 / 24.0])
+
+
+def _padded_moments(mesh: AtomicCellMesh, flux: np.ndarray):
+    clipped = mesh.clip(flux)
+    density = 2.0 + 0.2 * (mesh.centroids[:, 0] - 3.0) - 0.1 * mesh.centroids[:, 1]
+    gradient = np.broadcast_to(np.asarray([0.2, -0.1]), mesh.centroids.shape)
+    current, first = padded_linear_current_moments(
+        clipped.support_vertices,
+        clipped.vertex_count,
+        mesh.centroids,
+        density,
+        gradient,
+    )
+    return clipped, np.asarray(current), np.asarray(first)
+
+
+def test_perturbed_flux_moves_every_boundary_current_moment_continuously():
+    cells, centre = _staggered_rectangles(17, 27)
+    mesh = AtomicCellMesh.from_cells(cells, centroids=centre)
+    flux = _ellipse_level(mesh.node_coordinates)
+    epsilon = 1.0e-5
+
+    base, base_current, base_first = _padded_moments(mesh, flux)
+    fine, fine_current, fine_first = _padded_moments(mesh, flux + epsilon)
+    coarse, coarse_current, coarse_first = _padded_moments(mesh, flux + 2.0 * epsilon)
+
+    np.testing.assert_array_equal(fine.boundary, base.boundary)
+    np.testing.assert_array_equal(coarse.boundary, base.boundary)
+    active = base.boundary
+    fine_current_delta = np.abs(fine_current - base_current)[active]
+    coarse_current_delta = np.abs(coarse_current - base_current)[active]
+    fine_first_delta = np.linalg.norm(fine_first - base_first, axis=1)[active]
+    coarse_first_delta = np.linalg.norm(coarse_first - base_first, axis=1)[active]
+    assert np.all(fine_current_delta > 0.0)
+    assert np.all(fine_first_delta > 0.0)
+    assert np.linalg.norm(coarse_current_delta) / np.linalg.norm(
+        fine_current_delta
+    ) == pytest.approx(2.0, rel=2.0e-3)
+    assert np.linalg.norm(coarse_first_delta) / np.linalg.norm(
+        fine_first_delta
+    ) == pytest.approx(2.0, rel=2.0e-3)
+
+
+def test_centroid_selection_jumps_while_intersection_moments_are_continuous():
+    cell = np.asarray([[-1.0, -1.0], [1.0, -1.0], [1.0, 1.0], [-1.0, 1.0]])
+    mesh = AtomicCellMesh.from_cells([cell], centroids=np.asarray([[0.0, 0.0]]))
+    epsilon = 1.0e-6
+    density = np.asarray([2.0])
+    gradient = np.zeros((1, 2))
+
+    clipped_current = []
+    centroid_current = []
+    for displacement in (-epsilon, epsilon):
+        flux = mesh.node_coordinates[:, 0] - displacement
+        clipped = mesh.clip(flux)
+        current, _first = padded_linear_current_moments(
+            clipped.support_vertices,
+            clipped.vertex_count,
+            mesh.centroids,
+            density,
+            gradient,
+        )
+        clipped_current.append(float(current[0]))
+        centroid_inside = -displacement > 0.0
+        centroid_current.append(float(centroid_inside * density[0] * 4.0))
+
+    clipped_change = abs(clipped_current[1] - clipped_current[0])
+    centroid_jump = abs(centroid_current[1] - centroid_current[0])
+    assert clipped_change == pytest.approx(8.0 * epsilon, rel=1.0e-9)
+    assert centroid_jump == pytest.approx(8.0)
+    assert centroid_jump / clipped_change == pytest.approx(1.0 / epsilon)
+
+
+def test_moving_separatrix_padded_contraction_traces_once():
+    import jax
+    import jax.numpy as jnp
+
+    from nova.jax.config import configure_dtypes
+
+    configure_dtypes()
+    cells, centre = _staggered_rectangles(17, 27)
+    mesh = AtomicCellMesh.from_cells(cells, centroids=centre)
+    density = jnp.asarray(
+        2.0 + 0.2 * (mesh.centroids[:, 0] - 3.0) - 0.1 * mesh.centroids[:, 1]
+    )
+    gradient = jnp.broadcast_to(jnp.asarray([0.2, -0.1]), mesh.centroids.shape)
+    trace_count = 0
+
+    def traced(vertices, count, centroids):
+        nonlocal trace_count
+        trace_count += 1
+        return padded_linear_current_moments(
+            vertices, count, centroids, density, gradient
+        )
+
+    compiled = jax.jit(traced)
+    shapes = set()
+    for displacement in np.linspace(-0.025, 0.025, 12):
+        points = mesh.node_coordinates.copy()
+        points[:, 0] -= displacement
+        clipped = mesh.clip(_ellipse_level(points))
+        shapes.add((clipped.support_vertices.shape, clipped.vertex_count.shape))
+        current, first = compiled(
+            jnp.asarray(clipped.support_vertices),
+            jnp.asarray(clipped.vertex_count),
+            jnp.asarray(mesh.centroids),
+        )
+        jax.block_until_ready((current, first))
+        expected = clipped.linear_current_moments(
+            np.asarray(density), np.asarray(gradient)
+        )
+        np.testing.assert_allclose(
+            current, expected.current, rtol=2.0e-13, atol=1.0e-14
+        )
+        np.testing.assert_allclose(first, expected.first, rtol=2.0e-13, atol=1.0e-14)
+
+    assert shapes == {((459, 12, 2), (459,))}
+    assert trace_count == 1

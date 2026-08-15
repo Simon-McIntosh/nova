@@ -21,7 +21,12 @@ from typing import Callable, Iterable
 
 import numpy as np
 
-__all__ = ["AtomicCellMesh", "ClippedSupports", "LinearCurrentMoments"]
+__all__ = [
+    "AtomicCellMesh",
+    "ClippedSupports",
+    "LinearCurrentMoments",
+    "padded_linear_current_moments",
+]
 
 
 def _signed_area(vertices: np.ndarray) -> float:
@@ -144,6 +149,124 @@ class LinearCurrentMoments:
     def vertical(self) -> np.ndarray:
         """Return the vertical first-current moment."""
         return self.first[:, 1]
+
+
+def padded_linear_current_moments(
+    support_vertices,
+    vertex_count,
+    centroids,
+    density,
+    gradient,
+):
+    """Contract fixed-capacity clipped supports into current moments.
+
+    Every argument keeps the mesh's fixed leading cell dimension while
+    ``support_vertices`` retains its fixed vertex capacity. ``vertex_count``
+    masks padding and closes each live polygon back to its first vertex. The
+    resulting contraction is therefore compatible with one JAX trace across
+    moving separatrices even when the number of live support vertices changes.
+    """
+    from nova.jax.config import configure_dtypes
+
+    configure_dtypes()
+
+    import jax.numpy as jnp
+
+    vertices = jnp.asarray(support_vertices)
+    count = jnp.asarray(vertex_count)
+    centre = jnp.asarray(centroids)
+    density = jnp.asarray(density)
+    gradient = jnp.asarray(gradient)
+    if vertices.ndim != 3 or vertices.shape[2] != 2:
+        raise ValueError("support_vertices must have shape (cells, capacity, 2)")
+    cell_count, capacity, _coordinate = vertices.shape
+    if count.shape != (cell_count,):
+        raise ValueError("vertex_count must carry one value per cell")
+    if centre.shape != (cell_count, 2):
+        raise ValueError("centroids must have shape (cells, 2)")
+    if density.shape != (cell_count,):
+        raise ValueError("density must carry one value per cell")
+    if gradient.shape != (cell_count, 2):
+        raise ValueError("gradient must have shape (cells, 2)")
+
+    slot = jnp.arange(capacity)
+    valid = slot[jnp.newaxis, :] < count[:, jnp.newaxis]
+    following_slot = jnp.where(
+        slot[jnp.newaxis, :] + 1 < count[:, jnp.newaxis],
+        slot[jnp.newaxis, :] + 1,
+        0,
+    )
+    following = jnp.take_along_axis(vertices, following_slot[..., jnp.newaxis], axis=1)
+    local = vertices - centre[:, jnp.newaxis, :]
+    following_local = following - centre[:, jnp.newaxis, :]
+    radial = local[..., 0]
+    vertical = local[..., 1]
+    following_radial = following_local[..., 0]
+    following_vertical = following_local[..., 1]
+    cross = radial * following_vertical - following_radial * vertical
+    cross = jnp.where(valid, cross, 0.0)
+    area_twice = jnp.sum(cross, axis=1)
+    orientation = jnp.where(area_twice < 0.0, -1.0, 1.0)
+    area = 0.5 * orientation * area_twice
+    first_area = orientation[:, jnp.newaxis] * jnp.stack(
+        [
+            jnp.sum((radial + following_radial) * cross, axis=1) / 6.0,
+            jnp.sum((vertical + following_vertical) * cross, axis=1) / 6.0,
+        ],
+        axis=1,
+    )
+    radial_squared = (
+        orientation
+        * jnp.sum(
+            (
+                radial * radial
+                + radial * following_radial
+                + following_radial * following_radial
+            )
+            * cross,
+            axis=1,
+        )
+        / 12.0
+    )
+    vertical_squared = (
+        orientation
+        * jnp.sum(
+            (
+                vertical * vertical
+                + vertical * following_vertical
+                + following_vertical * following_vertical
+            )
+            * cross,
+            axis=1,
+        )
+        / 12.0
+    )
+    cross_area = (
+        orientation
+        * jnp.sum(
+            (
+                2.0 * radial * vertical
+                + radial * following_vertical
+                + following_radial * vertical
+                + 2.0 * following_radial * following_vertical
+            )
+            * cross,
+            axis=1,
+        )
+        / 24.0
+    )
+    second_area = jnp.stack(
+        [
+            jnp.stack([radial_squared, cross_area], axis=1),
+            jnp.stack([cross_area, vertical_squared], axis=1),
+        ],
+        axis=1,
+    )
+    current = density * area + jnp.einsum("ni,ni->n", gradient, first_area)
+    first_current = density[:, jnp.newaxis] * first_area + jnp.einsum(
+        "nij,nj->ni", second_area, gradient
+    )
+    return current, first_current
 
 
 @dataclass(frozen=True)

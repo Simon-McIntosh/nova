@@ -1257,6 +1257,67 @@ def _section_centroid(vertices: np.ndarray) -> np.ndarray:
     )
 
 
+def _horizontal_reflection(vertices: np.ndarray) -> tuple[float, np.ndarray] | None:
+    """Return a round-off-close horizontal reflection of a polygon, if present."""
+    section = np.asarray(vertices, dtype=np.float64)
+    axis = 0.5 * (np.max(section[:, 1]) + np.min(section[:, 1]))
+    scale = max(float(np.ptp(section[:, 0])), float(np.ptp(section[:, 1])), 1.0)
+    tolerance = 32.0 * np.finfo(np.float64).eps * scale
+    indices = np.arange(len(section))
+    for offset in range(len(section)):
+        partner = (offset - indices) % len(section)
+        radial_error = np.max(np.abs(section[:, 0] - section[partner, 0]))
+        vertical_error = np.max(
+            np.abs(section[:, 1] + section[partner, 1] - 2.0 * axis)
+        )
+        if max(radial_error, vertical_error) <= tolerance:
+            return axis, partner
+    return None
+
+
+def _condition_vertical_contour_sum(
+    vertices: np.ndarray,
+    centre_z: float,
+    target_z: np.ndarray,
+    live: np.ndarray,
+    flux_terms: list[np.ndarray],
+    vertical_terms: list[np.ndarray],
+    unconditioned: np.ndarray,
+) -> np.ndarray:
+    """Pair reflection-related edge terms on the symmetry plane.
+
+    For a mirror pair, the source-coordinate part odd about the reflection axis
+    cancels algebraically.  Its vertical central moment is therefore the pair's
+    uniform term times the offset between that axis and the area centroid.  This
+    uses contour geometry alone; it never inspects or thresholds the accumulated
+    value.
+    """
+    reflection = _horizontal_reflection(vertices)
+    if reflection is None or not np.all(live):
+        return unconditioned
+    axis, vertex_partner = reflection
+    on_axis = target_z == axis
+    if not np.any(on_axis):
+        return unconditioned
+
+    conditioned = np.zeros_like(unconditioned)
+    consumed = np.zeros(len(vertices), dtype=bool)
+    for index in range(len(vertices)):
+        if consumed[index]:
+            continue
+        partner = int(vertex_partner[(index + 1) % len(vertices)])
+        consumed[index] = True
+        consumed[partner] = True
+        pair_flux = flux_terms[index]
+        pair_vertical = vertical_terms[index]
+        if partner != index:
+            pair_flux = pair_flux + flux_terms[partner]
+            pair_vertical = pair_vertical + vertical_terms[partner]
+        pair_vertical = np.where(on_axis, (axis - centre_z) * pair_flux, pair_vertical)
+        conditioned = conditioned + pair_vertical
+    return np.where(on_axis, conditioned, unconditioned)
+
+
 def polygon_analytic_flux_moments(
     target_r: np.ndarray,
     target_z: np.ndarray,
@@ -1272,12 +1333,13 @@ def polygon_analytic_flux_moments(
     Part V corner channel, pole family and pair of graded residual builds.  The
     default expansion point is the polygon's area centroid.
     """
-    centre = (
-        _section_centroid(vertices)
+    area_centroid = _section_centroid(vertices)
+    requested_centre = (
+        area_centroid
         if expansion_point is None
         else np.asarray(expansion_point, dtype=np.float64)
     )
-    if centre.shape != (2,) or not np.all(np.isfinite(centre)):
+    if requested_centre.shape != (2,) or not np.all(np.isfinite(requested_centre)):
         raise ValueError("expansion_point must be a finite (R, Z) pair")
     edges, weights, norm = pack_section(vertices)
     signed = np.asarray(target_r, dtype=np.float64)
@@ -1294,7 +1356,7 @@ def polygon_analytic_flux_moments(
                 signed.ravel()[off_axis],
                 z[off_axis],
                 vertices,
-                expansion_point=centre,
+                expansion_point=requested_centre,
                 nodes=nodes,
             )
             for row, values in zip(rows, computed, strict=True):
@@ -1304,9 +1366,11 @@ def polygon_analytic_flux_moments(
     flux = np.zeros_like(r)
     radial_moment = np.zeros_like(r)
     vertical_moment = np.zeros_like(r)
-    target_z_minus_expansion_z = z - centre[1]
+    target_z_minus_expansion_z = z - area_centroid[1]
     sides = len(edges)
     live = weights != 0.0
+    flux_terms = [np.zeros_like(r) for _ in range(sides)]
+    vertical_terms = [np.zeros_like(r) for _ in range(sides)]
     chain = live.astype(np.int64) - np.roll(live, 1).astype(np.int64)
     last_read: dict[int, int] = {}
     for index in np.flatnonzero(live):
@@ -1328,28 +1392,47 @@ def polygon_analytic_flux_moments(
         lower = corner_part(index, ra, za)
         upper = corner_part((index + 1) % sides, rb, zb)
         edge = _Edge(r, z, edges[index], nodes)
-        high = edge.flux_and_moment_terms(upper, centre[0], target_z_minus_expansion_z)
-        low = edge.flux_and_moment_terms(lower, centre[0], target_z_minus_expansion_z)
-        flux = flux - (high[0] - low[0])
-        radial_moment = radial_moment - (high[1] - low[1])
-        vertical_moment = vertical_moment - (high[2] - low[2])
+        high = edge.flux_and_moment_terms(
+            upper, area_centroid[0], target_z_minus_expansion_z
+        )
+        low = edge.flux_and_moment_terms(
+            lower, area_centroid[0], target_z_minus_expansion_z
+        )
+        flux_terms[index] = low[0] - high[0]
+        vertical_terms[index] = low[2] - high[2]
+        flux = flux + flux_terms[index]
+        radial_moment = radial_moment + low[1] - high[1]
+        vertical_moment = vertical_moment + vertical_terms[index]
         for corner in dict.fromkeys((index, (index + 1) % sides)):
             if last_read[corner] != index:
                 continue
             if chain[corner]:
                 one_flux = corners[corner].arsinh_terms()[0]
                 one_radial, one_vertical = corners[corner].flux_moment_residuals(
-                    centre[0], target_z_minus_expansion_z
+                    area_centroid[0], target_z_minus_expansion_z
                 )
                 flux = flux + chain[corner] * one_flux
                 radial_moment = radial_moment + chain[corner] * one_radial
                 vertical_moment = vertical_moment + chain[corner] * one_vertical
             del corners[corner]
+    vertical_moment = _condition_vertical_contour_sum(
+        vertices,
+        area_centroid[1],
+        z,
+        live,
+        flux_terms,
+        vertical_terms,
+        vertical_moment,
+    )
     scale = 0.5 * norm * r
+    uniform = scale * flux
+    radial_central = scale * radial_moment
+    vertical_central = scale * vertical_moment
+    displacement = requested_centre - area_centroid
     return (
-        (scale * flux).reshape(shape),
-        (scale * radial_moment).reshape(shape),
-        (scale * vertical_moment).reshape(shape),
+        uniform.reshape(shape),
+        (radial_central - displacement[0] * uniform).reshape(shape),
+        (vertical_central - displacement[1] * uniform).reshape(shape),
     )
 
 

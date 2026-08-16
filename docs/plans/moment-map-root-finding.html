@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="moment-map-root-finding">
+  <meta name="plan-title" content="Moment-Map Root Finding — convergence on a piecewise-smooth free-boundary map">
+  <meta name="plan-summary" content="Understand, then treat, the derivative kinks that defeat Newton on the moment-represented free-boundary map: a kink census along real solver trajectories names the dominant class and its frequency before either treatment — kink-aware root finding on the unchanged map, or an owner-gated C1 smoothing of the convicted surface — is implemented">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="6.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-sprint" content="S7">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-blocks" content="plasma-edge-current-representation">
+  <title>Moment-Map Root Finding | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — What is measured, and what is not yet understood</h2>
+
+    <p><strong>The exclusion chain is complete and the obstruction is continuous-but-kinked.</strong>
+    On the held moment-representation lineage, the free-boundary continuation rejects reproducibly at a
+    bracket where: σ_min of the residual Jacobian stays finite along the accepted branch (no smooth
+    fold); a 4× solver budget reproduces the stall residual to ten digits (no starvation); the pointwise
+    tangent verifies against finite differences; and — after the participation repair — discrete events
+    account for <em>exactly zero</em> of the stall (zero crossing-set changes, zero topology-selector
+    changes, controlled aggregate jump 0.0 Wb). The map is value-continuous by measurement; what remains
+    are <strong>derivative kinks</strong> — surfaces where the map is C0 but not C1 — with a
+    deterministic Newton cycle across them fitting every observation.</p>
+
+    <p><strong>What is not yet known is which kink class dominates, and that decides everything
+    downstream.</strong> At the bracket endpoints the topology class stayed diverted with identical
+    selectors, and the only discrete differences were three cells entering or leaving clip support — but
+    endpoints are not trajectories. The kink the solver actually cycles on lives on the path between
+    Newton iterates, where nobody has yet looked. Candidate classes, from local-and-frequent to
+    global-and-rare:</p>
+
+    <ul>
+      <li><strong>clip support entry/exit</strong> — a cell's clipped support appearing or vanishing:
+      value-continuous (measured, ε-ratios ≈ 2), derivative-kinked, one surface per near-boundary cell —
+      the frequent, low-amplitude class;</li>
+      <li><strong>atomic-edge crossing flips</strong> — an edge's crossing existence switching with node
+      flux signs: the same class one level finer;</li>
+      <li><strong>ring-completeness × participation</strong> — a cell entering participation whose
+      interior stencil cannot form its gradient (35 such cells on the accepted root, −7.8 kA,
+      5.2e-4 of |I_p|): small in amplitude, but a distinct surface family;</li>
+      <li><strong>x-point candidate selector switches</strong> — the selected saddle changing identity
+      while the class stays diverted: rare, but it moves the boundary flux;</li>
+      <li><strong>boundary-flux normalisation kinks</strong> — anything discrete in the axis or boundary
+      flux feeds ψ_N globally, kinking <em>every</em> cell's source at once: the rare,
+      high-amplitude class, including the limited↔diverted switch as its extreme case (not observed at
+      the endpoints, unmeasured along trajectories).</li>
+    </ul>
+
+    <p>The owner's directive is the plan's spine: <em>understand what we are fixing before we fix
+    it</em>. No treatment is implemented until the census names the dominant class.</p>
+
+    <h2 id="s2">§2 — The kink census: name the surface Newton cycles on</h2>
+
+    <p>Instrument the solver trajectory itself on the coarse reference fixture, at the barrier bracket
+    and from the analytic seed. Along every Newton iterate path (and along the line segment between
+    consecutive iterates, sampled densely enough to catch surface crossings): log each kink-surface
+    crossing by class — clip support entry/exit (which cell), atomic-edge crossing flips (which edge),
+    ring-completeness participation changes, x-point selector identity, axis/boundary flux sources, and
+    topology class. For each crossing record the derivative jump it induces in the composed map
+    (directional derivative from both sides) and its amplitude relative to the local Newton step. Then
+    correlate: which class does the cycling iterate pair actually straddle, at what amplitude, how many
+    times per iteration?</p>
+
+    <p><em>Done-when:</em> a banked census reports per-class crossing counts and derivative-jump
+    amplitudes along the stalled trajectories; the dominant class is named with the measured margin over
+    the next class; the limited↔diverted question is answered explicitly (observed or excluded along
+    trajectories, not only at endpoints); and the census states whether the dominant surface is local
+    (per-cell) or global (normalisation-chain) — the fact that selects between §3 and §4 emphases.</p>
+
+    <h2 id="s3">§3 — Treatment 1: kink-aware root finding on the unchanged map</h2>
+
+    <p><em>Gated on §2.</em> The map's semantics do not change; the solver learns the map's true
+    smoothness class. Candidates to evaluate against the convicted kink class, on the fixture, with the
+    unchanged gate set: semismooth Newton variants (Clarke-generalised Jacobian elements at kink
+    straddles); nonmonotone line search or trust-region globalisation that tolerates crossing a kink
+    without cycling; damped Picard–Newton hybrids exploiting the measured map eigenvalue; and
+    step-restriction at detected surface crossings (the census instrument doubles as the detector).
+    The winner is selected by measurement: residual to the unchanged 1e-6 gate on the coarse fixture,
+    then the fine continuation to t=1, then the full unchanged gate set at the reached root.</p>
+
+    <p><em>Done-when:</em> either a route configuration converges the coarse analytic-seed solve to the
+    unchanged 1e-6 residual gate with the unchanged physics gates scored at the root and the fine t=1
+    continuation scored likewise — or every candidate's failure is banked with its mechanism, which is
+    the honest input §4 needs.</p>
+
+    <h2 id="s4">§4 — Treatment 2: C1 smoothing of the convicted surface (owner-gated)</h2>
+
+    <p><em>Gated on §2's verdict and on §3's outcome; opening it is an owner decision because it changes
+    representation semantics.</em> Only the <em>convicted</em> surface is smoothed — a C1 transition
+    over a measured band (for a support-entry kink: the clipped moments blended smoothly from zero over
+    an ε-band of the entering cell's inside-fraction; for a normalisation kink: a smoothed boundary-flux
+    blend), with the smoothing scale a reported parameter, never a hidden default. The physics price is
+    re-measured, not assumed: patch-area conservation, the continuity pins, the steep-edge demonstration
+    gates and the single-cell equivalence rungs all re-run under the smoothed map, with any degradation
+    stated beside the convergence gain.</p>
+
+    <h2 id="s5">§5 — Adjudication and the held lineage's merge</h2>
+
+    <p>Whichever treatment closes the residual gate: the coarse reference lane runs once, the fine
+    continuation to t=1 is scored, and the analytic-validation verdict is written. That verdict is the
+    owner's gate for merging the held lineage (routing + canonical centres + participation pin and
+    repair) onto the primary branch and thereby the gate the sprint's forward chain — the SOL
+    demonstration, the fcoil_c decomposition primary, and efit-forward-parity — stands on.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="diagnosis-before-treatment" data-choice="census-first" data-by="Simon McIntosh" data-when="2026-08-16T21:00:00+00:00">
+    <p class="r-dec-q">May a treatment be implemented before the kink census names the dominant class?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="census-first">no — understand what is being fixed before fixing it; §3 and §4 are gated on §2's verdict</button>
+      <button class="r-opt" data-value="parallel">treatments may start in parallel with the census</button>
+      </p>
+    <p class="r-dec-rat">Owner direction 2026-08-16: we need to understand what we are fixing before we
+        fix it — including whether the kink is a limited-diverted topology change or something occurring
+        more frequently through cell clipping. The census answers that question explicitly along real
+        solver trajectories, not only at bracket endpoints.</p>
+    </div>
+<div class="r-dec" data-key="smoothing-authority" data-choice="owner-gated" data-by="Simon McIntosh" data-when="2026-08-16T21:00:00+00:00">
+    <p class="r-dec-q">Who opens the C1-smoothing treatment, which changes representation semantics?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="owner-gated">the owner, on §2's conviction and §3's outcome</button>
+      <button class="r-opt" data-value="orchestrator">the orchestrator, if §3 fails</button>
+      </p>
+    <p class="r-dec-rat">Smoothing trades a measured physics property for convergence; the trade is
+        priced by §4's re-measurements and the decision to pay it is the owner's.</p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-mmrf-001" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-16" data-recommends-skill="/reckon-ship moment-map-root-finding" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Run the kink census, then the gated treatments</h4>
+    <div class="r-fu-body"><p>The census (§2) runs on the held lineage's coarse fixture at the barrier
+        bracket and from the analytic seed, instrumenting real Newton trajectories. Its verdict gates §3
+        (kink-aware root finding, no semantics change) and, through the owner, §4 (C1 smoothing of the
+        convicted surface only). §5 adjudicates the analytic-validation gate and the held lineage's
+        merge.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship moment-map-root-finding</pre>
+    </article>
+</section>
+  </main>
+</body>
+</html>

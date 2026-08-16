@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T13:40:32",
+  "updated": "2026-08-16T13:43:51",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -5507,9 +5507,55 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T112818093252-supply-topology-research",
+        "plan": "mast-misfit-toroidal-harmonics",
+        "section": "\u00a72",
+        "node": "supply-topology-research",
+        "role": "investigate",
+        "member": "supply-topology",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-16T11:28:20Z",
+        "completed_at": "2026-08-16T11:42:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 869,
+        "time_budget": "45m",
+        "base_sha": "9315ab5229563e2e7e89576470a3a153f6f43df0",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/0738e6b1-3bc0-4082-a69e-59214ef05a7c/scratchpad/supply-topology-research-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00a54-6e81-7761-85eb-33e193da78cc",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 5769984,
+            "input_tokens": 6200882,
+            "output_tokens": 34058,
+            "reasoning_output_tokens": 10056
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 180
+    "_version": 181
   }
 }

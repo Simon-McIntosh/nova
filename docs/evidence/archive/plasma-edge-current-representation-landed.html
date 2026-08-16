@@ -286,5 +286,29 @@
   made. Rigid offsets reported separately: axis 0.0100 m (coarse) / 0.0320 m (fine), X-point ≈0.0226 m
   (both).</p>
 
+  <h2 id="hexcell-moment-equivalence">§8 — rung 1: the single-cell equivalence holds at second order</h2>
+
+  <p>Commit <code>61f8ddb9</code>; gate passed; TDD (module red at collection, then 15/15). Artifacts:
+  <code>tests/test_hexcell_moment_equivalence.py</code>,
+  <code>benchmarks/hex_cell_moment_equivalence.py</code>, convergence figure and findings JSON under
+  <code>docs/figures/plasma-edge-current-representation/</code>.</p>
+
+  <figure>
+    <img src="/nova/figures/plasma-edge-current-representation/hex_cell_moment_equivalence_convergence.svg"
+         alt="Convergence of the finely meshed low-order route to the single-cell moment route for flux and both fields">
+    <figcaption>Six panels (near/far × ψ/B_R/B_Z): the boundary-fitted low-order submesh converging to
+    the nine-block moment route under refinement.</figcaption>
+  </figure>
+
+  <p><strong>The two routes are equivalent in the limit, without a solver anywhere in the loop.</strong>
+  One large hexagon through <code>polygon_analytic_flux_moments</code> and
+  <code>polygon_analytic_field_moments</code> (uniform and combined radial/vertical linear coefficients)
+  against the identical authored boundary handed to <code>PolyGrid</code> and meshed into 61/140/331/784
+  boundary-fitted low-order elements driven by the exact per-element integral of the same density: fitted
+  convergence orders 1.780–3.149 (uniform) and 1.953–2.288 (linear) across all twelve
+  case/region/quantity variants; finest relative L2 disagreements 2.82e-6–5.31e-5; total current between
+  routes at round-off (≤5.195e-15) on every refinement. All nine moment blocks exercised by a pinned
+  test.</p>
+
 </main></body>
 </html>

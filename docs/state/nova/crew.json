@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T18:08:24",
+  "updated": "2026-08-16T19:09:51",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -87,6 +87,13 @@
         "role": "implement",
         "session_id": "019ffb42-5d8a-7972-a213-5e64bec221f3",
         "created": "2026-08-13"
+      },
+      {
+        "id": "equivalence-ladder",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a00b7e-1817-7740-93a6-aac064c671e7",
+        "created": "2026-08-16"
       },
       {
         "id": "fffe-infra",
@@ -5963,9 +5970,61 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T165325378593-hexcell-moment-equivalence",
+        "plan": "plasma-edge-current-representation",
+        "section": "\u00a78",
+        "node": "hexcell-moment-equivalence",
+        "role": "implement",
+        "member": "equivalence-ladder",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T16:53:27Z",
+        "completed_at": "2026-08-16T17:02:04Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 517,
+        "time_budget": "25m",
+        "base_sha": "c8b1325036b59b285eebbf2505e79b2d1a9515be",
+        "commits": [
+          "61f8ddb9"
+        ],
+        "changed_lines": {
+          "added": 794,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": 15,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/hexcell-moment-equivalence-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00b7e-1817-7740-93a6-aac064c671e7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 3784448,
+            "input_tokens": 3944206,
+            "output_tokens": 18770,
+            "reasoning_output_tokens": 5323
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 189
+    "_version": 192
   }
 }

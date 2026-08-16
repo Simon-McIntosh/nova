@@ -18,8 +18,14 @@ from shapely.geometry import MultiPolygon, Polygon
 
 from nova.biot.biotframe import Source, Target
 from nova.biot.greens import greens_bz_br, greens_psi
+from nova.biot.plasmagrid import PlasmaGrid
+from nova.biot.plasmawall import PlasmaWall
 from nova.biot.polysection import PolySection, PolySectionPolicy, TiledPolySection
-from nova.biot.polygonanalytic import polygon_analytic_greens
+from nova.biot.polygonanalytic import (
+    polygon_analytic_field_moments,
+    polygon_analytic_flux_moments,
+    polygon_analytic_greens,
+)
 from nova.biot.sectionaverage import section_triangles
 from nova.biot.solve import Solve
 from nova.biot.target import TargetQuadraturePolicy
@@ -42,6 +48,110 @@ def hexagon(r0=1.0, z0=0.0, radius=0.03):
     """Return the vertices of a regular hexagon section, flat-top."""
     angle = np.pi / 6 + np.linspace(0.0, 2.0 * np.pi, 6, endpoint=False)
     return np.column_stack([r0 + radius * np.cos(angle), z0 + radius * np.sin(angle)])
+
+
+def hex_mesh_source():
+    """Return three neighbouring polygon-section plasma cells."""
+    centres = np.array([[2.94, -0.04], [3.06, -0.04], [3.0, 0.065]])
+    sections = [hexagon(r, z, radius=0.065) for r, z in centres]
+    return Source(
+        {
+            "x": centres[:, 0],
+            "y": np.zeros(len(centres)),
+            "z": centres[:, 1],
+            "segment": ["polysection"] * len(centres),
+            "poly": [Polygon(vertices) for vertices in sections],
+            "frame": [f"Coil{index}" for index in range(len(centres))],
+            "nturn": np.ones(len(centres)),
+            "plasma": np.ones(len(centres), dtype=bool),
+            "link": [""] * len(centres),
+        }
+    )
+
+
+MOMENT_ATTRIBUTES = (
+    "Psi",
+    "PsiR",
+    "PsiZ",
+    "Br",
+    "BrR",
+    "BrZ",
+    "Bz",
+    "BzR",
+    "BzZ",
+)
+
+
+def test_hex_mesh_moment_attributes_match_direct_polygon_evaluation():
+    """Every assembled row is the direct fixed-centroid polygon block."""
+    target_r = np.array([2.72, 3.0, 3.31, 4.2])
+    target_z = np.array([-0.16, 0.01, 0.22, -0.5])
+    solve = Solve(
+        hex_mesh_source(),
+        Target({"x": target_r, "z": target_z}),
+        attrs=list(MOMENT_ATTRIBUTES),
+        turns=[False, False],
+        reduce=[False, False],
+    )
+
+    expected = {attribute: [] for attribute in MOMENT_ATTRIBUTES}
+    for polygon in hex_mesh_source()["poly"]:
+        vertices = np.asarray(polygon.exterior.coords, dtype=float)[:-1, :2]
+        flux = polygon_analytic_flux_moments(target_r, target_z, vertices)
+        radial, vertical = polygon_analytic_field_moments(target_r, target_z, vertices)
+        for names, rows in zip(
+            (("Psi", "PsiR", "PsiZ"), ("Br", "BrR", "BrZ"), ("Bz", "BzR", "BzZ")),
+            (flux, radial, vertical),
+            strict=True,
+        ):
+            for name, row in zip(names, rows, strict=True):
+                expected[name].append(row)
+
+    for attribute in MOMENT_ATTRIBUTES:
+        np.testing.assert_array_equal(
+            solve.data[attribute], np.column_stack(expected[attribute])
+        )
+
+
+def test_adding_moment_attributes_keeps_uniform_assembly_bitwise_identical():
+    """Requesting companion rows cannot reassociate established uniform rows."""
+    target = {"x": [2.72, 3.0, 3.31, 4.2], "z": [-0.16, 0.01, 0.22, -0.5]}
+    uniform = Solve(
+        hex_mesh_source(),
+        Target(target),
+        attrs=["Psi", "Br", "Bz"],
+        turns=[False, False],
+        reduce=[False, False],
+    )
+    expanded = Solve(
+        hex_mesh_source(),
+        Target(target),
+        attrs=list(MOMENT_ATTRIBUTES),
+        turns=[False, False],
+        reduce=[False, False],
+    )
+    for attribute in ("Psi", "Br", "Bz"):
+        np.testing.assert_array_equal(expanded.data[attribute], uniform.data[attribute])
+
+
+def test_plasma_assemblies_request_kernel_axis_companions():
+    """Grid and wall defaults expose the rows their solve contractions consume."""
+    assert PlasmaGrid.__dataclass_fields__["attrs"].default_factory() == [
+        "Br",
+        "BrR",
+        "BrZ",
+        "Bz",
+        "BzR",
+        "BzZ",
+        "Psi",
+        "PsiR",
+        "PsiZ",
+    ]
+    assert PlasmaWall.__dataclass_fields__["attrs"].default_factory() == [
+        "Psi",
+        "PsiR",
+        "PsiZ",
+    ]
 
 
 # --- the two oracles --------------------------------------------------------

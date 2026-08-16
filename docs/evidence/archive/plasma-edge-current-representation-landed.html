@@ -51,6 +51,33 @@
   coefficients reproduce the existing uniform flux kernel bit-for-bit. B_R/B_Z companions follow as
   their own node on the same session.</p>
 
+  <h2 id="field-moment-blocks">§3 — direct field-kernel moment blocks, after the differentiation route measured out</h2>
+
+  <p>Commits <code>7f89b853</code> (red-first gates) through <code>fbc28097</code> (production direct
+  antiderivatives); gate passed; five honest budget stops across the node; formal suite 8/8 (all four
+  flux-moment and all four field-moment tests). Artifacts: <code>nova/biot/polygonanalytic.py</code>,
+  <code>tests/test_biotpolygonmoments.py</code> (+115 lines, 4 new tests).</p>
+
+  <p><strong>The mathematically exact differentiation route was abandoned on measurement, not
+  taste.</strong> Forward-mode AD of the accepted flux antiderivatives is exact, but its compilation
+  graph cannot serve a build-once kernel: a single one-target differentiation died at every radius on the
+  login node (EXIT 137 at R = 2.6, 3.5, 5.0 independently — excluding geometric regime and target
+  accumulation), and the identical parity pytest on a 32 GiB all_debug node timed out at 20m23s with
+  MaxRSS 12,235,772 KiB (SLURM 1249084). The replacement derives the field blocks directly: filament
+  identities 2πR·B_R = ∂_Z′q and 2πR²·B_Z = 3q − div′[q·(R′, Z′−Z)] moved to the polygon contour, with
+  slanted-edge antiderivatives J₀/J₁/J₂ and horizontal-edge primitives Q₀/Q_R/Q_Z contracted through the
+  same ninth-order harmonic, pole and graded-residual channel as the flux kernel. No JAX import, no
+  target derivative, no source quadrature remains reachable from the field-moment API; the near/far build
+  costs 0.119 s where the AD graph needed 12 GiB.</p>
+
+  <p><strong>All four pin families hold at the flux kernel's standard.</strong> Richardson references:
+  worst relative error B_R 1.616e-08, B_Z 7.910e-09 (absolute component errors 9.8e-21 to 7.6e-18).
+  Uniform rows bitwise identical to <code>polygon_analytic_greens</code> for both kernels — an initial
+  2.37e-21 arithmetic-order difference was made exactly zero by matching the existing kernel's
+  −(high−low) contour arithmetic. Algebraic translation residuals 0 to 7.28e-23; hexagon parity ratios 0
+  to 1.39e-17 by reflection geometry, never value inspection. The nine-block plasma interaction stack —
+  ψ, B_R, B_Z, each with G₀/G_R/G_Z — is complete.</p>
+
   <h2 id="separatrix-clip">§4 — the conservative clip and its linear-current moments</h2>
 
   <p>Commit <code>acea51cb</code>; gate passed; worker 1171 s across one resumption; TDD with the red

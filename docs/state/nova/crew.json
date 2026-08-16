@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T10:31:08",
+  "updated": "2026-08-16T10:52:13",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -43,7 +43,7 @@
         "id": "dataset-census",
         "harness": "codex",
         "role": "investigate",
-        "session_id": null,
+        "session_id": "01a009b2-97d6-7931-bd17-979e2170440f",
         "created": "2026-08-16"
       },
       {
@@ -4924,9 +4924,107 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260815T214251389090-field-moment-blocks",
+        "plan": "plasma-edge-current-representation",
+        "section": "\u00a73",
+        "node": "field-moment-blocks",
+        "role": "implement",
+        "member": "moment-blocks",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-15T21:42:53Z",
+        "completed_at": "2026-08-16T08:43:02Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 39609,
+        "time_budget": "25m",
+        "base_sha": "df67d3c279b2bc9f309bedc28281f7a66c1c0cef",
+        "commits": [
+          "fbc28097"
+        ],
+        "changed_lines": {
+          "added": 469,
+          "removed": 1,
+          "files": 2
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/field-moment-blocks-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00738-dbe8-7d62-a6fa-c0ff2c23dd6b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 42866176,
+            "input_tokens": 43986990,
+            "output_tokens": 167332,
+            "reasoning_output_tokens": 70077
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260816T083131441338-efit-dataset-census",
+        "plan": "efit-forward-parity",
+        "section": "\u00a74",
+        "node": "efit-dataset-census",
+        "role": "investigate",
+        "member": "dataset-census",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-16T08:31:33Z",
+        "completed_at": "2026-08-16T08:48:16Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1003,
+        "time_budget": "25m",
+        "base_sha": "3f5cab6322ec666ff4e4e9865e7dd3a66120b2eb",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/efit-dataset-census-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a009b2-97d6-7931-bd17-979e2170440f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 5788672,
+            "input_tokens": 5976376,
+            "output_tokens": 33451,
+            "reasoning_output_tokens": 13279
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 158
+    "_version": 161
   }
 }

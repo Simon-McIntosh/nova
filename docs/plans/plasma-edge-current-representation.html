@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-16">
-<meta name="plan-commits" content="444d4d7d,acea51cb,bdd3120b,ca000f36,1a9bc9ff">
+<meta name="plan-commits" content="444d4d7d,acea51cb,bdd3120b,ca000f36,1a9bc9ff,7f89b853,6cafed36,070bddd2,02ddf888,dfe8ba70,fbc28097">
 <meta name="plan-artifacts" content="docs/evidence/archive/plasma-edge-current-representation-landed.html,nova/equilibrium/stencil_mesh.py,tests/test_equilibrium_stencil_mesh.py,nova/equilibrium/separatrix_clip.py,tests/test_equilibrium_separatrix_clip.py,nova/biot/polygonanalytic.py,tests/test_biotpolygonmoments.py">
-<meta name="plan-impl" content="0.57">
-<meta name="plan-version" content="7">
+<meta name="plan-impl" content="0.62">
+<meta name="plan-version" content="9">
 </head>
 <body>
   <main class="plan-doc">
@@ -92,22 +92,23 @@
     to 6.6e-16. <strong>The matrices never move:</strong> per-iteration work is node evaluations of j plus
     moment assembly plus matvecs; per-step Green evaluations are zero by construction.</p>
 
-    <h2 id="s3">§3 — Kernel blocks: Part V companions for ψ, B_R and B_Z</h2>
-
-    <p>Implement the exact first-moment companions G_R = ⟨(R−R_c)·K⟩ and G_Z = ⟨(Z−Z_c)·K⟩ over the full
-    fixed polygon section, for the flux kernel and for both field kernels — the full plasma interaction
-    stack. The feasibility measurement located the extension: one harmonic order beyond the current eight
-    plus one-degree-higher weighted companions to the two surviving arsinh residual integrals, with the
-    expensive elliptic and pole moment stack shared (1.0× moment-build multiplier; 3× storage and
-    contraction). The filament-derivative shortcut is valid only beyond 2.0 section radii and must not
-    carry self or neighbour terms. Plasma blocks are built exact-everywhere — build cost is
-    architecture-irrelevant — which also removes the separately measured 11.7% far-field filament term
-    from G₀.</p>
-
-    <p><em>TDD gates:</em> tests written first and observed red; closed-form blocks pinned against
-    converged midpoint-subdivision references on near and far target sets; reduction to the uniform kernel
-    at zero moments; the translation identity (shifting the expansion point by d changes G_R by −d_R·G₀)
-    held to near machine precision; hexagon symmetry zeros held.</p>
+    <section id="s3" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-16</span>
+        <h2>§3 — Kernel blocks: Part V companions for ψ, B_R and B_Z</h2>
+      </header>
+      <p class="landed-summary">
+        All nine exact blocks exist: the flux kernel through explicit weighted edge antiderivatives
+        (Richardson pins G₀ 4.2e-12 / G_R 7.7e-10 / G_Z 3.9e-09; translation algebraic at ≤6.9e-22), and
+        both field kernels through direct antiderivatives after the forward-AD route measured out at
+        12.2 GiB per target (worst relative B_R 1.6e-08, B_Z 7.9e-09; translation ≤7.3e-23; parity by
+        reflection geometry). Uniform rows bitwise identical to the existing kernels; build 0.12 s. TDD,
+        8/8 formal suite.
+        Full records: <a href="/nova/evidence/archive/plasma-edge-current-representation-landed#flux-moment-blocks">flux</a> ·
+        <a href="/nova/evidence/archive/plasma-edge-current-representation-landed#field-moment-blocks">fields</a>
+        (commits <code>bdd3120b</code>…<code>fbc28097</code>).
+      </p>
+    </section>
 
     <section id="s4" class="section-landed">
       <header>
@@ -253,6 +254,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260816-adroute" data-who="reckon-ship" data-when="2026-08-16T08:37:00+00:00">
     <div class="r-comment-body">field-moment-blocks interim, recorded so the route change is visible: reduction and translation are formally green and the near/far pin reached its pass marker, but the exact forward-AD evaluator cannot serve production - the one-target discriminator excluded geometric regime and target accumulation (all three radii die independently, EXIT 137 on the login node), and the identical parity pytest on a 32 GiB all_debug node timed out at 20m23s with MaxRSS 12,235,772 KiB (SLURM 1249084). The node continues on its own leaning, now owner-supported: derive the direct coordinate-weighted field edge antiderivatives through the shared ninth-order harmonic, pole and graded-residual channel - the same derivation discipline the flux kernel landed with. The four named field tests stand unchanged; only the evaluator behind them is replaced.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260816-fieldmoments" data-who="reckon-ship" data-when="2026-08-16T09:05:00+00:00">
+    <div class="r-comment-body">field-moment-blocks landed - commits 7f89b853 through fbc28097, merged on main; gate PASSED; five honest budget stops, formal suite 8/8. THE AD ROUTE WAS ABANDONED ON MEASUREMENT: exact forward differentiation of the flux antiderivatives dies at 12.24 GiB MaxRSS and 20m23s on a 32 GiB all_debug node for ONE target (SLURM 1249084), with the one-target discriminator excluding geometric regime and accumulation (EXIT 137 independently at R=2.6/3.5/5.0). The production kernel derives the field blocks DIRECTLY: 2piR*B_R = dZ'q and 2piR^2*B_Z = 3q - div'[q(R',Z'-Z)] moved to the contour, slanted-edge J0/J1/J2 and horizontal-edge Q0/QR/QZ antiderivatives through the shared ninth-order channel; no JAX import or derivative remains reachable from the API and the near/far build costs 0.119 s. Pins at the flux standard: worst relative B_R 1.616e-08 / B_Z 7.910e-09 vs Richardson; uniform rows BITWISE identical to polygon_analytic_greens (a 2.37e-21 arithmetic-order difference was made exactly zero by matching the existing -(high-low) contour arithmetic); translation 0 to 7.28e-23; parity 0 to 1.39e-17 by reflection geometry. SECTION 3 CLOSES: the nine-block plasma interaction stack is complete. impl set to 0.62 = 5 of 8 nodes - the denominator grew from 7 to 8 because the s6 wiring split into matrices and contraction nodes on the scouted seam (PolySection/PlasmaGrid/PlasmaWall attrs, then FluxTarget/ForwardSource substitution), beside the demonstration node. Record at /nova/evidence/archive/plasma-edge-current-representation-landed#field-moment-blocks</div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20260816-ownerdirection" data-who="reckon-ship" data-when="2026-08-16T08:36:00+00:00">
     <div class="r-comment-body">OWNER DIRECTION 2026-08-16 sharpens this section's scope: the linear poly elements REPLACE the piecewise-constant plasma elements throughout the solve path - the wiring is a substitution of the production representation, not an optional side entry - and the demonstration validates fully on exact analytic solutions (Solov'ev class) BEFORE any EFIT-facing work moves. The s6 gate is therefore the programme's analytic-validation gate: efit-flux-decomposition s3-s4 and the efit-forward-parity entry both wait behind it. Coil and conductor operators remain untouched per the locked field-target-scope decision.</div>

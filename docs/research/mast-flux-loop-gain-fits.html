@@ -7,13 +7,13 @@
   <meta name="reckon-type" content="research">
   <meta name="plan-slug" content="mast-flux-loop-gain-fits">
   <meta name="plan-title" content="MAST flux loops carry no unknown gain and restore the structural current rank from 10 of 13 to 13 of 13">
-  <meta name="plan-summary" content="Eighteen calibrated flux loops are now admitted as published to the MAST free-current inversion. Their noise-whitened response removes the probe-only spectral cliff and raises the interpreted current-space rank from 10 of 13 to 13 of 13. The full 369-shot cohort gives 369 probe-only solves and 351 joint solves. Structural resolution becomes complete in all named directions, most materially in the four P2 conductors and the solenoid, but full-cohort current-ratio stability says P2, P3 and P6 wiring is still not answerable; P4 becomes answerable and P5 remains answerable. Forty-five P4/P5 constraint rows across 44 shots are banked with both the raw nominal-current gap and the surviving free-current residual. The admission rests on the calibration result: the store and kernel both carry total loop flux in weber, no 2-pi factor or per-channel gain promotes, and the copied P4-lower positions are restored from the reconstruction table.">
+  <meta name="plan-summary" content="Eighteen calibrated flux loops are admitted as published to the MAST free-current inversion. The canonical 369-shot bank now applies the complete promoted sensor-correction chain and retains its acquisition-scale-only predecessor beside it. Support and structural rank are invariant: 369 probe-only solves, 351 joint solves, 45 P4/P5 rows across 44 shots, and rank 10 of 13 to 13 of 13. The downstream taxonomy also survives: P2, P3 and P6 remain unanswered, while P4 and P5 remain answered. Numerically, the largest useful stabilization is P3 pair-member spread from 36.5% to 14.7%; the largest absolute shift is P6-lower spread from 369.8% to 204.6%, still far outside the 10% gate. The P5-pair surviving probe constraint falls 28.7%, while the P4-pair surviving loop constraint rises 27.9%; no taxonomy verdict changes.">
   <meta name="plan-status" content="reference">
   <meta name="plan-owner" content="Simon McIntosh">
-  <meta name="plan-recorded-at" content="2026-08-12">
+  <meta name="plan-recorded-at" content="2026-08-16">
   <meta name="plan-evidence-for" content="mast-flux-loop-calibration">
   <meta name="plan-informs" content="mast-misfit-toroidal-harmonics">
-  <meta name="plan-verdict" content="The 18 admissible loops restore the structural free-current rank from 10 of 13 to 13 of 13, a delta of three. The probe-only operator has a factor-11.684 cliff after its tenth singular mode; the joint 95-row operator has no decade cliff, with its largest gap 6.406, so all 13 algebraically independent directions are retained. The full-space condition number is 549.319, so the recovered weakest direction remains poorly conditioned. Per-shot ratios do not make P2, P3 or P6 wiring answerable: at least one member of every pair exceeds the 10% spread or rank-movement ceiling. P4 changes from unanswered to answered and P5 remains answered. The 45 P4/P5 constraint rows are banked for the downstream joint harmonic and coil-current fit. Calibration remains as measured: no convention factor and no per-channel gain is applied.">
+  <meta name="plan-verdict" content="The full promoted correction chain leaves the scientific classification intact. The 18 admissible loops still restore the structural free-current rank from 10 of 13 to 13 of 13, a delta of three; conditions remain 370.699 probe-only and 549.319 joint. P2, P3 and P6 wiring remains unanswered, while P4 and P5 remain answered. All 369 requested shots, 369 probe-only solves, 351 joint solves and 45 P4/P5 rows are identical in support to the retained acquisition-scale-only snapshot. The correction chain materially moves some downstream values without crossing a verdict boundary: P3 worst spread improves from 36.5% to 14.7%, P6 worst spread from 399.2% to 324.6%, and P2-inner worst spread worsens from 31.3% to 159.9%. The canonical cache is the promoted-chain result; the superseded snapshot is retained beside it.">
   <title>MAST flux-loop gain fits | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -22,7 +22,7 @@
 <main class="plan-doc">
 
   <header>
-    <span class="badge badge-active">recorded 2026-08-12</span>
+    <span class="badge badge-active">recorded 2026-08-16</span>
     <h1>The flux loops carry no unknown gain and restore the structural current rank</h1>
     <p>Every MAST vacuum fit so far has excluded the flux loops, because a factor of 2&pi;
     between the store's convention and the kernel's could not be ruled out and one unknown row
@@ -46,6 +46,11 @@
     to distinguish their upper/lower wiring. The distinction is material &mdash; the loops
     remove the operator null space, while the pulse evidence decides whether a particular
     wiring inference is repeatable.</p>
+    <p>The canonical bank has subsequently been regenerated through the full promoted
+    correction chain. Relative to the retained acquisition-scale-only snapshot, the five
+    promoted probe gains move several fitted ratios and residual constraints but change no
+    taxonomy verdict. The same 369-shot support still gives 369 probe-only solves, 351 joint
+    solves and 45 constraint rows; the structural ranks remain 10/13 and 13/13.</p>
   </header>
 
   <section class="quick-status">
@@ -119,6 +124,13 @@
           free-current solve. The raw rows are the input to a joint harmonics plus
           coil-current fit; the surviving rows measure what the free-current arm absorbed.</td>
         </tr>
+        <tr>
+          <td>Does the full promoted correction chain change the classification?</td>
+          <td><strong>No taxonomy verdict changes.</strong></td>
+          <td>P3 worst pair-member spread improves from 36.5% to 14.7% and P6 from
+          399.2% to 324.6%, but both remain above 10%. P2 inner worsens from 31.3% to
+          159.9%. P4 and P5 remain answerable.</td>
+        </tr>
       </tbody>
     </table>
   </section>
@@ -127,7 +139,8 @@
   <p>The comparison changes only the sensor rows. Both arms use the same 13 active-current
   families, geometry, 369-shot sustained vacuum cohort, case-current subtraction and measured
   sensor noise. The baseline has 77 probes; the joint operator appends 18 loops for 95
-  structural rows. The job traversed every shot in 16&nbsp;min&nbsp;50&nbsp;s on four CPU cores.
+  structural rows. The promoted-chain job traversed every shot in
+  14&nbsp;min&nbsp;43&nbsp;s on four CPU cores.
   The probe arm solved all 369 shots and the joint arm solved 351; 18 joint shots did not
   retain the minimum 100 common finite samples after the loop rows were added and therefore
   contribute no per-shot ratio.</p>
@@ -175,21 +188,28 @@
 
   <h3>Structural resolution is necessary, but the wiring verdict remains empirical</h3>
   <table>
-    <thead><tr><th>pair</th><th>probe-only maximum spread / rank move</th><th>joint maximum spread / rank move</th><th>joint qualifying shots</th><th>verdict</th></tr></thead>
+    <thead><tr><th>group</th><th>joint member ratios, snapshot &rarr; promoted</th><th>maximum spread, snapshot &rarr; promoted</th><th>maximum rank move, snapshot &rarr; promoted</th><th>promoted verdict</th></tr></thead>
     <tbody>
-      <tr><td>P2 inner</td><td>1047% / 49.8%</td><td>31.3% / 35.4%</td><td>127 lower; 14 upper</td><td><strong>not answerable</strong></td></tr>
-      <tr><td>P2 outer</td><td>697% / 48.2%</td><td>525% / 38.3%</td><td>75 lower; 12 upper</td><td><strong>not answerable</strong></td></tr>
-      <tr><td>P3</td><td>35.5% / 35.3%</td><td>36.5% / 6.89%</td><td>29 lower; 33 upper</td><td><strong>not answerable</strong></td></tr>
-      <tr><td>P6</td><td>3197% / 49.2%</td><td>399% / 0.106%</td><td>77 lower; 70 upper</td><td><strong>not answerable</strong></td></tr>
+      <tr><td>P2 inner</td><td>13.316 &rarr; 13.312 lower; 13.121 &rarr; 13.150 upper</td><td>31.305% &rarr; 159.931%</td><td>35.365% &rarr; 35.896%</td><td><strong>not answerable</strong></td></tr>
+      <tr><td>P2 outer</td><td>10.409 &rarr; 10.406 lower; 9.312 &rarr; 9.321 upper</td><td>524.949% &rarr; 537.417%</td><td>38.263% &rarr; 38.431%</td><td><strong>not answerable</strong></td></tr>
+      <tr><td>P3</td><td>7.666 &rarr; 7.299 lower; 6.919 &rarr; 6.938 upper</td><td>36.495% &rarr; 14.698%</td><td>6.887% &rarr; 6.202%</td><td><strong>not answerable</strong></td></tr>
+      <tr><td>P4</td><td>25.266 &rarr; 25.351 lower; 20.975 &rarr; 21.409 upper</td><td>3.162% &rarr; 2.871%</td><td>0.254% &rarr; 0.220%</td><td><strong>answerable</strong></td></tr>
+      <tr><td>P5</td><td>21.956 &rarr; 22.388 lower; 22.795 &rarr; 22.841 upper</td><td>1.849% &rarr; 3.224%</td><td>0.059% &rarr; 0.047%</td><td><strong>answerable</strong></td></tr>
+      <tr><td>P6</td><td>1.079 &rarr; 0.893 lower; 0.748 &rarr; 0.758 upper</td><td>399.204% &rarr; 324.637%</td><td>0.106% &rarr; 0.065%</td><td><strong>not answerable</strong></td></tr>
+      <tr><td>Solenoid</td><td>325.742 &rarr; 325.674</td><td>0.727% &rarr; 0.904%</td><td>0.029% &rarr; 0.020%</td><td><strong>answerable</strong></td></tr>
     </tbody>
   </table>
-  <p>The joint arm materially stabilizes several rank-sensitive ratios, but the stated test
+  <p>The table compares the superseded acquisition-scale-only snapshot with the canonical
+  full-chain result on the joint arm. The chain admits one extra qualifying P2-inner-upper
+  shot, which exposes the 159.9% spread; P3 gains one qualifying lower shot and improves
+  materially, while P6 moves six lower shots in and six upper shots out. Those qualifying-fit
+  changes do not alter arm-level support. The stated test
   requires <em>both</em> relative spread and movement under removal of the last retained mode
   to be at most 10% for both pair members. P2 fails on an upper member in each sub-family, P3
   fails on shot spread, and P6 fails overwhelmingly on shot spread. There is therefore no
-  defensible positive P2/P3/P6 wiring answer in this cohort. As a cross-check on the gate, P4
-  changes from unanswered in the probe arm to answered in the joint arm, while P5 is answered
-  in both.</p>
+  defensible positive P2/P3/P6 wiring answer in this cohort. No taxonomy verdict changes at
+  the cutover: P4 remains answerable in the joint arm, P5 remains answerable, and the solenoid
+  remains answerable.</p>
 
   <h3>P4/P5 constraint rows bank both sides of the free-current solve</h3>
   <p>The localization bank contains 45 independently conditioned drive rows across 44 shots:
@@ -199,14 +219,21 @@
   <table>
     <thead><tr><th>drive group</th><th>rows</th><th>probe raw &rarr; surviving</th><th>loop raw &rarr; surviving</th></tr></thead>
     <tbody>
-      <tr><td>P4 lower</td><td>13</td><td>8.38e-4 &rarr; 5.38e-4</td><td>2.19e-4 &rarr; 5.99e-4</td></tr>
-      <tr><td>P4 pair</td><td>3</td><td>3.83e-4 &rarr; 3.59e-4</td><td>9.92e-5 &rarr; 1.15e-4</td></tr>
-      <tr><td>P4 upper</td><td>6</td><td>7.89e-4 &rarr; 4.77e-4</td><td>4.23e-4 &rarr; 6.41e-4</td></tr>
-      <tr><td>P5 lower</td><td>12</td><td>1.19e-3 &rarr; 6.92e-4</td><td>2.54e-3 &rarr; 5.53e-4</td></tr>
-      <tr><td>P5 pair</td><td>4</td><td>3.87e-4 &rarr; 3.38e-4</td><td>7.28e-4 &rarr; 2.63e-4</td></tr>
-      <tr><td>P5 upper</td><td>7</td><td>1.62e-3 &rarr; 3.77e-4</td><td>3.40e-3 &rarr; 8.33e-4</td></tr>
+      <tr><td>P4 lower</td><td>13</td><td>7.56e-4 &rarr; 4.23e-4</td><td>2.19e-4 &rarr; 5.83e-4</td></tr>
+      <tr><td>P4 pair</td><td>3</td><td>3.33e-4 &rarr; 3.08e-4</td><td>9.92e-5 &rarr; 1.47e-4</td></tr>
+      <tr><td>P4 upper</td><td>6</td><td>7.89e-4 &rarr; 4.74e-4</td><td>4.23e-4 &rarr; 6.42e-4</td></tr>
+      <tr><td>P5 lower</td><td>12</td><td>1.13e-3 &rarr; 5.59e-4</td><td>2.54e-3 &rarr; 5.50e-4</td></tr>
+      <tr><td>P5 pair</td><td>4</td><td>2.49e-4 &rarr; 2.41e-4</td><td>7.28e-4 &rarr; 2.44e-4</td></tr>
+      <tr><td>P5 upper</td><td>7</td><td>1.62e-3 &rarr; 3.64e-4</td><td>3.40e-3 &rarr; 8.32e-4</td></tr>
     </tbody>
   </table>
+  <p>Against the retained snapshot, probe raw RMS shifts by &minus;9.81%, &minus;13.05%,
+  &minus;0.01%, &minus;5.35%, &minus;35.79% and &minus;0.07% for P4 lower, P4 pair,
+  P4 upper, P5 lower, P5 pair and P5 upper respectively. Probe surviving RMS shifts by
+  &minus;21.28%, &minus;14.34%, &minus;0.62%, &minus;19.19%, &minus;28.67% and
+  &minus;3.50%. Loop raw RMS is unchanged in every group because the promoted delta is in
+  five probe gains; the loop surviving RMS moves through the joint solve by &minus;2.81%,
+  +27.86%, +0.12%, &minus;0.61%, &minus;7.16% and &minus;0.18% in the same order.</p>
   <p>The raw nominal-current gap is the correct downstream input because a joint harmonic and
   coil-current fit must see the discrepancy before the free-current arm absorbs it. The
   surviving array is banked alongside it as the diagnostic of that absorption; it is not a
@@ -218,6 +245,15 @@
     and green bars the surviving residual. A surviving coefficient can exceed its raw value
     when the unconstrained current fit redistributes a coupled error; both arrays are retained
     so the downstream model does not confuse redistribution with absence.</figcaption>
+  </figure>
+
+  <figure>
+    <img src="/nova/figures/flux-loop-inclusion/promoted-chain-bank-shift.svg"
+         alt="Paired before-and-after comparison of joint-inversion answerability statistics for all thirteen current directions and bars showing the percentage change in surviving P4 and P5 probe and loop constraints under the full promoted correction chain.">
+    <figcaption>Left: the full-chain cutover moves several ratios and spreads but none crosses
+    the answerability boundary. Right: the downstream shift of each surviving constraint RMS;
+    the P4-pair loop residual rises 27.9% while the P5-pair probe residual falls 28.7%.
+    Structural ranks do not move.</figcaption>
   </figure>
 
   <h2>The copied block, and the relation that catches it</h2>
@@ -413,7 +449,8 @@
   <h2>What this hands on</h2>
   <ul>
     <li><strong>To the inversion:</strong> 18 loop channels are admissible as published, with
-    no gain applied and no convention factor. Seventeen of them reach a described sensor;
+    no loop gain applied and no loop convention factor. The read still applies every promoted
+    correction warranted for the probe rows. Seventeen loops reach a described sensor;
     <code>fl_p6u_1</code> is measurable but not describable until the catalog carries a
     P6-upper loop. The admission and noise-whitened current-space decomposition are now
     reusable library operations, and the measured outcome is rank 13/13 rather than the
@@ -489,10 +526,15 @@
   <code>run_joint_inversion.py</code> produced <code>inversion.json</code> (rank,
   per-direction resolution and wiring taxonomy), <code>ratios.json</code> (per-shot current
   ratios) and <code>constraint_sets.npz</code> (P4/P5 raw and surviving arrays). The compute
-  receipt is <code>sacct.log</code>, the complete run output is <code>full.log</code>, and
-  <code>make_evidence.py</code> produced <code>summary.json</code> and the two SVG figures in
-  <code>docs/figures/flux-loop-inclusion/</code>. The reusable admission and rank rules are
-  pinned in <code>tests/test_mast_flux_loop_adjudication.py</code>.</p>
+  receipt is <code>promoted-chain-sacct.log</code>, the complete run output is
+  <code>promoted-chain-full.log</code>, and <code>make_evidence.py</code> produced
+  <code>summary.json</code> and the canonical-state SVGs in
+  <code>docs/figures/flux-loop-inclusion/</code>. The exact before/after record is
+  <code>promoted-chain-shift.json</code>. The superseded bank, its runner, source snapshot,
+  logs and checksum manifest remain under
+  <code>acquisition-scale-only-snapshot/</code>; the canonical files at the bank root are the
+  promoted-chain result. The reusable admission and rank rules are pinned in
+  <code>tests/test_mast_flux_loop_adjudication.py</code>.</p>
 
   <h2>Related records</h2>
   <ul>

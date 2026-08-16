@@ -266,3 +266,126 @@ def test_moving_separatrix_padded_contraction_traces_once():
 
     assert shapes == {((459, 12, 2), (459,))}
     assert trace_count == 1
+
+
+@pytest.mark.parametrize(
+    ("radial_count", "vertical_count"),
+    [(15, 17), (17, 27), (23, 35)],
+)
+def test_traced_clip_matches_host_supports_and_linear_moments(
+    radial_count: int, vertical_count: int
+):
+    cells, centre = _staggered_rectangles(radial_count, vertical_count)
+    mesh = AtomicCellMesh.from_cells(cells, centroids=centre)
+    flux = _ellipse_level(mesh.node_coordinates)
+    density = 2.0 + 0.2 * (centre[:, 0] - 3.0) - 0.1 * centre[:, 1]
+    gradient = np.broadcast_to(np.asarray([0.2, -0.1]), centre.shape)
+
+    host = mesh.clip(flux)
+    traced = mesh.traced_clip(flux)
+    host_moments = host.linear_current_moments(density, gradient)
+    traced_current, traced_first = traced.linear_current_moments(density, gradient)
+
+    np.testing.assert_array_equal(traced.vertex_count, host.vertex_count)
+    np.testing.assert_allclose(
+        traced.support_vertices, host.support_vertices, rtol=1.0e-14, atol=1.0e-14
+    )
+    np.testing.assert_allclose(traced.area, host.area, rtol=1.0e-14, atol=1.0e-14)
+    np.testing.assert_allclose(
+        traced_current, host_moments.current, rtol=1.0e-14, atol=1.0e-14
+    )
+    np.testing.assert_allclose(
+        traced_first, host_moments.first, rtol=1.0e-14, atol=1.0e-14
+    )
+    assert abs(float(traced.patch_area_sum - traced.contour_area)) < 1.0e-12
+
+
+def test_traced_clip_matches_exact_zero_corner_and_tangential_cells():
+    cells = [
+        np.asarray([[r, z], [r + 1, z], [r + 1, z + 1], [r, z + 1]], dtype=float)
+        for r in range(-2, 2)
+        for z in range(-2, 2)
+    ]
+    centre = np.asarray(
+        [[r + 0.5, z + 0.5] for r in range(-2, 2) for z in range(-2, 2)]
+    )
+    mesh = AtomicCellMesh.from_cells(cells, centroids=centre)
+    flux = (
+        1.0 - np.abs(mesh.node_coordinates[:, 0]) - np.abs(mesh.node_coordinates[:, 1])
+    )
+
+    host = mesh.clip(flux)
+    traced = mesh.traced_clip(flux)
+    density = 1.5 + 0.1 * centre[:, 0] - 0.2 * centre[:, 1]
+    gradient = np.broadcast_to(np.asarray([0.1, -0.2]), centre.shape)
+    host_moments = host.linear_current_moments(density, gradient)
+    traced_current, traced_first = traced.linear_current_moments(density, gradient)
+
+    np.testing.assert_array_equal(traced.vertex_count, host.vertex_count)
+    np.testing.assert_array_equal(traced.boundary, host.boundary)
+    np.testing.assert_allclose(
+        traced.support_vertices, host.support_vertices, rtol=1.0e-14, atol=1.0e-14
+    )
+    np.testing.assert_allclose(traced.area, host.area, rtol=1.0e-14, atol=1.0e-14)
+    np.testing.assert_allclose(
+        traced_current, host_moments.current, rtol=1.0e-14, atol=1.0e-14
+    )
+    np.testing.assert_allclose(
+        traced_first, host_moments.first, rtol=1.0e-14, atol=1.0e-14
+    )
+    assert float(traced.patch_area_sum) == pytest.approx(2.0, abs=1.0e-14)
+    assert float(traced.contour_area) == pytest.approx(2.0, abs=1.0e-14)
+
+
+def test_traced_clip_jits_once_and_vmaps_over_moving_separatrices():
+    import jax
+    import jax.numpy as jnp
+
+    from nova.jax.config import configure_dtypes
+
+    configure_dtypes()
+    cells, centre = _staggered_rectangles(15, 17)
+    mesh = AtomicCellMesh.from_cells(cells, centroids=centre)
+    density = jnp.asarray(2.0 + 0.2 * (centre[:, 0] - 3.0) - 0.1 * centre[:, 1])
+    gradient = jnp.broadcast_to(jnp.asarray([0.2, -0.1]), centre.shape)
+    flux_bank = np.asarray(
+        [
+            _ellipse_level(mesh.node_coordinates - np.asarray([displacement, 0.0]))
+            for displacement in np.linspace(-0.02, 0.02, 12)
+        ]
+    )
+    trace_count = 0
+
+    def clip_and_measure(flux):
+        nonlocal trace_count
+        trace_count += 1
+        clipped = mesh.traced_clip(flux)
+        current, first = clipped.linear_current_moments(density, gradient)
+        return (
+            clipped.area,
+            clipped.patch_area_sum,
+            clipped.contour_area,
+            current,
+            first,
+        )
+
+    compiled = jax.jit(clip_and_measure)
+    for flux in flux_bank:
+        area, patch_area, contour_area, current, first = compiled(jnp.asarray(flux))
+        jax.block_until_ready((area, patch_area, contour_area, current, first))
+        assert abs(float(patch_area - contour_area)) < 1.0e-12
+    assert trace_count == 1
+
+    def clip_and_measure_without_count(flux):
+        clipped = mesh.traced_clip(flux)
+        return clipped, clipped.linear_current_moments(density, gradient)
+
+    batched, batched_moments = jax.jit(jax.vmap(clip_and_measure_without_count))(
+        jnp.asarray(flux_bank)
+    )
+    jax.block_until_ready((batched, batched_moments))
+    np.testing.assert_allclose(
+        batched.patch_area_sum, batched.contour_area, rtol=0.0, atol=1.0e-12
+    )
+    assert batched_moments[0].shape == (12, len(cells))
+    assert batched_moments[1].shape == (12, len(cells), 2)

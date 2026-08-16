@@ -183,5 +183,18 @@
   retained:</strong> the steep-pedestal ψ sup order reads 0.715 while its RMS order is 2.035 — a local
   sup-norm effect at the steepest gradient, reported rather than smoothed.</p>
 
+  <h2 id="target-moment-contraction">§6 — the solve's contraction learns the moment triple</h2>
+
+  <p>Commit <code>b774e696</code>; gate passed; TDD (4 named tests red at collection); 56/56 across the
+  new contraction tests and the existing target, topology, limiter and wall-flux suites.</p>
+
+  <p><code>FluxTarget</code> appends <code>plasma_target_r</code> and <code>plasma_target_z</code> after
+  the existing fields with concrete zero-block defaults — every existing positional constructor stays
+  valid — and <code>internal</code> contracts (m₀, m_R, m_Z) beside the retained single-vector branch.
+  Zero moment vectors reproduce all three uniform outputs bitwise through both call forms; the pytree
+  widens to five children and round-trips under jax; <code>Limiter.target</code> now constructs by
+  keyword, closing the positional-construction hazard the integration scout flagged before any field
+  moved.</p>
+
 </main></body>
 </html>

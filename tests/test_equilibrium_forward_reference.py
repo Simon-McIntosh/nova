@@ -191,7 +191,7 @@ from __future__ import annotations
 import getpass
 import sys
 from dataclasses import dataclass, field
-from functools import lru_cache
+from functools import cached_property, lru_cache
 from pathlib import Path
 
 import numpy as np
@@ -213,6 +213,7 @@ with skip_import("jax"):
     from nova.equilibrium.observation import current_ledger, observe_moments
     from nova.equilibrium.source import DomainProfile, ForwardSource
     from nova.equilibrium.stencil_mesh import (
+        MomentGeometry,
         RING_CONDITION_LIMIT,
         StencilMesh,
         ring_condition,
@@ -794,6 +795,7 @@ class HexMachine:
     passive_columns: int
     node: np.ndarray
     area: np.ndarray
+    cell_polygons: tuple[np.ndarray, ...]
     hexagon: np.ndarray
     stencil: np.ndarray
     wall_node: np.ndarray
@@ -803,6 +805,11 @@ class HexMachine:
     plasma_to_wall: np.ndarray
     radial_field: tuple[np.ndarray, np.ndarray]
     vertical_field: tuple[np.ndarray, np.ndarray]
+
+    @cached_property
+    def moment_geometry(self) -> MomentGeometry:
+        """Build the fixed current-moment geometry once for this machine."""
+        return MomentGeometry.from_cells(receipt_mesh(self), self.cell_polygons)
 
     @property
     def passive_flux(self) -> np.ndarray:
@@ -899,12 +906,17 @@ def build_machine(
         raise ValueError(f"coupling column order {order} is not the conductor order")
     plasma = np.asarray(coilset.subframe.loc[:, "plasma"], dtype=bool)
     section = np.asarray(coilset.subframe.loc[:, "section"], dtype=object)[plasma]
+    material = np.asarray(coilset.subframe.loc[:, "poly"], dtype=object)[plasma]
     return HexMachine(
         coilset=coilset,
         source_current=np.array([conductor.current for conductor in drive]),
         passive_columns=len(case.passive) if passive else 0,
         node=np.c_[np.asarray(grid.x), np.asarray(grid.z)].astype(float),
         area=np.asarray(coilset.aloc["plasma", "area"], dtype=float),
+        cell_polygons=tuple(
+            np.asarray(polygon.poly.exterior.coords, dtype=float)[:-1, :2]
+            for polygon in material
+        ),
         hexagon=np.asarray([name == "hexagon" for name in section]),
         stencil=np.asarray(grid["stencil"]),
         wall_node=np.c_[np.asarray(limiter.x), np.asarray(limiter.z)].astype(float),
@@ -966,6 +978,7 @@ def forward_operator(case: ReferenceCase, machine: HexMachine) -> ForwardFluxOpe
         external_current=jnp.asarray(machine.source_current),
         area=jnp.asarray(machine.area),
         polarity=-1,
+        moment_geometry=machine.moment_geometry,
     )
 
 
@@ -1256,6 +1269,34 @@ def solved() -> SolvedEquilibrium:
 def published():
     """Return the ForwardProfile solve and its receipts on the suite mesh."""
     return _published(SUITE_CELLS)
+
+
+def test_hex_operator_carries_the_authored_cell_geometry(solved):
+    """The production constructor keeps every plasma polygon and shared node."""
+    operator = forward_operator(solved.case, solved.machine)
+    geometry = operator.moment_geometry
+    coordinate = solved.machine.node
+    flux = (
+        0.7
+        + 0.2 * coordinate[:, 0]
+        - 0.3 * coordinate[:, 1]
+        + 0.1 * coordinate[:, 0] ** 2
+        + 0.05 * coordinate[:, 0] * coordinate[:, 1]
+    )
+    shared = geometry.atomic_mesh.node_coordinates
+    expected = (
+        0.7
+        + 0.2 * shared[:, 0]
+        - 0.3 * shared[:, 1]
+        + 0.1 * shared[:, 0] ** 2
+        + 0.05 * shared[:, 0] * shared[:, 1]
+    )
+
+    np.testing.assert_allclose(
+        geometry.shared_node_flux(jnp.asarray(flux)), expected, rtol=0.0, atol=2.0e-13
+    )
+    assert len(geometry.polygons) == len(solved.machine.node)
+    assert geometry.atomic_mesh.cell_nodes.shape[0] == len(solved.machine.node)
 
 
 # --------------------------------------------------------------------------

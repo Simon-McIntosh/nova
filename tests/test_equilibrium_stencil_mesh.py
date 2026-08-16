@@ -57,6 +57,7 @@ with skip_import("jax"):
     from nova.equilibrium.domain import DomainMasks, PlasmaDomain
     from nova.equilibrium.source import DomainProfile, ForwardSource
     from nova.equilibrium.stencil_mesh import (
+        MomentGeometry,
         RING_CONDITION_LIMIT,
         StencilMesh,
         cell_average_weights,
@@ -338,6 +339,53 @@ def test_shared_hexagon_node_evaluations_amortise_to_three_per_cell():
     node_coordinate, _cell_node = shared_hexagon_vertices(mesh, 0.08)
     evaluations_per_cell = 1.0 + len(node_coordinate) / mesh.node_count
     assert 3.0 <= evaluations_per_cell < 3.11
+
+
+def test_moment_geometry_shared_nodes_reproduce_a_quadratic_flux_map():
+    """The fixed shared-node evaluator is exact on the fitted polynomial space."""
+    configure_dtypes()
+    pitch = 0.16
+    mesh = hex_mesh(pitch)
+    cells = [regular_hexagon_vertices(centre, pitch) for centre in mesh.coordinate]
+    geometry = MomentGeometry.from_cells(mesh, cells)
+
+    def flux(coordinate):
+        radius, height = coordinate[..., 0], coordinate[..., 1]
+        return (
+            1.3 + 0.2 * radius - 0.4 * height + 0.7 * radius**2 + 0.3 * radius * height
+        )
+
+    expected = flux(geometry.atomic_mesh.node_coordinates)
+    actual = geometry.shared_node_flux(flux(mesh.coordinate))
+
+    np.testing.assert_allclose(actual, expected, rtol=0.0, atol=8.0e-14)
+    assert geometry.second_moment.shape == (mesh.node_count, 3)
+    assert len(geometry.polygons) == mesh.node_count
+
+
+def test_moment_geometry_is_static_across_jitted_flux_updates():
+    """One compiled evaluator accepts changing cell flux without rebuilding geometry."""
+    configure_dtypes()
+    pitch = 0.32
+    mesh = hex_mesh(pitch)
+    geometry = MomentGeometry.from_cells(
+        mesh,
+        [regular_hexagon_vertices(centre, pitch) for centre in mesh.coordinate],
+    )
+    traces = 0
+
+    def evaluate(flux):
+        nonlocal traces
+        traces += 1
+        return geometry.shared_node_flux(flux)
+
+    compiled = jax.jit(evaluate)
+    first = compiled(jnp.ones(mesh.node_count))
+    second = compiled(jnp.arange(mesh.node_count, dtype=jnp.float64))
+    jax.block_until_ready((first, second))
+
+    assert traces == 1
+    assert first.shape == (len(geometry.atomic_mesh.node_coordinates),)
 
 
 # --------------------------------------------------------------------------

@@ -262,5 +262,29 @@
   the moment representation: 1.766 vs the pinned 1.249/1.401. No gate, fixture, route default or
   semantic was changed anywhere in the program.</p>
 
+  <h2 id="solovev-contour-overlay">§6 — the discrete-contour comparison, from the verified state bank</h2>
+
+  <p>Commit <code>4d8e5cd6</code>; gate passed. Artifacts:
+  <code>benchmarks/solovev_contour_overlay.py</code> and the figure/findings pair under
+  <code>docs/figures/plasma-edge-current-representation/</code>, produced as pure consumers of the
+  ten-checkpoint state bank (every checkpoint SHA-verified and receipt-reproduced before use; no physics
+  re-derived).</p>
+
+  <figure>
+    <img src="/nova/figures/plasma-edge-current-representation/solovev_contour_overlay.svg"
+         alt="Matched-level discrete flux contours: analytic Solov'ev beside the converged legacy solve and the fine moment-blend root">
+    <figcaption>21 matched ψ_N levels, three matched-scale panels: analytic reference, converged coarse
+    legacy solve (residual 6.6e-16), fine moment-blend last root (t=0.5875, residual 1.2e-12). Wall,
+    axis and X-point marked; 720/720 rays close on every contour.</figcaption>
+  </figure>
+
+  <p><strong>Read of the distances.</strong> Radial shape distance to the analytic contour about each
+  state's own axis: coarse legacy mean 7.53e-3 m / max 0.2152 m; fine moment-blend mean 9.31e-3 m /
+  max 0.1629 m — the global maxima sit only at the separatrix/X-point level ψ_N = 1. At ψ_N = 0.95 the
+  moment-blend root is 3.01× closer than legacy (0.0186 m vs 0.0561 m), and its worst local displacement
+  is 1.32× smaller; its across-level mean is 1.24× the legacy mean, so no monotonic-improvement claim is
+  made. Rigid offsets reported separately: axis 0.0100 m (coarse) / 0.0320 m (fine), X-point ≈0.0226 m
+  (both).</p>
+
 </main></body>
 </html>

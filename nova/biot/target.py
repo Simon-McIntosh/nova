@@ -547,6 +547,15 @@ else:
         source_target: jnp.ndarray = field(repr=False)
         plasma_target: jnp.ndarray = field(repr=False)
         null: Null1D | Null2D
+        plasma_target_r: jnp.ndarray | None = field(default=None, repr=False)
+        plasma_target_z: jnp.ndarray | None = field(default=None, repr=False)
+
+        def __post_init__(self):
+            """Ensure every target carries concrete companion blocks."""
+            if self.plasma_target_r is None:
+                self.plasma_target_r = jnp.zeros_like(self.plasma_target)
+            if self.plasma_target_z is None:
+                self.plasma_target_z = jnp.zeros_like(self.plasma_target)
 
         @property
         def coordinate(self):
@@ -564,12 +573,25 @@ else:
             return self.source_target @ external_current
 
         @jax.jit
-        def internal(self, plasma_current: jnp.ndarray):
-            """Return internal (plasma generated) poloidal flux map."""
-            return self.plasma_target @ plasma_current
+        def internal(self, current_moments):
+            """Return plasma flux from uniform, radial and vertical moments."""
+            if not isinstance(current_moments, tuple | list):
+                return self.plasma_target @ current_moments
+            uniform, radial, vertical = current_moments
+            return (
+                self.plasma_target @ uniform
+                + self.plasma_target_r @ radial
+                + self.plasma_target_z @ vertical
+            )
 
         def tree_flatten(self):
             """Return flattened pytree."""
-            children = (self.source_target, self.plasma_target, self.null)
+            children = (
+                self.source_target,
+                self.plasma_target,
+                self.null,
+                self.plasma_target_r,
+                self.plasma_target_z,
+            )
             aux_data = {}
             return (children, aux_data)

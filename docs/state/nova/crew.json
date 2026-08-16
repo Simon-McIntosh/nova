@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T22:25:46",
+  "updated": "2026-08-16T23:08:44",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -6362,9 +6362,55 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T204600606889-smoothed-handoff-ladder",
+        "plan": "moment-map-root-finding",
+        "section": "\u00a74",
+        "node": "smoothed-handoff-ladder",
+        "role": "implement",
+        "member": "coupling-blocks",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T20:46:03Z",
+        "completed_at": "2026-08-16T21:07:52Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1309,
+        "time_budget": "25m",
+        "base_sha": "0d2208f84d063da8ccd6c19cf37cd6a3f35fc8ea",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 2,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/smoothed-handoff-ladder-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a009c8-8ac4-7a50-806e-c28169dbfc66",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 289292800,
+            "input_tokens": 294339355,
+            "output_tokens": 610573,
+            "reasoning_output_tokens": 179776
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 199
+    "_version": 200
   }
 }

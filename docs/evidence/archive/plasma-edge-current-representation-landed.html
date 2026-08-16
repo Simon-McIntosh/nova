@@ -145,5 +145,43 @@
   stencil replaces at four orders better interior accuracy (the ladder's measured orders: centroid 1.894,
   stencil 3.764 sup).</p>
 
+  <h2 id="coupling-moment-attrs">§6 — the nine blocks become assembly attributes</h2>
+
+  <p>Commit <code>020c4dc9</code>; gate passed; TDD with the named red run preserved. Artifacts:
+  <code>nova/biot/polysection.py</code>, <code>plasmagrid.py</code>, <code>plasmawall.py</code>,
+  <code>solve.py</code>, <code>tests/test_biotpolysection.py</code> (+112 lines, 3 new tests;
+  68-test regression green).</p>
+
+  <p><code>PolySection._moment_coupling</code> caches the six companion matrices per element about the
+  authored material centroids; <code>PsiR/PsiZ/BrR/BrZ/BzR/BzZ</code> are first-class attribute rows
+  through the existing attribute-generic Solve path, requested by <code>PlasmaGrid</code> (all nine) and
+  <code>PlasmaWall</code> (flux three). All 108 entries of the nine assembled matrices match direct
+  per-pair kernel evaluation; the three uniform matrices are bitwise unchanged; conductor batches carry
+  zero companion columns by construction, honouring the locked field-target-scope boundary.</p>
+
+  <h2 id="steep-edge-demonstration">§6 — the analytic-validation gate, passed with one qualification</h2>
+
+  <p>Commit <code>260ce85b</code>; gate passed. Artifacts:
+  <code>benchmarks/steep_edge_moment_demonstration.py</code>, findings JSON and convergence figure under
+  <code>docs/figures/plasma-edge-current-representation/</code>.</p>
+
+  <figure>
+    <img src="/nova/figures/plasma-edge-current-representation/steep_edge_moment_convergence.svg"
+         alt="Convergence of the linear representation against the centroid rule across pitches and edge-gradient steepnesses">
+    <figcaption>ψ, B_R and B_Z error against mesh pitch for the exact Solov'ev and two pedestal profiles,
+    linear representation beside the production centroid rule.</figcaption>
+  </figure>
+
+  <p><strong>On exact Solov'ev the representation converges at second order in every component</strong>
+  (sup orders ψ/B_R/B_Z 2.214/2.051/2.091; RMS 2.092/2.047/2.047), and <strong>it beats the production
+  centroid rule at the coarsest pitch on all 18 metrics</strong>: 1.185–7.746× on Solov'ev, 2.227–13.228×
+  on the moderate pedestal, 4.708–8.837× on the steep pedestal. Patch-area conservation held below 1e-12
+  on every one of the nine mesh/profile cases (worst 3.96e-16) with centroid-outside cells present in
+  each, the fixed support shapes retraced exactly once over 12 moving-separatrix iterations, and
+  per-iteration wall time is 4.60e-4 s CPU warm / 6.13e-5 s on the NVIDIA L4 including transfers (host
+  agreement 3.6e-12). Nested analytic reference drift is ≤3.01e-5 of span. <strong>One qualification
+  retained:</strong> the steep-pedestal ψ sup order reads 0.715 while its RMS order is 2.035 — a local
+  sup-norm effect at the steepest gradient, reported rather than smoothed.</p>
+
 </main></body>
 </html>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T10:54:17",
+  "updated": "2026-08-16T11:15:20",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -40,6 +40,13 @@
         "created": "2026-08-12"
       },
       {
+        "id": "coupling-blocks",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a009c8-8ac4-7a50-806e-c28169dbfc66",
+        "created": "2026-08-16"
+      },
+      {
         "id": "dataset-census",
         "harness": "codex",
         "role": "investigate",
@@ -66,6 +73,13 @@
         "role": "implement",
         "session_id": "01a00738-f48f-7150-97d1-17307a705e4b",
         "created": "2026-08-15"
+      },
+      {
+        "id": "edge-demo",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a009c8-ac0c-7d93-98a2-5c8890d08869",
+        "created": "2026-08-16"
       },
       {
         "id": "efit-referee",
@@ -5074,9 +5088,113 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T085530093412-coupling-moment-attrs",
+        "plan": "plasma-edge-current-representation",
+        "section": "\u00a76",
+        "node": "coupling-moment-attrs",
+        "role": "implement",
+        "member": "coupling-blocks",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T08:55:32Z",
+        "completed_at": "2026-08-16T09:05:34Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 602,
+        "time_budget": "25m",
+        "base_sha": "ae229f05928fd8ddc0dba8d21ec545dd0b24084f",
+        "commits": [
+          "020c4dc9"
+        ],
+        "changed_lines": {
+          "added": 205,
+          "removed": 4,
+          "files": 5
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/coupling-moment-attrs-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a009c8-8ac4-7a50-806e-c28169dbfc66",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 4894720,
+            "input_tokens": 5031555,
+            "output_tokens": 19383,
+            "reasoning_output_tokens": 6960
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260816T085538776076-steep-edge-demonstration",
+        "plan": "plasma-edge-current-representation",
+        "section": "\u00a76",
+        "node": "steep-edge-demonstration",
+        "role": "implement",
+        "member": "edge-demo",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T08:55:40Z",
+        "completed_at": "2026-08-16T09:14:07Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1107,
+        "time_budget": "25m",
+        "base_sha": "ae229f05928fd8ddc0dba8d21ec545dd0b24084f",
+        "commits": [
+          "260ce85b"
+        ],
+        "changed_lines": {
+          "added": 1609,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/steep-edge-demonstration-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a009c8-ac0c-7d93-98a2-5c8890d08869",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 8951552,
+            "input_tokens": 9313952,
+            "output_tokens": 33213,
+            "reasoning_output_tokens": 9546
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 162
+    "_version": 168
   }
 }

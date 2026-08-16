@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T19:23:25",
+  "updated": "2026-08-16T19:34:49",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -6068,9 +6068,61 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T172435916608-clipped-cell-equivalence",
+        "plan": "plasma-edge-current-representation",
+        "section": "\u00a78",
+        "node": "clipped-cell-equivalence",
+        "role": "implement",
+        "member": "equivalence-ladder",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T17:24:38Z",
+        "completed_at": "2026-08-16T17:33:46Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 548,
+        "time_budget": "25m",
+        "base_sha": "ec6c6d7fed6f8bfdaf801824c5d1f04f72bb62c4",
+        "commits": [
+          "a803cd7d"
+        ],
+        "changed_lines": {
+          "added": 1493,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": 0,
+        "gate": "not-run",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/clipped-cell-equivalence-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00b7e-1817-7740-93a6-aac064c671e7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 10401536,
+            "input_tokens": 10670661,
+            "output_tokens": 40112,
+            "reasoning_output_tokens": 12938
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 193
+    "_version": 194
   }
 }

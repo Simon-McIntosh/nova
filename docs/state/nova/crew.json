@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T20:42:42",
+  "updated": "2026-08-16T21:27:47",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -6270,9 +6270,55 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T185922763294-kink-census",
+        "plan": "moment-map-root-finding",
+        "section": "\u00a72",
+        "node": "kink-census",
+        "role": "implement",
+        "member": "coupling-blocks",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T18:59:25Z",
+        "completed_at": "2026-08-16T19:27:03Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1658,
+        "time_budget": "25m",
+        "base_sha": "3f6355cea469baaf3fd76dee794369474c943715",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/kink-census-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a009c8-8ac4-7a50-806e-c28169dbfc66",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 251886080,
+            "input_tokens": 256236285,
+            "output_tokens": 529389,
+            "reasoning_output_tokens": 164405
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 197
+    "_version": 198
   }
 }

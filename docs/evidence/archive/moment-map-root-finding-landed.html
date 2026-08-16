@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="moment-map-root-finding-landed">
+  <meta name="plan-title" content="Moment-Map Root Finding — Cumulative Evidence">
+  <meta name="plan-summary" content="Landed record of the piecewise-smooth convergence investigation: the kink census along real Newton trajectories, the treatment measurements, and the analytic-validation adjudication">
+  <meta name="plan-status" content="active">
+  <meta name="plan-evidence-for" content="moment-map-root-finding">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>Moment-Map Root Finding — Cumulative Evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+
+  <p>Execution record for <a href="/nova/moment-map-root-finding.html">moment-map-root-finding</a>.
+  The inherited exclusion chain lives in the
+  <a href="/nova/evidence/archive/plasma-edge-current-representation-landed#solve-substitution-validation">representation plan's record</a>;
+  this record starts where the obstruction was proven continuous-but-kinked.</p>
+
+  <h2 id="kink-census">§2 — the kink census: the cycle is a local clip hand-off, not topology</h2>
+
+  <p>Scratchpad-only measurement; gate passed; artifacts (census JSON, summary, trajectory bank with all
+  11 states per real 10-step Newton trajectory and 1,765 atomic edges) SHA-recorded in the run ledger.
+  Every one of 20 iterate segments sampled at 257 points; the eager instrumented Newton body reproduced
+  the banked residuals (barrier 3.9272077520e-5, analytic seed 0.1373100251).</p>
+
+  <p><strong>The stalled barrier cycle contains zero topology events.</strong> Along the barrier-bracket
+  trajectory the class stays diverted with axis and x-point selectors fixed; the counts are 30
+  atomic-edge flips and 10 clip-boundary hand-offs, every other class zero. The cycle is
+  <strong>cell 17 crossing the full-cell↔clipped hand-off once on every Newton segment</strong>,
+  alternating between inside-fractions 0.0970 and 0.9030, with a steady both-sided
+  directional-derivative jump of 1.7058e-5 Wb per segment (transient maximum 2.9540e-5 Wb); the cycling
+  iterate pair 9→10 straddles exactly that surface.</p>
+
+  <p><strong>Across both trajectories the clip class dominates by frequency and amplitude.</strong>
+  Combined counts: 4,557 atomic-edge flips, 1,510 full↔clipped hand-offs, 798 clip-support
+  entries/exits, 221 ring-participation changes — against one x-point identity switch, one
+  boundary-flux-source switch, one limited↔diverted switch and zero axis-source switches. The dominant
+  class by measured amplitude is the clip-boundary hand-off at 15.596 Wb maximum per full iterate
+  direction (2.811× the local Newton-step sup norm), a 4.491× margin over the next class
+  (ring-completeness participation, 3.473 Wb). <strong>The limited↔diverted question is answered
+  explicitly:</strong> observed exactly once, on the analytic-seed path only (jump 3.123 Wb), excluded
+  from the stalled cycle, and 4.99× smaller than the worst clip hand-off — retained as a globalisation
+  stress case. The dominant surface is local and per-cell, not global through the normalisation
+  chain.</p>
+
+</main></body>
+</html>

@@ -13,7 +13,7 @@ from nova.biot.limiter import Limiter
 class PlasmaWall(Limiter, Point):
     """Compute interaction for a series of discrete points."""
 
-    attrs: list[str] = field(default_factory=lambda: ["Psi"])
+    attrs: list[str] = field(default_factory=lambda: ["Psi", "PsiR", "PsiZ"])
 
     def __post_init__(self):
         """Initialize limiter flux version."""

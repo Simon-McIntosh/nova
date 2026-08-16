@@ -63,7 +63,11 @@ from nova.biot.bandedcoupling import banded_greens
 from nova.biot.greens import greens_bz_br, greens_psi, section_centroid
 from nova.biot.matrix import Matrix
 from nova.biot.polygon import _N_NODES, _N_PANELS, polygon_greens
-from nova.biot.polygonanalytic import polygon_analytic_greens
+from nova.biot.polygonanalytic import (
+    polygon_analytic_field_moments,
+    polygon_analytic_flux_moments,
+    polygon_analytic_greens,
+)
 from nova.biot.sectionaverage import section_triangles
 
 
@@ -354,9 +358,59 @@ class PolySection(Matrix):
         return psi, br, bz
 
     @cached_property
+    def _moment_coupling(self) -> tuple[np.ndarray, ...]:
+        """Return radial and vertical companion matrices for all three kernels."""
+        target_r = np.asarray(self.target("r"))
+        target_z = np.asarray(self.target("z"))
+        companions = tuple(np.zeros(target_r.shape) for _ in range(6))
+        for column, (source_value, components) in enumerate(
+            zip(np.asarray(self.source["poly"]), self._section_components, strict=True)
+        ):
+            material = self._material_geometry(source_value)
+            expansion_point = (
+                section_centroid(components[0][0])
+                if len(components) == 1
+                else np.asarray(material.centroid.coords[0], dtype=np.float64)
+            )
+            for vertices, weight in components:
+                flux = polygon_analytic_flux_moments(
+                    target_r[:, column],
+                    target_z[:, column],
+                    vertices,
+                    expansion_point=expansion_point,
+                )
+                radial, vertical = polygon_analytic_field_moments(
+                    target_r[:, column],
+                    target_z[:, column],
+                    vertices,
+                    expansion_point=expansion_point,
+                )
+                rows = (
+                    flux[1],
+                    flux[2],
+                    radial[1],
+                    radial[2],
+                    vertical[1],
+                    vertical[2],
+                )
+                for output, row in zip(companions, rows, strict=True):
+                    output[:, column] += weight * row
+        return companions
+
+    @cached_property
     def Psi(self):
         """Return the total poloidal flux array [Wb/A]."""
         return self._coupling[0]
+
+    @cached_property
+    def PsiR(self):
+        """Return the radial flux-moment companion [m Wb/A]."""
+        return self._moment_coupling[0]
+
+    @cached_property
+    def PsiZ(self):
+        """Return the vertical flux-moment companion [m Wb/A]."""
+        return self._moment_coupling[1]
 
     @cached_property
     def Aphi(self):
@@ -377,9 +431,29 @@ class PolySection(Matrix):
         return self._coupling[1]
 
     @cached_property
+    def BrR(self):
+        """Return the radial moment companion of radial field [m T/A]."""
+        return self._moment_coupling[2]
+
+    @cached_property
+    def BrZ(self):
+        """Return the vertical moment companion of radial field [m T/A]."""
+        return self._moment_coupling[3]
+
+    @cached_property
     def Bz(self):
         """Return the vertical field array [T/A]."""
         return self._coupling[2]
+
+    @cached_property
+    def BzR(self):
+        """Return the radial moment companion of vertical field [m T/A]."""
+        return self._moment_coupling[4]
+
+    @cached_property
+    def BzZ(self):
+        """Return the vertical moment companion of vertical field [m T/A]."""
+        return self._moment_coupling[5]
 
 
 @dataclass

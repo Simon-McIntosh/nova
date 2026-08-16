@@ -22,7 +22,19 @@ from nova.frame.plasmaloc import PlasmaLoc
 class PlasmaGrid(BaseGrid, PlasmaLoc):
     """Compute interaction across hexagonal grid."""
 
-    attrs: list[str] = field(default_factory=lambda: ["Br", "Bz", "Psi"])
+    attrs: list[str] = field(
+        default_factory=lambda: [
+            "Br",
+            "BrR",
+            "BrZ",
+            "Bz",
+            "BzR",
+            "BzZ",
+            "Psi",
+            "PsiR",
+            "PsiZ",
+        ]
+    )
     levels: int | list[float] | np.ndarray = 21
 
     def __post_init__(self):

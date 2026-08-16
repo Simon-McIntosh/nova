@@ -26,6 +26,9 @@ from nova.biot.polysection import (
 from nova.biot.groupset import GroupSet
 
 
+_PLASMA_MOMENT_ATTRIBUTES = frozenset({"PsiR", "PsiZ", "BrR", "BrZ", "BzR", "BzZ"})
+
+
 @dataclass(frozen=True)
 class SourceBatch:
     """One bounded source evaluation with a complete immutable route identity."""
@@ -344,6 +347,8 @@ class Solve(GroupSet):
             **generator_kwargs,
         )
         for attr in self.attrs:
+            if attr in _PLASMA_MOMENT_ATTRIBUTES and batch.lane != "plasma":
+                continue
             matrix, target_plasma, plasma_source, plasma_plasma = generator.compute(
                 attr
             )

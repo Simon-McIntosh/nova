@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="vacuum-signature-extraction">
   <meta name="plan-title" content="Vacuum Signature Extraction — every pulse carries its own calibration windows">
   <meta name="plan-summary" content="Every tokamak pulse has vacuum intervals — before breakdown and after termination — where the exact field is computable from recorded conductor currents alone. Build machine-agnostic routines that harvest those windows from every pulse: per-channel offsets, integrator drift (rate and curvature), post-pulse return-to-baseline, scale-step and pair-state flags, and opportunistic gain checks against the exact solution. Products flow into the diagnostic-correction schema, turning the whole archive into a continuous calibration instrument instead of relying on designed calibration shots alone.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="M">
   <meta name="plan-capability-version" content="1.0">
@@ -21,9 +21,9 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-16">
-<meta name="plan-version" content="6">
-<meta name="plan-impl" content="0.9">
-<meta name="plan-commits" content="e59d976a,e75101ce,5ed0da48,6f0b11ed">
+<meta name="plan-version" content="8">
+<meta name="plan-impl" content="1.0">
+<meta name="plan-commits" content="e59d976a,e75101ce,5ed0da48,6f0b11ed,e8db81ab">
 <meta name="plan-artifacts" content="nova/calibrate/windows.py,nova/calibrate/instrument.py,nova/calibrate/gain_check.py,nova/calibrate/sweep.py,~/.cache/nova-mast/vacuum-signatures/archive/signature_store.json,~/.cache/nova-mast/vacuum-signatures/archive/signature_series.npz,~/.cache/nova-mast/vacuum-signatures/archive/transition_catalogue.json,~/.cache/nova-mast/vacuum-signatures/archive/recorded_corrections.yaml,docs/research/mast-vacuum-signatures.html">
 </head>
 <body>
@@ -73,21 +73,30 @@
     machine's life). Drift curvature travels in notes — the schema gives it no slot (queued
     with the schema plan). Demo banked at
     <code>~/.cache/nova-mast/vacuum-signatures/</code>. Merge <code>e59d976a</code>.</li>
-    <li><strong>Opportunistic gain checks.</strong> In vacuum-driven windows, the exact
-    solution per channel follows from the described Green's columns and the recorded currents —
-    a per-pulse mini gain fit. Pooled over the archive, these detect scale steps and
-    pair-state changes at the pulse where they happen (the block table's 37 switch points and
-    obv03's mid-life step become measured transitions with pulse-number precision, not
-    bracketed guesses).</li>
-    <li><strong>Archive sweep and products.</strong> A SLURM-friendly sweep over the MAST
-    store (chunked under the one-hour debug wall) producing: the per-pulse signature store,
-    per-channel drift/offset time series across the machine's life, transition catalogues
-    (steps, flips, deaths), and summary figures. The correction-schema instance gains its
-    time-resolved layer from measurement rather than curation.</li>
-    <li><strong>Portability proof.</strong> The routines take arrays and adapter callbacks
-    only; the done-when includes running the window classifier and instrument-term extraction
-    unchanged against a second data source (any IMAS-backed pulse file with pf_active +
-    magnetics is sufficient) to demonstrate machine-agnosticism.</li>
+    <li class="section-landed"><span class="badge badge-shipped">✓ landed 2026-08-13</span>
+    <strong>Opportunistic gain checks.</strong> Kernel in <code>nova/calibrate/gain_check.py</code>
+    (commit <code>e75101ce</code>): injected gain 1.083 recovered within 5×10⁻⁴; an injected ×2
+    transition bounded to the exact introduction pulse; a pair-state change separated from a
+    gain change rather than confounded. The pulse-number-precision ambition for the archive was
+    later REFUTED at scale — see the next item.</li>
+    <li class="section-landed"><span class="badge badge-shipped">✓ landed 2026-08-16</span>
+    <strong>Archive sweep — banked at full scale; the transition claim closes on a measured
+    bound.</strong> All 17,111 pulses in 35 chunks under the debug wall (commit
+    <code>5ed0da48</code>): 1,092,847 offset/drift fits, 33,351 far-field gain fits, 1,676
+    schema-valid recorded corrections. The transition catalogue is a BOUND, not a boundary list
+    (commit <code>6f0b11ed</code>): response normalisation removes 30.1% of apparent transitions
+    yet 0 of 37 established switches reach adjacent-pulse precision, and the synthetic lane
+    proves a channel-local response multiplier is scalar-identical to an acquisition multiplier
+    without an external state label. Adjacent-pulse precision is unobtainable from banked
+    vacuum-window scalar observables.</li>
+    <li class="section-landed"><span class="badge badge-shipped">✓ landed 2026-08-16</span>
+    <strong>Portability proof — demonstrated on TCV, not asserted.</strong> The classifier and
+    instrument extraction ran UNCHANGED against TCV pulse 77549 (imas-python at its recorded
+    DD 3.41.0; 29 pf_active traces, 38 probes, 38 flux loops): five-window
+    quiet/driven/plasma/driven/quiet timeline classified and 76/76 magnetic signals fitted with
+    finite terms, unchanged-kernel provenance cited (commit <code>e8db81ab</code>). The
+    imas.training entry was audited first and disqualified — it carries no pf_active or
+    magnetics payload.</li>
   </ol>
   <p>Done-when: window classifier and instrument-term extraction landed in
   <code>nova/calibrate/</code> with synthetic-truth unit tests (injected drift, offsets,
@@ -134,7 +143,7 @@ Done-when
   3. Followup written into plan + this one resolved</pre>
     <p class="r-fu-outcome">§2.1-§2.2 landed - merge e59d976a (commits adb7cb70, b60d87c8, a943c516). Classifier + instrument terms in nova/calibrate (arrays+adapters, 41 new tests; targeted lane 221 passed; fast lane 4206 passed at the known 5-failure env baseline). Synthetic recovery pinned: offset 1e-5 T, drift rate 10%, curvature 1e-3, non-closure 5%. 3-pulse demo banked: 75/75, 73/73, 69/69 channels fitted; degenerate undriven shot handled. Closure scored with rate standard error over the extrapolation lever (65/73 false condemnations → 67/73 close; six real candidates led by ccbv14 9.7σ). Emission path proven: 154 records validate and flatten quiet windows below 1e-7 T via apply_corrections; emitted as recorded, not promoted. Two archive-found guard/scoring faults fixed with tests; two adapter facts recorded for the sweep (1 kA labelling threshold; guard budget 216 ms affordable / 650 ms not).</p>
     </article>
-<article class="r-fu" data-id="f-vse-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-08" data-recommends-skill="/reckon-ship vacuum-signature-extraction §2.3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-vse-002" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-08" data-recommends-skill="/reckon-ship vacuum-signature-extraction §2.3" data-resolved-at="2026-08-16T13:07:22+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Opportunistic gain checks and the archive sweep (§2.3-§2.4)</h4>
     <div class="r-fu-body">The classifier and terms are landed and the demo measured the guard budget per pulse. Next: per-pulse mini gain fits in vacuum-driven windows against the described Green's columns (§2.3), then the SLURM-chunked archive sweep (§2.4) producing the per-pulse signature store, per-channel drift/offset series, and the transition catalogue (the block table's 37 switch points and obv03's mid-life step become measured transitions with pulse-number precision). Inherit the two adapter facts from the README: labelling threshold 1 kA, and the guard width is a per-pulse affordability measurement. Portability proof (§2.5) remains after the sweep.</div>
     <pre class="r-fu-prompt">Project: nova
@@ -162,12 +171,18 @@ Done-when
      catalogue with pulse-number precision; summary figures committed
   3. Corrections emitted in schema form; findings in a research note
   4. Followup written into plan + this one resolved</pre>
+    <p class="r-fu-outcome">Landed across three beats. Gain checks: commit e75101ce, injected gain recovered within 5e-4 and an injected scale transition bounded to its exact introduction pulse on synthetic truth. Archive sweep: commit 5ed0da48, all 17,111 pulses in 35 chunks, 1,092,847 offset/drift fits and 33,351 gain fits banked with 1,676 recorded corrections. The pulse-number-precision promise this followup carried was then REFUTED at scale rather than delivered: the best discriminating observable removes 30.1 percent of apparent transitions and none of the 37 established switches reach adjacent-pulse precision (commit 6f0b11ed), because a channel-local response multiplier is scalar-identical to an acquisition multiplier without an external state label. The catalogue carries the measured bound; the drift and offset series stand as products.</p>
     </article>
 <article class="r-fu" data-id="f-vse-003" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship vacuum-signature-extraction §2" data-resolved-at="2026-08-16T12:51:23+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Find a discriminating transition observable, then re-derive the catalogue — or record that pulse precision is unobtainable</h4>
     <div class="r-fu-body">The sweep is banked at full archive scale and the transition catalogue is on HOLD because the scalar gain series confounds three causes: an acquisition-state step, a drive or pair-state change, and a response-model change all move it. 0 of 37 established switches reach adjacent-pulse precision and 1,445 apparent blocks appear where 37 are expected. The work is to find an observable that separates those causes — candidates include the pair-state classifier's own state sequence, which is already built and is blind to acquisition scale, and the ratio between simultaneously-driven channels, which cancels a common response-model error — then re-derive the catalogue against the 37 known switches as the falsification set. An honest outcome here may be that adjacent-pulse precision is not obtainable from vacuum windows at all, in which case that bound is the deliverable and the section closes on it. Do not promote a boundary from the confounded series to make the catalogue look complete.</div>
     <pre class="r-fu-prompt">/reckon-ship vacuum-signature-extraction §2</pre>
     <p class="r-fu-outcome">Closed on the honest branch the followup named: the bound IS the deliverable. The best discriminating observable available — response normalisation over simultaneously-driven channels — removes 30.1 percent of apparent transitions yet 0 of 37 established switches reach adjacent-pulse precision, and the synthetic lane proves a channel-local response multiplier is scalar-identical to an acquisition multiplier absent an external state label. Adjacent-pulse precision is unobtainable from banked vacuum-window scalar observables; commit 6f0b11ed rebanks the catalogue with the bound and the research record carries the measured confusion per cause. No boundary was promoted from the confounded series.</p>
+    </article>
+<article class="r-fu" data-id="f-vse-004" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-16" data-recommends-skill="/reckon-ship vacuum-signature-extraction" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Break the transition bound with an external shot-resolved state source (authority-required: external data acquisition)</h4>
+    <div class="r-fu-body">Exemption: authority-required. The measured identifiability bound is structural - no scalar vacuum-window observable separates an acquisition step from a response or configuration change - so the only route past it is an external authoritative source of shot-resolved state: link-board configuration records, acquisition-settings logs, or pickup-response maintenance records from the MAST operations archive. Acquiring these is an outward-facing request to UKAEA/FAIR-MAST channels the orchestrator does not hold authority for. If such a source lands, re-derive the transition catalogue against the 37 known switches; until then the bound stands as the deliverable.</div>
+    <pre class="r-fu-prompt">/reckon-ship vacuum-signature-extraction</pre>
     </article>
 </section>
 

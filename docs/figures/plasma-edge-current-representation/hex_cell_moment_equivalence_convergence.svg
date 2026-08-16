@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1050 620" role="img" aria-labelledby="title description">
+<title id="title">Hexagonal cell moment equivalence convergence</title>
+<desc id="description">Relative disagreement between exact moment blocks and refined low-order plasma elements for flux and both field components.</desc>
+<rect width="100%" height="100%" fill="white"/>
+<g font-family="system-ui, sans-serif" fill="#222">
+<text x="525" y="25" text-anchor="middle" font-size="17">Single-cell moments vs boundary-fitted low-order plasma mesh</text>
+<rect x="72" y="58" width="300" height="220" fill="none" stroke="#777"/>
+<text x="222.0" y="46" text-anchor="middle" font-size="13">uniform: psi</text>
+<text x="222.0" y="312" text-anchor="middle" font-size="11">characteristic element size [m]</text>
+<text x="24" y="168.0" text-anchor="middle" font-size="11" transform="rotate(-90 24 168.0)">relative L2 disagreement</text>
+<polyline points="372.00,84.39 274.40,128.87 173.31,185.62 72.00,233.34" fill="none" stroke="#1769aa" stroke-width="1.8"/>
+<circle cx="372.00" cy="84.39" r="3" fill="#1769aa"/>
+<circle cx="274.40" cy="128.87" r="3" fill="#1769aa"/>
+<circle cx="173.31" cy="185.62" r="3" fill="#1769aa"/>
+<circle cx="72.00" cy="233.34" r="3" fill="#1769aa"/>
+<line x1="82" y1="75" x2="102" y2="75" stroke="#1769aa" stroke-width="1.8"/>
+<text x="108" y="79" font-size="10">near, p=1.78</text>
+<polyline points="372.00,80.94 274.40,138.53 173.31,198.63 72.00,255.06" fill="none" stroke="#c44e52" stroke-width="1.8"/>
+<rect x="369.00" y="77.94" width="6" height="6" fill="#c44e52"/>
+<rect x="271.40" y="135.53" width="6" height="6" fill="#c44e52"/>
+<rect x="170.31" y="195.63" width="6" height="6" fill="#c44e52"/>
+<rect x="69.00" y="252.06" width="6" height="6" fill="#c44e52"/>
+<line x1="82" y1="91" x2="102" y2="91" stroke="#c44e52" stroke-width="1.8"/>
+<text x="108" y="95" font-size="10">far, p=2.06</text>
+<text x="72" y="293" font-size="9">0.017</text>
+<text x="372" y="293" text-anchor="end" font-size="9">0.062</text>
+<rect x="72" y="348" width="300" height="220" fill="none" stroke="#777"/>
+<text x="222.0" y="336" text-anchor="middle" font-size="13">linear: psi</text>
+<text x="222.0" y="602" text-anchor="middle" font-size="11">characteristic element size [m]</text>
+<text x="24" y="458.0" text-anchor="middle" font-size="11" transform="rotate(-90 24 458.0)">relative L2 disagreement</text>
+<polyline points="372.00,369.29 274.40,418.01 173.31,473.57 72.00,523.99" fill="none" stroke="#1769aa" stroke-width="1.8"/>
+<circle cx="372.00" cy="369.29" r="3" fill="#1769aa"/>
+<circle cx="274.40" cy="418.01" r="3" fill="#1769aa"/>
+<circle cx="173.31" cy="473.57" r="3" fill="#1769aa"/>
+<circle cx="72.00" cy="523.99" r="3" fill="#1769aa"/>
+<line x1="82" y1="365" x2="102" y2="365" stroke="#1769aa" stroke-width="1.8"/>
+<text x="108" y="369" font-size="10">near, p=1.99</text>
+<polyline points="372.00,385.59 274.40,438.65 173.31,494.43 72.00,546.71" fill="none" stroke="#c44e52" stroke-width="1.8"/>
+<rect x="369.00" y="382.59" width="6" height="6" fill="#c44e52"/>
+<rect x="271.40" y="435.65" width="6" height="6" fill="#c44e52"/>
+<rect x="170.31" y="491.43" width="6" height="6" fill="#c44e52"/>
+<rect x="69.00" y="543.71" width="6" height="6" fill="#c44e52"/>
+<line x1="82" y1="381" x2="102" y2="381" stroke="#c44e52" stroke-width="1.8"/>
+<text x="108" y="385" font-size="10">far, p=2.06</text>
+<text x="72" y="583" font-size="9">0.017</text>
+<text x="372" y="583" text-anchor="end" font-size="9">0.062</text>
+<rect x="410" y="58" width="300" height="220" fill="none" stroke="#777"/>
+<text x="560.0" y="46" text-anchor="middle" font-size="13">uniform: B_R</text>
+<text x="560.0" y="312" text-anchor="middle" font-size="11">characteristic element size [m]</text>
+<polyline points="710.00,79.29 612.40,130.25 511.31,169.27 410.00,223.33" fill="none" stroke="#1769aa" stroke-width="1.8"/>
+<circle cx="710.00" cy="79.29" r="3" fill="#1769aa"/>
+<circle cx="612.40" cy="130.25" r="3" fill="#1769aa"/>
+<circle cx="511.31" cy="169.27" r="3" fill="#1769aa"/>
+<circle cx="410.00" cy="223.33" r="3" fill="#1769aa"/>
+<line x1="420" y1="75" x2="440" y2="75" stroke="#1769aa" stroke-width="1.8"/>
+<text x="446" y="79" font-size="10">near, p=3.15</text>
+<polyline points="710.00,164.69 612.40,195.50 511.31,226.96 410.00,256.71" fill="none" stroke="#c44e52" stroke-width="1.8"/>
+<rect x="707.00" y="161.69" width="6" height="6" fill="#c44e52"/>
+<rect x="609.40" y="192.50" width="6" height="6" fill="#c44e52"/>
+<rect x="508.31" y="223.96" width="6" height="6" fill="#c44e52"/>
+<rect x="407.00" y="253.71" width="6" height="6" fill="#c44e52"/>
+<line x1="420" y1="91" x2="440" y2="91" stroke="#c44e52" stroke-width="1.8"/>
+<text x="446" y="95" font-size="10">far, p=2.06</text>
+<text x="410" y="293" font-size="9">0.017</text>
+<text x="710" y="293" text-anchor="end" font-size="9">0.062</text>
+<rect x="410" y="348" width="300" height="220" fill="none" stroke="#777"/>
+<text x="560.0" y="336" text-anchor="middle" font-size="13">linear: B_R</text>
+<text x="560.0" y="602" text-anchor="middle" font-size="11">characteristic element size [m]</text>
+<polyline points="710.00,369.29 612.40,405.10 511.31,454.28 410.00,492.06" fill="none" stroke="#1769aa" stroke-width="1.8"/>
+<circle cx="710.00" cy="369.29" r="3" fill="#1769aa"/>
+<circle cx="612.40" cy="405.10" r="3" fill="#1769aa"/>
+<circle cx="511.31" cy="454.28" r="3" fill="#1769aa"/>
+<circle cx="410.00" cy="492.06" r="3" fill="#1769aa"/>
+<line x1="420" y1="365" x2="440" y2="365" stroke="#1769aa" stroke-width="1.8"/>
+<text x="446" y="369" font-size="10">near, p=1.95</text>
+<polyline points="710.00,415.07 612.40,458.48 511.31,503.99 410.00,546.71" fill="none" stroke="#c44e52" stroke-width="1.8"/>
+<rect x="707.00" y="412.07" width="6" height="6" fill="#c44e52"/>
+<rect x="609.40" y="455.48" width="6" height="6" fill="#c44e52"/>
+<rect x="508.31" y="500.99" width="6" height="6" fill="#c44e52"/>
+<rect x="407.00" y="543.71" width="6" height="6" fill="#c44e52"/>
+<line x1="420" y1="381" x2="440" y2="381" stroke="#c44e52" stroke-width="1.8"/>
+<text x="446" y="385" font-size="10">far, p=2.06</text>
+<text x="410" y="583" font-size="9">0.017</text>
+<text x="710" y="583" text-anchor="end" font-size="9">0.062</text>
+<rect x="748" y="58" width="300" height="220" fill="none" stroke="#777"/>
+<text x="898.0" y="46" text-anchor="middle" font-size="13">uniform: B_Z</text>
+<text x="898.0" y="312" text-anchor="middle" font-size="11">characteristic element size [m]</text>
+<polyline points="1048.00,79.29 950.40,115.79 849.31,158.54 748.00,198.73" fill="none" stroke="#1769aa" stroke-width="1.8"/>
+<circle cx="1048.00" cy="79.29" r="3" fill="#1769aa"/>
+<circle cx="950.40" cy="115.79" r="3" fill="#1769aa"/>
+<circle cx="849.31" cy="158.54" r="3" fill="#1769aa"/>
+<circle cx="748.00" cy="198.73" r="3" fill="#1769aa"/>
+<line x1="758" y1="75" x2="778" y2="75" stroke="#1769aa" stroke-width="1.8"/>
+<text x="784" y="79" font-size="10">near, p=2.81</text>
+<polyline points="1048.00,168.20 950.40,195.86 849.31,227.66 748.00,256.71" fill="none" stroke="#c44e52" stroke-width="1.8"/>
+<rect x="1045.00" y="165.20" width="6" height="6" fill="#c44e52"/>
+<rect x="947.40" y="192.86" width="6" height="6" fill="#c44e52"/>
+<rect x="846.31" y="224.66" width="6" height="6" fill="#c44e52"/>
+<rect x="745.00" y="253.71" width="6" height="6" fill="#c44e52"/>
+<line x1="758" y1="91" x2="778" y2="91" stroke="#c44e52" stroke-width="1.8"/>
+<text x="784" y="95" font-size="10">far, p=2.08</text>
+<text x="748" y="293" font-size="9">0.017</text>
+<text x="1048" y="293" text-anchor="end" font-size="9">0.062</text>
+<rect x="748" y="348" width="300" height="220" fill="none" stroke="#777"/>
+<text x="898.0" y="336" text-anchor="middle" font-size="13">linear: B_Z</text>
+<text x="898.0" y="602" text-anchor="middle" font-size="11">characteristic element size [m]</text>
+<polyline points="1048.00,369.29 950.40,409.20 849.31,451.89 748.00,492.02" fill="none" stroke="#1769aa" stroke-width="1.8"/>
+<circle cx="1048.00" cy="369.29" r="3" fill="#1769aa"/>
+<circle cx="950.40" cy="409.20" r="3" fill="#1769aa"/>
+<circle cx="849.31" cy="451.89" r="3" fill="#1769aa"/>
+<circle cx="748.00" cy="492.02" r="3" fill="#1769aa"/>
+<line x1="758" y1="365" x2="778" y2="365" stroke="#1769aa" stroke-width="1.8"/>
+<text x="784" y="369" font-size="10">near, p=2.29</text>
+<polyline points="1048.00,436.00 950.40,472.00 849.31,510.69 748.00,546.71" fill="none" stroke="#c44e52" stroke-width="1.8"/>
+<rect x="1045.00" y="433.00" width="6" height="6" fill="#c44e52"/>
+<rect x="947.40" y="469.00" width="6" height="6" fill="#c44e52"/>
+<rect x="846.31" y="507.69" width="6" height="6" fill="#c44e52"/>
+<rect x="745.00" y="543.71" width="6" height="6" fill="#c44e52"/>
+<line x1="758" y1="381" x2="778" y2="381" stroke="#c44e52" stroke-width="1.8"/>
+<text x="784" y="385" font-size="10">far, p=2.07</text>
+<text x="748" y="583" font-size="9">0.017</text>
+<text x="1048" y="583" text-anchor="end" font-size="9">0.062</text>
+</g>
+</svg>

@@ -20,8 +20,8 @@
   <title>Coil Geometry Inversion | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-13">
-<meta name="plan-version" content="14">
+<meta name="plan-modified" content="2026-08-16">
+<meta name="plan-version" content="15">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-commits" content="81ef6739,42ae9f60">
 <meta name="plan-artifacts" content="docs/figures/geometry-recovery/geometry_recovery.npz,docs/figures/geometry-recovery/geometry_recovery_summary.json,docs/figures/geometry-recovery/recovery_ladder.png,docs/figures/geometry-recovery/mast_bounds.png,docs/research/mast-p4p5-geometry-solve.html">
@@ -274,10 +274,11 @@ Done-when
     <pre class="r-fu-prompt">/reckon-ship coil-geometry-inversion §2</pre>
     <p class="r-fu-outcome">MAST half landed — commit 42ae9f60 (merge 6e0e2ff1). The gridded flux-map functional reuses the Gauss–Newton core and nuisance projection unchanged, and was run against the reconciled harmonic maps at 26x26 without interpolation. It resolves 2–3 affine directions per member, explains 65.4/68.5/26.8/3.3 percent of whitened power, and forces geometry equivalents 21–38 times their best resolution on the three determined members while P5 upper has zero determined cells. Independent confirmation of the sensor-space bounded negative through a different functional. The challenge-facing DIII-D half of this section is separated into f-cgi-005.</p>
     </article>
-<article class="r-fu" data-id="f-cgi-005" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship coil-geometry-inversion §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-cgi-005" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship coil-geometry-inversion §2" data-resolved-at="2026-08-16T11:31:02+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">The challenge-facing half of the flux-map class: validate shipped DIII-D geometry, infer what does not ship</h4>
     <div class="r-fu-body">§2.4's MAST half is closed with a bounded negative reached twice by independent functionals. The challenge-facing half is untouched and is the part with an external deadline: (a) validate the per-shot conductor geometry the DIII-D dataset SHIPS against label-derived fields through the identifiability spectrum — a shipped description is a claim, not a truth, and the spectrum says which of its parameters the data can actually check; and (b) infer what does NOT ship, the wall contour and passive/vessel structure, from labeled ramp frames where eddy fields dominate the mismatch. The calibrated solver, its coverage ladder and now the map functional all carry over unchanged. Feeds diiid-forward-onboarding and the Sophelio entry, whose development phase closes 2026-10-18.</div>
     <pre class="r-fu-prompt">/reckon-ship coil-geometry-inversion §2</pre>
+    <p class="r-fu-outcome">Moved to diiid-forward-onboarding as f-dfo-002 (foreign-owner: that plan owns the DIII-D description, the registry ingest route, and the challenge deadline). The MAST science this plan set out to deliver is complete: both problem classes solved with the same calibrated core, and the bounded negative reached independently by the sensor-space and flux-map functionals. The solver, coverage ladder, and flux-map functional transfer to the new owner unchanged. This plan ships once the rectangle-section prototype dispatched 2026-08-16 records its landing beat.</p>
     </article>
 </section>
 

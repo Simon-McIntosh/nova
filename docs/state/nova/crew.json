@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T12:07:59",
+  "updated": "2026-08-16T13:27:38",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -117,6 +117,13 @@
         "created": "2026-08-12"
       },
       {
+        "id": "geo-research",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-16"
+      },
+      {
         "id": "geometry-solve",
         "harness": "codex",
         "role": "implement",
@@ -229,6 +236,13 @@
         "created": "2026-08-12"
       },
       {
+        "id": "rect-prototype",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-16"
+      },
+      {
         "id": "registry",
         "harness": "codex",
         "role": "implement",
@@ -248,6 +262,13 @@
         "role": "implement",
         "session_id": "01a00738-4206-7582-b3b5-e5ed51fa5e91",
         "created": "2026-08-15"
+      },
+      {
+        "id": "supply-topology",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-16"
       },
       {
         "id": "topology-parity",
@@ -5391,6 +5412,6 @@
       }
     ],
     "holds": [],
-    "_version": 172
+    "_version": 175
   }
 }

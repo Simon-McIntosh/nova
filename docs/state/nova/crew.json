@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T15:06:41",
+  "updated": "2026-08-16T15:09:02",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -5761,9 +5761,61 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T124242549674-bank-regeneration",
+        "plan": "mast-misfit-toroidal-harmonics",
+        "section": "\u00a72",
+        "node": "bank-regeneration",
+        "role": "implement",
+        "member": "flux-loops",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T12:42:44Z",
+        "completed_at": "2026-08-16T13:08:36Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1552,
+        "time_budget": "60m",
+        "base_sha": "273a66dacecd41c5d3442bfdea745fee5c8bab4a",
+        "commits": [
+          "8bbb0e3f"
+        ],
+        "changed_lines": {
+          "added": 4125,
+          "removed": 1906,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/0738e6b1-3bc0-4082-a69e-59214ef05a7c/scratchpad/bank-regeneration-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff706-9a2b-7243-97f3-9e101baa0562",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 56703232,
+            "input_tokens": 58109680,
+            "output_tokens": 173299,
+            "reasoning_output_tokens": 51229
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 185
+    "_version": 186
   }
 }

@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="mast-misfit-toroidal-harmonics">
   <meta name="plan-title" content="Toroidal-Harmonic Misfit Maps and Source Localization">
   <meta name="plan-summary" content="Expand the surviving vacuum misfit in toroidal harmonics constrained by probes and calibrated flux loops, producing honest contour maps of the misfit flux and localising the missing conductor by interior/exterior expansion mismatch and multi-filament fits.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
   <meta name="plan-capability-version" content="1.0">
@@ -22,9 +22,9 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-16">
-<meta name="plan-version" content="10">
-<meta name="plan-impl" content="0.96">
-<meta name="plan-commits" content="a08af0e5,ae037f69,22ea4269,4fdb7a03,75da1c2d">
+<meta name="plan-version" content="12">
+<meta name="plan-impl" content="1.0">
+<meta name="plan-commits" content="a08af0e5,ae037f69,22ea4269,4fdb7a03,75da1c2d,8bbb0e3f">
 <meta name="plan-artifacts" content="nova/imas/mast_misfit_harmonics.py,tests/test_mast_misfit_harmonics.py,docs/research/mast-misfit-harmonic-maps.html,docs/figures/toroidal-harmonics/,docs/figures/circuit-basis/physical-circuit-inversion.svg,~/.cache/nova-mast/toroidal-harmonics/maps.npz,~/.cache/nova-mast/machine-topology/">
 </head>
 <body>
@@ -68,38 +68,38 @@
     never the pre-projected survivor alone. 49 tests; merge <code>a08af0e5</code>; figures
     <code>docs/figures/toroidal-harmonics/</code>; banked
     <code>~/.cache/nova-mast/toroidal-harmonics/</code>.</li>
-    <li><strong>Constraint sets.</strong> Per drive group: the banked signed couplings
-    (<code>~/.cache/nova-mast/misfit-localization/couplings.npz</code>) as B-projections at 77
-    probes, plus calibrated loop fluxes from <code>mast-flux-loop-calibration</code>, with
-    per-channel noise weights from the sensor-floor record replacing the uniform pooling of the
-    first pass.</li>
-    <li><strong>Maps.</strong> Interior expansion (regular at the axis) fitted to the
-    centre-column band, exterior expansion to the outboard band; contour the reconciled flux and
-    its disagreement. Bootstrap over shots for confidence bands.</li>
-    <li><strong>Source fits.</strong> Multi-filament (2–4 rings, symmetric pairs allowed but not
-    imposed) and extended-path (line-current segments closing through the machine) models scored
-    against the harmonic maps; report explained fraction, implied currents in supply-current
-    units, and the residue after the best source.</li>
-    <li><strong>Toroidal sensitivity accounting.</strong> The n=0 fits above must carry an
-    explicit statement of what each sensor class can see. Healthy MAST pickup channels are
-    180°-summed pairs, so all odd-n content cancels by construction (the error-field
-    correction coils, odd-n by design, are doubly excluded — parity plus the measured
-    R² &lt; 0.0005) while <em>even</em> n (2, 4, …) from any toroidally-localised conductor
-    leaks into the "axisymmetric" reading; toroidally-closed flux loops see exactly n=0 and
-    nothing else; the 36 saddle loops are the only n-resolving set. Deliver the leakage
-    bound: for plausible localised sources (a feeder run, the P4 coil tail), the even-n
-    fraction that a summed pair reports against the true n=0 — and screen the pair-failure
-    channels (obr17 class), which are single coils and regain full odd-n sensitivity,
-    against the correction-coil and feeder odd-n content specifically. Cross-machine flux-loop
-    versus probe disagreement per drive group is the practical asymmetry detector the user
-    hypothesis predicts.</li>
-    <li><strong>Verdict.</strong> Either a localised source region with implied current and
-    candidate identity (handed to <code>mast-p4p5-circuit-provenance</code> for engineering
-    confirmation), or a measured statement that the survivor is non-axisymmetric or distributed
-    beyond the array's resolving power — with the resolution limit quantified by the synthetic
-    recovery tests. The reconciled misfit flux maps are also the natural plasma-subtracted
-    targets for <code>coil-geometry-inversion</code>'s flux-map problem class: publish them
-    on a grid with uncertainty so the geometry solve can consume them directly.</li>
+    <li class="section-landed"><span class="badge badge-shipped">✓ landed 2026-08-13/16</span>
+    <strong>Constraint sets and maps — recovered, verified, and rebanked under the promoted
+    chain.</strong> 91–94 rows per group with 17 admitted loops (merge <code>ae037f69</code>);
+    joint-fit explained fractions 0.930/0.771/0.766 (P4L/P5L/P4U); loop withholding costs
+    3×–40,195×; 205×205 grid with determined-area fractions 80/68/59/0%. The canonical bank now
+    carries the full correction chain with structure unchanged at cutover — rank 10/13 → 13/13
+    and both conditions identical (commit <code>8bbb0e3f</code>), shift recorded per conductor.
+    Record: <a href="/nova/research/mast-misfit-harmonic-maps">harmonic maps</a>.</li>
+    <li class="section-landed"><span class="badge badge-shipped">✓ landed 2026-08-13</span>
+    <strong>Source fits.</strong> 2/3/4-ring and tied extended-path models scored on the
+    regenerated bank (commit <code>22ea4269</code>); implied currents in supply units (per
+    ampere-turn × 23 drive turns); residue a LOWER bound still containing pooled-shot
+    systematics — 2.80/2.04% lower groups, 36.17–42.94% upper and pair.</li>
+    <li class="section-landed"><span class="badge badge-shipped">✓ landed 2026-08-13/16</span>
+    <strong>Toroidal sensitivity accounting.</strong> Healthy pairs cancel odd n exactly; for a
+    uniform 20° footprint the retained even-n fractions are n2 0.9798, n4 0.9207, n6 0.8270 —
+    but WITHOUT a measured tail width the bound is vacuous at 1.0 in both parities, and that
+    honest gap is recorded rather than papered over. Correction coils bounded out at R² &lt;
+    0.0005 (amplitude correlation &lt; 0.0224). The saddle-loop acquisition that breaks the tie
+    is owned by <code>mast-nonaxisymmetric-physics</code>.</li>
+    <li class="section-landed"><span class="badge badge-shipped">✓ landed 2026-08-16</span>
+    <strong>Verdict — localised, geometry excluded twice, and the anomaly table reframed by the
+    circuit basis.</strong> Strongest survivor below the P4 lower winding (Z ≤ −0.95 m, R
+    unresolved 0.60–2.40 m); static geometry excluded by both the sensor-space and flux-map
+    functionals. The circuit-basis test (commit <code>4fdb7a03</code>) collapsed the P2 anomaly
+    to one link-board freedom (3.127% spread), leaving the outer central ratio 1.4772 for the
+    12:8 ampere-turn adjudication; P3 and P6 stay real in every basis; and all 13 survivor shots
+    are lower-only member surveys (series forcing +862%), so the survivor is a separately-driven
+    configuration whose candidates now include the survey supply's own cabling. Maps published
+    as gridded solve targets with per-cell uncertainty (commit <code>75da1c2d</code>,
+    <code>maps.npz</code>). Record:
+    <a href="/nova/research/mast-misfit-harmonic-maps">harmonic maps verdict</a>.</li>
   </ol>
   <p>Done-when: synthetic recovery validated; per-group misfit flux maps with confidence bands
   published as figures; source fits scored and ranked; non-axisymmetric residue quantified; a
@@ -233,7 +233,7 @@ Done-when
     <h4 class="r-fu-title">Source fits, toroidal sensitivity accounting and the verdict (§2.4–§2.6), on the regenerated constraint bank</h4>
     <div class="r-fu-body">The maps are fitted and the flux-loop plan has just regenerated the P4/P5 constraint bank from the 13-of-13 inversion (45 rows over 44 shots in six groups, raw and surviving arrays banked). Remaining: score multi-filament and extended-path source models against the harmonic representation with explained fraction and implied currents in supply-current units; deliver the toroidal sensitivity accounting, including the even-n leakage bound for 180-degree-summed pairs and the odd-n screen on the pair-failure channels; quantify the non-axisymmetric residue that bounds what a 3D busbar run must explain; and record the verdict. Two inputs are newly decisive: coil-geometry-inversion returned a bounded negative, so the survivor is current- or sensor-side rather than geometry-side, and the geometry plan's flux-map class wants these reconciled maps published on a grid with uncertainty. Consider pinning at least the per-group explained fractions as a regression, since nothing currently does.</div>
     <pre class="r-fu-prompt">/reckon-ship mast-misfit-toroidal-harmonics §2</pre>
-    <p class="r-fu-outcome">§2.4–§2.6 all landed — commits 22ea4269 (source fits and parity accounting), 4fdb7a03 (circuit-basis test) and 75da1c2d (verdict); 39/39 tests. The verdict is written with its bounds: strongest survivor below P4 lower (Z <= -0.95 m, R unresolved 0.60–2.40 m); static geometry excluded by two independent functionals; residue a lower bound still containing pooled-shot systematics (2.80/2.04 percent lower groups, 36.17–42.94 percent upper and pair, P5 pair 0.058 percent); even-n leakage bound honestly vacuous at 1.0 pending a tail width. The circuit findings reframe the anomaly table: P2 collapses to one link-board freedom (3.127 percent spread) leaving the outer 1.4772 central ratio for the 12:8 ampere-turn adjudication; P3 and P6 remain real in every tested basis; and the P4-lower survivor is a separately-driven member-survey configuration (13/13 lower-only, series forcing +862 percent), with the survey supply's own cabling now a named candidate. The reconciled maps are published as gridded solve targets with per-cell uncertainty (maps.npz, sha bf1bf07-prefixed, with maps.json metadata). Remaining in-plan work is exactly f-mth-006, the bank regeneration under the promoted chain.</p>
+    <p class="r-fu-outcome">§2.4–§2.6 all landed — commits 22ea4269 (source fits and parity accounting), 4fdb7a03 (circuit-basis test) and 75da1c2d (verdict); 39/39 tests. The verdict is written with its bounds: strongest survivor below P4 lower (Z &lt;= -0.95 m, R unresolved 0.60–2.40 m); static geometry excluded by two independent functionals; residue a lower bound still containing pooled-shot systematics (2.80/2.04 percent lower groups, 36.17–42.94 percent upper and pair, P5 pair 0.058 percent); even-n leakage bound honestly vacuous at 1.0 pending a tail width. The circuit findings reframe the anomaly table: P2 collapses to one link-board freedom (3.127 percent spread) leaving the outer 1.4772 central ratio for the 12:8 ampere-turn adjudication; P3 and P6 remain real in every tested basis; and the P4-lower survivor is a separately-driven member-survey configuration (13/13 lower-only, series forcing +862 percent), with the survey supply's own cabling now a named candidate. The reconciled maps are published as gridded solve targets with per-cell uncertainty (maps.npz, sha bf1bf07-prefixed, with maps.json metadata). Remaining in-plan work is exactly f-mth-006, the bank regeneration under the promoted chain.</p>
     </article>
 <article class="r-fu" data-id="f-mth-004" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship mast-misfit-toroidal-harmonics §2" data-resolved-at="2026-08-16T11:31:47+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Separate the residue from pooled-shot systematics: gain-aware pair-failure channels and the 36 saddle loops</h4>
@@ -241,10 +241,16 @@ Done-when
     <pre class="r-fu-prompt">/reckon-ship mast-misfit-toroidal-harmonics §2</pre>
     <p class="r-fu-outcome">Split at the ownership boundary. The data-path half - admitting the 36 saddle loops and the gain-aware pair-failure channels - moved to mast-nonaxisymmetric-physics as f-mnap-saddle-loops (foreign-owner: the saddle loops are the machine's only n-resolving set and that plan owns MAST 3D fields and vacuum taring; the deliverable it owes back is a measured localised-tail width, without which the even-n leakage bound stays vacuous at 1.0). What remains here is exactly f-mth-003's still-open remainder: the §2.6 verdict, written with the bounds as they stand - localisation below the P4 lower winding, geometry excluded twice independently, residue stated as a lower bound containing pooled-shot systematics - plus publishing the reconciled maps on their grid with uncertainty as the standing flux-map solve target. The verdict node awaits one input dispatched 2026-08-16: the supply-topology research, since a multi-supply or separately-driven circuit is a candidate the verdict must name or exclude.</p>
     </article>
-<article class="r-fu" data-id="f-mth-006" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-16" data-recommends-skill="/reckon-ship mast-misfit-toroidal-harmonics §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mth-006" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-16" data-recommends-skill="/reckon-ship mast-misfit-toroidal-harmonics §2" data-resolved-at="2026-08-16T13:11:26+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Regenerate the canonical constraint bank under the promoted correction chain</h4>
     <div class="r-fu-body">The circuit-basis node measured that the live read path (full promoted chain) and the banked inversion snapshot (acquisition-scale only) now disagree materially: a secondary 351-shot run shows taxonomy drift up to 1.6523 absolute spread on identical support. Every number this plan banks was internally consistent because it was solved on the snapshot, but the next consumer that mixes bank-derived couplings with live corrected reads inherits a phantom calibration shift. Regenerate the 13-column bank and the constraint sets under the promoted chain, re-stamp the taxonomy, and record the before/after deltas as the correction chain's downstream shift — the same equivalence-first discipline the read-layer cutover used.</div>
     <pre class="r-fu-prompt">/reckon-ship mast-misfit-toroidal-harmonics §2</pre>
+    <p class="r-fu-outcome">Landed — commit 8bbb0e3f. The canonical bank regenerated under the full promoted correction chain (SLURM job 1249203, 14m43s, identical support: 369/369/351, 45 rows over 44 shots) with the acquisition-scale snapshot retained beside it and per-arm, per-conductor shifts recorded. The structure does not move at cutover: probe-only rank 10/13 at condition 370.698900 and joint rank 13/13 at condition 549.318853 are identical before and after, so every landed verdict survives the chain. The downstream change is carried by five promoted gains — obr17 0.5011, obv04 0.8571, obr05 1.1043, obv05 0.9449, ccbv35 0.9474 — and is banked in promoted-chain-shift.json with the shift figure committed.</p>
+    </article>
+<article class="r-fu" data-id="f-mth-007" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-16" data-recommends-skill="/reckon-ship mast-nonaxisymmetric-physics" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">The residue split and the tail width are owed back by the non-axisymmetric plan (foreign-owner: mast-nonaxisymmetric-physics)</h4>
+    <div class="r-fu-body">Exemption: foreign-owner. This plan ships with its residue honestly stated as a lower bound containing pooled-shot systematics, because the two data paths that split it — the 36 saddle loops and the gain-aware pair-failure channels — are owned by mast-nonaxisymmetric-physics (f-mnap-saddle-loops), together with the measured localised-tail width without which the even-n leakage bound stays vacuous at 1.0. When that plan delivers, the per-group residue fractions in the verdict section of the harmonic-maps record can be split into non-axisymmetric content versus systematics; until then the bound stands.</div>
+    <pre class="r-fu-prompt">/reckon-ship mast-nonaxisymmetric-physics</pre>
     </article>
 </section>
 

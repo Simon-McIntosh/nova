@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T13:30:12",
+  "updated": "2026-08-16T15:12:30",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -147,7 +147,7 @@
       },
       {
         "id": "S6",
-        "status": "active",
+        "status": "done",
         "theme": "Close the P4/P5 misfit source and promote the calibration machinery",
         "items": [
           {
@@ -251,7 +251,8 @@
             }
           }
         ],
-        "description": "Two arms. Source closure: recover the flux loops (per-loop gains; the 2-pi convention is measured), build toroidal-harmonic contour maps of the surviving misfit, and resolve the P4/P5 provenance candidates (the description's own 17.3 mm / 3% member asymmetry first). Infrastructure: promote the diagnostic-calibration ladder to a unit-tested machine-agnostic nova/calibrate package, give every correction a versioned pulse-range-scoped schema (LinkML candidate), harvest the vacuum windows every pulse carries (offsets, integrator drift, closure) across the whole archive, and solve coil positions and shapes from vacuum measurements by autodiff through the traced Green's kernels (geometry Jacobians verified exact 2026-08-07)."
+        "description": "Two arms. Source closure: recover the flux loops (per-loop gains; the 2-pi convention is measured), build toroidal-harmonic contour maps of the surviving misfit, and resolve the P4/P5 provenance candidates (the description's own 17.3 mm / 3% member asymmetry first). Infrastructure: promote the diagnostic-calibration ladder to a unit-tested machine-agnostic nova/calibrate package, give every correction a versioned pulse-range-scoped schema (LinkML candidate), harvest the vacuum windows every pulse carries (offsets, integrator drift, closure) across the whole archive, and solve coil positions and shapes from vacuum measurements by autodiff through the traced Green's kernels (geometry Jacobians verified exact 2026-08-07).",
+        "summary": "Closed 2026-08-16 at 8/8 plans shipped, 100 percent implementation, empty ready set, no wiring findings. Source-closure arm: no 2-pi flux convention exists and 18 loops entered as published, lifting current-space rank 10/13 to 13/13; static P4/P5 geometry excluded twice by independent functionals (bounded negative, no registry correction); the circuit-basis test then reframed the anomaly table - P2 collapses to one link-board freedom (outer central ratio 1.4772 left for the 12:8 ampere-turn adjudication), P3 and P6 stay real in every basis, and all 13 P4-lower survivor shots are lower-only member surveys whose candidates now include the survey supply's own cabling. Harmonic maps published as gridded solve targets; residue recorded as a lower bound pending the saddle loops owned by S3. Infrastructure arm: nova/calibrate complete at nine capabilities; corrections document at 160 records under set_version 1.1.0 with honest recorded-versus-promoted pins; registry cut over to 44 unique loop positions (join 39 to 43, physical digest b55c5bb005a2cb67) with the OCI republication retired as describing a channel that does not exist; the 17,111-pulse archive swept into a million banked instrument-term fits with the transition question closed on its measured structural bound; portability demonstrated on TCV 77549 with unchanged kernels. Feeds S7 (spine-efit-parity via the corrected read layer) and S8 (mast-catalog-gpu-solve). Machine-description packaging moves to imas-ambix S22 with nova S11 retiring the bespoke layer behind an equivalence gate."
       },
       {
         "id": "S7",
@@ -667,6 +668,11 @@
         "when": "2026-08-16",
         "who": "Simon McIntosh (via reckon-ship)",
         "what": "S7 progress recorded from the plan ledger: the sprint grew from 6 to 14 items through the forward-equilibrium decomposition and 8 are complete at 83.9 percent implementation. Landed by parallel sessions: spine-boundary-accelerator and efit-map-inversion shipped; spine-efit-parity at 99 percent on the corrected read layer; flux-function-forward-equilibrium at 100 percent awaiting closure; plasma-edge-current-representation at 91 percent with a source-moment node live; efit-flux-decomposition at 85 percent. The S6-to-S7 gate mast-corrected-read-layer shipped, so the critical path now runs efit-flux-decomposition to efit-forward-parity to mast-catalog-gpu-solve. Status corrected planned-to-active to match the ledger: more than half the sprint's work has executed."
+      },
+      {
+        "when": "2026-08-16",
+        "who": "Simon McIntosh (via reckon-ship)",
+        "what": "S6 closed: 8/8 shipped. Both sprint questions closed on measurement - the misfit source is current- or sensor-side with the P4-lower survivor reclassified as a separately-driven survey configuration, and the calibration machinery is a tested machine-agnostic package whose portability is demonstrated on TCV. Continuations: S7 and S8 fed directly; the saddle-loop residue split owned by S3; machine-description packaging owned by imas-ambix S22 and nova S11."
       }
     ],
     "blockers": [
@@ -699,6 +705,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 39
+    "_version": 40
   }
 }

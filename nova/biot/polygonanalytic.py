@@ -140,6 +140,8 @@ Sign and unit conventions, and the ``psi [Wb/A]`` normalisation, are those of
 
 from __future__ import annotations
 
+from functools import lru_cache
+
 import numpy as np
 
 from nova.biot.elliptic import (
@@ -162,6 +164,7 @@ from nova.biot.rangefunction import (
 
 __all__ = [
     "packed_analytic_greens",
+    "polygon_analytic_field_moments",
     "polygon_analytic_flux",
     "polygon_analytic_flux_moments",
     "polygon_analytic_greens",
@@ -457,6 +460,49 @@ class _Vertex:
         )
         base_flux = self.arsinh_terms()[0]
         return radial, vertical + target_z_minus_expansion_z * base_flux
+
+    def horizontal_flux_line_moments(
+        self, expansion_r: float, target_z_minus_expansion_z
+    ):
+        """Return flux line primitives on a horizontal source edge.
+
+        The three rows are antiderivatives in source radius of the filament-flux
+        integrand weighted by ``1``, ``R' - expansion_r`` and
+        ``Z' - expansion_z``.  They use only the corner's existing root moments
+        and first graded ``arsinh`` residual.
+        """
+        one = self.one
+        r = self.radius
+        a = self.span
+        outer = self.cosine
+        source_cosine = scaled(outer, r)
+
+        def constant(value):
+            return range_function([], value * one, value * one)
+
+        base = 4.0 * a * self.against_root(outer) + 4.0 * self.against_first_arsinh(
+            product(outer, source_cosine)
+        )
+        radial_root_weight = product(
+            outer,
+            total(
+                scaled(self.edge_radius, 0.5),
+                scaled(source_cosine, 2.0),
+                constant(-expansion_r),
+            ),
+        )
+        radial_arsinh_weight = product(
+            outer,
+            total(
+                product(source_cosine, total(source_cosine, constant(-expansion_r))),
+                scaled(self.ring_squared, -0.5),
+            ),
+        )
+        radial = 4.0 * a * self.against_root(
+            radial_root_weight
+        ) + 4.0 * self.against_first_arsinh(radial_arsinh_weight)
+        vertical = (self.level + target_z_minus_expansion_z) * base
+        return base, radial, vertical
 
 
 class _Edge:
@@ -768,6 +814,105 @@ class _Edge:
             - (4.0 * b1 / a02) * a * vertex.root_moments[0]
         )
         return flux, radial, vertical
+
+    def flux_line_moments(
+        self,
+        vertex: _Vertex,
+        expansion_r: float,
+        target_z_minus_expansion_z,
+    ):
+        """Return source-height primitives of three flux-weighted line rows.
+
+        With ``Y = r1 - R cos(phi)`` and ``Gamma = a0^2 u + b1 Y``, the
+        required elementary primitives are
+
+        ``J_0 = asinh(Gamma/B) / a0``,
+        ``J_1 = D/a0^2 - b1 Y asinh(Gamma/B)/a0^3``, and
+        ``J_2 = D (Gamma/2 - 2 b1 Y)/a0^4
+              + (b1^2 Y^2 - B^2/2) asinh(Gamma/B)/a0^5``.
+
+        Contracting ``r' J_0 + b1 J_1`` and its two coordinate-weighted
+        companions against ``cos(phi)`` leaves only the shared root moments and
+        second graded ``arsinh`` residual.
+        """
+        one = vertex.one
+        r = self.radius
+        b1 = self.slope
+        a = vertex.span
+        a0 = self.axial_slope
+        a02 = self.squared_slope
+        r1 = self.plane_radius_value
+        outer = vertex.cosine
+        plane_radius = self.plane_radius
+        plane_squared = self.plane_squared
+        gamma = range_function(
+            [], vertex.level + b1 * vertex.offset, vertex.level + b1 * vertex.radius_sum
+        )
+        plane = vertex.split(plane_squared)
+        plane_residual = self._second_residual(vertex)
+        plane_derivative = product(gamma, self.edge_slope)
+
+        def constant(value):
+            return range_function([], value * one, value * one)
+
+        def against_second_arsinh(weight):
+            series = across_the_range(weight)
+            primitive = _oscillatory_primitive(series)
+            core = sine_squared_times(primitive)
+            return (
+                series[0] * plane_residual
+                + (2.0 * b1 * r / (a0 * a)) * vertex.plain(core)
+                + (0.5 / (a0 * a))
+                * vertex.across(product(core, plane_derivative), plane)
+            )
+
+        j2_root = scaled(
+            total(scaled(gamma, 0.5), scaled(plane_radius, -2.0 * b1)),
+            1.0 / (a02 * a02),
+        )
+        j2_arsinh = scaled(
+            total(
+                scaled(product(plane_radius, plane_radius), b1 * b1),
+                scaled(plane_squared, -0.5),
+            ),
+            1.0 / a0**5,
+        )
+
+        base_root = constant(b1 / a02)
+        base_arsinh = total(constant(r1 / a0), scaled(plane_radius, -(b1 * b1) / a0**3))
+        radial_root = total(
+            constant(b1 * (2.0 * r1 - expansion_r) / a02),
+            scaled(j2_root, b1 * b1),
+        )
+        radial_arsinh = total(
+            constant((r1 - expansion_r) * r1 / a0),
+            scaled(
+                plane_radius,
+                -(b1 * b1) * (2.0 * r1 - expansion_r) / a0**3,
+            ),
+            scaled(j2_arsinh, b1 * b1),
+        )
+        vertical_root = total(
+            scaled(base_root, target_z_minus_expansion_z),
+            constant(r1 / a02),
+            scaled(j2_root, b1),
+        )
+        vertical_arsinh = total(
+            scaled(base_arsinh, target_z_minus_expansion_z),
+            scaled(plane_radius, -r1 * b1 / a0**3),
+            scaled(j2_arsinh, b1),
+        )
+
+        def full_turn(root_weight, arsinh_weight):
+            return 4.0 * a * vertex.against_root(
+                product(outer, root_weight)
+            ) + 4.0 * against_second_arsinh(product(outer, arsinh_weight))
+
+        return (
+            full_turn(base_root, base_arsinh),
+            full_turn(radial_root, radial_arsinh),
+            full_turn(vertical_root, vertical_arsinh),
+        )
 
     def flux_and_moment_terms(
         self,
@@ -1433,6 +1578,216 @@ def polygon_analytic_flux_moments(
         uniform.reshape(shape),
         (radial_central - displacement[0] * uniform).reshape(shape),
         (vertical_central - displacement[1] * uniform).reshape(shape),
+    )
+
+
+@lru_cache(maxsize=8)
+def _central_field_moments_direct(
+    target_r: tuple[float, ...],
+    target_z: tuple[float, ...],
+    vertices: tuple[tuple[float, float], ...],
+    nodes: int,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Build central field triplets from direct source-coordinate primitives.
+
+    For a filament flux ``q``, translation and length homogeneity give
+
+    ``2 pi R B_R = partial q / partial Z'`` and
+    ``2 pi R^2 B_Z = 3 q - div'[q (R', Z' - Z)]``.
+
+    Integrating those identities against a linear source weight moves every
+    derivative onto the polygon boundary.  Along an oriented slanted edge,
+    ``n_Z ds = -b1 du`` and
+    ``(R', Z' - Z) dot n ds = r1 du``; the dropped horizontal edges reduce to
+    the corner primitives accumulated by ``chain``.  The remaining area terms
+    are exactly the three central flux rows assembled in the same pass.
+    """
+    section = np.asarray(vertices, dtype=np.float64)
+    centre = _section_centroid(section)
+    edges, weights, norm = pack_section(section)
+    signed = np.asarray(target_r, dtype=np.float64)
+    r = np.abs(signed)
+    z = np.asarray(target_z, dtype=np.float64)
+    target_z_minus_centre = z - centre[1]
+    sides = len(edges)
+    live = weights != 0.0
+    chain = live.astype(np.int64) - np.roll(live, 1).astype(np.int64)
+
+    flux = np.zeros_like(r)
+    flux_radial = np.zeros_like(r)
+    flux_vertical = np.zeros_like(r)
+    field_radial = np.zeros_like(r)
+    field_vertical = np.zeros_like(r)
+    boundary_vertical = np.zeros((3, len(r)), dtype=np.float64)
+    boundary_radial = np.zeros((3, len(r)), dtype=np.float64)
+    flux_terms = [np.zeros_like(r) for _ in range(sides)]
+    vertical_terms = [np.zeros_like(r) for _ in range(sides)]
+
+    last_read: dict[int, int] = {}
+    for index in np.flatnonzero(live):
+        last_read[int(index)] = int(index)
+        last_read[int(index + 1) % sides] = int(index)
+    corners: dict[int, _Vertex] = {}
+
+    def corner_part(index: int, corner_r: float, corner_z: float) -> _Vertex:
+        if index not in corners:
+            corners[index] = _Vertex(
+                r, z, corner_r, corner_z, nodes, residual=bool(chain[index])
+            )
+        return corners[index]
+
+    for index in range(sides):
+        if not live[index]:
+            continue
+        ra, za, rb, zb = edges[index]
+        lower = corner_part(index, ra, za)
+        upper = corner_part((index + 1) % sides, rb, zb)
+        edge = _Edge(r, z, edges[index], nodes)
+
+        high_field = edge.terms(upper)
+        low_field = edge.terms(lower)
+        field_radial = field_radial - (high_field[1] - low_field[1])
+        field_vertical = field_vertical - (high_field[2] - low_field[2])
+
+        high_flux = edge.flux_and_moment_terms(upper, centre[0], target_z_minus_centre)
+        low_flux = edge.flux_and_moment_terms(lower, centre[0], target_z_minus_centre)
+        flux_terms[index] = low_flux[0] - high_flux[0]
+        vertical_terms[index] = low_flux[2] - high_flux[2]
+        flux = flux + flux_terms[index]
+        flux_radial = flux_radial + low_flux[1] - high_flux[1]
+        flux_vertical = flux_vertical + vertical_terms[index]
+
+        high_line = edge.flux_line_moments(upper, centre[0], target_z_minus_centre)
+        low_line = edge.flux_line_moments(lower, centre[0], target_z_minus_centre)
+        line = np.stack(high_line) - np.stack(low_line)
+        boundary_vertical = boundary_vertical - edge.slope * line
+        boundary_radial = boundary_radial + edge.plane_radius_value * line
+
+        for corner in dict.fromkeys((index, (index + 1) % sides)):
+            if last_read[corner] != index:
+                continue
+            if chain[corner]:
+                vertex = corners[corner]
+                one_flux, one_field_radial, one_field_vertical = vertex.arsinh_terms()
+                field_radial = field_radial + chain[corner] * one_field_radial
+                field_vertical = field_vertical + chain[corner] * one_field_vertical
+                one_radial, one_vertical = vertex.flux_moment_residuals(
+                    centre[0], target_z_minus_centre
+                )
+                flux = flux + chain[corner] * one_flux
+                flux_radial = flux_radial + chain[corner] * one_radial
+                flux_vertical = flux_vertical + chain[corner] * one_vertical
+                horizontal = np.stack(
+                    vertex.horizontal_flux_line_moments(
+                        centre[0], target_z_minus_centre
+                    )
+                )
+                boundary_vertical = boundary_vertical - chain[corner] * horizontal
+                boundary_radial = (
+                    boundary_radial - vertex.level * chain[corner] * horizontal
+                )
+            del corners[corner]
+
+    flux_vertical = _condition_vertical_contour_sum(
+        section,
+        centre[1],
+        z,
+        live,
+        flux_terms,
+        vertical_terms,
+        flux_vertical,
+    )
+    scale = 0.5 * norm * r
+    uniform_flux = scale * flux
+    radial_flux = scale * flux_radial
+    vertical_flux = scale * flux_vertical
+    sign = np.sign(signed)
+    uniform_radial = norm / (4.0 * np.pi) * sign * field_radial
+    uniform_vertical = norm / (4.0 * np.pi) * field_vertical
+
+    radial_moment = -norm / (4.0 * np.pi) * sign * boundary_vertical[1]
+    vertical_moment = (
+        sign * (-scale * boundary_vertical[2] - uniform_flux) / (2.0 * np.pi * r)
+    )
+    vertical_radial_moment = (
+        4.0 * radial_flux + centre[0] * uniform_flux + scale * boundary_radial[1]
+    ) / (2.0 * np.pi * r * r)
+    vertical_vertical_moment = (
+        4.0 * vertical_flux
+        - target_z_minus_centre * uniform_flux
+        + scale * boundary_radial[2]
+    ) / (2.0 * np.pi * r * r)
+
+    radial = np.column_stack((uniform_radial, radial_moment, vertical_moment))
+    vertical = np.column_stack(
+        (uniform_vertical, vertical_radial_moment, vertical_vertical_moment)
+    )
+    reflection = _horizontal_reflection(section)
+    if reflection is not None:
+        reflection_axis, _ = reflection
+        on_plane = z == reflection_axis
+        radial[on_plane, 0] = 0.0
+        radial[on_plane, 1] = 0.0
+        vertical[on_plane, 2] = (reflection_axis - centre[1]) * vertical[on_plane, 0]
+    radial.setflags(write=False)
+    vertical.setflags(write=False)
+    return radial, vertical
+
+
+def polygon_analytic_field_moments(
+    target_r: np.ndarray,
+    target_z: np.ndarray,
+    vertices: np.ndarray,
+    *,
+    expansion_point: np.ndarray | tuple[float, float] | None = None,
+    nodes: int = _NODES,
+) -> tuple[
+    tuple[np.ndarray, np.ndarray, np.ndarray],
+    tuple[np.ndarray, np.ndarray, np.ndarray],
+]:
+    """Return exact ``(G_0, G_R, G_Z)`` blocks for ``B_R`` and ``B_Z``.
+
+    Direct source-coordinate antiderivatives carry the two weighted field rows
+    through the same ninth-order Part V harmonic, pole and graded-residual channel
+    as the flux rows.  Central companions are cached once about the polygon area
+    centroid, then translated algebraically.
+    """
+    area_centroid = _section_centroid(vertices)
+    requested_centre = (
+        area_centroid
+        if expansion_point is None
+        else np.asarray(expansion_point, dtype=np.float64)
+    )
+    if requested_centre.shape != (2,) or not np.all(np.isfinite(requested_centre)):
+        raise ValueError("expansion_point must be a finite (R, Z) pair")
+
+    signed = np.asarray(target_r, dtype=np.float64)
+    height = np.asarray(target_z, dtype=np.float64)
+    shape = signed.shape
+    z = np.broadcast_to(height, shape).ravel()
+    signed_flat = signed.ravel()
+    if np.any(signed_flat == 0.0):
+        raise ValueError("field moment blocks require nonzero target radius")
+    radial_central, vertical_central = _central_field_moments_direct(
+        tuple(float(value) for value in signed_flat),
+        tuple(float(value) for value in z),
+        tuple(tuple(float(value) for value in vertex) for vertex in vertices),
+        nodes,
+    )
+
+    displacement = requested_centre - area_centroid
+    radial = (
+        radial_central[:, 0],
+        radial_central[:, 1] - displacement[0] * radial_central[:, 0],
+        radial_central[:, 2] - displacement[1] * radial_central[:, 0],
+    )
+    vertical = (
+        vertical_central[:, 0],
+        vertical_central[:, 1] - displacement[0] * vertical_central[:, 0],
+        vertical_central[:, 2] - displacement[1] * vertical_central[:, 0],
+    )
+    return tuple(row.reshape(shape) for row in radial), tuple(
+        row.reshape(shape) for row in vertical
     )
 
 

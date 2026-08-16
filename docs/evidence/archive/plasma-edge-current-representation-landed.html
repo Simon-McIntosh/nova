@@ -286,5 +286,54 @@
   made. Rigid offsets reported separately: axis 0.0100 m (coarse) / 0.0320 m (fine), X-point ≈0.0226 m
   (both).</p>
 
+  <h2 id="hexcell-moment-equivalence">§8 — rung 1: the single-cell equivalence holds at second order</h2>
+
+  <p>Commit <code>61f8ddb9</code>; gate passed; TDD (module red at collection, then 15/15). Artifacts:
+  <code>tests/test_hexcell_moment_equivalence.py</code>,
+  <code>benchmarks/hex_cell_moment_equivalence.py</code>, convergence figure and findings JSON under
+  <code>docs/figures/plasma-edge-current-representation/</code>.</p>
+
+  <figure>
+    <img src="/nova/figures/plasma-edge-current-representation/hex_cell_moment_equivalence_convergence.svg"
+         alt="Convergence of the finely meshed low-order route to the single-cell moment route for flux and both fields">
+    <figcaption>Six panels (near/far × ψ/B_R/B_Z): the boundary-fitted low-order submesh converging to
+    the nine-block moment route under refinement.</figcaption>
+  </figure>
+
+  <p><strong>The two routes are equivalent in the limit, without a solver anywhere in the loop.</strong>
+  One large hexagon through <code>polygon_analytic_flux_moments</code> and
+  <code>polygon_analytic_field_moments</code> (uniform and combined radial/vertical linear coefficients)
+  against the identical authored boundary handed to <code>PolyGrid</code> and meshed into 61/140/331/784
+  boundary-fitted low-order elements driven by the exact per-element integral of the same density: fitted
+  convergence orders 1.780–3.149 (uniform) and 1.953–2.288 (linear) across all twelve
+  case/region/quantity variants; finest relative L2 disagreements 2.82e-6–5.31e-5; total current between
+  routes at round-off (≤5.195e-15) on every refinement. All nine moment blocks exercised by a pinned
+  test.</p>
+
+  <h2 id="barrier-event-diff">§6 — the barrier's root cause, convicted to one cell</h2>
+
+  <p>Scratchpad-only measurement node; gate passed; diff report, Markdown summary and the two banked
+  states SHA-recorded in the run ledger. Both states independently reproduced (accepted t=0.375 at
+  6.48e-16; stall t=0.3875 at 3.9268343648851e-5, matching the banked figure to eleven digits); the
+  manual composed-map reconstruction is exact to 0.0 Wb.</p>
+
+  <p><strong>Exactly one discrete event separates the accepted root from the stall.</strong> Cell 516
+  (centroid R=7.9297 m, Z=1.9163 m) flips COMMON_SOL→CORE as its centroid ψ_N moves 1.000654→0.999892.
+  Zero crossing-set changes, zero shared-node label changes, zero topology-selector changes — the clip
+  and the topology read are clean. Because the fixture declares no SOL current, the label flip switches
+  the cell's entire interior-stencil current (−50.19 A, with radial/vertical couplings 140.77/58.61) from
+  exact zero to nonzero in one step. Controlled label substitution prices the event at 1.78e-3 Wb sup —
+  <strong>0.517 of the stall residual amplitude</strong> — the dominant discrete term, with continuous
+  state response supplying the remainder.</p>
+
+  <p><strong>The mechanism, named.</strong> The conservative clip removed the centroid rule's
+  discontinuity for LCFS-<em>crossing</em> cells — but a near-boundary cell whose polygon the discrete
+  separatrix polyline never enters still gains or loses its <em>whole</em> current through the
+  centroid-evaluated domain label. The surviving discontinuity class is the domain-participation rule
+  for non-crossing cells, not the clip and not the moment blocks. The repair direction (a separately
+  scoped node, after the ladder's toy pin): derive current-domain participation from the same node-flux
+  clip partition — full inside, zero outside, clipped fraction across — so participation is continuous
+  through the crossing set instead of switching on the centroid label.</p>
+
 </main></body>
 </html>

@@ -26,7 +26,7 @@
 <meta name="plan-commits" content="444d4d7d,acea51cb,bdd3120b,ca000f36,1a9bc9ff,7f89b853,6cafed36,070bddd2,02ddf888,dfe8ba70,fbc28097,020c4dc9,260ce85b,b774e696,42b6853b,5aa3056d,4d8e5cd6">
 <meta name="plan-artifacts" content="docs/evidence/archive/plasma-edge-current-representation-landed.html,nova/equilibrium/stencil_mesh.py,tests/test_equilibrium_stencil_mesh.py,nova/equilibrium/separatrix_clip.py,tests/test_equilibrium_separatrix_clip.py,nova/biot/polygonanalytic.py,tests/test_biotpolygonmoments.py,nova/biot/polysection.py,benchmarks/steep_edge_moment_demonstration.py,docs/figures/plasma-edge-current-representation/steep_edge_moment_findings.json,docs/figures/plasma-edge-current-representation/steep_edge_moment_convergence.svg">
 <meta name="plan-impl" content="0.92">
-<meta name="plan-version" content="18">
+<meta name="plan-version" content="19">
 </head>
 <body>
   <main class="plan-doc">
@@ -163,6 +163,34 @@
     the same three vectors, with no new coupling blocks. Trigger: a locked SOL current closure at the
     flux-function level (the physical specification belongs to the forward-equilibrium plan's SOL
     continuation, not here).</p>
+
+    <h2 id="s8">§8 — The equivalence ladder: small validated problems up to the barrier</h2>
+
+    <p><strong>Owner directive 2026-08-16.</strong> Step back from full equilibrium solves and validate
+    the representation through toy problems the solver cannot confound, building up to the mechanism
+    blocking the reference lane. Each rung is a unit test with a convergence claim, built with nova's own
+    tools.</p>
+
+    <ul>
+      <li><strong>Rung 1 — single-cell equivalence:</strong> one large hexagonal cell carrying first a
+      uniform then a linear current density through the nine moment blocks, against the same cell defined
+      as a plasma boundary and meshed by nova into many finer low-order elements. Flux and both field
+      components from the two routes must converge to each other under submesh refinement, at stated
+      orders, on near and far targets.</li>
+      <li><strong>Rung 2 — clipped-cell equivalence:</strong> the same cell cut by a straight then a
+      curved boundary; the clipped moment representation against the finely meshed clipped region,
+      including continuity as the boundary sweeps the cell.</li>
+      <li><strong>Rung 3 — the hand-off jump:</strong> a small patch with a moving boundary crossing a
+      cell-label transition; measure the numerical jump in the composed field where evaluation hands off
+      between the interior-stencil and clipped-support routes — the suspected barrier mechanism, measured
+      in isolation.</li>
+      <li><strong>Rung 4 — toy fixed point:</strong> the smallest free-boundary iteration exhibiting the
+      barrier, small enough that every discrete event is enumerable.</li>
+    </ul>
+
+    <p><em>Done-when, per rung:</em> a red-then-green unit test pinning the equivalence or the measured
+    jump, a fitted convergence order where the rung claims one, and the rung's numbers recorded in the
+    cumulative evidence before the next rung opens.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>

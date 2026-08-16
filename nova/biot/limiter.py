@@ -35,9 +35,9 @@ class Limiter(Plot, Array):
         from nova.biot.target import FluxTarget  # noqa: PLC0415
 
         return FluxTarget(
-            jnp.array(self.data["Psi"]),
-            jnp.array(self.data["Psi_"]),
-            self.null,
+            source_target=jnp.array(self.data["Psi"]),
+            plasma_target=jnp.array(self.data["Psi_"]),
+            null=self.null,
         )
 
     @property

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T19:34:49",
+  "updated": "2026-08-16T20:17:08",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -6120,9 +6120,113 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T173600308185-handoff-jump-pin",
+        "plan": "plasma-edge-current-representation",
+        "section": "\u00a78",
+        "node": "handoff-jump-pin",
+        "role": "implement",
+        "member": "equivalence-ladder",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T17:36:02Z",
+        "completed_at": "2026-08-16T17:44:28Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 506,
+        "time_budget": "25m",
+        "base_sha": "1acd68bb9734b2f797d0c8c4caafb3b65949693f",
+        "commits": [
+          "dae804f4"
+        ],
+        "changed_lines": {
+          "added": 654,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/handoff-jump-pin-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00b7e-1817-7740-93a6-aac064c671e7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 13727488,
+            "input_tokens": 14133895,
+            "output_tokens": 55871,
+            "reasoning_output_tokens": 16714
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260816T174530144515-clip-partition-participation",
+        "plan": "plasma-edge-current-representation",
+        "section": "\u00a76",
+        "node": "clip-partition-participation",
+        "role": "implement",
+        "member": "coupling-blocks",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T17:45:32Z",
+        "completed_at": "2026-08-16T18:16:11Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1839,
+        "time_budget": "25m",
+        "base_sha": "fe9b9ec9dd2f6b798f6aa973131f6cf0c997fa4a",
+        "commits": [
+          "8b2ace00"
+        ],
+        "changed_lines": {
+          "added": 191,
+          "removed": 46,
+          "files": 4
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/clip-partition-participation-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a009c8-8ac4-7a50-806e-c28169dbfc66",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 225936640,
+            "input_tokens": 229892759,
+            "output_tokens": 471921,
+            "reasoning_output_tokens": 152824
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 194
+    "_version": 196
   }
 }

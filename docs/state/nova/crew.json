@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T21:27:47",
+  "updated": "2026-08-16T22:25:46",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -6316,9 +6316,55 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T192904420172-kink-aware-route",
+        "plan": "moment-map-root-finding",
+        "section": "\u00a73",
+        "node": "kink-aware-route",
+        "role": "implement",
+        "member": "coupling-blocks",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T19:29:07Z",
+        "completed_at": "2026-08-16T20:25:12Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3365,
+        "time_budget": "25m",
+        "base_sha": "6410100db5add3f6c57e4417f5274f5af9ec3202",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 2,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/kink-aware-route-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a009c8-8ac4-7a50-806e-c28169dbfc66",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 280817920,
+            "input_tokens": 285620703,
+            "output_tokens": 586010,
+            "reasoning_output_tokens": 175738
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 198
+    "_version": 199
   }
 }

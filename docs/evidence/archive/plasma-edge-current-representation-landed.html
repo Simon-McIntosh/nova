@@ -310,5 +310,30 @@
   routes at round-off (≤5.195e-15) on every refinement. All nine moment blocks exercised by a pinned
   test.</p>
 
+  <h2 id="barrier-event-diff">§6 — the barrier's root cause, convicted to one cell</h2>
+
+  <p>Scratchpad-only measurement node; gate passed; diff report, Markdown summary and the two banked
+  states SHA-recorded in the run ledger. Both states independently reproduced (accepted t=0.375 at
+  6.48e-16; stall t=0.3875 at 3.9268343648851e-5, matching the banked figure to eleven digits); the
+  manual composed-map reconstruction is exact to 0.0 Wb.</p>
+
+  <p><strong>Exactly one discrete event separates the accepted root from the stall.</strong> Cell 516
+  (centroid R=7.9297 m, Z=1.9163 m) flips COMMON_SOL→CORE as its centroid ψ_N moves 1.000654→0.999892.
+  Zero crossing-set changes, zero shared-node label changes, zero topology-selector changes — the clip
+  and the topology read are clean. Because the fixture declares no SOL current, the label flip switches
+  the cell's entire interior-stencil current (−50.19 A, with radial/vertical couplings 140.77/58.61) from
+  exact zero to nonzero in one step. Controlled label substitution prices the event at 1.78e-3 Wb sup —
+  <strong>0.517 of the stall residual amplitude</strong> — the dominant discrete term, with continuous
+  state response supplying the remainder.</p>
+
+  <p><strong>The mechanism, named.</strong> The conservative clip removed the centroid rule's
+  discontinuity for LCFS-<em>crossing</em> cells — but a near-boundary cell whose polygon the discrete
+  separatrix polyline never enters still gains or loses its <em>whole</em> current through the
+  centroid-evaluated domain label. The surviving discontinuity class is the domain-participation rule
+  for non-crossing cells, not the clip and not the moment blocks. The repair direction (a separately
+  scoped node, after the ladder's toy pin): derive current-domain participation from the same node-flux
+  clip partition — full inside, zero outside, clipped fraction across — so participation is continuous
+  through the crossing set instead of switching on the centroid label.</p>
+
 </main></body>
 </html>

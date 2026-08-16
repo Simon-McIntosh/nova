@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T19:09:51",
+  "updated": "2026-08-16T19:23:25",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -6022,9 +6022,55 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T165305350326-barrier-event-diff",
+        "plan": "plasma-edge-current-representation",
+        "section": "\u00a76",
+        "node": "barrier-event-diff",
+        "role": "implement",
+        "member": "coupling-blocks",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T16:53:07Z",
+        "completed_at": "2026-08-16T17:23:07Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1800,
+        "time_budget": "25m",
+        "base_sha": "70ac31c195995fe28b8c0d479e3d4ad32ae28093",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/barrier-event-diff-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a009c8-8ac4-7a50-806e-c28169dbfc66",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 213544192,
+            "input_tokens": 217109035,
+            "output_tokens": 430496,
+            "reasoning_output_tokens": 140786
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 192
+    "_version": 193
   }
 }

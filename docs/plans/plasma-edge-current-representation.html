@@ -22,11 +22,11 @@
   <title>Plasma Edge Current Representation | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-15">
+<meta name="plan-modified" content="2026-08-16">
 <meta name="plan-commits" content="444d4d7d,acea51cb,bdd3120b,ca000f36,1a9bc9ff">
 <meta name="plan-artifacts" content="docs/evidence/archive/plasma-edge-current-representation-landed.html,nova/equilibrium/stencil_mesh.py,tests/test_equilibrium_stencil_mesh.py,nova/equilibrium/separatrix_clip.py,tests/test_equilibrium_separatrix_clip.py,nova/biot/polygonanalytic.py,tests/test_biotpolygonmoments.py">
 <meta name="plan-impl" content="0.57">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 </head>
 <body>
   <main class="plan-doc">
@@ -250,6 +250,12 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260815-fluxmoments" data-who="reckon-ship" data-when="2026-08-15T22:10:00+00:00">
     <div class="r-comment-body">flux-moment-blocks landed - commits bdd3120b + ca000f36, merged on main; gate PASSED; worker 2339 s across two honest budget stops; TDD red observed before implementation. THE WEIGHTED PART V ANTIDERIVATIVES NOW EXIST EXPLICITLY - they were in no plan or feasibility artifact, and the node's first stop was its refusal to deliver a passing Gauss-quadrature prototype as the exact shared-stack implementation. polygon_analytic_flux_moments returns exact fixed-polygon G0/GR/GZ for the flux kernel through closed H_Z/H_R edge antiderivatives, one more harmonic on the shared channel, and coordinate-weighted companions of both surviving graded arsinh residuals. Verified at three independent levels: primitive derivatives vs central difference 6.3e-12 to 7.9e-11; endpoint values vs 1600-node direct quadrature worst 1.3e-12; blocks vs Richardson-extrapolated midpoint subdivision G0 4.19e-12 / GR 7.69e-10 / GZ 3.89e-09 near and far, below the 3e-8 gate. THE EXACT IDENTITIES ARE ALGEBRAIC, NOT NUMERICAL: the second stop measured 3.1e-17 lost to endpoint cancellation, and the fix builds central moments once and translates after the contour sum - translation residual GR 6.88e-22, GZ exactly 0.0 (gate 3e-21); hexagon GZ symmetry 1.11e-22 via geometric odd-parity pairing, never value thresholding; zero coefficients reproduce the uniform kernel BIT-FOR-BIT. Remaining in this section: the B_R/B_Z companions, next node on the same member. Record at /nova/evidence/archive/plasma-edge-current-representation-landed#flux-moment-blocks</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260816-adroute" data-who="reckon-ship" data-when="2026-08-16T08:37:00+00:00">
+    <div class="r-comment-body">field-moment-blocks interim, recorded so the route change is visible: reduction and translation are formally green and the near/far pin reached its pass marker, but the exact forward-AD evaluator cannot serve production - the one-target discriminator excluded geometric regime and target accumulation (all three radii die independently, EXIT 137 on the login node), and the identical parity pytest on a 32 GiB all_debug node timed out at 20m23s with MaxRSS 12,235,772 KiB (SLURM 1249084). The node continues on its own leaning, now owner-supported: derive the direct coordinate-weighted field edge antiderivatives through the shared ninth-order harmonic, pole and graded-residual channel - the same derivation discipline the flux kernel landed with. The four named field tests stand unchanged; only the evaluator behind them is replaced.</div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-20260816-ownerdirection" data-who="reckon-ship" data-when="2026-08-16T08:36:00+00:00">
+    <div class="r-comment-body">OWNER DIRECTION 2026-08-16 sharpens this section's scope: the linear poly elements REPLACE the piecewise-constant plasma elements throughout the solve path - the wiring is a substitution of the production representation, not an optional side entry - and the demonstration validates fully on exact analytic solutions (Solov'ev class) BEFORE any EFIT-facing work moves. The s6 gate is therefore the programme's analytic-validation gate: efit-flux-decomposition s3-s4 and the efit-forward-parity entry both wait behind it. Coil and conductor operators remain untouched per the locked field-target-scope decision.</div>
 </div>
 </section>
 </main>

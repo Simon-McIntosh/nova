@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T01:09:02",
+  "updated": "2026-08-16T10:31:08",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -38,6 +38,13 @@
         "role": "implement",
         "session_id": "019ff707-955a-7070-9a90-e2284e6049db",
         "created": "2026-08-12"
+      },
+      {
+        "id": "dataset-census",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "created": "2026-08-16"
       },
       {
         "id": "dina-currents",
@@ -4920,6 +4927,6 @@
       }
     ],
     "holds": [],
-    "_version": 157
+    "_version": 158
   }
 }

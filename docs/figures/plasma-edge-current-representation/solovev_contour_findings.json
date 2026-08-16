@@ -1,0 +1,570 @@
+{
+  "artifacts": {
+    "figure": "docs/figures/plasma-edge-current-representation/solovev_contour_overlay.svg",
+    "findings": "docs/figures/plasma-edge-current-representation/solovev_contour_findings.json"
+  },
+  "metric": {
+    "angle_count": 720,
+    "definition": "abs(r_state(theta) - r_analytic(theta)) at matched psi_norm and 720 common poloidal angles; each radius is measured about that state's banked axis",
+    "interpolation": "piecewise linear over banked state nodes; no equilibrium or source physics evaluated",
+    "name": "absolute radial contour-shape distance",
+    "radial_sample_count": 1025,
+    "units": "m"
+  },
+  "pure_consumer": true,
+  "schema": "nova.solovev-contour-comparison.v1",
+  "state_bank": {
+    "levels": [
+      0.0,
+      0.05,
+      0.1,
+      0.15000000000000002,
+      0.2,
+      0.25,
+      0.30000000000000004,
+      0.35000000000000003,
+      0.4,
+      0.45,
+      0.5,
+      0.55,
+      0.6000000000000001,
+      0.65,
+      0.7000000000000001,
+      0.75,
+      0.8,
+      0.8500000000000001,
+      0.9,
+      0.9500000000000001,
+      1.0
+    ],
+    "manifest": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/flux-state-bank/state-bank-manifest.json",
+    "normalized_contour_level_count": 21,
+    "reference_fixture": {
+      "pulse": 135011,
+      "run": 7,
+      "source": "tests/test_equilibrium_forward_reference.py",
+      "time_s": 338.9275978120551
+    },
+    "schema": "nova.flux-state-bank.v1"
+  },
+  "states": {
+    "analytic_solovev": {
+      "axis": [
+        6.369716484198529,
+        0.5319802000450808
+      ],
+      "contours": [
+        {
+          "maximum_absolute_radial_distance_m": 0.0,
+          "mean_absolute_radial_distance_m": 0.0,
+          "psi_norm": 0.0,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.0,
+          "mean_absolute_radial_distance_m": 0.0,
+          "psi_norm": 0.05,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.0,
+          "mean_absolute_radial_distance_m": 0.0,
+          "psi_norm": 0.1,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.0,
+          "mean_absolute_radial_distance_m": 0.0,
+          "psi_norm": 0.15000000000000002,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.0,
+          "mean_absolute_radial_distance_m": 0.0,
+          "psi_norm": 0.2,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.0,
+          "mean_absolute_radial_distance_m": 0.0,
+          "psi_norm": 0.25,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.0,
+          "mean_absolute_radial_distance_m": 0.0,
+          "psi_norm": 0.30000000000000004,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.0,
+          "mean_absolute_radial_distance_m": 0.0,
+          "psi_norm": 0.35000000000000003,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.0,
+          "mean_absolute_radial_distance_m": 0.0,
+          "psi_norm": 0.4,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.0,
+          "mean_absolute_radial_distance_m": 0.0,
+          "psi_norm": 0.45,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.0,
+          "mean_absolute_radial_distance_m": 0.0,
+          "psi_norm": 0.5,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.0,
+          "mean_absolute_radial_distance_m": 0.0,
+          "psi_norm": 0.55,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.0,
+          "mean_absolute_radial_distance_m": 0.0,
+          "psi_norm": 0.6000000000000001,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.0,
+          "mean_absolute_radial_distance_m": 0.0,
+          "psi_norm": 0.65,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.0,
+          "mean_absolute_radial_distance_m": 0.0,
+          "psi_norm": 0.7000000000000001,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.0,
+          "mean_absolute_radial_distance_m": 0.0,
+          "psi_norm": 0.75,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.0,
+          "mean_absolute_radial_distance_m": 0.0,
+          "psi_norm": 0.8,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.0,
+          "mean_absolute_radial_distance_m": 0.0,
+          "psi_norm": 0.8500000000000001,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.0,
+          "mean_absolute_radial_distance_m": 0.0,
+          "psi_norm": 0.9,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.0,
+          "mean_absolute_radial_distance_m": 0.0,
+          "psi_norm": 0.9500000000000001,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.0,
+          "mean_absolute_radial_distance_m": 0.0,
+          "psi_norm": 1.0,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        }
+      ],
+      "grid": "fine bank",
+      "label": "analytic Solov'ev reference",
+      "plasma_node_count": 1069,
+      "x_point": [
+        5.110385318980776,
+        -3.4125499207818475
+      ]
+    },
+    "coarse_legacy": {
+      "axis": [
+        6.360177434482966,
+        0.5351073660067175
+      ],
+      "axis_offset_m": 0.010038557487387929,
+      "checkpoint": "coarse_legacy_t0000.npz",
+      "contours": [
+        {
+          "maximum_absolute_radial_distance_m": 0.0,
+          "mean_absolute_radial_distance_m": 0.0,
+          "psi_norm": 0.0,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.006141689797235839,
+          "mean_absolute_radial_distance_m": 0.0019211740583337418,
+          "psi_norm": 0.05,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.007013903599427884,
+          "mean_absolute_radial_distance_m": 0.0025681667588115316,
+          "psi_norm": 0.1,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.00901608351417904,
+          "mean_absolute_radial_distance_m": 0.0028078700297462862,
+          "psi_norm": 0.15000000000000002,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.009176913423407651,
+          "mean_absolute_radial_distance_m": 0.003347915868749995,
+          "psi_norm": 0.2,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.010856433959740341,
+          "mean_absolute_radial_distance_m": 0.003959186692034107,
+          "psi_norm": 0.25,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.011114214764524455,
+          "mean_absolute_radial_distance_m": 0.004582841035403045,
+          "psi_norm": 0.30000000000000004,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.012763850293384005,
+          "mean_absolute_radial_distance_m": 0.00539934664557614,
+          "psi_norm": 0.35000000000000003,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.013721903597645468,
+          "mean_absolute_radial_distance_m": 0.006066529890729933,
+          "psi_norm": 0.4,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.015031383317266611,
+          "mean_absolute_radial_distance_m": 0.006704091678001991,
+          "psi_norm": 0.45,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.01616010996526307,
+          "mean_absolute_radial_distance_m": 0.007325265867773033,
+          "psi_norm": 0.5,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.017814137987834044,
+          "mean_absolute_radial_distance_m": 0.007704183081255706,
+          "psi_norm": 0.55,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.01908350057589958,
+          "mean_absolute_radial_distance_m": 0.008250412473573953,
+          "psi_norm": 0.6000000000000001,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.0207072752434323,
+          "mean_absolute_radial_distance_m": 0.008668323237513877,
+          "psi_norm": 0.65,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.02268656358497978,
+          "mean_absolute_radial_distance_m": 0.009152469611496603,
+          "psi_norm": 0.7000000000000001,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.024658584456956678,
+          "mean_absolute_radial_distance_m": 0.009657473519597991,
+          "psi_norm": 0.75,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.028009020774081073,
+          "mean_absolute_radial_distance_m": 0.010226530739927344,
+          "psi_norm": 0.8,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.03265292962206301,
+          "mean_absolute_radial_distance_m": 0.01078855432512477,
+          "psi_norm": 0.8500000000000001,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.03991235349686262,
+          "mean_absolute_radial_distance_m": 0.011554748516404091,
+          "psi_norm": 0.9,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.056129931763842844,
+          "mean_absolute_radial_distance_m": 0.01300564391100712,
+          "psi_norm": 0.9500000000000001,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.21524935734196315,
+          "mean_absolute_radial_distance_m": 0.01694693537960006,
+          "psi_norm": 1.0,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        }
+      ],
+      "homotopy_fraction": 0.0,
+      "label": "coarse legacy forward solve",
+      "maximum_across_all_levels_m": 0.21524935734196315,
+      "mean_across_nonzero_levels_m": 0.007531883166033067,
+      "plasma_node_count": 566,
+      "reference_axis": [
+        6.369716484198529,
+        0.5319802000450808
+      ],
+      "reference_x_point": [
+        5.110385318980776,
+        -3.4125499207818475
+      ],
+      "residual": 6.56114941374349e-16,
+      "sha256": "c91b87ba5ddd2c7d26993c51c3477ebe6ac1299b450de7f92a13f296a334aa71",
+      "wall_target_count": 165,
+      "x_point": [
+        5.100899964859583,
+        -3.4330691000016387
+      ],
+      "x_point_offset_m": 0.02260550062835006
+    },
+    "fine_moment_blend": {
+      "axis": [
+        6.33774318822071,
+        0.531208467400416
+      ],
+      "axis_offset_m": 0.031982608195080885,
+      "checkpoint": "fine_homotopy_t5875.npz",
+      "contours": [
+        {
+          "maximum_absolute_radial_distance_m": 0.0,
+          "mean_absolute_radial_distance_m": 0.0,
+          "psi_norm": 0.0,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.01087930031609019,
+          "mean_absolute_radial_distance_m": 0.003925391214047221,
+          "psi_norm": 0.05,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.010138307665915391,
+          "mean_absolute_radial_distance_m": 0.004714177820591385,
+          "psi_norm": 0.1,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.009557413409904347,
+          "mean_absolute_radial_distance_m": 0.005436196033976776,
+          "psi_norm": 0.15000000000000002,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.010533123971846026,
+          "mean_absolute_radial_distance_m": 0.00618717437806345,
+          "psi_norm": 0.2,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.010598912152580242,
+          "mean_absolute_radial_distance_m": 0.0069325082802192545,
+          "psi_norm": 0.25,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.010903452218884224,
+          "mean_absolute_radial_distance_m": 0.007311816966450458,
+          "psi_norm": 0.30000000000000004,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.010519529495190527,
+          "mean_absolute_radial_distance_m": 0.007730763875997526,
+          "psi_norm": 0.35000000000000003,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.010770093026748917,
+          "mean_absolute_radial_distance_m": 0.0081412163480389,
+          "psi_norm": 0.4,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.011181545136695892,
+          "mean_absolute_radial_distance_m": 0.00862759439764055,
+          "psi_norm": 0.45,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.012097087413540208,
+          "mean_absolute_radial_distance_m": 0.009185950205810004,
+          "psi_norm": 0.5,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.012733873871266566,
+          "mean_absolute_radial_distance_m": 0.00966825631507733,
+          "psi_norm": 0.55,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.012937426800074148,
+          "mean_absolute_radial_distance_m": 0.010182492320041132,
+          "psi_norm": 0.6000000000000001,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.013738530561838047,
+          "mean_absolute_radial_distance_m": 0.010665043989056218,
+          "psi_norm": 0.65,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.014219326067986815,
+          "mean_absolute_radial_distance_m": 0.011108176141186582,
+          "psi_norm": 0.7000000000000001,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.015112251267156207,
+          "mean_absolute_radial_distance_m": 0.011565698952452028,
+          "psi_norm": 0.75,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.015911541781296723,
+          "mean_absolute_radial_distance_m": 0.011966013171871522,
+          "psi_norm": 0.8,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.01671313061227986,
+          "mean_absolute_radial_distance_m": 0.012379774614793058,
+          "psi_norm": 0.8500000000000001,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.017577337341703192,
+          "mean_absolute_radial_distance_m": 0.012580334864851364,
+          "psi_norm": 0.9,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.018617028680962378,
+          "mean_absolute_radial_distance_m": 0.012954804059026416,
+          "psi_norm": 0.9500000000000001,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        },
+        {
+          "maximum_absolute_radial_distance_m": 0.1628611396507842,
+          "mean_absolute_radial_distance_m": 0.014910928955737332,
+          "psi_norm": 1.0,
+          "requested_ray_count": 720,
+          "valid_ray_count": 720
+        }
+      ],
+      "homotopy_fraction": 0.5875,
+      "label": "fine last accepted moment-blend root",
+      "maximum_across_all_levels_m": 0.1628611396507842,
+      "mean_across_nonzero_levels_m": 0.009308715645246424,
+      "plasma_node_count": 1069,
+      "reference_axis": [
+        6.369716484198529,
+        0.5319802000450808
+      ],
+      "reference_x_point": [
+        5.110385318980776,
+        -3.4125499207818475
+      ],
+      "residual": 1.2492297151242747e-12,
+      "sha256": "413c2a818d40c1056a9b78c1e28e9875ab491f87acb74e6a9c4372597773bbd6",
+      "wall_target_count": 330,
+      "x_point": [
+        5.094546511714981,
+        -3.39623523655848
+      ],
+      "x_point_offset_m": 0.02273844183120749
+    }
+  }
+}

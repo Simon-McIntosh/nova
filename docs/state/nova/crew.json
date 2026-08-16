@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T10:52:13",
+  "updated": "2026-08-16T10:54:17",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -5022,9 +5022,61 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260815T231027310429-remask-mechanism",
+        "plan": "efit-flux-decomposition",
+        "section": "\u00a72",
+        "node": "remask-mechanism",
+        "role": "implement",
+        "member": "edge-clip",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-15T23:10:29Z",
+        "completed_at": "2026-08-15T23:19:04Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 515,
+        "time_budget": "25m",
+        "base_sha": "3f5cab6322ec666ff4e4e9865e7dd3a66120b2eb",
+        "commits": [
+          "d82587cd"
+        ],
+        "changed_lines": {
+          "added": 116,
+          "removed": 6,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/remask-mechanism-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00738-f48f-7150-97d1-17307a705e4b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 55992832,
+            "input_tokens": 57380439,
+            "output_tokens": 163244,
+            "reasoning_output_tokens": 53965
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 161
+    "_version": 162
   }
 }

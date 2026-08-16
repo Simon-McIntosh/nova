@@ -20,10 +20,10 @@
   <title>Vacuum Signature Extraction | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-13">
-<meta name="plan-version" content="5">
-<meta name="plan-impl" content="0.8">
-<meta name="plan-commits" content="e59d976a,e75101ce,5ed0da48">
+<meta name="plan-modified" content="2026-08-16">
+<meta name="plan-version" content="6">
+<meta name="plan-impl" content="0.9">
+<meta name="plan-commits" content="e59d976a,e75101ce,5ed0da48,6f0b11ed">
 <meta name="plan-artifacts" content="nova/calibrate/windows.py,nova/calibrate/instrument.py,nova/calibrate/gain_check.py,nova/calibrate/sweep.py,~/.cache/nova-mast/vacuum-signatures/archive/signature_store.json,~/.cache/nova-mast/vacuum-signatures/archive/signature_series.npz,~/.cache/nova-mast/vacuum-signatures/archive/transition_catalogue.json,~/.cache/nova-mast/vacuum-signatures/archive/recorded_corrections.yaml,docs/research/mast-vacuum-signatures.html">
 </head>
 <body>
@@ -163,10 +163,11 @@ Done-when
   3. Corrections emitted in schema form; findings in a research note
   4. Followup written into plan + this one resolved</pre>
     </article>
-<article class="r-fu" data-id="f-vse-003" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship vacuum-signature-extraction §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-vse-003" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship vacuum-signature-extraction §2" data-resolved-at="2026-08-16T12:51:23+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Find a discriminating transition observable, then re-derive the catalogue — or record that pulse precision is unobtainable</h4>
     <div class="r-fu-body">The sweep is banked at full archive scale and the transition catalogue is on HOLD because the scalar gain series confounds three causes: an acquisition-state step, a drive or pair-state change, and a response-model change all move it. 0 of 37 established switches reach adjacent-pulse precision and 1,445 apparent blocks appear where 37 are expected. The work is to find an observable that separates those causes — candidates include the pair-state classifier's own state sequence, which is already built and is blind to acquisition scale, and the ratio between simultaneously-driven channels, which cancels a common response-model error — then re-derive the catalogue against the 37 known switches as the falsification set. An honest outcome here may be that adjacent-pulse precision is not obtainable from vacuum windows at all, in which case that bound is the deliverable and the section closes on it. Do not promote a boundary from the confounded series to make the catalogue look complete.</div>
     <pre class="r-fu-prompt">/reckon-ship vacuum-signature-extraction §2</pre>
+    <p class="r-fu-outcome">Closed on the honest branch the followup named: the bound IS the deliverable. The best discriminating observable available — response normalisation over simultaneously-driven channels — removes 30.1 percent of apparent transitions yet 0 of 37 established switches reach adjacent-pulse precision, and the synthetic lane proves a channel-local response multiplier is scalar-identical to an acquisition multiplier absent an external state label. Adjacent-pulse precision is unobtainable from banked vacuum-window scalar observables; commit 6f0b11ed rebanks the catalogue with the bound and the research record carries the measured confusion per cause. No boundary was promoted from the confounded series.</p>
     </article>
 </section>
 
@@ -176,6 +177,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260813-vse-024" data-who="reckon-ship" data-when="2026-08-13T08:05:00+00:00">
     <div class="r-comment-body">§2.4 archive sweep landed — commit 5ed0da48; gate FAILED, and recorded as such rather than relaxed. THE SWEEP ITSELF SUCCEEDED at full scale: all 17,111 pulse directories (11,695–30,473) covered in 35 deterministic chunks with every requested identity visited once and zero partial files; SLURM jobs 1245008 and 1245013 completed 35/35 tasks at exit 0, maximum kernel duration 1,578.8 s and maximum elapsed 26:45 against the 59-minute debug wall. 15,139 pulses measured, 1,972 explicit refusals. Banked: 1,092,847 offset and drift fits, 33,351 far-field gain fits, and 1,676 schema-valid recorded-only correction records. THE TRANSITION CLAIM IS REFUTED: exact adjacent-pulse precision was reached on 0 of 37 established switches, only 5 of 37 are even ordered, and obv03 has no single ordered boundary — changed-state evidence appears at pulse 19,337 while old-state evidence persists through 19,857. A raw scalar gain series finds 1,445 apparent blocks, which is far too many to promote any boundary safely. MECHANISM: the present observable cannot separate an acquisition-state change from a drive or pair-state change or from a response-model change, so apparent blocks are a mixture. The node was right to refuse; the fault is in the section's own premise, which assumed pulse-number precision was obtainable from this series rather than treating it as the thing to measure. The research record carries an explicit HOLD.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260816-vse-025" data-who="reckon-ship" data-when="2026-08-16T13:20:00+00:00">
+    <div class="r-comment-body">Transition observable landed — commit 6f0b11ed; gate passed; 263 calibrate tests, 0 failed. The HOLD resolves to a measured identifiability bound rather than a promoted boundary. Response normalisation — robust log-gain over at least 3 simultaneously-driven channels, retaining 27,438 of 33,351 gains across 3,462 pulses — removes 390 of 1,296 same-cohort apparent transitions (30.1 percent), leaving 869 excess over the 37 established switches, and STILL 0 of 37 reach adjacent-pulse precision (28 interleaved or unclassified, 6 ordered non-adjacent, 2 without an adjacent pair, 1 without ratios). The mechanism is proven, not just observed: the store-free synthetic tests recover an isolated injected acquisition step exactly AND show a channel-local pickup-response multiplier is scalar-identical to a channel-local acquisition multiplier without an external state label — so no scalar vacuum-window observable can separate the causes, and the bank carries zero independent response-state or per-shot configuration labels to break the tie (the stable one-link P2 result is cohort-level, not per-shot). VERDICT: adjacent-pulse precision is quantitatively unobtainable from banked vacuum-window scalar observables; the catalogue is rebanked carrying that bound; obv03 stays interleaved (19,337 changed-state against old-state through 19,857). The only route past the bound is an external authoritative shot-resolved state source, recorded as a deferred follow-on.</div>
 </div>
 </section>
 </main>

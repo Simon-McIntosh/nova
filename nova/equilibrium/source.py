@@ -55,6 +55,7 @@ from nova.equilibrium.convention import (
 )
 from nova.equilibrium.domain import DomainMasks, PlasmaDomain
 from nova.equilibrium.observation import gradient_tail
+from nova.equilibrium.stencil_mesh import CellCurrentMoments
 
 __all__ = [
     "ContinuationForm",
@@ -563,3 +564,50 @@ class ForwardSource:
         outside the declared support carries exactly zero.
         """
         return self.current_density(radius, masks) * area
+
+    def current_moments(
+        self,
+        radius,
+        masks: DomainMasks,
+        shared_radius,
+        shared_masks: DomainMasks,
+        interior_moments,
+        density_gradient,
+        core_support,
+        common_support,
+    ) -> CellCurrentMoments:
+        """Return the linear current moments selected by the moving boundary.
+
+        Complete cells use the fixed interior contraction. Cells crossed by
+        the last closed surface replace that result with the exact moments of
+        the locally linear core density; a declared common-SOL continuation
+        contributes the complementary clipped support.
+        """
+        centroid_density = self.current_density(radius, masks)
+        shared_density = self.current_density(shared_radius, shared_masks)
+        interior = interior_moments(centroid_density, shared_density)
+
+        core_density = self.core.current_density(
+            radius, jnp.clip(masks.psi_norm, 0.0, 1.0)
+        )
+        core_current, core_first = core_support.linear_current_moments(
+            core_density, density_gradient(core_density)
+        )
+        boundary_current = core_current
+        boundary_first = core_first
+        if self.common_sol is not None:
+            common_density = self.common_sol.current_density(
+                radius, jnp.maximum(masks.psi_norm, 1.0)
+            )
+            common_current, common_first = common_support.linear_current_moments(
+                common_density, density_gradient(common_density)
+            )
+            boundary_current = boundary_current + common_current
+            boundary_first = boundary_first + common_first
+
+        boundary = core_support.boundary
+        return CellCurrentMoments(
+            jnp.where(boundary, boundary_current, interior.cell_current),
+            jnp.where(boundary, boundary_first[:, 0], interior.radial_moment),
+            jnp.where(boundary, boundary_first[:, 1], interior.vertical_moment),
+        )

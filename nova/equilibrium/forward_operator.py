@@ -31,11 +31,17 @@ from dataclasses import dataclass, field
 
 import jax
 import jax.numpy as jnp
+import numpy as np
 
 from nova.biot.target import FluxTarget
-from nova.equilibrium.domain import DomainMasks
+from nova.equilibrium.domain import DomainMasks, PlasmaDomain
 from nova.equilibrium.source import ForwardSource
-from nova.equilibrium.stencil_mesh import MomentGeometry
+from nova.equilibrium.stencil_mesh import (
+    CellCurrentMoments,
+    InteriorCurrentMomentStencil,
+    MomentGeometry,
+    StencilMesh,
+)
 from nova.equilibrium.topology import Topology, TopologyState
 
 __all__ = ["ForwardFluxOperator"]
@@ -53,6 +59,7 @@ class ForwardFluxOperator:
     polarity: int = 1
     inside_material: jnp.ndarray | None = field(repr=False, default=None)
     moment_geometry: MomentGeometry | None = field(repr=False, default=None)
+    use_linear_moments: bool = field(repr=False, default=True)
 
     def __post_init__(self):
         """Build the topology read and default the material mask."""
@@ -72,6 +79,53 @@ class ForwardFluxOperator:
             and len(self.moment_geometry.polygons) != self.grid.node_number
         ):
             raise ValueError("moment geometry must carry one polygon per grid node")
+        if self.moment_geometry is not None:
+            self._build_moment_stencils()
+
+    def _build_moment_stencils(self) -> None:
+        """Build fixed full-cell contractions from the carried mesh geometry."""
+        coordinate = np.asarray(self.grid.coordinate, dtype=np.float64)
+        ring = np.asarray(self.grid.null.stencil, dtype=np.intp)
+        area = np.asarray(self.area, dtype=np.float64)
+        atomic = self.moment_geometry.atomic_mesh
+        node = np.asarray(atomic.node_coordinates)
+        polygon_size = np.asarray(
+            [len(polygon) for polygon in self.moment_geometry.polygons]
+        )
+        stencils = []
+        for vertex_count in (4, 6):
+            selected = polygon_size[ring[:, 0]] == vertex_count
+            if not np.any(selected):
+                continue
+            mesh = StencilMesh(coordinate, ring[selected], area)
+            cell_node = np.zeros((len(coordinate), vertex_count), dtype=np.intp)
+            for centre in mesh.centre:
+                vertices = self.moment_geometry.polygons[int(centre)]
+                distance = np.sum(
+                    (vertices[:, np.newaxis, :] - node[np.newaxis, :, :]) ** 2,
+                    axis=2,
+                )
+                nearest = np.argmin(distance, axis=1)
+                if np.any(
+                    np.sqrt(distance[np.arange(vertex_count), nearest])
+                    > atomic.tolerance
+                ):
+                    raise ValueError("moment polygon vertex is absent from atomic mesh")
+                cell_node[int(centre)] = nearest
+            stencil = mesh.current_moment_stencil(
+                cell_node, self.moment_geometry.second_moment[:, :2]
+            )
+            stencils.append(
+                InteriorCurrentMomentStencil(
+                    gather_index=stencil.gather_index,
+                    contraction_weight=stencil.contraction_weight,
+                    centre=stencil.centre,
+                    cell_count=stencil.cell_count,
+                    shared_node_count=len(node),
+                )
+            )
+        self._moment_mesh = StencilMesh(coordinate, ring, area)
+        self._interior_moment_stencils = tuple(stencils)
 
     @property
     def node_number(self) -> int:
@@ -103,15 +157,118 @@ class ForwardFluxOperator:
         grid_flux, _wall_flux = self.topology.split_flux_map(psi)
         return self.moment_geometry.shared_node_flux(grid_flux)
 
+    def current_density_gradient(self, density) -> jax.Array:
+        """Return fitted radial and vertical derivatives of a cell field."""
+        if self.moment_geometry is None:
+            raise ValueError("moment geometry is required for current gradients")
+        radial, vertical = self._moment_mesh.gradient(density)
+        return jnp.stack([radial, vertical], axis=1)
+
+    def interior_current_moments(
+        self, centroid_density, shared_density
+    ) -> CellCurrentMoments:
+        """Apply every fixed interior moment contraction and combine its rows."""
+        if self.moment_geometry is None:
+            raise ValueError("moment geometry is required for current moments")
+        vectors = jnp.zeros(
+            (3, self.grid.node_number), dtype=jnp.asarray(centroid_density).dtype
+        )
+        for stencil in self._interior_moment_stencils:
+            vectors = vectors + jnp.stack(stencil(centroid_density, shared_density))
+        return CellCurrentMoments(*vectors)
+
+    def coupling_current_moments(
+        self, moments: CellCurrentMoments
+    ) -> CellCurrentMoments:
+        """Convert physical first moments to the fixed linear-basis vectors."""
+        second = jnp.asarray(
+            self.moment_geometry.second_moment, dtype=moments.cell_current.dtype
+        )
+        radial_second = second[:, 0]
+        vertical_second = second[:, 1]
+        cross_second = second[:, 2]
+        determinant = radial_second * vertical_second - cross_second**2
+        radial = (
+            vertical_second * moments.radial_moment
+            - cross_second * moments.vertical_moment
+        ) / determinant
+        vertical = (
+            radial_second * moments.vertical_moment
+            - cross_second * moments.radial_moment
+        ) / determinant
+        return CellCurrentMoments(moments.cell_current, radial, vertical)
+
+    def shared_domain_masks(
+        self, masks: DomainMasks, topology: TopologyState, shared_flux
+    ) -> DomainMasks:
+        """Interpolate domain labels onto shared nodes without crossing the LCFS."""
+        owner = self.moment_geometry.shared_flux_stencil.gather_index[:, 0]
+        owner_label = masks.label[owner]
+        psi_norm = (shared_flux - topology.axis_flux) / topology.flux_span
+        closed = psi_norm <= 1.0
+        label = jnp.where(
+            owner_label == int(PlasmaDomain.EXCLUDED_MATERIAL),
+            owner_label,
+            jnp.where(
+                owner_label == int(PlasmaDomain.PRIVATE_FLUX),
+                owner_label,
+                jnp.where(
+                    closed,
+                    jnp.asarray(int(PlasmaDomain.CORE), dtype=owner_label.dtype),
+                    jnp.asarray(int(PlasmaDomain.COMMON_SOL), dtype=owner_label.dtype),
+                ),
+            ),
+        )
+        return DomainMasks(label=label, psi_norm=psi_norm)
+
+    def cell_current_moments(self, psi) -> CellCurrentMoments:
+        """Return the current and first moments driven by one trial flux."""
+        if self.moment_geometry is None:
+            raise ValueError("moment geometry is required for current moments")
+        masks, topology = self.read(psi)
+        if not self.use_linear_moments:
+            current = self.source.cell_current(self.radius, self.area, masks)
+            zero = jnp.zeros_like(current)
+            return CellCurrentMoments(current, zero, zero)
+        shared_flux = self.shared_node_flux(psi)
+        shared_masks = self.shared_domain_masks(masks, topology, shared_flux)
+        signed_flux = self.polarity * (shared_flux - topology.boundary_flux)
+        moments = self.source.current_moments(
+            self.radius,
+            masks,
+            self.moment_geometry.atomic_mesh.node_coordinates[:, 0],
+            shared_masks,
+            self.interior_current_moments,
+            self.current_density_gradient,
+            self.moment_geometry.atomic_mesh.traced_clip(signed_flux),
+            self.moment_geometry.atomic_mesh.traced_clip(-signed_flux),
+        )
+        return self.coupling_current_moments(moments)
+
+    def current_domain_masks(self, psi) -> DomainMasks:
+        """Return domain labels that account LCFS-crossing current as core."""
+        masks, topology = self.read(psi)
+        if not self.use_linear_moments:
+            return masks
+        shared_flux = self.shared_node_flux(psi)
+        support = self.moment_geometry.atomic_mesh.traced_clip(
+            self.polarity * (shared_flux - topology.boundary_flux)
+        )
+        label = jnp.where(
+            support.boundary,
+            jnp.asarray(int(PlasmaDomain.CORE), dtype=masks.label.dtype),
+            masks.label,
+        )
+        return DomainMasks(label=label, psi_norm=masks.psi_norm)
+
     def cell_current(self, psi) -> jax.Array:
         """Return the per-cell plasma current [A] a trial flux drives."""
-        masks = self.read(psi)[0]
-        return self.source.cell_current(self.radius, self.area, masks)
+        return self.cell_current_moments(psi).cell_current
 
     def internal(self, psi) -> jax.Array:
         """Return the flux map [Wb] generated by the plasma current."""
-        current = self.cell_current(psi)
-        return jnp.r_[self.grid.internal(current), self.wall.internal(current)]
+        moments = self.cell_current_moments(psi)
+        return jnp.r_[self.grid.internal(moments), self.wall.internal(moments)]
 
     def __call__(self, psi, current=None) -> jax.Array:
         """Return the total poloidal flux [Wb] one write-then-read cycle gives."""

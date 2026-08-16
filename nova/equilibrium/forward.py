@@ -219,6 +219,10 @@ class ForwardProfile:
         source_to_wall,
         plasma_to_wall,
         wall_coordinate,
+        plasma_to_grid_r=None,
+        plasma_to_grid_z=None,
+        plasma_to_wall_r=None,
+        plasma_to_wall_z=None,
         polarity: int = 1,
         inside_material=None,
         maxsize: int = 5,
@@ -240,10 +244,26 @@ class ForwardProfile:
         )
         operator = ForwardFluxOperator(
             grid=FluxTarget(
-                jnp.asarray(source_to_grid), jnp.asarray(plasma_to_grid), grid_null
+                source_target=jnp.asarray(source_to_grid),
+                plasma_target=jnp.asarray(plasma_to_grid),
+                null=grid_null,
+                plasma_target_r=(
+                    None if plasma_to_grid_r is None else jnp.asarray(plasma_to_grid_r)
+                ),
+                plasma_target_z=(
+                    None if plasma_to_grid_z is None else jnp.asarray(plasma_to_grid_z)
+                ),
             ),
             wall=FluxTarget(
-                jnp.asarray(source_to_wall), jnp.asarray(plasma_to_wall), wall_null
+                source_target=jnp.asarray(source_to_wall),
+                plasma_target=jnp.asarray(plasma_to_wall),
+                null=wall_null,
+                plasma_target_r=(
+                    None if plasma_to_wall_r is None else jnp.asarray(plasma_to_wall_r)
+                ),
+                plasma_target_z=(
+                    None if plasma_to_wall_z is None else jnp.asarray(plasma_to_wall_z)
+                ),
             ),
             source=source,
             external_current=jnp.asarray(external_current),
@@ -252,6 +272,15 @@ class ForwardProfile:
             inside_material=inside_material,
             moment_geometry=MomentGeometry.from_cells(
                 moment_mesh, _lattice_cells(lattice)
+            ),
+            use_linear_moments=all(
+                block is not None
+                for block in (
+                    plasma_to_grid_r,
+                    plasma_to_grid_z,
+                    plasma_to_wall_r,
+                    plasma_to_wall_z,
+                )
             ),
         )
         return cls(operator=operator, lattice=lattice, **kwargs)
@@ -289,13 +318,12 @@ class ForwardProfile:
         in the way, so ``jacfwd`` through it costs one observation.
         """
         masks, topology = self.operator.read(flux)
-        cell_current = self.operator.source.cell_current(
-            self.operator.radius, self.operator.area, masks
-        )
+        current_masks = self.operator.current_domain_masks(flux)
+        cell_current = self.operator.cell_current_moments(flux).cell_current
         radial, vertical = poloidal_field(self.lattice, flux[: self.lattice.node_count])
         return observe_moments(
             self.operator.source,
-            masks,
+            current_masks,
             jnp.asarray(self.lattice.node_radius),
             self.operator.area,
             cell_current,
@@ -308,15 +336,14 @@ class ForwardProfile:
     ) -> ForwardEquilibrium:
         """Return the typed result of one converged or supplied flux map."""
         masks, topology = self.operator.read(flux)
-        cell_current = self.operator.source.cell_current(
-            self.operator.radius, self.operator.area, masks
-        )
+        current_masks = self.operator.current_domain_masks(flux)
+        cell_current = self.operator.cell_current_moments(flux).cell_current
         grid_flux = flux[: self.lattice.node_count]
         radius = jnp.asarray(self.lattice.node_radius)
         radial, vertical = poloidal_field(self.lattice, grid_flux)
         moments = observe_moments(
             self.operator.source,
-            masks,
+            current_masks,
             radius,
             self.operator.area,
             cell_current,
@@ -337,7 +364,7 @@ class ForwardProfile:
             topology=topology,
             fixed_point=history,
             moments=moments,
-            ledger=current_ledger(cell_current, masks),
+            ledger=current_ledger(cell_current, current_masks),
             conservation=conservation,
             normalisation=absolute_normalisation_record(flux.dtype),
             rotation=self.operator.source.rotation_record(radius, masks),

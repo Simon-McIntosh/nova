@@ -39,6 +39,7 @@ the current ledger's declared support, and the conservation receipts.
 
 from __future__ import annotations
 
+from dataclasses import replace
 from types import SimpleNamespace
 
 import numpy as np
@@ -260,6 +261,72 @@ def relaxed(machine):
 def _relative(left, right, scale):
     """Return a sup-norm difference read against one flux scale."""
     return float(jnp.max(jnp.abs(left - right))) / float(scale)
+
+
+def test_solve_path_current_moments_match_direct_stencil_and_clip(machine):
+    """Interior rings and every LCFS crossing use their direct moment rule."""
+    profile, seed, _vacuum = machine
+    operator = replace(profile.operator, use_linear_moments=True)
+    masks, topology = operator.read(seed)
+    geometry = operator.moment_geometry
+    shared_flux = operator.shared_node_flux(seed)
+    shared_masks = operator.shared_domain_masks(masks, topology, shared_flux)
+
+    centroid_density = operator.source.current_density(operator.radius, masks)
+    shared_density = operator.source.current_density(
+        geometry.atomic_mesh.node_coordinates[:, 0], shared_masks
+    )
+    interior = operator.interior_current_moments(centroid_density, shared_density)
+    core_density = operator.source.core.current_density(operator.radius, masks.psi_norm)
+    core_gradient = operator.current_density_gradient(core_density)
+    clipped = geometry.atomic_mesh.traced_clip(
+        operator.polarity * (shared_flux - topology.boundary_flux)
+    )
+    clipped_current, clipped_first = clipped.linear_current_moments(
+        core_density, core_gradient
+    )
+    expected_current = jnp.where(
+        clipped.boundary, clipped_current, interior.cell_current
+    )
+    expected_first = jnp.stack(
+        [
+            jnp.where(clipped.boundary, clipped_first[:, 0], interior.radial_moment),
+            jnp.where(clipped.boundary, clipped_first[:, 1], interior.vertical_moment),
+        ],
+        axis=1,
+    )
+    radial_second, vertical_second, cross_second = geometry.second_moment.T
+    determinant = radial_second * vertical_second - cross_second**2
+    expected = (
+        expected_current,
+        (vertical_second * expected_first[:, 0] - cross_second * expected_first[:, 1])
+        / determinant,
+        (radial_second * expected_first[:, 1] - cross_second * expected_first[:, 0])
+        / determinant,
+    )
+    actual = operator.cell_current_moments(seed)
+    for observed, direct in zip(actual, expected, strict=True):
+        np.testing.assert_allclose(observed, direct, rtol=2e-13, atol=2e-13)
+
+    crossing_outside = np.asarray(clipped.boundary & ~masks.core)
+    assert crossing_outside.sum() > 0
+    assert np.count_nonzero(np.asarray(actual.cell_current)[crossing_outside]) == int(
+        crossing_outside.sum()
+    )
+
+
+def test_receipts_and_integral_observation_share_solve_current_moments(machine):
+    """Both observation entries consume the zeroth moment used by the map."""
+    profile, seed, _vacuum = machine
+    operator = replace(profile.operator, use_linear_moments=True)
+    profile = replace(profile, operator=operator)
+    expected = operator.cell_current_moments(seed).cell_current
+    receipt = profile.observe(seed)
+    np.testing.assert_array_equal(receipt.cell_current, expected)
+    np.testing.assert_array_equal(
+        profile.integral_observation(seed).plasma_current,
+        receipt.moments.plasma_current,
+    )
 
 
 def _fit_dtype(profile):

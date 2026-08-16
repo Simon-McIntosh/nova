@@ -53,7 +53,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-from nova.biot.greens import second_moments
+from nova.biot.greens import second_moments, section_centroid
 from nova.equilibrium.conservation import STENCIL_MARGIN
 from nova.equilibrium.separatrix_clip import AtomicCellMesh
 
@@ -230,7 +230,8 @@ class MomentGeometry:
             polygons.append(np.ascontiguousarray(vertices))
         if len(polygons) != mesh.node_count:
             raise ValueError("one polygon is required per mesh cell")
-        atomic = AtomicCellMesh.from_cells(polygons, centroids=mesh.coordinate)
+        centroids = np.asarray([section_centroid(cell) for cell in polygons])
+        atomic = AtomicCellMesh.from_cells(polygons, centroids=centroids)
         moments = np.asarray([second_moments(cell) for cell in polygons])
         return cls(
             polygons=tuple(polygons),

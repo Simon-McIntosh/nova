@@ -190,7 +190,7 @@ from __future__ import annotations
 
 import getpass
 import sys
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from functools import cached_property, lru_cache
 from pathlib import Path
 
@@ -801,10 +801,14 @@ class HexMachine:
     wall_node: np.ndarray
     source_to_grid: np.ndarray
     plasma_to_grid: np.ndarray
+    plasma_to_grid_r: np.ndarray
+    plasma_to_grid_z: np.ndarray
     source_to_wall: np.ndarray
     plasma_to_wall: np.ndarray
-    radial_field: tuple[np.ndarray, np.ndarray]
-    vertical_field: tuple[np.ndarray, np.ndarray]
+    plasma_to_wall_r: np.ndarray
+    plasma_to_wall_z: np.ndarray
+    radial_field: tuple[np.ndarray, ...]
+    vertical_field: tuple[np.ndarray, ...]
 
     @cached_property
     def moment_geometry(self) -> MomentGeometry:
@@ -841,15 +845,19 @@ class HexMachine:
         """
         return self.stencil[self.hexagon[self.stencil].all(axis=1)]
 
-    def poloidal_field_squared(self, source_current, cell_current) -> jnp.ndarray:
+    def poloidal_field_squared(self, source_current, current_moments) -> jnp.ndarray:
         """Return the squared poloidal field [T^2] the two sources produce."""
-        radial = (
-            jnp.asarray(self.radial_field[0]) @ source_current
-            + jnp.asarray(self.radial_field[1]) @ cell_current
+        radial = jnp.asarray(self.radial_field[0]) @ source_current + sum(
+            jnp.asarray(block) @ moment
+            for block, moment in zip(
+                self.radial_field[1:], current_moments, strict=True
+            )
         )
-        vertical = (
-            jnp.asarray(self.vertical_field[0]) @ source_current
-            + jnp.asarray(self.vertical_field[1]) @ cell_current
+        vertical = jnp.asarray(self.vertical_field[0]) @ source_current + sum(
+            jnp.asarray(block) @ moment
+            for block, moment in zip(
+                self.vertical_field[1:], current_moments, strict=True
+            )
         )
         return radial**2 + vertical**2
 
@@ -922,10 +930,24 @@ def build_machine(
         wall_node=np.c_[np.asarray(limiter.x), np.asarray(limiter.z)].astype(float),
         source_to_grid=np.asarray(grid["Psi"])[:, :-1],
         plasma_to_grid=np.asarray(grid["Psi_"]),
+        plasma_to_grid_r=np.asarray(grid["PsiR_"]),
+        plasma_to_grid_z=np.asarray(grid["PsiZ_"]),
         source_to_wall=np.asarray(limiter["Psi"])[:, :-1],
         plasma_to_wall=np.asarray(limiter["Psi_"]),
-        radial_field=(np.asarray(grid["Br"])[:, :-1], np.asarray(grid["Br_"])),
-        vertical_field=(np.asarray(grid["Bz"])[:, :-1], np.asarray(grid["Bz_"])),
+        plasma_to_wall_r=np.asarray(limiter["PsiR_"]),
+        plasma_to_wall_z=np.asarray(limiter["PsiZ_"]),
+        radial_field=(
+            np.asarray(grid["Br"])[:, :-1],
+            np.asarray(grid["Br_"]),
+            np.asarray(grid["BrR_"]),
+            np.asarray(grid["BrZ_"]),
+        ),
+        vertical_field=(
+            np.asarray(grid["Bz"])[:, :-1],
+            np.asarray(grid["Bz_"]),
+            np.asarray(grid["BzR_"]),
+            np.asarray(grid["BzZ_"]),
+        ),
     )
 
 
@@ -965,14 +987,20 @@ def forward_operator(case: ReferenceCase, machine: HexMachine) -> ForwardFluxOpe
     """
     return ForwardFluxOperator(
         grid=FluxTarget(
-            jnp.asarray(machine.source_to_grid),
-            jnp.asarray(machine.plasma_to_grid),
-            Null2D.from_coordinates(machine.node, machine.interior_stencil, maxsize=5),
+            source_target=jnp.asarray(machine.source_to_grid),
+            plasma_target=jnp.asarray(machine.plasma_to_grid),
+            null=Null2D.from_coordinates(
+                machine.node, machine.interior_stencil, maxsize=5
+            ),
+            plasma_target_r=jnp.asarray(machine.plasma_to_grid_r),
+            plasma_target_z=jnp.asarray(machine.plasma_to_grid_z),
         ),
         wall=FluxTarget(
-            jnp.asarray(machine.source_to_wall),
-            jnp.asarray(machine.plasma_to_wall),
-            Null1D(jnp.asarray(machine.wall_node, dtype=jnp.float64)),
+            source_target=jnp.asarray(machine.source_to_wall),
+            plasma_target=jnp.asarray(machine.plasma_to_wall),
+            null=Null1D(jnp.asarray(machine.wall_node, dtype=jnp.float64)),
+            plasma_target_r=jnp.asarray(machine.plasma_to_wall_r),
+            plasma_target_z=jnp.asarray(machine.plasma_to_wall_z),
         ),
         source=forward_source(case),
         external_current=jnp.asarray(machine.source_current),
@@ -1197,8 +1225,10 @@ def solve(case: ReferenceCase, machine: HexMachine) -> SolvedEquilibrium:
         warmup=0,
     )
     masks, topology = operator.read(history.state)
+    current_masks = operator.current_domain_masks(history.state)
     radius = jnp.asarray(machine.radius)
-    cell_current = operator.source.cell_current(radius, operator.area, masks)
+    current_moments = operator.cell_current_moments(history.state)
+    cell_current = current_moments.cell_current
     return SolvedEquilibrium(
         case=case,
         machine=machine,
@@ -1208,14 +1238,14 @@ def solve(case: ReferenceCase, machine: HexMachine) -> SolvedEquilibrium:
         topology=topology,
         moments=observe_moments(
             operator.source,
-            masks,
+            current_masks,
             radius,
             operator.area,
             cell_current,
-            machine.poloidal_field_squared(operator.external_current, cell_current),
+            machine.poloidal_field_squared(operator.external_current, current_moments),
             topology.flux_span,
         ),
-        ledger=current_ledger(cell_current, masks),
+        ledger=current_ledger(cell_current, current_masks),
         fixed_point=history,
     )
 
@@ -1297,6 +1327,182 @@ def test_hex_operator_carries_the_authored_cell_geometry(solved):
     )
     assert len(geometry.polygons) == len(solved.machine.node)
     assert geometry.atomic_mesh.cell_nodes.shape[0] == len(solved.machine.node)
+
+
+def test_couplings_and_current_vectors_share_geometric_expansion_centres(published):
+    """Matrix translation responses recover the vector-side geometric centres."""
+    from nova.biot.greens import section_centroid
+    from nova.biot.polysection import PolySection
+    from nova.biot.polygonanalytic import (
+        polygon_analytic_field_moments,
+        polygon_analytic_flux_moments,
+    )
+    from shapely.geometry import Polygon
+
+    profile, equilibrium = published
+    operator = profile.operator
+    machine = _machine(SUITE_CELLS, True)[1]
+    geometry = operator.moment_geometry
+    vector_centre = np.asarray(geometry.atomic_mesh.centroids)
+    geometric_centre = np.asarray(
+        [section_centroid(vertices) for vertices in geometry.polygons]
+    )
+    matrix_centre = np.asarray(
+        [
+            PolySection._material_area_centroid(Polygon(vertices))
+            for vertices in geometry.polygons
+        ]
+    )
+    cell_width = np.sqrt(np.asarray(machine.area))
+    sample = np.unique(np.linspace(0, len(machine.node) - 1, 12, dtype=np.intp))
+    target_r = machine.radius[sample]
+    target_z = machine.node[sample, 1]
+    recovered = np.empty_like(vector_centre)
+    translation_spread = np.empty_like(vector_centre)
+    field_translation_error = np.empty((len(machine.node), 2))
+    uniform_absolute_error = []
+    uniform_relative_error = []
+
+    for column, (vertices, centre, authored_centre) in enumerate(
+        zip(geometry.polygons, vector_centre, matrix_centre, strict=True)
+    ):
+        flux = polygon_analytic_flux_moments(
+            target_r, target_z, vertices, expansion_point=authored_centre
+        )
+        probe_offset = cell_width[column] * np.array([0.125, -0.125])
+        probe_centre = authored_centre + probe_offset
+        translated_flux = polygon_analytic_flux_moments(
+            target_r, target_z, vertices, expansion_point=probe_centre
+        )
+        translation_scale = float(np.dot(flux[0], flux[0]))
+        recovered_offset = np.array(
+            [
+                -np.dot(flux[0], translated_flux[1] - flux[1]) / translation_scale,
+                -np.dot(flux[0], translated_flux[2] - flux[2]) / translation_scale,
+            ]
+        )
+        recovered[column] = probe_centre - recovered_offset
+        translation_spread[column] = [
+            np.max(np.abs(translated_flux[1] - flux[1] + probe_offset[0] * flux[0]))
+            / np.max(np.abs(flux[0])),
+            np.max(np.abs(translated_flux[2] - flux[2] + probe_offset[1] * flux[0]))
+            / np.max(np.abs(flux[0])),
+        ]
+        assembled_uniform = machine.plasma_to_grid[sample, column]
+        uniform_difference = np.abs(flux[0] - assembled_uniform)
+        uniform_scale = np.maximum(
+            np.maximum(np.abs(flux[0]), np.abs(assembled_uniform)), 1.0e-300
+        )
+        uniform_absolute_error.extend(uniform_difference.tolist())
+        uniform_relative_error.extend((uniform_difference / uniform_scale).tolist())
+        radial, vertical = polygon_analytic_field_moments(
+            target_r, target_z, vertices, expansion_point=authored_centre
+        )
+        for index, (direct, assembled) in enumerate(
+            (
+                (
+                    radial,
+                    (
+                        machine.radial_field[1][sample, column],
+                        machine.radial_field[2][sample, column],
+                        machine.radial_field[3][sample, column],
+                    ),
+                ),
+                (
+                    vertical,
+                    (
+                        machine.vertical_field[1][sample, column],
+                        machine.vertical_field[2][sample, column],
+                        machine.vertical_field[3][sample, column],
+                    ),
+                ),
+            )
+        ):
+            matrix_offset = centre - authored_centre
+            expected_radial = direct[1] + matrix_offset[0] * direct[0]
+            expected_vertical = direct[2] + matrix_offset[1] * direct[0]
+            scale = max(
+                float(np.max(np.abs(assembled[1]))),
+                float(np.max(np.abs(assembled[2]))),
+                1.0e-30,
+            )
+            field_translation_error[column, index] = (
+                max(
+                    float(np.max(np.abs(assembled[1] - expected_radial))),
+                    float(np.max(np.abs(assembled[2] - expected_vertical))),
+                )
+                / scale
+            )
+
+    matrix_vector_delta = recovered - vector_centre
+    geometric_vector_delta = geometric_centre - vector_centre
+    matrix_geometric_delta = recovered - geometric_centre
+    matrix_vector_widths = matrix_vector_delta / cell_width[:, None]
+    geometric_vector_widths = geometric_vector_delta / cell_width[:, None]
+    matrix_geometric_widths = matrix_geometric_delta / cell_width[:, None]
+    current_moments = operator.cell_current_moments(equilibrium.flux)
+    inconsistent_current = -matrix_vector_delta[:, 0] * np.asarray(
+        current_moments.radial_moment
+    ) - matrix_vector_delta[:, 1] * np.asarray(current_moments.vertical_moment)
+    grid_impact = machine.plasma_to_grid @ inconsistent_current
+    wall_impact = machine.plasma_to_wall @ inconsistent_current
+    total_impact = np.r_[grid_impact, wall_impact]
+    per_cell_impact = np.max(
+        np.abs(
+            np.vstack([machine.plasma_to_grid, machine.plasma_to_wall])
+            * inconsistent_current[None, :]
+        ),
+        axis=0,
+    )
+
+    for index in range(len(machine.node)):
+        print(
+            "expansion_centre_cell="
+            f"{index} whole_hexagon={bool(machine.hexagon[index])} "
+            f"recovered_matrix={recovered[index].tolist()} "
+            f"atomic_mesh={vector_centre[index].tolist()} "
+            f"geometric={geometric_centre[index].tolist()} "
+            f"matrix_minus_vector={matrix_vector_delta[index].tolist()} "
+            f"cell_width_m={cell_width[index]:.17g} "
+            f"matrix_minus_vector_cell_widths="
+            f"{matrix_vector_widths[index].tolist()} "
+            f"flux_impact_wb={per_cell_impact[index]:.17g}"
+        )
+
+    clipped = ~machine.hexagon
+    score = {
+        "cell_count": len(machine.node),
+        "clipped_cell_count": int(clipped.sum()),
+        "matrix_vector_max_m": float(np.max(np.abs(matrix_vector_delta))),
+        "matrix_vector_clipped_max_m": float(
+            np.max(np.abs(matrix_vector_delta[clipped]))
+        ),
+        "matrix_vector_max_cell_widths": float(np.max(np.abs(matrix_vector_widths))),
+        "matrix_vector_clipped_max_cell_widths": float(
+            np.max(np.abs(matrix_vector_widths[clipped]))
+        ),
+        "geometric_vector_max_m": float(np.max(np.abs(geometric_vector_delta))),
+        "geometric_vector_max_cell_widths": float(
+            np.max(np.abs(geometric_vector_widths))
+        ),
+        "matrix_geometric_max_m": float(np.max(np.abs(matrix_geometric_delta))),
+        "matrix_geometric_max_cell_widths": float(
+            np.max(np.abs(matrix_geometric_widths))
+        ),
+        "uniform_g0_worst_absolute_wb_per_a": float(np.max(uniform_absolute_error)),
+        "uniform_g0_worst_relative": float(np.max(uniform_relative_error)),
+        "translation_identity_spread_m": float(np.max(np.abs(translation_spread))),
+        "field_translation_relative_error": float(np.max(field_translation_error)),
+        "flux_map_impact_sup_wb": float(np.max(np.abs(total_impact))),
+        "flux_map_impact_rms_wb": float(np.sqrt(np.mean(total_impact**2))),
+        "flux_map_impact_fraction_of_span": float(
+            np.max(np.abs(total_impact)) / abs(float(equilibrium.topology.flux_span))
+        ),
+    }
+    print(f"expansion_centre_score={score!r}")
+    assert score["matrix_vector_max_cell_widths"] < 1.0e-12, score
+    assert score["geometric_vector_max_cell_widths"] < 1.0e-12, score
+    assert score["matrix_geometric_max_cell_widths"] < 1.0e-12, score
 
 
 # --------------------------------------------------------------------------
@@ -1448,7 +1654,7 @@ def test_the_passive_structure_cannot_carry_the_reproduction_gap(solved):
     assert residual > PASSIVE_SHORTFALL * peak, (residual, peak)
 
 
-def test_the_passive_closure_moves_the_reproduction_by_a_tenth_of_a_percent():
+def test_the_passive_closure_moves_the_reproduction_by_a_tenth_of_a_percent(solved):
     """Solving both machine models is what the closure is finally worth.
 
     The bound above is on the flux the passive currents put in. This is on
@@ -1484,8 +1690,13 @@ def test_the_passive_closure_moves_the_reproduction_by_a_tenth_of_a_percent():
     gain, which says closing the gap needs a source an order larger than
     anything the entry has left to supply.
     """
-    without = _solved(SUITE_CELLS, False).deviations()
-    structure = _solved(SUITE_CELLS, True).deviations()
+    without_current = solved.machine.source_current.copy()
+    without_current[-solved.machine.passive_columns :] = 0.0
+    without_machine = replace(
+        solved.machine, source_current=without_current, passive_columns=0
+    )
+    without = solve(solved.case, without_machine).deviations()
+    structure = solved.deviations()
     closed = without["flux sup-norm"] - structure["flux sup-norm"]
     assert 0.0 < closed < PASSIVE_REPRODUCTION_MOVE_CEILING, closed
     assert closed / without["flux sup-norm"] < 0.15, closed
@@ -1534,8 +1745,103 @@ def test_the_free_boundary_map_does_not_contract_at_the_equilibrium(published):
         vector = tangent(vector)
         vector = vector / jnp.linalg.norm(vector)
     eigenvalue = float(jnp.dot(vector, tangent(vector)))
+    print(f"dominant_map_eigenvalue={eigenvalue:.12g}")
     assert eigenvalue > CONTRACTION_MARGIN, eigenvalue
     assert (1.0 - RELAXATION) + RELAXATION * eigenvalue > 1.0
+
+
+def test_the_published_equilibrium_is_the_scored_post_map_state(published):
+    """The published state is the map image whose unchanged gates are scored."""
+    profile, equilibrium = published
+    case, machine = _machine(SUITE_CELLS, True)
+    operator = profile.operator
+    candidate = profile.flux_map()(equilibrium.flux)
+    receipt = profile.observe(candidate)
+
+    masks, topology = operator.read(candidate)
+    current_masks = operator.current_domain_masks(candidate)
+    current_moments = operator.cell_current_moments(candidate)
+    cell_current = current_moments.cell_current
+    moments = observe_moments(
+        operator.source,
+        current_masks,
+        jnp.asarray(machine.radius),
+        operator.area,
+        cell_current,
+        machine.poloidal_field_squared(operator.external_current, current_moments),
+        topology.flux_span,
+    )
+    direct = SolvedEquilibrium(
+        case=case,
+        machine=machine,
+        flux=candidate,
+        cell_current=cell_current,
+        masks=masks,
+        topology=topology,
+        moments=moments,
+        ledger=current_ledger(cell_current, current_masks),
+        fixed_point=receipt.fixed_point,
+    )
+
+    reference = case.map_moments()
+    core = np.asarray(masks.core)
+    flux_deviation = float(
+        np.max(np.abs(direct.grid_flux - direct.reference_flux)[core])
+        / abs(case.flux_span)
+    )
+    axis_deviation = float(np.max(np.abs(np.asarray(topology.axis) - case.axis)))
+    scale = direct.reference_scale
+    plasma_current_deviation = abs(
+        float(moments.plasma_current) / case.plasma_current - 1.0
+    )
+    poloidal_beta_deviation = abs(
+        float(moments.poloidal_beta) * scale / reference["poloidal_beta"] - 1.0
+    )
+    internal_inductance_deviation = abs(
+        float(moments.internal_inductance) * scale / reference["internal_inductance"]
+        - 1.0
+    )
+    quadrature_deviation = abs(
+        float(moments.poloidal_field_integral) / reference["field_integral"] - 1.0
+    )
+    field_deviation = abs(
+        float(receipt.moments.poloidal_field_integral)
+        / float(moments.poloidal_field_integral)
+        - 1.0
+    )
+    grad_shafranov = float(receipt.conservation.relative_grad_shafranov)
+    publication_gap = float(
+        jnp.max(jnp.abs(candidate - equilibrium.flux))
+        / jnp.maximum(jnp.max(jnp.abs(candidate)), 1.0e-30)
+    )
+    score = {
+        "publication_gap": publication_gap,
+        "post_map_residual": float(receipt.fixed_point.residual),
+        "axis_max_deviation_m": axis_deviation,
+        "flux_deviation_fraction": flux_deviation,
+        "plasma_current_deviation_fraction": plasma_current_deviation,
+        "poloidal_beta_deviation_fraction": poloidal_beta_deviation,
+        "internal_inductance_deviation_fraction": internal_inductance_deviation,
+        "analytic_field_quadrature_deviation_fraction": quadrature_deviation,
+        "receipt_field_deviation_fraction": field_deviation,
+        "grad_shafranov_residual": grad_shafranov,
+        "relative_divergence_b": float(receipt.conservation.relative_divergence_b),
+        "relative_divergence_j": float(receipt.conservation.relative_divergence_j),
+    }
+    print(f"post_map_score={score!r}")
+
+    assert float(receipt.fixed_point.residual) < RESIDUAL_TOLERANCE, score
+    assert axis_deviation < AXIS_TOLERANCE, score
+    assert flux_deviation < FLUX_TOLERANCE, score
+    assert plasma_current_deviation < PLASMA_CURRENT_TOLERANCE, score
+    assert poloidal_beta_deviation < MOMENT_TOLERANCE, score
+    assert internal_inductance_deviation < MOMENT_TOLERANCE, score
+    assert quadrature_deviation < QUADRATURE_TOLERANCE, score
+    assert field_deviation < FIELD_INTEGRAL_TOLERANCE, score
+    assert grad_shafranov < GRAD_SHAFRANOV_TOLERANCE, score
+    for name in ("relative_divergence_b", "relative_divergence_j"):
+        assert score[name] < DIVERGENCE_MARGIN * grad_shafranov, score
+    assert publication_gap < RESIDUAL_TOLERANCE, score
 
 
 def test_the_relaxed_routes_leave_the_equilibrium_on_a_bounded_budget(published):
@@ -2375,10 +2681,11 @@ def _receipt_figure(figure, solved, equilibrium):
 
     radial, vertical = poloidal_field(mesh, jnp.asarray(solved.grid_flux))
     fitted = np.sqrt(np.asarray(radial) ** 2 + np.asarray(vertical) ** 2)
+    current_moments = forward_operator(case, machine).cell_current_moments(solved.flux)
     analytic = np.sqrt(
         np.asarray(
             machine.poloidal_field_squared(
-                jnp.asarray(machine.source_current), solved.cell_current
+                jnp.asarray(machine.source_current), current_moments
             )
         )
     )

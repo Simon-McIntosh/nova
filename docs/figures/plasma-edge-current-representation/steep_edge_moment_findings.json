@@ -1,0 +1,768 @@
+{
+  "cases": {
+    "pedestal_moderate": [
+      {
+        "any_intersection_centroid_outside_count": 34,
+        "boundary_cell_count": 58,
+        "cell_count": 286,
+        "centroid_production": {
+          "b_r": {
+            "reference_span": 0.5834975497383303,
+            "rms_fraction_of_span": 0.026777932544713376,
+            "sup_fraction_of_span": 0.0919858475226265
+          },
+          "b_z": {
+            "reference_span": 1.0425822144887733,
+            "rms_fraction_of_span": 0.019758574664148394,
+            "sup_fraction_of_span": 0.050734614843602886
+          },
+          "psi": {
+            "reference_span": 3.845209808463446,
+            "rms_fraction_of_span": 0.02409027655320837,
+            "sup_fraction_of_span": 0.03219954598544162
+          }
+        },
+        "linear_representation": {
+          "b_r": {
+            "reference_span": 0.5834975497383303,
+            "rms_fraction_of_span": 0.004722025394458124,
+            "sup_fraction_of_span": 0.006953778052725268
+          },
+          "b_z": {
+            "reference_span": 1.0425822144887733,
+            "rms_fraction_of_span": 0.003628137829080465,
+            "sup_fraction_of_span": 0.006067740533331666
+          },
+          "psi": {
+            "reference_span": 3.845209808463446,
+            "rms_fraction_of_span": 0.009738942943799902,
+            "sup_fraction_of_span": 0.014459984119128605
+          }
+        },
+        "patch_area_relative_residual": 1.3290428079706927e-16,
+        "pitch_m": 0.11
+      },
+      {
+        "any_intersection_centroid_outside_count": 38,
+        "boundary_cell_count": 76,
+        "cell_count": 448,
+        "centroid_production": {
+          "b_r": {
+            "reference_span": 0.5834975497383303,
+            "rms_fraction_of_span": 0.011552580739405975,
+            "sup_fraction_of_span": 0.02601794347880526
+          },
+          "b_z": {
+            "reference_span": 1.0425822144887733,
+            "rms_fraction_of_span": 0.007137248386827292,
+            "sup_fraction_of_span": 0.017311489975747798
+          },
+          "psi": {
+            "reference_span": 3.845209808463446,
+            "rms_fraction_of_span": 0.018392252091417476,
+            "sup_fraction_of_span": 0.04031434716118647
+          }
+        },
+        "linear_representation": {
+          "b_r": {
+            "reference_span": 0.5834975497383303,
+            "rms_fraction_of_span": 0.002560116077168216,
+            "sup_fraction_of_span": 0.004075725362599299
+          },
+          "b_z": {
+            "reference_span": 1.0425822144887733,
+            "rms_fraction_of_span": 0.002156420129620202,
+            "sup_fraction_of_span": 0.0034641309643146253
+          },
+          "psi": {
+            "reference_span": 3.845209808463446,
+            "rms_fraction_of_span": 0.006089005791357981,
+            "sup_fraction_of_span": 0.008958987736597297
+          }
+        },
+        "patch_area_relative_residual": 1.3231402821943275e-16,
+        "pitch_m": 0.08
+      },
+      {
+        "any_intersection_centroid_outside_count": 52,
+        "boundary_cell_count": 102,
+        "cell_count": 756,
+        "centroid_production": {
+          "b_r": {
+            "reference_span": 0.5834975497383303,
+            "rms_fraction_of_span": 0.007737351658800842,
+            "sup_fraction_of_span": 0.028160196547607205
+          },
+          "b_z": {
+            "reference_span": 1.0425822144887733,
+            "rms_fraction_of_span": 0.004209422580018044,
+            "sup_fraction_of_span": 0.00981695763556817
+          },
+          "psi": {
+            "reference_span": 3.845209808463446,
+            "rms_fraction_of_span": 0.012063367145864354,
+            "sup_fraction_of_span": 0.02931799884649332
+          }
+        },
+        "linear_representation": {
+          "b_r": {
+            "reference_span": 0.5834975497383303,
+            "rms_fraction_of_span": 0.0015098332091042737,
+            "sup_fraction_of_span": 0.0023822784767383903
+          },
+          "b_z": {
+            "reference_span": 1.0425822144887733,
+            "rms_fraction_of_span": 0.0012780994885762188,
+            "sup_fraction_of_span": 0.0020074827713328107
+          },
+          "psi": {
+            "reference_span": 3.845209808463446,
+            "rms_fraction_of_span": 0.0035556206442619075,
+            "sup_fraction_of_span": 0.005249067256163278
+          }
+        },
+        "patch_area_relative_residual": 3.961389276346682e-16,
+        "pitch_m": 0.06
+      }
+    ],
+    "pedestal_steep": [
+      {
+        "any_intersection_centroid_outside_count": 34,
+        "boundary_cell_count": 58,
+        "cell_count": 286,
+        "centroid_production": {
+          "b_r": {
+            "reference_span": 0.5685432897341419,
+            "rms_fraction_of_span": 0.03288067464040689,
+            "sup_fraction_of_span": 0.11700998699369866
+          },
+          "b_z": {
+            "reference_span": 1.0160010069510768,
+            "rms_fraction_of_span": 0.022708395718824485,
+            "sup_fraction_of_span": 0.06863127135368237
+          },
+          "psi": {
+            "reference_span": 3.7436444162375078,
+            "rms_fraction_of_span": 0.022998033789286266,
+            "sup_fraction_of_span": 0.06005100918920366
+          }
+        },
+        "linear_representation": {
+          "b_r": {
+            "reference_span": 0.5685432897341419,
+            "rms_fraction_of_span": 0.00570152816688096,
+            "sup_fraction_of_span": 0.016534784135720564
+          },
+          "b_z": {
+            "reference_span": 1.0160010069510768,
+            "rms_fraction_of_span": 0.0032724077016166157,
+            "sup_fraction_of_span": 0.009228568442562063
+          },
+          "psi": {
+            "reference_span": 3.7436444162375078,
+            "rms_fraction_of_span": 0.004885060487202265,
+            "sup_fraction_of_span": 0.006795411310595764
+          }
+        },
+        "patch_area_relative_residual": 1.3290428079706927e-16,
+        "pitch_m": 0.11
+      },
+      {
+        "any_intersection_centroid_outside_count": 38,
+        "boundary_cell_count": 76,
+        "cell_count": 448,
+        "centroid_production": {
+          "b_r": {
+            "reference_span": 0.5685432897341419,
+            "rms_fraction_of_span": 0.014009225432792111,
+            "sup_fraction_of_span": 0.03045869335509543
+          },
+          "b_z": {
+            "reference_span": 1.0160010069510768,
+            "rms_fraction_of_span": 0.00862350440708755,
+            "sup_fraction_of_span": 0.02162581823887427
+          },
+          "psi": {
+            "reference_span": 3.7436444162375078,
+            "rms_fraction_of_span": 0.0226773560847902,
+            "sup_fraction_of_span": 0.050193632076620795
+          }
+        },
+        "linear_representation": {
+          "b_r": {
+            "reference_span": 0.5685432897341419,
+            "rms_fraction_of_span": 0.002641575218965238,
+            "sup_fraction_of_span": 0.00504240302598616
+          },
+          "b_z": {
+            "reference_span": 1.0160010069510768,
+            "rms_fraction_of_span": 0.0019512618752421508,
+            "sup_fraction_of_span": 0.0028534880313629855
+          },
+          "psi": {
+            "reference_span": 3.7436444162375078,
+            "rms_fraction_of_span": 0.004312702866447526,
+            "sup_fraction_of_span": 0.006366581317205751
+          }
+        },
+        "patch_area_relative_residual": 1.3231402821943275e-16,
+        "pitch_m": 0.08
+      },
+      {
+        "any_intersection_centroid_outside_count": 52,
+        "boundary_cell_count": 102,
+        "cell_count": 756,
+        "centroid_production": {
+          "b_r": {
+            "reference_span": 0.5685432897341419,
+            "rms_fraction_of_span": 0.010415392249348072,
+            "sup_fraction_of_span": 0.03926833791499959
+          },
+          "b_z": {
+            "reference_span": 1.0160010069510768,
+            "rms_fraction_of_span": 0.005460286477091643,
+            "sup_fraction_of_span": 0.01477768499741965
+          },
+          "psi": {
+            "reference_span": 3.7436444162375078,
+            "rms_fraction_of_span": 0.01741482423031766,
+            "sup_fraction_of_span": 0.04285298096974799
+          }
+        },
+        "linear_representation": {
+          "b_r": {
+            "reference_span": 0.5685432897341419,
+            "rms_fraction_of_span": 0.0017768928095532298,
+            "sup_fraction_of_span": 0.006401459066180115
+          },
+          "b_z": {
+            "reference_span": 1.0160010069510768,
+            "rms_fraction_of_span": 0.0009709371293510658,
+            "sup_fraction_of_span": 0.0028976899906708294
+          },
+          "psi": {
+            "reference_span": 3.7436444162375078,
+            "rms_fraction_of_span": 0.0013970587893892025,
+            "sup_fraction_of_span": 0.004381874716556618
+          }
+        },
+        "patch_area_relative_residual": 3.961389276346682e-16,
+        "pitch_m": 0.06
+      }
+    ],
+    "solovev_exact": [
+      {
+        "any_intersection_centroid_outside_count": 34,
+        "boundary_cell_count": 58,
+        "cell_count": 286,
+        "centroid_production": {
+          "b_r": {
+            "reference_span": 0.7291227389268586,
+            "rms_fraction_of_span": 0.009351021054831793,
+            "sup_fraction_of_span": 0.03151901694093953
+          },
+          "b_z": {
+            "reference_span": 1.183128545547726,
+            "rms_fraction_of_span": 0.007930541532453596,
+            "sup_fraction_of_span": 0.018085675122562636
+          },
+          "psi": {
+            "reference_span": 0.4110494933294043,
+            "rms_fraction_of_span": 0.11443773797957539,
+            "sup_fraction_of_span": 0.1624955719969363
+          }
+        },
+        "linear_representation": {
+          "b_r": {
+            "reference_span": 0.7291227389268586,
+            "rms_fraction_of_span": 0.0026898149921158994,
+            "sup_fraction_of_span": 0.004068990310067522
+          },
+          "b_z": {
+            "reference_span": 1.183128545547726,
+            "rms_fraction_of_span": 0.0025548549723768354,
+            "sup_fraction_of_span": 0.004112778485694897
+          },
+          "psi": {
+            "reference_span": 0.4110494933294043,
+            "rms_fraction_of_span": 0.0802372750288597,
+            "sup_fraction_of_span": 0.1371514853828869
+          }
+        },
+        "patch_area_relative_residual": 1.3290428079706927e-16,
+        "pitch_m": 0.11
+      },
+      {
+        "any_intersection_centroid_outside_count": 38,
+        "boundary_cell_count": 76,
+        "cell_count": 448,
+        "centroid_production": {
+          "b_r": {
+            "reference_span": 0.7291227389268586,
+            "rms_fraction_of_span": 0.00420952858602916,
+            "sup_fraction_of_span": 0.009308350420171849
+          },
+          "b_z": {
+            "reference_span": 1.183128545547726,
+            "rms_fraction_of_span": 0.0028244985424232968,
+            "sup_fraction_of_span": 0.0065950811413051464
+          },
+          "psi": {
+            "reference_span": 0.4110494933294043,
+            "rms_fraction_of_span": 0.07693647829574736,
+            "sup_fraction_of_span": 0.1732418174764623
+          }
+        },
+        "linear_representation": {
+          "b_r": {
+            "reference_span": 0.7291227389268586,
+            "rms_fraction_of_span": 0.0013633886213947938,
+            "sup_fraction_of_span": 0.002039425456031035
+          },
+          "b_z": {
+            "reference_span": 1.183128545547726,
+            "rms_fraction_of_span": 0.0013037079960207551,
+            "sup_fraction_of_span": 0.002074118770253213
+          },
+          "psi": {
+            "reference_span": 0.4110494933294043,
+            "rms_fraction_of_span": 0.03964811673462022,
+            "sup_fraction_of_span": 0.06261673667596544
+          }
+        },
+        "patch_area_relative_residual": 1.3231402821943275e-16,
+        "pitch_m": 0.08
+      },
+      {
+        "any_intersection_centroid_outside_count": 52,
+        "boundary_cell_count": 102,
+        "cell_count": 756,
+        "centroid_production": {
+          "b_r": {
+            "reference_span": 0.7291227389268586,
+            "rms_fraction_of_span": 0.0028131301332429835,
+            "sup_fraction_of_span": 0.010304444455759534
+          },
+          "b_z": {
+            "reference_span": 1.183128545547726,
+            "rms_fraction_of_span": 0.0016699284351252572,
+            "sup_fraction_of_span": 0.004012058935765947
+          },
+          "psi": {
+            "reference_span": 0.4110494933294043,
+            "rms_fraction_of_span": 0.051417592550571496,
+            "sup_fraction_of_span": 0.12567793047733003
+          }
+        },
+        "linear_representation": {
+          "b_r": {
+            "reference_span": 0.7291227389268586,
+            "rms_fraction_of_span": 0.0007785299795511646,
+            "sup_fraction_of_span": 0.0011755562794669749
+          },
+          "b_z": {
+            "reference_span": 1.183128545547726,
+            "rms_fraction_of_span": 0.0007391304403403376,
+            "sup_fraction_of_span": 0.0011587126044234196
+          },
+          "psi": {
+            "reference_span": 0.4110494933294043,
+            "rms_fraction_of_span": 0.022613004648976955,
+            "sup_fraction_of_span": 0.03594233719181085
+          }
+        },
+        "patch_area_relative_residual": 3.961389276346682e-16,
+        "pitch_m": 0.06
+      }
+    ]
+  },
+  "coarsest_pitch_improvement_factors": {
+    "pedestal_moderate": {
+      "b_r": {
+        "rms_fraction_of_span": 5.670857377459377,
+        "sup_fraction_of_span": 13.228182841782843
+      },
+      "b_z": {
+        "rms_fraction_of_span": 5.445927248347154,
+        "sup_fraction_of_span": 8.361368546480284
+      },
+      "psi": {
+        "rms_fraction_of_span": 2.47360280188775,
+        "sup_fraction_of_span": 2.2268036894207905
+      }
+    },
+    "pedestal_steep": {
+      "b_r": {
+        "rms_fraction_of_span": 5.766993282854266,
+        "sup_fraction_of_span": 7.076595982944746
+      },
+      "b_z": {
+        "rms_fraction_of_span": 6.939354074862438,
+        "sup_fraction_of_span": 7.436827475554676
+      },
+      "psi": {
+        "rms_fraction_of_span": 4.707829892697506,
+        "sup_fraction_of_span": 8.8369940308939
+      }
+    },
+    "solovev_exact": {
+      "b_r": {
+        "rms_fraction_of_span": 3.4764551027637642,
+        "sup_fraction_of_span": 7.746151880223204
+      },
+      "b_z": {
+        "rms_fraction_of_span": 3.1041063458391323,
+        "sup_fraction_of_span": 4.397434772008363
+      },
+      "psi": {
+        "rms_fraction_of_span": 1.4262415808415039,
+        "sup_fraction_of_span": 1.184789005699035
+      }
+    }
+  },
+  "fitted_orders": {
+    "pedestal_moderate": {
+      "centroid_production": {
+        "b_r": {
+          "rms_fraction_of_span": {
+            "coefficient": 2.3738599355666166,
+            "order": 2.0587620428808138,
+            "r_squared": 0.9705555163660917
+          },
+          "sup_fraction_of_span": {
+            "coefficient": 6.054344434273471,
+            "order": 1.9886614915141507,
+            "r_squared": 0.7265720783233447
+          }
+        },
+        "b_z": {
+          "rms_fraction_of_span": {
+            "coefficient": 5.2956792712052145,
+            "order": 2.5625016782184495,
+            "r_squared": 0.9771486239869454
+          },
+          "sup_fraction_of_span": {
+            "coefficient": 19.280969947271,
+            "order": 2.7216278832203042,
+            "r_squared": 0.9784317825163165
+          }
+        },
+        "psi": {
+          "rms_fraction_of_span": {
+            "coefficient": 0.30444093244576326,
+            "order": 1.1358401228463102,
+            "r_squared": 0.9760414026592946
+          },
+          "sup_fraction_of_span": {
+            "coefficient": 0.04776217328567909,
+            "order": 0.1393828233035971,
+            "r_squared": 0.06666097630814094
+          }
+        }
+      },
+      "linear_representation": {
+        "b_r": {
+          "rms_fraction_of_span": {
+            "coefficient": 0.29944871524445454,
+            "order": 1.8818924306284803,
+            "r_squared": 0.9998238702871216
+          },
+          "sup_fraction_of_span": {
+            "coefficient": 0.34575491016044624,
+            "order": 1.7657126693659184,
+            "r_squared": 0.9990524759539178
+          }
+        },
+        "b_z": {
+          "rms_fraction_of_span": {
+            "coefficient": 0.1629588236567875,
+            "order": 1.7197504625273505,
+            "r_squared": 0.9990483169706444
+          },
+          "sup_fraction_of_span": {
+            "coefficient": 0.3420307187269766,
+            "order": 1.823696855064516,
+            "r_squared": 0.9995377504550412
+          }
+        },
+        "psi": {
+          "rms_fraction_of_span": {
+            "coefficient": 0.3864099016644893,
+            "order": 1.6590063433623472,
+            "r_squared": 0.9953257753323238
+          },
+          "sup_fraction_of_span": {
+            "coefficient": 0.585140825459302,
+            "order": 1.6688011577913582,
+            "r_squared": 0.9962679746476447
+          }
+        }
+      }
+    },
+    "pedestal_steep": {
+      "centroid_production": {
+        "b_r": {
+          "rms_fraction_of_span": {
+            "coefficient": 2.0613604265690157,
+            "order": 1.9105071514664316,
+            "r_squared": 0.9419455295915897
+          },
+          "sup_fraction_of_span": {
+            "coefficient": 5.373369524128436,
+            "order": 1.8443967690288794,
+            "r_squared": 0.6115718463642756
+          }
+        },
+        "b_z": {
+          "rms_fraction_of_span": {
+            "coefficient": 3.9066786590441067,
+            "order": 2.363586250400017,
+            "r_squared": 0.969715399400959
+          },
+          "sup_fraction_of_span": {
+            "coefficient": 17.21692830132401,
+            "order": 2.5528933349247707,
+            "r_squared": 0.9369035181126282
+          }
+        },
+        "psi": {
+          "rms_fraction_of_span": {
+            "coefficient": 0.06494651315995532,
+            "order": 0.4514189936199893,
+            "r_squared": 0.7633267030763231
+          },
+          "sup_fraction_of_span": {
+            "coefficient": 0.20510694264189236,
+            "order": 0.5567858666310396,
+            "r_squared": 0.9999517614152683
+          }
+        }
+      },
+      "linear_representation": {
+        "b_r": {
+          "rms_fraction_of_span": {
+            "coefficient": 0.3860762355467005,
+            "order": 1.9321929788710868,
+            "r_squared": 0.9766883999468722
+          },
+          "sup_fraction_of_span": {
+            "coefficient": 0.45856446870334766,
+            "order": 1.6039972409344538,
+            "r_squared": 0.5993321514493027
+          }
+        },
+        "b_z": {
+          "rms_fraction_of_span": {
+            "coefficient": 0.27963737669078337,
+            "order": 1.9977663247747188,
+            "r_squared": 0.9868194542752452
+          },
+          "sup_fraction_of_span": {
+            "coefficient": 0.5620360124290223,
+            "order": 1.9426362413305793,
+            "r_squared": 0.7653265471901229
+          }
+        },
+        "psi": {
+          "rms_fraction_of_span": {
+            "coefficient": 0.516772269999384,
+            "order": 2.03549535860164,
+            "r_squared": 0.8009808693600986
+          },
+          "sup_fraction_of_span": {
+            "coefficient": 0.034673114318711874,
+            "order": 0.7146582052588106,
+            "r_squared": 0.8375835538757788
+          }
+        }
+      }
+    },
+    "solovev_exact": {
+      "centroid_production": {
+        "b_r": {
+          "rms_fraction_of_span": {
+            "coefficient": 0.7186916743687828,
+            "order": 1.991033459972166,
+            "r_squared": 0.9751311654699808
+          },
+          "sup_fraction_of_span": {
+            "coefficient": 1.6357752203372344,
+            "order": 1.8797719750386417,
+            "r_squared": 0.7092699987235371
+          }
+        },
+        "b_z": {
+          "rms_fraction_of_span": {
+            "coefficient": 2.214462834120304,
+            "order": 2.582214781238531,
+            "r_squared": 0.9757493378150114
+          },
+          "sup_fraction_of_span": {
+            "coefficient": 4.173944301428277,
+            "order": 2.4964308479252884,
+            "r_squared": 0.9731963808632947
+          }
+        },
+        "psi": {
+          "rms_fraction_of_span": {
+            "coefficient": 2.1174118309930545,
+            "order": 1.3186206843360246,
+            "r_squared": 0.9988718062625727
+          },
+          "sup_fraction_of_span": {
+            "coefficient": 0.43038466370169126,
+            "order": 0.41277570071053743,
+            "r_squared": 0.5428188231842508
+          }
+        }
+      },
+      "linear_representation": {
+        "b_r": {
+          "rms_fraction_of_span": {
+            "coefficient": 0.24442660849140613,
+            "order": 2.047018206353215,
+            "r_squared": 0.999316897020182
+          },
+          "sup_fraction_of_span": {
+            "coefficient": 0.37149386364646714,
+            "order": 2.0506152981856585,
+            "r_squared": 0.9987323424390154
+          }
+        },
+        "b_z": {
+          "rms_fraction_of_span": {
+            "coefficient": 0.2328609818562436,
+            "order": 2.0473826677686726,
+            "r_squared": 0.9996130886202061
+          },
+          "sup_fraction_of_span": {
+            "coefficient": 0.4130250269707246,
+            "order": 2.0910036507027963,
+            "r_squared": 0.9997005781719887
+          }
+        },
+        "psi": {
+          "rms_fraction_of_span": {
+            "coefficient": 8.016383449898957,
+            "order": 2.0916120689023217,
+            "r_squared": 0.9987052903994209
+          },
+          "sup_fraction_of_span": {
+            "coefficient": 17.715793259038175,
+            "order": 2.2138462347619927,
+            "r_squared": 0.9952355547993889
+          }
+        }
+      }
+    }
+  },
+  "live_checks": {
+    "all_cases_conserve_area": true,
+    "all_cases_use_any_intersection": true,
+    "area_relative_tolerance": 1e-12,
+    "maximum_coarsest_improvement_factor": 13.228182841782843,
+    "maximum_patch_area_relative_residual": 3.961389276346682e-16,
+    "minimum_coarsest_improvement_factor": 1.184789005699035
+  },
+  "moving_separatrix_timing": {
+    "cpu": {
+      "backend": "jax-cpu",
+      "first_iteration_seconds": 0.13603308098390698,
+      "shape_count": 1,
+      "trace_count": 1,
+      "warm_mean_seconds": 0.0004601358880542896,
+      "warm_median_seconds": 0.0005101819988340139
+    },
+    "cuda": {
+      "backend": "cuda-c-kernel",
+      "device": "NVIDIA L4",
+      "host_agreement_sup": 3.637978807091713e-12,
+      "includes_host_device_transfers": true,
+      "warm_mean_seconds": 6.134808333333333e-05
+    },
+    "iterations": 12
+  },
+  "profiles": {
+    "pedestal_moderate": {
+      "pedestal_width_psi_n": 0.1
+    },
+    "pedestal_steep": {
+      "pedestal_width_psi_n": 0.035
+    },
+    "solovev_exact": {
+      "pedestal_width_psi_n": null
+    }
+  },
+  "reference": {
+    "analytic_family": "static Solov'ev member of the rotating-equilibrium reference family",
+    "convergence": {
+      "pedestal_moderate": {
+        "b_r": {
+          "reference_span": 0.5834975497383303,
+          "rms_fraction_of_span": 5.837718602799506e-06,
+          "sup_fraction_of_span": 2.5894003087935082e-05
+        },
+        "b_z": {
+          "reference_span": 1.0425822144887733,
+          "rms_fraction_of_span": 3.3136216219381655e-06,
+          "sup_fraction_of_span": 1.586758735724395e-05
+        },
+        "psi": {
+          "reference_span": 3.845209808463446,
+          "rms_fraction_of_span": 1.130820340010336e-07,
+          "sup_fraction_of_span": 5.355273496601195e-07
+        }
+      },
+      "pedestal_steep": {
+        "b_r": {
+          "reference_span": 0.5685432897341419,
+          "rms_fraction_of_span": 6.794389979344544e-06,
+          "sup_fraction_of_span": 3.0124928511508906e-05
+        },
+        "b_z": {
+          "reference_span": 1.0160010069510768,
+          "rms_fraction_of_span": 3.856336933133149e-06,
+          "sup_fraction_of_span": 1.846141705239785e-05
+        },
+        "psi": {
+          "reference_span": 3.7436444162375078,
+          "rms_fraction_of_span": 1.3200173788001423e-07,
+          "sup_fraction_of_span": 6.29400230762949e-07
+        }
+      },
+      "solovev_exact": {
+        "b_r": {
+          "reference_span": 0.7291227389268586,
+          "rms_fraction_of_span": 2.2390207158494397e-06,
+          "sup_fraction_of_span": 9.941935534018516e-06
+        },
+        "b_z": {
+          "reference_span": 1.183128545547726,
+          "rms_fraction_of_span": 1.3991953036350681e-06,
+          "sup_fraction_of_span": 6.7129157349584375e-06
+        },
+        "psi": {
+          "reference_span": 0.4110494933294043,
+          "rms_fraction_of_span": 5.06642445267649e-07,
+          "sup_fraction_of_span": 2.4039391647519304e-06
+        }
+      }
+    },
+    "nested_orders": [
+      [
+        40,
+        80
+      ],
+      [
+        64,
+        128
+      ]
+    ],
+    "pedestal_fields": "64x128 Gauss-Legendre integration in exact analytic flux coordinates",
+    "solovev_fields": "closed-form total flux and analytic derivatives, with the converged plasma integral resolving the homogeneous complement",
+    "target_count": 48,
+    "target_surface": "an exterior oval at 1.18 radial and 1.30 vertical LCFS scale"
+  },
+  "representation": "nine exact fixed polygon blocks with degree-three interior moments and conservative any-intersection clipped boundary moments",
+  "schema": "nova-steep-edge-moment-demonstration"
+}

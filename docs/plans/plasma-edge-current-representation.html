@@ -26,7 +26,7 @@
 <meta name="plan-commits" content="444d4d7d,acea51cb,bdd3120b,ca000f36,1a9bc9ff,7f89b853,6cafed36,070bddd2,02ddf888,dfe8ba70,fbc28097,020c4dc9,260ce85b,b774e696,42b6853b,5aa3056d">
 <meta name="plan-artifacts" content="docs/evidence/archive/plasma-edge-current-representation-landed.html,nova/equilibrium/stencil_mesh.py,tests/test_equilibrium_stencil_mesh.py,nova/equilibrium/separatrix_clip.py,tests/test_equilibrium_separatrix_clip.py,nova/biot/polygonanalytic.py,tests/test_biotpolygonmoments.py,nova/biot/polysection.py,benchmarks/steep_edge_moment_demonstration.py,docs/figures/plasma-edge-current-representation/steep_edge_moment_findings.json,docs/figures/plasma-edge-current-representation/steep_edge_moment_convergence.svg">
 <meta name="plan-impl" content="0.91">
-<meta name="plan-version" content="14">
+<meta name="plan-version" content="15">
 </head>
 <body>
   <main class="plan-doc">
@@ -275,6 +275,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20260816-geometrycarrier" data-who="reckon-ship" data-when="2026-08-16T11:10:00+00:00">
     <div class="r-comment-body">operator-geometry-carrier landed - commit 5aa3056d, merged on main; gate PASSED; TDD red observed (4 named tests, pytest exit 4 at collection); isolated hex test 1/1, broad regression 98/98. MomentGeometry carries every authored polygon (566/566 on the production HexMachine, cached once and reused by every operator), the AtomicCellMesh topology and shared nodes, and per-cell area-normalised (Irr,Izz,Irz); SharedNodeFluxStencil assigns each atomic node to its nearest complete ring with precomputed gather indices and weights, EXACT on the StencilMesh polynomial space (quadratic worst 5.68e-14) and static under jit (one trace across flux updates); the structured from_lattice path derives one rectangular control polygon per centroid. Current evaluation and receipts unchanged at this additive node - proven by the suite, not asserted. The routing node now has its whole recipe: traced_clip(shared_node_flux(psi)) against the topology boundary, plus the carried second moments and fitted gradients, with no further geometry seam. impl 10/11 = 0.91. Record at /nova/evidence/archive/plasma-edge-current-representation-landed#operator-geometry-carrier</div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-20260816-solclosure" data-who="reckon-ship" data-when="2026-08-16T10:40:00+00:00">
+    <div class="r-comment-body">The section's trigger is now satisfied: the owner supplied the SOL current closure on 2026-08-16 - Eich-scaled width with exponential decay (dual e-folding measured beside it), continuity across the separatrix, common-SOL support to the divertor target, zero current in the private region. The exercise of this section's mechanism (exterior supports riding the same three moment vectors) is owned by the new sol-current-demonstration plan in the same sprint, which depends on this plan's solve-path routing; any exterior-moment wiring it needs lands under that plan's nodes with this section's contract as authority.</div>
 </div>
 </section>
 </main>

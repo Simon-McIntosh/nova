@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T20:17:08",
+  "updated": "2026-08-16T20:42:42",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -6224,9 +6224,55 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T181708423898-homotopy-retest",
+        "plan": "plasma-edge-current-representation",
+        "section": "\u00a76",
+        "node": "homotopy-retest",
+        "role": "implement",
+        "member": "coupling-blocks",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T18:17:10Z",
+        "completed_at": "2026-08-16T18:41:48Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1478,
+        "time_budget": "25m",
+        "base_sha": "8b2ace0059838885c32e46c223f816d4b7fca722",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/homotopy-retest-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a009c8-8ac4-7a50-806e-c28169dbfc66",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 234848512,
+            "input_tokens": 239064776,
+            "output_tokens": 500411,
+            "reasoning_output_tokens": 157992
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 196
+    "_version": 197
   }
 }

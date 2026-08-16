@@ -272,9 +272,12 @@ def test_solve_path_current_moments_match_direct_stencil_and_clip(machine):
     shared_flux = operator.shared_node_flux(seed)
     shared_masks = operator.shared_domain_masks(masks, topology, shared_flux)
 
-    centroid_density = operator.source.current_density(operator.radius, masks)
-    shared_density = operator.source.current_density(
-        geometry.atomic_mesh.node_coordinates[:, 0], shared_masks
+    centroid_density = operator.source.core.current_density(
+        operator.radius, jnp.clip(masks.psi_norm, 0.0, 1.0)
+    )
+    shared_density = operator.source.core.current_density(
+        geometry.atomic_mesh.node_coordinates[:, 0],
+        jnp.clip(shared_masks.psi_norm, 0.0, 1.0),
     )
     interior = operator.interior_current_moments(centroid_density, shared_density)
     core_density = operator.source.core.current_density(operator.radius, masks.psi_norm)
@@ -285,13 +288,25 @@ def test_solve_path_current_moments_match_direct_stencil_and_clip(machine):
     clipped_current, clipped_first = clipped.linear_current_moments(
         core_density, core_gradient
     )
+    boundary = clipped.boundary
+    complete = clipped.included & ~clipped.boundary
     expected_current = jnp.where(
-        clipped.boundary, clipped_current, interior.cell_current
+        boundary,
+        clipped_current,
+        jnp.where(complete, interior.cell_current, 0.0),
     )
     expected_first = jnp.stack(
         [
-            jnp.where(clipped.boundary, clipped_first[:, 0], interior.radial_moment),
-            jnp.where(clipped.boundary, clipped_first[:, 1], interior.vertical_moment),
+            jnp.where(
+                boundary,
+                clipped_first[:, 0],
+                jnp.where(complete, interior.radial_moment, 0.0),
+            ),
+            jnp.where(
+                boundary,
+                clipped_first[:, 1],
+                jnp.where(complete, interior.vertical_moment, 0.0),
+            ),
         ],
         axis=1,
     )

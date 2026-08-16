@@ -576,38 +576,79 @@ class ForwardSource:
         core_support,
         common_support,
     ) -> CellCurrentMoments:
-        """Return the linear current moments selected by the moving boundary.
+        """Return current moments selected by the shared-node clip partition.
 
-        Complete cells use the fixed interior contraction. Cells crossed by
-        the last closed surface replace that result with the exact moments of
-        the locally linear core density; a declared common-SOL continuation
-        contributes the complementary clipped support.
+        The complementary core and common-SOL clips decide participation for
+        every cell: complete support uses the fixed interior contraction,
+        crossing support uses exact clipped moments, and absent support is
+        zero. Centroid domain labels remain available for closure identity and
+        receipts, but never switch geometric participation on or off.
         """
-        centroid_density = self.current_density(radius, masks)
-        shared_density = self.current_density(shared_radius, shared_masks)
-        interior = interior_moments(centroid_density, shared_density)
 
-        core_density = self.core.current_density(
-            radius, jnp.clip(masks.psi_norm, 0.0, 1.0)
+        def partitioned_moments(profile, centroid_flux, node_flux, support):
+            centroid_density = profile.current_density(radius, centroid_flux)
+            shared_density = profile.current_density(shared_radius, node_flux)
+            interior = interior_moments(centroid_density, shared_density)
+            clipped_current, clipped_first = support.linear_current_moments(
+                centroid_density, density_gradient(centroid_density)
+            )
+            boundary = support.boundary
+            complete = support.included & ~support.boundary
+            return CellCurrentMoments(
+                jnp.where(
+                    boundary,
+                    clipped_current,
+                    jnp.where(complete, interior.cell_current, 0.0),
+                ),
+                jnp.where(
+                    boundary,
+                    clipped_first[:, 0],
+                    jnp.where(complete, interior.radial_moment, 0.0),
+                ),
+                jnp.where(
+                    boundary,
+                    clipped_first[:, 1],
+                    jnp.where(complete, interior.vertical_moment, 0.0),
+                ),
+            )
+
+        core = partitioned_moments(
+            self.core,
+            jnp.clip(masks.psi_norm, 0.0, 1.0),
+            jnp.clip(shared_masks.psi_norm, 0.0, 1.0),
+            core_support,
         )
-        core_current, core_first = core_support.linear_current_moments(
-            core_density, density_gradient(core_density)
-        )
-        boundary_current = core_current
-        boundary_first = core_first
+        total = jnp.stack(core)
+
         if self.common_sol is not None:
-            common_density = self.common_sol.current_density(
-                radius, jnp.maximum(masks.psi_norm, 1.0)
+            common = partitioned_moments(
+                self.common_sol,
+                jnp.maximum(masks.psi_norm, 1.0),
+                jnp.maximum(shared_masks.psi_norm, 1.0),
+                common_support,
             )
-            common_current, common_first = common_support.linear_current_moments(
-                common_density, density_gradient(common_density)
-            )
-            boundary_current = boundary_current + common_current
-            boundary_first = boundary_first + common_first
+            total = total + jnp.stack(common)
 
-        boundary = core_support.boundary
-        return CellCurrentMoments(
-            jnp.where(boundary, boundary_current, interior.cell_current),
-            jnp.where(boundary, boundary_first[:, 0], interior.radial_moment),
-            jnp.where(boundary, boundary_first[:, 1], interior.vertical_moment),
-        )
+        if self.private_flux is not None:
+            centroid_selection = masks.private_flux
+            shared_selection = shared_masks.private_flux
+            centroid_density = jnp.where(
+                centroid_selection,
+                self.private_flux.current_density(
+                    radius, jnp.where(centroid_selection, masks.psi_norm, 1.0)
+                ),
+                0.0,
+            )
+            shared_density = jnp.where(
+                shared_selection,
+                self.private_flux.current_density(
+                    shared_radius,
+                    jnp.where(shared_selection, shared_masks.psi_norm, 1.0),
+                ),
+                0.0,
+            )
+            total = total + jnp.stack(
+                interior_moments(centroid_density, shared_density)
+            )
+
+        return CellCurrentMoments(*total)

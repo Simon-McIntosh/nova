@@ -246,7 +246,7 @@ class ForwardFluxOperator:
         return self.coupling_current_moments(moments)
 
     def current_domain_masks(self, psi) -> DomainMasks:
-        """Return domain labels that account LCFS-crossing current as core."""
+        """Return domain labels following the shared-node clip partition."""
         masks, topology = self.read(psi)
         if not self.use_linear_moments:
             return masks
@@ -255,7 +255,7 @@ class ForwardFluxOperator:
             self.polarity * (shared_flux - topology.boundary_flux)
         )
         label = jnp.where(
-            support.boundary,
+            support.included,
             jnp.asarray(int(PlasmaDomain.CORE), dtype=masks.label.dtype),
             masks.label,
         )

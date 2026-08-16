@@ -25,8 +25,8 @@
 <meta name="plan-modified" content="2026-08-16">
 <meta name="plan-commits" content="444d4d7d,acea51cb,bdd3120b,ca000f36,1a9bc9ff,7f89b853,6cafed36,070bddd2,02ddf888,dfe8ba70,fbc28097,020c4dc9,260ce85b,b774e696">
 <meta name="plan-artifacts" content="docs/evidence/archive/plasma-edge-current-representation-landed.html,nova/equilibrium/stencil_mesh.py,tests/test_equilibrium_stencil_mesh.py,nova/equilibrium/separatrix_clip.py,tests/test_equilibrium_separatrix_clip.py,nova/biot/polygonanalytic.py,tests/test_biotpolygonmoments.py,nova/biot/polysection.py,benchmarks/steep_edge_moment_demonstration.py,docs/figures/plasma-edge-current-representation/steep_edge_moment_findings.json,docs/figures/plasma-edge-current-representation/steep_edge_moment_convergence.svg">
-<meta name="plan-impl" content="0.89">
-<meta name="plan-version" content="11">
+<meta name="plan-impl" content="0.73">
+<meta name="plan-version" content="12">
 </head>
 <body>
   <main class="plan-doc">
@@ -266,6 +266,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20260816-targetcontraction" data-who="reckon-ship" data-when="2026-08-16T10:00:00+00:00">
     <div class="r-comment-body">target-moment-contraction landed - commit b774e696, merged on main; gate PASSED; TDD red observed (4 named tests); 56/56 across the new contraction tests and the existing target, topology, limiter and wall-flux suites. FluxTarget appends plasma_target_r and plasma_target_z AFTER the existing fields with concrete zero-block defaults, so every existing three-positional constructor stays valid; internal contracts (m0, mR, mZ) beside the retained single-vector uniform branch, and zero moment vectors reproduce all three uniform outputs BITWISE through both calls; the pytree widens to five children and round-trips; Limiter.target now builds by keyword, closing the positional-construction hazard the seam scout flagged. Remaining: the last substitution node - ForwardSource cell-current moments (interior stencil + clipped supports) routed through ForwardFluxOperator and the ForwardProfile receipts. impl 8/9 = 0.89. Record at /nova/evidence/archive/plasma-edge-current-representation-landed#target-moment-contraction</div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-20260816-tracedclipseam" data-who="reckon-ship" data-when="2026-08-16T10:20:00+00:00">
+    <div class="r-comment-body">source-moment-routing BLOCKED honestly with zero files changed, and the blocker is architectural: the solve's runtime carriers (ForwardFluxOperator; the production hex path's StencilMesh) hold centroids, areas and rings but NO cell polygons, shared-node mapping or fixed second moments; AtomicCellMesh.clip is eager numpy and unreachable from the jitted/vmapped fixed-point map; padded_linear_current_moments is traceable only once supports exist. A frozen-support shortcut would break moving-separatrix any-intersection and a centroid fallback would preserve the forbidden second current rule. SEAM DECISION, deduced from the programme's own record rather than invented: the clip must be TRACED - spine-efit-parity's gate ran the fixed-shape vmap-safe path precisely because eager-only parity would not transfer to the batched GPU route, so an eager host clip would strand the wired solve off the path every downstream consumer requires. Tractability is structural: the atomic-edge topology, cell polygons, shared nodes and second moments are all FIXED per mesh at build time; per iteration only node fluxes change, so crossings are sign-change masks with linearly interpolated positions at fixed capacity. The substitution splits into three nodes on that seam: traced fixed-capacity clip (separatrix_clip.py, pinned against the host clip on matched inputs); the static geometry carrier plus shared-node flux evaluation through the operator construction; then the original source routing. impl reduced 0.89 to 0.73 = 8/11 because the landing added two executable nodes rather than closing the section.</div>
 </div>
 </section>
 </main>

@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="coil-geometry-inversion">
   <meta name="plan-title" content="Coil Geometry Inversion — solve coil positions and shapes from vacuum measurements by autodiff">
   <meta name="plan-summary" content="The traced polygon Green&#x27;s kernel is verified autograd-able with respect to coil geometry (jacfwd against finite differences to 1e-6; values to 8e-12; second derivatives finite; jacrev consistent to 1e-12), so coil positions and shapes are solvable from vacuum measurements by gradient optimisation. Two problem classes: sensor-space (recorded currents fixed, optimise per-coil geometry against vacuum magnetics — the MAST case, seeded with Kirk&#x27;s measured as-built offsets) and flux-map-space (currents fixed, match a plasma-subtracted flux map). First stage: audit and refactor the remaining kernel classes (ring filament, arc, line, closed-form polygon) to the traced dual-namespace pattern with a traceable section pack.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
   <meta name="plan-capability-version" content="1.0">
@@ -21,9 +21,9 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-16">
-<meta name="plan-version" content="15">
-<meta name="plan-impl" content="0.9">
-<meta name="plan-commits" content="81ef6739,42ae9f60">
+<meta name="plan-version" content="17">
+<meta name="plan-impl" content="1.0">
+<meta name="plan-commits" content="81ef6739,42ae9f60,a7eedaf7">
 <meta name="plan-artifacts" content="docs/figures/geometry-recovery/geometry_recovery.npz,docs/figures/geometry-recovery/geometry_recovery_summary.json,docs/figures/geometry-recovery/recovery_ladder.png,docs/figures/geometry-recovery/mast_bounds.png,docs/research/mast-p4p5-geometry-solve.html">
 </head>
 <body>
@@ -113,27 +113,17 @@
     0.00022 µm RMS across four projected Kirk seeds. The survivor is current- or sensor-side;
     no registry correction issues. Merge <code>e941cfb8</code>; record:
     <a href="/nova/evidence/archive/coil-geometry-inversion-landed#s4">landed §4</a>.</li>
-    <li><strong>Problem class B — flux-map-space.</strong>
-    Given fixed coil currents and a target flux map with the plasma contribution subtracted
-    (an equilibrium-reconstruction by-product, or the toroidal-harmonic misfit maps), solve
-    the coil set's geometry to match the map on its grid. Same machinery, different data
-    functional — the form any machine can consume without raw sensor access. The named
-    application is the Sophelio Fusion Equilibrium Challenge (development phase closes
-    2026-10-18), and its premise is corrected here: verified against the challenge data page
-    on 2026-08-11, the dataset <em>ships</em> per-shot conductor geometry (coil positions,
-    section width/height, skew angles on six DIII-D F-coils) alongside coil currents, Thomson
-    profiles and 65×65 EFIT flux maps for 7,915 DIII-D shots (CC BY 4.0, magnetics withheld;
-    blind cross-machine target MAST, 1,206 shots, zero training) — see
-    <code>sophelio-challenge-geometry-sourcing</code>. The challenge-facing deliverable
-    therefore re-anchors from recovering the coil description to (a) <em>validating the
-    shipped DIII-D geometry</em> against label-derived fields through the identifiability
-    spectrum, and (b) <em>inferring what does not ship</em> — wall contour and passive/vessel
-    structure — from labeled ramp frames where eddy fields dominate the mismatch, feeding
-    <code>diiid-forward-onboarding</code>. The MAST-side science deliverable —
-    <em>recover a machine's coil positions from its published flux maps and currents
-    alone</em>, developed and scored on MAST as the oracle where our registry geometry is the
-    known truth — is unchanged and keeps its full validation ladder; a machine that carries
-    real geometry retains its structural edge on the cross-machine metric.</li>
+    <li class="section-landed"><span class="badge badge-shipped">✓ landed 2026-08-13 (MAST half)</span>
+    <strong>Problem class B — flux-map-space: the map functional confirms the sensor-space
+    verdict.</strong> A gridded flux-map data functional over the unchanged Gauss–Newton core
+    and nuisance projection (merge <code>6e0e2ff1</code>) fitted the reconciled harmonic maps
+    at 26×26 without interpolation: 2–3 affine directions resolved per member, whitened power
+    explained 65.4/68.5/26.8/3.3%, geometry equivalents 21–38× best resolution on the three
+    determined members, P5 upper with zero determined cells — independently preserving the
+    no-credible-correction verdict through a second data functional. The challenge-facing
+    DIII-D half (validate shipped geometry, infer wall/passive) moved to
+    <code>diiid-forward-onboarding</code>, which owns that machine and the 2026-10-18
+    deadline. Record: <a href="/nova/evidence/archive/coil-geometry-inversion-landed#s5">landed §5</a>.</li>
     <li class="section-landed"><span class="badge badge-shipped">✓ landed 2026-08-12</span>
     <strong>Validation ladder — the solver is calibrated, which is what licenses the verdict
     above.</strong> 4,096 recoveries at the measured noise floors: maximum synthetic mean bias
@@ -280,6 +270,11 @@ Done-when
     <pre class="r-fu-prompt">/reckon-ship coil-geometry-inversion §2</pre>
     <p class="r-fu-outcome">Moved to diiid-forward-onboarding as f-dfo-002 (foreign-owner: that plan owns the DIII-D description, the registry ingest route, and the challenge deadline). The MAST science this plan set out to deliver is complete: both problem classes solved with the same calibrated core, and the bounded negative reached independently by the sensor-space and flux-map functionals. The solver, coverage ladder, and flux-map functional transfer to the new owner unchanged. This plan ships once the rectangle-section prototype dispatched 2026-08-16 records its landing beat.</p>
     </article>
+<article class="r-fu" data-id="f-cgi-006" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-16" data-recommends-skill="/reckon-ship imas-ambix:machine-map-transform-engine" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Carry the rectangle-section decomposition into the MAST machine map (foreign-owner: imas-ambix machine-map-transform-engine)</h4>
+    <div class="r-fu-body">The measured verdict is that section representation is description content: the packaged hulls overstate section area by 6.3-26.0 percent per family and are measurably wrong near the pack at operating current, while every active family's store record is already finite rectangles (CS 656 half-weight cells, P2 12+8, P3 8, P4/P5 23 as 18+5, P6 4). The MAST machine map in imas-ambix should declare per-rectangle elements with pf_active element semantics, carrying turns only where the record supports them (P4/P5 yes; CS pending the parallel-feed adjudication; P6 ampere-turn channels, no turn count; coil cases as passive plates, never series turns). Foreign-owner: the map plan owns machine description; this plan's solver consumes whatever sections the map declares.</div>
+    <pre class="r-fu-prompt">/reckon-ship imas-ambix:machine-map-transform-engine</pre>
+    </article>
 </section>
 
 <section data-reckon="research" id="research" class="r-research-list">
@@ -295,6 +290,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260813-cgi-024" data-who="reckon-ship" data-when="2026-08-13T07:40:00+00:00">
     <div class="r-comment-body">§2.4 flux-map problem class landed — commit 42ae9f60; gate passed. FluxMapFunctional takes a two-dimensional target with one positive uncertainty per supported cell, a support mask and gridded nuisance columns; solve_flux_map flattens only supported cells and calls solve_geometry directly, so the damped Gauss–Newton core and the 13-column nuisance projection are UNCHANGED between the two problem classes — which is what makes the comparison below a like-for-like one. Synthetic ladder through the map functional: 128 draws at each of the 0.5, 1, 3 and 10 mm rungs, rigid and affine, all four members. THE REAL TEST used the reconciled plasma-subtracted harmonic map (archive bf1fbf07f246589e) sampled at every eighth published node to a 26x26 grid WITHOUT interpolation, carrying its own shot-resampling half-band as uncertainty plus a constant flux-gauge nuisance — so the two plans' outputs are wired together on real data rather than in prose. Result: 2, 3, 3 and 3 affine directions resolved; geometry-equivalent bias to best-resolution ratios 33.2, 38.2, 21.1 and 0.82; checkerboard fit ranges 17.81–24.88, 19.40–41.23, 18.84–22.62 and 1.17–1.82 mm; whitened power explained 65.4, 68.5, 26.8 and 3.3 percent; mean residual biases −0.80, −0.51, −1.43 and −0.10 sigma. The first three maps force geometry equivalents that are both implausibly large and grid-sensitive, and P5 upper has ZERO determined sampled cells — it sits below resolution and is unresolvable. VERDICT: the flux-map functional independently preserves the sensor-space conclusion that no credible geometry correction is resolvable at this array, now reached through a completely different data functional on a target the harmonics plan produced. 42 targeted tests passed.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260816-cgi-025" data-who="reckon-ship" data-when="2026-08-16T12:20:00+00:00">
+    <div class="r-comment-body">Section-representation prototype landed — commit a7eedaf7; gate passed — and the plan ships. The chamfered P4 pair resolves into five series-weighted rectangles carrying 6+6+6+4+1 of the 23 drive turns, derived from the chamfer with no fitting. Per drive ampere all three representations (hull, rectangle rows, 23-cell lattice) agree to at most 1.3e-3 of the 387 microtesla floor; at operating current the prior symmetry study puts lattice-vs-hull at 565-571 microtesla at the nearest probes — 1.46-1.48x the floor — while rows-vs-lattice stays below it. So the HULL is the representation that is measurably wrong near the pack at operating scale, and rectangle rows recover the lattice at a fifth of its elements. The machine-wide winding investigation (read-only node, findings banked in the session scratchpad and summarised in the evidence record §6) grounds the same conclusion per family with citations, and flags three electrical facts geometry must not assert: the CS turn-count conflict (304 published / 328 effective / 344.657 artifact under two parallel feeds), the unresolved P2 inner/outer interconnection, and archive counterexamples against the published P3 series pairing. Those belong to the supply-topology thread and the machine map, not to this solver.</div>
 </div>
 </section>
 </main>

@@ -108,6 +108,56 @@
     38 passed. Full reasoning in
     <a href="/nova/research/mast-p4p5-geometry-solve">the geometry-solve record</a>.</p>
 
+    <h2 id="s5">§5 — The flux-map functional reaches the same verdict independently</h2>
+
+    <p>Commit <code>42ae9f60</code>, merge <code>6e0e2ff1</code>. <code>FluxMapFunctional</code>
+    takes a gridded target with one positive uncertainty per supported cell and flattens only
+    supported cells into the <em>unchanged</em> Gauss–Newton core and nuisance projection — so
+    the comparison with §4 is like-for-like, not a second solver's opinion. The real target was
+    the reconciled plasma-subtracted harmonic map, sampled at every eighth published node to
+    26×26 without interpolation, carrying its own shot-resampling half-band as uncertainty.</p>
+
+    <table>
+      <thead><tr><th>Member</th><th>Affine dirs</th><th>Geometry equiv ÷ best resolution</th><th>Power explained</th><th>Residual bias</th></tr></thead>
+      <tbody>
+        <tr><td>P4 lower</td><td>2</td><td>33.2×</td><td>65.4%</td><td>−0.80σ</td></tr>
+        <tr><td>P4 upper</td><td>3</td><td>38.2×</td><td>68.5%</td><td>−0.51σ</td></tr>
+        <tr><td>P5 lower</td><td>3</td><td>21.1×</td><td>26.8%</td><td>−1.43σ</td></tr>
+        <tr><td>P5 upper</td><td>3</td><td>0.82×</td><td>3.3%</td><td>−0.10σ</td></tr>
+      </tbody>
+    </table>
+
+    <p>The determined members force geometry equivalents both implausibly large and
+    grid-sensitive; P5 upper has zero determined sampled cells. The bounded negative of §4 is
+    therefore reached twice, by two unrelated data functionals, on data produced by two
+    different plans. 42 targeted tests passed.</p>
+
+    <h2 id="s6">§6 — What the section representation is worth, measured</h2>
+
+    <p>Prototype commit <code>a7eedaf7</code> with banked artifacts under
+    <code>~/.cache/nova-mast/rectangle-sections/</code>, and the read-only winding-geometry
+    investigation delivered 2026-08-16. The chamfered P4/P5 pack resolves into
+    <strong>five series-weighted rectangles carrying 6+6+6+4+1 of the 23 drive turns</strong> —
+    the chamfer uniquely identifies the vacant 24th cell, so the decomposition needs no fitting.
+    Per drive ampere at the real array, the three representations are indistinguishable:
+    lattice-vs-hull at most 5.1×10<sup>−7</sup> T/A (1.3×10<sup>−3</sup> of the 387&nbsp;µT
+    floor), rows-vs-lattice at most 3.7×10<sup>−8</sup> T/A. At <em>operating</em> current the
+    ranking changes: the prior symmetry study measured the lattice-vs-hull difference at
+    565–571&nbsp;µT at the nearest probes — 1.46–1.48× the floor — while rows-vs-lattice stays
+    below it. The hull is therefore the one representation that is measurably wrong near the
+    pack at operating scale, and rectangle rows recover the lattice's prediction at a fifth of
+    its element count.</p>
+
+    <p>The winding investigation generalises this machine-wide with citations: every active
+    family's store record is already finite rectangles (CS 656 half-weight cells; P2 12+8 per
+    side; P3 8; P4/P5 23 as 18+5; P6 4), the packaged registry's convex hulls overstate section
+    area by 6.3–26.0% per family, and three electrical facts must not be inferred from geometry —
+    the CS 304/328/344.657 turn-count conflict under its two-parallel-feed model, the unresolved
+    P2 inner/outer interconnection, and the archive counterexamples against the published P3
+    series pairing. Consequence for ownership: the rectangle decomposition is
+    <em>description</em> content and lands in the machine map, not in this plan's solver, which
+    consumes whatever sections the description declares.</p>
+
   </main>
 </body>
 </html>

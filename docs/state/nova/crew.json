@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T13:27:38",
+  "updated": "2026-08-16T13:40:32",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -120,7 +120,7 @@
         "id": "geo-research",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a00a54-1ea1-7b13-b789-29fe5164a74f",
         "created": "2026-08-16"
       },
       {
@@ -239,7 +239,7 @@
         "id": "rect-prototype",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a00a54-cace-7fc1-bfda-2ef1b1f01fa8",
         "created": "2026-08-16"
       },
       {
@@ -267,7 +267,7 @@
         "id": "supply-topology",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a00a54-6e81-7761-85eb-33e193da78cc",
         "created": "2026-08-16"
       },
       {
@@ -5409,9 +5409,107 @@
           "tokens": null,
           "utilisation_pct": null
         }
+      },
+      {
+        "run_id": "r-20260816T112841470126-rectangle-section-prototype",
+        "plan": "coil-geometry-inversion",
+        "section": "\u00a72",
+        "node": "rectangle-section-prototype",
+        "role": "implement",
+        "member": "rect-prototype",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T11:28:43Z",
+        "completed_at": "2026-08-16T11:38:44Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 601,
+        "time_budget": "60m",
+        "base_sha": "9315ab5229563e2e7e89576470a3a153f6f43df0",
+        "commits": [
+          "a7eedaf7"
+        ],
+        "changed_lines": {
+          "added": 0,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/0738e6b1-3bc0-4082-a69e-59214ef05a7c/scratchpad/rectangle-section-prototype-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00a54-cace-7fc1-bfda-2ef1b1f01fa8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 2593280,
+            "input_tokens": 2744146,
+            "output_tokens": 25828,
+            "reasoning_output_tokens": 9197
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260816T112757420981-coil-geometry-research",
+        "plan": "mast-p4p5-circuit-provenance",
+        "section": "\u00a72",
+        "node": "coil-geometry-research",
+        "role": "investigate",
+        "member": "geo-research",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-16T11:27:59Z",
+        "completed_at": "2026-08-16T11:39:13Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 674,
+        "time_budget": "45m",
+        "base_sha": "9315ab5229563e2e7e89576470a3a153f6f43df0",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/0738e6b1-3bc0-4082-a69e-59214ef05a7c/scratchpad/coil-geometry-research-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00a54-1ea1-7b13-b789-29fe5164a74f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 5072896,
+            "input_tokens": 5542981,
+            "output_tokens": 25292,
+            "reasoning_output_tokens": 7518
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 175
+    "_version": 180
   }
 }

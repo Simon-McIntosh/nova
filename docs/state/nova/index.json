@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-15T22:46:16",
+  "updated": "2026-08-16T15:12:30",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -147,7 +147,7 @@
       },
       {
         "id": "S6",
-        "status": "active",
+        "status": "done",
         "theme": "Close the P4/P5 misfit source and promote the calibration machinery",
         "items": [
           {
@@ -251,11 +251,12 @@
             }
           }
         ],
-        "description": "Two arms. Source closure: recover the flux loops (per-loop gains; the 2-pi convention is measured), build toroidal-harmonic contour maps of the surviving misfit, and resolve the P4/P5 provenance candidates (the description's own 17.3 mm / 3% member asymmetry first). Infrastructure: promote the diagnostic-calibration ladder to a unit-tested machine-agnostic nova/calibrate package, give every correction a versioned pulse-range-scoped schema (LinkML candidate), harvest the vacuum windows every pulse carries (offsets, integrator drift, closure) across the whole archive, and solve coil positions and shapes from vacuum measurements by autodiff through the traced Green's kernels (geometry Jacobians verified exact 2026-08-07)."
+        "description": "Two arms. Source closure: recover the flux loops (per-loop gains; the 2-pi convention is measured), build toroidal-harmonic contour maps of the surviving misfit, and resolve the P4/P5 provenance candidates (the description's own 17.3 mm / 3% member asymmetry first). Infrastructure: promote the diagnostic-calibration ladder to a unit-tested machine-agnostic nova/calibrate package, give every correction a versioned pulse-range-scoped schema (LinkML candidate), harvest the vacuum windows every pulse carries (offsets, integrator drift, closure) across the whole archive, and solve coil positions and shapes from vacuum measurements by autodiff through the traced Green's kernels (geometry Jacobians verified exact 2026-08-07).",
+        "summary": "Closed 2026-08-16 at 8/8 plans shipped, 100 percent implementation, empty ready set, no wiring findings. Source-closure arm: no 2-pi flux convention exists and 18 loops entered as published, lifting current-space rank 10/13 to 13/13; static P4/P5 geometry excluded twice by independent functionals (bounded negative, no registry correction); the circuit-basis test then reframed the anomaly table - P2 collapses to one link-board freedom (outer central ratio 1.4772 left for the 12:8 ampere-turn adjudication), P3 and P6 stay real in every basis, and all 13 P4-lower survivor shots are lower-only member surveys whose candidates now include the survey supply's own cabling. Harmonic maps published as gridded solve targets; residue recorded as a lower bound pending the saddle loops owned by S3. Infrastructure arm: nova/calibrate complete at nine capabilities; corrections document at 160 records under set_version 1.1.0 with honest recorded-versus-promoted pins; registry cut over to 44 unique loop positions (join 39 to 43, physical digest b55c5bb005a2cb67) with the OCI republication retired as describing a channel that does not exist; the 17,111-pulse archive swept into a million banked instrument-term fits with the transition question closed on its measured structural bound; portability demonstrated on TCV 77549 with unchanged kernels. Feeds S7 (spine-efit-parity via the corrected read layer) and S8 (mast-catalog-gpu-solve). Machine-description packaging moves to imas-ambix S22 with nova S11 retiring the bespoke layer behind an equivalence gate."
       },
       {
         "id": "S7",
-        "status": "planned",
+        "status": "active",
         "theme": "Prove the physics spine against EFIT",
         "items": [
           {
@@ -432,6 +433,19 @@
                 "risk": "elevated"
               }
             }
+          },
+          {
+            "slug": "sol-current-demonstration",
+            "why_now": "Owner commission 2026-08-16: with the linear edge-current representation wired through the solve, a short proof of principle shows SOL current operating - finite continuous j across the separatrix on an Eich-scaled width, maintained along the common SOL to the divertor target, zero in the private region - before any EFIT-facing work consumes the SOL machinery.",
+            "done_when": "Two forward solutions at identical net plasma current (confined control vs SOL-carrying) with FSA j profiles and matched-level contour overlays banked; the psi_N support-limit ladder (1.05, 1.10, ...) measured; private-flux-zero, net-current-identity and strike-point-continuity assertions green.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
           }
         ],
         "starts": "2026-08-10",
@@ -548,7 +562,7 @@
         "description": "Nova is a physics solver; producing and packaging machine description is not its job. Once the map-driven producer in imas-ambix serves MAST descriptions, remove the three surfaces that grew here only because nothing else carried the geometry: the nova-machine-geometry-registry schema with its physical and registry digests, the content-addressed artifact caches and the OCI reference helper nothing publishes through, and the machine-specific solve-input IDS builder. The geometry itself is kept and migrates into the MAST map. The digest scheme goes because it answers 'is this the same machine' as a single global question, which a machine whose geometry changes across and within campaigns cannot satisfy \u2014 which is why it needed a coordinated cutover every time the description moved."
       }
     ],
-    "active_sprint_id": "S6",
+    "active_sprint_id": "S7",
     "timeline": [
       {
         "when": "2026-07-29",
@@ -649,6 +663,16 @@
         "when": "2026-08-13",
         "who": "reckon-ship",
         "what": "S7 scope corrected on owner direction after a premise error was caught. The frozen-six parity gate was driving ReconstructProfile.least_squares_map through newton_krylov - a whitened least-squares fit to measured magnetics with a hard measured-current equality - so it inferred the flux functions rather than being given them and scored a fitted state against EFIT. That is an inverse solve, outside the forward class nova's own locked matrix assigns it, and its converged_fraction=0 is a fit failing to converge rather than the Grad-Shafranov fixed point failing. The intended demonstration - the free-boundary fixed point given a reference's own flux functions and conductor currents, with no measurement in the path - has never been run. Three plans added to carry it: efit-map-inversion (read the reference correctly), efit-flux-decomposition (validate the external field that is the free-boundary condition), efit-forward-parity (the demonstration itself, replacing the reconstruction gate as the parity claim and inheriting the mast-catalog-gpu-solve block). Evidence already landed from three probe nodes: efm DOES store pprime [time,65] Pa-rad/Wb and ffprime [time,65] T-rad on a 65-point uniform psi_norm, with 397 forward-usable rows exactly matching the usable geometry count, so a forward solve can be driven from stored values; no COCOS is declared in the file, derived digits are compatible with source COCOS 3 with sigma_RphiZ undeterminable. Owner direction to mask the plasma current with the given LCFS is locked as a decision and was decisive - unmasked, 1421 cells closed plasma current at -42.88%; masked to the stored 151-vertex boundary, 938 cells close at -0.0275%, a factor of about 1560, with derived current density correlating 0.999920 against the stored field. The mask also isolates the exterior signal as a measurable diagnostic: -9.605 MA signed and 10.080 MA absolute outside the plasma. The R^4 rotation term is resolved above its own standard error in 11 of 24 bins, so two terms do not suffice everywhere and the physical-versus-numerical separation is its own section."
+      },
+      {
+        "when": "2026-08-16",
+        "who": "Simon McIntosh (via reckon-ship)",
+        "what": "S7 progress recorded from the plan ledger: the sprint grew from 6 to 14 items through the forward-equilibrium decomposition and 8 are complete at 83.9 percent implementation. Landed by parallel sessions: spine-boundary-accelerator and efit-map-inversion shipped; spine-efit-parity at 99 percent on the corrected read layer; flux-function-forward-equilibrium at 100 percent awaiting closure; plasma-edge-current-representation at 91 percent with a source-moment node live; efit-flux-decomposition at 85 percent. The S6-to-S7 gate mast-corrected-read-layer shipped, so the critical path now runs efit-flux-decomposition to efit-forward-parity to mast-catalog-gpu-solve. Status corrected planned-to-active to match the ledger: more than half the sprint's work has executed."
+      },
+      {
+        "when": "2026-08-16",
+        "who": "Simon McIntosh (via reckon-ship)",
+        "what": "S6 closed: 8/8 shipped. Both sprint questions closed on measurement - the misfit source is current- or sensor-side with the P4-lower survivor reclassified as a separately-driven survey configuration, and the calibration machinery is a tested machine-agnostic package whose portability is demonstrated on TCV. Continuations: S7 and S8 fed directly; the saddle-loop residue split owned by S3; machine-description packaging owned by imas-ambix S22 and nova S11."
       }
     ],
     "blockers": [
@@ -681,6 +705,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 37
+    "_version": 40
   }
 }

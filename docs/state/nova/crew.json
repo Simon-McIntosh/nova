@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T12:07:59",
+  "updated": "2026-08-16T17:01:35",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -117,6 +117,13 @@
         "created": "2026-08-12"
       },
       {
+        "id": "geo-research",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a00a54-1ea1-7b13-b789-29fe5164a74f",
+        "created": "2026-08-16"
+      },
+      {
         "id": "geometry-solve",
         "harness": "codex",
         "role": "implement",
@@ -229,6 +236,13 @@
         "created": "2026-08-12"
       },
       {
+        "id": "rect-prototype",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a00a54-cace-7fc1-bfda-2ef1b1f01fa8",
+        "created": "2026-08-16"
+      },
+      {
         "id": "registry",
         "harness": "codex",
         "role": "implement",
@@ -248,6 +262,13 @@
         "role": "implement",
         "session_id": "01a00738-4206-7582-b3b5-e5ed51fa5e91",
         "created": "2026-08-15"
+      },
+      {
+        "id": "supply-topology",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a00a54-6e81-7761-85eb-33e193da78cc",
+        "created": "2026-08-16"
       },
       {
         "id": "topology-parity",
@@ -5388,9 +5409,465 @@
           "tokens": null,
           "utilisation_pct": null
         }
+      },
+      {
+        "run_id": "r-20260816T112841470126-rectangle-section-prototype",
+        "plan": "coil-geometry-inversion",
+        "section": "\u00a72",
+        "node": "rectangle-section-prototype",
+        "role": "implement",
+        "member": "rect-prototype",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T11:28:43Z",
+        "completed_at": "2026-08-16T11:38:44Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 601,
+        "time_budget": "60m",
+        "base_sha": "9315ab5229563e2e7e89576470a3a153f6f43df0",
+        "commits": [
+          "a7eedaf7"
+        ],
+        "changed_lines": {
+          "added": 0,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/0738e6b1-3bc0-4082-a69e-59214ef05a7c/scratchpad/rectangle-section-prototype-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00a54-cace-7fc1-bfda-2ef1b1f01fa8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 2593280,
+            "input_tokens": 2744146,
+            "output_tokens": 25828,
+            "reasoning_output_tokens": 9197
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260816T112757420981-coil-geometry-research",
+        "plan": "mast-p4p5-circuit-provenance",
+        "section": "\u00a72",
+        "node": "coil-geometry-research",
+        "role": "investigate",
+        "member": "geo-research",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-16T11:27:59Z",
+        "completed_at": "2026-08-16T11:39:13Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 674,
+        "time_budget": "45m",
+        "base_sha": "9315ab5229563e2e7e89576470a3a153f6f43df0",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/0738e6b1-3bc0-4082-a69e-59214ef05a7c/scratchpad/coil-geometry-research-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00a54-1ea1-7b13-b789-29fe5164a74f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 5072896,
+            "input_tokens": 5542981,
+            "output_tokens": 25292,
+            "reasoning_output_tokens": 7518
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260816T112818093252-supply-topology-research",
+        "plan": "mast-misfit-toroidal-harmonics",
+        "section": "\u00a72",
+        "node": "supply-topology-research",
+        "role": "investigate",
+        "member": "supply-topology",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-16T11:28:20Z",
+        "completed_at": "2026-08-16T11:42:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 869,
+        "time_budget": "45m",
+        "base_sha": "9315ab5229563e2e7e89576470a3a153f6f43df0",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/0738e6b1-3bc0-4082-a69e-59214ef05a7c/scratchpad/supply-topology-research-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00a54-6e81-7761-85eb-33e193da78cc",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 5769984,
+            "input_tokens": 6200882,
+            "output_tokens": 34058,
+            "reasoning_output_tokens": 10056
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260816T114412224137-circuit-basis-inversion",
+        "plan": "mast-misfit-toroidal-harmonics",
+        "section": "\u00a72",
+        "node": "circuit-basis-inversion",
+        "role": "implement",
+        "member": "flux-loops",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T11:44:14Z",
+        "completed_at": "2026-08-16T12:32:11Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2877,
+        "time_budget": "60m",
+        "base_sha": "fbeed40b5092bc4205c18161b6f4087f6c2e8169",
+        "commits": [
+          "4fdb7a03"
+        ],
+        "changed_lines": {
+          "added": 1672,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/0738e6b1-3bc0-4082-a69e-59214ef05a7c/scratchpad/circuit-basis-inversion-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff706-9a2b-7243-97f3-9e101baa0562",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 44097280,
+            "input_tokens": 45220637,
+            "output_tokens": 136641,
+            "reasoning_output_tokens": 42685
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260816T123510209326-harmonic-verdict",
+        "plan": "mast-misfit-toroidal-harmonics",
+        "section": "\u00a72",
+        "node": "harmonic-verdict",
+        "role": "implement",
+        "member": "harmonics",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T12:35:12Z",
+        "completed_at": "2026-08-16T12:41:22Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 370,
+        "time_budget": "45m",
+        "base_sha": "c7fe9ee3a3006f27a5f8c420c517f78289d3b51e",
+        "commits": [
+          "75da1c2d"
+        ],
+        "changed_lines": {
+          "added": 100,
+          "removed": 8,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/0738e6b1-3bc0-4082-a69e-59214ef05a7c/scratchpad/harmonic-verdict-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff707-6400-7580-8da2-e2a75d8896fe",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 18550272,
+            "input_tokens": 19381320,
+            "output_tokens": 77848,
+            "reasoning_output_tokens": 22762
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260816T123533999123-transition-observable",
+        "plan": "vacuum-signature-extraction",
+        "section": "\u00a72",
+        "node": "transition-observable",
+        "role": "implement",
+        "member": "vacuum-windows",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T12:35:36Z",
+        "completed_at": "2026-08-16T12:50:35Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 899,
+        "time_budget": "60m",
+        "base_sha": "c7fe9ee3a3006f27a5f8c420c517f78289d3b51e",
+        "commits": [
+          "6f0b11ed"
+        ],
+        "changed_lines": {
+          "added": 684,
+          "removed": 77,
+          "files": 5
+        },
+        "tests_added": 14,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/0738e6b1-3bc0-4082-a69e-59214ef05a7c/scratchpad/transition-observable-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff740-cea5-7b52-9521-1e7339657bf8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 30467840,
+            "input_tokens": 31491289,
+            "output_tokens": 122240,
+            "reasoning_output_tokens": 32320
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260816T125149270009-portability-proof",
+        "plan": "vacuum-signature-extraction",
+        "section": "\u00a72",
+        "node": "portability-proof",
+        "role": "implement",
+        "member": "vacuum-windows",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T12:51:51Z",
+        "completed_at": "2026-08-16T13:06:02Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 851,
+        "time_budget": "45m",
+        "base_sha": "38c9b0b0bc67446adc886532ff13e071875b7461",
+        "commits": [
+          "e8db81ab"
+        ],
+        "changed_lines": {
+          "added": 214,
+          "removed": 1,
+          "files": 2
+        },
+        "tests_added": 12,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/0738e6b1-3bc0-4082-a69e-59214ef05a7c/scratchpad/portability-proof-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff740-cea5-7b52-9521-1e7339657bf8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 38584320,
+            "input_tokens": 39769279,
+            "output_tokens": 149174,
+            "reasoning_output_tokens": 40414
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260816T124242549674-bank-regeneration",
+        "plan": "mast-misfit-toroidal-harmonics",
+        "section": "\u00a72",
+        "node": "bank-regeneration",
+        "role": "implement",
+        "member": "flux-loops",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T12:42:44Z",
+        "completed_at": "2026-08-16T13:08:36Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1552,
+        "time_budget": "60m",
+        "base_sha": "273a66dacecd41c5d3442bfdea745fee5c8bab4a",
+        "commits": [
+          "8bbb0e3f"
+        ],
+        "changed_lines": {
+          "added": 4125,
+          "removed": 1906,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/0738e6b1-3bc0-4082-a69e-59214ef05a7c/scratchpad/bank-regeneration-manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff706-9a2b-7243-97f3-9e101baa0562",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 56703232,
+            "input_tokens": 58109680,
+            "output_tokens": 173299,
+            "reasoning_output_tokens": 51229
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260816T100950284801-source-moment-routing",
+        "plan": "plasma-edge-current-representation",
+        "section": "\u00a76",
+        "node": "source-moment-routing",
+        "role": "implement",
+        "member": "coupling-blocks",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T10:09:52Z",
+        "completed_at": "2026-08-16T15:00:54Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 17462,
+        "time_budget": "25m",
+        "base_sha": "0b9812b032e80d1709286860496b73ad7961317d",
+        "commits": [
+          "e3a7d843"
+        ],
+        "changed_lines": {
+          "added": 649,
+          "removed": 43,
+          "files": 5
+        },
+        "tests_added": 6,
+        "gate": "not-run",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/source-moment-routing-manifest.md",
+        "scope_changed": true,
+        "session_id": "01a009c8-8ac4-7a50-806e-c28169dbfc66",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 128980480,
+            "input_tokens": 131066994,
+            "output_tokens": 269074,
+            "reasoning_output_tokens": 96580
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 172
+    "_version": 187
   }
 }

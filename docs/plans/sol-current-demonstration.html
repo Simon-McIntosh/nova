@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sol-current-demonstration">
+  <meta name="plan-title" content="SOL Current Demonstration — finite j across the separatrix to the divertor target">
+  <meta name="plan-summary" content="Proof of principle that scrape-off-layer current operates in the forward solve: a finite, continuous toroidal current density crossing the separatrix, decaying on an Eich-scaled width through the common SOL all the way to the divertor target, with zero current in the private-flux region — demonstrated by two forward solutions at identical net plasma current, one confined and one carrying SOL current">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="2.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint" content="S7">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-depends-on" content="plasma-edge-current-representation">
+  <meta name="plan-informs" content="flux-function-forward-equilibrium">
+  <title>SOL Current Demonstration | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — What the demonstration must show</h2>
+
+    <p><strong>Owner commission 2026-08-16.</strong> A short proof of principle that SOL currents operate
+    in the forward solve and can be maintained all the way to the divertor target, while the private-flux
+    region carries no current. The target is a finite and <em>continuous</em> j crossing the separatrix
+    and extending into the SOL — not a sheet, not a jump — with <strong>no artificial normalised-flux
+    truncation</strong>: the exponential closure itself drives the current to zero, and the support is
+    the whole common-SOL mask, which the material boundary already bounds. A cutoff at 1.05 or 1.10
+    would reintroduce exactly the support-edge discontinuity class the edge representation was built to
+    remove.</p>
+
+    <p>The machinery this rides on is landed: the linear edge-current representation carries clipped
+    boundary supports and exterior moments in the same three per-iteration vectors with no new coupling
+    blocks; the topology read supplies common-SOL and private-flux masks; and the forward solve's SOL
+    continuation contract (value and first-derivative continuity at the separatrix, independent
+    private-flux policy) is in place from the forward-equilibrium plan. This plan composes them into a
+    physical demonstration; it does not add solver machinery.</p>
+
+    <h2 id="s2">§2 — The SOL current closure</h2>
+
+    <p>The SOL width and fall-off come from the Eich scaling: the heat-flux width λ_q evaluated from the
+    equilibrium's poloidal field sets the physical decay length at the outboard midplane, mapped into
+    normalised flux to give the e-folding of j(ψ_N) for ψ_N &gt; 1. The decay is exponential; a dual
+    e-folding variant (a narrow λ_q channel plus a broader spreading length) is measured beside the
+    single-length form rather than assumed. Continuity at the separatrix is by construction: the SOL
+    profile starts from the confined profile's separatrix value, so j is finite and continuous across
+    ψ_N = 1.</p>
+
+    <p><strong>Domain discipline:</strong> the SOL source lives on the common-SOL mask only, following
+    field lines to their strike points on the material boundary — the current is maintained to the
+    divertor target because the support extends to where the common-SOL flux surfaces meet the wall. The
+    private-flux region is excluded by its topology label: it receives zero current however far its flux
+    values sit below the support limit. This is the connectivity distinction the domain machinery
+    already draws; the demonstration asserts it live.</p>
+
+    <h2 id="s3">§3 — Two solutions, one net current</h2>
+
+    <p>Run two forward solutions on the same machine at <strong>identical net plasma current</strong> and
+    p′/FF′ profiles as close as the closure permits: one with all current inside the LCFS (the confined
+    control), one with part of the current flowing in the SOL under the §2 closure. Report:</p>
+
+    <ul>
+      <li><strong>⟨j⟩ flux-surface-average profiles</strong> for both solutions across the full ψ_N range
+      including the SOL leg, showing the finite continuous crossing at ψ_N = 1 and the Eich-scaled decay;</li>
+      <li><strong>discrete-contour flux-map comparisons</strong> of the two solutions (matched levels),
+      localising where the SOL current moves the equilibrium — boundary shape, x-point, strike-point
+      geometry;</li>
+      <li>the measured support extent per width variant: the ψ_N at which j falls below a stated
+      insignificance floor (e.g. 1e-6 of its separatrix value) — an outcome of the closure, never an
+      imposed limit;</li>
+      <li>live assertions: zero current on the private-flux mask in every case; net-current identity
+      between the two solutions to solver precision; current present on common-SOL cells adjacent to the
+      strike points (maintained to the target).</li>
+    </ul>
+
+    <p><em>Done-when:</em> both solutions converge on the same machine with the net-current identity and
+    private-flux-zero assertions green; the ⟨j⟩ profiles and matched-level contour overlays are banked as
+    figures with the measured support extent per width variant; and the divertor-target continuity is
+    asserted on the strike-point cells rather than claimed.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="sol-width-closure" data-choice="eich-exponential" data-by="Simon McIntosh" data-when="2026-08-16T10:30:00+00:00">
+    <p class="r-dec-q">What sets the SOL current width and fall-off?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="eich-exponential">Eich-scaled width with exponential decay; dual e-folding measured beside it</button>
+      <button class="r-opt" data-value="free-parameter">a free width parameter tuned per case</button>
+      </p>
+    <p class="r-dec-rat">Owner direction 2026-08-16: use the Eich scaling to set the SOL width and the
+        fall-off of current in the SOL — exponential decay, possibly with dual e-folding lengths. The
+        dual-length variant is measured beside the single length rather than assumed.</p>
+    </div>
+<div class="r-dec" data-key="private-region-current" data-choice="excluded" data-by="Simon McIntosh" data-when="2026-08-16T10:30:00+00:00">
+    <p class="r-dec-q">Does the private-flux region carry SOL current?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="excluded">no — zero current on the private-flux mask, asserted live</button>
+      <button class="r-opt" data-value="continued">yes — continue the SOL profile into private flux</button>
+      </p>
+    <p class="r-dec-rat">Owner direction 2026-08-16: maintain SOL current all the way to the divertor
+        target whilst not solving currents in the private region. The topology label, not the flux value,
+        excludes the private region — matching the locked domain discipline of the forward-equilibrium
+        plan.</p>
+    </div>
+<div class="r-dec" data-key="support-limit-ladder" data-choice="closure-driven" data-by="Simon McIntosh" data-when="2026-08-16T11:50:00+00:00">
+    <p class="r-dec-q">Where does the SOL current support end?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="closure-driven">nowhere artificial — the exponential closure drives j to zero over the whole common-SOL mask</button>
+      <button class="r-opt" data-value="measured-ladder">a measured ladder of normalised-flux limits (1.05, 1.10, …)</button>
+      <button class="r-opt" data-value="single-limit">one fixed limit</button>
+      </p>
+    <p class="r-dec-rat">Owner refinement 2026-08-16 (superseding the same-day ladder direction): with an
+        exponential fall-off there is no need to truncate — the closure definition itself drives the
+        current to zero, the common-SOL mask is already bounded by the material boundary, and an
+        artificial ψ_N cutoff would reintroduce the support-edge discontinuity class the edge
+        representation removed. The support extent is reported as a measurement — the ψ_N where j falls
+        below a stated insignificance floor per width variant — never imposed.</p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-scd-001" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-16" data-recommends-skill="/reckon-ship sol-current-demonstration" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Run the demonstration once the solve-path routing has landed</h4>
+    <div class="r-fu-body"><p>All three decisions are locked by owner direction. The demonstration needs
+        the wired linear representation (the routing node of plasma-edge-current-representation §6) so the
+        SOL supports ride the production moment vectors; it dispatches as soon as that node is merged.
+        §2's closure and §3's two-solution comparison are one node each, with the figures and live
+        assertions inside the demonstration node.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship sol-current-demonstration</pre>
+    </article>
+</section>
+  </main>
+</body>
+</html>

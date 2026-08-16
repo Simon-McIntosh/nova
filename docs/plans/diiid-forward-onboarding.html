@@ -4,25 +4,27 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="nova">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="diiid-forward-onboarding">
-  <meta name="plan-title"     content="DIII-D Forward Onboarding">
-  <meta name="plan-summary"   content="Onboard a second machine entirely from its shipped description and complete the forward stack the magnetics-free entry needs: DIII-D geometry through the registry route, limiter-topology solve mode, passive circuit forwards, the response-kernel library with label-map extraction, and measured batched throughput with vertical-conditioning receipts">
-  <meta name="plan-status"    content="active">
-  <meta name="plan-roi"       content="high">
-  <meta name="plan-effort"    content="L">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="diiid-forward-onboarding">
+  <meta name="plan-title" content="DIII-D Forward Onboarding">
+  <meta name="plan-summary" content="Onboard a second machine entirely from its shipped description and complete the forward stack the magnetics-free entry needs: DIII-D geometry through the registry route, limiter-topology solve mode, passive circuit forwards, the response-kernel library with label-map extraction, and measured batched throughput with vertical-conditioning receipts">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="L">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-capability-risk" content="elevated">
-  <meta name="plan-sprint"    content="S10">
-  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-sprint" content="S10">
+  <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-depends-on" content="flux-function-forward-equilibrium">
-  <meta name="plan-blocks"    content="imas-ambix:magnetics-free-equilibrium-recovery">
+  <meta name="plan-blocks" content="imas-ambix:magnetics-free-equilibrium-recovery">
   <title>DIII-D Forward Onboarding | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-16">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -97,52 +99,55 @@
     conditioning receipt wired through the seam; branch-continuity behaviour pinned by tests.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="diiid-geometry-authority" data-choice="dataset-primary-external-wall" data-by="Simon McIntosh" data-when="2026-08-11">
-        <p class="r-dec-q">Which source is authoritative for the DIII-D machine description?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="dataset-primary-external-wall">Dataset-shipped conductor geometry is primary; external published descriptions supply only what does not ship (wall, passive) and serve as cross-checks; all external material disclosed</button>
-          <button class="r-opt" data-value="external-primary">External machine description primary, dataset geometry as check</button>
-        </p>
-        <p class="r-dec-rat">The scorer's ground truth was produced against the machine the dataset
-        describes; the shipped geometry is the challenge's own contract. External files fill the two
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="diiid-geometry-authority" data-choice="dataset-primary-external-wall" data-by="Simon McIntosh" data-when="2026-08-11">
+    <p class="r-dec-q">Which source is authoritative for the DIII-D machine description?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="dataset-primary-external-wall">Dataset-shipped conductor geometry is primary; external published descriptions supply only what does not ship (wall, passive) and serve as cross-checks; all external material disclosed</button>
+      <button class="r-opt" data-value="external-primary">External machine description primary, dataset geometry as check</button>
+      </p>
+    <p class="r-dec-rat">The scorer&#x27;s ground truth was produced against the machine the dataset
+        describes; the shipped geometry is the challenge&#x27;s own contract. External files fill the two
         holes (wall, passive) and validate the rest.</p>
-      </div>
-      <div class="r-dec" data-key="vertical-authority" data-choice="nk-plus-attribution" data-by="Simon McIntosh" data-when="2026-08-11">
-        <p class="r-dec-q">How is vertical placement handled without magnetics?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="nk-plus-attribution">No solver-side constraint hook: NK-stabilised converged solves place the plasma; LCFS misfit is attributed by ambix across coil currents, positions, passive currents and flux profiles; nova emits an n=0 conditioning receipt</button>
-          <button class="r-opt" data-value="constraint-hook">Typed vertical-position constraint enforced inside the solve</button>
-        </p>
-        <p class="r-dec-rat">The recorded coil currents are the closed-loop currents — the information
+    </div>
+<div class="r-dec" data-key="vertical-authority" data-choice="nk-plus-attribution" data-by="Simon McIntosh" data-when="2026-08-11">
+    <p class="r-dec-q">How is vertical placement handled without magnetics?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="nk-plus-attribution">No solver-side constraint hook: NK-stabilised converged solves place the plasma; LCFS misfit is attributed by ambix across coil currents, positions, passive currents and flux profiles; nova emits an n=0 conditioning receipt</button>
+      <button class="r-opt" data-value="constraint-hook">Typed vertical-position constraint enforced inside the solve</button>
+      </p>
+    <p class="r-dec-rat">The recorded coil currents are the closed-loop currents — the information
         that placed the plasma is already in the inputs. A constraint hook would smuggle a fitting term
         into the forward solve and break the seam authority; the receipt gives the consumer the
         conditioning information a hook would have hidden.</p>
-      </div>
-      <div class="r-dec" data-key="passive-model-order" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">How many vessel eigenmodes per machine does vertical placement and ramp fidelity require?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="minimal-two-four">2–4 modes, order chosen by the labeled-ramp-frame study</button>
-          <button class="r-opt" data-value="extended-ladder">Extended mode ladder with per-era refinement</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+    </div>
+<div class="r-dec" data-key="passive-model-order" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">How many vessel eigenmodes per machine does vertical placement and ramp fidelity require?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="minimal-two-four">2–4 modes, order chosen by the labeled-ramp-frame study</button>
+      <button class="r-opt" data-value="extended-ladder">Extended mode ladder with per-era refinement</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-dfo-001" data-status="open"
-               data-capability-version="1.0" data-capability-class="orchestrator"
-               data-written-by="reckon-create" data-written-at="2026-08-11">
-        <h4 class="r-fu-title">Ingest the shipped DIII-D description and pass the vacuum kill gate (§2)</h4>
-        <div class="r-fu-body"><p>First rung and first kill gate: shipped conductor geometry through the
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-dfo-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-08-11" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Ingest the shipped DIII-D description and pass the vacuum kill gate (§2)</h4>
+    <div class="r-fu-body"><p>First rung and first kill gate: shipped conductor geometry through the
         registry route (parallelogram sections via the polygonal-section kernels), wall/passive sourced
         externally with provenance, vacuum ψ on the shipped grid checked against the starter-kit bar.
         Runnable as soon as the sibling equilibrium-forward contract's remaining §3 items land; the §5
         extraction hardening can proceed in parallel off the transport-seam machinery.</p></div>
-        <pre class="r-fu-prompt">/reckon-ship diiid-forward-onboarding §2</pre>
-      </article>
-    </section>
+    <pre class="r-fu-prompt">/reckon-ship diiid-forward-onboarding §2</pre>
+    </article>
+<article class="r-fu" data-id="f-dfo-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-16" data-recommends-skill="/reckon-ship diiid-forward-onboarding" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Validate the shipped DIII-D geometry and infer what does not ship (moved from coil-geometry-inversion)</h4>
+    <div class="r-fu-body">Moved here from coil-geometry-inversion f-cgi-005 because this plan owns the DIII-D description and the challenge deadline (development closes 2026-10-18). The donor plan's machinery all carries over calibrated: the damped Gauss-Newton solver with nuisance projection, the 4,096-recovery coverage ladder (max bias 0.27 sigma, realised coverage 93.3-95.5 percent), and the gridded flux-map functional landed 42ae9f60. Work: (a) validate the per-shot conductor geometry the dataset SHIPS against label-derived fields through the identifiability spectrum - a shipped description is a claim, and the spectrum says which of its parameters the data can actually check; (b) infer wall contour and passive/vessel structure, which do NOT ship, from labeled ramp frames where eddy fields dominate the mismatch.</div>
+    <pre class="r-fu-prompt">/reckon-ship diiid-forward-onboarding</pre>
+    </article>
+</section>
   </main>
 </body>
 </html>

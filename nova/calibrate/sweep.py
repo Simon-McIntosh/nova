@@ -45,6 +45,10 @@ from nova.calibrate.instrument import (
     instrument_corrections,
 )
 from nova.calibrate.scale_step import ChannelScaleHistory, scale_blocks
+from nova.calibrate.transition import (
+    evaluate_transition_discrimination,
+    refine_established_transitions,
+)
 from nova.calibrate.windows import PulseWindow, classify_pulse
 
 DRIVE_THRESHOLD = 1.0e3
@@ -463,70 +467,38 @@ def _expected_steps(path: Path | str) -> list[dict[str, Any]]:
 def refine_expected_transitions(
     pulses: Sequence[Mapping[str, Any]], expected_path: Path | str
 ) -> dict[str, Any]:
-    """Narrow established scale transitions with pulse-by-pulse measurements.
+    """Narrow established scale transitions with pulse-by-pulse measurements."""
 
-    Each measurement is assigned to the nearer established block level in log
-    amplitude.  The established levels state which transition is being narrowed;
-    the archive measurements decide its boundary.  Interleaved assignments remain
-    explicitly unresolved instead of being forced into a single switch.
-    """
+    shot = np.asarray(
+        [pulse["shot"] for pulse in pulses for _ in pulse["gains"]], dtype=np.int64
+    )
+    channel = _column(pulses, "gains", "channel", "U16")
+    gain = _column(pulses, "gains", "gain", float)
+    return refine_established_transitions(
+        shot, channel, gain, _expected_steps(expected_path)
+    )
 
-    by_channel = _scale_series(pulses)
-    rows: list[dict[str, Any]] = []
-    for expected in _expected_steps(expected_path):
-        channel = str(expected["channel"])
-        first = int(expected["before_shot"])
-        last = int(expected["after_shot"])
-        before = float(expected["before_scale"])
-        after = float(expected["after_scale"])
-        measured = [
-            (shot, float(np.median(values)))
-            for shot, values in sorted(by_channel.get(channel, {}).items())
-            if first <= shot <= last and values
-        ]
-        old: list[int] = []
-        changed: list[int] = []
-        if before != 0.0 and after != 0.0 and before * after > 0.0:
-            for shot, value in measured:
-                if value * before <= 0.0:
-                    continue
-                old_distance = abs(math.log(abs(value / before)))
-                new_distance = abs(math.log(abs(value / after)))
-                (old if old_distance <= new_distance else changed).append(shot)
-        before_shot = max(old, default=None)
-        after_shot = min(changed, default=None)
-        ordered = (
-            before_shot is not None
-            and after_shot is not None
-            and before_shot < after_shot
-            and not any(shot > after_shot for shot in old)
-            and not any(shot < before_shot for shot in changed)
+
+def rebank_transition_catalogue(
+    series_path: Path | str,
+    catalogue_path: Path | str,
+    expected_path: Path | str,
+) -> dict[str, Any]:
+    """Attach the simultaneous-channel discrimination and precision bound."""
+
+    with np.load(series_path, allow_pickle=False) as series:
+        discrimination = evaluate_transition_discrimination(
+            series["gain_shot"],
+            series["gain_channel"],
+            series["gain"],
+            _expected_steps(expected_path),
+            shape_agreement=series["gain_shape"],
         )
-        width = after_shot - before_shot if ordered else None
-        rows.append(
-            {
-                "after_scale": after,
-                "after_shot": after_shot,
-                "before_scale": before,
-                "before_shot": before_shot,
-                "channel": channel,
-                "expected_after_shot": last,
-                "expected_before_shot": first,
-                "measured_in_bracket": len(measured),
-                "ordered": bool(ordered),
-                "pulse_width": width,
-                "ratio": after / before if before != 0.0 else None,
-            }
-        )
-    exact = [row for row in rows if row["pulse_width"] == 1]
-    obv03 = next((row for row in rows if row["channel"] == "obv03"), None)
-    return {
-        "exact_count": len(exact),
-        "expected_count": len(rows),
-        "obv03": obv03,
-        "ordered_count": sum(1 for row in rows if row["ordered"]),
-        "transitions": rows,
-    }
+    destination = Path(catalogue_path)
+    catalogue = json.loads(destination.read_text())
+    catalogue["discrimination"] = discrimination
+    destination.write_text(json.dumps(catalogue, indent=1, sort_keys=True))
+    return discrimination
 
 
 def _pool(values: np.ndarray) -> tuple[float, float]:
@@ -670,6 +642,15 @@ def merge_chunks(
     (root / "transition_catalogue.json").write_text(
         json.dumps(catalogue, indent=1, sort_keys=True)
     )
+    discrimination = (
+        None
+        if expected_transitions is None
+        else rebank_transition_catalogue(
+            series_path,
+            root / "transition_catalogue.json",
+            expected_transitions,
+        )
+    )
     document = recorded_corrections(
         pulses, "~/.cache/nova-mast/vacuum-signatures/archive/signature_series.npz"
     )
@@ -688,6 +669,7 @@ def merge_chunks(
         "requested_shots": sum(len(row["chunk"]["shots"]) for row in chunks),
         "term_measurements": sum(len(row["terms"]) for row in pulses),
         "transition_refinement": refinement,
+        "transition_discrimination": discrimination,
     }
     (root / "summary.json").write_text(json.dumps(summary, indent=1, sort_keys=True))
     (root / "signature_store.json").write_text(
@@ -709,7 +691,7 @@ def draw_summary_figures(
     series_path: Path | str,
     catalogue_path: Path | str,
     output: Path | str,
-) -> tuple[Path, Path]:
+) -> tuple[Path, Path, Path]:
     """Draw archive coverage and channel histories as compact evidence figures."""
 
     import matplotlib
@@ -771,7 +753,46 @@ def draw_summary_figures(
     histories = destination / "signature-histories.png"
     figure.savefig(histories, dpi=160)
     plt.close(figure)
-    return coverage, histories
+
+    discrimination = catalogue.get("discrimination") or {}
+    counts = discrimination.get("cause_counts") or {}
+    stages = [
+        ("raw scalar", discrimination.get("raw_apparent_transitions", 0)),
+        (
+            "simultaneous cohort",
+            discrimination.get("raw_cohort_apparent_transitions", 0),
+        ),
+        (
+            "common response removed",
+            discrimination.get("corrected_apparent_transitions", 0),
+        ),
+        ("established switches", discrimination.get("expected_switches", 0)),
+    ]
+    causes = [
+        ("interleaved", counts.get("interleaved_or_unclassified_states", 0)),
+        ("ordered, not adjacent", counts.get("ordered_but_nonadjacent", 0)),
+        ("no adjacent pair", counts.get("no_adjacent_observation_pair", 0)),
+        ("no ratio samples", counts.get("no_ratio_observations", 0)),
+        ("adjacent", counts.get("adjacent_transition", 0)),
+    ]
+    figure, axes = plt.subplots(1, 2, figsize=(9.2, 4.2), constrained_layout=True)
+    axes[0].bar(
+        [row[0] for row in stages],
+        [row[1] for row in stages],
+        color=["#456990", "#6f8faf", "#9ab4c9", "#c5604f"],
+    )
+    axes[0].tick_params(axis="x", rotation=22)
+    axes[0].set(ylabel="apparent transitions", title="Common-mode discrimination")
+    axes[1].barh(
+        [row[0] for row in causes],
+        [row[1] for row in causes],
+        color=["#c5604f", "#d59a65", "#8c8c8c", "#aaaaaa", "#4c956c"],
+    )
+    axes[1].set(xlabel="established switches", title="Adjacent-precision outcome")
+    discrimination_path = destination / "transition-discrimination.png"
+    figure.savefig(discrimination_path, dpi=160)
+    plt.close(figure)
+    return coverage, histories, discrimination_path
 
 
 def stage_mast_inputs(path: Path | str, weights_path: Path | str) -> Path:
@@ -840,6 +861,11 @@ def _parser() -> argparse.ArgumentParser:
     figures.add_argument("--series", type=Path, required=True)
     figures.add_argument("--catalogue", type=Path, required=True)
     figures.add_argument("--output", type=Path, required=True)
+    transitions = commands.add_parser("transitions")
+    transitions.add_argument("--series", type=Path, required=True)
+    transitions.add_argument("--catalogue", type=Path, required=True)
+    transitions.add_argument("--expected-transitions", type=Path, required=True)
+    transitions.add_argument("--report", type=Path)
     return parser
 
 
@@ -880,11 +906,20 @@ def main(argv: Sequence[str] | None = None) -> None:
                 sort_keys=True,
             )
         )
-    else:
+    elif arguments.command == "figures":
         for path in draw_summary_figures(
             arguments.series, arguments.catalogue, arguments.output
         ):
             print(path)
+    else:
+        report = rebank_transition_catalogue(
+            arguments.series,
+            arguments.catalogue,
+            arguments.expected_transitions,
+        )
+        if arguments.report is not None:
+            arguments.report.write_text(json.dumps(report, indent=1, sort_keys=True))
+        print(json.dumps(report, sort_keys=True))
 
 
 if __name__ == "__main__":

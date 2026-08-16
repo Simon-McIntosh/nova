@@ -228,5 +228,39 @@
   closed: <code>traced_clip(shared_node_flux(ψ))</code> against the topology boundary, with the carried
   second moments and fitted gradients — no further geometry seam.</p>
 
+  <h2 id="solve-substitution-validation">§6 — the wired solve's analytic validation: every implementation cause excluded, a nonsmooth barrier isolated</h2>
+
+  <p>Local commit <code>e3a7d843</code> (routing + canonical centres, held unmerged); gate not-run;
+  fourteen diagnostic windows, worker 17462 s, scope widened twice on request. The substitution is
+  implemented and TDD-green (2 named routing tests red→green; 147/147 non-reference forward tests; the
+  original reference lane 15/26), and the qualification chain then excluded every implementation cause by
+  measurement:</p>
+
+  <ul>
+    <li>result plumbing falsified — g(returned_root) fails six unchanged gates;</li>
+    <li>expansion centres canonicalised to 1.17e-16 cell widths, contraction impact 1.4e-19 of span;</li>
+    <li>the traced-clip tangent verified against central differences (worst 1.9e-6 relative, ten
+    directions, two states);</li>
+    <li>the moment→coefficient conversion exact to 4.5e-13 against independent shoelace algebra;</li>
+    <li>the harness exonerated — the retained legacy branch converges the same tree to 8.2e-16;</li>
+    <li>the moment map's one-application primal closer to analytic than centroid on all six norms;</li>
+    <li>warm-start basin falsified — a near-root seed worsens 0.054 → 0.164 and loses topology.</li>
+  </ul>
+
+  <p><strong>The isolating measurements.</strong> Homotopy continuation g_t between the maps at fixed
+  external: the physical diverted branch continues at ~1e-15 residual to t=0.375 (coarse fixture) and
+  t=0.5875 (resolution-doubled fixture, 1069 cells), then reproducibly stops — never entering the vacuum
+  attractor. At the fine last root 10/12 unchanged gates pass; only internal inductance (0.0911 vs 0.08)
+  and the analytic field integral (0.0693 vs 0.05) fail, both margins roughly halved by the resolution
+  doubling. σ_min[D(g_t−I)] along the coarse branch stays finite (0.0239–0.0287, final 1.16× initial;
+  condition 2200–2560; JVP-column matrices verified to 1.3e-15) — <strong>not a smooth fold</strong> —
+  and a single 4× budget attempt at t=0.3875 lands at residual 3.926834364936e-5, identical to the
+  original-budget 3.926834364848e-5 to ten digits — <strong>not budget starvation</strong>. A
+  nonsingular Jacobian, a budget-independent stall, and a core-cell count flip (389→390) across the
+  bracket point at a nonsmooth event surface — a discrete support/label change between the smooth
+  pieces of the map — as the barrier; recorded as inference, not proven mechanism. Map eigenvalue under
+  the moment representation: 1.766 vs the pinned 1.249/1.401. No gate, fixture, route default or
+  semantic was changed anywhere in the program.</p>
+
 </main></body>
 </html>

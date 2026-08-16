@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="research">
   <meta name="plan-slug" content="mast-vacuum-signatures">
   <meta name="plan-title" content="MAST archive vacuum signatures">
-  <meta name="plan-summary" content="A raw-level archive sweep banks per-pulse offsets, drift, and opportunistic gains, with every unreadable shot retained as a refusal and all correction records left unpromoted.">
+  <meta name="plan-summary" content="The full raw-level archive sweep banks per-pulse terms and gains. Simultaneous-channel normalisation bounds adjacent transition precision as unobtainable from scalar observables, while an unchanged-kernel run on TCV pulse 77549 demonstrates that window classification and instrument-term extraction are machine-agnostic.">
   <meta name="plan-status" content="reference">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-evidence-for" content="vacuum-signature-extraction">
@@ -50,15 +50,46 @@
   </figure>
 
   <h2>Transition catalogue</h2>
-  <p><strong>HOLD — the exact-transition measure did not pass.</strong> The established block
-  table contains 37 acquisition-scale switches. The pulse-by-pulse gain series ordered only
-  5 of 37 and narrowed <strong>0 of 37</strong> to adjacent pulse numbers. For
-  <code>obv03</code>, five driven measurements lie in the 19,258–19,995 bracket, but the two
-  expected states interleave: a changed-state measurement appears at pulse 19,337 while an
-  old-state measurement persists through pulse 19,857. That is evidence against claiming a
-  single exact boundary from this observable, not permission to choose one. Assignment uses
-  the established before/after scale levels only to identify the two states; recorded archive
-  measurements decide whether an ordered boundary exists.</p>
+  <p><strong>Measured bound — adjacent-pulse precision is unobtainable from the banked
+  vacuum-window scalar observables.</strong> The raw series contains 1,445 apparent changes
+  (1,522 blocks over 77 channels) against 37 established acquisition switches. A robust
+  simultaneous-channel observable requires at least three accepted channels in one pulse and
+  removes the alternating-median pulse factor in log gain. This retains 27,438 measurements
+  over 3,462 pulses. On that same cohort, common-response cancellation removes 390 of 1,296
+  apparent changes (30.1%), but <strong>906 remain</strong> — 869 more than the falsification
+  set permits. The reduction is real, but it is not a discriminating acquisition observable.</p>
+
+  <table>
+    <thead><tr><th>falsification outcome</th><th>switches</th></tr></thead>
+    <tbody>
+      <tr><td>interleaved or scalar state unclassified</td><td>28</td></tr>
+      <tr><td>ordered, but measured boundary not adjacent</td><td>6</td></tr>
+      <tr><td>no adjacent simultaneous-observation pair</td><td>2</td></tr>
+      <tr><td>no simultaneous-channel ratio observation</td><td>1</td></tr>
+      <tr><td><strong>adjacent transition</strong></td><td><strong>0</strong></td></tr>
+    </tbody>
+  </table>
+
+  <p>For <code>obv03</code>, all five driven measurements survive the ratio cohort, but the
+  states remain reversed in time: changed-state evidence appears at pulse 19,337 while
+  old-state evidence persists through pulse 19,857. The bank contains zero independently
+  classified pickup-response states and zero shot-resolved link-board states. That absence is
+  decisive rather than clerical: after common-response cancellation, a channel-local pickup
+  multiplier and a channel-local acquisition multiplier enter the scalar gain as the same
+  product. Synthetic controls recover an isolated injected acquisition step exactly while also
+  demonstrating that those two local causes are algebraically identical without an external
+  shape or configuration label. The topology record independently states that no public
+  shot-by-shot link-board inventory was recovered. The later shared-link P2 inversion is fully
+  stable, but that is a cohort-level circuit-basis verdict rather than a per-shot configuration
+  coordinate and therefore cannot label these scalar transitions.</p>
+
+  <figure>
+    <img src="/nova/figures/vacuum-signatures/transition-discrimination.png"
+         alt="Reduction in apparent transitions and causes preventing adjacent precision">
+    <figcaption>Left: cohort restriction and common-response cancellation reduce false
+    transitions but do not approach the 37 established switches. Right: every established
+    switch fails adjacent precision, predominantly through interleaved scalar states.</figcaption>
+  </figure>
 
   <figure>
     <img src="/nova/figures/vacuum-signatures/signature-histories.png"
@@ -67,10 +98,66 @@
     histories. These are raw-archive signatures, so acquisition steps remain visible.</figcaption>
   </figure>
 
+  <h2>Portability proof on TCV</h2>
+  <p><strong>The machine-agnostic claim passed on a non-MAST source.</strong> TCV pulse
+  77,549, run 1 provides <code>pf_active</code>, <code>magnetics</code>, and
+  <code>summary</code> in its recorded DD 3.41.0. It carries 60,968 common time samples,
+  29 active-coil current traces, 38 poloidal-field probes, 38 flux loops, and a plasma-current
+  trace. The adapter reads the IDSs with <code>imas-python</code>, first obtains the stored
+  version from <code>ids_properties/version_put/data_dictionary</code>, reopens at that exact
+  version, and converts only IDS nodes to arrays. No HDF5 dataset is read directly.</p>
+
+  <table>
+    <thead><tr><th>candidate source</th><th>carried data</th><th>verdict</th></tr></thead>
+    <tbody>
+      <tr><td><code>imas.training</code>, DD 3.39.0</td><td><code>core_profiles</code> and
+      <code>equilibrium</code>; <code>pf_active</code> and <code>magnetics</code> are empty</td>
+      <td>refused: no drive currents or magnetic signals</td></tr>
+      <tr><td>reachable TCV pulse 77,549/run 1, DD 3.41.0</td><td>29 drive currents,
+      76 magnetic signals, plasma current</td><td><strong>qualified and executed</strong></td></tr>
+      <tr><td>installed <code>imas-python</code> sample assets</td><td>the same training
+      <code>core_profiles</code>/<code>equilibrium</code> payload plus schema fixtures</td>
+      <td>refused: no independent pulse carrying both required IDSs</td></tr>
+    </tbody>
+  </table>
+
+  <p>The TCV-only adapter supplies its acquisition thresholds — 100 A for a driven circuit
+  and 10 kA for plasma — then calls <code>nova.calibrate.windows.classify_pulse</code>
+  unchanged. The result is five intervals:</p>
+
+  <table>
+    <thead><tr><th>interval</th><th>time span (s)</th><th>samples</th></tr></thead>
+    <tbody>
+      <tr><td>quiet</td><td>−2.2160 to −0.2735</td><td>19,426</td></tr>
+      <tr><td>driven</td><td>−0.2734 to −0.0001</td><td>2,734</td></tr>
+      <tr><td>plasma</td><td>0.0000 to 1.6211</td><td>16,212</td></tr>
+      <tr><td>driven</td><td>1.6212 to 2.2141</td><td>5,930</td></tr>
+      <tr><td>quiet</td><td>2.2142 to 3.8807</td><td>16,666</td></tr>
+    </tbody>
+  </table>
+
+  <p><code>nova.calibrate.instrument.fit_instrument_terms</code> then fits all
+  <strong>76 of 76</strong> magnetic signals over the leading quiet window; this window has
+  no preceding disturbance and therefore needs no machine decay assumption. Every offset,
+  rate, curvature, and scatter is finite. For representative probe <code>bpol:001</code>, the
+  fitted offset is 1.217304265×10<sup>−3</sup> T, drift rate
+  2.704760302×10<sup>−3</sup> T/s, and residual scatter
+  2.833661837×10<sup>−4</sup> T. The trailing quiet interval is classified but deliberately
+  not fitted because this source provides no passive-decay constant with which to guard it.</p>
+
+  <p>The executable path imports only the two generic calibration modules; every
+  source-specific operation is confined to the test adapter that selects IDS nodes, aligns
+  the recorded plasma trace, and states thresholds. Git blame pins both public kernel
+  definitions to <code>adb7cb70f</code>, and this portability commit changes neither kernel.
+  The complete five-window timeline and all 76 term records are banked at
+  <code>~/.cache/nova-mast/vacuum-signatures/portability-proof/tcv-77549.json</code>.</p>
+
   <h2>Artifacts and interpretation boundary</h2>
   <p>The durable bank contains <code>signature_series.npz</code> for dense channel time series,
   <code>signature_store.json</code> for chunk and refusal provenance,
-  <code>transition_catalogue.json</code> for measured and established-boundary transitions, and
+  <code>transition_catalogue.json</code> for measured and established-boundary transitions,
+  <code>transition_observable.json</code> for the common-response falsification and precision
+  bound, and
   <code>recorded_corrections.yaml</code> with 1,676 schema-validated records.
   It was produced from the raw read path so an already-promoted block correction could not
   erase the transition being measured. Gain fitting is admitted only for probes at least two

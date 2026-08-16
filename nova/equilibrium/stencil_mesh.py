@@ -53,12 +53,16 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
+from nova.biot.greens import second_moments
 from nova.equilibrium.conservation import STENCIL_MARGIN
+from nova.equilibrium.separatrix_clip import AtomicCellMesh
 
 __all__ = [
     "RING_CONDITION_LIMIT",
     "CellCurrentMoments",
     "InteriorCurrentMomentStencil",
+    "MomentGeometry",
+    "SharedNodeFluxStencil",
     "StencilMesh",
     "cell_average_weights",
     "ring_condition",
@@ -157,6 +161,87 @@ class InteriorCurrentMomentStencil:
             .set(entries.T)
         )
         return CellCurrentMoments(*vectors)
+
+
+@dataclass(frozen=True)
+class SharedNodeFluxStencil:
+    """Fixed quadratic reconstruction from cell centres to shared polygon nodes."""
+
+    gather_index: np.ndarray = field(repr=False)
+    weight: np.ndarray = field(repr=False)
+    cell_count: int
+
+    def __post_init__(self):
+        """Store compact immutable interpolation arrays."""
+        gather = np.ascontiguousarray(self.gather_index, dtype=np.intp)
+        weight = np.ascontiguousarray(self.weight, dtype=np.float64)
+        if gather.shape != weight.shape:
+            raise ValueError("shared-node gather indices and weights must align")
+        object.__setattr__(self, "gather_index", gather)
+        object.__setattr__(self, "weight", weight)
+
+    def __call__(self, cell_flux) -> jax.Array:
+        """Evaluate cell-centred flux on every shared atomic node."""
+        flux = jnp.asarray(cell_flux)
+        if flux.shape != (self.cell_count,):
+            raise ValueError("cell_flux must carry one value per cell centroid")
+        return jnp.sum(
+            jnp.asarray(self.weight, dtype=flux.dtype) * flux[self.gather_index],
+            axis=1,
+        )
+
+
+@dataclass(frozen=True)
+class MomentGeometry:
+    """Fixed polygon topology and interpolation used by current moments."""
+
+    polygons: tuple[np.ndarray, ...] = field(repr=False)
+    atomic_mesh: AtomicCellMesh = field(repr=False)
+    second_moment: np.ndarray = field(repr=False)
+    shared_flux_stencil: SharedNodeFluxStencil = field(repr=False)
+
+    @classmethod
+    def from_cells(cls, mesh: StencilMesh, cells) -> MomentGeometry:
+        """Build all geometry-dependent current-moment state once per mesh."""
+        polygons = []
+        for cell in cells:
+            vertices = np.asarray(cell, dtype=np.float64)
+            if vertices.ndim != 2 or vertices.shape[1] < 2:
+                raise ValueError(
+                    "cell polygons must have shape (vertices, coordinates)"
+                )
+            vertices = vertices[:, :2]
+            if len(vertices) > 1 and np.array_equal(vertices[0], vertices[-1]):
+                vertices = vertices[:-1]
+            scale = max(float(np.max(np.abs(vertices))), float(np.ptp(vertices)), 1.0)
+            tolerance = 128.0 * np.finfo(np.float64).eps * scale
+            distinct = [vertices[0]]
+            for vertex in vertices[1:]:
+                if np.linalg.norm(vertex - distinct[-1]) > tolerance:
+                    distinct.append(vertex)
+            if (
+                len(distinct) > 1
+                and np.linalg.norm(distinct[-1] - distinct[0]) <= tolerance
+            ):
+                distinct.pop()
+            vertices = np.asarray(distinct)
+            if len(vertices) < 3:
+                raise ValueError("a moment polygon must retain at least three vertices")
+            polygons.append(np.ascontiguousarray(vertices))
+        if len(polygons) != mesh.node_count:
+            raise ValueError("one polygon is required per mesh cell")
+        atomic = AtomicCellMesh.from_cells(polygons, centroids=mesh.coordinate)
+        moments = np.asarray([second_moments(cell) for cell in polygons])
+        return cls(
+            polygons=tuple(polygons),
+            atomic_mesh=atomic,
+            second_moment=moments,
+            shared_flux_stencil=mesh.shared_node_flux_stencil(atomic.node_coordinates),
+        )
+
+    def shared_node_flux(self, cell_flux) -> jax.Array:
+        """Evaluate one cell-centred flux map on the atomic shared nodes."""
+        return self.shared_flux_stencil(cell_flux)
 
 
 def _quadratic_design(local: np.ndarray) -> np.ndarray:
@@ -308,6 +393,34 @@ class StencilMesh:
         return (
             self._scatter(self._apply(self.radial_weight, values)),
             self._scatter(self._apply(self.vertical_weight, values)),
+        )
+
+    def shared_node_flux_stencil(self, coordinates) -> SharedNodeFluxStencil:
+        """Fit fixed weights that reconstruct flux at arbitrary shared nodes.
+
+        Each node uses the nearest complete neighbour ring. The reconstruction
+        evaluates the same normalised quadratic fit as the mesh derivatives,
+        so it is exact on that fitted polynomial space and remains one fixed
+        gather and reduction while the flux map changes.
+        """
+        query = np.ascontiguousarray(coordinates, dtype=np.float64)
+        if query.ndim != 2 or query.shape[1] != 2:
+            raise ValueError("shared-node coordinates must have shape (nodes, 2)")
+        centre_coordinate = self.coordinate[self.centre]
+        distance_squared = np.sum(
+            (query[:, np.newaxis, :] - centre_coordinate[np.newaxis, :, :]) ** 2,
+            axis=2,
+        )
+        owner = np.argmin(distance_squared, axis=1)
+        local, scale, cluster = _normalised_ring(self.coordinate, self.stencil)
+        inverse = np.linalg.pinv(_quadratic_design(local))
+        query_local = (query - cluster[owner, 0]) / scale[owner]
+        basis = _quadratic_design(query_local)
+        weight = np.einsum("ni,nij->nj", basis, inverse[owner])
+        return SharedNodeFluxStencil(
+            gather_index=self.stencil[owner],
+            weight=weight,
+            cell_count=self.node_count,
         )
 
     def current_moment_stencil(

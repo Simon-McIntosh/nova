@@ -105,6 +105,7 @@ from nova.equilibrium.source import (
     RotationRecord,
     absolute_normalisation_record,
 )
+from nova.equilibrium.stencil_mesh import MomentGeometry, StencilMesh
 from nova.equilibrium.topology import TopologyState
 from nova.geometry.hexstencil import hex_stencil
 
@@ -119,6 +120,21 @@ SolveRoute = Literal["host", "host_krylov", "picard", "anderson", "newton_krylov
 
 _HOST: tuple[str, ...] = ("host", "host_krylov")
 _ACCELERATED: tuple[str, ...] = ("picard", "anderson", "newton_krylov")
+
+
+def _lattice_cells(lattice: FluxLattice) -> tuple[np.ndarray, ...]:
+    """Return rectangular control polygons centred on a structured lattice."""
+    half_radial = 0.5 * lattice.radial_step
+    half_vertical = 0.5 * lattice.vertical_step
+    offset = np.asarray(
+        [
+            [-half_radial, -half_vertical],
+            [half_radial, -half_vertical],
+            [half_radial, half_vertical],
+            [-half_radial, half_vertical],
+        ]
+    )
+    return tuple(coordinate + offset for coordinate in lattice.coordinate)
 
 
 class FiniteCheck(NamedTuple):
@@ -217,6 +233,11 @@ class ForwardProfile:
             lattice.coordinate, hex_stencil(lattice.shape), maxsize=maxsize
         )
         wall_null = Null1D(jnp.asarray(wall_coordinate, dtype=jnp.float64))
+        moment_mesh = StencilMesh(
+            coordinate=lattice.coordinate,
+            stencil=hex_stencil(lattice.shape),
+            area=lattice.cell_area,
+        )
         operator = ForwardFluxOperator(
             grid=FluxTarget(
                 jnp.asarray(source_to_grid), jnp.asarray(plasma_to_grid), grid_null
@@ -229,6 +250,9 @@ class ForwardProfile:
             area=jnp.asarray(lattice.cell_area),
             polarity=polarity,
             inside_material=inside_material,
+            moment_geometry=MomentGeometry.from_cells(
+                moment_mesh, _lattice_cells(lattice)
+            ),
         )
         return cls(operator=operator, lattice=lattice, **kwargs)
 

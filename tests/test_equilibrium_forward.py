@@ -37,6 +37,7 @@ from scipy.constants import mu_0
 from nova.utilities.importmanager import skip_import
 
 with skip_import("jax"):
+    import jax
     import jax.numpy as jnp
 
     from nova.biot.greens import hybrid_greens
@@ -541,6 +542,42 @@ def test_the_solve_refuses_enforcement_before_reading_the_profiles():
     with pytest.raises(TypeError):
         profile.solve(np.zeros(nodes + len(angle)), measured=np.zeros(4))
     assert np.asarray(source.core.p_prime.data).tobytes() == before
+
+
+def test_rectangular_lattice_construction_carries_fixed_moment_geometry():
+    """The structured constructor derives its cell polygons and shared-node map once."""
+    lattice = FluxLattice(np.linspace(0.8, 1.2, 9), np.linspace(-0.2, 0.2, 9))
+    nodes = lattice.node_count
+    angle = 2 * np.pi * np.arange(12) / 12
+    profile = ForwardProfile.from_lattice(
+        lattice,
+        constant_source(),
+        external_current=np.zeros(1),
+        source_to_grid=np.zeros((nodes, 1)),
+        plasma_to_grid=np.zeros((nodes, nodes)),
+        source_to_wall=np.zeros((len(angle), 1)),
+        plasma_to_wall=np.zeros((len(angle), nodes)),
+        wall_coordinate=np.c_[1.0 + 0.15 * np.cos(angle), 0.15 * np.sin(angle)],
+    )
+    geometry = profile.operator.moment_geometry
+    radius, height = lattice.coordinate.T
+    flux = 0.4 + 0.7 * radius - 0.3 * height + 0.2 * radius**2 + 0.1 * radius * height
+    shared = geometry.atomic_mesh.node_coordinates
+    expected = (
+        0.4
+        + 0.7 * shared[:, 0]
+        - 0.3 * shared[:, 1]
+        + 0.2 * shared[:, 0] ** 2
+        + 0.1 * shared[:, 0] * shared[:, 1]
+    )
+
+    full_flux = jnp.asarray(np.r_[flux, np.zeros(len(angle))])
+    np.testing.assert_allclose(
+        profile.operator.shared_node_flux(full_flux), expected, rtol=0.0, atol=2.0e-14
+    )
+    assert len(geometry.polygons) == nodes
+    assert geometry.atomic_mesh.cell_nodes.shape[0] == nodes
+    assert jax.tree_util.tree_leaves(geometry.shared_flux_stencil)
 
 
 def test_the_solve_defaults_to_the_root_find():

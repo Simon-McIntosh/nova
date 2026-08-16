@@ -35,6 +35,7 @@ import jax.numpy as jnp
 from nova.biot.target import FluxTarget
 from nova.equilibrium.domain import DomainMasks
 from nova.equilibrium.source import ForwardSource
+from nova.equilibrium.stencil_mesh import MomentGeometry
 from nova.equilibrium.topology import Topology, TopologyState
 
 __all__ = ["ForwardFluxOperator"]
@@ -51,6 +52,7 @@ class ForwardFluxOperator:
     area: jnp.ndarray = field(repr=False)
     polarity: int = 1
     inside_material: jnp.ndarray | None = field(repr=False, default=None)
+    moment_geometry: MomentGeometry | None = field(repr=False, default=None)
 
     def __post_init__(self):
         """Build the topology read and default the material mask."""
@@ -65,6 +67,11 @@ class ForwardFluxOperator:
             raise ValueError("area must carry one control area per grid node")
         if self.inside_material.shape != (self.grid.node_number,):
             raise ValueError("inside_material must carry one flag per grid node")
+        if (
+            self.moment_geometry is not None
+            and len(self.moment_geometry.polygons) != self.grid.node_number
+        ):
+            raise ValueError("moment geometry must carry one polygon per grid node")
 
     @property
     def node_number(self) -> int:
@@ -88,6 +95,13 @@ class ForwardFluxOperator:
     def read(self, psi) -> tuple[DomainMasks, TopologyState]:
         """Return the domain labels and axis/separatrix state of a trial flux."""
         return self.topology.read(psi, self.polarity, self.inside_material)
+
+    def shared_node_flux(self, psi) -> jax.Array:
+        """Evaluate the plasma-grid flux on fixed atomic shared nodes."""
+        if self.moment_geometry is None:
+            raise ValueError("moment geometry is required for shared-node flux")
+        grid_flux, _wall_flux = self.topology.split_flux_map(psi)
+        return self.moment_geometry.shared_node_flux(grid_flux)
 
     def cell_current(self, psi) -> jax.Array:
         """Return the per-cell plasma current [A] a trial flux drives."""

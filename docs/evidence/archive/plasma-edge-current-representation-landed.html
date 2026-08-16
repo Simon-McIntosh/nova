@@ -213,5 +213,20 @@
   through the traced path: worst 2.220e-16 against the 1e-12 requirement. Exactly one JIT trace over 12
   moving-separatrix iterations, composing under vmap across all 12 flux maps.</p>
 
+  <h2 id="operator-geometry-carrier">§6 — the operator carries its moment geometry</h2>
+
+  <p>Commit <code>5aa3056d</code>; gate passed; TDD (4 named tests red at collection); isolated
+  production-hex test green, broad forward/reference/stencil regression 98/98.</p>
+
+  <p><code>MomentGeometry</code> is built once with the operator and carries every authored polygon
+  (566/566 on the production HexMachine), the <code>AtomicCellMesh</code> topology with shared nodes, and
+  per-cell area-normalised second moments; the structured lattice path derives one rectangular control
+  polygon per centroid. <code>SharedNodeFluxStencil</code> assigns each atomic node to its nearest
+  complete fitted ring as precomputed gather indices and weights — exact on the mesh polynomial space
+  (quadratic worst 5.68e-14) and static under jit, one trace across flux updates. Current evaluation and
+  receipts are untouched at this additive node, proven by the suite. The routing node's recipe is now
+  closed: <code>traced_clip(shared_node_flux(ψ))</code> against the topology boundary, with the carried
+  second moments and fitted gradients — no further geometry seam.</p>
+
 </main></body>
 </html>

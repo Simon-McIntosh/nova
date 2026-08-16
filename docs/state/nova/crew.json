@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T11:47:38",
+  "updated": "2026-08-16T12:07:59",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -5342,9 +5342,55 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T095014395191-operator-geometry-carrier",
+        "plan": "plasma-edge-current-representation",
+        "section": "\u00a76",
+        "node": "operator-geometry-carrier",
+        "role": "implement",
+        "member": "coupling-blocks",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T09:50:16Z",
+        "completed_at": "2026-08-16T10:07:56Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1060,
+        "time_budget": "25m",
+        "base_sha": "c66d9ccd0b52332e80e10e1e3759fcbc3816f102",
+        "commits": [
+          "5aa3056d"
+        ],
+        "changed_lines": {
+          "added": 278,
+          "removed": 1,
+          "files": 6
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/operator-geometry-carrier-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a009c8-8ac4-7a50-806e-c28169dbfc66",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        }
       }
     ],
     "holds": [],
-    "_version": 171
+    "_version": 172
   }
 }

@@ -31,8 +31,11 @@
     <p><strong>Owner commission 2026-08-16.</strong> A short proof of principle that SOL currents operate
     in the forward solve and can be maintained all the way to the divertor target, while the private-flux
     region carries no current. The target is a finite and <em>continuous</em> j crossing the separatrix
-    and extending into the SOL — not a sheet, not a jump — with the support truncated at a declared
-    normalised-flux limit, measured as a ladder (ψ_N up to 1.05, 1.10, and further if informative).</p>
+    and extending into the SOL — not a sheet, not a jump — with <strong>no artificial normalised-flux
+    truncation</strong>: the exponential closure itself drives the current to zero, and the support is
+    the whole common-SOL mask, which the material boundary already bounds. A cutoff at 1.05 or 1.10
+    would reintroduce exactly the support-edge discontinuity class the edge representation was built to
+    remove.</p>
 
     <p>The machinery this rides on is landed: the linear edge-current representation carries clipped
     boundary supports and exterior moments in the same three per-iteration vectors with no new coupling
@@ -70,8 +73,9 @@
       <li><strong>discrete-contour flux-map comparisons</strong> of the two solutions (matched levels),
       localising where the SOL current moves the equilibrium — boundary shape, x-point, strike-point
       geometry;</li>
-      <li>the support-limit ladder (ψ_N ≤ 1.05, 1.10, …): what the truncation costs, so the limit is a
-      measured choice rather than a default;</li>
+      <li>the measured support extent per width variant: the ψ_N at which j falls below a stated
+      insignificance floor (e.g. 1e-6 of its separatrix value) — an outcome of the closure, never an
+      imposed limit;</li>
       <li>live assertions: zero current on the private-flux mask in every case; net-current identity
       between the two solutions to solver precision; current present on common-SOL cells adjacent to the
       strike points (maintained to the target).</li>
@@ -79,8 +83,8 @@
 
     <p><em>Done-when:</em> both solutions converge on the same machine with the net-current identity and
     private-flux-zero assertions green; the ⟨j⟩ profiles and matched-level contour overlays are banked as
-    figures with the per-limit ladder; and the divertor-target continuity is asserted on the strike-point
-    cells rather than claimed.</p>
+    figures with the measured support extent per width variant; and the divertor-target continuity is
+    asserted on the strike-point cells rather than claimed.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -105,14 +109,19 @@
         excludes the private region — matching the locked domain discipline of the forward-equilibrium
         plan.</p>
     </div>
-<div class="r-dec" data-key="support-limit-ladder" data-choice="measured-ladder" data-by="Simon McIntosh" data-when="2026-08-16T10:30:00+00:00">
+<div class="r-dec" data-key="support-limit-ladder" data-choice="closure-driven" data-by="Simon McIntosh" data-when="2026-08-16T11:50:00+00:00">
     <p class="r-dec-q">Where does the SOL current support end?</p>
     <p class="r-dec-opts">
-      <button class="r-opt chosen" data-value="measured-ladder">a measured ladder of normalised-flux limits (1.05, 1.10, …)</button>
+      <button class="r-opt chosen" data-value="closure-driven">nowhere artificial — the exponential closure drives j to zero over the whole common-SOL mask</button>
+      <button class="r-opt" data-value="measured-ladder">a measured ladder of normalised-flux limits (1.05, 1.10, …)</button>
       <button class="r-opt" data-value="single-limit">one fixed limit</button>
       </p>
-    <p class="r-dec-rat">Owner direction 2026-08-16: try a number of limits such as ψ_N up to 1.05, 1.1
-        etc. — the truncation cost is reported per limit so the choice is a measurement.</p>
+    <p class="r-dec-rat">Owner refinement 2026-08-16 (superseding the same-day ladder direction): with an
+        exponential fall-off there is no need to truncate — the closure definition itself drives the
+        current to zero, the common-SOL mask is already bounded by the material boundary, and an
+        artificial ψ_N cutoff would reintroduce the support-edge discontinuity class the edge
+        representation removed. The support extent is reported as a measurement — the ψ_N where j falls
+        below a stated insignificance floor per width variant — never imposed.</p>
     </div>
 </section>
 

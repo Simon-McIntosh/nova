@@ -27,7 +27,21 @@ __all__ = [
     "LinearCurrentMoments",
     "TracedClippedSupports",
     "padded_linear_current_moments",
+    "padded_polynomial_current_moments",
 ]
+
+POLYNOMIAL_POWERS = (
+    (0, 0),
+    (1, 0),
+    (0, 1),
+    (2, 0),
+    (1, 1),
+    (0, 2),
+    (3, 0),
+    (2, 1),
+    (1, 2),
+    (0, 3),
+)
 
 
 def _signed_area(vertices: np.ndarray) -> float:
@@ -337,6 +351,101 @@ def padded_linear_current_moments(
     return current, first_current
 
 
+def padded_polynomial_current_moments(
+    support_vertices,
+    vertex_count,
+    centroids,
+    coordinate_scale,
+    coefficients,
+):
+    """Integrate one cubic density and its first moments over each support.
+
+    ``coefficients`` multiply :data:`POLYNOMIAL_POWERS` in coordinates centred
+    on ``centroids`` and divided by ``coordinate_scale``.  The edge reductions
+    are closed simplex moments, so moving clip vertices remain traced values
+    and no quadrature nodes or data-dependent shapes enter an iteration.
+    """
+    from nova.jax.config import configure_dtypes
+
+    configure_dtypes()
+
+    import jax.numpy as jnp
+
+    vertices = jnp.asarray(support_vertices)
+    count = jnp.asarray(vertex_count)
+    centre = jnp.asarray(centroids)
+    scale = jnp.asarray(coordinate_scale)
+    coefficient = jnp.asarray(coefficients)
+    if vertices.ndim != 3 or vertices.shape[2] != 2:
+        raise ValueError("support_vertices must have shape (cells, capacity, 2)")
+    cell_count, capacity, _coordinate = vertices.shape
+    if count.shape != (cell_count,):
+        raise ValueError("vertex_count must carry one value per cell")
+    if centre.shape != (cell_count, 2) or scale.shape != (cell_count, 2):
+        raise ValueError("centroids and coordinate_scale must have shape (cells, 2)")
+    if coefficient.shape != (cell_count, len(POLYNOMIAL_POWERS)):
+        raise ValueError("coefficients must carry every cubic monomial per cell")
+
+    local = (vertices - centre[:, None, :]) / scale[:, None, :]
+    slot = jnp.arange(capacity)
+    valid = slot[None, :] < count[:, None]
+    following_slot = jnp.where(slot[None, :] + 1 < count[:, None], slot[None, :] + 1, 0)
+    following = jnp.take_along_axis(local, following_slot[..., None], axis=1)
+    cross = local[..., 0] * following[..., 1] - following[..., 0] * local[..., 1]
+    cross = jnp.where(valid, cross, 0.0)
+    orientation = jnp.where(jnp.sum(cross, axis=1) < 0.0, -1.0, 1.0)
+    area_scale = scale[:, 0] * scale[:, 1]
+
+    def monomial_moment(radial_power, vertical_power):
+        edge_moment = jnp.zeros((cell_count, capacity), dtype=vertices.dtype)
+        total_degree = radial_power + vertical_power
+        for radial_first in range(radial_power + 1):
+            radial_factor = (
+                math.comb(radial_power, radial_first)
+                * local[..., 0] ** radial_first
+                * following[..., 0] ** (radial_power - radial_first)
+            )
+            for vertical_first in range(vertical_power + 1):
+                first_degree = radial_first + vertical_first
+                simplex = (
+                    math.factorial(first_degree)
+                    * math.factorial(total_degree - first_degree)
+                    / math.factorial(total_degree + 2)
+                )
+                vertical_factor = (
+                    math.comb(vertical_power, vertical_first)
+                    * local[..., 1] ** vertical_first
+                    * following[..., 1] ** (vertical_power - vertical_first)
+                )
+                edge_moment = edge_moment + simplex * radial_factor * vertical_factor
+        return orientation * area_scale * jnp.sum(cross * edge_moment, axis=1)
+
+    required_powers = tuple(
+        (radial, vertical)
+        for degree in range(5)
+        for radial in range(degree, -1, -1)
+        for vertical in (degree - radial,)
+    )
+    moments = {powers: monomial_moment(*powers) for powers in required_powers}
+    current = sum(
+        coefficient[:, column] * moments[powers]
+        for column, powers in enumerate(POLYNOMIAL_POWERS)
+    )
+    radial = scale[:, 0] * sum(
+        coefficient[:, column] * moments[(powers[0] + 1, powers[1])]
+        for column, powers in enumerate(POLYNOMIAL_POWERS)
+    )
+    vertical = scale[:, 1] * sum(
+        coefficient[:, column] * moments[(powers[0], powers[1] + 1)]
+        for column, powers in enumerate(POLYNOMIAL_POWERS)
+    )
+    included = count >= 3
+    return (
+        jnp.where(included, current, 0.0),
+        jnp.where(included[:, None], jnp.stack([radial, vertical], axis=1), 0.0),
+    )
+
+
 def _pack_traced_vertices(vertices, valid, capacity):
     """Compact masked vertices without data-dependent array shapes."""
     import jax.numpy as jnp
@@ -548,9 +657,7 @@ def _traced_clip(
         cell_distance = jnp.min(
             jnp.where(valid_edge, node_distance[nodes], 1.0), axis=1
         )
-        transition_weight = cell_distance * cell_distance * (
-            3.0 - 2.0 * cell_distance
-        )
+        transition_weight = cell_distance * cell_distance * (3.0 - 2.0 * cell_distance)
 
     return TracedClippedSupports(
         support_vertices=support,

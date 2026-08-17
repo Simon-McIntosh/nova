@@ -4,11 +4,105 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+from scipy import integrate
 
 from nova.equilibrium.separatrix_clip import (
     AtomicCellMesh,
     padded_linear_current_moments,
+    padded_polynomial_current_moments,
 )
+
+
+def test_polynomial_current_moments_match_adaptive_triangle_quadrature():
+    """Cubic density and its weighted moments are exact on a clipped polygon."""
+    centre = np.asarray([1.7, -0.25])
+    scale = np.asarray([0.31, 0.23])
+    polygon = centre + scale * np.asarray(
+        [[-0.8, -0.7], [0.9, -0.55], [0.65, 0.8], [-0.35, 0.95], [-0.9, 0.1]]
+    )
+    coefficients = np.asarray(
+        [2.1, -0.7, 0.4, 0.31, -0.22, 0.18, 0.09, -0.06, 0.04, -0.03]
+    )
+    vertices = np.zeros((1, 8, 2))
+    vertices[0, : len(polygon)] = polygon
+    actual = padded_polynomial_current_moments(
+        vertices,
+        np.asarray([len(polygon)]),
+        centre[None, :],
+        scale[None, :],
+        coefficients[None, :],
+    )
+
+    powers = (
+        (0, 0),
+        (1, 0),
+        (0, 1),
+        (2, 0),
+        (1, 1),
+        (0, 2),
+        (3, 0),
+        (2, 1),
+        (1, 2),
+        (0, 3),
+    )
+
+    def density(radius, height):
+        u = (radius - centre[0]) / scale[0]
+        v = (height - centre[1]) / scale[1]
+        return sum(
+            coefficient * u**radial * v**vertical
+            for coefficient, (radial, vertical) in zip(
+                coefficients, powers, strict=True
+            )
+        )
+
+    expected = np.zeros(3)
+    anchor = polygon[0]
+    for first, second in zip(polygon[1:-1], polygon[2:], strict=True):
+        edge = np.column_stack((first - anchor, second - anchor))
+        determinant = abs(float(np.linalg.det(edge)))
+        for component, weight in enumerate(
+            (
+                lambda radius, height: 1.0,
+                lambda radius, height: radius - centre[0],
+                lambda radius, height: height - centre[1],
+            )
+        ):
+            value, _error = integrate.dblquad(
+                lambda vertical_coordinate, radial_coordinate: (
+                    density(
+                        anchor[0]
+                        + radial_coordinate * edge[0, 0]
+                        + vertical_coordinate * edge[0, 1],
+                        anchor[1]
+                        + radial_coordinate * edge[1, 0]
+                        + vertical_coordinate * edge[1, 1],
+                    )
+                    * weight(
+                        anchor[0]
+                        + radial_coordinate * edge[0, 0]
+                        + vertical_coordinate * edge[0, 1],
+                        anchor[1]
+                        + radial_coordinate * edge[1, 0]
+                        + vertical_coordinate * edge[1, 1],
+                    )
+                    * determinant
+                ),
+                0.0,
+                1.0,
+                0.0,
+                lambda radial_coordinate: 1.0 - radial_coordinate,
+                epsabs=2.0e-13,
+                epsrel=2.0e-13,
+            )
+            expected[component] += value
+
+    np.testing.assert_allclose(
+        np.r_[np.asarray(actual[0]), np.asarray(actual[1]).ravel()],
+        expected,
+        rtol=2.0e-13,
+        atol=2.0e-13,
+    )
 
 
 def _staggered_rectangles(
@@ -422,12 +516,8 @@ def test_edge_crossing_birth_is_c1_without_changing_exact_clip_geometry():
         return jnp.r_[current, first.ravel()]
 
     step = 1.0e-7
-    left = jax.jvp(
-        evaluated, (jnp.asarray(-step),), (jnp.asarray(1.0),)
-    )[1]
-    right = jax.jvp(
-        evaluated, (jnp.asarray(step),), (jnp.asarray(1.0),)
-    )[1]
+    left = jax.jvp(evaluated, (jnp.asarray(-step),), (jnp.asarray(1.0),))[1]
+    right = jax.jvp(evaluated, (jnp.asarray(step),), (jnp.asarray(1.0),))[1]
     np.testing.assert_allclose(left, right, rtol=0.0, atol=2.0e-4)
 
     raw_surface = evaluated(jnp.asarray(0.0), 0.0)

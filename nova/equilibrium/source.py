@@ -572,62 +572,24 @@ class ForwardSource:
         shared_radius,
         shared_masks: DomainMasks,
         interior_moments,
-        density_gradient,
+        support_moments,
         core_support,
         common_support,
-        smoothing_epsilon=0.0,
     ) -> CellCurrentMoments:
         """Return current moments selected by the shared-node clip partition.
 
         The complementary core and common-SOL clips decide participation for
-        every cell: complete support uses the fixed interior contraction,
-        crossing support uses exact clipped moments, and absent support is
-        zero. Centroid domain labels remain available for closure identity and
-        receipts, but never switch geometric participation on or off.
+        every cell. One cubic nodal interpolant is integrated over the actual
+        support at every fill fraction; there is no separate full-cell and
+        clipped evaluation path. Centroid domain labels remain available for
+        closure identity and receipts, but never switch geometric
+        participation on or off.
         """
 
         def partitioned_moments(profile, centroid_flux, node_flux, support):
             centroid_density = profile.current_density(radius, centroid_flux)
             shared_density = profile.current_density(shared_radius, node_flux)
-            interior = interior_moments(centroid_density, shared_density)
-            clipped_current, clipped_first = support.linear_current_moments(
-                centroid_density, density_gradient(centroid_density)
-            )
-            if smoothing_epsilon == 0.0:
-                boundary = support.boundary
-                complete = support.included & ~support.boundary
-                return CellCurrentMoments(
-                    jnp.where(
-                        boundary,
-                        clipped_current,
-                        jnp.where(complete, interior.cell_current, 0.0),
-                    ),
-                    jnp.where(
-                        boundary,
-                        clipped_first[:, 0],
-                        jnp.where(complete, interior.radial_moment, 0.0),
-                    ),
-                    jnp.where(
-                        boundary,
-                        clipped_first[:, 1],
-                        jnp.where(complete, interior.vertical_moment, 0.0),
-                    ),
-                )
-            participation, clipped_path = support.evaluation_weights(smoothing_epsilon)
-            missing_fraction = jnp.clip(
-                1.0 - support.area / support.full_area, 0.0, 1.0
-            )
-
-            def blend(full, clipped):
-                clipped_limit = full + missing_fraction * (clipped - full)
-                evaluated = full + clipped_path * (clipped_limit - full)
-                return participation * evaluated
-
-            return CellCurrentMoments(
-                blend(interior.cell_current, clipped_current),
-                blend(interior.radial_moment, clipped_first[:, 0]),
-                blend(interior.vertical_moment, clipped_first[:, 1]),
-            )
+            return support_moments(centroid_density, shared_density, support)
 
         core = partitioned_moments(
             self.core,

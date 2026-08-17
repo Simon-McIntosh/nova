@@ -47,6 +47,7 @@ reported.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import math
 from typing import NamedTuple
 
 import jax
@@ -55,7 +56,11 @@ import numpy as np
 
 from nova.biot.greens import second_moments, section_centroid
 from nova.equilibrium.conservation import STENCIL_MARGIN
-from nova.equilibrium.separatrix_clip import AtomicCellMesh
+from nova.equilibrium.separatrix_clip import (
+    POLYNOMIAL_POWERS,
+    AtomicCellMesh,
+    padded_polynomial_current_moments,
+)
 
 __all__ = [
     "RING_CONDITION_LIMIT",
@@ -121,6 +126,9 @@ class InteriorCurrentMomentStencil:
     centre: np.ndarray = field(repr=False)
     cell_count: int
     shared_node_count: int
+    coefficient_weight: np.ndarray | None = field(default=None, repr=False)
+    coordinate_scale: np.ndarray | None = field(default=None, repr=False)
+    full_vertices: np.ndarray | None = field(default=None, repr=False)
 
     def __post_init__(self):
         """Store compact contiguous geometry arrays for repeated contractions."""
@@ -137,9 +145,15 @@ class InteriorCurrentMomentStencil:
         object.__setattr__(
             self, "centre", np.ascontiguousarray(self.centre, dtype=np.intp)
         )
+        for name in ("coefficient_weight", "coordinate_scale", "full_vertices"):
+            value = getattr(self, name)
+            if value is not None:
+                object.__setattr__(
+                    self, name, np.ascontiguousarray(value, dtype=np.float64)
+                )
 
-    def __call__(self, centroid_current_density, shared_node_current_density):
-        """Return the three moment-vector entries for one current-density field."""
+    def _gather(self, centroid_current_density, shared_node_current_density):
+        """Return the common value pool and gathered per-cell samples."""
         centroid_value = jnp.asarray(centroid_current_density)
         shared_value = jnp.asarray(shared_node_current_density)
         if centroid_value.shape != (self.cell_count,):
@@ -149,7 +163,13 @@ class InteriorCurrentMomentStencil:
         if centroid_value.dtype != shared_value.dtype:
             shared_value = shared_value.astype(centroid_value.dtype)
         value_pool = jnp.concatenate([centroid_value, shared_value])
-        gathered = value_pool[self.gather_index]
+        return value_pool, value_pool[self.gather_index]
+
+    def __call__(self, centroid_current_density, shared_node_current_density):
+        """Return the three moment-vector entries for one current-density field."""
+        value_pool, gathered = self._gather(
+            centroid_current_density, shared_node_current_density
+        )
         entries = jnp.einsum(
             "rks,rs->rk",
             jnp.asarray(self.contraction_weight, dtype=value_pool.dtype),
@@ -158,6 +178,64 @@ class InteriorCurrentMomentStencil:
         vectors = (
             jnp.zeros((3, self.cell_count), dtype=entries.dtype)
             .at[:, self.centre]
+            .set(entries.T)
+        )
+        return CellCurrentMoments(*vectors)
+
+    def support_moments(
+        self, centroid_current_density, shared_node_current_density, support
+    ) -> CellCurrentMoments:
+        """Integrate the stencil's cubic interpolant over traced supports."""
+        if self.coefficient_weight is None:
+            raise ValueError("support quadrature geometry was not built")
+        value_pool, gathered = self._gather(
+            centroid_current_density, shared_node_current_density
+        )
+        weights = jnp.asarray(self.contraction_weight, dtype=value_pool.dtype)
+        full_entries = jnp.einsum("rks,rs->rk", weights, gathered)
+        coefficients = jnp.einsum(
+            "rps,rs->rp",
+            jnp.asarray(self.coefficient_weight, dtype=value_pool.dtype),
+            gathered,
+        )
+        centre = self.centre
+        scale = jnp.asarray(self.coordinate_scale, dtype=value_pool.dtype)
+        clipped = padded_polynomial_current_moments(
+            support.support_vertices[centre],
+            support.vertex_count[centre],
+            support.centroids[centre],
+            scale,
+            coefficients,
+        )
+        full_vertices = jnp.asarray(self.full_vertices, dtype=value_pool.dtype)
+        full_vertex_count = full_vertices.shape[1]
+        full_vertices = jnp.pad(
+            full_vertices,
+            (
+                (0, 0),
+                (0, support.support_vertices.shape[1] - full_vertex_count),
+                (0, 0),
+            ),
+        )
+        full = padded_polynomial_current_moments(
+            full_vertices,
+            jnp.full(len(centre), full_vertex_count, dtype=jnp.int32),
+            support.centroids[centre],
+            scale,
+            coefficients,
+        )
+        entries = full_entries + jnp.stack(
+            [
+                clipped[0] - full[0],
+                clipped[1][:, 0] - full[1][:, 0],
+                clipped[1][:, 1] - full[1][:, 1],
+            ],
+            axis=1,
+        )
+        entries = jnp.where(support.included[centre, None], entries, 0.0)
+        vectors = (
+            jnp.zeros((3, self.cell_count), dtype=entries.dtype)
+            .at[:, centre]
             .set(entries.T)
         )
         return CellCurrentMoments(*vectors)
@@ -259,6 +337,46 @@ def _quadratic_design(local: np.ndarray) -> np.ndarray:
         ],
         axis=-1,
     )
+
+
+def _cubic_design(local: np.ndarray) -> np.ndarray:
+    """Evaluate the complete cubic monomial basis at local coordinates."""
+    radial, vertical = local[..., 0], local[..., 1]
+    return np.stack([radial**p * vertical**q for p, q in POLYNOMIAL_POWERS], axis=-1)
+
+
+def _polygon_monomial_integral(
+    vertices: np.ndarray, radial_power: int, vertical_power: int
+) -> float:
+    """Return one exact signed-fan monomial integral on a local polygon."""
+    total_degree = radial_power + vertical_power
+    total = 0.0
+    area_twice = 0.0
+    for first, second in zip(vertices, np.roll(vertices, -1, axis=0), strict=True):
+        cross = first[0] * second[1] - second[0] * first[1]
+        area_twice += cross
+        edge = 0.0
+        for radial_first in range(radial_power + 1):
+            radial = (
+                math.comb(radial_power, radial_first)
+                * first[0] ** radial_first
+                * second[0] ** (radial_power - radial_first)
+            )
+            for vertical_first in range(vertical_power + 1):
+                first_degree = radial_first + vertical_first
+                simplex = (
+                    math.factorial(first_degree)
+                    * math.factorial(total_degree - first_degree)
+                    / math.factorial(total_degree + 2)
+                )
+                vertical = (
+                    math.comb(vertical_power, vertical_first)
+                    * first[1] ** vertical_first
+                    * second[1] ** (vertical_power - vertical_first)
+                )
+                edge += simplex * radial * vertical
+        total += cross * edge
+    return math.copysign(1.0, area_twice) * total
 
 
 def _normalised_ring(coordinate: np.ndarray, stencil: np.ndarray):
@@ -425,7 +543,12 @@ class StencilMesh:
         )
 
     def current_moment_stencil(
-        self, cell_node, second_moment
+        self,
+        cell_node,
+        second_moment,
+        *,
+        node_coordinate=None,
+        polygon_centroid=None,
     ) -> InteriorCurrentMomentStencil:
         """Build the fixed interior operator for cell-current moments.
 
@@ -467,12 +590,72 @@ class StencilMesh:
             area[:, np.newaxis] * moment[centre, 1:] * self.vertical_weight
         )
         shared_node_count = int(cell_node.max()) + 1 if cell_node.size else 0
+        coefficient_weight = None
+        coordinate_scale = None
+        full_vertices = None
+        if node_coordinate is not None:
+            node_coordinate = np.ascontiguousarray(node_coordinate, dtype=np.float64)
+            if node_coordinate.ndim != 2 or node_coordinate.shape[1] != 2:
+                raise ValueError("node_coordinate must have shape (nodes, 2)")
+            shared_node_count = len(node_coordinate)
+            polygon_centre = (
+                self.coordinate
+                if polygon_centroid is None
+                else np.asarray(polygon_centroid, dtype=np.float64)
+            )
+            if polygon_centre.shape != self.coordinate.shape:
+                raise ValueError("polygon_centroid must carry one point per cell")
+            full_vertices = node_coordinate[cell_node[centre]]
+            offset = full_vertices - polygon_centre[centre, None, :]
+            coordinate_scale = np.max(np.abs(offset), axis=1)
+            if np.any(coordinate_scale <= 0.0):
+                raise ValueError("every moment polygon must span both coordinates")
+            sample_count = gather_index.shape[1]
+            coefficient_weight = np.empty(
+                (len(centre), len(POLYNOMIAL_POWERS), sample_count),
+                dtype=np.float64,
+            )
+            for row, cell in enumerate(centre):
+                local_vertices = offset[row] / coordinate_scale[row]
+                local_centre = (
+                    self.coordinate[cell] - polygon_centre[cell]
+                ) / coordinate_scale[row]
+                point_design = _cubic_design(np.vstack([local_centre, local_vertices]))
+                area_local = _polygon_monomial_integral(local_vertices, 0, 0)
+                radial_constraint = np.asarray(
+                    [
+                        _polygon_monomial_integral(local_vertices, p + 1, q)
+                        / area_local
+                        for p, q in POLYNOMIAL_POWERS
+                    ]
+                )
+                vertical_constraint = np.asarray(
+                    [
+                        _polygon_monomial_integral(local_vertices, p, q + 1)
+                        / area_local
+                        for p, q in POLYNOMIAL_POWERS
+                    ]
+                )
+                constraint = np.vstack(
+                    [point_design, radial_constraint, vertical_constraint]
+                )
+                target = np.zeros((len(constraint), sample_count))
+                target[0, 0] = 1.0
+                target[1 : 1 + cell_node.shape[1], ring_width:] = np.eye(
+                    cell_node.shape[1]
+                )
+                target[-2] = weight[row, 1] / (area[row] * coordinate_scale[row, 0])
+                target[-1] = weight[row, 2] / (area[row] * coordinate_scale[row, 1])
+                coefficient_weight[row] = np.linalg.pinv(constraint) @ target
         return InteriorCurrentMomentStencil(
             gather_index=gather_index,
             contraction_weight=weight,
             centre=centre,
             cell_count=self.node_count,
             shared_node_count=shared_node_count,
+            coefficient_weight=coefficient_weight,
+            coordinate_scale=coordinate_scale,
+            full_vertices=full_vertices,
         )
 
     def delta_star(self, flux) -> jax.Array:

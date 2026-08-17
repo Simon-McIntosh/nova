@@ -38,7 +38,6 @@ from nova.equilibrium.domain import DomainMasks, PlasmaDomain
 from nova.equilibrium.source import ForwardSource
 from nova.equilibrium.stencil_mesh import (
     CellCurrentMoments,
-    InteriorCurrentMomentStencil,
     MomentGeometry,
     StencilMesh,
 )
@@ -116,17 +115,12 @@ class ForwardFluxOperator:
                     raise ValueError("moment polygon vertex is absent from atomic mesh")
                 cell_node[int(centre)] = nearest
             stencil = mesh.current_moment_stencil(
-                cell_node, self.moment_geometry.second_moment[:, :2]
+                cell_node,
+                self.moment_geometry.second_moment[:, :2],
+                node_coordinate=node,
+                polygon_centroid=atomic.centroids,
             )
-            stencils.append(
-                InteriorCurrentMomentStencil(
-                    gather_index=stencil.gather_index,
-                    contraction_weight=stencil.contraction_weight,
-                    centre=stencil.centre,
-                    cell_count=stencil.cell_count,
-                    shared_node_count=len(node),
-                )
-            )
+            stencils.append(stencil)
         self._moment_mesh = StencilMesh(coordinate, ring, area)
         self._interior_moment_stencils = tuple(stencils)
 
@@ -178,6 +172,21 @@ class ForwardFluxOperator:
         )
         for stencil in self._interior_moment_stencils:
             vectors = vectors + jnp.stack(stencil(centroid_density, shared_density))
+        return CellCurrentMoments(*vectors)
+
+    def support_current_moments(
+        self, centroid_density, shared_density, support
+    ) -> CellCurrentMoments:
+        """Integrate the common cubic density over one traced support partition."""
+        if self.moment_geometry is None:
+            raise ValueError("moment geometry is required for current moments")
+        vectors = jnp.zeros(
+            (3, self.grid.node_number), dtype=jnp.asarray(centroid_density).dtype
+        )
+        for stencil in self._interior_moment_stencils:
+            vectors = vectors + jnp.stack(
+                stencil.support_moments(centroid_density, shared_density, support)
+            )
         return CellCurrentMoments(*vectors)
 
     def coupling_current_moments(
@@ -253,10 +262,9 @@ class ForwardFluxOperator:
             self.moment_geometry.atomic_mesh.node_coordinates[:, 0],
             shared_masks,
             self.interior_current_moments,
-            self.current_density_gradient,
+            self.support_current_moments,
             core_support,
             common_support,
-            smoothing_epsilon=self.smoothing_epsilon,
         )
         return self.coupling_current_moments(moments)
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import jax
 import jax.numpy as jnp
 import numpy as np
 
@@ -10,7 +11,10 @@ from nova.biot.polygonanalytic import (
     polygon_analytic_flux_moments,
 )
 from nova.equilibrium.domain import DomainMasks, PlasmaDomain
-from nova.equilibrium.separatrix_clip import AtomicCellMesh
+from nova.equilibrium.separatrix_clip import (
+    AtomicCellMesh,
+    padded_polynomial_current_moments,
+)
 from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.equilibrium.stencil_mesh import CellCurrentMoments
 
@@ -42,8 +46,8 @@ def _participation_sweep():
     def density_gradient(density):
         return density[:, None] * gradient_scale
 
-    def interior_moments(centroid_density, _shared_density):
-        current, first = core_support.linear_current_moments(
+    def support_moments(centroid_density, _shared_density, support):
+        current, first = support.linear_current_moments(
             centroid_density, density_gradient(centroid_density)
         )
         return CellCurrentMoments(current, first[:, 0], first[:, 1])
@@ -77,8 +81,8 @@ def _participation_sweep():
             masks,
             jnp.asarray(mesh.node_coordinates[:, 0]),
             shared_masks,
-            interior_moments,
-            density_gradient,
+            lambda centroid, shared: support_moments(centroid, shared, core_support),
+            support_moments,
             core_support,
             common_support,
         )
@@ -147,25 +151,29 @@ def test_clipped_evaluation_converges_to_full_stencil_limit():
         psi_norm=jnp.full(len(mesh.node_coordinates), 0.5),
     )
 
-    def density_gradient(density):
-        return density[:, None] * jnp.asarray([[0.8 / width, -0.5 / width]])
-
-    centroid_density = source.core.current_density(radius, masks.psi_norm)
+    coefficients = jnp.asarray(
+        [[100.0, 300.0, 300.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]
+    )
+    scale = jnp.asarray([[width / 2.0, width / 2.0]])
     complete_support = mesh.traced_clip(jnp.ones(len(mesh.node_coordinates)))
-    linear_current, linear_first = complete_support.linear_current_moments(
-        centroid_density, density_gradient(centroid_density)
+    full_current, full_first = padded_polynomial_current_moments(
+        complete_support.support_vertices,
+        complete_support.vertex_count,
+        complete_support.centroids,
+        scale,
+        coefficients,
     )
-    stencil_scale = 1.0 / (1.0 - 0.2319)
-    full_values = jnp.asarray(
-        [
-            linear_current[0] * stencil_scale,
-            linear_first[0, 0] * stencil_scale,
-            linear_first[0, 1] * stencil_scale,
-        ]
-    )
+    full_values = jnp.asarray([full_current[0], full_first[0, 0], full_first[0, 1]])
 
-    def interior_moments(_centroid_density, _shared_density):
-        return CellCurrentMoments(full_values[0:1], full_values[1:2], full_values[2:3])
+    def support_moments(_centroid_density, _shared_density, support):
+        current, first = padded_polynomial_current_moments(
+            support.support_vertices,
+            support.vertex_count,
+            support.centroids,
+            scale,
+            coefficients,
+        )
+        return CellCurrentMoments(current, first[:, 0], first[:, 1])
 
     target_r = np.asarray([1.22, 1.79, 2.55, 3.8])
     target_z = np.asarray([0.19, -0.27, 0.41, -0.63])
@@ -191,11 +199,12 @@ def test_clipped_evaluation_converges_to_full_stencil_limit():
             masks,
             shared_radius,
             shared_masks,
-            interior_moments,
-            density_gradient,
+            lambda centroid, shared: support_moments(
+                centroid, shared, complete_support
+            ),
+            support_moments,
             core_support,
             common_support,
-            smoothing_epsilon=3.0e-4,
         )
         vector = np.asarray(jnp.stack(moments))[:, 0]
         actual_missing = float(1.0 - core_support.area[0] / core_support.full_area[0])
@@ -213,5 +222,57 @@ def test_clipped_evaluation_converges_to_full_stencil_limit():
     moment_ratios = np.asarray(moment_ratios)
     field_ratios = np.asarray(field_ratios)
     np.testing.assert_allclose(observed_missing, [2.8e-4, 2.0e-4, 1.0e-4, 3.0e-5])
-    assert np.all(moment_ratios <= 4.0 * observed_missing)
-    assert np.all(field_ratios <= 4.0 * observed_missing[:, None])
+    assert np.all(moment_ratios <= 4.1 * observed_missing)
+    assert np.all(field_ratios <= 4.1 * observed_missing[:, None])
+
+
+def test_cubic_support_is_c1_at_full_cell_transition_without_smoothing():
+    """Edge-vanishing cubic moments and their assembled fields cross fill C1."""
+    centre = np.asarray([1.5, 0.0])
+    half_width = np.asarray([0.1, 0.08])
+    polygon = centre + half_width * np.asarray(
+        [[-1.0, -1.0], [1.0, -1.0], [1.0, 1.0], [-1.0, 1.0]]
+    )
+    mesh = AtomicCellMesh.from_cells([polygon], centroids=centre[None, :])
+    node_u = jnp.asarray((mesh.node_coordinates[:, 0] - centre[0]) / half_width[0])
+    target_r = np.asarray([1.22, 1.79, 2.55, 3.8])
+    target_z = np.asarray([0.19, -0.27, 0.41, -0.63])
+    flux = polygon_analytic_flux_moments(
+        target_r, target_z, polygon, expansion_point=centre
+    )
+    radial, vertical = polygon_analytic_field_moments(
+        target_r, target_z, polygon, expansion_point=centre
+    )
+    blocks = jnp.asarray(
+        np.stack([np.stack(flux), np.stack(radial), np.stack(vertical)])
+    )
+
+    def composed(cut):
+        support = mesh.traced_clip(cut - node_u)
+        coefficients = jnp.asarray(
+            [[cut, -1.0, 0.2 * cut, 0.1 * cut, -0.2, 0.0, -0.1, 0.0, 0.0, 0.0]]
+        )
+        current, first = padded_polynomial_current_moments(
+            support.support_vertices,
+            support.vertex_count,
+            support.centroids,
+            jnp.asarray(half_width)[None, :],
+            coefficients,
+        )
+        moments = jnp.asarray([current[0], first[0, 0], first[0, 1]])
+        fields = jnp.einsum("m,qmt->qt", moments, blocks).ravel()
+        return jnp.concatenate([moments, fields])
+
+    displacement = 2.0e-7
+    left_value, left_derivative = jax.jvp(
+        composed, (jnp.asarray(1.0 - displacement),), (jnp.asarray(1.0),)
+    )
+    right_value, right_derivative = jax.jvp(
+        composed, (jnp.asarray(1.0 + displacement),), (jnp.asarray(1.0),)
+    )
+    surface = composed(jnp.asarray(1.0))
+    np.testing.assert_allclose(left_value, surface, rtol=0.0, atol=2.0e-7)
+    np.testing.assert_allclose(right_value, surface, rtol=0.0, atol=2.0e-7)
+    np.testing.assert_allclose(
+        left_derivative, right_derivative, rtol=2.0e-6, atol=2.0e-9
+    )

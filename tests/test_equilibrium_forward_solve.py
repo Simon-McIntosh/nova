@@ -279,44 +279,17 @@ def test_solve_path_current_moments_match_direct_stencil_and_clip(machine):
         geometry.atomic_mesh.node_coordinates[:, 0],
         jnp.clip(shared_masks.psi_norm, 0.0, 1.0),
     )
-    interior = operator.interior_current_moments(centroid_density, shared_density)
-    core_density = operator.source.core.current_density(operator.radius, masks.psi_norm)
-    core_gradient = operator.current_density_gradient(core_density)
     clipped = geometry.atomic_mesh.traced_clip(
         operator.polarity * (shared_flux - topology.boundary_flux)
     )
-    clipped_current, clipped_first = clipped.linear_current_moments(
-        core_density, core_gradient
-    )
-    boundary = clipped.boundary
-    complete = clipped.included & ~clipped.boundary
-    expected_current = jnp.where(
-        boundary,
-        clipped_current,
-        jnp.where(complete, interior.cell_current, 0.0),
-    )
-    expected_first = jnp.stack(
-        [
-            jnp.where(
-                boundary,
-                clipped_first[:, 0],
-                jnp.where(complete, interior.radial_moment, 0.0),
-            ),
-            jnp.where(
-                boundary,
-                clipped_first[:, 1],
-                jnp.where(complete, interior.vertical_moment, 0.0),
-            ),
-        ],
-        axis=1,
-    )
+    direct = operator.support_current_moments(centroid_density, shared_density, clipped)
     radial_second, vertical_second, cross_second = geometry.second_moment.T
     determinant = radial_second * vertical_second - cross_second**2
     expected = (
-        expected_current,
-        (vertical_second * expected_first[:, 0] - cross_second * expected_first[:, 1])
+        direct.cell_current,
+        (vertical_second * direct.radial_moment - cross_second * direct.vertical_moment)
         / determinant,
-        (radial_second * expected_first[:, 1] - cross_second * expected_first[:, 0])
+        (radial_second * direct.vertical_moment - cross_second * direct.radial_moment)
         / determinant,
     )
     actual = operator.cell_current_moments(seed)
@@ -328,6 +301,31 @@ def test_solve_path_current_moments_match_direct_stencil_and_clip(machine):
     assert np.count_nonzero(np.asarray(actual.cell_current)[crossing_outside]) == int(
         crossing_outside.sum()
     )
+
+
+def test_unclipped_support_quadrature_is_interior_stencil_bitwise(machine):
+    """The full support is the identical cubic-stencil contraction."""
+    profile, seed, _vacuum = machine
+    operator = replace(profile.operator, use_linear_moments=True)
+    masks, topology = operator.read(seed)
+    shared_flux = operator.shared_node_flux(seed)
+    shared_masks = operator.shared_domain_masks(masks, topology, shared_flux)
+    centroid_density = operator.source.core.current_density(
+        operator.radius, jnp.clip(masks.psi_norm, 0.0, 1.0)
+    )
+    shared_density = operator.source.core.current_density(
+        operator.moment_geometry.atomic_mesh.node_coordinates[:, 0],
+        jnp.clip(shared_masks.psi_norm, 0.0, 1.0),
+    )
+    complete = operator.moment_geometry.atomic_mesh.traced_clip(
+        jnp.ones(len(shared_density))
+    )
+    expected = operator.interior_current_moments(centroid_density, shared_density)
+    observed = operator.support_current_moments(
+        centroid_density, shared_density, complete
+    )
+    for actual, direct in zip(observed, expected, strict=True):
+        np.testing.assert_array_equal(actual, direct)
 
 
 def test_zero_smoothing_width_preserves_moment_map_bitwise(machine):

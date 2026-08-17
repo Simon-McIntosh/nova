@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-17T22:13:13",
+  "updated": "2026-08-17T22:17:48",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -7772,9 +7772,55 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260817T163132373468-band-confined-limit",
+        "plan": "moment-map-root-finding",
+        "section": "\u00a74",
+        "node": "band-confined-limit",
+        "role": "implement",
+        "member": "coupling-blocks",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T16:31:34Z",
+        "completed_at": "2026-08-17T16:54:34Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1380,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1380,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "df21ceabfd609b55a06e244de6885a02bcf00a5b",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "failed",
+        "outcome": "Stopped by the owner mid-flight: the band-confined common-limit blend is a software workaround, and the owner directed the true mathematical fix instead. Superseded by the consistent-support-quadrature node, which removed the two-path seam entirely; no band evidence was produced and none is needed.",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/band-confined-limit-manifest.md",
+        "scope_changed": true,
+        "session_id": "01a009c8-8ac4-7a50-806e-c28169dbfc66",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 233
+    "_version": 234
   }
 }

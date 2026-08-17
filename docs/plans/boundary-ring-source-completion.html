@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="boundary-ring-source-completion">
+  <meta name="plan-title"     content="Boundary Ring Source Completion">
+  <meta name="plan-summary"   content="Give every nonempty support a defined moment-source evaluation at the stencil-availability seam, then re-adjudicate the analytic gates and the held lineage merge">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort-hours" content="10.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint"    content="S7">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-depends-on" content="moment-map-root-finding">
+  <meta name="plan-blocks"    content="plasma-edge-current-representation">
+  <title>Boundary Ring Source Completion | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — The defect, exactly, and how it was found</h2>
+
+    <p>The free-boundary moment map's convergence barrier was chased through an exclusion chain that
+    ended in three decisive measurements, all banked in
+    <a href="/nova/evidence/archive/moment-map-root-finding-landed.html">the moment-map evidence
+    record</a>. First, the <strong>consistent support quadrature</strong>
+    (<a href="/nova/evidence/archive/moment-map-root-finding-landed.html#consistent-support-quadrature">evidence</a>)
+    replaced the two-path source seam (degree-3 interior stencil vs locally linearised clipped
+    integral) with one formula — exact moments of the same cubic nodal interpolant over the actual
+    support polygon, closed Green/simplex edge moments through degree four. It is verified at the
+    property level: unclipped support reproduces the interior stencil bitwise, clipped error is
+    bounded by 4.1× the missing-area fraction, both-sided derivatives agree with smoothing switched
+    off, and the polygon integration matches independent adaptive quadrature at 2e-13. The kink is
+    removed by construction, so the entire smoothing branch retires as symptom treatment.</p>
+
+    <p>Second, the <strong>four-quadrant test</strong>
+    (<a href="/nova/evidence/archive/moment-map-root-finding-landed.html#source-coupling-quadrants">evidence</a>)
+    crossed both source schemes with both the production first-moment coupling and a converged
+    piecewise-linear reference coupling on the 566-cell coarse fixture at the analytic Solov'ev seed.
+    The coupling axis moved the flux error by less than the reference's own refinement change while
+    the source axis carried a 10.9 Wb shift (source error 7,598× the coupling error in RMS), so
+    <strong>second-moment coupling blocks are refuted</strong> and the coupling stays first-moment.</p>
+
+    <p>Third, the <strong>per-cell localization</strong>
+    (<a href="/nova/evidence/archive/moment-map-root-finding-landed.html#stencil-availability-seam">evidence</a>)
+    attributed the shift completely. Of 447 nonempty supports, <strong>96 lack a degree-3 stencil</strong>
+    — boundary-ring cells whose neighbour rings are incomplete. Those 96 cells carry 4.59% of the
+    plasma current (−689 kA) yet 84% (L1) of the flux shift; every one of the ten leading flux cells
+    is stencil-unavailable, and the moment source's total current is −14.384 MA against the
+    exact-support −15.005 MA — 0.62 MA of edge current lost at the availability seam. The ψ
+    normalisation constants are secondary (0.87%). The interior agrees with the analytic integral;
+    only the ring is wrong:</p>
+
+    <figure>
+      <img src="/nova/figures/moment-map-root-finding/per-cell-m0-relative-error.png"
+           alt="R-Z maps of per-cell signed m0 relative error, legacy vs moment stencil"
+           style="max-width:100%">
+      <figcaption>Per-cell signed m0 relative error at the analytic seed. The moment-stencil error is
+      confined to the boundary ring where no degree-3 stencil is available.</figcaption>
+    </figure>
+
+    <p><strong>The falsifiable prediction this plan starts from:</strong> repairing only the 96
+    ring-incomplete supports with boundary-local nodal quadrature, keeping the 351 stencil-available
+    cells unchanged, removes 11.281 Wb of the 10.935 Wb sup shift at the argmax target, leaving
+    ≈ −0.345 Wb — the moment source would then beat the legacy centroid scheme (0.826 Wb) by
+    roughly 2.4×.</p>
+
+    <h2 id="s2">§2 — Where the implementation lives (lineage, not main)</h2>
+
+    <p>The consistent-quadrature implementation is deliberately uncommitted to <code>main</code>: it
+    sits in the experimental lineage worktree
+    <code>/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/4c0db14a/consistent-support-quadrature</code>
+    as commit <code>3e46a605</code> (feat: integrate one interpolant over the actual support), with
+    integration base <code>6d65b5fa</code> (that commit merged with <code>main</code>). The full
+    lineage below it holds the routing, canonical centres, participation, and clip-partition commits.
+    <strong>Verify the worktree is intact before dispatching</strong> — the runtime pruner strips
+    tracked files from day-old worktrees; the commits stay reachable through the worktree HEAD, so if
+    the files are gone, recreate with
+    <code>git worktree add --detach &lt;path&gt; 6d65b5fa</code> and <code>uv sync --all-extras</code>.
+    All work in this plan builds on that base; nothing merges to <code>main</code> before §6.</p>
+
+    <p>Measurement state to reuse (session scratchpad, tmpfs — may not survive; the durable numbers
+    are all in the evidence record): the coarse-fixture resume bank
+    <code>source-coupling-cancellation/coarse-fixture-reference-inputs.npz</code> (targets, analytic
+    and external flux, supports, cubic coefficients, legacy density, production fluxes) and the
+    per-cell attribution bank <code>source-shift-localization/source-shift-localization.npz</code>.
+    If tmpfs has cycled, the coarse fixture rebuilds in ≈ 6.5 minutes; the banks regenerate from the
+    archived harnesses beside them.</p>
+
+    <h2 id="s3">§3 — Ring quadrature verification (the prediction gate)</h2>
+
+    <p>Before any production change: implement boundary-local nodal quadrature for the 96
+    ring-incomplete supports at measurement level, on the banked coarse fixture at the analytic seed.
+    The construction must use the same cubic-interpolant-over-support machinery as the interior — the
+    only change is the nodal set feeding the interpolant where the neighbour ring is incomplete
+    (candidate sets in the open decision below). No smoothing, no blending, no per-cell tuning.</p>
+
+    <p><strong>Done when:</strong> on the coarse fixture at the analytic seed, (a) the moment-source
+    flux shift at the argmax target falls from 10.935 Wb to at most 0.5 Wb (prediction −0.345 Wb) and
+    the sup over all 731 targets falls below the legacy control 0.826 Wb; (b) the moment total
+    current lands within 0.5% of the exact-support −15.005 MA; (c) the per-cell signed m0 relative
+    error on the repaired ring is bounded by the interior's own error scale rather than forming a
+    distinct population (shown by an updated R-Z figure); (d) the 351 stencil-available cells are
+    bitwise unchanged. A miss on (a) is an honest negative: bank the measured field, name which ring
+    cells resist and why, and stop for owner adjudication before touching production.</p>
+
+    <h2 id="s4">§4 — Production implementation</h2>
+
+    <p>Fold the verified ring evaluation into <code>ForwardSource</code> /
+    <code>InteriorCurrentMomentStencil</code> so <em>every</em> nonempty support has a defined
+    evaluation through one support-moment callable — the stencil-availability seam ceases to exist as
+    a code path. TDD against the existing pin set.</p>
+
+    <p><strong>Done when:</strong> (a) full interior supports reproduce the established stencil
+    bitwise (existing pin stays green untouched); (b) the exact-polygon-integration pin extends to
+    ring supports against independent adaptive quadrature at its existing tolerance class; (c) the
+    missing-area convergence pin and the no-smoothing C¹ fill-transition pins hold on ring cells
+    (both-sided JVPs at the banked 2e-6/2e-9 tolerances, width zero); (d) exact clip vertices, area
+    receipts, conservation, topology and private-flux qualification are unchanged; (e) the complete
+    component suite (the 83-test set plus the new ring pins) is green; (f) committed to the lineage
+    with the mechanism in the body.</p>
+
+    <h2 id="s5">§5 — Analytic-seed adjudication</h2>
+
+    <p>Re-run the seed-defect measurement and the direct solves that convicted the source. This is
+    the plan's scientific verdict on whether the discrete equilibrium now sits closer to the analytic
+    one than legacy's does.</p>
+
+    <p><strong>Done when:</strong> (a) the analytic-seed map defect is re-tabulated on both fixtures
+    beside the banked controls (legacy 9.54e-3 coarse / 1.16e-2 fine; pre-repair consistent 1.29e-1 /
+    2.35e-2) and the repaired consistent map beats legacy on both; (b) direct 10×30 solves from the
+    analytic seed are reported per fixture against the banked route controls, and any configuration
+    closing the unchanged 1e-6 residual gate gets the complete unchanged physics gate set scored at
+    its root; (c) if the repaired map still does not admit a direct analytic-seed root, the residual
+    trend across the damping set is banked and the obstruction named — that outcome routes to §6's
+    continuation rather than failing the plan.</p>
+
+    <h2 id="s6">§6 — Continuation, full gates, and the merge adjudication</h2>
+
+    <p>The decisive solve: the fine 1069-cell continuation from fraction 0 at zero smoothing under
+    the repaired map, identical step policy and unchanged 10×30 budget, every accepted fraction
+    logged. Historical brackets for scale: two-path unsmoothed 0.5875/0.6, smoothed 0.4375/0.45,
+    pre-repair consistent 0.3/0.3125 (a one-cell participation birth, not a topology change).</p>
+
+    <p><strong>Done when:</strong> (a) the continuation reaches fraction 1 at the unchanged 1e-6
+    residual gate and the complete unchanged physics gate set passes at the full-moment-map root, with
+    the terminal state serialized — in which case the lineage (consistent quadrature + ring
+    completion) merges to <code>main</code> with <code>--no-ff</code>, the smoothing branch is
+    formally retired, and the held plasma-edge-current-representation §6 routing merge plus the
+    sol-current-demonstration kickoff unblock; or (b) a bracket appears, the rejected state is banked,
+    one census pass names the surface class it straddles, and the plan stops for owner adjudication
+    with the map's remaining obstruction stated in mechanism terms. No gate, fixture physics, or
+    route default moves in either branch.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="ring-node-set" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">Which nodal set feeds the cubic interpolant on ring-incomplete supports?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="own-geometry">own-geometry: the cell's centroid, corners and fitted first moments only — no neighbour data</button>
+          <button class="r-opt" data-value="one-sided">one-sided: extend the stencil with the available partial neighbour ring, weights re-derived for the incomplete pattern</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="coupling-order" data-choice="first-moment" data-by="Simon McIntosh" data-when="2026-08-17">
+        <p class="r-dec-q">Does the coupling need second-moment blocks to match the exact source?</p>
+        <p class="r-dec-rat">No — refuted by the four-quadrant measurement: the production first-moment
+        coupling is already at reference accuracy on the coarse fixture (below refinement noise), and
+        the source error is 7,598× the coupling error in RMS. The coupling stays first-moment.</p>
+      </div>
+      <div class="r-dec" data-key="smoothing-retirement" data-choice="retired" data-by="Simon McIntosh" data-when="2026-08-17">
+        <p class="r-dec-q">Does the ε-band smoothing remain in the treatment set?</p>
+        <p class="r-dec-rat">Retired. The owner directed the true mathematical fix over the software
+        workaround; the consistent quadrature removes the kink by construction (both-sided derivatives
+        agree at width zero), so smoothing treated a symptom of the two-path seam that no longer
+        exists. All gates in this plan run at zero smoothing width.</p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-brs-001" data-status="open"
+               data-capability-version="1.0" data-capability-class="orchestrator"
+               data-written-by="reckon-create" data-written-at="2026-08-17">
+        <h4 class="r-fu-title">Execute the ring completion from the prediction gate forward</h4>
+        <div class="r-fu-body"><p>Fully scoped and evidence-anchored; deserves a clean session. Start
+        at §3 (the prediction gate) after verifying the lineage worktree per §2. The §3 outcome locks
+        the ring-node-set decision before §4 touches production.</p></div>
+        <pre class="r-fu-prompt">/reckon-ship boundary-ring-source-completion</pre>
+      </article>
+    </section>
+
+  </main>
+</body>
+</html>

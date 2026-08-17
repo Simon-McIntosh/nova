@@ -19,12 +19,12 @@
   <meta name="plan-sprint" content="S10">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-depends-on" content="flux-function-forward-equilibrium">
-  <meta name="plan-blocks" content="imas-ambix:magnetics-free-equilibrium-recovery">
+  <meta name="plan-blocks" content="imas-ambix:magnetics-free-equilibrium-recovery,imas-ambix:sophelio-entry-master">
   <title>DIII-D Forward Onboarding | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-17">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 <meta name="plan-commits" content="7d9743fd,92a4a00e,685a7602,11bac959">
 <meta name="plan-impl" content="0.28">
 </head>
@@ -131,15 +131,15 @@
       </p>
     <p class="r-dec-rat"></p>
     </div>
-<div class="r-dec" data-key="vacuum-gate-measure" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="vacuum-gate-measure" data-choice="quiescent-window-true-vacuum" data-by="Simon McIntosh" data-when="2026-08-17T19:11:03+00:00">
     <p class="r-dec-q">What replaces the inapplicable starter-kit bar as the section-2 kill gate?</p>
     <p class="r-dec-ctx">The measured diagnosis established that the published 0.94 is reached by fitting exterior psi to Green functions, while this plan forbids fitting anywhere in a forward. The two tests are not comparable, so the gate as written cannot pass or fail the entry premise. Our geometry and kernels were independently validated by the same diagnosis, so this is a question about what to measure, not about whether the physics is right.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="fitted-parity-plus-absolute-floor">Reproduce the starter kit&#x27;s own fitted decomposition to confirm we match its 0.94, AND pre-register a separate absolute-forward floor whose shortfall is then interpreted as the unmodelled passive and vessel contribution (recommended, because it keeps the original kill-gate function while turning the residual into a measurement the passive lane needs)</button>
-      <button class="r-opt" data-value="absolute-only-rebar">Drop the fitted comparison and pre-register a new absolute-forward bar from our own MAST vacuum-floor experience</button>
+      <button class="r-opt chosen" data-value="quiescent-window-true-vacuum">Re-open the gate on quiescent windows: census the corpus for labeled frames where every coil |dI/dt| sits below a declared threshold (passive and vessel currents decayed by selection, not by modelling), score exterior psi there against shipped-coil Green functions plus the label-extracted plasma contribution, and bank the transient-window residuals as the passive-fit corpus for the section-4 model</button>
+      <button class="r-opt" data-value="fitted-parity-plus-absolute-floor">Reproduce the starter kit&#x27;s own fitted decomposition to confirm parity with its 0.94, and pre-register a separate absolute-forward floor whose shortfall is interpreted as the unmodelled passive and vessel contribution</button>
       <button class="r-opt" data-value="fitted-parity-only">Adopt the fitted decomposition as the gate and accept that it does not test the absolute forward</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Owner directive 2026-08-17: search for vacuum-quiet conditions where all coils&#x27; dI/dt are low — that gives a true vacuum-side measure now, because with the coil set quiescent the vessel and passive currents have decayed and the exterior residual attributes to geometry rather than to unmodelled transients. Transients are not the gate&#x27;s problem: the windows the selection excludes become, deliberately, the fitting corpus for the section-4 passive model later. One recorded implementation caveat rather than a hidden assumption: the corpus labels are diverted-slices-only, so a labeled frame with no plasma is not expected to exist — the faithful implementation therefore scores exterior psi against coil Green functions PLUS the plasma term extracted from the label interior (derivative-level consumption, already permitted and disclosed), and the census explicitly counts any labeled low-current frames so a pure coil-only comparison runs on them if they exist.</p>
     </div>
 </section>
 
@@ -172,6 +172,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260817-vacuum-diagnosis" data-who="reckon-ship" data-when="2026-08-17T19:45:00+00:00">
     <div class="r-comment-body">vacuum-diagnosis landed: commit 11bac959, report at docs/research/diiid-vacuum-gate-diagnosis.html. VERDICT: fitted-versus-absolute CONTRACT MISMATCH at HIGH confidence, so the gate was mis-specified rather than failed. The deciding starter-kit text reads: Fitting psi outside the plasma envelope to those Green's functions ... reaches R2 approximately 0.94. The published bar therefore scores a FITTED exterior decomposition and does NOT apply to the no-coefficient-fit absolute current-only forward this plan requires. Both rival causes were quantified and rejected as insufficient rather than argued away. Sweeping ECOILA turns across the entire unresolved interval 1, 12, 24, 48, 72, 96 moves pooled R-squared only 0.495267 to 0.512497, an improvement of 0.017230 against a shortfall of 0.427503; adding explicit ECOILB as a co-located 48-turn group at fixed ECOILA=48 adds a further 0.004884. Skew-sign error is REJECTED at high confidence because the shipped convention scores best of all tested (0.495267) and every reversal is worse by 0.000095 to 0.000410, with an independent F5A vertex derivation from centre (1.0041, 1.5169) m, extent (0.1392, 0.1194) m and AF=+45 degrees giving vertical shear 0.0696 m that matches the declared parallelogram orientation. CONSEQUENCE: our geometry construction and kernels are validated, not implicated, and the entry premise is not damaged by this measurement. The gate measure itself must be redefined before it can kill anything. A physical reading worth testing rather than assuming: the gap between a fitted 0.94 and an absolute 0.495 is a candidate MEASUREMENT of how much exterior flux the shipped coil currents alone do not explain, which would be the passive and vessel currents this plan already names as its highest-risk physics component.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260817-gate-reopened" data-who="reckon-ship" data-when="2026-08-17T20:10:00+00:00">
+    <div class="r-comment-body">GATE RE-OPENED under the freshly locked quiescent-window measure, superseding the inapplicable starter-kit bar. The section-2 kill gate is live again with a well-posed formulation: quiescent labeled frames (all-coil low dI/dt) isolate geometry from transients, the label-extracted plasma term completes the exterior prediction without any fitted coefficient, and the excluded transient windows are banked as the passive-model fitting corpus instead of being noise. A measurement worker is dispatched against this formulation; its bar is pre-registered from the quiescent selection itself before scoring.</div>
 </div>
 </section>
 </main>

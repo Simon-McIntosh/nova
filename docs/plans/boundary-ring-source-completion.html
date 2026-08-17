@@ -23,7 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-17">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="3">
+<meta name="plan-commits" content="f943bacba9ac64c404afe92c94d43f023950b349">
+<meta name="plan-artifacts" content="docs/evidence/archive/boundary-ring-source-completion-landed.html,docs/figures/boundary-ring-source-completion/ring-m0-relative-error.png,scripts/ring_quadrature/results/ring-quadrature-results.json (lineage f943bacb),scripts/ring_quadrature/results/ring-quadrature-fields.npz (lineage f943bacb)">
+<meta name="plan-impl" content="0.25">
 </head>
 <body>
   <main class="plan-doc">
@@ -100,22 +103,22 @@
     with both harnesses beside the banks — copy the two bank directories into the working worktree
     at node start; tmpfs offers no durability guarantee beyond the moment of copy.</p>
 
-    <h2 id="s3">§3 — Ring quadrature verification (the prediction gate)</h2>
-
-    <p>Before any production change: implement boundary-local nodal quadrature for the 96
-    ring-incomplete supports at measurement level, on the banked coarse fixture at the analytic seed.
-    The construction must use the same cubic-interpolant-over-support machinery as the interior — the
-    only change is the nodal set feeding the interpolant where the neighbour ring is incomplete
-    (candidate sets in the open decision below). No smoothing, no blending, no per-cell tuning.</p>
-
-    <p><strong>Done when:</strong> on the coarse fixture at the analytic seed, (a) the moment-source
-    flux shift at the argmax target falls from 10.935 Wb to at most 0.5 Wb (prediction −0.345 Wb) and
-    the sup over all 731 targets falls below the legacy control 0.826 Wb; (b) the moment total
-    current lands within 0.5% of the exact-support −15.005 MA; (c) the per-cell signed m0 relative
-    error on the repaired ring is bounded by the interior's own error scale rather than forming a
-    distinct population (shown by an updated R-Z figure); (d) the 351 stencil-available cells are
-    bitwise unchanged. A miss on (a) is an honest negative: bank the measured field, name which ring
-    cells resist and why, and stop for owner adjudication before touching production.</p>
+    <section id="s3" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ measured 2026-08-17 — gate FAILED (honest negative)</span>
+        <h2>§3 — Ring quadrature verification (the prediction gate)</h2>
+      </header>
+      <p class="landed-summary">
+        Measured both candidate nodal sets on the banked coarse fixture at the analytic seed
+        (commit <code>f943bacb</code>, lineage). own-geometry repairs the flux the plan predicted
+        (argmax +0.091 Wb, sup 0.340 Wb — 2.4× under the 0.826 Wb legacy control) but misses total
+        current (0.686% &gt; 0.5%) and the ring-error bound (p95 62.4× interior); one-sided passes
+        current (0.468%) but misses argmax (0.760 Wb) and ring-error (82.8×); 351 interior cells
+        bitwise unchanged under both. Production untouched; <code>ring-node-set</code> stays open for
+        owner adjudication. Full record:
+        <a href="/nova/evidence/archive/boundary-ring-source-completion-landed#ring-prediction-gate">§3 landed</a>.
+      </p>
+    </section>
 
     <h2 id="s4">§4 — Production implementation</h2>
 
@@ -192,15 +195,26 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-brs-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-08-17" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-brs-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-08-17" data-recommends-skill="" data-resolved-at="2026-08-17T20:52:21+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Execute the ring completion from the prediction gate forward</h4>
     <div class="r-fu-body"><p>Fully scoped and evidence-anchored; deserves a clean session. Start
         at §3 (the prediction gate) after verifying the lineage worktree per §2. The §3 outcome locks
         the ring-node-set decision before §4 touches production.</p></div>
     <pre class="r-fu-prompt">/reckon-ship boundary-ring-source-completion</pre>
+    <p class="r-fu-outcome">§3 executed and promoted (commit f943bacb): honest negative — neither nodal candidate satisfies the full gate contract (own-geometry repairs flux but misses current 0.686% and ring-error population 62.4×; one-sided repairs current but misses argmax 0.760 Wb and ring-error 82.8×). Production untouched per the §3 stop rule; ring-node-set stays open; adjudication carried by f-brs-002.</p>
+    </article>
+<article class="r-fu" data-id="f-brs-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-17" data-recommends-skill="/reckon-edit" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Adjudicate the ring construction after the honest negative</h4>
+    <div class="r-fu-body"><p>Owner-owned scientific adjudication (exemption: authority-required — the plan's §3 stop rule reserves any production path to the owner after a gate miss). Both candidates fail complementarily: own-geometry repairs the flux field (argmax +0.091 Wb, sup 0.340 Wb, 2.4× under legacy) but misstates total current by 0.686% and leaves a distinct ring error population (62.4× interior p95); one-sided repairs current (0.468%) but not the argmax flux (0.760 Wb) nor the ring population (82.8×). Options: accept a candidate under explicitly relaxed bounds, direct a new mechanism for the common resisting cells (8, 5, 78, 26, 257, 17, 23, 76 — small-current irregular polygons), or re-scope the gate. Evidence: the §3 anchor in the cumulative record. After the lock, resume execution with the prompt below.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship boundary-ring-source-completion</pre>
     </article>
 </section>
 
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s3" data-id="c-20260817T2052" data-who="reckon-ship" data-when="2026-08-17T20:52Z">
+    <div class="r-comment-body">ring-prediction-gate landed — commit f943bacb (run r-20260817T203644474480, 685 s); gate FAILED, honest negative. own-geometry: argmax shift +0.0909 Wb (pass ≤0.5), sup 0.3396 Wb (pass &lt;0.826 legacy), total current 0.686% from −15.005 MA (fail ≤0.5%), ring m0 p95 62.4× interior scale (fail). one-sided: argmax 0.7595 Wb (fail), sup 0.7604 Wb (pass), current 0.468% (pass), ring p95 82.8× (fail). Both keep all 351 stencil-available cells bitwise unchanged. Leading resisting cells common to both: 8, 5, 78, 26, 257, 17, 23, 76. Banks + scorecard durable in the lineage under scripts/ring_quadrature/.</div>
+</div>
+</section>
+</main>
 </body>
 </html>

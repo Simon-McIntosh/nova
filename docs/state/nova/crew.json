@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-17T22:37:57",
+  "updated": "2026-08-17T22:49:54",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -8054,9 +8054,72 @@
           "utilisation_pct": null
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260817T203644474480-ring-prediction-gate",
+        "plan": "boundary-ring-source-completion",
+        "section": "\u00a73",
+        "node": "ring-prediction-gate",
+        "role": "implement",
+        "member": "ring-quadrature",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T20:36:53Z",
+        "completed_at": "2026-08-17T20:48:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 685,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 685,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "c594d6b224c9f53c750bf067525b8aa89f6a5808",
+        "commits": [
+          "f943bacba9ac64c404afe92c94d43f023950b349"
+        ],
+        "changed_lines": {
+          "added": 1272,
+          "removed": 0,
+          "files": 11
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "outcome": "Honest negative banked: own-geometry passes flux (argmax +0.091 Wb, sup 0.340 Wb vs legacy 0.826) but misses current (0.686% vs 0.5%) and ring-error population (62.4x interior p95); one-sided misses argmax (0.760 Wb) and ring-error (82.8x); 351 interior cells bitwise unchanged; production untouched",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T203644474480-ring-prediction-gate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01171-0694-7063-985b-f5d112e74147",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4217600,
+            "cached_input_tokens_cumulative": 4217600,
+            "input_tokens": 4377227,
+            "input_tokens_cumulative": 4377227,
+            "output_tokens": 29448,
+            "output_tokens_cumulative": 29448,
+            "reasoning_output_tokens": 10006,
+            "reasoning_output_tokens_cumulative": 10006
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 240
+    "_version": 241
   }
 }

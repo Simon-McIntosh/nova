@@ -1,0 +1,341 @@
+{
+  "inputs": {
+    "fixture": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/57d0f89f-c6af-4053-b5de-b938e7dd5877/ring-prediction-gate/scripts/ring_quadrature/inputs/coarse-fixture-reference-inputs.npz",
+    "localization": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/57d0f89f-c6af-4053-b5de-b938e7dd5877/ring-prediction-gate/scripts/ring_quadrature/inputs/source-shift-localization.npz",
+    "quadrants": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/57d0f89f-c6af-4053-b5de-b938e7dd5877/ring-prediction-gate/scripts/ring_quadrature/inputs/source-coupling-signed-errors.npz"
+  },
+  "controls": {
+    "pre_repair_argmax_shift_wb": 10.935349448551932,
+    "argmax_target": 440,
+    "predicted_repaired_shift_wb": -0.345,
+    "argmax_absolute_limit_wb": 0.5,
+    "legacy_control_sup_wb": 0.826,
+    "exact_support_total_current_a": -15005421.582465796,
+    "total_current_relative_limit": 0.005,
+    "ring_error_limit_definition": "available-cell absolute relative-error p95",
+    "banked_shared_node_count": 798,
+    "ring_vertex_values_recovered": 175,
+    "ring_vertex_value_count": 664,
+    "shared_node_recovery_spread_a_m2": 8.440110832452774e-09
+  },
+  "candidates": {
+    "own_geometry": {
+      "argmax_target": 440,
+      "argmax_shift_wb": 0.09087071873982921,
+      "all_target_sup_wb": 0.339593282975688,
+      "all_target_sup_index": 4,
+      "total_current_a": -15108347.8750462,
+      "total_current_relative_error": 0.006859273630850593,
+      "ring_relative_error": {
+        "count": 88,
+        "max_absolute": 119.1242304418841,
+        "p95_absolute": 10.034689795100517,
+        "median_absolute": 0.20793849081913376,
+        "rms": 14.965287526852212
+      },
+      "interior_relative_error": {
+        "count": 350,
+        "max_absolute": 140.7726212403953,
+        "p95_absolute": 0.16079532413985334,
+        "median_absolute": 0.00675853732851984,
+        "rms": 7.737712737855295
+      },
+      "interior_error_scale": 0.16079532413985334,
+      "stencil_available_bitwise_unchanged": true,
+      "stencil_available_cells": 351,
+      "ring_cells": 96,
+      "fit_constraint_residual_sup_a_m2": 921.3186942916709,
+      "one_sided_condition_max": null,
+      "resisting_cells": [
+        {
+          "cell": 8,
+          "radius_m": 5.2870632529335,
+          "height_m": -3.678128979015079,
+          "relative_m0_error": 119.1242304418841,
+          "analytic_m0_a": -2.1532879421710076,
+          "repaired_m0_a": -258.6620569730805,
+          "full_vertex_count": 6,
+          "neighbour_count": 6
+        },
+        {
+          "cell": 5,
+          "radius_m": 5.479342791778796,
+          "height_m": -4.059564129423392,
+          "relative_m0_error": 67.8796061310379,
+          "analytic_m0_a": -2.156224923677263,
+          "repaired_m0_a": -148.51992347281714,
+          "full_vertex_count": 5,
+          "neighbour_count": 7
+        },
+        {
+          "cell": 78,
+          "radius_m": 4.6263981926336255,
+          "height_m": -3.550983928878974,
+          "relative_m0_error": 17.484995485735823,
+          "analytic_m0_a": -11.645149005767433,
+          "repaired_m0_a": -215.26052680233198,
+          "full_vertex_count": 6,
+          "neighbour_count": 6
+        },
+        {
+          "cell": 26,
+          "radius_m": 5.507284939700125,
+          "height_m": -3.2966938286067657,
+          "relative_m0_error": 14.620341026752678,
+          "analytic_m0_a": -18.47851537358944,
+          "repaired_m0_a": -288.6407118035592,
+          "full_vertex_count": 6,
+          "neighbour_count": 6
+        },
+        {
+          "cell": 257,
+          "radius_m": 4.202036701324899,
+          "height_m": 2.0433982771096177,
+          "relative_m0_error": 10.54511445922351,
+          "analytic_m0_a": -3.8045409125890246,
+          "repaired_m0_a": -43.92386030063896,
+          "full_vertex_count": 7,
+          "neighbour_count": 6
+        },
+        {
+          "cell": 17,
+          "radius_m": 5.066841566166875,
+          "height_m": -3.550983928878974,
+          "relative_m0_error": 9.086758276014995,
+          "analytic_m0_a": -72.45406830851313,
+          "repaired_m0_a": -730.8266731418506,
+          "full_vertex_count": 6,
+          "neighbour_count": 6
+        },
+        {
+          "cell": 23,
+          "radius_m": 4.84661987940025,
+          "height_m": -2.9152586781984526,
+          "relative_m0_error": 6.497357941848503,
+          "analytic_m0_a": -48.61202732342255,
+          "repaired_m0_a": -364.46176912261853,
+          "full_vertex_count": 6,
+          "neighbour_count": 6
+        },
+        {
+          "cell": 76,
+          "radius_m": 4.261377047853079,
+          "height_m": -3.8148553596637442,
+          "relative_m0_error": 6.29985329195553,
+          "analytic_m0_a": -248.80752167836232,
+          "repaired_m0_a": -1816.25840618709,
+          "full_vertex_count": 35,
+          "neighbour_count": 5
+        },
+        {
+          "cell": 393,
+          "radius_m": 7.68690337417645,
+          "height_m": -1.5018087952457913,
+          "relative_m0_error": 5.13835955435148,
+          "analytic_m0_a": -44.36322007414432,
+          "repaired_m0_a": -272.31739580392116,
+          "full_vertex_count": 6,
+          "neighbour_count": 5
+        },
+        {
+          "cell": 397,
+          "radius_m": 7.9038302867397014,
+          "height_m": -1.1232886478940989,
+          "relative_m0_error": 4.81920733891024,
+          "analytic_m0_a": -38.13494830668086,
+          "repaired_m0_a": -221.9151710551999,
+          "full_vertex_count": 6,
+          "neighbour_count": 5
+        },
+        {
+          "cell": 109,
+          "radius_m": 4.202036701324899,
+          "height_m": -0.2452126253402608,
+          "relative_m0_error": 4.25914722521618,
+          "analytic_m0_a": -16.735204722998894,
+          "repaired_m0_a": -88.01290548238434,
+          "full_vertex_count": 7,
+          "neighbour_count": 6
+        },
+        {
+          "cell": 364,
+          "radius_m": 6.601274676413868,
+          "height_m": -2.6519196834798753,
+          "relative_m0_error": 2.7414851847901525,
+          "analytic_m0_a": -105.13539489424342,
+          "repaired_m0_a": -393.362522393874,
+          "full_vertex_count": 7,
+          "neighbour_count": 6
+        }
+      ],
+      "verdicts": {
+        "argmax_shift": true,
+        "all_target_sup": true,
+        "total_current": false,
+        "ring_error": false,
+        "interior_bitwise": true
+      },
+      "passes_all": false
+    },
+    "one_sided": {
+      "argmax_target": 440,
+      "argmax_shift_wb": 0.75954069489595,
+      "all_target_sup_wb": 0.7604305610601969,
+      "all_target_sup_index": 439,
+      "total_current_a": -15075637.705572754,
+      "total_current_relative_error": 0.00467938356287223,
+      "ring_relative_error": {
+        "count": 88,
+        "max_absolute": 131.67105110137564,
+        "p95_absolute": 13.320159466968029,
+        "median_absolute": 0.2969514635585849,
+        "rms": 19.645624363551406
+      },
+      "interior_relative_error": {
+        "count": 350,
+        "max_absolute": 140.7726212403953,
+        "p95_absolute": 0.16079532413985334,
+        "median_absolute": 0.00675853732851984,
+        "rms": 7.737712737855295
+      },
+      "interior_error_scale": 0.16079532413985334,
+      "stencil_available_bitwise_unchanged": true,
+      "stencil_available_cells": 351,
+      "ring_cells": 96,
+      "fit_constraint_residual_sup_a_m2": 1443.754976963326,
+      "one_sided_condition_max": 463.55473424468374,
+      "resisting_cells": [
+        {
+          "cell": 5,
+          "radius_m": 5.479342791778796,
+          "height_m": -4.059564129423392,
+          "relative_m0_error": 131.67105110137564,
+          "analytic_m0_a": -2.156224923677263,
+          "repaired_m0_a": -286.0686270352459,
+          "full_vertex_count": 5,
+          "neighbour_count": 7
+        },
+        {
+          "cell": 8,
+          "radius_m": 5.2870632529335,
+          "height_m": -3.678128979015079,
+          "relative_m0_error": 123.12997322620492,
+          "analytic_m0_a": -2.1532879421710076,
+          "repaired_m0_a": -267.2875746099971,
+          "full_vertex_count": 6,
+          "neighbour_count": 6
+        },
+        {
+          "cell": 78,
+          "radius_m": 4.6263981926336255,
+          "height_m": -3.550983928878974,
+          "relative_m0_error": 22.243913543332532,
+          "analytic_m0_a": -11.645149005767433,
+          "repaired_m0_a": -270.678836689283,
+          "full_vertex_count": 6,
+          "neighbour_count": 6
+        },
+        {
+          "cell": 26,
+          "radius_m": 5.507284939700125,
+          "height_m": -3.2966938286067657,
+          "relative_m0_error": 19.378685252633836,
+          "analytic_m0_a": -18.47851537358944,
+          "repaired_m0_a": -376.56784873433475,
+          "full_vertex_count": 6,
+          "neighbour_count": 6
+        },
+        {
+          "cell": 257,
+          "radius_m": 4.202036701324899,
+          "height_m": 2.0433982771096177,
+          "relative_m0_error": 14.344030185820545,
+          "analytic_m0_a": -3.8045409125890246,
+          "repaired_m0_a": -58.376990605955235,
+          "full_vertex_count": 7,
+          "neighbour_count": 6
+        },
+        {
+          "cell": 76,
+          "radius_m": 4.261377047853079,
+          "height_m": -3.8148553596637442,
+          "relative_m0_error": 11.418685274813425,
+          "analytic_m0_a": -248.80752167836232,
+          "repaired_m0_a": -3089.8623057299,
+          "full_vertex_count": 35,
+          "neighbour_count": 5
+        },
+        {
+          "cell": 17,
+          "radius_m": 5.066841566166875,
+          "height_m": -3.550983928878974,
+          "relative_m0_error": 8.7143752665132,
+          "analytic_m0_a": -72.45406830851313,
+          "repaired_m0_a": -703.8460091344778,
+          "full_vertex_count": 6,
+          "neighbour_count": 6
+        },
+        {
+          "cell": 23,
+          "radius_m": 4.84661987940025,
+          "height_m": -2.9152586781984526,
+          "relative_m0_error": 7.84821011753789,
+          "analytic_m0_a": -48.61202732342255,
+          "repaired_m0_a": -430.1294319971358,
+          "full_vertex_count": 6,
+          "neighbour_count": 6
+        },
+        {
+          "cell": 109,
+          "radius_m": 4.202036701324899,
+          "height_m": -0.2452126253402608,
+          "relative_m0_error": 5.934309397159277,
+          "analytic_m0_a": -16.735204722998894,
+          "repaired_m0_a": -116.04708737407555,
+          "full_vertex_count": 7,
+          "neighbour_count": 6
+        },
+        {
+          "cell": 364,
+          "radius_m": 6.601274676413868,
+          "height_m": -2.6519196834798753,
+          "relative_m0_error": 3.7939528491940178,
+          "analytic_m0_a": -105.13539489424342,
+          "repaired_m0_a": -504.0141259043964,
+          "full_vertex_count": 7,
+          "neighbour_count": 6
+        },
+        {
+          "cell": 77,
+          "radius_m": 4.410204175112744,
+          "height_m": -3.6799280644149452,
+          "relative_m0_error": 2.7283549833949556,
+          "analytic_m0_a": -186.95461747314152,
+          "repaired_m0_a": -697.0331797246848,
+          "full_vertex_count": 6,
+          "neighbour_count": 5
+        },
+        {
+          "cell": 97,
+          "radius_m": 4.406176505867,
+          "height_m": -1.3895180765652,
+          "relative_m0_error": 2.6626510433669375,
+          "analytic_m0_a": -178.5696405600316,
+          "repaired_m0_a": -654.0382803108587,
+          "full_vertex_count": 6,
+          "neighbour_count": 6
+        }
+      ],
+      "verdicts": {
+        "argmax_shift": false,
+        "all_target_sup": true,
+        "total_current": true,
+        "ring_error": false,
+        "interior_bitwise": true
+      },
+      "passes_all": false
+    }
+  },
+  "selected_candidate": null,
+  "scientific_verdict": "negative"
+}

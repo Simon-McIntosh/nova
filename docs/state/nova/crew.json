@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-17T18:01:23",
+  "updated": "2026-08-17T18:01:56",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -6929,9 +6929,125 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260817T144849549148-extraction-consolidation",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a75",
+        "node": "extraction-consolidation",
+        "role": "implement",
+        "member": "extraction-kernels",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T14:48:52Z",
+        "completed_at": "2026-08-17T14:55:27Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 395,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 395,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "4bbaec8f98f4a999eb4fca716d6dec8d68fe9e70",
+        "commits": [
+          "92a4a00e9930806703944a5f2a9412559c825e31"
+        ],
+        "changed_lines": {
+          "added": 123,
+          "removed": 91,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T144849549148-extraction-consolidation/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01023-bc16-7b41-bc10-ac6f27afa6d1",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3754240,
+            "cached_input_tokens_cumulative": 5585920,
+            "input_tokens": 3834894,
+            "input_tokens_cumulative": 5774441,
+            "output_tokens": 14378,
+            "output_tokens_cumulative": 35028,
+            "reasoning_output_tokens": 4598,
+            "reasoning_output_tokens_cumulative": 11206
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260817T144910609763-transport-geometry",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a73",
+        "node": "transport-geometry",
+        "role": "implement",
+        "member": "transport-env",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T14:49:13Z",
+        "completed_at": "2026-08-17T14:56:43Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 450,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 450,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "4bbaec8f98f4a999eb4fca716d6dec8d68fe9e70",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Blocked before any test executed: the worktree had no TORAX-plus-JAX Python 3.14 environment, and both permitted pytest attempts failed at collection (uv selected the Reckon env without JAX, then system Python 3.11 could not parse the 3.14-targeted checkout). The dispatch omitted worktree venv provisioning, which is the orchestrator error rather than a worker failure. The implementation is uncommitted but intact in the worktree: 13 TORAX-facing fixed-shape FSA face fields plus a direct StandardGeometry adapter, unverified. Repair node redispatched with explicit uv sync provisioning and instructions to recover, audit and verify that work.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T144910609763-transport-geometry/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01023-3e4f-7081-b1ab-24ffbe816152",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4387840,
+            "cached_input_tokens_cumulative": 6835968,
+            "input_tokens": 4497255,
+            "input_tokens_cumulative": 7072428,
+            "output_tokens": 19896,
+            "output_tokens_cumulative": 35237,
+            "reasoning_output_tokens": 8148,
+            "reasoning_output_tokens_cumulative": 15750
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 213
+    "_version": 215
   }
 }

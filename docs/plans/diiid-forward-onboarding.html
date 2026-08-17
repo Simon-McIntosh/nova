@@ -24,9 +24,9 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-17">
-<meta name="plan-version" content="2">
-<meta name="plan-commits" content="7d9743fd">
-<meta name="plan-impl" content="0.1">
+<meta name="plan-version" content="3">
+<meta name="plan-commits" content="7d9743fd,92a4a00e">
+<meta name="plan-impl" content="0.18">
 </head>
 <body>
   <main class="plan-doc">
@@ -153,6 +153,9 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s5" data-id="c-20260817-extraction-kernels" data-who="reckon-ship" data-when="2026-08-17T14:47:00+00:00">
     <div class="r-comment-body">extraction-kernels landed: commit 7d9743fd (worktree, held for consolidation before integration); gate extraction-roundtrip PASSED. New nova/equilibrium/map_extraction.py exposes apply_delta_star, extract_flux_functions (per-surface separation with projection RMS, scaled design condition, axis and zero-gradient uncertainty inflation, reliability flags), vacuum_region_receipt and sample_chord_psi_norm; 4/4 tests green, prescribed p-prime/FF-prime recovered at 2.0e-8 relative, vacuum Delta-star RMS below 2.0e-10, chord psi_N at 2.0e-14 absolute. AUDIT FINDING: the module hand-rolls central-difference stencils, duplicating the production Delta-star in nova/equilibrium/conservation.py and the validated binned separation in benchmarks/efit_affine_extraction.py (shipped by efit-map-inversion); a consolidation node is dispatched to the same member before merge so the repo carries exactly one Delta-star and one separation implementation.</div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20260817-extraction-consolidation" data-who="reckon-ship" data-when="2026-08-17T17:05:00+00:00">
+    <div class="r-comment-body">extraction-consolidation landed: commit 92a4a00e; gate single-implementation PASSED, closing the duplication finding recorded on the previous landing. apply_delta_star now delegates to nova.equilibrium.conservation.delta_star and takes gradient and interior qualification from the same FluxLattice contract, so zero module-local finite-difference stencils remain and the hexagonal StencilMesh route is reachable rather than raster-only. Production extraction adopts the validated R*j_phi projection on the [R squared, 1] basis from the efit-map-inversion benchmark and converts its per-radian coefficients to Nova negated-total-flux p-prime and FF-prime; benchmarks/efit_affine_extraction.py now imports extract_flux_functions and keeps only its distinct R-to-the-fourth sufficiency diagnostic. Round-trip held at 2.0e-8 relative, 4/4 green. Recorded numerical constraint: float64 is required to meet that bar, an unconfigured float32 diagnostic measured 3.446e-5 relative p-prime error and was explicitly not accepted as evidence.</div>
 </div>
 </section>
 </main>

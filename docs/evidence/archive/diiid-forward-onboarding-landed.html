@@ -35,6 +35,23 @@
     plan). A consolidation node was dispatched to the same member so the repository carries
     exactly one Δ* and one separation implementation; its outcome lands under the next
     anchor.</p>
+
+    <h2 id="extraction-consolidation">Response-kernel consolidation — 2026-08-17</h2>
+    <p>Commit <code>92a4a00e</code> (node extraction-consolidation), closing the audit
+    finding above. <code>apply_delta_star</code> now delegates to
+    <code>nova.equilibrium.conservation.delta_star</code> and draws gradient and
+    interior-qualification from the same <code>FluxLattice</code> contract, so
+    <strong>zero module-local finite-difference stencils remain</strong> and the hexagonal
+    <code>StencilMesh</code> route is reachable rather than raster-only. The separation
+    adopts the validated <code>R·j_φ</code> projection on the <code>[R², 1]</code> basis
+    from <code>benchmarks/efit_affine_extraction.py</code>, converting its per-radian
+    coefficients into Nova's negated-total-flux p′ and FF′; that benchmark now imports
+    <code>extract_flux_functions</code> and retains only its distinct R⁴ sufficiency
+    diagnostic. Round-trip held at <strong>2.0e-8 relative</strong>, 4/4 green.</p>
+    <p>Numerical constraint recorded rather than hidden: float64 is required to meet that
+    bar. An unconfigured float32 diagnostic measured <strong>3.446e-5</strong> relative p′
+    error and was explicitly not accepted as passing evidence — the same precision floor
+    the sibling equilibrium plan found on its null-fit ladder.</p>
   </main>
 </body>
 </html>

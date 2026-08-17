@@ -212,5 +212,45 @@
   coupling blocks from an optional extension into the matching partner of an exact source — an owner
   decision, now with a measured reason rather than a preference.</p>
 
+  <p><em>Superseded by the four-quadrant measurement below: the cancellation exists in sign but is
+  immaterial in magnitude, and matched-order coupling was not selected.</em></p>
+
+
+  <h2 id="source-coupling-quadrants">§4 — the four-quadrant verdict: the coupling is exonerated, the source scheme itself is the defect</h2>
+
+  <p>The cancellation hypothesis was put to a direct 2×2 test on the 566-cell coarse fixture at the
+  analytic Solov'ev seed (smoothing off): both source schemes crossed with both the production
+  first-moment coupling and a converged reference coupling built by piecewise-linear subdivision of
+  every plasma cell (two refinement levels, 36,864/33,840 elements; level-to-level change 3.0e-5 /
+  2.0e-4 of internal sup, so the reference is converged). Sup-norm flux error over 731 targets,
+  80.89 Wb span:</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Source scheme</th><th>production coupling</th><th>reference coupling</th></tr></thead>
+    <tbody>
+      <tr><td>legacy centroid</td><td>0.8260 Wb</td><td><strong>0.8257 Wb (1.02%)</strong></td></tr>
+      <tr><td>consistent quadrature</td><td>10.2414 Wb</td><td>10.2319 Wb (12.65%)</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>Three facts follow.</strong> First, the coupling axis is immaterial: switching coupling
+  moves the error by less than the reference's own refinement change, so the production first-moment
+  coupling is already reference-accurate on this fixture. Second, sign opposition between source and
+  coupling error fields is real (Pearson −0.594, signed cosine −0.756) but there is nothing material
+  to cancel — the source error is <strong>7,598× the coupling error in RMS</strong>. Third,
+  consistent-source × reference-coupling is <em>not</em> the most accurate quadrant, so second-moment
+  coupling blocks are refuted as the next implementation: they would repair the axis that is already
+  at reference accuracy.</p>
+
+  <p><strong>The reframed defect.</strong> The degree-3 moment-stencil source misses the analytic
+  flux by 12.65% where the legacy centroid source achieves 1.02% — a 10.9 Wb source-side shift, over
+  200× the largest refinement change and robust. The quadrant ordering agrees with the banked seed
+  defects (legacy 9.54e-3 vs consistent 1.29e-1), so the seed-defect trend is now attributed: the
+  moment source assigns materially different cell currents from the analytic j at the analytic seed.
+  Whether that shift is broad (a representation property) or concentrated in few cells (an
+  implementation defect) is the next measurement, and it decides the shape of the repair.</p>
+
 </main></body>
 </html>

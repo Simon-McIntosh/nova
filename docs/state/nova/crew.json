@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-17T21:48:35",
+  "updated": "2026-08-17T21:53:08",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -7532,9 +7532,66 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260817T191207138288-source-coupling-cancellation",
+        "plan": "moment-map-root-finding",
+        "section": "\u00a74",
+        "node": "source-coupling-cancellation",
+        "role": "implement",
+        "member": "coupling-blocks",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T19:12:09Z",
+        "completed_at": "2026-08-17T19:51:22Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2353,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2353,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "6d65b5fad648b7f042907575e6807926ca44a15d",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/source-coupling-cancellation-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a009c8-8ac4-7a50-806e-c28169dbfc66",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 29340416,
+            "cached_input_tokens_cumulative": 515365888,
+            "input_tokens": 29823735,
+            "input_tokens_cumulative": 524380133,
+            "output_tokens": 46778,
+            "output_tokens_cumulative": 984379,
+            "reasoning_output_tokens": 8479,
+            "reasoning_output_tokens_cumulative": 263721
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 229
+    "_version": 230
   }
 }

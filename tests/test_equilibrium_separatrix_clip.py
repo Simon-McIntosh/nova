@@ -403,6 +403,74 @@ def test_clip_evaluation_weights_are_c1_without_changing_patch_geometry():
             np.testing.assert_array_equal(observed, expected)
 
 
+def test_edge_crossing_birth_is_c1_without_changing_exact_clip_geometry():
+    """A zero-flux node ramps the evaluated path, not the exact support."""
+    import jax
+    import jax.numpy as jnp
+
+    cell = np.asarray([[-1.0, -1.0], [1.0, -1.0], [1.0, 1.0], [-1.0, 1.0]])
+    mesh = AtomicCellMesh.from_cells([cell])
+    base_flux = jnp.asarray([0.0, 1.0, -1.0, -1.0])
+    density = jnp.asarray([1.0])
+    gradient = jnp.asarray([[0.3, -0.2]])
+    width = 0.05
+
+    def evaluated(displacement, smoothing_width=width):
+        flux = base_flux.at[0].set(displacement)
+        support = mesh.traced_clip(flux, smoothing_width=smoothing_width)
+        current, first = support.linear_current_moments(density, gradient)
+        return jnp.r_[current, first.ravel()]
+
+    step = 1.0e-7
+    left = jax.jvp(
+        evaluated, (jnp.asarray(-step),), (jnp.asarray(1.0),)
+    )[1]
+    right = jax.jvp(
+        evaluated, (jnp.asarray(step),), (jnp.asarray(1.0),)
+    )[1]
+    np.testing.assert_allclose(left, right, rtol=0.0, atol=2.0e-4)
+
+    raw_surface = evaluated(jnp.asarray(0.0), 0.0)
+    np.testing.assert_allclose(
+        evaluated(jnp.asarray(0.0)), raw_surface, rtol=0.0, atol=2.0e-14
+    )
+    for displacement in (-2.0 * width, 2.0 * width):
+        np.testing.assert_allclose(
+            evaluated(jnp.asarray(displacement)),
+            evaluated(jnp.asarray(displacement), 0.0),
+            rtol=0.0,
+            atol=2.0e-14,
+        )
+
+    flux = np.asarray(base_flux.at[0].set(0.4 * width))
+    raw = mesh.traced_clip(jnp.asarray(flux))
+    smoothed = mesh.traced_clip(jnp.asarray(flux), smoothing_width=width)
+    for observed, expected in zip(
+        (
+            smoothed.support_vertices,
+            smoothed.vertex_count,
+            smoothed.included,
+            smoothed.boundary,
+            smoothed.area,
+            smoothed.first_area_moment,
+            smoothed.second_area_moment,
+            smoothed.patch_area_sum,
+        ),
+        (
+            raw.support_vertices,
+            raw.vertex_count,
+            raw.included,
+            raw.boundary,
+            raw.area,
+            raw.first_area_moment,
+            raw.second_area_moment,
+            raw.patch_area_sum,
+        ),
+        strict=True,
+    ):
+        np.testing.assert_array_equal(observed, expected)
+
+
 def test_traced_clip_jits_once_and_vmaps_over_moving_separatrices():
     import jax
     import jax.numpy as jnp

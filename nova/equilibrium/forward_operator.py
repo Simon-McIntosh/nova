@@ -236,6 +236,17 @@ class ForwardFluxOperator:
         shared_flux = self.shared_node_flux(psi)
         shared_masks = self.shared_domain_masks(masks, topology, shared_flux)
         signed_flux = self.polarity * (shared_flux - topology.boundary_flux)
+        if self.smoothing_epsilon == 0.0:
+            core_support = self.moment_geometry.atomic_mesh.traced_clip(signed_flux)
+            common_support = self.moment_geometry.atomic_mesh.traced_clip(-signed_flux)
+        else:
+            smoothing_width = self.smoothing_epsilon * jnp.abs(topology.flux_span)
+            core_support = self.moment_geometry.atomic_mesh.traced_clip(
+                signed_flux, smoothing_width=smoothing_width
+            )
+            common_support = self.moment_geometry.atomic_mesh.traced_clip(
+                -signed_flux, smoothing_width=smoothing_width
+            )
         moments = self.source.current_moments(
             self.radius,
             masks,
@@ -243,8 +254,8 @@ class ForwardFluxOperator:
             shared_masks,
             self.interior_current_moments,
             self.current_density_gradient,
-            self.moment_geometry.atomic_mesh.traced_clip(signed_flux),
-            self.moment_geometry.atomic_mesh.traced_clip(-signed_flux),
+            core_support,
+            common_support,
             smoothing_epsilon=self.smoothing_epsilon,
         )
         return self.coupling_current_moments(moments)

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-17T22:17:48",
+  "updated": "2026-08-17T22:20:01",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -7818,9 +7818,66 @@
           "utilisation_pct": null
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260816T150307897672-solovev-contour-overlay",
+        "plan": "plasma-edge-current-representation",
+        "section": "\u00a76",
+        "node": "solovev-contour-overlay",
+        "role": "implement",
+        "member": "edge-demo",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T15:03:10Z",
+        "completed_at": "2026-08-16T15:07:11Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 241,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 241,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "6273c87256cf98496610126db1c2f853ab4e51e2",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/solovev-contour-overlay-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a009c8-ac0c-7d93-98a2-5c8890d08869",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 10751232,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 11414931,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 40357,
+            "reasoning_output_tokens": 0,
+            "reasoning_output_tokens_cumulative": 11282
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 234
+    "_version": 235
   }
 }

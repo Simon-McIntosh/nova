@@ -26,8 +26,11 @@ from scipy.constants import mu_0
 
 jax.config.update("jax_enable_x64", True)
 
-from nova.equilibrium.conservation import FluxLattice, delta_star  # noqa: E402
+from nova.equilibrium.conservation import FluxLattice  # noqa: E402
 from nova.equilibrium.convention import TOTAL_FLUX_FACTOR  # noqa: E402
+from nova.equilibrium.map_extraction import (  # noqa: E402
+    extract_flux_functions as extract_map_flux_functions,
+)
 from nova.equilibrium.wall_mask import inside_polygon  # noqa: E402
 from nova.imas.mast_vacuum_cohort import SHOT_STORE  # noqa: E402
 
@@ -74,9 +77,12 @@ def _flux_map(group: zarr.Group, slice_index: int, radius: np.ndarray) -> np.nda
     return raw[:, finite_columns]
 
 
-def _fit(matrix: np.ndarray, target: np.ndarray) -> dict[str, Any]:
-    """Return ordinary least-squares coefficients and residual diagnostics."""
+def _radial_correction_diagnostic(
+    radius: np.ndarray, target: np.ndarray
+) -> dict[str, Any]:
+    """Return the extra radial-dependence diagnostic beyond the production pair."""
 
+    matrix = np.column_stack((radius**2, np.ones(radius.size), radius**4))
     coefficients, _, rank, singular_values = np.linalg.lstsq(matrix, target, rcond=None)
     fitted = matrix @ coefficients
     residual = target - fitted
@@ -179,7 +185,7 @@ def _stored_lcfs(group: zarr.Group, slice_index: int) -> tuple[np.ndarray, np.nd
     return radius, height
 
 
-def extract_flux_functions(
+def extract_efit_flux_functions(
     store: Path = SHOT_STORE,
     shot: int = DEFAULT_SHOT,
     slice_index: int = DEFAULT_SLICE_INDEX,
@@ -208,11 +214,6 @@ def extract_flux_functions(
 
     mesh = FluxLattice(radius, height)
     psi_flat = psi_per_radian.T.reshape(-1)
-    total_flux = TOTAL_FLUX_FACTOR * psi_flat
-    elliptic = np.asarray(delta_star(mesh, total_flux), dtype=np.float64)
-    node_radius = mesh.node_radius
-    current_density = -elliptic / (TOTAL_FLUX_FACTOR * mu_0 * node_radius)
-
     psi_axis = float(group["psi_axis"][slice_index])
     psi_boundary = float(group["psi_boundary"][slice_index])
     flux_span = psi_boundary - psi_axis
@@ -226,14 +227,31 @@ def extract_flux_functions(
         lcfs_radius,
         lcfs_height,
     )
+    bin_edges = np.linspace(0.0, 1.0, bin_count + 1)
+    bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
     operator_interior = np.asarray(mesh.interior(), dtype=bool)
+    plasma_seed = operator_interior & np.isfinite(psi_normalised) & lcfs_interior
+    extraction = extract_map_flux_functions(
+        radius,
+        height,
+        (TOTAL_FLUX_FACTOR * psi_flat).reshape(mesh.shape),
+        psi_normalised.reshape(mesh.shape),
+        surfaces=bin_centers,
+        plasma_mask=plasma_seed.reshape(mesh.shape),
+        min_samples=4,
+        maximum_condition=np.inf,
+        maximum_inflation=np.inf,
+    )
+    node_radius = mesh.node_radius
+    current_density = extraction.current.toroidal_current_density.reshape(-1)
     operator_valid = (
-        operator_interior & np.isfinite(current_density) & np.isfinite(psi_normalised)
+        extraction.current.valid.reshape(-1)
+        & np.isfinite(current_density)
+        & np.isfinite(psi_normalised)
     )
     plasma = operator_valid & lcfs_interior
     exterior = operator_valid & ~lcfs_interior
 
-    bin_edges = np.linspace(0.0, 1.0, bin_count + 1)
     bins: list[dict[str, Any]] = []
     exclusions: list[dict[str, Any]] = []
     for index, (lower, upper) in enumerate(zip(bin_edges[:-1], bin_edges[1:])):
@@ -257,11 +275,14 @@ def extract_flux_functions(
             continue
         radial = node_radius[selected]
         target = radial * current_density[selected]
-        two_term = _fit(np.column_stack((radial**2, np.ones(cell_count))), target)
-        three_term = _fit(
-            np.column_stack((radial**2, np.ones(cell_count), radial**4)), target
-        )
-        if two_term["rank"] != 2 or three_term["rank"] != 3:
+        three_term = _radial_correction_diagnostic(radial, target)
+        extracted_pprime = -TOTAL_FLUX_FACTOR * extraction.p_prime[index]
+        extracted_ffprime = -TOTAL_FLUX_FACTOR * extraction.ff_prime[index]
+        if (
+            not np.isfinite(extracted_pprime)
+            or not np.isfinite(extracted_ffprime)
+            or three_term["rank"] != 3
+        ):
             exclusions.append(
                 {
                     "bin_index": index,
@@ -272,12 +293,25 @@ def extract_flux_functions(
                 }
             )
             continue
+        fitted = radial**2 * extracted_pprime + extracted_ffprime / mu_0
+        residual = target - fitted
+        residual_sum_squares = float(residual @ residual)
+        target_offset = target - np.mean(target)
+        total_sum_squares = float(target_offset @ target_offset)
+        scatter = float(extraction.projection_rms[index])
+        fitted_magnitude = float(np.sqrt(np.mean(fitted**2)))
+        scatter_fraction = (
+            scatter / fitted_magnitude if fitted_magnitude > 0.0 else np.nan
+        )
+        r_squared = (
+            1.0 - residual_sum_squares / total_sum_squares
+            if total_sum_squares > 0.0
+            else np.nan
+        )
         r4_coefficient = float(three_term["coefficients"][2])
         r4_standard_error = float(three_term["standard_error"][2])
         scatter_reduction = (
-            (two_term["scatter"] - three_term["scatter"]) / two_term["scatter"]
-            if two_term["scatter"] > 0.0
-            else 0.0
+            (scatter - three_term["scatter"]) / scatter if scatter > 0.0 else 0.0
         )
         bins.append(
             {
@@ -286,13 +320,13 @@ def extract_flux_functions(
                 "upper": float(upper),
                 "center": float((lower + upper) / 2.0),
                 "cell_count": cell_count,
-                "pprime": float(two_term["coefficients"][0]),
-                "intercept_ffprime_over_mu0": float(two_term["coefficients"][1]),
-                "ffprime": float(mu_0 * two_term["coefficients"][1]),
-                "residual_scatter": float(two_term["scatter"]),
-                "fitted_r_jphi_magnitude": float(two_term["fitted_magnitude"]),
-                "residual_scatter_fraction": float(two_term["scatter_fraction"]),
-                "r_squared": float(two_term["r_squared"]),
+                "pprime": float(extracted_pprime),
+                "intercept_ffprime_over_mu0": float(extracted_ffprime / mu_0),
+                "ffprime": float(extracted_ffprime),
+                "residual_scatter": scatter,
+                "fitted_r_jphi_magnitude": fitted_magnitude,
+                "residual_scatter_fraction": float(scatter_fraction),
+                "r_squared": float(r_squared),
                 "three_term_residual_scatter": float(three_term["scatter"]),
                 "three_term_scatter_reduction_fraction": float(scatter_reduction),
                 "r4_coefficient": r4_coefficient,
@@ -471,7 +505,8 @@ def extract_affine_cohort(
     """Run the landed affine extraction on one common slice per frozen shot."""
 
     reports = [
-        extract_flux_functions(store, shot, slice_index, bin_count) for shot in shots
+        extract_efit_flux_functions(store, shot, slice_index, bin_count)
+        for shot in shots
     ]
     control_report = next(
         (report for report in reports if report["source"]["shot"] == DEFAULT_SHOT),

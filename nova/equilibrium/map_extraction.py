@@ -9,12 +9,13 @@ Grad--Shafranov relation is
     \Delta^\star \Phi = -2\pi\mu_0Rj_\phi
       = 4\pi^2\left(\mu_0R^2p' + FF'\right).
 
-The surface separation is the closed-form projection of that identity onto
-``R**2`` and a constant on each normalised-flux shell.  Its receipt exposes
-the projection residual, the scaled design condition, and uncertainty
-inflation where a surface collapses onto the magnetic axis or where
-``|grad(psi_N)|`` approaches zero.  Those values qualify a produced response;
-they are never used here to alter or fit the supplied map.
+The surface separation follows the affine current projection used for EFIT
+maps: ``R * j_phi`` onto ``R**2`` and a constant on each normalised-flux
+shell, followed by the sign and total-flux conversion pinned above.  Its
+receipt exposes the projection residual, the scaled design condition, and
+uncertainty inflation where a surface collapses onto the magnetic axis or
+where ``|grad(psi_N)|`` approaches zero.  Those values qualify a produced
+response; they are never used here to alter or fit the supplied map.
 """
 
 from __future__ import annotations
@@ -25,6 +26,7 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 from scipy.constants import mu_0
 
+from nova.equilibrium.conservation import FluxLattice, delta_star
 from nova.equilibrium.convention import TOTAL_FLUX_FACTOR
 
 __all__ = [
@@ -43,9 +45,9 @@ __all__ = [
 class MapCurrentReceipt:
     """Grad--Shafranov operator and current read from one flux map.
 
-    Boundary nodes are deliberately marked invalid and carry ``NaN`` because
-    this response uses a centred stencil.  Publishing a one-sided boundary
-    estimate would mix a different operator into the same receipt.
+    Nodes outside the production operator's complete-stencil interior are
+    deliberately marked invalid and carry ``NaN``.  Publishing a one-sided
+    boundary estimate would mix a different operator into the same receipt.
     """
 
     radius: NDArray[np.float64]
@@ -123,34 +125,6 @@ def _map(values: ArrayLike, shape: tuple[int, int], name: str) -> NDArray[np.flo
     return field
 
 
-def _central(field: NDArray[np.float64], spacing: float, axis: int):
-    centre = [slice(None), slice(None)]
-    lower = [slice(None), slice(None)]
-    upper = [slice(None), slice(None)]
-    centre[axis] = slice(1, -1)
-    lower[axis] = slice(None, -2)
-    upper[axis] = slice(2, None)
-    result = np.full(field.shape, np.nan, dtype=np.float64)
-    result[tuple(centre)] = (field[tuple(upper)] - field[tuple(lower)]) / (
-        2.0 * spacing
-    )
-    return result
-
-
-def _second(field: NDArray[np.float64], spacing: float, axis: int):
-    centre = [slice(None), slice(None)]
-    lower = [slice(None), slice(None)]
-    upper = [slice(None), slice(None)]
-    centre[axis] = slice(1, -1)
-    lower[axis] = slice(None, -2)
-    upper[axis] = slice(2, None)
-    result = np.full(field.shape, np.nan, dtype=np.float64)
-    result[tuple(centre)] = (
-        field[tuple(upper)] - 2.0 * field[tuple(centre)] + field[tuple(lower)]
-    ) / spacing**2
-    return result
-
-
 def apply_delta_star(
     radius: ArrayLike,
     height: ArrayLike,
@@ -167,16 +141,12 @@ def apply_delta_star(
     height_axis, vertical_step = _uniform_axis(height, "height")
     shape = (radius_axis.size, height_axis.size)
     flux_map = _map(flux, shape, "flux")
-    radius_map = np.broadcast_to(radius_axis[:, None], shape)
-
-    radial_first = _central(flux_map, radial_step, 0)
-    delta_star_flux = (
-        _second(flux_map, radial_step, 0)
-        - radial_first / radius_map
-        + _second(flux_map, vertical_step, 1)
-    )
-    valid = np.zeros(shape, dtype=bool)
-    valid[1:-1, 1:-1] = True
+    mesh = FluxLattice(radius_axis, height_axis)
+    radius_map = mesh.node_radius.reshape(shape)
+    delta_star_flux = np.asarray(
+        delta_star(mesh, flux_map.reshape(-1)), dtype=np.float64
+    ).reshape(shape)
+    valid = np.array(mesh.interior(), dtype=bool, copy=True).reshape(shape)
     valid &= np.isfinite(delta_star_flux)
     current_density = np.full(shape, np.nan, dtype=np.float64)
     current_density[valid] = -delta_star_flux[valid] / (
@@ -222,11 +192,14 @@ def extract_flux_functions(
 ) -> SurfaceExtractionReceipt:
     """Separate ``p_prime`` and ``FF_prime`` on normalised-flux shells.
 
-    On each shell, ``Delta-star(flux) / (4 pi**2)`` is projected onto
-    ``[mu_0 R**2, 1]``.  This is a deterministic read of the supplied map,
-    not an optimisation against observations.  The two-column design is
-    scaled before its condition number is evaluated, so the receipt describes
-    geometric separability rather than the different SI units of its columns.
+    On each shell, ``R * j_phi`` is projected onto ``[R**2, 1]``.  Those
+    coefficients are derivatives in the input map's per-radian convention;
+    division by ``-2 pi`` (and multiplication of the intercept by ``mu_0``)
+    publishes Nova's negated-total-flux ``p_prime`` and ``FF_prime``.  This is
+    a deterministic read of the supplied map, not an optimisation against
+    observations.  The two-column design is scaled before its condition
+    number is evaluated, so the receipt describes geometric separability
+    rather than the different SI units of its columns.
 
     ``surfaces`` defaults to 19 shell centres from 0.05 through 0.95.  A
     caller may include points closer to the axis or separatrix; unresolved
@@ -257,8 +230,11 @@ def extract_flux_functions(
         selected = _map(plasma_mask, shape, "plasma_mask").astype(bool)
     selected &= current.valid & np.isfinite(normalised)
 
-    radial_gradient = _central(normalised, current.radial_step, 0)
-    vertical_gradient = _central(normalised, current.vertical_step, 1)
+    mesh = FluxLattice(current.radius, current.height)
+    radial_gradient, vertical_gradient = (
+        np.asarray(component, dtype=np.float64).reshape(shape)
+        for component in mesh.gradient(normalised.reshape(-1))
+    )
     gradient = np.hypot(radial_gradient, vertical_gradient)
     selected &= np.isfinite(gradient)
     positive_gradient = gradient[selected & (gradient > 0.0)]
@@ -284,7 +260,8 @@ def extract_flux_functions(
 
     boundaries = _surface_boundaries(surface_coordinate)
     radius_map = np.broadcast_to(current.radius[:, None], shape)
-    response = current.delta_star_flux / TOTAL_FLUX_FACTOR**2
+    current_density = current.toroidal_current_density
+    response = radius_map * current_density
     response_scale = max(
         float(np.nanmax(np.abs(response[selected]))) if np.any(selected) else 0.0,
         1.0,
@@ -300,9 +277,7 @@ def extract_flux_functions(
         if sample_count[index] < min_samples:
             continue
 
-        design = np.column_stack(
-            [mu_0 * radius_map[shell] ** 2, np.ones(sample_count[index])]
-        )
+        design = np.column_stack([radius_map[shell] ** 2, np.ones(sample_count[index])])
         target = response[shell]
         column_scale = np.linalg.norm(design, axis=0)
         scaled_design = design / column_scale
@@ -312,7 +287,8 @@ def extract_flux_functions(
         condition_number[index] = float(singular_values[0] / singular_values[-1])
         scaled_coefficients = np.linalg.lstsq(scaled_design, target, rcond=None)[0]
         coefficients = scaled_coefficients / column_scale
-        p_prime[index], ff_prime[index] = coefficients
+        p_prime[index] = -coefficients[0] / TOTAL_FLUX_FACTOR
+        ff_prime[index] = -mu_0 * coefficients[1] / TOTAL_FLUX_FACTOR
 
         residual = target - design @ coefficients
         projection_rms[index] = float(np.sqrt(np.mean(residual**2)))
@@ -330,10 +306,15 @@ def extract_flux_functions(
             max(1.0, gradient_inflation, axis_inflation)
         )
         p_uncertainty[index] = (
-            np.sqrt(max(float(covariance[0, 0]), 0.0)) * uncertainty_inflation[index]
+            np.sqrt(max(float(covariance[0, 0]), 0.0))
+            * uncertainty_inflation[index]
+            / TOTAL_FLUX_FACTOR
         )
         ff_uncertainty[index] = (
-            np.sqrt(max(float(covariance[1, 1]), 0.0)) * uncertainty_inflation[index]
+            mu_0
+            * np.sqrt(max(float(covariance[1, 1]), 0.0))
+            * uncertainty_inflation[index]
+            / TOTAL_FLUX_FACTOR
         )
         reliable[index] = bool(
             np.isfinite(p_prime[index])

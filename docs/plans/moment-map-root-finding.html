@@ -22,10 +22,10 @@
   <title>Moment-Map Root Finding | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-16">
+<meta name="plan-modified" content="2026-08-17">
 <meta name="plan-artifacts" content="docs/evidence/archive/moment-map-root-finding-landed.html">
-<meta name="plan-impl" content="0.75">
-<meta name="plan-version" content="4">
+<meta name="plan-impl" content="0.85">
+<meta name="plan-version" content="5">
 </head>
 <body>
   <main class="plan-doc">
@@ -170,6 +170,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260816-ladderverdict" data-who="reckon-ship" data-when="2026-08-16T23:40:00+00:00">
     <div class="r-comment-body">smoothed-handoff-ladder landed on its honest negative branch - gate PASSED (the negative was fully measured and banked). All three owner constraints verified by pins: epsilon=0 bitwise, moments/areas never blended (conservation by construction), topology discrete. EMPTY CONVERGENCE WINDOW across four decades and both seeds: best analytic residual 1.359e-2 at 3e-4 (1.36e4x the gate), best barrier residual 2.237e-1 - WORSE than both the unsmoothed 3.93e-5 stall and the damped 6.56e-6 floor, with vacuum/non-finite terminal states at some widths. THE AMBIGUITY IS STATED, NOT SMOOTHED: the pins validate smoothness properties, not solve dynamics, so this window cannot distinguish wrong-treatment from adverse-feedback-in-the-path-blend; the smoothed runs' blow-up mechanism is unexamined and is the first question of any continuation. No default selected, no commit made, gates untouched. THE ASSEMBLED ADJUDICATION PICTURE: solver-side floor 6.56e-6 (6.6x gate) on the unchanged map; smoothing empty-window as implemented; resolution halves gate margins (fine root 10/12). Owner options: (a) diagnose the smoothed-map blow-up before abandoning the treatment; (b) accept the damped floor with a piecewise-smooth residual criterion - a gate change, owner-only; (c) resolution-referenced validation; (d) hold the lineage and re-plan. impl 3/4 = 0.75. Record at /nova/evidence/archive/moment-map-root-finding-landed#smoothed-handoff-ladder</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260817-campaignrecord" data-who="reckon-ship" data-when="2026-08-17T08:30:00+00:00">
+    <div class="r-comment-body">SIX MEASUREMENT WINDOWS CONSOLIDATED, all promoted to the ledger and every state banked. The empty-window verdict was FALSIFIED as a two-part harness defect (unintended Picard warm-ups on the 1.766-eigenvalue map; scoring under the wrong homotopy fraction); on the corrected ladder the smoothed barrier root converges to 5.67e-16 across widths 1e-4 to 3e-2 - THE CELL-LEVEL CLIP KINK IS SOLVED. What the campaign then measured: coarse smoothed continuation opens through the old barrier to 0.5125 at 7.6e-15 and rejects at 0.525 in a LIMITED state (the unsmoothed topology margin); the full map from the analytic seed still has no root at any width (best 0.0596; damped hybrid 0.0126) - smoothing does not globalise the far seed; the fine smoothed bracket is 0.4375/0.45, EARLIER than unsmoothed fine (0.5875/0.6), both states diverted; the 0.45 miss is a stable budget-invariant cycle (20x60 vs 40x120 agree to 1.7e-10 at 7.72e-6); completing the clip family (edge-crossing births made C1, TDD, zero-width bitwise, conservation untouched) leaves the cycle at 8.56e-6 - EDGE BIRTHS EXONERATED. OPEN: the surviving fine cycle belongs to a class never censused (the census ran on coarse only) and the smoothing-hurts-fine inversion is unexplained. All treatments stay uncommitted experimental lineage; no gate, semantic or default moved. Owner decision point: fine-fixture kink census next, or step back to posture options. impl 0.85 - the treatments are built and measured; adjudication and §5 remain. Record at /nova/evidence/archive/moment-map-root-finding-landed#smoothing-campaign</div>
 </div>
 </section>
 </main>

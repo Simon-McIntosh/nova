@@ -179,5 +179,38 @@
   A continuation must be re-rooted under this map from t=0 before any convergence claim is meaningful.
   The implementation stays uncommitted by adjudication, not for want of evidence.</p>
 
+
+  <h2 id="analytic-seed-defect">§4 — the seed-defect trend: source and coupling errors were cancelling</h2>
+
+  <p>The consistent quadrature predicted a discrete equilibrium closer to the analytic one. Measured
+  directly as the analytic-seed map defect, the opposite holds:</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Source scheme</th><th>coarse seed defect</th><th>fine seed defect</th></tr></thead>
+    <tbody>
+      <tr><td>legacy centroid</td><td><strong>9.54e-3</strong></td><td><strong>1.16e-2</strong></td></tr>
+      <tr><td>two-path moment</td><td>5.24e-2</td><td>unavailable</td></tr>
+      <tr><td>consistent quadrature</td><td>1.29e-1</td><td>2.35e-2</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>Best direct route from the analytic seed: 1.67e-2 coarse, 1.20e-2 fine — no configuration closes
+  the gate. <strong>The explanation is error cancellation, and it was measured earlier in this same
+  programme:</strong> the flux-decomposition attribution recorded that one term exceeds the whole
+  composition error, so <em>"the round-trip terms cancel rather than add — the small composition figures
+  are the NET of larger opposing contributions."</em> The source error and the coupling's first-moment
+  truncation carry opposite signs. The original centroid + first-moment scheme inherits that
+  cancellation; correcting the source alone breaks it, the total error rises, the discrete root moves
+  away from the analytic state, and the continuation brackets earlier — which is exactly the measured
+  trend across all three source schemes (0.5875 → 0.4375 → 0.3).</p>
+
+  <p><strong>Consequence for the representation.</strong> Source and coupling must be improved at
+  matching order, or not at all. The clipped-patch coupling's first-moment truncation is already
+  measured (the rung-2 plateau, 5.1e-2 near-field on a single cell). This reframes second-moment
+  coupling blocks from an optional extension into the matching partner of an exact source — an owner
+  decision, now with a measured reason rather than a preference.</p>
+
 </main></body>
 </html>

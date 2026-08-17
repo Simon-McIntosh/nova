@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-17T19:39:32",
+  "updated": "2026-08-17T20:29:00",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -7422,9 +7422,112 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260817T174003148536-requoted-continuation",
+        "plan": "moment-map-root-finding",
+        "section": "\u00a74",
+        "node": "requoted-continuation",
+        "role": "implement",
+        "member": "coupling-blocks",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T17:40:05Z",
+        "completed_at": "2026-08-17T18:02:34Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1349,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1349,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "6d65b5fad648b7f042907575e6807926ca44a15d",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/requoted-continuation-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a009c8-8ac4-7a50-806e-c28169dbfc66",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260817T180235175294-analytic-seed-direct",
+        "plan": "moment-map-root-finding",
+        "section": "\u00a74",
+        "node": "analytic-seed-direct",
+        "role": "implement",
+        "member": "coupling-blocks",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T18:02:38Z",
+        "completed_at": "2026-08-17T18:28:04Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1526,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1526,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "6d65b5fad648b7f042907575e6807926ca44a15d",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/analytic-seed-direct-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a009c8-8ac4-7a50-806e-c28169dbfc66",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 486025472,
+            "cached_input_tokens_cumulative": 486025472,
+            "input_tokens": 494556398,
+            "input_tokens_cumulative": 494556398,
+            "output_tokens": 937601,
+            "output_tokens_cumulative": 937601,
+            "reasoning_output_tokens": 255242,
+            "reasoning_output_tokens_cumulative": 255242
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 225
+    "_version": 227
   }
 }

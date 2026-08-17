@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-17T18:47:55",
+  "updated": "2026-08-17T19:11:14",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -309,7 +309,7 @@
         "id": "vacuum-diagnosis",
         "harness": "codex",
         "role": "investigate",
-        "session_id": null,
+        "session_id": "01a010a3-85c7-71d0-a7c2-bdabe4fe49f8",
         "created": "2026-08-17"
       },
       {
@@ -7245,9 +7245,129 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260817T164904632681-vacuum-diagnosis",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a72",
+        "node": "vacuum-diagnosis",
+        "role": "investigate",
+        "member": "vacuum-diagnosis",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-17T16:49:07Z",
+        "completed_at": "2026-08-17T16:50:41Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 94,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 94,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "eabf9b586c547551dee6b4ed826a8bfeff8faf55",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Blocked by sandbox, not by the task. Dispatched with role=investigate, which flight config maps to a read-only worktree, so uv sync could not create .venv and the fenced report path could not be authored. This is a known orchestrator trap and the dispatch should have used role=implement with a narrow write fence. No diagnostic work was lost.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T164904632681-vacuum-diagnosis/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a010a0-7b24-7d32-984e-ef866a333414",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 501504,
+            "cached_input_tokens_cumulative": 501504,
+            "input_tokens": 551599,
+            "input_tokens_cumulative": 551599,
+            "output_tokens": 3571,
+            "output_tokens_cumulative": 3571,
+            "reasoning_output_tokens": 802,
+            "reasoning_output_tokens_cumulative": 802
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260817T165224291027-vacuum-diagnosis-writable",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a72",
+        "node": "vacuum-diagnosis-writable",
+        "role": "implement",
+        "member": "vacuum-diagnosis",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T16:52:26Z",
+        "completed_at": "2026-08-17T17:10:47Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1101,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1101,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "04f153bcbcfd2c53f47677ee1aabbef4558e48e4",
+        "commits": [
+          "11bac95945e24df7517ce3f5a0fb75292366f2df"
+        ],
+        "changed_lines": {
+          "added": 402,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "Verdict: fitted-versus-absolute contract mismatch, HIGH confidence. The starter bar does not apply to a no-coefficient-fit absolute forward. Both rival causes were quantified and rejected as insufficient, and the shipped skew convention was independently validated.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T165224291027-vacuum-diagnosis-writable/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a010a3-85c7-71d0-a7c2-bdabe4fe49f8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 10441216,
+            "cached_input_tokens_cumulative": 10441216,
+            "input_tokens": 10633129,
+            "input_tokens_cumulative": 10633129,
+            "output_tokens": 29432,
+            "output_tokens_cumulative": 29432,
+            "reasoning_output_tokens": 5956,
+            "reasoning_output_tokens_cumulative": 5956
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 221
+    "_version": 224
   }
 }

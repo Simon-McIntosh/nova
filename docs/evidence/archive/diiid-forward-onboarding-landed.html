@@ -52,6 +52,45 @@
     bar. An unconfigured float32 diagnostic measured <strong>3.446e-5</strong> relative p′
     error and was explicitly not accepted as passing evidence — the same precision floor
     the sibling equilibrium plan found on its null-fit ladder.</p>
+
+    <h2 id="vacuum-gate">§2 vacuum kill gate — failed as written, then diagnosed — 2026-08-17</h2>
+    <p>Commits <code>685a7602</code> (harness and measurement) and <code>11bac959</code>
+    (diagnosis). The gate harness, digest-backed geometry registry and preregistration
+    receipt landed with unit tests 5/5, and the gate itself <strong>failed</strong>: pooled
+    exterior R² <strong>0.49527</strong> against a bar of <strong>0.94</strong> registered
+    literally from the starter-kit README <em>before</em> any scoring run, over 20 shots and
+    4,140 frames (per-shot min −2.532, median 0.238, max 0.832). No physics was adjusted
+    after observing it.</p>
+    <p>Two facts made a units explanation impossible: the best post-hoc scale is 0.338, yet
+    the <em>scale-invariant</em> correlation R² is only 0.407 — the predicted field had the
+    wrong shape, not merely the wrong magnitude.</p>
+    <p><strong>Diagnosis: the gate was mis-specified, not failed.</strong> The deciding
+    starter-kit text reads: <em>"Fitting psi outside the plasma envelope to those Green's
+    functions … reaches R2 approximately 0.94."</em> The published bar therefore scores a
+    <strong>fitted</strong> exterior decomposition, and does not apply to the
+    no-coefficient-fit absolute forward this plan requires. Verdict recorded at HIGH
+    confidence.</p>
+    <table>
+      <caption>Sensitivity sweep. Each rival cause was quantified rather than argued away;
+      the shortfall to be explained is 0.4275.</caption>
+      <thead><tr><th>Swept alternative</th><th>Pooled exterior R²</th><th>Effect</th></tr></thead>
+      <tbody>
+        <tr><td>ECOILA turns 1 → 96 (whole unresolved interval)</td><td>0.495267 → 0.512497</td><td>+0.017230 — insufficient</td></tr>
+        <tr><td>Explicit ECOILB at fixed ECOILA = 48</td><td>0.507613 → 0.512497</td><td>+0.004884 — insufficient</td></tr>
+        <tr><td>Skew convention: shipped vs three reversals</td><td>0.495267 vs 0.495172 / 0.494951 / 0.494857</td><td>shipped is best — reversal rejected</td></tr>
+      </tbody>
+    </table>
+    <p>The skew handling was independently validated: an F5A vertex derivation from centre
+    (1.0041, 1.5169) m, extent (0.1392, 0.1194) m and AF = +45° gives a vertical shear of
+    0.0696 m matching the declared parallelogram orientation. <strong>Our geometry
+    construction and kernels are therefore validated rather than implicated, and the entry
+    premise is undamaged by this measurement.</strong></p>
+    <p>One physical reading is worth testing rather than assuming: the gap between a fitted
+    0.94 and an absolute 0.495 is a candidate <em>measurement</em> of how much exterior flux
+    the shipped coil currents alone do not explain — which would be the passive and vessel
+    currents §4 already names as the entry's highest-risk physics. The
+    <code>vacuum-gate-measure</code> decision now carries that as its recommended
+    reformulation.</p>
   </main>
 </body>
 </html>

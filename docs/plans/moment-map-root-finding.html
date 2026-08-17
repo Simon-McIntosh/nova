@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="moment-map-root-finding">
   <meta name="plan-title" content="Moment-Map Root Finding — convergence on a piecewise-smooth free-boundary map">
   <meta name="plan-summary" content="Understand, then treat, the derivative kinks that defeat Newton on the moment-represented free-boundary map: a kink census along real solver trajectories names the dominant class and its frequency before either treatment — kink-aware root finding on the unchanged map, or an owner-gated C1 smoothing of the convicted surface — is implemented">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="6.0">
   <meta name="plan-capability-version" content="1.0">
@@ -24,8 +24,8 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-17">
 <meta name="plan-artifacts" content="docs/evidence/archive/moment-map-root-finding-landed.html">
-<meta name="plan-impl" content="0.85">
-<meta name="plan-version" content="7">
+<meta name="plan-impl" content="1.0">
+<meta name="plan-version" content="9">
 </head>
 <body>
   <main class="plan-doc">
@@ -122,31 +122,29 @@
     repair) onto the primary branch and thereby the gate the sprint's forward chain — the SOL
     demonstration, the fcoil_c decomposition primary, and efit-forward-parity — stands on.</p>
 
-    <h2 id="s6">§6 — The remaining program: two named residues</h2>
+    <h2 id="s6">§6 — LANDED: the program closed by diagnosis; the repair moved to its own plan</h2>
 
-    <p><strong>Owner direction 2026-08-17: the science comes first — the smoothing is a root-convergence
-    fix that is part done, failing on fine grids and for the far seed.</strong> The measured
-    decomposition so far: the cell-level clip kink is solved to round-off; the coarse topology margin is
-    real and deliberately unsmoothed; edge-crossing births are exonerated. Two residues remain, each a
-    concrete thread:</p>
+    <p><strong>Both residues resolved to one root cause, and the plan's mandate — understand before
+    fixing — is discharged.</strong> The fine-scale cycle was traced by two-element ablation to a
+    path-consistency seam (cell 933: the interior degree-3 stencil and the linearised clipped integral
+    disagreeing 23% at 0.028% missing area), and the owner-directed true fix — the
+    <a href="/nova/evidence/archive/moment-map-root-finding-landed.html#consistent-support-quadrature">consistent
+    support quadrature</a> — removed that seam by construction (unclipped bitwise identical to the
+    stencil, C¹ at zero smoothing, verified at 2e-13 against adaptive quadrature). The ε-band smoothing
+    is thereby retired as symptom treatment. The far-seed question was then answered by the
+    <a href="/nova/evidence/archive/moment-map-root-finding-landed.html#source-coupling-quadrants">four-quadrant
+    test</a> (coupling exonerated at reference accuracy; source error 7,598× coupling error) and the
+    <a href="/nova/evidence/archive/moment-map-root-finding-landed.html#stencil-availability-seam">per-cell
+    localization</a>: 96 boundary-ring supports lacking a degree-3 stencil carry 84% (L1) of the
+    10.9 Wb analytic-seed flux shift and drop 0.62 MA of edge current — a concentrated implementation
+    seam with a falsified-or-verified-in-one-step repair prediction (10.935 → ≈0.345 Wb).</p>
 
-    <ul>
-      <li><strong>The fine-scale class.</strong> A budget-invariant cycle at ~5–9e-6 survives complete
-      clip-family smoothing on the fine fixture, and smoothing <em>shortens</em> the fine continuation
-      (bracket 0.4375/0.45 vs 0.5875/0.6 unsmoothed) — an unexplained inversion. The census instrument,
-      which has only ever run on the coarse fixture, runs on the fine stalled trajectories under both
-      maps, with the smoothing bands themselves censused as a surface class. Its verdict gates the
-      fine-side treatment.</li>
-      <li><strong>The far-seed globalisation.</strong> No treatment globalises the analytic seed on the
-      full map (best: damped hybrid at 0.0126 on the smoothed map). Continuation from the legacy root is
-      the working globaliser; whether the production solve adopts continuation seeding, a semismooth
-      globalisation informed by the fine census, or another design is decided on that census's
-      verdict.</li>
-    </ul>
-
-    <p>All treatment code lives as committed experimental lineage in the session worktrees
-    (kink-aware route options; cell-level and complete clip-family smoothing), uncommitted to the
-    primary branch; zero-width and default-route behaviour reproduce production bitwise throughout.</p>
+    <p>The repair, its analytic re-adjudication, the fine continuation from fraction 0, and the held
+    lineage's merge decision now live in
+    <a href="/nova/plans/boundary-ring-source-completion.html">boundary-ring-source-completion</a>
+    (sprint S7), which builds on lineage base <code>6d65b5fa</code> in the consistent-support-quadrature
+    worktree. Zero-width and default-route behaviour reproduce production bitwise throughout the
+    lineage; nothing merged to the primary branch from this plan.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -174,7 +172,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-mmrf-001" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-16" data-recommends-skill="/reckon-ship moment-map-root-finding" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mmrf-001" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-16" data-recommends-skill="/reckon-ship moment-map-root-finding" data-resolved-at="2026-08-17T20:18:32+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Run the kink census, then the gated treatments</h4>
     <div class="r-fu-body"><p>The census (§2) runs on the held lineage's coarse fixture at the barrier
         bracket and from the analytic seed, instrumenting real Newton trajectories. Its verdict gates §3
@@ -182,6 +180,7 @@
         convicted surface only). §5 adjudicates the analytic-validation gate and the held lineage's
         merge.</p></div>
     <pre class="r-fu-prompt">/reckon-ship moment-map-root-finding</pre>
+    <p class="r-fu-outcome">done — no followup here: the census named the classes (coarse discrete families; fine smoothing-band pair; topology margin excluded), the kink-aware routes were measured as an honest negative, the smoothing campaign ran and was retired when the consistent support quadrature removed the two-path seam by construction, and the diagnosis chain (four-quadrant coupling exoneration, stencil-availability-seam localization) closed §6. The repair and the analytic/merge adjudication continue in boundary-ring-source-completion (S7), which carries its own open followup.</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -202,6 +201,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260817-truefix" data-who="reckon-ship" data-when="2026-08-17T17:00:00+00:00">
     <div class="r-comment-body">OWNER DIRECTION 2026-08-17: find and implement the true mathematical fix rather than a software workaround. The band-confined node was stopped mid-flight and the direction is right. THE SEAM RESTATED CORRECTLY: the two evaluation paths were never two implementations of one integral - the interior path integrates the degree-3 nodal interpolant of the true j(psi_N) over the full polygon (that is what the stencil weights ARE), while the clipped path integrates a locally LINEARISED j over the clipped polygon. On a steep-gradient cell the linear model's own truncation is 23 percent, so the paths disagree at that order and no blend width can reconcile two different functions; the pin measured the error scaling 23.1/17.3/6.0/0.65 percent at missing fractions 2.8e-4/2.0e-4/1.0e-4/3.0e-5, which is the linear model's error, not a geometry artifact. THE TRUE FIX, dispatched as consistent-support-quadrature: one formula for every clip fraction - exact moments of the SAME degree-3 nodal interpolant over the ACTUAL support polygon, via closed Green/shoelace polygon moments contracted with the interpolant coefficients. Three properties by construction rather than tuning: (1) unclipped reduces to the interior stencil as an IDENTITY, so there is no hand-off to blend; (2) by Reynolds transport the moments' derivative carries a boundary term over the separatrix arc inside the cell which vanishes continuously as the cell fills, so the kink DISAPPEARS rather than being smoothed - the smoothing branch may become unnecessary and the node tests that at width zero; (3) boundary cells gain degree-3 accuracy instead of the linear model's 23 percent error. The first-moment truncation of the COUPLING blocks is separate and intentional (the rung-2 envelope) and is untouched by this.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260817-ring-handoff" data-who="reckon-ship" data-when="2026-08-17">
+    <div class="r-comment-body"><p>Plan shipped as a diagnosis: the barrier is understood to mechanism level and the treatment direction is locked (consistent quadrature, zero smoothing, first-moment coupling). Execution of the boundary-ring repair and the fraction-1 adjudication is deliberately deferred to <a href="/nova/plans/boundary-ring-source-completion.html">boundary-ring-source-completion</a> for a clean session, per owner directive 2026-08-17.</p></div>
 </div>
 </section>
 </main>

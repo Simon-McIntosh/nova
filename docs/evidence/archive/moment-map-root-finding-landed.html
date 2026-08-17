@@ -179,5 +179,113 @@
   A continuation must be re-rooted under this map from t=0 before any convergence claim is meaningful.
   The implementation stays uncommitted by adjudication, not for want of evidence.</p>
 
+
+  <h2 id="analytic-seed-defect">§4 — the seed-defect trend: source and coupling errors were cancelling</h2>
+
+  <p>The consistent quadrature predicted a discrete equilibrium closer to the analytic one. Measured
+  directly as the analytic-seed map defect, the opposite holds:</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Source scheme</th><th>coarse seed defect</th><th>fine seed defect</th></tr></thead>
+    <tbody>
+      <tr><td>legacy centroid</td><td><strong>9.54e-3</strong></td><td><strong>1.16e-2</strong></td></tr>
+      <tr><td>two-path moment</td><td>5.24e-2</td><td>unavailable</td></tr>
+      <tr><td>consistent quadrature</td><td>1.29e-1</td><td>2.35e-2</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>Best direct route from the analytic seed: 1.67e-2 coarse, 1.20e-2 fine — no configuration closes
+  the gate. <strong>The explanation is error cancellation, and it was measured earlier in this same
+  programme:</strong> the flux-decomposition attribution recorded that one term exceeds the whole
+  composition error, so <em>"the round-trip terms cancel rather than add — the small composition figures
+  are the NET of larger opposing contributions."</em> The source error and the coupling's first-moment
+  truncation carry opposite signs. The original centroid + first-moment scheme inherits that
+  cancellation; correcting the source alone breaks it, the total error rises, the discrete root moves
+  away from the analytic state, and the continuation brackets earlier — which is exactly the measured
+  trend across all three source schemes (0.5875 → 0.4375 → 0.3).</p>
+
+  <p><strong>Consequence for the representation.</strong> Source and coupling must be improved at
+  matching order, or not at all. The clipped-patch coupling's first-moment truncation is already
+  measured (the rung-2 plateau, 5.1e-2 near-field on a single cell). This reframes second-moment
+  coupling blocks from an optional extension into the matching partner of an exact source — an owner
+  decision, now with a measured reason rather than a preference.</p>
+
+  <p><em>Superseded by the four-quadrant measurement below: the cancellation exists in sign but is
+  immaterial in magnitude, and matched-order coupling was not selected.</em></p>
+
+
+  <h2 id="source-coupling-quadrants">§4 — the four-quadrant verdict: the coupling is exonerated, the source scheme itself is the defect</h2>
+
+  <p>The cancellation hypothesis was put to a direct 2×2 test on the 566-cell coarse fixture at the
+  analytic Solov'ev seed (smoothing off): both source schemes crossed with both the production
+  first-moment coupling and a converged reference coupling built by piecewise-linear subdivision of
+  every plasma cell (two refinement levels, 36,864/33,840 elements; level-to-level change 3.0e-5 /
+  2.0e-4 of internal sup, so the reference is converged). Sup-norm flux error over 731 targets,
+  80.89 Wb span:</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>Source scheme</th><th>production coupling</th><th>reference coupling</th></tr></thead>
+    <tbody>
+      <tr><td>legacy centroid</td><td>0.8260 Wb</td><td><strong>0.8257 Wb (1.02%)</strong></td></tr>
+      <tr><td>consistent quadrature</td><td>10.2414 Wb</td><td>10.2319 Wb (12.65%)</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>Three facts follow.</strong> First, the coupling axis is immaterial: switching coupling
+  moves the error by less than the reference's own refinement change, so the production first-moment
+  coupling is already reference-accurate on this fixture. Second, sign opposition between source and
+  coupling error fields is real (Pearson −0.594, signed cosine −0.756) but there is nothing material
+  to cancel — the source error is <strong>7,598× the coupling error in RMS</strong>. Third,
+  consistent-source × reference-coupling is <em>not</em> the most accurate quadrant, so second-moment
+  coupling blocks are refuted as the next implementation: they would repair the axis that is already
+  at reference accuracy.</p>
+
+  <p><strong>The reframed defect.</strong> The degree-3 moment-stencil source misses the analytic
+  flux by 12.65% where the legacy centroid source achieves 1.02% — a 10.9 Wb source-side shift, over
+  200× the largest refinement change and robust. The quadrant ordering agrees with the banked seed
+  defects (legacy 9.54e-3 vs consistent 1.29e-1), so the seed-defect trend is now attributed: the
+  moment source assigns materially different cell currents from the analytic j at the analytic seed.
+  Whether that shift is broad (a representation property) or concentrated in few cells (an
+  implementation defect) is the next measurement, and it decides the shape of the repair.</p>
+
+
+  <h2 id="stencil-availability-seam">§4 — root cause: current lost at the stencil-availability seam on the boundary ring</h2>
+
+  <p>The per-cell decomposition of the 10.9 Wb source shift (reference-coupling attribution, authorized
+  with a 0.014 Wb aggregate caveat; the coupling-free m0 evidence needs no attribution at all) localizes
+  the defect completely. Of the coarse fixture's 566 cells, 447 carry nonempty support; <strong>96 of
+  those lack a degree-3 stencil</strong> — boundary-ring cells whose neighbour rings are incomplete.
+  Those 96 cells:</p>
+
+  <ul>
+    <li>carry −689,027 A, 4.59% of the plasma current;</li>
+    <li>account for <strong>103% signed / 84% L1</strong> of the sup-norm flux shift — every one of the
+    ten leading flux cells is stencil-unavailable;</li>
+    <li>drag the moment source's total current to −14.384 MA against the exact-support −15.005 MA
+    (legacy: −15.095 MA) — 0.62 MA of edge current effectively lost at the availability seam.</li>
+  </ul>
+
+  <p>The ψ normalisation constants are secondary (boundary −4.712 vs analytic −5.123 Wb moves the exact
+  total by 0.87%, against 4.59% on unavailable supports). Concentration statistics: top-1/10/50 signed
+  shares 12.2%/69.3%/100.3%. The R-Z map shows the error confined to the boundary ring:</p>
+
+  <figure>
+    <img src="/nova/figures/moment-map-root-finding/per-cell-m0-relative-error.png"
+         alt="R-Z maps of per-cell signed m0 relative error, legacy vs moment stencil"
+         style="max-width:100%">
+    <figcaption>Per-cell signed m0 relative error at the analytic seed. The moment-stencil error is
+    concentrated on the boundary ring where no degree-3 stencil is available; the interior agrees.</figcaption>
+  </figure>
+
+  <p><strong>Verdict: concentrated, implementation-seam, falsifiably repairable.</strong> The predicted
+  repair — evaluating only the 96 ring-incomplete supports with boundary-local nodal quadrature while
+  keeping the 351 stencil-available cells unchanged — removes 11.281 Wb of the shift at the argmax
+  target, leaving ≈ −0.345 Wb: the moment source would then beat legacy (0.826 Wb) by roughly 2.4×.
+  This prediction is the first gate of the follow-on plan.</p>
+
 </main></body>
 </html>

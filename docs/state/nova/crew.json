@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-17T22:01:54",
+  "updated": "2026-08-17T22:13:13",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -7715,9 +7715,66 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260817T195444348517-source-shift-localization",
+        "plan": "moment-map-root-finding",
+        "section": "\u00a74",
+        "node": "source-shift-localization",
+        "role": "implement",
+        "member": "coupling-blocks",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T19:54:54Z",
+        "completed_at": "2026-08-17T20:11:46Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1012,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1012,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "6d65b5fad648b7f042907575e6807926ca44a15d",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/source-shift-localization-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a009c8-8ac4-7a50-806e-c28169dbfc66",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8857216,
+            "cached_input_tokens_cumulative": 524223104,
+            "input_tokens": 9265639,
+            "input_tokens_cumulative": 533645772,
+            "output_tokens": 35003,
+            "output_tokens_cumulative": 1019382,
+            "reasoning_output_tokens": 8430,
+            "reasoning_output_tokens_cumulative": 272151
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 232
+    "_version": 233
   }
 }

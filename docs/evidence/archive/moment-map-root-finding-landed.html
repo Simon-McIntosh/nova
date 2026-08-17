@@ -252,5 +252,40 @@
   Whether that shift is broad (a representation property) or concentrated in few cells (an
   implementation defect) is the next measurement, and it decides the shape of the repair.</p>
 
+
+  <h2 id="stencil-availability-seam">§4 — root cause: current lost at the stencil-availability seam on the boundary ring</h2>
+
+  <p>The per-cell decomposition of the 10.9 Wb source shift (reference-coupling attribution, authorized
+  with a 0.014 Wb aggregate caveat; the coupling-free m0 evidence needs no attribution at all) localizes
+  the defect completely. Of the coarse fixture's 566 cells, 447 carry nonempty support; <strong>96 of
+  those lack a degree-3 stencil</strong> — boundary-ring cells whose neighbour rings are incomplete.
+  Those 96 cells:</p>
+
+  <ul>
+    <li>carry −689,027 A, 4.59% of the plasma current;</li>
+    <li>account for <strong>103% signed / 84% L1</strong> of the sup-norm flux shift — every one of the
+    ten leading flux cells is stencil-unavailable;</li>
+    <li>drag the moment source's total current to −14.384 MA against the exact-support −15.005 MA
+    (legacy: −15.095 MA) — 0.62 MA of edge current effectively lost at the availability seam.</li>
+  </ul>
+
+  <p>The ψ normalisation constants are secondary (boundary −4.712 vs analytic −5.123 Wb moves the exact
+  total by 0.87%, against 4.59% on unavailable supports). Concentration statistics: top-1/10/50 signed
+  shares 12.2%/69.3%/100.3%. The R-Z map shows the error confined to the boundary ring:</p>
+
+  <figure>
+    <img src="/nova/figures/moment-map-root-finding/per-cell-m0-relative-error.png"
+         alt="R-Z maps of per-cell signed m0 relative error, legacy vs moment stencil"
+         style="max-width:100%">
+    <figcaption>Per-cell signed m0 relative error at the analytic seed. The moment-stencil error is
+    concentrated on the boundary ring where no degree-3 stencil is available; the interior agrees.</figcaption>
+  </figure>
+
+  <p><strong>Verdict: concentrated, implementation-seam, falsifiably repairable.</strong> The predicted
+  repair — evaluating only the 96 ring-incomplete supports with boundary-local nodal quadrature while
+  keeping the 351 stencil-available cells unchanged — removes 11.281 Wb of the shift at the argmax
+  target, leaving ≈ −0.345 Wb: the moment source would then beat legacy (0.826 Wb) by roughly 2.4×.
+  This prediction is the first gate of the follow-on plan.</p>
+
 </main></body>
 </html>

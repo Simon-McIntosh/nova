@@ -31,8 +31,8 @@ dependencies = [
   "contourpy>=1.3",
   "fsspec>=2024.10",
   "gitpython>=3.1.31",
-  "h5py>=3.10",
-  "imas-python>=2.0",
+  "h5py>=3.15",
+  "imas-python>=2.2",
   "netcdf4>=1.7",
   "numpy>=2",
   "packaging>=23.2",
@@ -78,7 +78,7 @@ numba = ["numba>=0.61"]
 # reading a correction document needs none of this.
 schema = ["linkml>=1.9"]
 test = [
-  "nova-stella[jax]",
+  "nova-stella[jax,transport]",
   "matplotlib>=3.10",
   "meshio>=5.3.4",
   "networkx",
@@ -100,6 +100,7 @@ thermofluids = [
   "tables>=3.8.0",
   "xlrd>=2.0.1",
 ]
+transport = ["torax>=1.4.3"]
 viz = [
   "alphashape>=1.3.1",
   "meshio>=5.3.4",
@@ -111,7 +112,7 @@ viz = [
 
 [dependency-groups]
 dev = [
-  "nova-stella[jax]",
+  "nova-stella[jax,transport]",
   # Code formatting and linting
   "black>=23.0.0",
   "ruff>=0",
@@ -143,6 +144,15 @@ build-backend = "hatchling.build"
 # this opt-in. Drops out when the pins flip to PyPI ranges on upstream release.
 [tool.hatch.metadata]
 allow-direct-references = true
+
+# TORAX currently constrains these shared I/O dependencies below Nova's
+# supported stack. Runtime compatibility is covered by the transport
+# environment test, so uv resolves the declared Nova versions instead.
+[tool.uv]
+override-dependencies = [
+  "h5py>=3.15",
+  "imas-python>=2.2",
+]
 
 [tool.hatch.version]
 source = "vcs"

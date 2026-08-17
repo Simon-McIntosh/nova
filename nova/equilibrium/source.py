@@ -614,9 +614,13 @@ class ForwardSource:
                     ),
                 )
             participation, clipped_path = support.evaluation_weights(smoothing_epsilon)
+            missing_fraction = jnp.clip(
+                1.0 - support.area / support.full_area, 0.0, 1.0
+            )
 
             def blend(full, clipped):
-                evaluated = full + clipped_path * (clipped - full)
+                clipped_limit = full + missing_fraction * (clipped - full)
+                evaluated = full + clipped_path * (clipped_limit - full)
                 return participation * evaluated
 
             return CellCurrentMoments(

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-17T09:57:49",
+  "updated": "2026-08-17T16:43:58",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -94,6 +94,13 @@
         "role": "implement",
         "session_id": "01a00b7e-1817-7740-93a6-aac064c671e7",
         "created": "2026-08-16"
+      },
+      {
+        "id": "extraction-kernels",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a01023-bc16-7b41-bc10-ac6f27afa6d1",
+        "created": "2026-08-17"
       },
       {
         "id": "fffe-infra",
@@ -283,6 +290,13 @@
         "role": "implement",
         "session_id": "019ffb73-f8a9-7f02-b9ee-19586af8c6e8",
         "created": "2026-08-13"
+      },
+      {
+        "id": "transport-env",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a01023-3e4f-7081-b1ab-24ffbe816152",
+        "created": "2026-08-17"
       },
       {
         "id": "vacuum-windows",
@@ -6683,9 +6697,186 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260817T134830865693-fine-kink-census",
+        "plan": "moment-map-root-finding",
+        "section": "\u00a72",
+        "node": "fine-kink-census",
+        "role": "implement",
+        "member": "coupling-blocks",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T13:48:33Z",
+        "completed_at": "2026-08-17T14:13:52Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1519,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1519,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "d4322a0ac4f5591cd6492f4b5e1994cbc51c2850",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/fine-kink-census-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a009c8-8ac4-7a50-806e-c28169dbfc66",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7985664,
+            "cached_input_tokens_cumulative": 373210112,
+            "input_tokens": 8356844,
+            "input_tokens_cumulative": 379841318,
+            "output_tokens": 22598,
+            "output_tokens_cumulative": 763492,
+            "reasoning_output_tokens": 4475,
+            "reasoning_output_tokens_cumulative": 213928
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260817T143249062133-extraction-kernels",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a75",
+        "node": "extraction-kernels",
+        "role": "implement",
+        "member": "extraction-kernels",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T14:32:52Z",
+        "completed_at": "2026-08-17T14:40:37Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 465,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 465,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "ed92994878d9eb46cbd3d0fc3fca693bcf622a9d",
+        "commits": [
+          "7d9743fdbfa76059ef4d7c6d1572a97e382bab32"
+        ],
+        "changed_lines": {
+          "added": 719,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T143249062133-extraction-kernels/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01023-bc16-7b41-bc10-ac6f27afa6d1",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1831680,
+            "cached_input_tokens_cumulative": 1831680,
+            "input_tokens": 1939547,
+            "input_tokens_cumulative": 1939547,
+            "output_tokens": 20650,
+            "output_tokens_cumulative": 20650,
+            "reasoning_output_tokens": 6608,
+            "reasoning_output_tokens_cumulative": 6608
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260817T143216934796-transport-env",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a73",
+        "node": "transport-env",
+        "role": "implement",
+        "member": "transport-env",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T14:32:19Z",
+        "completed_at": "2026-08-17T14:39:51Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 452,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 452,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "ed92994878d9eb46cbd3d0fc3fca693bcf622a9d",
+        "commits": [
+          "f7af67dc"
+        ],
+        "changed_lines": {
+          "added": 517,
+          "removed": 9,
+          "files": 3
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T143216934796-transport-env/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01023-3e4f-7081-b1ab-24ffbe816152",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2448128,
+            "cached_input_tokens_cumulative": 2448128,
+            "input_tokens": 2575173,
+            "input_tokens_cumulative": 2575173,
+            "output_tokens": 15341,
+            "output_tokens_cumulative": 15341,
+            "reasoning_output_tokens": 7602,
+            "reasoning_output_tokens_cumulative": 7602
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 205
+    "_version": 212
   }
 }

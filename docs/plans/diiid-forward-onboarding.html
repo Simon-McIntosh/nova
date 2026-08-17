@@ -24,9 +24,9 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-17">
-<meta name="plan-version" content="3">
-<meta name="plan-commits" content="7d9743fd,92a4a00e">
-<meta name="plan-impl" content="0.18">
+<meta name="plan-version" content="4">
+<meta name="plan-commits" content="7d9743fd,92a4a00e,685a7602">
+<meta name="plan-impl" content="0.28">
 </head>
 <body>
   <main class="plan-doc">
@@ -156,6 +156,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20260817-extraction-consolidation" data-who="reckon-ship" data-when="2026-08-17T17:05:00+00:00">
     <div class="r-comment-body">extraction-consolidation landed: commit 92a4a00e; gate single-implementation PASSED, closing the duplication finding recorded on the previous landing. apply_delta_star now delegates to nova.equilibrium.conservation.delta_star and takes gradient and interior qualification from the same FluxLattice contract, so zero module-local finite-difference stencils remain and the hexagonal StencilMesh route is reachable rather than raster-only. Production extraction adopts the validated R*j_phi projection on the [R squared, 1] basis from the efit-map-inversion benchmark and converts its per-radian coefficients to Nova negated-total-flux p-prime and FF-prime; benchmarks/efit_affine_extraction.py now imports extract_flux_functions and keeps only its distinct R-to-the-fourth sufficiency diagnostic. Round-trip held at 2.0e-8 relative, 4/4 green. Recorded numerical constraint: float64 is required to meet that bar, an unconfigured float32 diagnostic measured 3.446e-5 relative p-prime error and was explicitly not accepted as evidence.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260817-diiid-vacuum" data-who="reckon-ship" data-when="2026-08-17T19:10:00+00:00">
+    <div class="r-comment-body">diiid-vacuum landed its harness and its VERDICT: commit 685a7602; gate vacuum-check FAILED and was preserved rather than repaired. Measured pooled exterior R-squared 0.49527 against the bar 0.94 pre-registered literally from the starter-kit README before any scoring run, over 20 shots and 4,140 frames; per-shot minimum -2.532, q25 0.063, median 0.238, q75 0.441, maximum 0.832. Unit tests 5/5, one geometry digest, provenance complete. THE FAILURE IS NOT UNITS: post-hoc best scale is 0.337957 while the scale-invariant correlation R-squared is only 0.407332, so the predicted vacuum field has the wrong SHAPE, not merely the wrong magnitude, and no amplitude fix can close it. Construction was doctrine-clean: all 18 F coils and ECOILA through analytic polygon_greens including the six signed parallelogram shears, F currents converted from shipped kA-turn to A-turn with no turn multiplier, nova total Wb per A converted to dataset Wb per radian by two pi, one additive flux gauge per frame and the one global sign normalised, and no fitted currents, turns, amplitudes or spatial modes anywhere. TWO CANDIDATE CAUSES, neither tuned against: (1) a contract mismatch, since the starter README describes FITTING psi outside the plasma envelope to Green functions and still references coil_turns, while the shipped dataset carries no coil_turns field, declares F currents already in kA-turn, leaves ECOILA turns unresolved across the interval 1 to 96, and supplies no bcoil poloidal geometry, so the published bar may score a fitted exterior decomposition rather than the absolute current-only forward this plan requires; and (2) a structurally incomplete ohmic set, with no ECOILB representation, which would produce exactly this shape deficit. Resolving which is a semantic and machine-description question that must be answered before the entry can rely on this gate, and it is now the entry's top priority.</div>
 </div>
 </section>
 </main>

@@ -19,7 +19,12 @@ with skip_import("jax"):
     import jax
     import jax.numpy as jnp
 
-    from nova.equilibrium.fixed_point import anderson, newton_krylov, picard
+    from nova.equilibrium.fixed_point import (
+        anderson,
+        kink_aware_newton_krylov,
+        newton_krylov,
+        picard,
+    )
     from nova.jax.config import Precision, configure_dtypes
 
 
@@ -64,6 +69,88 @@ def test_newton_krylov_solves_an_affine_map_in_one_step():
     )
     np.testing.assert_allclose(np.asarray(result.state), fixed_point, atol=1e-9)
     assert float(result.residual) < 1e-10
+
+
+@pytest.mark.parametrize(
+    "strategy",
+    ("clarke", "nonmonotone", "surface_restricted", "damped_hybrid"),
+)
+def test_kink_aware_route_options_converge_across_a_piecewise_tangent(strategy):
+    """Every explicit policy crosses a derivative hand-off to the same root."""
+
+    def map_fn(state):
+        slope = jnp.where(state[0] < 0.0, 0.2, 0.4)
+        return slope * state + 0.8
+
+    kwargs = {}
+    if strategy in ("clarke", "surface_restricted"):
+        kwargs["surface_fn"] = lambda state: state[0]
+    result = jax.jit(
+        lambda initial: kink_aware_newton_krylov(
+            map_fn,
+            initial,
+            strategy=strategy,
+            newton_steps=20,
+            gmres_iterations=2,
+            warmup=0,
+            **kwargs,
+        )
+    )(jnp.asarray([-1.0]))
+    assert float(result.residual) < 1e-10
+    np.testing.assert_allclose(np.asarray(result.state), 4.0 / 3.0, atol=1e-10)
+    assert np.all(np.isfinite(np.asarray(result.trace)))
+
+
+def test_kink_aware_routes_do_not_change_existing_newton_krylov_results():
+    """The additive route leaves the established exact-tangent path bitwise."""
+    matrix, offset, _fixed_point = _contraction(seed=19, radius=0.5)
+    options = dict(
+        newton_steps=3,
+        gmres_iterations=6,
+        warmup=2,
+        relaxation=0.4,
+        step_cap=3.0,
+    )
+    expected = newton_krylov(
+        lambda state: matrix @ state + offset,
+        jnp.zeros(DIMENSION),
+        **options,
+    )
+    observed = newton_krylov(
+        lambda state: matrix @ state + offset,
+        jnp.zeros(DIMENSION),
+        **options,
+    )
+    assert np.array_equal(np.asarray(observed.state), np.asarray(expected.state))
+    assert np.array_equal(
+        np.asarray(observed.trace), np.asarray(expected.trace), equal_nan=True
+    )
+
+
+def test_damped_hybrid_can_release_damping_as_the_residual_falls():
+    """The residual-triggered schedule is explicit, jittable, and additive."""
+
+    def map_fn(state):
+        return 0.5 * state + jnp.ones_like(state)
+
+    def solve(schedule):
+        return kink_aware_newton_krylov(
+            map_fn,
+            jnp.zeros(2),
+            strategy="damped_hybrid",
+            newton_steps=12,
+            gmres_iterations=2,
+            warmup=0,
+            hybrid_weight=0.2,
+            hybrid_schedule=schedule,
+            hybrid_final_weight=1.0,
+            hybrid_release_residual=1.0e-2,
+        )
+
+    fixed = jax.jit(lambda: solve("fixed"))()
+    released = jax.jit(lambda: solve("residual_release"))()
+    assert float(released.residual) < float(fixed.residual)
+    np.testing.assert_allclose(np.asarray(released.state), 2.0, atol=1e-10)
 
 
 def test_anderson_accelerates_relaxed_picard_at_a_shared_budget():

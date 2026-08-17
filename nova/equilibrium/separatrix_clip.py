@@ -161,6 +161,7 @@ class TracedClippedSupports(NamedTuple):
     included: object
     boundary: object
     area: object
+    full_area: object
     first_area_moment: object
     second_area_moment: object
     contour_area: object
@@ -175,6 +176,28 @@ class TracedClippedSupports(NamedTuple):
             density,
             gradient,
         )
+
+    def evaluation_weights(self, epsilon):
+        """Return C1 participation and clipped-evaluation weights.
+
+        These weights choose between already-evaluated current paths. They do
+        not alter the exact clipped polygon or any of its area moments.
+        """
+        import jax.numpy as jnp
+
+        if epsilon < 0.0 or epsilon > 1.0:
+            raise ValueError("epsilon must lie between zero and one")
+        if epsilon == 0.0:
+            return self.included.astype(self.area.dtype), self.boundary.astype(
+                self.area.dtype
+            )
+        fraction = jnp.clip(self.area / self.full_area, 0.0, 1.0)
+
+        def smoothstep(value):
+            scaled = jnp.clip(value / epsilon, 0.0, 1.0)
+            return scaled * scaled * (3.0 - 2.0 * scaled)
+
+        return smoothstep(fraction), smoothstep(1.0 - fraction)
 
 
 def padded_linear_current_moments(
@@ -446,6 +469,9 @@ def _traced_clip(
         compact_slot[None, :, None] < vertex_count[:, None, None], support, 0.0
     )
 
+    full_area, _full_first, _full_second = _traced_polygon_moments(
+        start_point, count, centre
+    )
     area, first, second = _traced_polygon_moments(support, vertex_count, centre)
     included = area > 0.0
     vertex_count = jnp.where(included, vertex_count, 0)
@@ -484,6 +510,7 @@ def _traced_clip(
         included=included,
         boundary=boundary,
         area=area,
+        full_area=full_area,
         first_area_moment=first,
         second_area_moment=second,
         contour_area=contour_area,

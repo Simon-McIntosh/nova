@@ -337,6 +337,72 @@ def test_traced_clip_matches_exact_zero_corner_and_tangential_cells():
     assert float(traced.contour_area) == pytest.approx(2.0, abs=1.0e-14)
 
 
+def test_clip_evaluation_weights_are_c1_without_changing_patch_geometry():
+    """Evaluation weights smooth entry and hand-off, not polygon geometry."""
+    import jax
+    import jax.numpy as jnp
+
+    cell = np.asarray([[-1.0, -1.0], [1.0, -1.0], [1.0, 1.0], [-1.0, 1.0]])
+    mesh = AtomicCellMesh.from_cells([cell], centroids=np.asarray([[0.0, 0.0]]))
+    coordinates = jnp.asarray(mesh.node_coordinates)
+    epsilon = 0.05
+
+    def evaluated_current(displacement, entering):
+        signed_flux = jax.lax.cond(
+            entering,
+            lambda: displacement - (coordinates[:, 0] + 1.0),
+            lambda: 1.0 + displacement - coordinates[:, 0],
+        )
+        support = mesh.traced_clip(signed_flux)
+        participation, clipped_path = support.evaluation_weights(epsilon)
+        clipped = support.area
+        full = jnp.full_like(clipped, 4.0)
+        return (participation * ((1.0 - clipped_path) * full + clipped_path * clipped))[
+            0
+        ]
+
+    step = 1.0e-7
+    for entering, expected in ((True, 0.0), (False, 4.0)):
+        value = evaluated_current(0.0, entering)
+        left = jax.jvp(
+            lambda shift: evaluated_current(shift, entering),
+            (jnp.asarray(-step),),
+            (jnp.asarray(1.0),),
+        )[1]
+        right = jax.jvp(
+            lambda shift: evaluated_current(shift, entering),
+            (jnp.asarray(step),),
+            (jnp.asarray(1.0),),
+        )[1]
+        assert float(value) == pytest.approx(expected, abs=2.0e-14)
+        assert float(left) == pytest.approx(float(right), abs=2.0e-4)
+
+    flux = _ellipse_level(mesh.node_coordinates)
+    support = mesh.traced_clip(jnp.asarray(flux))
+    geometry = tuple(
+        np.asarray(value)
+        for value in (
+            support.area,
+            support.first_area_moment,
+            support.second_area_moment,
+            support.patch_area_sum,
+        )
+    )
+    for width in (0.0, 1.0e-3, 1.0e-2, 1.0e-1):
+        support.evaluation_weights(width)
+        for observed, expected in zip(
+            (
+                support.area,
+                support.first_area_moment,
+                support.second_area_moment,
+                support.patch_area_sum,
+            ),
+            geometry,
+            strict=True,
+        ):
+            np.testing.assert_array_equal(observed, expected)
+
+
 def test_traced_clip_jits_once_and_vmaps_over_moving_separatrices():
     import jax
     import jax.numpy as jnp

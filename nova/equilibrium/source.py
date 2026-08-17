@@ -575,6 +575,7 @@ class ForwardSource:
         density_gradient,
         core_support,
         common_support,
+        smoothing_epsilon=0.0,
     ) -> CellCurrentMoments:
         """Return current moments selected by the shared-node clip partition.
 
@@ -592,24 +593,36 @@ class ForwardSource:
             clipped_current, clipped_first = support.linear_current_moments(
                 centroid_density, density_gradient(centroid_density)
             )
-            boundary = support.boundary
-            complete = support.included & ~support.boundary
+            if smoothing_epsilon == 0.0:
+                boundary = support.boundary
+                complete = support.included & ~support.boundary
+                return CellCurrentMoments(
+                    jnp.where(
+                        boundary,
+                        clipped_current,
+                        jnp.where(complete, interior.cell_current, 0.0),
+                    ),
+                    jnp.where(
+                        boundary,
+                        clipped_first[:, 0],
+                        jnp.where(complete, interior.radial_moment, 0.0),
+                    ),
+                    jnp.where(
+                        boundary,
+                        clipped_first[:, 1],
+                        jnp.where(complete, interior.vertical_moment, 0.0),
+                    ),
+                )
+            participation, clipped_path = support.evaluation_weights(smoothing_epsilon)
+
+            def blend(full, clipped):
+                evaluated = full + clipped_path * (clipped - full)
+                return participation * evaluated
+
             return CellCurrentMoments(
-                jnp.where(
-                    boundary,
-                    clipped_current,
-                    jnp.where(complete, interior.cell_current, 0.0),
-                ),
-                jnp.where(
-                    boundary,
-                    clipped_first[:, 0],
-                    jnp.where(complete, interior.radial_moment, 0.0),
-                ),
-                jnp.where(
-                    boundary,
-                    clipped_first[:, 1],
-                    jnp.where(complete, interior.vertical_moment, 0.0),
-                ),
+                blend(interior.cell_current, clipped_current),
+                blend(interior.radial_moment, clipped_first[:, 0]),
+                blend(interior.vertical_moment, clipped_first[:, 1]),
             )
 
         core = partitioned_moments(

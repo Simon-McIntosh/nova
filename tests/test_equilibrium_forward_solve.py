@@ -330,6 +330,16 @@ def test_solve_path_current_moments_match_direct_stencil_and_clip(machine):
     )
 
 
+def test_zero_smoothing_width_preserves_moment_map_bitwise(machine):
+    """The zero-width option is exactly the established discrete map."""
+    profile, seed, _vacuum = machine
+    baseline = profile.operator.cell_current_moments(seed)
+    zero_width = replace(profile.operator, smoothing_epsilon=0.0)
+    observed = zero_width.cell_current_moments(seed)
+    for actual, expected in zip(observed, baseline, strict=True):
+        np.testing.assert_array_equal(actual, expected)
+
+
 def test_receipts_and_integral_observation_share_solve_current_moments(machine):
     """Both observation entries consume the zeroth moment used by the map."""
     profile, seed, _vacuum = machine

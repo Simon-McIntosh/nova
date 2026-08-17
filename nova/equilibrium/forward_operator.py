@@ -60,6 +60,7 @@ class ForwardFluxOperator:
     inside_material: jnp.ndarray | None = field(repr=False, default=None)
     moment_geometry: MomentGeometry | None = field(repr=False, default=None)
     use_linear_moments: bool = field(repr=False, default=True)
+    smoothing_epsilon: float = field(repr=False, default=0.0)
 
     def __post_init__(self):
         """Build the topology read and default the material mask."""
@@ -74,6 +75,8 @@ class ForwardFluxOperator:
             raise ValueError("area must carry one control area per grid node")
         if self.inside_material.shape != (self.grid.node_number,):
             raise ValueError("inside_material must carry one flag per grid node")
+        if self.smoothing_epsilon < 0.0 or self.smoothing_epsilon > 1.0:
+            raise ValueError("smoothing_epsilon must lie between zero and one")
         if (
             self.moment_geometry is not None
             and len(self.moment_geometry.polygons) != self.grid.node_number
@@ -242,6 +245,7 @@ class ForwardFluxOperator:
             self.current_density_gradient,
             self.moment_geometry.atomic_mesh.traced_clip(signed_flux),
             self.moment_geometry.atomic_mesh.traced_clip(-signed_flux),
+            smoothing_epsilon=self.smoothing_epsilon,
         )
         return self.coupling_current_moments(moments)
 

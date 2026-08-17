@@ -24,8 +24,8 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-16">
 <meta name="plan-artifacts" content="docs/evidence/archive/moment-map-root-finding-landed.html">
-<meta name="plan-impl" content="0.5">
-<meta name="plan-version" content="3">
+<meta name="plan-impl" content="0.75">
+<meta name="plan-version" content="4">
 </head>
 <body>
   <main class="plan-doc">
@@ -167,6 +167,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260816-smoothingauthorized" data-who="reckon-ship" data-when="2026-08-16T23:00:00+00:00">
     <div class="r-comment-body">OWNER AUTHORIZATION 2026-08-16: section 4 opens on the census conviction and the section-3 honest failure, with the epsilon ladder as the instrument and three design constraints fixed in the authorization discussion: (1) machine-precision patch-area conservation is preserved BY CONSTRUCTION - the smoothing blends WHICH EVALUATION PATH feeds the moment vectors at the full-to-clipped hand-off (both paths produce identical exact values at the surface, so only the derivative is smoothed) and applies a C1 smoothstep to the participation weight at support entry (where current already scales with the inside-fraction, making the bias second-order in the band); areas and moments themselves are never blended; (2) topology events are NOT smoothed - the single limited-diverted switch stays discrete and remains a globalisation stress case; (3) epsilon is a reported, ladder-selected production parameter with a pinned default and its measured basis, and epsilon=0 must reproduce the unsmoothed map bitwise. The rationale recorded with the authorization: smoothing rescues the 1e-6 gate rather than bending it - a C1 map has a classical root again, where the piecewise map's pseudo-root pair set a physical floor at the kink amplitude (damped floor 6.6e-6 against the 1.7e-5 Wb cell-17 jump).</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260816-ladderverdict" data-who="reckon-ship" data-when="2026-08-16T23:40:00+00:00">
+    <div class="r-comment-body">smoothed-handoff-ladder landed on its honest negative branch - gate PASSED (the negative was fully measured and banked). All three owner constraints verified by pins: epsilon=0 bitwise, moments/areas never blended (conservation by construction), topology discrete. EMPTY CONVERGENCE WINDOW across four decades and both seeds: best analytic residual 1.359e-2 at 3e-4 (1.36e4x the gate), best barrier residual 2.237e-1 - WORSE than both the unsmoothed 3.93e-5 stall and the damped 6.56e-6 floor, with vacuum/non-finite terminal states at some widths. THE AMBIGUITY IS STATED, NOT SMOOTHED: the pins validate smoothness properties, not solve dynamics, so this window cannot distinguish wrong-treatment from adverse-feedback-in-the-path-blend; the smoothed runs' blow-up mechanism is unexamined and is the first question of any continuation. No default selected, no commit made, gates untouched. THE ASSEMBLED ADJUDICATION PICTURE: solver-side floor 6.56e-6 (6.6x gate) on the unchanged map; smoothing empty-window as implemented; resolution halves gate margins (fine root 10/12). Owner options: (a) diagnose the smoothed-map blow-up before abandoning the treatment; (b) accept the damped floor with a piecewise-smooth residual criterion - a gate change, owner-only; (c) resolution-referenced validation; (d) hold the lineage and re-plan. impl 3/4 = 0.75. Record at /nova/evidence/archive/moment-map-root-finding-landed#smoothed-handoff-ladder</div>
 </div>
 </section>
 </main>

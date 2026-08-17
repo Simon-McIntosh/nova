@@ -24,9 +24,9 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-17">
-<meta name="plan-version" content="6">
-<meta name="plan-commits" content="f7af67dc">
-<meta name="plan-impl" content="0.15">
+<meta name="plan-version" content="7">
+<meta name="plan-commits" content="f7af67dc,3a438d1b">
+<meta name="plan-impl" content="0.4">
 </head>
 <body>
   <main class="plan-doc">
@@ -131,6 +131,9 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s3" data-id="c-20260817-transport-env" data-who="reckon-ship" data-when="2026-08-17T14:45:00+00:00">
     <div class="r-comment-body">transport-env landed: commit f7af67dc (worktree, pending integration); gate torax-co-resolution PASSED. Plain uv sync co-resolves TORAX 1.4.3 with imas-python 2.3.0 and h5py 3.16.0 on Python 3.14.2 via uv override entries (imas-python at or above 2.2, h5py at or above 3.15) and a new optional extra transport with torax at or above 1.4.3; a shared-process test asserts x64 and the FAST_COMPILE XLA preset (1/1 green). No upstream issue filed; the torax-pin-resolution decision stays open with this as evidence for the uv-override-plus-upstream option.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260817-transport-geometry" data-who="reckon-ship" data-when="2026-08-17T16:40:00+00:00">
+    <div class="r-comment-body">transport-geometry landed: commit 3a438d1b; gate geometry-parity PASSED. The traced FSA record now carries the 13 TORAX-facing face columns the plan listed (volume, enclosed current, the poloidal dl-over-Bp integral, three grad-psi moments, B-squared and inverse-B-squared, inner and outer radii, elongation and both triangularities) plus an inverse-R moment, and a direct StandardGeometry adapter constructs TORAX geometry without the experimental IMAS layer, with explicit outward-flux, positive-current and positive-F normalisation. One TORAX transport step driven from the Nova-built record matches the same case through TORAX own StandardGeometryIntermediates reader and build route at rtol 0.12 and atol 1e-8; shaped analytic validation covers four coarea moments at rtol 0.12, inner/outer radii at rtol 0.04 and atol 0.02 m, elongation at rtol 0.08 and triangularities below 0.12, with a nontrivial 2 by 25 vmap. Tests 2/2 plus the 5/5 FSA regression. TWO QUALIFICATIONS: the 0.12 relative tolerance is loose for a parity claim and should tighten before the record is trusted for the coupled window, and the direct-adapter route is implemented as the working assumption only, so the geometry-handoff decision stays open with this receipt as its evidence rather than being locked from a worker result. Root cause of the earlier blocked attempt was a missing worktree uv sync, not the design.</div>
 </div>
 </section>
 </main>

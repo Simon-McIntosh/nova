@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-17T21:53:08",
+  "updated": "2026-08-17T22:01:54",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -7589,9 +7589,135 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260817T191456162910-quiescent-vacuum-gate",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a72",
+        "node": "quiescent-vacuum-gate",
+        "role": "implement",
+        "member": "diiid-vacuum",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T19:14:58Z",
+        "completed_at": "2026-08-17T19:59:12Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2654,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2654,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "ee856ac1f539b87bed400064bb81a7e5c38ab8c8",
+        "commits": [
+          "26a06b78"
+        ],
+        "changed_lines": {
+          "added": 581,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 6,
+        "gate": "failed",
+        "outcome": "Authoritative delivery, scientific FAIL: after the two unit fixes, 120 quiescent frames pool to exterior R2 -5.3347 versus -5.3296 on matched transient frames - indistinguishable, and far below the coil-only 0.495, which implicates the coil-plus-plasma composition boundary (sign or per-radian factor) rather than quiescent selection, geometry or passive currents. The corrected low-current census returned 658,787 labeled frames below 50 kA, physically implausible for diverted plasmas, so the plasma-current channel units are also unresolved. Composition audit dispatched; the banked transient corpus is quarantined from passive fitting until the audit clears it.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T191456162910-quiescent-vacuum-gate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01090-c119-7413-b062-4589e1bc160f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 15853440,
+            "cached_input_tokens_cumulative": 24022912,
+            "input_tokens": 16389066,
+            "input_tokens_cumulative": 24789662,
+            "output_tokens": 39353,
+            "output_tokens_cumulative": 67448,
+            "reasoning_output_tokens": 9180,
+            "reasoning_output_tokens_cumulative": 18951
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260817T191518720579-label-resolve-gate",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a75",
+        "node": "label-resolve-gate",
+        "role": "implement",
+        "member": "label-resolve",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T19:15:21Z",
+        "completed_at": "2026-08-17T19:54:45Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2364,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2364,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "ee856ac1f539b87bed400064bb81a7e5c38ab8c8",
+        "commits": [
+          "4ae27c42f061c695e5b7e363ae632e206d4d29a6"
+        ],
+        "changed_lines": {
+          "added": 541,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 4,
+        "gate": "failed",
+        "outcome": "Authoritative delivery, scientific FAIL preserved without any fitting: 0 of 100 frames reach the preregistered grid-discretisation floor, median fractional RMS 0.0429 (3090 times the floor) at median R2 0.949, with 86 of 100 frames at the 80-iteration Picard ceiling and all 14 converged frames still above floor. Attribution among solver non-convergence, 19-surface profile-representation loss and irreducible non-GS label content is dispatched as a decomposition node before the entry training-signal premise is declared broken.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T191518720579-label-resolve-gate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01126-5c49-7ae0-8dad-8df2af9ab8f7",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4182016,
+            "cached_input_tokens_cumulative": 4182016,
+            "input_tokens": 4442029,
+            "input_tokens_cumulative": 4442029,
+            "output_tokens": 32769,
+            "output_tokens_cumulative": 32769,
+            "reasoning_output_tokens": 10884,
+            "reasoning_output_tokens_cumulative": 10884
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 230
+    "_version": 232
   }
 }

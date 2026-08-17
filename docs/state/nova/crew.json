@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-17T22:21:55",
+  "updated": "2026-08-17T22:37:57",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -276,6 +276,13 @@
         "role": "implement",
         "session_id": "019ff73b-a1b5-73a2-9252-011b64d1ab64",
         "created": "2026-08-12"
+      },
+      {
+        "id": "ring-quadrature",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a01171-0694-7063-985b-f5d112e74147",
+        "created": "2026-08-17"
       },
       {
         "id": "solve-convergence",
@@ -8001,9 +8008,55 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260817T202437607496-corpus-cocos-adapter",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a72",
+        "node": "corpus-cocos-adapter",
+        "role": "implement",
+        "member": "diiid-vacuum",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T20:24:39Z",
+        "completed_at": "2026-08-17T20:36:19Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 700,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 700,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "42f239ee9561ee2b7d84249a2be71a3f73b7fda5",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Stopped mid-run by owner boundary correction before any commit or manifest: the corpus convention adapter must not live in nova. Corpus reading and its conventions are imas-ambix work and are kept separate from the physics repository - nova stays COCOS 17 internally and carries no challenge-corpus convention module. The determination itself (empirical discriminators, single pinned authority, migration of consumers off ad-hoc factors) remains mandated and is re-homed to the imas-ambix challenge package as entry-plan section-2 work.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T202437607496-corpus-cocos-adapter/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01090-c119-7413-b062-4589e1bc160f",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 237
+    "_version": 240
   }
 }

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-17T18:14:28",
+  "updated": "2026-08-17T22:16:23",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -460,6 +460,19 @@
                 "risk": "elevated"
               }
             }
+          },
+          {
+            "slug": "boundary-ring-source-completion",
+            "why_now": "The moment-map exclusion chain ended in a localized root cause: 96 boundary-ring supports lacking a degree-3 stencil carry 84% of the 10.9 Wb analytic-seed flux shift, with a falsifiable one-step repair prediction. The whole held forward chain (lineage merge, SOL demonstration, EFIT parity) waits on this analytic verdict.",
+            "done_when": "The ring-quadrature prediction gate is adjudicated on the banked coarse fixture; the production ring evaluation lands on the lineage with the interior bitwise-preserved and all pins green at zero smoothing; the analytic-seed defect beats legacy on both fixtures; the fine continuation from fraction 0 either reaches fraction 1 at 1e-6 with full physics gates green and the lineage merges, or the bracket is banked with its surface class named for owner adjudication.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
           }
         ],
         "starts": "2026-08-10",
@@ -723,6 +736,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 42
+    "_version": 43
   }
 }

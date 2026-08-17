@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-17T16:43:58",
+  "updated": "2026-08-17T18:01:23",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -6874,9 +6874,64 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260817T141540000425-smoothing-band-ablation",
+        "plan": "moment-map-root-finding",
+        "section": "\u00a72",
+        "node": "smoothing-band-ablation",
+        "role": "implement",
+        "member": "coupling-blocks",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T14:15:42Z",
+        "completed_at": "2026-08-17T14:59:40Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2638,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2638,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "5f82c76d7bd6876238a13e876af039c601721e1a",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/smoothing-band-ablation-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a009c8-8ac4-7a50-806e-c28169dbfc66",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 27069952,
+            "cached_input_tokens_cumulative": 400280064,
+            "input_tokens": 27434662,
+            "input_tokens_cumulative": 407275980,
+            "output_tokens": 33362,
+            "output_tokens_cumulative": 796854,
+            "reasoning_output_tokens": 6356,
+            "reasoning_output_tokens_cumulative": 220284
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 212
+    "_version": 213
   }
 }

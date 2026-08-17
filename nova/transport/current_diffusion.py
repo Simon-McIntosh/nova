@@ -271,6 +271,110 @@ def _surface_interpolation(rho, rho_samples, values, axis_value, edge_value):
     return jnp.where(inner, inner_value, interpolated)
 
 
+def _torax_surface_columns(
+    psi2d,
+    psi_n_grid,
+    core,
+    radius,
+    height,
+    mesh_radius,
+    f_grid,
+    psi_n_surface,
+    bandwidth,
+):
+    """Return TORAX geometry columns from the same fixed coarea shells."""
+    dtype = psi2d.dtype
+    dr = radius[1] - radius[0]
+    dz = height[1] - height[0]
+    gradient_z, gradient_r = jnp.gradient(psi2d, height, radius)
+    gradient_flux = jnp.sqrt(gradient_r**2 + gradient_z**2)
+    gradient_psi = gradient_flux / _TWO_PI
+    inverse_radius_squared = 1.0 / mesh_radius**2
+    magnetic_field_squared = (
+        gradient_psi**2 * inverse_radius_squared + f_grid**2 * inverse_radius_squared
+    )
+    volume_weight = core * (_TWO_PI * mesh_radius * dr * dz)
+
+    spacing = jnp.mean(jnp.diff(psi_n_surface))
+    lower = psi_n_surface - 0.5 * spacing
+    upper = psi_n_surface + 0.5 * spacing
+    lower = lower.at[0].set(psi_n_surface[0] - 0.5 * spacing)
+    upper = upper.at[-1].set(psi_n_surface[-1] + 0.5 * spacing)
+    lower_z = (lower[:, None, None] - psi_n_grid[None, :, :]) / bandwidth
+    upper_z = (upper[:, None, None] - psi_n_grid[None, :, :]) / bandwidth
+    shell = (
+        volume_weight[None, :, :]
+        * 0.5
+        * (
+            jax.scipy.special.erf(upper_z / jnp.sqrt(2.0))
+            - jax.scipy.special.erf(lower_z / jnp.sqrt(2.0))
+        )
+    )
+    shell_sum = jnp.maximum(jnp.sum(shell, axis=(1, 2)), 1e-30)
+
+    def average(values):
+        return jnp.sum(shell * values[None, :, :], axis=(1, 2)) / shell_sum
+
+    grad_psi = average(gradient_psi)
+    grad_psi2 = average(gradient_psi**2)
+    grad_psi2_over_r2 = average(gradient_psi**2 * inverse_radius_squared)
+    b2 = average(magnetic_field_squared)
+    inverse_b2 = average(1.0 / jnp.maximum(magnetic_field_squared, 1e-30))
+
+    point_shell = (
+        jnp.exp(
+            -0.5
+            * ((psi_n_surface[:, None, None] - psi_n_grid[None, :, :]) / bandwidth) ** 2
+        )
+        * core[None, :, :]
+    )
+    selected = point_shell >= 0.1 * jnp.max(point_shell, axis=(1, 2), keepdims=True)
+    radius_field = jnp.broadcast_to(mesh_radius, psi2d.shape)
+    height_field = jnp.broadcast_to(height[:, None], psi2d.shape)
+    r_in = jnp.min(jnp.where(selected, radius_field[None, :, :], jnp.inf), axis=(1, 2))
+    r_out = jnp.max(
+        jnp.where(selected, radius_field[None, :, :], -jnp.inf), axis=(1, 2)
+    )
+    z_lower = jnp.min(
+        jnp.where(selected, height_field[None, :, :], jnp.inf), axis=(1, 2)
+    )
+    z_upper = jnp.max(
+        jnp.where(selected, height_field[None, :, :], -jnp.inf), axis=(1, 2)
+    )
+    top = selected & (jnp.abs(height_field[None, :, :] - z_upper[:, None, None]) <= dz)
+    bottom = selected & (
+        jnp.abs(height_field[None, :, :] - z_lower[:, None, None]) <= dz
+    )
+
+    def radial_mean(mask):
+        count = jnp.maximum(jnp.sum(mask, axis=(1, 2)), 1)
+        return jnp.sum(mask * radius_field[None, :, :], axis=(1, 2)) / count
+
+    r_upper = radial_mean(top)
+    r_lower = radial_mean(bottom)
+    local_major = 0.5 * (r_in + r_out)
+    local_minor = jnp.maximum(0.5 * (r_out - r_in), 1e-12)
+    elongation = (z_upper - z_lower) / (2.0 * local_minor)
+    delta_upper = (local_major - r_upper) / local_minor
+    delta_lower = (local_major - r_lower) / local_minor
+    axis_position = jnp.argmin(jnp.where(core > 0, psi_n_grid, jnp.inf))
+    axis_radius = radius_field.reshape(-1)[axis_position]
+
+    return {
+        "grad_psi_surface": grad_psi,
+        "grad_psi2_surface": grad_psi2,
+        "grad_psi2_over_r2_surface": grad_psi2_over_r2,
+        "b2_surface": b2,
+        "inv_b2_surface": inverse_b2,
+        "r_in_surface": r_in,
+        "r_out_surface": r_out,
+        "elongation_surface": elongation,
+        "delta_upper_surface": delta_upper,
+        "delta_lower_surface": delta_lower,
+        "axis_radius": jnp.asarray(axis_radius, dtype=dtype),
+    }
+
+
 @partial(
     jax.jit,
     static_argnames=(
@@ -371,6 +475,20 @@ def traced_assemble_flux_surface_geometry(
     volume = jnp.asarray(surface_bins["v_total"], dtype=dtype)
 
     f_surface = jnp.interp(psi_n_surface, psi_n_profile, f_profile)
+    f_grid = jnp.interp(psi_n_grid, psi_n_profile, f_profile)
+    surface_spacing = jnp.mean(jnp.diff(psi_n_surface))
+    bandwidth = jnp.maximum(bandwidth_factor * surface_spacing, 1e-6)
+    torax_columns = _torax_surface_columns(
+        psi2d,
+        psi_n_grid,
+        core,
+        radius,
+        height,
+        mesh_radius,
+        f_grid,
+        psi_n_surface,
+        bandwidth,
+    )
     volume_derivative_per_flux = volume_derivative / jnp.abs(safe_span)
     safety_factor = (
         jnp.abs(f_surface)
@@ -415,6 +533,13 @@ def traced_assemble_flux_surface_geometry(
     )
     g3_cell = 0.5 * (g3_face[:-1] + g3_face[1:])
     inverse_radius_cell = jnp.interp(psi_n_cell, psi_n_surface, inverse_radius)
+    inverse_radius_face = _surface_interpolation(
+        rho_face,
+        rho_surface,
+        inverse_radius,
+        inverse_radius[0],
+        inverse_radius[-1],
+    )
     magnetic_field_squared_cell = jnp.interp(
         psi_n_cell, psi_n_surface, magnetic_field_squared
     )
@@ -450,8 +575,6 @@ def traced_assemble_flux_surface_geometry(
     # the edge is normalised to the measured total current.
     dr = radius[1] - radius[0]
     dz = height[1] - height[0]
-    surface_spacing = jnp.mean(jnp.diff(psi_n_surface))
-    bandwidth = jnp.maximum(bandwidth_factor * surface_spacing, 1e-6)
     normal_cdf = 0.5 * (
         1.0
         + jax.scipy.special.erf(
@@ -523,6 +646,32 @@ def traced_assemble_flux_surface_geometry(
         ]
     )
 
+    axis_radius = torax_columns["axis_radius"]
+
+    def torax_face(name, axis_value):
+        values = torax_columns[name]
+        return _surface_interpolation(
+            rho_face, rho_surface, values, axis_value, values[-1]
+        )
+
+    grad_psi_face = torax_face("grad_psi_surface", 0.0)
+    grad_psi2_face = torax_face("grad_psi2_surface", 0.0)
+    grad_psi2_over_r2_face = torax_face("grad_psi2_over_r2_surface", 0.0)
+    b2_face = torax_face("b2_surface", torax_columns["b2_surface"][0])
+    inv_b2_face = torax_face("inv_b2_surface", torax_columns["inv_b2_surface"][0])
+    r_in_face = torax_face("r_in_surface", axis_radius)
+    r_out_face = torax_face("r_out_surface", axis_radius)
+    elongation_face = torax_face(
+        "elongation_surface", torax_columns["elongation_surface"][0]
+    )
+    delta_upper_face = torax_face(
+        "delta_upper_surface", torax_columns["delta_upper_surface"][0]
+    )
+    delta_lower_face = torax_face(
+        "delta_lower_surface", torax_columns["delta_lower_surface"][0]
+    )
+    int_dl_over_bp_face = volume_derivative_per_flux_face
+
     finite_arrays = (
         jnp.all(jnp.isfinite(psi_n_surface))
         & jnp.all(jnp.isfinite(volume_derivative))
@@ -555,6 +704,7 @@ def traced_assemble_flux_surface_geometry(
         "f_cell": f_cell,
         "b2_cell": magnetic_field_squared_cell,
         "inv_r_cell": inverse_radius_cell,
+        "inv_r_face": inverse_radius_face,
         "phi_b": safe_boundary_toroidal_flux,
         "r0": major_radius,
         "ip_amperes": jnp.abs(ip_amperes),
@@ -562,6 +712,19 @@ def traced_assemble_flux_surface_geometry(
         "boundary_psi": boundary_psi,
         "volume": volume,
         "q_face": safety_factor_face,
+        "volume_face": volume_face,
+        "ip_profile_face": enclosed_current,
+        "int_dl_over_bp_face": int_dl_over_bp_face,
+        "grad_psi_face": grad_psi_face,
+        "grad_psi2_face": grad_psi2_face,
+        "grad_psi2_over_r2_face": grad_psi2_over_r2_face,
+        "b2_face": b2_face,
+        "inv_b2_face": inv_b2_face,
+        "r_in_face": r_in_face,
+        "r_out_face": r_out_face,
+        "elongation_face": elongation_face,
+        "delta_upper_face": delta_upper_face,
+        "delta_lower_face": delta_lower_face,
         "flux_sign": flux_sign,
         "valid": valid,
     }

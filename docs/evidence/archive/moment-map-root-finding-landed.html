@@ -145,5 +145,39 @@
   not agree in the limit where they must. The repair is to make them identical at the near-full
   hand-off (or reformulate the blend about their exact common limit), pin that equality, and rerun.</p>
 
+
+  <h2 id="consistent-support-quadrature">§4 — the true fix: one quadrature, no smoothing, kink gone by construction</h2>
+
+  <p>Owner direction 2026-08-17 rejected the band workaround in favour of the mathematics, and the
+  mathematics held. <strong>The seam restated:</strong> the two evaluation paths were never two
+  implementations of one integral — the interior path integrates the degree-3 nodal interpolant of the
+  true j(ψ_N) over the full polygon, while the clipped path integrated a locally <em>linearised</em> j
+  over the clipped polygon. On a steep-gradient cell the linear model's own truncation is 23%, so the
+  paths disagreed at that order and no blend width could reconcile two different functions.</p>
+
+  <p><strong>The replacement is a single formula for every fill fraction:</strong> exact moments of the
+  same cubic nodal interpolant over the actual support, via closed simplex/Green edge moments through
+  degree four, with the full-support arithmetic anchored so equal-capacity reductions cancel bitwise.
+  The smoothing weights, the missing-area blend and the full-versus-clipped switch are all
+  <em>removed</em> from the source side. Verified (TDD, 4 new pins, 83/83 components green):</p>
+
+  <ul>
+    <li>exact polygon integration vs independent adaptive triangle quadrature: <strong>2e-13</strong>;</li>
+    <li>unclipped support reproduces the interior stencil <strong>bitwise</strong> on all three vectors —
+    the former hand-off is an identity, not a limit;</li>
+    <li>clipped moment and composed-field error bounded by <strong>4.1 × missing-area fraction</strong>,
+    against the convicted 23.19% at 0.028% missing (~830×);</li>
+    <li>both-sided JVPs agree at 2e-6 <strong>with smoothing off</strong> — the kink is removed by
+    construction, as Reynolds transport predicts, not smoothed away;</li>
+    <li>exact clip vertices, area receipts, conservation, topology and private-flux qualification
+    unchanged.</li>
+  </ul>
+
+  <p><strong>The solve question is reopened, not answered.</strong> Because the correction materially
+  moves the map, the banked t=0.4375 state — a root of the <em>smoothed</em> map — is not a root here
+  (residual 5.56e-3), so the t=0.45 retry from it terminated at 6.45e-3 and was correctly not promoted.
+  A continuation must be re-rooted under this map from t=0 before any convergence claim is meaningful.
+  The implementation stays uncommitted by adjudication, not for want of evidence.</p>
+
 </main></body>
 </html>

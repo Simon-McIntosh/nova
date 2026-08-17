@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-17T19:11:14",
+  "updated": "2026-08-17T19:39:32",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -7365,9 +7365,66 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260817T165546571192-consistent-support-quadrature",
+        "plan": "moment-map-root-finding",
+        "section": "\u00a74",
+        "node": "consistent-support-quadrature",
+        "role": "implement",
+        "member": "coupling-blocks",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T16:55:49Z",
+        "completed_at": "2026-08-17T17:38:44Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2575,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2575,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "df21ceabfd609b55a06e244de6885a02bcf00a5b",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 4,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/consistent-support-quadrature-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a009c8-8ac4-7a50-806e-c28169dbfc66",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 45451776,
+            "cached_input_tokens_cumulative": 458069760,
+            "input_tokens": 46147381,
+            "input_tokens_cumulative": 466258419,
+            "output_tokens": 69187,
+            "output_tokens_cumulative": 900197,
+            "reasoning_output_tokens": 18323,
+            "reasoning_output_tokens_cumulative": 248770
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 224
+    "_version": 225
   }
 }

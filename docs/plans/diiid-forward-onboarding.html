@@ -24,9 +24,9 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-17">
-<meta name="plan-version" content="2">
-<meta name="plan-commits" content="7d9743fd">
-<meta name="plan-impl" content="0.1">
+<meta name="plan-version" content="6">
+<meta name="plan-commits" content="7d9743fd,92a4a00e,685a7602,11bac959">
+<meta name="plan-impl" content="0.28">
 </head>
 <body>
   <main class="plan-doc">
@@ -131,6 +131,16 @@
       </p>
     <p class="r-dec-rat"></p>
     </div>
+<div class="r-dec" data-key="vacuum-gate-measure" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">What replaces the inapplicable starter-kit bar as the section-2 kill gate?</p>
+    <p class="r-dec-ctx">The measured diagnosis established that the published 0.94 is reached by fitting exterior psi to Green functions, while this plan forbids fitting anywhere in a forward. The two tests are not comparable, so the gate as written cannot pass or fail the entry premise. Our geometry and kernels were independently validated by the same diagnosis, so this is a question about what to measure, not about whether the physics is right.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="fitted-parity-plus-absolute-floor">Reproduce the starter kit&#x27;s own fitted decomposition to confirm we match its 0.94, AND pre-register a separate absolute-forward floor whose shortfall is then interpreted as the unmodelled passive and vessel contribution (recommended, because it keeps the original kill-gate function while turning the residual into a measurement the passive lane needs)</button>
+      <button class="r-opt" data-value="absolute-only-rebar">Drop the fitted comparison and pre-register a new absolute-forward bar from our own MAST vacuum-floor experience</button>
+      <button class="r-opt" data-value="fitted-parity-only">Adopt the fitted decomposition as the gate and accept that it does not test the absolute forward</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
@@ -153,6 +163,15 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s5" data-id="c-20260817-extraction-kernels" data-who="reckon-ship" data-when="2026-08-17T14:47:00+00:00">
     <div class="r-comment-body">extraction-kernels landed: commit 7d9743fd (worktree, held for consolidation before integration); gate extraction-roundtrip PASSED. New nova/equilibrium/map_extraction.py exposes apply_delta_star, extract_flux_functions (per-surface separation with projection RMS, scaled design condition, axis and zero-gradient uncertainty inflation, reliability flags), vacuum_region_receipt and sample_chord_psi_norm; 4/4 tests green, prescribed p-prime/FF-prime recovered at 2.0e-8 relative, vacuum Delta-star RMS below 2.0e-10, chord psi_N at 2.0e-14 absolute. AUDIT FINDING: the module hand-rolls central-difference stencils, duplicating the production Delta-star in nova/equilibrium/conservation.py and the validated binned separation in benchmarks/efit_affine_extraction.py (shipped by efit-map-inversion); a consolidation node is dispatched to the same member before merge so the repo carries exactly one Delta-star and one separation implementation.</div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20260817-extraction-consolidation" data-who="reckon-ship" data-when="2026-08-17T17:05:00+00:00">
+    <div class="r-comment-body">extraction-consolidation landed: commit 92a4a00e; gate single-implementation PASSED, closing the duplication finding recorded on the previous landing. apply_delta_star now delegates to nova.equilibrium.conservation.delta_star and takes gradient and interior qualification from the same FluxLattice contract, so zero module-local finite-difference stencils remain and the hexagonal StencilMesh route is reachable rather than raster-only. Production extraction adopts the validated R*j_phi projection on the [R squared, 1] basis from the efit-map-inversion benchmark and converts its per-radian coefficients to Nova negated-total-flux p-prime and FF-prime; benchmarks/efit_affine_extraction.py now imports extract_flux_functions and keeps only its distinct R-to-the-fourth sufficiency diagnostic. Round-trip held at 2.0e-8 relative, 4/4 green. Recorded numerical constraint: float64 is required to meet that bar, an unconfigured float32 diagnostic measured 3.446e-5 relative p-prime error and was explicitly not accepted as evidence.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260817-diiid-vacuum" data-who="reckon-ship" data-when="2026-08-17T19:10:00+00:00">
+    <div class="r-comment-body">diiid-vacuum landed its harness and its VERDICT: commit 685a7602; gate vacuum-check FAILED and was preserved rather than repaired. Measured pooled exterior R-squared 0.49527 against the bar 0.94 pre-registered literally from the starter-kit README before any scoring run, over 20 shots and 4,140 frames; per-shot minimum -2.532, q25 0.063, median 0.238, q75 0.441, maximum 0.832. Unit tests 5/5, one geometry digest, provenance complete. THE FAILURE IS NOT UNITS: post-hoc best scale is 0.337957 while the scale-invariant correlation R-squared is only 0.407332, so the predicted vacuum field has the wrong SHAPE, not merely the wrong magnitude, and no amplitude fix can close it. Construction was doctrine-clean: all 18 F coils and ECOILA through analytic polygon_greens including the six signed parallelogram shears, F currents converted from shipped kA-turn to A-turn with no turn multiplier, nova total Wb per A converted to dataset Wb per radian by two pi, one additive flux gauge per frame and the one global sign normalised, and no fitted currents, turns, amplitudes or spatial modes anywhere. TWO CANDIDATE CAUSES, neither tuned against: (1) a contract mismatch, since the starter README describes FITTING psi outside the plasma envelope to Green functions and still references coil_turns, while the shipped dataset carries no coil_turns field, declares F currents already in kA-turn, leaves ECOILA turns unresolved across the interval 1 to 96, and supplies no bcoil poloidal geometry, so the published bar may score a fitted exterior decomposition rather than the absolute current-only forward this plan requires; and (2) a structurally incomplete ohmic set, with no ECOILB representation, which would produce exactly this shape deficit. Resolving which is a semantic and machine-description question that must be answered before the entry can rely on this gate, and it is now the entry's top priority.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260817-vacuum-diagnosis" data-who="reckon-ship" data-when="2026-08-17T19:45:00+00:00">
+    <div class="r-comment-body">vacuum-diagnosis landed: commit 11bac959, report at docs/research/diiid-vacuum-gate-diagnosis.html. VERDICT: fitted-versus-absolute CONTRACT MISMATCH at HIGH confidence, so the gate was mis-specified rather than failed. The deciding starter-kit text reads: Fitting psi outside the plasma envelope to those Green's functions ... reaches R2 approximately 0.94. The published bar therefore scores a FITTED exterior decomposition and does NOT apply to the no-coefficient-fit absolute current-only forward this plan requires. Both rival causes were quantified and rejected as insufficient rather than argued away. Sweeping ECOILA turns across the entire unresolved interval 1, 12, 24, 48, 72, 96 moves pooled R-squared only 0.495267 to 0.512497, an improvement of 0.017230 against a shortfall of 0.427503; adding explicit ECOILB as a co-located 48-turn group at fixed ECOILA=48 adds a further 0.004884. Skew-sign error is REJECTED at high confidence because the shipped convention scores best of all tested (0.495267) and every reversal is worse by 0.000095 to 0.000410, with an independent F5A vertex derivation from centre (1.0041, 1.5169) m, extent (0.1392, 0.1194) m and AF=+45 degrees giving vertical shear 0.0696 m that matches the declared parallelogram orientation. CONSEQUENCE: our geometry construction and kernels are validated, not implicated, and the entry premise is not damaged by this measurement. The gate measure itself must be redefined before it can kill anything. A physical reading worth testing rather than assuming: the gap between a fitted 0.94 and an absolute 0.495 is a candidate MEASUREMENT of how much exterior flux the shipped coil currents alone do not explain, which would be the passive and vessel currents this plan already names as its highest-risk physics component.</div>
 </div>
 </section>
 </main>

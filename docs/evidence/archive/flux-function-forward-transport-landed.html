@@ -30,6 +30,36 @@
     <code>torax-pin-resolution</code> decision remains open, with this landing as evidence
     for its <code>uv-override-plus-upstream</code> recommendation (the override half is
     proven; the upstream half is the user's outward action).</p>
+
+    <h2 id="geometry-adapter">§3 geometry adapter — 2026-08-17</h2>
+    <p>Commit <code>3a438d1b</code> (node transport-geometry, after a first attempt blocked
+    and was repaired). The traced flux-surface-averaged record now carries the thirteen
+    TORAX-facing face columns the plan's gap list named — volume, enclosed current, the
+    poloidal ∮dl/B_p integral, three ∇ψ moments, ⟨B²⟩ and ⟨1/B²⟩, R_in and R_out,
+    elongation and both triangularities — plus an inverse-R moment, all fixed-shape and
+    vmap-safe (a non-trivial 2×25 batch is exercised). A direct
+    <code>StandardGeometry</code> adapter builds TORAX geometry without the experimental
+    IMAS layer, applying explicit outward-flux, positive-current and positive-F
+    normalisation.</p>
+    <p><strong>Parity:</strong> one TORAX transport step driven from the Nova-built record
+    matches the same case driven through TORAX's own
+    <code>StandardGeometryIntermediates</code> reader-and-build route at <strong>rtol 0.12,
+    atol 1e-8</strong>. Shaped analytic validation covers four coarea moments at rtol 0.12,
+    R_in/R_out at rtol 0.04 and atol 0.02 m, elongation at rtol 0.08, and triangularities
+    below 0.12. Tests 2/2, with the 5/5 flux-surface-geometry regression still green.</p>
+    <p><strong>Two qualifications kept on the page.</strong> A 12% relative tolerance is
+    loose for a parity claim — adequate to prove the adapter is wired correctly, not
+    adequate to trust the record inside the coupled window, so it must tighten before the
+    loop consumes it. And the direct-adapter route was implemented as the plan's
+    recommendation under a working assumption: the <code>geometry-handoff</code> decision
+    stays <em>open</em> with this as evidence, rather than being locked from a worker
+    receipt.</p>
+    <p><strong>Process note worth keeping.</strong> The first attempt at this node blocked
+    without running a single test: its worktree had no TORAX-plus-JAX environment, and both
+    permitted pytest invocations died at collection (one selecting an env without JAX, one
+    falling back to a system Python that cannot parse this checkout). The implementation was
+    sound; the dispatch omitted worktree provisioning. Adding an explicit
+    <code>uv sync --extra test</code> to the redispatch was the entire fix.</p>
   </main>
 </body>
 </html>

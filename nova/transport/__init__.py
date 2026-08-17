@@ -34,6 +34,7 @@ from nova.transport.current_diffusion import (
     predicted_current,
     project_coefficients,
 )
+from nova.transport.torax_geometry import torax_geometry_from_fsa
 
 __all__ = [
     "CurrentDiffusion",
@@ -49,4 +50,5 @@ __all__ = [
     "poloidal_field_energy_li",
     "predicted_current",
     "project_coefficients",
+    "torax_geometry_from_fsa",
 ]

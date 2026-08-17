@@ -15,6 +15,8 @@ from nova.equilibrium import (
     sample_chord_psi_norm,
     vacuum_region_receipt,
 )
+from nova.equilibrium.conservation import FluxLattice, delta_star
+from nova.jax.config import configure_dtypes
 
 PROFILE_RELATIVE_TOLERANCE = 2.0e-8
 VACUUM_RELATIVE_TOLERANCE = 2.0e-10
@@ -75,6 +77,7 @@ def _operator_matrix(radius: np.ndarray, height: np.ndarray):
 def _prescribed_equilibrium() -> PrescribedEquilibrium:
     """Solve a compact-source equilibrium under Nova's total-flux convention."""
 
+    configure_dtypes()
     radius = np.linspace(0.62, 1.38, 65)
     height = np.linspace(-0.38, 0.38, 65)
     radius_map, height_map = np.meshgrid(radius, height, indexing="ij")
@@ -205,9 +208,22 @@ def test_delta_star_receipt_marks_the_centred_stencil_only():
     receipt = apply_delta_star(
         equilibrium.radius, equilibrium.height, equilibrium.flux.reshape(-1)
     )
-    assert receipt.valid[1:-1, 1:-1].all()
-    assert not receipt.valid[[0, -1], :].any()
-    assert not receipt.valid[:, [0, -1]].any()
+    mesh = FluxLattice(equilibrium.radius, equilibrium.height)
+    expected_operator = np.asarray(
+        delta_star(mesh, equilibrium.flux.reshape(-1))
+    ).reshape(equilibrium.flux.shape)
+    assert np.array_equal(receipt.valid.reshape(-1), np.asarray(mesh.interior()))
+    assert np.allclose(
+        receipt.delta_star_flux[receipt.valid],
+        expected_operator[receipt.valid],
+        rtol=0.0,
+        atol=0.0,
+    )
+    assert receipt.valid[2:-2, 2:-2].all()
+    assert not receipt.valid[:2, :].any()
+    assert not receipt.valid[-2:, :].any()
+    assert not receipt.valid[:, :2].any()
+    assert not receipt.valid[:, -2:].any()
     expected_current = np.broadcast_to(
         -2.0
         * np.pi

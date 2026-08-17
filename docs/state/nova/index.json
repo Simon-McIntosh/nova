@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T20:58:28",
+  "updated": "2026-08-17T18:14:28",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -487,7 +487,9 @@
             }
           }
         ],
-        "description": "Nova's side of the magnetics-free challenge entry, deadline 2026-10-18: onboard DIII-D entirely from its shipped description through the registry route, add the limiter-topology forward mode and passive circuit forwards, harden the response-kernel library (chord sampling, label-map extraction with conditioning-aware uncertainty), and publish the measured batched-solve budget with vertical-conditioning receipts. Two kill gates protect the entry premise: the vacuum flux starter-kit check and the extraction round-trip on labeled maps."
+        "description": "Nova's side of the magnetics-free challenge entry, deadline 2026-10-18: onboard DIII-D entirely from its shipped description through the registry route, add the limiter-topology forward mode and passive circuit forwards, harden the response-kernel library (chord sampling, label-map extraction with conditioning-aware uncertainty), and publish the measured batched-solve budget with vertical-conditioning receipts. Two kill gates protect the entry premise: the vacuum flux starter-kit check and the extraction round-trip on labeled maps.",
+        "starts": "2026-08-17",
+        "ends": "2026-09-20"
       },
       {
         "id": "S8",
@@ -530,7 +532,9 @@
             }
           }
         ],
-        "description": "Promote the transport forward solve to a public Nova capability beside ForwardProfile: a declared-fidelity ladder from the landed native current-diffusion rung to an embedded TORAX multi-channel step, the jnp FSA geometry adapter, COCOS boundary tests, and the coupled equilibrium\u2013transport solve as a windowed waveform exchange \u2014 Nova owns the converged window fixed point with typed convergence receipts and implicit-function gradients; staggered co-simulation is the contract's one-iteration point. Sequenced after the S7 spine-parity gate that hardens ForwardProfile; grounded in the transport-forward-contract research record (capability-gap inventory, embed-not-reimplement verdict, imas-python pin gate, window-coupling selection)."
+        "description": "Promote the transport forward solve to a public Nova capability beside ForwardProfile: a declared-fidelity ladder from the landed native current-diffusion rung to an embedded TORAX multi-channel step, the jnp FSA geometry adapter, COCOS boundary tests, and the coupled equilibrium\u2013transport solve as a windowed waveform exchange \u2014 Nova owns the converged window fixed point with typed convergence receipts and implicit-function gradients; staggered co-simulation is the contract's one-iteration point. Sequenced after the S7 spine-parity gate that hardens ForwardProfile; grounded in the transport-forward-contract research record (capability-gap inventory, embed-not-reimplement verdict, imas-python pin gate, window-coupling selection).",
+        "starts": "2026-08-17",
+        "ends": "2026-09-13"
       },
       {
         "id": "S3",
@@ -719,6 +723,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 41
+    "_version": 42
   }
 }

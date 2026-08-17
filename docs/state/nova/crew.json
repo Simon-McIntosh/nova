@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-17T18:01:23",
+  "updated": "2026-08-17T19:39:32",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -52,6 +52,13 @@
         "role": "investigate",
         "session_id": "01a009b2-97d6-7931-bd17-979e2170440f",
         "created": "2026-08-16"
+      },
+      {
+        "id": "diiid-vacuum",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a01090-c119-7413-b062-4589e1bc160f",
+        "created": "2026-08-17"
       },
       {
         "id": "dina-currents",
@@ -296,6 +303,13 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a01023-3e4f-7081-b1ab-24ffbe816152",
+        "created": "2026-08-17"
+      },
+      {
+        "id": "vacuum-diagnosis",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": "01a010a3-85c7-71d0-a7c2-bdabe4fe49f8",
         "created": "2026-08-17"
       },
       {
@@ -6929,9 +6943,488 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260817T144849549148-extraction-consolidation",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a75",
+        "node": "extraction-consolidation",
+        "role": "implement",
+        "member": "extraction-kernels",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T14:48:52Z",
+        "completed_at": "2026-08-17T14:55:27Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 395,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 395,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "4bbaec8f98f4a999eb4fca716d6dec8d68fe9e70",
+        "commits": [
+          "92a4a00e9930806703944a5f2a9412559c825e31"
+        ],
+        "changed_lines": {
+          "added": 123,
+          "removed": 91,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T144849549148-extraction-consolidation/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01023-bc16-7b41-bc10-ac6f27afa6d1",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3754240,
+            "cached_input_tokens_cumulative": 5585920,
+            "input_tokens": 3834894,
+            "input_tokens_cumulative": 5774441,
+            "output_tokens": 14378,
+            "output_tokens_cumulative": 35028,
+            "reasoning_output_tokens": 4598,
+            "reasoning_output_tokens_cumulative": 11206
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260817T144910609763-transport-geometry",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a73",
+        "node": "transport-geometry",
+        "role": "implement",
+        "member": "transport-env",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T14:49:13Z",
+        "completed_at": "2026-08-17T14:56:43Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 450,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 450,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "4bbaec8f98f4a999eb4fca716d6dec8d68fe9e70",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Blocked before any test executed: the worktree had no TORAX-plus-JAX Python 3.14 environment, and both permitted pytest attempts failed at collection (uv selected the Reckon env without JAX, then system Python 3.11 could not parse the 3.14-targeted checkout). The dispatch omitted worktree venv provisioning, which is the orchestrator error rather than a worker failure. The implementation is uncommitted but intact in the worktree: 13 TORAX-facing fixed-shape FSA face fields plus a direct StandardGeometry adapter, unverified. Repair node redispatched with explicit uv sync provisioning and instructions to recover, audit and verify that work.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T144910609763-transport-geometry/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01023-3e4f-7081-b1ab-24ffbe816152",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4387840,
+            "cached_input_tokens_cumulative": 6835968,
+            "input_tokens": 4497255,
+            "input_tokens_cumulative": 7072428,
+            "output_tokens": 19896,
+            "output_tokens_cumulative": 35237,
+            "reasoning_output_tokens": 8148,
+            "reasoning_output_tokens_cumulative": 15750
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260817T160501934628-transport-geometry-repair",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a73",
+        "node": "transport-geometry-repair",
+        "role": "implement",
+        "member": "transport-env",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T16:05:03Z",
+        "completed_at": "2026-08-17T16:13:47Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 524,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 524,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "a0e3a4e3addeec3282c1a9737ec4263208ce33f9",
+        "commits": [
+          "3a438d1b293401ce211c505a3ebde4609b26aba6"
+        ],
+        "changed_lines": {
+          "added": 537,
+          "removed": 2,
+          "files": 4
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T160501934628-transport-geometry-repair/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01023-3e4f-7081-b1ab-24ffbe816152",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2343936,
+            "cached_input_tokens_cumulative": 9179904,
+            "input_tokens": 2689416,
+            "input_tokens_cumulative": 9761844,
+            "output_tokens": 13605,
+            "output_tokens_cumulative": 48842,
+            "reasoning_output_tokens": 4379,
+            "reasoning_output_tokens_cumulative": 20129
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260817T160159169902-path-limit-consistency",
+        "plan": "moment-map-root-finding",
+        "section": "\u00a74",
+        "node": "path-limit-consistency",
+        "role": "implement",
+        "member": "coupling-blocks",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T16:02:01Z",
+        "completed_at": "2026-08-17T16:30:06Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1685,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1685,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "60ce99b2f03ce9476b7042836355af659adca347",
+        "commits": [
+          "df21ceab"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "diff_unavailable"
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/path-limit-consistency-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a009c8-8ac4-7a50-806e-c28169dbfc66",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 12337920,
+            "cached_input_tokens_cumulative": 412617984,
+            "input_tokens": 12835058,
+            "input_tokens_cumulative": 420111038,
+            "output_tokens": 34156,
+            "output_tokens_cumulative": 831010,
+            "reasoning_output_tokens": 10163,
+            "reasoning_output_tokens_cumulative": 230447
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260817T163154235073-diiid-vacuum",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a72",
+        "node": "diiid-vacuum",
+        "role": "implement",
+        "member": "diiid-vacuum",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T16:31:56Z",
+        "completed_at": "2026-08-17T16:46:36Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 880,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 880,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "f3d14df542dabcb5adf7ee4e84420de506ac2474",
+        "commits": [
+          "685a760251a18cd3fb79e93a86d8912f558afe46"
+        ],
+        "changed_lines": {
+          "added": 720,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 5,
+        "gate": "failed",
+        "outcome": "Entry kill gate UNMET and preserved rather than repaired. Pooled exterior R2 0.49527 against the pre-registered starter-kit bar of 0.94, over 20 shots and 4,140 frames; per-shot median 0.238, max 0.832, min -2.53. Critically this is NOT an amplitude or units error: the post-hoc best scale is 0.338 yet the scale-invariant correlation R2 is only 0.407, so the predicted vacuum field has the wrong shape, not merely the wrong magnitude. Two candidate causes are named and neither was tuned against: the starter README describes FITTING psi outside the plasma envelope to Green functions and still references coil_turns, while the shipped dataset has no coil_turns field, declares F currents already in kA.turn, leaves ECOILA turns unresolved over 1..96 and ships no bcoil poloidal geometry - so the published bar may score a fitted exterior decomposition rather than the absolute current-only forward our doctrine requires; and the ohmic set may be structurally incomplete with no ECOILB representation, which would produce exactly this shape deficit. The gate harness, geometry registry and preregistration receipt are sound and banked.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T163154235073-diiid-vacuum/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01090-c119-7413-b062-4589e1bc160f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8169472,
+            "cached_input_tokens_cumulative": 8169472,
+            "input_tokens": 8400596,
+            "input_tokens_cumulative": 8400596,
+            "output_tokens": 28095,
+            "output_tokens_cumulative": 28095,
+            "reasoning_output_tokens": 9771,
+            "reasoning_output_tokens_cumulative": 9771
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260817T164904632681-vacuum-diagnosis",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a72",
+        "node": "vacuum-diagnosis",
+        "role": "investigate",
+        "member": "vacuum-diagnosis",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-17T16:49:07Z",
+        "completed_at": "2026-08-17T16:50:41Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 94,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 94,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "eabf9b586c547551dee6b4ed826a8bfeff8faf55",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Blocked by sandbox, not by the task. Dispatched with role=investigate, which flight config maps to a read-only worktree, so uv sync could not create .venv and the fenced report path could not be authored. This is a known orchestrator trap and the dispatch should have used role=implement with a narrow write fence. No diagnostic work was lost.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T164904632681-vacuum-diagnosis/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a010a0-7b24-7d32-984e-ef866a333414",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 501504,
+            "cached_input_tokens_cumulative": 501504,
+            "input_tokens": 551599,
+            "input_tokens_cumulative": 551599,
+            "output_tokens": 3571,
+            "output_tokens_cumulative": 3571,
+            "reasoning_output_tokens": 802,
+            "reasoning_output_tokens_cumulative": 802
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260817T165224291027-vacuum-diagnosis-writable",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a72",
+        "node": "vacuum-diagnosis-writable",
+        "role": "implement",
+        "member": "vacuum-diagnosis",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T16:52:26Z",
+        "completed_at": "2026-08-17T17:10:47Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1101,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1101,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "04f153bcbcfd2c53f47677ee1aabbef4558e48e4",
+        "commits": [
+          "11bac95945e24df7517ce3f5a0fb75292366f2df"
+        ],
+        "changed_lines": {
+          "added": 402,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "Verdict: fitted-versus-absolute contract mismatch, HIGH confidence. The starter bar does not apply to a no-coefficient-fit absolute forward. Both rival causes were quantified and rejected as insufficient, and the shipped skew convention was independently validated.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T165224291027-vacuum-diagnosis-writable/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a010a3-85c7-71d0-a7c2-bdabe4fe49f8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 10441216,
+            "cached_input_tokens_cumulative": 10441216,
+            "input_tokens": 10633129,
+            "input_tokens_cumulative": 10633129,
+            "output_tokens": 29432,
+            "output_tokens_cumulative": 29432,
+            "reasoning_output_tokens": 5956,
+            "reasoning_output_tokens_cumulative": 5956
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260817T165546571192-consistent-support-quadrature",
+        "plan": "moment-map-root-finding",
+        "section": "\u00a74",
+        "node": "consistent-support-quadrature",
+        "role": "implement",
+        "member": "coupling-blocks",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T16:55:49Z",
+        "completed_at": "2026-08-17T17:38:44Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2575,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2575,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "df21ceabfd609b55a06e244de6885a02bcf00a5b",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 4,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/consistent-support-quadrature-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a009c8-8ac4-7a50-806e-c28169dbfc66",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 45451776,
+            "cached_input_tokens_cumulative": 458069760,
+            "input_tokens": 46147381,
+            "input_tokens_cumulative": 466258419,
+            "output_tokens": 69187,
+            "output_tokens_cumulative": 900197,
+            "reasoning_output_tokens": 18323,
+            "reasoning_output_tokens_cumulative": 248770
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 213
+    "_version": 225
   }
 }

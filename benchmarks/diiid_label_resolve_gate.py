@@ -21,7 +21,7 @@ from scipy.sparse import csr_matrix
 from scipy.sparse.linalg import splu
 
 from nova.equilibrium.convention import TOTAL_FLUX_FACTOR, grad_shafranov_source
-from nova.equilibrium.map_extraction import extract_flux_functions
+from nova.equilibrium.map_extraction import apply_delta_star, extract_flux_functions
 
 DEFAULT_DATA = Path("/work/projects/imas_gpu/sophelio/raw/data/diii_d_train")
 MINIMUM_SHOTS = 20
@@ -36,6 +36,31 @@ PREREGISTERED_GRID_FRACTIONAL_RMS = (
     1.326312981932316e-06,
 )
 REGISTERED_MAX_FRACTIONAL_RMS = max(PREREGISTERED_GRID_FRACTIONAL_RMS)
+FULL_CONVERGENCE_MAX_ITERATIONS = 2000
+FULL_CONVERGENCE_INITIAL_RELAXATION = 0.2
+FULL_CONVERGENCE_MINIMUM_RELAXATION = 1.0e-6
+RELAXATION_REDUCTION_INTERVAL = 100
+EXTRACTION_SURFACE_COUNTS = (19, 33, 65)
+BANKED_BASELINE = {
+    "fractional_rms": {
+        "minimum": 0.012548112177869468,
+        "q25": 0.03699923736014252,
+        "median": 0.042896271750575046,
+        "q75": 0.04724520518723122,
+        "maximum": 0.09330868372029019,
+    },
+    "r_squared": {
+        "minimum": 0.7380150917920182,
+        "q25": 0.933508708775954,
+        "median": 0.9491128925765698,
+        "q75": 0.9668085875977502,
+        "maximum": 0.9973640543517514,
+    },
+    "frames": 100,
+    "converged_frames": 14,
+    "iteration_ceiling_frames": 86,
+    "iteration_ceiling": 80,
+}
 
 
 @dataclass(frozen=True)
@@ -263,6 +288,274 @@ def _summary(items: list[dict[str, Any]], key: str) -> dict[str, float | None]:
     }
 
 
+def _distribution(values: list[float]) -> dict[str, float]:
+    array = np.asarray(values, dtype=np.float64)
+    return {
+        "minimum": float(np.min(array)),
+        "q25": float(np.quantile(array, 0.25)),
+        "median": float(np.median(array)),
+        "q75": float(np.quantile(array, 0.75)),
+        "maximum": float(np.max(array)),
+    }
+
+
+def _frame_fields(
+    row: dict[str, Any], frame: int, operator: DirichletOperator
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, float]:
+    label = TOTAL_FLUX_FACTOR * np.asarray(row["efit_psirz"][frame], dtype=np.float64).T
+    contour, plasma_mask = _plasma_geometry(
+        row, frame, operator.radius, operator.height
+    )
+    axis_point = np.array([[row["efit_r_axis"][frame], row["efit_z_axis"][frame]]])
+    axis_interpolator = RegularGridInterpolator(
+        (operator.radius, operator.height), label
+    )
+    axis_flux = float(axis_interpolator(axis_point)[0])
+    boundary_flux = float(
+        np.nanmedian(_sample_contour(operator.radius, operator.height, label, contour))
+    )
+    label_span = boundary_flux - axis_flux
+    if abs(label_span) <= np.finfo(np.float64).eps:
+        raise ValueError("label axis and separatrix flux are indistinguishable")
+    return label, contour, plasma_mask, label_span
+
+
+def _residual_localisation(
+    difference: np.ndarray,
+    label_normalised: np.ndarray,
+    plasma_mask: np.ndarray,
+    radius: np.ndarray,
+    height: np.ndarray,
+) -> dict[str, float]:
+    interior = np.zeros_like(plasma_mask)
+    interior[1:-1, 1:-1] = True
+    near_axis = interior & plasma_mask & (label_normalised <= 0.2)
+    edge_candidate = (
+        interior & plasma_mask & (label_normalised >= 0.8) & (label_normalised <= 1.05)
+    )
+    radial_gradient, vertical_gradient = np.gradient(
+        label_normalised, radius, height, edge_order=2
+    )
+    gradient = np.hypot(radial_gradient, vertical_gradient)
+    x_point = np.zeros_like(plasma_mask)
+    if np.any(edge_candidate):
+        candidates = np.argwhere(edge_candidate)
+        selected = candidates[np.argmin(gradient[edge_candidate])]
+        radius_map, height_map = np.meshgrid(radius, height, indexing="ij")
+        distance = np.hypot(
+            radius_map - radius[selected[0]], height_map - height[selected[1]]
+        )
+        neighbourhood = 2.0 * max(radius[1] - radius[0], height[1] - height[0])
+        x_point = interior & (distance <= neighbourhood)
+    edge_band = edge_candidate & ~x_point
+    near_axis &= ~x_point
+    other = interior & ~(near_axis | x_point | edge_band)
+    energy = np.asarray(difference, dtype=np.float64) ** 2
+    total = float(np.sum(energy[interior]))
+    if total <= np.finfo(np.float64).tiny:
+        return {
+            "near_axis": 0.0,
+            "x_point_region": 0.0,
+            "edge_band": 0.0,
+            "other": 0.0,
+            "total_squared_residual_wb2": total,
+        }
+    return {
+        "near_axis": float(np.sum(energy[near_axis]) / total),
+        "x_point_region": float(np.sum(energy[x_point]) / total),
+        "edge_band": float(np.sum(energy[edge_band]) / total),
+        "other": float(np.sum(energy[other]) / total),
+        "total_squared_residual_wb2": total,
+    }
+
+
+def _frame_metrics(
+    label: np.ndarray,
+    solution: np.ndarray,
+    label_normalised: np.ndarray,
+    plasma_mask: np.ndarray,
+    operator: DirichletOperator,
+) -> dict[str, Any]:
+    difference = solution - label
+    scored_difference = difference[1:-1, 1:-1]
+    rms = float(np.sqrt(np.mean(scored_difference**2)))
+    span = float(np.ptp(label))
+    return {
+        "interior_rms_wb": rms,
+        "interior_fractional_rms": rms / span,
+        "interior_r_squared": _r_squared(label[1:-1, 1:-1], solution[1:-1, 1:-1]),
+        "residual_localisation": _residual_localisation(
+            difference,
+            label_normalised,
+            plasma_mask,
+            operator.radius,
+            operator.height,
+        ),
+    }
+
+
+def _operator_round_trip(
+    row: dict[str, Any], frame: int, operator: DirichletOperator
+) -> dict[str, Any]:
+    label, _contour, plasma_mask, label_span = _frame_fields(row, frame, operator)
+    axis_reducer = np.nanmin if label_span > 0.0 else np.nanmax
+    axis_flux = float(axis_reducer(label[plasma_mask]))
+    boundary_flux = axis_flux + label_span
+    label_normalised = (label - axis_flux) / (boundary_flux - axis_flux)
+    current = apply_delta_star(operator.radius, operator.height, label)
+    solution = operator.solve(current.delta_star_flux, label)
+    result = _frame_metrics(label, solution, label_normalised, plasma_mask, operator)
+    result.update(
+        {
+            "frame": frame,
+            "time_s": float(row["efit_times"][frame]),
+            "valid_current_nodes": int(np.count_nonzero(current.valid)),
+        }
+    )
+    return result
+
+
+def _profile_round_trip(
+    row: dict[str, Any],
+    frame: int,
+    operator: DirichletOperator,
+    surface_count: int,
+) -> dict[str, Any]:
+    label, contour, plasma_mask, label_span = _frame_fields(row, frame, operator)
+    axis_point = np.array([[row["efit_r_axis"][frame], row["efit_z_axis"][frame]]])
+    axis_interpolator = RegularGridInterpolator(
+        (operator.radius, operator.height), label
+    )
+    axis_flux = float(axis_interpolator(axis_point)[0])
+    label_normalised = (label - axis_flux) / label_span
+    surfaces = np.linspace(0.05, 0.95, surface_count)
+    extraction = extract_flux_functions(
+        operator.radius,
+        operator.height,
+        label,
+        label_normalised,
+        surfaces=surfaces,
+        plasma_mask=plasma_mask,
+        min_samples=6,
+    )
+    reliable = (
+        extraction.reliable
+        & np.isfinite(extraction.p_prime)
+        & np.isfinite(extraction.ff_prime)
+    )
+    if np.count_nonzero(reliable) < 2:
+        raise ValueError(
+            f"only {np.count_nonzero(reliable)} reliable extracted flux surfaces"
+        )
+    surface = extraction.psi_norm[reliable]
+    p_prime = extraction.p_prime[reliable]
+    ff_prime = extraction.ff_prime[reliable]
+    radius_map = np.broadcast_to(operator.radius[:, None], label.shape)
+    solution = np.array(label, copy=True)
+    relaxation = FULL_CONVERGENCE_INITIAL_RELAXATION
+    for iteration in range(1, FULL_CONVERGENCE_MAX_ITERATIONS + 1):
+        if iteration > 1 and (iteration - 1) % RELAXATION_REDUCTION_INTERVAL == 0:
+            relaxation = max(FULL_CONVERGENCE_MINIMUM_RELAXATION, relaxation / 2.0)
+        normalised, own_span = _normalise_flux(
+            solution,
+            operator.radius,
+            operator.height,
+            contour,
+            plasma_mask,
+            np.sign(label_span),
+        )
+        active = plasma_mask & (normalised >= 0.0) & (normalised <= 1.0)
+        evaluated_p = np.interp(normalised, surface, p_prime)
+        evaluated_ff = np.interp(normalised, surface, ff_prime)
+        source = np.zeros_like(label)
+        source[active] = grad_shafranov_source(
+            radius_map[active], evaluated_p[active], evaluated_ff[active]
+        )
+        solved = operator.solve(source, label)
+        fixed_update = float(
+            np.sqrt(np.mean((solved[1:-1, 1:-1] - solution[1:-1, 1:-1]) ** 2))
+            / abs(own_span)
+        )
+        updated = relaxation * solved + (1.0 - relaxation) * solution
+        relative_update = relaxation * fixed_update
+        solution = updated
+        if relative_update <= PICARD_RELATIVE_TOLERANCE:
+            break
+    converged = relative_update <= PICARD_RELATIVE_TOLERANCE
+    result = _frame_metrics(label, solution, label_normalised, plasma_mask, operator)
+    result.update(
+        {
+            "frame": frame,
+            "time_s": float(row["efit_times"][frame]),
+            "surface_count": surface_count,
+            "reliable_extraction_surfaces": int(np.count_nonzero(reliable)),
+            "picard_converged": converged,
+            "picard_iterations": iteration,
+            "final_picard_fractional_update": relative_update,
+            "final_fixed_point_fractional_update": fixed_update,
+            "final_relaxation": relaxation,
+        }
+    )
+    return result
+
+
+def _arm_summary(results: list[dict[str, Any]]) -> dict[str, Any]:
+    localisation_keys = ("near_axis", "x_point_region", "edge_band", "other")
+    total_energy = sum(
+        item["residual_localisation"]["total_squared_residual_wb2"] for item in results
+    )
+    if total_energy <= np.finfo(np.float64).tiny:
+        localisation = {key: 0.0 for key in localisation_keys}
+    else:
+        localisation = {
+            key: float(
+                sum(
+                    item["residual_localisation"][key]
+                    * item["residual_localisation"]["total_squared_residual_wb2"]
+                    for item in results
+                )
+                / total_energy
+            )
+            for key in localisation_keys
+        }
+    return {
+        "frames": len(results),
+        "fractional_rms": _distribution(
+            [item["interior_fractional_rms"] for item in results]
+        ),
+        "r_squared": _distribution([item["interior_r_squared"] for item in results]),
+        "residual_spatial_split": localisation,
+        "per_frame": results,
+    }
+
+
+def _attribution(
+    operator_arm: dict[str, Any], representation_arms: dict[str, dict[str, Any]]
+) -> dict[str, Any]:
+    baseline = BANKED_BASELINE["fractional_rms"]["median"]
+    converged_nineteen = representation_arms["19"]["fractional_rms"]["median"]
+    richest = representation_arms["65"]["fractional_rms"]["median"]
+    operator = operator_arm["fractional_rms"]["median"]
+    signed = {
+        "solver_nonconvergence": baseline - converged_nineteen,
+        "profile_representation": converged_nineteen - richest,
+        "irreducible_non_gs_label_content": richest - operator,
+    }
+    carriers = {key: max(value, 0.0) for key, value in signed.items()}
+    dominant = max(carriers, key=carriers.get)
+    return {
+        "median_fractional_rms_differences": signed,
+        "nonnegative_carrier_magnitudes": carriers,
+        "dominant_carrier": dominant,
+        "verdict_line": (
+            "Baseline failure attribution: "
+            f"{dominant.replace('_', ' ')} is dominant; solver non-convergence, "
+            "profile representation, and residual strict-GS incompatibility are "
+            "reported as separate median fractional-RMS carriers without fitting."
+        ),
+    }
+
+
 def resolve_frame(
     row: dict[str, Any],
     frame: int,
@@ -446,11 +739,87 @@ def score(paths: list[Path], floor: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def decompose_failure(paths: list[Path], floor: dict[str, Any]) -> dict[str, Any]:
+    """Attribute the banked residual without changing the cohort or profiles."""
+
+    operator_results: list[dict[str, Any]] = []
+    profile_results: dict[int, list[dict[str, Any]]] = {
+        count: [] for count in EXTRACTION_SURFACE_COUNTS
+    }
+    selected_frames: list[dict[str, Any]] = []
+    for path in paths:
+        row = _row(path)
+        frame_count = len(row["efit_times"])
+        if frame_count < MINIMUM_FRAMES_PER_SHOT:
+            raise ValueError(f"{path.name} has fewer than five labelled frames")
+        operator = _operator(row["efit_grid_R"], row["efit_grid_Z"])
+        selected = np.linspace(0, frame_count - 1, MINIMUM_FRAMES_PER_SHOT, dtype=int)
+        for frame_value in selected:
+            frame = int(frame_value)
+            identity = {
+                "shot_file": path.name,
+                "frame": frame,
+                "time_s": float(row["efit_times"][frame]),
+            }
+            selected_frames.append(identity)
+            operator_result = _operator_round_trip(row, frame, operator)
+            operator_result["shot_file"] = path.name
+            operator_results.append(operator_result)
+            for count in EXTRACTION_SURFACE_COUNTS:
+                profile_result = _profile_round_trip(row, frame, operator, count)
+                profile_result["shot_file"] = path.name
+                profile_results[count].append(profile_result)
+
+    operator_arm = _arm_summary(operator_results)
+    representation_arms = {
+        str(count): _arm_summary(profile_results[count])
+        for count in EXTRACTION_SURFACE_COUNTS
+    }
+    profile_frames = [item for results in profile_results.values() for item in results]
+    converged = [item for item in profile_frames if item["picard_converged"]]
+    iteration_budget = {
+        "configured_maximum_iterations_per_frame": FULL_CONVERGENCE_MAX_ITERATIONS,
+        "initial_under_relaxation": FULL_CONVERGENCE_INITIAL_RELAXATION,
+        "minimum_under_relaxation": FULL_CONVERGENCE_MINIMUM_RELAXATION,
+        "relaxation_reduction_interval": RELAXATION_REDUCTION_INTERVAL,
+        "maximum_iterations_used": max(
+            item["picard_iterations"] for item in profile_frames
+        ),
+        "minimum_final_relaxation": min(
+            item["final_relaxation"] for item in profile_frames
+        ),
+        "converged_frames": len(converged),
+        "required_converged_frames": len(profile_frames),
+        "all_frames_converged": len(converged) == len(profile_frames),
+    }
+    attribution = _attribution(operator_arm, representation_arms)
+    return {
+        "measurement": "DIII-D label re-solve failure decomposition",
+        "no_fitting": True,
+        "cohort": {
+            "shots": len(paths),
+            "frames": len(selected_frames),
+            "frames_per_shot": MINIMUM_FRAMES_PER_SHOT,
+            "selection": "the same evenly spaced frame indices as the banked baseline",
+            "selected_frames": selected_frames,
+        },
+        "grid_floor": floor,
+        "banked_baseline": BANKED_BASELINE,
+        "operator_round_trip": operator_arm,
+        "converged_only": representation_arms["19"],
+        "representation_surface_sweep": representation_arms,
+        "iteration_budget": iteration_budget,
+        "attribution": attribution,
+        "complete": iteration_budget["all_frames_converged"],
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=Path, default=DEFAULT_DATA)
     parser.add_argument("--shots", type=int, default=MINIMUM_SHOTS)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--decomposition", action="store_true")
     args = parser.parse_args()
     paths = sorted(args.data.glob("*.parquet"))[: args.shots]
     if len(paths) < MINIMUM_SHOTS:
@@ -458,11 +827,15 @@ def main() -> None:
     first = _row(paths[0])
     floor = derive_grid_floor(_operator(first["efit_grid_R"], first["efit_grid_Z"]))
     print("PREREGISTERED " + json.dumps(floor, sort_keys=True), flush=True)
-    result = score(paths, floor)
+    result = (
+        decompose_failure(paths, floor) if args.decomposition else score(paths, floor)
+    )
     encoded = json.dumps(result, indent=2, sort_keys=True) + "\n"
     print(encoded, end="")
     if args.output is not None:
         args.output.write_text(encoded)
+    if args.decomposition:
+        raise SystemExit(0 if result["complete"] else 1)
     raise SystemExit(0 if result["passes"] else 1)
 
 

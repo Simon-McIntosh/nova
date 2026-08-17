@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 
 from benchmarks.diiid_label_resolve_gate import (
     GRID_NODE_COUNT,
     REGISTERED_MAX_FRACTIONAL_RMS,
+    _attribution,
     _continuous_delta_star,
     _operator,
+    _residual_localisation,
     derive_grid_floor,
 )
 
@@ -69,3 +72,29 @@ def test_analytic_delta_star_matches_known_polynomials():
         _continuous_delta_star(radius_map, height_map, 4, 2),
         8.0 * radius_map**2 * height_map**2 + 2.0 * radius_map**4,
     )
+
+
+def test_residual_localisation_is_a_complete_disjoint_split():
+    radius, height = _grid()
+    radius_map, height_map = np.meshgrid(radius, height, indexing="ij")
+    normalised = ((radius_map - 1.7) ** 2 + height_map**2) / 1.2
+    plasma = normalised <= 1.0
+    difference = np.ones_like(normalised)
+
+    split = _residual_localisation(difference, normalised, plasma, radius, height)
+
+    keys = ("near_axis", "x_point_region", "edge_band", "other")
+    assert sum(split[key] for key in keys) == pytest.approx(1.0)
+
+
+def test_attribution_names_largest_median_error_carrier():
+    operator = {"fractional_rms": {"median": 1.0e-6}}
+    representations = {
+        "19": {"fractional_rms": {"median": 0.03}},
+        "65": {"fractional_rms": {"median": 0.02}},
+    }
+
+    result = _attribution(operator, representations)
+
+    assert result["dominant_carrier"] == "irreducible_non_gs_label_content"
+    assert "irreducible non gs label content is dominant" in result["verdict_line"]

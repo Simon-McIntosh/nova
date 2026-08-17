@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="diiid-vacuum-gate-diagnosis">
+  <meta name="plan-title" content="DIII-D vacuum gate diagnosis">
+  <meta name="plan-summary" content="A no-fit sensitivity study separates the starter-kit comparison contract, unresolved ohmic representation, and polygon skew convention behind the DIII-D absolute-forward vacuum result.">
+  <meta name="plan-informs" content="diiid-forward-onboarding">
+  <meta name="plan-recorded-at" content="2026-08-17">
+  <meta name="plan-verdict" content="The starter-kit 0.94 result is explicitly a fitted exterior decomposition and is inapplicable to the absolute current-only gate. Ohmic alternatives improve pooled R-squared by at most 0.017230 to 0.512497, while every skew-sign reversal is slightly worse than the shipped convention; neither explains the gap.">
+  <title>DIII-D vacuum gate diagnosis | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <header>
+    <span class="badge badge-blocked">gate comparison invalid as written</span>
+    <h1>DIII-D vacuum gate diagnosis</h1>
+    <p>The banked absolute current-only forward scored pooled exterior
+    R² = <strong>0.495267</strong> over 20 shots and 4,140 frames, with
+    best-scale 0.337957 and correlation² 0.407332. The low correlation already
+    establishes a shape error. This report tests three candidate explanations
+    without fitting currents, turns, amplitudes, or spatial modes to the cohort.</p>
+  </header>
+
+  <h2>Verdict</h2>
+  <p><strong>Supported cause: contract mismatch, high confidence.</strong>
+  The published ≈0.94 number is explicitly a fitted exterior Green-function
+  decomposition, not an absolute current-only forward. It therefore does not
+  apply to this gate as written. The no-fit sensitivity sweep gives
+  <strong>directional support for an incomplete ohmic representation but no
+  quantitative support that it causes the observed deficit: the entire
+  predeclared ladder reaches only 0.512497</strong>. The shipped skew convention
+  is <strong>supported: every sign reversal is slightly worse</strong>.</p>
+
+  <h2>Does the starter-kit bar apply?</h2>
+  <p><strong>No.</strong> The deciding starter-kit sentence is:
+  “Fitting ψ outside the plasma envelope to those Green’s functions … reaches
+  R² ≈ 0.94.” A fitted decomposition can absorb missing members, turn
+  conventions, calibration, and other exterior components into coefficients;
+  the Nova gate permits only one additive gauge per frame and one global sign.
+  The tests are not comparable, so 0.94 is not an applicable pass bar for the
+  absolute current-only forward.</p>
+  <p>The same current starter text also states that neither machine ships
+  <code>coil_turns</code>, that F-coil turns are already folded into their
+  current values, that ECOILA is plain kA and should not receive a fabricated
+  multiplier, and that ECOILB is a second co-located group absent from the
+  shipped geometry. Sources: <a href="https://github.com/Sophelio/fusion-equilibrium-challenge-starter#new-machine-geometry-both-machines-every-split">starter geometry contract</a>
+  and the pinned dataset inventory revision
+  <code>1e280905b85f2a6fdde7e06fca8cf3a1edf447cb</code>.</p>
+
+  <h2>No-fit sensitivity results</h2>
+  <p>Every row uses the same first 20 sorted training shots as the banked gate,
+  the same exterior masks, one frame-wise additive gauge, and one global sign.
+  Values below are predeclared physical alternatives, not selected parameters.</p>
+
+  <h3>ECOILA unresolved-turn ladder</h3>
+  <table>
+    <thead><tr><th>ECOILA turns</th><th>ECOILB</th><th>Pooled exterior R²</th><th>Δ from baseline</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>absent</td><td>0.495267</td><td>+0.000000</td></tr>
+      <tr><td>12</td><td>absent</td><td>0.498827</td><td>+0.003560</td></tr>
+      <tr><td>24</td><td>absent</td><td>0.502244</td><td>+0.006977</td></tr>
+      <tr><td>48</td><td>absent</td><td>0.507613</td><td>+0.012346</td></tr>
+      <tr><td>72</td><td>absent</td><td>0.511031</td><td>+0.015764</td></tr>
+      <tr><td>96</td><td>absent</td><td>0.512497</td><td>+0.017230</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Missing ECOILB structural hypothesis</h3>
+  <table>
+    <thead><tr><th>ECOILA turns</th><th>ECOILB representation</th><th>Effective turns</th><th>Pooled exterior R²</th></tr></thead>
+    <tbody>
+      <tr><td>48</td><td>absent</td><td>48</td><td>0.507613</td></tr>
+      <tr><td>48</td><td>co-located 48-turn group</td><td>96</td><td>0.512497</td></tr>
+    </tbody>
+  </table>
+  <p>“Present” means the published structural hypothesis only: one co-located
+  48-turn group driven by the sole recorded ohmic channel. No separate ECOILB
+  current exists in the parquet schema, so this cannot identify the true
+  wiring. It tests whether that omission, under the most direct published
+  representation, reproduces the observed shape deficit.</p>
+
+  <h3>EFIT shear-angle sign conventions</h3>
+  <table>
+    <thead><tr><th>Convention</th><th>AF sign</th><th>AF2 sign</th><th>Pooled exterior R²</th><th>Δ from baseline</th></tr></thead>
+    <tbody>
+      <tr><td>shipped</td><td>+1</td><td>+1</td><td>0.495267</td><td>+0.000000</td></tr>
+      <tr><td>AF reversed</td><td>−1</td><td>+1</td><td>0.495172</td><td>−0.000095</td></tr>
+      <tr><td>AF2 reversed</td><td>+1</td><td>−1</td><td>0.494951</td><td>−0.000316</td></tr>
+      <tr><td>both reversed</td><td>−1</td><td>−1</td><td>0.494857</td><td>−0.000410</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Polygon convention cross-check</h2>
+  <p>The starter geometry contract identifies the non-zero fields as EFIT AF
+  and AF2 shear angles and states that 0° is the canonical unskewed value. For
+  F5A the shipped/published machine row is centre (R,Z) = (1.0041, 1.5169) m,
+  width × height = 0.1392 × 0.1194 m, AF = +45°, AF2 = 0°. Re-deriving the
+  parallelogram gives the following counter-clockwise vertices:</p>
+  <table>
+    <thead><tr><th>Vertex</th><th>R (m)</th><th>Z (m)</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>0.9345</td><td>1.3876</td></tr>
+      <tr><td>2</td><td>1.0737</td><td>1.5268</td></tr>
+      <tr><td>3</td><td>1.0737</td><td>1.6462</td></tr>
+      <tr><td>4</td><td>0.9345</td><td>1.5070</td></tr>
+    </tbody>
+  </table>
+  <p>Here the vertical shear is
+  (width/2) tan(AF) = 0.0696 m and radial shear is zero. Thus the lower and
+  upper edges have the published +45° shear, exactly matching the polygon sent
+  to <code>polygon_greens</code>. The sign sweep independently checks the
+  opposite interpretations.</p>
+
+  <h2>Interpretation and confidence</h2>
+  <table>
+    <thead><tr><th>Candidate</th><th>Evidence</th><th>Verdict</th><th>Confidence</th></tr></thead>
+    <tbody>
+      <tr><td>Published bar belongs to a fitted decomposition</td><td>Explicit deciding text says “Fitting ψ”; absolute gate fits no coefficients.</td><td>Supported; bar inapplicable</td><td>High</td></tr>
+      <tr><td>Incomplete ohmic set causes the shape deficit</td><td>Increasing the effective ohmic turns monotonically helps, but only from 0.495267 to 0.512497 across the full 1–96 interval; adding the explicit co-located 48-turn group to a 48-turn ECOILA changes 0.507613 to 0.512497.</td><td>Structurally plausible and directionally supported, but quantitatively insufficient; it does not reproduce the deficit.</td><td>Medium for incompleteness; high that this direct hypothesis does not close the gate.</td></tr>
+      <tr><td>Skew sign is wrong</td><td>The shipped convention is best. Reversals lower R² by 0.000095 to 0.000410, and F5A vertices reproduce the declared +45° parallelogram shear.</td><td>Rejected as the cause; shipped convention supported.</td><td>High for the tested sign conventions.</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Boundary of inference.</strong> This sweep diagnoses the named
+  candidates only. It does not validate the absolute forward against a new
+  fitted bar, infer ECOILB current, or authorize tuning conductor physics
+  against these labels.</p>
+
+  <h2>Reproduction</h2>
+  <pre><code>uv run --with pyarrow python benchmarks/diiid_vacuum_sensitivity_sweep.py &gt; /tmp/vacuum-diagnosis-sweep.json</code></pre>
+  <p>Inputs: the protected Nova description and gate harness at commit
+  <code>685a7602</code>, the banked JSON from that node, the first 20 sorted
+  parquet files under <code>/work/projects/imas_gpu/sophelio/raw/data/diii_d_train</code>,
+  parquet schema metadata <code>fusion_coil_units=kA.turn/v1</code>, and the
+  starter README machine-geometry contract.</p>
+</main>
+</body>
+</html>

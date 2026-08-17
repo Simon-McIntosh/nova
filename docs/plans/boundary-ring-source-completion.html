@@ -4,24 +4,26 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="nova">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="boundary-ring-source-completion">
-  <meta name="plan-title"     content="Boundary Ring Source Completion">
-  <meta name="plan-summary"   content="Give every nonempty support a defined moment-source evaluation at the stencil-availability seam, then re-adjudicate the analytic gates and the held lineage merge">
-  <meta name="plan-status"    content="active">
-  <meta name="plan-roi"       content="high">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="boundary-ring-source-completion">
+  <meta name="plan-title" content="Boundary Ring Source Completion">
+  <meta name="plan-summary" content="Give every nonempty support a defined moment-source evaluation at the stencil-availability seam, then re-adjudicate the analytic gates and the held lineage merge">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="10.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
   <meta name="plan-capability-verification" content="strict">
-  <meta name="plan-sprint"    content="S7">
-  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-sprint" content="S7">
+  <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-depends-on" content="moment-map-root-finding">
-  <meta name="plan-blocks"    content="plasma-edge-current-representation">
+  <meta name="plan-blocks" content="plasma-edge-current-representation">
   <title>Boundary Ring Source Completion | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-17">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -93,7 +95,10 @@
     and external flux, supports, cubic coefficients, legacy density, production fluxes) and the
     per-cell attribution bank <code>source-shift-localization/source-shift-localization.npz</code>.
     If tmpfs has cycled, the coarse fixture rebuilds in ≈ 6.5 minutes; the banks regenerate from the
-    archived harnesses beside them.</p>
+    archived harnesses beside them. Verified present 2026-08-17 at
+    <code>/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/</code>
+    with both harnesses beside the banks — copy the two bank directories into the working worktree
+    at node start; tmpfs offers no durability guarantee beyond the moment of copy.</p>
 
     <h2 id="s3">§3 — Ring quadrature verification (the prediction gate)</h2>
 
@@ -161,42 +166,40 @@
     route default moves in either branch.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="ring-node-set" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Which nodal set feeds the cubic interpolant on ring-incomplete supports?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="own-geometry">own-geometry: the cell's centroid, corners and fitted first moments only — no neighbour data</button>
-          <button class="r-opt" data-value="one-sided">one-sided: extend the stencil with the available partial neighbour ring, weights re-derived for the incomplete pattern</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="coupling-order" data-choice="first-moment" data-by="Simon McIntosh" data-when="2026-08-17">
-        <p class="r-dec-q">Does the coupling need second-moment blocks to match the exact source?</p>
-        <p class="r-dec-rat">No — refuted by the four-quadrant measurement: the production first-moment
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="ring-node-set" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Which nodal set feeds the cubic interpolant on ring-incomplete supports?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="own-geometry">own-geometry: the cell&#x27;s centroid, corners and fitted first moments only — no neighbour data</button>
+      <button class="r-opt" data-value="one-sided">one-sided: extend the stencil with the available partial neighbour ring, weights re-derived for the incomplete pattern</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="coupling-order" data-choice="first-moment" data-by="Simon McIntosh" data-when="2026-08-17">
+    <p class="r-dec-q">Does the coupling need second-moment blocks to match the exact source?</p>
+    <p class="r-dec-rat">No — refuted by the four-quadrant measurement: the production first-moment
         coupling is already at reference accuracy on the coarse fixture (below refinement noise), and
         the source error is 7,598× the coupling error in RMS. The coupling stays first-moment.</p>
-      </div>
-      <div class="r-dec" data-key="smoothing-retirement" data-choice="retired" data-by="Simon McIntosh" data-when="2026-08-17">
-        <p class="r-dec-q">Does the ε-band smoothing remain in the treatment set?</p>
-        <p class="r-dec-rat">Retired. The owner directed the true mathematical fix over the software
+    </div>
+<div class="r-dec" data-key="smoothing-retirement" data-choice="retired" data-by="Simon McIntosh" data-when="2026-08-17">
+    <p class="r-dec-q">Does the ε-band smoothing remain in the treatment set?</p>
+    <p class="r-dec-rat">Retired. The owner directed the true mathematical fix over the software
         workaround; the consistent quadrature removes the kink by construction (both-sided derivatives
         agree at width zero), so smoothing treated a symptom of the two-path seam that no longer
         exists. All gates in this plan run at zero smoothing width.</p>
-      </div>
-    </section>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-brs-001" data-status="open"
-               data-capability-version="1.0" data-capability-class="orchestrator"
-               data-written-by="reckon-create" data-written-at="2026-08-17">
-        <h4 class="r-fu-title">Execute the ring completion from the prediction gate forward</h4>
-        <div class="r-fu-body"><p>Fully scoped and evidence-anchored; deserves a clean session. Start
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-brs-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-08-17" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Execute the ring completion from the prediction gate forward</h4>
+    <div class="r-fu-body"><p>Fully scoped and evidence-anchored; deserves a clean session. Start
         at §3 (the prediction gate) after verifying the lineage worktree per §2. The §3 outcome locks
         the ring-node-set decision before §4 touches production.</p></div>
-        <pre class="r-fu-prompt">/reckon-ship boundary-ring-source-completion</pre>
-      </article>
-    </section>
+    <pre class="r-fu-prompt">/reckon-ship boundary-ring-source-completion</pre>
+    </article>
+</section>
 
   </main>
 </body>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-17T20:29:00",
+  "updated": "2026-08-17T21:48:35",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -171,6 +171,13 @@
         "role": "implement",
         "session_id": "019ff724-7bb4-7270-836c-b0c7c9e7f7cc",
         "created": "2026-08-12"
+      },
+      {
+        "id": "label-resolve",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a01126-5c49-7ae0-8dad-8df2af9ab8f7",
+        "created": "2026-08-17"
       },
       {
         "id": "lane-health",
@@ -7528,6 +7535,6 @@
       }
     ],
     "holds": [],
-    "_version": 227
+    "_version": 229
   }
 }

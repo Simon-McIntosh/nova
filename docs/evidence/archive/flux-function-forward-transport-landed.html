@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="flux-function-forward-transport-landed">
+  <meta name="plan-title" content="Flux-Function Forward Transport — landed record">
+  <meta name="plan-summary" content="Cumulative execution evidence for the transport forward plan: the TORAX dependency gate resolution and subsequent landings">
+  <meta name="plan-evidence-for" content="flux-function-forward-transport">
+  <title>Flux-Function Forward Transport — landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="torax-co-resolution">TORAX dependency gate — resolved 2026-08-17</h2>
+    <p>Commit <code>f7af67dc</code> (node transport-env, 465 s wall). Plain
+    <code>uv sync</code> now co-resolves <strong>TORAX 1.4.3 with imas-python 2.3.0 and
+    h5py 3.16.0 on Python 3.14.2</strong>, through two uv override entries
+    (<code>imas-python&gt;=2.2</code>, <code>h5py&gt;=3.15</code>) and a new optional extra
+    <code>transport = ["torax&gt;=1.4.3"]</code> activated in the default dev and test
+    self-extras. The lock diff is 481 insertions and both overrides are recorded in the lock
+    manifest. A single shared-process test (<code>tests/test_transport_environment.py</code>,
+    1/1 green in 7.69 s) imports <code>nova.transport</code> and <code>torax</code> together,
+    verifies the installed floors, and asserts <code>jax.config.x64_enabled</code> plus the
+    <code>--xla_cpu_opt_preset=FAST_COMPILE</code> XLA flag — pinning the import-time side
+    effects the plan's environment gate names. No upstream issue was filed: the
+    <code>torax-pin-resolution</code> decision remains open, with this landing as evidence
+    for its <code>uv-override-plus-upstream</code> recommendation (the override half is
+    proven; the upstream half is the user's outward action).</p>
+  </main>
+</body>
+</html>

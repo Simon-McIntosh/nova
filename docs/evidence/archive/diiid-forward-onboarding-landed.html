@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="diiid-forward-onboarding-landed">
+  <meta name="plan-title" content="DIII-D Forward Onboarding — landed record">
+  <meta name="plan-summary" content="Cumulative execution evidence for the DIII-D onboarding plan: the response-kernel library landings">
+  <meta name="plan-evidence-for" content="diiid-forward-onboarding">
+  <title>DIII-D Forward Onboarding — landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="map-extraction">Response-kernel library, first landing — 2026-08-17</h2>
+    <p>Commit <code>7d9743fd</code> (node extraction-kernels, 465 s wall).
+    <code>nova/equilibrium/map_extraction.py</code> exposes four pure, receipts-bearing
+    forwards, lazy-exported from <code>nova.equilibrium</code>:
+    <code>apply_delta_star</code>, <code>extract_flux_functions</code> (per-surface
+    separation publishing projection RMS, a scaled design condition, axis and zero-gradient
+    uncertainty inflation, sample counts and reliability flags),
+    <code>vacuum_region_receipt</code> and <code>sample_chord_psi_norm</code>. On a
+    compact-source finite-difference equilibrium fixture the separation recovers prescribed
+    p′ and FF′ at <strong>2.0e-8 relative</strong>, the vacuum Δ* relative RMS sits below
+    <strong>2.0e-10</strong>, and chord ψ_N agrees at <strong>2.0e-14 absolute</strong>
+    (4/4 tests). No fitting path exists anywhere in the module.</p>
+    <p><strong>Audit finding, carried forward:</strong> the module hand-rolled its own
+    central-difference stencils, duplicating the production Δ* of
+    <code>nova/equilibrium/conservation.py</code> (which also serves the hexagonal
+    StencilMesh) and the binned separation validated on real EFIT maps in
+    <code>benchmarks/efit_affine_extraction.py</code> (shipped by the efit-map-inversion
+    plan). A consolidation node was dispatched to the same member so the repository carries
+    exactly one Δ* and one separation implementation; its outcome lands under the next
+    anchor.</p>
+  </main>
+</body>
+</html>

@@ -117,5 +117,33 @@
   the coarse fixture — and the smoothing-hurts-fine inversion (0.4375 vs 0.5875) is unexplained. All
   treatments remain uncommitted experimental lineage; no gate, semantic, or default has moved.</p>
 
+
+  <h2 id="fine-census-and-ablation">§2 — the fine census and the two-element ablation: a path-consistency defect</h2>
+
+  <p>Two measurement windows on the fine fixture (1069 plasma cells, 330 wall targets), all states
+  banked. <strong>The fine census cleared every discrete class:</strong> along 20 densely sampled
+  segments the smoothed cycle crosses <em>only</em> smoothing-band surfaces — zero atomic-edge flips,
+  zero clip hand-offs, zero ring changes, zero topology switches, and limited↔diverted excluded (count
+  0) on both arms. The unsmoothed arm meets its dense 118-event clip/ring population only at fraction
+  0.6. Tangent amplification is excluded too: the smoothed tangent is 0.939× the unsmoothed at matched
+  states. Two elements carried the crossings: node-band element 1642 and full-cell hand-off cell 933.</p>
+
+  <p><strong>The ablation convicts one of them, and the clamp proves causality.</strong> Node 1642
+  (R=6.583, Z=−2.490 m) contributes 1.79e-6 Wb transiently, zero at the terminal pair; clamping it
+  slightly <em>worsens</em> the residual — exonerated. Cell 933 (R=8.037, Z=0.567 m) sits at inside
+  fraction 0.99972 with occupancy 1 and hand-off weight 0.989 — so band placement, width units and
+  weight normalisation are all correct. The defect is <strong>path consistency</strong>: at 0.028%
+  missing area the clipped path differs from the full path by <strong>23.19%</strong> in cell current
+  (−16174.0 A full vs −3751.5 A difference), coupling to 9.29e-4 Wb — 28.8% of the total map
+  displacement. <strong>Clamping cell 933 to its unsmoothed path improves the fine 0.45 residual
+  20.24× to 4.228e-7 — below the unchanged 1e-6 gate — with diverted topology preserved.</strong> A
+  methods correction rides with it: the census's "displacement" figures were differences of separate
+  sup norms; the true map-difference norms are 3.224e-3/3.340e-3 Wb (4.7–6.0× larger), and the
+  ablation supersedes them.</p>
+
+  <p>So the smoothing is not intrinsically costly at these widths — the two evaluation paths simply do
+  not agree in the limit where they must. The repair is to make them identical at the near-full
+  hand-off (or reformulate the blend about their exact common limit), pin that equality, and rerun.</p>
+
 </main></body>
 </html>

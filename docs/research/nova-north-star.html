@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"  content="nova">
+  <meta name="reckon-type"   content="research">
+  <meta name="plan-slug"     content="nova-north-star">
+  <meta name="plan-title"    content="Nova North Star — The Exact Forward Operator">
+  <meta name="plan-summary"  content="Nova's durable direction: the deterministic, differentiable forward-physics operator that produces every response and fits with none of them — validated by EFIT parity, rehearsed at the Sophelio challenge, aimed at ITER first plasma">
+  <meta name="plan-informs"  content="flux-function-forward-equilibrium,flux-function-forward-transport,diiid-forward-onboarding,mast-catalog-gpu-solve,forward-profile-validator-set,plasma-edge-current-representation">
+  <title>Nova North Star | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — The single sentence</h2>
+    <p><strong>Nova is the exact forward operator for magnetically confined plasma:</strong>
+    a deterministic, differentiable, receipts-bearing library that maps declared physical
+    sources — conductor geometry and currents, flux-function profiles, transport closures —
+    to fields, equilibria, evolved profile states and synthetic-diagnostic responses, and
+    that <strong>fits with none of them</strong>. Every statistical operation — priors,
+    noise models, innovation, correction, uncertainty — lives on the other side of a typed
+    seam, in imas-ambix. Nova's competitive claim is not that it infers well; it is that its
+    forwards are exact enough, fast enough and honest enough that a thin estimator wrapped
+    around them beats a fitted reconstruction.</p>
+
+    <h2 id="s2">§2 — Doctrine</h2>
+    <p>Five commitments recur across every landed plan, and they are the durable identity of
+    the codebase rather than the residue of any one project:</p>
+    <ul>
+      <li><strong>Produce, don't use.</strong> Nova builds every response kernel — the
+      magnetics design matrix, chord→ψ_N sampling, Δ* extraction, moment operators — exactly
+      as precisely as if it fitted with them, and never fits with them. A measurement array
+      accepted by a public forward solve is a test failure.</li>
+      <li><strong>Receipts, not rails.</strong> Conservation ledgers, convergence receipts,
+      conditioning receipts and provenance travel with every result. A solve that cannot
+      converge raises; it never returns a silently degraded state, and it never accepts a
+      constraint hook that would smuggle fitting into force balance.</li>
+      <li><strong>Absolute sources.</strong> No silent renormalisation, no gauge shuffling,
+      no per-slice rescaling. Declared model fidelity — from the native ψ-diffusion rung to
+      the embedded TORAX multi-channel step — is a provenance field, never an approximation
+      the consumer must reverse-engineer.</li>
+      <li><strong>Differentiable and batchable end to end.</strong> jit/vmap/grad-safe
+      kernels so an ensemble is a vmap, a sensitivity is an adjoint, and a fixed point
+      differentiates by the implicit-function theorem rather than unrolling.</li>
+      <li><strong>Machine portability as a recipe.</strong> Onboarding a machine is a
+      repeatable path from shipped machine description to converged free-boundary forwards
+      with published throughput budgets — not a bespoke porting project.</li>
+    </ul>
+
+    <h2 id="s3">§3 — The program arc: three rehearsals</h2>
+    <p>The direction is tested by three progressively harsher external contacts, each one an
+    existing plan cluster:</p>
+    <ul>
+      <li><strong>Reference parity (internal).</strong> Reproduce what established codes
+      produced, forward-only: DINA/CORSICA/ASTRA reference equilibria
+      (<code>forward-profile-validator-set</code>), EFIT parity on measured MAST slices
+      (<code>spine-efit-parity</code>, <code>efit-forward-parity</code>), and the
+      full-catalog GPU solve (<code>mast-catalog-gpu-solve</code>). This proves the operator
+      is right, cheap and portable across producers.</li>
+      <li><strong>The Sophelio Fusion Equilibrium Challenge (external, adversarial,
+      dated).</strong> Development closes 2026-10-18; blind final 2026-10-19–26. The
+      challenge deletes the magnetics design matrix and asks whether state estimation over
+      an exact forward operator can replace it — from actuators and Thomson scattering
+      alone, with zero-shot transfer to a second machine. Nova's side is
+      <code>diiid-forward-onboarding</code>: the first true second-machine onboarding, and
+      the carrier of both entry kill gates (the vacuum-ψ starter-kit check and the
+      label-extraction re-solve). The estimator side is
+      <code>imas-ambix:magnetics-free-equilibrium-recovery</code>.</li>
+      <li><strong>ITER first plasma (the goal).</strong> Day-one state estimation on a
+      machine with no operational history: sparse, partially commissioned diagnostics, exact
+      as-built machine description, and a forward-model-backed estimator whose physics
+      transferred because physics that is physics transfers exactly. Everything above is
+      rehearsal for this.</li>
+    </ul>
+
+    <h2 id="s4">§4 — The seam, and why the estimator is thin</h2>
+    <p>The state that crosses the seam is deliberately low-dimensional: the two flux
+    functions p′(ψ) and FF′/μ₀(ψ) with their coordinate map, uncertainty and causal
+    provenance — the typed <code>FluxFunctionState</code>
+    (<code>imas-ambix:flux-function-state-interface</code>). Nova closes the loop around
+    that state twice: the free-boundary Grad–Shafranov solve maps it to a flux map and every
+    synthetic response (spatial closure), and the transport forward advances it in time
+    (temporal closure). Because both closures are exact forwards, the estimator that joins
+    them to data needs only to correct a slowly drifting low-dimensional state — a
+    Kalman-structured filter over flux functions, not a fit over a 65×65 map. That division
+    is what makes the whole architecture portable: the machine enters through the
+    description and the forwards; the data enters through ambix's measurement models; and
+    neither contaminates the other.</p>
+  </main>
+</body>
+</html>

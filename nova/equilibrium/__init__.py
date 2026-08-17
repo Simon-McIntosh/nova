@@ -63,6 +63,16 @@ if TYPE_CHECKING:
     )
     from nova.equilibrium.forward import ForwardEquilibrium, ForwardProfile
     from nova.equilibrium.forward_operator import ForwardFluxOperator
+    from nova.equilibrium.map_extraction import (
+        ChordSamplingReceipt,
+        MapCurrentReceipt,
+        SurfaceExtractionReceipt,
+        VacuumRegionReceipt,
+        apply_delta_star,
+        extract_flux_functions,
+        sample_chord_psi_norm,
+        vacuum_region_receipt,
+    )
     from nova.equilibrium.observation import (
         CurrentLedger,
         IntegralObservation,
@@ -113,6 +123,8 @@ _DEFERRED_EXPORTS: dict[str, str] = {
     "GridMotion": "flux_surface_geometry",
     "IntegralObservation": "observation",
     "IsothermalRotation": "rotation",
+    "ChordSamplingReceipt": "map_extraction",
+    "MapCurrentReceipt": "map_extraction",
     "MomentEnforcementError": "observation",
     "MomentTargets": "observation",
     "NormalisationPolicy": "source",
@@ -129,11 +141,18 @@ _DEFERRED_EXPORTS: dict[str, str] = {
     "SeparatrixJumpError": "continuation",
     "StencilMesh": "stencil_mesh",
     "SurfaceGeometryError": "flux_surface_geometry",
+    "SurfaceExtractionReceipt": "map_extraction",
+    "VacuumRegionReceipt": "map_extraction",
+    "apply_delta_star": "map_extraction",
+    "extract_flux_functions": "map_extraction",
+    "sample_chord_psi_norm": "map_extraction",
     "source_field_function": "flux_surface_geometry",
+    "vacuum_region_receipt": "map_extraction",
 }
 
 __all__ = [
     "DECAY_INDEX_WINDOW",
+    "ChordSamplingReceipt",
     "ConservationLedger",
     "ContinuationForm",
     "ContinuationLedger",
@@ -152,6 +171,7 @@ __all__ = [
     "GridMotion",
     "IntegralObservation",
     "IsothermalRotation",
+    "MapCurrentReceipt",
     "MomentEnforcementError",
     "MomentTargets",
     "NormalisationPolicy",
@@ -167,11 +187,17 @@ __all__ = [
     "SeparatrixContinuity",
     "SeparatrixJumpError",
     "StencilMesh",
+    "SurfaceExtractionReceipt",
     "SurfaceGeometryError",
+    "VacuumRegionReceipt",
+    "apply_delta_star",
     "decay_index",
+    "extract_flux_functions",
+    "sample_chord_psi_norm",
     "shafranov_vertical_field",
     "shafranov_vertical_field_elongated",
     "source_field_function",
+    "vacuum_region_receipt",
 ]
 
 

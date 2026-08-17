@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T15:12:30",
+  "updated": "2026-08-16T20:58:28",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -446,6 +446,20 @@
                 "verification": "strict"
               }
             }
+          },
+          {
+            "slug": "moment-map-root-finding",
+            "why_now": "Owner commission 2026-08-16: the moment representation is validated at cell level and value-continuous, yet the free-boundary solve cycles on derivative kinks - the whole forward chain (held routing merge, SOL demonstration, fcoil_c primary, efit-forward-parity) waits on this convergence question, and the owner requires the kink UNDERSTOOD before it is fixed.",
+            "done_when": "The kink census names the dominant surface class along real solver trajectories with the limited-diverted question answered explicitly; kink-aware root finding is measured against the unchanged 1e-6 residual and physics gates, with C1 smoothing of the convicted surface held as the owner-gated alternative; the analytic-validation verdict and the held-lineage merge posture are adjudicated on the outcome.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict",
+                "risk": "elevated"
+              }
+            }
           }
         ],
         "starts": "2026-08-10",
@@ -705,6 +719,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 40
+    "_version": 41
   }
 }

@@ -248,5 +248,43 @@
     representation (updated in place from the prototype map).</figcaption>
   </figure>
 
+  <h2 id="representation-accuracy-floors">§7 (adjudication) — the interior cubic is the dominant error; one representation for all cells</h2>
+
+  <p>The owner questioned the 0.5% net-current gate as mismatched beside round-off geometry
+  tolerances and asked whether one representation can serve every plasma cell. Two parallel
+  measurement nodes answered both on the banked coarse fixture against the same depth-4
+  subdivided-triangle Solov'ev oracle.</p>
+
+  <p><strong>Interior score (commit <code>ba1dab86</code>)</strong> — the seven-sample own-node
+  quadratic applied to all 351 complete-ring interior cells, beside the established
+  neighbour-ring cubic stencil:</p>
+
+  <table>
+    <tr><th>Metric (351 interior cells)</th><th>own-node quadratic</th><th>established cubic</th><th>ratio</th></tr>
+    <tr><td>net current error</td><td>−220.0 A (0.001537%)</td><td>−67,786.3 A (0.473486%)</td><td>308×</td></tr>
+    <tr><td>current-weighted m0 L1</td><td>0.012005%</td><td>0.764644%</td><td>64×</td></tr>
+    <tr><td>normalized m1 L1</td><td>0.011119%</td><td>0.906181%</td><td>82×</td></tr>
+  </table>
+
+  <p>The established interior cubic — which reconstructs from neighbour cell-centres a
+  cell-width away — is the dominant accuracy limiter of the whole source; the banked 0.3822%
+  total-current error is carried by the interior representation, not the ring. In-cell direct
+  sampling removes it.</p>
+
+  <p><strong>Sample-order study (commit <code>3964883b</code>)</strong> — a thirteen-sample cubic
+  (six pre-clip vertices, six edge midpoints, centroid) beside the locked seven-sample quadratic
+  over the 96 ring cells: ring-local floors improve 1.3–1.4× (m0 L1 0.2405% → 0.1686%, net
+  0.1504% → 0.1154%, centroid max 1.190 → 0.812 mm) but the fixture total does not (0.38223% →
+  0.38382%, interior-dominated), so the seven-sample route stands and <code>ring-node-set</code>
+  is unchanged.</p>
+
+  <p><strong>Ruling recorded (decision <code>unified-cell-representation</code>):</strong> the
+  bitwise interior-reproduction pin is retired in favour of accuracy gates; one clip-independent
+  own-node representation serves interior, boundary-clipped, and topology-zero cells. Provisional
+  gates from the measured floors, final values with <code>q-current-gate</code>: interior
+  current-weighted m0 L1 ≤ 0.025%, net total current ≤ 0.05%, ring gates unchanged from §6.
+  Per-cell records: <code>scripts/own_node_interior_score/results.json</code> and
+  <code>scripts/in_cell_order_study/results.json</code> (lineage <code>a529bd60</code>).</p>
+
 </main></body>
 </html>

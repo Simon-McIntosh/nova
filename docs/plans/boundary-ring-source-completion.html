@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-18">
-<meta name="plan-version" content="16">
+<meta name="plan-version" content="18">
 <meta name="plan-commits" content="f943bacba9ac64c404afe92c94d43f023950b349,919bafcea9422ff5b0c6de8607d86d4a9418ea86">
 <meta name="plan-artifacts" content="docs/evidence/archive/boundary-ring-source-completion-landed.html,docs/figures/boundary-ring-source-completion/ring-m0-relative-error.png,docs/research/hex-clip-current-attribution.html,docs/figures/hex-clip-current-attribution/clip-audit.png,scripts/ring_quadrature/results/ring-quadrature-results.json (lineage f943bacb),scripts/clip_audit/results/clip-audit-results.json (lineage 919bafce)">
 <meta name="plan-impl" content="0.33">
@@ -208,6 +208,18 @@
 
     <h2 id="s6">§6 — Route prototype for the default hex path</h2>
 
+    <p><em>Route locked 2026-08-18 (ring-node-set = own-nodes-direct-targets).</em> The evaluation
+    architecture is fixed: extend the one-off Biot evaluation matrices (the
+    <code>nova.biot</code> <code>Solve</code>/<code>Target</code> machinery
+    <code>PlasmaGrid.solve</code> already builds for cell-centre Psi/Br/Bz and gradients) to the
+    union of all cell centres and all unique hex vertices; evaluate the whole node set in one
+    matmul per current update; select each cell's seven-sample set (six vertices + centroid) by
+    precomputed index arrays; build the in-cell interpolant from those seven samples; map
+    j(psi_norm) through the GS relationship; integrate over the clipped support with the
+    exonerated closed-form attribution. No out-of-cell sampling, no reconstruction step, no
+    availability seam; fixed shapes throughout, so the path is vectorized, traceable, and
+    GPU-batchable by construction.</p>
+
     <p>The prototyped route the plan must produce before production work: the repaired boundary
     evaluation demonstrated in place on the default hex path at measurement level, satisfying the
     complete ladder. The forward GS model is critical to the whole project, so the prototype must
@@ -273,7 +285,7 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="ring-node-set" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="ring-node-set" data-choice="own-nodes-direct-targets" data-by="Simon McIntosh" data-when="2026-08-18T16:23:41+00:00">
     <p class="r-dec-q">Which nodal set feeds the cubic interpolant on ring-incomplete supports?</p>
     <p class="r-dec-ctx">Deferred by the owner&#x27;s 2026-08-18 ruling pending the audit; the audit then exonerated the attribution formulas and convicted the availability zero. Owner steer 2026-08-18: evaluate own-nodes first — sample on the hex nodes + cell centroid and construct current and moments from there. Why the current path samples outside the cell: trial flux lives only at cell centres, so vertex values are themselves ring reconstructions (SharedNodeFluxStencil, runtime step 3), and the interior cubic additionally takes fitted first-moment constraints from the neighbour ring (step 8) — 10 dof exceeds 7 in-cell samples. own-nodes drops the cubic&#x27;s ring constraints on the boundary: the seven in-cell samples support an in-cell quadratic, the shared-node vertex values already exist on ring cells wherever vertex-sharing neighbours exist, and the clipped-moment integration is the audited closed-form machinery. The two quantified risks are scored in isolation by the §5 ladder: the psi_norm interpolation gate (quadratic reconstruction vs the exact quartic oracle) and outermost-vertex availability.</p>
     <p class="r-dec-opts">
@@ -281,7 +293,7 @@
       <button class="r-opt" data-value="own-geometry">own-geometry: the cell&#x27;s centroid, corners and fitted first moments only — no neighbour data</button>
       <button class="r-opt" data-value="one-sided">one-sided: extend the stencil with the available partial neighbour ring, weights re-derived for the incomplete pattern</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Owner ruling 2026-08-18: sample only the cell&#x27;s own geometry — six hex vertices plus cell centroid — with vertex flux carried as direct grid-free targets, never reconstructed from out-of-cell ring fits. Architecture: build one-off evaluation matrices (the existing nova.biot Solve/Target machinery PlasmaGrid.solve already uses for cell-centre Psi/Br/Bz and gradients) over the union of all cell centres and all unique hex vertices, evaluate every node in a single matmul pass as currents change, then select each cell&#x27;s seven-sample adjacent set by precomputed indexing. Fully vectorized and traceable, hence performant and GPU-batchable. Verified in code: PlasmaGrid&#x27;s tricontour triangulates cell centres, so vertices are new target rows through existing machinery, not new machinery. This removes the shared-node quadratic reconstruction error (±≈1.2–1.5 mWb on the quartic oracle) by construction and dissolves the availability seam — every nonempty cell owns its seven samples.</p>
     </div>
 <div class="r-dec" data-key="coupling-order" data-choice="first-moment" data-by="Simon McIntosh" data-when="2026-08-17">
     <p class="r-dec-q">Does the coupling need second-moment blocks to match the exact source?</p>

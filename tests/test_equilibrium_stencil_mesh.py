@@ -57,9 +57,9 @@ with skip_import("jax"):
     )
     from nova.equilibrium.domain import DomainMasks, PlasmaDomain
     from nova.equilibrium.source import DomainProfile, ForwardSource
-    from nova.equilibrium.separatrix_clip import POLYNOMIAL_POWERS
     from nova.equilibrium.stencil_mesh import (
         MomentGeometry,
+        PROFILE_DENSITY_POWERS,
         RING_CONDITION_LIMIT,
         StencilMesh,
         cell_average_weights,
@@ -499,8 +499,8 @@ def test_boundary_supports_preserve_complete_ring_moments_bitwise():
     assert np.all(np.isfinite(np.asarray(attributed.cell_current)[problem["ring"]]))
 
 
-def test_boundary_affine_density_matches_adaptive_polygon_quadrature():
-    """A ring cell's fixed profile cubic is integrated at cubic tolerance."""
+def test_boundary_profile_density_matches_adaptive_polygon_quadrature():
+    """A ring cell's fixed profile polynomial matches adaptive quadrature."""
     problem = boundary_support_problem()
     atomic = problem["geometry"].atomic_mesh
     support = atomic.traced_clip(jnp.ones(len(atomic.node_coordinates)))
@@ -515,9 +515,16 @@ def test_boundary_affine_density_matches_adaptive_polygon_quadrature():
 
     def local_basis(point):
         local = (point - centre) / scale
-        return np.asarray([local[0] ** p * local[1] ** q for p, q in POLYNOMIAL_POWERS])
+        return np.asarray(
+            [local[0] ** p * local[1] ** q for p, q in PROFILE_DENSITY_POWERS]
+        )
 
     stencil = problem["stencil"]
+    assert stencil.ring_profile_weight.shape[1:] == (
+        len(PROFILE_DENSITY_POWERS),
+        672,
+    )
+    assert np.max(stencil.ring_profile_condition) < 1.4e4
     ring_slot = int(np.flatnonzero(stencil.ring_centre == cell)[0])
     pool = np.concatenate(
         [np.asarray(problem["centroid_flux"]), np.asarray(problem["sample_flux"])]

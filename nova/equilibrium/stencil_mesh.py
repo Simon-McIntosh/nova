@@ -59,6 +59,7 @@ from nova.equilibrium.conservation import STENCIL_MARGIN
 from nova.equilibrium.separatrix_clip import (
     POLYNOMIAL_POWERS,
     AtomicCellMesh,
+    complete_polynomial_powers,
     padded_polynomial_current_moments,
 )
 
@@ -67,6 +68,7 @@ __all__ = [
     "CellCurrentMoments",
     "InteriorCurrentMomentStencil",
     "MomentGeometry",
+    "PROFILE_DENSITY_POWERS",
     "SharedNodeFluxStencil",
     "StencilMesh",
     "cell_average_weights",
@@ -80,6 +82,11 @@ __all__ = [
 #: determine a quadratic, which pinv would answer with a plausible-looking
 #: least-norm fit rather than an error.
 RING_CONDITION_LIMIT = 1.0e3
+
+#: Total-degree basis used for the clip-independent profile density. The
+#: weighted full-cell design is projected once at geometry construction time;
+#: exact support moments then require monomials through one degree higher.
+PROFILE_DENSITY_POWERS = complete_polynomial_powers(9)
 
 #: Coefficients of the fitted quadratic, in design-matrix column order.
 _VALUE, _RADIAL, _VERTICAL, _RADIAL_CURVATURE, _CROSS, _VERTICAL_CURVATURE = range(6)
@@ -137,6 +144,7 @@ class InteriorCurrentMomentStencil:
     ring_profile_point: np.ndarray | None = field(default=None, repr=False)
     ring_profile_flux_design: np.ndarray | None = field(default=None, repr=False)
     ring_profile_weight: np.ndarray | None = field(default=None, repr=False)
+    ring_profile_condition: np.ndarray | None = field(default=None, repr=False)
     ring_sample_node_count: int = 0
 
     def __post_init__(self):
@@ -164,6 +172,7 @@ class InteriorCurrentMomentStencil:
             "ring_profile_point",
             "ring_profile_flux_design",
             "ring_profile_weight",
+            "ring_profile_condition",
         ):
             value = getattr(self, name)
             if value is not None:
@@ -274,7 +283,7 @@ class InteriorCurrentMomentStencil:
         sample_flux,
         support,
     ) -> CellCurrentMoments:
-        """Integrate fixed interior and own-node profile cubics over supports."""
+        """Integrate fixed interior and own-node profile polynomials."""
         vectors = jnp.stack(
             self.support_moments(centroid_density, shared_density, support)
         )
@@ -459,8 +468,33 @@ def _quadratic_design(local: np.ndarray) -> np.ndarray:
 
 def _cubic_design(local: np.ndarray) -> np.ndarray:
     """Evaluate the complete cubic monomial basis at local coordinates."""
+    return _polynomial_design(local, POLYNOMIAL_POWERS)
+
+
+def _polynomial_design(
+    local: np.ndarray, powers: tuple[tuple[int, int], ...]
+) -> np.ndarray:
+    """Evaluate a fixed complete monomial basis at local coordinates."""
     radial, vertical = local[..., 0], local[..., 1]
-    return np.stack([radial**p * vertical**q for p, q in POLYNOMIAL_POWERS], axis=-1)
+    return np.stack([radial**p * vertical**q for p, q in powers], axis=-1)
+
+
+def _subdivide_triangles(triangles: np.ndarray) -> np.ndarray:
+    """Split every triangle into four fixed equal-area children."""
+    first, second, third = np.moveaxis(triangles, -2, 0)
+    first_second = 0.5 * (first + second)
+    second_third = 0.5 * (second + third)
+    third_first = 0.5 * (third + first)
+    children = np.stack(
+        [
+            np.stack([first, first_second, third_first], axis=-2),
+            np.stack([first_second, second, second_third], axis=-2),
+            np.stack([third_first, second_third, third], axis=-2),
+            np.stack([first_second, second_third, third_first], axis=-2),
+        ],
+        axis=-3,
+    )
+    return children.reshape(*triangles.shape[:-2], 4, 3, 2)
 
 
 def _quadratic_flux_design(local):
@@ -491,7 +525,7 @@ def fixed_profile_current_moments(
     profile_flux_design,
     profile_weight,
 ):
-    """Integrate one clip-independent cubic profile over changing supports."""
+    """Integrate one clip-independent profile polynomial over changing supports."""
     vertices = jnp.asarray(support_vertices)
     count = jnp.asarray(vertex_count)
     included = count >= 3
@@ -504,6 +538,7 @@ def fixed_profile_current_moments(
         sampling_centre,
         coordinate_scale,
         jnp.where(included[:, None], polynomial, 0.0),
+        PROFILE_DENSITY_POWERS,
     )
     first_about_moment = first_about_sampling + current[:, None] * (
         sampling_centre - moment_centre
@@ -772,6 +807,7 @@ class StencilMesh:
         ring_profile_point = None
         ring_profile_flux_design = None
         ring_profile_weight = None
+        ring_profile_condition = None
         ring_sample_node_count = 0
         if node_coordinate is not None:
             node_coordinate = np.ascontiguousarray(node_coordinate, dtype=np.float64)
@@ -893,6 +929,9 @@ class StencilMesh:
                 ],
                 axis=2,
             )
+            for _ in range(2):
+                triangles = _subdivide_triangles(triangles)
+            triangles = triangles.reshape(len(ring_centre), -1, 3, 2)
             first = triangles[:, :, 1] - triangles[:, :, 0]
             second = triangles[:, :, 2] - triangles[:, :, 0]
             triangle_area = 0.5 * np.abs(
@@ -908,12 +947,15 @@ class StencilMesh:
                 ring_profile_point - ring_sampling_centre[:, None, :]
             ) / ring_coordinate_scale[:, None, :]
             ring_profile_flux_design = _quadratic_design(profile_local)
-            density_design = _cubic_design(profile_local)
-            weighted_design = density_design * quadrature_weight[..., None]
-            normal = np.einsum("nqi,nqj->nij", density_design, weighted_design)
-            ring_profile_weight = np.linalg.solve(
-                normal, np.swapaxes(weighted_design, 1, 2)
+            density_design = _polynomial_design(profile_local, PROFILE_DENSITY_POWERS)
+            square_root_weight = np.sqrt(quadrature_weight)
+            weighted_design = density_design * square_root_weight[..., None]
+            orthogonal, triangular = np.linalg.qr(weighted_design, mode="reduced")
+            weighted_right = (
+                np.swapaxes(orthogonal, 1, 2) * square_root_weight[:, None, :]
             )
+            ring_profile_weight = np.linalg.solve(triangular, weighted_right)
+            ring_profile_condition = np.linalg.cond(triangular)
         return InteriorCurrentMomentStencil(
             gather_index=gather_index,
             contraction_weight=weight,
@@ -931,6 +973,7 @@ class StencilMesh:
             ring_profile_point=ring_profile_point,
             ring_profile_flux_design=ring_profile_flux_design,
             ring_profile_weight=ring_profile_weight,
+            ring_profile_condition=ring_profile_condition,
             ring_sample_node_count=ring_sample_node_count,
         )
 

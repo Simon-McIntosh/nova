@@ -26,22 +26,24 @@ __all__ = [
     "ClippedSupports",
     "LinearCurrentMoments",
     "TracedClippedSupports",
+    "complete_polynomial_powers",
     "padded_linear_current_moments",
     "padded_polynomial_current_moments",
 ]
 
-POLYNOMIAL_POWERS = (
-    (0, 0),
-    (1, 0),
-    (0, 1),
-    (2, 0),
-    (1, 1),
-    (0, 2),
-    (3, 0),
-    (2, 1),
-    (1, 2),
-    (0, 3),
-)
+
+def complete_polynomial_powers(degree: int) -> tuple[tuple[int, int], ...]:
+    """Return a complete two-dimensional monomial basis through ``degree``."""
+    if degree < 0:
+        raise ValueError("polynomial degree must be non-negative")
+    return tuple(
+        (radial, total - radial)
+        for total in range(degree + 1)
+        for radial in range(total, -1, -1)
+    )
+
+
+POLYNOMIAL_POWERS = complete_polynomial_powers(3)
 
 
 def _signed_area(vertices: np.ndarray) -> float:
@@ -357,13 +359,16 @@ def padded_polynomial_current_moments(
     centroids,
     coordinate_scale,
     coefficients,
+    powers=None,
 ):
-    """Integrate one cubic density and its first moments over each support.
+    """Integrate one complete polynomial and its first moments over each support.
 
-    ``coefficients`` multiply :data:`POLYNOMIAL_POWERS` in coordinates centred
-    on ``centroids`` and divided by ``coordinate_scale``.  The edge reductions
-    are closed simplex moments, so moving clip vertices remain traced values
-    and no quadrature nodes or data-dependent shapes enter an iteration.
+    ``coefficients`` multiply total-degree monomials in coordinates centred on
+    ``centroids`` and divided by ``coordinate_scale``. If ``powers`` is omitted,
+    the complete basis is inferred from the static coefficient width. The edge
+    reductions are closed simplex moments, so moving clip vertices remain
+    traced values and no quadrature nodes or data-dependent shapes enter an
+    iteration.
     """
     from nova.jax.config import configure_dtypes
 
@@ -376,6 +381,13 @@ def padded_polynomial_current_moments(
     centre = jnp.asarray(centroids)
     scale = jnp.asarray(coordinate_scale)
     coefficient = jnp.asarray(coefficients)
+    if powers is None:
+        column_count = coefficient.shape[-1]
+        degree = math.isqrt(8 * column_count + 1)
+        degree = (degree - 3) // 2
+        powers = complete_polynomial_powers(degree)
+    else:
+        powers = tuple(powers)
     if vertices.ndim != 3 or vertices.shape[2] != 2:
         raise ValueError("support_vertices must have shape (cells, capacity, 2)")
     cell_count, capacity, _coordinate = vertices.shape
@@ -383,8 +395,10 @@ def padded_polynomial_current_moments(
         raise ValueError("vertex_count must carry one value per cell")
     if centre.shape != (cell_count, 2) or scale.shape != (cell_count, 2):
         raise ValueError("centroids and coordinate_scale must have shape (cells, 2)")
-    if coefficient.shape != (cell_count, len(POLYNOMIAL_POWERS)):
-        raise ValueError("coefficients must carry every cubic monomial per cell")
+    if coefficient.shape != (cell_count, len(powers)):
+        raise ValueError(
+            "coefficients must carry one complete polynomial basis per cell"
+        )
 
     local = (vertices - centre[:, None, :]) / scale[:, None, :]
     slot = jnp.arange(capacity)
@@ -420,24 +434,24 @@ def padded_polynomial_current_moments(
                 edge_moment = edge_moment + simplex * radial_factor * vertical_factor
         return orientation * area_scale * jnp.sum(cross * edge_moment, axis=1)
 
+    maximum_degree = max(radial + vertical for radial, vertical in powers)
     required_powers = tuple(
         (radial, vertical)
-        for degree in range(5)
+        for degree in range(maximum_degree + 2)
         for radial in range(degree, -1, -1)
         for vertical in (degree - radial,)
     )
-    moments = {powers: monomial_moment(*powers) for powers in required_powers}
+    moments = {power: monomial_moment(*power) for power in required_powers}
     current = sum(
-        coefficient[:, column] * moments[powers]
-        for column, powers in enumerate(POLYNOMIAL_POWERS)
+        coefficient[:, column] * moments[power] for column, power in enumerate(powers)
     )
     radial = scale[:, 0] * sum(
-        coefficient[:, column] * moments[(powers[0] + 1, powers[1])]
-        for column, powers in enumerate(POLYNOMIAL_POWERS)
+        coefficient[:, column] * moments[(power[0] + 1, power[1])]
+        for column, power in enumerate(powers)
     )
     vertical = scale[:, 1] * sum(
-        coefficient[:, column] * moments[(powers[0], powers[1] + 1)]
-        for column, powers in enumerate(POLYNOMIAL_POWERS)
+        coefficient[:, column] * moments[(power[0], power[1] + 1)]
+        for column, power in enumerate(powers)
     )
     included = count >= 3
     return (

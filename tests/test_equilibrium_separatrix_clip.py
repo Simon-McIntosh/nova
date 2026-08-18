@@ -8,20 +8,22 @@ from scipy import integrate
 
 from nova.equilibrium.separatrix_clip import (
     AtomicCellMesh,
+    complete_polynomial_powers,
     padded_linear_current_moments,
     padded_polynomial_current_moments,
 )
 
 
 def test_polynomial_current_moments_match_adaptive_triangle_quadrature():
-    """Cubic density and its weighted moments are exact on a clipped polygon."""
+    """Degree-nine density and degree-ten moments are exact on a clipped polygon."""
     centre = np.asarray([1.7, -0.25])
     scale = np.asarray([0.31, 0.23])
     polygon = centre + scale * np.asarray(
         [[-0.8, -0.7], [0.9, -0.55], [0.65, 0.8], [-0.35, 0.95], [-0.9, 0.1]]
     )
+    powers = complete_polynomial_powers(9)
     coefficients = np.asarray(
-        [2.1, -0.7, 0.4, 0.31, -0.22, 0.18, 0.09, -0.06, 0.04, -0.03]
+        [(-1.0) ** column / (column + 1.0) for column in range(len(powers))]
     )
     vertices = np.zeros((1, 8, 2))
     vertices[0, : len(polygon)] = polygon
@@ -31,19 +33,6 @@ def test_polynomial_current_moments_match_adaptive_triangle_quadrature():
         centre[None, :],
         scale[None, :],
         coefficients[None, :],
-    )
-
-    powers = (
-        (0, 0),
-        (1, 0),
-        (0, 1),
-        (2, 0),
-        (1, 1),
-        (0, 2),
-        (3, 0),
-        (2, 1),
-        (1, 2),
-        (0, 3),
     )
 
     def density(radius, height):

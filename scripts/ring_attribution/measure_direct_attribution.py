@@ -17,7 +17,10 @@ import numpy as np
 from scipy.constants import mu_0
 
 from nova.biot.greens import greens_psi, second_moments, section_centroid
-from nova.equilibrium.separatrix_clip import padded_polynomial_current_moments
+from nova.equilibrium.separatrix_clip import (
+    complete_polynomial_powers,
+    padded_polynomial_current_moments,
+)
 
 
 TOTAL_FLUX_FACTOR = 2.0 * np.pi
@@ -25,12 +28,20 @@ SOURCE_AXIS_FLUX_WB = -86.01817570002173
 SOURCE_BOUNDARY_FLUX_WB = -4.7117712394715845
 EXACT_TOTAL_CURRENT_A = -15_005_421.582465796
 INTERIOR_CURRENT_WEIGHTED_SCALE = 0.007646206247471605
+RING_CURRENT_WEIGHTED_LIMIT = 0.0025
 TOTAL_CURRENT_RELATIVE_LIMIT = 0.005
 ARGMAX_SHIFT_LIMIT_WB = 0.5
 ALL_TARGET_SHIFT_LIMIT_WB = 0.826
 CURRENT_RESOLUTION_A = 1.0
 PREVIOUS_RING_CURRENT_WEIGHTED_L1 = 0.10228012882939425
 PREVIOUS_TOTAL_CURRENT_RELATIVE_ERROR = 0.0057329356059026
+DENSITY_POWERS = complete_polynomial_powers(9)
+STUDY_LEVELS = {
+    "ring_current_weighted_l1": 0.0016005,
+    "ring_net_relative_error": 0.0007214,
+    "first_moment_l1": 0.0011804,
+    "centroid_p95_mm": 0.3298,
+}
 
 
 def parse_args() -> argparse.Namespace:
@@ -116,23 +127,10 @@ def quadratic_design(local: np.ndarray) -> np.ndarray:
     )
 
 
-def cubic_design(local: np.ndarray) -> np.ndarray:
+def density_design(local: np.ndarray) -> np.ndarray:
+    """Evaluate the fixed complete current-density basis."""
     radial, vertical = local[..., 0], local[..., 1]
-    return np.stack(
-        [
-            np.ones_like(radial),
-            radial,
-            vertical,
-            radial**2,
-            radial * vertical,
-            vertical**2,
-            radial**3,
-            radial**2 * vertical,
-            radial * vertical**2,
-            vertical**3,
-        ],
-        axis=-1,
-    )
+    return np.stack([radial**p * vertical**q for p, q in DENSITY_POWERS], axis=-1)
 
 
 def triangle_degree_five_rule() -> tuple[np.ndarray, np.ndarray]:
@@ -176,6 +174,23 @@ def fixed_profile_geometry(
         ],
         axis=2,
     )
+    triangles = triangles[:, :, None, :, :]
+    for _ in range(2):
+        first, second, third = np.moveaxis(triangles, -2, 0)
+        first_second = 0.5 * (first + second)
+        second_third = 0.5 * (second + third)
+        third_first = 0.5 * (third + first)
+        children = np.stack(
+            [
+                np.stack([first, first_second, third_first], axis=-2),
+                np.stack([first_second, second, second_third], axis=-2),
+                np.stack([third_first, second_third, third], axis=-2),
+                np.stack([first_second, second_third, third_first], axis=-2),
+            ],
+            axis=-3,
+        )
+        triangles = children.reshape(cell_count, capacity, -1, 3, 2)
+    triangles = triangles.reshape(cell_count, -1, 3, 2)
     triangle_first = triangles[:, :, 1] - triangles[:, :, 0]
     triangle_second = triangles[:, :, 2] - triangles[:, :, 0]
     triangle_area = 0.5 * np.abs(
@@ -185,15 +200,16 @@ def fixed_profile_geometry(
     barycentric, quadrature_weight = triangle_degree_five_rule()
     points = np.einsum("qa,ntad->ntqd", barycentric, triangles)
     weight = triangle_area[:, :, None] * quadrature_weight[None, None, :]
-    points = points.reshape(cell_count, capacity * len(quadrature_weight), 2)
-    weight = weight.reshape(cell_count, capacity * len(quadrature_weight))
+    points = points.reshape(cell_count, -1, 2)
+    weight = weight.reshape(cell_count, -1)
     local = (points - centres[:, None, :]) / scale[:, None, :]
-    density_design = cubic_design(local)
-    weighted_design = density_design * weight[..., None]
-    normal = np.einsum("nqi,nqj->nij", density_design, weighted_design)
-    right = np.swapaxes(weighted_design, 1, 2)
-    projection = np.linalg.solve(normal, right)
-    condition = np.linalg.cond(normal)
+    design = density_design(local)
+    square_root_weight = np.sqrt(weight)
+    weighted_design = design * square_root_weight[..., None]
+    orthogonal, triangular = np.linalg.qr(weighted_design, mode="reduced")
+    right = np.swapaxes(orthogonal, 1, 2) * square_root_weight[:, None, :]
+    projection = np.linalg.solve(triangular, right)
+    condition = np.linalg.cond(triangular)
     return {
         "points": points,
         "local": local,
@@ -210,8 +226,8 @@ def polynomial_moment_operator(
     scale: np.ndarray,
 ) -> np.ndarray:
     responses = []
-    for column in range(10):
-        coefficient = np.zeros((len(centres), 10))
+    for column in range(len(DENSITY_POWERS)):
+        coefficient = np.zeros((len(centres), len(DENSITY_POWERS)))
         coefficient[:, column] = 1.0
         current, first = padded_polynomial_current_moments(
             support_vertices,
@@ -292,7 +308,7 @@ def reference_moments(
 
 
 def polynomial_values(local: np.ndarray, coefficient: np.ndarray) -> np.ndarray:
-    return np.einsum("...p,p->...", cubic_design(local), coefficient)
+    return np.einsum("...p,p->...", density_design(local), coefficient)
 
 
 def independent_polynomial_moments(
@@ -302,16 +318,28 @@ def independent_polynomial_moments(
     coefficient: np.ndarray,
 ) -> tuple[float, np.ndarray]:
     triangles = triangle_fan(vertices)
-    area = triangle_areas(triangles)
-    barycentric, weight = triangle_degree_five_rule()
-    points = np.einsum("qa,tad->tqd", barycentric, triangles)
+    nodes, weights = np.polynomial.legendre.leggauss(6)
+    nodes = 0.5 * (nodes + 1.0)
+    weights = 0.5 * weights
+    radial_grid, vertical_grid = np.meshgrid(nodes, nodes, indexing="ij")
+    radial_weight, vertical_weight = np.meshgrid(weights, weights, indexing="ij")
+    weight = (radial_weight * vertical_weight * (1.0 - radial_grid)).ravel()
+    radial = radial_grid.ravel()
+    vertical = vertical_grid.ravel()
+    anchor = triangles[:, 0]
+    first = triangles[:, 1] - anchor
+    second = triangles[:, 2] - anchor
+    determinant = 2.0 * triangle_areas(triangles)
+    points = (
+        anchor[:, None, :]
+        + radial[None, :, None] * first[:, None, :]
+        + ((1.0 - radial) * vertical)[None, :, None] * second[:, None, :]
+    )
     density = polynomial_values((points - centre) / scale, coefficient)
-    current = float(np.sum(area[:, None] * weight[None, :] * density))
+    weighted_area = determinant[:, None] * weight[None, :]
+    current = float(np.sum(weighted_area * density))
     first = np.sum(
-        area[:, None, None]
-        * weight[None, :, None]
-        * density[..., None]
-        * (points - centre),
+        weighted_area[..., None] * density[..., None] * (points - centre),
         axis=(0, 1),
     )
     return current, first
@@ -568,7 +596,7 @@ def main() -> None:
         "niq,nq->ni", projection_geometry["projection"], quadrature_density
     )
     coefficient[lower_leg] = 0.0
-    cubic_coefficient = coefficient
+    density_coefficient = coefficient
 
     exact_quadrature_density = source_current_density(
         case,
@@ -582,14 +610,14 @@ def main() -> None:
         exact_quadrature_density,
     )
     exact_coefficient[lower_leg] = 0.0
-    exact_cubic_coefficient = exact_coefficient
+    exact_density_coefficient = exact_coefficient
 
     attributed_m0, attributed_first_hex = padded_polynomial_current_moments(
         fixture["support_vertices"],
         fixture["support_vertex_count"],
         hex_centres,
         scale,
-        cubic_coefficient,
+        density_coefficient,
     )
     attributed_m0 = np.array(attributed_m0)
     attributed_first_hex = np.array(attributed_first_hex)
@@ -601,7 +629,7 @@ def main() -> None:
         fixture["support_vertex_count"],
         hex_centres,
         scale,
-        exact_cubic_coefficient,
+        exact_density_coefficient,
     )
     exact_projected_m0 = np.asarray(exact_projected_m0)
     exact_projected_first = np.asarray(exact_projected_first_hex) + (
@@ -645,7 +673,7 @@ def main() -> None:
                 support,
                 hex_centres[cell],
                 scale[cell],
-                cubic_coefficient[cell],
+                density_coefficient[cell],
             )
             independent_first = independent_first_hex + independent_m0 * (
                 hex_centres[cell] - centres[cell]
@@ -656,6 +684,9 @@ def main() -> None:
     ring_denominator = float(np.sum(np.abs(oracle_m0[ring])))
     ring_current_error = attributed_m0 - oracle_m0
     ring_l1 = float(np.sum(np.abs(ring_current_error[ring])) / ring_denominator)
+    ring_signed_oracle = float(np.sum(oracle_m0[ring]))
+    ring_net_error = float(np.sum(ring_current_error[ring]))
+    ring_net_relative_error = abs(ring_net_error / ring_signed_oracle)
     resolved = ring & (np.abs(oracle_m0) > CURRENT_RESOLUTION_A)
     oracle_centroid = (
         centres[resolved] + oracle_first[resolved] / oracle_m0[resolved, None]
@@ -784,7 +815,7 @@ def main() -> None:
             np.all(attributed_m0[lower_leg] == 0.0)
             and np.all(attributed_first[lower_leg] == 0.0)
         ),
-        "ring_current_weighted_l1": ring_l1 <= INTERIOR_CURRENT_WEIGHTED_SCALE,
+        "ring_current_weighted_l1": ring_l1 <= RING_CURRENT_WEIGHTED_LIMIT,
         "total_current": total_current_error <= TOTAL_CURRENT_RELATIVE_LIMIT,
         "argmax_target_shift": abs(argmax_shift) <= ARGMAX_SHIFT_LIMIT_WB,
         "all_target_sup": all_target_sup < ALL_TARGET_SHIFT_LIMIT_WB,
@@ -833,7 +864,7 @@ def main() -> None:
             "one_matmul_per_current_update": True,
             "direct_flux_target_error_wb": 0.0,
             "quadrature_point_shape": list(projection_geometry["points"].shape),
-            "projection_condition_max": float(
+            "weighted_design_condition_max": float(
                 np.max(projection_geometry["condition"][nonempty])
             ),
             "sampling_and_integration_support": (
@@ -852,30 +883,20 @@ def main() -> None:
         "representation": {
             "flux_interpolant_total_degree": 2,
             "flux_samples_per_cell": 7,
-            "current_density_total_degree": 3,
-            "current_density_basis": [
-                "constant",
-                "radial",
-                "vertical",
-                "radial_squared",
-                "radial_vertical",
-                "vertical_squared",
-                "radial_cubed",
-                "radial_squared_vertical",
-                "radial_vertical_squared",
-                "vertical_cubed",
-            ],
+            "current_density_total_degree": 9,
+            "current_density_basis_powers": [list(power) for power in DENSITY_POWERS],
             "projection": (
-                "area-weighted cubic projection on the fixed pre-clip hexagon"
+                "weighted reduced-QR projection on the fixed pre-clip hexagon"
             ),
             "triangle_quadrature_degree": 5,
             "triangle_quadrature_points": 7,
+            "triangle_subdivision_depth": 2,
             "support_edge_capacity": int(fixture["support_vertices"].shape[1]),
             "fixed_collocation_points_per_cell": int(
                 projection_geometry["points"].shape[1]
             ),
             "priority_preservation": (
-                "The fixed cubic is independent of fill. Its net current and "
+                "The fixed density is independent of fill. Its net current and "
                 "first moments match the fixed full-cell profile quadrature, "
                 "then the same polynomial is integrated over the clipped domain."
             ),
@@ -891,10 +912,34 @@ def main() -> None:
             "topology_zero_lower_leg_supports": int(np.count_nonzero(lower_leg)),
             "ring_current_bearing_supports": int(np.count_nonzero(resolved)),
         },
+        "study_comparison": {
+            "reference": STUDY_LEVELS,
+            "measured": {
+                "ring_current_weighted_l1": ring_l1,
+                "ring_net_relative_error": ring_net_relative_error,
+                "first_moment_l1": first_l1,
+                "centroid_p95_mm": 1.0e3
+                * weighted_quantile(centroid_distance, centroid_weight, 0.95),
+            },
+            "measured_minus_reference": {
+                "ring_current_weighted_l1": ring_l1
+                - STUDY_LEVELS["ring_current_weighted_l1"],
+                "ring_net_relative_error": ring_net_relative_error
+                - STUDY_LEVELS["ring_net_relative_error"],
+                "first_moment_l1": first_l1 - STUDY_LEVELS["first_moment_l1"],
+                "centroid_p95_mm": 1.0e3
+                * weighted_quantile(centroid_distance, centroid_weight, 0.95)
+                - STUDY_LEVELS["centroid_p95_mm"],
+            },
+        },
         "priority_ordered_errors": {
             "net_current": {
                 "current_weighted_ring_l1": ring_l1,
+                "ring_limit": RING_CURRENT_WEIGHTED_LIMIT,
                 "interior_scale": INTERIOR_CURRENT_WEIGHTED_SCALE,
+                "signed_error_a": ring_net_error,
+                "signed_oracle_a": ring_signed_oracle,
+                "signed_relative_error": ring_net_relative_error,
                 "improvement_factor_from_value_only_quadratic": (
                     PREVIOUS_RING_CURRENT_WEIGHTED_L1 / ring_l1
                 ),
@@ -985,9 +1030,9 @@ def main() -> None:
         fit_centres=hex_centres,
         moment_centres=centres,
         coordinate_scale=scale,
-        coefficients=cubic_coefficient,
+        coefficients=density_coefficient,
         flux_coefficients=flux_coefficient,
-        representation=np.asarray("quadratic_flux_fixed_cubic_current"),
+        representation=np.asarray("quadratic_flux_fixed_degree_nine_current"),
         triangle_quadrature_degree=np.asarray(5),
         ring_mask=ring,
         lower_leg_mask=lower_leg,

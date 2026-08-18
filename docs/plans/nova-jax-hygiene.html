@@ -19,8 +19,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-sprint" content="S7">
-<meta name="plan-modified" content="2026-08-09">
-<meta name="plan-version" content="4">
+<meta name="plan-modified" content="2026-08-18">
+<meta name="plan-version" content="5">
 <meta name="plan-impl" content="1.0">
 </head>
 <body>
@@ -158,9 +158,9 @@ Done-when
   2. nova/jax/ holds only JAX code; duplicate math single-homed.
   3. Divergence parity tests added and green; full suite green; followup
      resolved with the before/after file census.</pre>
-    <p class="r-fu-outcome">All five items landed, commits 28035f70..0f553ebb. Census: nova/jax 16 modules -> 14, every remaining one referencing jax; 5 dead modules deleted (jax/gap, jax/plasmaloc, field/jax_bspline, field/jaxopt_linalg, utilities/xpu) with per-file zero-importer proof; wall_mask + equilibrium_labels rehomed to nova/equilibrium; nova/jax/config.py added as the single jax_enable_x64 owner, collapsing 10 sites in nova and 9 in tests. Duplicate math single-homed: Bernstein (by deletion), _dilate4, the biquadratic null fit. THREE REAL DEFECTS found by the parity work, each returning a wrong answer rather than an error: a Force operator left with no index by a silent except-KeyError (e4ec7a0c); an empty profile ladder that raised on the host arm and returned a clean (n,0) basis on the traced arm (b31e198d); a missing degenerate-fit guard letting +-inf into vmapped gradients (ed33cf3a). TWO LISTED ITEMS REFUSED ON EVIDENCE: nova/jax/fieldnull.py is not a class-for-class copy -- its hex-stencil construction was unique and moved to nova/geometry/hexstencil.py per owner direction (the stencil is 6-point; the 7th column is the prepended centre); and the four greens hosts were KEPT after measurement -- the traced twins run 1.9-3.9x and return a small negative flux where the host returns the divergence inf, which is the wrong answer a caller cannot detect. No suite regressed (1172/103/72/58/28/23/20/18 passed across the affected lanes); ruff 34 against a 36 baseline. Record: docs/evidence/archive/nova-jax-hygiene-s2-landed.html</p>
+    <p class="r-fu-outcome">All five items landed, commits 28035f70..0f553ebb. Census: nova/jax 16 modules -&gt; 14, every remaining one referencing jax; 5 dead modules deleted (jax/gap, jax/plasmaloc, field/jax_bspline, field/jaxopt_linalg, utilities/xpu) with per-file zero-importer proof; wall_mask + equilibrium_labels rehomed to nova/equilibrium; nova/jax/config.py added as the single jax_enable_x64 owner, collapsing 10 sites in nova and 9 in tests. Duplicate math single-homed: Bernstein (by deletion), _dilate4, the biquadratic null fit. THREE REAL DEFECTS found by the parity work, each returning a wrong answer rather than an error: a Force operator left with no index by a silent except-KeyError (e4ec7a0c); an empty profile ladder that raised on the host arm and returned a clean (n,0) basis on the traced arm (b31e198d); a missing degenerate-fit guard letting +-inf into vmapped gradients (ed33cf3a). TWO LISTED ITEMS REFUSED ON EVIDENCE: nova/jax/fieldnull.py is not a class-for-class copy -- its hex-stencil construction was unique and moved to nova/geometry/hexstencil.py per owner direction (the stencil is 6-point; the 7th column is the prepended centre); and the four greens hosts were KEPT after measurement -- the traced twins run 1.9-3.9x and return a small negative flux where the host returns the divergence inf, which is the wrong answer a caller cannot detect. No suite regressed (1172/103/72/58/28/23/20/18 passed across the affected lanes); ruff 34 against a 36 baseline. Record: docs/evidence/archive/nova-jax-hygiene-s2-landed.html</p>
     </article>
-<article class="r-fu" data-id="f-njh-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-08" data-recommends-skill="/reckon-ship nova-jax-hygiene" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-njh-002" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-08" data-recommends-skill="/reckon-ship nova-jax-hygiene" data-resolved-at="2026-08-18T20:03:34+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Adopt the NaN wall_flux convention, or keep the serial sentinel deliberately</h4>
     <div class="r-fu-body"><p>The sweep documented rather than aligned the one convention split it found. The serial <code>wall_flux</code> returns <code>(0, 0, 0)</code> at zero polarity, the traced one all-NaN. NaN is the safer answer — <code>(0, 0, 0)</code> is a well-formed coordinate and flux a caller cannot distinguish from a real result — but adopting it changes what <code>Limiter.update_wall</code> publishes at zero plasma current, so it needs validating rather than doing in passing. Two callers.</p></div>
     <pre class="r-fu-prompt">Project: nova
@@ -194,8 +194,14 @@ Done-when
      in both docstrings.
   2. A test pins whichever convention is chosen at zero polarity on both paths.
   3. Full suite green; followup resolved.</pre>
+    <p class="r-fu-outcome">Done — no followup. The convention was already settled on main before this node ran: commit 7193988c (fix(select): unify host and traced null contracts, integrated at 714bebd2) adopted the all-NaN zero-polarity convention on BOTH paths — host_wall_flux and traced_wall_flux each return a fixed four-value all-NaN result, the traced implementation moved into nova/geometry/select.py with its jnp.where(polarity != 0, result, full-NaN) convention unchanged, and Limiter.update_wall publishes NaN through w_psi and both w_point coordinates. Pinned by tests/test_fieldnull.py (both paths together) and tests/test_wallflux.py (host shape/sentinel + limiter publication). Independently re-verified on HEAD f947dc23 by node wall-flux-zero-polarity-convention (run r-20260818T195535154479, gate passed): 78/78 slow-inclusive focused tests, with the descendant full repository gate recorded at 5024 passed / 121 expected skips. A production caller census found exactly the two known selector callers (Limiter.update_wall via host, Null1D via traced). No source edit or redundant commit was made.</p>
     </article>
 </section>
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s1" data-id="c-20260818T2000" data-who="reckon-ship" data-when="2026-08-18T20:00:00+00:00">
+    <div class="r-comment-body">wall-flux-zero-polarity-convention landed — gate PASSED with no new commit (run r-20260818T195535154479, member lane-jax, 191 s). Verification-only outcome: the open followup was stale — ancestor 7193988c already unified both wall_flux paths on the all-NaN zero-polarity convention and 714bebd2 integrated it; tests/test_fieldnull.py and tests/test_wallflux.py pin it on both paths including Limiter.update_wall publishing NaN w_psi/w_point. Re-verified at HEAD f947dc23: 78/78 slow-inclusive focused tests; the cumulative evidence records the descendant repository gate at 5024 passed / 121 expected skips. The plan's last open followup is resolved; the plan stays shipped with the chain closed.</div>
+</div>
+</section>
+</main>
 </body>
 </html>

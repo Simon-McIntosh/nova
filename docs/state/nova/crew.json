@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-18T18:27:05",
+  "updated": "2026-08-18T19:29:48",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -8243,9 +8243,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260818T162951770073-ring-support-attribution-prototype",
+        "plan": "boundary-ring-source-completion",
+        "section": "\u00a76",
+        "node": "ring-support-attribution-prototype",
+        "role": "implement",
+        "member": "ring-quadrature",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-18T16:29:54Z",
+        "completed_at": "2026-08-18T17:28:33Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3519,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3519,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "a5d3078ecdb86ae49c55da58e248eccd5eee37a0",
+        "commits": [
+          "3f2312e743289492bc3b4a4a58d4a16dc339d11d"
+        ],
+        "changed_lines": {
+          "added": 1252,
+          "removed": 0,
+          "files": 8
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "outcome": "Architecture validated, gate honest-negative on one component: (566,7) gather over 2,218 direct targets built with 0 m vertex identity deviation; 96/96 ring supports attributed, 351 interior bitwise, 17 leg cells exactly zero, field gates pass (argmax 0.174 Wb, sup 0.202 Wb vs 0.5/0.826), JAX batch 0.0796 ms/state, 48-line probe exact; misses isolated to in-cell interpolation (ring current-weighted L1 10.228% vs 0.7646%; total current 0.5733% vs 0.5%; all other components at round-off or zero)",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260818T162951770073-ring-support-attribution-prototype/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01171-0694-7063-985b-f5d112e74147",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 23746048,
+            "cached_input_tokens_cumulative": 42760064,
+            "input_tokens": 24341669,
+            "input_tokens_cumulative": 44106522,
+            "output_tokens": 71875,
+            "output_tokens_cumulative": 173185,
+            "reasoning_output_tokens": 24285,
+            "reasoning_output_tokens_cumulative": 55165
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 243
+    "_version": 244
   }
 }

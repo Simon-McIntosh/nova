@@ -125,5 +125,50 @@
     and the fixture availability map isolating the 96 zeroed boundary supports.</figcaption>
   </figure>
 
+  <h2 id="zero-current-leg-attribution">§5 — the divertor-leg signal: an oracle artifact for the baseline, a real leak in both candidates</h2>
+
+  <p>Gate <strong>PASSED</strong> (adjudication complete, 17/17 lower-leg cells classified and
+  asserted) at lineage commit <code>f332f842</code> (run
+  <code>r-20260818T161242825288-zero-current-leg-attribution</code>). The owner asked why the §3
+  error figure shows m0 signal in the divertor legs, where the Solov'ev seed carries no SOL or
+  private-flux current. The answer splits by population:</p>
+
+  <ul>
+    <li><strong>The baseline signal is a metric/oracle artifact.</strong> All 17 cells below the
+    lower X point (11 private-flux with psi_norm ≤ 1, 6 open-leg with psi_norm &gt; 1) are
+    topology-zero. The figure's geometry-only support oracle totals −9.595 kA there, while the
+    topology-qualified oracle is exactly 0 A — and the production baseline attributes exactly
+    0 A in all 17. Production is clean in the legs; the figure's oracle was wrong, not the
+    code.</li>
+    <li><strong>Both §3 repair candidates genuinely leak.</strong> own-geometry attributes
+    −18.025 kA and one-sided −19.631 kA across the 17 topology-zero cells (cell max ≈ 3.8 kA).
+    Causal path named and probe-demonstrated: <code>ForwardFluxOperator.cell_current_moments</code>
+    supplies a topology-unqualified <code>core_support</code> into
+    <code>ForwardSource.current_moments</code>'s nested <code>partitioned_moments</code>, which
+    evaluates clipped core density with no domain mask — core node density at psi_norm = 0.9 flows
+    to both PRIVATE_FLUX and COMMON_SOL labels despite no declared open-domain closure.</li>
+    <li><strong>Population metrics restated current-weighted</strong> (L1 =
+    Σ|attributed − oracle| / Σ|oracle|): interior scale <strong>0.7646%</strong> over 351 cells;
+    the 96-cell ring scores baseline 100% (the availability zero), own-geometry 12.47%, one-sided
+    15.81% after the lower-leg oracle correction — the §3 "62× ring population" was substantially
+    a relative-error metric dominated by near-zero-current cells.</li>
+  </ul>
+
+  <figure>
+    <img src="/nova/figures/boundary-ring-source-completion/ring-m0-current-weighted-error.png"
+         alt="Three-panel R-Z map of current-weighted m0 error beside the original relative-error map"
+         style="max-width:100%">
+    <figcaption>Corrected current-weighted error maps beside the original relative-error map: the
+    leg signal vanishes under the topology-qualified oracle for the baseline and reappears as a
+    genuine candidate leak.</figcaption>
+  </figure>
+
+  <p><strong>Consequence for §6:</strong> the route prototype must topology-qualify
+  <code>core_support</code> (a domain mask before or within <code>partitioned_moments</code>), its
+  gate requires exactly zero attributed current in the 17 topology-zero cells, and all ladder
+  population gates are scored current-weighted against the 0.7646% interior scale. Artifacts:
+  <code>scripts/zero_current_audit/results/</code> (classification, worst-cells, machine-readable
+  totals) at the lineage commit.</p>
+
 </main></body>
 </html>

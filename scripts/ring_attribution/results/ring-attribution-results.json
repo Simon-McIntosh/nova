@@ -1,0 +1,126 @@
+{
+  "verdict": "honest_negative",
+  "failed_gates": [
+    "ring_current_weighted_l1",
+    "total_current"
+  ],
+  "architecture": {
+    "cells": 566,
+    "six_vertex_material_rows": 387,
+    "canonical_offsets_collapsed": false,
+    "canonical_offset_max_deviation_m": 0.30406465419805717,
+    "canonical_offset_roundoff_bound_m": 2.3652337919603447e-13,
+    "offset_route": "fixed_per_cell_tiling_parameters",
+    "cell_offset_shape": [
+      566,
+      6,
+      2
+    ],
+    "tiling_cell_delta_m": [
+      0.2936289156888333,
+      0.2936289156888333
+    ],
+    "tiling_raw_vertex_count": 8,
+    "tiling_generator_vertex_count": 6,
+    "tiling_vertex_deduplication_epsilon_m": 2.842170943040401e-14,
+    "tiling_vertex_identity_max_deviation_m": 0.0,
+    "tiling_vertex_identity_roundoff_bound_m": 2.842170943040401e-14,
+    "unique_hex_vertices": 1652,
+    "direct_targets": 2218,
+    "samples_per_cell": 7,
+    "sample_index_shape": [
+      566,
+      7
+    ],
+    "combined_matrix_shape": [
+      2218,
+      1815
+    ],
+    "combined_matrix_bytes": 32205360,
+    "one_matmul_per_current_update": true,
+    "direct_flux_target_error_wb": 0.0,
+    "sampling_and_integration_support": "The sampling set and integration support are different objects. Trial-flux evaluation is grid-free, so the pre-clip hex vertices are valid targets even where the wall clipped the material polygon. The centre and six vertices define the in-cell interpolant of the smooth flux field; exact closed forms then integrate that interpolant only over the actual clipped support.",
+    "batch_compatibility": "Fixed-shape JAX array contraction; jit and vmap executed on the banked matrix with no Python branching over cells or batch items."
+  },
+  "population": {
+    "nonempty_supports": 447,
+    "stencil_available_supports": 351,
+    "ring_incomplete_supports": 96,
+    "topology_zero_lower_leg_supports": 17,
+    "ring_current_bearing_supports": 73
+  },
+  "priority_ordered_errors": {
+    "net_current": {
+      "current_weighted_ring_l1": 0.10228012882939425,
+      "interior_scale": 0.007646206247471605,
+      "absolute_error_current_a": 69507.91288801067,
+      "oracle_absolute_current_a": 679583.7440129898
+    },
+    "centroid": {
+      "current_weighted_mean_error_mm": 7.283380419849099,
+      "current_weighted_p95_error_mm": 12.650608969712355,
+      "maximum_error_mm": 30.091915444174663
+    },
+    "first_moments": {
+      "normalised_vector_l1": 0.06213101671578998,
+      "absolute_vector_error_am": 6198.98046806363,
+      "normalisation_am": 99772.71893714594,
+      "radial_absolute_error_am": 5204.373695881379,
+      "vertical_absolute_error_am": 2853.057172921503
+    }
+  },
+  "field_contract": {
+    "total_current_a": -15091446.698137492,
+    "target_current_a": -15005421.582465796,
+    "total_current_relative_error": 0.0057329356059026,
+    "argmax_target": 440,
+    "argmax_target_shift_wb": 0.1738814309926724,
+    "all_target_sup_wb": 0.20165858116454416,
+    "all_target_sup_index": 439
+  },
+  "error_components": {
+    "attribution_current_sup_a": 1.0459189070388675e-10,
+    "attribution_first_sup_am": 2.2229338289125938e-11,
+    "direct_node_flux_sup_wb": 0.0,
+    "in_cell_density_interpolation_current_l1_a": 69507.91288801067,
+    "availability_undefined_cells": 0,
+    "zero_current_leakage_a": 0.0,
+    "clip_geometry": "held fixed to the banked linear support; prototype and oracle integrate the identical polygon"
+  },
+  "microbenchmark": {
+    "backend": "gpu",
+    "dtype": "float64",
+    "single_update_median_ms": 0.43721002293750644,
+    "single_update_min_ms": 0.15329092275351286,
+    "batch_size": 8,
+    "batch_update_ms": 0.6367489928379655,
+    "batch_per_state_ms": 0.07959362410474569,
+    "jit_compatible": true,
+    "vmap_compatible": true,
+    "batch_first_state_sup_difference": 4.121147867408581e-13
+  },
+  "trace_cells": [
+    430,
+    444,
+    542
+  ],
+  "gates": {
+    "seven_samples_per_cell": true,
+    "one_matmul_per_update": true,
+    "all_ring_supports_attributed": true,
+    "interior_bitwise_unchanged": true,
+    "topology_zero_exact": true,
+    "ring_current_weighted_l1": false,
+    "total_current": false,
+    "argmax_target_shift": true,
+    "all_target_sup": true,
+    "jit_batch_compatible": true
+  },
+  "artifacts": {
+    "matrix_bank": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/57d0f89f-c6af-4053-b5de-b938e7dd5877/ring-support-attribution-prototype/scripts/ring_attribution/inputs/direct-target-matrices.npz",
+    "cell_table": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/57d0f89f-c6af-4053-b5de-b938e7dd5877/ring-support-attribution-prototype/scripts/ring_attribution/results/ring-cell-attribution.csv",
+    "field_bank": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/57d0f89f-c6af-4053-b5de-b938e7dd5877/ring-support-attribution-prototype/scripts/ring_attribution/results/ring-attribution-fields.npz",
+    "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/57d0f89f-c6af-4053-b5de-b938e7dd5877/ring-support-attribution-prototype/docs/figures/boundary-ring-source-completion/direct-ring-attribution-errors.png"
+  },
+  "production_authority_follow_on": "Have the grid constructor expose its authoritative pre-clip vertex array; this prototype deliberately does not add that production API."
+}

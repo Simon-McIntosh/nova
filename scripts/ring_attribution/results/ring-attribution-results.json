@@ -1,9 +1,6 @@
 {
-  "verdict": "honest_negative",
-  "failed_gates": [
-    "ring_current_weighted_l1",
-    "total_current"
-  ],
+  "verdict": "pass",
+  "failed_gates": [],
   "architecture": {
     "cells": 566,
     "six_vertex_material_rows": 387,
@@ -39,8 +36,34 @@
     "combined_matrix_bytes": 32205360,
     "one_matmul_per_current_update": true,
     "direct_flux_target_error_wb": 0.0,
+    "quadrature_point_shape": [
+      566,
+      490,
+      2
+    ],
+    "projection_condition_max": 890921.7438148335,
     "sampling_and_integration_support": "The sampling set and integration support are different objects. Trial-flux evaluation is grid-free, so the pre-clip hex vertices are valid targets even where the wall clipped the material polygon. The centre and six vertices define the in-cell interpolant of the smooth flux field; exact closed forms then integrate that interpolant only over the actual clipped support.",
     "batch_compatibility": "Fixed-shape JAX array contraction; jit and vmap executed on the banked matrix with no Python branching over cells or batch items."
+  },
+  "representation": {
+    "flux_interpolant_total_degree": 2,
+    "flux_samples_per_cell": 7,
+    "current_density_total_degree": 1,
+    "current_density_basis": [
+      "constant",
+      "radial",
+      "vertical"
+    ],
+    "projection": "area-weighted least squares on the clipped support",
+    "triangle_quadrature_degree": 5,
+    "triangle_quadrature_points": 7,
+    "support_edge_capacity": 70,
+    "fixed_collocation_points_per_cell": 490,
+    "priority_preservation": "The affine normal equations preserve quadrature net current and both first moments before the same affine polynomial is integrated by the closed-form polygon attribution.",
+    "previous_value_only_quadratic": {
+      "ring_current_weighted_l1": 0.10228012882939425,
+      "total_current_relative_error": 0.0057329356059026
+    }
   },
   "population": {
     "nonempty_supports": 447,
@@ -51,58 +74,71 @@
   },
   "priority_ordered_errors": {
     "net_current": {
-      "current_weighted_ring_l1": 0.10228012882939425,
+      "current_weighted_ring_l1": 0.002404925182149656,
       "interior_scale": 0.007646206247471605,
-      "absolute_error_current_a": 69507.91288801067,
+      "improvement_factor_from_value_only_quadratic": 42.529443156302506,
+      "absolute_error_current_a": 1634.3480593563847,
       "oracle_absolute_current_a": 679583.7440129898
     },
     "centroid": {
-      "current_weighted_mean_error_mm": 7.283380419849099,
-      "current_weighted_p95_error_mm": 12.650608969712355,
-      "maximum_error_mm": 30.091915444174663
+      "current_weighted_mean_error_mm": 0.1395509655050678,
+      "current_weighted_p95_error_mm": 0.3407270636020294,
+      "maximum_error_mm": 1.1897778999118556
     },
     "first_moments": {
-      "normalised_vector_l1": 0.06213101671578998,
-      "absolute_vector_error_am": 6198.98046806363,
+      "normalised_vector_l1": 0.0012399239140626333,
+      "absolute_vector_error_am": 123.71058018121701,
       "normalisation_am": 99772.71893714594,
-      "radial_absolute_error_am": 5204.373695881379,
-      "vertical_absolute_error_am": 2853.057172921503
+      "radial_absolute_error_am": 78.04940030964019,
+      "vertical_absolute_error_am": 82.64545615138096
     }
   },
   "field_contract": {
-    "total_current_a": -15091446.698137492,
+    "total_current_a": -15062777.546754116,
     "target_current_a": -15005421.582465796,
-    "total_current_relative_error": 0.0057329356059026,
+    "total_current_relative_error": 0.0038223494070530606,
     "argmax_target": 440,
-    "argmax_target_shift_wb": 0.1738814309926724,
-    "all_target_sup_wb": 0.20165858116454416,
+    "argmax_target_shift_wb": 0.2641484523375155,
+    "all_target_sup_wb": 0.31006536635558035,
     "all_target_sup_index": 439
   },
   "error_components": {
-    "attribution_current_sup_a": 1.0459189070388675e-10,
-    "attribution_first_sup_am": 2.2229338289125938e-11,
+    "attribution_current_sup_a": 1.4279066817834973e-10,
+    "attribution_first_sup_am": 2.268757948320147e-11,
     "direct_node_flux_sup_wb": 0.0,
-    "in_cell_density_interpolation_current_l1_a": 69507.91288801067,
+    "psi_norm_interpolation_current_l1_a": 1197.1541419600446,
+    "support_projection_quadrature_current_l1_a": 1107.1450492169688,
+    "psi_norm_interpolation_first_l1_am": 87.96217393964646,
+    "support_projection_quadrature_first_l1_am": 96.4992164381242,
     "availability_undefined_cells": 0,
     "zero_current_leakage_a": 0.0,
     "clip_geometry": "held fixed to the banked linear support; prototype and oracle integrate the identical polygon"
   },
   "microbenchmark": {
-    "backend": "gpu",
+    "backend": "cpu",
     "dtype": "float64",
-    "single_update_median_ms": 0.43721002293750644,
-    "single_update_min_ms": 0.15329092275351286,
+    "evaluation_matrix_shape": [
+      2218,
+      1815
+    ],
+    "one_matrix_multiply_per_update": true,
+    "representation_output_shape": [
+      566,
+      3
+    ],
+    "single_update_median_ms": 5.326268961653113,
+    "single_update_min_ms": 4.423593985848129,
     "batch_size": 8,
-    "batch_update_ms": 0.6367489928379655,
-    "batch_per_state_ms": 0.07959362410474569,
+    "batch_update_ms": 40.22264960221946,
+    "batch_per_state_ms": 5.027831200277433,
     "jit_compatible": true,
     "vmap_compatible": true,
-    "batch_first_state_sup_difference": 4.121147867408581e-13
+    "batch_first_state_sup_difference": 7.312337402254343e-10
   },
   "trace_cells": [
-    430,
-    444,
-    542
+    396,
+    399,
+    513
   ],
   "gates": {
     "seven_samples_per_cell": true,
@@ -110,17 +146,17 @@
     "all_ring_supports_attributed": true,
     "interior_bitwise_unchanged": true,
     "topology_zero_exact": true,
-    "ring_current_weighted_l1": false,
-    "total_current": false,
+    "ring_current_weighted_l1": true,
+    "total_current": true,
     "argmax_target_shift": true,
     "all_target_sup": true,
     "jit_batch_compatible": true
   },
   "artifacts": {
-    "matrix_bank": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/57d0f89f-c6af-4053-b5de-b938e7dd5877/ring-support-attribution-prototype/scripts/ring_attribution/inputs/direct-target-matrices.npz",
-    "cell_table": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/57d0f89f-c6af-4053-b5de-b938e7dd5877/ring-support-attribution-prototype/scripts/ring_attribution/results/ring-cell-attribution.csv",
-    "field_bank": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/57d0f89f-c6af-4053-b5de-b938e7dd5877/ring-support-attribution-prototype/scripts/ring_attribution/results/ring-attribution-fields.npz",
-    "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/57d0f89f-c6af-4053-b5de-b938e7dd5877/ring-support-attribution-prototype/docs/figures/boundary-ring-source-completion/direct-ring-attribution-errors.png"
+    "matrix_bank": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/57d0f89f-c6af-4053-b5de-b938e7dd5877/in-cell-current-representation/scripts/ring_attribution/inputs/direct-target-matrices.npz",
+    "cell_table": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/57d0f89f-c6af-4053-b5de-b938e7dd5877/in-cell-current-representation/scripts/ring_attribution/results/ring-cell-attribution.csv",
+    "field_bank": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/57d0f89f-c6af-4053-b5de-b938e7dd5877/in-cell-current-representation/scripts/ring_attribution/results/ring-attribution-fields.npz",
+    "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/57d0f89f-c6af-4053-b5de-b938e7dd5877/in-cell-current-representation/docs/figures/boundary-ring-source-completion/direct-ring-attribution-errors.png"
   },
   "production_authority_follow_on": "Have the grid constructor expose its authoritative pre-clip vertex array; this prototype deliberately does not add that production API."
 }

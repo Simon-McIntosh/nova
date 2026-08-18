@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-17T22:49:54",
+  "updated": "2026-08-18T18:06:17",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -8117,9 +8117,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260818T154222346873-clip-attribution-defect-map",
+        "plan": "boundary-ring-source-completion",
+        "section": "\u00a74",
+        "node": "clip-attribution-defect-map",
+        "role": "implement",
+        "member": "ring-quadrature",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-18T15:42:24Z",
+        "completed_at": "2026-08-18T16:04:10Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1306,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1306,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "cac4b0933205a1f1b7ebb07b4dc2a24ab242974d",
+        "commits": [
+          "919bafcea9422ff5b0c6de8607d86d4a9418ea86"
+        ],
+        "changed_lines": {
+          "added": 1330,
+          "removed": 0,
+          "files": 10
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Defect localised: clip and affine attribution formulas exonerated (247 chord cases at binary64 round-off, complementary partitions close to 8.1e-16); the structural defect is support_moments scattering only to complete-ring centre cells, zeroing 96 of 447 supports and omitting -689027 A (4.592% of exact); curved shared-flux reconstruction measured viable; rungs 1-2 green, rung 3 oracle prescribed",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260818T154222346873-clip-attribution-defect-map/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01171-0694-7063-985b-f5d112e74147",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8283136,
+            "cached_input_tokens_cumulative": 12500736,
+            "input_tokens": 8670986,
+            "input_tokens_cumulative": 13048213,
+            "output_tokens": 46090,
+            "output_tokens_cumulative": 75538,
+            "reasoning_output_tokens": 14436,
+            "reasoning_output_tokens_cumulative": 24442
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 241
+    "_version": 242
   }
 }

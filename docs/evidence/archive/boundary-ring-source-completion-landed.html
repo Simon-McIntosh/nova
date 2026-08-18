@@ -84,5 +84,46 @@
   §4–§6 hold for owner adjudication: accept a candidate under explicitly relaxed bounds, direct a
   new ring mechanism for the resisting cells, or re-scope the gate.</p>
 
+  <h2 id="clip-attribution-defect-map">§4 — defect localisation: the formulas are clean; the availability zero is the defect</h2>
+
+  <p>Gate <strong>g-defect-map PASSED</strong> at lineage commit <code>919bafce</code> (run
+  <code>r-20260818T154222346873-clip-attribution-defect-map</code>; 9/9 localisation checks). The
+  owner's bug hypothesis was tested against the default hex path and adjudicated per suspect in
+  <a href="/nova/hex-clip-current-attribution.html">the research record</a>:</p>
+
+  <ul>
+    <li><strong>Exonerated:</strong> the psi_norm = 1 clip and the affine current/moment
+    attribution close at binary64 round-off over 247 chord cases (retained-area agreement to
+    2.7e-10 of a sliver case, scaled m0 error 1.16e-15, m1 5.74e-16); complementary partitions sum
+    to the uncut cell at 8.1e-16 of current scale; the coupling reconstructs physical m1 to
+    2.8e-14 A·m, and the banked coupling sup is 0.0134 Wb against the 10.935 Wb source error.</li>
+    <li><strong>Convicted:</strong> <code>InteriorCurrentMomentStencil.support_moments</code>
+    scatters moments only to cells with a complete neighbour ring — 351 of 447 nonempty supports.
+    The 96 ring-incomplete supports receive exactly zero, silently omitting −689,027 A
+    (4.592% of the exact −15.005 MA). The boundary cells are not misattributed; they are
+    dropped.</li>
+    <li><strong>Measured mechanism:</strong> a general quadratic shared flux reconstructs to
+    1.7e-16, while the exact quartic-radial Solov'ev toy leaves 1.464e-3 Wb shared-node error on a
+    0.24 m ring against 1.448e-3 Wb true vertex spread — curved-boundary reconstruction error sits
+    at the level of real field variation, so nodal reconstruction remains viable.</li>
+  </ul>
+
+  <p>The record's verification ladder is implementation-ready: rungs 1–2 (uncut hex closed forms;
+  straight-chord sweep with slivers and vertex cuts) are <strong>already green</strong> in the
+  banked reproducer (<code>scripts/clip_audit/audit_hex_clip.py</code>); rung 3 prescribes an
+  exact curved Solov'ev oracle (quartic flux, Gauss–Kronrod reference, curvature-bounded chord
+  envelope) without straightening the curve. Implementation order fixed by evidence: remove the
+  availability zero preserving the 351 complete-ring cells bitwise, validate net current on the
+  curved oracle, and only then promote centroid and first moments. Smoothing cannot create the
+  missing 96 stencil centres and stays retired.</p>
+
+  <figure>
+    <img src="/nova/figures/hex-clip-current-attribution/clip-audit.png"
+         alt="Spatial clip audit: chord sweep closure, Solov'ev node error, fixture availability map"
+         style="max-width:100%">
+    <figcaption>The audit's spatial evidence: exact chord-clip closure, Solov'ev shared-node error,
+    and the fixture availability map isolating the 96 zeroed boundary supports.</figcaption>
+  </figure>
+
 </main></body>
 </html>

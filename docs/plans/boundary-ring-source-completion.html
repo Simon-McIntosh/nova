@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-18">
-<meta name="plan-version" content="14">
+<meta name="plan-version" content="16">
 <meta name="plan-commits" content="f943bacba9ac64c404afe92c94d43f023950b349,919bafcea9422ff5b0c6de8607d86d4a9418ea86">
 <meta name="plan-artifacts" content="docs/evidence/archive/boundary-ring-source-completion-landed.html,docs/figures/boundary-ring-source-completion/ring-m0-relative-error.png,docs/research/hex-clip-current-attribution.html,docs/figures/hex-clip-current-attribution/clip-audit.png,scripts/ring_quadrature/results/ring-quadrature-results.json (lineage f943bacb),scripts/clip_audit/results/clip-audit-results.json (lineage 919bafce)">
 <meta name="plan-impl" content="0.33">
@@ -275,8 +275,9 @@
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="ring-node-set" data-choice="" data-by="" data-when="">
     <p class="r-dec-q">Which nodal set feeds the cubic interpolant on ring-incomplete supports?</p>
-    <p class="r-dec-ctx">Deferred by the owner&#x27;s 2026-08-18 ruling: the §3 honest negative routed to a bottom-up audit of the clipped-cell attribution itself (§4–§5). This decision re-opens for locking only after the ladder isolates the defect(s) and the §6 route prototype demonstrates the repair — the candidate set may change.</p>
+    <p class="r-dec-ctx">Deferred by the owner&#x27;s 2026-08-18 ruling pending the audit; the audit then exonerated the attribution formulas and convicted the availability zero. Owner steer 2026-08-18: evaluate own-nodes first — sample on the hex nodes + cell centroid and construct current and moments from there. Why the current path samples outside the cell: trial flux lives only at cell centres, so vertex values are themselves ring reconstructions (SharedNodeFluxStencil, runtime step 3), and the interior cubic additionally takes fitted first-moment constraints from the neighbour ring (step 8) — 10 dof exceeds 7 in-cell samples. own-nodes drops the cubic&#x27;s ring constraints on the boundary: the seven in-cell samples support an in-cell quadratic, the shared-node vertex values already exist on ring cells wherever vertex-sharing neighbours exist, and the clipped-moment integration is the audited closed-form machinery. The two quantified risks are scored in isolation by the §5 ladder: the psi_norm interpolation gate (quadratic reconstruction vs the exact quartic oracle) and outermost-vertex availability.</p>
     <p class="r-dec-opts">
+      <button class="r-opt" data-value="own-nodes">own-nodes: seven in-cell samples (six hex vertices + cell centroid), in-cell interpolant, j(psi_norm) integrated by the exonerated attribution over the clipped support. Vertex-value source is the sub-decision: (a) DIRECT flux targets — the grid-free coupling (FluxTarget.internal G0/GR/GZ + external Biot-Savart) evaluates trial flux at the vertices themselves, eliminating ring reconstruction and its measured ±1.2 mWb quartic-field error by construction, at the cost of ~3× coupling-matrix rows (shared vertices computed once, N_nodes ≈ 2 N_cells); or (b) RECONSTRUCTED — keep SharedNodeFluxStencil&#x27;s quadratic one-ring fit and inherit its measured node error</button>
       <button class="r-opt" data-value="own-geometry">own-geometry: the cell&#x27;s centroid, corners and fitted first moments only — no neighbour data</button>
       <button class="r-opt" data-value="one-sided">one-sided: extend the stencil with the available partial neighbour ring, weights re-derived for the incomplete pattern</button>
       </p>
@@ -335,6 +336,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260818T1615" data-who="reckon-ship" data-when="2026-08-18T16:15Z">
     <div class="r-comment-body">clip-attribution-defect-map landed — commit 919bafce; gate g-defect-map PASSED (9/9 localisation checks, 247 chord cases). Clip + affine attribution formulas exonerated at binary64 round-off; structural defect convicted: support_moments scatters only to complete-ring centre cells, zeroing 96/447 supports and omitting −689,027 A (4.592% of exact −15.005 MA). Curved shared-flux reconstruction measured viable (quartic toy node error 1.464e-3 Wb vs 1.448e-3 Wb true vertex spread). Ladder rungs 1–2 already green in the banked reproducer; rung 3 curved oracle fully prescribed. Coupling unchanged (sup 0.0134 Wb vs 10.935 Wb source error).</div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20260818T1710" data-who="Simon McIntosh (relayed by reckon-ship)" data-when="2026-08-18T17:10Z">
+    <div class="r-comment-body">Owner, on the audit figure 'Exact Solov'ev field sampled by one ring': the samples lie well outside the cell — why sample the field outside the hex at all; sample on the hex nodes + cell centroid and construct current and moments from there. Figure fact: the vertex (shared-node) values are reconstructed by a quadratic fitted to the six neighbouring cell centres ~0.4 m out; on the exact quartic field that reconstruction leaves ±≈1.2–1.5 mWb vertex error — the psi_norm interpolation error component. Because nova's flux operators are grid-free, vertex flux can instead be carried as direct targets, removing that component by construction; the §6 prototype scores own-nodes with direct vertex targets first, against own-nodes with reconstructed vertices.</div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

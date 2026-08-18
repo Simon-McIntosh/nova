@@ -22,8 +22,8 @@
   <title>Boundary Ring Source Completion | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-17">
-<meta name="plan-version" content="3">
+<meta name="plan-modified" content="2026-08-18">
+<meta name="plan-version" content="9">
 <meta name="plan-commits" content="f943bacba9ac64c404afe92c94d43f023950b349">
 <meta name="plan-artifacts" content="docs/evidence/archive/boundary-ring-source-completion-landed.html,docs/figures/boundary-ring-source-completion/ring-m0-relative-error.png,scripts/ring_quadrature/results/ring-quadrature-results.json (lineage f943bacb),scripts/ring_quadrature/results/ring-quadrature-fields.npz (lineage f943bacb)">
 <meta name="plan-impl" content="0.25">
@@ -90,7 +90,7 @@
     tracked files from day-old worktrees; the commits stay reachable through the worktree HEAD, so if
     the files are gone, recreate with
     <code>git worktree add --detach &lt;path&gt; 6d65b5fa</code> and <code>uv sync --all-extras</code>.
-    All work in this plan builds on that base; nothing merges to <code>main</code> before §6.</p>
+    All work in this plan builds on that base; nothing merges to <code>main</code> before §9.</p>
 
     <p>Measurement state to reuse (session scratchpad, tmpfs — may not survive; the durable numbers
     are all in the evidence record): the coarse-fixture resume bank
@@ -120,9 +120,86 @@
       </p>
     </section>
 
-    <h2 id="s4">§4 — Production implementation</h2>
+    <h2 id="s4">§4 — Defect localisation on the default hex-cell path</h2>
 
-    <p>Fold the verified ring evaluation into <code>ForwardSource</code> /
+    <p><em>Owner directive 2026-08-18.</em> The §3 negative is to be read as a symptom: bugs are
+    likely in the clipped plasma-cell calculations and in the current + current-moment attributions,
+    and the representation must be understood in detail before anything is implemented. Three exact
+    instruments are available: the <strong>Solov'ev oracle</strong> (exact plasma current and its
+    full spatial distribution), the <strong>hexagonal plasma cells with linear capability</strong>,
+    and the <strong>GS relationship</strong> mapping the flux functions and psi_norm to current
+    density. The audit targets the default hex plasma-cell path only — the shipped modules under
+    <code>nova/equilibrium/</code> (<code>source.py</code> ForwardSource,
+    <code>stencil_mesh.py</code> hex tiling + InteriorCurrentMomentStencil,
+    <code>separatrix_clip.py</code>, <code>moment.py</code>, <code>conservation.py</code>,
+    <code>profile.py</code>) — per the locked single-code-path decision.</p>
+
+    <p><strong>Deliverable:</strong> a research record
+    (<code>docs/research/hex-clip-current-attribution.html</code>) that maps the exact call path a
+    bisected boundary cell takes — construction → psi_norm = 1 clip → net-current attribution →
+    centroid → first moments → coupling — at low call depth, with every suspected defect either
+    reproduced or refuted by a minimal single-cell probe, and a closed-form toy reference stated
+    for every §5 rung. <strong>Done when (gate g-defect-map):</strong> the record validates with
+    the doc checker; the call path is named function-by-function; each suspected defect in the clip
+    and attribution machinery carries a minimal reproducing probe or an explicit refutation with
+    the probe that cleared it; each §5 rung has its closed-form or reference-quadrature toy stated
+    precisely enough to implement without further research; figures embed wherever the relationship
+    is spatial.</p>
+
+    <h2 id="s5">§5 — The single-element evidence ladder</h2>
+
+    <p>Evidence collection starts at one element with a known toy solution and climbs; each rung is
+    a gate, ordered by the locked boundary-cell priority (net current → centroid → first moments).
+    A failing rung stops the climb and localises the defect — that is its job. All rungs run on the
+    default hex path with no smoothing, blending, or per-cell tuning; harness files are named by
+    mechanism, never by rung label.</p>
+
+    <ul>
+      <li><strong>R1 — uncut single hex cell, linear density.</strong> Closed-form area, centroid,
+      and first moments of an affine density over a hexagon (exact Green/shoelace forms).
+      <em>Gate:</em> the default path reproduces all three at float64 round-off (relative
+      1e-13).</li>
+      <li><strong>R2 — single hex cell bisected by a straight chord.</strong> Closed-form clipped
+      moments of the affine density over the partial polygon, swept over chord positions and angles
+      including near-vertex and sliver cuts. <em>Gate:</em> net current, then centroid, then first
+      moments agree with the closed forms at stated tolerance across the whole sweep; any
+      disagreement names the defective function.</li>
+      <li><strong>R3 — single hex cell cut by the exact Solov'ev psi_norm = 1 curve.</strong>
+      Reference adaptive quadrature of the exact current density over the curved partial cell,
+      separating the chord-linearisation error from attribution bugs. <em>Gate:</em> the default
+      path's error is bounded by the predicted curvature term, with the bound stated before the
+      measurement.</li>
+      <li><strong>R4 — the GS mapping on the boundary ring.</strong> j(psi_norm) through the flux
+      functions on every clipped support of the coarse fixture versus the oracle's exact per-cell
+      integrals: per-cell net current, centroid position, first moments, priority-ordered.
+      <em>Gate:</em> the per-cell net-current error and the ring m0 error population sit within the
+      interior's own error scale — the clause both §3 candidates failed.</li>
+      <li><strong>R5 — field consequence.</strong> The §3 contract re-scored under the repaired
+      attribution: total current within 0.5% of −15.005 MA, argmax-target shift ≤ 0.5 Wb, sup over
+      731 targets below the 0.826 Wb legacy control. <em>Gate:</em> all clauses pass
+      simultaneously.</li>
+    </ul>
+
+    <h2 id="s6">§6 — Route prototype for the default hex path</h2>
+
+    <p>The prototyped route the plan must produce before production work: the repaired boundary
+    evaluation demonstrated in place on the default hex path at measurement level, satisfying the
+    complete ladder. The forward GS model is critical to the whole project, so the prototype must
+    demonstrate the full bar, not only accuracy: <strong>robust</strong> (defined for every
+    nonempty support, no smoothing or tuning, zero-width limits agree both-sided);
+    <strong>fast</strong> — batchable and shardable on GPUs at very high throughput (a fixed-shape,
+    vectorised formulation over all boundary cells in one call, no data-dependent Python branching,
+    with a banked microbenchmark and a statement of JAX/batch compatibility); and
+    <strong>traceable at low depth</strong> (any cell's net current, centroid, and first moments
+    reproducible by an independent short probe of stated depth). <strong>Done when:</strong> the
+    ladder gates R1–R5 pass on the prototype; the batch formulation and microbenchmark are banked;
+    the traceability probe is demonstrated on the worst §3 resisting cells; the ring-node-set
+    decision (or its successor shaped by §4's findings) is locked from evidence; owner sign-off
+    recorded before §7 opens.</p>
+
+    <h2 id="s7">§7 — Production implementation</h2>
+
+    <p>Fold the route prototyped in §6 into <code>ForwardSource</code> /
     <code>InteriorCurrentMomentStencil</code> so <em>every</em> nonempty support has a defined
     evaluation through one support-moment callable — the stencil-availability seam ceases to exist as
     a code path. TDD against the existing pin set.</p>
@@ -136,7 +213,7 @@
     component suite (the 83-test set plus the new ring pins) is green; (f) committed to the lineage
     with the mechanism in the body.</p>
 
-    <h2 id="s5">§5 — Analytic-seed adjudication</h2>
+    <h2 id="s8">§8 — Analytic-seed adjudication</h2>
 
     <p>Re-run the seed-defect measurement and the direct solves that convicted the source. This is
     the plan's scientific verdict on whether the discrete equilibrium now sits closer to the analytic
@@ -148,10 +225,10 @@
     analytic seed are reported per fixture against the banked route controls, and any configuration
     closing the unchanged 1e-6 residual gate gets the complete unchanged physics gate set scored at
     its root; (c) if the repaired map still does not admit a direct analytic-seed root, the residual
-    trend across the damping set is banked and the obstruction named — that outcome routes to §6's
+    trend across the damping set is banked and the obstruction named — that outcome routes to §9's
     continuation rather than failing the plan.</p>
 
-    <h2 id="s6">§6 — Continuation, full gates, and the merge adjudication</h2>
+    <h2 id="s9">§9 — Continuation, full gates, and the merge adjudication</h2>
 
     <p>The decisive solve: the fine 1069-cell continuation from fraction 0 at zero smoothing under
     the repaired map, identical step policy and unchanged 10×30 budget, every accepted fraction
@@ -172,6 +249,7 @@
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="ring-node-set" data-choice="" data-by="" data-when="">
     <p class="r-dec-q">Which nodal set feeds the cubic interpolant on ring-incomplete supports?</p>
+    <p class="r-dec-ctx">Deferred by the owner&#x27;s 2026-08-18 ruling: the §3 honest negative routed to a bottom-up audit of the clipped-cell attribution itself (§4–§5). This decision re-opens for locking only after the ladder isolates the defect(s) and the §6 route prototype demonstrates the repair — the candidate set may change.</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="own-geometry">own-geometry: the cell&#x27;s centroid, corners and fitted first moments only — no neighbour data</button>
       <button class="r-opt" data-value="one-sided">one-sided: extend the stencil with the available partial neighbour ring, weights re-derived for the incomplete pattern</button>
@@ -191,6 +269,15 @@
         agree at width zero), so smoothing treated a symptom of the two-path seam that no longer
         exists. All gates in this plan run at zero smoothing width.</p>
     </div>
+<div class="r-dec" data-key="boundary-cell-priority" data-choice="net-current, then centroid, then first moments" data-by="Simon McIntosh" data-when="2026-08-18">
+    <p class="r-dec-q">In what priority order must a cell bisected by the psi_norm = 1 boundary be repaired?</p>
+    <p class="r-dec-ctx">Owner ruling on the §3 honest negative: the complementary candidate failures point at the attribution machinery, not the interpolation order.</p>
+    <p class="r-dec-rat">For any boundary cell bisected by the psi_norm = 1 surface the repair lands in strict priority order: (1) the net plasma current of the cell exactly right, (2) the centroid of the clipped current in the right position, (3) the first moments right. The evidence ladder and its gates are ordered by this priority; a rung may not trade a higher priority for a lower one.</p>
+    </div>
+<div class="r-dec" data-key="single-code-path" data-choice="default-hex-path" data-by="Simon McIntosh" data-when="2026-08-18">
+    <p class="r-dec-q">Where does the repaired boundary evaluation live?</p>
+    <p class="r-dec-rat">All probes, prototypes and fixes target the default hexagonal plasma-cell path in place — the shipped tiling, clip, and attribution modules under nova/equilibrium/. No parallel modules, wrappers, backend switches, or duplicate code paths; a superseded formula is replaced where it lives.</p>
+    </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
@@ -203,10 +290,16 @@
     <pre class="r-fu-prompt">/reckon-ship boundary-ring-source-completion</pre>
     <p class="r-fu-outcome">§3 executed and promoted (commit f943bacb): honest negative — neither nodal candidate satisfies the full gate contract (own-geometry repairs flux but misses current 0.686% and ring-error population 62.4×; one-sided repairs current but misses argmax 0.760 Wb and ring-error 82.8×). Production untouched per the §3 stop rule; ring-node-set stays open; adjudication carried by f-brs-002.</p>
     </article>
-<article class="r-fu" data-id="f-brs-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-17" data-recommends-skill="/reckon-edit" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-brs-002" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-17" data-recommends-skill="/reckon-edit" data-resolved-at="2026-08-18T15:39:36+00:00" data-resolved-by="Simon McIntosh">
     <h4 class="r-fu-title">Adjudicate the ring construction after the honest negative</h4>
     <div class="r-fu-body"><p>Owner-owned scientific adjudication (exemption: authority-required — the plan's §3 stop rule reserves any production path to the owner after a gate miss). Both candidates fail complementarily: own-geometry repairs the flux field (argmax +0.091 Wb, sup 0.340 Wb, 2.4× under legacy) but misstates total current by 0.686% and leaves a distinct ring error population (62.4× interior p95); one-sided repairs current (0.468%) but not the argmax flux (0.760 Wb) nor the ring population (82.8×). Options: accept a candidate under explicitly relaxed bounds, direct a new mechanism for the common resisting cells (8, 5, 78, 26, 257, 17, 23, 76 — small-current irregular polygons), or re-scope the gate. Evidence: the §3 anchor in the cumulative record. After the lock, resume execution with the prompt below.</p></div>
     <pre class="r-fu-prompt">/reckon-ship boundary-ring-source-completion</pre>
+    <p class="r-fu-outcome">Owner ruled 2026-08-18: neither candidate is accepted and no bound is relaxed. The complementary failures are to be treated as symptoms of likely bugs in the clipped plasma-cell calculations and the current + current-moment attributions. Route: research the boundary current representation fully, build a single-element evidence ladder against the Solov'ev oracle with gates per rung (priority: net cell current, centroid position, first moments), produce a prototyped route on the default hex plasma-cell path (no parallel code), and only then implement. The forward GS model must end accurate, robust, GPU-batchable at very high throughput, and traceable at low depth. Recorded as §4–§6 and the locked decisions boundary-cell-priority and single-code-path.</p>
+    </article>
+<article class="r-fu" data-id="f-brs-003" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-18" data-recommends-skill="/reckon-ship boundary-ring-source-completion §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Execute the defect localisation, then the evidence ladder</h4>
+    <div class="r-fu-body"><p>Owner-directed route: §4 defect-localisation research on the default hex path first (research record with reproduced-or-refuted probes and closed-form rung references), then the §5 ladder rung by rung under its gates, then the §6 route prototype. Production (§7) stays closed until §6 passes.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship boundary-ring-source-completion §4</pre>
     </article>
 </section>
 

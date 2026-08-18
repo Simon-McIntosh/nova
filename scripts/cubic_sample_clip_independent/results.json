@@ -1,0 +1,143 @@
+{
+  "arms": {
+    "seven_sample_density_degree_four": {
+      "centroid_weighted_mean_mm": 0.5524752452406476,
+      "centroid_weighted_p95_mm": 1.6022061831484296,
+      "fixed_density_total_degree": 4,
+      "fixture_total_current_a": -15066191.802717878,
+      "fixture_total_current_relative_error": 0.004049884231382972,
+      "flux_polynomial_total_degree": 2,
+      "name": "seven_sample_density_degree_four",
+      "projection_condition_max": 2843.780846922187,
+      "ring_m0_absolute_error_a": 3377.752311415259,
+      "ring_m0_current_weighted_l1": 0.0049703253516180275,
+      "ring_m1_absolute_vector_error_am": 303.3368592958251,
+      "ring_m1_normalised_l1": 0.003040278570406797,
+      "ring_net_current_error_a": -2392.097467771774,
+      "ring_net_current_relative_error": 0.003519945097047599,
+      "samples_per_cell": 7,
+      "topology_zero_current_a": 0.0,
+      "verdict": "does_not_reach_m0_threshold",
+      "width_zero_jvp": {
+        "checked": false,
+        "passed": null,
+        "reason": "ring m0 L1 exceeds 0.25 percent"
+      }
+    },
+    "seven_sample_density_degree_three": {
+      "centroid_weighted_mean_mm": 0.7866594780774963,
+      "centroid_weighted_p95_mm": 2.891046258162128,
+      "fixed_density_total_degree": 3,
+      "fixture_total_current_a": -15067008.582183719,
+      "fixture_total_current_relative_error": 0.004104316521828855,
+      "flux_polynomial_total_degree": 2,
+      "name": "seven_sample_density_degree_three",
+      "projection_condition_max": 259.0381520392152,
+      "ring_m0_absolute_error_a": 3978.3766637188037,
+      "ring_m0_current_weighted_l1": 0.0058541374757233155,
+      "ring_m1_absolute_vector_error_am": 433.81052857241605,
+      "ring_m1_normalised_l1": 0.0043479874377855224,
+      "ring_net_current_error_a": -3208.876933613459,
+      "ring_net_current_relative_error": 0.00472182709177947,
+      "samples_per_cell": 7,
+      "topology_zero_current_a": 0.0,
+      "verdict": "does_not_reach_m0_threshold",
+      "width_zero_jvp": {
+        "checked": false,
+        "passed": null,
+        "reason": "ring m0 L1 exceeds 0.25 percent"
+      }
+    },
+    "thirteen_sample_density_degree_four": {
+      "centroid_weighted_mean_mm": 0.5468811593776397,
+      "centroid_weighted_p95_mm": 1.6904304279782374,
+      "fixed_density_total_degree": 4,
+      "fixture_total_current_a": -15066503.27177862,
+      "fixture_total_current_relative_error": 0.00407064133301005,
+      "flux_polynomial_total_degree": 3,
+      "name": "thirteen_sample_density_degree_four",
+      "projection_condition_max": 2843.780846922187,
+      "ring_m0_absolute_error_a": 3656.713419399775,
+      "ring_m0_current_weighted_l1": 0.005380813551846642,
+      "ring_m1_absolute_vector_error_am": 277.9170468682892,
+      "ring_m1_normalised_l1": 0.0027855013858384416,
+      "ring_net_current_error_a": -2703.566528515871,
+      "ring_net_current_relative_error": 0.00397826839198819,
+      "samples_per_cell": 13,
+      "topology_zero_current_a": 0.0,
+      "verdict": "does_not_reach_m0_threshold",
+      "width_zero_jvp": {
+        "checked": false,
+        "passed": null,
+        "reason": "ring m0 L1 exceeds 0.25 percent"
+      }
+    },
+    "thirteen_sample_density_degree_three": {
+      "centroid_weighted_mean_mm": 0.7746040259169371,
+      "centroid_weighted_p95_mm": 2.9717957318522,
+      "fixed_density_total_degree": 3,
+      "fixture_total_current_a": -15067319.015289044,
+      "fixture_total_current_relative_error": 0.004125004584714764,
+      "flux_polynomial_total_degree": 3,
+      "name": "thirteen_sample_density_degree_three",
+      "projection_condition_max": 259.0381520392152,
+      "ring_m0_absolute_error_a": 4133.741742395461,
+      "ring_m0_current_weighted_l1": 0.006082755479089929,
+      "ring_m1_absolute_vector_error_am": 391.7319359639786,
+      "ring_m1_normalised_l1": 0.003926242966384018,
+      "ring_net_current_error_a": -3519.310038939366,
+      "ring_net_current_relative_error": 0.00517862598972364,
+      "samples_per_cell": 13,
+      "topology_zero_current_a": 0.0,
+      "verdict": "does_not_reach_m0_threshold",
+      "width_zero_jvp": {
+        "checked": false,
+        "passed": null,
+        "reason": "ring m0 L1 exceeds 0.25 percent"
+      }
+    }
+  },
+  "controls": {
+    "landed_clip_independent_fold": {
+      "centroid_weighted_p95_mm": 2.891046258162127,
+      "fixture_total_current_relative_error": 0.004104316521828855,
+      "ring_m0_current_weighted_l1": 0.005854137475723323,
+      "ring_m1_normalised_l1": 0.0043479874377855094
+    },
+    "landed_fold_reproduction_difference": {
+      "centroid_weighted_p95_mm": 8.881784197001252e-16,
+      "fixture_total_current_relative_error": 0.0,
+      "ring_m0_current_weighted_l1": -7.806255641895632e-18,
+      "ring_m1_normalised_l1": 1.3010426069826053e-17
+    },
+    "support_matched_prototype": {
+      "centroid_weighted_p95_mm": 0.3407270636020294,
+      "ring_m0_current_weighted_l1": 0.0024049251821496712,
+      "ring_m1_normalised_l1": 0.0012399239140626279,
+      "ring_net_current_relative_error": 0.0015040949772473923
+    }
+  },
+  "fixture": {
+    "cells": 566,
+    "oracle_ring_absolute_current_a": 679583.7440129898,
+    "oracle_ring_current_a": -679583.7440129898,
+    "ring_cells": 96,
+    "ring_current_bearing_cells": 73,
+    "topology_zero_ring_cells": 17
+  },
+  "representation": {
+    "clip_role": "integration domain only",
+    "density_total_degrees": [
+      3,
+      4
+    ],
+    "fixed_full_hex_collocation_points": 42,
+    "moment_evaluation": "closed simplex edge moments through density degree plus one",
+    "production_commit": "ca77200c287c0151c87bba832a4c889a3b02edcb",
+    "sample_sets": {
+      "seven": "cell centroid and six authoritative pre-clip vertices",
+      "thirteen": "cell centroid, six authoritative pre-clip vertices, and six edge midpoints"
+    }
+  },
+  "verdict": "not_closed"
+}

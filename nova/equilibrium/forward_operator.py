@@ -21,7 +21,8 @@ that varies across a batch (the trial flux, the conductor currents) is an
 explicit argument, which is what ``jit``, ``vmap`` and ``grad`` need.
 
 All fluxes are total poloidal fluxes, :math:`\Phi = 2 \pi R A_\phi` in Wb,
-concatenated over the plasma grid nodes followed by the wall nodes.
+concatenated over the plasma grid nodes, wall nodes and, when present, the
+direct pre-clip sample nodes.
 """
 
 from __future__ import annotations
@@ -58,6 +59,7 @@ class ForwardFluxOperator:
     polarity: int = 1
     inside_material: jnp.ndarray | None = field(repr=False, default=None)
     moment_geometry: MomentGeometry | None = field(repr=False, default=None)
+    sample: FluxTarget | None = field(repr=False, default=None)
     use_linear_moments: bool = field(repr=False, default=True)
     smoothing_epsilon: float = field(repr=False, default=0.0)
 
@@ -82,6 +84,12 @@ class ForwardFluxOperator:
         ):
             raise ValueError("moment geometry must carry one polygon per grid node")
         if self.moment_geometry is not None:
+            if self.sample is not None and self.sample.node_number != len(
+                self.moment_geometry.sample_node_coordinates
+            ):
+                raise ValueError(
+                    "direct sample target rows must match the moment sampling nodes"
+                )
             self._build_moment_stencils()
 
     def _build_moment_stencils(self) -> None:
@@ -94,13 +102,17 @@ class ForwardFluxOperator:
         polygon_size = np.asarray(
             [len(polygon) for polygon in self.moment_geometry.polygons]
         )
+        sample_size = np.asarray(self.moment_geometry.sample_vertex_count)
         stencils = []
         for vertex_count in (4, 6):
-            selected = polygon_size[ring[:, 0]] == vertex_count
-            if not np.any(selected):
+            support_centre = np.flatnonzero(sample_size == vertex_count)
+            if len(support_centre) == 0:
                 continue
+            selected = (polygon_size[ring[:, 0]] == vertex_count) & (
+                sample_size[ring[:, 0]] == vertex_count
+            )
             mesh = StencilMesh(coordinate, ring[selected], area)
-            cell_node = np.zeros((len(coordinate), vertex_count), dtype=np.intp)
+            cell_node = np.asarray(atomic.cell_nodes[:, :vertex_count], dtype=np.intp)
             for centre in mesh.centre:
                 vertices = self.moment_geometry.polygons[int(centre)]
                 distance = np.sum(
@@ -119,6 +131,11 @@ class ForwardFluxOperator:
                 self.moment_geometry.second_moment[:, :2],
                 node_coordinate=node,
                 polygon_centroid=atomic.centroids,
+                support_centre=support_centre,
+                sampling_node_coordinate=self.moment_geometry.sample_node_coordinates,
+                sampling_cell_node=self.moment_geometry.cell_sample_nodes[
+                    :, :vertex_count
+                ],
             )
             stencils.append(stencil)
         self._moment_mesh = StencilMesh(coordinate, ring, area)
@@ -126,7 +143,13 @@ class ForwardFluxOperator:
 
     @property
     def node_number(self) -> int:
-        """Return the length of the concatenated grid and wall flux vector."""
+        """Return the length of the physical and direct-sample flux vector."""
+        direct = 0 if self.sample is None else self.sample.node_number
+        return self.grid.node_number + self.wall.node_number + direct
+
+    @property
+    def physical_node_number(self) -> int:
+        """Return the centre and wall prefix consumed by topology and receipts."""
         return self.grid.node_number + self.wall.node_number
 
     @property
@@ -141,18 +164,39 @@ class ForwardFluxOperator:
     def external(self, current=None) -> jax.Array:
         """Return the flux map [Wb] of every conductor but the plasma."""
         conductor = self._current(current)
-        return jnp.r_[self.grid.external(conductor), self.wall.external(conductor)]
+        physical = jnp.r_[self.grid.external(conductor), self.wall.external(conductor)]
+        if self.sample is None:
+            return physical
+        return jnp.r_[physical, self.sample.external(conductor)]
 
     def read(self, psi) -> tuple[DomainMasks, TopologyState]:
         """Return the domain labels and axis/separatrix state of a trial flux."""
-        return self.topology.read(psi, self.polarity, self.inside_material)
+        return self.topology.read(
+            jnp.asarray(psi)[: self.physical_node_number],
+            self.polarity,
+            self.inside_material,
+        )
 
     def shared_node_flux(self, psi) -> jax.Array:
         """Evaluate the plasma-grid flux on fixed atomic shared nodes."""
         if self.moment_geometry is None:
             raise ValueError("moment geometry is required for shared-node flux")
-        grid_flux, _wall_flux = self.topology.split_flux_map(psi)
+        grid_flux, _wall_flux = self.topology.split_flux_map(
+            jnp.asarray(psi)[: self.physical_node_number]
+        )
         return self.moment_geometry.shared_node_flux(grid_flux)
+
+    def sample_node_flux(self, psi) -> jax.Array:
+        """Return direct pre-clip vertex flux, or the structured fallback fit."""
+        if self.moment_geometry is None:
+            raise ValueError("moment geometry is required for sampling-node flux")
+        values = jnp.asarray(psi)
+        if self.sample is not None:
+            return values[self.physical_node_number :]
+        grid_flux, _wall_flux = self.topology.split_flux_map(
+            values[: self.physical_node_number]
+        )
+        return self.moment_geometry.sample_node_flux(grid_flux)
 
     def current_density_gradient(self, density) -> jax.Array:
         """Return fitted radial and vertical derivatives of a cell field."""
@@ -175,9 +219,15 @@ class ForwardFluxOperator:
         return CellCurrentMoments(*vectors)
 
     def support_current_moments(
-        self, centroid_density, shared_density, support
+        self,
+        profile,
+        centroid_flux,
+        centroid_density,
+        shared_density,
+        sample_flux,
+        support,
     ) -> CellCurrentMoments:
-        """Integrate the common cubic density over one traced support partition."""
+        """Evaluate every nonempty support through one moment callable."""
         if self.moment_geometry is None:
             raise ValueError("moment geometry is required for current moments")
         vectors = jnp.zeros(
@@ -185,7 +235,14 @@ class ForwardFluxOperator:
         )
         for stencil in self._interior_moment_stencils:
             vectors = vectors + jnp.stack(
-                stencil.support_moments(centroid_density, shared_density, support)
+                stencil.support_flux_moments(
+                    profile,
+                    centroid_flux,
+                    centroid_density,
+                    shared_density,
+                    sample_flux,
+                    support,
+                )
             )
         return CellCurrentMoments(*vectors)
 
@@ -243,7 +300,9 @@ class ForwardFluxOperator:
             zero = jnp.zeros_like(current)
             return CellCurrentMoments(current, zero, zero)
         shared_flux = self.shared_node_flux(psi)
+        sample_flux = self.sample_node_flux(psi)
         shared_masks = self.shared_domain_masks(masks, topology, shared_flux)
+        sample_psi_norm = (sample_flux - topology.axis_flux) / topology.flux_span
         signed_flux = self.polarity * (shared_flux - topology.boundary_flux)
         if self.smoothing_epsilon == 0.0:
             core_support = self.moment_geometry.atomic_mesh.traced_clip(signed_flux)
@@ -265,6 +324,7 @@ class ForwardFluxOperator:
             self.support_current_moments,
             core_support,
             common_support,
+            sample_flux=sample_psi_norm,
         )
         return self.coupling_current_moments(moments)
 
@@ -291,7 +351,10 @@ class ForwardFluxOperator:
     def internal(self, psi) -> jax.Array:
         """Return the flux map [Wb] generated by the plasma current."""
         moments = self.cell_current_moments(psi)
-        return jnp.r_[self.grid.internal(moments), self.wall.internal(moments)]
+        physical = jnp.r_[self.grid.internal(moments), self.wall.internal(moments)]
+        if self.sample is None:
+            return physical
+        return jnp.r_[physical, self.sample.internal(moments)]
 
     def __call__(self, psi, current=None) -> jax.Array:
         """Return the total poloidal flux [Wb] one write-then-read cycle gives."""

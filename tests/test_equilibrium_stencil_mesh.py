@@ -41,6 +41,7 @@ import math
 
 import numpy as np
 import pytest
+from scipy import integrate
 
 from nova.utilities.importmanager import skip_import
 
@@ -56,6 +57,7 @@ with skip_import("jax"):
     )
     from nova.equilibrium.domain import DomainMasks, PlasmaDomain
     from nova.equilibrium.source import DomainProfile, ForwardSource
+    from nova.equilibrium.separatrix_clip import POLYNOMIAL_POWERS
     from nova.equilibrium.stencil_mesh import (
         MomentGeometry,
         RING_CONDITION_LIMIT,
@@ -386,6 +388,277 @@ def test_moment_geometry_is_static_across_jitted_flux_updates():
 
     assert traces == 1
     assert first.shape == (len(geometry.atomic_mesh.node_coordinates),)
+
+
+def boundary_support_problem(profile=None):
+    """Return one mesh whose outer cells have own-node support evaluation."""
+    configure_dtypes()
+    pitch = 0.32
+    mesh = hex_mesh(pitch)
+    cells = [regular_hexagon_vertices(centre, pitch) for centre in mesh.coordinate]
+    geometry = MomentGeometry.from_cells(mesh, cells)
+    atomic = geometry.atomic_mesh
+    stencil = mesh.current_moment_stencil(
+        atomic.cell_nodes[:, :6],
+        geometry.second_moment[:, :2],
+        node_coordinate=atomic.node_coordinates,
+        polygon_centroid=atomic.centroids,
+        support_centre=np.arange(mesh.node_count),
+        sampling_node_coordinate=geometry.sample_node_coordinates,
+        sampling_cell_node=geometry.cell_sample_nodes[:, :6],
+    )
+    if profile is None:
+        profile = DomainProfile(
+            p_prime=lambda psi: -(1.0 + 0.2 * psi),
+            ff_prime=lambda psi: jnp.zeros_like(psi),
+        )
+
+    def flux(coordinate):
+        radius, height = coordinate[..., 0], coordinate[..., 1]
+        return (
+            0.35
+            + 0.04 * radius
+            - 0.03 * height
+            + 0.01 * radius**2
+            + 0.005 * radius * height
+        )
+
+    centroid_flux = jnp.asarray(flux(mesh.coordinate))
+    atomic_flux = jnp.asarray(flux(atomic.node_coordinates))
+    sample_flux = jnp.asarray(flux(geometry.sample_node_coordinates))
+    centroid_density = profile.current_density(
+        jnp.asarray(mesh.coordinate[:, 0]), centroid_flux
+    )
+    shared_density = profile.current_density(
+        jnp.asarray(atomic.node_coordinates[:, 0]), atomic_flux
+    )
+    ring = np.setdiff1d(np.arange(mesh.node_count), mesh.centre)
+    return {
+        "mesh": mesh,
+        "geometry": geometry,
+        "stencil": stencil,
+        "profile": profile,
+        "centroid_flux": centroid_flux,
+        "atomic_flux": atomic_flux,
+        "sample_flux": sample_flux,
+        "centroid_density": centroid_density,
+        "shared_density": shared_density,
+        "ring": ring,
+    }
+
+
+def evaluate_boundary_support(problem, support):
+    """Apply the production support callable to one fixed flux field."""
+    stencil = problem["stencil"]
+    return stencil.support_flux_moments(
+        problem["profile"],
+        problem["centroid_flux"],
+        problem["centroid_density"],
+        problem["shared_density"],
+        problem["sample_flux"],
+        support,
+    )
+
+
+def adaptive_polygon_integral(polygon, function) -> float:
+    """Integrate a scalar over one convex polygon with adaptive triangles."""
+    total = 0.0
+    anchor = polygon[0]
+    for first, second in zip(polygon[1:-1], polygon[2:], strict=True):
+        edge = np.column_stack((first - anchor, second - anchor))
+        determinant = abs(float(np.linalg.det(edge)))
+        value, _error = integrate.dblquad(
+            lambda vertical, radial: (
+                function(anchor + edge @ np.asarray([radial, vertical])) * determinant
+            ),
+            0.0,
+            1.0,
+            0.0,
+            lambda radial: 1.0 - radial,
+            epsabs=2.0e-13,
+            epsrel=2.0e-13,
+        )
+        total += value
+    return total
+
+
+def test_boundary_supports_preserve_complete_ring_moments_bitwise():
+    """One callable retains the complete-ring contraction without rounding it."""
+    problem = boundary_support_problem()
+    atomic = problem["geometry"].atomic_mesh
+    support = atomic.traced_clip(jnp.ones(len(atomic.node_coordinates)))
+    established = problem["stencil"].support_moments(
+        problem["centroid_density"], problem["shared_density"], support
+    )
+    attributed = evaluate_boundary_support(problem, support)
+    for previous, current in zip(established, attributed, strict=True):
+        assert np.array_equal(
+            np.asarray(previous)[problem["mesh"].centre],
+            np.asarray(current)[problem["mesh"].centre],
+        )
+    assert np.all(np.isfinite(np.asarray(attributed.cell_current)[problem["ring"]]))
+
+
+def test_boundary_affine_density_matches_adaptive_polygon_quadrature():
+    """A ring cell's fixed profile cubic is integrated at cubic tolerance."""
+    problem = boundary_support_problem()
+    atomic = problem["geometry"].atomic_mesh
+    support = atomic.traced_clip(jnp.ones(len(atomic.node_coordinates)))
+    attributed = evaluate_boundary_support(problem, support)
+    cell = int(problem["ring"][len(problem["ring"]) // 2])
+    polygon = np.asarray(problem["geometry"].polygons[cell])
+    centre = np.asarray(problem["mesh"].coordinate[cell])
+    scale = np.max(
+        np.abs(np.asarray(problem["geometry"].sampling_vertices[cell]) - centre),
+        axis=0,
+    )
+
+    def local_basis(point):
+        local = (point - centre) / scale
+        return np.asarray([local[0] ** p * local[1] ** q for p, q in POLYNOMIAL_POWERS])
+
+    stencil = problem["stencil"]
+    ring_slot = int(np.flatnonzero(stencil.ring_centre == cell)[0])
+    pool = np.concatenate(
+        [np.asarray(problem["centroid_flux"]), np.asarray(problem["sample_flux"])]
+    )
+    gathered = pool[stencil.ring_gather_index[ring_slot]]
+    flux_coefficient = stencil.ring_flux_weight[ring_slot] @ gathered
+    profile_flux = stencil.ring_profile_flux_design[ring_slot] @ flux_coefficient
+    profile_density = np.asarray(
+        problem["profile"].current_density(
+            stencil.ring_profile_point[ring_slot, :, 0], profile_flux
+        )
+    )
+    coefficient = stencil.ring_profile_weight[ring_slot] @ profile_density
+    expected = np.asarray(
+        [
+            adaptive_polygon_integral(
+                polygon,
+                lambda point, component=component: (
+                    (coefficient @ local_basis(point))
+                    * (
+                        1.0
+                        if component == 0
+                        else point[component - 1] - centre[component - 1]
+                    )
+                ),
+            )
+            for component in range(3)
+        ]
+    )
+    actual = np.asarray(
+        [
+            attributed.cell_current[cell],
+            attributed.radial_moment[cell],
+            attributed.vertical_moment[cell],
+        ]
+    )
+    np.testing.assert_allclose(actual, expected, rtol=2.0e-13, atol=2.0e-13)
+
+
+def test_boundary_support_error_converges_with_missing_area():
+    """Moment error falls in proportion to the omitted ring-cell area."""
+    problem = boundary_support_problem()
+    atomic = problem["geometry"].atomic_mesh
+    cell = int(problem["ring"][len(problem["ring"]) // 2])
+    polygon = np.asarray(problem["geometry"].polygons[cell])
+    centre = problem["mesh"].coordinate[cell]
+    half_width = 0.5 * np.ptp(polygon, axis=0)
+
+    class EdgeVanishingCubic:
+        def current_density(self, radius, height):
+            radial = (radius - centre[0]) / half_width[0]
+            vertical = (height - centre[1]) / half_width[1]
+            return (
+                1.0
+                - radial
+                + 0.2 * vertical
+                + 0.1 * radial**2
+                - 0.2 * radial * vertical
+                - 0.1 * radial**3
+            )
+
+    profile = EdgeVanishingCubic()
+    centroid_flux = jnp.asarray(problem["mesh"].coordinate[:, 1])
+    sample_flux = jnp.asarray(problem["geometry"].sample_node_coordinates[:, 1])
+    full_support = atomic.traced_clip(jnp.ones(len(atomic.node_coordinates)))
+
+    def evaluate(support):
+        moments = problem["stencil"].support_flux_moments(
+            profile,
+            centroid_flux,
+            problem["centroid_density"],
+            problem["shared_density"],
+            sample_flux,
+            support,
+        )
+        return np.asarray(jnp.stack(moments))[:, cell]
+
+    full = evaluate(full_support)
+    width = float(np.ptp(polygon[:, 0]))
+    maximum = float(np.max(polygon[:, 0]))
+    observed_missing = []
+    for missing_fraction in (2.8e-4, 2.0e-4, 1.0e-4, 3.0e-5):
+        cut = maximum - width * missing_fraction
+        support = atomic.traced_clip(cut - atomic.node_coordinates[:, 0])
+        value = evaluate(support)
+        observed = float(1.0 - support.area[cell] / support.full_area[cell])
+        observed_missing.append(observed)
+        error = float(np.max(np.abs(value - full) / np.maximum(np.abs(full), 1.0e-30)))
+        assert error <= 4.1 * observed
+    assert np.all(np.diff(observed_missing) < 0.0)
+
+
+def test_boundary_support_is_c1_at_full_fill_without_smoothing():
+    """Both-sided support JVPs agree at the exact full-cell transition."""
+    profile = DomainProfile(
+        p_prime=lambda psi: -((1.0 - psi) ** 2),
+        ff_prime=lambda psi: jnp.zeros_like(psi),
+    )
+    problem = boundary_support_problem(profile)
+    atomic = problem["geometry"].atomic_mesh
+    cell = int(problem["ring"][len(problem["ring"]) // 2])
+    centre = problem["mesh"].coordinate[cell]
+    half_width = 0.5 * np.ptp(problem["geometry"].polygons[cell], axis=0)
+    atomic_u = (atomic.node_coordinates[:, 0] - centre[0]) / half_width[0]
+    sample_u = (
+        problem["geometry"].sample_node_coordinates[:, 0] - centre[0]
+    ) / half_width[0]
+    centroid_u = (problem["mesh"].coordinate[:, 0] - centre[0]) / half_width[0]
+
+    def composed(cut):
+        support = atomic.traced_clip(cut - jnp.asarray(atomic_u))
+        centroid_flux = 1.0 - (cut - jnp.asarray(centroid_u))
+        shared_flux = jnp.clip(1.0 - (cut - jnp.asarray(atomic_u)), 0.0, 1.0)
+        sample_flux = 1.0 - (cut - jnp.asarray(sample_u))
+        centroid_density = profile.current_density(
+            jnp.asarray(problem["mesh"].coordinate[:, 0]), centroid_flux
+        )
+        shared_density = profile.current_density(
+            jnp.asarray(atomic.node_coordinates[:, 0]), shared_flux
+        )
+        moments = problem["stencil"].support_flux_moments(
+            profile,
+            centroid_flux,
+            centroid_density,
+            shared_density,
+            sample_flux,
+            support,
+        )
+        return jnp.stack(moments)[:, cell]
+
+    displacement = 2.0e-7
+    left_value, left_derivative = jax.jvp(
+        composed, (jnp.asarray(1.0 - displacement),), (jnp.asarray(1.0),)
+    )
+    right_value, right_derivative = jax.jvp(
+        composed, (jnp.asarray(1.0 + displacement),), (jnp.asarray(1.0),)
+    )
+    assert np.all(np.isfinite(np.asarray([left_value, right_value])))
+    np.testing.assert_allclose(
+        left_derivative, right_derivative, rtol=2.0e-6, atol=2.0e-9
+    )
 
 
 # --------------------------------------------------------------------------

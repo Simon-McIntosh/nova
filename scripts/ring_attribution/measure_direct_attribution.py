@@ -93,11 +93,7 @@ def source_current_density(
     radius, height = coordinates[..., 0], coordinates[..., 1]
     if flux is None:
         flux = case.flux(radius, height)
-    psi_norm = np.clip(
-        (flux - axis_flux) / (boundary_flux - axis_flux),
-        0.0,
-        1.0,
-    )
+    psi_norm = (flux - axis_flux) / (boundary_flux - axis_flux)
     pressure_gradient = np.interp(psi_norm, case.psi_norm, case.p_prime)
     diamagnetic_gradient = np.interp(psi_norm, case.psi_norm, case.ff_prime)
     return -TOTAL_FLUX_FACTOR * (
@@ -115,6 +111,25 @@ def quadratic_design(local: np.ndarray) -> np.ndarray:
             radial**2,
             radial * vertical,
             vertical**2,
+        ],
+        axis=-1,
+    )
+
+
+def cubic_design(local: np.ndarray) -> np.ndarray:
+    radial, vertical = local[..., 0], local[..., 1]
+    return np.stack(
+        [
+            np.ones_like(radial),
+            radial,
+            vertical,
+            radial**2,
+            radial * vertical,
+            vertical**2,
+            radial**3,
+            radial**2 * vertical,
+            radial * vertical**2,
+            vertical**3,
         ],
         axis=-1,
     )
@@ -146,37 +161,16 @@ def triangle_degree_five_rule() -> tuple[np.ndarray, np.ndarray]:
     return barycentric, weight
 
 
-def affine_projection_geometry(
+def fixed_profile_geometry(
     vertices: np.ndarray,
-    vertex_count: np.ndarray,
     centres: np.ndarray,
     scale: np.ndarray,
 ) -> dict[str, np.ndarray]:
     cell_count, capacity, _coordinate = vertices.shape
-    slot = np.arange(capacity)
-    valid = slot[None, :] < vertex_count[:, None]
-    following_slot = np.where(
-        slot[None, :] + 1 < vertex_count[:, None], slot[None, :] + 1, 0
-    )
-    following = np.take_along_axis(vertices, following_slot[..., None], axis=1)
-    local_vertex = vertices - centres[:, None, :]
-    local_following = following - centres[:, None, :]
-    cross = (
-        local_vertex[..., 0] * local_following[..., 1]
-        - local_following[..., 0] * local_vertex[..., 1]
-    )
-    cross = np.where(valid, cross, 0.0)
-    area_twice = np.sum(cross, axis=1)
-    included = vertex_count >= 3
-    safe_area_twice = np.where(included, area_twice, 1.0)
-    support_centre = centres + np.sum(
-        (local_vertex + local_following) * cross[..., None], axis=1
-    ) / (3.0 * safe_area_twice[:, None])
-    support_centre = np.where(included[:, None], support_centre, centres)
-
+    following = np.roll(vertices, -1, axis=1)
     triangles = np.stack(
         [
-            np.broadcast_to(support_centre[:, None, :], vertices.shape),
+            np.broadcast_to(centres[:, None, :], vertices.shape),
             vertices,
             following,
         ],
@@ -188,21 +182,17 @@ def affine_projection_geometry(
         triangle_first[..., 0] * triangle_second[..., 1]
         - triangle_first[..., 1] * triangle_second[..., 0]
     )
-    triangle_area = np.where(valid, triangle_area, 0.0)
     barycentric, quadrature_weight = triangle_degree_five_rule()
     points = np.einsum("qa,ntad->ntqd", barycentric, triangles)
     weight = triangle_area[:, :, None] * quadrature_weight[None, None, :]
     points = points.reshape(cell_count, capacity * len(quadrature_weight), 2)
     weight = weight.reshape(cell_count, capacity * len(quadrature_weight))
-    points = np.where(weight[..., None] > 0.0, points, centres[:, None, :])
     local = (points - centres[:, None, :]) / scale[:, None, :]
-    affine_design = quadratic_design(local)[..., :3]
-    weighted_design = affine_design * weight[..., None]
-    normal = np.einsum("nqi,nqj->nij", affine_design, weighted_design)
-    normal = np.where(included[:, None, None], normal, np.eye(3)[None, :, :])
+    density_design = cubic_design(local)
+    weighted_design = density_design * weight[..., None]
+    normal = np.einsum("nqi,nqj->nij", density_design, weighted_design)
     right = np.swapaxes(weighted_design, 1, 2)
     projection = np.linalg.solve(normal, right)
-    projection = np.where(included[:, None, None], projection, 0.0)
     condition = np.linalg.cond(normal)
     return {
         "points": points,
@@ -213,14 +203,14 @@ def affine_projection_geometry(
     }
 
 
-def affine_moment_operator(
+def polynomial_moment_operator(
     support_vertices: np.ndarray,
     support_vertex_count: np.ndarray,
     centres: np.ndarray,
     scale: np.ndarray,
 ) -> np.ndarray:
     responses = []
-    for column in range(3):
+    for column in range(10):
         coefficient = np.zeros((len(centres), 10))
         coefficient[:, column] = 1.0
         current, first = padded_polynomial_current_moments(
@@ -302,7 +292,7 @@ def reference_moments(
 
 
 def polynomial_values(local: np.ndarray, coefficient: np.ndarray) -> np.ndarray:
-    return np.einsum("...p,p->...", quadratic_design(local), coefficient[:6])
+    return np.einsum("...p,p->...", cubic_design(local), coefficient)
 
 
 def independent_polynomial_moments(
@@ -313,15 +303,7 @@ def independent_polynomial_moments(
 ) -> tuple[float, np.ndarray]:
     triangles = triangle_fan(vertices)
     area = triangle_areas(triangles)
-    barycentric = np.asarray(
-        [
-            [1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0],
-            [0.6, 0.2, 0.2],
-            [0.2, 0.6, 0.2],
-            [0.2, 0.2, 0.6],
-        ]
-    )
-    weight = np.asarray([-27.0, 25.0, 25.0, 25.0]) / 48.0
+    barycentric, weight = triangle_degree_five_rule()
     points = np.einsum("qa,tad->tqd", barycentric, triangles)
     density = polynomial_values((points - centre) / scale, coefficient)
     current = float(np.sum(area[:, None] * weight[None, :] * density))
@@ -417,16 +399,14 @@ def benchmark_fixed_update(
         sample_flux = target_flux[gather]
         flux_coefficient = jnp.einsum("nij,nj->ni", fit, sample_flux)
         quadrature_flux = jnp.einsum("nqi,ni->nq", flux_design, flux_coefficient)
-        normalized = jnp.clip(
-            (quadrature_flux - case.flux_axis) / (case.flux_boundary - case.flux_axis),
-            0.0,
-            1.0,
+        normalized = (quadrature_flux - case.flux_axis) / (
+            case.flux_boundary - case.flux_axis
         )
         p_prime = jnp.interp(normalized, psi_norm, pressure_gradient)
         ff_prime = jnp.interp(normalized, psi_norm, diamagnetic_gradient)
         density = -TOTAL_FLUX_FACTOR * (radius * p_prime + ff_prime / (mu_0 * radius))
-        affine = jnp.einsum("niq,nq->ni", projection, density)
-        attributed = jnp.einsum("noi,ni->no", moments, affine)
+        polynomial = jnp.einsum("niq,nq->ni", projection, density)
+        attributed = jnp.einsum("noi,ni->no", moments, polynomial)
         return jnp.where(topology_zero[:, None], 0.0, attributed)
 
     apply = jax.jit(fixed_update)
@@ -570,9 +550,8 @@ def main() -> None:
     design = quadratic_design(local)
     flux_fit = np.linalg.pinv(design)
     flux_coefficient = np.einsum("nij,nj->ni", flux_fit, direct_flux[sample_index])
-    projection_geometry = affine_projection_geometry(
-        fixture["support_vertices"],
-        fixture["support_vertex_count"],
+    projection_geometry = fixed_profile_geometry(
+        cell_points[:, 1:],
         hex_centres,
         scale,
     )
@@ -589,8 +568,7 @@ def main() -> None:
         "niq,nq->ni", projection_geometry["projection"], quadrature_density
     )
     coefficient[lower_leg] = 0.0
-    cubic_coefficient = np.zeros((cell_count, 10))
-    cubic_coefficient[:, :3] = coefficient
+    cubic_coefficient = coefficient
 
     exact_quadrature_density = source_current_density(
         case,
@@ -604,8 +582,7 @@ def main() -> None:
         exact_quadrature_density,
     )
     exact_coefficient[lower_leg] = 0.0
-    exact_cubic_coefficient = np.zeros((cell_count, 10))
-    exact_cubic_coefficient[:, :3] = exact_coefficient
+    exact_cubic_coefficient = exact_coefficient
 
     attributed_m0, attributed_first_hex = padded_polynomial_current_moments(
         fixture["support_vertices"],
@@ -730,7 +707,7 @@ def main() -> None:
     if combined_matrix.shape[1] != len(update_vector):
         raise AssertionError("the one-pass matrix and current update do not align")
     direct_update = combined_matrix @ update_vector
-    moment_operator = affine_moment_operator(
+    moment_operator = polynomial_moment_operator(
         fixture["support_vertices"],
         fixture["support_vertex_count"],
         hex_centres,
@@ -875,9 +852,22 @@ def main() -> None:
         "representation": {
             "flux_interpolant_total_degree": 2,
             "flux_samples_per_cell": 7,
-            "current_density_total_degree": 1,
-            "current_density_basis": ["constant", "radial", "vertical"],
-            "projection": "area-weighted least squares on the clipped support",
+            "current_density_total_degree": 3,
+            "current_density_basis": [
+                "constant",
+                "radial",
+                "vertical",
+                "radial_squared",
+                "radial_vertical",
+                "vertical_squared",
+                "radial_cubed",
+                "radial_squared_vertical",
+                "radial_vertical_squared",
+                "vertical_cubed",
+            ],
+            "projection": (
+                "area-weighted cubic projection on the fixed pre-clip hexagon"
+            ),
             "triangle_quadrature_degree": 5,
             "triangle_quadrature_points": 7,
             "support_edge_capacity": int(fixture["support_vertices"].shape[1]),
@@ -885,9 +875,9 @@ def main() -> None:
                 projection_geometry["points"].shape[1]
             ),
             "priority_preservation": (
-                "The affine normal equations preserve quadrature net current "
-                "and both first moments before the same affine polynomial is "
-                "integrated by the closed-form polygon attribution."
+                "The fixed cubic is independent of fill. Its net current and "
+                "first moments match the fixed full-cell profile quadrature, "
+                "then the same polynomial is integrated over the clipped domain."
             ),
             "previous_value_only_quadratic": {
                 "ring_current_weighted_l1": PREVIOUS_RING_CURRENT_WEIGHTED_L1,
@@ -984,9 +974,8 @@ def main() -> None:
             "field_bank": str((args.output / "ring-attribution-fields.npz").resolve()),
             "figure": str(args.figure.resolve()),
         },
-        "production_authority_follow_on": (
-            "Have the grid constructor expose its authoritative pre-clip vertex "
-            "array; this prototype deliberately does not add that production API."
+        "production_vertex_authority": (
+            "The grid constructor supplies the authoritative pre-clip vertex array."
         ),
     }
     np.savez_compressed(
@@ -998,7 +987,7 @@ def main() -> None:
         coordinate_scale=scale,
         coefficients=cubic_coefficient,
         flux_coefficients=flux_coefficient,
-        representation=np.asarray("quadratic_flux_affine_current"),
+        representation=np.asarray("quadratic_flux_fixed_cubic_current"),
         triangle_quadrature_degree=np.asarray(5),
         ring_mask=ring,
         lower_leg_mask=lower_leg,

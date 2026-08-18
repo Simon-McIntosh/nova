@@ -176,8 +176,9 @@ class ForwardProfile:
     :class:`~nova.equilibrium.source.ForwardSource` set the toroidal current
     density on the domains the topology read labels, and the equilibrium is
     the fixed point of the resulting write-then-read cycle. Fluxes are total
-    poloidal fluxes, :math:`\\Phi = 2 \\pi R A_\\phi` in Wb, concatenated over
-    the plasma grid nodes followed by the wall nodes.
+    poloidal fluxes, :math:`\\Phi = 2 \\pi R A_\\phi` in Wb. The physical grid
+    and wall prefix may be followed by fixed direct-sampling nodes used only
+    to construct the in-cell density on clipped supports.
 
     ``lattice`` is the mesh the plasma grid is carried on, meeting the
     :class:`~nova.equilibrium.conservation.FluxMesh` contract: a uniform

@@ -803,6 +803,12 @@ class HexMachine:
     plasma_to_grid: np.ndarray
     plasma_to_grid_r: np.ndarray
     plasma_to_grid_z: np.ndarray
+    sampling_vertices: np.ndarray
+    sample_coordinates: np.ndarray
+    source_to_sample: np.ndarray
+    plasma_to_sample: np.ndarray
+    plasma_to_sample_r: np.ndarray
+    plasma_to_sample_z: np.ndarray
     source_to_wall: np.ndarray
     plasma_to_wall: np.ndarray
     plasma_to_wall_r: np.ndarray
@@ -813,7 +819,11 @@ class HexMachine:
     @cached_property
     def moment_geometry(self) -> MomentGeometry:
         """Build the fixed current-moment geometry once for this machine."""
-        return MomentGeometry.from_cells(receipt_mesh(self), self.cell_polygons)
+        return MomentGeometry.from_cells(
+            receipt_mesh(self),
+            self.cell_polygons,
+            sampling_vertices=self.sampling_vertices,
+        )
 
     @property
     def passive_flux(self) -> np.ndarray:
@@ -907,6 +917,7 @@ def build_machine(
     coilset.plasmawall.solve(boundary=case.wall)
 
     grid = coilset.plasmagrid.data
+    sample = coilset.plasmagrid.sample_data
     limiter = coilset.plasmawall.data
     order = [str(label) for label in np.asarray(grid.coords["source"])]
     expected = [conductor.name for conductor in drive]
@@ -932,6 +943,12 @@ def build_machine(
         plasma_to_grid=np.asarray(grid["Psi_"]),
         plasma_to_grid_r=np.asarray(grid["PsiR_"]),
         plasma_to_grid_z=np.asarray(grid["PsiZ_"]),
+        sampling_vertices=np.asarray(coilset.plasmagrid.sampling_vertices),
+        sample_coordinates=np.asarray(coilset.plasmagrid.sample_coordinates),
+        source_to_sample=np.asarray(sample["Psi"])[:, :-1],
+        plasma_to_sample=np.asarray(sample["Psi_"]),
+        plasma_to_sample_r=np.asarray(sample["PsiR_"]),
+        plasma_to_sample_z=np.asarray(sample["PsiZ_"]),
         source_to_wall=np.asarray(limiter["Psi"])[:, :-1],
         plasma_to_wall=np.asarray(limiter["Psi_"]),
         plasma_to_wall_r=np.asarray(limiter["PsiR_"]),
@@ -1007,6 +1024,13 @@ def forward_operator(case: ReferenceCase, machine: HexMachine) -> ForwardFluxOpe
         area=jnp.asarray(machine.area),
         polarity=-1,
         moment_geometry=machine.moment_geometry,
+        sample=FluxTarget(
+            source_target=jnp.asarray(machine.source_to_sample),
+            plasma_target=jnp.asarray(machine.plasma_to_sample),
+            null=Null1D(jnp.asarray(machine.sample_coordinates, dtype=jnp.float64)),
+            plasma_target_r=jnp.asarray(machine.plasma_to_sample_r),
+            plasma_target_z=jnp.asarray(machine.plasma_to_sample_z),
+        ),
     )
 
 
@@ -1182,6 +1206,9 @@ def seed_flux(case: ReferenceCase, machine: HexMachine) -> jnp.ndarray:
         np.r_[
             case.flux(machine.radius, machine.node[:, 1]),
             case.flux(machine.wall_node[:, 0], machine.wall_node[:, 1]),
+            case.flux(
+                machine.sample_coordinates[:, 0], machine.sample_coordinates[:, 1]
+            ),
         ]
     )
 

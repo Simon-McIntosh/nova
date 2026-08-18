@@ -170,5 +170,50 @@
   <code>scripts/zero_current_audit/results/</code> (classification, worst-cells, machine-readable
   totals) at the lineage commit.</p>
 
+  <h2 id="ring-support-attribution-prototype">§6 — the direct-target prototype: architecture validated; one component left standing</h2>
+
+  <p>Gate <strong>honest negative</strong> at lineage commit <code>3f2312e7</code> (run
+  <code>r-20260818T162951770073-ring-support-attribution-prototype</code>). The locked
+  own-nodes-direct-targets route was built end-to-end at measurement level: 566 centres +
+  1,652 unique pre-clip hex vertices = 2,218 direct grid-free targets in one
+  <code>(2218, 1815)</code> evaluation matrix, a <code>(566, 7)</code> per-cell gather, one matmul
+  per current update. Two geometry negatives were measured on the way and are banked: canonical
+  offset inference from wall-clipped material rows is <em>refuted</em> (0.304 m deviation against
+  a 2.4e-13 m round-off bound), and the authoritative six vertices come from the tiling generator
+  after closure deduplication, verified against the analytic construction at
+  <strong>0 m identity deviation</strong> before the expensive build.</p>
+
+  <table>
+    <thead><tr><th>Gate clause</th><th>Result</th><th>Verdict</th></tr></thead>
+    <tbody>
+      <tr><td>96 ring supports attributed / 351 interior bitwise / 17 leg cells exactly zero</td>
+          <td>96/96 · bitwise · 0 A and 0 A·m</td><td><strong>pass</strong></td></tr>
+      <tr><td>argmax-target shift ≤ 0.5 Wb / 731-target sup &lt; 0.826 Wb</td>
+          <td>0.1739 Wb / 0.2017 Wb (from 10.935)</td><td><strong>pass</strong></td></tr>
+      <tr><td>total current within 0.5% of −15.005 MA</td>
+          <td>−15.0914 MA, 0.5733%</td><td>fail (narrow)</td></tr>
+      <tr><td>ring current-weighted L1 ≤ 0.7646% interior scale</td>
+          <td>10.228%; centroid mean/p95 7.28/12.65 mm; m1 L1 6.213%</td><td>fail</td></tr>
+      <tr><td>batchable / traceable</td>
+          <td>JAX jit+vmap: 0.437 ms/update, 0.0796 ms/state at batch 8; 48-line probe exact on
+          three cells</td><td><strong>pass</strong></td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>The miss is one component.</strong> Error separation on the failing clauses: in-cell
+  interpolation L1 69.51 kA; attribution round-off sup 1.0e-10 A; first-moment round-off sup
+  2.2e-11 A·m; direct-node flux error 0 Wb; clip geometry identical; zero-current leakage 0 A.
+  Everything the architecture was chosen for holds by construction — the remaining work is the
+  in-cell representation of the current density over the seven samples, in the locked priority
+  order (current 10.23% → centroid 7.3 mm mean → m1 6.2%).</p>
+
+  <figure>
+    <img src="/nova/figures/boundary-ring-source-completion/direct-ring-attribution-errors.png"
+         alt="R-Z maps of per-cell current, centroid, and first-moment errors under the direct-target prototype"
+         style="max-width:100%">
+    <figcaption>Direct-target prototype errors by cell and component: current, centroid position,
+    first moments.</figcaption>
+  </figure>
+
 </main></body>
 </html>

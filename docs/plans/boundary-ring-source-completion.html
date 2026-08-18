@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-18">
-<meta name="plan-version" content="20">
-<meta name="plan-commits" content="f943bacba9ac64c404afe92c94d43f023950b349,919bafcea9422ff5b0c6de8607d86d4a9418ea86,f332f8426c672f6cdc6bb09fe68e07dd7ecf94a0">
+<meta name="plan-version" content="22">
+<meta name="plan-commits" content="f943bacba9ac64c404afe92c94d43f023950b349,919bafcea9422ff5b0c6de8607d86d4a9418ea86,f332f8426c672f6cdc6bb09fe68e07dd7ecf94a0,3f2312e743289492bc3b4a4a58d4a16dc339d11d">
 <meta name="plan-artifacts" content="docs/evidence/archive/boundary-ring-source-completion-landed.html,docs/figures/boundary-ring-source-completion/ring-m0-relative-error.png,docs/research/hex-clip-current-attribution.html,docs/figures/hex-clip-current-attribution/clip-audit.png,scripts/ring_quadrature/results/ring-quadrature-results.json (lineage f943bacb),scripts/clip_audit/results/clip-audit-results.json (lineage 919bafce)">
-<meta name="plan-impl" content="0.43">
+<meta name="plan-impl" content="0.5">
 </head>
 <body>
   <main class="plan-doc">
@@ -225,6 +225,19 @@
     availability seam; fixed shapes throughout, so the path is vectorized, traceable, and
     GPU-batchable by construction.</p>
 
+    <p><em>Prototype status 2026-08-18 (commit <code>3f2312e7</code>,
+    <a href="/nova/evidence/archive/boundary-ring-source-completion-landed#ring-support-attribution-prototype">evidence §6</a>):</em>
+    the architecture is validated end-to-end — structural, topology, field-shift, throughput and
+    traceability gates all pass — and the remaining miss is isolated to the <strong>in-cell
+    representation of the current density over the seven samples</strong> (interpolation L1
+    69.51 kA: ring current-weighted L1 10.228% vs the 0.7646% gate; total current 0.5733% vs
+    0.5%). The closing node improves that one component in the locked priority order without
+    disturbing any passing contract. Instruments already in hand: the one-off
+    <code>Solve</code> matrices carry gradient attrs (<code>PsiR</code>, <code>PsiZ</code>) at the
+    same targets — gradient-enriched samples cost rows, not new machinery — and the GS closure
+    evaluates j exactly pointwise at each sample, so j (not only psi) can be interpolated over the
+    clipped support.</p>
+
     <p>The prototyped route the plan must produce before production work: the repaired boundary
     evaluation demonstrated in place on the default hex path at measurement level, satisfying the
     complete ladder. The forward GS model is critical to the whole project, so the prototype must
@@ -359,6 +372,9 @@
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20260818T1745" data-who="reckon-ship" data-when="2026-08-18T17:45Z">
     <div class="r-comment-body">zero-current-leg-attribution landed — commit f332f842; gate PASSED. Baseline leg signal = oracle artifact (production attributes exactly 0 A in all 17 topology-zero cells); both §3 candidates genuinely leak (−18.0/−19.6 kA) via unmasked core_support in partitioned_moments. Population metrics restated current-weighted: interior scale 0.7646%; ring 100%/12.47%/15.81% (baseline/own-geometry/one-sided). Corrected figure banked beside the original.</div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-20260818T1945" data-who="reckon-ship" data-when="2026-08-18T19:45Z">
+    <div class="r-comment-body">ring-support-attribution-prototype landed — commit 3f2312e7; gate honest-negative on one component. Architecture validated: (566,7) gather over 2,218 direct targets (vertex identity 0 m), 96/96 attributed, 351 bitwise, 17 leg cells exactly zero, field gates pass (argmax 0.1739 Wb, sup 0.2017 Wb vs 0.5/0.826), JAX jit+vmap 0.0796 ms/state at batch 8, 48-line probe exact. Misses isolated to in-cell interpolation (69.51 kA L1): ring current-weighted L1 10.228% vs 0.7646%, total current 0.5733% vs 0.5%; every other component at round-off or zero. Two banked geometry negatives: material-row canonical-offset inference refuted (0.304 m vs 2.4e-13 m); generator vertices deduplicated + analytically verified. Production follow-on recorded: constructor exposes the pre-clip vertex array.</div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

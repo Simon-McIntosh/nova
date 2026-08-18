@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-18">
-<meta name="plan-version" content="27">
+<meta name="plan-version" content="28">
 <meta name="plan-commits" content="f943bacba9ac64c404afe92c94d43f023950b349,919bafcea9422ff5b0c6de8607d86d4a9418ea86,f332f8426c672f6cdc6bb09fe68e07dd7ecf94a0,3f2312e743289492bc3b4a4a58d4a16dc339d11d,66a62016108c856e1868fe12790ccc9f10d69c43">
 <meta name="plan-artifacts" content="docs/evidence/archive/boundary-ring-source-completion-landed.html,docs/figures/boundary-ring-source-completion/ring-m0-relative-error.png,docs/research/hex-clip-current-attribution.html,docs/figures/hex-clip-current-attribution/clip-audit.png,scripts/ring_quadrature/results/ring-quadrature-results.json (lineage f943bacb),scripts/clip_audit/results/clip-audit-results.json (lineage 919bafce)">
 <meta name="plan-impl" content="0.625">
@@ -310,12 +310,18 @@
 <div class="r-comment" data-section="s6" data-id="c-20260818T2005" data-who="reckon-ship" data-when="2026-08-18T20:05Z">
     <div class="r-comment-body">in-cell-current-representation landed — commit 66a62016; ALL 10 GATES PASS. Ring current-weighted L1 0.2405% (gate 0.7646%, 42.5× better than the prototype), total current 0.3822% (gate 0.5%), centroid p95 0.341 mm, m1 L1 0.1240%, argmax 0.264 Wb, sup 0.310 Wb, 351 bitwise, 17 leg zeros exact, 49-line probe bitwise exact. Representation: degree-2 flux interpolant from the seven direct samples → GS j at a fixed 7-point degree-5 triangle rule over the clipped-support fan → moment-preserving affine projection → closed-form integration. §6 measured complete; owner sign-off is the remaining gate before §7.</div>
 </div>
+<div class="r-comment" data-section="s7" data-id="c-20260818T1905" data-who="reckon-ship" data-when="2026-08-18T19:05Z">
+    <div class="r-comment-body">Owner steer mid-§7: the 0.5% net-current gate looks too lenient beside round-off-level geometry tolerances, and one representation for all plasma cells is preferred for GPU throughput (q-current-gate). Fold worker state: blocked once on the two new ring pins (missing-area residual 142× the fraction vs the 4.1× bound; width-zero current JVPs 5.618 vs 0.271 — one signature: the clipped path does not limit to the full-fill formula), answered with a reformulation directive (clip enters only through the integration domain of a clip-independent density; no full-fill branch; pin tolerances stay locked) and resumed in-session; repair in flight. Two measurement nodes dispatched in parallel under disjoint script scopes: interior-own-node-score (member hex-stencil) and in-cell-sample-order-study (member edge-clip), both 30m against the banked coarse fixture.</div>
+</div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
 <h2><span class="sec">§</span> Open questions</h2>
 <div class="r-q" data-id="q-leg-zero" data-section="s5" data-status="resolved" data-opened-by="Simon McIntosh" data-opened-at="2026-08-18" data-resolved-at="2026-08-18T16:28:25+00:00" data-resolved-by="reckon-ship">
     <p class="r-q-body">The boundary-ring evidence figure shows per-cell m0 error signal in the divertor legs. Current should only appear there when driving current through the SOL, for which no Solov'ev solution exists — what is the cause of these errors where the exact current is zero? Candidates: a relative-error metric normalised by a near-zero exact cell current (figure artifact), or genuine misattributed current via psi_norm labeling / participation (a real defect).</p>
     <p class="r-q-resolution">Both causes, split by population (commit f332f842, 17/17 lower-leg cells classified). Baseline: metric/oracle artifact — the figure's geometry-only oracle counted −9.595 kA where the topology-qualified oracle is exactly 0 A; production attributes exactly 0 A in all 17 cells. Candidates: genuine leak — own-geometry −18.025 kA, one-sided −19.631 kA through topology-unqualified core_support entering partitioned_moments without a domain mask (probe-demonstrated). Metrics restated current-weighted: interior 0.7646% L1; ring baseline 100%, own-geometry 12.47%, one-sided 15.81%. §6 must topology-qualify core_support and gate the 17 cells at exactly zero.</p>
+    </div>
+<div class="r-q" data-id="q-current-gate" data-section="s7" data-status="open" data-opened-by="Simon McIntosh" data-opened-at="2026-08-18" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body">Is the 0.5% net plasma-current gate mismatched against the rest of the tolerance budget? Clip geometry, attribution formulas, and closed-form integration sit at binary64 round-off while the net-current gate admits 0.5%; plasma current dominates flux-surface shape, so the gate should be re-derived from a measured representation floor rather than inherited from the §3 prediction contract. Coupled question: can one representation serve every plasma cell (interior, boundary-bisected, external/topology-zero) — one method is best for GPU throughput. Probes dispatched: interior-own-node-score (own-node quadratic scored on the complete-ring population beside the established cubic stencil) and in-cell-sample-order-study (seven-sample quadratic vs thirteen-sample cubic on the 96 ring cells).</p>
     </div>
 </section>
 </main>

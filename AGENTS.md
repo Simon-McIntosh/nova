@@ -4,20 +4,36 @@
 
 ## Critical Rules
 
-### Pre-commit Hooks Require Virtual Environment
+### One Environment per Repository
 
-The pre-commit hook uses `.venv/bin/python3` to run checks. In worktrees, you must:
+The repo's single `.venv` at the root is provisioned by the user — agents use
+it and never rebuild it. Do not run `uv sync`, `uv venv`, or `pip install` as
+setup; a duplicate worktree environment is ~70k files / ~1.8 GiB on GPFS.
+
+In a worktree, reuse the main checkout's environment. `PYTHONPATH="$PWD"`
+makes the worktree's own code shadow the main checkout's editable install:
 
 ```bash
-# Option 1: Use uv run for git commit (recommended)
-uv run git commit -m 'type: description'
-
-# Option 2: Activate venv first
-source .venv/bin/activate
-git commit -m 'type: description'
+UV_PROJECT_ENVIRONMENT=~/Code/nova/.venv PYTHONPATH="$PWD" \
+  uv run --no-sync pytest <targets>
 ```
 
-**Why**: Pre-commit hooks fail with "pre-commit not found" if the venv is not active or accessible.
+### Pre-commit Hooks Require Virtual Environment
+
+The pre-commit hook runs checks through `.venv/bin/python3`, so it needs the
+environment reachable at that path:
+
+```bash
+# Main checkout: uv run resolves the root .venv (recommended)
+uv run git commit -m 'type: description'
+
+# Worktree: link the main checkout's environment once (never copy or sync),
+# then always pass --no-sync so nothing mutates the shared venv
+ln -s ~/Code/nova/.venv .venv
+uv run --no-sync git commit -m 'type: description'
+```
+
+**Why**: Pre-commit hooks fail with "pre-commit not found" if the venv is not accessible.
 
 ## Quick Reference
 
@@ -28,8 +44,7 @@ git commit -m 'type: description'
 | Run tests               | `uv run pytest`                                     |
 | Run tests with coverage | `uv run pytest --cov=nova`                          |
 | Lint/format             | `uv run ruff check --fix . && uv run ruff format .` |
-| Sync dependencies       | `uv sync --extra test`                              |
-| Sync all extras         | `uv sync --all-extras`                              |
+| Run tests in a worktree | `UV_PROJECT_ENVIRONMENT=~/Code/nova/.venv PYTHONPATH="$PWD" uv run --no-sync pytest` |
 | Add dependency          | `uv add <package>`                                  |
 | Add dev dependency      | `uv add --dev <package>`                            |
 | Launch Spyder           | `uv run spyder &`                                   |
@@ -113,8 +128,9 @@ the whole message. Verify before push:
 ### Testing
 
 ```bash
-# Sync dependencies first (required in worktrees)
-uv sync --extra test
+# In a worktree, reuse the main checkout's environment (see One Environment
+# per Repository above) — never sync a worktree venv:
+# UV_PROJECT_ENVIRONMENT=~/Code/nova/.venv PYTHONPATH="$PWD" uv run --no-sync pytest
 
 # Run all tests
 uv run pytest
@@ -135,16 +151,20 @@ Use worktrees only when the user has already authorised a non-primary branch or
 when an orchestrated worker needs an isolated checkout. Do not create a topic
 branch or move commits between branches with cherry-pick.
 
+A worktree never builds its own environment: run everything through the main
+checkout's `.venv` with `UV_PROJECT_ENVIRONMENT` + `--no-sync`, and link
+`.venv` (`ln -s ~/Code/nova/.venv .venv`) only so the pre-commit hook resolves.
+
 Commit and push from the worktree on its assigned branch:
 
 ```bash
-# Lint and format
-uv run ruff check --fix .
-uv run ruff format .
+# Lint and format (path-scoped over the files you touched)
+uv run --no-sync ruff check --fix <files>
+uv run --no-sync ruff format <files>
 
 # Stage, commit, and publish
 git add <file1> <file2> ...
-uv run git commit -m 'type: description'
+uv run --no-sync git commit -m 'type: description'
 git pull --no-rebase origin <assigned-branch>
 git push origin <assigned-branch>
 ```

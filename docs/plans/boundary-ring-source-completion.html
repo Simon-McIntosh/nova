@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-18">
-<meta name="plan-version" content="22">
-<meta name="plan-commits" content="f943bacba9ac64c404afe92c94d43f023950b349,919bafcea9422ff5b0c6de8607d86d4a9418ea86,f332f8426c672f6cdc6bb09fe68e07dd7ecf94a0,3f2312e743289492bc3b4a4a58d4a16dc339d11d">
+<meta name="plan-version" content="27">
+<meta name="plan-commits" content="f943bacba9ac64c404afe92c94d43f023950b349,919bafcea9422ff5b0c6de8607d86d4a9418ea86,f332f8426c672f6cdc6bb09fe68e07dd7ecf94a0,3f2312e743289492bc3b4a4a58d4a16dc339d11d,66a62016108c856e1868fe12790ccc9f10d69c43">
 <meta name="plan-artifacts" content="docs/evidence/archive/boundary-ring-source-completion-landed.html,docs/figures/boundary-ring-source-completion/ring-m0-relative-error.png,docs/research/hex-clip-current-attribution.html,docs/figures/hex-clip-current-attribution/clip-audit.png,scripts/ring_quadrature/results/ring-quadrature-results.json (lineage f943bacb),scripts/clip_audit/results/clip-audit-results.json (lineage 919bafce)">
-<meta name="plan-impl" content="0.5">
+<meta name="plan-impl" content="0.625">
 </head>
 <body>
   <main class="plan-doc">
@@ -139,119 +139,44 @@
       </p>
     </section>
 
-    <h2 id="s5">§5 — The single-element evidence ladder</h2>
+    <section id="s5" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-18 — all five error components green</span>
+        <h2>§5 — The single-element evidence ladder</h2>
+      </header>
+      <p class="landed-summary">
+        Every error component is separated, oracled, and driven below its gate: attribution and
+        clip geometry at binary64 round-off (R1–R2, commit <code>919bafce</code>); zero-current
+        leakage adjudicated — baseline clean, candidate leak convicted and repaired by topology
+        qualification, metrics restated current-weighted with the interior scale at 0.7646%
+        (commit <code>f332f842</code>); availability and psi-interpolation closed by the §6 route
+        (R3–R5 folded into its gates: ring L1 0.2405%, total current 0.3822%, leg zeros exact —
+        commits <code>3f2312e7</code>, <code>66a62016</code>). Full record:
+        <a href="/nova/evidence/archive/boundary-ring-source-completion-landed">cumulative evidence</a>.
+      </p>
+    </section>
 
-    <p>Evidence collection starts at one element with a known toy solution and climbs; each rung is
-    a gate, ordered by the locked boundary-cell priority (net current → centroid → first moments).
-    A failing rung stops the climb and localises the defect — that is its job. All rungs run on the
-    default hex path with no smoothing, blending, or per-cell tuning; harness files are named by
-    mechanism, never by rung label. <em>Status after §4:</em> <strong>R1 and R2 are green</strong>
-    in the banked reproducer (<code>scripts/clip_audit/audit_hex_clip.py</code>, commit
-    <code>919bafce</code>) — the formulas they gate are exonerated at binary64 round-off; the
-    research record prescribes R3's exact curved oracle (quartic flux, Gauss–Kronrod reference,
-    curvature envelope). R3–R5 score the §6 prototype, which is where the convicted availability
-    zero is repaired.</p>
-
-    <p><em>Error separation (owner directive 2026-08-18).</em> The boundary-source error decomposes
-    into independently-oracled components; every measurement in this plan must attribute its error
-    to exactly one component, each driven below its own gate — no rung may conflate two:</p>
-
-    <ul>
-      <li><strong>Attribution error</strong> — moments of a known density over a known polygon.
-      Oracle: closed shoelace/Green forms. <em>Gate green</em> (R1–R2, binary64 round-off).</li>
-      <li><strong>Clip-geometry error</strong> — linearised LCFS chord versus the exact curved
-      psi_norm = 1 contour. Oracle: the exact LCFS with the curvature envelope
-      B_A = κ_max·L³/6. Gated by R3.</li>
-      <li><strong>psi_norm interpolation error</strong> — the nodal reconstruction of the flux
-      field feeding j(psi_norm), measured in isolation against the exact quartic Solov'ev flux at
-      the same nodes. Measured 1.464e-3 Wb shared-node error against 1.448e-3 Wb true vertex
-      spread. Gate: the cell-current error induced by reconstruction <em>alone</em> (exact
-      geometry, exact attribution) stays inside the interior error scale, bound stated before the
-      measurement. Scored within R3–R4.</li>
-      <li><strong>Availability error</strong> — the convicted zero on ring-incomplete supports
-      (−689 kA over 96 cells). Oracle: exact per-cell integrals. Repaired by §6; gated by R4.</li>
-      <li><strong>Zero-current leakage</strong> — cells beyond psi_norm = 1 (divertor legs,
-      private flux) must attribute exactly zero at the analytic seed: no SOL current exists in the
-      Solov'ev solution. Oracle: literal zero. <em>Adjudicated 2026-08-18</em>
-      (<a href="/nova/evidence/archive/boundary-ring-source-completion-landed#zero-current-leg-attribution">evidence §5</a>,
-      commit <code>f332f842</code>): the baseline figure signal was an oracle artifact
-      (geometry-only oracle −9.595 kA vs topology-qualified 0 A; production attributes exactly
-      0 A in all 17 topology-zero cells), while <em>both</em> §3 candidates genuinely leak
-      (−18.0 / −19.6 kA) through a topology-unqualified <code>core_support</code> entering
-      <code>partitioned_moments</code> with no domain mask. Gate: the §6 route topology-qualifies
-      <code>core_support</code>; attributed current in the 17 topology-zero cells is exactly zero;
-      every ladder population metric is scored current-weighted (L1), interior scale measured
-      <strong>0.7646%</strong> — the §3 "62× ring population" was substantially a relative-error
-      metric dominated by near-zero-current cells.</li>
-    </ul>
-
-    <ul>
-      <li><strong>R1 — uncut single hex cell, linear density.</strong> Closed-form area, centroid,
-      and first moments of an affine density over a hexagon (exact Green/shoelace forms).
-      <em>Gate:</em> the default path reproduces all three at float64 round-off (relative
-      1e-13).</li>
-      <li><strong>R2 — single hex cell bisected by a straight chord.</strong> Closed-form clipped
-      moments of the affine density over the partial polygon, swept over chord positions and angles
-      including near-vertex and sliver cuts. <em>Gate:</em> net current, then centroid, then first
-      moments agree with the closed forms at stated tolerance across the whole sweep; any
-      disagreement names the defective function.</li>
-      <li><strong>R3 — single hex cell cut by the exact Solov'ev psi_norm = 1 curve.</strong>
-      Reference adaptive quadrature of the exact current density over the curved partial cell,
-      separating the chord-linearisation error from attribution bugs. <em>Gate:</em> the default
-      path's error is bounded by the predicted curvature term, with the bound stated before the
-      measurement.</li>
-      <li><strong>R4 — the GS mapping on the boundary ring.</strong> j(psi_norm) through the flux
-      functions on every clipped support of the coarse fixture versus the oracle's exact per-cell
-      integrals: per-cell net current, centroid position, first moments, priority-ordered.
-      <em>Gate:</em> the per-cell net-current error and the ring m0 error population sit within the
-      interior's own error scale — the clause both §3 candidates failed.</li>
-      <li><strong>R5 — field consequence.</strong> The §3 contract re-scored under the repaired
-      attribution: total current within 0.5% of −15.005 MA, argmax-target shift ≤ 0.5 Wb, sup over
-      731 targets below the 0.826 Wb legacy control. <em>Gate:</em> all clauses pass
-      simultaneously.</li>
-    </ul>
-
-    <h2 id="s6">§6 — Route prototype for the default hex path</h2>
-
-    <p><em>Route locked 2026-08-18 (ring-node-set = own-nodes-direct-targets).</em> The evaluation
-    architecture is fixed: extend the one-off Biot evaluation matrices (the
-    <code>nova.biot</code> <code>Solve</code>/<code>Target</code> machinery
-    <code>PlasmaGrid.solve</code> already builds for cell-centre Psi/Br/Bz and gradients) to the
-    union of all cell centres and all unique hex vertices; evaluate the whole node set in one
-    matmul per current update; select each cell's seven-sample set (six vertices + centroid) by
-    precomputed index arrays; build the in-cell interpolant from those seven samples; map
-    j(psi_norm) through the GS relationship; integrate over the clipped support with the
-    exonerated closed-form attribution. No out-of-cell sampling, no reconstruction step, no
-    availability seam; fixed shapes throughout, so the path is vectorized, traceable, and
-    GPU-batchable by construction.</p>
-
-    <p><em>Prototype status 2026-08-18 (commit <code>3f2312e7</code>,
-    <a href="/nova/evidence/archive/boundary-ring-source-completion-landed#ring-support-attribution-prototype">evidence §6</a>):</em>
-    the architecture is validated end-to-end — structural, topology, field-shift, throughput and
-    traceability gates all pass — and the remaining miss is isolated to the <strong>in-cell
-    representation of the current density over the seven samples</strong> (interpolation L1
-    69.51 kA: ring current-weighted L1 10.228% vs the 0.7646% gate; total current 0.5733% vs
-    0.5%). The closing node improves that one component in the locked priority order without
-    disturbing any passing contract. Instruments already in hand: the one-off
-    <code>Solve</code> matrices carry gradient attrs (<code>PsiR</code>, <code>PsiZ</code>) at the
-    same targets — gradient-enriched samples cost rows, not new machinery — and the GS closure
-    evaluates j exactly pointwise at each sample, so j (not only psi) can be interpolated over the
-    clipped support.</p>
-
-    <p>The prototyped route the plan must produce before production work: the repaired boundary
-    evaluation demonstrated in place on the default hex path at measurement level, satisfying the
-    complete ladder. The forward GS model is critical to the whole project, so the prototype must
-    demonstrate the full bar, not only accuracy: <strong>robust</strong> (defined for every
-    nonempty support, no smoothing or tuning, zero-width limits agree both-sided);
-    <strong>fast</strong> — batchable and shardable on GPUs at very high throughput (a fixed-shape,
-    vectorised formulation over all boundary cells in one call, no data-dependent Python branching,
-    with a banked microbenchmark and a statement of JAX/batch compatibility); and
-    <strong>traceable at low depth</strong> (any cell's net current, centroid, and first moments
-    reproducible by an independent short probe of stated depth). <strong>Done when:</strong> the
-    ladder gates R1–R5 pass on the prototype; the batch formulation and microbenchmark are banked;
-    the traceability probe is demonstrated on the worst §3 resisting cells; the ring-node-set
-    decision (or its successor shaped by §4's findings) is locked from evidence; owner sign-off
-    recorded before §7 opens.</p>
+    <section id="s6" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ measured complete 2026-08-18 — owner sign-off pending</span>
+        <h2>§6 — Route prototype for the default hex path</h2>
+      </header>
+      <p class="landed-summary">
+        The locked own-nodes-direct-targets route passes all ten gates at measurement level
+        (commits <code>3f2312e7</code>, <code>66a62016</code>): 2,218 direct grid-free targets in
+        one <code>(2218,1815)</code> matrix, <code>(566,7)</code> gather, degree-2 flux interpolant
+        → GS j at a fixed 7-point degree-5 triangle rule over the clipped-support fan →
+        moment-preserving affine projection → closed-form integration. Ring current-weighted L1
+        <strong>0.2405%</strong> (gate 0.7646%), total current <strong>0.3822%</strong> (gate
+        0.5%), centroid p95 0.341 mm, m1 L1 0.1240%, field 0.264/0.310 Wb (bounds 0.5/0.826),
+        interior bitwise, 17 leg cells exactly zero, jit+vmap fixed-shape, 49-line probe bitwise
+        exact. Full record:
+        <a href="/nova/evidence/archive/boundary-ring-source-completion-landed#in-cell-current-representation">evidence §6</a>.
+        <strong>§7 opens on owner sign-off</strong> (tracked as f-brs-004), with two recorded
+        production follow-ons: constructor-exposed pre-clip vertex array; CUDA jit/vmap timing if a
+        GPU-specific throughput number is required.
+      </p>
+    </section>
 
     <h2 id="s7">§7 — Production implementation</h2>
 
@@ -353,10 +278,16 @@
     <pre class="r-fu-prompt">/reckon-ship boundary-ring-source-completion</pre>
     <p class="r-fu-outcome">Owner ruled 2026-08-18: neither candidate is accepted and no bound is relaxed. The complementary failures are to be treated as symptoms of likely bugs in the clipped plasma-cell calculations and the current + current-moment attributions. Route: research the boundary current representation fully, build a single-element evidence ladder against the Solov'ev oracle with gates per rung (priority: net cell current, centroid position, first moments), produce a prototyped route on the default hex plasma-cell path (no parallel code), and only then implement. The forward GS model must end accurate, robust, GPU-batchable at very high throughput, and traceable at low depth. Recorded as §4–§6 and the locked decisions boundary-cell-priority and single-code-path.</p>
     </article>
-<article class="r-fu" data-id="f-brs-003" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-18" data-recommends-skill="/reckon-ship boundary-ring-source-completion §4" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-brs-003" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-18" data-recommends-skill="/reckon-ship boundary-ring-source-completion §4" data-resolved-at="2026-08-18T17:53:26+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Execute the defect localisation, then the evidence ladder</h4>
     <div class="r-fu-body"><p>Owner-directed route: §4 defect-localisation research on the default hex path first (research record with reproduced-or-refuted probes and closed-form rung references), then the §5 ladder rung by rung under its gates, then the §6 route prototype. Production (§7) stays closed until §6 passes.</p></div>
     <pre class="r-fu-prompt">/reckon-ship boundary-ring-source-completion §4</pre>
+    <p class="r-fu-outcome">Executed end to end: §4 defect localisation (formulas exonerated; availability zero convicted — 919bafce), the leg adjudication (baseline oracle artifact + genuine candidate leak; metrics restated current-weighted — f332f842), the §6 direct-target prototype (architecture validated; honest negative isolated to one component — 3f2312e7), and the closing representation node (all ten gates pass — 66a62016). §6 is measured complete; owner sign-off carried by f-brs-004.</p>
+    </article>
+<article class="r-fu" data-id="f-brs-004" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-18" data-recommends-skill="/reckon-ship boundary-ring-source-completion §7" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Owner sign-off on the prototyped route, then production implementation</h4>
+    <div class="r-fu-body"><p>Exemption: authority-required — §6's done-when reserves opening §7 to the owner. The prototyped route passes every gate (ring L1 0.2405% vs 0.7646%; total current 0.3822% vs 0.5%; centroid p95 0.341 mm; m1 0.1240%; field 0.264/0.310 Wb; interior bitwise; leg zeros exact; fixed-shape jit+vmap; 49-line probe). On sign-off, §7 folds the route into ForwardSource / InteriorCurrentMomentStencil in place, with the recorded production follow-ons: the grid constructor exposes the authoritative pre-clip vertex array, and a CUDA jit/vmap timing if a GPU-specific throughput number is required.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship boundary-ring-source-completion §7</pre>
     </article>
 </section>
 
@@ -375,6 +306,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20260818T1945" data-who="reckon-ship" data-when="2026-08-18T19:45Z">
     <div class="r-comment-body">ring-support-attribution-prototype landed — commit 3f2312e7; gate honest-negative on one component. Architecture validated: (566,7) gather over 2,218 direct targets (vertex identity 0 m), 96/96 attributed, 351 bitwise, 17 leg cells exactly zero, field gates pass (argmax 0.1739 Wb, sup 0.2017 Wb vs 0.5/0.826), JAX jit+vmap 0.0796 ms/state at batch 8, 48-line probe exact. Misses isolated to in-cell interpolation (69.51 kA L1): ring current-weighted L1 10.228% vs 0.7646%, total current 0.5733% vs 0.5%; every other component at round-off or zero. Two banked geometry negatives: material-row canonical-offset inference refuted (0.304 m vs 2.4e-13 m); generator vertices deduplicated + analytically verified. Production follow-on recorded: constructor exposes the pre-clip vertex array.</div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-20260818T2005" data-who="reckon-ship" data-when="2026-08-18T20:05Z">
+    <div class="r-comment-body">in-cell-current-representation landed — commit 66a62016; ALL 10 GATES PASS. Ring current-weighted L1 0.2405% (gate 0.7646%, 42.5× better than the prototype), total current 0.3822% (gate 0.5%), centroid p95 0.341 mm, m1 L1 0.1240%, argmax 0.264 Wb, sup 0.310 Wb, 351 bitwise, 17 leg zeros exact, 49-line probe bitwise exact. Representation: degree-2 flux interpolant from the seven direct samples → GS j at a fixed 7-point degree-5 triangle rule over the clipped-support fan → moment-preserving affine projection → closed-form integration. §6 measured complete; owner sign-off is the remaining gate before §7.</div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

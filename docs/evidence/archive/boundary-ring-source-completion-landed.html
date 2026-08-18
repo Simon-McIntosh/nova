@@ -207,12 +207,45 @@
   in-cell representation of the current density over the seven samples, in the locked priority
   order (current 10.23% → centroid 7.3 mm mean → m1 6.2%).</p>
 
+  <h2 id="in-cell-current-representation">§6 (closing) — the representation node passes all ten gates</h2>
+
+  <p>Gate <strong>PASSED</strong> at lineage commit <code>66a62016</code> (run
+  <code>r-20260818T173237632410-in-cell-current-representation</code>). The winning in-cell
+  representation, found by banked sweeps over representation order and projection rule: a
+  <strong>total-degree-2 smooth-flux interpolant</strong> from the seven direct samples, nonlinear
+  GS current-density evaluation at a <strong>fixed positive 7-point degree-5 triangle rule</strong>
+  over the padded clipped-support fan, then an <strong>area-weighted affine current-density
+  projection whose normal equations preserve quadrature net current and first moments</strong>
+  before closed-form polygon integration. Fixed shapes throughout: <code>(2218,1815)</code> shared
+  matrix, <code>(566,7)</code> gather, <code>(566,490,2)</code> support collocation,
+  <code>(566,3)</code> moments; one shared matmul per update; jit and vmap both pass.</p>
+
+  <table>
+    <thead><tr><th>Gate</th><th>Prototype (honest negative)</th><th>Closing node</th><th>Bound</th></tr></thead>
+    <tbody>
+      <tr><td>ring current-weighted L1</td><td>10.228%</td><td><strong>0.2405%</strong> (42.5×)</td><td>≤ 0.7646%</td></tr>
+      <tr><td>total current error</td><td>0.5733%</td><td><strong>0.3822%</strong> (−15.0628 MA)</td><td>≤ 0.5%</td></tr>
+      <tr><td>centroid error (weighted mean / p95 / max)</td><td>7.28 / 12.65 / 30.09 mm</td><td><strong>0.140 / 0.341 / 1.190 mm</strong></td><td>priority order</td></tr>
+      <tr><td>first-moment normalised L1</td><td>6.213%</td><td><strong>0.1240%</strong></td><td>priority order</td></tr>
+      <tr><td>argmax shift / 731-target sup</td><td>0.174 / 0.202 Wb</td><td>0.264 / 0.310 Wb</td><td>≤ 0.5 / &lt; 0.826 Wb</td></tr>
+      <tr><td>interior bitwise / leg zeros / probe</td><td>pass</td><td>pass (49-line probe bitwise exact ×3)</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <p>Residual decomposition in the locked priority order: psi-interpolation current L1 1197 A and
+  support-projection/quadrature 1107 A (of −15.005 MA exact); first-moment components 88.0 and
+  96.5 A·m; closed-form attribution sup residuals 1.4e-10 A and 2.3e-11 A·m. The affine normal
+  matrix reaches condition 8.9e5 on the banked sliver supports with all outputs finite and the
+  probe bitwise exact. Microbenchmark note: this run's JAX fell back to CPU (jit 5.33 ms/state,
+  vmap batch-8 5.03 ms/state, jit/vmap sup difference 7.3e-10); a CUDA timing is a follow-on if a
+  GPU-specific number is required for the throughput bar.</p>
+
   <figure>
     <img src="/nova/figures/boundary-ring-source-completion/direct-ring-attribution-errors.png"
-         alt="R-Z maps of per-cell current, centroid, and first-moment errors under the direct-target prototype"
+         alt="R-Z maps of per-cell current, centroid, and first-moment errors under the closing representation"
          style="max-width:100%">
-    <figcaption>Direct-target prototype errors by cell and component: current, centroid position,
-    first moments.</figcaption>
+    <figcaption>Per-cell current, centroid, and first-moment errors under the closing
+    representation (updated in place from the prototype map).</figcaption>
   </figure>
 
 </main></body>

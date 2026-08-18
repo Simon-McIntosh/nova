@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-18T19:29:48",
+  "updated": "2026-08-18T19:51:26",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -8306,9 +8306,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260818T173237632410-in-cell-current-representation",
+        "plan": "boundary-ring-source-completion",
+        "section": "\u00a76",
+        "node": "in-cell-current-representation",
+        "role": "implement",
+        "member": "ring-quadrature",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-18T17:32:40Z",
+        "completed_at": "2026-08-18T17:50:25Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1065,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1065,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "849c3e70e328c3142b1c0304f7eae459e0778d56",
+        "commits": [
+          "66a62016108c856e1868fe12790ccc9f10d69c43"
+        ],
+        "changed_lines": {
+          "added": 445,
+          "removed": 137,
+          "files": 6
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "All 10 gates pass: ring current-weighted L1 0.2405% (gate 0.7646%, 42.5x improvement), total current 0.3822% (gate 0.5%), centroid p95 0.341 mm, m1 L1 0.1240%, argmax 0.264 Wb, sup 0.310 Wb, 351 bitwise, 17 leg cells exactly zero, jit+vmap fixed-shape (CPU fallback 5.03 ms/state), 49-line probe bitwise exact; representation: degree-2 flux interpolant, GS j at a fixed 7-point degree-5 triangle rule over the clipped-support fan, moment-preserving affine projection, closed-form integration",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260818T173237632410-in-cell-current-representation/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01171-0694-7063-985b-f5d112e74147",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7440640,
+            "cached_input_tokens_cumulative": 50200704,
+            "input_tokens": 7752139,
+            "input_tokens_cumulative": 51858661,
+            "output_tokens": 39533,
+            "output_tokens_cumulative": 212718,
+            "reasoning_output_tokens": 15723,
+            "reasoning_output_tokens_cumulative": 70888
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 244
+    "_version": 245
   }
 }

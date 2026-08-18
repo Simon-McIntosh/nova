@@ -129,6 +129,15 @@ class InteriorCurrentMomentStencil:
     coefficient_weight: np.ndarray | None = field(default=None, repr=False)
     coordinate_scale: np.ndarray | None = field(default=None, repr=False)
     full_vertices: np.ndarray | None = field(default=None, repr=False)
+    ring_centre: np.ndarray | None = field(default=None, repr=False)
+    ring_gather_index: np.ndarray | None = field(default=None, repr=False)
+    ring_flux_weight: np.ndarray | None = field(default=None, repr=False)
+    ring_coordinate_scale: np.ndarray | None = field(default=None, repr=False)
+    ring_sampling_centre: np.ndarray | None = field(default=None, repr=False)
+    ring_profile_point: np.ndarray | None = field(default=None, repr=False)
+    ring_profile_flux_design: np.ndarray | None = field(default=None, repr=False)
+    ring_profile_weight: np.ndarray | None = field(default=None, repr=False)
+    ring_sample_node_count: int = 0
 
     def __post_init__(self):
         """Store compact contiguous geometry arrays for repeated contractions."""
@@ -145,11 +154,27 @@ class InteriorCurrentMomentStencil:
         object.__setattr__(
             self, "centre", np.ascontiguousarray(self.centre, dtype=np.intp)
         )
-        for name in ("coefficient_weight", "coordinate_scale", "full_vertices"):
+        for name in (
+            "coefficient_weight",
+            "coordinate_scale",
+            "full_vertices",
+            "ring_flux_weight",
+            "ring_coordinate_scale",
+            "ring_sampling_centre",
+            "ring_profile_point",
+            "ring_profile_flux_design",
+            "ring_profile_weight",
+        ):
             value = getattr(self, name)
             if value is not None:
                 object.__setattr__(
                     self, name, np.ascontiguousarray(value, dtype=np.float64)
+                )
+        for name in ("ring_centre", "ring_gather_index"):
+            value = getattr(self, name)
+            if value is not None:
+                object.__setattr__(
+                    self, name, np.ascontiguousarray(value, dtype=np.intp)
                 )
 
     def _gather(self, centroid_current_density, shared_node_current_density):
@@ -240,6 +265,50 @@ class InteriorCurrentMomentStencil:
         )
         return CellCurrentMoments(*vectors)
 
+    def support_flux_moments(
+        self,
+        profile,
+        centroid_flux,
+        centroid_density,
+        shared_density,
+        sample_flux,
+        support,
+    ) -> CellCurrentMoments:
+        """Integrate fixed interior and own-node profile cubics over supports."""
+        vectors = jnp.stack(
+            self.support_moments(centroid_density, shared_density, support)
+        )
+        if self.ring_centre is None or len(self.ring_centre) == 0:
+            return CellCurrentMoments(*vectors)
+
+        sample_value = jnp.asarray(sample_flux)
+        if sample_value.shape != (self.ring_sample_node_count,):
+            raise ValueError("one flux value is needed per direct sampling node")
+        centroid_value = jnp.asarray(centroid_flux)
+        value_pool = jnp.concatenate([centroid_value, sample_value])
+        gathered = value_pool[self.ring_gather_index]
+        flux_coefficient = jnp.einsum(
+            "rps,rs->rp",
+            jnp.asarray(self.ring_flux_weight, dtype=value_pool.dtype),
+            gathered,
+        )
+        ring = self.ring_centre
+        current, first = fixed_profile_current_moments(
+            profile,
+            support.support_vertices[ring],
+            support.vertex_count[ring],
+            support.centroids[ring],
+            jnp.asarray(self.ring_sampling_centre, dtype=value_pool.dtype),
+            jnp.asarray(self.ring_coordinate_scale, dtype=value_pool.dtype),
+            flux_coefficient,
+            jnp.asarray(self.ring_profile_point, dtype=value_pool.dtype),
+            jnp.asarray(self.ring_profile_flux_design, dtype=value_pool.dtype),
+            jnp.asarray(self.ring_profile_weight, dtype=value_pool.dtype),
+        )
+        entries = jnp.stack([current, first[:, 0], first[:, 1]])
+        vectors = vectors.at[:, ring].set(entries)
+        return CellCurrentMoments(*vectors)
+
 
 @dataclass(frozen=True)
 class SharedNodeFluxStencil:
@@ -277,9 +346,16 @@ class MomentGeometry:
     atomic_mesh: AtomicCellMesh = field(repr=False)
     second_moment: np.ndarray = field(repr=False)
     shared_flux_stencil: SharedNodeFluxStencil = field(repr=False)
+    sampling_vertices: tuple[np.ndarray, ...] = field(repr=False)
+    sample_node_coordinates: np.ndarray = field(repr=False)
+    cell_sample_nodes: np.ndarray = field(repr=False)
+    sample_vertex_count: np.ndarray = field(repr=False)
+    sample_flux_stencil: SharedNodeFluxStencil = field(repr=False)
 
     @classmethod
-    def from_cells(cls, mesh: StencilMesh, cells) -> MomentGeometry:
+    def from_cells(
+        cls, mesh: StencilMesh, cells, *, sampling_vertices=None
+    ) -> MomentGeometry:
         """Build all geometry-dependent current-moment state once per mesh."""
         polygons = []
         for cell in cells:
@@ -311,16 +387,58 @@ class MomentGeometry:
         centroids = np.asarray([section_centroid(cell) for cell in polygons])
         atomic = AtomicCellMesh.from_cells(polygons, centroids=centroids)
         moments = np.asarray([second_moments(cell) for cell in polygons])
+        if sampling_vertices is None:
+            sampling = tuple(np.asarray(polygon) for polygon in polygons)
+        else:
+            sampling = tuple(
+                np.ascontiguousarray(vertices, dtype=np.float64)
+                for vertices in sampling_vertices
+            )
+            if len(sampling) != mesh.node_count:
+                raise ValueError("one sampling polygon is required per mesh cell")
+            if any(
+                vertices.ndim != 2
+                or vertices.shape[1] != 2
+                or len(vertices) not in (4, 6)
+                for vertices in sampling
+            ):
+                raise ValueError(
+                    "sampling polygons must have four or six two-dimensional vertices"
+                )
+        sample_nodes: list[np.ndarray] = []
+        sample_lookup: dict[tuple[int, int], int] = {}
+        sample_count = np.asarray(
+            [len(vertices) for vertices in sampling], dtype=np.intp
+        )
+        sample_width = int(np.max(sample_count))
+        cell_sample_nodes = np.zeros((mesh.node_count, sample_width), dtype=np.intp)
+        for cell, vertices in enumerate(sampling):
+            for corner, vertex in enumerate(vertices):
+                key = tuple(np.rint(vertex / atomic.tolerance).astype(np.int64))
+                if key not in sample_lookup:
+                    sample_lookup[key] = len(sample_nodes)
+                    sample_nodes.append(vertex)
+                cell_sample_nodes[cell, corner] = sample_lookup[key]
+        sample_coordinate = np.asarray(sample_nodes)
         return cls(
             polygons=tuple(polygons),
             atomic_mesh=atomic,
             second_moment=moments,
             shared_flux_stencil=mesh.shared_node_flux_stencil(atomic.node_coordinates),
+            sampling_vertices=sampling,
+            sample_node_coordinates=sample_coordinate,
+            cell_sample_nodes=cell_sample_nodes,
+            sample_vertex_count=sample_count,
+            sample_flux_stencil=mesh.shared_node_flux_stencil(sample_coordinate),
         )
 
     def shared_node_flux(self, cell_flux) -> jax.Array:
         """Evaluate one cell-centred flux map on the atomic shared nodes."""
         return self.shared_flux_stencil(cell_flux)
+
+    def sample_node_flux(self, cell_flux) -> jax.Array:
+        """Evaluate one cell-centred flux map on the pre-clip sampling nodes."""
+        return self.sample_flux_stencil(cell_flux)
 
 
 def _quadratic_design(local: np.ndarray) -> np.ndarray:
@@ -343,6 +461,56 @@ def _cubic_design(local: np.ndarray) -> np.ndarray:
     """Evaluate the complete cubic monomial basis at local coordinates."""
     radial, vertical = local[..., 0], local[..., 1]
     return np.stack([radial**p * vertical**q for p, q in POLYNOMIAL_POWERS], axis=-1)
+
+
+def _quadratic_flux_design(local):
+    """Evaluate the complete quadratic basis with the input array namespace."""
+    radial, vertical = local[..., 0], local[..., 1]
+    return jnp.stack(
+        [
+            jnp.ones_like(radial),
+            radial,
+            vertical,
+            radial**2,
+            radial * vertical,
+            vertical**2,
+        ],
+        axis=-1,
+    )
+
+
+def fixed_profile_current_moments(
+    profile,
+    support_vertices,
+    vertex_count,
+    moment_centre,
+    sampling_centre,
+    coordinate_scale,
+    flux_coefficient,
+    profile_point,
+    profile_flux_design,
+    profile_weight,
+):
+    """Integrate one clip-independent cubic profile over changing supports."""
+    vertices = jnp.asarray(support_vertices)
+    count = jnp.asarray(vertex_count)
+    included = count >= 3
+    flux = jnp.einsum("nqi,ni->nq", profile_flux_design, flux_coefficient)
+    density = profile.current_density(profile_point[..., 0], flux)
+    polynomial = jnp.einsum("niq,nq->ni", profile_weight, density)
+    current, first_about_sampling = padded_polynomial_current_moments(
+        vertices,
+        count,
+        sampling_centre,
+        coordinate_scale,
+        jnp.where(included[:, None], polynomial, 0.0),
+    )
+    first_about_moment = first_about_sampling + current[:, None] * (
+        sampling_centre - moment_centre
+    )
+    current = jnp.where(included, current, 0.0)
+    first_about_moment = jnp.where(included[:, None], first_about_moment, 0.0)
+    return current, first_about_moment
 
 
 def _polygon_monomial_integral(
@@ -549,6 +717,9 @@ class StencilMesh:
         *,
         node_coordinate=None,
         polygon_centroid=None,
+        support_centre=None,
+        sampling_node_coordinate=None,
+        sampling_cell_node=None,
     ) -> InteriorCurrentMomentStencil:
         """Build the fixed interior operator for cell-current moments.
 
@@ -593,6 +764,15 @@ class StencilMesh:
         coefficient_weight = None
         coordinate_scale = None
         full_vertices = None
+        ring_centre = None
+        ring_gather_index = None
+        ring_flux_weight = None
+        ring_coordinate_scale = None
+        ring_sampling_centre = None
+        ring_profile_point = None
+        ring_profile_flux_design = None
+        ring_profile_weight = None
+        ring_sample_node_count = 0
         if node_coordinate is not None:
             node_coordinate = np.ascontiguousarray(node_coordinate, dtype=np.float64)
             if node_coordinate.ndim != 2 or node_coordinate.shape[1] != 2:
@@ -647,6 +827,93 @@ class StencilMesh:
                 target[-2] = weight[row, 1] / (area[row] * coordinate_scale[row, 0])
                 target[-1] = weight[row, 2] / (area[row] * coordinate_scale[row, 1])
                 coefficient_weight[row] = np.linalg.pinv(constraint) @ target
+        if support_centre is not None:
+            if sampling_node_coordinate is None or sampling_cell_node is None:
+                raise ValueError(
+                    "support centres require sampling coordinates and cell-node indices"
+                )
+            support_centre = np.ascontiguousarray(support_centre, dtype=np.intp)
+            ring_centre = np.setdiff1d(support_centre, centre, assume_unique=False)
+            sampling_node_coordinate = np.ascontiguousarray(
+                sampling_node_coordinate, dtype=np.float64
+            )
+            sampling_cell_node = np.ascontiguousarray(sampling_cell_node, dtype=np.intp)
+            if sampling_cell_node.shape[0] != self.node_count:
+                raise ValueError("sampling cell-node rows must match the mesh")
+            ring_sample_node_count = len(sampling_node_coordinate)
+            ring_gather_index = np.column_stack(
+                [
+                    ring_centre,
+                    self.node_count + sampling_cell_node[ring_centre],
+                ]
+            )
+            ring_sampling_centre = self.coordinate[ring_centre]
+            ring_vertices = sampling_node_coordinate[sampling_cell_node[ring_centre]]
+            ring_offset = ring_vertices - ring_sampling_centre[:, None, :]
+            ring_coordinate_scale = np.max(np.abs(ring_offset), axis=1)
+            if np.any(ring_coordinate_scale <= 0.0):
+                raise ValueError("every sampling polygon must span both coordinates")
+            ring_points = np.concatenate(
+                [ring_sampling_centre[:, None, :], ring_vertices], axis=1
+            )
+            ring_local = (
+                ring_points - ring_sampling_centre[:, None, :]
+            ) / ring_coordinate_scale[:, None, :]
+            ring_flux_weight = np.linalg.pinv(_quadratic_design(ring_local))
+            barycentric = np.asarray(
+                [
+                    [1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0],
+                    [0.059715871789770, 0.470142064105115, 0.470142064105115],
+                    [0.470142064105115, 0.059715871789770, 0.470142064105115],
+                    [0.470142064105115, 0.470142064105115, 0.059715871789770],
+                    [0.797426985353087, 0.101286507323456, 0.101286507323456],
+                    [0.101286507323456, 0.797426985353087, 0.101286507323456],
+                    [0.101286507323456, 0.101286507323456, 0.797426985353087],
+                ]
+            )
+            rule_weight = np.asarray(
+                [
+                    0.225,
+                    0.132394152788506,
+                    0.132394152788506,
+                    0.132394152788506,
+                    0.125939180544827,
+                    0.125939180544827,
+                    0.125939180544827,
+                ]
+            )
+            following = np.roll(ring_vertices, -1, axis=1)
+            triangles = np.stack(
+                [
+                    np.broadcast_to(
+                        ring_sampling_centre[:, None, :], ring_vertices.shape
+                    ),
+                    ring_vertices,
+                    following,
+                ],
+                axis=2,
+            )
+            first = triangles[:, :, 1] - triangles[:, :, 0]
+            second = triangles[:, :, 2] - triangles[:, :, 0]
+            triangle_area = 0.5 * np.abs(
+                first[..., 0] * second[..., 1] - first[..., 1] * second[..., 0]
+            )
+            ring_profile_point = np.einsum(
+                "qa,ntad->ntqd", barycentric, triangles
+            ).reshape(len(ring_centre), -1, 2)
+            quadrature_weight = (
+                triangle_area[:, :, None] * rule_weight[None, None, :]
+            ).reshape(len(ring_centre), -1)
+            profile_local = (
+                ring_profile_point - ring_sampling_centre[:, None, :]
+            ) / ring_coordinate_scale[:, None, :]
+            ring_profile_flux_design = _quadratic_design(profile_local)
+            density_design = _cubic_design(profile_local)
+            weighted_design = density_design * quadrature_weight[..., None]
+            normal = np.einsum("nqi,nqj->nij", density_design, weighted_design)
+            ring_profile_weight = np.linalg.solve(
+                normal, np.swapaxes(weighted_design, 1, 2)
+            )
         return InteriorCurrentMomentStencil(
             gather_index=gather_index,
             contraction_weight=weight,
@@ -656,6 +923,15 @@ class StencilMesh:
             coefficient_weight=coefficient_weight,
             coordinate_scale=coordinate_scale,
             full_vertices=full_vertices,
+            ring_centre=ring_centre,
+            ring_gather_index=ring_gather_index,
+            ring_flux_weight=ring_flux_weight,
+            ring_coordinate_scale=ring_coordinate_scale,
+            ring_sampling_centre=ring_sampling_centre,
+            ring_profile_point=ring_profile_point,
+            ring_profile_flux_design=ring_profile_flux_design,
+            ring_profile_weight=ring_profile_weight,
+            ring_sample_node_count=ring_sample_node_count,
         )
 
     def delta_star(self, flux) -> jax.Array:

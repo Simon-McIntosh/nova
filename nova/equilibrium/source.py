@@ -575,6 +575,8 @@ class ForwardSource:
         support_moments,
         core_support,
         common_support,
+        *,
+        sample_flux=None,
     ) -> CellCurrentMoments:
         """Return current moments selected by the shared-node clip partition.
 
@@ -586,16 +588,42 @@ class ForwardSource:
         participation on or off.
         """
 
-        def partitioned_moments(profile, centroid_flux, node_flux, support):
+        def partitioned_moments(
+            profile,
+            centroid_flux,
+            node_flux,
+            direct_centroid_flux,
+            direct_flux,
+            support,
+            selection,
+        ):
             centroid_density = profile.current_density(radius, centroid_flux)
             shared_density = profile.current_density(shared_radius, node_flux)
-            return support_moments(centroid_density, shared_density, support)
+            if direct_flux is not None:
+                moments = support_moments(
+                    profile,
+                    direct_centroid_flux,
+                    centroid_density,
+                    shared_density,
+                    direct_flux,
+                    support,
+                )
+            else:
+                moments = support_moments(centroid_density, shared_density, support)
+            return CellCurrentMoments(
+                *(jnp.where(selection, entry, 0.0) for entry in moments)
+            )
+
+        closed_branch = masks.core | masks.common_sol
 
         core = partitioned_moments(
             self.core,
             jnp.clip(masks.psi_norm, 0.0, 1.0),
             jnp.clip(shared_masks.psi_norm, 0.0, 1.0),
+            masks.psi_norm,
+            sample_flux,
             core_support,
+            closed_branch,
         )
         total = jnp.stack(core)
 
@@ -604,7 +632,10 @@ class ForwardSource:
                 self.common_sol,
                 jnp.maximum(masks.psi_norm, 1.0),
                 jnp.maximum(shared_masks.psi_norm, 1.0),
+                masks.psi_norm,
+                sample_flux,
                 common_support,
+                closed_branch,
             )
             total = total + jnp.stack(common)
 

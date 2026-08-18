@@ -282,7 +282,18 @@ def test_solve_path_current_moments_match_direct_stencil_and_clip(machine):
     clipped = geometry.atomic_mesh.traced_clip(
         operator.polarity * (shared_flux - topology.boundary_flux)
     )
-    direct = operator.support_current_moments(centroid_density, shared_density, clipped)
+    sample_flux = operator.sample_node_flux(seed)
+    sample_psi_norm = (sample_flux - topology.axis_flux) / topology.flux_span
+    direct = operator.support_current_moments(
+        operator.source.core,
+        masks.psi_norm,
+        centroid_density,
+        shared_density,
+        sample_psi_norm,
+        clipped,
+    )
+    closed_branch = masks.core | masks.common_sol
+    direct = type(direct)(*(jnp.where(closed_branch, entry, 0.0) for entry in direct))
     radial_second, vertical_second, cross_second = geometry.second_moment.T
     determinant = radial_second * vertical_second - cross_second**2
     expected = (
@@ -296,11 +307,15 @@ def test_solve_path_current_moments_match_direct_stencil_and_clip(machine):
     for observed, direct in zip(actual, expected, strict=True):
         np.testing.assert_allclose(observed, direct, rtol=2e-13, atol=2e-13)
 
-    crossing_outside = np.asarray(clipped.boundary & ~masks.core)
-    assert crossing_outside.sum() > 0
-    assert np.count_nonzero(np.asarray(actual.cell_current)[crossing_outside]) == int(
-        crossing_outside.sum()
+    crossing_closed = np.asarray(clipped.boundary & (masks.core | masks.common_sol))
+    crossing_unqualified = np.asarray(
+        clipped.boundary & ~(masks.core | masks.common_sol)
     )
+    assert crossing_closed.sum() > 0
+    assert np.count_nonzero(np.asarray(actual.cell_current)[crossing_closed]) == int(
+        crossing_closed.sum()
+    )
+    assert np.count_nonzero(np.asarray(actual.cell_current)[crossing_unqualified]) == 0
 
 
 def test_unclipped_support_quadrature_is_interior_stencil_bitwise(machine):
@@ -321,11 +336,19 @@ def test_unclipped_support_quadrature_is_interior_stencil_bitwise(machine):
         jnp.ones(len(shared_density))
     )
     expected = operator.interior_current_moments(centroid_density, shared_density)
+    sample_flux = operator.sample_node_flux(seed)
+    sample_psi_norm = (sample_flux - topology.axis_flux) / topology.flux_span
     observed = operator.support_current_moments(
-        centroid_density, shared_density, complete
+        operator.source.core,
+        masks.psi_norm,
+        centroid_density,
+        shared_density,
+        sample_psi_norm,
+        complete,
     )
+    interior = operator._moment_mesh.centre
     for actual, direct in zip(observed, expected, strict=True):
-        np.testing.assert_array_equal(actual, direct)
+        np.testing.assert_array_equal(actual[interior], direct[interior])
 
 
 def test_zero_smoothing_width_preserves_moment_map_bitwise(machine):

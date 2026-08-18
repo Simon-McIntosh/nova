@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-18">
-<meta name="plan-version" content="32">
-<meta name="plan-commits" content="f943bacba9ac64c404afe92c94d43f023950b349,919bafcea9422ff5b0c6de8607d86d4a9418ea86,f332f8426c672f6cdc6bb09fe68e07dd7ecf94a0,3f2312e743289492bc3b4a4a58d4a16dc339d11d,66a62016108c856e1868fe12790ccc9f10d69c43,ba1dab86fa30ed4198ae01c8748dff722b7d3540,3964883b2cd62bbcd691cb735ab141b2bb3dec2a">
-<meta name="plan-artifacts" content="docs/evidence/archive/boundary-ring-source-completion-landed.html,docs/figures/boundary-ring-source-completion/ring-m0-relative-error.png,docs/research/hex-clip-current-attribution.html,docs/figures/hex-clip-current-attribution/clip-audit.png,scripts/ring_quadrature/results/ring-quadrature-results.json (lineage f943bacb),scripts/clip_audit/results/clip-audit-results.json (lineage 919bafce),scripts/own_node_interior_score/results.json (lineage ba1dab86),scripts/in_cell_order_study/results.json (lineage 3964883b)">
-<meta name="plan-impl" content="0.64">
+<meta name="plan-version" content="33">
+<meta name="plan-commits" content="f943bacba9ac64c404afe92c94d43f023950b349,919bafcea9422ff5b0c6de8607d86d4a9418ea86,f332f8426c672f6cdc6bb09fe68e07dd7ecf94a0,3f2312e743289492bc3b4a4a58d4a16dc339d11d,66a62016108c856e1868fe12790ccc9f10d69c43,ba1dab86fa30ed4198ae01c8748dff722b7d3540,3964883b2cd62bbcd691cb735ab141b2bb3dec2a,ca77200c287c0151c87bba832a4c889a3b02edcb">
+<meta name="plan-artifacts" content="docs/evidence/archive/boundary-ring-source-completion-landed.html,docs/figures/boundary-ring-source-completion/ring-m0-relative-error.png,docs/figures/boundary-ring-source-completion/fixed-cubic-errors.png,docs/research/hex-clip-current-attribution.html,docs/figures/hex-clip-current-attribution/clip-audit.png,scripts/ring_quadrature/results/ring-quadrature-results.json (lineage f943bacb),scripts/clip_audit/results/clip-audit-results.json (lineage 919bafce),scripts/own_node_interior_score/results.json (lineage ba1dab86),scripts/in_cell_order_study/results.json (lineage 3964883b),scripts/ring_attribution/results/ring-attribution-results.json (lineage ca77200c)">
+<meta name="plan-impl" content="0.67">
 </head>
 <body>
   <main class="plan-doc">
@@ -331,6 +331,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-20260818T1930b" data-who="reckon-ship" data-when="2026-08-18T19:32Z">
     <div class="r-comment-body">in-cell-sample-order-study landed — commit 3964883b; gate PASSED (qualified negative on adoption). Thirteen-sample cubic (six pre-clip vertices, six edge midpoints, centroid) vs the locked seven-sample quadratic over the 96 ring cells: ring net current 0.15041% → 0.11542%, current-weighted m0 L1 0.24049% → 0.16863% (1.43×), m1 L1 0.12399% → 0.09515%, centroid max 1.190 → 0.812 mm — but fixture-total current worsens slightly (0.38223% → 0.38382%) because the total is dominated by the interior cubic error, so sample order does not justify replacing the seven-sample route on this fixture alone. ring-node-set stands at seven samples; revisit only if the tightened gates demand it.</div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-20260818T2145" data-who="reckon-ship" data-when="2026-08-18T21:45Z">
+    <div class="r-comment-body">ring-route-production-fold landed — commit ca77200c; gate PASSED on the locked contract (87/87 suite incl. 4 new ring pins; bitwise 351; leg zeros exact; adaptive integration 2e-13; restored missing-area toy under the unchanged 4.1× bound; width-zero C¹ JVPs at 2e-6/2e-9; net current 0.41043% < 0.5%; argmax 0.1827 Wb; sup 0.2561 Wb; GPU JIT 0.4916 ms/state, batch-8 vmap 0.1133 ms/state). Mechanism: one clip-independent quadratic flux interpolant → 42 fixed full-hex quadrature points → one clip-independent degree-3 current-density polynomial → exact closed-form integration over each actual support; clip geometry enters only as the integration domain. FIRST-CLASS REGRESSION EVIDENCE for q-current-gate: the C¹-constrained fixed density trades clipped-cell accuracy vs the §6 support-matched prototype — ring L1 0.58541% vs 0.2405%, m1 0.43480% vs 0.1240%, centroid p95 2.891 mm vs 0.341 mm, net 0.41043% vs 0.3822%. The unification wave must recover prototype-level clipped accuracy within the C¹ invariant before the tightened gates can lock.</div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

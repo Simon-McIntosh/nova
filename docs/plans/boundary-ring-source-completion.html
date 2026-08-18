@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-18">
-<meta name="plan-version" content="27">
-<meta name="plan-commits" content="f943bacba9ac64c404afe92c94d43f023950b349,919bafcea9422ff5b0c6de8607d86d4a9418ea86,f332f8426c672f6cdc6bb09fe68e07dd7ecf94a0,3f2312e743289492bc3b4a4a58d4a16dc339d11d,66a62016108c856e1868fe12790ccc9f10d69c43">
-<meta name="plan-artifacts" content="docs/evidence/archive/boundary-ring-source-completion-landed.html,docs/figures/boundary-ring-source-completion/ring-m0-relative-error.png,docs/research/hex-clip-current-attribution.html,docs/figures/hex-clip-current-attribution/clip-audit.png,scripts/ring_quadrature/results/ring-quadrature-results.json (lineage f943bacb),scripts/clip_audit/results/clip-audit-results.json (lineage 919bafce)">
-<meta name="plan-impl" content="0.625">
+<meta name="plan-version" content="33">
+<meta name="plan-commits" content="f943bacba9ac64c404afe92c94d43f023950b349,919bafcea9422ff5b0c6de8607d86d4a9418ea86,f332f8426c672f6cdc6bb09fe68e07dd7ecf94a0,3f2312e743289492bc3b4a4a58d4a16dc339d11d,66a62016108c856e1868fe12790ccc9f10d69c43,ba1dab86fa30ed4198ae01c8748dff722b7d3540,3964883b2cd62bbcd691cb735ab141b2bb3dec2a,ca77200c287c0151c87bba832a4c889a3b02edcb">
+<meta name="plan-artifacts" content="docs/evidence/archive/boundary-ring-source-completion-landed.html,docs/figures/boundary-ring-source-completion/ring-m0-relative-error.png,docs/figures/boundary-ring-source-completion/fixed-cubic-errors.png,docs/research/hex-clip-current-attribution.html,docs/figures/hex-clip-current-attribution/clip-audit.png,scripts/ring_quadrature/results/ring-quadrature-results.json (lineage f943bacb),scripts/clip_audit/results/clip-audit-results.json (lineage 919bafce),scripts/own_node_interior_score/results.json (lineage ba1dab86),scripts/in_cell_order_study/results.json (lineage 3964883b),scripts/ring_attribution/results/ring-attribution-results.json (lineage ca77200c)">
+<meta name="plan-impl" content="0.67">
 </head>
 <body>
   <main class="plan-doc">
@@ -185,14 +185,18 @@
     evaluation through one support-moment callable — the stencil-availability seam ceases to exist as
     a code path. TDD against the existing pin set.</p>
 
-    <p><strong>Done when:</strong> (a) full interior supports reproduce the established stencil
-    bitwise (existing pin stays green untouched); (b) the exact-polygon-integration pin extends to
+    <p><strong>Done when:</strong> (a) every plasma cell — interior, boundary-clipped, and
+    topology-zero — evaluates through the one unified support-moment callable, with interior
+    accuracy gated against the oracle (current-weighted per-cell m0 L1 no worse than the retired
+    cubic stencil's measured 0.7646%) in place of bitwise reproduction of the retired stencil
+    (owner ruling 2026-08-18, decision unified-cell-representation; bitwise interior pins in the
+    existing set re-base to the same accuracy gates); (b) the exact-polygon-integration pin extends to
     ring supports against independent adaptive quadrature at its existing tolerance class; (c) the
     missing-area convergence pin and the no-smoothing C¹ fill-transition pins hold on ring cells
     (both-sided JVPs at the banked 2e-6/2e-9 tolerances, width zero); (d) exact clip vertices, area
     receipts, conservation, topology and private-flux qualification are unchanged; (e) the complete
-    component suite (the 83-test set plus the new ring pins) is green; (f) committed to the lineage
-    with the mechanism in the body.</p>
+    component suite (the 83-test set plus the new ring pins, re-based per (a)) is green; (f) committed
+    to the lineage with the mechanism in the body.</p>
 
     <h2 id="s8">§8 — Analytic-seed adjudication</h2>
 
@@ -260,6 +264,15 @@
     <p class="r-dec-q">Where does the repaired boundary evaluation live?</p>
     <p class="r-dec-rat">All probes, prototypes and fixes target the default hexagonal plasma-cell path in place — the shipped tiling, clip, and attribution modules under nova/equilibrium/. No parallel modules, wrappers, backend switches, or duplicate code paths; a superseded formula is replaced where it lives.</p>
     </div>
+<div class="r-dec" data-key="unified-cell-representation" data-choice="accuracy-gated-unified" data-by="Simon McIntosh" data-when="2026-08-18T19:35:00+00:00">
+    <p class="r-dec-q">Does the bitwise interior-stencil reproduction pin survive, or do accuracy gates govern a single representation for all plasma cells?</p>
+    <p class="r-dec-ctx">Owner question 2026-08-18 (q-current-gate): the 0.5% net-current gate is mismatched beside round-off geometry tolerances, and one method for all plasma cells is preferred for GPU throughput. Measured evidence: the own-node quadratic scored on the 351 complete-ring interior cells beats the established neighbour-ring cubic 64× on current-weighted m0 L1 (0.012005% vs 0.764644%) and 308× on net current (−220 A vs −67,786 A); the interior cubic, not the ring, dominates the source&#x27;s total-current error.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="retain-bitwise-pin">keep interior cells bitwise on the established cubic stencil; own-node route serves only ring-incomplete cells</button>
+      <button class="r-opt chosen" data-value="accuracy-gated-unified">retire the bitwise interior-reproduction pin; one clip-independent own-node representation serves every plasma cell (interior, boundary-clipped, topology-zero), gated by measured accuracy against the oracle</button>
+      </p>
+    <p class="r-dec-rat">Owner ruling 2026-08-18: relax the bitwise pin in favour of accuracy gates. One representation — seven direct in-cell samples, clip-independent density, exact polygon moments — serves all cells: single gather, no neighbour-ring collection, no branch, maximal GPU throughput, and the two-formula seam class dissolves by construction. Accuracy gates govern: the unified path must beat the retired cubic&#x27;s measured interior floor (m0 L1 0.7646% current-weighted) with headroom — provisional gates from the measured floors: interior m0 L1 ≤ 0.025% (2× the measured 0.012005%), net total current ≤ 0.05%, ring gates unchanged from §6; final values lock with q-current-gate once the unified fold is measured. ring-node-set stands at seven samples (the thirteen-sample cubic improves ring-local floors 1.3–1.4× but not the total, and is not adopted).</p>
+    </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
@@ -310,12 +323,27 @@
 <div class="r-comment" data-section="s6" data-id="c-20260818T2005" data-who="reckon-ship" data-when="2026-08-18T20:05Z">
     <div class="r-comment-body">in-cell-current-representation landed — commit 66a62016; ALL 10 GATES PASS. Ring current-weighted L1 0.2405% (gate 0.7646%, 42.5× better than the prototype), total current 0.3822% (gate 0.5%), centroid p95 0.341 mm, m1 L1 0.1240%, argmax 0.264 Wb, sup 0.310 Wb, 351 bitwise, 17 leg zeros exact, 49-line probe bitwise exact. Representation: degree-2 flux interpolant from the seven direct samples → GS j at a fixed 7-point degree-5 triangle rule over the clipped-support fan → moment-preserving affine projection → closed-form integration. §6 measured complete; owner sign-off is the remaining gate before §7.</div>
 </div>
+<div class="r-comment" data-section="s7" data-id="c-20260818T1905" data-who="reckon-ship" data-when="2026-08-18T19:05Z">
+    <div class="r-comment-body">Owner steer mid-§7: the 0.5% net-current gate looks too lenient beside round-off-level geometry tolerances, and one representation for all plasma cells is preferred for GPU throughput (q-current-gate). Fold worker state: blocked once on the two new ring pins (missing-area residual 142× the fraction vs the 4.1× bound; width-zero current JVPs 5.618 vs 0.271 — one signature: the clipped path does not limit to the full-fill formula), answered with a reformulation directive (clip enters only through the integration domain of a clip-independent density; no full-fill branch; pin tolerances stay locked) and resumed in-session; repair in flight. Two measurement nodes dispatched in parallel under disjoint script scopes: interior-own-node-score (member hex-stencil) and in-cell-sample-order-study (member edge-clip), both 30m against the banked coarse fixture.</div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-20260818T1930a" data-who="reckon-ship" data-when="2026-08-18T19:30Z">
+    <div class="r-comment-body">interior-own-node-score landed — commit ba1dab86; gate PASSED. The own-node quadratic scored on all 351 complete-ring interior cells against the same depth-4 Solov'ev oracle as the established cubic: net current error −220.0 A (0.001537%) vs cubic −67,786.3 A (0.473486%); current-weighted m0 L1 0.012005% vs 0.764644% (64× better); normalized m1 L1 0.011119% vs 0.906181% (82× better). The established interior cubic — not the ring — is the dominant accuracy limiter of the whole source; the 0.3822% total-current error is carried by the interior representation. Decisive for q-current-gate and the unified-cell-representation ruling.</div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-20260818T1930b" data-who="reckon-ship" data-when="2026-08-18T19:32Z">
+    <div class="r-comment-body">in-cell-sample-order-study landed — commit 3964883b; gate PASSED (qualified negative on adoption). Thirteen-sample cubic (six pre-clip vertices, six edge midpoints, centroid) vs the locked seven-sample quadratic over the 96 ring cells: ring net current 0.15041% → 0.11542%, current-weighted m0 L1 0.24049% → 0.16863% (1.43×), m1 L1 0.12399% → 0.09515%, centroid max 1.190 → 0.812 mm — but fixture-total current worsens slightly (0.38223% → 0.38382%) because the total is dominated by the interior cubic error, so sample order does not justify replacing the seven-sample route on this fixture alone. ring-node-set stands at seven samples; revisit only if the tightened gates demand it.</div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-20260818T2145" data-who="reckon-ship" data-when="2026-08-18T21:45Z">
+    <div class="r-comment-body">ring-route-production-fold landed — commit ca77200c; gate PASSED on the locked contract (87/87 suite incl. 4 new ring pins; bitwise 351; leg zeros exact; adaptive integration 2e-13; restored missing-area toy under the unchanged 4.1× bound; width-zero C¹ JVPs at 2e-6/2e-9; net current 0.41043% < 0.5%; argmax 0.1827 Wb; sup 0.2561 Wb; GPU JIT 0.4916 ms/state, batch-8 vmap 0.1133 ms/state). Mechanism: one clip-independent quadratic flux interpolant → 42 fixed full-hex quadrature points → one clip-independent degree-3 current-density polynomial → exact closed-form integration over each actual support; clip geometry enters only as the integration domain. FIRST-CLASS REGRESSION EVIDENCE for q-current-gate: the C¹-constrained fixed density trades clipped-cell accuracy vs the §6 support-matched prototype — ring L1 0.58541% vs 0.2405%, m1 0.43480% vs 0.1240%, centroid p95 2.891 mm vs 0.341 mm, net 0.41043% vs 0.3822%. The unification wave must recover prototype-level clipped accuracy within the C¹ invariant before the tightened gates can lock.</div>
+</div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
 <h2><span class="sec">§</span> Open questions</h2>
 <div class="r-q" data-id="q-leg-zero" data-section="s5" data-status="resolved" data-opened-by="Simon McIntosh" data-opened-at="2026-08-18" data-resolved-at="2026-08-18T16:28:25+00:00" data-resolved-by="reckon-ship">
     <p class="r-q-body">The boundary-ring evidence figure shows per-cell m0 error signal in the divertor legs. Current should only appear there when driving current through the SOL, for which no Solov'ev solution exists — what is the cause of these errors where the exact current is zero? Candidates: a relative-error metric normalised by a near-zero exact cell current (figure artifact), or genuine misattributed current via psi_norm labeling / participation (a real defect).</p>
     <p class="r-q-resolution">Both causes, split by population (commit f332f842, 17/17 lower-leg cells classified). Baseline: metric/oracle artifact — the figure's geometry-only oracle counted −9.595 kA where the topology-qualified oracle is exactly 0 A; production attributes exactly 0 A in all 17 cells. Candidates: genuine leak — own-geometry −18.025 kA, one-sided −19.631 kA through topology-unqualified core_support entering partitioned_moments without a domain mask (probe-demonstrated). Metrics restated current-weighted: interior 0.7646% L1; ring baseline 100%, own-geometry 12.47%, one-sided 15.81%. §6 must topology-qualify core_support and gate the 17 cells at exactly zero.</p>
+    </div>
+<div class="r-q" data-id="q-current-gate" data-section="s7" data-status="open" data-opened-by="Simon McIntosh" data-opened-at="2026-08-18" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body">Is the 0.5% net plasma-current gate mismatched against the rest of the tolerance budget? Clip geometry, attribution formulas, and closed-form integration sit at binary64 round-off while the net-current gate admits 0.5%; plasma current dominates flux-surface shape, so the gate should be re-derived from a measured representation floor rather than inherited from the §3 prediction contract. Coupled question: can one representation serve every plasma cell (interior, boundary-bisected, external/topology-zero) — one method is best for GPU throughput. Probes dispatched: interior-own-node-score (own-node quadratic scored on the complete-ring population beside the established cubic stencil) and in-cell-sample-order-study (seven-sample quadratic vs thirteen-sample cubic on the 96 ring cells).</p>
     </div>
 </section>
 </main>

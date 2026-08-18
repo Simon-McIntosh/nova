@@ -248,5 +248,87 @@
     representation (updated in place from the prototype map).</figcaption>
   </figure>
 
+  <h2 id="representation-accuracy-floors">§7 (adjudication) — the interior cubic is the dominant error; one representation for all cells</h2>
+
+  <p>The owner questioned the 0.5% net-current gate as mismatched beside round-off geometry
+  tolerances and asked whether one representation can serve every plasma cell. Two parallel
+  measurement nodes answered both on the banked coarse fixture against the same depth-4
+  subdivided-triangle Solov'ev oracle.</p>
+
+  <p><strong>Interior score (commit <code>ba1dab86</code>)</strong> — the seven-sample own-node
+  quadratic applied to all 351 complete-ring interior cells, beside the established
+  neighbour-ring cubic stencil:</p>
+
+  <table>
+    <tr><th>Metric (351 interior cells)</th><th>own-node quadratic</th><th>established cubic</th><th>ratio</th></tr>
+    <tr><td>net current error</td><td>−220.0 A (0.001537%)</td><td>−67,786.3 A (0.473486%)</td><td>308×</td></tr>
+    <tr><td>current-weighted m0 L1</td><td>0.012005%</td><td>0.764644%</td><td>64×</td></tr>
+    <tr><td>normalized m1 L1</td><td>0.011119%</td><td>0.906181%</td><td>82×</td></tr>
+  </table>
+
+  <p>The established interior cubic — which reconstructs from neighbour cell-centres a
+  cell-width away — is the dominant accuracy limiter of the whole source; the banked 0.3822%
+  total-current error is carried by the interior representation, not the ring. In-cell direct
+  sampling removes it.</p>
+
+  <p><strong>Sample-order study (commit <code>3964883b</code>)</strong> — a thirteen-sample cubic
+  (six pre-clip vertices, six edge midpoints, centroid) beside the locked seven-sample quadratic
+  over the 96 ring cells: ring-local floors improve 1.3–1.4× (m0 L1 0.2405% → 0.1686%, net
+  0.1504% → 0.1154%, centroid max 1.190 → 0.812 mm) but the fixture total does not (0.38223% →
+  0.38382%, interior-dominated), so the seven-sample route stands and <code>ring-node-set</code>
+  is unchanged.</p>
+
+  <p><strong>Ruling recorded (decision <code>unified-cell-representation</code>):</strong> the
+  bitwise interior-reproduction pin is retired in favour of accuracy gates; one clip-independent
+  own-node representation serves interior, boundary-clipped, and topology-zero cells. Provisional
+  gates from the measured floors, final values with <code>q-current-gate</code>: interior
+  current-weighted m0 L1 ≤ 0.025%, net total current ≤ 0.05%, ring gates unchanged from §6.
+  Per-cell records: <code>scripts/own_node_interior_score/results.json</code> and
+  <code>scripts/in_cell_order_study/results.json</code> (lineage <code>a529bd60</code>).</p>
+
+  <h2 id="ring-route-production-fold">§7 — the production fold: locked gates green; the C¹ trade is measured</h2>
+
+  <p>The prototyped route folded into production (commit <code>ca77200c</code>, lineage merge
+  <code>853ed500</code>): the flux state carries the physical centre/wall prefix plus unique
+  pre-clip vertex samples; one clip-independent quadratic flux interpolant is evaluated at 42
+  fixed full-hexagon quadrature points, projected once to a clip-independent total-degree-3
+  current-density polynomial, and that same density is integrated with exact closed forms over
+  each actual clipped support. Clip geometry enters only as the integration domain — no
+  support-dependent branch, refit, fan, or splice; the full-fill path is the analytic limit.</p>
+
+  <p>All locked gates pass: 87/87 component suite (the 83-test set plus four new ring pins) in
+  168.5 s; bitwise complete-ring reproduction on all 351 cells; 17 topology-zero leg cells at
+  exactly zero; adaptive polygon integration at rtol=atol=2e-13; the restored edge-vanishing
+  missing-area toy under the unchanged 4.1×-fraction bound; both-sided width-zero C¹ JVPs at
+  2e-6/2e-9; net current −15.06701 vs −15.00542 MA (0.41043% &lt; 0.5%); argmax shift 0.1827 Wb;
+  731-target sup 0.2561 Wb; attribution audit residuals 4.9e-10 A / 6.7e-11 A·m; 49-line probe
+  exact on three cells. GPU throughput on the fixed (2218,1815) matrix: JIT median
+  <strong>0.4916 ms/state</strong>, batch-8 vmap <strong>0.1133 ms/state</strong>, JIT/vmap sup
+  difference 4.6e-10 — the CUDA follow-on is closed.</p>
+
+  <p><strong>The C¹ trade, measured (first-class evidence for the tightened gates):</strong>
+  making the density clip-independent surrendered the §6 prototype's support-matched accuracy on
+  clipped cells:</p>
+
+  <table>
+    <tr><th>Metric</th><th>§6 support-matched prototype</th><th>landed clip-independent fold</th></tr>
+    <tr><td>ring current-weighted m0 L1</td><td>0.2405%</td><td>0.58541%</td></tr>
+    <tr><td>total current error</td><td>0.3822%</td><td>0.41043%</td></tr>
+    <tr><td>normalized m1 L1</td><td>0.1240%</td><td>0.43480%</td></tr>
+    <tr><td>centroid p95</td><td>0.341 mm</td><td>2.891 mm</td></tr>
+  </table>
+
+  <figure>
+    <img src="/nova/figures/boundary-ring-source-completion/fixed-cubic-errors.png"
+         alt="R-Z maps of per-cell current, centroid, and first-moment errors under the landed clip-independent density"
+         style="max-width:100%">
+    <figcaption>Per-cell current, centroid, and first-moment errors under the landed
+    clip-independent density (commit <code>ca77200c</code>).</figcaption>
+  </figure>
+
+  <p>The unification wave must recover prototype-level clipped accuracy within the C¹ invariant
+  before the tightened gates (net ≤ 0.05%, interior m0 L1 ≤ 0.025%) can lock — the
+  clip-independent representation study is the next node.</p>
+
 </main></body>
 </html>

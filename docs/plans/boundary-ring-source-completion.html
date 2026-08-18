@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-18">
-<meta name="plan-version" content="12">
+<meta name="plan-version" content="14">
 <meta name="plan-commits" content="f943bacba9ac64c404afe92c94d43f023950b349,919bafcea9422ff5b0c6de8607d86d4a9418ea86">
 <meta name="plan-artifacts" content="docs/evidence/archive/boundary-ring-source-completion-landed.html,docs/figures/boundary-ring-source-completion/ring-m0-relative-error.png,docs/research/hex-clip-current-attribution.html,docs/figures/hex-clip-current-attribution/clip-audit.png,scripts/ring_quadrature/results/ring-quadrature-results.json (lineage f943bacb),scripts/clip_audit/results/clip-audit-results.json (lineage 919bafce)">
 <meta name="plan-impl" content="0.33">
@@ -151,6 +151,34 @@
     research record prescribes R3's exact curved oracle (quartic flux, Gauss–Kronrod reference,
     curvature envelope). R3–R5 score the §6 prototype, which is where the convicted availability
     zero is repaired.</p>
+
+    <p><em>Error separation (owner directive 2026-08-18).</em> The boundary-source error decomposes
+    into independently-oracled components; every measurement in this plan must attribute its error
+    to exactly one component, each driven below its own gate — no rung may conflate two:</p>
+
+    <ul>
+      <li><strong>Attribution error</strong> — moments of a known density over a known polygon.
+      Oracle: closed shoelace/Green forms. <em>Gate green</em> (R1–R2, binary64 round-off).</li>
+      <li><strong>Clip-geometry error</strong> — linearised LCFS chord versus the exact curved
+      psi_norm = 1 contour. Oracle: the exact LCFS with the curvature envelope
+      B_A = κ_max·L³/6. Gated by R3.</li>
+      <li><strong>psi_norm interpolation error</strong> — the nodal reconstruction of the flux
+      field feeding j(psi_norm), measured in isolation against the exact quartic Solov'ev flux at
+      the same nodes. Measured 1.464e-3 Wb shared-node error against 1.448e-3 Wb true vertex
+      spread. Gate: the cell-current error induced by reconstruction <em>alone</em> (exact
+      geometry, exact attribution) stays inside the interior error scale, bound stated before the
+      measurement. Scored within R3–R4.</li>
+      <li><strong>Availability error</strong> — the convicted zero on ring-incomplete supports
+      (−689 kA over 96 cells). Oracle: exact per-cell integrals. Repaired by §6; gated by R4.</li>
+      <li><strong>Zero-current leakage</strong> — cells beyond psi_norm = 1 (divertor legs,
+      private flux) must attribute exactly zero at the analytic seed: no SOL current exists in the
+      Solov'ev solution. Oracle: literal zero. <em>Open question:</em> the §3 error figure shows
+      m0 signal in the divertor legs; the cause — a relative-error metric normalised by a
+      near-zero exact cell current, or genuine misattributed current through labeling or
+      participation — is under adjudication (q-leg-zero). Gate: attributed |I| per leg cell at
+      round-off of the cell current scale, and every ladder population metric restated
+      current-weighted so zero-current cells cannot dominate a relative-error population.</li>
+    </ul>
 
     <ul>
       <li><strong>R1 — uncut single hex cell, linear density.</strong> Closed-form area, centroid,
@@ -308,6 +336,12 @@
 <div class="r-comment" data-section="s4" data-id="c-20260818T1615" data-who="reckon-ship" data-when="2026-08-18T16:15Z">
     <div class="r-comment-body">clip-attribution-defect-map landed — commit 919bafce; gate g-defect-map PASSED (9/9 localisation checks, 247 chord cases). Clip + affine attribution formulas exonerated at binary64 round-off; structural defect convicted: support_moments scatters only to complete-ring centre cells, zeroing 96/447 supports and omitting −689,027 A (4.592% of exact −15.005 MA). Curved shared-flux reconstruction measured viable (quartic toy node error 1.464e-3 Wb vs 1.448e-3 Wb true vertex spread). Ladder rungs 1–2 already green in the banked reproducer; rung 3 curved oracle fully prescribed. Coupling unchanged (sup 0.0134 Wb vs 10.935 Wb source error).</div>
 </div>
+</section>
+<section data-reckon="questions" id="questions" class="r-questions">
+<h2><span class="sec">§</span> Open questions</h2>
+<div class="r-q" data-id="q-leg-zero" data-section="s5" data-status="open" data-opened-by="Simon McIntosh" data-opened-at="2026-08-18" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body">The boundary-ring evidence figure shows per-cell m0 error signal in the divertor legs. Current should only appear there when driving current through the SOL, for which no Solov'ev solution exists — what is the cause of these errors where the exact current is zero? Candidates: a relative-error metric normalised by a near-zero exact cell current (figure artifact), or genuine misattributed current via psi_norm labeling / participation (a real defect).</p>
+    </div>
 </section>
 </main>
 </body>

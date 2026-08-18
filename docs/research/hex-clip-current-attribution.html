@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="hex-clip-current-attribution">
+  <meta name="plan-title" content="Hex-Cell Clipped-Current Attribution Defect Map">
+  <meta name="plan-summary" content="Function-level localisation of clipping, current, centroid, first-moment and coupling errors on Nova's default hex-cell forward-source path">
+  <meta name="plan-informs" content="boundary-ring-source-completion">
+  <title>Hex-Cell Clipped-Current Attribution Defect Map | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Localisation verdict</h2>
+    <p><strong>The straight-edge clip, closed polygon moments, affine-current
+    integration, current-centroid convention and first-moment coupling transform are
+    not the defect.</strong> An independent 247-case regular-hex chord sweep exercised
+    the same <code>AtomicCellMesh.traced_clip</code> and
+    <code>InteriorCurrentMomentStencil.support_moments</code> calls used by the forward
+    solve. The smallest retained area was <code>2.673e-10</code> of a full cell. Maximum
+    errors were <code>1.53e-16 m²</code> in area, <code>1.16e-15</code> of full-cell
+    current, and <code>5.74e-16</code> of full-cell first-moment scale. The complementary
+    core/common partitions recombined to full-cell current within <code>8.10e-16</code>
+    of scale and the uncut support was bitwise identical to the ordinary interior
+    contraction.</p>
+
+    <p><strong>Two source-side mechanisms remain, and both are upstream of
+    coupling.</strong> First, <code>InteriorCurrentMomentStencil.support_moments</code>
+    scatters only onto <code>StencilMesh.centre</code>, the cells with complete
+    neighbour rings. The bank has 447 nonempty plasma supports but only 351 such
+    centres. The other 96 cells therefore receive exactly zero current even though
+    their exact current sums to <code>-0.689027 MA</code>, or 4.592% of the exact
+    <code>-15.005422 MA</code> total. Second, the ring reconstruction is exact for a
+    quadratic flux but not for the quartic radial term of an exact Solov'ev field. On
+    a 0.24 m regular ring the shared-node error was <code>1.464e-3 Wb</code> against a
+    <code>1.448e-3 Wb</code> vertex-to-vertex exact variation. That is truncation, not a
+    sign or polygon-clip failure, and it must be measured on the curved-boundary rung.
+    On the 351 retained fixture cells, the banked current-density attribution has
+    16.080% p95 relative <code>m0</code> error against the exact oracle, or 3.940% p95
+    against the source-normalised oracle.</p>
+
+    <figure>
+      <img src="/nova/figures/hex-clip-current-attribution/clip-audit.png"
+           alt="A chord-clipped hexagon with fixed, area and current centroids; Solov'ev shared-node reconstruction errors; and the spatial ring of 96 nonempty cells lacking a complete stencil">
+      <figcaption>Left: the first current moment is about the fixed full-cell centroid,
+      so the current centroid is derived as <code>c + m1/m0</code>. Centre: a quadratic
+      ring reconstruction is exact on its fitted space but visibly aliases the
+      quartic radial Solov'ev term at shared nodes. Right: the omitted cells form a
+      boundary-local ring rather than isolated clip failures; colour is their exact
+      current.</figcaption>
+    </figure>
+
+    <h2 id="s2">§2 — Runtime call path, function by function</h2>
+    <p>The default path is assembled by <code>ForwardProfile.from_lattice</code>, which
+    constructs <code>MomentGeometry</code>, the interior stencils, and the uniform,
+    radial and vertical plasma-coupling matrices. At every forward-map evaluation the
+    runtime path is:</p>
+    <table>
+      <thead>
+        <tr><th>Order</th><th>Function</th><th>Quantity handed onward</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td><code>ForwardFluxOperator.cell_current_moments</code><br><code>nova/equilibrium/forward_operator.py</code></td><td>Entry from one trial total-flux vector; selects the moment path when companion coupling blocks exist.</td></tr>
+        <tr><td>2</td><td><code>ForwardFluxOperator.read</code> → <code>Topology.read</code><br><code>nova/equilibrium/topology.py</code></td><td>Cell-centred <code>DomainMasks.psi_norm</code>, axis flux, boundary flux and polarity-aware topology state.</td></tr>
+        <tr><td>3</td><td><code>ForwardFluxOperator.shared_node_flux</code> → <code>MomentGeometry.shared_node_flux</code> → <code>SharedNodeFluxStencil.__call__</code><br><code>nova/equilibrium/stencil_mesh.py</code></td><td>Quadratic ring reconstruction of trial flux on every fixed atomic shared node.</td></tr>
+        <tr><td>4</td><td><code>ForwardFluxOperator.shared_domain_masks</code></td><td><code>psi_norm = (psi_shared - psi_axis) / flux_span</code>; <code>psi_norm &lt;= 1</code> labels the closed side. The geometric level is the equivalent <code>signed_flux = polarity * (psi_shared - psi_boundary)</code>.</td></tr>
+        <tr><td>5</td><td><code>AtomicCellMesh.traced_clip</code> → <code>_traced_clip</code> → <code>_traced_polygon_moments</code><br><code>nova/equilibrium/separatrix_clip.py</code></td><td>Core support from <code>signed_flux &gt; 0</code> and common-SOL support from its negative, including exact edge crossings, area, first area moment and second area tensor about each fixed full-cell centroid.</td></tr>
+        <tr><td>6</td><td><code>ForwardSource.current_moments</code> → nested <code>partitioned_moments</code><br><code>nova/equilibrium/source.py</code></td><td>Core density at clipped <code>psi_norm</code> in <code>[0,1]</code>; common-SOL density at <code>psi_norm &gt;= 1</code>. Centroid and shared-node densities are evaluated separately on the same closure.</td></tr>
+        <tr><td>7</td><td><code>DomainProfile.current_density</code> → <code>toroidal_current_density</code><br><code>nova/equilibrium/convention.py</code></td><td><code>j_phi = -2*pi*(R*p_prime + ff_prime/(mu0*R))</code> in A/m², preserving the total-poloidal-flux convention.</td></tr>
+        <tr><td>8</td><td><code>ForwardFluxOperator.support_current_moments</code> → <code>InteriorCurrentMomentStencil.support_moments</code></td><td>One cubic interpolant from cell-centre values, full-hex vertex values and fitted first-moment constraints. It is integrated over both clipped supports.</td></tr>
+        <tr><td>9</td><td><code>padded_polynomial_current_moments</code><br><code>nova/equilibrium/separatrix_clip.py</code></td><td>Closed simplex monomial integrals produce net current <code>m0</code> and physical first moments <code>(mR,mZ)</code>. The current centroid is not a stored branch: diagnostically it is exactly <code>cell_centroid + (mR,mZ)/m0</code>.</td></tr>
+        <tr><td>10</td><td><code>InteriorCurrentMomentStencil.support_moments</code> scatter</td><td><code>full_entries + clipped_polynomial - full_polynomial</code> is written only at <code>self.centre</code>. This is the structural zero on 96 nonempty ring-incomplete cells.</td></tr>
+        <tr><td>11</td><td><code>ForwardFluxOperator.coupling_current_moments</code></td><td>The inverse area-normalised second-moment tensor turns physical <code>(mR,mZ)</code> into the fixed linear-basis coefficients expected by the companion Green matrices.</td></tr>
+        <tr><td>12</td><td><code>ForwardFluxOperator.internal</code> → <code>FluxTarget.internal</code><br><code>nova/biot/target.py</code></td><td><code>G0@m0 + GR@radial + GZ@vertical</code> gives plasma flux on grid and wall targets.</td></tr>
+      </tbody>
+    </table>
+
+    <p>Three files named in the audit perimeter are consumers or alternate inverse
+    paths, not owners of this runtime attribution. <code>equilibrium/moment.py</code>
+    implements external-magnetics moment reconstruction; <code>profile.py</code>
+    implements <code>ReconstructProfile</code>; and <code>conservation.py</code> reads a
+    finished current image into the Grad-Shafranov and force ledgers. None clips a
+    <code>ForwardSource</code> support or computes the moments coupled by
+    <code>ForwardFluxOperator</code>.</p>
+
+    <h2 id="s3">§3 — Suspected defects: reproduced or refuted</h2>
+    <table>
+      <thead>
+        <tr><th>Suspect</th><th>Verdict</th><th>Minimal probe and quantitative result</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Wrong side of <code>psi_norm=1</code>, polarity sign, or a gap/overlap between core and common clips</td><td><strong>Refuted</strong></td><td>Each of 247 chords was clipped with both <code>s</code> and <code>-s</code>. The two areas recombined within <code>8.33e-17 m²</code>, current within <code>8.10e-16</code> of full-cell scale, and first moment within <code>3.00e-16</code>. Every orientation over <code>[0,pi)</code> was included.</td></tr>
+        <tr><td>Edge-crossing interpolation or polygon area moments</td><td><strong>Refuted for the linear contour represented by the code</strong></td><td>An independent Sutherland-Hodgman half-plane clip plus shoelace moments was the oracle. Maximum area, first-area and second-area errors were <code>1.53e-16 m²</code>, <code>2.03e-17 m³</code> and <code>3.74e-18 m⁴</code>.</td></tr>
+        <tr><td>Net current of a clipped affine density</td><td><strong>Refuted</strong></td><td>For <code>j=j0+g·(x-c)</code>, the independent identity <code>I=j0*A+g·Q1</code> agreed with the default cubic support path to <code>1.16e-15</code> of full-cell current.</td></tr>
+        <tr><td>Moving-origin or current-centroid error</td><td><strong>Refuted</strong></td><td>The independent first moment <code>m=j0*Q1+Q2@g</code> agreed to <code>5.74e-16</code> of full-cell first-moment scale. Even the smallest numerically resolved slivers kept derived centroid error below <code>4.97e-7 m</code>; ordinary cuts were at round-off.</td></tr>
+        <tr><td><code>full_entries + clipped - full</code> changes an uncut interior cell</td><td><strong>Refuted</strong></td><td>The production support method and ordinary stencil contraction were bitwise identical in all three moment vectors on an uncut regular hex.</td></tr>
+        <tr><td>Physical-first-moment to companion-basis transform</td><td><strong>Refuted</strong></td><td>Inverting the full-hex area-normalised second tensor and reconstructing the physical first moment left <code>2.84e-14 A m</code> absolute residual. On the banked fixture the consistent-source coupling error is only <code>0.01337 Wb</code>, 0.122% of the <code>10.93535 Wb</code> source error; the legacy-source coupling error is <code>0.002185 Wb</code>.</td></tr>
+        <tr><td>Shared-node flux reconstruction moves a curved boundary</td><td><strong>Reproduced as coarse-order truncation, not a clip algebra error</strong></td><td>The ring is exact to <code>1.67e-16</code> on a general quadratic. On <code>q=((R²-R0²)²)/(8R0²)+Z²/2</code>, its quartic radial term produced <code>1.464e-3 Wb</code> maximum shared-node error on a 0.24 m ring, 1.011 times the exact six-vertex flux spread. The curved Solov'ev rung must measure convergence and induced intersection displacement.</td></tr>
+        <tr><td>Nonempty cells without complete density stencils silently lose attribution</td><td><strong>Reproduced structural defect</strong></td><td>The immutable fixture contains 447 nonempty supports, 351 complete-ring centres and 96 nonempty cells absent from <code>self.centre</code>. Their returned current is zero; their oracle current sums to <code>-689027.210 A</code>.</td></tr>
+        <tr><td>Nonlinear source density is represented at interior accuracy</td><td><strong>Refuted on the fixture</strong></td><td>Among 350 finite relative comparisons on the 351 complete-ring cells, p95 <code>m0</code> error is 16.080% against the exact oracle. Holding the bank's source normalisation fixed reduces p95 to 3.940%, still far above the affine round-off floor. The defect is density/flux reconstruction accuracy, not polygon integration.</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="s4">§4 — Reproducer and evidence boundaries</h2>
+    <p>The complete reproducer is
+    <code>scripts/clip_audit/audit_hex_clip.py</code>. It builds one actual
+    <code>StencilMesh.current_moment_stencil</code>, obtains the atomised cell topology
+    from <code>MomentGeometry.from_cells</code>, evaluates production
+    <code>traced_clip</code> and <code>support_moments</code>, and compares them with
+    independently implemented polygon formulae. It writes:</p>
+    <ul>
+      <li><code>scripts/clip_audit/results/chord-sweep.csv</code> — all 247 cut-level measurements;</li>
+      <li><code>scripts/clip_audit/results/clip-audit-results.json</code> — headline metrics and fixture counts;</li>
+      <li><code>docs/figures/hex-clip-current-attribution/clip-audit.png</code> — the spatial evidence above.</li>
+    </ul>
+    <p>The fixture portion reads, but does not rewrite, the banked arrays under
+    <code>scripts/ring_quadrature/inputs</code>. It therefore preserves the exact same
+    566-cell, 731-target analytic-seed comparison used by the preceding gate. The
+    straight-chord probe deliberately does not claim that a linearly reconstructed
+    contour equals a curved exact contour, or that an affine density represents the
+    real profile. Those two un-cleared approximations are the subject of the next two
+    rungs below.</p>
+
+    <h2 id="s5">§5 — Closed verification ladder ready to implement</h2>
+    <h3 id="s5-1">Rung 1 — uncut regular hex and affine density</h3>
+    <p>Use fixed centroid <code>c=(R0,Z0)</code>, circumradius <code>a</code>, and vertices
+    <code>v_k=c+a(cos(pi/6+k*pi/3), sin(pi/6+k*pi/3))</code> for
+    <code>k=0..5</code>. Let <code>x=X-c</code> and
+    <code>j(X)=j0+g_R*x_R+g_Z*x_Z</code>. Compute closed shoelace tensors
+    <code>A=integral dA</code>, <code>Q1=integral x dA=0</code>, and
+    <code>Q2=integral x x^T dA</code>. The oracle is
+    <code>I=j0*A+g·Q1</code> and <code>m1=j0*Q1+Q2@g</code>. Run at three radii and
+    three translations near ITER major radius. Require each scaled current and
+    first-moment error at or below <code>1e-13</code>, and require the uncut
+    <code>support_moments</code> result bitwise equal to <code>__call__</code>. This rung
+    is already green in the supplied reproducer.</p>
+
+    <h3 id="s5-2">Rung 2 — straight chord, including slivers and vertices</h3>
+    <p>For unit normal <code>n=(cos(theta),sin(theta))</code>, define the exact retained
+    polygon by <code>s(X)=d-n·(X-c)&gt;0</code>. Intersect each crossed edge at
+    <code>t=s(v_i)/(s(v_i)-s(v_{i+1}))</code>; then apply the same shoelace tensors and
+    affine-current identities as rung 1. Sweep at least 19 angles over
+    <code>[0,pi)</code> and retained chord fractions
+    <code>{1e-5,1e-4,.01,.05,.15,.30,.50,.70,.85,.95,.99,1-1e-4,1-1e-5}</code>.
+    Test <code>s</code> and <code>-s</code> together. Require scaled <code>I</code> and
+    <code>m1</code> errors at or below <code>1e-13</code>, area through second moment at
+    the corresponding binary64 closed-form floor, and complement sums equal to the
+    uncut result at the same tolerance. Report current centroid only where
+    <code>|I| &gt; 1e-12 |j0*A_full|</code>. This rung is also already green.</p>
+
+    <h3 id="s5-3">Rung 3 — exact curved Solov'ev contour</h3>
+    <p>Use the total-flux analytic field <code>Phi=2*pi*q</code> with
+    <code>q(R,Z)=((R²-R0²)²)/(8R0²)+Z²/2</code>. It obeys
+    <code>DeltaStar(q)=R²/R0²+1</code>. Choose <code>R0=6.2 m</code> and set
+    <code>q_b=((R0+a)²-R0²)²/(8R0²)</code> with <code>a=0.8 m</code>; the exact LCFS is
+    <code>q=q_b</code> and <code>psi_norm=q/q_b</code>. A compatible exact current is
+    <code>j_phi=-(R²/R0²+1)/(mu0*R)</code>, obtained from
+    <code>DeltaStar(Phi)=-2*pi*mu0*R*j_phi</code>.</p>
+    <p>For each intersected hex, form an independent oracle without straightening the
+    curve. At a given <code>R</code>, intersect the hex's horizontal interval with
+    <code>|Z| &lt;= sqrt(2*(q_b-(R²-R0²)²/(8R0²)))</code>; integrate <code>j_phi</code>,
+    <code>(R-Rc)j_phi</code> and <code>(Z-Zc)j_phi</code> by adaptive 21-point
+    Gauss-Kronrod in <code>Z</code> and then <code>R</code>, splitting at every polygon
+    vertex and analytic radial LCFS root. Tighten absolute and relative tolerances by
+    factors of four until every reported moment changes by less than <code>1e-12</code>
+    of its full-cell scale.</p>
+    <p>Predict the linear-contour error from the implicit-curve curvature
+    <code>kappa=|F_RR F_Z²-2 F_RZ F_R F_Z+F_ZZ F_R²|/(F_R²+F_Z²)^(3/2)</code> for
+    <code>F=q-q_b</code>. For each reconstructed chord of length <code>L</code> with
+    <code>kappa_max*L &lt;= 0.25</code>, use the conservative area envelope
+    <code>B_A=kappa_max*L³/6</code>, twice the leading circular-segment term. Require
+    <code>|A_linear-A_curve| &lt;= B_A</code>, and bound induced current and first moment
+    by <code>sup|j|*B_A</code> and
+    <code>sup(|X-c|*|j|)*B_A</code>. Repeat at half and quarter pitch; both measured
+    error and bound must converge with the predicted cubic-in-chord scale. Separately
+    report the boundary displacement caused by shared-node flux reconstruction, so it
+    cannot be mislabeled as polygon quadrature.</p>
+
+    <h3 id="s5-4">Rung 4 — full coarse boundary ring</h3>
+    <p>Run the exact curved-support oracle from rung 3 on every nonempty cell of the
+    immutable 566-cell fixture. Compare in priority order: <code>m0</code>, current
+    centroid <code>c+m1/m0</code>, then physical <code>m1</code>. The repair must return
+    values for all 96 currently unavailable nonempty cells while leaving all 351
+    complete-ring cells bitwise unchanged. Define the interior error scale exactly as
+    the bank does: p95 of finite absolute relative <code>m0</code> error on retained
+    cells, currently <code>0.1607953241</code>. The repaired ring p95 must be no larger;
+    for <code>|I_ref|&lt;1 A</code>, report absolute amperes separately rather than letting
+    a near-zero denominator dominate the gate. Plot per-cell <code>m0</code>, centroid
+    distance and <code>|m1|</code> error on R-Z maps, with the worst cells labelled.</p>
+
+    <h3 id="s5-5">Rung 5 — simultaneous field consequence</h3>
+    <p>Use the same 731 banked targets, analytic flux, exact total current and legacy
+    control. Build a source oracle directly from the curved supports: fan-triangulate
+    each clipped support, integrate <code>G_psi(R_t,Z_t;R,Z)j_phi(R,Z)</code> adaptively,
+    and use a Duffy transform for any target inside its source triangle so the
+    logarithmic self-kernel is resolved rather than sampled. Tighten the quadrature
+    until every target changes by less than <code>1e-4 Wb</code>. Then require all three
+    consequences in one run: total current within 0.5% of
+    <code>-15.005421582 MA</code>; shift at the original argmax target no more than
+    <code>0.5 Wb</code> from the <code>10.935349449 Wb</code> source-error baseline; and
+    supremum over all targets strictly below the <code>0.826 Wb</code> legacy control.
+    Report the uniform, radial and vertical companion contributions separately. A
+    source result does not pass by cancellation with a coupling error.</p>
+
+    <h2 id="s6">§6 — Consequence for the implementation order</h2>
+    <p>The evidence fixes the next implementation order without choosing a new
+    production policy. First remove the complete-ring availability zero while
+    preserving the 351 existing cells bitwise. Then validate net-current density
+    attribution on the curved analytic oracle. Only after <code>m0</code> is inside the
+    interior scale should centroid and first-moment accuracy be promoted. The coupling
+    basis and companion matrices remain unchanged unless the separated quadrant
+    evidence grows from <code>0.01337 Wb</code> to the source-error scale. Smoothing is
+    not an alternative: it cannot create the missing 96 stencil centres or make a
+    quadratic shared-flux reconstruction exact on a quartic field.</p>
+  </main>
+</body>
+</html>

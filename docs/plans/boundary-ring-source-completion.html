@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-18">
-<meta name="plan-version" content="9">
-<meta name="plan-commits" content="f943bacba9ac64c404afe92c94d43f023950b349">
-<meta name="plan-artifacts" content="docs/evidence/archive/boundary-ring-source-completion-landed.html,docs/figures/boundary-ring-source-completion/ring-m0-relative-error.png,scripts/ring_quadrature/results/ring-quadrature-results.json (lineage f943bacb),scripts/ring_quadrature/results/ring-quadrature-fields.npz (lineage f943bacb)">
-<meta name="plan-impl" content="0.25">
+<meta name="plan-version" content="12">
+<meta name="plan-commits" content="f943bacba9ac64c404afe92c94d43f023950b349,919bafcea9422ff5b0c6de8607d86d4a9418ea86">
+<meta name="plan-artifacts" content="docs/evidence/archive/boundary-ring-source-completion-landed.html,docs/figures/boundary-ring-source-completion/ring-m0-relative-error.png,docs/research/hex-clip-current-attribution.html,docs/figures/hex-clip-current-attribution/clip-audit.png,scripts/ring_quadrature/results/ring-quadrature-results.json (lineage f943bacb),scripts/clip_audit/results/clip-audit-results.json (lineage 919bafce)">
+<meta name="plan-impl" content="0.33">
 </head>
 <body>
   <main class="plan-doc">
@@ -120,31 +120,24 @@
       </p>
     </section>
 
-    <h2 id="s4">§4 — Defect localisation on the default hex-cell path</h2>
-
-    <p><em>Owner directive 2026-08-18.</em> The §3 negative is to be read as a symptom: bugs are
-    likely in the clipped plasma-cell calculations and in the current + current-moment attributions,
-    and the representation must be understood in detail before anything is implemented. Three exact
-    instruments are available: the <strong>Solov'ev oracle</strong> (exact plasma current and its
-    full spatial distribution), the <strong>hexagonal plasma cells with linear capability</strong>,
-    and the <strong>GS relationship</strong> mapping the flux functions and psi_norm to current
-    density. The audit targets the default hex plasma-cell path only — the shipped modules under
-    <code>nova/equilibrium/</code> (<code>source.py</code> ForwardSource,
-    <code>stencil_mesh.py</code> hex tiling + InteriorCurrentMomentStencil,
-    <code>separatrix_clip.py</code>, <code>moment.py</code>, <code>conservation.py</code>,
-    <code>profile.py</code>) — per the locked single-code-path decision.</p>
-
-    <p><strong>Deliverable:</strong> a research record
-    (<code>docs/research/hex-clip-current-attribution.html</code>) that maps the exact call path a
-    bisected boundary cell takes — construction → psi_norm = 1 clip → net-current attribution →
-    centroid → first moments → coupling — at low call depth, with every suspected defect either
-    reproduced or refuted by a minimal single-cell probe, and a closed-form toy reference stated
-    for every §5 rung. <strong>Done when (gate g-defect-map):</strong> the record validates with
-    the doc checker; the call path is named function-by-function; each suspected defect in the clip
-    and attribution machinery carries a minimal reproducing probe or an explicit refutation with
-    the probe that cleared it; each §5 rung has its closed-form or reference-quadrature toy stated
-    precisely enough to implement without further research; figures embed wherever the relationship
-    is spatial.</p>
+    <section id="s4" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-18 — gate g-defect-map PASSED</span>
+        <h2>§4 — Defect localisation on the default hex-cell path</h2>
+      </header>
+      <p class="landed-summary">
+        The clip and affine attribution formulas are <strong>exonerated</strong> (247 chord cases at
+        binary64 round-off; complementary partitions close to 8.1e-16; coupling sup 0.0134 Wb vs the
+        10.935 Wb source error). The convicted defect is structural:
+        <code>InteriorCurrentMomentStencil.support_moments</code> scatters only to complete-ring
+        centre cells, zeroing 96/447 supports and omitting −689,027 A (4.592% of exact). Rungs 1–2
+        of the ladder are already green in the banked reproducer; rung 3's curved Solov'ev oracle is
+        fully prescribed. Full record:
+        <a href="/nova/hex-clip-current-attribution.html">research</a> ·
+        <a href="/nova/evidence/archive/boundary-ring-source-completion-landed#clip-attribution-defect-map">evidence §4</a>
+        (commit <code>919bafce</code>).
+      </p>
+    </section>
 
     <h2 id="s5">§5 — The single-element evidence ladder</h2>
 
@@ -152,7 +145,12 @@
     a gate, ordered by the locked boundary-cell priority (net current → centroid → first moments).
     A failing rung stops the climb and localises the defect — that is its job. All rungs run on the
     default hex path with no smoothing, blending, or per-cell tuning; harness files are named by
-    mechanism, never by rung label.</p>
+    mechanism, never by rung label. <em>Status after §4:</em> <strong>R1 and R2 are green</strong>
+    in the banked reproducer (<code>scripts/clip_audit/audit_hex_clip.py</code>, commit
+    <code>919bafce</code>) — the formulas they gate are exonerated at binary64 round-off; the
+    research record prescribes R3's exact curved oracle (quartic flux, Gauss–Kronrod reference,
+    curvature envelope). R3–R5 score the §6 prototype, which is where the convicted availability
+    zero is repaired.</p>
 
     <ul>
       <li><strong>R1 — uncut single hex cell, linear density.</strong> Closed-form area, centroid,
@@ -306,6 +304,9 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s3" data-id="c-20260817T2052" data-who="reckon-ship" data-when="2026-08-17T20:52Z">
     <div class="r-comment-body">ring-prediction-gate landed — commit f943bacb (run r-20260817T203644474480, 685 s); gate FAILED, honest negative. own-geometry: argmax shift +0.0909 Wb (pass ≤0.5), sup 0.3396 Wb (pass &lt;0.826 legacy), total current 0.686% from −15.005 MA (fail ≤0.5%), ring m0 p95 62.4× interior scale (fail). one-sided: argmax 0.7595 Wb (fail), sup 0.7604 Wb (pass), current 0.468% (pass), ring p95 82.8× (fail). Both keep all 351 stencil-available cells bitwise unchanged. Leading resisting cells common to both: 8, 5, 78, 26, 257, 17, 23, 76. Banks + scorecard durable in the lineage under scripts/ring_quadrature/.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260818T1615" data-who="reckon-ship" data-when="2026-08-18T16:15Z">
+    <div class="r-comment-body">clip-attribution-defect-map landed — commit 919bafce; gate g-defect-map PASSED (9/9 localisation checks, 247 chord cases). Clip + affine attribution formulas exonerated at binary64 round-off; structural defect convicted: support_moments scatters only to complete-ring centre cells, zeroing 96/447 supports and omitting −689,027 A (4.592% of exact −15.005 MA). Curved shared-flux reconstruction measured viable (quartic toy node error 1.464e-3 Wb vs 1.448e-3 Wb true vertex spread). Ladder rungs 1–2 already green in the banked reproducer; rung 3 curved oracle fully prescribed. Coupling unchanged (sup 0.0134 Wb vs 10.935 Wb source error).</div>
 </div>
 </section>
 </main>

@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-18">
-<meta name="plan-version" content="14">
-<meta name="plan-commits" content="f943bacba9ac64c404afe92c94d43f023950b349,919bafcea9422ff5b0c6de8607d86d4a9418ea86">
+<meta name="plan-version" content="20">
+<meta name="plan-commits" content="f943bacba9ac64c404afe92c94d43f023950b349,919bafcea9422ff5b0c6de8607d86d4a9418ea86,f332f8426c672f6cdc6bb09fe68e07dd7ecf94a0">
 <meta name="plan-artifacts" content="docs/evidence/archive/boundary-ring-source-completion-landed.html,docs/figures/boundary-ring-source-completion/ring-m0-relative-error.png,docs/research/hex-clip-current-attribution.html,docs/figures/hex-clip-current-attribution/clip-audit.png,scripts/ring_quadrature/results/ring-quadrature-results.json (lineage f943bacb),scripts/clip_audit/results/clip-audit-results.json (lineage 919bafce)">
-<meta name="plan-impl" content="0.33">
+<meta name="plan-impl" content="0.43">
 </head>
 <body>
   <main class="plan-doc">
@@ -172,12 +172,17 @@
       (−689 kA over 96 cells). Oracle: exact per-cell integrals. Repaired by §6; gated by R4.</li>
       <li><strong>Zero-current leakage</strong> — cells beyond psi_norm = 1 (divertor legs,
       private flux) must attribute exactly zero at the analytic seed: no SOL current exists in the
-      Solov'ev solution. Oracle: literal zero. <em>Open question:</em> the §3 error figure shows
-      m0 signal in the divertor legs; the cause — a relative-error metric normalised by a
-      near-zero exact cell current, or genuine misattributed current through labeling or
-      participation — is under adjudication (q-leg-zero). Gate: attributed |I| per leg cell at
-      round-off of the cell current scale, and every ladder population metric restated
-      current-weighted so zero-current cells cannot dominate a relative-error population.</li>
+      Solov'ev solution. Oracle: literal zero. <em>Adjudicated 2026-08-18</em>
+      (<a href="/nova/evidence/archive/boundary-ring-source-completion-landed#zero-current-leg-attribution">evidence §5</a>,
+      commit <code>f332f842</code>): the baseline figure signal was an oracle artifact
+      (geometry-only oracle −9.595 kA vs topology-qualified 0 A; production attributes exactly
+      0 A in all 17 topology-zero cells), while <em>both</em> §3 candidates genuinely leak
+      (−18.0 / −19.6 kA) through a topology-unqualified <code>core_support</code> entering
+      <code>partitioned_moments</code> with no domain mask. Gate: the §6 route topology-qualifies
+      <code>core_support</code>; attributed current in the 17 topology-zero cells is exactly zero;
+      every ladder population metric is scored current-weighted (L1), interior scale measured
+      <strong>0.7646%</strong> — the §3 "62× ring population" was substantially a relative-error
+      metric dominated by near-zero-current cells.</li>
     </ul>
 
     <ul>
@@ -207,6 +212,18 @@
     </ul>
 
     <h2 id="s6">§6 — Route prototype for the default hex path</h2>
+
+    <p><em>Route locked 2026-08-18 (ring-node-set = own-nodes-direct-targets).</em> The evaluation
+    architecture is fixed: extend the one-off Biot evaluation matrices (the
+    <code>nova.biot</code> <code>Solve</code>/<code>Target</code> machinery
+    <code>PlasmaGrid.solve</code> already builds for cell-centre Psi/Br/Bz and gradients) to the
+    union of all cell centres and all unique hex vertices; evaluate the whole node set in one
+    matmul per current update; select each cell's seven-sample set (six vertices + centroid) by
+    precomputed index arrays; build the in-cell interpolant from those seven samples; map
+    j(psi_norm) through the GS relationship; integrate over the clipped support with the
+    exonerated closed-form attribution. No out-of-cell sampling, no reconstruction step, no
+    availability seam; fixed shapes throughout, so the path is vectorized, traceable, and
+    GPU-batchable by construction.</p>
 
     <p>The prototyped route the plan must produce before production work: the repaired boundary
     evaluation demonstrated in place on the default hex path at measurement level, satisfying the
@@ -273,14 +290,15 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="ring-node-set" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="ring-node-set" data-choice="own-nodes-direct-targets" data-by="Simon McIntosh" data-when="2026-08-18T16:23:41+00:00">
     <p class="r-dec-q">Which nodal set feeds the cubic interpolant on ring-incomplete supports?</p>
-    <p class="r-dec-ctx">Deferred by the owner&#x27;s 2026-08-18 ruling: the §3 honest negative routed to a bottom-up audit of the clipped-cell attribution itself (§4–§5). This decision re-opens for locking only after the ladder isolates the defect(s) and the §6 route prototype demonstrates the repair — the candidate set may change.</p>
+    <p class="r-dec-ctx">Deferred by the owner&#x27;s 2026-08-18 ruling pending the audit; the audit then exonerated the attribution formulas and convicted the availability zero. Owner steer 2026-08-18: evaluate own-nodes first — sample on the hex nodes + cell centroid and construct current and moments from there. Why the current path samples outside the cell: trial flux lives only at cell centres, so vertex values are themselves ring reconstructions (SharedNodeFluxStencil, runtime step 3), and the interior cubic additionally takes fitted first-moment constraints from the neighbour ring (step 8) — 10 dof exceeds 7 in-cell samples. own-nodes drops the cubic&#x27;s ring constraints on the boundary: the seven in-cell samples support an in-cell quadratic, the shared-node vertex values already exist on ring cells wherever vertex-sharing neighbours exist, and the clipped-moment integration is the audited closed-form machinery. The two quantified risks are scored in isolation by the §5 ladder: the psi_norm interpolation gate (quadratic reconstruction vs the exact quartic oracle) and outermost-vertex availability.</p>
     <p class="r-dec-opts">
+      <button class="r-opt" data-value="own-nodes">own-nodes: seven in-cell samples (six hex vertices + cell centroid), in-cell interpolant, j(psi_norm) integrated by the exonerated attribution over the clipped support. Vertex-value source is the sub-decision: (a) DIRECT flux targets — the grid-free coupling (FluxTarget.internal G0/GR/GZ + external Biot-Savart) evaluates trial flux at the vertices themselves, eliminating ring reconstruction and its measured ±1.2 mWb quartic-field error by construction, at the cost of ~3× coupling-matrix rows (shared vertices computed once, N_nodes ≈ 2 N_cells); or (b) RECONSTRUCTED — keep SharedNodeFluxStencil&#x27;s quadratic one-ring fit and inherit its measured node error</button>
       <button class="r-opt" data-value="own-geometry">own-geometry: the cell&#x27;s centroid, corners and fitted first moments only — no neighbour data</button>
       <button class="r-opt" data-value="one-sided">one-sided: extend the stencil with the available partial neighbour ring, weights re-derived for the incomplete pattern</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Owner ruling 2026-08-18: sample only the cell&#x27;s own geometry — six hex vertices plus cell centroid — with vertex flux carried as direct grid-free targets, never reconstructed from out-of-cell ring fits. Architecture: build one-off evaluation matrices (the existing nova.biot Solve/Target machinery PlasmaGrid.solve already uses for cell-centre Psi/Br/Bz and gradients) over the union of all cell centres and all unique hex vertices, evaluate every node in a single matmul pass as currents change, then select each cell&#x27;s seven-sample adjacent set by precomputed indexing. Fully vectorized and traceable, hence performant and GPU-batchable. Verified in code: PlasmaGrid&#x27;s tricontour triangulates cell centres, so vertices are new target rows through existing machinery, not new machinery. This removes the shared-node quadratic reconstruction error (±≈1.2–1.5 mWb on the quartic oracle) by construction and dissolves the availability seam — every nonempty cell owns its seven samples.</p>
     </div>
 <div class="r-dec" data-key="coupling-order" data-choice="first-moment" data-by="Simon McIntosh" data-when="2026-08-17">
     <p class="r-dec-q">Does the coupling need second-moment blocks to match the exact source?</p>
@@ -336,11 +354,18 @@
 <div class="r-comment" data-section="s4" data-id="c-20260818T1615" data-who="reckon-ship" data-when="2026-08-18T16:15Z">
     <div class="r-comment-body">clip-attribution-defect-map landed — commit 919bafce; gate g-defect-map PASSED (9/9 localisation checks, 247 chord cases). Clip + affine attribution formulas exonerated at binary64 round-off; structural defect convicted: support_moments scatters only to complete-ring centre cells, zeroing 96/447 supports and omitting −689,027 A (4.592% of exact −15.005 MA). Curved shared-flux reconstruction measured viable (quartic toy node error 1.464e-3 Wb vs 1.448e-3 Wb true vertex spread). Ladder rungs 1–2 already green in the banked reproducer; rung 3 curved oracle fully prescribed. Coupling unchanged (sup 0.0134 Wb vs 10.935 Wb source error).</div>
 </div>
+<div class="r-comment" data-section="s5" data-id="c-20260818T1710" data-who="Simon McIntosh (relayed by reckon-ship)" data-when="2026-08-18T17:10Z">
+    <div class="r-comment-body">Owner, on the audit figure 'Exact Solov'ev field sampled by one ring': the samples lie well outside the cell — why sample the field outside the hex at all; sample on the hex nodes + cell centroid and construct current and moments from there. Figure fact: the vertex (shared-node) values are reconstructed by a quadratic fitted to the six neighbouring cell centres ~0.4 m out; on the exact quartic field that reconstruction leaves ±≈1.2–1.5 mWb vertex error — the psi_norm interpolation error component. Because nova's flux operators are grid-free, vertex flux can instead be carried as direct targets, removing that component by construction; the §6 prototype scores own-nodes with direct vertex targets first, against own-nodes with reconstructed vertices.</div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20260818T1745" data-who="reckon-ship" data-when="2026-08-18T17:45Z">
+    <div class="r-comment-body">zero-current-leg-attribution landed — commit f332f842; gate PASSED. Baseline leg signal = oracle artifact (production attributes exactly 0 A in all 17 topology-zero cells); both §3 candidates genuinely leak (−18.0/−19.6 kA) via unmasked core_support in partitioned_moments. Population metrics restated current-weighted: interior scale 0.7646%; ring 100%/12.47%/15.81% (baseline/own-geometry/one-sided). Corrected figure banked beside the original.</div>
+</div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
 <h2><span class="sec">§</span> Open questions</h2>
-<div class="r-q" data-id="q-leg-zero" data-section="s5" data-status="open" data-opened-by="Simon McIntosh" data-opened-at="2026-08-18" data-resolved-at="" data-resolved-by="">
+<div class="r-q" data-id="q-leg-zero" data-section="s5" data-status="resolved" data-opened-by="Simon McIntosh" data-opened-at="2026-08-18" data-resolved-at="2026-08-18T16:28:25+00:00" data-resolved-by="reckon-ship">
     <p class="r-q-body">The boundary-ring evidence figure shows per-cell m0 error signal in the divertor legs. Current should only appear there when driving current through the SOL, for which no Solov'ev solution exists — what is the cause of these errors where the exact current is zero? Candidates: a relative-error metric normalised by a near-zero exact cell current (figure artifact), or genuine misattributed current via psi_norm labeling / participation (a real defect).</p>
+    <p class="r-q-resolution">Both causes, split by population (commit f332f842, 17/17 lower-leg cells classified). Baseline: metric/oracle artifact — the figure's geometry-only oracle counted −9.595 kA where the topology-qualified oracle is exactly 0 A; production attributes exactly 0 A in all 17 cells. Candidates: genuine leak — own-geometry −18.025 kA, one-sided −19.631 kA through topology-unqualified core_support entering partitioned_moments without a domain mask (probe-demonstrated). Metrics restated current-weighted: interior 0.7646% L1; ring baseline 100%, own-geometry 12.47%, one-sided 15.81%. §6 must topology-qualify core_support and gate the 17 cells at exactly zero.</p>
     </div>
 </section>
 </main>

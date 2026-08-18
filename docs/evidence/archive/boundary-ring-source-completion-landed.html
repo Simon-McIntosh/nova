@@ -330,5 +330,30 @@
   before the tightened gates (net ≤ 0.05%, interior m0 L1 ≤ 0.025%) can lock — the
   clip-independent representation study is the next node.</p>
 
+  <h2 id="clip-independent-density-degree">§7 (representation) — density degree closes the gap; sample count does not</h2>
+
+  <p>Two parallel nodes resolved the C¹-vs-accuracy trade (commits <code>4f2f98a5</code>,
+  <code>55394aa5</code>; lineage <code>5bc0b44b</code>). The obstruction is the fixed density's
+  polynomial degree, not quadrature density and not the in-cell sample count.</p>
+
+  <p><strong>Degree ladder</strong> (seven samples, clip-independent full-hex density, 96 ring
+  cells, current-weighted m0 L1): degree 3 → 0.5854%, degree 5 → 0.2628%, degree 7 → 0.1774%,
+  <strong>degree 9 → 0.1600%</strong> — beating even the support-matched prototype (0.2405%)
+  while keeping the width-zero C¹ invariant essentially exact (JVP sup delta 3.3e-15). The
+  recommended arm (672-point fixed full-hex weighted-QR projection) also improves ring net
+  current to 0.0721% (prototype 0.1504%), m1 to 0.1180%, centroid p95 to 0.3298 mm, and the
+  fold's total-current error to 0.3923%. Denser quadrature at degree 3 <em>worsens</em> m0
+  (0.5994%); the smooth support-moment correction (0.2050%) passes C¹ but violates the
+  clip-independent-density invariant — retained as a diagnostic comparator only. Conditioning:
+  weighted design 1.37e4 (normal equations 1.87e8) — production must use a precomputed weighted
+  QR or orthogonal basis, with exact polygon moments through total degree ten.</p>
+
+  <p><strong>Sample-count negative</strong>: on the landed production route at density degrees
+  3–4, no arm reaches the 0.25% trigger, and thirteen samples (vertices + edge midpoints +
+  centroid) worsen m0, ring net, total, and centroid p95 relative to seven at equal degree
+  (only m1 improves). The production control reproduced to 1.3e-17. The owner's
+  thirteen-sample question is answered by measurement: <code>ring-node-set</code> stands at
+  seven samples; the accuracy floor is closed by density degree nine.</p>
+
 </main></body>
 </html>

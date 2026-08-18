@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="boundary-ring-source-completion-landed">
+  <meta name="plan-title" content="Boundary Ring Source Completion — Cumulative Evidence">
+  <meta name="plan-summary" content="Landed record of the ring-completion execution: the prediction-gate measurement of both boundary-local nodal candidates and the adjudication trail that follows">
+  <meta name="plan-status" content="active">
+  <meta name="plan-evidence-for" content="boundary-ring-source-completion">
+  <meta name="plan-verifies" content="boundary-ring-source-completion#s3">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>Boundary Ring Source Completion — Cumulative Evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+
+  <p>Execution record for
+  <a href="/nova/boundary-ring-source-completion.html">boundary-ring-source-completion</a>. The
+  diagnosis this plan starts from — the stencil-availability seam carrying 84% of the flux shift on
+  4.59% of the current — is banked in
+  <a href="/nova/evidence/archive/moment-map-root-finding-landed.html#stencil-availability-seam">the
+  moment-map record</a>.</p>
+
+  <h2 id="ring-prediction-gate">§3 — the prediction gate: both local nodal candidates fail the full contract</h2>
+
+  <p>Gate <strong>FAILED — honest negative</strong>, banked with fields, per-cell errors and spatial
+  evidence at lineage commit <code>f943bacb</code> (run
+  <code>r-20260817T203644474480-ring-prediction-gate</code>, 685 s). Both candidate nodal sets for
+  the 96 ring-incomplete supports were implemented at measurement level on the banked 566-cell
+  coarse fixture at the analytic Solov'ev seed, using the same cubic-interpolant-over-support
+  machinery as the interior, no smoothing, no blending, no per-cell tuning. All 351
+  stencil-available m0 entries are preserved bitwise by both candidates, and 175 of 664 ring
+  full-polygon vertex values were recovered from banked established interpolants with a cross-cell
+  spread of 8.44e-9 A/m², so the negative is attributable to the local constructions themselves,
+  not to harness drift.</p>
+
+  <table>
+    <thead>
+      <tr><th>Gate clause (bound)</th><th>own-geometry</th><th>one-sided</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>argmax-target flux shift (≤ 0.5 Wb, from 10.935 Wb)</td>
+          <td><strong>+0.0909 Wb — pass</strong></td><td>+0.7595 Wb — fail</td></tr>
+      <tr><td>sup over 731 targets (&lt; 0.826 Wb legacy control)</td>
+          <td><strong>0.3396 Wb — pass</strong></td><td><strong>0.7604 Wb — pass</strong></td></tr>
+      <tr><td>total current (within 0.5% of −15.005 MA)</td>
+          <td>−15.108 MA, 0.686% — fail</td><td><strong>−15.076 MA, 0.468% — pass</strong></td></tr>
+      <tr><td>ring m0 error within interior scale (p95 0.1608)</td>
+          <td>p95 10.03, 62.4× — fail</td><td>p95 13.32, 82.8× — fail</td></tr>
+      <tr><td>351 stencil-available cells bitwise unchanged</td>
+          <td><strong>pass</strong></td><td><strong>pass</strong></td></tr>
+    </tbody>
+  </table>
+
+  <p>The complementary failure pattern is the finding: <strong>own-geometry repairs the flux field
+  the plan predicted</strong> (0.091 Wb against the −0.345 Wb prediction; sup 2.4× under the legacy
+  control) <strong>while still misstating the ring current by 0.19% of total</strong>, whereas
+  one-sided repairs the current but not the argmax flux — and neither collapses the per-cell ring
+  error into the interior population. The leading resisting cells are common to both candidates
+  (8, 5, 78, 26, 257, 17, 23, 76 …): small-current, irregular-polygon ring cells whose coordinates,
+  currents, polygon sizes and neighbour counts are tabulated in the banked CSV/JSON.</p>
+
+  <figure>
+    <img src="/nova/figures/boundary-ring-source-completion/ring-m0-relative-error.png"
+         alt="R-Z maps of per-cell signed m0 relative error: pre-repair, own-geometry, one-sided"
+         style="max-width:100%">
+    <figcaption>Per-cell signed m0 relative error at the analytic seed. Both repaired candidates
+    still show a distinct boundary-ring error population against the interior scale.</figcaption>
+  </figure>
+
+  <p>Artifacts (lineage worktree, commit <code>f943bacb</code>):
+  <code>scripts/ring_quadrature/results/ring-quadrature-results.json</code> (complete scorecard),
+  <code>ring-quadrature-fields.npz</code> (731-target pre-repair and both repaired fields, all 566
+  per-cell m0 values), <code>ring-cell-errors.csv</code> (192 candidate/cell rows), plus the input
+  banks under <code>scripts/ring_quadrature/inputs/</code> with a SHA-256 manifest — the tmpfs
+  banks are now durable in the lineage.</p>
+
+  <p><strong>Consequence:</strong> per the plan's §3 stop rule, no production path was touched, the
+  <code>ring-node-set</code> decision stays open (neither candidate is viable as specified), and
+  §4–§6 hold for owner adjudication: accept a candidate under explicitly relaxed bounds, direct a
+  new ring mechanism for the resisting cells, or re-scope the gate.</p>
+
+</main></body>
+</html>

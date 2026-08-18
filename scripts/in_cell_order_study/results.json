@@ -1,0 +1,105 @@
+{
+  "banked_quadratic_reproduction_difference": {
+    "centroid_weighted_mean_mm": -6.938893903907228e-16,
+    "centroid_weighted_p95_mm": 0.0,
+    "fixture_total_current_relative_error": 0.0,
+    "m0_current_weighted_l1": 1.5178830414797062e-17,
+    "m1_normalised_l1": -5.421010862427522e-18
+  },
+  "comparison": {
+    "centroid_weighted_mean_mm": {
+      "cubic": 0.1397482352860146,
+      "quadratic": 0.1395509655050671,
+      "quadratic_over_cubic": 0.9985883916133627
+    },
+    "centroid_weighted_p95_mm": {
+      "cubic": 0.3391992393876009,
+      "quadratic": 0.3407270636020294,
+      "quadratic_over_cubic": 1.0045042088454765
+    },
+    "fixture_total_current_relative_error": {
+      "cubic": 0.003838197024708778,
+      "quadratic": 0.0038223494070530606,
+      "quadratic_over_cubic": 0.9958710776039643
+    },
+    "m0_current_weighted_l1": {
+      "cubic": 0.001686330966268276,
+      "quadratic": 0.0024049251821496712,
+      "quadratic_over_cubic": 1.4261288147199185
+    },
+    "m1_normalised_l1": {
+      "cubic": 0.0009514547617468477,
+      "quadratic": 0.0012399239140626279,
+      "quadratic_over_cubic": 1.303187459786483
+    },
+    "ring_net_current_relative_error": {
+      "cubic": 0.0011541746236509106,
+      "quadratic": 0.0015040949772473923,
+      "quadratic_over_cubic": 1.3031779996077246
+    }
+  },
+  "fixture": {
+    "cells": 566,
+    "oracle_ring_absolute_current_a": 679583.7440129898,
+    "oracle_ring_current_a": -679583.7440129898,
+    "ring_cells": 96,
+    "ring_current_bearing_cells": 73,
+    "topology_zero_ring_cells": 17,
+    "vertex_identity_max_error_m": 1.7763568394002505e-15,
+    "vertex_identity_roundoff_bound_m": 2.842170943040401e-14
+  },
+  "held_fixed": [
+    "banked coarse support polygons",
+    "topology qualification",
+    "Solovev current oracle",
+    "triangle-fan quadrature",
+    "moment-preserving affine current projection",
+    "closed-form polygon moment attribution"
+  ],
+  "methods": {
+    "seven_sample_quadratic": {
+      "centroid_maximum_mm": 1.1897778999118556,
+      "centroid_weighted_mean_mm": 0.1395509655050671,
+      "centroid_weighted_p95_mm": 0.3407270636020294,
+      "fixture_total_current_a": -15062777.546754116,
+      "fixture_total_current_relative_error": 0.0038223494070530606,
+      "flux_interpolation_sup_wb": 0.06992386523226202,
+      "flux_polynomial_total_degree": 2,
+      "m0_absolute_error_a": 1634.348059356395,
+      "m0_current_weighted_l1": 0.0024049251821496712,
+      "m1_absolute_vector_error_am": 123.71058018121647,
+      "m1_normalised_l1": 0.0012399239140626279,
+      "name": "seven_sample_quadratic",
+      "ring_current_bearing_cells": 73,
+      "ring_net_current_error_a": 1022.1584959889155,
+      "ring_net_current_relative_error": 0.0015040949772473923,
+      "samples_per_cell": 7,
+      "topology_zero_cells": 17,
+      "topology_zero_current_a": 0.0
+    },
+    "thirteen_sample_cubic": {
+      "centroid_maximum_mm": 0.8124116130473211,
+      "centroid_weighted_mean_mm": 0.1397482352860146,
+      "centroid_weighted_p95_mm": 0.3391992393876009,
+      "fixture_total_current_a": -15063015.346938118,
+      "fixture_total_current_relative_error": 0.003838197024708778,
+      "flux_interpolation_sup_wb": 0.030281932527328692,
+      "flux_polynomial_total_degree": 3,
+      "m0_absolute_error_a": 1146.0031117016379,
+      "m0_current_weighted_l1": 0.001686330966268276,
+      "m1_absolute_vector_error_am": 94.9292285251774,
+      "m1_normalised_l1": 0.0009514547617468477,
+      "name": "thirteen_sample_cubic",
+      "ring_current_bearing_cells": 73,
+      "ring_net_current_error_a": 784.3583119854693,
+      "ring_net_current_relative_error": 0.0011541746236509106,
+      "samples_per_cell": 13,
+      "topology_zero_cells": 17,
+      "topology_zero_current_a": 0.0
+    }
+  },
+  "sample_sets": {
+    "seven_sample_quadratic": "cell centroid plus six pre-clip vertices, evaluated directly",
+    "thirteen_sample_cubic": "cell centroid plus six pre-clip vertices and six edge midpoints, evaluated directly"
+  }
+}

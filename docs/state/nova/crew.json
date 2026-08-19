@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-19T23:02:51",
+  "updated": "2026-08-20T00:49:37",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -9557,9 +9557,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260819T202110430440-observation-clip-rescore",
+        "plan": "boundary-ring-source-completion",
+        "section": "\u00a79",
+        "node": "observation-clip-rescore",
+        "role": "implement",
+        "member": "ring-quadrature",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-19T20:21:13Z",
+        "completed_at": "2026-08-19T22:48:38Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 8845,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 8845,
+        "stalled": false,
+        "time_budget": "95m",
+        "base_sha": "b0510b8c6d3ace1cf303164c4eb6214175fdf0c6",
+        "commits": [
+          "fd2e10a0e50b89bd4876773c3963b4a6653332ed"
+        ],
+        "changed_lines": {
+          "added": 1502,
+          "removed": 0,
+          "files": 7
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260819T202110430440-observation-clip-rescore/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01171-0694-7063-985b-f5d112e74147",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 75143168,
+            "cached_input_tokens_cumulative": 346355584,
+            "input_tokens": 76008542,
+            "input_tokens_cumulative": 353116963,
+            "output_tokens": 68701,
+            "output_tokens_cumulative": 753225,
+            "reasoning_output_tokens": 16025,
+            "reasoning_output_tokens_cumulative": 236070
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 266
+    "_version": 267
   }
 }

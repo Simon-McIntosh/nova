@@ -611,5 +611,56 @@
     refinement trends and bound crossings.</figcaption>
   </figure>
 
+  <h2 id="clipped-support-observation">§9 (observation repair) — every integral observation rides the clip; all twenty-two gates pass, no bound moved</h2>
+
+  <p><strong>Owner direction 2026-08-19 executed in two nodes.</strong> Commit <code>9d4d3f4f</code>
+  routes every default hex equilibrium observation through the already-traced topology-qualified
+  clip partition: volume and the major-radius numerator exactly from clipped polygon area and
+  radial first/second moments; pressure and B_p² evaluated from the seven-sample quadratic flux
+  and both gradients over each actual support at a fixed 8×8 Duffy rule (degree 15 per transformed
+  coordinate, non-polynomial oracle error ≤ 2.0e-12); <strong>plasma current as the closed-form
+  degree-nine core-density support integral including in-cell variation</strong>; participation by
+  closed-branch topology plus core-support inclusion, never centroid-core labelling. The in-line
+  survey documents the metrics that correctly keep their form (CurrentLedger taxonomy over
+  already-integrated currents; centre-stencil conservation norms; contour-line flux-surface
+  geometry; coarea connectivity) and one recorded exception: the structured-lattice compatibility
+  constructor keeps its labelled finite-volume receipt for lack of pre-clip sample targets — not
+  the default hex path. 241 equilibrium tests green; the stored bank digits reproduce identically;
+  one jit trace over a moving-separatrix sweep; gate bounds verified untouched in the diff.</p>
+
+  <p><strong>The re-score (commit <code>fd2e10a0</code>) clears every previously failing gate on
+  both banked roots without re-solving and without moving a bound — 11/11 coarse and 11/11
+  fine.</strong> Roots qualified residual-first (coarse reproduced to 4.3e-16; fine 2.48e-15 vs
+  banked 1.03e-15, inside the 1e-14 qualification), and plasma current unchanged to 2.2e-16,
+  proving the change is observation-only:</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>gate</th><th>bound</th><th>coarse before → after</th><th>fine before → after</th></tr></thead>
+    <tbody>
+      <tr><td>analytic field</td><td>0.05</td><td>0.10124 → <strong>0.03194</strong></td><td>0.06765 → <strong>0.03173</strong></td></tr>
+      <tr><td>internal inductance</td><td>0.08</td><td>0.12630 → <strong>0.00991</strong></td><td>0.09267 → <strong>0.00904</strong></td></tr>
+      <tr><td>receipt field</td><td>0.03</td><td>0.05891 → <strong>0</strong></td><td>0.02076 → <strong>0</strong></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>The receipt-field zero is an identity — gate and receipt now consume the same clipped-support
+  field integral. <strong>The caveat carried to the merge adjudication:</strong> the residual
+  support term is ≈2.0–2.3 percentage points on both fixtures (field 2.294 coarse / 2.324 fine;
+  l_i 2.060 / 1.998), roughly h-independent and 10–11.6× the ≈0.2-point chord-crescent context —
+  it includes genuine solved-boundary displacement relative to the stored analytic contour, a real
+  discrete-equilibrium difference, and cannot be labelled chord curvature alone. Representation
+  components stay at 0.85–1.09 points; both decompositions close to 3.5e-18. Full records:
+  <code>scripts/observation_clip_rescore/results.json</code>.</p>
+
+  <figure>
+    <img src="/nova/figures/boundary-ring-source-completion/observation-clip-rescore.png"
+         alt="Before/after gate readings and two-reference decompositions on both fixtures under the clipped-support observation"
+         style="max-width:100%">
+    <figcaption>The clipped-support observation re-score (commit <code>fd2e10a0</code>):
+    before/after gate readings and same-domain decompositions on both banked roots.</figcaption>
+  </figure>
+
 </main></body>
 </html>

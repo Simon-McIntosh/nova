@@ -3,7 +3,7 @@ All checks passed!
 warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/nova/.venv` and will be ignored; use `--active` to target the active environment instead
 1 file already formatted
 warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/nova/.venv` and will be ignored; use `--active` to target the active environment instead
-results checkpoint valid
-RUFF_EXIT=0
-FORMAT_EXIT=0
-JSON_EXIT=0
+true
+scripts/analytic_seed_adjudication/seed-defect-comparison.png: PNG image data, 1296 x 792, 8-bit/color RGBA, non-interlaced
+scripts/analytic_seed_adjudication/direct-residual-trends.png: PNG image data, 1890 x 756, 8-bit/color RGBA, non-interlaced
+VALIDATION_EXIT=0

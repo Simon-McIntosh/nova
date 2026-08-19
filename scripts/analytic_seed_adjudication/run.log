@@ -1,23 +1,24 @@
 warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/nova/.venv` and will be ignored; use `--active` to target the active environment instead
-10:35:32 INFO     Parsing data dictionary version 3.39.0 [90m@dd_zip.py:89[0m
+11:20:12 INFO     Parsing data dictionary version 3.39.0 [90m@dd_zip.py:89[0m
 INFO:imas.dd_zip:Parsing data dictionary version 3.39.0
 BUILD fixture=coarse requested=-500 wall_nodes=3
-plasmagrid:   0%|                          | 0/4 [00:00<?, ?it/s]plasmagrid:  25%|████▌             | 1/4 [00:15<00:46, 15.49s/it]plasmagrid:  50%|█████████         | 2/4 [00:18<00:15,  7.98s/it]plasmagrid:  75%|█████████████▌    | 3/4 [03:10<01:22, 82.98s/it]plasmagrid: 100%|██████████████████| 4/4 [03:31<00:00, 58.64s/it]plasmagrid: 100%|██████████████████| 4/4 [03:31<00:00, 52.94s/it]
-Traceback (most recent call last):
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/analytic-seed-adjudication/scripts/analytic_seed_adjudication/run.py", line 416, in <module>
-    main()
-    ~~~~^^
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/analytic-seed-adjudication/scripts/analytic_seed_adjudication/run.py", line 371, in main
-    coarse = reference.build_machine(case, reference.SUITE_CELLS, passive=True)
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/analytic-seed-adjudication/tests/test_equilibrium_forward_reference.py", line 916, in build_machine
-    coilset.plasmagrid.solve()
-    ~~~~~~~~~~~~~~~~~~~~~~~~^^
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/analytic-seed-adjudication/nova/biot/plasmagrid.py", line 103, in solve
-    self._build_direct_samples(target)
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
-  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/analytic-seed-adjudication/nova/biot/plasmagrid.py", line 120, in _build_direct_samples
-    raise ValueError(
-        "a hex plasma grid needs at least one complete generator cell"
-    )
-ValueError: a hex plasma grid needs at least one complete generator cell
-HARNESS_EXIT=1
+plasmagrid:   0%|                          | 0/4 [00:00<?, ?it/s]plasmagrid:  25%|████▌             | 1/4 [00:15<00:46, 15.66s/it]plasmagrid:  50%|█████████         | 2/4 [00:18<00:16,  8.10s/it]plasmagrid:  75%|█████████████▌    | 3/4 [03:11<01:23, 83.22s/it]plasmagrid: 100%|██████████████████| 4/4 [03:32<00:00, 58.74s/it]plasmagrid: 100%|██████████████████| 4/4 [03:32<00:00, 53.07s/it]
+plasmagrid:   0%|                          | 0/4 [00:00<?, ?it/s]plasmagrid:  25%|████▌             | 1/4 [00:34<01:42, 34.26s/it]plasmagrid:  50%|█████████         | 2/4 [00:44<00:39, 19.93s/it]plasmagrid:  75%|████████████▊    | 3/4 [06:49<02:57, 177.56s/it]plasmagrid: 100%|█████████████████| 4/4 [07:33<00:00, 125.09s/it]plasmagrid: 100%|█████████████████| 4/4 [07:33<00:00, 113.49s/it]
+plasmawall:   0%|                          | 0/4 [00:00<?, ?it/s]plasmawall:  25%|████▌             | 1/4 [00:09<00:27,  9.16s/it]plasmawall:  50%|█████████         | 2/4 [00:09<00:08,  4.25s/it]plasmawall:  75%|█████████████▌    | 3/4 [01:55<00:50, 50.72s/it]plasmawall: 100%|██████████████████| 4/4 [02:09<00:00, 35.87s/it]plasmawall: 100%|██████████████████| 4/4 [02:09<00:00, 32.27s/it]
+DEFECT fixture=coarse cells=566 repaired=0.01483973487901389 legacy=0.0095399999999999999 margin=-0.0052997348790138898
+ROUTE fixture=coarse route=undamped weight=None residual=1.625101639852996e-15 converged=True topology=diverted core=376 current_a=-14824633.223493958
+ROUTE fixture=coarse route=eigen_weight weight=0.5662514156285391 residual=3.6458915199361461e-05 converged=False topology=diverted core=376 current_a=-14826021.463764343
+ROUTE fixture=coarse route=weight_0p55 weight=0.55 residual=4.4781992405067558e-05 converged=False topology=diverted core=376 current_a=-14826341.401151735
+BEST fixture=coarse route=undamped residual=1.625101639852996e-15 delta_to_control=-0.016699999999998376
+BUILD fixture=fine requested=-1000 wall_nodes=6
+plasmagrid:   0%|                          | 0/5 [00:00<?, ?it/s]plasmagrid:  20%|███▌              | 1/5 [00:25<01:40, 25.18s/it]plasmagrid:  40%|███████▏          | 2/5 [00:31<00:41, 13.93s/it]plasmagrid:  60%|██████████▏      | 3/5 [04:54<04:15, 127.68s/it]plasmagrid:  80%|█████████████▌   | 4/5 [09:14<03:00, 180.11s/it]plasmagrid: 100%|█████████████████| 5/5 [09:49<00:00, 127.71s/it]plasmagrid: 100%|█████████████████| 5/5 [09:49<00:00, 117.91s/it]
+plasmagrid:   0%|                          | 0/5 [00:00<?, ?it/s]plasmagrid:  20%|███▌              | 1/5 [01:15<05:01, 75.46s/it]plasmagrid:  40%|███████▏          | 2/5 [01:34<02:05, 41.98s/it]plasmagrid:  60%|██████████▏      | 3/5 [14:30<12:34, 377.34s/it]plasmagrid:  80%|█████████████▌   | 4/5 [27:16<08:50, 530.74s/it]plasmagrid: 100%|█████████████████| 5/5 [28:58<00:00, 376.12s/it]plasmagrid: 100%|█████████████████| 5/5 [28:58<00:00, 347.66s/it]
+plasmawall:   0%|                          | 0/5 [00:00<?, ?it/s]plasmawall:  20%|███▌              | 1/5 [00:12<00:48, 12.08s/it]plasmawall:  40%|███████▏          | 2/5 [00:13<00:18,  6.00s/it]plasmawall:  60%|██████████▊       | 3/5 [02:22<02:04, 62.10s/it]plasmawall:  80%|██████████████▍   | 4/5 [04:30<01:28, 88.16s/it]plasmawall: 100%|██████████████████| 5/5 [04:47<00:00, 62.36s/it]plasmawall: 100%|██████████████████| 5/5 [04:47<00:00, 57.48s/it]
+DEFECT fixture=fine cells=1069 repaired=0.01491767274863203 legacy=0.011599999999999999 margin=-0.0033176727486320303
+ROUTE fixture=fine route=undamped weight=None residual=1.0264068138122435e-15 converged=True topology=diverted core=751 current_a=-14819767.144974062
+ROUTE fixture=fine route=eigen_weight weight=0.5662514156285391 residual=3.8105607921433905e-05 converged=False topology=diverted core=751 current_a=-14821246.909707449
+ROUTE fixture=fine route=weight_0p55 weight=0.55 residual=4.90920673600053e-05 converged=False topology=diverted core=751 current_a=-14821684.77152928
+BEST fixture=fine route=undamped residual=1.0264068138122435e-15 delta_to_control=-0.011999999999998973
+VERDICT {'repaired_beats_legacy_both': False, 'any_direct_root': True, 'all_fixtures_have_direct_root': True, 'no_root_obstruction': None}
+ANALYTIC_SEED_ADJUDICATION_EXIT=0
+HARNESS_EXIT=0

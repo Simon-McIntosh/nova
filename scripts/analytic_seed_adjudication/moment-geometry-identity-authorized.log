@@ -1,0 +1,14 @@
+warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/nova/.venv` and will be ignored; use `--active` to target the active environment instead
+11:17:20 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/analytic-seed-adjudication
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collected 1 item
+
+tests/test_biotpolysection.py .                                          [100%]
+
+============================== 1 passed in 8.67s ===============================
+FOCUSED_EXIT=0

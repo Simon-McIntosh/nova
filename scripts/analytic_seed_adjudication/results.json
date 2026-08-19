@@ -11,7 +11,274 @@
       "legacy_seed_defect": 0.0116
     }
   },
-  "fixtures": {},
+  "fixtures": {
+    "coarse": {
+      "any_converged": true,
+      "banked_best_direct_residual": 0.0167,
+      "best_route": "undamped",
+      "best_terminal_residual": 1.625101639852996e-15,
+      "best_vs_banked_control": -0.016699999999998376,
+      "plasma_cells": 566,
+      "routes": {
+        "eigen_weight": {
+          "axis_m": [
+            6.327439742160681,
+            0.5323118221061323
+          ],
+          "converged": false,
+          "core_cells": 376,
+          "plasma_current_a": -14826021.463764343,
+          "residual": 3.645891519936146e-05,
+          "residual_history": [
+            0.006017540930941427,
+            0.002439378496511874,
+            0.0011673145237900602,
+            0.0006354947680005219,
+            0.00036549322437563276,
+            0.00021961732601673774,
+            0.00013696806842580247,
+            8.678132775320082e-05,
+            5.5767583330465355e-05,
+            3.645891519936146e-05
+          ],
+          "topology": "diverted",
+          "weight": 0.5662514156285391
+        },
+        "undamped": {
+          "all_physics_gates": false,
+          "axis_m": [
+            6.327274324940348,
+            0.5323321186513126
+          ],
+          "converged": true,
+          "core_cells": 376,
+          "physics_gates": {
+            "analytic_field": false,
+            "axis": true,
+            "divergence_b": true,
+            "divergence_j": true,
+            "flux": true,
+            "grad_shafranov": true,
+            "internal_inductance": false,
+            "physical": true,
+            "plasma_current": true,
+            "poloidal_beta": true,
+            "receipt_field": false,
+            "residual": true
+          },
+          "physics_score": {
+            "analytic_field_quadrature_deviation_fraction": 0.10124260849102606,
+            "axis_max_deviation_m": 0.04244215925818118,
+            "core_cells": 376,
+            "diverted": true,
+            "flux_deviation_fraction": 0.06505036753757784,
+            "grad_shafranov_residual": 0.04355732206134054,
+            "internal_inductance_deviation_fraction": 0.126302728863251,
+            "plasma_current_a": -14824633.223493958,
+            "plasma_current_deviation_fraction": 0.011187529199654711,
+            "poloidal_beta_deviation_fraction": 0.025713747630442763,
+            "receipt_field_deviation_fraction": 0.058914971799305715,
+            "relative_divergence_b": 0.001100977815544771,
+            "relative_divergence_j": 0.0031725980371919795,
+            "residual": 1.625101639852996e-15
+          },
+          "plasma_current_a": -14824633.223493958,
+          "residual": 1.625101639852996e-15,
+          "residual_history": [
+            0.01483973487901389,
+            0.0008836763419741456,
+            0.0008836763419741453,
+            1.5169846132720358e-05,
+            1.5169846132720358e-05,
+            1.4043954402179093e-08,
+            1.4043954402179093e-08,
+            1.4064023311018514e-09,
+            1.4064023311018514e-09,
+            1.4084067388741838e-10,
+            1.4084033176075717e-10,
+            1.410457787663466e-11,
+            1.4104577876634655e-11,
+            1.4115718375489017e-12,
+            1.4115718375489017e-12,
+            1.4093480142467967e-13,
+            1.4093480142467967e-13,
+            1.5074956001268532e-14,
+            1.5074956001268532e-14,
+            1.625101639852996e-15
+          ],
+          "topology": "diverted",
+          "weight": null
+        },
+        "weight_0p55": {
+          "axis_m": [
+            6.327477012376389,
+            0.5323071664223679
+          ],
+          "converged": false,
+          "core_cells": 376,
+          "plasma_current_a": -14826341.401151735,
+          "residual": 4.478199240506756e-05,
+          "residual_history": [
+            0.006224020589110348,
+            0.0026987757433023225,
+            0.0013027052330607046,
+            0.0007200437044196461,
+            0.00042040455326853595,
+            0.0002556061213478494,
+            0.00016177660508310914,
+            0.00010388506864569792,
+            6.774432148595199e-05,
+            4.478199240506756e-05
+          ],
+          "topology": "diverted",
+          "weight": 0.55
+        }
+      },
+      "seed_map_defect": {
+        "beats_legacy": false,
+        "legacy_control": 0.00954,
+        "margin_to_legacy": -0.00529973487901389,
+        "pre_repair_consistent_control": 0.129,
+        "ratio_to_legacy": 1.5555277650957955,
+        "repaired_unified": 0.01483973487901389
+      },
+      "state_size": 2396,
+      "wall_targets": 165
+    },
+    "fine": {
+      "any_converged": true,
+      "banked_best_direct_residual": 0.012,
+      "best_route": "undamped",
+      "best_terminal_residual": 1.0264068138122435e-15,
+      "best_vs_banked_control": -0.011999999999998973,
+      "plasma_cells": 1069,
+      "routes": {
+        "eigen_weight": {
+          "axis_m": [
+            6.327374008331262,
+            0.5322196930844577
+          ],
+          "converged": false,
+          "core_cells": 751,
+          "plasma_current_a": -14821246.90970745,
+          "residual": 3.8105607921433905e-05,
+          "residual_history": [
+            0.006177567334997675,
+            0.002623537666979869,
+            0.0012741265998658068,
+            0.0006856295340107112,
+            0.00039237794248723167,
+            0.0002346104052807714,
+            0.00014426577463981266,
+            9.038965489166877e-05,
+            5.806907314979623e-05,
+            3.8105607921433905e-05
+          ],
+          "topology": "diverted",
+          "weight": 0.5662514156285391
+        },
+        "undamped": {
+          "all_physics_gates": false,
+          "axis_m": [
+            6.327196440210975,
+            0.5322379442992652
+          ],
+          "converged": true,
+          "core_cells": 751,
+          "physics_gates": {
+            "analytic_field": false,
+            "axis": true,
+            "divergence_b": true,
+            "divergence_j": true,
+            "flux": true,
+            "grad_shafranov": true,
+            "internal_inductance": false,
+            "physical": true,
+            "plasma_current": true,
+            "poloidal_beta": true,
+            "receipt_field": true,
+            "residual": true
+          },
+          "physics_score": {
+            "analytic_field_quadrature_deviation_fraction": 0.06765400337273997,
+            "axis_max_deviation_m": 0.04252004398755371,
+            "core_cells": 751,
+            "diverted": true,
+            "flux_deviation_fraction": 0.06693245288400186,
+            "grad_shafranov_residual": 0.024647588020694625,
+            "internal_inductance_deviation_fraction": 0.0926669763375485,
+            "plasma_current_a": -14819767.144974062,
+            "plasma_current_deviation_fraction": 0.011512099733834269,
+            "poloidal_beta_deviation_fraction": 0.02447041102755887,
+            "receipt_field_deviation_fraction": 0.020757179864857922,
+            "relative_divergence_b": 0.0006882494574464881,
+            "relative_divergence_j": 0.0020895100274374288,
+            "residual": 1.0264068138122435e-15
+          },
+          "plasma_current_a": -14819767.144974062,
+          "residual": 1.0264068138122435e-15,
+          "residual_history": [
+            0.01491767274863203,
+            0.0008326003748457148,
+            0.0008326003748457148,
+            8.235437623298397e-06,
+            8.235437623298397e-06,
+            4.4949957878401396e-07,
+            4.4949957878401396e-07,
+            1.947922540979676e-08,
+            1.947922540979676e-08,
+            8.355855864702299e-10,
+            8.355855864702299e-10,
+            3.5841433643310016e-11,
+            3.5841433643310016e-11,
+            1.5375554023807301e-12,
+            1.5375554023807301e-12,
+            6.674851811071024e-14,
+            6.674851811071024e-14,
+            3.2395965060948623e-15,
+            3.2395965060948623e-15,
+            1.0264068138122435e-15
+          ],
+          "topology": "diverted",
+          "weight": null
+        },
+        "weight_0p55": {
+          "axis_m": [
+            6.327427246236805,
+            0.5322135978093232
+          ],
+          "converged": false,
+          "core_cells": 751,
+          "plasma_current_a": -14821684.77152928,
+          "residual": 4.90920673600053e-05,
+          "residual_history": [
+            0.006387637314865836,
+            0.0028325823391425692,
+            0.001417925303819146,
+            0.0007807718539235445,
+            0.0004581860283390294,
+            0.0002792878156009808,
+            0.00017580647988719148,
+            0.000112609540965103,
+            7.362554351971128e-05,
+            4.90920673600053e-05
+          ],
+          "topology": "diverted",
+          "weight": 0.55
+        }
+      },
+      "seed_map_defect": {
+        "beats_legacy": false,
+        "legacy_control": 0.0116,
+        "margin_to_legacy": -0.0033176727486320303,
+        "pre_repair_consistent_control": 0.0235,
+        "ratio_to_legacy": 1.2860062714337956,
+        "repaired_unified": 0.01491767274863203
+      },
+      "state_size": 4216,
+      "wall_targets": 330
+    }
+  },
   "lineage_head": "03a0a774",
   "policy": {
     "damping_weights": [
@@ -25,5 +292,11 @@
     "residual_gate": 1e-06,
     "warmup": 0
   },
-  "schema": "nova.analytic-seed-adjudication"
+  "schema": "nova.analytic-seed-adjudication",
+  "verdict": {
+    "all_fixtures_have_direct_root": true,
+    "any_direct_root": true,
+    "no_root_obstruction": null,
+    "repaired_beats_legacy_both": false
+  }
 }

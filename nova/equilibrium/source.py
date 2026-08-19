@@ -567,11 +567,7 @@ class ForwardSource:
 
     def current_moments(
         self,
-        radius,
         masks: DomainMasks,
-        shared_radius,
-        shared_masks: DomainMasks,
-        interior_moments,
         support_moments,
         core_support,
         common_support,
@@ -591,25 +587,16 @@ class ForwardSource:
         def partitioned_moments(
             profile,
             centroid_flux,
-            node_flux,
-            direct_centroid_flux,
             direct_flux,
             support,
             selection,
         ):
-            centroid_density = profile.current_density(radius, centroid_flux)
-            if direct_flux is not None:
-                moments = support_moments(
-                    profile,
-                    direct_centroid_flux,
-                    centroid_density,
-                    jnp.zeros_like(shared_radius),
-                    direct_flux,
-                    support,
-                )
-            else:
-                shared_density = profile.current_density(shared_radius, node_flux)
-                moments = support_moments(centroid_density, shared_density, support)
+            moments = support_moments(
+                profile,
+                centroid_flux,
+                direct_flux,
+                support,
+            )
             return CellCurrentMoments(
                 *(jnp.where(selection, entry, 0.0) for entry in moments)
             )
@@ -618,8 +605,6 @@ class ForwardSource:
 
         core = partitioned_moments(
             self.core,
-            jnp.clip(masks.psi_norm, 0.0, 1.0),
-            jnp.clip(shared_masks.psi_norm, 0.0, 1.0),
             masks.psi_norm,
             sample_flux,
             core_support,
@@ -630,8 +615,6 @@ class ForwardSource:
         if self.common_sol is not None:
             common = partitioned_moments(
                 self.common_sol,
-                jnp.maximum(masks.psi_norm, 1.0),
-                jnp.maximum(shared_masks.psi_norm, 1.0),
                 masks.psi_norm,
                 sample_flux,
                 common_support,
@@ -641,33 +624,12 @@ class ForwardSource:
 
         if self.private_flux is not None:
             centroid_selection = masks.private_flux
-            centroid_density = jnp.where(
-                centroid_selection,
-                self.private_flux.current_density(
-                    radius, jnp.where(centroid_selection, masks.psi_norm, 1.0)
-                ),
-                0.0,
+            private = support_moments(
+                self.private_flux,
+                jnp.maximum(masks.psi_norm, 1.0),
+                jnp.maximum(sample_flux, 1.0),
+                common_support,
             )
-            if sample_flux is None:
-                shared_selection = shared_masks.private_flux
-                shared_density = jnp.where(
-                    shared_selection,
-                    self.private_flux.current_density(
-                        shared_radius,
-                        jnp.where(shared_selection, shared_masks.psi_norm, 1.0),
-                    ),
-                    0.0,
-                )
-                private = interior_moments(centroid_density, shared_density)
-            else:
-                private = support_moments(
-                    self.private_flux,
-                    jnp.maximum(masks.psi_norm, 1.0),
-                    centroid_density,
-                    jnp.zeros_like(shared_radius),
-                    jnp.maximum(sample_flux, 1.0),
-                    common_support,
-                )
             total = total + jnp.stack(
                 CellCurrentMoments(
                     *(jnp.where(centroid_selection, entry, 0.0) for entry in private)

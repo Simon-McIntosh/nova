@@ -182,57 +182,16 @@ class TracedClippedSupports(NamedTuple):
     second_area_moment: object
     contour_area: object
     patch_area_sum: object
-    transition_vertices: object
-    transition_vertex_count: object
-    transition_weight: object
 
     def linear_current_moments(self, density, gradient):
         """Contract a cellwise-linear current over the traced supports."""
-        import jax.numpy as jnp
-
-        exact_current, exact_first = padded_linear_current_moments(
+        return padded_linear_current_moments(
             self.support_vertices,
             self.vertex_count,
             self.centroids,
             density,
             gradient,
         )
-        surface_current, surface_first = padded_linear_current_moments(
-            self.transition_vertices,
-            self.transition_vertex_count,
-            self.centroids,
-            density,
-            gradient,
-        )
-        weight = self.transition_weight
-        current = surface_current + weight * (exact_current - surface_current)
-        first = surface_first + weight[:, None] * (exact_first - surface_first)
-        return (
-            jnp.where(weight < 1.0, current, exact_current),
-            jnp.where(weight[:, None] < 1.0, first, exact_first),
-        )
-
-    def evaluation_weights(self, epsilon):
-        """Return C1 participation and clipped-evaluation weights.
-
-        These weights choose between already-evaluated current paths. They do
-        not alter the exact clipped polygon or any of its area moments.
-        """
-        import jax.numpy as jnp
-
-        if epsilon < 0.0 or epsilon > 1.0:
-            raise ValueError("epsilon must lie between zero and one")
-        if epsilon == 0.0:
-            return self.included.astype(self.area.dtype), self.boundary.astype(
-                self.area.dtype
-            )
-        fraction = jnp.clip(self.area / self.full_area, 0.0, 1.0)
-
-        def smoothstep(value):
-            scaled = jnp.clip(value / epsilon, 0.0, 1.0)
-            return scaled * scaled * (3.0 - 2.0 * scaled)
-
-        return smoothstep(fraction), smoothstep(1.0 - fraction)
 
 
 def padded_linear_current_moments(
@@ -556,7 +515,6 @@ def _traced_clip(
     centroids,
     support_capacity,
     signed_flux,
-    smoothing_width=None,
 ):
     """Clip fixed atomic cells using only traced fixed-shape operations."""
     from nova.jax.config import configure_dtypes
@@ -646,33 +604,6 @@ def _traced_clip(
         )
     )
     patch_area_sum = jnp.sum(area)
-    if smoothing_width is None:
-        transition_vertices = support
-        transition_vertex_count = vertex_count
-        transition_weight = jnp.ones_like(area)
-    else:
-        width_scale = jnp.maximum(
-            jnp.abs(jnp.asarray(smoothing_width, dtype=flux.dtype)),
-            jnp.finfo(flux.dtype).tiny,
-        )
-        in_band = jnp.abs(flux) < width_scale
-        surface_flux = jnp.where(in_band, 0.0, flux)
-        surface_clip = _traced_clip(
-            node_coordinates,
-            cell_nodes,
-            cell_vertex_count,
-            centroids,
-            support_capacity,
-            surface_flux,
-        )
-        transition_vertices = surface_clip.support_vertices
-        transition_vertex_count = surface_clip.vertex_count
-        node_distance = jnp.clip(jnp.abs(flux) / width_scale, 0.0, 1.0)
-        cell_distance = jnp.min(
-            jnp.where(valid_edge, node_distance[nodes], 1.0), axis=1
-        )
-        transition_weight = cell_distance * cell_distance * (3.0 - 2.0 * cell_distance)
-
     return TracedClippedSupports(
         support_vertices=support,
         vertex_count=vertex_count,
@@ -685,9 +616,6 @@ def _traced_clip(
         second_area_moment=second,
         contour_area=contour_area,
         patch_area_sum=patch_area_sum,
-        transition_vertices=transition_vertices,
-        transition_vertex_count=transition_vertex_count,
-        transition_weight=transition_weight,
     )
 
 
@@ -844,9 +772,7 @@ class AtomicCellMesh:
             raise ValueError("the sampled level field must return one value per node")
         return values
 
-    def traced_clip(
-        self, signed_flux, *, smoothing_width=None
-    ) -> TracedClippedSupports:
+    def traced_clip(self, signed_flux) -> TracedClippedSupports:
         """Clip this fixed topology inside a JAX transformation."""
         return _traced_clip(
             self.node_coordinates,
@@ -855,7 +781,6 @@ class AtomicCellMesh:
             self.centroids,
             self.support_capacity,
             signed_flux,
-            smoothing_width,
         )
 
     def clip(self, signed_flux: np.ndarray) -> ClippedSupports:

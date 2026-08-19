@@ -399,11 +399,11 @@
       566,
       3
     ],
-    "single_update_median_ms": 1.5883814776316285,
-    "single_update_min_ms": 1.504535903222859,
+    "single_update_median_ms": 1.646201009862125,
+    "single_update_min_ms": 1.566319027915597,
     "batch_size": 8,
-    "batch_update_ms": 6.218661204911768,
-    "batch_per_state_ms": 0.777332650613971,
+    "batch_update_ms": 6.225639209151268,
+    "batch_per_state_ms": 0.7782049011439085,
     "jit_compatible": true,
     "vmap_compatible": true,
     "batch_first_state_sup_difference": 5.966285243630409e-10
@@ -426,10 +426,10 @@
     "jit_batch_compatible": true
   },
   "artifacts": {
-    "matrix_bank": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/interior-unification/scripts/ring_attribution/inputs/direct-target-matrices.npz",
-    "cell_table": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/interior-unification/scripts/ring_attribution/results/ring-cell-attribution.csv",
-    "field_bank": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/interior-unification/scripts/ring_attribution/results/ring-attribution-fields.npz",
-    "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/interior-unification/scripts/ring_attribution/results/direct-ring-attribution-errors.png"
+    "matrix_bank": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/retired-path-excision/scripts/ring_attribution/inputs/direct-target-matrices.npz",
+    "cell_table": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/retired-path-excision/scripts/ring_attribution/results/ring-cell-attribution.csv",
+    "field_bank": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/retired-path-excision/scripts/ring_attribution/results/ring-attribution-fields.npz",
+    "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/retired-path-excision/scripts/ring_attribution/results/retired-path-bank.png"
   },
   "production_vertex_authority": "The grid constructor supplies the authoritative pre-clip vertex array."
 }

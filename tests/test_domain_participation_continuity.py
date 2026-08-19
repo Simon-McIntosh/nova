@@ -46,7 +46,10 @@ def _participation_sweep():
     def density_gradient(density):
         return density[:, None] * gradient_scale
 
-    def support_moments(centroid_density, _shared_density, support):
+    def support_moments(profile, centroid_flux, _sample_flux, support):
+        centroid_density = profile.current_density(
+            jnp.asarray([centre[0]]), centroid_flux
+        )
         current, first = support.linear_current_moments(
             centroid_density, density_gradient(centroid_density)
         )
@@ -72,19 +75,12 @@ def _participation_sweep():
             label=jnp.asarray([int(label)], dtype=jnp.int8),
             psi_norm=jnp.asarray([psi_norm]),
         )
-        shared_masks = DomainMasks(
-            label=jnp.full(len(mesh.node_coordinates), int(label), dtype=jnp.int8),
-            psi_norm=jnp.full(len(mesh.node_coordinates), psi_norm),
-        )
         moments = source.current_moments(
-            jnp.asarray([centre[0]]),
             masks,
-            jnp.asarray(mesh.node_coordinates[:, 0]),
-            shared_masks,
-            lambda centroid, shared: support_moments(centroid, shared, core_support),
             support_moments,
             core_support,
             common_support,
+            sample_flux=jnp.asarray([psi_norm]),
         )
         vector = np.asarray(jnp.stack(moments))[:, 0]
         states.append(
@@ -138,19 +134,10 @@ def test_clipped_evaluation_converges_to_full_stencil_limit():
             ff_prime=lambda psi: jnp.zeros_like(psi),
         )
     )
-    radius = jnp.asarray([centre[0]])
-    shared_radius = jnp.asarray(mesh.node_coordinates[:, 0])
     masks = DomainMasks(
         label=jnp.asarray([int(PlasmaDomain.CORE)], dtype=jnp.int8),
         psi_norm=jnp.asarray([0.5]),
     )
-    shared_masks = DomainMasks(
-        label=jnp.full(
-            len(mesh.node_coordinates), int(PlasmaDomain.CORE), dtype=jnp.int8
-        ),
-        psi_norm=jnp.full(len(mesh.node_coordinates), 0.5),
-    )
-
     coefficients = jnp.asarray(
         [[100.0, 300.0, 300.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]
     )
@@ -165,7 +152,7 @@ def test_clipped_evaluation_converges_to_full_stencil_limit():
     )
     full_values = jnp.asarray([full_current[0], full_first[0, 0], full_first[0, 1]])
 
-    def support_moments(_centroid_density, _shared_density, support):
+    def support_moments(_profile, _centroid_flux, _sample_flux, support):
         current, first = padded_polynomial_current_moments(
             support.support_vertices,
             support.vertex_count,
@@ -195,16 +182,11 @@ def test_clipped_evaluation_converges_to_full_stencil_limit():
         core_support = mesh.traced_clip(jnp.asarray(signed_flux))
         common_support = mesh.traced_clip(jnp.asarray(-signed_flux))
         moments = source.current_moments(
-            radius,
             masks,
-            shared_radius,
-            shared_masks,
-            lambda centroid, shared: support_moments(
-                centroid, shared, complete_support
-            ),
             support_moments,
             core_support,
             common_support,
+            sample_flux=jnp.asarray([0.5]),
         )
         vector = np.asarray(jnp.stack(moments))[:, 0]
         actual_missing = float(1.0 - core_support.area[0] / core_support.full_area[0])

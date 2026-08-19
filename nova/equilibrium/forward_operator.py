@@ -61,7 +61,6 @@ class ForwardFluxOperator:
     moment_geometry: MomentGeometry | None = field(repr=False, default=None)
     sample: FluxTarget | None = field(repr=False, default=None)
     use_linear_moments: bool = field(repr=False, default=True)
-    smoothing_epsilon: float = field(repr=False, default=0.0)
 
     def __post_init__(self):
         """Build the topology read and default the material mask."""
@@ -76,29 +75,29 @@ class ForwardFluxOperator:
             raise ValueError("area must carry one control area per grid node")
         if self.inside_material.shape != (self.grid.node_number,):
             raise ValueError("inside_material must carry one flag per grid node")
-        if self.smoothing_epsilon < 0.0 or self.smoothing_epsilon > 1.0:
-            raise ValueError("smoothing_epsilon must lie between zero and one")
         if (
             self.moment_geometry is not None
             and len(self.moment_geometry.polygons) != self.grid.node_number
         ):
             raise ValueError("moment geometry must carry one polygon per grid node")
-        if self.moment_geometry is not None:
-            if self.sample is not None and self.sample.node_number != len(
+        if self.moment_geometry is not None and self.use_linear_moments:
+            if self.sample is None:
+                raise ValueError(
+                    "linear current moments require direct pre-clip sample targets"
+                )
+            if self.sample.node_number != len(
                 self.moment_geometry.sample_node_coordinates
             ):
                 raise ValueError(
                     "direct sample target rows must match the moment sampling nodes"
                 )
-            self._build_moment_stencils()
+            self._build_support_moment_stencils()
 
-    def _build_moment_stencils(self) -> None:
-        """Build fixed full-cell contractions from the carried mesh geometry."""
+    def _build_support_moment_stencils(self) -> None:
+        """Build the fixed own-node projection for every support."""
         coordinate = np.asarray(self.grid.coordinate, dtype=np.float64)
         ring = np.asarray(self.grid.null.stencil, dtype=np.intp)
         area = np.asarray(self.area, dtype=np.float64)
-        atomic = self.moment_geometry.atomic_mesh
-        node = np.asarray(atomic.node_coordinates)
         polygon_size = np.asarray(
             [len(polygon) for polygon in self.moment_geometry.polygons]
         )
@@ -112,25 +111,7 @@ class ForwardFluxOperator:
                 sample_size[ring[:, 0]] == vertex_count
             )
             mesh = StencilMesh(coordinate, ring[selected], area)
-            cell_node = np.asarray(atomic.cell_nodes[:, :vertex_count], dtype=np.intp)
-            for centre in mesh.centre:
-                vertices = self.moment_geometry.polygons[int(centre)]
-                distance = np.sum(
-                    (vertices[:, np.newaxis, :] - node[np.newaxis, :, :]) ** 2,
-                    axis=2,
-                )
-                nearest = np.argmin(distance, axis=1)
-                if np.any(
-                    np.sqrt(distance[np.arange(vertex_count), nearest])
-                    > atomic.tolerance
-                ):
-                    raise ValueError("moment polygon vertex is absent from atomic mesh")
-                cell_node[int(centre)] = nearest
             stencil = mesh.current_moment_stencil(
-                cell_node,
-                self.moment_geometry.second_moment[:, :2],
-                node_coordinate=node,
-                polygon_centroid=atomic.centroids,
                 support_centre=support_centre,
                 sampling_node_coordinate=self.moment_geometry.sample_node_coordinates,
                 sampling_cell_node=self.moment_geometry.cell_sample_nodes[
@@ -138,8 +119,7 @@ class ForwardFluxOperator:
                 ],
             )
             stencils.append(stencil)
-        self._moment_mesh = StencilMesh(coordinate, ring, area)
-        self._interior_moment_stencils = tuple(stencils)
+        self._support_moment_stencils = tuple(stencils)
 
     @property
     def node_number(self) -> int:
@@ -187,43 +167,17 @@ class ForwardFluxOperator:
         return self.moment_geometry.shared_node_flux(grid_flux)
 
     def sample_node_flux(self, psi) -> jax.Array:
-        """Return direct pre-clip vertex flux, or the structured fallback fit."""
+        """Return the direct pre-clip sample rows from one flux vector."""
         if self.moment_geometry is None:
             raise ValueError("moment geometry is required for sampling-node flux")
-        values = jnp.asarray(psi)
-        if self.sample is not None:
-            return values[self.physical_node_number :]
-        grid_flux, _wall_flux = self.topology.split_flux_map(
-            values[: self.physical_node_number]
-        )
-        return self.moment_geometry.sample_node_flux(grid_flux)
-
-    def current_density_gradient(self, density) -> jax.Array:
-        """Return fitted radial and vertical derivatives of a cell field."""
-        if self.moment_geometry is None:
-            raise ValueError("moment geometry is required for current gradients")
-        radial, vertical = self._moment_mesh.gradient(density)
-        return jnp.stack([radial, vertical], axis=1)
-
-    def interior_current_moments(
-        self, centroid_density, shared_density
-    ) -> CellCurrentMoments:
-        """Apply every fixed interior moment contraction and combine its rows."""
-        if self.moment_geometry is None:
-            raise ValueError("moment geometry is required for current moments")
-        vectors = jnp.zeros(
-            (3, self.grid.node_number), dtype=jnp.asarray(centroid_density).dtype
-        )
-        for stencil in self._interior_moment_stencils:
-            vectors = vectors + jnp.stack(stencil(centroid_density, shared_density))
-        return CellCurrentMoments(*vectors)
+        if self.sample is None:
+            raise ValueError("direct pre-clip sample targets are required")
+        return jnp.asarray(psi)[self.physical_node_number :]
 
     def support_current_moments(
         self,
         profile,
         centroid_flux,
-        centroid_density,
-        shared_density,
         sample_flux,
         support,
     ) -> CellCurrentMoments:
@@ -231,15 +185,13 @@ class ForwardFluxOperator:
         if self.moment_geometry is None:
             raise ValueError("moment geometry is required for current moments")
         vectors = jnp.zeros(
-            (3, self.grid.node_number), dtype=jnp.asarray(centroid_density).dtype
+            (3, self.grid.node_number), dtype=jnp.asarray(centroid_flux).dtype
         )
-        for stencil in self._interior_moment_stencils:
+        for stencil in self._support_moment_stencils:
             vectors = vectors + jnp.stack(
                 stencil.support_flux_moments(
                     profile,
                     centroid_flux,
-                    centroid_density,
-                    shared_density,
                     sample_flux,
                     support,
                 )
@@ -301,26 +253,12 @@ class ForwardFluxOperator:
             return CellCurrentMoments(current, zero, zero)
         shared_flux = self.shared_node_flux(psi)
         sample_flux = self.sample_node_flux(psi)
-        shared_masks = self.shared_domain_masks(masks, topology, shared_flux)
         sample_psi_norm = (sample_flux - topology.axis_flux) / topology.flux_span
         signed_flux = self.polarity * (shared_flux - topology.boundary_flux)
-        if self.smoothing_epsilon == 0.0:
-            core_support = self.moment_geometry.atomic_mesh.traced_clip(signed_flux)
-            common_support = self.moment_geometry.atomic_mesh.traced_clip(-signed_flux)
-        else:
-            smoothing_width = self.smoothing_epsilon * jnp.abs(topology.flux_span)
-            core_support = self.moment_geometry.atomic_mesh.traced_clip(
-                signed_flux, smoothing_width=smoothing_width
-            )
-            common_support = self.moment_geometry.atomic_mesh.traced_clip(
-                -signed_flux, smoothing_width=smoothing_width
-            )
+        core_support = self.moment_geometry.atomic_mesh.traced_clip(signed_flux)
+        common_support = self.moment_geometry.atomic_mesh.traced_clip(-signed_flux)
         moments = self.source.current_moments(
-            self.radius,
             masks,
-            self.moment_geometry.atomic_mesh.node_coordinates[:, 0],
-            shared_masks,
-            self.interior_current_moments,
             self.support_current_moments,
             core_support,
             common_support,

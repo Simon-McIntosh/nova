@@ -38,7 +38,6 @@ receipt needs, but their floor is a property of the mesh.
 from __future__ import annotations
 
 import json
-import math
 from pathlib import Path
 
 import numpy as np
@@ -64,7 +63,6 @@ with skip_import("jax"):
         PROFILE_DENSITY_POWERS,
         RING_CONDITION_LIMIT,
         StencilMesh,
-        cell_average_weights,
     )
     from nova.geometry.hexstencil import hex_stencil
     from nova.jax.config import configure_dtypes
@@ -96,78 +94,6 @@ FORCE_AGREEMENT = 0.05
 #: Largest relative divergence receipt a ring mesh may report. The measured
 #: value is 4e-05 at the coarsest raster below and falls at second order.
 DIVERGENCE_CEILING = 1.0e-3
-
-
-def polygon_average_monomial(vertices: np.ndarray, powers: tuple[int, int]) -> float:
-    """Integrate one monomial exactly by triangulating from the centroid."""
-    centre = np.mean(vertices, axis=0)
-    integral = 0.0
-    area = 0.0
-    radial_power, vertical_power = powers
-    for first, second in zip(vertices, np.roll(vertices, -1, axis=0)):
-        triangle = np.stack([centre, first, second])
-        first_offset = first - centre
-        second_offset = second - centre
-        twice_area = abs(
-            first_offset[0] * second_offset[1] - first_offset[1] * second_offset[0]
-        )
-        area += 0.5 * twice_area
-        for radial_split in np.ndindex(*(radial_power + 1,) * 3):
-            if sum(radial_split) != radial_power:
-                continue
-            radial_coefficient = math.factorial(radial_power)
-            for exponent in radial_split:
-                radial_coefficient /= math.factorial(exponent)
-            for vertical_split in np.ndindex(*(vertical_power + 1,) * 3):
-                if sum(vertical_split) != vertical_power:
-                    continue
-                vertical_coefficient = math.factorial(vertical_power)
-                for exponent in vertical_split:
-                    vertical_coefficient /= math.factorial(exponent)
-                barycentric = tuple(
-                    radial_split[index] + vertical_split[index] for index in range(3)
-                )
-                barycentric_integral = twice_area
-                for exponent in barycentric:
-                    barycentric_integral *= math.factorial(exponent)
-                barycentric_integral /= math.factorial(
-                    radial_power + vertical_power + 2
-                )
-                coordinate_term = np.prod(
-                    triangle[:, 0] ** radial_split * triangle[:, 1] ** vertical_split
-                )
-                integral += (
-                    radial_coefficient
-                    * vertical_coefficient
-                    * barycentric_integral
-                    * coordinate_term
-                )
-    return integral / area
-
-
-def quadrature_average_monomial(vertices: np.ndarray, powers: tuple[int, int]) -> float:
-    """Apply the centroid-and-vertices cell-average contraction."""
-    centre = np.mean(vertices, axis=0)
-    radial_power, vertical_power = powers
-    samples = np.r_[
-        centre[0] ** radial_power * centre[1] ** vertical_power,
-        vertices[:, 0] ** radial_power * vertices[:, 1] ** vertical_power,
-    ]
-    return float(cell_average_weights(len(vertices)) @ samples)
-
-
-def rectangle_vertices() -> np.ndarray:
-    """Return an off-origin rectangle so exactness includes translated terms."""
-    centre = np.array([1.7, -0.4])
-    half_width = np.array([0.35, 0.6])
-    return centre + np.array(
-        [
-            [-half_width[0], -half_width[1]],
-            [half_width[0], -half_width[1]],
-            [half_width[0], half_width[1]],
-            [-half_width[0], half_width[1]],
-        ]
-    )
 
 
 def regular_hexagon_vertices(centre: np.ndarray, pitch: float) -> np.ndarray:
@@ -238,105 +164,6 @@ def sup_error(mesh: StencilMesh, value, reference) -> float:
     return float(np.max(np.abs(np.asarray(value) - reference)[inside]))
 
 
-# --------------------------------------------------------------------------
-# fixed interior current moments
-# --------------------------------------------------------------------------
-@pytest.mark.parametrize(
-    "powers",
-    [(radial, vertical) for radial in range(4) for vertical in range(4 - radial)],
-)
-def test_rectangle_cell_average_weights_are_exact_through_total_degree_three(powers):
-    """The rectangle contraction integrates every cubic monomial to round-off."""
-    vertices = rectangle_vertices()
-    expected = polygon_average_monomial(vertices, powers)
-    actual = quadrature_average_monomial(vertices, powers)
-    assert abs(actual - expected) < 4.0e-15
-
-
-@pytest.mark.parametrize(
-    "powers",
-    [(radial, vertical) for radial in range(4) for vertical in range(4 - radial)],
-)
-def test_hexagon_cell_average_weights_are_exact_through_total_degree_three(powers):
-    """The regular-hexagon contraction integrates translated cubics to round-off."""
-    vertices = regular_hexagon_vertices(np.array([1.4, -0.3]), pitch=0.7)
-    expected = polygon_average_monomial(vertices, powers)
-    actual = quadrature_average_monomial(vertices, powers)
-    assert abs(actual - expected) < 2.0e-15
-
-
-@pytest.mark.parametrize(
-    "vertices",
-    [rectangle_vertices(), regular_hexagon_vertices(np.zeros(2), 0.7)],
-)
-def test_cell_average_weights_do_not_claim_degree_four_exactness(vertices):
-    """The first omitted radial monomial remains observably non-exact."""
-    expected = polygon_average_monomial(vertices, (4, 0))
-    actual = quadrature_average_monomial(vertices, (4, 0))
-    assert abs(actual - expected) > 1.0e-5
-
-
-def test_interior_current_moments_use_the_fitted_gradient_and_fixed_second_moment():
-    """Current and both first moments share one fixed interior contraction."""
-    configure_dtypes()
-    pitch = 0.16
-    mesh = hex_mesh(pitch)
-    node_coordinate, cell_node = shared_hexagon_vertices(mesh, pitch)
-    radial_slope, vertical_slope = 2.3, -0.8
-
-    def current_density(coordinate):
-        radius, height = coordinate[..., 0], coordinate[..., 1]
-        return 4.1 + radial_slope * radius + vertical_slope * height
-
-    stencil = mesh.current_moment_stencil(
-        cell_node,
-        second_moment=np.full((mesh.node_count, 2), 5.0 / 72.0 * pitch**2),
-    )
-    moments = stencil(
-        current_density(mesh.coordinate), current_density(node_coordinate)
-    )
-    inside = np.asarray(mesh.interior(1))
-    expected_current = current_density(mesh.coordinate) * mesh.area
-    expected_radial = radial_slope * mesh.area * 5.0 / 72.0 * pitch**2
-    expected_vertical = vertical_slope * mesh.area * 5.0 / 72.0 * pitch**2
-    np.testing.assert_allclose(
-        np.asarray(moments.cell_current)[inside],
-        expected_current[inside],
-        rtol=0.0,
-        atol=2.0e-14,
-    )
-    np.testing.assert_allclose(
-        np.asarray(moments.radial_moment)[inside],
-        expected_radial[inside],
-        rtol=0.0,
-        atol=2.0e-14,
-    )
-    np.testing.assert_allclose(
-        np.asarray(moments.vertical_moment)[inside],
-        expected_vertical[inside],
-        rtol=0.0,
-        atol=2.0e-14,
-    )
-    assert np.all(np.asarray(moments.cell_current)[~inside] == 0.0)
-
-
-def test_interior_current_moments_are_one_gather_and_one_contraction():
-    """The per-iteration operator has one indexed read and one matrix contraction."""
-    configure_dtypes()
-    pitch = 0.32
-    mesh = hex_mesh(pitch)
-    node_coordinate, cell_node = shared_hexagon_vertices(mesh, pitch)
-    stencil = mesh.current_moment_stencil(
-        cell_node, second_moment=np.full((mesh.node_count, 2), 5.0 / 72.0 * pitch**2)
-    )
-    jaxpr = jax.make_jaxpr(stencil)(
-        jnp.ones(mesh.node_count), jnp.ones(len(node_coordinate))
-    )
-    primitives = [equation.primitive.name for equation in jaxpr.jaxpr.eqns]
-    assert primitives.count("gather") == 1
-    assert primitives.count("dot_general") == 1
-
-
 def test_shared_hexagon_node_evaluations_amortise_to_three_per_cell():
     """Two shared vertices plus one centroid are needed asymptotically per cell."""
     mesh = hex_mesh(0.08)
@@ -401,10 +228,6 @@ def boundary_support_problem(profile=None):
     geometry = MomentGeometry.from_cells(mesh, cells)
     atomic = geometry.atomic_mesh
     stencil = mesh.current_moment_stencil(
-        atomic.cell_nodes[:, :6],
-        geometry.second_moment[:, :2],
-        node_coordinate=atomic.node_coordinates,
-        polygon_centroid=atomic.centroids,
         support_centre=np.arange(mesh.node_count),
         sampling_node_coordinate=geometry.sample_node_coordinates,
         sampling_cell_node=geometry.cell_sample_nodes[:, :6],
@@ -456,8 +279,6 @@ def evaluate_boundary_support(problem, support):
     return stencil.support_flux_moments(
         problem["profile"],
         problem["centroid_flux"],
-        problem["centroid_density"],
-        problem["shared_density"],
         problem["sample_flux"],
         support,
     )
@@ -624,8 +445,6 @@ def test_boundary_support_error_converges_with_missing_area():
         moments = problem["stencil"].support_flux_moments(
             profile,
             centroid_flux,
-            problem["centroid_density"],
-            problem["shared_density"],
             sample_flux,
             support,
         )
@@ -666,19 +485,10 @@ def test_boundary_support_is_c1_at_full_fill_without_smoothing():
     def composed(cut):
         support = atomic.traced_clip(cut - jnp.asarray(atomic_u))
         centroid_flux = 1.0 - (cut - jnp.asarray(centroid_u))
-        shared_flux = jnp.clip(1.0 - (cut - jnp.asarray(atomic_u)), 0.0, 1.0)
         sample_flux = 1.0 - (cut - jnp.asarray(sample_u))
-        centroid_density = profile.current_density(
-            jnp.asarray(problem["mesh"].coordinate[:, 0]), centroid_flux
-        )
-        shared_density = profile.current_density(
-            jnp.asarray(atomic.node_coordinates[:, 0]), shared_flux
-        )
         moments = problem["stencil"].support_flux_moments(
             profile,
             centroid_flux,
-            centroid_density,
-            shared_density,
             sample_flux,
             support,
         )

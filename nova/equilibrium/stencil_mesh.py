@@ -42,6 +42,10 @@ withheld — carry no derivative. They are reported as zero and excluded by
 :meth:`StencilMesh.interior`, so a receipt never reads a value the mesh could
 not form, exactly as the lattice border is trimmed before a residual is
 reported.
+
+``SharedNodeFluxStencil`` remains only as the atomic-node reconstruction used
+by exact clip tracing and atomic-node topology labels. Current attribution
+uses direct pre-clip sample rows and never consumes that reconstruction.
 """
 
 from __future__ import annotations
@@ -57,7 +61,6 @@ import numpy as np
 from nova.biot.greens import second_moments, section_centroid
 from nova.equilibrium.conservation import STENCIL_MARGIN
 from nova.equilibrium.separatrix_clip import (
-    POLYNOMIAL_POWERS,
     AtomicCellMesh,
     complete_polynomial_powers,
     padded_polynomial_current_moments,
@@ -71,7 +74,6 @@ __all__ = [
     "PROFILE_DENSITY_POWERS",
     "SharedNodeFluxStencil",
     "StencilMesh",
-    "cell_average_weights",
     "ring_condition",
 ]
 
@@ -92,23 +94,6 @@ PROFILE_DENSITY_POWERS = complete_polynomial_powers(9)
 _VALUE, _RADIAL, _VERTICAL, _RADIAL_CURVATURE, _CROSS, _VERTICAL_CURVATURE = range(6)
 
 
-def cell_average_weights(vertex_count: int) -> np.ndarray:
-    """Return centroid-and-vertex weights exact through total degree three.
-
-    Rectangles use two thirds of the centroid value and one twelfth from each
-    corner. Regular hexagons use seven twelfths of the centroid value and five
-    seventy-seconds from each corner. Both rules include the constant exactly;
-    other polygon families need a separately derived rule and are rejected.
-    """
-    if vertex_count == 4:
-        return np.array([2.0 / 3.0, *(1.0 / 12.0,) * 4], dtype=np.float64)
-    if vertex_count == 6:
-        return np.array([7.0 / 12.0, *(5.0 / 72.0,) * 6], dtype=np.float64)
-    raise ValueError(
-        "degree-three cell averages support rectangles and regular hexagons"
-    )
-
-
 class CellCurrentMoments(NamedTuple):
     """Current and first moments about each fixed cell centroid."""
 
@@ -119,23 +104,9 @@ class CellCurrentMoments(NamedTuple):
 
 @dataclass(frozen=True)
 class InteriorCurrentMomentStencil:
-    """Fixed gather and contraction for interior cell-current moments.
+    """Fixed own-node projection and exact-support moment geometry."""
 
-    The value pool contains cell-centroid evaluations followed by evaluations
-    at the shared polygon nodes. Each call gathers that pool once and applies
-    one contraction whose rows are the cell-average rule and the fitted radial
-    and vertical derivative rules. Geometry construction supplies the weights;
-    no geometry-dependent work occurs in an iteration.
-    """
-
-    gather_index: np.ndarray = field(repr=False)
-    contraction_weight: np.ndarray = field(repr=False)
-    centre: np.ndarray = field(repr=False)
     cell_count: int
-    shared_node_count: int
-    coefficient_weight: np.ndarray | None = field(default=None, repr=False)
-    coordinate_scale: np.ndarray | None = field(default=None, repr=False)
-    full_vertices: np.ndarray | None = field(default=None, repr=False)
     ring_centre: np.ndarray | None = field(default=None, repr=False)
     ring_gather_index: np.ndarray | None = field(default=None, repr=False)
     ring_flux_weight: np.ndarray | None = field(default=None, repr=False)
@@ -149,23 +120,7 @@ class InteriorCurrentMomentStencil:
 
     def __post_init__(self):
         """Store compact contiguous geometry arrays for repeated contractions."""
-        object.__setattr__(
-            self,
-            "gather_index",
-            np.ascontiguousarray(self.gather_index, dtype=np.intp),
-        )
-        object.__setattr__(
-            self,
-            "contraction_weight",
-            np.ascontiguousarray(self.contraction_weight, dtype=np.float64),
-        )
-        object.__setattr__(
-            self, "centre", np.ascontiguousarray(self.centre, dtype=np.intp)
-        )
         for name in (
-            "coefficient_weight",
-            "coordinate_scale",
-            "full_vertices",
             "ring_flux_weight",
             "ring_coordinate_scale",
             "ring_sampling_centre",
@@ -186,105 +141,14 @@ class InteriorCurrentMomentStencil:
                     self, name, np.ascontiguousarray(value, dtype=np.intp)
                 )
 
-    def _gather(self, centroid_current_density, shared_node_current_density):
-        """Return the common value pool and gathered per-cell samples."""
-        centroid_value = jnp.asarray(centroid_current_density)
-        shared_value = jnp.asarray(shared_node_current_density)
-        if centroid_value.shape != (self.cell_count,):
-            raise ValueError("one current-density value is needed per cell centroid")
-        if shared_value.shape != (self.shared_node_count,):
-            raise ValueError("one current-density value is needed per shared node")
-        if centroid_value.dtype != shared_value.dtype:
-            shared_value = shared_value.astype(centroid_value.dtype)
-        value_pool = jnp.concatenate([centroid_value, shared_value])
-        return value_pool, value_pool[self.gather_index]
-
-    def __call__(self, centroid_current_density, shared_node_current_density):
-        """Return the three moment-vector entries for one current-density field."""
-        value_pool, gathered = self._gather(
-            centroid_current_density, shared_node_current_density
-        )
-        entries = jnp.einsum(
-            "rks,rs->rk",
-            jnp.asarray(self.contraction_weight, dtype=value_pool.dtype),
-            gathered,
-        )
-        vectors = (
-            jnp.zeros((3, self.cell_count), dtype=entries.dtype)
-            .at[:, self.centre]
-            .set(entries.T)
-        )
-        return CellCurrentMoments(*vectors)
-
-    def support_moments(
-        self, centroid_current_density, shared_node_current_density, support
-    ) -> CellCurrentMoments:
-        """Integrate the stencil's cubic interpolant over traced supports."""
-        if self.coefficient_weight is None:
-            raise ValueError("support quadrature geometry was not built")
-        value_pool, gathered = self._gather(
-            centroid_current_density, shared_node_current_density
-        )
-        weights = jnp.asarray(self.contraction_weight, dtype=value_pool.dtype)
-        full_entries = jnp.einsum("rks,rs->rk", weights, gathered)
-        coefficients = jnp.einsum(
-            "rps,rs->rp",
-            jnp.asarray(self.coefficient_weight, dtype=value_pool.dtype),
-            gathered,
-        )
-        centre = self.centre
-        scale = jnp.asarray(self.coordinate_scale, dtype=value_pool.dtype)
-        clipped = padded_polynomial_current_moments(
-            support.support_vertices[centre],
-            support.vertex_count[centre],
-            support.centroids[centre],
-            scale,
-            coefficients,
-        )
-        full_vertices = jnp.asarray(self.full_vertices, dtype=value_pool.dtype)
-        full_vertex_count = full_vertices.shape[1]
-        full_vertices = jnp.pad(
-            full_vertices,
-            (
-                (0, 0),
-                (0, support.support_vertices.shape[1] - full_vertex_count),
-                (0, 0),
-            ),
-        )
-        full = padded_polynomial_current_moments(
-            full_vertices,
-            jnp.full(len(centre), full_vertex_count, dtype=jnp.int32),
-            support.centroids[centre],
-            scale,
-            coefficients,
-        )
-        entries = full_entries + jnp.stack(
-            [
-                clipped[0] - full[0],
-                clipped[1][:, 0] - full[1][:, 0],
-                clipped[1][:, 1] - full[1][:, 1],
-            ],
-            axis=1,
-        )
-        entries = jnp.where(support.included[centre, None], entries, 0.0)
-        vectors = (
-            jnp.zeros((3, self.cell_count), dtype=entries.dtype)
-            .at[:, centre]
-            .set(entries.T)
-        )
-        return CellCurrentMoments(*vectors)
-
     def support_flux_moments(
         self,
         profile,
         centroid_flux,
-        centroid_density,
-        shared_density,
         sample_flux,
         support,
     ) -> CellCurrentMoments:
         """Integrate one own-node profile polynomial for every carried cell."""
-        del centroid_density, shared_density
         if self.ring_centre is None or len(self.ring_centre) == 0:
             raise ValueError("own-node profile geometry was not built")
 
@@ -320,7 +184,12 @@ class InteriorCurrentMomentStencil:
 
 @dataclass(frozen=True)
 class SharedNodeFluxStencil:
-    """Fixed quadratic reconstruction from cell centres to shared polygon nodes."""
+    """Reconstruct atomic-node flux only for clipping and topology labels.
+
+    Current attribution never samples this reconstruction. Its sole role is
+    the atomic-node representation shared by exact clip tracing and the
+    corresponding atomic-node topology labels.
+    """
 
     gather_index: np.ndarray = field(repr=False)
     weight: np.ndarray = field(repr=False)
@@ -358,7 +227,6 @@ class MomentGeometry:
     sample_node_coordinates: np.ndarray = field(repr=False)
     cell_sample_nodes: np.ndarray = field(repr=False)
     sample_vertex_count: np.ndarray = field(repr=False)
-    sample_flux_stencil: SharedNodeFluxStencil = field(repr=False)
 
     @classmethod
     def from_cells(
@@ -437,16 +305,11 @@ class MomentGeometry:
             sample_node_coordinates=sample_coordinate,
             cell_sample_nodes=cell_sample_nodes,
             sample_vertex_count=sample_count,
-            sample_flux_stencil=mesh.shared_node_flux_stencil(sample_coordinate),
         )
 
     def shared_node_flux(self, cell_flux) -> jax.Array:
         """Evaluate one cell-centred flux map on the atomic shared nodes."""
         return self.shared_flux_stencil(cell_flux)
-
-    def sample_node_flux(self, cell_flux) -> jax.Array:
-        """Evaluate one cell-centred flux map on the pre-clip sampling nodes."""
-        return self.sample_flux_stencil(cell_flux)
 
 
 def _quadratic_design(local: np.ndarray) -> np.ndarray:
@@ -463,11 +326,6 @@ def _quadratic_design(local: np.ndarray) -> np.ndarray:
         ],
         axis=-1,
     )
-
-
-def _cubic_design(local: np.ndarray) -> np.ndarray:
-    """Evaluate the complete cubic monomial basis at local coordinates."""
-    return _polynomial_design(local, POLYNOMIAL_POWERS)
 
 
 def _polynomial_design(
@@ -746,58 +604,12 @@ class StencilMesh:
 
     def current_moment_stencil(
         self,
-        cell_node,
-        second_moment,
         *,
-        node_coordinate=None,
-        polygon_centroid=None,
         support_centre=None,
         sampling_node_coordinate=None,
         sampling_cell_node=None,
     ) -> InteriorCurrentMomentStencil:
-        """Build the fixed interior operator for cell-current moments.
-
-        ``cell_node`` maps every cell to its four rectangle corners or six
-        regular-hexagon corners in a shared node pool. ``second_moment`` holds
-        the area-normalised radial and vertical central second moments in
-        square metres. The resulting callable evaluates no geometry: it reads
-        centroid and shared-node current densities and returns full-cell
-        vectors, with zero entries for cells lacking a complete fitted ring.
-        """
-        cell_node = np.ascontiguousarray(cell_node, dtype=np.intp)
-        if cell_node.ndim != 2 or cell_node.shape[0] != self.node_count:
-            raise ValueError("cell-node indices must have shape (cells, corners)")
-        average_weight = cell_average_weights(cell_node.shape[1])
-        if cell_node.size and cell_node.min() < 0:
-            raise ValueError("cell-node indices must be non-negative")
-        moment = np.asarray(second_moment, dtype=np.float64)
-        try:
-            moment = np.broadcast_to(moment, (self.node_count, 2))
-        except ValueError as error:
-            raise ValueError(
-                "radial and vertical second moments are needed per cell"
-            ) from error
-
-        centre = self.centre
-        ring_width = self.stencil.shape[1]
-        node_index = self.node_count + cell_node[centre]
-        gather_index = np.concatenate([self.stencil, node_index], axis=1)
-        weight = np.zeros(
-            (len(centre), 3, ring_width + cell_node.shape[1]), dtype=np.float64
-        )
-        area = self.area[centre]
-        weight[:, 0, 0] = area * average_weight[0]
-        weight[:, 0, ring_width:] = area[:, np.newaxis] * average_weight[1:]
-        weight[:, 1, :ring_width] = (
-            area[:, np.newaxis] * moment[centre, :1] * self.radial_weight
-        )
-        weight[:, 2, :ring_width] = (
-            area[:, np.newaxis] * moment[centre, 1:] * self.vertical_weight
-        )
-        shared_node_count = int(cell_node.max()) + 1 if cell_node.size else 0
-        coefficient_weight = None
-        coordinate_scale = None
-        full_vertices = None
+        """Build the fixed own-node density projection and support integrator."""
         ring_centre = None
         ring_gather_index = None
         ring_flux_weight = None
@@ -808,60 +620,6 @@ class StencilMesh:
         ring_profile_weight = None
         ring_profile_condition = None
         ring_sample_node_count = 0
-        if node_coordinate is not None:
-            node_coordinate = np.ascontiguousarray(node_coordinate, dtype=np.float64)
-            if node_coordinate.ndim != 2 or node_coordinate.shape[1] != 2:
-                raise ValueError("node_coordinate must have shape (nodes, 2)")
-            shared_node_count = len(node_coordinate)
-            polygon_centre = (
-                self.coordinate
-                if polygon_centroid is None
-                else np.asarray(polygon_centroid, dtype=np.float64)
-            )
-            if polygon_centre.shape != self.coordinate.shape:
-                raise ValueError("polygon_centroid must carry one point per cell")
-            full_vertices = node_coordinate[cell_node[centre]]
-            offset = full_vertices - polygon_centre[centre, None, :]
-            coordinate_scale = np.max(np.abs(offset), axis=1)
-            if np.any(coordinate_scale <= 0.0):
-                raise ValueError("every moment polygon must span both coordinates")
-            sample_count = gather_index.shape[1]
-            coefficient_weight = np.empty(
-                (len(centre), len(POLYNOMIAL_POWERS), sample_count),
-                dtype=np.float64,
-            )
-            for row, cell in enumerate(centre):
-                local_vertices = offset[row] / coordinate_scale[row]
-                local_centre = (
-                    self.coordinate[cell] - polygon_centre[cell]
-                ) / coordinate_scale[row]
-                point_design = _cubic_design(np.vstack([local_centre, local_vertices]))
-                area_local = _polygon_monomial_integral(local_vertices, 0, 0)
-                radial_constraint = np.asarray(
-                    [
-                        _polygon_monomial_integral(local_vertices, p + 1, q)
-                        / area_local
-                        for p, q in POLYNOMIAL_POWERS
-                    ]
-                )
-                vertical_constraint = np.asarray(
-                    [
-                        _polygon_monomial_integral(local_vertices, p, q + 1)
-                        / area_local
-                        for p, q in POLYNOMIAL_POWERS
-                    ]
-                )
-                constraint = np.vstack(
-                    [point_design, radial_constraint, vertical_constraint]
-                )
-                target = np.zeros((len(constraint), sample_count))
-                target[0, 0] = 1.0
-                target[1 : 1 + cell_node.shape[1], ring_width:] = np.eye(
-                    cell_node.shape[1]
-                )
-                target[-2] = weight[row, 1] / (area[row] * coordinate_scale[row, 0])
-                target[-1] = weight[row, 2] / (area[row] * coordinate_scale[row, 1])
-                coefficient_weight[row] = np.linalg.pinv(constraint) @ target
         if support_centre is not None:
             if sampling_node_coordinate is None or sampling_cell_node is None:
                 raise ValueError(
@@ -956,14 +714,7 @@ class StencilMesh:
             ring_profile_weight = np.linalg.solve(triangular, weighted_right)
             ring_profile_condition = np.linalg.cond(triangular)
         return InteriorCurrentMomentStencil(
-            gather_index=gather_index,
-            contraction_weight=weight,
-            centre=centre,
             cell_count=self.node_count,
-            shared_node_count=shared_node_count,
-            coefficient_weight=coefficient_weight,
-            coordinate_scale=coordinate_scale,
-            full_vertices=full_vertices,
             ring_centre=ring_centre,
             ring_gather_index=ring_gather_index,
             ring_flux_weight=ring_flux_weight,

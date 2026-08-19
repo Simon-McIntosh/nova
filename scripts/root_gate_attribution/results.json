@@ -1,0 +1,297 @@
+{
+  "adjudication": {
+    "analytic_field": {
+      "classification": "support-domain dominated",
+      "fine_representation_component_percentage_points": -0.9113393247777524,
+      "fine_support_component_percentage_points": 7.676739662051784,
+      "fine_total_deviation_percentage_points": 6.7654003372740315,
+      "mechanism": "The attributed representation cancels part of the positive straight-chord/topology-qualified support-domain deviation; it does not cause the analytic-field gate miss."
+    },
+    "internal_inductance": {
+      "classification": "mixed support-domain and representation error",
+      "fine_representation_component_percentage_points": 1.2310883143843663,
+      "fine_support_component_percentage_points": 8.035609319370534,
+      "fine_support_margin_to_bound_percentage_points": -0.03560931937052897,
+      "fine_total_deviation_percentage_points": 9.266697633754902,
+      "mechanism": "The fine support reference alone is only 0.0356 percentage points outside the bound, while the attributed representation adds 1.2311 points. Support geometry sets the baseline, but representation carries most of the fine excess beyond the bound."
+    },
+    "owner_merge_obstruction": "Root existence is no longer an obstruction and the receipt-field miss is coarse-only. The surviving analytic-field miss is a support-domain/resolution term that representation partially cancels. The surviving internal-inductance miss is mixed: its fine support reference nearly reaches the bound, but the representation adds the decisive excess. The two-point crossings are estimates, not measured convergence orders.",
+    "receipt_field": {
+      "classification": "coarse receipt-resolution artifact",
+      "fine_deviation_percentage_points": 2.0757179864858477,
+      "fine_margin_to_bound_percentage_points": 0.9242820135141522,
+      "mechanism": "The neighbour-ring differentiated receipt passes on the fine fixture and its two-point crossing estimate lies below that fixture, so it is not a surviving source or support obstruction."
+    }
+  },
+  "fixtures": {
+    "coarse": {
+      "absolute_inputs": {
+        "field_integral": {
+          "analytic_t2_m3": 880.1786593633865,
+          "attributed_t2_m3": 969.2902427754702,
+          "receipt_t2_m3": 912.1845354570107,
+          "support_geometry_t2_m3": 978.0615913400555
+        },
+        "internal_inductance": {
+          "analytic": 0.7999251811433871,
+          "attributed_raw": 0.9065890074952213,
+          "attributed_reference_scale": 0.9937887035465476,
+          "attributed_referred": 0.9009579144082273,
+          "support_geometry_raw": 0.8965876282519358,
+          "support_geometry_reference_scale": 0.9937887035465476,
+          "support_geometry_referred": 0.8910186566963653
+        },
+        "major_radius_m": {
+          "analytic_reference": 6.2,
+          "attributed": 6.161489961988595,
+          "support_geometry": 6.161489961988595
+        },
+        "plasma_current_a": {
+          "attributed": -14824633.22349396,
+          "support_geometry": -14974384.917345189
+        }
+      },
+      "plasma_cells": 566,
+      "reproduction": {
+        "absolute_tolerance": {
+          "analytic_field": 1e-12,
+          "internal_inductance": 1e-12,
+          "receipt_field": 1e-12,
+          "terminal_residual": 1e-14
+        },
+        "all_reproduced": true,
+        "banked": {
+          "analytic_field": 0.10124260849102606,
+          "internal_inductance": 0.126302728863251,
+          "receipt_field": 0.058914971799305715,
+          "terminal_residual": 1.625101639852996e-15
+        },
+        "maximum_absolute_scalar_difference": 5.551115123125783e-16,
+        "per_quantity_pass": {
+          "analytic_field": true,
+          "internal_inductance": true,
+          "receipt_field": true,
+          "terminal_residual": true
+        },
+        "rebuilt": {
+          "analytic_field": 0.10124260849102631,
+          "internal_inductance": 0.12630272886325103,
+          "receipt_field": 0.05891497179930627,
+          "terminal_residual": 1.1974433135758919e-15
+        },
+        "signed_difference": {
+          "analytic_field": 2.498001805406602e-16,
+          "internal_inductance": 2.7755575615628914e-17,
+          "receipt_field": 5.551115123125783e-16,
+          "terminal_residual": -4.276583262771041e-16
+        },
+        "terminal_residual_absolute_difference": 4.276583262771041e-16
+      },
+      "score": {
+        "analytic_field": {
+          "additive_closure_error": 0.0,
+          "attributed_margin_to_bound": -0.05124260849102631,
+          "attributed_vs_analytic_absolute_fraction": 0.10124260849102631,
+          "attributed_vs_analytic_fraction": 0.10124260849102631,
+          "attributed_vs_support_absolute_fraction": 0.008968094281841199,
+          "attributed_vs_support_fraction": -0.008968094281841199,
+          "bound": 0.05,
+          "representation_component_on_analytic_denominator": -0.009965418351462224,
+          "support_coverage_component_on_analytic_denominator": 0.11120802684248854,
+          "support_margin_to_bound": -0.061208026842488425,
+          "support_vs_analytic_absolute_fraction": 0.11120802684248843,
+          "support_vs_analytic_fraction": 0.11120802684248843
+        },
+        "internal_inductance": {
+          "additive_closure_error": 0.0,
+          "attributed_margin_to_bound": -0.04630272886325103,
+          "attributed_vs_analytic_absolute_fraction": 0.12630272886325103,
+          "attributed_vs_analytic_fraction": 0.12630272886325103,
+          "attributed_vs_support_absolute_fraction": 0.011154937819948474,
+          "attributed_vs_support_fraction": 0.011154937819948474,
+          "bound": 0.08,
+          "representation_component_on_analytic_denominator": 0.012425234192096742,
+          "support_coverage_component_on_analytic_denominator": 0.1138774946711543,
+          "support_margin_to_bound": -0.033877494671154265,
+          "support_vs_analytic_absolute_fraction": 0.11387749467115427,
+          "support_vs_analytic_fraction": 0.11387749467115427
+        },
+        "receipt_field": {
+          "bound": 0.03,
+          "margin_to_bound": -0.02891497179930627,
+          "receipt_vs_analytic_fraction": 0.036362931267583054,
+          "receipt_vs_attributed_absolute_fraction": 0.05891497179930627,
+          "receipt_vs_attributed_fraction": -0.05891497179930627,
+          "receipt_vs_support_fraction": -0.06735471105943924
+        }
+      },
+      "state_size": 2396,
+      "terminal_state": "scripts/root_gate_attribution/coarse-terminal-root.npz"
+    },
+    "fine": {
+      "absolute_inputs": {
+        "field_integral": {
+          "analytic_t2_m3": 880.1786593633865,
+          "attributed_t2_m3": 939.7262693525711,
+          "receipt_t2_m3": 920.2202021558874,
+          "support_geometry_t2_m3": 947.7476836036512
+        },
+        "internal_inductance": {
+          "analytic": 0.7999251811433871,
+          "attributed_raw": 0.8787107530716965,
+          "attributed_reference_scale": 0.9946980003610978,
+          "attributed_referred": 0.8740518289762109,
+          "support_geometry_raw": 0.8688104763793746,
+          "support_geometry_reference_scale": 0.9946980003610978,
+          "support_geometry_referred": 0.8642040435473367
+        },
+        "major_radius_m": {
+          "analytic_reference": 6.2,
+          "attributed": 6.167127602238806,
+          "support_geometry": 6.167127602238806
+        },
+        "plasma_current_a": {
+          "attributed": -14819767.14497406,
+          "support_geometry": -14967439.381951964
+        }
+      },
+      "plasma_cells": 1069,
+      "reproduction": {
+        "absolute_tolerance": {
+          "analytic_field": 1e-12,
+          "internal_inductance": 1e-12,
+          "receipt_field": 1e-12,
+          "terminal_residual": 1e-14
+        },
+        "all_reproduced": true,
+        "banked": {
+          "analytic_field": 0.06765400337273997,
+          "internal_inductance": 0.0926669763375485,
+          "receipt_field": 0.020757179864857922,
+          "terminal_residual": 1.0264068138122435e-15
+        },
+        "maximum_absolute_scalar_difference": 5.551115123125783e-16,
+        "per_quantity_pass": {
+          "analytic_field": true,
+          "internal_inductance": true,
+          "receipt_field": true,
+          "terminal_residual": true
+        },
+        "rebuilt": {
+          "analytic_field": 0.06765400337274032,
+          "internal_inductance": 0.09266697633754901,
+          "receipt_field": 0.020757179864858477,
+          "terminal_residual": 8.553390115102029e-16
+        },
+        "signed_difference": {
+          "analytic_field": 3.469446951953614e-16,
+          "internal_inductance": 5.134781488891349e-16,
+          "receipt_field": 5.551115123125783e-16,
+          "terminal_residual": -1.7106780230204062e-16
+        },
+        "terminal_residual_absolute_difference": 1.7106780230204062e-16
+      },
+      "score": {
+        "analytic_field": {
+          "additive_closure_error": 0.0,
+          "attributed_margin_to_bound": -0.017654003372740312,
+          "attributed_vs_analytic_absolute_fraction": 0.06765400337274032,
+          "attributed_vs_analytic_fraction": 0.06765400337274032,
+          "attributed_vs_support_absolute_fraction": 0.008463660096303394,
+          "attributed_vs_support_fraction": -0.008463660096303394,
+          "bound": 0.05,
+          "representation_component_on_analytic_denominator": -0.009113393247777523,
+          "support_coverage_component_on_analytic_denominator": 0.07676739662051783,
+          "support_margin_to_bound": -0.02676739662051779,
+          "support_vs_analytic_absolute_fraction": 0.07676739662051779,
+          "support_vs_analytic_fraction": 0.07676739662051779
+        },
+        "internal_inductance": {
+          "additive_closure_error": 0.0,
+          "attributed_margin_to_bound": -0.012666976337549013,
+          "attributed_vs_analytic_absolute_fraction": 0.09266697633754901,
+          "attributed_vs_analytic_fraction": 0.09266697633754901,
+          "attributed_vs_support_absolute_fraction": 0.011395208692210668,
+          "attributed_vs_support_fraction": 0.011395208692210668,
+          "bound": 0.08,
+          "representation_component_on_analytic_denominator": 0.012310883143843663,
+          "support_coverage_component_on_analytic_denominator": 0.08035609319370535,
+          "support_margin_to_bound": -0.0003560931937052897,
+          "support_vs_analytic_absolute_fraction": 0.08035609319370529,
+          "support_vs_analytic_fraction": 0.08035609319370529
+        },
+        "receipt_field": {
+          "bound": 0.03,
+          "margin_to_bound": 0.009242820135141522,
+          "receipt_vs_analytic_fraction": 0.0454925171912961,
+          "receipt_vs_attributed_absolute_fraction": 0.020757179864858477,
+          "receipt_vs_attributed_fraction": -0.020757179864858477,
+          "receipt_vs_support_fraction": -0.029045158246227776
+        }
+      },
+      "state_size": 4216,
+      "terminal_state": "scripts/root_gate_attribution/fine-terminal-root.npz"
+    }
+  },
+  "mechanism": {
+    "field_and_inductance_obstruction": "The common-denominator split distinguishes the attributed source representation from the straight-chord/topology-qualified support domain. The signed components close additively to binary64 round-off; their measured magnitudes determine which mechanism carries each remaining gate margin.",
+    "receipt_field_obstruction": "The receipt integrates gradients recovered from finite neighbour rings while the attributed field uses analytic polygon field matrices at the cell centres. Its coarse-only miss shrinks under mesh refinement and is therefore a receipt-resolution term, not a source-support attribution term.",
+    "support_reference_definition": "At each rebuilt root, the production traced straight-chord support polygons and topology selection are held fixed. The analytic Solovev current density is integrated over those polygons by the banked depth-four independent triangle oracle, then coupled through the production first-moment field matrices. This is the support-geometry reference; the stored-map raster remains the analytic reference."
+  },
+  "policy": {
+    "field_bound": 0.05,
+    "gmres_iterations": 30,
+    "internal_inductance_bound": 0.08,
+    "newton_steps": 10,
+    "receipt_field_bound": 0.03,
+    "routes": [
+      "undamped"
+    ],
+    "support_oracle_triangle_subdivision_depth": 4,
+    "warmup": 0
+  },
+  "refinement_trends": {
+    "analytic_field": {
+      "bound": 0.05,
+      "coarse_value": 0.10124260849102631,
+      "estimated_crossing_cell_count": 1722.391952791703,
+      "estimated_power_against_cell_count": 0.6339405335232969,
+      "fine_value": 0.06765400337274032,
+      "qualification": "Two fixtures determine this interpolation/extrapolation exactly; the exponent is an estimate, not a measured convergence order."
+    },
+    "internal_inductance": {
+      "bound": 0.08,
+      "coarse_value": 0.12630272886325103,
+      "estimated_crossing_cell_count": 1445.6343977265376,
+      "estimated_power_against_cell_count": 0.4869898644401905,
+      "fine_value": 0.09266697633754901,
+      "qualification": "Two fixtures determine this interpolation/extrapolation exactly; the exponent is an estimate, not a measured convergence order."
+    },
+    "receipt_field": {
+      "bound": 0.03,
+      "coarse_value": 0.05891497179930627,
+      "estimated_crossing_cell_count": 854.0402662929068,
+      "estimated_power_against_cell_count": 1.6405534308128376,
+      "fine_value": 0.020757179864858477,
+      "qualification": "Two fixtures determine this interpolation/extrapolation exactly; the exponent is an estimate, not a measured convergence order."
+    }
+  },
+  "schema": "nova.root-gate-attribution",
+  "source_artifacts": {
+    "fixture_definition": "tests/test_equilibrium_forward_reference.py",
+    "immutable_root_scorecard": "scripts/analytic_seed_adjudication/results.json"
+  },
+  "validation": {
+    "arrays_checked": 10,
+    "figure_bytes": 155571,
+    "fixtures_checked": 2,
+    "maximum_additive_closure_error": 0.0,
+    "maximum_scalar_reproduction_difference": 5.551115123125783e-16,
+    "passed": true
+  },
+  "verdict": {
+    "decomposition_complete": true,
+    "owner_merge_adjudication": "mechanism evidence ready",
+    "roots_reproduced": true
+  }
+}

@@ -374,5 +374,40 @@
     production density (commit <code>5e838c92</code>) — compare the degree-3 map above.</figcaption>
   </figure>
 
+  <h2 id="interior-unification">§7 (unification) — one representation for all 566 cells; the error budget split by source</h2>
+
+  <p>Commit <code>6282acd5</code> (lineage <code>c349bf59</code>) retires the neighbour-ring
+  cubic from the production support path: every default-hex plasma cell — interior,
+  boundary-clipped, and topology-zero — routes through the same seven-sample clip-independent
+  degree-nine callable and exact support-polygon moments, one (2218,1815) matmul, one (566,7)
+  gather. Private-flux participation uses the same callable. The bitwise interior pins are
+  re-based to accuracy pins per the <code>unified-cell-representation</code> ruling; the 88-test
+  suite is green, including a new algebraic bank-split pin.</p>
+
+  <table>
+    <tr><th>Gate (coverage-gate-split ruling)</th><th>Measured</th><th>Bound</th></tr>
+    <tr><td>interior m0 L1, current-weighted (351 cells)</td><td><strong>0.00474%</strong> (net 0.00092%)</td><td>0.025%</td></tr>
+    <tr><td>ring m0 L1 (96 cells)</td><td>0.16005% (m1 0.11804%, p95 0.3298 mm)</td><td>0.25%</td></tr>
+    <tr><td>attributed vs support-geometry reference, total</td><td><strong>−621.3 A / 0.00414%</strong></td><td>0.005%</td></tr>
+    <tr><td>representation-only field shift (argmax and sup)</td><td>0.0101 Wb</td><td>0.826 Wb</td></tr>
+    <tr><td>topology-zero leg cells</td><td>exactly 0 A (17/17)</td><td>exact</td></tr>
+  </table>
+
+  <p>The tracked (ungated) coverage term: support reference vs analytic +9,408.1 A / 0.06270% —
+  the straight-chord O(h²) deficit, carrying 0.731 Wb at the argmax target and 0.758 Wb sup;
+  the attributed-vs-analytic sums are +8,786.8 A / 0.05856% and 0.7209/0.7484 Wb. No
+  conservation correction is applied anywhere. GPU throughput with all 566 cells on the
+  degree-nine route: JIT median 1.588 ms/state, batch-8 vmap 0.777 ms/state (from 0.492/0.113
+  when only the 96 ring cells used it). The curved-chord coverage study
+  (<code>support-coverage-scaling</code>) owns the remaining term.</p>
+
+  <figure>
+    <img src="/nova/figures/boundary-ring-source-completion/ring-attribution-errors-unified.png"
+         alt="R-Z maps of per-cell errors under the unified own-node source"
+         style="max-width:100%">
+    <figcaption>Per-cell errors under the unified own-node source (commit
+    <code>6282acd5</code>).</figcaption>
+  </figure>
+
 </main></body>
 </html>

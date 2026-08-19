@@ -1,0 +1,23 @@
+warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/nova/.venv` and will be ignored; use `--active` to target the active environment instead
+10:35:32 INFO     Parsing data dictionary version 3.39.0 [90m@dd_zip.py:89[0m
+INFO:imas.dd_zip:Parsing data dictionary version 3.39.0
+BUILD fixture=coarse requested=-500 wall_nodes=3
+plasmagrid:   0%|                          | 0/4 [00:00<?, ?it/s]plasmagrid:  25%|████▌             | 1/4 [00:15<00:46, 15.49s/it]plasmagrid:  50%|█████████         | 2/4 [00:18<00:15,  7.98s/it]plasmagrid:  75%|█████████████▌    | 3/4 [03:10<01:22, 82.98s/it]plasmagrid: 100%|██████████████████| 4/4 [03:31<00:00, 58.64s/it]plasmagrid: 100%|██████████████████| 4/4 [03:31<00:00, 52.94s/it]
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/analytic-seed-adjudication/scripts/analytic_seed_adjudication/run.py", line 416, in <module>
+    main()
+    ~~~~^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/analytic-seed-adjudication/scripts/analytic_seed_adjudication/run.py", line 371, in main
+    coarse = reference.build_machine(case, reference.SUITE_CELLS, passive=True)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/analytic-seed-adjudication/tests/test_equilibrium_forward_reference.py", line 916, in build_machine
+    coilset.plasmagrid.solve()
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/analytic-seed-adjudication/nova/biot/plasmagrid.py", line 103, in solve
+    self._build_direct_samples(target)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/analytic-seed-adjudication/nova/biot/plasmagrid.py", line 120, in _build_direct_samples
+    raise ValueError(
+        "a hex plasma grid needs at least one complete generator cell"
+    )
+ValueError: a hex plasma grid needs at least one complete generator cell
+HARNESS_EXIT=1

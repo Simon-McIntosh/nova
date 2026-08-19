@@ -1,0 +1,29 @@
+{
+  "controls": {
+    "coarse": {
+      "best_direct_residual": 0.0167,
+      "consistent_seed_defect": 0.129,
+      "legacy_seed_defect": 0.00954
+    },
+    "fine": {
+      "best_direct_residual": 0.012,
+      "consistent_seed_defect": 0.0235,
+      "legacy_seed_defect": 0.0116
+    }
+  },
+  "fixtures": {},
+  "lineage_head": "03a0a774",
+  "policy": {
+    "damping_weights": [
+      null,
+      0.5662514156285391,
+      0.55
+    ],
+    "full_physics_score_trigger": "residual below residual_gate",
+    "gmres_iterations": 30,
+    "newton_steps": 10,
+    "residual_gate": 1e-06,
+    "warmup": 0
+  },
+  "schema": "nova.analytic-seed-adjudication"
+}

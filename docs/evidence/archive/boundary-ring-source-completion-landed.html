@@ -409,6 +409,21 @@
     <code>6282acd5</code>).</figcaption>
   </figure>
 
+  <h2 id="retired-path-excision">§7 (hygiene assertion) — one method per quantity, proven by grep and re-bank</h2>
+
+  <p>An owner-directed audit (2026-08-19) found three vestigial paths surviving the unification:
+  the dead interior contraction entrypoint (passed into <code>current_moments</code> but never
+  called), a silent reconstructed-sample fallback in <code>sample_node_flux</code>, and the
+  retired smoothing transition state. Commit <code>9ef0e8dd</code> (−855/+86 lines) excises all
+  three: 11 retired symbols removed with a zero-hit audit, direct sample rows made mandatory
+  (a linear-moment operator without direct targets now raises at construction; four constructor
+  sites enumerated and wired), and <code>SharedNodeFluxStencil</code> documented as retained
+  solely for atomic-node clip tracing and topology labels — never current attribution.
+  <code>support_flux_moments</code> is the only production support-moment method. The complete
+  component suite is green (62/62) and the bank reproduces the unified record exactly
+  (interior m0 L1 0.004740850588%, ring 0.1600484985%, attributed-vs-support 621.330 A,
+  17 leg zeros exact).</p>
+
   <h2 id="support-coverage-scaling">§7 (coverage adjudication) — the deficit was oracle topology; straight chords stand</h2>
 
   <p>The coverage study (commit <code>75c99039</code>, lineage <code>0fc12fad</code>)

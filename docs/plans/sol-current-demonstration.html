@@ -22,6 +22,8 @@
   <title>SOL Current Demonstration | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-19">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -137,6 +139,11 @@
     <pre class="r-fu-prompt">/reckon-ship sol-current-demonstration</pre>
     </article>
 </section>
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-20260819T0832" data-who="reckon-ship" data-when="2026-08-19T08:32:00+00:00">
+    <div class="r-comment-body">Recorded prerequisite from the boundary-ring saddle-gap audit (evidence: /nova/evidence/archive/boundary-ring-source-completion-landed.html#saddle-gap-current-check, commit a5998281): the demonstration's separatrix clip must give the X-point cell an explicit mechanism - the saddle vertex carried as a clip vertex, branch-paired chords (the audited saddle cell takes four separatrix crossings where the production clip draws one chord, ~0.2 A error at the audited state), and per-branch profiles so common-SOL and private-flux supports partition correctly inside that one cell. Today's single-chord treatment is adequate for confined current, but the SOL closure drives finite j through exactly that cell to the divertor legs, so the four-crossing partition becomes load-bearing here. Wire this into the demonstration node's done-when when the closure node dispatches.</div>
+</div>
+</section>
+</main>
 </body>
 </html>

@@ -37,7 +37,9 @@ receipt needs, but their floor is a property of the mesh.
 
 from __future__ import annotations
 
+import json
 import math
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -443,6 +445,7 @@ def boundary_support_problem(profile=None):
         "sample_flux": sample_flux,
         "centroid_density": centroid_density,
         "shared_density": shared_density,
+        "flux": flux,
         "ring": ring,
     }
 
@@ -482,20 +485,46 @@ def adaptive_polygon_integral(polygon, function) -> float:
     return total
 
 
-def test_boundary_supports_preserve_complete_ring_moments_bitwise():
-    """One callable retains the complete-ring contraction without rounding it."""
+def test_complete_supports_use_the_own_node_profile_to_oracle_accuracy():
+    """Complete supports use the unified profile within its accuracy gates."""
     problem = boundary_support_problem()
     atomic = problem["geometry"].atomic_mesh
     support = atomic.traced_clip(jnp.ones(len(atomic.node_coordinates)))
-    established = problem["stencil"].support_moments(
-        problem["centroid_density"], problem["shared_density"], support
-    )
     attributed = evaluate_boundary_support(problem, support)
-    for previous, current in zip(established, attributed, strict=True):
-        assert np.array_equal(
-            np.asarray(previous)[problem["mesh"].centre],
-            np.asarray(current)[problem["mesh"].centre],
+    complete = problem["mesh"].centre
+    cells = complete[[0, len(complete) // 2, -1]]
+    expected = []
+    for cell in cells:
+        polygon = np.asarray(problem["geometry"].polygons[int(cell)])
+        centre = np.asarray(problem["mesh"].coordinate[int(cell)])
+
+        def density(point):
+            return float(
+                problem["profile"].current_density(point[0], problem["flux"](point))
+            )
+
+        expected.append(
+            [
+                adaptive_polygon_integral(
+                    polygon,
+                    lambda point, component=component: (
+                        density(point)
+                        * (
+                            1.0
+                            if component == 0
+                            else point[component - 1] - centre[component - 1]
+                        )
+                    ),
+                )
+                for component in range(3)
+            ]
         )
+    expected = np.asarray(expected).T
+    actual = np.asarray(jnp.stack(attributed))[:, cells]
+    denominator = np.sum(np.abs(expected[0]))
+    assert np.sum(np.abs(actual[0] - expected[0])) / denominator <= 2.5e-4
+    assert abs(np.sum(actual[0]) / np.sum(expected[0]) - 1.0) <= 5.0e-5
+    np.testing.assert_allclose(actual[1:], expected[1:], rtol=2.0e-10, atol=2.0e-12)
     assert np.all(np.isfinite(np.asarray(attributed.cell_current)[problem["ring"]]))
 
 
@@ -665,6 +694,37 @@ def test_boundary_support_is_c1_at_full_fill_without_smoothing():
     assert np.all(np.isfinite(np.asarray([left_value, right_value])))
     np.testing.assert_allclose(
         left_derivative, right_derivative, rtol=2.0e-6, atol=2.0e-9
+    )
+
+
+def test_banked_unified_representation_satisfies_coverage_split_gates():
+    """The bank separates representation accuracy from support coverage."""
+    artifact = (
+        Path(__file__).parents[1]
+        / "scripts/ring_attribution/results/ring-attribution-results.json"
+    )
+    report = json.loads(artifact.read_text())
+    gates = report["gates"]
+    assert gates["all_cells_own_node_attributed"]
+    assert gates["interior_current_weighted_l1"]
+    assert gates["ring_current_weighted_l1"]
+    assert gates["support_reference_total_current"]
+    assert gates["topology_zero_exact"]
+    assert gates["support_reference_field_sup"]
+
+    decomposition = report["two_reference_decomposition"]
+    representation = decomposition["attributed_vs_support_geometry"]
+    coverage = decomposition["support_coverage_vs_analytic"]
+    tracked = decomposition["attributed_vs_analytic_tracked"]
+    assert representation["total_current_relative_error"] <= 5.0e-5
+    assert representation["all_target_sup_wb"] < 0.826
+    assert (
+        abs(
+            representation["signed_total_difference_a"]
+            + coverage["signed_total_difference_a"]
+            - tracked["signed_total_difference_a"]
+        )
+        < 1.0e-6
     )
 
 

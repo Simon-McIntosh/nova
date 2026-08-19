@@ -409,6 +409,21 @@
     <code>6282acd5</code>).</figcaption>
   </figure>
 
+  <h2 id="retired-path-excision">§7 (hygiene assertion) — one method per quantity, proven by grep and re-bank</h2>
+
+  <p>An owner-directed audit (2026-08-19) found three vestigial paths surviving the unification:
+  the dead interior contraction entrypoint (passed into <code>current_moments</code> but never
+  called), a silent reconstructed-sample fallback in <code>sample_node_flux</code>, and the
+  retired smoothing transition state. Commit <code>9ef0e8dd</code> (−855/+86 lines) excises all
+  three: 11 retired symbols removed with a zero-hit audit, direct sample rows made mandatory
+  (a linear-moment operator without direct targets now raises at construction; four constructor
+  sites enumerated and wired), and <code>SharedNodeFluxStencil</code> documented as retained
+  solely for atomic-node clip tracing and topology labels — never current attribution.
+  <code>support_flux_moments</code> is the only production support-moment method. The complete
+  component suite is green (62/62) and the bank reproduces the unified record exactly
+  (interior m0 L1 0.004740850588%, ring 0.1600484985%, attributed-vs-support 621.330 A,
+  17 leg zeros exact).</p>
+
   <h2 id="support-coverage-scaling">§7 (coverage adjudication) — the deficit was oracle topology; straight chords stand</h2>
 
   <p>The coverage study (commit <code>75c99039</code>, lineage <code>0fc12fad</code>)
@@ -439,7 +454,53 @@
   ≈ <strong>0.0054%</strong> of total plasma current. The study's recommended final gate is
   attributed-vs-topology-qualified-analytic ≤ <strong>0.011%</strong> (2× headroom); the
   0.134% all-support counterfactual is held as known oracle leg current, not a gate.
-  Full record: <code>scripts/coverage_scaling/results.json</code>.</p>
+  Full record: <code>scripts/coverage_scaling/results.json</code>. <em>Superseded detail:</em>
+  this study's ray-fan core total (−14,999,238.31 A) carried a fixed-radial-rule quadrature
+  bias — see the saddle-gap adjudication below; the gate recommendation never consumed the fan
+  total and is unaffected.</p>
+
+  <h2 id="saddle-gap-current-check">§7 (saddle-gap adjudication) — the fan total superseded; no forbidden region carries current; the saddle cell measured</h2>
+
+  <p>Commit <code>a5998281</code> (lineage <code>f71f663e</code>) resolved the 3,411.9 A gap
+  between the ray-fan saddle-cut core and the topology-qualified target.
+  <strong>Mechanism confirmed: fan radial quadrature bias.</strong> Adaptive radial integration
+  moves the fan total to −14,996,015.29 A, isolating <strong>−3,223.03 A of fixed
+  four-subdivision radial under-resolution</strong> — distributed along the boundary ring
+  (97.4%), not the throat (the 14 saddle-throat sectors carry −3.78 A, and their angular
+  order-8 vs order-16 difference is 2.8e-6 A). The corrected core sits 188.86 A from the
+  topology-qualified target, agreeing with the independently summed per-cell core intersections
+  to 2.37 A; the original gap decomposes additively to 1.9e-10 A. The bias was angularly
+  refinement-stable, which is why the study's own 4096/8192 convergence check could not see it.
+  The banked fan total is superseded; every gated number is unaffected.</p>
+
+  <p><strong>Owner physics check — verified exactly.</strong> Production supports, the
+  per-cell oracle, and the corrected ray core each integrate to exactly 0.0 A over the 119
+  wholly exterior psi_norm &gt; 1 cells, the 11 private-flux cells, the 6 open-leg cells, and
+  the 17 topology-zero lower-leg cells: with no psi_norm &gt; 1 distribution defined, no
+  construction anywhere carries SOL, private, or leg current.</p>
+
+  <p><strong>The saddle cell, measured.</strong> Support cell 19
+  (<code>core_qualified_boundary_cell</code>) contains the Newton saddle. The analytic
+  separatrix crosses its hex <strong>four times</strong>; production clips it with one straight
+  chord from (5.00826, −3.16955) to (5.14335, −3.41846) m — endpoint-to-crossing displacement
+  up to 14.95 mm. The corner mishandling is nonetheless bounded at ≈0.2 A today (production
+  attributes −1.584 A; the analytic core-side wedge is −1.798 A), because Solov'ev j carries
+  almost no current in the throat. The saddle cell plus its sole edge-sharing neighbour carry
+  −89.8 A (2.6% of the original gap). <strong>SOL prerequisite (routed to
+  sol-current-demonstration):</strong> with finite j(psi_norm &gt; 1), the four-crossing
+  geometry becomes first-order — the saddle cell needs an explicit X-point clip vertex,
+  branch-paired chord clipping, and per-branch profile integration over its partitioned
+  regions; the complement-clip machinery (<code>common_support</code>) already exists.
+  Full record: <code>scripts/saddle_gap_check/results.json</code>.</p>
+
+  <figure>
+    <img src="/nova/figures/boundary-ring-source-completion/saddle-gap-localization.png"
+         alt="Three-panel localization: fan sector bias, corrected per-cell residuals, saddle-cell clip geometry"
+         style="max-width:100%">
+    <figcaption>Saddle-gap localization (commit <code>a5998281</code>): fan sector bias along
+    the boundary ring, corrected per-cell residuals, and the saddle cell's four-crossing clip
+    geometry.</figcaption>
+  </figure>
 
 </main></body>
 </html>

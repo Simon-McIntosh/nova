@@ -1,0 +1,56 @@
+{
+  "convention_crossings": {
+    "efit_psirz": "corpus_flux_to_nova_total exactly once",
+    "efit_q95": "corpus_q_to_nova exactly once",
+    "p_prime_and_ff_prime": "extracted after the flux crossing; already native Nova quantities",
+    "toroidal_field_function": "corpus_f_to_nova exactly once"
+  },
+  "corpus_cocos": 5,
+  "measurement": "DIII-D labelled-map free-boundary forward GS match",
+  "nova_cocos": 17,
+  "pseudo_wall": {
+    "baseline_expansion": 0.02,
+    "sensitivity_expansions": [
+      0.0,
+      0.02,
+      0.05
+    ],
+    "sensitivity_frame": "first preregistered frame only",
+    "statement": "rectangular enclosing control surface derived from efit_grid; a pseudo-wall standing in for the absent machine wall"
+  },
+  "q95": {
+    "coefficient_fitted": false,
+    "definition": "FluxSurfaceGeometry safety factor at psi_norm 0.95",
+    "toroidal_field_model": "ideal 144-turn DIII-D toroidal coil, F=mu0*N*I/(2*pi)",
+    "turns_source": "https://fusion.gat.com/pubs-ext/SOFT02/A24059.pdf"
+  },
+  "score": {
+    "bar_basis": {
+      "discretisation_floor_used": false,
+      "fraction_of_measured_ceiling_retained": 0.95,
+      "measured_label_representability_median_r_squared": 0.949,
+      "strict_gs_residual_attributed_to_irreducible_non_gs_content": 0.9968
+    },
+    "coefficients_fitted": 0,
+    "gauge": "one additive constant over that interior",
+    "region": "label-LCFS interior sampled on the forward lattice",
+    "registered_median_interior_r_squared_bar": 0.90155
+  },
+  "selection": {
+    "eligibility": "finite map and q95, at least eight LCFS points, positive recorded DSEP; no score-dependent filtering",
+    "frame": "eligible time nearest the median eligible labelled time",
+    "frames": 8,
+    "paths": "lexicographic corpus order"
+  },
+  "solver": {
+    "entry_point": "nova.equilibrium.forward.ForwardProfile",
+    "gmres_iterations": 8,
+    "grid_stride": 2,
+    "newton_steps": 4,
+    "relative_residual_tolerance": 1e-05,
+    "route": "newton_krylov",
+    "seed": "the convention-clean labelled map, used only as a branch seed",
+    "warmup_sweeps": 0
+  },
+  "source": "extract_flux_functions(label) p-prime and FF-prime plus the shipped nineteen poloidal-conductor currents; zero fitted coefficients"
+}

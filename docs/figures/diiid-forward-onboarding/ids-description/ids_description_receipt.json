@@ -1,0 +1,608 @@
+{
+  "measurement": "DIII-D IMAS static machine-description read",
+  "source_entries": [
+    {
+      "shot": 1000,
+      "run": 0,
+      "database": "DIII-D",
+      "user": "hoeneno",
+      "dd_versions": {
+        "wall": "3.28.0",
+        "pf_active": "3.28.0",
+        "thomson_scattering": "3.28.0"
+      },
+      "contour": {
+        "kind": "limiter",
+        "r": [
+          1.0,
+          1.0,
+          1.3,
+          1.4,
+          1.6,
+          2.15,
+          2.35,
+          2.35,
+          2.15,
+          1.8,
+          1.35,
+          1.35,
+          1.1,
+          1.0,
+          1.0
+        ],
+        "z": [
+          0.0,
+          1.4,
+          1.4,
+          1.3,
+          1.1,
+          1.0,
+          0.5,
+          -0.5,
+          -1.0,
+          -1.25,
+          -1.25,
+          -1.4,
+          -1.4,
+          -1.3,
+          0.0
+        ]
+      },
+      "pf_active": [
+        {
+          "geometry_type": 2,
+          "name": "coil_0",
+          "r": 0.8608,
+          "z": 0.1683,
+          "width": 0.0508,
+          "height": 0.32106
+        },
+        {
+          "geometry_type": 1,
+          "name": "coil_1",
+          "r": [
+            0.9345,
+            0.9345,
+            1.0737,
+            1.0737
+          ],
+          "z": [
+            1.3876,
+            1.5070000000000001,
+            1.6461999999999999,
+            1.5267999999999997
+          ]
+        },
+        {
+          "geometry_type": 1,
+          "name": "coil_2",
+          "r": [
+            2.529878078275369,
+            2.5217219217246316,
+            2.694921921724631,
+            2.7030780782753685
+          ],
+          "z": [
+            0.3403,
+            0.5348999999999999,
+            0.5348999999999999,
+            0.3403
+          ]
+        },
+        {
+          "geometry_type": 1,
+          "name": "coil_3",
+          "r": [
+            2.2618138144094306,
+            2.3169861855905696,
+            2.5049861855905693,
+            2.4498138144094304
+          ],
+          "z": [
+            -1.2017,
+            -1.0325,
+            -1.0325,
+            -1.2017
+          ]
+        }
+      ],
+      "pf_passive_loop_count": 0,
+      "tf_coil_count": 0,
+      "thomson_scattering": [
+        {
+          "name": "F_TS_00",
+          "position": [
+            1.935,
+            -0.7,
+            6.5
+          ],
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "F_TS_01",
+          "position": [
+            1.9361111111111111,
+            -0.6,
+            6.5
+          ],
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "F_TS_02",
+          "position": [
+            1.9372222222222222,
+            -0.5,
+            6.5
+          ],
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "F_TS_03",
+          "position": [
+            1.9383333333333335,
+            -0.39999999999999997,
+            6.5
+          ],
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "F_TS_04",
+          "position": [
+            1.9394444444444445,
+            -0.3,
+            6.5
+          ],
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "F_TS_05",
+          "position": [
+            1.9405555555555556,
+            -0.2,
+            6.5
+          ],
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "F_TS_06",
+          "position": [
+            1.9416666666666667,
+            -0.09999999999999998,
+            6.5
+          ],
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "F_TS_07",
+          "position": [
+            1.942777777777778,
+            0.0,
+            6.5
+          ],
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "F_TS_08",
+          "position": [
+            1.943888888888889,
+            0.09999999999999998,
+            6.5
+          ],
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "F_TS_09",
+          "position": [
+            1.945,
+            0.2,
+            6.5
+          ],
+          "start": null,
+          "end": null
+        }
+      ]
+    },
+    {
+      "shot": 133221,
+      "run": 0,
+      "database": "DIII-D",
+      "user": "hoeneno",
+      "dd_versions": {
+        "wall": "3.28.1"
+      },
+      "contour": {
+        "kind": "limiter",
+        "r": [
+          1.016,
+          1.016,
+          1.016,
+          1.016,
+          1.016,
+          1.016,
+          1.016,
+          1.016,
+          1.016,
+          1.016,
+          1.016,
+          1.012,
+          1.001,
+          1.029,
+          1.042,
+          1.046,
+          1.056,
+          1.097,
+          1.108,
+          1.116,
+          1.134,
+          1.148,
+          1.162,
+          1.181,
+          1.182,
+          1.185,
+          1.19,
+          1.195,
+          1.201,
+          1.209,
+          1.215,
+          1.222,
+          1.228,
+          1.234,
+          1.239,
+          1.242,
+          1.248,
+          1.258,
+          1.263,
+          1.28,
+          1.28,
+          1.28,
+          1.31,
+          1.328,
+          1.361,
+          1.38,
+          1.419,
+          1.419,
+          1.372,
+          1.372,
+          1.608,
+          1.647,
+          1.785,
+          2.07,
+          2.128,
+          2.245,
+          2.323,
+          2.377,
+          2.352,
+          2.351,
+          2.351,
+          2.354,
+          2.354,
+          2.354,
+          2.353,
+          2.351,
+          2.353,
+          2.377,
+          2.134,
+          1.786,
+          1.768,
+          1.768,
+          1.682,
+          1.372,
+          1.372,
+          1.42,
+          1.42,
+          1.273,
+          1.153,
+          1.016,
+          1.016,
+          1.016,
+          1.016,
+          1.016,
+          1.016,
+          1.016,
+          1.016
+        ],
+        "z": [
+          0.0,
+          0.964,
+          0.968,
+          1.001,
+          1.019,
+          1.077,
+          1.07,
+          1.096,
+          1.113,
+          1.138,
+          1.147,
+          1.165,
+          1.217,
+          1.217,
+          1.1624,
+          1.16238,
+          1.1626,
+          1.1645,
+          1.16594,
+          1.16591,
+          1.16896,
+          1.17175,
+          1.17556,
+          1.183,
+          1.1835,
+          1.185,
+          1.188,
+          1.191,
+          1.196,
+          1.202,
+          1.208,
+          1.214,
+          1.221,
+          1.231,
+          1.238,
+          1.244,
+          1.254,
+          1.278,
+          1.29,
+          1.331,
+          1.347,
+          1.348,
+          1.348,
+          1.348,
+          1.348,
+          1.348,
+          1.348,
+          1.31,
+          1.31,
+          1.292,
+          1.095,
+          1.077,
+          1.077,
+          1.04,
+          0.993,
+          0.709,
+          0.519,
+          0.389,
+          0.4,
+          0.337,
+          0.205,
+          0.068,
+          0.0,
+          -0.068,
+          -0.205,
+          -0.337,
+          -0.4,
+          -0.389,
+          -0.973,
+          -1.174,
+          -1.211,
+          -1.25,
+          -1.25,
+          -1.25,
+          -1.329,
+          -1.329,
+          -1.363,
+          -1.363,
+          -1.363,
+          -1.223,
+          -1.223,
+          -0.83,
+          -0.8,
+          -0.415,
+          -0.4,
+          -0.001,
+          0.0
+        ]
+      },
+      "pf_active": [],
+      "pf_passive_loop_count": 0,
+      "tf_coil_count": 0,
+      "thomson_scattering": []
+    }
+  ],
+  "selected_entry": {
+    "shot": 1000,
+    "run": 0
+  },
+  "dd_version_policy": "read from ids_properties/version_put/data_dictionary for each non-empty IDS",
+  "cocos": {
+    "source_index": 11,
+    "source": "IMAS Data Dictionary coordinate convention",
+    "target_index": 17,
+    "factors": {
+      "psi_like": -1.0,
+      "ip_like": 1.0,
+      "b0_like": 1.0,
+      "q_like": 1.0,
+      "dodpsi_like": -1.0
+    }
+  },
+  "quantities": {
+    "wall_or_limiter": {
+      "status": "read_after_named_change",
+      "change": "accept DDv3 limiter outline when vessel units are absent",
+      "kind": "limiter",
+      "vertex_count": 15,
+      "r_extent_m": [
+        1.0,
+        2.35
+      ],
+      "z_extent_m": [
+        -1.4,
+        1.4
+      ]
+    },
+    "pf_active": {
+      "status": "read_after_named_change",
+      "change": "route legacy scalar and outline records through the tabular geometry reader",
+      "coil_count": 4,
+      "coils": [
+        {
+          "name": "coil_0",
+          "geometry_class": "rectangle",
+          "r_m": 0.8608,
+          "z_m": 0.1683,
+          "width_m": 0.0508,
+          "height_m": 0.32106,
+          "skew_rad": 0.0
+        },
+        {
+          "name": "coil_1",
+          "geometry_class": "outline",
+          "r_m": 1.0041,
+          "z_m": 1.5169,
+          "width_m": 0.1392000000000001,
+          "height_m": 0.25859999999999994,
+          "skew_rad": 1.5707963267948966
+        },
+        {
+          "name": "coil_2",
+          "geometry_class": "outline",
+          "r_m": 2.6124,
+          "z_m": 0.4376,
+          "width_m": 0.1813561565507369,
+          "height_m": 0.19459999999999994,
+          "skew_rad": 1.6126842288427594
+        },
+        {
+          "name": "coil_3",
+          "geometry_class": "outline",
+          "r_m": 2.3834,
+          "z_m": -1.1171,
+          "width_m": 0.24317237118113866,
+          "height_m": 0.16920000000000002,
+          "skew_rad": 1.2555898638847212
+        }
+      ]
+    },
+    "pf_passive": {
+      "status": "cannot_reach",
+      "loop_count": 0,
+      "reason": "the selected entry carries no pf_passive loops"
+    },
+    "tf": {
+      "status": "cannot_reach",
+      "coil_count": 0,
+      "reason": "the selected entry carries no tf coils or static tf parameters"
+    },
+    "thomson_scattering": {
+      "status": "cannot_reach",
+      "chord_count": 10,
+      "endpoint_pair_count": 0,
+      "reason": "DD 3.28 channels carry one position each and no line-of-sight endpoint fields",
+      "channels": [
+        {
+          "name": "F_TS_00",
+          "position_r_z_phi": [
+            1.935,
+            -0.7,
+            6.5
+          ],
+          "start_r_z_phi": null,
+          "end_r_z_phi": null
+        },
+        {
+          "name": "F_TS_01",
+          "position_r_z_phi": [
+            1.9361111111111111,
+            -0.6,
+            6.5
+          ],
+          "start_r_z_phi": null,
+          "end_r_z_phi": null
+        },
+        {
+          "name": "F_TS_02",
+          "position_r_z_phi": [
+            1.9372222222222222,
+            -0.5,
+            6.5
+          ],
+          "start_r_z_phi": null,
+          "end_r_z_phi": null
+        },
+        {
+          "name": "F_TS_03",
+          "position_r_z_phi": [
+            1.9383333333333335,
+            -0.39999999999999997,
+            6.5
+          ],
+          "start_r_z_phi": null,
+          "end_r_z_phi": null
+        },
+        {
+          "name": "F_TS_04",
+          "position_r_z_phi": [
+            1.9394444444444445,
+            -0.3,
+            6.5
+          ],
+          "start_r_z_phi": null,
+          "end_r_z_phi": null
+        },
+        {
+          "name": "F_TS_05",
+          "position_r_z_phi": [
+            1.9405555555555556,
+            -0.2,
+            6.5
+          ],
+          "start_r_z_phi": null,
+          "end_r_z_phi": null
+        },
+        {
+          "name": "F_TS_06",
+          "position_r_z_phi": [
+            1.9416666666666667,
+            -0.09999999999999998,
+            6.5
+          ],
+          "start_r_z_phi": null,
+          "end_r_z_phi": null
+        },
+        {
+          "name": "F_TS_07",
+          "position_r_z_phi": [
+            1.942777777777778,
+            0.0,
+            6.5
+          ],
+          "start_r_z_phi": null,
+          "end_r_z_phi": null
+        },
+        {
+          "name": "F_TS_08",
+          "position_r_z_phi": [
+            1.943888888888889,
+            0.09999999999999998,
+            6.5
+          ],
+          "start_r_z_phi": null,
+          "end_r_z_phi": null
+        },
+        {
+          "name": "F_TS_09",
+          "position_r_z_phi": [
+            1.945,
+            0.2,
+            6.5
+          ],
+          "start_r_z_phi": null,
+          "end_r_z_phi": null
+        }
+      ]
+    }
+  },
+  "figures": [
+    "docs/figures/diiid-forward-onboarding/ids-description/limiter_pf_active.png",
+    "docs/figures/diiid-forward-onboarding/ids-description/thomson_geometry.png",
+    "docs/figures/diiid-forward-onboarding/ids-description/passive_structure.png"
+  ]
+}

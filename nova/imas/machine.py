@@ -382,6 +382,108 @@ class CrossSection:
         return getattr(self.data, attr)
 
 
+@dataclass(frozen=True)
+class MachineContour:
+    """Static poloidal contour carried by a machine description."""
+
+    kind: str
+    r: tuple[float, ...]
+    z: tuple[float, ...]
+
+    @classmethod
+    def from_record(cls, record: dict) -> MachineContour:
+        """Build a contour without changing the coordinates read from its IDS."""
+        r = tuple(float(value) for value in record["r"])
+        z = tuple(float(value) for value in record["z"])
+        if len(r) != len(z):
+            raise ValueError("machine contour r and z arrays have different lengths")
+        return cls(kind=str(record["kind"]), r=r, z=z)
+
+
+@dataclass(frozen=True)
+class MachineSection:
+    """Named active-coil section routed through the geometry reader seam."""
+
+    name: str
+    section: GeomData
+
+    @classmethod
+    def from_record(cls, record: dict) -> MachineSection:
+        """Route a flat IDS receipt through the canonical section classes."""
+        geometry_type = int(record["geometry_type"])
+        try:
+            geometry = CrossSection.transform[geometry_type]
+        except KeyError:
+            raise ValueError(f"unsupported geometry type {geometry_type}") from None
+        return cls(
+            name=str(record["name"]),
+            section=TabularGeometryReader(record).section(geometry),
+        )
+
+
+@dataclass(frozen=True)
+class DiagnosticSightline:
+    """Static diagnostic location and optional line-of-sight endpoints."""
+
+    name: str
+    position: tuple[float, float, float]
+    start: tuple[float, float, float] | None
+    end: tuple[float, float, float] | None
+
+    @classmethod
+    def from_record(cls, record: dict) -> DiagnosticSightline:
+        """Build a diagnostic record, retaining absent endpoints as absent."""
+
+        def point(key: str) -> tuple[float, float, float] | None:
+            value = record.get(key)
+            if value is None:
+                return None
+            return tuple(float(component) for component in value)
+
+        position = point("position")
+        if position is None:
+            raise ValueError("diagnostic record has no position")
+        return cls(
+            name=str(record["name"]),
+            position=position,
+            start=point("start"),
+            end=point("end"),
+        )
+
+
+@dataclass(frozen=True)
+class StaticMachineDescription:
+    """Static IDS quantities used to construct a Nova machine."""
+
+    contour: MachineContour | None
+    active_sections: tuple[MachineSection, ...]
+    passive_loop_count: int
+    toroidal_coil_count: int
+    sightlines: tuple[DiagnosticSightline, ...]
+
+    @classmethod
+    def from_record(cls, record: dict) -> StaticMachineDescription:
+        """Route an IMAS extraction record through Nova's machine dataclasses."""
+        contour_record = record.get("contour")
+        return cls(
+            contour=(
+                MachineContour.from_record(contour_record)
+                if contour_record is not None
+                else None
+            ),
+            active_sections=tuple(
+                MachineSection.from_record(section)
+                for section in record.get("pf_active", ())
+            ),
+            passive_loop_count=int(record.get("pf_passive_loop_count", 0)),
+            toroidal_coil_count=int(record.get("tf_coil_count", 0)),
+            sightlines=tuple(
+                DiagnosticSightline.from_record(sightline)
+                for sightline in record.get("thomson_scattering", ())
+            ),
+        )
+
+
 @dataclass
 class Loop:
     """Poloidal loop."""

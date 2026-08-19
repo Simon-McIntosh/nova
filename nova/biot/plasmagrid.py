@@ -186,11 +186,27 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
         self._sampling_identity_bound = tolerance
         return centres[:, None, :] + analytic_offsets[None, :, :]
 
-    def _build_direct_samples(self, target: Target) -> None:
-        """Bank the authoritative pre-clip hex vertices and their coupling rows."""
-        vertices = self._preclip_sampling_vertices(target)
-        centres = np.c_[np.asarray(target.x), np.asarray(target.z)]
-        tolerance = float(self._sampling_identity_bound)
+    @staticmethod
+    def _support_roundoff_bound(target: Target) -> float:
+        """Return the atomic-mesh coordinate tolerance of the material support."""
+        points = np.vstack(
+            [
+                np.asarray(polygon.poly.exterior.coords, dtype=np.float64)[:, :2]
+                for polygon in target.poly
+            ]
+        )
+        scale = max(
+            float(np.max(np.abs(points))),
+            float(np.ptp(points)),
+            1.0,
+        )
+        return 128.0 * np.finfo(np.float64).eps * scale
+
+    @staticmethod
+    def _index_sampling_vertices(
+        vertices: np.ndarray, tolerance: float
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Deduplicate fixed samples with the support mesh's node identity."""
         flat = vertices.reshape(-1, 2)
         lookup: dict[tuple[int, int], int] = {}
         coordinates = []
@@ -201,10 +217,19 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
                 lookup[key] = len(coordinates)
                 coordinates.append(vertex)
             inverse[index] = lookup[key]
-        coordinates = np.asarray(coordinates)
+        cell_nodes = inverse.reshape(len(vertices), vertices.shape[1])
+        return np.asarray(coordinates), cell_nodes
+
+    def _build_direct_samples(self, target: Target) -> None:
+        """Bank the authoritative pre-clip hex vertices and their coupling rows."""
+        vertices = self._preclip_sampling_vertices(target)
+        tolerance = self._support_roundoff_bound(target)
+        coordinates, cell_sample_nodes = self._index_sampling_vertices(
+            vertices, tolerance
+        )
         self._sampling_vertices = vertices
         self._sample_coordinates = coordinates
-        self._cell_sample_nodes = inverse.reshape(len(centres), 6)
+        self._cell_sample_nodes = cell_sample_nodes
         sample_target = Target(
             {"x": coordinates[:, 0], "z": coordinates[:, 1]}, label="PlasmaSample"
         )

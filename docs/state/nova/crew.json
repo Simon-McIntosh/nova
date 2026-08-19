@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-19T22:19:12",
+  "updated": "2026-08-19T22:32:03",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -9259,9 +9259,135 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260819T201504180431-diiid-ids-machine-read",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a72",
+        "node": "diiid-ids-machine-read",
+        "role": "implement",
+        "member": "diiid-ids-read",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-19T20:15:06Z",
+        "completed_at": "2026-08-19T20:28:37Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 811,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 811,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "aad42ee136b50974b994c2a435975b47e4b6651f",
+        "commits": [
+          "a6f8bdf4"
+        ],
+        "changed_lines": {
+          "added": 1199,
+          "removed": 0,
+          "files": 7
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "DIII-D IMAS description read through nova machine dataclasses: shot 1000/run 0, DD 3.28.0 on wall/pf_active/thomson_scattering; 15 limiter vertices R 1.00-2.35 m Z +/-1.40 m, 4 active sections, 0 passive loops, 0 tf, 10 Thomson positions and 0 line-of-sight endpoint pairs; IDS COCOS 11 to nova 17 recorded; three geometry figures",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260819T201504180431-diiid-ids-machine-read/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01ba9-ca52-7b41-8d98-976b8adb93d9",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6243200,
+            "cached_input_tokens_cumulative": 6243200,
+            "input_tokens": 6439322,
+            "input_tokens_cumulative": 6439322,
+            "output_tokens": 23331,
+            "output_tokens_cumulative": 23331,
+            "reasoning_output_tokens": 7163,
+            "reasoning_output_tokens_cumulative": 7163
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260819T201521665477-diiid-corpus-cocos-pin",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a72",
+        "node": "diiid-corpus-cocos-pin",
+        "role": "implement",
+        "member": "diiid-vacuum",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-19T20:15:24Z",
+        "completed_at": "2026-08-19T20:27:58Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 754,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 754,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "aad42ee136b50974b994c2a435975b47e4b6651f",
+        "commits": [
+          "86f6f38a"
+        ],
+        "changed_lines": {
+          "added": 1178,
+          "removed": 92,
+          "files": 14
+        },
+        "tests_added": 6,
+        "gate": "passed",
+        "outcome": "Corpus COCOS empirically pinned as 5 (sigma_Bp +1, e_Bp 0, sigma_RphiZ +1, sigma_rhothetaphi -1) over 20 standard-field shots; transform to nova 17 psi -2pi, Ip +1, F +1, q -1, d/dpsi -1/2pi; single convention home verified by grep; synthetic composition 0.9967218640 against recorded 0.9967218639 and coil-only parity 0.4952670786 against recorded 0.49527",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260819T201521665477-diiid-corpus-cocos-pin/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01090-c119-7413-b062-4589e1bc160f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 41098496,
+            "cached_input_tokens_cumulative": 41098496,
+            "input_tokens": 42366654,
+            "input_tokens_cumulative": 42366654,
+            "output_tokens": 128608,
+            "output_tokens_cumulative": 128608,
+            "reasoning_output_tokens": 37581,
+            "reasoning_output_tokens_cumulative": 37581
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 261
+    "_version": 263
   }
 }

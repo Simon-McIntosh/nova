@@ -1,0 +1,11 @@
+warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/nova/.venv` and will be ignored; use `--active` to target the active environment instead
+coarse=9408.128862971440 A (0.062698197523%)
+fine=9407.071426449344 A (0.062691150494%)
+order_shared_core=0.000946279287499
+order_exact_total=0.000324324674651
+curved=9408.673707377166 A unqualified_reduction=0.999942091264
+topology_residual=186.482928836718 A topology_reduction=1.00292168516
+arc_delta=1.570326311514 A fraction_621=0.00252736457155
+oracle_uncertainty=0.075283465057 A fraction_621=0.000121165111361
+recommended_gate=0.011000% all_support_hold=0.134000%
+EXIT=0

@@ -1,0 +1,4 @@
+warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/nova/.venv` and will be ignored; use `--active` to target the active environment instead
+{"figure_bytes": 210273, "fixtures_checked": 2, "maximum_additive_closure_error": 3.469446951953614e-18, "passed": true, "physics_gates_checked": 22}
+OBSERVATION_RESCORE_VALIDATION_EXIT=0
+VALIDATE_EXISTING_EXIT=0

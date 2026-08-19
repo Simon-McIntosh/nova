@@ -1,0 +1,2624 @@
+{
+  "measurement": "competition-authoritative DIII-D machine description",
+  "source_row": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet",
+  "physical_geometry_digest": "782e9e08f02e610e252e9cf6d6cccfb3a9aefa62b56f14865553ba2f35d213dc",
+  "provenance_complete": true,
+  "machine_dataclass_route": {
+    "class": "nova.imas.machine.StaticMachineDescription",
+    "section_class": "nova.imas.machine.MachineSection",
+    "cross_section_dispatch": "nova.imas.machine.CrossSection.transform[1]",
+    "active_section_count": 19,
+    "maximum_vertex_route_difference_m": 0.0,
+    "vertex_identity_tolerance_m": 1e-12,
+    "vertex_identity_passed": true
+  },
+  "quantities": {
+    "poloidal_conductors": {
+      "acceptance": "accepted_after_named_change",
+      "count": 19,
+      "expected_count": 19,
+      "skewed_count": 6,
+      "conductors": [
+        {
+          "name": "F1A",
+          "centre_m": [
+            0.8608,
+            0.1683
+          ],
+          "width_m": 0.0508,
+          "height_m": 0.32106,
+          "skew": {
+            "angle1_deg": 0.0,
+            "angle2_deg": 0.0,
+            "effective_deg": 0.0
+          },
+          "section_vertices_m": [
+            [
+              0.8354,
+              0.007769999999999999
+            ],
+            [
+              0.8862,
+              0.007769999999999999
+            ],
+            [
+              0.8862,
+              0.32883
+            ],
+            [
+              0.8354,
+              0.32883
+            ]
+          ],
+          "routed_section_vertices_m": [
+            [
+              0.8354,
+              0.007769999999999999
+            ],
+            [
+              0.8862,
+              0.007769999999999999
+            ],
+            [
+              0.8862,
+              0.32883
+            ],
+            [
+              0.8354,
+              0.32883
+            ]
+          ],
+          "maximum_route_difference_m": 0.0,
+          "machine_seam": {
+            "acceptance": "accepted_after_named_change",
+            "change": "convert the shipped rectangle and shear parameters once to an outline record consumed by CrossSection.transform[1]",
+            "classes": [
+              "StaticMachineDescription",
+              "MachineSection",
+              "CrossSection.transform[1]"
+            ]
+          },
+          "provenance": [
+            {
+              "fields": [
+                "R",
+                "Z",
+                "width",
+                "height",
+                "angle1",
+                "angle2"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F1A; coil_* columns",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "m,m,m,m,degree,degree",
+              "statement": "section copied from the dataset-shipped conductor row"
+            },
+            {
+              "fields": [
+                "input_column"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F1A; coil_input_column",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "current join copied from the shipped geometry table"
+            },
+            {
+              "fields": [
+                "turn_convention"
+              ],
+              "locator": "dataset card machine-geometry current-unit contract",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "recorded F-coil channel already contains total ampere-turns"
+            }
+          ]
+        },
+        {
+          "name": "F2A",
+          "centre_m": [
+            0.8614,
+            0.5081
+          ],
+          "width_m": 0.0508,
+          "height_m": 0.32106,
+          "skew": {
+            "angle1_deg": 0.0,
+            "angle2_deg": 0.0,
+            "effective_deg": 0.0
+          },
+          "section_vertices_m": [
+            [
+              0.8360000000000001,
+              0.34757
+            ],
+            [
+              0.8868,
+              0.34757
+            ],
+            [
+              0.8868,
+              0.6686300000000001
+            ],
+            [
+              0.8360000000000001,
+              0.6686300000000001
+            ]
+          ],
+          "routed_section_vertices_m": [
+            [
+              0.8360000000000001,
+              0.34757
+            ],
+            [
+              0.8868,
+              0.34757
+            ],
+            [
+              0.8868,
+              0.6686300000000001
+            ],
+            [
+              0.8360000000000001,
+              0.6686300000000001
+            ]
+          ],
+          "maximum_route_difference_m": 0.0,
+          "machine_seam": {
+            "acceptance": "accepted_after_named_change",
+            "change": "convert the shipped rectangle and shear parameters once to an outline record consumed by CrossSection.transform[1]",
+            "classes": [
+              "StaticMachineDescription",
+              "MachineSection",
+              "CrossSection.transform[1]"
+            ]
+          },
+          "provenance": [
+            {
+              "fields": [
+                "R",
+                "Z",
+                "width",
+                "height",
+                "angle1",
+                "angle2"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F2A; coil_* columns",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "m,m,m,m,degree,degree",
+              "statement": "section copied from the dataset-shipped conductor row"
+            },
+            {
+              "fields": [
+                "input_column"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F2A; coil_input_column",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "current join copied from the shipped geometry table"
+            },
+            {
+              "fields": [
+                "turn_convention"
+              ],
+              "locator": "dataset card machine-geometry current-unit contract",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "recorded F-coil channel already contains total ampere-turns"
+            }
+          ]
+        },
+        {
+          "name": "F3A",
+          "centre_m": [
+            0.8628,
+            0.8491
+          ],
+          "width_m": 0.0508,
+          "height_m": 0.32106,
+          "skew": {
+            "angle1_deg": 0.0,
+            "angle2_deg": 0.0,
+            "effective_deg": 0.0
+          },
+          "section_vertices_m": [
+            [
+              0.8374,
+              0.6885699999999999
+            ],
+            [
+              0.8882,
+              0.6885699999999999
+            ],
+            [
+              0.8882,
+              1.00963
+            ],
+            [
+              0.8374,
+              1.00963
+            ]
+          ],
+          "routed_section_vertices_m": [
+            [
+              0.8374,
+              0.6885699999999999
+            ],
+            [
+              0.8882,
+              0.6885699999999999
+            ],
+            [
+              0.8882,
+              1.00963
+            ],
+            [
+              0.8374,
+              1.00963
+            ]
+          ],
+          "maximum_route_difference_m": 0.0,
+          "machine_seam": {
+            "acceptance": "accepted_after_named_change",
+            "change": "convert the shipped rectangle and shear parameters once to an outline record consumed by CrossSection.transform[1]",
+            "classes": [
+              "StaticMachineDescription",
+              "MachineSection",
+              "CrossSection.transform[1]"
+            ]
+          },
+          "provenance": [
+            {
+              "fields": [
+                "R",
+                "Z",
+                "width",
+                "height",
+                "angle1",
+                "angle2"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F3A; coil_* columns",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "m,m,m,m,degree,degree",
+              "statement": "section copied from the dataset-shipped conductor row"
+            },
+            {
+              "fields": [
+                "input_column"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F3A; coil_input_column",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "current join copied from the shipped geometry table"
+            },
+            {
+              "fields": [
+                "turn_convention"
+              ],
+              "locator": "dataset card machine-geometry current-unit contract",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "recorded F-coil channel already contains total ampere-turns"
+            }
+          ]
+        },
+        {
+          "name": "F4A",
+          "centre_m": [
+            0.8611,
+            1.1899
+          ],
+          "width_m": 0.0508,
+          "height_m": 0.32106,
+          "skew": {
+            "angle1_deg": 0.0,
+            "angle2_deg": 0.0,
+            "effective_deg": 0.0
+          },
+          "section_vertices_m": [
+            [
+              0.8357,
+              1.02937
+            ],
+            [
+              0.8865,
+              1.02937
+            ],
+            [
+              0.8865,
+              1.35043
+            ],
+            [
+              0.8357,
+              1.35043
+            ]
+          ],
+          "routed_section_vertices_m": [
+            [
+              0.8357,
+              1.02937
+            ],
+            [
+              0.8865,
+              1.02937
+            ],
+            [
+              0.8865,
+              1.35043
+            ],
+            [
+              0.8357,
+              1.35043
+            ]
+          ],
+          "maximum_route_difference_m": 0.0,
+          "machine_seam": {
+            "acceptance": "accepted_after_named_change",
+            "change": "convert the shipped rectangle and shear parameters once to an outline record consumed by CrossSection.transform[1]",
+            "classes": [
+              "StaticMachineDescription",
+              "MachineSection",
+              "CrossSection.transform[1]"
+            ]
+          },
+          "provenance": [
+            {
+              "fields": [
+                "R",
+                "Z",
+                "width",
+                "height",
+                "angle1",
+                "angle2"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F4A; coil_* columns",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "m,m,m,m,degree,degree",
+              "statement": "section copied from the dataset-shipped conductor row"
+            },
+            {
+              "fields": [
+                "input_column"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F4A; coil_input_column",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "current join copied from the shipped geometry table"
+            },
+            {
+              "fields": [
+                "turn_convention"
+              ],
+              "locator": "dataset card machine-geometry current-unit contract",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "recorded F-coil channel already contains total ampere-turns"
+            }
+          ]
+        },
+        {
+          "name": "F5A",
+          "centre_m": [
+            1.0041,
+            1.5169
+          ],
+          "width_m": 0.1392,
+          "height_m": 0.1194,
+          "skew": {
+            "angle1_deg": 45.0,
+            "angle2_deg": 0.0,
+            "effective_deg": 45.0
+          },
+          "section_vertices_m": [
+            [
+              0.9345,
+              1.3876
+            ],
+            [
+              1.0737,
+              1.5267999999999997
+            ],
+            [
+              1.0737,
+              1.6461999999999999
+            ],
+            [
+              0.9345,
+              1.5070000000000001
+            ]
+          ],
+          "routed_section_vertices_m": [
+            [
+              0.9345,
+              1.3876
+            ],
+            [
+              1.0737,
+              1.5267999999999997
+            ],
+            [
+              1.0737,
+              1.6461999999999999
+            ],
+            [
+              0.9345,
+              1.5070000000000001
+            ]
+          ],
+          "maximum_route_difference_m": 0.0,
+          "machine_seam": {
+            "acceptance": "accepted_after_named_change",
+            "change": "convert the shipped rectangle and shear parameters once to an outline record consumed by CrossSection.transform[1]",
+            "classes": [
+              "StaticMachineDescription",
+              "MachineSection",
+              "CrossSection.transform[1]"
+            ]
+          },
+          "provenance": [
+            {
+              "fields": [
+                "R",
+                "Z",
+                "width",
+                "height",
+                "angle1",
+                "angle2"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F5A; coil_* columns",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "m,m,m,m,degree,degree",
+              "statement": "section copied from the dataset-shipped conductor row"
+            },
+            {
+              "fields": [
+                "input_column"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F5A; coil_input_column",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "current join copied from the shipped geometry table"
+            },
+            {
+              "fields": [
+                "turn_convention"
+              ],
+              "locator": "dataset card machine-geometry current-unit contract",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "recorded F-coil channel already contains total ampere-turns"
+            }
+          ]
+        },
+        {
+          "name": "F6A",
+          "centre_m": [
+            2.6124,
+            0.4376
+          ],
+          "width_m": 0.1732,
+          "height_m": 0.1946,
+          "skew": {
+            "angle1_deg": 0.0,
+            "angle2_deg": 92.4,
+            "effective_deg": 92.4
+          },
+          "section_vertices_m": [
+            [
+              2.529878078275369,
+              0.3403
+            ],
+            [
+              2.7030780782753685,
+              0.3403
+            ],
+            [
+              2.694921921724631,
+              0.5348999999999999
+            ],
+            [
+              2.5217219217246316,
+              0.5348999999999999
+            ]
+          ],
+          "routed_section_vertices_m": [
+            [
+              2.529878078275369,
+              0.3403
+            ],
+            [
+              2.7030780782753685,
+              0.3403
+            ],
+            [
+              2.694921921724631,
+              0.5348999999999999
+            ],
+            [
+              2.5217219217246316,
+              0.5348999999999999
+            ]
+          ],
+          "maximum_route_difference_m": 0.0,
+          "machine_seam": {
+            "acceptance": "accepted_after_named_change",
+            "change": "convert the shipped rectangle and shear parameters once to an outline record consumed by CrossSection.transform[1]",
+            "classes": [
+              "StaticMachineDescription",
+              "MachineSection",
+              "CrossSection.transform[1]"
+            ]
+          },
+          "provenance": [
+            {
+              "fields": [
+                "R",
+                "Z",
+                "width",
+                "height",
+                "angle1",
+                "angle2"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F6A; coil_* columns",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "m,m,m,m,degree,degree",
+              "statement": "section copied from the dataset-shipped conductor row"
+            },
+            {
+              "fields": [
+                "input_column"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F6A; coil_input_column",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "current join copied from the shipped geometry table"
+            },
+            {
+              "fields": [
+                "turn_convention"
+              ],
+              "locator": "dataset card machine-geometry current-unit contract",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "recorded F-coil channel already contains total ampere-turns"
+            }
+          ]
+        },
+        {
+          "name": "F7A",
+          "centre_m": [
+            2.3733,
+            1.1171
+          ],
+          "width_m": 0.188,
+          "height_m": 0.1692,
+          "skew": {
+            "angle1_deg": 0.0,
+            "angle2_deg": 108.06,
+            "effective_deg": 108.06
+          },
+          "section_vertices_m": [
+            [
+              2.3068861855905696,
+              1.0325
+            ],
+            [
+              2.4948861855905693,
+              1.0325
+            ],
+            [
+              2.4397138144094304,
+              1.2017
+            ],
+            [
+              2.2517138144094306,
+              1.2017
+            ]
+          ],
+          "routed_section_vertices_m": [
+            [
+              2.3068861855905696,
+              1.0325
+            ],
+            [
+              2.4948861855905693,
+              1.0325
+            ],
+            [
+              2.4397138144094304,
+              1.2017
+            ],
+            [
+              2.2517138144094306,
+              1.2017
+            ]
+          ],
+          "maximum_route_difference_m": 0.0,
+          "machine_seam": {
+            "acceptance": "accepted_after_named_change",
+            "change": "convert the shipped rectangle and shear parameters once to an outline record consumed by CrossSection.transform[1]",
+            "classes": [
+              "StaticMachineDescription",
+              "MachineSection",
+              "CrossSection.transform[1]"
+            ]
+          },
+          "provenance": [
+            {
+              "fields": [
+                "R",
+                "Z",
+                "width",
+                "height",
+                "angle1",
+                "angle2"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F7A; coil_* columns",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "m,m,m,m,degree,degree",
+              "statement": "section copied from the dataset-shipped conductor row"
+            },
+            {
+              "fields": [
+                "input_column"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F7A; coil_input_column",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "current join copied from the shipped geometry table"
+            },
+            {
+              "fields": [
+                "turn_convention"
+              ],
+              "locator": "dataset card machine-geometry current-unit contract",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "recorded F-coil channel already contains total ampere-turns"
+            }
+          ]
+        },
+        {
+          "name": "F8A",
+          "centre_m": [
+            1.2518,
+            1.6019
+          ],
+          "width_m": 0.2349,
+          "height_m": 0.0851,
+          "skew": {
+            "angle1_deg": 0.0,
+            "angle2_deg": 0.0,
+            "effective_deg": 0.0
+          },
+          "section_vertices_m": [
+            [
+              1.13435,
+              1.55935
+            ],
+            [
+              1.36925,
+              1.55935
+            ],
+            [
+              1.36925,
+              1.6444500000000002
+            ],
+            [
+              1.13435,
+              1.6444500000000002
+            ]
+          ],
+          "routed_section_vertices_m": [
+            [
+              1.13435,
+              1.55935
+            ],
+            [
+              1.36925,
+              1.55935
+            ],
+            [
+              1.36925,
+              1.6444500000000002
+            ],
+            [
+              1.13435,
+              1.6444500000000002
+            ]
+          ],
+          "maximum_route_difference_m": 0.0,
+          "machine_seam": {
+            "acceptance": "accepted_after_named_change",
+            "change": "convert the shipped rectangle and shear parameters once to an outline record consumed by CrossSection.transform[1]",
+            "classes": [
+              "StaticMachineDescription",
+              "MachineSection",
+              "CrossSection.transform[1]"
+            ]
+          },
+          "provenance": [
+            {
+              "fields": [
+                "R",
+                "Z",
+                "width",
+                "height",
+                "angle1",
+                "angle2"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F8A; coil_* columns",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "m,m,m,m,degree,degree",
+              "statement": "section copied from the dataset-shipped conductor row"
+            },
+            {
+              "fields": [
+                "input_column"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F8A; coil_input_column",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "current join copied from the shipped geometry table"
+            },
+            {
+              "fields": [
+                "turn_convention"
+              ],
+              "locator": "dataset card machine-geometry current-unit contract",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "recorded F-coil channel already contains total ampere-turns"
+            }
+          ]
+        },
+        {
+          "name": "F9A",
+          "centre_m": [
+            1.689,
+            1.5874
+          ],
+          "width_m": 0.1694,
+          "height_m": 0.1331,
+          "skew": {
+            "angle1_deg": 0.0,
+            "angle2_deg": 0.0,
+            "effective_deg": 0.0
+          },
+          "section_vertices_m": [
+            [
+              1.6043,
+              1.5208499999999998
+            ],
+            [
+              1.7737,
+              1.5208499999999998
+            ],
+            [
+              1.7737,
+              1.65395
+            ],
+            [
+              1.6043,
+              1.65395
+            ]
+          ],
+          "routed_section_vertices_m": [
+            [
+              1.6043,
+              1.5208499999999998
+            ],
+            [
+              1.7737,
+              1.5208499999999998
+            ],
+            [
+              1.7737,
+              1.65395
+            ],
+            [
+              1.6043,
+              1.65395
+            ]
+          ],
+          "maximum_route_difference_m": 0.0,
+          "machine_seam": {
+            "acceptance": "accepted_after_named_change",
+            "change": "convert the shipped rectangle and shear parameters once to an outline record consumed by CrossSection.transform[1]",
+            "classes": [
+              "StaticMachineDescription",
+              "MachineSection",
+              "CrossSection.transform[1]"
+            ]
+          },
+          "provenance": [
+            {
+              "fields": [
+                "R",
+                "Z",
+                "width",
+                "height",
+                "angle1",
+                "angle2"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F9A; coil_* columns",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "m,m,m,m,degree,degree",
+              "statement": "section copied from the dataset-shipped conductor row"
+            },
+            {
+              "fields": [
+                "input_column"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F9A; coil_input_column",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "current join copied from the shipped geometry table"
+            },
+            {
+              "fields": [
+                "turn_convention"
+              ],
+              "locator": "dataset card machine-geometry current-unit contract",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "recorded F-coil channel already contains total ampere-turns"
+            }
+          ]
+        },
+        {
+          "name": "F1B",
+          "centre_m": [
+            0.8608,
+            -0.1737
+          ],
+          "width_m": 0.0508,
+          "height_m": 0.32106,
+          "skew": {
+            "angle1_deg": 0.0,
+            "angle2_deg": 0.0,
+            "effective_deg": 0.0
+          },
+          "section_vertices_m": [
+            [
+              0.8354,
+              -0.33423
+            ],
+            [
+              0.8862,
+              -0.33423
+            ],
+            [
+              0.8862,
+              -0.013169999999999987
+            ],
+            [
+              0.8354,
+              -0.013169999999999987
+            ]
+          ],
+          "routed_section_vertices_m": [
+            [
+              0.8354,
+              -0.33423
+            ],
+            [
+              0.8862,
+              -0.33423
+            ],
+            [
+              0.8862,
+              -0.013169999999999987
+            ],
+            [
+              0.8354,
+              -0.013169999999999987
+            ]
+          ],
+          "maximum_route_difference_m": 0.0,
+          "machine_seam": {
+            "acceptance": "accepted_after_named_change",
+            "change": "convert the shipped rectangle and shear parameters once to an outline record consumed by CrossSection.transform[1]",
+            "classes": [
+              "StaticMachineDescription",
+              "MachineSection",
+              "CrossSection.transform[1]"
+            ]
+          },
+          "provenance": [
+            {
+              "fields": [
+                "R",
+                "Z",
+                "width",
+                "height",
+                "angle1",
+                "angle2"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F1B; coil_* columns",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "m,m,m,m,degree,degree",
+              "statement": "section copied from the dataset-shipped conductor row"
+            },
+            {
+              "fields": [
+                "input_column"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F1B; coil_input_column",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "current join copied from the shipped geometry table"
+            },
+            {
+              "fields": [
+                "turn_convention"
+              ],
+              "locator": "dataset card machine-geometry current-unit contract",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "recorded F-coil channel already contains total ampere-turns"
+            }
+          ]
+        },
+        {
+          "name": "F2B",
+          "centre_m": [
+            0.8607,
+            -0.5135
+          ],
+          "width_m": 0.0508,
+          "height_m": 0.32106,
+          "skew": {
+            "angle1_deg": 0.0,
+            "angle2_deg": 0.0,
+            "effective_deg": 0.0
+          },
+          "section_vertices_m": [
+            [
+              0.8353,
+              -0.6740299999999999
+            ],
+            [
+              0.8861,
+              -0.6740299999999999
+            ],
+            [
+              0.8861,
+              -0.35296999999999995
+            ],
+            [
+              0.8353,
+              -0.35296999999999995
+            ]
+          ],
+          "routed_section_vertices_m": [
+            [
+              0.8353,
+              -0.6740299999999999
+            ],
+            [
+              0.8861,
+              -0.6740299999999999
+            ],
+            [
+              0.8861,
+              -0.35296999999999995
+            ],
+            [
+              0.8353,
+              -0.35296999999999995
+            ]
+          ],
+          "maximum_route_difference_m": 0.0,
+          "machine_seam": {
+            "acceptance": "accepted_after_named_change",
+            "change": "convert the shipped rectangle and shear parameters once to an outline record consumed by CrossSection.transform[1]",
+            "classes": [
+              "StaticMachineDescription",
+              "MachineSection",
+              "CrossSection.transform[1]"
+            ]
+          },
+          "provenance": [
+            {
+              "fields": [
+                "R",
+                "Z",
+                "width",
+                "height",
+                "angle1",
+                "angle2"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F2B; coil_* columns",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "m,m,m,m,degree,degree",
+              "statement": "section copied from the dataset-shipped conductor row"
+            },
+            {
+              "fields": [
+                "input_column"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F2B; coil_input_column",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "current join copied from the shipped geometry table"
+            },
+            {
+              "fields": [
+                "turn_convention"
+              ],
+              "locator": "dataset card machine-geometry current-unit contract",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "recorded F-coil channel already contains total ampere-turns"
+            }
+          ]
+        },
+        {
+          "name": "F3B",
+          "centre_m": [
+            0.8611,
+            -0.8543
+          ],
+          "width_m": 0.0508,
+          "height_m": 0.32106,
+          "skew": {
+            "angle1_deg": 0.0,
+            "angle2_deg": 0.0,
+            "effective_deg": 0.0
+          },
+          "section_vertices_m": [
+            [
+              0.8357,
+              -1.01483
+            ],
+            [
+              0.8865,
+              -1.01483
+            ],
+            [
+              0.8865,
+              -0.69377
+            ],
+            [
+              0.8357,
+              -0.69377
+            ]
+          ],
+          "routed_section_vertices_m": [
+            [
+              0.8357,
+              -1.01483
+            ],
+            [
+              0.8865,
+              -1.01483
+            ],
+            [
+              0.8865,
+              -0.69377
+            ],
+            [
+              0.8357,
+              -0.69377
+            ]
+          ],
+          "maximum_route_difference_m": 0.0,
+          "machine_seam": {
+            "acceptance": "accepted_after_named_change",
+            "change": "convert the shipped rectangle and shear parameters once to an outline record consumed by CrossSection.transform[1]",
+            "classes": [
+              "StaticMachineDescription",
+              "MachineSection",
+              "CrossSection.transform[1]"
+            ]
+          },
+          "provenance": [
+            {
+              "fields": [
+                "R",
+                "Z",
+                "width",
+                "height",
+                "angle1",
+                "angle2"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F3B; coil_* columns",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "m,m,m,m,degree,degree",
+              "statement": "section copied from the dataset-shipped conductor row"
+            },
+            {
+              "fields": [
+                "input_column"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F3B; coil_input_column",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "current join copied from the shipped geometry table"
+            },
+            {
+              "fields": [
+                "turn_convention"
+              ],
+              "locator": "dataset card machine-geometry current-unit contract",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "recorded F-coil channel already contains total ampere-turns"
+            }
+          ]
+        },
+        {
+          "name": "F4B",
+          "centre_m": [
+            0.863,
+            -1.1957
+          ],
+          "width_m": 0.0508,
+          "height_m": 0.32106,
+          "skew": {
+            "angle1_deg": 0.0,
+            "angle2_deg": 0.0,
+            "effective_deg": 0.0
+          },
+          "section_vertices_m": [
+            [
+              0.8376,
+              -1.35623
+            ],
+            [
+              0.8884,
+              -1.35623
+            ],
+            [
+              0.8884,
+              -1.03517
+            ],
+            [
+              0.8376,
+              -1.03517
+            ]
+          ],
+          "routed_section_vertices_m": [
+            [
+              0.8376,
+              -1.35623
+            ],
+            [
+              0.8884,
+              -1.35623
+            ],
+            [
+              0.8884,
+              -1.03517
+            ],
+            [
+              0.8376,
+              -1.03517
+            ]
+          ],
+          "maximum_route_difference_m": 0.0,
+          "machine_seam": {
+            "acceptance": "accepted_after_named_change",
+            "change": "convert the shipped rectangle and shear parameters once to an outline record consumed by CrossSection.transform[1]",
+            "classes": [
+              "StaticMachineDescription",
+              "MachineSection",
+              "CrossSection.transform[1]"
+            ]
+          },
+          "provenance": [
+            {
+              "fields": [
+                "R",
+                "Z",
+                "width",
+                "height",
+                "angle1",
+                "angle2"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F4B; coil_* columns",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "m,m,m,m,degree,degree",
+              "statement": "section copied from the dataset-shipped conductor row"
+            },
+            {
+              "fields": [
+                "input_column"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F4B; coil_input_column",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "current join copied from the shipped geometry table"
+            },
+            {
+              "fields": [
+                "turn_convention"
+              ],
+              "locator": "dataset card machine-geometry current-unit contract",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "recorded F-coil channel already contains total ampere-turns"
+            }
+          ]
+        },
+        {
+          "name": "F5B",
+          "centre_m": [
+            1.0025,
+            -1.5169
+          ],
+          "width_m": 0.1392,
+          "height_m": 0.1194,
+          "skew": {
+            "angle1_deg": -45.0,
+            "angle2_deg": 0.0,
+            "effective_deg": -45.0
+          },
+          "section_vertices_m": [
+            [
+              0.9329,
+              -1.5070000000000001
+            ],
+            [
+              1.0720999999999998,
+              -1.6461999999999999
+            ],
+            [
+              1.0720999999999998,
+              -1.5267999999999997
+            ],
+            [
+              0.9329,
+              -1.3876
+            ]
+          ],
+          "routed_section_vertices_m": [
+            [
+              0.9329,
+              -1.5070000000000001
+            ],
+            [
+              1.0720999999999998,
+              -1.6461999999999999
+            ],
+            [
+              1.0720999999999998,
+              -1.5267999999999997
+            ],
+            [
+              0.9329,
+              -1.3876
+            ]
+          ],
+          "maximum_route_difference_m": 0.0,
+          "machine_seam": {
+            "acceptance": "accepted_after_named_change",
+            "change": "convert the shipped rectangle and shear parameters once to an outline record consumed by CrossSection.transform[1]",
+            "classes": [
+              "StaticMachineDescription",
+              "MachineSection",
+              "CrossSection.transform[1]"
+            ]
+          },
+          "provenance": [
+            {
+              "fields": [
+                "R",
+                "Z",
+                "width",
+                "height",
+                "angle1",
+                "angle2"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F5B; coil_* columns",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "m,m,m,m,degree,degree",
+              "statement": "section copied from the dataset-shipped conductor row"
+            },
+            {
+              "fields": [
+                "input_column"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F5B; coil_input_column",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "current join copied from the shipped geometry table"
+            },
+            {
+              "fields": [
+                "turn_convention"
+              ],
+              "locator": "dataset card machine-geometry current-unit contract",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "recorded F-coil channel already contains total ampere-turns"
+            }
+          ]
+        },
+        {
+          "name": "F6B",
+          "centre_m": [
+            2.6124,
+            -0.4376
+          ],
+          "width_m": 0.1732,
+          "height_m": 0.1946,
+          "skew": {
+            "angle1_deg": 0.0,
+            "angle2_deg": -92.4,
+            "effective_deg": -92.4
+          },
+          "section_vertices_m": [
+            [
+              2.5217219217246316,
+              -0.5348999999999999
+            ],
+            [
+              2.694921921724631,
+              -0.5348999999999999
+            ],
+            [
+              2.7030780782753685,
+              -0.3403
+            ],
+            [
+              2.529878078275369,
+              -0.3403
+            ]
+          ],
+          "routed_section_vertices_m": [
+            [
+              2.5217219217246316,
+              -0.5348999999999999
+            ],
+            [
+              2.694921921724631,
+              -0.5348999999999999
+            ],
+            [
+              2.7030780782753685,
+              -0.3403
+            ],
+            [
+              2.529878078275369,
+              -0.3403
+            ]
+          ],
+          "maximum_route_difference_m": 0.0,
+          "machine_seam": {
+            "acceptance": "accepted_after_named_change",
+            "change": "convert the shipped rectangle and shear parameters once to an outline record consumed by CrossSection.transform[1]",
+            "classes": [
+              "StaticMachineDescription",
+              "MachineSection",
+              "CrossSection.transform[1]"
+            ]
+          },
+          "provenance": [
+            {
+              "fields": [
+                "R",
+                "Z",
+                "width",
+                "height",
+                "angle1",
+                "angle2"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F6B; coil_* columns",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "m,m,m,m,degree,degree",
+              "statement": "section copied from the dataset-shipped conductor row"
+            },
+            {
+              "fields": [
+                "input_column"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F6B; coil_input_column",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "current join copied from the shipped geometry table"
+            },
+            {
+              "fields": [
+                "turn_convention"
+              ],
+              "locator": "dataset card machine-geometry current-unit contract",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "recorded F-coil channel already contains total ampere-turns"
+            }
+          ]
+        },
+        {
+          "name": "F7B",
+          "centre_m": [
+            2.3834,
+            -1.1171
+          ],
+          "width_m": 0.188,
+          "height_m": 0.1692,
+          "skew": {
+            "angle1_deg": 0.0,
+            "angle2_deg": -108.06,
+            "effective_deg": -108.06
+          },
+          "section_vertices_m": [
+            [
+              2.2618138144094306,
+              -1.2017
+            ],
+            [
+              2.4498138144094304,
+              -1.2017
+            ],
+            [
+              2.5049861855905693,
+              -1.0325
+            ],
+            [
+              2.3169861855905696,
+              -1.0325
+            ]
+          ],
+          "routed_section_vertices_m": [
+            [
+              2.2618138144094306,
+              -1.2017
+            ],
+            [
+              2.4498138144094304,
+              -1.2017
+            ],
+            [
+              2.5049861855905693,
+              -1.0325
+            ],
+            [
+              2.3169861855905696,
+              -1.0325
+            ]
+          ],
+          "maximum_route_difference_m": 0.0,
+          "machine_seam": {
+            "acceptance": "accepted_after_named_change",
+            "change": "convert the shipped rectangle and shear parameters once to an outline record consumed by CrossSection.transform[1]",
+            "classes": [
+              "StaticMachineDescription",
+              "MachineSection",
+              "CrossSection.transform[1]"
+            ]
+          },
+          "provenance": [
+            {
+              "fields": [
+                "R",
+                "Z",
+                "width",
+                "height",
+                "angle1",
+                "angle2"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F7B; coil_* columns",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "m,m,m,m,degree,degree",
+              "statement": "section copied from the dataset-shipped conductor row"
+            },
+            {
+              "fields": [
+                "input_column"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F7B; coil_input_column",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "current join copied from the shipped geometry table"
+            },
+            {
+              "fields": [
+                "turn_convention"
+              ],
+              "locator": "dataset card machine-geometry current-unit contract",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "recorded F-coil channel already contains total ampere-turns"
+            }
+          ]
+        },
+        {
+          "name": "F8B",
+          "centre_m": [
+            1.2524,
+            -1.6027
+          ],
+          "width_m": 0.2349,
+          "height_m": 0.0851,
+          "skew": {
+            "angle1_deg": 0.0,
+            "angle2_deg": 0.0,
+            "effective_deg": 0.0
+          },
+          "section_vertices_m": [
+            [
+              1.13495,
+              -1.64525
+            ],
+            [
+              1.36985,
+              -1.64525
+            ],
+            [
+              1.36985,
+              -1.56015
+            ],
+            [
+              1.13495,
+              -1.56015
+            ]
+          ],
+          "routed_section_vertices_m": [
+            [
+              1.13495,
+              -1.64525
+            ],
+            [
+              1.36985,
+              -1.64525
+            ],
+            [
+              1.36985,
+              -1.56015
+            ],
+            [
+              1.13495,
+              -1.56015
+            ]
+          ],
+          "maximum_route_difference_m": 0.0,
+          "machine_seam": {
+            "acceptance": "accepted_after_named_change",
+            "change": "convert the shipped rectangle and shear parameters once to an outline record consumed by CrossSection.transform[1]",
+            "classes": [
+              "StaticMachineDescription",
+              "MachineSection",
+              "CrossSection.transform[1]"
+            ]
+          },
+          "provenance": [
+            {
+              "fields": [
+                "R",
+                "Z",
+                "width",
+                "height",
+                "angle1",
+                "angle2"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F8B; coil_* columns",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "m,m,m,m,degree,degree",
+              "statement": "section copied from the dataset-shipped conductor row"
+            },
+            {
+              "fields": [
+                "input_column"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F8B; coil_input_column",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "current join copied from the shipped geometry table"
+            },
+            {
+              "fields": [
+                "turn_convention"
+              ],
+              "locator": "dataset card machine-geometry current-unit contract",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "recorded F-coil channel already contains total ampere-turns"
+            }
+          ]
+        },
+        {
+          "name": "F9B",
+          "centre_m": [
+            1.6889,
+            -1.578
+          ],
+          "width_m": 0.1694,
+          "height_m": 0.1331,
+          "skew": {
+            "angle1_deg": 0.0,
+            "angle2_deg": 0.0,
+            "effective_deg": 0.0
+          },
+          "section_vertices_m": [
+            [
+              1.6042,
+              -1.6445500000000002
+            ],
+            [
+              1.7736,
+              -1.6445500000000002
+            ],
+            [
+              1.7736,
+              -1.51145
+            ],
+            [
+              1.6042,
+              -1.51145
+            ]
+          ],
+          "routed_section_vertices_m": [
+            [
+              1.6042,
+              -1.6445500000000002
+            ],
+            [
+              1.7736,
+              -1.6445500000000002
+            ],
+            [
+              1.7736,
+              -1.51145
+            ],
+            [
+              1.6042,
+              -1.51145
+            ]
+          ],
+          "maximum_route_difference_m": 0.0,
+          "machine_seam": {
+            "acceptance": "accepted_after_named_change",
+            "change": "convert the shipped rectangle and shear parameters once to an outline record consumed by CrossSection.transform[1]",
+            "classes": [
+              "StaticMachineDescription",
+              "MachineSection",
+              "CrossSection.transform[1]"
+            ]
+          },
+          "provenance": [
+            {
+              "fields": [
+                "R",
+                "Z",
+                "width",
+                "height",
+                "angle1",
+                "angle2"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F9B; coil_* columns",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "m,m,m,m,degree,degree",
+              "statement": "section copied from the dataset-shipped conductor row"
+            },
+            {
+              "fields": [
+                "input_column"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=F9B; coil_input_column",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "current join copied from the shipped geometry table"
+            },
+            {
+              "fields": [
+                "turn_convention"
+              ],
+              "locator": "dataset card machine-geometry current-unit contract",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "recorded F-coil channel already contains total ampere-turns"
+            }
+          ]
+        },
+        {
+          "name": "ECOILA",
+          "centre_m": [
+            0.7225,
+            0.0
+          ],
+          "width_m": 0.12875,
+          "height_m": 3.5058,
+          "skew": {
+            "angle1_deg": 0.0,
+            "angle2_deg": 0.0,
+            "effective_deg": 0.0
+          },
+          "section_vertices_m": [
+            [
+              0.6581250000000001,
+              -1.7529
+            ],
+            [
+              0.786875,
+              -1.7529
+            ],
+            [
+              0.786875,
+              1.7529
+            ],
+            [
+              0.6581250000000001,
+              1.7529
+            ]
+          ],
+          "routed_section_vertices_m": [
+            [
+              0.6581250000000001,
+              -1.7529
+            ],
+            [
+              0.786875,
+              -1.7529
+            ],
+            [
+              0.786875,
+              1.7529
+            ],
+            [
+              0.6581250000000001,
+              1.7529
+            ]
+          ],
+          "maximum_route_difference_m": 0.0,
+          "machine_seam": {
+            "acceptance": "accepted_after_named_change",
+            "change": "convert the shipped rectangle and shear parameters once to an outline record consumed by CrossSection.transform[1]",
+            "classes": [
+              "StaticMachineDescription",
+              "MachineSection",
+              "CrossSection.transform[1]"
+            ]
+          },
+          "provenance": [
+            {
+              "fields": [
+                "R",
+                "Z",
+                "width",
+                "height",
+                "angle1",
+                "angle2"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=ECOILA; coil_* columns",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "m,m,m,m,degree,degree",
+              "statement": "section copied from the dataset-shipped conductor row"
+            },
+            {
+              "fields": [
+                "input_column"
+              ],
+              "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:coil_name=ECOILA; coil_input_column",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "current join copied from the shipped geometry table"
+            },
+            {
+              "fields": [
+                "turn_convention"
+              ],
+              "locator": "dataset card machine-geometry current-unit contract",
+              "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+              "unit": "",
+              "statement": "recorded ECOILA is plain kA and is used without a fabricated turn multiplier; the published 48-element group and omitted co-located group bound the unresolved physical convention"
+            }
+          ]
+        }
+      ]
+    },
+    "bcoil": {
+      "acceptance": "accepted_unmodified",
+      "input_column": "magnetics_bcoil",
+      "axisymmetric_poloidal_section": null,
+      "machine_section_route": "not_applicable: the dataset declares no axisymmetric poloidal section",
+      "provenance": [
+        {
+          "fields": [
+            "poloidal_section"
+          ],
+          "locator": "dataset card machine-geometry exclusions",
+          "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+          "unit": "",
+          "statement": "toroidal bcoil has no poloidal-plane rectangle"
+        },
+        {
+          "fields": [
+            "input_column"
+          ],
+          "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:magnetics_bcoil",
+          "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+          "unit": "",
+          "statement": "recorded toroidal-field current channel"
+        },
+        {
+          "fields": [
+            "turn_convention"
+          ],
+          "locator": "dataset card main-coil unit contract",
+          "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+          "unit": "",
+          "statement": "toroidal bcoil turns are unresolved and do not enter axisymmetric poloidal flux"
+        }
+      ]
+    },
+    "thomson_chords": {
+      "acceptance": "accepted_after_named_change",
+      "change": "embed released poloidal R,Z coordinates at representative phi zero; retain line-of-sight endpoints as absent",
+      "count": 70,
+      "records": [
+        {
+          "name": "TS_core_r+1_0",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.6908000111579895
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_1",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.6862999796867371
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_2",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.6787999868392944
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_3",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.6727999448776245
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_4",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.6667999625205994
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_5",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.6602999567985535
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_6",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.6527999639511108
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_7",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.6462999582290649
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_8",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.639799952507019
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_9",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.6327999830245972
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_10",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.6252999901771545
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_11",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.6187999844551086
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_12",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.611299991607666
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_13",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.6042999625205994
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_14",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.5967999696731567
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_15",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.5902999639511108
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_16",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.5817999839782715
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_17",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.5742999911308289
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_18",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.5658000111579895
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_19",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.5587999820709229
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_20",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.5512999892234802
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_21",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.5433000326156616
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_22",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.5347999930381775
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_23",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.5263000130653381
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_24",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.517300009727478
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_25",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.5087999701499939
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_26",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.4993000030517578
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_27",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.4902999699115753
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_28",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.4812999963760376
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_29",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.4717999994754791
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_30",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.4617999792098999
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_31",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.4527999758720398
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_32",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.4368000030517578
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_33",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.4138000011444092
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_34",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.3887999951839447
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+1_35",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.3082999885082245
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+0_36",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.40529999136924744
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+0_37",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.3637999892234802
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+0_38",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.30570000410079956
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+0_39",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.2703000009059906
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+0_40",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.218299999833107
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+0_41",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.15229998528957367
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+0_42",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.0892999991774559
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_core_r+0_43",
+          "coordinates_r_z_m": [
+            1.9399999380111694,
+            0.030299998819828033
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_tangential_r+0_0",
+          "coordinates_r_z_m": [
+            1.6785000562667847,
+            -0.04389999806880951
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_tangential_r+0_1",
+          "coordinates_r_z_m": [
+            1.7580000162124634,
+            -0.05139999836683273
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_tangential_r+0_2",
+          "coordinates_r_z_m": [
+            1.8249000310897827,
+            -0.05729999765753746
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_tangential_r+0_3",
+          "coordinates_r_z_m": [
+            1.8766000270843506,
+            -0.06159999594092369
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_tangential_r+0_4",
+          "coordinates_r_z_m": [
+            1.9093999862670898,
+            -0.06419999897480011
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_tangential_r+0_5",
+          "coordinates_r_z_m": [
+            1.9472999572753906,
+            -0.06689999997615814
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_tangential_r+0_6",
+          "coordinates_r_z_m": [
+            1.9888999462127686,
+            -0.06989999860525131
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_tangential_r+0_7",
+          "coordinates_r_z_m": [
+            2.015700101852417,
+            -0.07149999588727951
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_tangential_r+0_8",
+          "coordinates_r_z_m": [
+            2.0393998622894287,
+            -0.07369999587535858
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_tangential_r+0_9",
+          "coordinates_r_z_m": [
+            2.061300039291382,
+            -0.07459999620914459
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_divertor_r+2_0",
+          "coordinates_r_z_m": [
+            1.4850000143051147,
+            1.215499997138977
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_divertor_r+2_1",
+          "coordinates_r_z_m": [
+            1.4850000143051147,
+            1.2034999132156372
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_divertor_r+2_2",
+          "coordinates_r_z_m": [
+            1.4850000143051147,
+            1.191499948501587
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_divertor_r+1_3",
+          "coordinates_r_z_m": [
+            1.4850000143051147,
+            1.1729999780654907
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_divertor_r+1_4",
+          "coordinates_r_z_m": [
+            1.4850000143051147,
+            1.1584999561309814
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_divertor_r+1_5",
+          "coordinates_r_z_m": [
+            1.4850000143051147,
+            1.1444998979568481
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_divertor_r+1_6",
+          "coordinates_r_z_m": [
+            1.4850000143051147,
+            1.1089999675750732
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_divertor_r+1_7",
+          "coordinates_r_z_m": [
+            1.4850000143051147,
+            1.0794999599456787
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_divertor_r+1_8",
+          "coordinates_r_z_m": [
+            1.4850000143051147,
+            1.0514999628067017
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_divertor_r+1_9",
+          "coordinates_r_z_m": [
+            1.4850000143051147,
+            1.022499918937683
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_divertor_r+1_10",
+          "coordinates_r_z_m": [
+            1.4850000143051147,
+            0.9969999194145203
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_divertor_r+1_11",
+          "coordinates_r_z_m": [
+            1.4850000143051147,
+            0.968999981880188
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_divertor_r-1_12",
+          "coordinates_r_z_m": [
+            1.4850000143051147,
+            -1.0712999105453491
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_divertor_r-1_13",
+          "coordinates_r_z_m": [
+            1.4850000143051147,
+            -1.0568000078201294
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_divertor_r-1_14",
+          "coordinates_r_z_m": [
+            1.4850000143051147,
+            -1.0248000621795654
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        },
+        {
+          "name": "TS_divertor_r-1_15",
+          "coordinates_r_z_m": [
+            1.4850000143051147,
+            -1.0087999105453491
+          ],
+          "representative_phi_rad": 0.0,
+          "start": null,
+          "end": null
+        }
+      ],
+      "provenance": {
+        "fields": [
+          "thomson_chord_name",
+          "thomson_chord_R",
+          "thomson_chord_Z"
+        ],
+        "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:thomson_chord_*",
+        "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+        "unit": "name,m,m",
+        "statement": "poloidal chord coordinates embedded at phi zero; no line-of-sight endpoint was fabricated"
+      }
+    },
+    "efit_grid": {
+      "acceptance": "accepted_unmodified",
+      "shape": [
+        65,
+        65
+      ],
+      "r_extent_m": [
+        0.8399999737739563,
+        2.5399999618530273
+      ],
+      "z_extent_m": [
+        -1.600000023841858,
+        1.600000023841858
+      ],
+      "provenance": {
+        "fields": [
+          "efit_grid_R",
+          "efit_grid_Z"
+        ],
+        "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:efit_grid_R,efit_grid_Z",
+        "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+        "unit": "m,m",
+        "statement": "released 65 by 65 EFIT coordinate axes copied unmodified"
+      }
+    },
+    "wall_contour": {
+      "acceptance": "absent",
+      "value": null,
+      "external_source": null,
+      "reason": "not shipped by the competition dataset and no external source is currently authorised",
+      "provenance": {
+        "fields": [
+          "wall_contour"
+        ],
+        "locator": "competition dataset machine-geometry exclusions",
+        "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+        "unit": "",
+        "statement": "wall contour explicitly absent and no external source selected"
+      }
+    },
+    "passive_structure": {
+      "acceptance": "absent",
+      "value": null,
+      "external_source": null,
+      "reason": "not shipped by the competition dataset and no external source is currently authorised",
+      "provenance": {
+        "fields": [
+          "passive_structure"
+        ],
+        "locator": "competition dataset machine-geometry exclusions",
+        "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+        "unit": "",
+        "statement": "passive structure explicitly absent and no external source selected"
+      }
+    }
+  },
+  "figures": [
+    "docs/figures/diiid-forward-onboarding/machine-description/conductor_sections.png",
+    "docs/figures/diiid-forward-onboarding/machine-description/thomson_grid_extent.png",
+    "docs/figures/diiid-forward-onboarding/machine-description/skewed_conductor_sections.png"
+  ]
+}

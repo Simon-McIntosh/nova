@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="evidence">
   <meta name="plan-slug" content="diiid-forward-onboarding-landed">
   <meta name="plan-title" content="DIII-D Forward Onboarding — landed record">
-  <meta name="plan-summary" content="Cumulative execution evidence for the DIII-D onboarding plan: the response-kernel library, the vacuum kill-gate reformulations and their located composition defect, and the measured strict-GS representability ceiling of the challenge labels">
+  <meta name="plan-summary" content="Cumulative execution evidence for the DIII-D onboarding plan: the nineteen-conductor machine description with its geometry receipts, the measured corpus COCOS, the passed plasma-subtraction kill gate, and the strict-GS representability ceiling of the challenge labels">
   <meta name="plan-evidence-for" content="diiid-forward-onboarding">
   <title>DIII-D Forward Onboarding — landed | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
@@ -210,6 +210,191 @@
     emitter can reproduce. Both convergence criteria are reported without conflation: the relaxed Picard
     update met 1e-8 on 300/300 cases within 1,701 iterations, while the unrelaxed fixed-point update
     remains median 8.5e-5.</p>
+
+    <h2 id="machine-description">§2 machine description — nineteen conductors from the competition dataset — 2026-08-19</h2>
+    <p>Commit <code>e2ffa796</code> (node diiid-dataset-machine-description), 10/10 tests, live benchmark
+    exit 0. The description is built from the <em>competition dataset</em>, which is where the conductor
+    sections, skews, Thomson chords and grid actually live, and routed through nova's machine dataclass
+    seam so the second-machine portability claim is evidenced rather than asserted.</p>
+    <p>The decisive receipt is a null: the maximum difference between the physical registry vertices and
+    the machine-routed vertices is <strong>exactly 0.0 m</strong> across all nineteen conductors, against
+    a 1e-12 bar. The shipped centre/width/height/two-angle parameterisation is converted to vertices
+    <em>once</em> by <code>section_vertices</code>, and those same vertices author the outline records
+    <code>MachineSection</code> consumes — so the repository carries one geometry construction, not a
+    second interpretation of the source angles.</p>
+    <figure>
+      <img src="/nova/figures/diiid-forward-onboarding/machine-description/conductor_sections.png"
+           alt="All nineteen DIII-D poloidal conductor cross-sections in the R-Z plane, each labelled, with the six skewed parallelogram sections shaded distinctly"
+           style="max-width:100%">
+      <figcaption>All nineteen poloidal conductors as routed through the machine seam: the ECOILA
+      solenoid inboard at R≈0.72 m, F1–F4 stacked up and down the inner column, F5/F8/F9 top and bottom,
+      and F6/F7 outboard. The six shaded sections are the skewed parallelograms — F5A, F6A, F7A, F5B,
+      F6B, F7B — drawn with their actual shear rather than as bounding rectangles.</figcaption>
+    </figure>
+    <figure>
+      <img src="/nova/figures/diiid-forward-onboarding/machine-description/skewed_conductor_sections.png"
+           alt="Six detail panels, one per skewed conductor, showing each parallelogram section outline"
+           style="max-width:100%">
+      <figcaption>The six skewed sections at detail scale. These are the case the polygonal-section
+      analytic kernels were built for; the vacuum-gate diagnosis separately established that the shipped
+      skew convention scores better than all three reversals, so the orientation drawn here is the
+      measured-best one and not an assumption.</figcaption>
+    </figure>
+    <figure>
+      <img src="/nova/figures/diiid-forward-onboarding/machine-description/thomson_grid_extent.png"
+           alt="Seventy Thomson chord coordinates in the R-Z plane inside the rectangular 65 by 65 EFIT grid extent"
+           style="max-width:100%">
+      <figcaption>Seventy Thomson coordinates against the 65×65 <code>efit_grid</code> extent, R
+      [0.840, 2.540] m and Z [−1.600, 1.600] m. Four sub-systems are visible and physical: a dense core
+      vertical string at R≈1.94 m spanning Z 0.03–0.70 m, an upper string at R≈1.48 m over Z 0.97–1.21 m,
+      a midplane row at Z≈−0.05 m across R 1.68–2.07 m, and two lower-divertor points near Z≈−1.03 m.
+      These are scattering-volume <em>positions</em>; the dataset ships no explicit endpoint pair, so the
+      records carry <code>start</code> and <code>end</code> as absent and no chord is fabricated. For the
+      vertical sub-systems the laser path is the string itself, which is the line of sight in all but
+      name; the midplane row is the tangential system, whose sightline is not recoverable this way.</figcaption>
+    </figure>
+    <p>Provenance is pinned by conductor-table digest
+    <code>782e9e08f02e610e252e9cf6d6cccfb3a9aefa62b56f14865553ba2f35d213dc</code>, which the
+    plasma-subtraction gate recorded <em>independently</em> — a genuine cross-node agreement rather than
+    a restated constant. <code>bcoil</code> is retained carrying no axisymmetric poloidal section.</p>
+    <p><strong>The gap is encoded as an invariant, not a comment.</strong> Wall contour and passive
+    structure do not ship, and <code>DiiidDatasetMachineDescription.validate</code> <em>raises</em> if a
+    contour or a passive loop ever appears, so the absence cannot be quietly filled by a later change.
+    §4's passive forwards are this plan's self-declared highest-risk physics and they need that geometry,
+    which puts the incoming updated dataset on the critical path rather than in the nice-to-have column.</p>
+
+    <h3 id="discarded-description">The description source that was read, measured and discarded</h3>
+    <p>A shipped IMAS description was located, read through the access layer (commit <code>a6f8bdf4</code>,
+    3/3 tests) and then discarded by the owner <em>on the evidence of that read</em>. The measurement is
+    retained because it is the reason, and because a reader who does not see it will eventually re-propose
+    the same source.</p>
+    <table>
+      <caption>What the legacy entry carried against what the competition dataset carries. Its figures
+      were retired: a four-conductor synthetic machine drawn under a DIII-D heading invites exactly the
+      misreading this table prevents.</caption>
+      <thead><tr><th>Quantity</th><th>Legacy IMAS entry</th><th>Competition dataset</th></tr></thead>
+      <tbody>
+        <tr><td>Poloidal conductors</td><td>4</td><td><strong>19</strong> (18 F-coils + ECOILA)</td></tr>
+        <tr><td>Skewed sections</td><td>1, at 90° (not 45°)</td><td>6, convention measured-best</td></tr>
+        <tr><td>Wall / limiter contour</td><td>15 vertices, coarse</td><td>absent — no source</td></tr>
+        <tr><td>Passive loops</td><td><strong>0</strong></td><td>absent — no source</td></tr>
+        <tr><td>Toroidal field coils</td><td><strong>0</strong></td><td>not required for poloidal flux</td></tr>
+        <tr><td>Thomson geometry</td><td>10 evenly spaced points, one radius, <strong>0</strong> endpoints</td><td>70 coordinates, four physical sub-systems</td></tr>
+        <tr><td>Data Dictionary</td><td>3.28.0 / 3.28.1</td><td>n/a — tabular</td></tr>
+      </tbody>
+    </table>
+    <p>One cross-source signal survived and is worth recording: the legacy entry's <code>coil_1</code>
+    centre (1.0041, 1.5169) m matches the F5A centre independently derived during the vacuum-gate
+    diagnosis to four decimals, while its Z-extent (0.2586 m against 0.1194 m) and skew (90° against
+    45°) disagree. Agree on position, disagree on section — which is why a shipped description is a
+    claim rather than a truth. What survives the discard unchanged is the reusable half: the five frozen
+    dataclasses added to <code>nova/imas/machine.py</code> and the access-layer reader, which are the
+    seam and the reader the updated dataset will arrive through.</p>
+
+    <h2 id="corpus-cocos">§2 corpus convention — COCOS measured, then pinned once — 2026-08-19</h2>
+    <p>Commit <code>86f6f38a</code> (node diiid-corpus-cocos-pin), 23/23 tests across all five DIII-D
+    modules. The campaign had reached the flux maps without a systematic convention evaluation, and the
+    cost was measured rather than hypothetical: a global sign applied twice, once to the coil term and
+    once to a plasma term that already carried label convention, worth 8.5 points of exterior R² on
+    construction-exact synthetic truth. The answer is one measured authority, imported everywhere.</p>
+    <table>
+      <caption>Four independent discriminators over a declared 20-shot standard-field cohort (recorded
+      Ip ≥ 500 kA, bcoil &lt; 0, one frame per shot, zero fitted coefficients).</caption>
+      <thead><tr><th>Discriminator</th><th>Measurement</th><th>Digit fixed</th></tr></thead>
+      <tbody>
+        <tr><td>Δ* current integral ÷ recorded Ip</td><td>median <strong>1.078781</strong> for Wb/rad against <strong>0.171693</strong> for total Wb</td><td>flux is <strong>per radian</strong>, e<sub>Bp</sub> = 0</td></tr>
+        <tr><td>ψ(boundary) − ψ(axis)</td><td>positive 20/20, median 0.259869 Wb/rad</td><td>σ<sub>Bp</sub> = +1</td></tr>
+        <tr><td>q95 sign against Ip·bcoil</td><td>q95 positive 20/20</td><td>σ<sub>ρθφ</sub> = −1</td></tr>
+        <tr><td>Coordinate handedness</td><td>consistent 20/20</td><td>σ<sub>RφZ</sub> = +1</td></tr>
+      </tbody>
+    </table>
+    <figure>
+      <img src="/nova/figures/diiid-forward-onboarding/cocos/corpus_cocos_discriminators.png"
+           alt="Three panels: Delta-star current over recorded Ip for both flux-exponent candidates, psi boundary minus axis against Ip, and q95 against Ip times bcoil"
+           style="max-width:100%">
+      <figcaption>The flux-exponent panel is the decisive one: the per-radian candidate clusters about
+      unity while the total-weber candidate sits near 0.17, a factor of 2π apart, so the corpus map is
+      flux per radian and no argument is required. The remaining panels fix the sign digits, both
+      unanimous across the cohort.</figcaption>
+    </figure>
+    <p><strong>Corpus COCOS is 5</strong>; the transform into nova's internal COCOS 17 is ψ → −2π,
+    Ip → +1, F → +1, q → −1 and d/dψ → −1/(2π), derived through
+    <code>nova.io.cocos.convention_transform</code> rather than hand-written factors. Nova's registry
+    kernels now return native total webers, so the per-radian conversion left
+    <code>nova/imas/diiid_description.py</code> entirely and nova stays COCOS 17 internally.</p>
+    <p>Two parity receipts confirm that pinning moved no physics: construction-exact synthetic
+    composition scores <strong>0.9967218639797544</strong> against the previously recorded
+    0.9967218639028415 — agreement to ten significant figures — and coil-only real-frame pooled exterior
+    R² is <strong>0.49526707859970365</strong> against the recorded 0.49527 over the same 20 shots and
+    4,140 frames. The worker carried its own limit rather than burying it: the q95 digit is conditional
+    on the standard-field selection, and reversed-field frames were not used to infer it.</p>
+    <p>The single-home property is the point, and it was verified by grep rather than trusted: after the
+    following node, <strong>zero</strong> <code>FIXED_FLUX_SIGN</code> or <code>TOTAL_FLUX_FACTOR</code>
+    exports or usages remain anywhere in the DIII-D benchmarks or the registry, and no local bare 2π flux
+    factor survives. An orchestrator audit had found the pinned module still exporting two constants
+    whose product was bitwise identical to the derived factor — the same double-application shape the
+    node existed to prevent — and their retirement was folded into the next node rather than deferred.</p>
+
+    <h2 id="plasma-subtraction">§2 kill gate PASSED — every labelled frame is its own vacuum shot — 2026-08-19</h2>
+    <p>Commit <code>10b5c850</code> (node diiid-plasma-subtraction-gate), 30/30 tests across every DIII-D
+    module, authoritative corpus run exit 0. The formulation is the owner's differencing trick: apply the
+    GS operator to each labelled map, separate the flux functions, solve for the plasma current, represent
+    it on nova filaments — a representation projection, never a measurement fit — subtract its flux, and
+    verify the coil model against the remainder. Every labelled frame becomes a vacuum shot.</p>
+    <p>The bar was written to disk with SHA-256 <code>7e60861d</code> <em>before</em> any scoring run,
+    fixed at the coil-only 0.49526707859970365.</p>
+    <table>
+      <caption>Gate result. The pooled statistic and the per-frame quartiles disagree, and both are
+      reported because the disagreement is the finding.</caption>
+      <thead><tr><th>Statistic</th><th>Quiescent (120 frames, 20 shots)</th><th>Matched transient</th></tr></thead>
+      <tbody>
+        <tr><td>Pooled whole-grid R²</td><td><strong>0.6392320708</strong> — clears bar by +0.1440</td><td>0.6319403168</td></tr>
+        <tr><td>Per-frame R² q25 / median / q75</td><td><strong>0.99325 / 0.99908 / 0.99967</strong></td><td>0.99222 / 0.99879 / 0.99966</td></tr>
+        <tr><td>Per-shot R² q25 / median / q75</td><td>0.99285 / 0.99918 / 0.99946</td><td>0.99280 / 0.99902 / 0.99937</td></tr>
+        <tr><td>Minimum frame R² (retained, unfiltered)</td><td>−3.3504160385</td><td>—</td></tr>
+        <tr><td>Filament projection fractional RMS, median</td><td>0.0201123093</td><td>0.0208083349</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The pooled figure must not be quoted alone, because it understates the method by two
+    orders of magnitude in error terms.</strong> The typical frame reproduces the vacuum field to better
+    than a part in a thousand; the pooled 0.639 is dragged down by a retained negative tail concentrated
+    in exactly two shots, <code>d3d_shot_009875548f</code> and <code>d3d_shot_001bc5a4ae</code>. No frame
+    was filtered to make the headline prettier, which is precisely why the two statistics disagree. The
+    quiescent selection itself is worth only +0.0072918 over matched transient frames — the differencing,
+    not the quiescence, is what does the work.</p>
+    <figure>
+      <img src="/nova/figures/diiid-forward-onboarding/differencing/quiescent_selection.png"
+           alt="Four shots, log-scale smoothed maximum coil current derivative against label time, with selected quiescent frames marked in the troughs and matched transient frames on the peaks"
+           style="max-width:100%">
+      <figcaption>Low-dI/dt selection on four shots. Quiescent frames sit in the troughs of the smoothed
+      maximum coil-current derivative and matched transient frames on the peaks, against the
+      preregistered 50/100/200 kA·turn·s⁻¹ thresholds; the 100 threshold was selected. Census unchanged
+      at 7,041 shots and 1,559,340 labelled frames, with 65,993 / 470,282 / 1,049,487 quiescent
+      candidates at the three thresholds.</figcaption>
+    </figure>
+    <figure>
+      <img src="/nova/figures/diiid-forward-onboarding/differencing/plasma_differencing.png"
+           alt="Five panels: labelled flux map, projected plasma flux, vacuum remainder, coil model with gauge, and the remainder minus coil residual"
+           style="max-width:100%">
+      <figcaption>The differencing on one frame, and the mechanism is visible rather than argued. The
+      labelled map carries a deep plasma well; the projected plasma flux reproduces it; the vacuum
+      remainder has the well <em>removed</em>, leaving only conductor structure; the coil model is
+      visually indistinguishable from that remainder. The residual is one to two orders of magnitude
+      below the signal and concentrated at high R, exactly where F6/F7/F9 and the vessel sit — which is
+      the passive signal §4 is looking for, not a defect in the coil model.</figcaption>
+    </figure>
+    <p><strong>What this settles.</strong> The coil model is verified against a plasma-free field derived
+    from the labels themselves, which is what the differencing formulation was locked to deliver. The
+    earlier −5.3347 quiescent score is now fully attributed to the composition defect rather than to
+    geometry, kernels, quiescent selection or passive currents — the chain from that failure to this pass
+    runs through a located sign error, not through a tuned parameter. Every frame yielded 19 reliable
+    extracted p′/FF′ surfaces, so the extraction premise holds at cohort scale.</p>
+    <p><strong>The transient bank leaves quarantine.</strong> 120 full-grid plasma-subtracted transient
+    remainders, 11,574,755 bytes, SHA-256 <code>a9dd8fa2</code>, are now §4's passive-fit corpus rather
+    than withheld noise.</p>
+    <p><strong>Carried forward, not swept:</strong> the two-shot negative tail needs a data, geometry or
+    current-alignment diagnosis before the 0.999 median is treated as universal. The preregistered gate
+    and its bank are not to be altered to accommodate that study.</p>
   </main>
 </body>
 </html>

@@ -23,9 +23,9 @@ def _frame() -> cocos.DiscriminatorFrame:
 def test_pinned_transform_maps_cocos_five_to_seventeen():
     assert cocos.CORPUS_COCOS == 5
     assert cocos.NOVA_COCOS == 17
-    assert cocos.FIXED_FLUX_SIGN == -1.0
-    assert cocos.TOTAL_FLUX_FACTOR == tau
     assert cocos.PSI_TO_NOVA == -tau
+    assert not hasattr(cocos, "FIXED_FLUX_SIGN")
+    assert not hasattr(cocos, "TOTAL_FLUX_FACTOR")
     assert cocos.IP_TO_NOVA == 1.0
     assert cocos.F_TO_NOVA == 1.0
     assert cocos.Q_TO_NOVA == -1.0

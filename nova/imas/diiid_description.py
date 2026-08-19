@@ -15,11 +15,14 @@ import json
 import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 from nova.biot.polygon import polygon_greens
+
+if TYPE_CHECKING:
+    from nova.imas.machine import StaticMachineDescription
 
 STARTER_KIT_VACUUM_R2_BAR = 0.94
 STARTER_KIT_VACUUM_BAR_SOURCE = (
@@ -168,6 +171,73 @@ class DiiidDescription:
         return True
 
 
+@dataclass(frozen=True)
+class DiiidDatasetMachineDescription:
+    """Competition geometry routed through Nova's static machine seam.
+
+    The shipped conductor parameters are converted to vertices exactly once by
+    :func:`section_vertices`.  Those same vertices author the outline records
+    consumed by ``MachineSection``; this wrapper adds the dataset quantities
+    that are not poloidal sections while retaining explicit source receipts.
+    """
+
+    physical: DiiidDescription
+    machine: StaticMachineDescription
+    grid_r: tuple[float, ...]
+    grid_z: tuple[float, ...]
+    receipts: tuple[GeometryReceipt, ...]
+
+    def validate(self) -> None:
+        """Require the complete released machine-geometry contract."""
+        self.physical.validate()
+        if self.machine.contour is not None:
+            raise DiiidDescriptionError(
+                "the competition dataset does not ship a wall contour"
+            )
+        if self.machine.passive_loop_count != 0:
+            raise DiiidDescriptionError(
+                "the competition dataset does not ship passive structures"
+            )
+        expected = set(POLOIDAL_CONDUCTORS)
+        section_names = {section.name for section in self.machine.active_sections}
+        if section_names != expected or len(self.machine.active_sections) != len(
+            expected
+        ):
+            raise DiiidDescriptionError(
+                "the static machine route must contain all nineteen poloidal sections"
+            )
+        if len(self.grid_r) != 65 or len(self.grid_z) != 65:
+            raise DiiidDescriptionError("the released EFIT grid must be 65 by 65")
+        if not self.machine.sightlines:
+            raise DiiidDescriptionError("the released Thomson geometry is empty")
+        for receipt in self.receipts:
+            receipt.validate()
+        covered = {field for receipt in self.receipts for field in receipt.fields}
+        required = {
+            "thomson_chord_name",
+            "thomson_chord_R",
+            "thomson_chord_Z",
+            "efit_grid_R",
+            "efit_grid_Z",
+            "wall_contour",
+            "passive_structure",
+        }
+        if not required <= covered:
+            raise DiiidDescriptionError(
+                "dataset machine provenance is incomplete: "
+                f"{sorted(required - covered)}"
+            )
+
+    @property
+    def provenance_complete(self) -> bool:
+        """Return whether every present and explicitly absent quantity is traced."""
+        try:
+            self.validate()
+        except DiiidDescriptionError:
+            return False
+        return True
+
+
 @dataclass
 class DiiidDescriptionRegistry:
     """Digest-indexed registry authored from challenge rows."""
@@ -192,6 +262,108 @@ class DiiidDescriptionRegistry:
             return self.configurations[digest]
         except KeyError as error:
             raise KeyError(f"DIII-D geometry {digest} is not registered") from error
+
+
+def dataset_machine_description(
+    row: Mapping[str, Any], *, source_row: str
+) -> DiiidDatasetMachineDescription:
+    """Build the released DIII-D geometry through ``StaticMachineDescription``.
+
+    Dataset section parameters first author the physical registry description.
+    The resulting vertices, rather than a second interpretation of the source
+    angles, then pass through ``CrossSection.transform`` as polygon outlines.
+    Thomson coordinates are poloidal points, so the named adapter embeds them
+    in the representative phi-zero plane without inventing sightline endpoints.
+    """
+    from nova.imas.machine import StaticMachineDescription
+
+    physical = _description_from_row(
+        row,
+        digest=geometry_digest(row),
+        source_row=source_row,
+    )
+    sections = []
+    for conductor in physical.conductors:
+        if conductor.vertices is None:
+            continue
+        sections.append(
+            {
+                "geometry_type": 1,
+                "name": conductor.name,
+                "r": conductor.vertices[:, 0].tolist(),
+                "z": conductor.vertices[:, 1].tolist(),
+            }
+        )
+
+    chord_names = _json_values(row, "thomson_chord_name")
+    chord_r = _json_values(row, "thomson_chord_R")
+    chord_z = _json_values(row, "thomson_chord_Z")
+    if len({len(chord_names), len(chord_r), len(chord_z)}) != 1:
+        raise DiiidDescriptionError(
+            "Thomson chord geometry columns have different lengths"
+        )
+    sightlines = [
+        {
+            "name": str(name),
+            "position": [float(radius), float(height), 0.0],
+            "start": None,
+            "end": None,
+        }
+        for name, radius, height in zip(chord_names, chord_r, chord_z, strict=True)
+    ]
+    machine = StaticMachineDescription.from_record(
+        {
+            "contour": None,
+            "pf_active": sections,
+            "pf_passive_loop_count": 0,
+            "tf_coil_count": 0,
+            "thomson_scattering": sightlines,
+        }
+    )
+    grid_r = tuple(float(value) for value in _json_values(row, "efit_grid_R"))
+    grid_z = tuple(float(value) for value in _json_values(row, "efit_grid_Z"))
+    receipts = (
+        GeometryReceipt(
+            fields=(
+                "thomson_chord_name",
+                "thomson_chord_R",
+                "thomson_chord_Z",
+            ),
+            locator=f"{source_row}:thomson_chord_*",
+            unit="name,m,m",
+            statement=(
+                "poloidal chord coordinates embedded at phi zero; no line-of-sight "
+                "endpoint was fabricated"
+            ),
+        ),
+        GeometryReceipt(
+            fields=("efit_grid_R", "efit_grid_Z"),
+            locator=f"{source_row}:efit_grid_R,efit_grid_Z",
+            unit="m,m",
+            statement="released 65 by 65 EFIT coordinate axes copied unmodified",
+        ),
+        GeometryReceipt(
+            fields=("wall_contour",),
+            locator="competition dataset machine-geometry exclusions",
+            statement="wall contour explicitly absent and no external source selected",
+        ),
+        GeometryReceipt(
+            fields=("passive_structure",),
+            locator="competition dataset machine-geometry exclusions",
+            statement=(
+                "passive structure explicitly absent and no external source selected"
+            ),
+        ),
+    )
+    result = DiiidDatasetMachineDescription(
+        physical=physical,
+        machine=machine,
+        grid_r=grid_r,
+        grid_z=grid_z,
+        receipts=receipts,
+    )
+    result.validate()
+    return result
 
 
 def section_vertices(
@@ -427,11 +599,13 @@ __all__ = [
     "DiiidDescription",
     "DiiidDescriptionError",
     "DiiidDescriptionRegistry",
+    "DiiidDatasetMachineDescription",
     "F_COILS",
     "GeometryReceipt",
     "STARTER_KIT_VACUUM_BAR_SOURCE",
     "STARTER_KIT_VACUUM_R2_BAR",
     "TurnConvention",
+    "dataset_machine_description",
     "geometry_digest",
     "section_vertices",
     "vacuum_psi",

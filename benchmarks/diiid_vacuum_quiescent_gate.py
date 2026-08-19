@@ -22,6 +22,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
 
+from benchmarks.diiid_corpus_conventions import (
+    CORPUS_COCOS,
+    corpus_flux_to_nova_total,
+    nova_total_flux_to_corpus,
+)
 from nova.biot.greens import greens_psi
 from nova.equilibrium.map_extraction import apply_delta_star
 from nova.imas.diiid_description import (
@@ -36,7 +41,6 @@ DEFAULT_OUTPUT = Path("/work/projects/imas_gpu/sophelio/vacuum-gate")
 DERIVATIVE_THRESHOLDS = (50.0, 100.0, 200.0)
 SELECTED_THRESHOLD = 100.0
 SMOOTHING_WINDOW_MS = 50.0
-FIXED_FLUX_SIGN = -1.0
 TARGET_STRIDE = 4
 
 
@@ -241,7 +245,7 @@ def _filament_matrix(
     total = greens_psi(
         target_r[:, None], target_z[:, None], source_r[None, :], source_z[None, :]
     )
-    per_radian = np.asarray(total, dtype=float) / (2.0 * np.pi)
+    per_radian = nova_total_flux_to_corpus(np.asarray(total, dtype=float))
     per_radian[~np.isfinite(per_radian)] = 0.0
     return target_index, per_radian
 
@@ -258,7 +262,7 @@ def label_map_current(
 ):
     """Extract current after converting a Wb/rad label to Nova total flux."""
 
-    total_flux = 2.0 * np.pi * np.asarray(flux_per_radian, dtype=float)
+    total_flux = corpus_flux_to_nova_total(np.asarray(flux_per_radian, dtype=float))
     return apply_delta_star(radius, height, total_flux.T)
 
 
@@ -296,7 +300,7 @@ def score(
     for shot_number, shot in enumerate(selected, start=1):
         row = first if shot_number == 1 else _read(shot.path, full_columns)
         registry.ingest(row, source_row=shot.path.name)
-        coil_flux = vacuum_psi(row, description, response)
+        coil_flux = nova_total_flux_to_corpus(vacuum_psi(row, description, response))
         frame_sets = frames[shot.path]
         populations = {
             "sensitivity": set(frame_sets["sensitivity"].tolist()),
@@ -320,7 +324,7 @@ def score(
             exterior = psi_norm[target_mask] > 1.05
             finite = exterior & np.isfinite(actual + coil_at_target + plasma_flux)
             actual = actual[finite]
-            predicted = FIXED_FLUX_SIGN * (coil_at_target[finite] + plasma_flux[finite])
+            predicted = coil_at_target[finite] + plasma_flux[finite]
             frame_r2, squared_error, total = _r2(actual, predicted)
             gauge = float(np.mean(actual - predicted))
             predicted_gauged = predicted + gauge
@@ -403,7 +407,7 @@ def score(
     return {
         "geometry_digest": description.physical_digest,
         "geometry_provenance_complete": description.provenance_complete,
-        "fixed_flux_sign": int(FIXED_FLUX_SIGN),
+        "corpus_cocos": CORPUS_COCOS,
         "target_stride": TARGET_STRIDE,
         "operator_grid_max_displacement_m": float(
             max(
@@ -456,7 +460,7 @@ def main() -> None:
         "derivative": "centred 50 ms native-rate smoothed derivative",
         "thresholds_ka_turn_per_s": DERIVATIVE_THRESHOLDS,
         "selected_threshold_ka_turn_per_s": SELECTED_THRESHOLD,
-        "fixed_flux_sign": int(FIXED_FLUX_SIGN),
+        "corpus_cocos": CORPUS_COCOS,
         "exterior": "label-normalised psi greater than 1.05",
         "target_stride": TARGET_STRIDE,
         "coefficients_fitted": 0,

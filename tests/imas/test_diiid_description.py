@@ -73,6 +73,7 @@ def test_every_poloidal_section_uses_polygon_kernel(monkeypatch) -> None:
     psi = diiid.vacuum_psi(row, description, response)
 
     assert len(calls) == 19
+    np.testing.assert_allclose(response[1][0], 1.0)
     assert psi.shape == (2, 2, 2)
     assert np.isfinite(psi).all()
 

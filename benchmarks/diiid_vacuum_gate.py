@@ -2,9 +2,9 @@
 
 The registered bar is the starter kit's documented ``R² ≈ 0.94`` worked use,
 made operational here as ``R² >= 0.94``.  It is emitted before any parquet is
-opened.  Scoring removes one additive flux gauge per frame and applies the
-challenge scorer's one global sign convention; it fits no current, turn count,
-amplitude, spatial mode or physics parameter.
+opened.  Scoring removes one additive flux gauge per frame and uses the pinned
+corpus convention; it fits no sign, current, turn count, amplitude, spatial
+mode or physics parameter.
 """
 
 from __future__ import annotations
@@ -17,6 +17,10 @@ from typing import Any
 import numpy as np
 import shapely
 
+from benchmarks.diiid_corpus_conventions import (
+    CORPUS_COCOS,
+    nova_total_flux_to_corpus,
+)
 from nova.imas.diiid_description import (
     STARTER_KIT_VACUUM_BAR_SOURCE,
     STARTER_KIT_VACUUM_R2_BAR,
@@ -49,7 +53,7 @@ def _exterior(row: dict[str, Any], frame: int) -> np.ndarray:
     return ~shapely.contains_xy(polygon, radius, height)
 
 
-def _aligned_pairs(row: dict[str, Any], prediction: np.ndarray, sign: float):
+def _aligned_pairs(row: dict[str, Any], prediction: np.ndarray):
     true_values: list[np.ndarray] = []
     predicted_values: list[np.ndarray] = []
     truth = np.asarray(row["efit_psirz"], dtype=float)
@@ -60,14 +64,14 @@ def _aligned_pairs(row: dict[str, Any], prediction: np.ndarray, sign: float):
             & np.isfinite(prediction[frame])
         )
         actual = truth[frame][mask]
-        predicted = sign * prediction[frame][mask]
+        predicted = prediction[frame][mask]
         predicted = predicted + np.mean(actual - predicted)
         true_values.append(actual)
         predicted_values.append(predicted)
     return np.concatenate(true_values), np.concatenate(predicted_values)
 
 
-def _centered_pairs(row: dict[str, Any], prediction: np.ndarray, sign: float):
+def _centered_pairs(row: dict[str, Any], prediction: np.ndarray):
     """Return gauge-free shape vectors without fitting their amplitude."""
 
     true_values: list[np.ndarray] = []
@@ -80,7 +84,7 @@ def _centered_pairs(row: dict[str, Any], prediction: np.ndarray, sign: float):
             & np.isfinite(prediction[frame])
         )
         actual = truth[frame][mask]
-        predicted = sign * prediction[frame][mask]
+        predicted = prediction[frame][mask]
         true_values.append(actual - np.mean(actual))
         predicted_values.append(predicted - np.mean(predicted))
     return np.concatenate(true_values), np.concatenate(predicted_values)
@@ -107,26 +111,25 @@ def score(paths: list[Path]) -> dict[str, Any]:
     response = vacuum_response(
         description, rows[0]["efit_grid_R"], rows[0]["efit_grid_Z"]
     )
-    predictions = [vacuum_psi(row, description, response) for row in rows]
-
-    signed: dict[float, tuple[np.ndarray, np.ndarray]] = {}
-    for sign in (1.0, -1.0):
-        pairs = [
-            _aligned_pairs(row, prediction, sign)
-            for row, prediction in zip(rows, predictions, strict=True)
-        ]
-        signed[sign] = (
-            np.concatenate([pair[0] for pair in pairs]),
-            np.concatenate([pair[1] for pair in pairs]),
-        )
-    chosen_sign = max(signed, key=lambda sign: _r2(*signed[sign]))
-    per_shot = [
-        _r2(*_aligned_pairs(row, prediction, chosen_sign))
+    predictions = [
+        nova_total_flux_to_corpus(vacuum_psi(row, description, response))
+        for row in rows
+    ]
+    pairs = [
+        _aligned_pairs(row, prediction)
         for row, prediction in zip(rows, predictions, strict=True)
     ]
-    pooled_r2 = _r2(*signed[chosen_sign])
+    pooled = (
+        np.concatenate([pair[0] for pair in pairs]),
+        np.concatenate([pair[1] for pair in pairs]),
+    )
+    per_shot = [
+        _r2(*_aligned_pairs(row, prediction))
+        for row, prediction in zip(rows, predictions, strict=True)
+    ]
+    pooled_r2 = _r2(*pooled)
     centered = [
-        _centered_pairs(row, prediction, chosen_sign)
+        _centered_pairs(row, prediction)
         for row, prediction in zip(rows, predictions, strict=True)
     ]
     centered_actual = np.concatenate([pair[0] for pair in centered])
@@ -148,7 +151,7 @@ def score(paths: list[Path]) -> dict[str, Any]:
         "diagnostic_note": (
             "scale and correlation are diagnosis only; neither participates in the gate"
         ),
-        "global_sign": int(chosen_sign),
+        "corpus_cocos": CORPUS_COCOS,
         "shots": len(paths),
         "frames": sum(len(row["efit_times"]) for row in rows),
         "geometry_configurations": len(digests),

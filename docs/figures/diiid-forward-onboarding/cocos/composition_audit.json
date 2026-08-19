@@ -1,0 +1,171 @@
+{
+  "coefficients_fitted": 0,
+  "corpus_cocos": 5,
+  "geometry_digest": "782e9e08f02e610e252e9cf6d6cccfb3a9aefa62b56f14865553ba2f35d213dc",
+  "geometry_provenance_complete": true,
+  "magnitude_table": {
+    "real_quiescent_frames": [
+      {
+        "exterior_points": 174,
+        "extracted_plasma_current_a": 1389641.5265191197,
+        "frame": 99,
+        "raw_plasma_current": 1280.715347290039,
+        "terms": {
+          "coil_corpus_convention": {
+            "centered_rms_wb": 1.1427533122824838,
+            "maximum_wb": 0.23445953646227027,
+            "mean_wb": -1.9424998002682397,
+            "minimum_wb": -4.359395013119725,
+            "span_wb": 4.593854549581995
+          },
+          "label": {
+            "centered_rms_wb": 0.5854400141195045,
+            "maximum_wb": -0.7179698114216517,
+            "mean_wb": -1.431953518545567,
+            "minimum_wb": -3.1342384590752155,
+            "span_wb": 2.4162686476535638
+          },
+          "plasma_extracted_label_sign": {
+            "centered_rms_wb": 0.8573000728577638,
+            "maximum_wb": 3.974652433737763,
+            "mean_wb": 1.9550235987258202,
+            "minimum_wb": 0.3983949359416969,
+            "span_wb": 3.576257497796066
+          }
+        },
+        "time_ms": 2140.0
+      },
+      {
+        "exterior_points": 182,
+        "extracted_plasma_current_a": 1378809.094629399,
+        "frame": 192,
+        "raw_plasma_current": 1270.8151038885117,
+        "terms": {
+          "coil_corpus_convention": {
+            "centered_rms_wb": 1.2004369594223807,
+            "maximum_wb": 0.19302697134208918,
+            "mean_wb": -2.023810799593799,
+            "minimum_wb": -4.578606525341274,
+            "span_wb": 4.771633496683363
+          },
+          "label": {
+            "centered_rms_wb": 0.6434550753056234,
+            "maximum_wb": -1.6321666062676567,
+            "mean_wb": -2.3886655191652757,
+            "minimum_wb": -4.386307583385645,
+            "span_wb": 2.7541409771179883
+          },
+          "plasma_extracted_label_sign": {
+            "centered_rms_wb": 0.9000831394067449,
+            "maximum_wb": 4.125855837445047,
+            "mean_wb": 1.9857775054280495,
+            "minimum_wb": 0.4046626846052926,
+            "span_wb": 3.7211931528397546
+          }
+        },
+        "time_ms": 4000.0
+      },
+      {
+        "exterior_points": 183,
+        "extracted_plasma_current_a": 1374132.9470760587,
+        "frame": 236,
+        "raw_plasma_current": 1272.4893066883087,
+        "terms": {
+          "coil_corpus_convention": {
+            "centered_rms_wb": 1.1735808379132104,
+            "maximum_wb": 0.19932416626519364,
+            "mean_wb": -1.9752025781398699,
+            "minimum_wb": -4.473188869272665,
+            "span_wb": 4.672513035537858
+          },
+          "label": {
+            "centered_rms_wb": 0.6403846550359127,
+            "maximum_wb": -1.9644627601477,
+            "mean_wb": -2.716999647791416,
+            "minimum_wb": -4.711925340683663,
+            "span_wb": 2.7474625805359634
+          },
+          "plasma_extracted_label_sign": {
+            "centered_rms_wb": 0.893838157766651,
+            "maximum_wb": 4.1024614312000836,
+            "mean_wb": 1.9797515908764274,
+            "minimum_wb": 0.4026977190545668,
+            "span_wb": 3.6997637121455167
+          }
+        },
+        "time_ms": 4880.0
+      }
+    ],
+    "synthetic": {
+      "analytic_patch_current_a": 800000.0,
+      "exterior_points": 130,
+      "extracted_patch_current_a": 979202.2582811557,
+      "frame_source": {
+        "frame": 99,
+        "shot": "d3d_shot_00000c4a7b.parquet"
+      },
+      "terms": {
+        "coil_corpus_convention": {
+          "centered_rms_wb": 0.8905240210280921,
+          "maximum_wb": -0.866561562924441,
+          "mean_wb": -2.4518966024447115,
+          "minimum_wb": -4.359395013119725,
+          "span_wb": 3.492833450195284
+        },
+        "label": {
+          "centered_rms_wb": 0.5529282175822547,
+          "maximum_wb": -0.19797161879644412,
+          "mean_wb": -0.9626799510265543,
+          "minimum_wb": -2.3747880854090306,
+          "span_wb": 2.1768164666125864
+        },
+        "plasma_extracted_label_sign": {
+          "centered_rms_wb": 0.5574233399490475,
+          "maximum_wb": 2.8199507381738735,
+          "mean_wb": 1.541317254929321,
+          "minimum_wb": 0.5973534333002727,
+          "span_wb": 2.222597304873601
+        },
+        "plasma_known_corpus_convention": {
+          "centered_rms_wb": 0.5760814653062608,
+          "maximum_wb": 2.8188050182691624,
+          "mean_wb": 1.489216651418157,
+          "minimum_wb": 0.5419461661362189,
+          "span_wb": 2.2768588521329436
+        }
+      }
+    },
+    "unit": "Nova total Wb after the pinned corpus conversion"
+  },
+  "plasma_current_channel": {
+    "ampere_per_raw_unit": {
+      "median": 1084.9800969554433,
+      "values": [
+        1085.051045464213,
+        1084.9800969554433,
+        1079.8777953209528
+      ]
+    },
+    "confidence": "high",
+    "finding": "raw units are kA; near-zero values in some labelled frames are not an A-versus-kA conversion and require a channel/alignment quality audit",
+    "loader_interpretation": "the challenge loader casts raw values to float and applies no unit scale",
+    "loader_quotes": [
+      "return np.asarray(table[name][0].as_py(), dtype=dtype)",
+      "values=_array(table, name)"
+    ],
+    "schema_field_quote": "pyarrow.Field<magnetics_plasma_current: list<element: float>>",
+    "schema_metadata_quote": {
+      "fusion_coil_units": "kA.turn/v1"
+    },
+    "verdict": "kA"
+  },
+  "synthetic_truth": {
+    "construction_exact_deviation_from_unity": 0.0,
+    "construction_exact_r2": 1.0,
+    "pinned_path_deviation_from_unity": 0.0032781360202456256,
+    "pinned_path_r2": 0.9967218639797544,
+    "recorded_coil_sign_only_r2": 0.9967218639028415,
+    "recorded_unmodified_gate_r2": -3.2003750603187706,
+    "verdict": "pipeline_sound"
+  }
+}

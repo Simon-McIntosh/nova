@@ -283,12 +283,10 @@ class InteriorCurrentMomentStencil:
         sample_flux,
         support,
     ) -> CellCurrentMoments:
-        """Integrate fixed interior and own-node profile polynomials."""
-        vectors = jnp.stack(
-            self.support_moments(centroid_density, shared_density, support)
-        )
+        """Integrate one own-node profile polynomial for every carried cell."""
+        del centroid_density, shared_density
         if self.ring_centre is None or len(self.ring_centre) == 0:
-            return CellCurrentMoments(*vectors)
+            raise ValueError("own-node profile geometry was not built")
 
         sample_value = jnp.asarray(sample_flux)
         if sample_value.shape != (self.ring_sample_node_count,):
@@ -315,6 +313,7 @@ class InteriorCurrentMomentStencil:
             jnp.asarray(self.ring_profile_weight, dtype=value_pool.dtype),
         )
         entries = jnp.stack([current, first[:, 0], first[:, 1]])
+        vectors = jnp.zeros((3, self.cell_count), dtype=entries.dtype)
         vectors = vectors.at[:, ring].set(entries)
         return CellCurrentMoments(*vectors)
 
@@ -869,7 +868,7 @@ class StencilMesh:
                     "support centres require sampling coordinates and cell-node indices"
                 )
             support_centre = np.ascontiguousarray(support_centre, dtype=np.intp)
-            ring_centre = np.setdiff1d(support_centre, centre, assume_unique=False)
+            ring_centre = support_centre
             sampling_node_coordinate = np.ascontiguousarray(
                 sampling_node_coordinate, dtype=np.float64
             )

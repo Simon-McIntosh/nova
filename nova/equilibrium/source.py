@@ -581,7 +581,7 @@ class ForwardSource:
         """Return current moments selected by the shared-node clip partition.
 
         The complementary core and common-SOL clips decide participation for
-        every cell. One cubic nodal interpolant is integrated over the actual
+        every cell. One clip-independent own-node density is integrated over the actual
         support at every fill fraction; there is no separate full-cell and
         clipped evaluation path. Centroid domain labels remain available for
         closure identity and receipts, but never switch geometric
@@ -598,17 +598,17 @@ class ForwardSource:
             selection,
         ):
             centroid_density = profile.current_density(radius, centroid_flux)
-            shared_density = profile.current_density(shared_radius, node_flux)
             if direct_flux is not None:
                 moments = support_moments(
                     profile,
                     direct_centroid_flux,
                     centroid_density,
-                    shared_density,
+                    jnp.zeros_like(shared_radius),
                     direct_flux,
                     support,
                 )
             else:
+                shared_density = profile.current_density(shared_radius, node_flux)
                 moments = support_moments(centroid_density, shared_density, support)
             return CellCurrentMoments(
                 *(jnp.where(selection, entry, 0.0) for entry in moments)
@@ -641,7 +641,6 @@ class ForwardSource:
 
         if self.private_flux is not None:
             centroid_selection = masks.private_flux
-            shared_selection = shared_masks.private_flux
             centroid_density = jnp.where(
                 centroid_selection,
                 self.private_flux.current_density(
@@ -649,16 +648,30 @@ class ForwardSource:
                 ),
                 0.0,
             )
-            shared_density = jnp.where(
-                shared_selection,
-                self.private_flux.current_density(
-                    shared_radius,
-                    jnp.where(shared_selection, shared_masks.psi_norm, 1.0),
-                ),
-                0.0,
-            )
+            if sample_flux is None:
+                shared_selection = shared_masks.private_flux
+                shared_density = jnp.where(
+                    shared_selection,
+                    self.private_flux.current_density(
+                        shared_radius,
+                        jnp.where(shared_selection, shared_masks.psi_norm, 1.0),
+                    ),
+                    0.0,
+                )
+                private = interior_moments(centroid_density, shared_density)
+            else:
+                private = support_moments(
+                    self.private_flux,
+                    jnp.maximum(masks.psi_norm, 1.0),
+                    centroid_density,
+                    jnp.zeros_like(shared_radius),
+                    jnp.maximum(sample_flux, 1.0),
+                    common_support,
+                )
             total = total + jnp.stack(
-                interior_moments(centroid_density, shared_density)
+                CellCurrentMoments(
+                    *(jnp.where(centroid_selection, entry, 0.0) for entry in private)
+                )
             )
 
         return CellCurrentMoments(*total)

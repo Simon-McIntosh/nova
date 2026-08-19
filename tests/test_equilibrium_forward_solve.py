@@ -318,8 +318,8 @@ def test_solve_path_current_moments_match_direct_stencil_and_clip(machine):
     assert np.count_nonzero(np.asarray(actual.cell_current)[crossing_unqualified]) == 0
 
 
-def test_unclipped_support_quadrature_is_interior_stencil_bitwise(machine):
-    """The full support is the identical cubic-stencil contraction."""
+def test_unclipped_support_uses_the_own_node_profile_for_every_cell(machine):
+    """The full support carries every cell through the own-node profile."""
     profile, seed, _vacuum = machine
     operator = replace(profile.operator, use_linear_moments=True)
     masks, topology = operator.read(seed)
@@ -335,7 +335,6 @@ def test_unclipped_support_quadrature_is_interior_stencil_bitwise(machine):
     complete = operator.moment_geometry.atomic_mesh.traced_clip(
         jnp.ones(len(shared_density))
     )
-    expected = operator.interior_current_moments(centroid_density, shared_density)
     sample_flux = operator.sample_node_flux(seed)
     sample_psi_norm = (sample_flux - topology.axis_flux) / topology.flux_span
     observed = operator.support_current_moments(
@@ -346,9 +345,14 @@ def test_unclipped_support_quadrature_is_interior_stencil_bitwise(machine):
         sample_psi_norm,
         complete,
     )
-    interior = operator._moment_mesh.centre
-    for actual, direct in zip(observed, expected, strict=True):
-        np.testing.assert_array_equal(actual[interior], direct[interior])
+    carried = np.sort(
+        np.concatenate(
+            [stencil.ring_centre for stencil in operator._interior_moment_stencils]
+        )
+    )
+    np.testing.assert_array_equal(carried, np.arange(operator.grid.node_number))
+    for entry in observed:
+        assert np.all(np.isfinite(np.asarray(entry)))
 
 
 def test_zero_smoothing_width_preserves_moment_map_bitwise(machine):

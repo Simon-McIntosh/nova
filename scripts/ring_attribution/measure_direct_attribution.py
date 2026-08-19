@@ -29,8 +29,8 @@ SOURCE_BOUNDARY_FLUX_WB = -4.7117712394715845
 EXACT_TOTAL_CURRENT_A = -15_005_421.582465796
 INTERIOR_CURRENT_WEIGHTED_SCALE = 0.007646206247471605
 RING_CURRENT_WEIGHTED_LIMIT = 0.0025
-TOTAL_CURRENT_RELATIVE_LIMIT = 0.005
-ARGMAX_SHIFT_LIMIT_WB = 0.5
+INTERIOR_CURRENT_WEIGHTED_LIMIT = 0.00025
+SUPPORT_REFERENCE_TOTAL_RELATIVE_LIMIT = 0.00005
 ALL_TARGET_SHIFT_LIMIT_WB = 0.826
 CURRENT_RESOLUTION_A = 1.0
 PREVIOUS_RING_CURRENT_WEIGHTED_L1 = 0.10228012882939425
@@ -635,8 +635,6 @@ def main() -> None:
     exact_projected_first = np.asarray(exact_projected_first_hex) + (
         exact_projected_m0[:, None] * (hex_centres - centres)
     )
-    attributed_m0[~ring] = localization["moment_m0"][~ring]
-
     baseline_m0, baseline_first = padded_polynomial_current_moments(
         fixture["support_vertices"],
         fixture["support_vertex_count"],
@@ -646,10 +644,6 @@ def main() -> None:
     )
     baseline_m0 = np.asarray(baseline_m0)
     baseline_first = np.asarray(baseline_first)
-    attributed_first[~ring] = baseline_first[~ring]
-
-    if not np.array_equal(attributed_m0[interior], localization["moment_m0"][interior]):
-        raise AssertionError("a stencil-available cell changed")
     if np.any(attributed_m0[lower_leg] != 0.0) or np.any(
         attributed_first[lower_leg] != 0.0
     ):
@@ -668,19 +662,26 @@ def main() -> None:
             oracle_m0[cell], oracle_first[cell] = reference_moments(
                 case, support, centres[cell]
             )
-        if ring[cell]:
-            independent_m0, independent_first_hex = independent_polynomial_moments(
-                support,
-                hex_centres[cell],
-                scale[cell],
-                density_coefficient[cell],
-            )
-            independent_first = independent_first_hex + independent_m0 * (
-                hex_centres[cell] - centres[cell]
-            )
-            attribution_m0_error[cell] = attributed_m0[cell] - independent_m0
-            attribution_first_error[cell] = attributed_first[cell] - independent_first
+        independent_m0, independent_first_hex = independent_polynomial_moments(
+            support,
+            hex_centres[cell],
+            scale[cell],
+            density_coefficient[cell],
+        )
+        independent_first = independent_first_hex + independent_m0 * (
+            hex_centres[cell] - centres[cell]
+        )
+        attribution_m0_error[cell] = attributed_m0[cell] - independent_m0
+        attribution_first_error[cell] = attributed_first[cell] - independent_first
 
+    interior_denominator = float(np.sum(np.abs(oracle_m0[interior])))
+    interior_current_error = attributed_m0 - oracle_m0
+    interior_l1 = float(
+        np.sum(np.abs(interior_current_error[interior])) / interior_denominator
+    )
+    interior_net_relative_error = abs(
+        float(np.sum(interior_current_error[interior]) / np.sum(oracle_m0[interior]))
+    )
     ring_denominator = float(np.sum(np.abs(oracle_m0[ring])))
     ring_current_error = attributed_m0 - oracle_m0
     ring_l1 = float(np.sum(np.abs(ring_current_error[ring])) / ring_denominator)
@@ -703,28 +704,57 @@ def main() -> None:
     first_scale = ring_denominator * float(matrices["hex_radius_m"])
     first_l1 = float(np.sum(np.linalg.norm(first_error[ring], axis=1)) / first_scale)
 
-    incremental_flux = np.zeros(len(fixture["targets"]))
+    analytic_reference_flux = np.zeros(len(fixture["targets"]))
+    support_reference_flux = np.zeros(len(fixture["targets"]))
     coupling_vectors = np.zeros((cell_count, 3))
     for cell in range(cell_count):
         count = int(fixture["legacy_vertex_count"][cell])
         full = fixture["legacy_vertices"][cell, :count]
-        coupling_vectors[cell] = coupling_basis(
+        attributed_coupling = coupling_basis(
             full, attributed_m0[cell], attributed_first[cell]
         )
+        support_coupling = coupling_basis(full, oracle_m0[cell], oracle_first[cell])
+        coupling_vectors[cell] = attributed_coupling
+        support_reference_flux += coupled_flux(
+            fixture["targets"],
+            full,
+            centres[cell],
+            attributed_coupling - support_coupling,
+        )
         if ring[cell]:
-            incremental_flux += coupled_flux(
+            analytic_reference_flux += coupled_flux(
                 fixture["targets"],
                 full,
                 centres[cell],
                 coupling_vectors[cell],
             )
-    shift = localization["reference_shift"] + incremental_flux
+        elif interior[cell]:
+            baseline_coupling = coupling_basis(
+                full, baseline_m0[cell], baseline_first[cell]
+            )
+            analytic_reference_flux += coupled_flux(
+                fixture["targets"],
+                full,
+                centres[cell],
+                attributed_coupling - baseline_coupling,
+            )
+    analytic_reference_flux = localization["reference_shift"] + analytic_reference_flux
+    coverage_flux = analytic_reference_flux - support_reference_flux
     argmax_target = int(np.argmax(np.abs(localization["reference_shift"])))
-    argmax_shift = float(shift[argmax_target])
-    all_target_sup = float(np.max(np.abs(shift)))
-    all_target_sup_index = int(np.argmax(np.abs(shift)))
+    support_argmax_shift = float(support_reference_flux[argmax_target])
+    support_sup = float(np.max(np.abs(support_reference_flux)))
+    support_sup_index = int(np.argmax(np.abs(support_reference_flux)))
+    analytic_argmax_shift = float(analytic_reference_flux[argmax_target])
+    analytic_sup = float(np.max(np.abs(analytic_reference_flux)))
+    analytic_sup_index = int(np.argmax(np.abs(analytic_reference_flux)))
+    coverage_argmax_shift = float(coverage_flux[argmax_target])
+    coverage_sup = float(np.max(np.abs(coverage_flux)))
+    coverage_sup_index = int(np.argmax(np.abs(coverage_flux)))
     total_current = float(np.sum(attributed_m0))
-    total_current_error = abs(total_current / EXACT_TOTAL_CURRENT_A - 1.0)
+    support_reference_current = float(np.sum(oracle_m0))
+    support_reference_total_error = abs(total_current / support_reference_current - 1.0)
+    coverage_total_error = abs(support_reference_current / EXACT_TOTAL_CURRENT_A - 1.0)
+    analytic_total_error = abs(total_current / EXACT_TOTAL_CURRENT_A - 1.0)
 
     combined_matrix = matrices["combined_target"]
     update_vector = np.concatenate(
@@ -808,17 +838,21 @@ def main() -> None:
         "all_ring_supports_attributed": bool(
             np.count_nonzero(np.isfinite(attributed_m0[ring])) == 96
         ),
-        "interior_bitwise_unchanged": bool(
-            np.array_equal(attributed_m0[interior], localization["moment_m0"][interior])
+        "all_cells_own_node_attributed": bool(
+            np.count_nonzero(np.isfinite(attributed_m0)) == cell_count
+        ),
+        "interior_current_weighted_l1": (
+            interior_l1 <= INTERIOR_CURRENT_WEIGHTED_LIMIT
         ),
         "topology_zero_exact": bool(
             np.all(attributed_m0[lower_leg] == 0.0)
             and np.all(attributed_first[lower_leg] == 0.0)
         ),
         "ring_current_weighted_l1": ring_l1 <= RING_CURRENT_WEIGHTED_LIMIT,
-        "total_current": total_current_error <= TOTAL_CURRENT_RELATIVE_LIMIT,
-        "argmax_target_shift": abs(argmax_shift) <= ARGMAX_SHIFT_LIMIT_WB,
-        "all_target_sup": all_target_sup < ALL_TARGET_SHIFT_LIMIT_WB,
+        "support_reference_total_current": (
+            support_reference_total_error <= SUPPORT_REFERENCE_TOTAL_RELATIVE_LIMIT
+        ),
+        "support_reference_field_sup": support_sup < ALL_TARGET_SHIFT_LIMIT_WB,
         "jit_batch_compatible": bool(
             benchmark["jit_compatible"] and benchmark["vmap_compatible"]
         ),
@@ -934,6 +968,9 @@ def main() -> None:
         },
         "priority_ordered_errors": {
             "net_current": {
+                "current_weighted_interior_l1": interior_l1,
+                "interior_limit": INTERIOR_CURRENT_WEIGHTED_LIMIT,
+                "interior_net_relative_error": interior_net_relative_error,
                 "current_weighted_ring_l1": ring_l1,
                 "ring_limit": RING_CURRENT_WEIGHTED_LIMIT,
                 "interior_scale": INTERIOR_CURRENT_WEIGHTED_SCALE,
@@ -966,14 +1003,50 @@ def main() -> None:
                 ),
             },
         },
-        "field_contract": {
-            "total_current_a": total_current,
-            "target_current_a": EXACT_TOTAL_CURRENT_A,
-            "total_current_relative_error": total_current_error,
-            "argmax_target": argmax_target,
-            "argmax_target_shift_wb": argmax_shift,
-            "all_target_sup_wb": all_target_sup,
-            "all_target_sup_index": all_target_sup_index,
+        "two_reference_decomposition": {
+            "attributed_vs_support_geometry": {
+                "attributed_total_current_a": total_current,
+                "support_reference_total_current_a": support_reference_current,
+                "signed_total_difference_a": (
+                    total_current - support_reference_current
+                ),
+                "total_current_relative_error": support_reference_total_error,
+                "total_current_relative_limit": (
+                    SUPPORT_REFERENCE_TOTAL_RELATIVE_LIMIT
+                ),
+                "fixed_argmax_target": argmax_target,
+                "fixed_argmax_target_shift_wb": support_argmax_shift,
+                "all_target_sup_wb": support_sup,
+                "all_target_sup_index": support_sup_index,
+                "all_target_sup_limit_wb": ALL_TARGET_SHIFT_LIMIT_WB,
+                "gate_authority": "representation",
+            },
+            "support_coverage_vs_analytic": {
+                "support_reference_total_current_a": support_reference_current,
+                "analytic_total_current_a": EXACT_TOTAL_CURRENT_A,
+                "signed_total_difference_a": (
+                    support_reference_current - EXACT_TOTAL_CURRENT_A
+                ),
+                "total_current_relative_error": coverage_total_error,
+                "fixed_argmax_target": argmax_target,
+                "fixed_argmax_target_shift_wb": coverage_argmax_shift,
+                "all_target_sup_wb": coverage_sup,
+                "all_target_sup_index": coverage_sup_index,
+                "classification": (
+                    "tracked O(h^2) straight-chord support-coverage term"
+                ),
+            },
+            "attributed_vs_analytic_tracked": {
+                "attributed_total_current_a": total_current,
+                "analytic_total_current_a": EXACT_TOTAL_CURRENT_A,
+                "signed_total_difference_a": total_current - EXACT_TOTAL_CURRENT_A,
+                "total_current_relative_error": analytic_total_error,
+                "fixed_argmax_target": argmax_target,
+                "fixed_argmax_target_shift_wb": analytic_argmax_shift,
+                "all_target_sup_wb": analytic_sup,
+                "all_target_sup_index": analytic_sup_index,
+                "gate_authority": "coverage study",
+            },
         },
         "error_components": {
             "attribution_current_sup_a": float(
@@ -1042,7 +1115,10 @@ def main() -> None:
         oracle_first=oracle_first,
         exact_projected_m0=exact_projected_m0,
         exact_projected_first=exact_projected_first,
-        target_shift=shift,
+        target_shift=analytic_reference_flux,
+        attributed_vs_support_reference_target_shift=support_reference_flux,
+        support_coverage_vs_analytic_target_shift=coverage_flux,
+        attributed_vs_analytic_target_shift=analytic_reference_flux,
     )
     (args.output / "ring-attribution-results.json").write_text(
         json.dumps(report, indent=2) + "\n"

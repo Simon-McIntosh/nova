@@ -20,7 +20,8 @@ from scipy.interpolate import RegularGridInterpolator
 from scipy.sparse import csr_matrix
 from scipy.sparse.linalg import splu
 
-from nova.equilibrium.convention import TOTAL_FLUX_FACTOR, grad_shafranov_source
+from benchmarks.diiid_corpus_conventions import corpus_flux_to_nova_total
+from nova.equilibrium.convention import grad_shafranov_source
 from nova.equilibrium.map_extraction import apply_delta_star, extract_flux_functions
 
 DEFAULT_DATA = Path("/work/projects/imas_gpu/sophelio/raw/data/diii_d_train")
@@ -302,7 +303,9 @@ def _distribution(values: list[float]) -> dict[str, float]:
 def _frame_fields(
     row: dict[str, Any], frame: int, operator: DirichletOperator
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, float]:
-    label = TOTAL_FLUX_FACTOR * np.asarray(row["efit_psirz"][frame], dtype=np.float64).T
+    label = corpus_flux_to_nova_total(
+        np.asarray(row["efit_psirz"][frame], dtype=np.float64)
+    ).T
     contour, plasma_mask = _plasma_geometry(
         row, frame, operator.radius, operator.height
     )
@@ -565,7 +568,7 @@ def resolve_frame(
     """Extract and re-solve one labelled map without adjusting its sources."""
 
     label_per_radian = np.asarray(row["efit_psirz"][frame], dtype=np.float64).T
-    label = TOTAL_FLUX_FACTOR * label_per_radian
+    label = corpus_flux_to_nova_total(label_per_radian)
     contour, plasma_mask = _plasma_geometry(
         row, frame, operator.radius, operator.height
     )

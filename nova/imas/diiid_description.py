@@ -236,7 +236,7 @@ def vacuum_response(
     grid_r: Sequence[float],
     grid_z: Sequence[float],
 ) -> tuple[tuple[str, ...], np.ndarray]:
-    """Return per-radian flux on the shipped grid per ampere-turn."""
+    """Return Nova total flux on the shipped grid per ampere-turn."""
 
     description.validate()
     radius = np.asarray(grid_r, dtype=float)
@@ -258,7 +258,7 @@ def vacuum_response(
             target_r.ravel(), target_z.ravel(), conductor.vertices
         )[0]
         names.append(conductor.name)
-        responses.append(total_flux.reshape(target_r.shape) / (2.0 * np.pi))
+        responses.append(total_flux.reshape(target_r.shape))
     return tuple(names), np.stack(responses)
 
 
@@ -267,7 +267,7 @@ def vacuum_psi(
     description: DiiidDescription,
     response: tuple[tuple[str, ...], np.ndarray] | None = None,
 ) -> np.ndarray:
-    """Compute vacuum psi [Wb/rad] at ``efit_times`` from recorded currents alone."""
+    """Compute Nova total vacuum flux [Wb] from recorded currents alone."""
 
     names, matrix = response or vacuum_response(
         description, row["efit_grid_R"], row["efit_grid_Z"]

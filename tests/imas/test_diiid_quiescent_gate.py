@@ -90,4 +90,4 @@ def test_label_map_current_converts_per_radian_flux(monkeypatch):
     height = np.array([-1.0, 0.0, 1.0])
     flux_per_radian = np.arange(9.0).reshape(3, 3)
     assert gate.label_map_current(radius, height, flux_per_radian) == "receipt"
-    np.testing.assert_allclose(captured["total_flux"], 2.0 * np.pi * flux_per_radian.T)
+    np.testing.assert_allclose(captured["total_flux"], -2.0 * np.pi * flux_per_radian.T)

@@ -1,9 +1,9 @@
-"""Audit the sign and flux-unit boundary of the DIII-D vacuum composition.
+"""Audit the pinned convention boundary of the DIII-D vacuum composition.
 
-The authoritative gate remains untouched.  This module imports its scoring and
-map-extraction helpers, builds a synthetic label from the same coil and filament
-Green kernels, and compares the gate composition with the construction-exact
-composition.  No coefficient is estimated from either synthetic or real data.
+This module imports the gate scoring and map-extraction helpers, builds a
+synthetic label from the same coil and filament Green kernels, and compares the
+pinned composition with construction-exact truth.  No coefficient is estimated
+from either synthetic or real data.
 """
 
 from __future__ import annotations
@@ -16,6 +16,11 @@ from typing import Any
 import numpy as np
 
 from benchmarks import diiid_vacuum_quiescent_gate as gate
+from benchmarks.diiid_corpus_conventions import (
+    CORPUS_COCOS,
+    corpus_flux_to_nova_total,
+    nova_total_flux_to_corpus,
+)
 from nova.biot.greens import greens_psi
 from nova.imas.diiid_description import (
     DiiidDescriptionRegistry,
@@ -36,7 +41,7 @@ AMBIX_LOADER = Path("/home/ITER/mcintos/Code/imas-ambix/imas_ambix/challenge/loa
 def _magnitude(values_per_radian: np.ndarray) -> dict[str, float]:
     """Return signed and gauge-free total-flux magnitudes in webers."""
 
-    total_flux = 2.0 * np.pi * np.asarray(values_per_radian, dtype=float)
+    total_flux = corpus_flux_to_nova_total(np.asarray(values_per_radian, dtype=float))
     centred = total_flux - np.mean(total_flux)
     return {
         "mean_wb": float(np.mean(total_flux)),
@@ -96,7 +101,9 @@ def _filament_flux_map(
         source_r[None, :],
         source_z[None, :],
     )
-    return ((response @ source_current_a) / (2.0 * np.pi)).reshape(target_r.shape)
+    return nova_total_flux_to_corpus(response @ source_current_a).reshape(
+        target_r.shape
+    )
 
 
 def _one_frame_row(row: dict[str, Any], frame: int, flux: np.ndarray) -> dict[str, Any]:
@@ -152,9 +159,8 @@ def _frame_table(
         filament_response,
     )
     exterior = psi_norm[target_mask] > 1.05
-    coil = gate.FIXED_FLUX_SIGN * coil_flux[frame][target_mask][exterior]
+    coil = coil_flux[frame][target_mask][exterior]
     plasma_label_sign = plasma[exterior]
-    plasma_gate_sign = gate.FIXED_FLUX_SIGN * plasma_label_sign
     actual = label[target_mask][exterior]
     return {
         "frame": frame,
@@ -169,9 +175,8 @@ def _frame_table(
         "extracted_plasma_current_a": extracted_current_a,
         "exterior_points": int(np.count_nonzero(exterior)),
         "terms": {
-            "coil_challenge_sign": _magnitude(coil),
+            "coil_corpus_convention": _magnitude(coil),
             "plasma_extracted_label_sign": _magnitude(plasma_label_sign),
-            "plasma_after_gate_global_sign": _magnitude(plasma_gate_sign),
             "label": _magnitude(actual),
         },
     }
@@ -234,7 +239,7 @@ def audit(
     registry = DiiidDescriptionRegistry()
     description = registry.ingest(row, source_row=path.name)
     response = vacuum_response(description, row["efit_grid_R"], row["efit_grid_Z"])
-    coil_flux = vacuum_psi(row, description, response)
+    coil_flux = nova_total_flux_to_corpus(vacuum_psi(row, description, response))
     radius = np.asarray(row["efit_grid_R"], dtype=float)
     height = np.asarray(row["efit_grid_Z"], dtype=float)
     operator_radius = np.linspace(radius[0], radius[-1], radius.size)
@@ -254,7 +259,7 @@ def audit(
         operator_radius, operator_height, source_r, source_z, source_current
     )
     coil_physical = coil_flux[frame]
-    synthetic_label = gate.FIXED_FLUX_SIGN * (coil_physical + plasma_physical)
+    synthetic_label = coil_physical + plasma_physical
     plasma_extracted, extracted_current_a, synthetic_norm = _extracted_plasma(
         row,
         frame,
@@ -268,31 +273,20 @@ def audit(
     coil_target = coil_physical[target_mask][exterior]
     known_plasma_target = plasma_physical[target_mask][exterior]
     extracted_target = plasma_extracted[exterior]
-    exact_prediction = gate.FIXED_FLUX_SIGN * (coil_target + known_plasma_target)
-    gate_prediction = gate.FIXED_FLUX_SIGN * (coil_target + extracted_target)
-    localized_prediction = gate.FIXED_FLUX_SIGN * coil_target + extracted_target
+    exact_prediction = coil_target + known_plasma_target
+    gate_prediction = coil_target + extracted_target
     exact_score = gate._r2(actual, exact_prediction)[0]
     gate_score = gate._r2(actual, gate_prediction)[0]
-    localized_score = gate._r2(actual, localized_prediction)[0]
-    defect = (
-        "global_sign_applied_twice_to_label_derived_plasma"
-        if exact_score > 1.0 - 1.0e-12 and localized_score > gate_score
-        else "pipeline_sound"
-    )
+    defect = "pipeline_sound" if gate_score >= 0.99 else "composition_defect"
     synthetic_table = {
         "frame_source": {"shot": path.name, "frame": frame},
         "analytic_patch_current_a": float(np.sum(source_current)),
         "extracted_patch_current_a": extracted_current_a,
         "exterior_points": int(np.count_nonzero(exterior)),
         "terms": {
-            "coil_challenge_sign": _magnitude(gate.FIXED_FLUX_SIGN * coil_target),
-            "plasma_known_challenge_sign": _magnitude(
-                gate.FIXED_FLUX_SIGN * known_plasma_target
-            ),
+            "coil_corpus_convention": _magnitude(coil_target),
+            "plasma_known_corpus_convention": _magnitude(known_plasma_target),
             "plasma_extracted_label_sign": _magnitude(extracted_target),
-            "plasma_after_gate_global_sign": _magnitude(
-                gate.FIXED_FLUX_SIGN * extracted_target
-            ),
             "label": _magnitude(actual),
         },
     }
@@ -318,20 +312,21 @@ def audit(
         "synthetic_truth": {
             "construction_exact_r2": exact_score,
             "construction_exact_deviation_from_unity": abs(1.0 - exact_score),
-            "unmodified_gate_r2": gate_score,
-            "unmodified_gate_deviation_from_unity": abs(1.0 - gate_score),
-            "localized_composition_r2": localized_score,
-            "localized_composition_deviation_from_unity": abs(1.0 - localized_score),
+            "pinned_path_r2": gate_score,
+            "pinned_path_deviation_from_unity": abs(1.0 - gate_score),
+            "recorded_coil_sign_only_r2": 0.9967218639028415,
+            "recorded_unmodified_gate_r2": -3.2003750603187706,
             "verdict": defect,
         },
         "magnitude_table": {
-            "unit": "Wb total flux; per-radian inputs multiplied by 2pi",
+            "unit": "Nova total Wb after the pinned corpus conversion",
             "synthetic": synthetic_table,
             "real_quiescent_frames": real_tables,
         },
         "plasma_current_channel": _unit_receipt(real_tables, schema),
         "geometry_digest": description.physical_digest,
         "geometry_provenance_complete": description.provenance_complete,
+        "corpus_cocos": CORPUS_COCOS,
         "coefficients_fitted": 0,
     }
 

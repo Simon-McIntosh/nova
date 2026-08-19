@@ -9,6 +9,7 @@ from typing import Any
 
 import numpy as np
 
+from benchmarks.diiid_corpus_conventions import nova_total_flux_to_corpus
 from benchmarks.diiid_vacuum_gate import _exterior, _r2, _row
 from nova.biot.polygon import polygon_greens
 from nova.imas.diiid_description import DiiidDescriptionRegistry, section_vertices
@@ -53,7 +54,7 @@ def _response(
         )
         total_flux = polygon_greens(target_r.ravel(), target_z.ravel(), vertices)[0]
         names.append(name)
-        responses.append(total_flux.reshape(target_r.shape) / (2.0 * np.pi))
+        responses.append(nova_total_flux_to_corpus(total_flux.reshape(target_r.shape)))
     return tuple(names), np.stack(responses)
 
 
@@ -118,24 +119,21 @@ def _pooled_score(
     prepared: list[tuple[list[np.ndarray], list[np.ndarray], np.ndarray]],
     predictions: list[np.ndarray],
 ) -> dict[str, Any]:
-    signed = {}
-    for sign in (1.0, -1.0):
-        actual_parts = []
-        predicted_parts = []
-        for (masks, actual_frames, actual), prediction in zip(
-            prepared, predictions, strict=True
+    actual_parts = []
+    predicted_parts = []
+    for (masks, actual_frames, actual), prediction in zip(
+        prepared, predictions, strict=True
+    ):
+        aligned = []
+        for frame, (mask, actual_frame) in enumerate(
+            zip(masks, actual_frames, strict=True)
         ):
-            aligned = []
-            for frame, (mask, actual_frame) in enumerate(
-                zip(masks, actual_frames, strict=True)
-            ):
-                values = sign * prediction[frame][mask]
-                aligned.append(values + np.mean(actual_frame - values))
-            actual_parts.append(actual)
-            predicted_parts.append(np.concatenate(aligned))
-        signed[sign] = (np.concatenate(actual_parts), np.concatenate(predicted_parts))
-    chosen_sign = max(signed, key=lambda sign: _r2(*signed[sign]))
-    return {"pooled_r2": _r2(*signed[chosen_sign]), "global_sign": int(chosen_sign)}
+            values = prediction[frame][mask]
+            aligned.append(values + np.mean(actual_frame - values))
+        actual_parts.append(actual)
+        predicted_parts.append(np.concatenate(aligned))
+    pooled = (np.concatenate(actual_parts), np.concatenate(predicted_parts))
+    return {"pooled_r2": _r2(*pooled)}
 
 
 def sweep(paths: list[Path]) -> dict[str, Any]:
@@ -237,8 +235,8 @@ def sweep(paths: list[Path]) -> dict[str, Any]:
                 "one-factor sign conventions at the shipped one-turn ECOILA baseline"
             ),
             "fitting": (
-                "only one additive gauge per frame and one global sign; no "
-                "amplitude or current fit"
+                "only one additive gauge per frame; the pinned corpus sign is not "
+                "fitted, and no amplitude or current is fitted"
             ),
         },
     }

@@ -90,10 +90,12 @@ from nova.equilibrium.conservation import (
 from nova.equilibrium.domain import DomainMasks
 from nova.equilibrium.forward_operator import ForwardFluxOperator
 from nova.equilibrium.observation import (
+    ClippedIntegralMeasure,
     CurrentLedger,
     IntegralObservation,
     MomentTargets,
     current_ledger,
+    core_pressure,
     moment_residual,
     observe_moments,
     reject_unsupported_enforcement,
@@ -318,39 +320,47 @@ class ForwardProfile:
         the declared source and integrates, with no conservation differencing
         in the way, so ``jacfwd`` through it costs one observation.
         """
+        _current, support_integrals, _masks, topology = self._integral_state(flux)
+        return observe_moments(support_integrals, topology.flux_span)
+
+    def _integral_state(self, flux):
+        """Return current and integral state for this construction's geometry."""
+        if self.operator.use_linear_moments:
+            return self.operator.current_moments_and_observation(flux)
         masks, topology = self.operator.read(flux)
-        current_masks = self.operator.current_domain_masks(flux)
-        cell_current = self.operator.cell_current_moments(flux).cell_current
-        radial, vertical = poloidal_field(self.lattice, flux[: self.lattice.node_count])
-        return observe_moments(
-            self.operator.source,
-            current_masks,
-            jnp.asarray(self.lattice.node_radius),
-            self.operator.area,
-            cell_current,
-            radial**2 + vertical**2,
-            topology.flux_span,
+        current_moments = self.operator.cell_current_moments(flux)
+        cell_current = current_moments.cell_current
+        radius = jnp.asarray(self.lattice.node_radius)
+        area = jnp.where(masks.core, self.operator.area, 0.0)
+        volume = 2.0 * jnp.pi * radius * area
+        radial, vertical = poloidal_field(
+            self.lattice, jnp.asarray(flux)[: self.lattice.node_count]
         )
+        pressure = jnp.where(
+            masks.core,
+            core_pressure(self.operator.source, masks, radius, topology.flux_span),
+            0.0,
+        )
+        support_integrals = ClippedIntegralMeasure(
+            area=area,
+            volume=volume,
+            radial_volume=radius * volume,
+            cell_current=jnp.where(masks.core, cell_current, 0.0),
+            pressure_volume=pressure * volume,
+            field_volume=(radial**2 + vertical**2) * volume,
+            masks=masks,
+        )
+        return current_moments, support_integrals, masks, topology
 
     def _receipt(
         self, flux: jax.Array, history: fixed_point.FixedPointResult
     ) -> ForwardEquilibrium:
         """Return the typed result of one converged or supplied flux map."""
-        masks, topology = self.operator.read(flux)
-        current_masks = self.operator.current_domain_masks(flux)
-        cell_current = self.operator.cell_current_moments(flux).cell_current
+        current_moments, support_integrals, masks, topology = self._integral_state(flux)
+        cell_current = current_moments.cell_current
         grid_flux = flux[: self.lattice.node_count]
         radius = jnp.asarray(self.lattice.node_radius)
-        radial, vertical = poloidal_field(self.lattice, grid_flux)
-        moments = observe_moments(
-            self.operator.source,
-            current_masks,
-            radius,
-            self.operator.area,
-            cell_current,
-            radial**2 + vertical**2,
-            topology.flux_span,
-        )
+        moments = observe_moments(support_integrals, topology.flux_span)
         conservation = conservation_ledger(
             self.lattice,
             grid_flux,
@@ -365,7 +375,7 @@ class ForwardProfile:
             topology=topology,
             fixed_point=history,
             moments=moments,
-            ledger=current_ledger(cell_current, current_masks),
+            ledger=current_ledger(cell_current, support_integrals.masks),
             conservation=conservation,
             normalisation=absolute_normalisation_record(flux.dtype),
             rotation=self.operator.source.rotation_record(radius, masks),

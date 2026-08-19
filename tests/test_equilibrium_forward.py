@@ -56,6 +56,7 @@ with skip_import("jax"):
     from nova.equilibrium.forward import ForwardProfile, SolveRoute
     from nova.equilibrium.forward_operator import ForwardFluxOperator
     from nova.equilibrium.observation import (
+        ClippedIntegralMeasure,
         MomentEnforcementError,
         core_field_function_squared,
         core_pressure,
@@ -427,16 +428,6 @@ def test_integral_observations_reproduce_their_pinned_definitions(analytic):
     )
     radial, vertical = poloidal_field(lattice, flux)
     field_squared = np.asarray(radial) ** 2 + np.asarray(vertical) ** 2
-    observation = observe_moments(
-        source,
-        masks,
-        jnp.asarray(radius),
-        jnp.asarray(area),
-        jnp.asarray(cell_current),
-        jnp.asarray(field_squared),
-        span,
-    )
-
     volume_element = np.where(core, 2.0 * np.pi * radius * area, 0.0)
     volume = volume_element.sum()
     plasma_current = cell_current[core].sum()
@@ -444,6 +435,16 @@ def test_integral_observations_reproduce_their_pinned_definitions(analytic):
     pressure = BOUNDARY_PRESSURE + float(span) * P_PRIME * (
         1.0 - np.asarray(masks.psi_norm)
     )
+    measure = ClippedIntegralMeasure(
+        area=jnp.asarray(np.where(core, area, 0.0)),
+        volume=jnp.asarray(volume_element),
+        radial_volume=jnp.asarray(radius * volume_element),
+        cell_current=jnp.asarray(np.where(core, cell_current, 0.0)),
+        pressure_volume=jnp.asarray(pressure * volume_element),
+        field_volume=jnp.asarray(field_squared * volume_element),
+        masks=masks,
+    )
+    observation = observe_moments(measure, span)
     reference = mu_0 * major_radius * plasma_current**2
     np.testing.assert_allclose(observation.volume, volume, rtol=1e-12)
     np.testing.assert_allclose(observation.plasma_current, plasma_current, rtol=1e-12)

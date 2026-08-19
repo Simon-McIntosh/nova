@@ -1251,10 +1251,9 @@ def solve(case: ReferenceCase, machine: HexMachine) -> SolvedEquilibrium:
         gmres_iterations=KRYLOV_ITERATIONS,
         warmup=0,
     )
-    masks, topology = operator.read(history.state)
-    current_masks = operator.current_domain_masks(history.state)
-    radius = jnp.asarray(machine.radius)
-    current_moments = operator.cell_current_moments(history.state)
+    current_moments, measure, masks, topology = (
+        operator.current_moments_and_observation(history.state)
+    )
     cell_current = current_moments.cell_current
     return SolvedEquilibrium(
         case=case,
@@ -1263,16 +1262,8 @@ def solve(case: ReferenceCase, machine: HexMachine) -> SolvedEquilibrium:
         cell_current=cell_current,
         masks=masks,
         topology=topology,
-        moments=observe_moments(
-            operator.source,
-            current_masks,
-            radius,
-            operator.area,
-            cell_current,
-            machine.poloidal_field_squared(operator.external_current, current_moments),
-            topology.flux_span,
-        ),
-        ledger=current_ledger(cell_current, current_masks),
+        moments=observe_moments(measure, topology.flux_span),
+        ledger=current_ledger(cell_current, measure.masks),
         fixed_point=history,
     )
 
@@ -1785,19 +1776,11 @@ def test_the_published_equilibrium_is_the_scored_post_map_state(published):
     candidate = profile.flux_map()(equilibrium.flux)
     receipt = profile.observe(candidate)
 
-    masks, topology = operator.read(candidate)
-    current_masks = operator.current_domain_masks(candidate)
-    current_moments = operator.cell_current_moments(candidate)
-    cell_current = current_moments.cell_current
-    moments = observe_moments(
-        operator.source,
-        current_masks,
-        jnp.asarray(machine.radius),
-        operator.area,
-        cell_current,
-        machine.poloidal_field_squared(operator.external_current, current_moments),
-        topology.flux_span,
+    current_moments, measure, masks, topology = (
+        operator.current_moments_and_observation(candidate)
     )
+    cell_current = current_moments.cell_current
+    moments = observe_moments(measure, topology.flux_span)
     direct = SolvedEquilibrium(
         case=case,
         machine=machine,
@@ -1806,7 +1789,7 @@ def test_the_published_equilibrium_is_the_scored_post_map_state(published):
         masks=masks,
         topology=topology,
         moments=moments,
-        ledger=current_ledger(cell_current, current_masks),
+        ledger=current_ledger(cell_current, measure.masks),
         fixed_point=receipt.fixed_point,
     )
 

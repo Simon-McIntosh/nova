@@ -12,6 +12,7 @@ from nova.equilibrium.separatrix_clip import (
     padded_linear_current_moments,
     padded_polynomial_current_moments,
 )
+from nova.equilibrium.observation import clipped_support_quadrature
 
 
 def test_polynomial_current_moments_match_adaptive_triangle_quadrature():
@@ -420,6 +421,70 @@ def test_traced_clip_matches_exact_zero_corner_and_tangential_cells():
     assert float(traced.contour_area) == pytest.approx(2.0, abs=1.0e-14)
 
 
+def test_clipped_observation_quadrature_carries_exact_area_and_linear_current():
+    """A crossing support contributes its clipped measure; an excluded one is zero."""
+    cells = [np.asarray([[1.0, -1.0], [2.0, -1.0], [2.0, 1.0], [1.0, 1.0]])]
+    centre = np.asarray([[1.5, 0.0]])
+    mesh = AtomicCellMesh.from_cells(cells, centroids=centre)
+    support = mesh.traced_clip(1.7 - mesh.node_coordinates[:, 0])
+    points, weights = clipped_support_quadrature(support, np.asarray([True]))
+    density = 3.0 + 0.4 * (points[..., 0] - centre[0, 0]) - 0.2 * points[..., 1]
+    observed_current = np.sum(np.asarray(weights * density), axis=1)
+    exact_current, _first = support.linear_current_moments(
+        np.asarray([3.0]), np.asarray([[0.4, -0.2]])
+    )
+    np.testing.assert_allclose(np.sum(weights, axis=1), support.area, atol=2.0e-15)
+    np.testing.assert_allclose(observed_current, exact_current, atol=2.0e-14)
+    assert float(support.area[0]) == pytest.approx(1.4, abs=2.0e-15)
+
+    _points, excluded_weight = clipped_support_quadrature(support, np.asarray([False]))
+    np.testing.assert_array_equal(excluded_weight, np.zeros_like(excluded_weight))
+
+
+def test_clipped_observation_quadrature_matches_adaptive_smooth_oracle():
+    """The fixed high-order rule resolves a non-polynomial closure integrand."""
+    cells = [np.asarray([[1.0, -0.8], [2.0, -0.8], [2.0, 0.9], [1.0, 0.9]])]
+    centre = np.asarray([[1.5, 0.05]])
+    mesh = AtomicCellMesh.from_cells(cells, centroids=centre)
+    support = mesh.traced_clip(
+        1.55 - mesh.node_coordinates[:, 0] - 0.15 * mesh.node_coordinates[:, 1]
+    )
+    points, weights = clipped_support_quadrature(support, np.asarray([True]))
+
+    def integrand(point):
+        radius, height = point
+        return 2.0 * np.pi * radius * np.exp(0.2 * radius - 0.3 * height) / radius**2
+
+    point_array = np.asarray(points)
+    point_value = (
+        2.0
+        * np.pi
+        * point_array[..., 0]
+        * np.exp(0.2 * point_array[..., 0] - 0.3 * point_array[..., 1])
+        / point_array[..., 0] ** 2
+    )
+    actual = float(np.sum(np.asarray(weights) * point_value))
+    polygon = np.asarray(support.support_vertices[0, : support.vertex_count[0]])
+    anchor = polygon[0]
+    expected = 0.0
+    for first, second in zip(polygon[1:-1], polygon[2:], strict=True):
+        edge = np.column_stack((first - anchor, second - anchor))
+        determinant = abs(float(np.linalg.det(edge)))
+        value, _error = integrate.dblquad(
+            lambda vertical, radial: (
+                integrand(anchor + edge @ np.asarray([radial, vertical])) * determinant
+            ),
+            0.0,
+            1.0,
+            0.0,
+            lambda radial: 1.0 - radial,
+            epsabs=2.0e-13,
+            epsrel=2.0e-13,
+        )
+        expected += value
+    assert abs(actual - expected) <= 2.0e-12
+
+
 def test_traced_clip_jits_once_and_vmaps_over_moving_separatrices():
     import jax
     import jax.numpy as jnp
@@ -443,6 +508,9 @@ def test_traced_clip_jits_once_and_vmaps_over_moving_separatrices():
         nonlocal trace_count
         trace_count += 1
         clipped = mesh.traced_clip(flux)
+        points, weights = clipped_support_quadrature(
+            clipped, jnp.ones(len(centre), dtype=bool)
+        )
         current, first = clipped.linear_current_moments(density, gradient)
         return (
             clipped.area,
@@ -450,12 +518,17 @@ def test_traced_clip_jits_once_and_vmaps_over_moving_separatrices():
             clipped.contour_area,
             current,
             first,
+            jnp.sum(points[..., 0] * weights),
         )
 
     compiled = jax.jit(clip_and_measure)
     for flux in flux_bank:
-        area, patch_area, contour_area, current, first = compiled(jnp.asarray(flux))
-        jax.block_until_ready((area, patch_area, contour_area, current, first))
+        area, patch_area, contour_area, current, first, radial_measure = compiled(
+            jnp.asarray(flux)
+        )
+        jax.block_until_ready(
+            (area, patch_area, contour_area, current, first, radial_measure)
+        )
         assert abs(float(patch_area - contour_area)) < 1.0e-12
     assert trace_count == 1
 

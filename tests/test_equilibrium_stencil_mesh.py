@@ -57,6 +57,7 @@ with skip_import("jax"):
         poloidal_field,
     )
     from nova.equilibrium.domain import DomainMasks, PlasmaDomain
+    from nova.equilibrium.observation import clipped_support_quadrature
     from nova.equilibrium.source import DomainProfile, ForwardSource
     from nova.equilibrium.stencil_mesh import (
         MomentGeometry,
@@ -282,6 +283,27 @@ def evaluate_boundary_support(problem, support):
         problem["sample_flux"],
         support,
     )
+
+
+def test_own_node_field_varies_exactly_across_clipped_quadrature_points():
+    """The seven samples recover a quadratic flux and both derivatives in-cell."""
+    problem = boundary_support_problem()
+    atomic = problem["geometry"].atomic_mesh
+    signed = 6.28 - atomic.node_coordinates[:, 0] - 0.08 * atomic.node_coordinates[:, 1]
+    support = atomic.traced_clip(jnp.asarray(signed))
+    points, _weights = clipped_support_quadrature(
+        support, jnp.ones(problem["mesh"].node_count, dtype=bool)
+    )
+    value, radial, vertical = problem["stencil"].sample_flux_field(
+        problem["centroid_flux"], problem["sample_flux"], points
+    )
+    query = np.asarray(points)
+    expected_value = problem["flux"](query)
+    expected_radial = 0.04 + 0.02 * query[..., 0] + 0.005 * query[..., 1]
+    expected_vertical = -0.03 + 0.005 * query[..., 0]
+    np.testing.assert_allclose(value, expected_value, rtol=2.0e-13, atol=2.0e-13)
+    np.testing.assert_allclose(radial, expected_radial, rtol=2.0e-13, atol=2.0e-13)
+    np.testing.assert_allclose(vertical, expected_vertical, rtol=2.0e-13, atol=2.0e-13)
 
 
 def adaptive_polygon_integral(polygon, function) -> float:
@@ -526,6 +548,12 @@ def test_banked_unified_representation_satisfies_coverage_split_gates():
     representation = decomposition["attributed_vs_support_geometry"]
     coverage = decomposition["support_coverage_vs_analytic"]
     tracked = decomposition["attributed_vs_analytic_tracked"]
+    errors = report["priority_ordered_errors"]["net_current"]
+    assert errors["current_weighted_interior_l1"] == 4.740850588173696e-05
+    assert errors["current_weighted_ring_l1"] == 0.0016004849848483096
+    assert representation["signed_total_difference_a"] == -621.3295577503741
+    assert report["population"]["topology_zero_lower_leg_supports"] == 17
+    assert report["error_components"]["zero_current_leakage_a"] == 0.0
     assert representation["total_current_relative_error"] <= 5.0e-5
     assert representation["all_target_sup_wb"] < 0.826
     assert (

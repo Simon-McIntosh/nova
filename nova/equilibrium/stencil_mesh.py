@@ -181,6 +181,47 @@ class InteriorCurrentMomentStencil:
         vectors = vectors.at[:, ring].set(entries)
         return CellCurrentMoments(*vectors)
 
+    def sample_flux_field(self, centroid_flux, sample_flux, points):
+        """Evaluate the own-node quadratic and its gradient at fixed points."""
+        if self.ring_centre is None or len(self.ring_centre) == 0:
+            raise ValueError("own-node profile geometry was not built")
+        sample_value = jnp.asarray(sample_flux)
+        centroid_value = jnp.asarray(centroid_flux)
+        value_pool = jnp.concatenate([centroid_value, sample_value])
+        gathered = value_pool[self.ring_gather_index]
+        coefficient = jnp.einsum(
+            "rps,rs->rp",
+            jnp.asarray(self.ring_flux_weight, dtype=value_pool.dtype),
+            gathered,
+        )
+        ring = self.ring_centre
+        query = jnp.asarray(points)[ring]
+        centre = jnp.asarray(self.ring_sampling_centre, dtype=value_pool.dtype)
+        scale = jnp.asarray(self.ring_coordinate_scale, dtype=value_pool.dtype)
+        local = (query - centre[:, None, :]) / scale[:, None, :]
+        design = _quadratic_flux_design(local)
+        value = jnp.einsum("nqi,ni->nq", design, coefficient)
+        radial, vertical = local[..., 0], local[..., 1]
+        radial_gradient = (
+            coefficient[:, None, 1]
+            + 2.0 * coefficient[:, None, 3] * radial
+            + coefficient[:, None, 4] * vertical
+        ) / scale[:, None, 0]
+        vertical_gradient = (
+            coefficient[:, None, 2]
+            + coefficient[:, None, 4] * radial
+            + 2.0 * coefficient[:, None, 5] * vertical
+        ) / scale[:, None, 1]
+        shape = (self.cell_count, points.shape[1])
+        values = jnp.zeros(shape, dtype=value.dtype).at[ring].set(value)
+        radial_values = (
+            jnp.zeros(shape, dtype=value.dtype).at[ring].set(radial_gradient)
+        )
+        vertical_values = (
+            jnp.zeros(shape, dtype=value.dtype).at[ring].set(vertical_gradient)
+        )
+        return values, radial_values, vertical_values
+
 
 @dataclass(frozen=True)
 class SharedNodeFluxStencil:

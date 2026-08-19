@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-19">
-<meta name="plan-version" content="38">
-<meta name="plan-commits" content="f943bacba9ac64c404afe92c94d43f023950b349,919bafcea9422ff5b0c6de8607d86d4a9418ea86,f332f8426c672f6cdc6bb09fe68e07dd7ecf94a0,3f2312e743289492bc3b4a4a58d4a16dc339d11d,66a62016108c856e1868fe12790ccc9f10d69c43,ba1dab86fa30ed4198ae01c8748dff722b7d3540,3964883b2cd62bbcd691cb735ab141b2bb3dec2a,ca77200c287c0151c87bba832a4c889a3b02edcb,4f2f98a5b69ce1befee2f0c43907ad8b1722b296,55394aa5849157002b84961c09461bdc7dc3c2f2,5e838c92f53e7e3f81663ed69e7eed8336dc050f">
-<meta name="plan-artifacts" content="docs/evidence/archive/boundary-ring-source-completion-landed.html,docs/figures/boundary-ring-source-completion/ring-m0-relative-error.png,docs/figures/boundary-ring-source-completion/fixed-cubic-errors.png,docs/figures/boundary-ring-source-completion/ring-attribution-errors-degree-nine.png,docs/research/hex-clip-current-attribution.html,docs/figures/hex-clip-current-attribution/clip-audit.png,scripts/ring_quadrature/results/ring-quadrature-results.json (lineage f943bacb),scripts/clip_audit/results/clip-audit-results.json (lineage 919bafce),scripts/own_node_interior_score/results.json (lineage ba1dab86),scripts/in_cell_order_study/results.json (lineage 3964883b),scripts/ring_attribution/results/ring-attribution-results.json (lineage 5e838c92),scripts/clip_independent_representation/results.json (lineage 4f2f98a5),scripts/cubic_sample_clip_independent/results.json (lineage 55394aa5)">
-<meta name="plan-impl" content="0.78">
+<meta name="plan-version" content="43">
+<meta name="plan-commits" content="f943bacba9ac64c404afe92c94d43f023950b349,919bafcea9422ff5b0c6de8607d86d4a9418ea86,f332f8426c672f6cdc6bb09fe68e07dd7ecf94a0,3f2312e743289492bc3b4a4a58d4a16dc339d11d,66a62016108c856e1868fe12790ccc9f10d69c43,ba1dab86fa30ed4198ae01c8748dff722b7d3540,3964883b2cd62bbcd691cb735ab141b2bb3dec2a,ca77200c287c0151c87bba832a4c889a3b02edcb,4f2f98a5b69ce1befee2f0c43907ad8b1722b296,55394aa5849157002b84961c09461bdc7dc3c2f2,5e838c92f53e7e3f81663ed69e7eed8336dc050f,6282acd5c41117c61c855becaef3088e9df9700e,75c99039a66231fdc36f51f2016e8ccdc846ed02">
+<meta name="plan-artifacts" content="docs/evidence/archive/boundary-ring-source-completion-landed.html,docs/figures/boundary-ring-source-completion/ring-m0-relative-error.png,docs/figures/boundary-ring-source-completion/fixed-cubic-errors.png,docs/figures/boundary-ring-source-completion/ring-attribution-errors-degree-nine.png,docs/figures/boundary-ring-source-completion/ring-attribution-errors-unified.png,docs/research/hex-clip-current-attribution.html,docs/figures/hex-clip-current-attribution/clip-audit.png,scripts/ring_quadrature/results/ring-quadrature-results.json (lineage f943bacb),scripts/clip_audit/results/clip-audit-results.json (lineage 919bafce),scripts/own_node_interior_score/results.json (lineage ba1dab86),scripts/in_cell_order_study/results.json (lineage 3964883b),scripts/ring_attribution/results/ring-attribution-results.json (lineage 6282acd5),scripts/clip_independent_representation/results.json (lineage 4f2f98a5),scripts/cubic_sample_clip_independent/results.json (lineage 55394aa5),scripts/coverage_scaling/results.json (lineage 75c99039)">
+<meta name="plan-impl" content="0.9">
 </head>
 <body>
   <main class="plan-doc">
@@ -89,7 +89,9 @@
     <strong>Verify the worktree is intact before dispatching</strong> — the runtime pruner strips
     tracked files from day-old worktrees; the commits stay reachable through the worktree HEAD, so if
     the files are gone, recreate with
-    <code>git worktree add --detach &lt;path&gt; 6d65b5fa</code> and <code>uv sync --all-extras</code>.
+    <code>git worktree add --detach &lt;path&gt; 6d65b5fa</code> and run everything through the main
+    checkout's environment (<code>UV_PROJECT_ENVIRONMENT=~/Code/nova/.venv PYTHONPATH="$PWD"
+    uv run --no-sync</code> — never sync a worktree venv).
     All work in this plan builds on that base; nothing merges to <code>main</code> before §9.</p>
 
     <p>Measurement state to reuse (session scratchpad, tmpfs — may not survive; the durable numbers
@@ -178,25 +180,25 @@
       </p>
     </section>
 
-    <h2 id="s7">§7 — Production implementation</h2>
-
-    <p>Fold the route prototyped in §6 into <code>ForwardSource</code> /
-    <code>InteriorCurrentMomentStencil</code> so <em>every</em> nonempty support has a defined
-    evaluation through one support-moment callable — the stencil-availability seam ceases to exist as
-    a code path. TDD against the existing pin set.</p>
-
-    <p><strong>Done when:</strong> (a) every plasma cell — interior, boundary-clipped, and
-    topology-zero — evaluates through the one unified support-moment callable, with interior
-    accuracy gated against the oracle (current-weighted per-cell m0 L1 no worse than the retired
-    cubic stencil's measured 0.7646%) in place of bitwise reproduction of the retired stencil
-    (owner ruling 2026-08-18, decision unified-cell-representation; bitwise interior pins in the
-    existing set re-base to the same accuracy gates); (b) the exact-polygon-integration pin extends to
-    ring supports against independent adaptive quadrature at its existing tolerance class; (c) the
-    missing-area convergence pin and the no-smoothing C¹ fill-transition pins hold on ring cells
-    (both-sided JVPs at the banked 2e-6/2e-9 tolerances, width zero); (d) exact clip vertices, area
-    receipts, conservation, topology and private-flux qualification are unchanged; (e) the complete
-    component suite (the 83-test set plus the new ring pins, re-based per (a)) is green; (f) committed
-    to the lineage with the mechanism in the body.</p>
+    <section id="s7" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-19</span>
+        <h2>§7 — Production implementation</h2>
+      </header>
+      <p class="landed-summary">
+        One seven-sample clip-independent degree-nine callable now serves all 566 plasma cells;
+        the neighbour-ring cubic and the availability seam are retired (commits
+        <code>ca77200c</code>, <code>5e838c92</code>, <code>6282acd5</code>; studies
+        <code>4f2f98a5</code>, <code>55394aa5</code>, <code>75c99039</code>). Gates: interior m0
+        L1 0.00474% (0.025%), ring 0.16005% (0.25%), attributed-vs-support 0.00414% (0.005%),
+        leg zeros exact, 88-test suite green, C¹ at width zero. Error vs the topology-qualified
+        analytic total ≈ 0.0054%; the coverage O(h²) hypothesis refuted (true chord residual
+        187 A, curved clip declined at 0.54 A gain); thirteen-sample stencil declined. GPU
+        1.588/0.777 ms per state (jit / batch-8 vmap). Full record:
+        <a href="/nova/evidence/archive/boundary-ring-source-completion-landed#interior-unification">unification</a> ·
+        <a href="/nova/evidence/archive/boundary-ring-source-completion-landed#support-coverage-scaling">coverage adjudication</a>.
+      </p>
+    </section>
 
     <h2 id="s8">§8 — Analytic-seed adjudication</h2>
 
@@ -284,6 +286,17 @@
       </p>
     <p class="r-dec-rat">Owner ruling 2026-08-19: §7 closes on the unified callable gated at attributed-vs-support-reference ≤ 0.005% (measured 0.0041%, PASS); the coverage deficit is tracked as its own term with a study measuring its h-scaling on the fine 1069-cell fixture and prototyping a curved-chord clip correction; the final single-number attributed-vs-analytic gate locks under q-current-gate after that evidence. The argmax field diagnostic re-bases identically — measured against the support-geometry reference now, re-measured against the analytic target after coverage work — with the 0.826 Wb sup bound and the per-cell gates carrying the field check meanwhile. Conservation rescaling is refused (it biases the per-cell oracle and hides the term the measurement exists to expose); a gate restatement without a repair path is refused.</p>
     </div>
+<div class="r-dec" data-key="final-current-gate" data-choice="topology-qualified-with-chord-subgate" data-by="Simon McIntosh" data-when="2026-08-19T07:05:00+00:00">
+    <p class="r-dec-q">Where does the plasma-current gate lock after the coverage adjudication?</p>
+    <p class="r-dec-ctx">Closes q-current-gate. The owner challenged the 0.5% net-current gate as mismatched beside round-off geometry tolerances. The measured chain: the unified seven-sample degree-nine source reaches 621.3 A (0.00414%) against its own support geometry; the coverage study refuted the O(h²) chord hypothesis (9,408 A was oracle leg topology; fitted order ~0.001) leaving a 187.0 A h-independent straight-chord residual against the Newton-saddle topology-qualified analytic total; combined ≈808 A ≈ 0.0054%. Curved-chord clip declined at a 0.54 A gain.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="topology-qualified-with-chord-subgate">attributed vs topology-qualified analytic ≤ 0.011% PLUS an independent straight-chord residual pin ≤ 250 A</button>
+      <button class="r-opt" data-value="topology-qualified-only">the 0.011% total gate alone</button>
+      <button class="r-opt" data-value="near-floor">lock at 0.006% with ~10% headroom</button>
+      <button class="r-opt" data-value="defer">hold open until §8 re-tabulates both fixtures</button>
+      </p>
+    <p class="r-dec-rat">Owner ruling 2026-08-19: lock attributed-vs-topology-qualified-analytic ≤ 0.011% (45× tighter than the original 0.5%; 2× headroom over the measured 0.0054%) with a separate pin holding the straight-chord coverage residual ≤ 250 A (measured 187.0 A), so geometry drift is caught independently of representation drift and any future regression attributes to its source. The 0.134% all-support counterfactual stays recorded as known oracle leg current, never a gate. The 0.05% provisional gate from unified-cell-representation is superseded; interior m0 L1 ≤ 0.025%, ring m0 L1 ≤ 0.25%, and attributed-vs-support ≤ 0.005% stand unchanged.</p>
+    </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
@@ -308,10 +321,16 @@
     <pre class="r-fu-prompt">/reckon-ship boundary-ring-source-completion §4</pre>
     <p class="r-fu-outcome">Executed end to end: §4 defect localisation (formulas exonerated; availability zero convicted — 919bafce), the leg adjudication (baseline oracle artifact + genuine candidate leak; metrics restated current-weighted — f332f842), the §6 direct-target prototype (architecture validated; honest negative isolated to one component — 3f2312e7), and the closing representation node (all ten gates pass — 66a62016). §6 is measured complete; owner sign-off carried by f-brs-004.</p>
     </article>
-<article class="r-fu" data-id="f-brs-004" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-18" data-recommends-skill="/reckon-ship boundary-ring-source-completion §7" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-brs-004" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-18" data-recommends-skill="/reckon-ship boundary-ring-source-completion §7" data-resolved-at="2026-08-19T06:16:23+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Owner sign-off on the prototyped route, then production implementation</h4>
     <div class="r-fu-body"><p>Exemption: authority-required — §6's done-when reserves opening §7 to the owner. The prototyped route passes every gate (ring L1 0.2405% vs 0.7646%; total current 0.3822% vs 0.5%; centroid p95 0.341 mm; m1 0.1240%; field 0.264/0.310 Wb; interior bitwise; leg zeros exact; fixed-shape jit+vmap; 49-line probe). On sign-off, §7 folds the route into ForwardSource / InteriorCurrentMomentStencil in place, with the recorded production follow-ons: the grid constructor exposes the authoritative pre-clip vertex array, and a CUDA jit/vmap timing if a GPU-specific throughput number is required.</p></div>
     <pre class="r-fu-prompt">/reckon-ship boundary-ring-source-completion §7</pre>
+    <p class="r-fu-outcome">§7 landed end to end under live owner rulings (2026-08-18/19: bitwise pin relaxed to accuracy gates; coverage-gate split). Chain: production fold ca77200c → degree-nine weighted-QR density 5e838c92 → interior unification 6282acd5 (all 566 cells, one callable, all gates pass) → coverage adjudication 75c99039 (O(h²) refuted; true chord residual 187 A; curved clip declined). Studies banked: interior own-node 64× floor ba1dab86; sample-order negatives 3964883b/55394aa5; degree ladder 4f2f98a5. Error vs topology-qualified analytic ≈ 0.0054%. Recorded production follow-ons both closed (pre-clip vertex array carried in the fold; GPU timing banked). Continuation: f-brs-005 (§8).</p>
+    </article>
+<article class="r-fu" data-id="f-brs-005" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-19" data-recommends-skill="/reckon-ship boundary-ring-source-completion §8" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Analytic-seed adjudication on the unified source</h4>
+    <div class="r-fu-body"><p>§7 is landed: one clip-independent degree-nine callable for all 566 cells, error ≈ 0.0054% against the topology-qualified analytic total. §8 re-runs the seed-defect measurement and the direct solves on both fixtures beside the banked controls (legacy 9.54e-3 coarse / 1.16e-2 fine; pre-repair consistent 1.29e-1 / 2.35e-2). Pending at start: the owner's final q-current-gate lock — the coverage study recommends attributed-vs-topology-qualified-analytic ≤ 0.011%, with the 0.134% all-support counterfactual held as known oracle leg current.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship boundary-ring-source-completion §8</pre>
     </article>
 </section>
 
@@ -357,6 +376,12 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-20260818T2110" data-who="reckon-ship" data-when="2026-08-18T21:10Z">
     <div class="r-comment-body">interior-unification measured — honest negative, held uncommitted pending owner adjudication (stop rule). All 566 cells through the single own-node degree-nine callable: interior current-weighted m0 L1 0.00474% (gate 0.025%), interior net 0.00092%, ring levels reproduced (0.16005%, m1 0.11804%, p95 0.3298 mm), leg zeros exact, all pins green. Total-current gate misses: 0.05856% vs 0.05% (1,284 A). Decomposition: the banked topology-qualified support polygons themselves integrate to −14.996013 MA — 0.06270% (9,408 A) short of the analytic total — so the miss is SUPPORT COVERAGE (straight-chord clips + topology qualification vs the curved analytic boundary), not representation: attributed vs own-geometry agreement is 622 A (0.0041%). The same term moves the inherited argmax diagnostic to 0.7209 Wb (old 0.5 Wb bound; sup 0.7484 &lt; 0.826 passes). Owner decision pending: gate decomposition + coverage study vs geometry repair first vs conservation rescale vs gate restatement; plus whether the argmax bound binds this node.</div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-20260819T0555" data-who="reckon-ship" data-when="2026-08-19T05:55Z">
+    <div class="r-comment-body">interior-unification landed — commit 6282acd5; ALL GATES PASS under coverage-gate-split. Every one of the 566 default-hex cells routes through the single seven-sample clip-independent degree-nine callable; the neighbour-ring cubic is retired from the support path. Interior m0 L1 0.00474% (gate 0.025%), interior net 0.00092%; ring levels held (m0 0.16005%, m1 0.11804%, p95 0.3298 mm, ring-net 0.07214%); leg zeros exact. Two-reference decomposition algebraically pinned: attributed vs support reference −621.3 A / 0.00414% (gate 0.005% PASS); support vs analytic +9,408.1 A / 0.06270% (tracked O(h²) coverage term); representation-only field shift 0.0101 Wb at argmax and sup (coverage carries 0.731/0.758 Wb). 88-test suite green incl. the bank-split pin. GPU: jit 1.588 ms/state, batch-8 vmap 0.777 ms/state (566 cells through degree-nine vs 96 previously). §7 code complete; section closes when the coverage-scaling study lands its gate recommendation.</div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-20260819T0640" data-who="reckon-ship" data-when="2026-08-19T06:40Z">
+    <div class="r-comment-body">support-coverage-scaling landed — commit 75c99039; gate PASSED, and the O(h²) coverage hypothesis is REFUTED. The 9,408 A deficit is target topology, not chord geometry: the geometry-only analytic oracle counts −9,595 A in the 17 lower-leg cells production correctly zeros — the same artifact class q-leg-zero convicted. Against the Newton-saddle topology-qualified analytic total, the true straight-chord residual is 187.03 A coarse (fine 9,407.07 A raw confirms h-independence; fitted order ~0.001). Curved-chord prototype improves only 0.54 A — NOT promoted; straight chords stand. Saddle provenance banked: (5.11011, −3.41235) m, |grad psi| 6.4e-15, det H −354.5, psi_norm 0.99994 (the clip constant sits 5.5e-5 beyond the true saddle); 14/8192 throat rays closed deterministically, oracle uncertainty 0.075 A. Recommended final gate: attributed-vs-topology-qualified-analytic ≤ 0.011% (measured ≈ 0.0054%); the 0.134% all-support counterfactual is held as known oracle leg current. Gate-authority lock pending owner.</div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

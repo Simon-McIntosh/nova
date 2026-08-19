@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-19T22:32:03",
+  "updated": "2026-08-19T23:02:51",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -9385,9 +9385,181 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260819T203455937558-diiid-geometry-corroboration",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a72",
+        "node": "diiid-geometry-corroboration",
+        "role": "implement",
+        "member": "diiid-ids-read",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-19T20:34:58Z",
+        "completed_at": "2026-08-19T20:43:15Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 497,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 497,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "77e79c737394a6c81024f08eb972a1a23fad2476",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Stopped intentionally at 8.5 minutes with zero commits: the owner discarded the legacy DD v3 description this node was built to corroborate against, voiding its premise. Three untracked files preserved to session scratch, worktree removed. Corroboration will be re-authored against the updated dataset when it arrives.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260819T203455937558-diiid-geometry-corroboration/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a01bbb-fa09-7f40-a26e-c5ba66960e4f",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260819T203439011947-diiid-plasma-subtraction-gate",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a72",
+        "node": "diiid-plasma-subtraction-gate",
+        "role": "implement",
+        "member": "diiid-vacuum",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-19T20:34:41Z",
+        "completed_at": "2026-08-19T20:53:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1117,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1117,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "77e79c737394a6c81024f08eb972a1a23fad2476",
+        "commits": [
+          "10b5c850"
+        ],
+        "changed_lines": {
+          "added": 568,
+          "removed": 9,
+          "files": 6
+        },
+        "tests_added": 7,
+        "gate": "passed",
+        "outcome": "Plasma-subtraction differencing gate PASSED its preregistered bar 0.49526707859970365 by +0.14396: quiescent pooled whole-grid R-squared 0.6392320708 over 120 frames/20 shots, transient 0.6319403168, selection effect +0.0072918. Per-frame quartiles far stronger than pooled: q25/median/q75 0.99325/0.99908/0.99967. Negative tail retained unfiltered, min frame -3.35 in two named shots. Transient residual bank written as the passive corpus, 120 full-grid frames, 11.6 MB, SHA-256 pinned. Redundant convention exports retired.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260819T203439011947-diiid-plasma-subtraction-gate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01090-c119-7413-b062-4589e1bc160f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6786048,
+            "cached_input_tokens_cumulative": 47884544,
+            "input_tokens": 6952576,
+            "input_tokens_cumulative": 49319230,
+            "output_tokens": 22770,
+            "output_tokens_cumulative": 151378,
+            "reasoning_output_tokens": 3482,
+            "reasoning_output_tokens_cumulative": 41063
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260819T204633563050-diiid-dataset-machine-description",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a72",
+        "node": "diiid-dataset-machine-description",
+        "role": "implement",
+        "member": "diiid-ids-read",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-19T20:46:46Z",
+        "completed_at": "2026-08-19T21:00:05Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 799,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 799,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "60b6738359707dcda8c791e9dc994b9dc29b09a6",
+        "commits": [
+          "e2ffa796"
+        ],
+        "changed_lines": {
+          "added": 3397,
+          "removed": 1,
+          "files": 7
+        },
+        "tests_added": 10,
+        "gate": "passed",
+        "outcome": "DIII-D machine description built from the competition dataset through nova's machine dataclass seam: 19/19 poloidal conductors (18 F-coils plus ECOILA) as MachineSection outlines, six skewed (F5A/F6A/F7A/F5B/F6B/F7B), max physical-versus-routed vertex difference 0.0 m against a 1e-12 bar so one geometry construction is proven; 70 Thomson coordinates as DiagnosticSightline records with endpoints explicitly absent; 65x65 grid R [0.840,2.540] m Z [-1.600,1.600] m; bcoil retained with no axisymmetric poloidal section; wall contour and passive structure explicit nulls, nothing fabricated; conductor digest 782e9e08 matches the differencing gate's provenance.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260819T204633563050-diiid-dataset-machine-description/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01bc6-cf43-7593-9d6b-d9a6e4df9c42",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5036544,
+            "cached_input_tokens_cumulative": 5036544,
+            "input_tokens": 5216395,
+            "input_tokens_cumulative": 5216395,
+            "output_tokens": 26882,
+            "output_tokens_cumulative": 26882,
+            "reasoning_output_tokens": 7884,
+            "reasoning_output_tokens_cumulative": 7884
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 263
+    "_version": 266
   }
 }

@@ -23,9 +23,9 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-19">
-<meta name="plan-version" content="46">
-<meta name="plan-commits" content="f943bacba9ac64c404afe92c94d43f023950b349,919bafcea9422ff5b0c6de8607d86d4a9418ea86,f332f8426c672f6cdc6bb09fe68e07dd7ecf94a0,3f2312e743289492bc3b4a4a58d4a16dc339d11d,66a62016108c856e1868fe12790ccc9f10d69c43,ba1dab86fa30ed4198ae01c8748dff722b7d3540,3964883b2cd62bbcd691cb735ab141b2bb3dec2a,ca77200c287c0151c87bba832a4c889a3b02edcb,4f2f98a5b69ce1befee2f0c43907ad8b1722b296,55394aa5849157002b84961c09461bdc7dc3c2f2,5e838c92f53e7e3f81663ed69e7eed8336dc050f,6282acd5c41117c61c855becaef3088e9df9700e,75c99039a66231fdc36f51f2016e8ccdc846ed02,9ef0e8ddfa73bbefbef7bf78854af160e20d7aa8,a5998281a6ab6a8c5ae786c29d369753222b45d3">
-<meta name="plan-artifacts" content="docs/evidence/archive/boundary-ring-source-completion-landed.html,docs/figures/boundary-ring-source-completion/ring-m0-relative-error.png,docs/figures/boundary-ring-source-completion/fixed-cubic-errors.png,docs/figures/boundary-ring-source-completion/ring-attribution-errors-degree-nine.png,docs/figures/boundary-ring-source-completion/ring-attribution-errors-unified.png,docs/figures/boundary-ring-source-completion/saddle-gap-localization.png,docs/research/hex-clip-current-attribution.html,docs/figures/hex-clip-current-attribution/clip-audit.png,scripts/ring_quadrature/results/ring-quadrature-results.json (lineage f943bacb),scripts/clip_audit/results/clip-audit-results.json (lineage 919bafce),scripts/own_node_interior_score/results.json (lineage ba1dab86),scripts/in_cell_order_study/results.json (lineage 3964883b),scripts/ring_attribution/results/ring-attribution-results.json (lineage 9ef0e8dd),scripts/clip_independent_representation/results.json (lineage 4f2f98a5),scripts/cubic_sample_clip_independent/results.json (lineage 55394aa5),scripts/coverage_scaling/results.json (lineage 75c99039),scripts/saddle_gap_check/results.json (lineage a5998281)">
+<meta name="plan-version" content="48">
+<meta name="plan-commits" content="f943bacba9ac64c404afe92c94d43f023950b349,919bafcea9422ff5b0c6de8607d86d4a9418ea86,f332f8426c672f6cdc6bb09fe68e07dd7ecf94a0,3f2312e743289492bc3b4a4a58d4a16dc339d11d,66a62016108c856e1868fe12790ccc9f10d69c43,ba1dab86fa30ed4198ae01c8748dff722b7d3540,3964883b2cd62bbcd691cb735ab141b2bb3dec2a,ca77200c287c0151c87bba832a4c889a3b02edcb,4f2f98a5b69ce1befee2f0c43907ad8b1722b296,55394aa5849157002b84961c09461bdc7dc3c2f2,5e838c92f53e7e3f81663ed69e7eed8336dc050f,6282acd5c41117c61c855becaef3088e9df9700e,75c99039a66231fdc36f51f2016e8ccdc846ed02,9ef0e8ddfa73bbefbef7bf78854af160e20d7aa8,a5998281a6ab6a8c5ae786c29d369753222b45d3,cb5a3c1d20504123e8462b8d7ebe065a97e054f6,b820c424c863e1db5ed4535bc07799e0b3b1a94e,25c9846995b5bfe637b50f55693b309c9a51a31b">
+<meta name="plan-artifacts" content="docs/evidence/archive/boundary-ring-source-completion-landed.html,docs/figures/boundary-ring-source-completion/ring-m0-relative-error.png,docs/figures/boundary-ring-source-completion/fixed-cubic-errors.png,docs/figures/boundary-ring-source-completion/ring-attribution-errors-degree-nine.png,docs/figures/boundary-ring-source-completion/ring-attribution-errors-unified.png,docs/figures/boundary-ring-source-completion/saddle-gap-localization.png,docs/figures/boundary-ring-source-completion/analytic-seed-defect-comparison.png,docs/figures/boundary-ring-source-completion/analytic-seed-direct-residuals.png,docs/research/hex-clip-current-attribution.html,docs/figures/hex-clip-current-attribution/clip-audit.png,scripts/ring_quadrature/results/ring-quadrature-results.json (lineage f943bacb),scripts/clip_audit/results/clip-audit-results.json (lineage 919bafce),scripts/own_node_interior_score/results.json (lineage ba1dab86),scripts/in_cell_order_study/results.json (lineage 3964883b),scripts/ring_attribution/results/ring-attribution-results.json (lineage 9ef0e8dd),scripts/clip_independent_representation/results.json (lineage 4f2f98a5),scripts/cubic_sample_clip_independent/results.json (lineage 55394aa5),scripts/coverage_scaling/results.json (lineage 75c99039),scripts/saddle_gap_check/results.json (lineage a5998281),scripts/analytic_seed_adjudication/results.json (lineage 25c98469)">
 <meta name="plan-impl" content="0.94">
 </head>
 <body>
@@ -200,20 +200,25 @@
       </p>
     </section>
 
-    <h2 id="s8">§8 — Analytic-seed adjudication</h2>
-
-    <p>Re-run the seed-defect measurement and the direct solves that convicted the source. This is
-    the plan's scientific verdict on whether the discrete equilibrium now sits closer to the analytic
-    one than legacy's does.</p>
-
-    <p><strong>Done when:</strong> (a) the analytic-seed map defect is re-tabulated on both fixtures
-    beside the banked controls (legacy 9.54e-3 coarse / 1.16e-2 fine; pre-repair consistent 1.29e-1 /
-    2.35e-2) and the repaired consistent map beats legacy on both; (b) direct 10×30 solves from the
-    analytic seed are reported per fixture against the banked route controls, and any configuration
-    closing the unchanged 1e-6 residual gate gets the complete unchanged physics gate set scored at
-    its root; (c) if the repaired map still does not admit a direct analytic-seed root, the residual
-    trend across the damping set is banked and the obstruction named — that outcome routes to §9's
-    continuation rather than failing the plan.</p>
+    <section id="s8" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-19</span>
+        <h2>§8 — Analytic-seed adjudication</h2>
+      </header>
+      <p class="landed-summary">
+        The repaired unified map admits <strong>direct analytic-seed roots on both fixtures</strong>:
+        undamped 10×30 Newton closes at 1.625e-15 / 1.026e-15 of span (banked controls 1.67e-2 /
+        1.2e-2), both diverted — §9's continuation mechanics are superseded, no bracket exists.
+        Honest negative: the one-application seed defect no longer beats legacy (1.484e-2 / 1.492e-2
+        vs 9.54e-3 / 1.16e-2), though it improves pre-repair 8.69× / 36.5%. Gates at the roots: 8/11
+        coarse, 9/11 fine — the misses (analytic-field 0.1012→0.0677 vs 0.05; l_i 0.1263→0.0927 vs
+        0.08; receipt-field passes fine) all shrink strongly under refinement. Two production repairs
+        forced en route (<code>cb5a3c1d</code>, <code>b820c424</code>): pre-clip samples from the
+        authored tiling; sample-node identity with MomentGeometry — bank digits unchanged. Full
+        record: <a href="/nova/evidence/archive/boundary-ring-source-completion-landed#analytic-seed-adjudication">§8 landed</a>
+        (commit <code>25c98469</code>).
+      </p>
+    </section>
 
     <h2 id="s9">§9 — Continuation, full gates, and the merge adjudication</h2>
 
@@ -327,10 +332,16 @@
     <pre class="r-fu-prompt">/reckon-ship boundary-ring-source-completion §7</pre>
     <p class="r-fu-outcome">§7 landed end to end under live owner rulings (2026-08-18/19: bitwise pin relaxed to accuracy gates; coverage-gate split). Chain: production fold ca77200c → degree-nine weighted-QR density 5e838c92 → interior unification 6282acd5 (all 566 cells, one callable, all gates pass) → coverage adjudication 75c99039 (O(h²) refuted; true chord residual 187 A; curved clip declined). Studies banked: interior own-node 64× floor ba1dab86; sample-order negatives 3964883b/55394aa5; degree ladder 4f2f98a5. Error vs topology-qualified analytic ≈ 0.0054%. Recorded production follow-ons both closed (pre-clip vertex array carried in the fold; GPU timing banked). Continuation: f-brs-005 (§8).</p>
     </article>
-<article class="r-fu" data-id="f-brs-005" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-19" data-recommends-skill="/reckon-ship boundary-ring-source-completion §8" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-brs-005" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-19" data-recommends-skill="/reckon-ship boundary-ring-source-completion §8" data-resolved-at="2026-08-19T10:34:26+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Analytic-seed adjudication on the unified source</h4>
     <div class="r-fu-body"><p>§7 is landed: one clip-independent degree-nine callable for all 566 cells, error ≈ 0.0054% against the topology-qualified analytic total. §8 re-runs the seed-defect measurement and the direct solves on both fixtures beside the banked controls (legacy 9.54e-3 coarse / 1.16e-2 fine; pre-repair consistent 1.29e-1 / 2.35e-2). Pending at start: the owner's final q-current-gate lock — the coverage study recommends attributed-vs-topology-qualified-analytic ≤ 0.011%, with the 0.134% all-support counterfactual held as known oracle leg current.</p></div>
     <pre class="r-fu-prompt">/reckon-ship boundary-ring-source-completion §8</pre>
+    <p class="r-fu-outcome">§8 executed and promoted (commit 25c98469; repairs cb5a3c1d, b820c424). Direct analytic-seed roots on both fixtures at 1.6e-15 / 1.0e-15 — the §9 continuation mechanics are superseded, no bracket exists. Honest negative: seed defect 1.484e-2 / 1.492e-2 does not beat legacy 9.54e-3 / 1.16e-2. Gates at roots 8/11 / 9/11 with all misses shrinking under refinement. Root-gate attribution node dispatched; the §9 merge adjudication carried by f-brs-006.</p>
+    </article>
+<article class="r-fu" data-id="f-brs-006" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-19" data-recommends-skill="/reckon-ship boundary-ring-source-completion §9" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Owner merge adjudication on the direct-root result</h4>
+    <div class="r-fu-body"><p>Exemption: authority-required — §9 reserves the lineage merge to the owner, and neither done-when branch obtains as written: no continuation bracket exists (direct roots at machine precision on both fixtures), but the complete physics gate set does not pass at the roots (analytic-field 0.0677 vs 0.05 and l_i 0.0927 vs 0.08 on fine; both shrinking strongly under refinement, receipt-field already passing fine). A root-gate-failure attribution node is measuring the mechanism behind the two remaining misses so the adjudication has mechanism terms, per §9(b). The owner rules on: merge posture for the lineage (consistent quadrature + unified source + the §8 production repairs), the gate posture for the two resolution-limited misses, and whether the seed-defect regression vs legacy (1.556x / 1.286x at one application, against machine-precision fixed points) changes anything.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship boundary-ring-source-completion §9</pre>
     </article>
 </section>
 
@@ -387,7 +398,10 @@
     <div class="r-comment-body">retired-path-excision landed — commit 9ef0e8dd; gate PASSED (−855/+86 lines). Owner-directed hygiene assertion executed: the dead interior contraction entrypoint, its cubic coefficient-weight build, the reconstructed sample-node fallback, and the retired smoothing transition state are all removed — 11 retired symbols, 0 grep hits. sample_node_flux now returns direct suffix rows only; a linear-moment operator without direct sample targets raises at construction (four constructor sites enumerated and wired). SharedNodeFluxStencil is documented and retained solely for atomic-node clip tracing and topology labels. support_flux_moments is the only production support-moment method. Complete component suite 62/62 green; bank metrics reproduce the unified record exactly (interior m0 L1 0.004740850588%, ring 0.1600484985%, attributed-vs-support 621.330 A, 17 leg zeros exact).</div>
 </div>
 <div class="r-comment" data-section="s7" data-id="c-20260819T0845" data-who="reckon-ship" data-when="2026-08-19T08:45Z">
-    <div class="r-comment-body">saddle-gap-current-check landed — commit a5998281; gate PASSED, fan-bias hypothesis CONFIRMED. The banked ray-fan core total is superseded: adaptive radial integration isolates −3,223.03 A of fixed four-subdivision radial quadrature bias (distributed under-resolution along the boundary ring, 97.4%; the 14 throat sectors carry only −3.78 A). Corrected core −188.86 A from the topology-qualified target, agreeing with the independent cell sum to 2.37 A; the original −3,411.9 A gap decomposes additively to 1.9e-10 A. Owner physics check VERIFIED: production, per-cell oracle, and corrected core all integrate to exactly 0.0 A over 119 exterior psi_norm>1 cells, 11 private-flux, 6 open-leg, 17 topology-zero leg cells — no SOL current anywhere. Saddle cell identified: support cell 19 (core_qualified_boundary_cell); the analytic separatrix crosses its hex FOUR times, production uses one chord (max displacement 14.95 mm), yet total cell current is ≈1.6–1.8 A, so the mishandling is ≈0.2 A today — first-order only when SOL currents arrive (mechanism requirement routed to sol-current-demonstration). Gate recommendation unaffected (it never used the fan).</div>
+    <div class="r-comment-body">saddle-gap-current-check landed — commit a5998281; gate PASSED, fan-bias hypothesis CONFIRMED. The banked ray-fan core total is superseded: adaptive radial integration isolates −3,223.03 A of fixed four-subdivision radial quadrature bias (distributed under-resolution along the boundary ring, 97.4%; the 14 throat sectors carry only −3.78 A). Corrected core −188.86 A from the topology-qualified target, agreeing with the independent cell sum to 2.37 A; the original −3,411.9 A gap decomposes additively to 1.9e-10 A. Owner physics check VERIFIED: production, per-cell oracle, and corrected core all integrate to exactly 0.0 A over 119 exterior psi_norm&gt;1 cells, 11 private-flux, 6 open-leg, 17 topology-zero leg cells — no SOL current anywhere. Saddle cell identified: support cell 19 (core_qualified_boundary_cell); the analytic separatrix crosses its hex FOUR times, production uses one chord (max displacement 14.95 mm), yet total cell current is ≈1.6–1.8 A, so the mishandling is ≈0.2 A today — first-order only when SOL currents arrive (mechanism requirement routed to sol-current-demonstration). Gate recommendation unaffected (it never used the fan).</div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-20260819T1035" data-who="reckon-ship" data-when="2026-08-19T10:35:00+00:00">
+    <div class="r-comment-body">analytic-seed-adjudication landed — commit 25c98469 (production repairs cb5a3c1d, b820c424; run r-20260819T083003522691, scope-changed, 117 min wall). GATE PASSED on the done-when measure; the scientific content splits. DECISIVE POSITIVE: direct analytic-seed roots exist on BOTH fixtures at the unchanged 10x30 budget — undamped Newton 1.625e-15 coarse / 1.026e-15 fine of span (banked best-direct controls 1.67e-2 / 1.2e-2), both diverted, damped arms stall above 3.6e-5 — so the continuation barrier class that defined section 9 is gone on the unified map. HONEST NEGATIVE: the one-application seed defect no longer beats legacy — 1.4840e-2 / 1.4918e-2 vs legacy 9.54e-3 / 1.16e-2 (1.556x / 1.286x), while improving pre-repair 8.69x / 36.5 percent. Gates at the roots: 8/11 coarse, 9/11 fine; misses analytic-field 0.10124→0.06765 (bound 0.05), internal inductance 0.12630→0.09267 (0.08), receipt-field 0.05891→0.02076 (0.03, passes fine) — every miss shrinks strongly under 1.9x refinement, reading as discretization-limited accuracy rather than solver or representation structure. Production repairs forced by the harness: pre-clip samples now derive from the authored tiling via PlasmaGrid.aloc (the Target section column carries schema defaults and is not the authority; the material-offset inference is retired), and sampling-node dedup aligns to material-support scale with exact identity to MomentGeometry.from_cells; the stored bank digits reproduce identically after both. A root-gate-failure attribution node dispatches next; the section-9 merge adjudication is the owner's with that mechanism evidence in front of it.</div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

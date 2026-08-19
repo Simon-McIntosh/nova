@@ -502,5 +502,74 @@
     geometry.</figcaption>
   </figure>
 
+  <h2 id="analytic-seed-adjudication">§8 — direct analytic-seed roots at machine precision; the seed-defect prediction misses legacy</h2>
+
+  <p>Commit <code>25c98469</code> (production repairs <code>cb5a3c1d</code>, <code>b820c424</code>;
+  harness banked at <code>abacba4f</code>) ran the adjudication on both fixtures at the unchanged
+  10×30 budget and 1e-6 residual gate. <strong>The decisive result: the repaired unified map admits
+  direct analytic-seed roots on both fixtures</strong> — undamped Newton terminates at
+  <strong>1.625e-15</strong> of span on the 566-cell coarse fixture and <strong>1.026e-15</strong>
+  on the 1069-cell fine fixture, against banked best-direct controls of 1.67e-2 and 1.2e-2. Both
+  roots are diverted (376 / 751 core cells). The continuation mechanics §9 was written around —
+  homotopy fractions, barrier brackets at 0.375–0.6 — are superseded: no bracket exists on the
+  unified map, and the no-root obstruction branch is vacuously closed. The damping arms confirm
+  undamped is the best route (eigen-weight 3.65e-5 / 3.81e-5; weight-0.55 4.48e-5 / 4.91e-5 —
+  neither converges within the 10-step budget).</p>
+
+  <p><strong>The honest negative: the one-application seed-map defect no longer beats legacy.</strong>
+  Repaired unified 1.4840e-2 coarse / 1.4918e-2 fine against legacy 9.54e-3 / 1.16e-2 — ratios
+  1.556× and 1.286×, margins −5.300e-3 and −3.318e-3 — while improving the pre-repair consistent
+  control by 8.69× coarse and 36.5% fine. The §1 prediction, written for the ring-only repair,
+  does not survive the unified representation on this metric even as the same map's fixed point
+  reaches machine precision where the pre-repair map stalled at ~1e-2.</p>
+
+  <p><strong>Physics gates at the roots: 8/11 coarse, 9/11 fine, and every miss shrinks under
+  refinement.</strong> Passing on both: residual, axis, flux, plasma current (1.12% / 1.15%),
+  poloidal beta, Grad-Shafranov, both divergences, physical topology. Failing:</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>gate</th><th>bound</th><th>coarse 566</th><th>fine 1069</th><th>trend</th></tr></thead>
+    <tbody>
+      <tr><td>analytic-field quadrature</td><td>0.05</td><td>0.10124 FAIL</td><td>0.06765 FAIL</td><td>−33% under 1.9× cells</td></tr>
+      <tr><td>internal inductance</td><td>0.08</td><td>0.12630 FAIL</td><td>0.09267 FAIL</td><td>−27%</td></tr>
+      <tr><td>receipt field</td><td>0.03</td><td>0.05891 FAIL</td><td>0.02076 PASS</td><td>−65%, passes fine</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>The pattern — machine-precision residual with integral-accuracy gates converging toward their
+  bounds under refinement — reads as discretization-limited accuracy at the root, not solver or
+  representation structure; the mechanism attribution is the dispatched follow-on measurement, and
+  the §9 merge adjudication is the owner's with these numbers in front of it.</p>
+
+  <p><strong>Two production repairs landed en route, forced by the harness itself.</strong>
+  <code>PlasmaGrid._build_direct_samples</code> read the Target's schema-default <code>section</code>
+  column — which carries <code>"rectangle"</code> on every row by construction — so zero hexagon rows
+  matched and construction failed; the authoritative section, polygon and tiling dimensions live on
+  <code>PlasmaGrid.aloc</code>. <code>cb5a3c1d</code> derives fixed (cells,6,2) pre-clip samples from
+  the authored tiling with round-off deduplication and analytic generator verification, retiring the
+  material-offset median inference (refuted at 0.304 m spread against a 2.37e-13 m bound).
+  <code>b820c424</code> aligns sampling-node deduplication to the material-support scale with exact
+  coordinate-row and inverse-gather identity against <code>MomentGeometry.from_cells</code>. The
+  stored bank digits reproduce identically after both repairs: interior m0 L1 0.004740850588%, ring
+  0.16004849848%, attributed-vs-support −621.3295578 A, 17 leg zeros exact, 0.0 A leakage.</p>
+
+  <figure>
+    <img src="/nova/figures/boundary-ring-source-completion/analytic-seed-defect-comparison.png"
+         alt="Seed-map defect on both fixtures: repaired unified beside legacy and pre-repair controls"
+         style="max-width:100%">
+    <figcaption>The seed-defect comparison (commit <code>25c98469</code>): repaired unified against
+    the banked legacy and pre-repair consistent controls on both fixtures.</figcaption>
+  </figure>
+
+  <figure>
+    <img src="/nova/figures/boundary-ring-source-completion/analytic-seed-direct-residuals.png"
+         alt="Residual histories for six direct routes: undamped, eigen-weight and weight-0.55 on both fixtures"
+         style="max-width:100%">
+    <figcaption>Direct-solve residual histories, six routes: undamped Newton reaches 1.6e-15 /
+    1.0e-15 while both damped arms stall above 3.6e-5 within the 10-step budget.</figcaption>
+  </figure>
+
 </main></body>
 </html>

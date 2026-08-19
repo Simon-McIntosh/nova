@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="evidence">
   <meta name="plan-slug" content="diiid-forward-onboarding-landed">
   <meta name="plan-title" content="DIII-D Forward Onboarding — landed record">
-  <meta name="plan-summary" content="Cumulative execution evidence for the DIII-D onboarding plan: the response-kernel library landings">
+  <meta name="plan-summary" content="Cumulative execution evidence for the DIII-D onboarding plan: the response-kernel library, the vacuum kill-gate reformulations and their located composition defect, and the measured strict-GS representability ceiling of the challenge labels">
   <meta name="plan-evidence-for" content="diiid-forward-onboarding">
   <title>DIII-D Forward Onboarding — landed | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
@@ -91,6 +91,125 @@
     currents §4 already names as the entry's highest-risk physics. The
     <code>vacuum-gate-measure</code> decision now carries that as its recommended
     reformulation.</p>
+
+    <h2 id="quiescent-gate">§2 gate, second formulation — quiescent windows, failed with a named suspect — 2026-08-17</h2>
+    <p>Commit <code>26a06b78</code> (node quiescent-vacuum-gate, authoritative rerun), 6/6 tests.
+    The starter-kit bar having been shown inapplicable, the gate was reformulated: select labeled
+    frames where every coil is quiescent, so geometry is isolated from transients, and complete the
+    exterior prediction with the label-extracted plasma term rather than a fitted coefficient. The
+    preregistration — centred 50 ms derivative, thresholds 50/100/200 kA·turn·s⁻¹, ψ<sub>N</sub> above
+    1.05, zero fitted coefficients — was emitted <em>before</em> parquet access.</p>
+    <p>A first run stopped at its time fence with two self-diagnosed unit defects and claimed
+    <strong>no</strong> authoritative numbers, which is the behaviour the fence exists for. The census
+    infrastructure and preregistration stood; the low-current census and every R² were voided and
+    rerun.</p>
+    <table>
+      <caption>Full-corpus census over 1,559,340 labeled frames in 7,041 shots, and the scored cohort.</caption>
+      <thead><tr><th>Quantity</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Quiescent candidates at 50 / 100 / 200 kA·turn·s⁻¹</td><td>65,993 / 470,282 / 1,049,487</td></tr>
+        <tr><td>Pooled exterior R², 120 quiescent frames</td><td><strong>−5.3347</strong></td></tr>
+        <tr><td>Pooled exterior R², 120 matched transient frames</td><td>−5.3296</td></tr>
+        <tr><td>Coil-only result of the first attempt, for scale</td><td>0.49527</td></tr>
+        <tr><td>Grid endpoint reconstruction, max displacement</td><td>1.4e-7 m</td></tr>
+      </tbody>
+    </table>
+    <p>The gate <strong>failed</strong>, and the shape of the failure named its own cause. Quiescent and
+    transient cohorts scoring indistinguishably, both far below the coil-only 0.495, cannot be a story
+    about quiescent selection, geometry, kernels or passive currents — those would separate the two
+    cohorts. It is the signature of a sign or per-radian defect at the <em>composition</em> boundary
+    where the coil and plasma terms meet. Two quarantines were recorded rather than deferred: the
+    transient residual bank was withheld from passive fitting until the pipeline cleared, and a
+    corrected census finding 658,787 labeled frames below 50 kA — implausible for diverted plasmas —
+    left the plasma-current channel's units unresolved and to be read from schema, not assumed.</p>
+
+    <h2 id="composition-audit">§2 composition audit — the defect located and named — 2026-08-17</h2>
+    <p>Commit <code>52e4ad17</code> (node vacuum-composition-audit), 3/3 tests. The gate composed
+    <code>FIXED_FLUX_SIGN × (coil_flux + plasma_flux)</code>, but the plasma term is extracted from a
+    label that <em>already carries</em> the challenge sign. <strong>The global sign was therefore
+    applied to it twice.</strong></p>
+    <p>The proof is by construction-exact synthetic truth, not by argument: a registry coil response at
+    a real quiescent frame's currents plus an 800 kA analytic Gaussian patch at that frame's recorded
+    axis, both mapped through the same Green kernels and exported per-radian, so the correct answer is
+    known in closed form.</p>
+    <table>
+      <caption>Composition arms scored against construction-exact synthetic truth. Zero fitted coefficients.</caption>
+      <thead><tr><th>Composition</th><th>Exterior R²</th><th>Reading</th></tr></thead>
+      <tbody>
+        <tr><td>Correct composition</td><td><strong>1.0</strong></td><td>the pipeline can be exact</td></tr>
+        <tr><td>Global sign on the coil term only</td><td>0.99672</td><td>residual 0.0033 is extraction discretisation</td></tr>
+        <tr><td>Unmodified gate (sign applied twice)</td><td><strong>−3.2004</strong></td><td>8.5 points of R² destroyed</td></tr>
+      </tbody>
+    </table>
+    <p>The double flip was independently visible in signed means on all three real frames checked.
+    <strong>Unit verdict, at high confidence:</strong> <code>magnetics_plasma_current</code> is kA —
+    label-current scale receipts 1085.05 / 1084.98 / 1079.88 A per raw unit — with the schema carrying
+    no explicit unit and the loader applying no conversion. The 658,787 near-zero-Ip frames are a
+    separate channel-quality finding, not a units error.</p>
+    <p><strong>Boundary correction, recorded the same day.</strong> A follow-on node that would have
+    homed the convention transform in nova was <em>stopped mid-run before any commit</em>: corpus
+    conventions belong to the repository that owns the corpus read. Its worktree held only rejected
+    edits. The gate was then re-locked to the owner's plasma-subtraction differencing formulation,
+    which this audit had already de-risked at 0.9967 on construction-exact truth.</p>
+
+    <h2 id="label-resolve">§5 label-resolve gate — failed as preregistered, interpretation withheld — 2026-08-17</h2>
+    <p>Commit <code>4ae27c42</code> (node label-resolve-gate), 4/4 tests, 100/100 numeric frame
+    receipts, zero evaluation errors. Extracted flux functions were re-solved to the labeled map on a
+    20-shot, 100-frame cohort. Nothing was fitted.</p>
+    <table>
+      <caption>Fractional interior RMS against a floor of 1.388e-5 locked before scoring from three
+      manufactured continuous-to-discrete solves.</caption>
+      <thead><tr><th>Statistic</th><th>Fractional interior RMS</th><th>Multiple of floor</th></tr></thead>
+      <tbody>
+        <tr><td>Minimum</td><td>0.0125</td><td>904×</td></tr>
+        <tr><td>Median</td><td><strong>0.0429</strong></td><td><strong>3,090×</strong></td></tr>
+        <tr><td>Maximum</td><td>0.0933</td><td>6,721×</td></tr>
+      </tbody>
+    </table>
+    <p>Interior R² spanned 0.738 to 0.997 with median <strong>0.949</strong>. The convergence caveat
+    travelled with the number rather than behind it: 86 of 100 frames stopped at the 80-iteration
+    Picard ceiling, and all 14 that did converge under the 1e-8 update tolerance still sat above the
+    floor.</p>
+    <p><strong>Interpretation was deliberately withheld</strong> pending attribution, because three
+    readings of the same number carry opposite consequences: solver non-convergence would be numerics,
+    profile-representation loss would be fixable with a richer basis, and irreducible non-GS label
+    content would simultaneously break the grid-floor form of this kill gate and hand us the strict-GS
+    ceiling on the scored metric.</p>
+    <p>A prerequisite defect was ruled en route: the shipped 65×65 axes are decimal-rounded and fail
+    nova's strict uniform-grid contract at 5.4e-6 radial steps. Canonical endpoint axes were added, and
+    only the regression tolerance that tripped on a 4.4e-16 float64 representation difference was
+    relaxed, to 3e-14 — the production acceptance bound and the preregistered floor both untouched.</p>
+
+    <h2 id="resolve-decomposition">§5 residual decomposition — the residual is the labels, not us — 2026-08-17</h2>
+    <p>Commit <code>d1aaa089</code> (node resolve-decomposition), 6/6 tests, same 20-shot 100-frame
+    cohort, nothing fitted. <strong>Verdict: 99.68 % of the 0.0429 median residual is irreducible
+    non-GS label content.</strong> Each rival was measured and eliminated, not reasoned away.</p>
+    <table>
+      <caption>Attribution of the median fractional interior RMS residual.</caption>
+      <thead><tr><th>Candidate cause</th><th>Measured effect on the median</th><th>Share of residual</th></tr></thead>
+      <tbody>
+        <tr><td>Discrete operator and solve (direct-operator arm, profiles bypassed)</td><td>round-trips at 2.29e-8, min R² 0.99999999999934</td><td>exact against the 1.39e-5 floor</td></tr>
+        <tr><td>Solver non-convergence (iteration ceiling removed entirely)</td><td>1.35e-4</td><td>0.32 %</td></tr>
+        <tr><td>Profile-representation loss (19 / 33 / 65 extraction surfaces)</td><td>4.0e-7</td><td>0.001 %</td></tr>
+        <tr><td><strong>Irreducible non-GS label content</strong></td><td>remainder</td><td><strong>99.68 %</strong></td></tr>
+      </tbody>
+    </table>
+    <p>The residual is spatially generic — 91.3 % ordinary interior, 6.7 % edge band, 1.9 % near-axis,
+    0.08 % X-point region — which is what a basis-and-regularisation mismatch looks like and is not what
+    a localised numerical defect looks like.</p>
+    <p><strong>Reading.</strong> The labels are EFIT output carrying its own basis, regularisation and
+    interpolation; they are not discrete-GS-exact fields. The grid-floor form of this kill gate therefore
+    tested a premise EFIT output cannot satisfy, and the measured 0.95-class interior R² is the
+    <em>strict-GS representability ceiling of the labels</em> under a pinned border.</p>
+    <p>Three consequences follow. Kill gate 2 is re-scoped to the production route — extracted profiles
+    plus shipped coil currents driving the grid-free filament-Green Newton-Krylov free-boundary solve,
+    with its bar set relative to the measured ceiling rather than the discretisation floor. The bespoke
+    Dirichlet-Picard harness is demoted from gate to instrument: it earned its keep by measuring the
+    ceiling and does not become a second production solver. And the quarantined referee-emission layer
+    gains measurable value, since up to 5 points of the scored metric live in label content no strict-GS
+    emitter can reproduce. Both convergence criteria are reported without conflation: the relaxed Picard
+    update met 1e-8 on 300/300 cases within 1,701 iterations, while the unrelaxed fixed-point update
+    remains median 8.5e-5.</p>
   </main>
 </body>
 </html>

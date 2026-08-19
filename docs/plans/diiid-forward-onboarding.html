@@ -23,8 +23,8 @@
   <title>DIII-D Forward Onboarding | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-17">
-<meta name="plan-version" content="11">
+<meta name="plan-modified" content="2026-08-19">
+<meta name="plan-version" content="13">
 <meta name="plan-commits" content="7d9743fd,92a4a00e,685a7602,11bac959,26a06b78,4ae27c42,52e4ad17,d1aaa089">
 <meta name="plan-impl" content="0.36">
 </head>
@@ -50,6 +50,38 @@
     (published DIII-D descriptions; disclosed), with provenance receipts on every element. The registry
     recipe is written down as it is executed — machine onboarding is the deliverable, DIII-D is its first
     instance.</p>
+
+    <p><strong>External machine-description source (located 2026-08-19).</strong> The external hole this
+    section names — wall contour, passive structure, and an independent check on the conductor set — is
+    filled by a shipped DIII-D <em>IMAS</em> description read with imas-python, never h5py. Two candidate
+    homes were surveyed on this workstation and only one is reachable:</p>
+    <ul>
+      <li><code>/home/ITER/hoeneno/public/imasdb/DIII-D/3/0</code> — <strong>readable, and the source of
+      record for this plan.</strong> MDSplus backend, Data Dictionary major version 3, two entries:
+      shot 133221 run 0000 (580 KB datafile) and shot 1000 run 0000 (11.6 MB datafile). The DD version
+      must still be taken from <code>ids_properties/version_put/data_dictionary</code> per entry rather
+      than inferred from the <code>3</code> path component.</li>
+      <li><code>/home/ITER/hoeneno/public/expdata/DIII-D</code> — <strong>not enumerable.</strong> Mode
+      <code>drwx--s--x</code>, owner <code>hoeneno</code>, group <code>94843</code>. Traversal succeeds
+      and any file can be read <em>by exact name</em>, but the directory cannot be listed, and every
+      name from the sibling convention used by <code>ITER/MD</code>, <code>TCV/66441</code> and
+      <code>MAST-U/45272</code> (<code>master.h5</code>, <code>pf_active.h5</code>, <code>wall.h5</code>,
+      <code>thomson_scattering.h5</code>) returns ENOENT. Directory link count 2 proves it holds files
+      only, no sub-entries. Recoverable at any time by supplied filenames or <code>o+rx</code>; it is
+      not on the critical path while the imasdb entry serves.</li>
+    </ul>
+
+    <p><strong>Three requirements added by the owner 2026-08-19</strong>, all inside this section's
+    existing remit rather than new scope: (a) <em>corroborate</em> the competition-shipped geometry
+    against that IMAS description — coil positions, sections and skews, Thomson chord line-of-sights,
+    and the wall — so the dataset's claim is checked by an independent description rather than trusted;
+    (b) route the read through <code>nova/imas/machine.py</code>'s machine dataclass wherever it reaches,
+    reporting per quantity whether it reads unmodified, reads after a named change, or cannot reach it —
+    the portability claim is about that route, not about a bespoke reader; (c) identify the DIII-D COCOS
+    index explicitly on both sides and record the transform into nova's internal COCOS 17. The IMAS and
+    the challenge-corpus conventions are two separate determinations and are not to be conflated: the
+    corpus transform is pinned once under <code>benchmarks/</code> (owner ruling 2026-08-19, below),
+    while the IDS side is stated with its source at the read.</p>
     <p><strong>Done-when:</strong> vacuum ψ on the shipped <code>efit_grid</code> from coil currents
     reproduces the challenge starter-kit vacuum check (reported R²≈0.94 class — exact bar pre-registered
     from the starter kit itself); geometry provenance receipts complete. <em>This is a kill gate for the
@@ -196,6 +228,9 @@
 <div class="r-comment" data-section="s5" data-id="c-20260817-decomposition-verdict" data-who="reckon-ship" data-when="2026-08-17T22:57:00+00:00">
     <div class="r-comment-body">resolve-decomposition landed: commit d1aaa089, 6/6 tests, same 20-shot 100-frame cohort, nothing fitted. VERDICT: the 0.0429 median fractional RMS is 99.68 percent IRREDUCIBLE NON-GS LABEL CONTENT. The direct-operator arm (toroidal current straight from apply_delta_star of the label, bypassing profiles) round-trips at median 2.29e-8 fractional RMS with R-squared 0.99999999999934 minimum, so the discrete operator and solve are exact against the 1.39e-5 floor; removing the iteration ceiling entirely moves the median by 1.35e-4 (0.32 percent of the residual); sweeping 19/33/65 extraction surfaces moves it by 4.0e-7 (0.001 percent). The residual is spatially generic (91.3 percent ordinary interior, 6.7 percent edge band, 1.9 percent near-axis, 0.08 percent X-point region). READING: the labels are EFIT output with its own basis, regularisation and interpolation - not discrete-GS-exact fields - so the grid-floor form of this kill gate tested a premise EFIT output cannot satisfy, and the measured 0.95-class interior R-squared is the strict-GS representability ceiling of the labels under a pinned border. CONSEQUENCES: (1) kill gate 2 is re-scoped to the production route - extracted profiles plus shipped coil currents driving nova's grid-free filament-Green Newton-Krylov free-boundary solve, compared to the label with a bar set relative to the measured representability ceiling rather than the discretisation floor; (2) the bespoke Dirichlet-Picard harness is demoted from gate to instrument - it earned its keep by measuring the ceiling, and it does not become a second production solver; (3) the quarantined referee-emission layer gains measurable value, since up to 5 points of R-squared-psi live in non-GS label content that no strict-GS emitter can reproduce. Convergence qualification preserved: the relaxed Picard update met 1e-8 on 300/300 cases within 1701 iterations, while the unrelaxed fixed-point update remains median 8.5e-5, so the two criteria are both reported and not conflated.</div>
 </div>
+<div class="r-comment" data-section="s5" data-id="c-20260819-forward-gs-illustration" data-who="reckon-ship" data-when="2026-08-19T20:15:00+00:00">
+    <div class="r-comment-body">OWNER DIRECTIVE 2026-08-19 sharpening the f-dfo-004 production-route gate and the evidence record. (1) Once flux functions extract, nova's forward GS solve runs on example labeled maps and the match against the competition data is DEMONSTRATED, not merely scored - side-by-side predicted and labeled maps with their difference field, on named shots and frames. (2) The completion evidence document must carry clear illustrations of all pertinent geometry: the conductor set with its sections and skews, the wall and passive structure, the Thomson chord line-of-sights, the efit_grid extent, and the quiescent-window selection. This is the standing figures mandate applied as an acceptance condition on the evidence record rather than an optional nicety, so every doc-producing node in this plan carries it explicitly. Tables stay HTML tables - no imagified tabular text.</div>
+</div>
 <div class="r-comment" data-section="s2" data-id="c-20260817-diiid-vacuum" data-who="reckon-ship" data-when="2026-08-17T19:10:00+00:00">
     <div class="r-comment-body">diiid-vacuum landed its harness and its VERDICT: commit 685a7602; gate vacuum-check FAILED and was preserved rather than repaired. Measured pooled exterior R-squared 0.49527 against the bar 0.94 pre-registered literally from the starter-kit README before any scoring run, over 20 shots and 4,140 frames; per-shot minimum -2.532, q25 0.063, median 0.238, q75 0.441, maximum 0.832. Unit tests 5/5, one geometry digest, provenance complete. THE FAILURE IS NOT UNITS: post-hoc best scale is 0.337957 while the scale-invariant correlation R-squared is only 0.407332, so the predicted vacuum field has the wrong SHAPE, not merely the wrong magnitude, and no amplitude fix can close it. Construction was doctrine-clean: all 18 F coils and ECOILA through analytic polygon_greens including the six signed parallelogram shears, F currents converted from shipped kA-turn to A-turn with no turn multiplier, nova total Wb per A converted to dataset Wb per radian by two pi, one additive flux gauge per frame and the one global sign normalised, and no fitted currents, turns, amplitudes or spatial modes anywhere. TWO CANDIDATE CAUSES, neither tuned against: (1) a contract mismatch, since the starter README describes FITTING psi outside the plasma envelope to Green functions and still references coil_turns, while the shipped dataset carries no coil_turns field, declares F currents already in kA-turn, leaves ECOILA turns unresolved across the interval 1 to 96, and supplies no bcoil poloidal geometry, so the published bar may score a fitted exterior decomposition rather than the absolute current-only forward this plan requires; and (2) a structurally incomplete ohmic set, with no ECOILB representation, which would produce exactly this shape deficit. Resolving which is a semantic and machine-description question that must be answered before the entry can rely on this gate, and it is now the entry's top priority.</div>
 </div>
@@ -216,6 +251,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260817-boundary-correction" data-who="reckon-ship" data-when="2026-08-17T23:20:00+00:00">
     <div class="r-comment-body">Boundary correction recorded: the corpus-cocos-adapter node was STOPPED mid-run before any commit, because the convention authority belongs in imas-ambix, not nova. Its worktree holds only rejected uncommitted edits and was left for inspection. The vacuum gate is re-locked to the owner's plasma-subtraction differencing formulation: separate the flux functions with the GS operator, solve for plasma current, represent it on nova filaments, subtract, and verify the coil model against the vacuum remainder — every labeled frame becomes a vacuum shot, and the method is already de-risked by the audit's 0.9967 construction-exact synthetic receipt. Longer-term boundary note: corpus-facing comparison runners (the gate benchmarks that read parquet directly) belong ambix-side consuming nova kernels, since ambix owns the data path and nova cannot import ambix; their migration rides with the convention re-home.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260819-cocos-home-ruling" data-who="reckon-ship" data-when="2026-08-19T20:15:00+00:00">
+    <div class="r-comment-body">OWNER RULING 2026-08-19 on where the corpus convention lands, amending the LOCATION clause of corpus-convention-authority while leaving its policy content untouched. Measured state that forced the question: the ambix home has not landed - imas_ambix/challenge/loader.py carries zero convention handling, only the plan decision was committed (efcf12a, a docs commit) - while nova still holds exactly the per-consumer factors the decision bans (FIXED_FLUX_SIGN in diiid_vacuum_quiescent_gate.py, TOTAL_FLUX_FACTOR in diiid_label_resolve_gate.py, and three separate 2-pi divisions across diiid_vacuum_composition_audit.py, diiid_vacuum_sensitivity_sweep.py and nova/imas/diiid_description.py line 261). Nova cannot import ambix, so a nova-side runner cannot consume an ambix-homed transform. RULED: pin the empirically determined transform in ONE module under benchmarks/ - the corpus-facing harness, NOT the shipped nova package - retire every scattered factor into it, and deliver the differencing gate plus the forward-GS demonstration now. The decision's policy content is fully satisfied: one measured authority, applied once, ad-hoc per-consumer factors banned. The ambix re-home of both the convention and the corpus-facing runners remains the intended end state and is carried as a foreign-owner followup, not abandoned. Also ruled the same day: the IMAS IDS convention and the challenge-corpus convention are two separate determinations and must not be conflated.</div>
 </div>
 </section>
 </main>

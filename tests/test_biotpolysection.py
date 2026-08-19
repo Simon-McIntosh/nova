@@ -767,6 +767,38 @@ def test_the_plasma_grid_defaults_to_hexagonal_cells():
     assert section <= {"hexagon", "polygon"}
 
 
+def test_preclip_samples_come_from_the_verified_authored_generator():
+    """Sampling geometry remains a fixed hexagon when material support is clipped."""
+    coilset = CoilSet(dplasma=-40)
+    coilset.firstwall.insert({"e": [1.0, 0, 0.3, 0.4]}, Ic=1e6)
+    plasma = np.asarray(coilset.subframe["plasma"], dtype=bool)
+    target = Target(
+        {
+            "x": np.asarray(coilset.subframe["x"])[plasma],
+            "z": np.asarray(coilset.subframe["z"])[plasma],
+            "poly": np.asarray(coilset.subframe["poly"], dtype=object)[plasma],
+        }
+    )
+
+    vertices = coilset.plasmagrid._preclip_sampling_vertices(target)
+    centres = np.c_[np.asarray(target.x), np.asarray(target.z)]
+    assert vertices.shape == (len(centres), 6, 2)
+    assert coilset.plasmagrid.sampling_identity_deviation <= (
+        coilset.plasmagrid.sampling_identity_bound
+    )
+    np.testing.assert_allclose(vertices.mean(axis=1), centres, atol=2e-16, rtol=0)
+    radii = np.linalg.norm(vertices - centres[:, None, :], axis=2)
+    np.testing.assert_allclose(radii, radii[0, 0], atol=2e-16, rtol=0)
+
+    material_counts = [
+        len(np.asarray(polygon.poly.exterior.coords)) - 1 for polygon in target.poly
+    ]
+    assert any(count != 6 for count in material_counts)
+    assert not np.any(np.asarray(target["section"], dtype=str) == "hexagon")
+    authored = np.asarray(coilset.plasmagrid.aloc["plasma", "section"], dtype=str)
+    assert np.any(authored == "hexagon")
+
+
 @pytest.mark.parametrize("orientation", [1, -1])
 def test_the_section_orientation_does_not_change_the_field(orientation):
     """Vertices wound either way describe the same conductor."""

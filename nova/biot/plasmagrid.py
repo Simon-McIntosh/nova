@@ -40,6 +40,10 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
     _sampling_vertices: np.ndarray | None = field(init=False, repr=False, default=None)
     _sample_coordinates: np.ndarray | None = field(init=False, repr=False, default=None)
     _cell_sample_nodes: np.ndarray | None = field(init=False, repr=False, default=None)
+    _sampling_identity_deviation: float | None = field(
+        init=False, repr=False, default=None
+    )
+    _sampling_identity_bound: float | None = field(init=False, repr=False, default=None)
 
     def __post_init__(self):
         """Initialize psi axis and psi x versions."""
@@ -104,45 +108,89 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
         super().post_solve()
 
     @staticmethod
-    def _ordered_polygon_vertices(polygon, centre) -> np.ndarray:
-        """Return one authored polygon's exterior in angular order."""
+    def _roundoff_unique_vertices(polygon, epsilon: float) -> np.ndarray:
+        """Return one exterior without its closing or round-off duplicate rows."""
         geometry = polygon.poly if hasattr(polygon, "poly") else polygon
-        vertices = np.asarray(geometry.exterior.coords, dtype=np.float64)[:-1, :2]
+        exterior = np.asarray(geometry.exterior.coords, dtype=np.float64)[:, :2]
+        if np.linalg.norm(exterior[-1] - exterior[0]) > epsilon:
+            raise ValueError("an authored cell exterior lacks its closing coordinate")
+        vertices = []
+        for vertex in exterior[:-1]:
+            if not any(np.linalg.norm(vertex - kept) <= epsilon for kept in vertices):
+                vertices.append(vertex)
+        return np.asarray(vertices)
+
+    @staticmethod
+    def _angular_order(vertices: np.ndarray, centre: np.ndarray) -> np.ndarray:
+        """Return exterior coordinates ordered by angle about one cell centre."""
         offset = vertices - centre
         return vertices[np.argsort(np.arctan2(offset[:, 1], offset[:, 0]))]
 
-    def _build_direct_samples(self, target: Target) -> None:
-        """Bank the authoritative pre-clip hex vertices and their coupling rows."""
+    def _preclip_sampling_vertices(self, target: Target) -> np.ndarray:
+        """Construct six fixed pre-clip samples for every authored plasma cell.
+
+        Material polygons are integration supports: wall clipping can change their
+        vertex count and pull their centroid away from the generator geometry.  The
+        smooth flux interpolant instead samples the tiling generator before clipping.
+        A complete authored cell supplies that generator's dimensions and exterior;
+        its round-off-deduplicated vertices are checked against the analytic hexagon
+        before those same tiling parameters construct six samples about every target
+        centre.  No statistic over clipped material offsets enters the construction.
+        """
         centres = np.c_[np.asarray(target.x), np.asarray(target.z)]
-        sections = np.asarray(target["section"], dtype=object).astype(str)
+        sections = np.asarray(self.aloc["plasma", "section"], dtype=object).astype(str)
         full = np.flatnonzero(sections == "hexagon")
         if len(full) == 0:
             raise ValueError(
                 "a hex plasma grid needs at least one complete generator cell"
             )
-        offsets = np.stack(
-            [
-                self._ordered_polygon_vertices(target.poly[cell], centres[cell])
-                - centres[cell]
-                for cell in full
-            ]
-        )
-        if offsets.shape[1:] != (6, 2):
-            raise ValueError("complete hex generator cells must carry six vertices")
-        canonical = np.median(offsets, axis=0)
+        polygons = np.asarray(self.aloc["plasma", "poly"], dtype=object)
+        dimensions = np.c_[
+            np.asarray(self.aloc["plasma", "dl"], dtype=float)[full],
+            np.asarray(self.aloc["plasma", "dt"], dtype=float)[full],
+        ]
         scale = max(
             float(np.max(np.abs(centres))),
-            float(np.max(np.abs(canonical))),
+            float(np.max(np.abs(dimensions))),
             1.0,
         )
         tolerance = 128.0 * np.finfo(np.float64).eps * scale
-        deviation = float(np.max(np.abs(offsets - canonical)))
+        if float(np.max(np.abs(dimensions - dimensions[0]))) > tolerance:
+            raise ValueError(
+                "one plasma tiling cannot carry multiple generator dimensions"
+            )
+
+        width, height = dimensions[0]
+        radius = min(width / 2.0, height / np.sqrt(3.0))
+        angles = np.linspace(0.0, 2.0 * np.pi, 7)[:-1]
+        analytic_offsets = radius * np.column_stack([np.cos(angles), np.sin(angles)])
+        analytic_offsets = self._angular_order(analytic_offsets, np.zeros(2))
+        deviations = []
+        for cell in full:
+            authored = self._roundoff_unique_vertices(polygons[cell], tolerance)
+            if authored.shape != (6, 2):
+                raise ValueError(
+                    "a complete hex generator must have six deduplicated vertices"
+                )
+            authored = self._angular_order(authored, centres[cell])
+            deviations.append(
+                float(np.max(np.abs(authored - centres[cell] - analytic_offsets)))
+            )
+        deviation = max(deviations)
         if deviation > tolerance:
             raise ValueError(
-                "complete hex generator offsets do not collapse at round-off: "
+                "authored generator vertices differ from the analytic tiling: "
                 f"{deviation:.17g} m exceeds {tolerance:.17g} m"
             )
-        vertices = centres[:, None, :] + canonical[None, :, :]
+        self._sampling_identity_deviation = deviation
+        self._sampling_identity_bound = tolerance
+        return centres[:, None, :] + analytic_offsets[None, :, :]
+
+    def _build_direct_samples(self, target: Target) -> None:
+        """Bank the authoritative pre-clip hex vertices and their coupling rows."""
+        vertices = self._preclip_sampling_vertices(target)
+        centres = np.c_[np.asarray(target.x), np.asarray(target.z)]
+        tolerance = float(self._sampling_identity_bound)
         flat = vertices.reshape(-1, 2)
         lookup: dict[tuple[int, int], int] = {}
         coordinates = []
@@ -190,6 +238,20 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
         if self._cell_sample_nodes is None:
             raise AttributeError("solve the plasma grid before reading sample targets")
         return self._cell_sample_nodes
+
+    @property
+    def sampling_identity_deviation(self) -> float:
+        """Return the authored-versus-analytic generator deviation in metres."""
+        if self._sampling_identity_deviation is None:
+            raise AttributeError("solve the plasma grid before reading sample identity")
+        return self._sampling_identity_deviation
+
+    @property
+    def sampling_identity_bound(self) -> float:
+        """Return the coordinate-scaled generator round-off bound in metres."""
+        if self._sampling_identity_bound is None:
+            raise AttributeError("solve the plasma grid before reading sample identity")
+        return self._sampling_identity_bound
 
     @cached_property
     def target(self):

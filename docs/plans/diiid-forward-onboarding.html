@@ -24,10 +24,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-19">
-<meta name="plan-version" content="14">
+<meta name="plan-version" content="16">
 <meta name="plan-commits" content="7d9743fd,92a4a00e,685a7602,11bac959,26a06b78,4ae27c42,52e4ad17,d1aaa089,a6f8bdf4,86f6f38a">
 <meta name="plan-impl" content="0.45">
-<meta name="plan-artifacts" content="docs/figures/diiid-forward-onboarding/ids-description/ids_description_receipt.json,docs/figures/diiid-forward-onboarding/ids-description/limiter_pf_active.png,docs/figures/diiid-forward-onboarding/ids-description/thomson_geometry.png,docs/figures/diiid-forward-onboarding/cocos/corpus_cocos_receipt.json,docs/figures/diiid-forward-onboarding/cocos/corpus_cocos_discriminators.png,docs/figures/diiid-forward-onboarding/cocos/composition_audit.json,docs/figures/diiid-forward-onboarding/cocos/coil_only_score.json">
+<meta name="plan-artifacts" content="docs/figures/diiid-forward-onboarding/ids-description/ids_description_receipt.json,docs/figures/diiid-forward-onboarding/cocos/corpus_cocos_receipt.json,docs/figures/diiid-forward-onboarding/cocos/corpus_cocos_discriminators.png,docs/figures/diiid-forward-onboarding/cocos/composition_audit.json,docs/figures/diiid-forward-onboarding/cocos/coil_only_score.json">
 </head>
 <body>
   <main class="plan-doc">
@@ -52,25 +52,42 @@
     recipe is written down as it is executed — machine onboarding is the deliverable, DIII-D is its first
     instance.</p>
 
-    <p><strong>External machine-description source (located 2026-08-19).</strong> The external hole this
-    section names — wall contour, passive structure, and an independent check on the conductor set — is
-    filled by a shipped DIII-D <em>IMAS</em> description read with imas-python, never h5py. Two candidate
-    homes were surveyed on this workstation and only one is reachable:</p>
+    <p><strong>External machine-description sourcing — surveyed, then ruled 2026-08-19.</strong> The
+    external hole this section names is wall contour, passive structure, and an independent check on the
+    conductor set. A survey of this workstation found two candidate IMAS homes; the reachable one was
+    read, measured, and then <strong>discarded by the owner on the evidence of that measurement</strong>.</p>
     <ul>
-      <li><code>/home/ITER/hoeneno/public/imasdb/DIII-D/3/0</code> — <strong>readable, and the source of
-      record for this plan.</strong> MDSplus backend, Data Dictionary major version 3, two entries:
-      shot 133221 run 0000 (580 KB datafile) and shot 1000 run 0000 (11.6 MB datafile). The DD version
-      must still be taken from <code>ids_properties/version_put/data_dictionary</code> per entry rather
-      than inferred from the <code>3</code> path component.</li>
-      <li><code>/home/ITER/hoeneno/public/expdata/DIII-D</code> — <strong>not enumerable.</strong> Mode
-      <code>drwx--s--x</code>, owner <code>hoeneno</code>, group <code>94843</code>. Traversal succeeds
-      and any file can be read <em>by exact name</em>, but the directory cannot be listed, and every
-      name from the sibling convention used by <code>ITER/MD</code>, <code>TCV/66441</code> and
-      <code>MAST-U/45272</code> (<code>master.h5</code>, <code>pf_active.h5</code>, <code>wall.h5</code>,
-      <code>thomson_scattering.h5</code>) returns ENOENT. Directory link count 2 proves it holds files
-      only, no sub-entries. Recoverable at any time by supplied filenames or <code>o+rx</code>; it is
-      not on the critical path while the imasdb entry serves.</li>
+      <li><code>/home/ITER/hoeneno/public/imasdb/DIII-D/3/0</code> — read, measured, and
+      <strong>DISCARDED (owner ruling 2026-08-19)</strong>. MDSplus backend, Data Dictionary 3.28.0 on
+      shot 1000 run 0000 and 3.28.1 on shot 133221 run 0000. The read succeeded and the measurement is
+      what condemned the source: it is a <em>partial, largely synthetic</em> description carrying four
+      conductors against the competition set's eighteen F-coils plus ECOILA, a coarse fifteen-vertex
+      limiter, <strong>zero</strong> passive loops, <strong>zero</strong> toroidal coils, and ten Thomson
+      channel positions in an evenly spaced vertical string at a single radius with <strong>zero</strong>
+      line-of-sight endpoint pairs. It fills neither the passive hole nor the chord geometry, so it is no
+      longer a source of record for anything. Its numeric receipt is retained as the negative result that
+      justifies the ruling; its figures were retired, because a four-conductor synthetic machine drawn
+      under a DIII-D heading invites exactly the misreading the ruling exists to prevent.</li>
+      <li><code>/home/ITER/hoeneno/public/expdata/DIII-D</code> — <strong>superseded by an incoming
+      updated dataset.</strong> Mode <code>drwx--s--x</code>: traversal succeeds and any file reads
+      <em>by exact name</em>, but the directory cannot be listed, and roughly six hundred candidate names
+      spanning every sibling convention (<code>ITER/MD</code>, <code>TCV/66441</code>,
+      <code>MAST-U/45272</code>) return ENOENT; link count 2 proves it holds files only. The owner is
+      obtaining access to the private directory carrying the <em>updated</em> DIII-D dataset, which
+      replaces both this path and the discarded imasdb entry as the intended external source.</li>
     </ul>
+
+    <p><strong>Consequent sourcing rule (owner ruling 2026-08-19).</strong> The machine description is
+    built from the <em>competition dataset</em>, which is where the eighteen F-coils with their sections
+    and six skews, ECOILA, bcoil, the Thomson chord coordinates and the 65×65 <code>efit_grid</code>
+    actually live. This is the <code>diiid-geometry-authority</code> decision applied without an escape
+    hatch rather than a change to it: dataset-primary, with external material filling only what does not
+    ship. The two quantities that still do not ship — <strong>wall contour and passive structure</strong>
+    — have <em>no</em> external source until the updated dataset arrives, and must be carried as an open
+    gap rather than approximated from a discarded synthetic description. Nova's machine dataclass route
+    in <code>nova/imas/machine.py</code> and the access-layer reader built against the discarded entry
+    both survive the ruling: they are the seam and the reader the updated dataset will arrive through,
+    and the reader's default path needs only re-pointing.</p>
 
     <p><strong>Three requirements added by the owner 2026-08-19</strong>, all inside this section's
     existing remit rather than new scope: (a) <em>corroborate</em> the competition-shipped geometry
@@ -261,6 +278,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260819-corpus-cocos-pin" data-who="reckon-ship" data-when="2026-08-19T20:35:00+00:00">
     <div class="r-comment-body">diiid-corpus-cocos-pin landed - commit 86f6f38a; gate single-convention-home PASSED and independently re-verified by the orchestrator; 23/23 tests across all five DIII-D test modules; path-scoped ruff clean. MEASURE, with zero fitted coefficients on a declared 20-shot standard-field cohort (recorded Ip at or above 500 kA, bcoil below zero, one frame per shot): CORPUS COCOS IS 5, digits sigma_Bp +1, e_Bp 0, sigma_RphiZ +1, sigma_rhothetaphi -1, decided by four independent discriminators rather than assumed. The flux-exponent discriminator is decisive - the Delta-star current integral over recorded Ip has median 1.078781 for the flux-per-radian candidate against 0.171693 for the total-weber candidate, so the corpus map is per radian. Supporting signs: psi boundary minus axis positive on 20/20 with median 0.259869 Wb/rad, sigma_Bp +1 on 20/20, q95 positive on 20/20 with sigma_rhothetaphi -1. The transform into nova COCOS 17 is psi -2pi, Ip +1, F +1, q -1, d/dpsi -1/(2pi), derived through nova.io.cocos convention_transform rather than hand-written factors. Two parity receipts confirm nothing moved that should not have: the construction-exact synthetic composition scores 0.9967218639797544 against the previously recorded 0.9967218639028415, agreeing to ten significant figures, and coil-only real-frame pooled exterior R-squared is 0.49526707859970365 against the recorded 0.49527 over the same 20 shots and 4,140 frames. Nova registry kernels now return native total webers and the per-radian conversion left nova/imas/diiid_description.py entirely, so nova stays COCOS 17 internally as the locked decision requires. HONEST CAVEAT CARRIED BY THE WORKER: the q95 sign digit is conditional on the declared standard-field selection, and reversed-field corpus frames were not used to infer it. AUDIT FINDING, not blocking and folded into the next node rather than given its own: the pinned module still exports FIXED_FLUX_SIGN and TOTAL_FLUX_FACTOR, whose product is bitwise identical to the derived PSI_TO_NOVA factor at -6.283185307179586, so the same convention has two spellings inside its single home - the precise shape of the double-application failure this node existed to prevent. It is latent rather than live: a grep over all five corpus runners shows none of them consumes either constant.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260819-discard-legacy-description" data-who="reckon-ship" data-when="2026-08-19T20:45:00+00:00">
+    <div class="r-comment-body">OWNER RULING 2026-08-19, acting on the measurement rather than on a preference: DISCARD the legacy DD v3 imasdb description and continue building the machine description from the COMPETITION DATASET. The owner is separately obtaining access to a private directory carrying an updated DIII-D dataset, which supersedes both the imasdb entry and the unlistable expdata path as the intended external source. ACTIONS TAKEN IN THE SAME BEAT. (1) diiid-geometry-corroboration was STOPPED mid-run at 8.5 minutes with zero commits, because its entire premise was corroborating the competition geometry against the source just discarded - a comparison against a four-conductor synthetic description measures nothing. Its three untracked files were preserved to session scratch, its worktree removed, and the corroboration will be re-authored fresh against the updated dataset rather than resurrected against a void premise. (2) The two figures drawn from the discarded entry were retired: a four-conductor synthetic machine and a ten-point Thomson string rendered under a DIII-D heading are a standing invitation to misread a demo description as the machine, and the counts they carried belong in a table anyway. The numeric receipt ids_description_receipt.json is KEPT as the negative result that justifies the ruling. (3) What survives and why: the five frozen dataclasses added to nova/imas/machine.py and the access-layer reader benchmark are the seam and the reader the updated dataset will arrive through - source-independent, and needing only a re-pointed default path - so neither is reverted. STANDING GAP, now carried honestly rather than approximated: wall contour and passive structure do not ship with the competition dataset and have NO external source until the updated dataset lands. The plasma-subtraction differencing gate is unaffected and continues, since it reads only the competition corpus.</div>
 </div>
 </section>
 </main>

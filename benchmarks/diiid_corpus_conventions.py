@@ -18,7 +18,6 @@ from __future__ import annotations
 import argparse
 import json
 from dataclasses import dataclass
-from math import tau
 from pathlib import Path
 from typing import Any
 
@@ -39,9 +38,6 @@ from nova.io.cocos import (
 
 CORPUS_COCOS = 5
 NOVA_COCOS = 17
-FIXED_FLUX_SIGN = -1.0
-TOTAL_FLUX_FACTOR = tau
-
 _TRANSFORM = convention_transform(source=CORPUS_COCOS, target=NOVA_COCOS)
 PSI_TO_NOVA = _TRANSFORM.factor(PSI_LIKE)
 IP_TO_NOVA = _TRANSFORM.factor(IP_LIKE)
@@ -230,7 +226,7 @@ def measure(paths: list[Path], *, shots: int = 20) -> list[DiscriminatorFrame]:
                 psi_boundary_wb_per_rad=boundary,
                 current_from_per_radian_a=_integrated_current(row, frame, PSI_TO_NOVA),
                 current_from_total_flux_a=_integrated_current(
-                    row, frame, FIXED_FLUX_SIGN
+                    row, frame, PSI_TO_NOVA / abs(PSI_TO_NOVA)
                 ),
             )
         )
@@ -389,13 +385,11 @@ if __name__ == "__main__":
 __all__ = [
     "CORPUS_COCOS",
     "D_PSI_TO_NOVA",
-    "FIXED_FLUX_SIGN",
     "F_TO_NOVA",
     "IP_TO_NOVA",
     "NOVA_COCOS",
     "PSI_TO_NOVA",
     "Q_TO_NOVA",
-    "TOTAL_FLUX_FACTOR",
     "DiscriminatorFrame",
     "corpus_derivative_to_nova",
     "corpus_f_to_nova",

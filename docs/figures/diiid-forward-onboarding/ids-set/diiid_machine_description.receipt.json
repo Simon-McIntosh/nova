@@ -16,9 +16,9 @@
   "content_firewall": {
     "equilibrium_written": false,
     "filled_path_counts": {
-      "magnetics": 22,
-      "pf_active": 17,
-      "wall": 10
+      "magnetics": 19,
+      "pf_active": 14,
+      "wall": 9
     },
     "magnetics_signal_arrays_written": false,
     "written_occurrences": [
@@ -46,58 +46,72 @@
   ],
   "ids_properties": {
     "magnetics": {
-      "comment": "Static DIII-D machine geometry copied from /home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc at IMAS Data Dictionary 3.41.0; dynamic signals and reconstruction content are excluded.",
-      "data_dictionary": "3.41.0",
+      "comment": "Static DIII-D machine geometry copied from /home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc at IMAS Data Dictionary 3.41.0 and authored natively at Data Dictionary 4.1.1; dynamic signals and reconstruction content are excluded, and no IDS conversion is performed.",
+      "data_dictionary": "4.1.1",
       "provenance": [
         {
           "path": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
           "sources": [
-            "IMAS netCDF entry; Data Dictionary 3.41.0"
+            "IMAS netCDF source; Data Dictionary 3.41.0",
+            "native IDSFactory authoring; Data Dictionary 4.1.1"
           ]
         }
       ],
-      "source": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc"
+      "source": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+      "source_leaf_present": false
     },
     "pf_active": {
-      "comment": "Static DIII-D machine geometry copied from /home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc at IMAS Data Dictionary 3.41.0; dynamic signals and reconstruction content are excluded.",
-      "data_dictionary": "3.41.0",
+      "comment": "Static DIII-D machine geometry copied from /home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc at IMAS Data Dictionary 3.41.0 and authored natively at Data Dictionary 4.1.1; dynamic signals and reconstruction content are excluded, and no IDS conversion is performed.",
+      "data_dictionary": "4.1.1",
       "provenance": [
         {
           "path": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
           "sources": [
-            "IMAS netCDF entry; Data Dictionary 3.41.0"
+            "IMAS netCDF source; Data Dictionary 3.41.0",
+            "native IDSFactory authoring; Data Dictionary 4.1.1"
           ]
         }
       ],
-      "source": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc"
+      "source": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+      "source_leaf_present": false
     },
     "wall": {
-      "comment": "Static DIII-D machine geometry copied from /home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc at IMAS Data Dictionary 3.41.0; dynamic signals and reconstruction content are excluded.",
-      "data_dictionary": "3.41.0",
+      "comment": "Static DIII-D machine geometry copied from /home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc at IMAS Data Dictionary 3.41.0 and authored natively at Data Dictionary 4.1.1; dynamic signals and reconstruction content are excluded, and no IDS conversion is performed.",
+      "data_dictionary": "4.1.1",
       "provenance": [
         {
           "path": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
           "sources": [
-            "IMAS netCDF entry; Data Dictionary 3.41.0"
+            "IMAS netCDF source; Data Dictionary 3.41.0",
+            "native IDSFactory authoring; Data Dictionary 4.1.1"
           ]
         }
       ],
-      "source": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc"
+      "source": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+      "source_leaf_present": false
     }
   },
   "measurement": "DIII-D static machine-description IDS netCDF export",
+  "native_authoring": {
+    "cross_major_conversion_performed": false,
+    "resolved_from": "imas.dd_zip.dd_xml_versions",
+    "statement": "The DD3 source is read with autoconvert=False into Nova machine dataclasses, then a latest-DD4 IDSFactory authors fresh IDSs; no conversion of these IDSs occurs.",
+    "target_data_dictionary": "4.1.1"
+  },
   "output": {
     "path": "docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc",
-    "sha256": "a6ef157f558592ee9318e0ad02539dfbbe5c812e55d5d5218c5692f759f6e5ef",
-    "size_bytes": 262087
+    "sha256": "1e560b2ad2f2f224eed064ed3ccbeedbd88d4f4d2daca4966a855e37961c05ab",
+    "size_bytes": 213703,
+    "superseded": {
+      "data_dictionary": "3.41.0",
+      "sha256": "a6ef157f558592ee9318e0ad02539dfbbe5c812e55d5d5218c5692f759f6e5ef",
+      "size_bytes": 262087
+    }
   },
   "round_trip": {
     "element_vertex_maximum_absolute_difference": 0.0,
     "ids": {
       "magnetics": {
-        "b_field_pol_probe[0]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[0]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -128,9 +142,6 @@
         "b_field_pol_probe[0]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[10]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[10]/length": {
           "exact_equal": true,
@@ -163,9 +174,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[11]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[11]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -196,9 +204,6 @@
         "b_field_pol_probe[11]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[12]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[12]/length": {
           "exact_equal": true,
@@ -231,9 +236,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[13]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[13]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -264,9 +266,6 @@
         "b_field_pol_probe[13]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[14]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[14]/length": {
           "exact_equal": true,
@@ -299,9 +298,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[15]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[15]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -332,9 +328,6 @@
         "b_field_pol_probe[15]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[16]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[16]/length": {
           "exact_equal": true,
@@ -367,9 +360,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[17]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[17]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -400,9 +390,6 @@
         "b_field_pol_probe[17]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[18]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[18]/length": {
           "exact_equal": true,
@@ -435,9 +422,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[19]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[19]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -468,9 +452,6 @@
         "b_field_pol_probe[19]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[1]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[1]/length": {
           "exact_equal": true,
@@ -503,9 +484,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[20]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[20]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -536,9 +514,6 @@
         "b_field_pol_probe[20]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[21]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[21]/length": {
           "exact_equal": true,
@@ -571,9 +546,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[22]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[22]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -604,9 +576,6 @@
         "b_field_pol_probe[22]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[23]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[23]/length": {
           "exact_equal": true,
@@ -639,9 +608,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[24]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[24]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -672,9 +638,6 @@
         "b_field_pol_probe[24]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[25]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[25]/length": {
           "exact_equal": true,
@@ -707,9 +670,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[26]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[26]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -740,9 +700,6 @@
         "b_field_pol_probe[26]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[27]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[27]/length": {
           "exact_equal": true,
@@ -775,9 +732,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[28]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[28]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -808,9 +762,6 @@
         "b_field_pol_probe[28]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[29]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[29]/length": {
           "exact_equal": true,
@@ -843,9 +794,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[2]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[2]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -876,9 +824,6 @@
         "b_field_pol_probe[2]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[30]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[30]/length": {
           "exact_equal": true,
@@ -911,9 +856,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[31]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[31]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -944,9 +886,6 @@
         "b_field_pol_probe[31]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[32]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[32]/length": {
           "exact_equal": true,
@@ -979,9 +918,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[33]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[33]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -1012,9 +948,6 @@
         "b_field_pol_probe[33]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[34]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[34]/length": {
           "exact_equal": true,
@@ -1047,9 +980,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[35]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[35]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -1080,9 +1010,6 @@
         "b_field_pol_probe[35]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[36]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[36]/length": {
           "exact_equal": true,
@@ -1115,9 +1042,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[37]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[37]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -1148,9 +1072,6 @@
         "b_field_pol_probe[37]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[38]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[38]/length": {
           "exact_equal": true,
@@ -1183,9 +1104,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[39]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[39]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -1216,9 +1134,6 @@
         "b_field_pol_probe[39]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[3]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[3]/length": {
           "exact_equal": true,
@@ -1251,9 +1166,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[40]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[40]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -1284,9 +1196,6 @@
         "b_field_pol_probe[40]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[41]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[41]/length": {
           "exact_equal": true,
@@ -1319,9 +1228,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[42]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[42]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -1352,9 +1258,6 @@
         "b_field_pol_probe[42]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[43]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[43]/length": {
           "exact_equal": true,
@@ -1387,9 +1290,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[44]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[44]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -1420,9 +1320,6 @@
         "b_field_pol_probe[44]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[45]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[45]/length": {
           "exact_equal": true,
@@ -1455,9 +1352,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[46]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[46]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -1488,9 +1382,6 @@
         "b_field_pol_probe[46]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[47]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[47]/length": {
           "exact_equal": true,
@@ -1523,9 +1414,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[48]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[48]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -1556,9 +1444,6 @@
         "b_field_pol_probe[48]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[49]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[49]/length": {
           "exact_equal": true,
@@ -1591,9 +1476,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[4]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[4]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -1624,9 +1506,6 @@
         "b_field_pol_probe[4]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[50]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[50]/length": {
           "exact_equal": true,
@@ -1659,9 +1538,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[51]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[51]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -1692,9 +1568,6 @@
         "b_field_pol_probe[51]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[52]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[52]/length": {
           "exact_equal": true,
@@ -1727,9 +1600,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[53]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[53]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -1760,9 +1630,6 @@
         "b_field_pol_probe[53]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[54]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[54]/length": {
           "exact_equal": true,
@@ -1795,9 +1662,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[55]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[55]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -1828,9 +1692,6 @@
         "b_field_pol_probe[55]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[56]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[56]/length": {
           "exact_equal": true,
@@ -1863,9 +1724,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[57]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[57]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -1896,9 +1754,6 @@
         "b_field_pol_probe[57]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[58]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[58]/length": {
           "exact_equal": true,
@@ -1931,9 +1786,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[59]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[59]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -1964,9 +1816,6 @@
         "b_field_pol_probe[59]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[5]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[5]/length": {
           "exact_equal": true,
@@ -1999,9 +1848,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[60]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[60]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -2032,9 +1878,6 @@
         "b_field_pol_probe[60]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[61]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[61]/length": {
           "exact_equal": true,
@@ -2067,9 +1910,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[62]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[62]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -2100,9 +1940,6 @@
         "b_field_pol_probe[62]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[63]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[63]/length": {
           "exact_equal": true,
@@ -2135,9 +1972,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[64]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[64]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -2168,9 +2002,6 @@
         "b_field_pol_probe[64]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[65]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[65]/length": {
           "exact_equal": true,
@@ -2203,9 +2034,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[66]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[66]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -2236,9 +2064,6 @@
         "b_field_pol_probe[66]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[67]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[67]/length": {
           "exact_equal": true,
@@ -2271,9 +2096,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[68]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[68]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -2304,9 +2126,6 @@
         "b_field_pol_probe[68]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[69]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[69]/length": {
           "exact_equal": true,
@@ -2339,9 +2158,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[6]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[6]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -2372,9 +2188,6 @@
         "b_field_pol_probe[6]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[70]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[70]/length": {
           "exact_equal": true,
@@ -2407,9 +2220,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[71]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[71]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -2440,9 +2250,6 @@
         "b_field_pol_probe[71]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[72]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[72]/length": {
           "exact_equal": true,
@@ -2475,9 +2282,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[73]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[73]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -2508,9 +2312,6 @@
         "b_field_pol_probe[73]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[74]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[74]/length": {
           "exact_equal": true,
@@ -2543,9 +2344,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[75]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[75]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -2576,9 +2374,6 @@
         "b_field_pol_probe[75]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[7]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[7]/length": {
           "exact_equal": true,
@@ -2611,9 +2406,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "b_field_pol_probe[8]/identifier": {
-          "exact_equal": true
-        },
         "b_field_pol_probe[8]/length": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
@@ -2644,9 +2436,6 @@
         "b_field_pol_probe[8]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "b_field_pol_probe[9]/identifier": {
-          "exact_equal": true
         },
         "b_field_pol_probe[9]/length": {
           "exact_equal": true,
@@ -2679,9 +2468,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "flux_loop[0]/identifier": {
-          "exact_equal": true
-        },
         "flux_loop[0]/name": {
           "exact_equal": true
         },
@@ -2696,9 +2482,6 @@
         "flux_loop[0]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "flux_loop[10]/identifier": {
-          "exact_equal": true
         },
         "flux_loop[10]/name": {
           "exact_equal": true
@@ -2715,9 +2498,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "flux_loop[11]/identifier": {
-          "exact_equal": true
-        },
         "flux_loop[11]/name": {
           "exact_equal": true
         },
@@ -2732,9 +2512,6 @@
         "flux_loop[11]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "flux_loop[12]/identifier": {
-          "exact_equal": true
         },
         "flux_loop[12]/name": {
           "exact_equal": true
@@ -2751,9 +2528,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "flux_loop[13]/identifier": {
-          "exact_equal": true
-        },
         "flux_loop[13]/name": {
           "exact_equal": true
         },
@@ -2768,9 +2542,6 @@
         "flux_loop[13]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "flux_loop[14]/identifier": {
-          "exact_equal": true
         },
         "flux_loop[14]/name": {
           "exact_equal": true
@@ -2787,9 +2558,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "flux_loop[15]/identifier": {
-          "exact_equal": true
-        },
         "flux_loop[15]/name": {
           "exact_equal": true
         },
@@ -2804,9 +2572,6 @@
         "flux_loop[15]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "flux_loop[16]/identifier": {
-          "exact_equal": true
         },
         "flux_loop[16]/name": {
           "exact_equal": true
@@ -2823,9 +2588,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "flux_loop[17]/identifier": {
-          "exact_equal": true
-        },
         "flux_loop[17]/name": {
           "exact_equal": true
         },
@@ -2840,9 +2602,6 @@
         "flux_loop[17]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "flux_loop[18]/identifier": {
-          "exact_equal": true
         },
         "flux_loop[18]/name": {
           "exact_equal": true
@@ -2859,9 +2618,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "flux_loop[19]/identifier": {
-          "exact_equal": true
-        },
         "flux_loop[19]/name": {
           "exact_equal": true
         },
@@ -2876,9 +2632,6 @@
         "flux_loop[19]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "flux_loop[1]/identifier": {
-          "exact_equal": true
         },
         "flux_loop[1]/name": {
           "exact_equal": true
@@ -2895,9 +2648,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "flux_loop[20]/identifier": {
-          "exact_equal": true
-        },
         "flux_loop[20]/name": {
           "exact_equal": true
         },
@@ -2912,9 +2662,6 @@
         "flux_loop[20]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "flux_loop[21]/identifier": {
-          "exact_equal": true
         },
         "flux_loop[21]/name": {
           "exact_equal": true
@@ -2931,9 +2678,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "flux_loop[22]/identifier": {
-          "exact_equal": true
-        },
         "flux_loop[22]/name": {
           "exact_equal": true
         },
@@ -2948,9 +2692,6 @@
         "flux_loop[22]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "flux_loop[23]/identifier": {
-          "exact_equal": true
         },
         "flux_loop[23]/name": {
           "exact_equal": true
@@ -2967,9 +2708,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "flux_loop[24]/identifier": {
-          "exact_equal": true
-        },
         "flux_loop[24]/name": {
           "exact_equal": true
         },
@@ -2984,9 +2722,6 @@
         "flux_loop[24]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "flux_loop[25]/identifier": {
-          "exact_equal": true
         },
         "flux_loop[25]/name": {
           "exact_equal": true
@@ -3003,9 +2738,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "flux_loop[26]/identifier": {
-          "exact_equal": true
-        },
         "flux_loop[26]/name": {
           "exact_equal": true
         },
@@ -3020,9 +2752,6 @@
         "flux_loop[26]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "flux_loop[27]/identifier": {
-          "exact_equal": true
         },
         "flux_loop[27]/name": {
           "exact_equal": true
@@ -3039,9 +2768,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "flux_loop[28]/identifier": {
-          "exact_equal": true
-        },
         "flux_loop[28]/name": {
           "exact_equal": true
         },
@@ -3056,9 +2782,6 @@
         "flux_loop[28]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "flux_loop[29]/identifier": {
-          "exact_equal": true
         },
         "flux_loop[29]/name": {
           "exact_equal": true
@@ -3075,9 +2798,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "flux_loop[2]/identifier": {
-          "exact_equal": true
-        },
         "flux_loop[2]/name": {
           "exact_equal": true
         },
@@ -3092,9 +2812,6 @@
         "flux_loop[2]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "flux_loop[30]/identifier": {
-          "exact_equal": true
         },
         "flux_loop[30]/name": {
           "exact_equal": true
@@ -3111,9 +2828,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "flux_loop[31]/identifier": {
-          "exact_equal": true
-        },
         "flux_loop[31]/name": {
           "exact_equal": true
         },
@@ -3128,9 +2842,6 @@
         "flux_loop[31]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "flux_loop[32]/identifier": {
-          "exact_equal": true
         },
         "flux_loop[32]/name": {
           "exact_equal": true
@@ -3147,9 +2858,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "flux_loop[33]/identifier": {
-          "exact_equal": true
-        },
         "flux_loop[33]/name": {
           "exact_equal": true
         },
@@ -3164,9 +2872,6 @@
         "flux_loop[33]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "flux_loop[34]/identifier": {
-          "exact_equal": true
         },
         "flux_loop[34]/name": {
           "exact_equal": true
@@ -3183,9 +2888,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "flux_loop[35]/identifier": {
-          "exact_equal": true
-        },
         "flux_loop[35]/name": {
           "exact_equal": true
         },
@@ -3200,9 +2902,6 @@
         "flux_loop[35]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "flux_loop[36]/identifier": {
-          "exact_equal": true
         },
         "flux_loop[36]/name": {
           "exact_equal": true
@@ -3219,9 +2918,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "flux_loop[37]/identifier": {
-          "exact_equal": true
-        },
         "flux_loop[37]/name": {
           "exact_equal": true
         },
@@ -3236,9 +2932,6 @@
         "flux_loop[37]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "flux_loop[38]/identifier": {
-          "exact_equal": true
         },
         "flux_loop[38]/name": {
           "exact_equal": true
@@ -3255,9 +2948,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "flux_loop[39]/identifier": {
-          "exact_equal": true
-        },
         "flux_loop[39]/name": {
           "exact_equal": true
         },
@@ -3272,9 +2962,6 @@
         "flux_loop[39]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "flux_loop[3]/identifier": {
-          "exact_equal": true
         },
         "flux_loop[3]/name": {
           "exact_equal": true
@@ -3291,9 +2978,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "flux_loop[40]/identifier": {
-          "exact_equal": true
-        },
         "flux_loop[40]/name": {
           "exact_equal": true
         },
@@ -3308,9 +2992,6 @@
         "flux_loop[40]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "flux_loop[41]/identifier": {
-          "exact_equal": true
         },
         "flux_loop[41]/name": {
           "exact_equal": true
@@ -3327,9 +3008,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "flux_loop[42]/identifier": {
-          "exact_equal": true
-        },
         "flux_loop[42]/name": {
           "exact_equal": true
         },
@@ -3344,9 +3022,6 @@
         "flux_loop[42]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "flux_loop[43]/identifier": {
-          "exact_equal": true
         },
         "flux_loop[43]/name": {
           "exact_equal": true
@@ -3363,9 +3038,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "flux_loop[4]/identifier": {
-          "exact_equal": true
-        },
         "flux_loop[4]/name": {
           "exact_equal": true
         },
@@ -3380,9 +3052,6 @@
         "flux_loop[4]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "flux_loop[5]/identifier": {
-          "exact_equal": true
         },
         "flux_loop[5]/name": {
           "exact_equal": true
@@ -3399,9 +3068,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "flux_loop[6]/identifier": {
-          "exact_equal": true
-        },
         "flux_loop[6]/name": {
           "exact_equal": true
         },
@@ -3416,9 +3082,6 @@
         "flux_loop[6]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "flux_loop[7]/identifier": {
-          "exact_equal": true
         },
         "flux_loop[7]/name": {
           "exact_equal": true
@@ -3435,9 +3098,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "flux_loop[8]/identifier": {
-          "exact_equal": true
-        },
         "flux_loop[8]/name": {
           "exact_equal": true
         },
@@ -3452,9 +3112,6 @@
         "flux_loop[8]/type/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "flux_loop[9]/identifier": {
-          "exact_equal": true
         },
         "flux_loop[9]/name": {
           "exact_equal": true
@@ -3481,10 +3138,10 @@
         "ids_properties/provenance/node[0]/path": {
           "exact_equal": true
         },
-        "ids_properties/provenance/node[0]/sources": {
+        "ids_properties/provenance/node[0]/reference[0]/name": {
           "exact_equal": true
         },
-        "ids_properties/source": {
+        "ids_properties/provenance/node[0]/reference[1]/name": {
           "exact_equal": true
         }
       },
@@ -3500,9 +3157,6 @@
         "coil[0]/element[0]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[0]/element[0]/identifier": {
-          "exact_equal": true
         },
         "coil[0]/element[0]/name": {
           "exact_equal": true
@@ -3523,9 +3177,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[0]/element[10]/identifier": {
-          "exact_equal": true
-        },
         "coil[0]/element[10]/name": {
           "exact_equal": true
         },
@@ -3544,9 +3195,6 @@
         "coil[0]/element[11]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[0]/element[11]/identifier": {
-          "exact_equal": true
         },
         "coil[0]/element[11]/name": {
           "exact_equal": true
@@ -3567,9 +3215,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[0]/element[12]/identifier": {
-          "exact_equal": true
-        },
         "coil[0]/element[12]/name": {
           "exact_equal": true
         },
@@ -3588,9 +3233,6 @@
         "coil[0]/element[13]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[0]/element[13]/identifier": {
-          "exact_equal": true
         },
         "coil[0]/element[13]/name": {
           "exact_equal": true
@@ -3611,9 +3253,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[0]/element[14]/identifier": {
-          "exact_equal": true
-        },
         "coil[0]/element[14]/name": {
           "exact_equal": true
         },
@@ -3632,9 +3271,6 @@
         "coil[0]/element[15]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[0]/element[15]/identifier": {
-          "exact_equal": true
         },
         "coil[0]/element[15]/name": {
           "exact_equal": true
@@ -3655,9 +3291,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[0]/element[16]/identifier": {
-          "exact_equal": true
-        },
         "coil[0]/element[16]/name": {
           "exact_equal": true
         },
@@ -3676,9 +3309,6 @@
         "coil[0]/element[17]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[0]/element[17]/identifier": {
-          "exact_equal": true
         },
         "coil[0]/element[17]/name": {
           "exact_equal": true
@@ -3699,9 +3329,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[0]/element[18]/identifier": {
-          "exact_equal": true
-        },
         "coil[0]/element[18]/name": {
           "exact_equal": true
         },
@@ -3720,9 +3347,6 @@
         "coil[0]/element[19]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[0]/element[19]/identifier": {
-          "exact_equal": true
         },
         "coil[0]/element[19]/name": {
           "exact_equal": true
@@ -3743,9 +3367,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[0]/element[1]/identifier": {
-          "exact_equal": true
-        },
         "coil[0]/element[1]/name": {
           "exact_equal": true
         },
@@ -3764,9 +3385,6 @@
         "coil[0]/element[20]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[0]/element[20]/identifier": {
-          "exact_equal": true
         },
         "coil[0]/element[20]/name": {
           "exact_equal": true
@@ -3787,9 +3405,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[0]/element[21]/identifier": {
-          "exact_equal": true
-        },
         "coil[0]/element[21]/name": {
           "exact_equal": true
         },
@@ -3808,9 +3423,6 @@
         "coil[0]/element[22]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[0]/element[22]/identifier": {
-          "exact_equal": true
         },
         "coil[0]/element[22]/name": {
           "exact_equal": true
@@ -3831,9 +3443,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[0]/element[23]/identifier": {
-          "exact_equal": true
-        },
         "coil[0]/element[23]/name": {
           "exact_equal": true
         },
@@ -3852,9 +3461,6 @@
         "coil[0]/element[24]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[0]/element[24]/identifier": {
-          "exact_equal": true
         },
         "coil[0]/element[24]/name": {
           "exact_equal": true
@@ -3875,9 +3481,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[0]/element[25]/identifier": {
-          "exact_equal": true
-        },
         "coil[0]/element[25]/name": {
           "exact_equal": true
         },
@@ -3896,9 +3499,6 @@
         "coil[0]/element[26]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[0]/element[26]/identifier": {
-          "exact_equal": true
         },
         "coil[0]/element[26]/name": {
           "exact_equal": true
@@ -3919,9 +3519,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[0]/element[27]/identifier": {
-          "exact_equal": true
-        },
         "coil[0]/element[27]/name": {
           "exact_equal": true
         },
@@ -3940,9 +3537,6 @@
         "coil[0]/element[28]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[0]/element[28]/identifier": {
-          "exact_equal": true
         },
         "coil[0]/element[28]/name": {
           "exact_equal": true
@@ -3963,9 +3557,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[0]/element[29]/identifier": {
-          "exact_equal": true
-        },
         "coil[0]/element[29]/name": {
           "exact_equal": true
         },
@@ -3984,9 +3575,6 @@
         "coil[0]/element[2]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[0]/element[2]/identifier": {
-          "exact_equal": true
         },
         "coil[0]/element[2]/name": {
           "exact_equal": true
@@ -4007,9 +3595,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[0]/element[30]/identifier": {
-          "exact_equal": true
-        },
         "coil[0]/element[30]/name": {
           "exact_equal": true
         },
@@ -4028,9 +3613,6 @@
         "coil[0]/element[31]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[0]/element[31]/identifier": {
-          "exact_equal": true
         },
         "coil[0]/element[31]/name": {
           "exact_equal": true
@@ -4051,9 +3633,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[0]/element[32]/identifier": {
-          "exact_equal": true
-        },
         "coil[0]/element[32]/name": {
           "exact_equal": true
         },
@@ -4072,9 +3651,6 @@
         "coil[0]/element[33]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[0]/element[33]/identifier": {
-          "exact_equal": true
         },
         "coil[0]/element[33]/name": {
           "exact_equal": true
@@ -4095,9 +3671,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[0]/element[34]/identifier": {
-          "exact_equal": true
-        },
         "coil[0]/element[34]/name": {
           "exact_equal": true
         },
@@ -4116,9 +3689,6 @@
         "coil[0]/element[35]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[0]/element[35]/identifier": {
-          "exact_equal": true
         },
         "coil[0]/element[35]/name": {
           "exact_equal": true
@@ -4139,9 +3709,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[0]/element[36]/identifier": {
-          "exact_equal": true
-        },
         "coil[0]/element[36]/name": {
           "exact_equal": true
         },
@@ -4160,9 +3727,6 @@
         "coil[0]/element[37]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[0]/element[37]/identifier": {
-          "exact_equal": true
         },
         "coil[0]/element[37]/name": {
           "exact_equal": true
@@ -4183,9 +3747,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[0]/element[38]/identifier": {
-          "exact_equal": true
-        },
         "coil[0]/element[38]/name": {
           "exact_equal": true
         },
@@ -4204,9 +3765,6 @@
         "coil[0]/element[39]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[0]/element[39]/identifier": {
-          "exact_equal": true
         },
         "coil[0]/element[39]/name": {
           "exact_equal": true
@@ -4227,9 +3785,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[0]/element[3]/identifier": {
-          "exact_equal": true
-        },
         "coil[0]/element[3]/name": {
           "exact_equal": true
         },
@@ -4248,9 +3803,6 @@
         "coil[0]/element[40]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[0]/element[40]/identifier": {
-          "exact_equal": true
         },
         "coil[0]/element[40]/name": {
           "exact_equal": true
@@ -4271,9 +3823,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[0]/element[41]/identifier": {
-          "exact_equal": true
-        },
         "coil[0]/element[41]/name": {
           "exact_equal": true
         },
@@ -4292,9 +3841,6 @@
         "coil[0]/element[42]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[0]/element[42]/identifier": {
-          "exact_equal": true
         },
         "coil[0]/element[42]/name": {
           "exact_equal": true
@@ -4315,9 +3861,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[0]/element[43]/identifier": {
-          "exact_equal": true
-        },
         "coil[0]/element[43]/name": {
           "exact_equal": true
         },
@@ -4336,9 +3879,6 @@
         "coil[0]/element[44]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[0]/element[44]/identifier": {
-          "exact_equal": true
         },
         "coil[0]/element[44]/name": {
           "exact_equal": true
@@ -4359,9 +3899,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[0]/element[45]/identifier": {
-          "exact_equal": true
-        },
         "coil[0]/element[45]/name": {
           "exact_equal": true
         },
@@ -4380,9 +3917,6 @@
         "coil[0]/element[46]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[0]/element[46]/identifier": {
-          "exact_equal": true
         },
         "coil[0]/element[46]/name": {
           "exact_equal": true
@@ -4403,9 +3937,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[0]/element[47]/identifier": {
-          "exact_equal": true
-        },
         "coil[0]/element[47]/name": {
           "exact_equal": true
         },
@@ -4424,9 +3955,6 @@
         "coil[0]/element[4]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[0]/element[4]/identifier": {
-          "exact_equal": true
         },
         "coil[0]/element[4]/name": {
           "exact_equal": true
@@ -4447,9 +3975,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[0]/element[5]/identifier": {
-          "exact_equal": true
-        },
         "coil[0]/element[5]/name": {
           "exact_equal": true
         },
@@ -4468,9 +3993,6 @@
         "coil[0]/element[6]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[0]/element[6]/identifier": {
-          "exact_equal": true
         },
         "coil[0]/element[6]/name": {
           "exact_equal": true
@@ -4491,9 +4013,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[0]/element[7]/identifier": {
-          "exact_equal": true
-        },
         "coil[0]/element[7]/name": {
           "exact_equal": true
         },
@@ -4512,9 +4031,6 @@
         "coil[0]/element[8]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[0]/element[8]/identifier": {
-          "exact_equal": true
         },
         "coil[0]/element[8]/name": {
           "exact_equal": true
@@ -4535,9 +4051,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[0]/element[9]/identifier": {
-          "exact_equal": true
-        },
         "coil[0]/element[9]/name": {
           "exact_equal": true
         },
@@ -4548,9 +4061,6 @@
         "coil[0]/function[0]/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[0]/identifier": {
-          "exact_equal": true
         },
         "coil[0]/name": {
           "exact_equal": true
@@ -4567,9 +4077,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[10]/element[0]/identifier": {
-          "exact_equal": true
-        },
         "coil[10]/element[0]/name": {
           "exact_equal": true
         },
@@ -4580,9 +4087,6 @@
         "coil[10]/function[0]/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[10]/identifier": {
-          "exact_equal": true
         },
         "coil[10]/name": {
           "exact_equal": true
@@ -4599,9 +4103,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[11]/element[0]/identifier": {
-          "exact_equal": true
-        },
         "coil[11]/element[0]/name": {
           "exact_equal": true
         },
@@ -4612,9 +4113,6 @@
         "coil[11]/function[0]/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[11]/identifier": {
-          "exact_equal": true
         },
         "coil[11]/name": {
           "exact_equal": true
@@ -4631,9 +4129,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[12]/element[0]/identifier": {
-          "exact_equal": true
-        },
         "coil[12]/element[0]/name": {
           "exact_equal": true
         },
@@ -4644,9 +4139,6 @@
         "coil[12]/function[0]/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[12]/identifier": {
-          "exact_equal": true
         },
         "coil[12]/name": {
           "exact_equal": true
@@ -4663,9 +4155,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[13]/element[0]/identifier": {
-          "exact_equal": true
-        },
         "coil[13]/element[0]/name": {
           "exact_equal": true
         },
@@ -4676,9 +4165,6 @@
         "coil[13]/function[0]/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[13]/identifier": {
-          "exact_equal": true
         },
         "coil[13]/name": {
           "exact_equal": true
@@ -4695,9 +4181,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[14]/element[0]/identifier": {
-          "exact_equal": true
-        },
         "coil[14]/element[0]/name": {
           "exact_equal": true
         },
@@ -4708,9 +4191,6 @@
         "coil[14]/function[0]/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[14]/identifier": {
-          "exact_equal": true
         },
         "coil[14]/name": {
           "exact_equal": true
@@ -4727,9 +4207,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[15]/element[0]/identifier": {
-          "exact_equal": true
-        },
         "coil[15]/element[0]/name": {
           "exact_equal": true
         },
@@ -4740,9 +4217,6 @@
         "coil[15]/function[0]/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[15]/identifier": {
-          "exact_equal": true
         },
         "coil[15]/name": {
           "exact_equal": true
@@ -4759,9 +4233,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[16]/element[0]/identifier": {
-          "exact_equal": true
-        },
         "coil[16]/element[0]/name": {
           "exact_equal": true
         },
@@ -4772,9 +4243,6 @@
         "coil[16]/function[0]/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[16]/identifier": {
-          "exact_equal": true
         },
         "coil[16]/name": {
           "exact_equal": true
@@ -4791,9 +4259,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[17]/element[0]/identifier": {
-          "exact_equal": true
-        },
         "coil[17]/element[0]/name": {
           "exact_equal": true
         },
@@ -4804,9 +4269,6 @@
         "coil[17]/function[0]/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[17]/identifier": {
-          "exact_equal": true
         },
         "coil[17]/name": {
           "exact_equal": true
@@ -4823,9 +4285,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[18]/element[0]/identifier": {
-          "exact_equal": true
-        },
         "coil[18]/element[0]/name": {
           "exact_equal": true
         },
@@ -4836,9 +4295,6 @@
         "coil[18]/function[0]/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[18]/identifier": {
-          "exact_equal": true
         },
         "coil[18]/name": {
           "exact_equal": true
@@ -4855,9 +4311,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[19]/element[0]/identifier": {
-          "exact_equal": true
-        },
         "coil[19]/element[0]/name": {
           "exact_equal": true
         },
@@ -4868,9 +4321,6 @@
         "coil[19]/function[0]/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[19]/identifier": {
-          "exact_equal": true
         },
         "coil[19]/name": {
           "exact_equal": true
@@ -4886,9 +4336,6 @@
         "coil[1]/element[0]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[1]/element[0]/identifier": {
-          "exact_equal": true
         },
         "coil[1]/element[0]/name": {
           "exact_equal": true
@@ -4909,9 +4356,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[1]/element[10]/identifier": {
-          "exact_equal": true
-        },
         "coil[1]/element[10]/name": {
           "exact_equal": true
         },
@@ -4930,9 +4374,6 @@
         "coil[1]/element[11]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[1]/element[11]/identifier": {
-          "exact_equal": true
         },
         "coil[1]/element[11]/name": {
           "exact_equal": true
@@ -4953,9 +4394,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[1]/element[12]/identifier": {
-          "exact_equal": true
-        },
         "coil[1]/element[12]/name": {
           "exact_equal": true
         },
@@ -4974,9 +4412,6 @@
         "coil[1]/element[13]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[1]/element[13]/identifier": {
-          "exact_equal": true
         },
         "coil[1]/element[13]/name": {
           "exact_equal": true
@@ -4997,9 +4432,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[1]/element[14]/identifier": {
-          "exact_equal": true
-        },
         "coil[1]/element[14]/name": {
           "exact_equal": true
         },
@@ -5018,9 +4450,6 @@
         "coil[1]/element[15]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[1]/element[15]/identifier": {
-          "exact_equal": true
         },
         "coil[1]/element[15]/name": {
           "exact_equal": true
@@ -5041,9 +4470,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[1]/element[16]/identifier": {
-          "exact_equal": true
-        },
         "coil[1]/element[16]/name": {
           "exact_equal": true
         },
@@ -5062,9 +4488,6 @@
         "coil[1]/element[17]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[1]/element[17]/identifier": {
-          "exact_equal": true
         },
         "coil[1]/element[17]/name": {
           "exact_equal": true
@@ -5085,9 +4508,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[1]/element[18]/identifier": {
-          "exact_equal": true
-        },
         "coil[1]/element[18]/name": {
           "exact_equal": true
         },
@@ -5106,9 +4526,6 @@
         "coil[1]/element[19]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[1]/element[19]/identifier": {
-          "exact_equal": true
         },
         "coil[1]/element[19]/name": {
           "exact_equal": true
@@ -5129,9 +4546,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[1]/element[1]/identifier": {
-          "exact_equal": true
-        },
         "coil[1]/element[1]/name": {
           "exact_equal": true
         },
@@ -5150,9 +4564,6 @@
         "coil[1]/element[20]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[1]/element[20]/identifier": {
-          "exact_equal": true
         },
         "coil[1]/element[20]/name": {
           "exact_equal": true
@@ -5173,9 +4584,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[1]/element[21]/identifier": {
-          "exact_equal": true
-        },
         "coil[1]/element[21]/name": {
           "exact_equal": true
         },
@@ -5194,9 +4602,6 @@
         "coil[1]/element[22]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[1]/element[22]/identifier": {
-          "exact_equal": true
         },
         "coil[1]/element[22]/name": {
           "exact_equal": true
@@ -5217,9 +4622,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[1]/element[23]/identifier": {
-          "exact_equal": true
-        },
         "coil[1]/element[23]/name": {
           "exact_equal": true
         },
@@ -5238,9 +4640,6 @@
         "coil[1]/element[24]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[1]/element[24]/identifier": {
-          "exact_equal": true
         },
         "coil[1]/element[24]/name": {
           "exact_equal": true
@@ -5261,9 +4660,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[1]/element[25]/identifier": {
-          "exact_equal": true
-        },
         "coil[1]/element[25]/name": {
           "exact_equal": true
         },
@@ -5282,9 +4678,6 @@
         "coil[1]/element[26]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[1]/element[26]/identifier": {
-          "exact_equal": true
         },
         "coil[1]/element[26]/name": {
           "exact_equal": true
@@ -5305,9 +4698,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[1]/element[27]/identifier": {
-          "exact_equal": true
-        },
         "coil[1]/element[27]/name": {
           "exact_equal": true
         },
@@ -5326,9 +4716,6 @@
         "coil[1]/element[28]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[1]/element[28]/identifier": {
-          "exact_equal": true
         },
         "coil[1]/element[28]/name": {
           "exact_equal": true
@@ -5349,9 +4736,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[1]/element[29]/identifier": {
-          "exact_equal": true
-        },
         "coil[1]/element[29]/name": {
           "exact_equal": true
         },
@@ -5370,9 +4754,6 @@
         "coil[1]/element[2]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[1]/element[2]/identifier": {
-          "exact_equal": true
         },
         "coil[1]/element[2]/name": {
           "exact_equal": true
@@ -5393,9 +4774,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[1]/element[30]/identifier": {
-          "exact_equal": true
-        },
         "coil[1]/element[30]/name": {
           "exact_equal": true
         },
@@ -5414,9 +4792,6 @@
         "coil[1]/element[31]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[1]/element[31]/identifier": {
-          "exact_equal": true
         },
         "coil[1]/element[31]/name": {
           "exact_equal": true
@@ -5437,9 +4812,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[1]/element[32]/identifier": {
-          "exact_equal": true
-        },
         "coil[1]/element[32]/name": {
           "exact_equal": true
         },
@@ -5458,9 +4830,6 @@
         "coil[1]/element[33]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[1]/element[33]/identifier": {
-          "exact_equal": true
         },
         "coil[1]/element[33]/name": {
           "exact_equal": true
@@ -5481,9 +4850,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[1]/element[34]/identifier": {
-          "exact_equal": true
-        },
         "coil[1]/element[34]/name": {
           "exact_equal": true
         },
@@ -5502,9 +4868,6 @@
         "coil[1]/element[35]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[1]/element[35]/identifier": {
-          "exact_equal": true
         },
         "coil[1]/element[35]/name": {
           "exact_equal": true
@@ -5525,9 +4888,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[1]/element[36]/identifier": {
-          "exact_equal": true
-        },
         "coil[1]/element[36]/name": {
           "exact_equal": true
         },
@@ -5546,9 +4906,6 @@
         "coil[1]/element[37]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[1]/element[37]/identifier": {
-          "exact_equal": true
         },
         "coil[1]/element[37]/name": {
           "exact_equal": true
@@ -5569,9 +4926,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[1]/element[38]/identifier": {
-          "exact_equal": true
-        },
         "coil[1]/element[38]/name": {
           "exact_equal": true
         },
@@ -5590,9 +4944,6 @@
         "coil[1]/element[39]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[1]/element[39]/identifier": {
-          "exact_equal": true
         },
         "coil[1]/element[39]/name": {
           "exact_equal": true
@@ -5613,9 +4964,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[1]/element[3]/identifier": {
-          "exact_equal": true
-        },
         "coil[1]/element[3]/name": {
           "exact_equal": true
         },
@@ -5634,9 +4982,6 @@
         "coil[1]/element[40]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[1]/element[40]/identifier": {
-          "exact_equal": true
         },
         "coil[1]/element[40]/name": {
           "exact_equal": true
@@ -5657,9 +5002,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[1]/element[41]/identifier": {
-          "exact_equal": true
-        },
         "coil[1]/element[41]/name": {
           "exact_equal": true
         },
@@ -5678,9 +5020,6 @@
         "coil[1]/element[42]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[1]/element[42]/identifier": {
-          "exact_equal": true
         },
         "coil[1]/element[42]/name": {
           "exact_equal": true
@@ -5701,9 +5040,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[1]/element[43]/identifier": {
-          "exact_equal": true
-        },
         "coil[1]/element[43]/name": {
           "exact_equal": true
         },
@@ -5722,9 +5058,6 @@
         "coil[1]/element[44]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[1]/element[44]/identifier": {
-          "exact_equal": true
         },
         "coil[1]/element[44]/name": {
           "exact_equal": true
@@ -5745,9 +5078,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[1]/element[45]/identifier": {
-          "exact_equal": true
-        },
         "coil[1]/element[45]/name": {
           "exact_equal": true
         },
@@ -5766,9 +5096,6 @@
         "coil[1]/element[46]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[1]/element[46]/identifier": {
-          "exact_equal": true
         },
         "coil[1]/element[46]/name": {
           "exact_equal": true
@@ -5789,9 +5116,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[1]/element[47]/identifier": {
-          "exact_equal": true
-        },
         "coil[1]/element[47]/name": {
           "exact_equal": true
         },
@@ -5810,9 +5134,6 @@
         "coil[1]/element[4]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[1]/element[4]/identifier": {
-          "exact_equal": true
         },
         "coil[1]/element[4]/name": {
           "exact_equal": true
@@ -5833,9 +5154,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[1]/element[5]/identifier": {
-          "exact_equal": true
-        },
         "coil[1]/element[5]/name": {
           "exact_equal": true
         },
@@ -5854,9 +5172,6 @@
         "coil[1]/element[6]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[1]/element[6]/identifier": {
-          "exact_equal": true
         },
         "coil[1]/element[6]/name": {
           "exact_equal": true
@@ -5877,9 +5192,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[1]/element[7]/identifier": {
-          "exact_equal": true
-        },
         "coil[1]/element[7]/name": {
           "exact_equal": true
         },
@@ -5898,9 +5210,6 @@
         "coil[1]/element[8]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[1]/element[8]/identifier": {
-          "exact_equal": true
         },
         "coil[1]/element[8]/name": {
           "exact_equal": true
@@ -5921,9 +5230,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[1]/element[9]/identifier": {
-          "exact_equal": true
-        },
         "coil[1]/element[9]/name": {
           "exact_equal": true
         },
@@ -5934,9 +5240,6 @@
         "coil[1]/function[0]/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[1]/identifier": {
-          "exact_equal": true
         },
         "coil[1]/name": {
           "exact_equal": true
@@ -5953,9 +5256,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[20]/element[0]/identifier": {
-          "exact_equal": true
-        },
         "coil[20]/element[0]/name": {
           "exact_equal": true
         },
@@ -5966,9 +5266,6 @@
         "coil[20]/function[0]/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[20]/identifier": {
-          "exact_equal": true
         },
         "coil[20]/name": {
           "exact_equal": true
@@ -5985,9 +5282,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[21]/element[0]/identifier": {
-          "exact_equal": true
-        },
         "coil[21]/element[0]/name": {
           "exact_equal": true
         },
@@ -5998,9 +5292,6 @@
         "coil[21]/function[0]/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[21]/identifier": {
-          "exact_equal": true
         },
         "coil[21]/name": {
           "exact_equal": true
@@ -6017,9 +5308,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[22]/element[0]/identifier": {
-          "exact_equal": true
-        },
         "coil[22]/element[0]/name": {
           "exact_equal": true
         },
@@ -6030,9 +5318,6 @@
         "coil[22]/function[0]/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[22]/identifier": {
-          "exact_equal": true
         },
         "coil[22]/name": {
           "exact_equal": true
@@ -6049,9 +5334,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[23]/element[0]/identifier": {
-          "exact_equal": true
-        },
         "coil[23]/element[0]/name": {
           "exact_equal": true
         },
@@ -6062,9 +5344,6 @@
         "coil[23]/function[0]/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[23]/identifier": {
-          "exact_equal": true
         },
         "coil[23]/name": {
           "exact_equal": true
@@ -6080,9 +5359,6 @@
         "coil[2]/element[0]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[2]/element[0]/identifier": {
-          "exact_equal": true
         },
         "coil[2]/element[0]/name": {
           "exact_equal": true
@@ -6103,9 +5379,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[2]/element[1]/identifier": {
-          "exact_equal": true
-        },
         "coil[2]/element[1]/name": {
           "exact_equal": true
         },
@@ -6124,9 +5397,6 @@
         "coil[2]/element[2]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[2]/element[2]/identifier": {
-          "exact_equal": true
         },
         "coil[2]/element[2]/name": {
           "exact_equal": true
@@ -6147,9 +5417,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[2]/element[3]/identifier": {
-          "exact_equal": true
-        },
         "coil[2]/element[3]/name": {
           "exact_equal": true
         },
@@ -6168,9 +5435,6 @@
         "coil[2]/element[4]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[2]/element[4]/identifier": {
-          "exact_equal": true
         },
         "coil[2]/element[4]/name": {
           "exact_equal": true
@@ -6191,9 +5455,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[2]/element[5]/identifier": {
-          "exact_equal": true
-        },
         "coil[2]/element[5]/name": {
           "exact_equal": true
         },
@@ -6204,9 +5465,6 @@
         "coil[2]/function[0]/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[2]/identifier": {
-          "exact_equal": true
         },
         "coil[2]/name": {
           "exact_equal": true
@@ -6222,9 +5480,6 @@
         "coil[3]/element[0]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[3]/element[0]/identifier": {
-          "exact_equal": true
         },
         "coil[3]/element[0]/name": {
           "exact_equal": true
@@ -6245,9 +5500,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[3]/element[1]/identifier": {
-          "exact_equal": true
-        },
         "coil[3]/element[1]/name": {
           "exact_equal": true
         },
@@ -6266,9 +5518,6 @@
         "coil[3]/element[2]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[3]/element[2]/identifier": {
-          "exact_equal": true
         },
         "coil[3]/element[2]/name": {
           "exact_equal": true
@@ -6289,9 +5538,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[3]/element[3]/identifier": {
-          "exact_equal": true
-        },
         "coil[3]/element[3]/name": {
           "exact_equal": true
         },
@@ -6310,9 +5556,6 @@
         "coil[3]/element[4]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[3]/element[4]/identifier": {
-          "exact_equal": true
         },
         "coil[3]/element[4]/name": {
           "exact_equal": true
@@ -6333,9 +5576,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[3]/element[5]/identifier": {
-          "exact_equal": true
-        },
         "coil[3]/element[5]/name": {
           "exact_equal": true
         },
@@ -6346,9 +5586,6 @@
         "coil[3]/function[0]/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[3]/identifier": {
-          "exact_equal": true
         },
         "coil[3]/name": {
           "exact_equal": true
@@ -6364,9 +5601,6 @@
         "coil[4]/element[0]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[4]/element[0]/identifier": {
-          "exact_equal": true
         },
         "coil[4]/element[0]/name": {
           "exact_equal": true
@@ -6387,9 +5621,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[4]/element[1]/identifier": {
-          "exact_equal": true
-        },
         "coil[4]/element[1]/name": {
           "exact_equal": true
         },
@@ -6408,9 +5639,6 @@
         "coil[4]/element[2]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[4]/element[2]/identifier": {
-          "exact_equal": true
         },
         "coil[4]/element[2]/name": {
           "exact_equal": true
@@ -6431,9 +5659,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[4]/element[3]/identifier": {
-          "exact_equal": true
-        },
         "coil[4]/element[3]/name": {
           "exact_equal": true
         },
@@ -6452,9 +5677,6 @@
         "coil[4]/element[4]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[4]/element[4]/identifier": {
-          "exact_equal": true
         },
         "coil[4]/element[4]/name": {
           "exact_equal": true
@@ -6475,9 +5697,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[4]/element[5]/identifier": {
-          "exact_equal": true
-        },
         "coil[4]/element[5]/name": {
           "exact_equal": true
         },
@@ -6497,9 +5716,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[4]/element[6]/identifier": {
-          "exact_equal": true
-        },
         "coil[4]/element[6]/name": {
           "exact_equal": true
         },
@@ -6510,9 +5726,6 @@
         "coil[4]/function[0]/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[4]/identifier": {
-          "exact_equal": true
         },
         "coil[4]/name": {
           "exact_equal": true
@@ -6528,9 +5741,6 @@
         "coil[5]/element[0]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[5]/element[0]/identifier": {
-          "exact_equal": true
         },
         "coil[5]/element[0]/name": {
           "exact_equal": true
@@ -6551,9 +5761,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[5]/element[1]/identifier": {
-          "exact_equal": true
-        },
         "coil[5]/element[1]/name": {
           "exact_equal": true
         },
@@ -6572,9 +5779,6 @@
         "coil[5]/element[2]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[5]/element[2]/identifier": {
-          "exact_equal": true
         },
         "coil[5]/element[2]/name": {
           "exact_equal": true
@@ -6595,9 +5799,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[5]/element[3]/identifier": {
-          "exact_equal": true
-        },
         "coil[5]/element[3]/name": {
           "exact_equal": true
         },
@@ -6616,9 +5817,6 @@
         "coil[5]/element[4]/geometry/outline/z": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[5]/element[4]/identifier": {
-          "exact_equal": true
         },
         "coil[5]/element[4]/name": {
           "exact_equal": true
@@ -6639,9 +5837,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[5]/element[5]/identifier": {
-          "exact_equal": true
-        },
         "coil[5]/element[5]/name": {
           "exact_equal": true
         },
@@ -6661,9 +5856,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[5]/element[6]/identifier": {
-          "exact_equal": true
-        },
         "coil[5]/element[6]/name": {
           "exact_equal": true
         },
@@ -6674,9 +5866,6 @@
         "coil[5]/function[0]/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[5]/identifier": {
-          "exact_equal": true
         },
         "coil[5]/name": {
           "exact_equal": true
@@ -6693,9 +5882,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[6]/element[0]/identifier": {
-          "exact_equal": true
-        },
         "coil[6]/element[0]/name": {
           "exact_equal": true
         },
@@ -6706,9 +5892,6 @@
         "coil[6]/function[0]/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[6]/identifier": {
-          "exact_equal": true
         },
         "coil[6]/name": {
           "exact_equal": true
@@ -6725,9 +5908,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[7]/element[0]/identifier": {
-          "exact_equal": true
-        },
         "coil[7]/element[0]/name": {
           "exact_equal": true
         },
@@ -6738,9 +5918,6 @@
         "coil[7]/function[0]/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[7]/identifier": {
-          "exact_equal": true
         },
         "coil[7]/name": {
           "exact_equal": true
@@ -6757,9 +5934,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[8]/element[0]/identifier": {
-          "exact_equal": true
-        },
         "coil[8]/element[0]/name": {
           "exact_equal": true
         },
@@ -6770,9 +5944,6 @@
         "coil[8]/function[0]/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[8]/identifier": {
-          "exact_equal": true
         },
         "coil[8]/name": {
           "exact_equal": true
@@ -6789,9 +5960,6 @@
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
         },
-        "coil[9]/element[0]/identifier": {
-          "exact_equal": true
-        },
         "coil[9]/element[0]/name": {
           "exact_equal": true
         },
@@ -6802,9 +5970,6 @@
         "coil[9]/function[0]/index": {
           "exact_equal": true,
           "maximum_absolute_difference": 0.0
-        },
-        "coil[9]/identifier": {
-          "exact_equal": true
         },
         "coil[9]/name": {
           "exact_equal": true
@@ -6819,10 +5984,10 @@
         "ids_properties/provenance/node[0]/path": {
           "exact_equal": true
         },
-        "ids_properties/provenance/node[0]/sources": {
+        "ids_properties/provenance/node[0]/reference[0]/name": {
           "exact_equal": true
         },
-        "ids_properties/source": {
+        "ids_properties/provenance/node[0]/reference[1]/name": {
           "exact_equal": true
         }
       },
@@ -6845,25 +6010,1523 @@
         "ids_properties/provenance/node[0]/path": {
           "exact_equal": true
         },
-        "ids_properties/provenance/node[0]/sources": {
+        "ids_properties/provenance/node[0]/reference[0]/name": {
           "exact_equal": true
         },
-        "ids_properties/source": {
+        "ids_properties/provenance/node[0]/reference[1]/name": {
           "exact_equal": true
         }
       }
     },
     "leaf_counts": {
-      "magnetics": 909,
-      "pf_active": 917,
+      "magnetics": 789,
+      "pf_active": 753,
       "wall": 7
     },
+    "major_comparison": {
+      "comparison_available": true,
+      "leaf_count_difference": -284,
+      "presence_differences": [
+        {
+          "ids": "wall",
+          "path": "ids_properties/provenance/node[0]/reference[0]/name",
+          "presence": "DD4 only"
+        },
+        {
+          "ids": "wall",
+          "path": "ids_properties/provenance/node[0]/reference[1]/name",
+          "presence": "DD4 only"
+        },
+        {
+          "ids": "wall",
+          "path": "ids_properties/provenance/node[0]/sources",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "wall",
+          "path": "ids_properties/source",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "ids_properties/provenance/node[0]/reference[0]/name",
+          "presence": "DD4 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "ids_properties/provenance/node[0]/reference[1]/name",
+          "presence": "DD4 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[0]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[10]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[11]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[12]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[13]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[14]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[15]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[16]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[17]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[18]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[19]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[1]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[20]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[21]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[22]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[23]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[24]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[25]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[26]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[27]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[28]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[29]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[2]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[30]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[31]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[32]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[33]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[34]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[35]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[36]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[37]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[38]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[39]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[3]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[40]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[41]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[42]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[43]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[44]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[45]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[46]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[47]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[4]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[5]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[6]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[7]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[8]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/element[9]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[0]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[10]/element[0]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[10]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[11]/element[0]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[11]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[12]/element[0]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[12]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[13]/element[0]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[13]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[14]/element[0]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[14]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[15]/element[0]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[15]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[16]/element[0]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[16]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[17]/element[0]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[17]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[18]/element[0]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[18]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[19]/element[0]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[19]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[0]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[10]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[11]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[12]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[13]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[14]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[15]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[16]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[17]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[18]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[19]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[1]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[20]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[21]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[22]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[23]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[24]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[25]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[26]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[27]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[28]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[29]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[2]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[30]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[31]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[32]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[33]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[34]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[35]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[36]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[37]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[38]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[39]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[3]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[40]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[41]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[42]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[43]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[44]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[45]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[46]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[47]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[4]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[5]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[6]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[7]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[8]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/element[9]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[1]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[20]/element[0]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[20]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[21]/element[0]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[21]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[22]/element[0]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[22]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[23]/element[0]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[23]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[2]/element[0]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[2]/element[1]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[2]/element[2]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[2]/element[3]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[2]/element[4]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[2]/element[5]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[2]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[3]/element[0]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[3]/element[1]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[3]/element[2]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[3]/element[3]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[3]/element[4]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[3]/element[5]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[3]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[4]/element[0]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[4]/element[1]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[4]/element[2]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[4]/element[3]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[4]/element[4]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[4]/element[5]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[4]/element[6]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[4]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[5]/element[0]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[5]/element[1]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[5]/element[2]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[5]/element[3]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[5]/element[4]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[5]/element[5]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[5]/element[6]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[5]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[6]/element[0]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[6]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[7]/element[0]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[7]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[8]/element[0]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[8]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[9]/element[0]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "coil[9]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "ids_properties/provenance/node[0]/sources",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "pf_active",
+          "path": "ids_properties/source",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "ids_properties/provenance/node[0]/reference[0]/name",
+          "presence": "DD4 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "ids_properties/provenance/node[0]/reference[1]/name",
+          "presence": "DD4 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[0]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[10]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[11]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[12]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[13]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[14]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[15]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[16]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[17]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[18]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[19]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[1]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[20]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[21]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[22]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[23]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[24]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[25]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[26]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[27]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[28]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[29]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[2]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[30]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[31]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[32]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[33]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[34]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[35]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[36]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[37]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[38]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[39]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[3]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[40]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[41]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[42]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[43]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[44]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[45]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[46]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[47]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[48]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[49]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[4]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[50]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[51]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[52]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[53]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[54]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[55]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[56]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[57]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[58]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[59]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[5]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[60]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[61]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[62]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[63]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[64]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[65]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[66]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[67]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[68]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[69]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[6]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[70]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[71]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[72]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[73]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[74]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[75]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[7]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[8]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "b_field_pol_probe[9]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[0]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[10]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[11]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[12]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[13]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[14]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[15]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[16]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[17]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[18]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[19]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[1]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[20]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[21]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[22]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[23]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[24]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[25]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[26]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[27]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[28]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[29]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[2]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[30]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[31]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[32]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[33]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[34]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[35]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[36]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[37]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[38]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[39]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[3]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[40]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[41]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[42]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[43]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[4]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[5]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[6]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[7]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[8]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "flux_loop[9]/identifier",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "ids_properties/provenance/node[0]/sources",
+          "presence": "DD3 only"
+        },
+        {
+          "ids": "magnetics",
+          "path": "ids_properties/source",
+          "presence": "DD3 only"
+        }
+      ],
+      "published_leaf_count": 1549,
+      "shape_differences": [],
+      "superseded_leaf_count": 1833
+    },
+    "total_leaf_count": 1549,
     "verdict": "exact",
     "wall_outline_maximum_absolute_difference": 0.0
   },
   "source": {
+    "autoconvert": false,
     "backend": "imas-python netCDF DBEntry",
     "data_dictionary": "3.41.0",
-    "entry": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc"
+    "entry": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+    "machine_dataclass_route": [
+      "nova.imas.machine.StaticMachineDescription",
+      "nova.imas.machine.MachineContour",
+      "nova.imas.machine.MachineCoil",
+      "nova.imas.machine.MachineSection",
+      "nova.imas.machine.DiagnosticSightline"
+    ]
   }
 }

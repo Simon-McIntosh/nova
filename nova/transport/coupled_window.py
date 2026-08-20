@@ -26,6 +26,8 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import Any
 
+import jax
+import jax.numpy as jnp
 import numpy as np
 
 from nova.equilibrium.forward import ForwardEquilibrium, ForwardProfile, SolveRoute
@@ -55,9 +57,111 @@ __all__ = [
     "WindowConvergenceReceipt",
     "WindowReceipt",
     "equilibrium_sweep",
+    "implicit_window_state",
     "solve_window",
     "transport_sweep",
 ]
+
+
+def implicit_window_state(
+    fixed_point_map: Callable[[jax.Array, Any], jax.Array],
+    initial_state,
+    parameters,
+    *,
+    iteration_cap: int,
+    tolerance: float,
+):
+    """Return a converged JAX window state with an implicit reverse rule.
+
+    ``fixed_point_map(state, parameters)`` is the pure, traced representation
+    of one complete equilibrium--transport exchange.  The primal computation
+    applies that map up to ``iteration_cap`` times and verifies the fixed-point
+    residual against ``tolerance``.  Reverse mode does not differentiate those
+    iterations.  Instead it solves the transposed Jacobian of
+
+    ``state - fixed_point_map(state, parameters) = 0``
+
+    and pulls the resulting adjoint back through one evaluation of the map.
+    Consequently a converged result has the same derivative for every
+    sufficient iteration cap.
+
+    The initial state is only a convergence seed and is intentionally closed
+    over by the custom derivative, so gradients are defined with respect to
+    ``parameters`` only.  Parameters may be any JAX pytree.  The state must be
+    one floating-point array, while the map must remain in traced JAX code;
+    host callbacks and the NumPy waveform/receipt boundary have no VJP.
+    """
+    if iteration_cap < 1:
+        raise ValueError("implicit window iteration cap must be at least one")
+    if not np.isfinite(tolerance) or tolerance <= 0.0:
+        raise ValueError("implicit window tolerance must be finite and positive")
+
+    seed = jnp.asarray(initial_state)
+    if not jnp.issubdtype(seed.dtype, jnp.inexact):
+        raise TypeError("implicit window state must have a floating-point dtype")
+
+    def residual(state, values):
+        candidate = jnp.asarray(fixed_point_map(state, values))
+        if candidate.shape != seed.shape:
+            raise ValueError("fixed-point map must preserve the window state shape")
+        return state - candidate
+
+    def iterate(values):
+        def apply_map(_, state):
+            candidate = jnp.asarray(fixed_point_map(state, values))
+            error = jnp.max(jnp.abs(candidate - state))
+            return jnp.where(error <= tolerance, state, candidate)
+
+        state = jax.lax.fori_loop(0, iteration_cap, apply_map, seed)
+        exit_residual = jnp.max(jnp.abs(residual(state, values)))
+
+        def require_convergence(value):
+            measured = float(value)
+            if not np.isfinite(measured) or measured > tolerance:
+                raise RuntimeError(
+                    "implicit window fixed point did not converge: "
+                    f"residual {measured:.6g} after {iteration_cap} iterations"
+                )
+
+        jax.debug.callback(require_convergence, exit_residual, ordered=True)
+        return state
+
+    @jax.custom_vjp
+    def solve(values):
+        return iterate(values)
+
+    def solve_forward(values):
+        state = iterate(values)
+        return state, (state, values)
+
+    def solve_reverse(saved, state_cotangent):
+        state, values = saved
+        state_shape = state.shape
+        flat_state = jnp.reshape(state, (-1,))
+
+        def flat_residual(flat_value):
+            shaped_value = jnp.reshape(flat_value, state_shape)
+            return jnp.reshape(residual(shaped_value, values), (-1,))
+
+        residual_jacobian = jax.jacrev(flat_residual)(flat_state)
+        adjoint = jnp.linalg.solve(
+            residual_jacobian.T,
+            jnp.reshape(state_cotangent, (-1,)),
+        )
+        adjoint = jnp.reshape(adjoint, state_shape)
+        _, parameter_pullback = jax.vjp(
+            lambda differentiated: residual(state, differentiated),
+            values,
+        )
+        parameter_cotangent = parameter_pullback(adjoint)[0]
+        parameter_cotangent = jax.tree.map(
+            lambda value: -value,
+            parameter_cotangent,
+        )
+        return (parameter_cotangent,)
+
+    solve.defvjp(solve_forward, solve_reverse)
+    return solve(parameters)
 
 
 def _readonly(value: object, *, dtype=None) -> np.ndarray:

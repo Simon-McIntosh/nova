@@ -170,6 +170,53 @@
     news. Item 3 reports its receipts whatever they say. Item 4 is accepted on the figures
     existing and being legible, not on the profiles being good.</p>
 
+    <h2 id="s7">§7 — FSA moment accuracy</h2>
+    <p><strong>The independent reference located a defect in the kernel, not the seam.</strong>
+    Against TORAX reading the same real EQDSK, the record disagrees by 18&#8211;26% on
+    <code>g2g3_over_rhon</code> — the &#968;-diffusion coefficient itself — 10&#8211;37% across the
+    &#8711;&#968; moments, 10&#8211;17% on enclosed current, and 10&#8211;22% on triangularity,
+    while scalars, <code>F</code> and &#968; are accurate to well under a percent and the
+    three-way COCOS check is bit-clean. Until these close, a transport solve on this record is
+    solving a measurably different problem from the one TORAX would solve from the same file, so
+    §6's remaining items — the real coupled window and the physics figures — wait on this
+    section rather than producing numbers nobody should quote.</p>
+    <p><strong>The kernel discards information the discretisation already carries.</strong>
+    &#968; is known at grid nodes; <code>jnp.gradient</code> evaluates &#8711;&#968; at those
+    nodes; the Gaussian-CDF shell weight is evaluated at those nodes; and each cell's entire
+    <code>2&#960;R dr dz</code> volume is attributed to its own node's &#968;. Every surface
+    average is therefore a node-sampled midpoint rule against a smeared indicator, and two errors
+    compound: a cell is wholly in or out of a shell according to one sample, and the bandwidth
+    (1.25 &#215; surface spacing) then smears across neighbouring shells. The extrema are worse
+    still — <code>min</code> and <code>max</code> over <em>selected nodes</em>, which quantises
+    R_in, R_out, elongation and triangularity to one cell.</p>
+    <ol>
+      <li><strong>Sub-cell enriched coarea quadrature.</strong> Use every sample the cell
+      carries — nodes, edge mid-points and the cell centre — rather than the node alone. With
+      &#968; known at a cell's four corners, the edge mid-points and centre follow from the
+      interpolant, giving a 3&#215;3 stencil per cell: the shell's within-cell occupancy becomes
+      sub-cell resolvable instead of an all-or-nothing node test, and &#8711;&#968; can be taken
+      analytically from the interpolant at those same points instead of from node-only central
+      differences that degrade to one-sided at the boundary. Sub-cell resolution is what earns
+      the right to shrink the bandwidth, so the two must move together and be reported
+      together.</li>
+      <li><strong>Interpolated surface extrema.</strong> Locate R_in, R_out and the top and
+      bottom of each surface by interpolating the level-set crossing along cell edges, not by
+      taking extrema over selected nodes. Grid quantisation is the whole of the shape error, so
+      this is a direct fix rather than a refinement.</li>
+    </ol>
+    <p><strong>Acceptance.</strong> Measured against the independently read
+    <code>iterhybrid_cocos17.eqdsk</code>: <code>g2g3_over_rhon</code>, <code>g0</code>,
+    <code>g1</code> and <code>g2</code> each below <strong>5%</strong> on the ITER equilibrium,
+    with the achieved STEP figures reported and the residual mechanism named — part of the STEP
+    gap is TORAX-side, since TORAX itself warns its radial spacing of 0.0787&#8211;0.0894 exceeds
+    its own 0.0200 recommendation, and that share must be separated rather than absorbed. The
+    fields already accurate (<code>R_major</code>, <code>B_0</code>, <code>a_minor</code>,
+    <code>F</code>, &#968;, &#934;, volume, area) must not degrade; the analytic-surface moments,
+    the 22-field self-parity at rtol 1e-12 and the COCOS round-trips must all stay green.
+    Finally the reference test's per-field tolerances — currently asserted as pass/fail at up to
+    0.45 — are relabelled as a characterisation baseline that catches drift in <em>both</em>
+    directions, so neither a regression nor an unrecorded improvement can pass silently.</p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="transport-engine" data-choice="torax-embedded-ladder" data-by="Simon McIntosh" data-when="2026-08-10T15:38:11+00:00">

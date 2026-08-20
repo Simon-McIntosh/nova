@@ -5,7 +5,6 @@ from __future__ import annotations
 from collections.abc import Mapping
 
 import jax.numpy as jnp
-import numpy as np
 
 
 def _cumulative_trapezoid(values, coordinates):
@@ -121,7 +120,7 @@ def torax_geometry_from_fsa(record: Mapping[str, object], *, hires_factor: int =
     elongation_face = jnp.asarray(record["elongation_face"])
     b2_face = jnp.asarray(record["b2_face"])
     inv_b2_face = jnp.asarray(record["inv_b2_face"])
-    mesh = Grid1D(face_centers=np.asarray(rho_face))
+    mesh = Grid1D(nx=rho_face.size - 1)
     return StandardGeometry(
         geometry_type=GeometryType.EQDSK,
         torax_mesh=mesh,

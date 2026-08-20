@@ -24,10 +24,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-20">
-<meta name="plan-version" content="7">
-<meta name="plan-commits" content="eed42e520d5f544f50cdb7485cffc74249f47037,0687526990e67eee5777310a71ad60588ca7736e,0e98afcb9960247313ea955822481983d63a7fd0,27fd5f364c4bb6fa89e5042ee0c190990f965be9,0e21b3997f841be1bf5a79c8b8772619f55c2fd2,5189b08e77dc994c13ebfbf40c4fcb5e29a03f2d">
+<meta name="plan-version" content="9">
+<meta name="plan-commits" content="eed42e520d5f544f50cdb7485cffc74249f47037,0687526990e67eee5777310a71ad60588ca7736e,0e98afcb9960247313ea955822481983d63a7fd0,27fd5f364c4bb6fa89e5042ee0c190990f965be9,0e21b3997f841be1bf5a79c8b8772619f55c2fd2,5189b08e77dc994c13ebfbf40c4fcb5e29a03f2d,10642e611aa44c805c9cc430048131826448bce8">
 <meta name="plan-artifacts" content="docs/evidence/archive/solovev-exact-recovery-landed.html,docs/figures/solovev-exact-recovery/map-forcing-decomposition.png,docs/figures/solovev-exact-recovery/forcing-residual-decomposition.png,scripts/map_forcing_attribution/results.json,scripts/forcing_residual_decomposition/results.json,scripts/build_cache_audit/results.json,scripts/build_cache_audit/measurements-coarse.json,scripts/build_cache_audit/measurements-fine.json">
-<meta name="plan-impl" content="0.55">
+<meta name="plan-impl" content="0.6">
 </head>
 <body>
   <main class="plan-doc">
@@ -88,30 +88,23 @@
       near-marginal position mode plausibly amplifies them into the observed rigid drift.</figcaption>
     </figure>
 
-    <h2 id="s2">§2 — Exact kernels by default: Urankar everywhere, hexagons are hexagons</h2>
-
-    <p><strong>Locked (kernel-default, section-fidelity).</strong> The Urankar/Part V exact
-    section kernel becomes the production default on every coupling path; the far-field filament
-    truncation is retired — its measured runtime advantage was never significant (production paid
-    ~1.07 primitive evaluations per pair only because it truncated; the exact section costs 4
-    against the quadrupole's ~5 and is more accurate). And a cell authored as a hexagon couples
-    through a hexagon section: <strong>no fallback to rectangle sections, ever</strong>. The
-    substitution is removed, not deprecated — construction of a coupling that would route an
-    authored polygon through a different section shape fails loudly.</p>
-
-    <p><em>Done-when:</em> (a) an audit enumerates every coupling construction site (plasma,
-    coil, passive, wall, sensor rows) with the kernel and section shape each actually uses, on
-    main; (b) the exact kernel is the default on all of them with the filament far-field branch
-    removed from reachable production code; (c) hexagon cells demonstrably couple through exact
-    hexagon sections — a red-then-green test constructs a hexagon-authored machine and asserts
-    the section moments used by the coupling equal the exact hexagon values (5/72 pitch²), with a
-    guard test proving a shape-mismatched construction raises; (d) uniform-current rows reproduce
-    the prior exact-kernel values bitwise where the kernel was already exact, and every changed
-    row is accounted to the retired truncation or substitution; (e) the complete suite is green
-    and the boundary-ring bank digits reproduce; (f) build-time impact is measured (§5 owns the
-    formal benchmark; this section records the raw before/after build cost so the change is never
-    credited or blamed unmeasured).</p>
-
+    <section id="s2" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-20</span>
+        <h2>§2 — Exact kernels by default: Urankar everywhere, hexagons are hexagons</h2>
+      </header>
+      <p class="landed-summary">
+        The exact Part V kernel is the production default on every coupling path; standoff,
+        banded and filament truncation branches are removed and Cylinder accepts only authored
+        axis-aligned rectangles. The new shape guard exposed 296 authored non-axis-aligned
+        conductor polygons routing through rectangle kernels — now exact polygon sections
+        (routes 321+361 → 25+657, 78 columns changed, plasma rows bitwise). Build +5.88%/+5.20%
+        one-time; conductor correction hygiene-scale (8.58e-5 Wb wall). Suite 2,852 green; ring
+        bank exact with leg zeros; L1 pins moved only at 1e-17. Full record:
+        <a href="/nova/evidence/archive/solovev-exact-recovery-landed#exact-kernel-defaults">§2 landed</a>
+        (commit <code>10642e61</code>).
+      </p>
+    </section>
     <h2 id="s3">§3 — The cell-moment wiring: convict, then correct</h2>
 
     <p><strong>Owner framing: we developed a highly accurate scheme and then failed at the last
@@ -278,6 +271,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20260820T1652" data-who="reckon-ship" data-when="2026-08-20T16:52:00+00:00">
     <div class="r-comment-body">build-cache-audit landed - commits 06875269 + 0e98afcb, merged 540bdfbe; gate PASSED (scope-changed recorded for the activation extension). Coarse 1,246.88 s cold to 0.266 s warm (4,689x); fine 3,335.33 s cold to 0.818 s warm (4,079x); 31 arrays bitwise at both resolutions; semantic key, advisory-locked single miss builder, GPFS-safe in-place validated publication, one shared store across worktrees. The three standalone measurement programs request cached_machine; agent doctrine recorded for the machine-building guidance.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260820T1750" data-who="reckon-ship" data-when="2026-08-20T17:50:00+00:00">
+    <div class="r-comment-body">exact-kernel-defaults landed - commit 10642e61, merged 40d30fb6; gate PASSED (scope-changed for the constructor extension). The section-fidelity guard proved itself at introduction: 296 of 321 Cylinder-routed conductor rows are deliberately authored non-axis-aligned polygons (first: TRI_SUPP, 0.173 m axis residual vs 1e-9), now coupled through exact Part V polygon sections; standoff, banded and filament truncation branches removed; routes 321+361 to 25+657 with 78 of 117 aggregated columns changed and plasma rows bitwise. Build +5.88 / +5.20 percent one-time under the fixture cache; conductor correction hygiene-scale (wall 8.58e-5 Wb both fixtures) beside the 1.598e-2-of-span forcing. Default suite 2,852 green under SLURM; ring bank exact including 17 leg zeros; the two L1 pins moved at 1e-17 round-off only. Immutable staged snapshots preserved at ~/.local/share/nova/benchmarks/exact_section/. Slow-test isolation (test_the_stored_boundary_encloses_the_stored_axis, 30 min) routed to the test-lane owner.</div>
 </div>
 </section>
 </main>

@@ -104,6 +104,32 @@
     analytic-state forcing and their projected root responses beside the observed drift.</figcaption>
   </figure>
 
+  <h2 id="exact-kernel-defaults">§2 — exact kernels everywhere: 296 authored polygons rerouted, truncation branches removed, +5–6% one-time build cost</h2>
+
+  <p>Commit <code>10642e61</code> (merged <code>40d30fb6</code>). The Urankar/Part V exact
+  section kernel is the production default on every coupling path: the reachable standoff,
+  banded and far-field filament truncation branches are removed (grep-proven outside the
+  dedicated comparator), and <code>Cylinder</code> accepts only authored axis-aligned rectangles
+  — a build-time shape guard, which immediately exposed that <strong>296 of the fixture's 321
+  Cylinder-routed conductor rows are deliberately authored non-axis-aligned polygons</strong>
+  (first: TRI_SUPP, seven vertices, 0.173 m axis residual vs a 1e-9 m criterion). Those now
+  couple through exact polygon sections; route counts move 321+361 → 25+657, changing 78 of 117
+  aggregated source columns with all plasma matrices bitwise unchanged.</p>
+
+  <p><strong>Costs and corrections, measured with immutable staged snapshots</strong> (shared
+  fixture hashes, before/after receipts; artifacts preserved at
+  <code>~/.local/share/nova/benchmarks/exact_section/</code>): design-matrix build
+  1,146.8 → 1,214.2 s coarse (+5.88%) and 2,805.5 → 2,951.5 s fine (+5.20%) — one-time under
+  the fixture cache. The conductor field correction is hygiene-scale: wall flux 8.575e-5 Wb on
+  both fixtures, B components ≤5.4e-6 T — beside the banked 1.598e-2-of-span map forcing,
+  confirming the independent 99.18% source-density attribution. Verification: default
+  equilibrium/Biot suite 2,852 passed under SLURM; ring bank remeasured with support current
+  exact to the stored digit, 17 leg zeros exact, zero leakage; the two L1 pins shift only at
+  1e-17/1e-18 (round-off, suite green — stored digits to refresh opportunistically). The
+  all-lanes sweep ran 91% green before the debug ceiling inside one slow test
+  (<code>test_the_stored_boundary_encloses_the_stored_axis</code> — routed to the test-lane
+  owner for isolation). Full record: <code>tests/exact_section_route_results.json</code>.</p>
+
   <h2 id="density-forcing-ladder">§3 (mechanism) — the fit, not the flux: exact samples leave the forcing flat, so the projection's moment deviation is the carrier</h2>
 
   <p>Commit <code>5189b08e</code> (warm coarse carrier, three arms, production control

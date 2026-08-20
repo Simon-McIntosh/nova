@@ -9,15 +9,32 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterator, Mapping
+from typing import Any, Iterable, Iterator, Mapping
 
 import imas
 import numpy as np
+from imas.dd_zip import dd_xml_versions
+
+from nova.imas.machine import DiagnosticSightline, StaticMachineDescription
 
 
 SOURCE_PATH = Path("/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc")
-DD_VERSION = "3.41.0"
 IDS_NAMES = ("wall", "pf_active", "magnetics")
+PUBLISHED_DD_MAJOR = 4
+
+
+def latest_published_dd_version(versions: Iterable[str] | None = None) -> str:
+    """Return the latest installed Data Dictionary in the publication major."""
+
+    available = dd_xml_versions() if versions is None else list(versions)
+    candidates = [
+        version
+        for version in available
+        if int(version.partition(".")[0]) == PUBLISHED_DD_MAJOR
+    ]
+    if not candidates:
+        raise RuntimeError("no DD4 Data Dictionary is available for publication")
+    return max(candidates, key=lambda value: tuple(map(int, value.split("."))))
 
 
 @dataclass(frozen=True)
@@ -43,6 +60,7 @@ class DiiidMachineIds:
 
     ids: Mapping[str, Any]
     source_path: Path
+    source_dd_version: str
     dd_version: str
     absent: tuple[AbsentQuantity, ...]
 
@@ -64,186 +82,390 @@ class DiiidMachineIds:
             raise ValueError("plasma-current signals are forbidden in the description")
 
 
-def _new_ids(factory: imas.IDSFactory, name: str, source_path: Path) -> Any:
+@dataclass(frozen=True)
+class SourceMachineDescription:
+    """Version-pinned source values after routing through Nova's machine seam."""
+
+    machine: StaticMachineDescription
+    wall: Mapping[str, Any]
+    active_coils: tuple[Mapping[str, Any], ...]
+    probes: tuple[Mapping[str, Any], ...]
+    flux_loops: tuple[Mapping[str, Any], ...]
+    dd_version: str
+
+
+def _new_ids(
+    factory: imas.IDSFactory,
+    name: str,
+    source_path: Path,
+    *,
+    source_dd_version: str,
+    target_dd_version: str,
+) -> Any:
     ids = factory.new(name)
     properties = ids.ids_properties
     properties.homogeneous_time = 0
-    properties.source = str(source_path)
+    if hasattr(properties, "source"):
+        properties.source = str(source_path)
     properties.comment = (
         f"Static DIII-D machine geometry copied from {source_path} at IMAS "
-        f"Data Dictionary {DD_VERSION}; dynamic signals and reconstruction "
-        "content are excluded."
+        f"Data Dictionary {source_dd_version} and authored natively at Data "
+        f"Dictionary {target_dd_version}; dynamic signals and reconstruction "
+        "content are excluded, and no IDS conversion is performed."
     )
     properties.provenance.node.resize(1)
     provenance = properties.provenance.node[0]
     provenance.path = str(source_path)
-    provenance.sources = [f"IMAS netCDF entry; Data Dictionary {DD_VERSION}"]
+    sources = [
+        f"IMAS netCDF source; Data Dictionary {source_dd_version}",
+        f"native IDSFactory authoring; Data Dictionary {target_dd_version}",
+    ]
+    if hasattr(provenance, "sources"):
+        provenance.sources = sources
+    else:
+        provenance.reference.resize(len(sources))
+        for reference, source in zip(provenance.reference, sources, strict=True):
+            reference.name = source
     return ids
 
 
-def _copy_present(source: Any, target: Any, name: str) -> bool:
-    """Copy one primitive leaf only when the source actually supplies it."""
+def _primitive_record(source: Any, names: tuple[str, ...]) -> dict[str, Any]:
+    """Detach populated primitive values from a source IDS structure."""
 
-    leaf = getattr(source, name)
-    if not leaf.has_value:
-        return False
-    value = leaf.value
-    if isinstance(value, np.ndarray):
-        value = value.copy()
-    setattr(target, name, value)
-    return True
-
-
-def _copy_enum(source: Any, target: Any) -> None:
-    """Copy the populated leaves of one IMAS identifier structure."""
-
-    _copy_present(source, target, "index")
-    _copy_present(source, target, "name")
-    _copy_present(source, target, "description")
+    record = {}
+    for name in names:
+        leaf = getattr(source, name)
+        if not leaf.has_value:
+            continue
+        value = leaf.value
+        record[name] = value.copy() if isinstance(value, np.ndarray) else value
+    return record
 
 
-def _outline(element: Any) -> np.ndarray:
-    """Return an element's exact stored outline or exact rectangle expansion."""
+def _write_record(target: Any, record: Mapping[str, Any]) -> None:
+    """Write a detached record into a natively authored IDS structure."""
+
+    for name, value in record.items():
+        if hasattr(target, name):
+            setattr(target, name, value)
+
+
+def _element_record(element: Any, fallback_name: str) -> dict[str, Any]:
+    """Detach one source element in the record shape the machine seam accepts."""
 
     geometry = element.geometry
     geometry_type = int(geometry.geometry_type)
+    name = str(element.name).strip() or str(element.identifier).strip() or fallback_name
     if geometry_type == 1:
-        return np.column_stack(
-            [
-                np.asarray(geometry.outline.r, dtype=float),
-                np.asarray(geometry.outline.z, dtype=float),
-            ]
-        )
+        geometry_record = {
+            "geometry_type": geometry_type,
+            "r": np.asarray(geometry.outline.r, dtype=float).copy(),
+            "z": np.asarray(geometry.outline.z, dtype=float).copy(),
+        }
     if geometry_type == 2:
         rectangle = geometry.rectangle
-        radius = float(rectangle.r)
-        height = float(rectangle.z)
-        half_width = float(rectangle.width) / 2.0
-        half_height = float(rectangle.height) / 2.0
-        return np.asarray(
-            [
-                [radius - half_width, height - half_height],
-                [radius + half_width, height - half_height],
-                [radius + half_width, height + half_height],
-                [radius - half_width, height + half_height],
-            ],
-            dtype=float,
-        )
-    raise ValueError(f"unsupported pf_active geometry type {geometry_type}")
+        geometry_record = {
+            "geometry_type": geometry_type,
+            "r": float(rectangle.r),
+            "z": float(rectangle.z),
+            "width": float(rectangle.width),
+            "height": float(rectangle.height),
+        }
+    if geometry_type not in (1, 2):
+        raise ValueError(f"unsupported pf_active geometry type {geometry_type}")
+    return {
+        "name": name,
+        "identifier": str(element.identifier).strip(),
+        "turns_with_sign": float(element.turns_with_sign),
+        **geometry_record,
+    }
 
 
-def _author_wall(factory: imas.IDSFactory, source: Any, source_path: Path) -> Any:
-    target = _new_ids(factory, "wall", source_path)
-    if len(source.description_2d) != 1:
+def _source_dd_version(source_path: Path) -> str:
+    """Discover the version written into the source without converting it."""
+
+    with imas.DBEntry(source_path, "r") as database:
+        wall = database.get("wall", 0, lazy=True, autoconvert=False)
+        return str(wall.ids_properties.version_put.data_dictionary)
+
+
+def _read_source_description(source_path: Path) -> SourceMachineDescription:
+    """Read at the declared DD and detach values through Nova dataclasses."""
+
+    source_dd_version = _source_dd_version(source_path)
+    with imas.DBEntry(source_path, "r", dd_version=source_dd_version) as source_entry:
+        source_ids = {
+            name: source_entry.get(name, 0, autoconvert=False) for name in IDS_NAMES
+        }
+        for name, ids in source_ids.items():
+            written = str(ids.ids_properties.version_put.data_dictionary)
+            if written != source_dd_version:
+                raise ValueError(
+                    f"source {name} carries Data Dictionary {written}, "
+                    f"expected declared version {source_dd_version}"
+                )
+        if source_entry.list_all_occurrences("pf_passive"):
+            raise ValueError("source unexpectedly contains pf_passive geometry")
+
+    wall_ids = source_ids["wall"]
+    if len(wall_ids.description_2d) != 1:
         raise ValueError("expected exactly one wall description")
-    source_description = source.description_2d[0]
-    if len(source_description.limiter.unit) != 1:
+    source_wall = wall_ids.description_2d[0]
+    if len(source_wall.limiter.unit) != 1:
         raise ValueError("expected exactly one limiter unit")
+    source_limiter = source_wall.limiter.unit[0]
+    contour = {
+        "kind": "limiter",
+        "r": np.asarray(source_limiter.outline.r, dtype=float).copy(),
+        "z": np.asarray(source_limiter.outline.z, dtype=float).copy(),
+    }
+
+    active_records = []
+    for coil_index, coil in enumerate(source_ids["pf_active"].coil):
+        name = (
+            str(coil.name).strip()
+            or str(coil.identifier).strip()
+            or f"coil_{coil_index}"
+        )
+        elements = tuple(
+            _element_record(element, f"{name}_{element_index}")
+            for element_index, element in enumerate(coil.element)
+        )
+        active_records.append(
+            {
+                "name": name,
+                "identifier": str(coil.identifier).strip(),
+                "functions": tuple(
+                    _primitive_record(function, ("index", "name", "description"))
+                    for function in coil.function
+                ),
+                "elements": elements,
+            }
+        )
+
+    probes = []
+    for index, probe in enumerate(source_ids["magnetics"].b_field_pol_probe):
+        position = _primitive_record(probe.position, ("r", "z", "phi"))
+        location = DiagnosticSightline.from_record(
+            {
+                "name": str(probe.name).strip() or f"probe_{index}",
+                "position": tuple(
+                    position.get(axis, 0.0) for axis in ("r", "z", "phi")
+                ),
+                "start": None,
+                "end": None,
+            }
+        )
+        probes.append(
+            {
+                "location": location,
+                "position_leaves": tuple(position),
+                "leaves": _primitive_record(
+                    probe,
+                    (
+                        "name",
+                        "identifier",
+                        "length",
+                        "turns",
+                        "poloidal_angle",
+                        "toroidal_angle",
+                    ),
+                ),
+                "type": _primitive_record(probe.type, ("index", "name", "description")),
+            }
+        )
+
+    flux_loops = []
+    for loop_index, loop in enumerate(source_ids["magnetics"].flux_loop):
+        positions = []
+        for position_index, position in enumerate(loop.position):
+            position_record = _primitive_record(position, ("r", "z", "phi"))
+            locations = DiagnosticSightline.from_record(
+                {
+                    "name": f"flux_loop_{loop_index}_{position_index}",
+                    "position": tuple(
+                        position_record.get(axis, 0.0) for axis in ("r", "z", "phi")
+                    ),
+                    "start": None,
+                    "end": None,
+                }
+            )
+            positions.append(
+                {
+                    "location": locations,
+                    "position_leaves": tuple(position_record),
+                }
+            )
+        flux_loops.append(
+            {
+                "leaves": _primitive_record(loop, ("name", "identifier")),
+                "type": _primitive_record(loop.type, ("index", "name", "description")),
+                "positions": tuple(positions),
+            }
+        )
+
+    machine = StaticMachineDescription.from_record(
+        {
+            "contour": contour,
+            "pf_active": active_records,
+            "pf_passive_loop_count": 0,
+            "tf_coil_count": 0,
+        }
+    )
+    return SourceMachineDescription(
+        machine=machine,
+        wall={
+            "type": _primitive_record(
+                source_wall.type, ("index", "name", "description")
+            ),
+            "limiter": _primitive_record(source_limiter, ("name", "identifier")),
+        },
+        active_coils=tuple(active_records),
+        probes=tuple(probes),
+        flux_loops=tuple(flux_loops),
+        dd_version=source_dd_version,
+    )
+
+
+def _author_wall(
+    factory: imas.IDSFactory,
+    source: SourceMachineDescription,
+    source_path: Path,
+    *,
+    target_dd_version: str,
+) -> Any:
+    target = _new_ids(
+        factory,
+        "wall",
+        source_path,
+        source_dd_version=source.dd_version,
+        target_dd_version=target_dd_version,
+    )
     target.description_2d.resize(1)
     description = target.description_2d[0]
-    _copy_enum(source_description.type, description.type)
+    _write_record(description.type, source.wall["type"])
     description.limiter.unit.resize(1)
-    source_limiter = source_description.limiter.unit[0]
     limiter = description.limiter.unit[0]
-    _copy_present(source_limiter, limiter, "name")
-    _copy_present(source_limiter, limiter, "identifier")
-    limiter.outline.r = np.asarray(source_limiter.outline.r, dtype=float)
-    limiter.outline.z = np.asarray(source_limiter.outline.z, dtype=float)
+    _write_record(limiter, source.wall["limiter"])
+    contour = source.machine.contour
+    if contour is None:
+        raise ValueError("source machine has no limiter contour")
+    limiter.outline.r = contour.r
+    limiter.outline.z = contour.z
     return target
 
 
-def _author_pf_active(factory: imas.IDSFactory, source: Any, source_path: Path) -> Any:
-    target = _new_ids(factory, "pf_active", source_path)
-    target.coil.resize(len(source.coil))
-    for source_coil, coil in zip(source.coil, target.coil, strict=True):
-        _copy_present(source_coil, coil, "name")
-        _copy_present(source_coil, coil, "identifier")
-        coil.function.resize(len(source_coil.function))
-        for source_function, function in zip(
-            source_coil.function, coil.function, strict=True
+def _author_pf_active(
+    factory: imas.IDSFactory,
+    source: SourceMachineDescription,
+    source_path: Path,
+    *,
+    target_dd_version: str,
+) -> Any:
+    target = _new_ids(
+        factory,
+        "pf_active",
+        source_path,
+        source_dd_version=source.dd_version,
+        target_dd_version=target_dd_version,
+    )
+    target.coil.resize(len(source.machine.active_coils))
+    for machine_coil, coil_record, coil in zip(
+        source.machine.active_coils, source.active_coils, target.coil, strict=True
+    ):
+        coil.name = machine_coil.name
+        if hasattr(coil, "identifier"):
+            coil.identifier = machine_coil.identifier
+        functions = coil_record["functions"]
+        coil.function.resize(len(functions))
+        for function_record, function in zip(functions, coil.function, strict=True):
+            _write_record(function, function_record)
+        coil.element.resize(len(machine_coil.elements))
+        for machine_element, element_record, element in zip(
+            machine_coil.elements, coil_record["elements"], coil.element, strict=True
         ):
-            _copy_enum(source_function, function)
-        coil.element.resize(len(source_coil.element))
-        for source_element, element in zip(
-            source_coil.element, coil.element, strict=True
-        ):
-            _copy_present(source_element, element, "name")
-            _copy_present(source_element, element, "identifier")
-            _copy_present(source_element, element, "turns_with_sign")
-            vertices = _outline(source_element)
+            element.name = machine_element.name
+            if element_record["identifier"] and hasattr(element, "identifier"):
+                element.identifier = element_record["identifier"]
+            element.turns_with_sign = element_record["turns_with_sign"]
+            vertices = np.asarray(machine_element.outline, dtype=float)
             element.geometry.geometry_type = 1
             element.geometry.outline.r = vertices[:, 0]
             element.geometry.outline.z = vertices[:, 1]
     return target
 
 
-def _copy_position(source: Any, target: Any) -> None:
-    for coordinate in ("r", "z", "phi"):
-        _copy_present(source, target, coordinate)
+def _write_position(target: Any, record: Mapping[str, Any]) -> None:
+    location = record["location"].position
+    for name, value in zip(("r", "z", "phi"), location, strict=True):
+        if name in record["position_leaves"]:
+            setattr(target, name, value)
 
 
-def _author_magnetics(factory: imas.IDSFactory, source: Any, source_path: Path) -> Any:
-    target = _new_ids(factory, "magnetics", source_path)
-    target.b_field_pol_probe.resize(len(source.b_field_pol_probe))
-    for source_probe, probe in zip(
-        source.b_field_pol_probe, target.b_field_pol_probe, strict=True
+def _author_magnetics(
+    factory: imas.IDSFactory,
+    source: SourceMachineDescription,
+    source_path: Path,
+    *,
+    target_dd_version: str,
+) -> Any:
+    target = _new_ids(
+        factory,
+        "magnetics",
+        source_path,
+        source_dd_version=source.dd_version,
+        target_dd_version=target_dd_version,
+    )
+    target.b_field_pol_probe.resize(len(source.probes))
+    for probe_record, probe in zip(
+        source.probes, target.b_field_pol_probe, strict=True
     ):
-        for name in (
-            "name",
-            "identifier",
-            "length",
-            "turns",
-            "poloidal_angle",
-            "toroidal_angle",
-        ):
-            _copy_present(source_probe, probe, name)
-        _copy_enum(source_probe.type, probe.type)
-        _copy_position(source_probe.position, probe.position)
+        _write_record(probe, probe_record["leaves"])
+        _write_record(probe.type, probe_record["type"])
+        _write_position(probe.position, probe_record)
 
-    target.flux_loop.resize(len(source.flux_loop))
-    for source_loop, loop in zip(source.flux_loop, target.flux_loop, strict=True):
-        _copy_present(source_loop, loop, "name")
-        _copy_present(source_loop, loop, "identifier")
-        _copy_enum(source_loop.type, loop.type)
-        loop.position.resize(len(source_loop.position))
-        for source_position, position in zip(
-            source_loop.position, loop.position, strict=True
-        ):
-            _copy_position(source_position, position)
+    target.flux_loop.resize(len(source.flux_loops))
+    for loop_record, loop in zip(source.flux_loops, target.flux_loop, strict=True):
+        _write_record(loop, loop_record["leaves"])
+        _write_record(loop.type, loop_record["type"])
+        positions = loop_record["positions"]
+        loop.position.resize(len(positions))
+        for position_record, position in zip(positions, loop.position, strict=True):
+            _write_position(position, position_record)
     return target
 
 
 def build_diiid_machine_ids(source_path: Path | str = SOURCE_PATH) -> DiiidMachineIds:
-    """Read the source entry and build a static, firewalled IDS set."""
+    """Read at the source DD and author a native IDS set at the latest target."""
 
     source_path = Path(source_path)
-    with imas.DBEntry(source_path, "r") as source_entry:
-        source_ids = {
-            name: source_entry.get(name, 0, autoconvert=False) for name in IDS_NAMES
-        }
-        for name, ids in source_ids.items():
-            written = str(ids.ids_properties.version_put.data_dictionary)
-            if written != DD_VERSION:
-                raise ValueError(
-                    f"source {name} carries Data Dictionary {written}, "
-                    f"expected {DD_VERSION}"
-                )
-        if source_entry.list_all_occurrences("pf_passive"):
-            raise ValueError("source unexpectedly contains pf_passive geometry")
-
-    factory = imas.IDSFactory(version=DD_VERSION)
+    source = _read_source_description(source_path)
+    target_dd_version = latest_published_dd_version()
+    factory = imas.IDSFactory(version=target_dd_version)
     bundle = DiiidMachineIds(
         ids={
-            "wall": _author_wall(factory, source_ids["wall"], source_path),
+            "wall": _author_wall(
+                factory,
+                source,
+                source_path,
+                target_dd_version=target_dd_version,
+            ),
             "pf_active": _author_pf_active(
-                factory, source_ids["pf_active"], source_path
+                factory,
+                source,
+                source_path,
+                target_dd_version=target_dd_version,
             ),
             "magnetics": _author_magnetics(
-                factory, source_ids["magnetics"], source_path
+                factory,
+                source,
+                source_path,
+                target_dd_version=target_dd_version,
             ),
         },
         source_path=source_path,
-        dd_version=DD_VERSION,
+        source_dd_version=source.dd_version,
+        dd_version=target_dd_version,
         absent=(
             AbsentQuantity(
                 "pf_passive",
@@ -269,6 +491,8 @@ def build_diiid_machine_ids(source_path: Path | str = SOURCE_PATH) -> DiiidMachi
 
 def _primitive_leaves(parent: Any, names: tuple[str, ...]) -> Iterator[tuple[str, Any]]:
     for name in names:
+        if not hasattr(parent, name):
+            continue
         leaf = getattr(parent, name)
         if leaf.has_value:
             value = leaf.value
@@ -290,6 +514,15 @@ def machine_ids_snapshot(ids: Mapping[str, Any]) -> dict[str, dict[str, Any]]:
         for index, node in enumerate(properties.provenance.node):
             for leaf, value in _primitive_leaves(node, ("path", "sources")):
                 result[name][f"ids_properties/provenance/node[{index}]/{leaf}"] = value
+            if hasattr(node, "reference"):
+                for reference_index, reference in enumerate(node.reference):
+                    for leaf, value in _primitive_leaves(
+                        reference, ("name", "timestamp")
+                    ):
+                        result[name][
+                            "ids_properties/provenance/"
+                            f"node[{index}]/reference[{reference_index}]/{leaf}"
+                        ] = value
 
     wall = ids["wall"]
     for description_index, description in enumerate(wall.description_2d):

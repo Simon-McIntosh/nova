@@ -226,6 +226,73 @@
     exposed &#8212; and is not owed: the coupled window differentiates by the
     implicit-function adjoint at its converged fixed point, which never needs a gradient
     through a dynamic trip count.</p>
+    <h2 id="seam-return-channel">Evolved state through the seam — 2026-08-20</h2>
+    <p>Commits <code>d943c12a</code>, <code>fc8d3313</code> (node
+    evolved-state-return-channel). <code>forward_source_from_receipt</code> takes a typed
+    <code>ForwardTransportReceipt</code> with its geometry and returns a
+    <code>nova.equilibrium.ForwardSource</code> — so an evolved transport state is a
+    first-class <code>ForwardProfile</code> input, not a private hand-off.
+    <strong>8 passed in 34.9 s.</strong></p>
+    <p>The seam's own guard is what makes this a contract rather than a conversion.
+    <code>DomainProfile</code> refuses a sampled image standing in for a flux function, so
+    the mapping returns <code>EvolvedFluxFunction</code> instances that are genuinely
+    JAX-callable on normalised flux: <code>p_prime</code> is &#8722;dp/d&#934; on signed
+    total poloidal flux, and <code>ff_prime</code> follows
+    dI_p/dV = &#8722;(p&#8242; + FF&#8242;&#183;&#10216;1/R&#178;&#10217;/&#956;&#8320;). Sampled arrays
+    remain refused, and the mapper validates the boundary flux, current and
+    flux-consumption ledgers before returning.</p>
+    <table>
+      <caption>Receipts from the mapped source driving the free-boundary fixture.</caption>
+      <thead><tr><th>Quantity</th><th>Achieved</th><th>Bound this repository holds the fixture to</th></tr></thead>
+      <tbody>
+        <tr><td>fixed-point residual</td><td>8.14e&#8722;15</td><td>&#8212;</td></tr>
+        <tr><td>relative div<em>B</em></td><td>3.88e&#8722;16</td><td>&#8212;</td></tr>
+        <tr><td>relative div<em>J</em></td><td>1.90e&#8722;16</td><td>&#8212;</td></tr>
+        <tr><td>relative Grad&#8211;Shafranov</td><td>2.70e&#8722;02</td><td>0.1</td></tr>
+        <tr><td>relative force</td><td>2.29e&#8722;02</td><td>0.1</td></tr>
+        <tr><td>internal current-ledger residual</td><td>0</td><td>&#8212;</td></tr>
+        <tr><td>transport&#8594;equilibrium current residual</td><td>2.68e&#8722;07</td><td>&#8212;</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Read the 2.7% correctly.</strong> The fixed point is converged to machine
+    precision and both divergence receipts are at round-off; the Grad&#8211;Shafranov and force
+    figures are the discrete solution's standing residual on this free-boundary machine
+    fixture, whose accepted bound in <code>tests/test_equilibrium_forward_solve.py</code> is
+    0.1. At 0.027 and 0.023 the mapped source lands comfortably inside it, so the mapping
+    degrades nothing — the analytic-class fixtures that assert 1e-4 are a different problem
+    with a known exact solution. The number that actually measures <em>this</em> seam is the
+    current round trip: <strong>2.68e&#8722;07</strong>, I_p 5.574552e5 A against transport's
+    5.574551e5 A.</p>
+    <p>One mechanical fact worth keeping, and the reason for the second commit: the FSA record
+    carries n+1 face values while a real TORAX state carries n+2 cells-plus-boundaries. The
+    mapper interpolates between them and treats the repeated axis value as a
+    <em>normalisation anchor</em>, not as a derivative interval — differencing across it
+    would manufacture an axis gradient from a duplicated point.</p>
+
+    <h2 id="ensemble-batching">Ensemble member batching — 2026-08-20</h2>
+    <p>Commit <code>c792f7d2</code> (node ensemble-member-batching).
+    <code>EnsembleForwardTransport</code> advances a stacked, immutable member state and
+    returns per-member receipts. <strong>9 passed in 32.7 s</strong> (5 ensemble, 4 façade
+    regressions): a batch of 3 distinguishable members on each of the 2 ladder rungs matches
+    the member-by-member loop and agrees between eager and jitted paths at rtol 1e&#8722;10,
+    atol 1e&#8722;8. Identity holds end to end — input order is retained in
+    <code>member_ids</code>, identities are unique and non-empty,
+    <code>for_member</code> recovers the associated scalar receipt, and all three axis-flux
+    signatures stay distinct on both rungs, so no member is silently reordered or merged.</p>
+    <p><strong>The qualification is about what <code>vmap</code> is doing here.</strong> The
+    batching boundary is <code>jax.vmap</code> wrapped around a
+    <code>jax.pure_callback</code> carrying <code>vmap_method="sequential"</code>, because
+    <code>ForwardTransport</code> still holds host-oriented typed receipts and host-side
+    engine setup, so each member call must cross the host boundary. What that delivers is
+    real: identity safety, one call shape, jit compatibility, and a batch that provably
+    equals the loop. What it does not deliver is the point of batching — there is no
+    device-parallel execution, and no gradient, because <code>pure_callback</code> carries no
+    VJP. Functionally it is a loop in <code>vmap</code>'s clothing.</p>
+    <p>The cause is located, and it is not the engine: TORAX's core state objects and its
+    stepper are registered pytrees <em>precisely</em> so that an ensemble is a batch rather
+    than a serialisation problem. The host boundary is Nova's. A corrective node moves the
+    batch inside the traced region — vmapping the step over stacked member state and
+    constructing the typed receipts once, outside, from the batched arrays.</p>
   </main>
 </body>
 </html>

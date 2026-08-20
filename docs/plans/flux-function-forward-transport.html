@@ -24,9 +24,9 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-20">
-<meta name="plan-version" content="11">
-<meta name="plan-commits" content="f7af67dc,3a438d1b,9e1b5ce2,e583d796,95a3dc72,4df7993b,5088a466">
-<meta name="plan-impl" content="0.53">
+<meta name="plan-version" content="12">
+<meta name="plan-commits" content="f7af67dc,3a438d1b,9e1b5ce2,e583d796,95a3dc72,4df7993b,5088a466,d943c12a,fc8d3313,c792f7d2">
+<meta name="plan-impl" content="0.62">
 <meta name="plan-blocks" content="imas-ambix:sophelio-entry-master">
 </head>
 <body>
@@ -150,6 +150,12 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260820-coarea-accuracy" data-who="reckon-ship" data-when="2026-08-20T13:56:00+00:00">
     <div class="r-comment-body">coarea-moment-accuracy landed - commit 5088a466; gate geometry PASSED; measure: the shaped analytic assertion moved from one shared rtol 0.12 to per-moment bounds 0.006 (dl/Bp), 0.020 (grad-psi), 0.006 (grad-psi squared) and 5e-5 (inverse B squared), matching achieved errors of 5.28e-3, 1.83e-2, 5.26e-3 and 3.07e-5 at the 101x101 test grid; 30 passed / 1 deselected in 73.7 s. The mechanism is now named: errors PLATEAU under refinement across 51, 101 and 201 grids (observed orders tend to zero), so the bound is not the grid stencil but the deliberate finite Gaussian-CDF coarea bandwidth h = 1.25 times the normalised-flux bin spacing together with interpolation from the fixed 28 surface bins. Only the grad-psi moment exceeds rtol 1e-2, at 1.83%; halving the bandwidth takes it to 8.55e-3 and 56 surface bins to 5.39e-3. Production bandwidth was deliberately preserved because it trades analytic bias against cell-binning noise on general equilibria, a trade an analytic-surface test cannot adjudicate; the test now states the measured default-resolution accuracy instead of hiding it behind one permissive threshold.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260820-return-channel" data-who="reckon-ship" data-when="2026-08-20T14:25:00+00:00">
+    <div class="r-comment-body">evolved-state-return-channel landed - commits d943c12a, fc8d3313; gate seam PASSED; measure: the mapped evolved state drives ForwardProfile to a fixed-point residual of 8.14e-15 with relative div(B) 3.88e-16, relative div(J) 1.90e-16, relative Grad-Shafranov 2.70e-2 and relative force 2.29e-2 - inside the 0.1 bound this repository holds free-boundary machine fixtures to, so the equilibrium is force-balanced to the standard of its class rather than degraded by the mapping. The seam number is the current round trip: transport-to-equilibrium current residual 2.68e-7, Ip 5.574552e5 A against transport 5.574551e5 A, with the internal current-ledger residual exactly zero. forward_source_from_receipt returns a nova.equilibrium.ForwardSource whose core p_prime is -dp/dPhi on signed total poloidal flux and whose ff_prime follows dIp/dV = -(p_prime + ff_prime x <1/R^2>/mu0), both as JAX-callable EvolvedFluxFunction instances that DomainProfile accepts while sampled arrays stay refused. The mapper validates the boundary flux, current and flux-consumption ledgers and interpolates the n+1 FSA face fields onto TORAX's n+2 cell-plus-boundaries grid, treating the repeated axis value as a normalisation anchor rather than a derivative interval. 8 passed in 34.9 s.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260820-ensemble-batch" data-who="reckon-ship" data-when="2026-08-20T14:26:00+00:00">
+    <div class="r-comment-body">ensemble-member-batching landed - commit c792f7d2; gate numerics PASSED; measure: 9 passed in 32.7 s (5 ensemble, 4 facade regressions); a batch of 3 distinguishable members on each of the 2 ladder rungs matches the member-by-member loop and agrees between eager and jitted paths at rtol 1e-10 / atol 1e-8; input order is retained in member_ids, identities are unique and non-empty, for_member recovers each scalar receipt, and all three axis-flux signatures stay distinct on both rungs. ONE QUALIFICATION: the batching boundary is jax.vmap over a jax.pure_callback carrying vmap_method sequential, because ForwardTransport still holds host-oriented typed receipts and host-side engine setup - so this is identity-safe, jit-compatible SEMANTIC batching, not fused device-parallel execution, and it carries no gradient because pure_callback has no VJP. TORAX's own state objects and stepper are registered pytrees precisely so a real batch is possible, so the shortfall is Nova's host boundary rather than the engine; a corrective node moves the batch inside the traced region.</div>
 </div>
 </section>
 </main>

@@ -19,13 +19,13 @@
   <meta name="plan-capability-risk" content="elevated">
   <meta name="plan-sprint" content="S7">
   <meta name="plan-owner" content="Simon McIntosh">
-  <meta name="plan-depends-on" content="efit-map-inversion,efit-flux-decomposition,plasma-edge-current-representation">
+  <meta name="plan-depends-on" content="efit-map-inversion,efit-flux-decomposition,plasma-edge-current-representation,solovev-exact-recovery">
   <meta name="plan-blocks" content="mast-catalog-gpu-solve">
   <title>EFIT Forward Parity | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-16">
-<meta name="plan-version" content="3">
+<meta name="plan-modified" content="2026-08-20">
+<meta name="plan-version" content="4">
 </head>
 <body>
   <main class="plan-doc">
@@ -227,6 +227,9 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s4" data-id="c-20260816-datasetcensus" data-who="reckon-ship" data-when="2026-08-16T09:15:00+00:00">
     <div class="r-comment-body">efit-dataset-census landed (read-only, owner-directed: find EFIT validation datasets on other machines, less exposed to single-machine archive defects). 23/23 declared references in the imas-efit artifact opened at native DD versions (3.37.0-4.1.0) across 7 machine families; all equilibrium-only, conductor currents in separately declared pf_active inputs. FORWARD-INPUT COMPLETENESS: 2/23 standalone-complete (hl3_efit_reference, tcv_liuqe_77549); 14/23 complete after explicit time-aligned pf_active pairing; 9/23 partial (WEST references lack psi maps; JT-60SA Selene lacks map and profiles; AUG EQH lacks f_df_dpsi; MAST-U EPM/EPQ carry coil PC with no current in the matching pf_active). Qualifications: open each entry at its written native DD; pf_active is homogeneous-time; TCV DINA needs DD 4.1.0-to-3.39.0 conversion; WEST 63159/62751 need same-major alignment; ITER dina3420 pairs only over 5.03-30.05 s; ITER 135013 PF input misses its validation window. Corpus: ghcr.io/iterorganization/efitpp-test-data:v0.0.14, cache_version=166, no immutable digest pinned. Delivery note: the investigate sandbox rejected the worker manifest write, so the orchestrator persisted the final message verbatim. These candidates open only after the analytic-validation gate; hl3 and tcv_liuqe are the natural first cross-machine references.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260820T1140" data-who="reckon-ship" data-when="2026-08-20T11:40:00+00:00">
+    <div class="r-comment-body">Owner ruling 2026-08-20 adds a hard prerequisite: all further forward-model progress gates on agreement with the Solov'ev oracle. solovev-exact-recovery owns that gate set (pre-registered agreement gates with convergence clauses, Urankar-exact kernel defaults, hexagon-section enforcement, the cell-moment wiring conviction, and the accuracy-cost ladder with the ~1 ms GPU fixed-point target). This plan's entry now waits on that plan in the DAG. Calibration note this plan already carries: the DINA demonstration's axis 41.2 mm / Ip -1.12% deviations match the Solov'ev root drift (42 mm / -1.15%) - the same composition systematic - so the recovery work directly sharpens what a forward-parity deviation here will mean.</div>
 </div>
 </section>
 </main>

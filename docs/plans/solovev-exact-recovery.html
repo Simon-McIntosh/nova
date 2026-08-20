@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="solovev-exact-recovery">
+  <meta name="plan-title"     content="Solov'ev Exact Recovery — correct first, then fast">
+  <meta name="plan-summary"   content="Recover the analytic Solov'ev equilibrium as the fixed oracle: Urankar-exact section kernels everywhere by default, hexagon sections with no rectangle fallback, the cell-moment coupling wired correctly end to end, pre-registered agreement gates that all downstream progress rides on, and a benchmarked accuracy-cost ladder targeting a converged Newton fixed point in about one millisecond on GPU">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort-hours" content="6.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-sprint"    content="S7">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-depends-on" content="boundary-ring-source-completion">
+  <meta name="plan-blocks"    content="efit-forward-parity">
+  <title>Solov'ev Exact Recovery | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — The mandate, and the drift it answers</h2>
+
+    <p><strong>Owner commission 2026-08-20.</strong> The Solov'ev analytic equilibrium is this
+    programme's fixed oracle. There is no confusion about authority: when the discrete forward
+    model disagrees with it, the defect is nova's to find and fix — never the oracle's, never a
+    bound's. The boundary-ring merge (main <code>3b3122fa</code>) closed the source seam with
+    every gate green, but the converged roots still sit displaced from the analytic solution by
+    an <strong>h-independent</strong> offset: axis 42.4→42.5 mm, flux 6.51→6.69% of span, plasma
+    current −1.12→−1.15% under a 1.9× cell refinement, while the local operator residuals
+    genuinely converge (Grad-Shafranov residual 0.0436→0.0246 ≈ O(h²)). The same magnitudes —
+    axis 41.2 mm, I_p −1.12% — were banked against DINA 135011/7 on the ITER 1587-cell mesh, a
+    different reference on a different machine. A fixed systematic in the composed field is the
+    only mechanism that produces the same numbers twice
+    (<a href="/nova/evidence/archive/boundary-ring-source-completion-landed#root-gate-attribution">attribution evidence</a>).</p>
+
+    <p>The suspects each carry one prior measurement: the far-field filament truncation in the
+    hybrid kernel (11.7% of the coupling pair error, removable by the exact kernel at
+    <em>fewer</em> primitive evaluations than the quadrupole — 4 vs ~5 — so the truncation buys
+    nothing); the rectangle-for-hexagon section substitution (a stable ~3.5% share of the
+    composition error; hexagon vs equal-pitch rectangle second moments differ +20%/−10%
+    radial/vertical); and the first-moment coupling truncation on clipped and near cells (a
+    measured plateau, worst 5.1e-2 relative at near targets, that refinement does not remove).
+    The free-boundary position mode is near-marginal (measured map eigenvalues 1.25–1.77 on
+    diverted states), so small fixed forcing terms plausibly amplify into the observed rigid
+    displacement — plausibly, not provenly: §3 convicts before §2's defaults are credited with
+    the recovery.</p>
+
+    <figure>
+      <svg viewBox="0 0 880 190" role="img" style="max-width:100%;height:auto;font-family:system-ui">
+        <text x="440" y="16" text-anchor="middle" font-size="14" font-weight="600" fill="#111">Where the three measured suspects sit in the composed field</text>
+        <rect x="16" y="40" width="180" height="52" fill="none" stroke="#0a6" stroke-width="1.2"/>
+        <text x="106" y="61" text-anchor="middle" font-size="12" fill="#111">cell source</text>
+        <text x="106" y="78" text-anchor="middle" font-size="10.5" fill="#064">degree-9 clip-exact · 0.004%</text>
+        <line x1="196" y1="66" x2="240" y2="66" stroke="#555"/><polygon points="240,66 233,62.5 233,69.5" fill="#555"/>
+        <rect x="240" y="40" width="200" height="52" fill="none" stroke="#c22" stroke-width="1.4"/>
+        <text x="340" y="57" text-anchor="middle" font-size="12" fill="#111">moment contraction</text>
+        <text x="340" y="72" text-anchor="middle" font-size="10.5" fill="#911">first-moment plateau ≤5.1e-2 near</text>
+        <text x="340" y="86" text-anchor="middle" font-size="10.5" fill="#911">§3 wiring audit</text>
+        <line x1="440" y1="66" x2="484" y2="66" stroke="#555"/><polygon points="484,66 477,62.5 477,69.5" fill="#555"/>
+        <rect x="484" y="40" width="200" height="52" fill="none" stroke="#c22" stroke-width="1.4"/>
+        <text x="584" y="57" text-anchor="middle" font-size="12" fill="#111">section kernels</text>
+        <text x="584" y="72" text-anchor="middle" font-size="10.5" fill="#911">far-field filament 11.7% of pair err</text>
+        <text x="584" y="86" text-anchor="middle" font-size="10.5" fill="#911">rectangle-for-hex ~3.5% · §2 exact</text>
+        <line x1="684" y1="66" x2="728" y2="66" stroke="#555"/><polygon points="728,66 721,62.5 721,69.5" fill="#555"/>
+        <rect x="728" y="40" width="136" height="52" fill="none" stroke="#555" stroke-width="1.2"/>
+        <text x="796" y="61" text-anchor="middle" font-size="12" fill="#111">free-boundary root</text>
+        <text x="796" y="78" text-anchor="middle" font-size="10.5" fill="#555">eigenvalue 1.25–1.77</text>
+        <line x1="796" y1="92" x2="796" y2="126" stroke="#c22" stroke-dasharray="3 2"/>
+        <text x="796" y="142" text-anchor="middle" font-size="11" fill="#911">amplifies fixed forcing → 42 mm, 6.5% span, 1.1% I_p</text>
+        <text x="440" y="172" text-anchor="middle" font-size="11" fill="#555">h-independent at the root; local operator residuals converge O(h²) — the signature of composition constants, not truncation</text>
+      </svg>
+      <figcaption>The composed field and its three measured suspects. The source is exonerated
+      at 0.004%; the contraction and kernel stages each carry a banked constant-class error; the
+      near-marginal position mode plausibly amplifies them into the observed rigid drift.</figcaption>
+    </figure>
+
+    <h2 id="s2">§2 — Exact kernels by default: Urankar everywhere, hexagons are hexagons</h2>
+
+    <p><strong>Locked (kernel-default, section-fidelity).</strong> The Urankar/Part V exact
+    section kernel becomes the production default on every coupling path; the far-field filament
+    truncation is retired — its measured runtime advantage was never significant (production paid
+    ~1.07 primitive evaluations per pair only because it truncated; the exact section costs 4
+    against the quadrupole's ~5 and is more accurate). And a cell authored as a hexagon couples
+    through a hexagon section: <strong>no fallback to rectangle sections, ever</strong>. The
+    substitution is removed, not deprecated — construction of a coupling that would route an
+    authored polygon through a different section shape fails loudly.</p>
+
+    <p><em>Done-when:</em> (a) an audit enumerates every coupling construction site (plasma,
+    coil, passive, wall, sensor rows) with the kernel and section shape each actually uses, on
+    main; (b) the exact kernel is the default on all of them with the filament far-field branch
+    removed from reachable production code; (c) hexagon cells demonstrably couple through exact
+    hexagon sections — a red-then-green test constructs a hexagon-authored machine and asserts
+    the section moments used by the coupling equal the exact hexagon values (5/72 pitch²), with a
+    guard test proving a shape-mismatched construction raises; (d) uniform-current rows reproduce
+    the prior exact-kernel values bitwise where the kernel was already exact, and every changed
+    row is accounted to the retired truncation or substitution; (e) the complete suite is green
+    and the boundary-ring bank digits reproduce; (f) build-time impact is measured (§5 owns the
+    formal benchmark; this section records the raw before/after build cost so the change is never
+    credited or blamed unmeasured).</p>
+
+    <h2 id="s3">§3 — The cell-moment wiring: convict, then correct</h2>
+
+    <p><strong>Owner framing: we developed a highly accurate scheme and then failed at the last
+    step by not wiring it correctly.</strong> The nine exact Part V moment blocks, the
+    machine-precision clip, and the degree-nine density all exist and are individually verified —
+    yet the composed field at the root drifts by constants. This section audits the wiring from
+    the attributed cell moments to the field the fixed point actually consumes, and convicts the
+    drift quantitatively before any repair is credited.</p>
+
+    <p><em>Done-when:</em> (a) a wiring audit traces the production path from
+    <code>CellCurrentMoments</code> through the coupling contraction to the flux and field each
+    solve target consumes, stating for every stage which kernel, section, expansion centre and
+    moment order it actually uses — discrepancies against the intended design (exact blocks,
+    fixed centroids, first moments) are listed with file and line; (b) the map forcing
+    <code>g(x)−x</code> is evaluated at the exact analytic state on both fixtures and decomposed
+    by component swap — exact-section vs production, second-moment near-field comparator vs
+    first-moment, kernel-constant variants — using the already-banked variant machinery, each
+    component reported as a fraction of the observed forcing; (c) the linear-response check runs:
+    <code>(I−Dg)⁻¹</code> applied to the measured forcing, against the observed root displacement
+    (42 mm axis, 6.5% span flux, 1.1% I_p) using the serialized terminal roots and the verified
+    tangent — reproduction within stated tolerance convicts the composition constants, failure to
+    reproduce is itself a recorded finding that redirects the hunt; (d) any wiring defect found
+    is repaired in place (single code path) with the repair's effect on the root measured
+    directly; (e) results JSON, the decomposition figure, and the run log are banked and the
+    complete suite is green.</p>
+
+    <h2 id="s4">§4 — The Solov'ev recovery gates: develop, pre-register, and gate everything on them</h2>
+
+    <p><strong>Locked (oracle-authority).</strong> The analytic Solov'ev solution is the fixed
+    oracle. This section develops the agreement gate set that all further forward-model progress
+    rides on — efit-forward-parity and everything behind it wait behind these gates by DAG
+    dependency, not by convention. The gates are pre-registered from measured floors before the
+    §2/§3 repairs are scored against them, in the tradition of final-current-gate: each gate
+    names the quantity, the reference, the bound, and the measured basis for the bound.</p>
+
+    <p><em>Done-when:</em> (a) a registered gate set covers, at minimum: root flux deviation
+    (sup and RMS of span), axis and X-point position, plasma current, poloidal beta, internal
+    inductance, the field integral, GS residual, divergence pins, topology class, and the
+    fixed-point residual — each against the analytic oracle with the reference evaluation
+    (raster or closed form) and its own quadrature error stated; (b) every gate carries a
+    <em>convergence clause</em>: deviations must fall under refinement with no h-independent
+    floor above the stated representation and reference bounds — a flat deviation under
+    refinement fails the gate whatever its magnitude, because a constant is a defect by the
+    oracle-authority ruling; (c) the bounds lock with the owner after the §3 conviction evidence
+    is in, so they are set from understood mechanisms rather than inherited numbers; (d) the gate
+    harness runs as one command banked in the test lane, so any future change to kernels,
+    representation, or solver re-scores the full set without bespoke work; (e) the DAG carries
+    the gate: efit-forward-parity depends on this plan.</p>
+
+    <h2 id="s5">§5 — The benchmarked accuracy–cost ladder: correct, then fast</h2>
+
+    <p><strong>Locked (runtime-target).</strong> Solutions must be correct and they must be fast
+    at runtime. The target: a converged Newton-Krylov — or Newton-only, if the exact tangent at
+    these scales makes the Krylov loop unnecessary — free-boundary fixed point in
+    <strong>≈1 ms on GPU</strong>. Build cost is a separate axis: the design-matrix construction
+    (coupling blocks, moment companions, clip geometry carriers) must be reasonable on CPU and on
+    GPU, measured, because §2's exact kernels move work into the build where it belongs — and
+    that trade is only sound if it is priced.</p>
+
+    <p><em>Done-when:</em> (a) a ladder of configurations spanning the accuracy axis (kernel
+    exactness, section fidelity, moment order, density degree, mesh resolution) is benchmarked on
+    both axes — Solov'ev gate margins from §4 on one side, build time (CPU and GPU) and per-solve
+    time (GPU; jit-compiled, fixed-shape, batch-1 and batched) on the other — so the cost of
+    every increment of accuracy is a number, not a belief; (b) the solve benchmark reports the
+    converged-fixed-point wall time per state against the ≈1 ms target, with the iteration
+    count, tolerance, and device stated, and the batch-throughput figure beside it for the
+    catalog use case; (c) the recommended production operating point is stated with its gate
+    margins and its costs, and locked with the owner; (d) results and figures are banked in the
+    cumulative evidence with the benchmark harness committed so the ladder re-runs on any future
+    change.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="kernel-default" data-choice="urankar-exact-everywhere" data-by="Simon McIntosh" data-when="2026-08-20T11:00:00+00:00">
+        <p class="r-dec-q">Which section kernel is the production default across all coupling paths?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt chosen" data-value="urankar-exact-everywhere">Urankar/Part V exact sections everywhere; far-field filament truncation retired</button>
+          <button class="r-opt" data-value="hybrid-near-far">keep the hybrid near/far split with filament far field</button>
+          <button class="r-opt" data-value="quadrupole-far">quadrupole-corrected far field</button>
+        </p>
+        <p class="r-dec-rat">Owner ruling 2026-08-20: there were never significant runtime
+        advantages to the far-field filament truncation — the exact kernel costs 4 primitive
+        evaluations against the quadrupole's ~5 and is more accurate, and the banked
+        filament-truncation measurement already showed the exact section as the better buy at
+        production's own far-field fraction. Exact is the default; speed is recovered at the
+        ladder (§5), never by kernel truncation.</p>
+      </div>
+      <div class="r-dec" data-key="section-fidelity" data-choice="authored-shape-exact" data-by="Simon McIntosh" data-when="2026-08-20T11:00:00+00:00">
+        <p class="r-dec-q">May a coupling substitute a simpler section shape for the authored cell geometry?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt chosen" data-value="authored-shape-exact">never — hexagons couple through exact hexagon sections; shape-mismatched construction fails loudly</button>
+          <button class="r-opt" data-value="rectangle-fallback">rectangle substitution permitted where kernels are cheaper</button>
+        </p>
+        <p class="r-dec-rat">Owner ruling 2026-08-20: if we select hex then we use hex — no
+        fallback to rectangle sections, ever, and the absence of the fallback is verified by
+        construction and by test, not by convention. Measured basis: the substitution carries a
+        stable ~3.5% share of the composition error with +20%/−10% second-moment distortion.</p>
+      </div>
+      <div class="r-dec" data-key="oracle-authority" data-choice="solovev-exact" data-by="Simon McIntosh" data-when="2026-08-20T11:00:00+00:00">
+        <p class="r-dec-q">What is the accuracy authority for the forward model?</p>
+        <p class="r-dec-rat">Owner ruling 2026-08-20: the Solov'ev solution is the fixed oracle
+        and there is no confusion here — any disagreement between the discrete forward model and
+        the analytic solution is nova's defect to fix. No gate is relaxed to accommodate a
+        disagreement; an h-independent deviation is a defect whatever its size. Further forward
+        progress gates on the §4 agreement set.</p>
+      </div>
+      <div class="r-dec" data-key="runtime-target" data-choice="one-millisecond-gpu-fixed-point" data-by="Simon McIntosh" data-when="2026-08-20T11:00:00+00:00">
+        <p class="r-dec-q">What is the runtime target for the production forward solve?</p>
+        <p class="r-dec-rat">Owner ruling 2026-08-20: a converged Newton-Krylov or Newton-only
+        free-boundary fixed point in about one millisecond on GPU, with design-matrix build time
+        reasonable on both CPU and GPU. Accuracy is bought at build time through exact
+        precomputed matrices; runtime stays fixed-shape matvecs. The §5 ladder prices every
+        accuracy increment so the operating point is chosen on numbers.</p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-ser-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-08-20" data-recommends-skill="/reckon-ship solovev-exact-recovery" data-resolved-at="" data-resolved-by="">
+        <h4 class="r-fu-title">Execute the recovery: defaults, wiring conviction, gates, ladder</h4>
+        <div class="r-fu-body"><p>All four framing decisions are owner-locked at creation. §2
+        (exact defaults + hex enforcement) and §3 (wiring audit + forcing decomposition) are
+        independent write scopes and open the plan; §4's gate bounds lock with the owner after
+        §3's conviction evidence; §5 benchmarks the ladder on the repaired defaults. The
+        boundary-ring merge (main 3b3122fa) is the substrate; the serialized terminal roots and
+        the variant machinery from the decomposition ladder are the measurement inputs.</p></div>
+        <pre class="r-fu-prompt">/reckon-ship solovev-exact-recovery</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

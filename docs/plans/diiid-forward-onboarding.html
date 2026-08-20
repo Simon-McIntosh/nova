@@ -23,8 +23,8 @@
   <title>DIII-D Forward Onboarding | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-20">
-<meta name="plan-version" content="32">
+<meta name="plan-modified" content="2026-08-21">
+<meta name="plan-version" content="33">
 <meta name="plan-commits" content="7d9743fd,92a4a00e,685a7602,11bac959,26a06b78,4ae27c42,52e4ad17,d1aaa089,a6f8bdf4,86f6f38a,10b5c850,e2ffa796,10049a7a,db55fe58,a3d7e947,7af48b66,29d0fcd2,cf2bd3c6,a06b7072,3f654bc9,97a35d9f,fd4637ec,0dfda59a,1df19c16,b14ec670,a672cece,0b54d0bf,5686eb1b,213cc9a4,c3092ace,2d6f9b37,04cc6df2,ddb152e3,99e148ad">
 <meta name="plan-impl" content="0.93">
 <meta name="plan-artifacts" content="docs/figures/diiid-forward-onboarding/machine-description/machine_description_receipt.json,docs/figures/diiid-forward-onboarding/machine-description/conductor_sections.png,docs/figures/diiid-forward-onboarding/machine-description/skewed_conductor_sections.png,docs/figures/diiid-forward-onboarding/machine-description/thomson_grid_extent.png,docs/figures/diiid-forward-onboarding/differencing/quiescent_selection.png,docs/figures/diiid-forward-onboarding/differencing/plasma_differencing.png,docs/figures/diiid-forward-onboarding/cocos/corpus_cocos_receipt.json,docs/figures/diiid-forward-onboarding/cocos/corpus_cocos_discriminators.png,/work/projects/imas_gpu/sophelio/vacuum-gate/diiid_plasma_subtraction_gate.json,/work/projects/imas_gpu/sophelio/vacuum-gate/diiid_transient_plasma_subtracted_residuals.jsonl,docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc,docs/figures/diiid-forward-onboarding/limiter-topology/limiter_topology_receipt.json,docs/figures/diiid-forward-onboarding/limiter-topology/limiter_topology_modes.png,docs/figures/diiid-forward-onboarding/throughput/batched_throughput_budget.json,docs/figures/diiid-forward-onboarding/throughput/batched_throughput_budget.csv,docs/figures/diiid-forward-onboarding/throughput/batched_throughput_budget.html,docs/figures/diiid-forward-onboarding/cocos-ip-sign/receipt.json,docs/figures/diiid-forward-onboarding/producer-currents/producer_current_scaling_receipt.json,docs/figures/diiid-forward-onboarding/producer-currents/producer_current_scaling.png,docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_fixed_boundary_illustration.png,docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_illustration_receipt.json">
@@ -204,6 +204,26 @@
     rather than omitted silently; and the publication recipe is executable as written. <em>Note that the
     producer-side current inconsistency does not gate this section: a machine description is static
     geometry and carries no currents.</em></p>
+
+    <h2 id="s8">§8 — Which side inverts the recorded coil-current polarity</h2>
+    <p>Folded in from the §2 negative-tail attribution rather than handed off, because it is this plan's
+    own read path that the answer either clears or convicts. The attribution found that
+    <strong>98.6 % of the two-shot negative tail is a coil-current polarity inversion</strong> — geometry
+    contributes exactly 0.0 and native-rate timing 1.4 % — with both tail shots at a centred shape slope
+    of −0.997 and −1.024 against the matched control cohort's +1.011, and polarity correction alone
+    recovering median R² from −3.014 to 0.99821 and from −2.904 to 0.99912.</p>
+    <p>Two boundaries can produce that: the corpus <em>producer</em> recorded these two shot rows with
+    inverted current polarity, or <em>our own</em> corpus read path inverts them. Only one of those is
+    ours to fix, and only one of them makes the campaign's <code>kA.turn</code> channels unsafe to treat
+    as universally signed — so the question is answered before either is assumed. Note this is the third
+    sign fault this campaign has met, after a global sign applied twice in the vacuum composition and a
+    data dictionary displaying the wrong current transform factor; the pattern is why the audit is worth
+    a node rather than a note.</p>
+    <p><strong>Done-when:</strong> the two shots' recorded polarity is compared against the corpus bytes
+    on both sides of nova's read path, the inverting boundary is named with the evidence that fixes it
+    there, and the scope of the fault is reported as a count of affected shots over the full corpus
+    rather than assumed to be two. The passed differencing gate and its banked artifacts are not
+    rewritten.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>

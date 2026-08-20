@@ -824,6 +824,51 @@
       physical R–Z axes. The difference panels carry the residual structure the fractional RMS summarises
       — this is the picture the score cannot show.</figcaption>
     </figure>
+
+    <h2 id="negative-tail">§2 the negative tail is a sign, on exactly two shots — 2026-08-21</h2>
+    <p>Commits <code>99e148ad</code> (harness) and <code>4bb375b7</code> (authoritative run, SLURM job
+    1252494, COMPLETED in 11 m 44 s, exit 0:0). The passed differencing gate reported pooled whole-grid
+    R² 0.6392 against per-frame quartiles 0.99325 / 0.99908 / 0.99967. That gap was a retained,
+    unfiltered negative tail concentrated in two shots, and it was not noise, not geometry, and not
+    timing.</p>
+    <table>
+      <caption>Exclusive attribution of the frame-R² deficit. Controls were selected without using R²,
+      so the cohort cannot be chosen to flatter the answer.</caption>
+      <thead><tr><th>Cause</th><th><code>d3d_shot_009875548f</code></th><th><code>d3d_shot_001bc5a4ae</code></th><th>Combined</th></tr></thead>
+      <tbody>
+        <tr><td>Geometry</td><td>0.0</td><td>0.0</td><td><strong>0.0</strong></td></tr>
+        <tr><td>Coil-current timing (−100…+100 ms)</td><td>0.0173</td><td>0.0099</td><td>0.0136</td></tr>
+        <tr><td>Polarity / data quality</td><td>0.9821</td><td>0.9899</td><td><strong>0.9860</strong></td></tr>
+        <tr><td>Unexplained</td><td>0.00057</td><td>0.00021</td><td>0.00039</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The discriminator is the centred shape slope, and it is unambiguous.</strong> The
+    eight-shot, 48-frame matched quiescent control cohort has median R² 0.99946 at slope
+    <strong>+1.0114</strong>. Both tail shots sit at slope <strong>−0.9966</strong> and
+    <strong>−1.0243</strong> — the predicted field has the right shape with the wrong sign. Correcting
+    the polarity alone recovers median R² from <strong>−3.0144 to 0.99821</strong> and from
+    <strong>−2.9035 to 0.99912</strong>, putting both shots inside the control distribution.</p>
+    <p><strong>What this does and does not license.</strong> It does <em>not</em> repair the gate: the
+    authoritative bank and its preregistration were verified byte-identical before and after at SHA-256
+    <code>5b53ffc3…</code> and <code>7e60861d…</code>, and the study was run as a separate measurement
+    that may qualify the median rather than alter a passed result. Frame reproduction agreed with the
+    bank to 2.10e-9 against a 1e-6 guard, geometry carried one digest at 0.0 maximum numeric difference,
+    and every tail label was fully finite. What it does license is a narrower reading of the 0.99908
+    median: it holds where the recorded current polarity is right, and two shots in this corpus record it
+    inverted.</p>
+    <figure>
+      <img src="/nova/figures/diiid-forward-onboarding/negative-tail/counterfactual_scores.png"
+           alt="Per-frame scores for both tail shots under the baseline, timing-swept and polarity-corrected counterfactuals, against the matched control cohort band"
+           style="max-width:100%">
+      <figcaption>Baseline, timing-swept and polarity-corrected scores for both tail shots against the
+      matched control band. Only the polarity counterfactual moves them, and it moves them all the way
+      in.</figcaption>
+    </figure>
+    <p>The finding hands on one question rather than closing quietly: <strong>which boundary inverts the
+    recorded polarity for exactly these two shots</strong> — the corpus producer or our loader — must be
+    audited before the current channels are treated as universally signed. This campaign has now met a
+    sign fault three times: a global sign applied twice in the vacuum composition, a migration guide
+    displaying the wrong current factor, and now two shots recording an inverted polarity.</p>
   </main>
 </body>
 </html>

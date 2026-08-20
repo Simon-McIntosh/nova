@@ -1,0 +1,195 @@
+All checks passed!
+{
+    "adjudication": {
+        "component": "second_order_comparator_residual",
+        "linear_amplification": "convicted",
+        "mechanism": "The verified production tangent amplifies the measured exact-state forcing into the banked terminal displacement. Exact-section and centre-wiring swaps are identities on this revision; the signed decomposition states whether omitted second moments or the comparator residual dominates.",
+        "repair_scope": "No repair is made by this diagnostic."
+    },
+    "artifacts": {
+        "figure": "scripts/map_forcing_attribution/decomposition.png",
+        "figure_bytes": 84748
+    },
+    "coarse_fixture": {
+        "exact_block_audit": {
+            "sampled_sources": 16,
+            "sampled_targets": 32,
+            "worst_absolute_wb_per_a": 6.085387899327287e-16,
+            "worst_relative": 3.11468281333353e-05
+        },
+        "forcing": {
+            "grid_sup_fraction_of_analytic_span": 0.015976762660416564,
+            "rms_wb": 0.9318920455843203,
+            "sup_wb": 1.292419301535996
+        },
+        "forcing_decomposition": {
+            "additive_closure_relative_sup": 0.0,
+            "additive_closure_sup_wb": 0.0,
+            "components": {
+                "exact_section_kernel": {
+                    "projection_fraction": 0.0,
+                    "rms_norm_fraction": 0.0,
+                    "signed_peak_fraction": -0.0,
+                    "sup_norm_fraction": 0.0
+                },
+                "expansion_centre_wiring": {
+                    "projection_fraction": 0.0,
+                    "rms_norm_fraction": 0.0,
+                    "signed_peak_fraction": -0.0,
+                    "sup_norm_fraction": 0.0
+                },
+                "omitted_second_moment_near_field": {
+                    "projection_fraction": -0.0002330355060721908,
+                    "rms_norm_fraction": 0.005861931656942568,
+                    "signed_peak_fraction": 0.0021018073182988367,
+                    "sup_norm_fraction": 0.03940573405826956
+                },
+                "second_order_comparator_residual": {
+                    "projection_fraction": 1.000233035506072,
+                    "rms_norm_fraction": 1.0002501853310974,
+                    "signed_peak_fraction": 0.9978981926817012,
+                    "sup_norm_fraction": 0.9978981926817012
+                }
+            },
+            "dominant_component_by_absolute_projection": "second_order_comparator_residual",
+            "sign_convention": "production forcing equals exact-kernel error plus centre-wiring error plus omitted-second-moment error plus comparator residual"
+        },
+        "linear_response": {
+            "comparator_residual_solve": {
+                "gmres_info": 0,
+                "residual_relative_sup": 5.40605179278975e-14,
+                "residual_sup_wb": 6.972200594645983e-14
+            },
+            "component_response_closure_sup_wb": 1.2878587085651816e-13,
+            "equation": "(I - Dg) delta = g(x_exact) - x_exact",
+            "exact_state": {
+                "axis_delta_m": [
+                    -0.0017626369295449251,
+                    -0.00032824968276889965
+                ],
+                "axis_displacement_mm": 1.79294082435351,
+                "flux_sup_fraction_of_span": 0.0,
+                "plasma_current_a": -15120361.44991176,
+                "plasma_current_fractional_deviation": 0.008537731711769858
+            },
+            "moment_component_solve": {
+                "gmres_info": 0,
+                "residual_relative_sup": 1.0899771077593372e-15,
+                "residual_sup_wb": 5.551115123125783e-17
+            },
+            "observable_relative_errors": {
+                "axis_displacement_mm": 0.0234260849676646,
+                "flux_sup_fraction_of_span": 0.03473978463006506,
+                "plasma_current_fractional_deviation": 0.044272872907312466
+            },
+            "observed_root": {
+                "axis_delta_m": [
+                    -0.042442159258182954,
+                    0.00035191860623606797
+                ],
+                "axis_displacement_mm": 42.4436182388163,
+                "flux_sup_fraction_of_span": 0.06584635827187019,
+                "plasma_current_a": -14824633.223493962,
+                "plasma_current_fractional_deviation": -0.011187529199654378
+            },
+            "predicted_root": {
+                "axis_delta_m": [
+                    -0.04343550531623386,
+                    0.00045668324444159136
+                ],
+                "axis_displacement_mm": 43.43790604601393,
+                "flux_sup_fraction_of_span": 0.06813384657690906,
+                "plasma_current_a": -14817207.446395913,
+                "plasma_current_fractional_deviation": -0.011682833258057523
+            },
+            "reproduced": true,
+            "reproduction_tolerance": 0.1,
+            "state_displacement_relative_sup_error": 0.04430387334464316,
+            "tangent_finite_difference_relative_sup": 1.3022118408663087e-07,
+            "total_solve": {
+                "gmres_info": 0,
+                "residual_relative_sup": 5.5321336272900546e-14,
+                "residual_sup_wb": 7.149836278586008e-14
+            }
+        },
+        "plasma_cells": 566,
+        "second_moment_comparator": {
+            "active_cells": 435,
+            "actual_second_moment_sup_a_m2": 419.4247848591715,
+            "correction_sup_wb": 0.05092873128810195,
+            "definition": "Residual clipped analytic-density second moments relative to the production full-section linear reconstruction are contracted against exact-section translation Hessians only within 2.5 section radii.",
+            "hessian_step_fractions": [
+                0.002,
+                0.001
+            ],
+            "near_source_target_pairs": 10246,
+            "qualification": "This is a second-moment near-field comparator, not an exact all-orders clipped-section kernel.",
+            "reconstructed_second_moment_sup_a_m2": 419.27833662723594,
+            "residual_second_moment_sup_a_m2": 31.635765772171126,
+            "step_refinement_relative_sup": 0.08918420511604454
+        },
+        "state_size": 2396
+    },
+    "fine_fixture": {
+        "follow_on": "Repeat the dominant coarse component and linear projection against scripts/root_gate_attribution/fine-terminal-root.npz.",
+        "reason": "The 1069-cell coupling build exceeds the remaining diagnostic fence after the coarse exact-state build and two Hessian refinements.",
+        "status": "not run"
+    },
+    "schema": "nova.map-forcing-attribution",
+    "source_artifacts": {
+        "analytic_fixture": "tests/test_equilibrium_forward_reference.py",
+        "banked_terminal_root": "scripts/root_gate_attribution/coarse-terminal-root.npz"
+    },
+    "wiring_audit": {
+        "actual_geometry": {
+            "cells": 566,
+            "clipped_authored_polygons": 126,
+            "rectangle_substitutions": 0,
+            "whole_hexagons": 440
+        },
+        "conclusion": "No kernel, section-shape, expansion-centre, sign, normalisation, or moment-order wiring discrepancy was found on this revision.",
+        "discrepancies": [],
+        "intended_design": {
+            "expansion_centre": "fixed atomic-cell area centroid",
+            "kernel": "exact closed-form polygon blocks",
+            "moment_order": "zeroth and first current moments",
+            "section_shape": "each authored plasma polygon"
+        },
+        "stages": [
+            {
+                "source": "nova/equilibrium/stencil_mesh.py:97",
+                "stage": "physical current vectors",
+                "value": "CellCurrentMoments stores current and two first moments about fixed cell centroids"
+            },
+            {
+                "source": "nova/equilibrium/forward_operator.py:218",
+                "stage": "physical-to-linear coefficient conversion",
+                "value": "the authored polygon second-moment tensor converts physical first moments to radial and vertical coefficients"
+            },
+            {
+                "source": "nova/biot/polysection.py:369",
+                "stage": "fixed coupling assembly",
+                "value": "uniform and companion rows use each authored polygon; the companion expansion point is its material area centroid"
+            },
+            {
+                "source": "nova/biot/target.py:576",
+                "stage": "grid, wall, and direct-sample flux contraction",
+                "value": "all three targets contract uniform, radial, and vertical blocks with the same coefficient vectors"
+            },
+            {
+                "source": "nova/equilibrium/forward_operator.py:387",
+                "stage": "fixed-point map",
+                "value": "the solve state consumes grid plus wall plus direct-sample plasma flux in that order"
+            },
+            {
+                "source": "tests/test_equilibrium_forward_reference.py:858",
+                "stage": "field observation contraction",
+                "value": "the reference receipt contracts the same three current vectors with Br and Bz uniform and companion blocks"
+            }
+        ]
+    }
+}
+figure verified
+RUFF_EXIT=0
+JSON_EXIT=0
+FIGURE_EXIT=0

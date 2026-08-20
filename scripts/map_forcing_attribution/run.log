@@ -1,0 +1,11 @@
+14:43:24 INFO     Parsing data dictionary version 3.39.0 [90m@dd_zip.py:89[0m
+INFO:imas.dd_zip:Parsing data dictionary version 3.39.0
+BUILD fixture=coarse requested=566
+plasmagrid:   0%|                          | 0/4 [00:00<?, ?it/s]plasmagrid:  25%|████▌             | 1/4 [00:50<02:30, 50.32s/it]plasmagrid:  50%|█████████         | 2/4 [00:53<00:45, 22.74s/it]plasmagrid:  75%|████████████▊    | 3/4 [05:08<02:08, 128.72s/it]plasmagrid: 100%|██████████████████| 4/4 [05:36<00:00, 89.03s/it]plasmagrid: 100%|██████████████████| 4/4 [05:36<00:00, 84.19s/it]
+plasmagrid:   0%|                          | 0/4 [00:00<?, ?it/s]plasmagrid:  25%|████▌             | 1/4 [00:57<02:51, 57.09s/it]plasmagrid:  50%|█████████         | 2/4 [01:12<01:04, 32.34s/it]plasmagrid:  75%|████████████▊    | 3/4 [19:42<08:44, 524.47s/it]plasmagrid: 100%|█████████████████| 4/4 [20:51<00:00, 344.93s/it]plasmagrid: 100%|█████████████████| 4/4 [20:51<00:00, 312.97s/it]
+plasmawall:   0%|                          | 0/4 [00:00<?, ?it/s]plasmawall:  25%|████▌             | 1/4 [00:14<00:42, 14.01s/it]plasmawall:  50%|█████████         | 2/4 [00:15<00:13,  6.64s/it]plasmawall:  75%|█████████████▌    | 3/4 [02:56<01:17, 77.20s/it]plasmawall: 100%|██████████████████| 4/4 [03:15<00:00, 54.27s/it]plasmawall: 100%|██████████████████| 4/4 [03:15<00:00, 48.94s/it]
+FORCING sup_wb=1.2924193015359959 grid_span_fraction=0.015976762660416564
+SECOND_ORDER step_fraction=0.002 active_cells=435 near_pairs=10246 sup_wb=0.04638669287060395
+SECOND_ORDER step_fraction=0.001 active_cells=435 near_pairs=10246 sup_wb=0.05092873128810195
+RESULT reproduced=True state_error=0.044303873344643162 dominant=second_order_comparator_residual closure=0 hessian_refinement=0.089184205116044538
+MAP_FORCING_ATTRIBUTION_EXIT=0

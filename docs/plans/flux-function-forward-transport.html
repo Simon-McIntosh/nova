@@ -219,36 +219,59 @@
       extraction as well as against TORAX's reader. Three independent routes over one
       equilibrium localise any residual disagreement to a method rather than leaving it
       unattributed — and a persistent two-against-one split is itself the diagnosis.</li>
-      <li><strong>Curved cell clips, and the extremum they unlock.</strong> A straight clip
-      represents the surface inside a cell as a chord, so the surface's topmost point can only
-      ever be an edge crossing. Near its own turning point the surface is locally
-      <em>parabolic</em> in R about that point, which makes the R error of a chord endpoint scale
-      as &#8730;(&#916;z/&#954;) — a square-root rate, and the likely whole of the 10&#8211;22%
-      triangularity error, since no amount of area accuracy touches it. Clipping against the arc
-      instead moves the extremum to <strong>O(h&#178;)</strong> while improving the area only
-      from O(h&#178;) to O(h&#179;): significant for shape, marginal for the moments, which is
-      why it does not compete with item 1's coefficient target.</li>
-      <li><strong>The arc is exact, not fitted.</strong> For bilinear &#968; on a cell the level
-      set is a hyperbola, Z = (k &#8722; a &#8722; bR)/(c + dR), so the chord-to-arc area
-      correction has a closed form and <em>adds</em> to the existing polygon moments rather than
-      replacing them — <code>TracedClippedSupports</code> keeps its contract and gains a sagitta
-      term. The turning point follows from setting the arc's tangent horizontal or vertical,
-      again in closed form per cell. Where a fitted route is preferred over the analytic one,
-      nova already carries both halves: <code>Curve</code> and <code>Peak</code> in
-      <code>nova/geometry/curve.py</code> do arc-length quadratic interpolation with a bounded
-      extremum search host-side, and <code>nova/linalg/interpolant.py</code> supplies the traced
-      equivalents — <code>Bernstein</code>, <code>Polynomial</code>, <code>BSpline</code>,
-      <code>Interp</code> — as registered JAX pytrees, which is what the FSA assembly needs to
-      stay jit, vmap and grad safe. This work stays inside the transport tree and only
-      <em>consumes</em> <code>separatrix_clip</code>: that module is shared with the
-      edge-current and boundary-ring plans and must not be written from here.</li>
+      <li><strong>A higher-order surface representation, and the extremum it unlocks.</strong>
+      A chord represents the surface inside a cell as a straight segment, so its topmost point can
+      only be an edge crossing. Near its own turning point the surface is locally
+      <em>parabolic</em> in R, which makes the radial error of an endpoint scale as
+      &#8730;(&#916;z/&#954;) — a square-root rate, and the likely whole of the 10&#8211;22%
+      triangularity error, since no amount of area accuracy touches it. Reaching
+      <strong>O(h&#178;)</strong> requires the reconstruction itself to carry curvature.</li>
+      <li><strong>Why the exact bilinear arc is not that reconstruction — proved, and measured.</strong>
+      This section first specified clipping against the exact bilinear level set, assuming its arc
+      carried an interior turning point. <em>It does not.</em> For bilinear &#968; the level set is
+      Z = (k &#8722; a &#8722; bR)/(c + dR), so dZ/dR = &#8722;(bc + d(k &#8722; a))/(c + dR)&#178;
+      — and that numerator is a <strong>constant</strong>. Every branch is therefore monotone, its
+      extrema are necessarily its endpoints, and if the numerator vanishes the branch degenerates
+      to a line of constant Z. So the square-root behaviour belongs to the <em>bilinear
+      reconstruction</em>, not to the chord. The correction was implemented exactly regardless and
+      validated against a 500&#215;500 subcell raster to 1.57e&#8722;5, and it measured
+      <em>worse</em>: ITER coefficients barely moved (g2g3 2.628&#8594;2.549%) while STEP degraded
+      on every decisive field — vpr 14.60&#8594;25.75%, g1 16.04&#8594;22.83%, area
+      3.51&#8594;4.25% — and clipped-versus-contour vpr went 16.46&#8594;27.59%, away from both
+      reference routes. The lesson generalises: <strong>exactness on a poor reconstruction is
+      worse than a compensating error on it.</strong></li>
+      <li><strong>Tensor bicubic, replacing bilinear as the moment authority.</strong> Represent
+      &#968; per cell by a tensor bicubic, take clipped area and moments by Green's theorem along
+      the in-cell arc with a fixed Gauss&#8211;Legendre rule, and locate the extremum as the
+      stationary point of that level set within the cell. Three things make this the principled
+      choice rather than merely the remaining one: both reference routes already use this
+      representation class and agree with each other to 0.16% on &#934; while bilinear disagrees
+      with both, so two independent implementations outvote ours; a bicubic is C&#185; with
+      non-constant in-cell gradient, so its level set carries curvature and <em>can</em> hold an
+      interior stationary point at all; and Nova already reads flux this way on the equilibrium
+      side, where <code>flux_surface_geometry.py</code> builds a
+      <code>RectBivariateSpline</code> and takes Newton steps on the spline Hessian — adopting the
+      house method rather than importing a foreign one. Reuse rather than author: the traced pytree
+      interpolants in <code>nova/linalg/interpolant.py</code> keep the assembly jit and vmap safe,
+      and <code>nova/biot/arcbandedcoupling.py::_arc_rule</code> is the existing unit-interval
+      Gauss rule. The bilinear arc path is retired rather than kept beside it, and
+      <code>nova/equilibrium/separatrix_clip.py</code> stays unmodified because concurrent plans
+      own it.</li>
     </ol>
-    <p><strong>Acceptance for the curved items.</strong> Triangularity and elongation against the
-    independently read equilibrium fall below <strong>2%</strong> on ITER and are reported on
-    STEP, and the measured convergence order of the extremum position under grid refinement is
-    reported and exceeds one — the point being to demonstrate the rate has left the square-root
-    regime, not merely that one number improved. The coefficient errors from item 1 must not
-    regress, and the traced assembly stays jit and vmap safe.</p>
+    <p><strong>Acceptance for the representation items.</strong> ITER triangularity and elongation
+    each below <strong>2%</strong> against the independently read equilibrium, with the
+    <em>measured convergence order</em> of the extremum radial position across at least three grid
+    refinements reported and exceeding one — the claim is that the rate has left the square-root
+    regime, which a single improved number cannot establish. The STEP clipped-versus-contour
+    disagreement on vpr and g1 falls below the TORAX-versus-contour figures of 3.92% and 6.20%, so
+    the clipped route stops being the outlier of three. STEP &#934;, volume and area return to at
+    least their pre-migration 2.13%, 1.41% and 1.80%, and the ITER coefficients do not regress from
+    2.63%, 0.90%, 2.08% and 1.98%. No bandwidth or smoothing is reintroduced, the traced assembly
+    stays jit and vmap safe, and the two-sided baseline width narrows from 35% to what the settled
+    method supports. <strong>If bicubic also misses the STEP gates, that is a publishable negative
+    result about clipped-cell integration on low-aspect-ratio equilibria</strong>, recorded with
+    numbers and a named mechanism rather than worked around: a measured no is a deliverable
+    here.</p>
     <p><strong>Acceptance.</strong> Measured against the independently read
     <code>iterhybrid_cocos17.eqdsk</code>: <code>g2g3_over_rhon</code>, <code>g0</code>,
     <code>g1</code> and <code>g2</code> each below <strong>5%</strong> on the ITER equilibrium,

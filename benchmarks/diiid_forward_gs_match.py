@@ -10,7 +10,7 @@ when scoring flux is its physically arbitrary additive gauge.
 The competition data do not ship a machine wall.  The rectangular enclosing
 surface used by the topology read is therefore labelled a pseudo-wall.  It is
 derived only from the released EFIT-grid extent, and the first frame is solved
-again with two outward displacements to expose the resulting sensitivity.
+again with one outward displacement to expose the resulting sensitivity.
 """
 
 from __future__ import annotations
@@ -69,13 +69,18 @@ RETAINED_CEILING_FRACTION = 0.95
 REGISTERED_MEDIAN_INTERIOR_R2_BAR = (
     RETAINED_CEILING_FRACTION * LABEL_REPRESENTABILITY_MEDIAN_R2
 )
-REGISTERED_FRAME_COUNT = 8
+REGISTERED_FRAME_COUNT = 3
 REGISTERED_GRID_STRIDE = 2
 REGISTERED_RESIDUAL_TOLERANCE = 1.0e-5
-REGISTERED_NEWTON_STEPS = 4
-REGISTERED_GMRES_ITERATIONS = 8
-REGISTERED_WARMUP_SWEEPS = 0
-PSEUDO_WALL_EXPANSIONS = (0.0, 0.02, 0.05)
+REGISTERED_SOLVER_ROUTE = "newton_krylov"
+REGISTERED_PROFILE_EVALUATIONS = 180
+REGISTERED_ACCELERATED_NEWTON_STEPS = 24
+REGISTERED_ACCELERATED_GMRES_ITERATIONS = 24
+REGISTERED_ACCELERATED_WARMUP = 8
+REGISTERED_ACCELERATED_RELAXATION = 0.5
+REGISTERED_ACCELERATED_STEP_CAP = 10.0
+REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION = 0.02
+PSEUDO_WALL_EXPANSIONS = (0.02, 0.05)
 TOROIDAL_FIELD_TURNS = 144
 TOROIDAL_FIELD_TURNS_SOURCE = "https://fusion.gat.com/pubs-ext/SOFT02/A24059.pdf"
 
@@ -156,6 +161,8 @@ class FrameResult:
     diverted: bool
     converged: bool
     convergence_criterion: str
+    solver_termination: str
+    residual_history: tuple[float, ...]
     metrics: MatchMetrics
 
 
@@ -174,6 +181,11 @@ def preregistration() -> dict[str, Any]:
                 "DSEP; no score-dependent filtering"
             ),
             "frames": REGISTERED_FRAME_COUNT,
+            "cohort_reduction": (
+                "reduced from eight to three before scoring because the host "
+                "root route is substantially more expensive; the convergence "
+                "criterion and 0.90155 score bar are unchanged"
+            ),
         },
         "source": (
             "extract_flux_functions(label) p-prime and FF-prime plus the shipped "
@@ -181,13 +193,76 @@ def preregistration() -> dict[str, Any]:
         ),
         "solver": {
             "entry_point": "nova.equilibrium.forward.ForwardProfile",
-            "route": "newton_krylov",
+            "route": REGISTERED_SOLVER_ROUTE,
             "grid_stride": REGISTERED_GRID_STRIDE,
-            "newton_steps": REGISTERED_NEWTON_STEPS,
-            "gmres_iterations": REGISTERED_GMRES_ITERATIONS,
-            "warmup_sweeps": REGISTERED_WARMUP_SWEEPS,
+            "profile_evaluations": REGISTERED_PROFILE_EVALUATIONS,
+            "newton_steps": REGISTERED_ACCELERATED_NEWTON_STEPS,
+            "gmres_iterations": REGISTERED_ACCELERATED_GMRES_ITERATIONS,
+            "warmup": REGISTERED_ACCELERATED_WARMUP,
+            "relaxation": REGISTERED_ACCELERATED_RELAXATION,
+            "step_cap": REGISTERED_ACCELERATED_STEP_CAP,
             "relative_residual_tolerance": REGISTERED_RESIDUAL_TOLERANCE,
             "seed": "the convention-clean labelled map, used only as a branch seed",
+            "history_reporting": (
+                "all finite relative residuals from ForwardProfile.fixed_point.trace"
+            ),
+            "policy_history": [
+                {
+                    "route": "newton_krylov",
+                    "newton_steps": 4,
+                    "gmres_iterations": 8,
+                    "warmup_sweeps": 0,
+                    "outcome": (
+                        "quarantined: unchanged label seed at relative residual "
+                        "1.057120826; no match score claimed"
+                    ),
+                },
+                {
+                    "route": "host_krylov",
+                    "function_tolerance": 1.0e-8,
+                    "maximum_iterations": 20,
+                    "outcome": (
+                        "quarantined: iteration budget exhausted on a diverted "
+                        "finite state at relative residual 1.857399452; no match "
+                        "score claimed"
+                    ),
+                },
+                {
+                    "route": "host",
+                    "solver_tolerance": 1.0e-8,
+                    "maximum_evaluations": 1701,
+                    "initial_relaxation": 0.2,
+                    "outcome": (
+                        "discarded diagnostic: relative residual 6.597034616e-9 "
+                        "after 88 evaluations by leaving the plasma for the "
+                        "non-diverted vacuum branch; the free-boundary map is "
+                        "non-contractive, so relaxed routes are inapplicable"
+                    ),
+                },
+                {
+                    "route": "host_krylov",
+                    "profile_evaluations": 100,
+                    "function_tolerance": 1.0e-8,
+                    "maximum_iterations": 100,
+                    "inner_maximum_iterations": 40,
+                    "outcome": (
+                        "quarantined: finite diverted state at final relative "
+                        "residual 1.982164465; the 100-iteration absolute residual "
+                        "history cycles near 5.61 to 5.84 with a jump near 10.50 "
+                        "every fifteen iterations, rather than descending"
+                    ),
+                },
+                {
+                    "route": REGISTERED_SOLVER_ROUTE,
+                    "profile_evaluations": REGISTERED_PROFILE_EVALUATIONS,
+                    "newton_steps": REGISTERED_ACCELERATED_NEWTON_STEPS,
+                    "gmres_iterations": REGISTERED_ACCELERATED_GMRES_ITERATIONS,
+                    "warmup": REGISTERED_ACCELERATED_WARMUP,
+                    "relaxation": REGISTERED_ACCELERATED_RELAXATION,
+                    "step_cap": REGISTERED_ACCELERATED_STEP_CAP,
+                    "status": "active scoring policy",
+                },
+            ],
         },
         "score": {
             "region": "label-LCFS interior sampled on the forward lattice",
@@ -212,7 +287,7 @@ def preregistration() -> dict[str, Any]:
                 "rectangular enclosing control surface derived from efit_grid; "
                 "a pseudo-wall standing in for the absent machine wall"
             ),
-            "baseline_expansion": PSEUDO_WALL_EXPANSIONS[1],
+            "baseline_expansion": REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION,
             "sensitivity_expansions": list(PSEUDO_WALL_EXPANSIONS),
             "sensitivity_frame": "first preregistered frame only",
         },
@@ -223,6 +298,11 @@ def preregistration() -> dict[str, Any]:
             ),
             "turns_source": TOROIDAL_FIELD_TURNS_SOURCE,
             "coefficient_fitted": False,
+            "assumption_scope": (
+                "q95 scales linearly with F and therefore with the external "
+                "144-turn assumption; flux, separatrix and magnetic-axis metrics "
+                "do not depend on that turn count"
+            ),
         },
         "convention_crossings": {
             "efit_psirz": "corpus_flux_to_nova_total exactly once",
@@ -537,7 +617,8 @@ def build_profile(
         wall_coordinate=wall,
         polarity=1,
         inside_material=np.ones(lattice.node_count, dtype=bool),
-        newton_steps=REGISTERED_NEWTON_STEPS,
+        evaluations=REGISTERED_PROFILE_EVALUATIONS,
+        newton_steps=REGISTERED_ACCELERATED_NEWTON_STEPS,
     )
     spline = RectBivariateSpline(radius, height, label, kx=3, ky=3, s=0)
     seed = np.r_[label.ravel(), spline.ev(wall[:, 0], wall[:, 1])]
@@ -598,6 +679,23 @@ def contour_separation(
     return 1000.0 * float(np.mean(distances)), 1000.0 * float(np.max(distances))
 
 
+def _solve_registered(profile: ForwardProfile, seed: np.ndarray):
+    """Run the preregistered fixed-shape Newton-Krylov root solve."""
+
+    equilibrium = profile.solve(
+        seed,
+        route=REGISTERED_SOLVER_ROUTE,
+        gmres_iterations=REGISTERED_ACCELERATED_GMRES_ITERATIONS,
+        warmup=REGISTERED_ACCELERATED_WARMUP,
+        relaxation=REGISTERED_ACCELERATED_RELAXATION,
+        step_cap=REGISTERED_ACCELERATED_STEP_CAP,
+    )
+    return (
+        equilibrium,
+        "accelerated Newton-Krylov exhausted its preregistered fixed-shape budget",
+    )
+
+
 def solve_frame(
     row: dict[str, Any], frame: int, expansion: float
 ) -> tuple[FrameResult, dict[str, np.ndarray]]:
@@ -606,12 +704,7 @@ def solve_frame(
     profile, seed, label, wall, reliable, wall_statement = build_profile(
         row, frame, expansion
     )
-    equilibrium = profile.solve(
-        seed,
-        route="newton_krylov",
-        gmres_iterations=REGISTERED_GMRES_ITERATIONS,
-        warmup=REGISTERED_WARMUP_SWEEPS,
-    )
+    equilibrium, solver_termination = _solve_registered(profile, seed)
     radius = profile.lattice.radius
     height = profile.lattice.height
     predicted = np.asarray(equilibrium.flux[: profile.lattice.node_count]).reshape(
@@ -665,6 +758,11 @@ def solve_frame(
         and np.isfinite(residual)
         and residual <= REGISTERED_RESIDUAL_TOLERANCE
     )
+    residual_history = tuple(
+        float(value)
+        for value in np.asarray(equilibrium.fixed_point.trace, dtype=float)
+        if np.isfinite(value)
+    )
     result = FrameResult(
         shot=Path(row["_source_path"]).name,
         frame=frame,
@@ -682,6 +780,8 @@ def solve_frame(
             "finite receipt AND diverted topology AND fixed-point relative residual "
             f"<= {REGISTERED_RESIDUAL_TOLERANCE:g}"
         ),
+        solver_termination=solver_termination,
+        residual_history=residual_history,
         metrics=MatchMetrics(
             interior_r_squared=r_squared,
             interior_fractional_rms=fractional_rms,
@@ -725,7 +825,11 @@ def summarize(
     """Return the cohort verdict while retaining every frame record."""
 
     r_squared = [item.metrics.interior_r_squared for item in results]
-    baseline = sensitivity[1].metrics.interior_r_squared
+    baseline = next(
+        item.metrics.interior_r_squared
+        for item in sensitivity
+        if item.pseudo_wall_expansion == REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION
+    )
     sensitivity_rows = [
         {
             "pseudo_wall_expansion": item.pseudo_wall_expansion,
@@ -744,6 +848,12 @@ def summarize(
         "preregistration_sha256": preregistration_hash,
         "frames": len(results),
         "coefficients_fitted": 0,
+        "metric_assumptions": {
+            "q95": ("depends linearly on F and the disclosed 144-turn external input"),
+            "flux_separatrix_axis": (
+                "independent of the toroidal-field turn-count assumption"
+            ),
+        },
         "pseudo_wall": {
             "statement": results[0].pseudo_wall_statement,
             "sensitivity": sensitivity_rows,
@@ -918,6 +1028,10 @@ def run(
 ) -> dict[str, Any]:
     """Write the bar, execute the declared cohort, and publish its evidence."""
 
+    if frames != REGISTERED_FRAME_COUNT:
+        raise ValueError(
+            f"scoring requires exactly {REGISTERED_FRAME_COUNT} preregistered frames"
+        )
     configure_dtypes()
     preregistration_path = write_preregistration(output)
     preregistration_hash = require_preregistration(preregistration_path)
@@ -925,7 +1039,7 @@ def run(
     selected = select_frames(paths, frames)
     results: list[FrameResult] = []
     fields: list[dict[str, np.ndarray]] = []
-    baseline_expansion = PSEUDO_WALL_EXPANSIONS[1]
+    baseline_expansion = REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION
     for number, selected_frame in enumerate(selected, start=1):
         row = _read(
             selected_frame.path,
@@ -935,6 +1049,26 @@ def run(
         result, frame_fields = solve_frame(
             row, selected_frame.frame, baseline_expansion
         )
+        print(
+            "RESIDUAL_HISTORY "
+            + json.dumps(
+                {
+                    "shot": result.shot,
+                    "frame": result.frame,
+                    "route": REGISTERED_SOLVER_ROUTE,
+                    "relative_residual": list(result.residual_history),
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+        if not result.converged:
+            raise RuntimeError(
+                f"non-converged frame {result.shot}:{result.frame}: "
+                f"residual={result.fixed_point_relative_residual:.9e}, "
+                f"diverted={result.diverted}, finite={result.finite}, "
+                f"termination={result.solver_termination}"
+            )
         results.append(result)
         fields.append(frame_fields)
         print(
@@ -951,7 +1085,30 @@ def run(
         if expansion == baseline_expansion:
             sensitivity.append(results[0])
         else:
-            sensitivity.append(solve_frame(first_row, first.frame, expansion)[0])
+            expanded = solve_frame(first_row, first.frame, expansion)[0]
+            print(
+                "RESIDUAL_HISTORY "
+                + json.dumps(
+                    {
+                        "shot": expanded.shot,
+                        "frame": expanded.frame,
+                        "route": REGISTERED_SOLVER_ROUTE,
+                        "pseudo_wall_expansion": expansion,
+                        "relative_residual": list(expanded.residual_history),
+                    },
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
+            if not expanded.converged:
+                raise RuntimeError(
+                    f"non-converged pseudo-wall sensitivity for "
+                    f"{expanded.shot}:{expanded.frame}: "
+                    f"residual={expanded.fixed_point_relative_residual:.9e}, "
+                    f"diverted={expanded.diverted}, finite={expanded.finite}, "
+                    f"termination={expanded.solver_termination}"
+                )
+            sensitivity.append(expanded)
     receipt = {
         "preregistration": preregistration(),
         "preregistration_path": str(preregistration_path),

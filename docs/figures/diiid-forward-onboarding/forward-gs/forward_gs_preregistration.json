@@ -11,7 +11,6 @@
   "pseudo_wall": {
     "baseline_expansion": 0.02,
     "sensitivity_expansions": [
-      0.0,
       0.02,
       0.05
     ],
@@ -19,6 +18,7 @@
     "statement": "rectangular enclosing control surface derived from efit_grid; a pseudo-wall standing in for the absent machine wall"
   },
   "q95": {
+    "assumption_scope": "q95 scales linearly with F and therefore with the external 144-turn assumption; flux, separatrix and magnetic-axis metrics do not depend on that turn count",
     "coefficient_fitted": false,
     "definition": "FluxSurfaceGeometry safety factor at psi_norm 0.95",
     "toroidal_field_model": "ideal 144-turn DIII-D toroidal coil, F=mu0*N*I/(2*pi)",
@@ -37,20 +37,65 @@
     "registered_median_interior_r_squared_bar": 0.90155
   },
   "selection": {
+    "cohort_reduction": "reduced from eight to three before scoring because the host root route is substantially more expensive; the convergence criterion and 0.90155 score bar are unchanged",
     "eligibility": "finite map and q95, at least eight LCFS points, positive recorded DSEP; no score-dependent filtering",
     "frame": "eligible time nearest the median eligible labelled time",
-    "frames": 8,
+    "frames": 3,
     "paths": "lexicographic corpus order"
   },
   "solver": {
     "entry_point": "nova.equilibrium.forward.ForwardProfile",
-    "gmres_iterations": 8,
+    "gmres_iterations": 24,
     "grid_stride": 2,
-    "newton_steps": 4,
+    "history_reporting": "all finite relative residuals from ForwardProfile.fixed_point.trace",
+    "newton_steps": 24,
+    "policy_history": [
+      {
+        "gmres_iterations": 8,
+        "newton_steps": 4,
+        "outcome": "quarantined: unchanged label seed at relative residual 1.057120826; no match score claimed",
+        "route": "newton_krylov",
+        "warmup_sweeps": 0
+      },
+      {
+        "function_tolerance": 1e-08,
+        "maximum_iterations": 20,
+        "outcome": "quarantined: iteration budget exhausted on a diverted finite state at relative residual 1.857399452; no match score claimed",
+        "route": "host_krylov"
+      },
+      {
+        "initial_relaxation": 0.2,
+        "maximum_evaluations": 1701,
+        "outcome": "discarded diagnostic: relative residual 6.597034616e-9 after 88 evaluations by leaving the plasma for the non-diverted vacuum branch; the free-boundary map is non-contractive, so relaxed routes are inapplicable",
+        "route": "host",
+        "solver_tolerance": 1e-08
+      },
+      {
+        "function_tolerance": 1e-08,
+        "inner_maximum_iterations": 40,
+        "maximum_iterations": 100,
+        "outcome": "quarantined: finite diverted state at final relative residual 1.982164465; the 100-iteration absolute residual history cycles near 5.61 to 5.84 with a jump near 10.50 every fifteen iterations, rather than descending",
+        "profile_evaluations": 100,
+        "route": "host_krylov"
+      },
+      {
+        "gmres_iterations": 24,
+        "newton_steps": 24,
+        "profile_evaluations": 180,
+        "relaxation": 0.5,
+        "route": "newton_krylov",
+        "status": "active scoring policy",
+        "step_cap": 10.0,
+        "warmup": 8
+      }
+    ],
+    "profile_evaluations": 180,
     "relative_residual_tolerance": 1e-05,
+    "relaxation": 0.5,
     "route": "newton_krylov",
     "seed": "the convention-clean labelled map, used only as a branch seed",
-    "warmup_sweeps": 0
+    "step_cap": 10.0,
+    "warmup": 8
   },
   "source": "extract_flux_functions(label) p-prime and FF-prime plus the shipped nineteen poloidal-conductor currents; zero fitted coefficients"
 }

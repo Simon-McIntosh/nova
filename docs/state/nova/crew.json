@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-20T17:40:21",
+  "updated": "2026-08-20T17:49:58",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -11594,9 +11594,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260820T153931549081-transport-suite-verification",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a74",
+        "node": "transport-suite-verification",
+        "role": "test",
+        "member": "transport-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T15:39:51Z",
+        "completed_at": "2026-08-20T15:49:11Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 560,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 560,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "88e3a1faaffad43e9fa751359a5a88290cdfa75d",
+        "commits": [
+          "47cd2122c47ce20f9ef24877844c83ab9d2459e4"
+        ],
+        "changed_lines": {
+          "added": 91,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "full ten-module transport surface on merged main with the slow lane selected: 62 passed, 0 failed, 0 skipped, 0 deselected in 157.9 s; the previously deselected TORAX cross-check test_solver_formulation_matches_torax_on_the_shared_circular_case was selected and passed in 1.101 s; per-module durations recorded, no failure needed defect-versus-environment classification",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T153931549081-transport-suite-verification/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01fd4-2cdf-7591-8b96-1b45c9de75bc",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2193152,
+            "cached_input_tokens_cumulative": 2193152,
+            "input_tokens": 2300033,
+            "input_tokens_cumulative": 2300033,
+            "output_tokens": 14288,
+            "output_tokens_cumulative": 14288,
+            "reasoning_output_tokens": 6347,
+            "reasoning_output_tokens_cumulative": 6347
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 319
+    "_version": 320
   }
 }

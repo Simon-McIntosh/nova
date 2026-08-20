@@ -507,6 +507,63 @@
     that node's fence, which had left <code>forward_source_from_receipt</code> reachable only
     as <code>nova.transport.evolved_state.forward_source_from_receipt</code> &#8212; a public
     capability with a private-looking address.</p>
+    <h2 id="suite-verification">Whole-surface verification &#8212; 2026-08-20</h2>
+    <p>Commit <code>47cd2122</code> (node transport-suite-verification, role test). One
+    full-lane run of all ten transport modules on merged main with the <code>slow</code>
+    marker selected: <strong>62 passed, 0 failed, 0 skipped, 0 deselected</strong>, exit 0,
+    157.9 s of pytest session time (209 s outer wall). Report:
+    <code>scripts/transport_verification/report.md</code>.</p>
+    <p><strong>The point of this node was the test nobody had run.</strong> Every
+    implementation node this session reported "1 deselected" &#8212; the default lane excludes
+    <code>slow</code>, and the native rung's TORAX cross-check
+    (<code>test_solver_formulation_matches_torax_on_the_shared_circular_case</code>) is marked
+    slow. §4's Physics gate names it explicitly. Selected here, it
+    <strong>passed in 1.101 s</strong>: the ported &#968;-diffusion formulation still agrees with
+    TORAX after sixteen nodes of change around it.</p>
+    <table>
+      <caption>Per-module cumulative durations, declared order.</caption>
+      <thead><tr><th>Module</th><th>s</th></tr></thead>
+      <tbody>
+        <tr><td><code>test_current_diffusion</code></td><td>27.35</td></tr>
+        <tr><td><code>test_transport_environment</code></td><td>5.70</td></tr>
+        <tr><td><code>test_transport_geometry</code></td><td>28.55</td></tr>
+        <tr><td><code>test_transport_cocos</code></td><td>1.08</td></tr>
+        <tr><td><code>test_forward_transport</code></td><td>14.24</td></tr>
+        <tr><td><code>test_transport_evolved_state</code></td><td>8.83</td></tr>
+        <tr><td><code>test_transport_ensemble</code></td><td>18.03</td></tr>
+        <tr><td><code>test_transport_coupled_window</code></td><td>5.81</td></tr>
+        <tr><td><code>test_transport_window_gradients</code></td><td>3.32</td></tr>
+        <tr><td><code>test_transport_public_surface</code></td><td>0.00</td></tr>
+      </tbody>
+    </table>
+    <p>Those durations are also the coarse answer to the mesh guard's unmeasured host-callback
+    cost: the geometry and window modules are not distorted. It remains a coarse answer, not a
+    benchmark.</p>
+    <p>The verdict applies to <em>main</em>, not to a stale tree: the tested worktree commit is
+    an ancestor of main, and a path-scoped comparison found <code>pyproject.toml</code>,
+    <code>uv.lock</code>, <code>nova/transport</code>, <code>nova/equilibrium</code> and all ten
+    transport test modules byte-identical to merged main. One non-failing third-party JAXopt
+    deprecation warning and six post-summary DLASCL diagnostics remain visible in the log.</p>
+
+    <h2 id="closing">What shipped, and what is not here</h2>
+    <p>All eight §3 items and all nine §4 gates are green; the plan is
+    <strong>shipped</strong>. Nineteen commits across sixteen nodes. Three things are worth
+    stating plainly at the close, because each is a boundary rather than an omission.</p>
+    <p><strong>Two declared limits.</strong> Differentiated façade calls and batched TORAX
+    ensembles both <em>fail closed</em> unless the configuration is non-adaptive fixed-step:
+    one traced computation needs a static step schedule, and a data-dependent adaptive step
+    count has no reverse-mode path. Adaptive stepping remains available for ordinary solves.
+    This costs the plan nothing, because the coupled window differentiates by the
+    implicit-function adjoint at its converged fixed point &#8212; which never needs a gradient
+    through a dynamic trip count.</p>
+    <p><strong>One measured systematic.</strong> The coarea kernel's
+    &#10216;|&#8711;&#968;|&#10217; carries a ~1.8% bias that grid refinement does not remove,
+    set by the smoothing bandwidth rather than the stencil. It is asserted rather than hidden,
+    and the two knobs that reduce it are recorded. Production settings were deliberately not
+    changed on the strength of an analytic-surface test that sees only half the trade.</p>
+    <p><strong>One unmeasured cost.</strong> The uniform-mesh guard adds a host callback per
+    adapter construction, inside the window's iteration loop. No adapter performance gate
+    exists in this plan; whoever first needs the window to be fast owns that measurement.</p>
   </main>
 </body>
 </html>

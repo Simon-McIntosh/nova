@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-20T19:22:18",
+  "updated": "2026-08-20T22:23:25",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -12345,9 +12345,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260820T165008114750-rampup-trajectory-and-moving-grid",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a76",
+        "node": "rampup-trajectory-and-moving-grid",
+        "role": "implement",
+        "member": "transport-facade",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T16:50:12Z",
+        "completed_at": "2026-08-20T17:02:29Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 737,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 737,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "cd706cf710b3f268ad7cee389f274ded303aa4c1",
+        "commits": [
+          "250018404c15f6446f2137af3f03f1ea62a10455"
+        ],
+        "changed_lines": {
+          "added": 120,
+          "removed": 5,
+          "files": 1
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "the published ramp-up now advances 10 TORAX steps through the facade against a time-dependent StandardGeometryProvider with calcphibdot enabled, peak absolute Phi_b_dot 0.1256 Wb/s sampled from every evolved state rather than assumed; every saved T_i, T_e, n_e and psi state including the initial one matches TORAX run_simulation at rtol 1e-10; forward.py needed no change because the stepwise facade already passes a configured time-dependent provider through intact; 6/6 green",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T165008114750-rampup-trajectory-and-moving-grid/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f49-d28d-76c0-a01f-00215a8049e2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4987136,
+            "cached_input_tokens_cumulative": 32976384,
+            "input_tokens": 5140705,
+            "input_tokens_cumulative": 33856839,
+            "output_tokens": 14702,
+            "output_tokens_cumulative": 96986,
+            "reasoning_output_tokens": 3926,
+            "reasoning_output_tokens_cumulative": 35920
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 331
+    "_version": 332
   }
 }

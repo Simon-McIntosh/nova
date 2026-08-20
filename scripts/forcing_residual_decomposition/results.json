@@ -1,0 +1,412 @@
+{
+  "additive_closure": {
+    "projection_fraction_sum": 1.0000000000000004,
+    "relative_sup": 5.5093521455183375e-15,
+    "sup_wb": 7.105427357601002e-15
+  },
+  "artifacts": {
+    "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/forcing-residual-decomposition/scripts/forcing_residual_decomposition/decomposition.png",
+    "figure_bytes": 96108
+  },
+  "components": {
+    "source_density": {
+      "forcing": {
+        "projection_fraction": 0.991762605972982,
+        "rms_norm_fraction": 0.9919726299515949,
+        "rms_wb": 0.9246426774622433,
+        "signed_peak_fraction": 0.9373562033022365,
+        "sup_norm_fraction": 0.9709929211988949,
+        "sup_wb": 1.252292371968979
+      },
+      "root_response": {
+        "axis_signed_projection_mm": 40.06497374819343,
+        "flux_signed_peak_percent_of_span": 6.38591306844158,
+        "observed_flux_peak_grid_slot": 440,
+        "plasma_current_signed_percent": -1.8757187303384244,
+        "solve": {
+          "gmres_info": 0,
+          "residual_relative_sup": 3.262513468956739e-14,
+          "residual_sup_wb": 4.085620730620576e-14
+        }
+      }
+    },
+    "support_geometry": {
+      "forcing": {
+        "projection_fraction": 0.0008803827174759889,
+        "rms_norm_fraction": 0.0012430470565327218,
+        "rms_wb": 0.0011586754753707895,
+        "signed_peak_fraction": 0.0005150024434147465,
+        "sup_norm_fraction": 0.003979263974275843,
+        "sup_wb": 0.005132068228554942
+      },
+      "root_response": {
+        "axis_signed_projection_mm": -0.0740996745981609,
+        "flux_signed_peak_percent_of_span": -0.01246935743990674,
+        "observed_flux_peak_grid_slot": 440,
+        "plasma_current_signed_percent": 0.0019759942211246178,
+        "solve": {
+          "gmres_info": 0,
+          "residual_relative_sup": 1.9182433451280036e-13,
+          "residual_sup_wb": 9.84455572616838e-16
+        }
+      }
+    },
+    "topology_qualification": {
+      "forcing": {
+        "projection_fraction": 0.007357011309542356,
+        "rms_norm_fraction": 0.021736920469829668,
+        "rms_wb": 0.020261531151305967,
+        "signed_peak_fraction": 0.06212879425434883,
+        "sup_norm_fraction": 0.06212879425434883,
+        "sup_wb": 0.08012768520319025
+      },
+      "root_response": {
+        "axis_signed_projection_mm": 1.9249945660031462,
+        "flux_signed_peak_percent_of_span": 0.43003519118665695,
+        "observed_flux_peak_grid_slot": 440,
+        "plasma_current_signed_percent": -0.13741701235980108,
+        "solve": {
+          "gmres_info": 0,
+          "residual_relative_sup": 3.754887451327976e-13,
+          "residual_sup_wb": 3.008704396734174e-14
+        }
+      }
+    }
+  },
+  "controls": {
+    "banked_observed_root_drift": {
+      "axis_displacement_mm": 42.44361823881716,
+      "flux_sup_percent_of_span": 6.584635827187019,
+      "plasma_current_percent": -1.118752919965449
+    },
+    "comparator_residual_projection_on_total_forcing": 1.0002330355060722,
+    "expected_comparator_residual_projection": 1.000233035506072,
+    "expected_forcing_grid_sup_fraction_of_span": 0.015976762660416564,
+    "forcing_grid_sup_fraction_of_span": 0.015976762660416213,
+    "plasma_cells": 566,
+    "state_size": 2396
+  },
+  "fine_fixture": {
+    "reason": "The fine 1069-cell coupling build is not banked as reusable map blocks; repeat the dominant coarse swap when that build is available.",
+    "status": "not run"
+  },
+  "linear_response": {
+    "component_response_closure_sup_wb": 0.0,
+    "component_sum": {
+      "axis_signed_projection_mm": 41.915868639598415,
+      "flux_signed_peak_percent_of_span": 6.80347890218833,
+      "observed_flux_peak_grid_slot": 440,
+      "plasma_current_signed_percent": -2.011159748477099
+    },
+    "equation": "(I - Dg) delta = forcing component",
+    "observable_signs": "Axis is projected along the observed displacement; flux uses the observed root's peak grid slot; current is a JVP at the exact state."
+  },
+  "method": {
+    "second_moment_comparator": {
+      "active_cells": 435,
+      "correction_sup_wb": 0.05092873128810178,
+      "near_source_target_pairs": 10246
+    },
+    "sign_convention": "Each component is the earlier image minus the later image; the three named components sum to the comparator residual.",
+    "swap_path": [
+      "second-order comparator image",
+      "exact analytic density on the same straight supports and production participation",
+      "exact analytic density on saddle-aware curved per-cell intersections and production participation",
+      "topology-qualified analytic reference state"
+    ],
+    "topology_arm_qualification": "The topology arm is separately split into the measured lower-leg participation swap and the remaining qualified-reference residual."
+  },
+  "oracle": {
+    "analytic_selected_cells": 430,
+    "arc_points": 8192,
+    "banked_arc_refinement_current_delta_a": 1.5703263115137815,
+    "banked_arc_refinement_fraction_of_representation_term": 0.0025273645715478375,
+    "core": {
+      "bounded_maximum_double_roots": 0,
+      "current_density_absolute_bound_a_per_m2": 3422162.7370700086,
+      "distinct_boundary_points": 8192,
+      "exact_saddle_tangencies": 0,
+      "maximum_far_root_separation_m": 0.0,
+      "near_root_selected_for_every_double_root": true,
+      "oracle_area_uncertainty_m2": 2.1998797497626644e-08,
+      "oracle_current_uncertainty_bound_a": 0.07528346505672685,
+      "oracle_uncertainty_far_below_representation_term": true,
+      "oracle_uncertainty_fraction_of_representation_term": 0.00012116511136103524,
+      "oracle_uncertainty_model": "per grazing ray: 2*flux_span/min_abs_hessian_eigenvalue times level_deficit**1.5 times angular_step",
+      "ordinary_sign_change_roots": 8178,
+      "requested_angular_points": 8192,
+      "saddle_branch": "finite_below_level_throat_cut",
+      "saddle_level_offset": -5.530053327573725e-05,
+      "saddle_level_roundoff_tolerance": 1.1368683772161603e-13,
+      "saddle_psi_norm": 0.9999446994667243,
+      "saddle_throat_cut_receipts": [
+        {
+          "angular_slot": 5734,
+          "area_uncertainty_m2": 9.662419495413375e-11,
+          "current_uncertainty_bound_a": 0.00033066371947142447,
+          "distance_to_saddle_m": 0.02073938795884057,
+          "level_deficit": 5.969705504260681e-06,
+          "maximum_coordinates_m": [
+            5.091291408208717,
+            -3.4036346868497547
+          ],
+          "maximum_psi_norm": 0.9999940302944957
+        },
+        {
+          "angular_slot": 5735,
+          "area_uncertainty_m2": 5.923189766237753e-10,
+          "current_uncertainty_bound_a": 0.002027011930261325,
+          "distance_to_saddle_m": 0.017543038234444988,
+          "level_deficit": 1.9995521987614673e-05,
+          "maximum_coordinates_m": [
+            5.094194019920156,
+            -3.404973165923181
+          ],
+          "maximum_psi_norm": 0.9999800044780124
+        },
+        {
+          "angular_slot": 5736,
+          "area_uncertainty_m2": 1.1815618456243725e-09,
+          "current_uncertainty_bound_a": 0.004043496919639394,
+          "distance_to_saddle_m": 0.014345883963672422,
+          "level_deficit": 3.1685941824344255e-05,
+          "maximum_coordinates_m": [
+            5.097096601937735,
+            -3.406313626101689
+          ],
+          "maximum_psi_norm": 0.9999683140581757
+        },
+        {
+          "angular_slot": 5737,
+          "area_uncertainty_m2": 1.741519278489708e-09,
+          "current_uncertainty_bound_a": 0.005959762380736526,
+          "distance_to_saddle_m": 0.011147915433278942,
+          "level_deficit": 4.1037526146592285e-05,
+          "maximum_coordinates_m": [
+            5.09999915967612,
+            -3.4076560769668176
+          ],
+          "maximum_psi_norm": 0.9999589624738534
+        },
+        {
+          "angular_slot": 5738,
+          "area_uncertainty_m2": 2.2062453232893538e-09,
+          "current_uncertainty_bound_a": 0.007550130534195801,
+          "distance_to_saddle_m": 0.00794912311149546,
+          "level_deficit": 4.804684219228417e-05,
+          "maximum_coordinates_m": [
+            5.102901699099792,
+            -3.409000526468956
+          ],
+          "maximum_psi_norm": 0.9999519531578077
+        },
+        {
+          "angular_slot": 5739,
+          "area_uncertainty_m2": 2.535138960951525e-09,
+          "current_uncertainty_bound_a": 0.008675658085462688,
+          "distance_to_saddle_m": 0.004749497181024487,
+          "level_deficit": 5.271046263144452e-05,
+          "maximum_coordinates_m": [
+            5.10580422554944,
+            -3.4103469845663974
+          ],
+          "maximum_psi_norm": 0.9999472895373686
+        },
+        {
+          "angular_slot": 5740,
+          "area_uncertainty_m2": 2.7039346374713405e-09,
+          "current_uncertainty_bound_a": 0.009253304359827325,
+          "distance_to_saddle_m": 0.0015490277795196668,
+          "level_deficit": 5.502496490783493e-05,
+          "maximum_coordinates_m": [
+            5.108706744359957,
+            -3.4116954613192823
+          ],
+          "maximum_psi_norm": 0.9999449750350922
+        },
+        {
+          "angular_slot": 5741,
+          "area_uncertainty_m2": 2.701131604909694e-09,
+          "current_uncertainty_bound_a": 0.009243711926244064,
+          "distance_to_saddle_m": 0.0016522949849547726,
+          "level_deficit": 5.498693059868831e-05,
+          "maximum_coordinates_m": [
+            5.111609260899235,
+            -3.413045966769285
+          ],
+          "maximum_psi_norm": 0.9999450130694013
+        },
+        {
+          "angular_slot": 5742,
+          "area_uncertainty_m2": 2.5266655595401393e-09,
+          "current_uncertainty_bound_a": 0.008646660726896408,
+          "distance_to_saddle_m": 0.004854481476794269,
+          "level_deficit": 5.259294479098564e-05,
+          "maximum_coordinates_m": [
+            5.11451177951604,
+            -3.414398514247222
+          ],
+          "maximum_psi_norm": 0.999947407055209
+        },
+        {
+          "angular_slot": 5743,
+          "area_uncertainty_m2": 2.1919859985272487e-09,
+          "current_uncertainty_bound_a": 0.007501332804339145,
+          "distance_to_saddle_m": 0.008057541782607338,
+          "level_deficit": 4.7839595473275764e-05,
+          "maximum_coordinates_m": [
+            5.11741430535822,
+            -3.4157531146852644
+          ],
+          "maximum_psi_norm": 0.9999521604045267
+        },
+        {
+          "angular_slot": 5744,
+          "area_uncertainty_m2": 1.7215662493659637e-09,
+          "current_uncertainty_bound_a": 0.005891479867977575,
+          "distance_to_saddle_m": 0.01126148548832133,
+          "level_deficit": 4.072347294903356e-05,
+          "maximum_coordinates_m": [
+            5.120316844850987,
+            -3.417109775073036
+          ],
+          "maximum_psi_norm": 0.999959276527051
+        },
+        {
+          "angular_slot": 5745,
+          "area_uncertainty_m2": 1.156771146838487e-09,
+          "current_uncertainty_bound_a": 0.00395865911402841,
+          "distance_to_saddle_m": 0.014466324011688481,
+          "level_deficit": 3.124116926367382e-05,
+          "maximum_coordinates_m": [
+            5.123219400264879,
+            -3.418468515620464
+          ],
+          "maximum_psi_norm": 0.9999687588307363
+        },
+        {
+          "angular_slot": 5746,
+          "area_uncertainty_m2": 5.655864188204064e-10,
+          "current_uncertainty_bound_a": 0.0019355287670800663,
+          "distance_to_saddle_m": 0.0176720671759181,
+          "level_deficit": 1.9389277652992476e-05,
+          "maximum_coordinates_m": [
+            5.126121977734397,
+            -3.419829344453799
+          ],
+          "maximum_psi_norm": 0.999980610722347
+        },
+        {
+          "angular_slot": 5747,
+          "area_uncertainty_m2": 7.774730222049605e-11,
+          "current_uncertainty_bound_a": 0.00026606392056670195,
+          "distance_to_saddle_m": 0.020878725884926123,
+          "level_deficit": 5.164392007261931e-06,
+          "maximum_coordinates_m": [
+            5.129024581032704,
+            -3.4211922772887
+          ],
+          "maximum_psi_norm": 0.9999948356079927
+        }
+      ],
+      "saddle_throat_cuts": 14,
+      "saddle_throat_radius_m": 0.021854856597852468
+    },
+    "curved_analytic_participation_refinement": {
+      "accepted_depth": 4,
+      "coarse_depth": 3,
+      "current_l1_refinement_a": 81.70400116232068,
+      "first_moment_l1_refinement_a_m": 7.952076625319179,
+      "intersected_cells": 431
+    },
+    "curved_production_participation_refinement": {
+      "accepted_depth": 4,
+      "coarse_depth": 3,
+      "current_l1_refinement_a": 81.70400116232068,
+      "first_moment_l1_refinement_a_m": 7.952076625319179,
+      "intersected_cells": 431
+    },
+    "production_selected_cells": 555,
+    "saddle": {
+      "coordinates_m": [
+        5.1101112852782995,
+        -3.412348723801311
+      ],
+      "derivative_authority": "exact first and second derivatives of the RectBivariateSpline evaluated by case.flux",
+      "final_gradient_norm_wb_per_m": 6.39199559631279e-15,
+      "genuine_saddle": true,
+      "gradient_norm_history_wb_per_m": [
+        0.006400895791678405,
+        3.9184018507835407e-07,
+        6.39199559631279e-15
+      ],
+      "hessian_determinant_wb2_per_m4": -354.52263783288987,
+      "hessian_eigenvalues_wb_per_m2": [
+        -18.830238611825695,
+        18.82730458923892
+      ],
+      "hessian_wb_per_m2": [
+        [
+          13.84438447608831,
+          -12.759899551892328
+        ],
+        [
+          -12.759899551892328,
+          -13.847318498675083
+        ]
+      ],
+      "machine_gradient_scale_wb_per_m": 1.6442840340556913e-12,
+      "newton_corrections": 3,
+      "seed_coordinates_m": [
+        5.110385318980776,
+        -3.4125499207818475
+      ],
+      "step_norm_history_m": [
+        0.000339949700046205,
+        2.080962970719207e-08,
+        3.395043150439851e-16
+      ]
+    },
+    "saddle_coordinates_m": [
+      5.1101112852782995,
+      -3.412348723801311
+    ],
+    "straight_support_cells": 447,
+    "banked_straight_topology_excluded_lower_leg_cells": 17,
+    "curved_topology_excluded_lower_leg_cells": 1
+  },
+  "schema": "nova.forcing-residual-decomposition",
+  "source_artifacts": {
+    "coverage_oracle": "scripts/coverage_scaling/results.json",
+    "prior_forcing": "scripts/map_forcing_attribution/results.json",
+    "prior_forcing_control": {
+      "grid_sup_fraction_of_analytic_span": 0.015976762660416564,
+      "rms_wb": 0.9318920455843203,
+      "sup_wb": 1.292419301535996
+    },
+    "terminal_root": "scripts/root_gate_attribution/coarse-terminal-root.npz"
+  },
+  "topology_arm_subcomponents": {
+    "participation_swap": {
+      "projection_fraction": 0.0,
+      "rms_norm_fraction": 0.0,
+      "rms_wb": 0.0,
+      "signed_peak_fraction": -0.0,
+      "sup_norm_fraction": 0.0,
+      "sup_wb": 0.0
+    },
+    "qualified_reference_remainder": {
+      "projection_fraction": 0.007357011309542356,
+      "rms_norm_fraction": 0.021736920469829668,
+      "rms_wb": 0.020261531151305967,
+      "signed_peak_fraction": 0.06212879425434883,
+      "sup_norm_fraction": 0.06212879425434883,
+      "sup_wb": 0.08012768520319025
+    }
+  },
+  "verdict": {
+    "dominant_component": "source_density",
+    "dominant_projection_fraction": 0.991762605972982,
+    "measurement_only": true
+  }
+}

@@ -1,0 +1,19 @@
+warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/nova/.venv` and will be ignored; use `--active` to target the active environment instead
+16:04:42 INFO     Parsing data dictionary version 3.39.0 [90m@dd_zip.py:89[0m
+INFO:imas.dd_zip:Parsing data dictionary version 3.39.0
+BUILD coarse analytic fixture
+plasmagrid:   0%|                          | 0/4 [00:00<?, ?it/s]plasmagrid:  25%|████▌             | 1/4 [00:16<00:50, 16.86s/it]plasmagrid:  50%|█████████         | 2/4 [00:19<00:17,  8.57s/it]plasmagrid:  75%|█████████████▌    | 3/4 [03:22<01:28, 88.32s/it]plasmagrid: 100%|██████████████████| 4/4 [03:47<00:00, 63.17s/it]plasmagrid: 100%|██████████████████| 4/4 [03:47<00:00, 56.87s/it]
+plasmagrid:   0%|                          | 0/4 [00:00<?, ?it/s]plasmagrid:  25%|████▎            | 1/4 [04:09<12:28, 249.60s/it]plasmagrid:  50%|████████▌        | 2/4 [04:46<04:08, 124.49s/it]plasmagrid:  75%|████████████▊    | 3/4 [11:33<04:13, 253.30s/it]plasmagrid: 100%|█████████████████| 4/4 [12:21<00:00, 172.48s/it]plasmagrid: 100%|█████████████████| 4/4 [12:21<00:00, 185.42s/it]
+plasmawall:   0%|                          | 0/4 [00:00<?, ?it/s]plasmawall:  25%|████▌             | 1/4 [00:09<00:28,  9.34s/it]plasmawall:  50%|█████████         | 2/4 [00:10<00:08,  4.33s/it]plasmawall:  75%|████████████▊    | 3/4 [07:35<03:25, 205.54s/it]plasmawall: 100%|█████████████████| 4/4 [08:10<00:00, 138.51s/it]plasmawall: 100%|█████████████████| 4/4 [08:10<00:00, 122.72s/it]
+E0820 16:48:53.447900 3633866 slow_operation_alarm.cc:73]
+********************************
+[Compiling module jit_while for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+E0820 16:49:21.373303 3563417 slow_operation_alarm.cc:140] The operation took 2m27.92549898s
+
+********************************
+[Compiling module jit_while for GPU] Very slow compile? If you want to file a bug, run with envvar XLA_FLAGS=--xla_dump_to=/tmp/foo and attach the results.
+********************************
+RESULT dominant=source_density projection=0.99176260597298205 closure=5.5093521455183375e-15
+FORCING_RESIDUAL_DECOMPOSITION_EXIT=0
+RUN_EXIT=0

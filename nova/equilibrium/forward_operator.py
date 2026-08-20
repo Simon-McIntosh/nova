@@ -263,7 +263,12 @@ class ForwardFluxOperator:
         """Trace the complementary supports and sampling state once."""
         if self.moment_geometry is None:
             raise ValueError("moment geometry is required for current moments")
-        masks, topology = self.read(psi)
+        physical = jnp.asarray(psi)[: self.physical_node_number]
+        masks, topology, connected = self.topology.read_with_connectivity(
+            physical,
+            self.polarity,
+            self.inside_material,
+        )
         if not self.use_linear_moments:
             raise ValueError("clipped support moments are required")
         shared_flux = self.shared_node_flux(psi)
@@ -271,6 +276,7 @@ class ForwardFluxOperator:
         sample_psi_norm = (sample_flux - topology.axis_flux) / topology.flux_span
         signed_flux = self.polarity * (shared_flux - topology.boundary_flux)
         core_support = self.moment_geometry.atomic_mesh.traced_clip(signed_flux)
+        core_support = core_support.qualify(connected)
         common_support = self.moment_geometry.atomic_mesh.traced_clip(-signed_flux)
         return masks, topology, sample_psi_norm, core_support, common_support
 

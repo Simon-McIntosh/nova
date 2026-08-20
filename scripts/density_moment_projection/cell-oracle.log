@@ -1,0 +1,8 @@
+slurmstepd: error: Unable to create TMPDIR [/run/user/39486]: Permission denied
+slurmstepd: error: Setting TMPDIR to /tmp
+warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/nova/.venv` and will be ignored; use `--active` to target the active environment instead
+18:57:10 INFO     Parsing data dictionary version 3.39.0 [90m@dd_zip.py:89[0m
+INFO:imas.dd_zip:Parsing data dictionary version 3.39.0
+CELL_ORACLE quadrature_sup=0.000687149656052 excluded=17 leakage_a=0
+DENSITY_MOMENT_CELL_ORACLE_EXIT=0
+CELL_ORACLE_EXIT=0

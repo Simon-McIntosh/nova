@@ -206,8 +206,8 @@ class Topology(Pytree):
         return psi_norm, ionize
 
     @jax.jit
-    def read(self, psi, polarity, inside_material):
-        """Return the domain labels and axis/separatrix state of one flux map.
+    def read_with_connectivity(self, psi, polarity, inside_material):
+        """Return domain labels, separatrix state, and axis connectivity.
 
         The same axis, X-point set and wall-limit read that :meth:`update`
         performs, published as a labelled domain partition instead of a single
@@ -231,10 +231,11 @@ class Topology(Pytree):
         data_w = self.wall(psi_wall, polarity)
         data_b = self.boundary(data_o, vmap_x, data_w, polarity)
         psi_norm = self.normalize(data_o[2], data_b[2], psi_grid)
+        connected = self.x_mask(data_o, vmap_x)
         masks = classify_domains(
             psi_norm,
             self.psi_mask(polarity, psi_grid, data_b[2]),
-            self.x_mask(data_o, vmap_x),
+            connected,
             inside_material,
         )
         state = TopologyState(
@@ -247,6 +248,14 @@ class Topology(Pytree):
             wall_point=data_w[:2],
             wall_point_flux=data_w[2],
             diverted=jnp.equal(data_b[2], data_x[2]),
+        )
+        return masks, state, connected
+
+    @jax.jit
+    def read(self, psi, polarity, inside_material):
+        """Return the domain labels and axis/separatrix state of one flux map."""
+        masks, state, _connected = self.read_with_connectivity(
+            psi, polarity, inside_material
         )
         return masks, state
 

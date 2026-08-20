@@ -19,6 +19,7 @@ from dataclasses import dataclass
 import math
 from typing import Callable, Iterable, NamedTuple
 
+import jax.numpy as jnp
 import numpy as np
 
 __all__ = [
@@ -182,6 +183,22 @@ class TracedClippedSupports(NamedTuple):
     second_area_moment: object
     contour_area: object
     patch_area_sum: object
+
+    def qualify(self, participation):
+        """Zero every geometric measure outside a topology participation mask."""
+        selected = jnp.asarray(participation, dtype=bool)
+        area = jnp.where(selected, self.area, 0.0)
+        return self._replace(
+            vertex_count=jnp.where(selected, self.vertex_count, 0),
+            included=self.included & selected,
+            boundary=self.boundary & selected,
+            area=area,
+            first_area_moment=jnp.where(selected[:, None], self.first_area_moment, 0.0),
+            second_area_moment=jnp.where(
+                selected[:, None, None], self.second_area_moment, 0.0
+            ),
+            patch_area_sum=jnp.sum(area),
+        )
 
     def linear_current_moments(self, density, gradient):
         """Contract a cellwise-linear current over the traced supports."""

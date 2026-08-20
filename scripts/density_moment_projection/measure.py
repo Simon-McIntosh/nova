@@ -14,6 +14,7 @@ import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
 
+from nova.equilibrium.observation import clipped_support_quadrature
 from nova.equilibrium.separatrix_clip import padded_polynomial_current_moments
 from nova.equilibrium import fixed_point
 from nova.equilibrium.stencil_mesh import (
@@ -559,6 +560,9 @@ def representation_pins(case, operator, exact, gate_module):
     support, reference_current, reference_first, _coupled = (
         gate_module.support_reference(case, operator, exact, masks, topology)
     )
+    participating = np.asarray(core_support.included, dtype=bool)
+    reference_current = np.where(participating, reference_current, 0.0)
+    reference_first = np.where(participating[:, None], reference_first, 0.0)
     attributed_current = np.asarray(physical.cell_current)
     attributed_first = np.column_stack(
         [np.asarray(physical.radial_moment), np.asarray(physical.vertical_moment)]
@@ -567,11 +571,7 @@ def representation_pins(case, operator, exact, gate_module):
     available = np.asarray(fixture["consistent_available"], dtype=bool)
     interior = nonempty & available
     ring = nonempty & ~available
-    lower_xpoint = case.x_point[np.argmin(case.x_point[:, 1])]
-    lower_leg = nonempty & (
-        np.asarray(operator.moment_geometry.atomic_mesh.centroids)[:, 1]
-        < lower_xpoint[1]
-    )
+    lower_leg = nonempty & ~participating
     interior_error = attributed_current - reference_current
     interior_l1 = float(
         np.sum(np.abs(interior_error[interior]))
@@ -633,6 +633,226 @@ def representation_pins(case, operator, exact, gate_module):
             != prior["attributed_vs_support_fraction"]
         ),
     }
+
+
+def high_order_interpolant_moments(polygon, centre, density):
+    """Integrate one production interpolant with an independent Duffy rule."""
+    values = np.zeros(3)
+    node, node_weight = np.polynomial.legendre.leggauss(48)
+    node = 0.5 * (node + 1.0)
+    node_weight = 0.5 * node_weight
+    radial, vertical = np.meshgrid(node, node, indexing="ij")
+    radial_weight, vertical_weight = np.meshgrid(
+        node_weight, node_weight, indexing="ij"
+    )
+    radial = radial.reshape(-1)
+    vertical = vertical.reshape(-1)
+    rule_weight = (
+        radial_weight * vertical_weight * (1.0 - radial.reshape(48, 48))
+    ).reshape(-1)
+    anchor = polygon[0]
+    for first, second in zip(polygon[1:-1], polygon[2:], strict=True):
+        edge_first = first - anchor
+        edge_second = second - anchor
+        determinant = abs(float(np.linalg.det(np.stack([edge_first, edge_second]))))
+        points = (
+            anchor
+            + radial[:, None] * edge_first
+            + ((1.0 - radial) * vertical)[:, None] * edge_second
+        )
+        weighted_density = determinant * rule_weight * np.asarray(density(points))
+        values[0] += np.sum(weighted_density)
+        values[1:] += np.sum(weighted_density[:, None] * (points - centre), axis=0)
+    return values
+
+
+def measure_cell_oracle() -> None:
+    """Audit production Duffy moments against independent per-cell references."""
+    reference = load_module(REFERENCE_PATH, "density_cell_oracle_reference")
+    gate_module = load_module(GATE_PATH, "density_cell_oracle_gate")
+    reference.configure_dtypes()
+    case = reference.require_reference()
+    machine = reference.cached_machine(case, reference.SUITE_CELLS, passive=True)
+    if machine.cache_receipt is None or not machine.cache_receipt.hit:
+        raise AssertionError("cell oracle requires the warm coarse carrier")
+    operator = reference.forward_operator(case, machine)
+    exact = reference.seed_flux(case, machine)
+    masks, topology, sample_flux, core_support, common_support = (
+        operator._support_partition(exact)
+    )
+    physical = operator.source.current_moments(
+        masks,
+        operator.support_current_moments,
+        core_support,
+        common_support,
+        sample_flux=sample_flux,
+    )
+    shared_flux = operator.shared_node_flux(exact)
+    signed_flux = operator.polarity * (shared_flux - topology.boundary_flux)
+    raw_support = operator.moment_geometry.atomic_mesh.traced_clip(signed_flux)
+    participating = np.asarray(core_support.included, dtype=bool)
+    raw_nonempty = np.asarray(raw_support.included, dtype=bool)
+    reference_current = np.zeros(len(machine.node))
+    reference_first = np.zeros((len(machine.node), 2))
+    fixture = load_npz(REPRESENTATION_FIXTURE_PATH)
+    available = np.asarray(fixture["consistent_available"], dtype=bool)
+    categories = {
+        "interior": participating & available,
+        "boundary": participating & ~available,
+    }
+    selected = []
+    for category, selection in categories.items():
+        candidates = np.flatnonzero(selection)
+        cells = candidates[np.asarray([0, len(candidates) // 2, -1])]
+        selected.extend((category, int(cell)) for cell in cells)
+    raw_vertices = np.asarray(raw_support.support_vertices)
+    raw_count = np.asarray(raw_support.vertex_count)
+    raw_centres = np.asarray(raw_support.centroids)
+    for _category, cell in selected:
+        reference_current[cell], reference_first[cell] = (
+            gate_module.reference_current_moments(
+                case,
+                raw_vertices[cell, : raw_count[cell]],
+                raw_centres[cell],
+                depth=6,
+            )
+        )
+    direct_current = np.asarray(physical.cell_current)
+    direct_first = np.column_stack(
+        [np.asarray(physical.radial_moment), np.asarray(physical.vertical_moment)]
+    )
+    coefficient_by_cell = {}
+    pool = np.concatenate([np.asarray(masks.psi_norm), np.asarray(sample_flux)])
+    for stencil in operator._support_moment_stencils:
+        cells = np.asarray(stencil.ring_centre)
+        gathered = pool[np.asarray(stencil.ring_gather_index)]
+        coefficient = np.einsum(
+            "nps,ns->np", np.asarray(stencil.ring_flux_weight), gathered
+        )
+        for slot, cell in enumerate(cells):
+            coefficient_by_cell[int(cell)] = (
+                np.asarray(stencil.ring_sampling_centre)[slot],
+                np.asarray(stencil.ring_coordinate_scale)[slot],
+                coefficient[slot],
+            )
+
+    points, weights = clipped_support_quadrature(core_support, participating)
+    weight_area = np.sum(np.asarray(weights), axis=1)
+    cells = []
+    for category, cell in selected:
+        count = int(np.asarray(core_support.vertex_count)[cell])
+        polygon = np.asarray(core_support.support_vertices)[cell, :count]
+        centre = np.asarray(core_support.centroids)[cell]
+        sampling_centre, scale, coefficient = coefficient_by_cell[cell]
+
+        def interpolated_density(point):
+            local = (point - sampling_centre) / scale
+            flux = quadratic_design(local) @ coefficient
+            return operator.source.core.current_density(point[..., 0], flux)
+
+        high_order = high_order_interpolant_moments(
+            polygon, centre, interpolated_density
+        )
+        direct = np.r_[direct_current[cell], direct_first[cell]]
+        analytic = np.r_[reference_current[cell], reference_first[cell]]
+        signed_area = 0.5 * float(
+            np.sum(
+                polygon[:, 0] * np.roll(polygon[:, 1], -1)
+                - polygon[:, 1] * np.roll(polygon[:, 0], -1)
+            )
+        )
+        moment_scale = np.r_[
+            max(abs(high_order[0]), 1.0),
+            np.maximum(abs(high_order[0]) * np.ptp(polygon, axis=0), 1.0),
+        ]
+        cells.append(
+            {
+                "cell": cell,
+                "category": category,
+                "vertex_count": count,
+                "boundary_support": bool(np.asarray(core_support.boundary)[cell]),
+                "area_fraction": float(
+                    np.asarray(core_support.area)[cell]
+                    / np.asarray(core_support.full_area)[cell]
+                ),
+                "signed_shoelace_area_m2": signed_area,
+                "support_area_m2": float(np.asarray(core_support.area)[cell]),
+                "duffy_weight_area_m2": float(weight_area[cell]),
+                "direct_moments": direct.tolist(),
+                "high_order_same_interpolant_moments": high_order.tolist(),
+                "analytic_density_moments": analytic.tolist(),
+                "direct_vs_high_order_interpolant_scaled_sup": float(
+                    np.max(np.abs(direct - high_order) / moment_scale)
+                ),
+                "direct_vs_analytic_scaled_sup": float(
+                    np.max(np.abs(direct - analytic) / moment_scale)
+                ),
+                "quadrature_fraction_of_analytic_discrepancy": float(
+                    np.max(np.abs(direct - high_order))
+                    / max(np.max(np.abs(direct - analytic)), 1.0)
+                ),
+            }
+        )
+
+    excluded = raw_nonempty & ~participating
+    same_interpolant = [
+        cell["direct_vs_high_order_interpolant_scaled_sup"] for cell in cells
+    ]
+    quadrature_fraction = [
+        cell["quadrature_fraction_of_analytic_discrepancy"] for cell in cells
+    ]
+    area_error = float(
+        np.max(
+            np.abs(
+                weight_area[participating]
+                - np.asarray(core_support.area)[participating]
+            )
+        )
+    )
+    result = {
+        "fixture": "coarse",
+        "plasma_cells": len(machine.node),
+        "warm_cache": True,
+        "sampled_cells": cells,
+        "seams": {
+            "domain": "actual traced clipped support",
+            "fan_orientation": "absolute Duffy Jacobian; signed shoelace reported",
+            "weight_normalisation_area_sup_absolute_m2": area_error,
+            "full_hex_substitution": False,
+            "geometry_verified": bool(area_error <= 3.0e-15),
+        },
+        "quadrature": {
+            "sample_count": len(cells),
+            "same_interpolant_scaled_sup": float(max(same_interpolant)),
+            "maximum_fraction_of_analytic_discrepancy": float(max(quadrature_fraction)),
+            "defect_convicted": False,
+            "finding": (
+                "The production rule and the independent high-order rule agree "
+                "far more closely than either agrees with the analytic-density "
+                "oracle. The large attribution floor is carried by the in-cell "
+                "flux representation near the separatrix, not polygon integration."
+            ),
+        },
+        "topology": {
+            "raw_nonempty_supports": int(np.count_nonzero(raw_nonempty)),
+            "participating_supports": int(np.count_nonzero(participating)),
+            "excluded_supports": int(np.count_nonzero(excluded)),
+            "excluded_current_sup_a": float(np.max(np.abs(direct_current[excluded]))),
+            "excluded_first_sup_a_m": float(np.max(np.abs(direct_first[excluded]))),
+        },
+    }
+    (OUTPUT / "cell-oracle-results.json").write_text(
+        json.dumps(result, indent=2, sort_keys=True, allow_nan=False) + "\n",
+        encoding="utf-8",
+    )
+    print(
+        "CELL_ORACLE "
+        f"quadrature_sup={result['quadrature']['same_interpolant_scaled_sup']:.12g} "
+        f"excluded={result['topology']['excluded_supports']} "
+        f"leakage_a={result['topology']['excluded_current_sup_a']:.12g}",
+        flush=True,
+    )
+    print("DENSITY_MOMENT_CELL_ORACLE_EXIT=0", flush=True)
 
 
 def measure_root(name: str) -> None:
@@ -821,6 +1041,9 @@ def render_final(report: dict[str, object]) -> None:
 def finalize() -> None:
     """Combine candidate, root, gate, and representation evidence."""
     candidate = json.loads((OUTPUT / "candidate-results.json").read_text())
+    cell_oracle = json.loads(
+        (OUTPUT / "cell-oracle-results.json").read_text(encoding="utf-8")
+    )
     roots = {}
     for name, _multiplier, _cells in FIXTURES:
         path = OUTPUT / f"root-{name}.json"
@@ -835,10 +1058,48 @@ def finalize() -> None:
         direct["forcing"]["projection_fraction"]
         - control["density_projection_fraction"]
     )
+    pins = roots["coarse"]["representation_pins"]
+    measured_pins = pins["measured"]
+    interior_floor = measured_pins["interior_m0_current_weighted_l1"]
     report = {
         "schema": "nova.density-moment-projection",
         "candidate_comparison": candidate,
         "roots": roots,
+        "quadrature_oracle": cell_oracle,
+        "representation_floor": {
+            "interior_m0_current_weighted_l1_fraction": interior_floor,
+            "interior_m0_current_weighted_l1_percent": 100.0 * interior_floor,
+            "ring_m0_current_weighted_l1_fraction": measured_pins[
+                "ring_m0_current_weighted_l1"
+            ],
+            "attributed_vs_support_absolute_fraction": measured_pins[
+                "attributed_vs_support_absolute_fraction"
+            ],
+            "attribution": "quadratic in-cell flux image near the separatrix",
+            "interpretation": (
+                "Faithful direct support moments expose the representation floor. "
+                "The retired degree-nine fit masked it through cancellation rather "
+                "than supplying a more accurate integral."
+            ),
+        },
+        "topology_qualification": {
+            "excluded_supports": cell_oracle["topology"]["excluded_supports"],
+            "excluded_current_sup_a": cell_oracle["topology"]["excluded_current_sup_a"],
+            "excluded_first_sup_a_m": cell_oracle["topology"]["excluded_first_sup_a_m"],
+            "construction": (
+                "Axis-connected topology participation qualifies the traced core "
+                "support before direct quadrature."
+            ),
+        },
+        "integration_disposition": {
+            "merge_to_main": "held_by_orchestrator",
+            "pending_measurement": "normalization_constant_discriminator",
+            "reason": (
+                "The direct path exposes a 0.68 percent interior representation "
+                "floor; an upstream correction may need to land first so the main "
+                "branch never regresses the banked representation pins."
+            ),
+        },
         "forcing_verdict": {
             "collapsed": forcing_sup_ratio < 0.25,
             "banked_projection_fraction": control["density_projection_fraction"],
@@ -890,15 +1151,19 @@ def finalize() -> None:
                     "The read-only test directly inspects ring_profile_weight, "
                     "which belongs to the removed losing production route."
                 ),
-                "focused_new_tests_passed": 2,
-                "combined_passed": 20,
+                "focused_new_tests_passed": 3,
+                "combined_passed": 21,
                 "combined_failed": 1,
             },
         },
         "logs": [
             str(OUTPUT / "candidate-compute-retry.log"),
-            str(OUTPUT / "root-coarse-refine.log"),
-            str(OUTPUT / "root-fine-slurm.log"),
+            str(OUTPUT / "cell-oracle.log"),
+            str(OUTPUT / "root-coarse-repair.log"),
+            str(OUTPUT / "root-fine-repair.log"),
+            str(OUTPUT / "repair-topology-green.log"),
+            str(OUTPUT / "repair-focused-green.log"),
+            str(OUTPUT / "repair-combined.log"),
         ],
     }
     render_final(report)
@@ -934,7 +1199,12 @@ def main() -> None:
     if sys.argv[1:] == ["--finalize"]:
         finalize()
         return
-    raise SystemExit("use --candidates, --root {coarse,fine}, or --finalize")
+    if sys.argv[1:] == ["--cell-oracle"]:
+        measure_cell_oracle()
+        return
+    raise SystemExit(
+        "use --candidates, --cell-oracle, --root {coarse,fine}, or --finalize"
+    )
 
 
 if __name__ == "__main__":

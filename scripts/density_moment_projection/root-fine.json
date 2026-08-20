@@ -1,7 +1,7 @@
 {
   "cache": {
     "key": "f0f96aa214aa9459",
-    "load_seconds": 0.7786665968596935,
+    "load_seconds": 0.8616693411022425,
     "warm_hit": true
   },
   "fixture": "fine",
@@ -19,9 +19,9 @@
         "comparison": "less_than",
         "repaired": {
           "bound": 0.05,
-          "margin": 0.018226857428004853,
+          "margin": 0.017719458083601716,
           "passed": true,
-          "value": 0.03177314257199515
+          "value": 0.032280541916398287
         }
       },
       "axis": {
@@ -34,9 +34,9 @@
         "comparison": "less_than",
         "repaired": {
           "bound": 0.06,
-          "margin": 0.017466948053544262,
+          "margin": 0.01704222475649647,
           "passed": true,
-          "value": 0.042533051946455736
+          "value": 0.042957775243503526
         }
       },
       "divergence_b": {
@@ -48,10 +48,10 @@
         },
         "comparison": "less_than",
         "repaired": {
-          "bound": 0.004930046529270089,
-          "margin": 0.004241782695894815,
+          "bound": 0.004949867257678028,
+          "margin": 0.004261461532880367,
           "passed": true,
-          "value": 0.0006882638333752741
+          "value": 0.0006884057247976616
         }
       },
       "divergence_j": {
@@ -63,10 +63,10 @@
         },
         "comparison": "less_than",
         "repaired": {
-          "bound": 0.004930046529270089,
-          "margin": 0.002840502964530787,
+          "bound": 0.004949867257678028,
+          "margin": 0.002857352045699051,
           "passed": true,
-          "value": 0.0020895435647393023
+          "value": 0.0020925152119789774
         }
       },
       "flux": {
@@ -79,9 +79,9 @@
         "comparison": "less_than",
         "repaired": {
           "bound": 0.1,
-          "margin": 0.03303093174489252,
+          "margin": 0.03233988606499286,
           "passed": true,
-          "value": 0.06696906825510748
+          "value": 0.06766011393500715
         }
       },
       "grad_shafranov": {
@@ -94,9 +94,9 @@
         "comparison": "less_than",
         "repaired": {
           "bound": 0.08,
-          "margin": 0.05534976735364956,
+          "margin": 0.05525066371160986,
           "passed": true,
-          "value": 0.024650232646350443
+          "value": 0.02474933628839014
         }
       },
       "internal_inductance": {
@@ -109,9 +109,9 @@
         "comparison": "less_than",
         "repaired": {
           "bound": 0.08,
-          "margin": 0.07095328934450666,
+          "margin": 0.0707934255303662,
           "passed": true,
-          "value": 0.00904671065549334
+          "value": 0.0092065744696338
         }
       },
       "physical": {
@@ -141,9 +141,9 @@
         "comparison": "less_than",
         "repaired": {
           "bound": 0.03,
-          "margin": 0.018466535422651503,
+          "margin": 0.018287218579436576,
           "passed": true,
-          "value": 0.011533464577348496
+          "value": 0.011712781420563423
         }
       },
       "poloidal_beta": {
@@ -156,9 +156,9 @@
         "comparison": "less_than",
         "repaired": {
           "bound": 0.08,
-          "margin": 0.05749500629239883,
+          "margin": 0.05751418753575337,
           "passed": true,
-          "value": 0.022504993707601173
+          "value": 0.022485812464246635
         }
       },
       "receipt_field": {
@@ -179,24 +179,24 @@
     },
     "passed": 11,
     "scores": {
-      "analytic_field_quadrature_deviation_fraction": 0.03177314257199515,
-      "axis_max_deviation_m": 0.042533051946455736,
+      "analytic_field_quadrature_deviation_fraction": 0.032280541916398287,
+      "axis_max_deviation_m": 0.042957775243503526,
       "core_cells": 751,
       "diverted": true,
-      "flux_deviation_fraction": 0.06696906825510748,
-      "grad_shafranov_residual": 0.024650232646350443,
-      "internal_inductance_deviation_fraction": 0.00904671065549334,
-      "internal_inductance_raw": 0.7963175229015009,
-      "internal_inductance_referred": 0.7926884894835398,
-      "major_radius_m": 6.1717449302014895,
-      "plasma_current_a": -14819446.835533872,
-      "plasma_current_deviation_fraction": 0.011533464577348496,
-      "poloidal_beta_deviation_fraction": 0.022504993707601173,
-      "poloidal_field_integral_t2_m3": 852.212617330606,
+      "flux_deviation_fraction": 0.06766011393500715,
+      "grad_shafranov_residual": 0.02474933628839014,
+      "internal_inductance_deviation_fraction": 0.0092065744696338,
+      "internal_inductance_raw": 0.7959459298094709,
+      "internal_inductance_referred": 0.7925606103930551,
+      "major_radius_m": 6.173630142958578,
+      "plasma_current_a": -14816758.452741425,
+      "plasma_current_deviation_fraction": 0.011712781420563423,
+      "poloidal_beta_deviation_fraction": 0.022485812464246635,
+      "poloidal_field_integral_t2_m3": 851.7660152558874,
       "receipt_field_deviation_fraction": 0.0,
-      "relative_divergence_b": 0.0006882638333752741,
-      "relative_divergence_j": 0.0020895435647393023,
-      "volume_m3": 798.5173064358197
+      "relative_divergence_b": 0.0006884057247976616,
+      "relative_divergence_j": 0.0020925152119789774,
+      "volume_m3": 796.8136515224874
     },
     "unchanged_bounds": true
   },
@@ -209,26 +209,26 @@
     },
     "measured": {
       "axis_delta_m": [
-        -0.042533051946455736,
-        0.00024673804483277273
+        -0.042957775243503526,
+        -0.00012593629558876884
       ],
-      "axis_displacement_mm": 42.53376761518629,
-      "flux_sup_fraction_of_span": 0.06696906825510748,
-      "flux_sup_percent_of_span": 6.696906825510748,
-      "plasma_current_a": -14819446.835533872,
-      "plasma_current_fractional_deviation": -0.011533464577348496,
-      "plasma_current_percent": -1.1533464577348496
+      "axis_displacement_mm": 42.95795984240768,
+      "flux_sup_fraction_of_span": 0.06766011393500715,
+      "flux_sup_percent_of_span": 6.766011393500715,
+      "plasma_current_a": -14816758.452741425,
+      "plasma_current_fractional_deviation": -0.011712781420563423,
+      "plasma_current_percent": -1.1712781420563423
     },
     "signed_difference": {
-      "axis_displacement_mm": 0.09014937636913345,
-      "flux_sup_fraction_of_span": 0.0011227099832372966,
-      "plasma_current_fractional_deviation": -0.0003459353776940049
+      "axis_displacement_mm": 0.5143416035905233,
+      "flux_sup_fraction_of_span": 0.0018137556631369622,
+      "plasma_current_fractional_deviation": -0.0005252522209089321
     }
   },
   "state_size": 4216,
   "terminal_root": {
     "artifact": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/fine-terminal-root.npz",
     "machine_precision": true,
-    "residual": 2.063584683965597e-15
+    "residual": 2.053615568930518e-15
   }
 }

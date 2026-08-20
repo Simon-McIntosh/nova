@@ -1,0 +1,3 @@
+warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/nova/.venv` and will be ignored; use `--active` to target the active environment instead
+FINAL forcing_ratio=1.00356054399 roots=['coarse', 'fine'] gates={coarse:11/11, fine:11/11}
+DENSITY_MOMENT_FINALIZE_EXIT=0

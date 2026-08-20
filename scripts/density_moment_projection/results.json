@@ -2,7 +2,7 @@
   "artifacts": {
     "coarse_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/coarse-terminal-root.npz",
     "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/density-moment-projection.png",
-    "figure_bytes": 115016,
+    "figure_bytes": 114577,
     "fine_root": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/fine-terminal-root.npz"
   },
   "candidate_comparison": {
@@ -123,8 +123,8 @@
     "read_only_test_rebase": {
       "cause": "The read-only test directly inspects ring_profile_weight, which belongs to the removed losing production route.",
       "combined_failed": 1,
-      "combined_passed": 20,
-      "focused_new_tests_passed": 2,
+      "combined_passed": 21,
+      "focused_new_tests_passed": 3,
       "required": true,
       "test": "tests/test_equilibrium_stencil_mesh.py::test_boundary_profile_density_matches_adaptive_polygon_quadrature"
     },
@@ -140,16 +140,229 @@
     "signed_projection_fraction_difference": 5.673032485220553e-06,
     "sup_ratio_to_banked": 1.0035605439863104
   },
+  "integration_disposition": {
+    "merge_to_main": "held_by_orchestrator",
+    "pending_measurement": "normalization_constant_discriminator",
+    "reason": "The direct path exposes a 0.68 percent interior representation floor; an upstream correction may need to land first so the main branch never regresses the banked representation pins."
+  },
   "logs": [
     "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/candidate-compute-retry.log",
-    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/root-coarse-refine.log",
-    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/root-fine-slurm.log"
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/cell-oracle.log",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/root-coarse-repair.log",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/root-fine-repair.log",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/repair-topology-green.log",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/repair-focused-green.log",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/repair-combined.log"
   ],
+  "quadrature_oracle": {
+    "fixture": "coarse",
+    "plasma_cells": 566,
+    "quadrature": {
+      "defect_convicted": false,
+      "finding": "The production rule and the independent high-order rule agree far more closely than either agrees with the analytic-density oracle. The large attribution floor is carried by the in-cell flux representation near the separatrix, not polygon integration.",
+      "maximum_fraction_of_analytic_discrepancy": 0.017760624777599477,
+      "same_interpolant_scaled_sup": 0.0006871496560517665,
+      "sample_count": 6
+    },
+    "sampled_cells": [
+      {
+        "analytic_density_moments": [
+          -1.7957980175808228,
+          -0.1284904480599078,
+          -0.20750271057885658
+        ],
+        "area_fraction": 0.4529509503196349,
+        "boundary_support": true,
+        "category": "interior",
+        "cell": 19,
+        "direct_moments": [
+          -287.7674105654526,
+          -17.41180223990599,
+          -16.439907831043836
+        ],
+        "direct_vs_analytic_scaled_sup": 0.9938007974891532,
+        "direct_vs_high_order_interpolant_scaled_sup": 4.1506089915093314e-05,
+        "duffy_weight_area_m2": 0.025365341457274218,
+        "high_order_same_interpolant_moments": [
+          -287.7554669611674,
+          -17.410909371346747,
+          -16.44113090142603
+        ],
+        "quadrature_fraction_of_analytic_discrepancy": 4.176499960551333e-05,
+        "signed_shoelace_area_m2": 0.025365341457272983,
+        "support_area_m2": 0.025365341457274218,
+        "vertex_count": 4
+      },
+      {
+        "analytic_density_moments": [
+          -19976.707938025094,
+          16.111665008359513,
+          -26.66226036324625
+        ],
+        "area_fraction": 1.0,
+        "boundary_support": false,
+        "category": "interior",
+        "cell": 274,
+        "direct_moments": [
+          -19835.608593585337,
+          16.978785785703728,
+          -26.261156249474624
+        ],
+        "direct_vs_analytic_scaled_sup": 0.007113446015844352,
+        "direct_vs_high_order_interpolant_scaled_sup": 1.321637113816782e-06,
+        "duffy_weight_area_m2": 0.056000194810000126,
+        "high_order_same_interpolant_moments": [
+          -19835.582378143492,
+          16.9790703657074,
+          -26.25960541767313
+        ],
+        "quadrature_fraction_of_analytic_discrepancy": 0.0001857942143474475,
+        "signed_shoelace_area_m2": 0.05600019480999929,
+        "support_area_m2": 0.056000194810000126,
+        "vertex_count": 6
+      },
+      {
+        "analytic_density_moments": [
+          -26960.23436188329,
+          162.63257587767185,
+          174.8257275022499
+        ],
+        "area_fraction": 1.0,
+        "boundary_support": false,
+        "category": "interior",
+        "cell": 552,
+        "direct_moments": [
+          -27497.33225190372,
+          107.92362336165458,
+          113.87144147497926
+        ],
+        "direct_vs_analytic_scaled_sup": 0.019539505732266267,
+        "direct_vs_high_order_interpolant_scaled_sup": 0.00034703382965053524,
+        "duffy_weight_area_m2": 0.056000194810000126,
+        "high_order_same_interpolant_moments": [
+          -27487.793057810228,
+          107.84272947249798,
+          114.39486318448985
+        ],
+        "quadrature_fraction_of_analytic_discrepancy": 0.017760624777599477,
+        "signed_shoelace_area_m2": 0.056000194809998405,
+        "support_area_m2": 0.05600019481000012,
+        "vertex_count": 6
+      },
+      {
+        "analytic_density_moments": [
+          -217.28897151792785,
+          10.075879109911881,
+          -22.128057609183365
+        ],
+        "area_fraction": 0.2802716497957756,
+        "boundary_support": true,
+        "category": "boundary",
+        "cell": 13,
+        "direct_moments": [
+          -616.0549901609004,
+          25.676572559674593,
+          -54.54583545903247
+        ],
+        "direct_vs_analytic_scaled_sup": 0.6472790721047532,
+        "direct_vs_high_order_interpolant_scaled_sup": 1.634102661070443e-05,
+        "duffy_weight_area_m2": 0.015695266988283465,
+        "high_order_same_interpolant_moments": [
+          -616.0650572963956,
+          25.67726748244841,
+          -54.54700478096293
+        ],
+        "quadrature_fraction_of_analytic_discrepancy": 2.524572060945585e-05,
+        "signed_shoelace_area_m2": 0.015695266988283052,
+        "support_area_m2": 0.01569526698828346,
+        "vertex_count": 5
+      },
+      {
+        "analytic_density_moments": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "area_fraction": 0.005538523848066151,
+        "boundary_support": true,
+        "category": "boundary",
+        "cell": 366,
+        "direct_moments": [
+          -2.259768599432074,
+          0.12646464905627763,
+          -0.2254449196896978
+        ],
+        "direct_vs_analytic_scaled_sup": 0.9999303382243208,
+        "direct_vs_high_order_interpolant_scaled_sup": 8.427947301936634e-05,
+        "duffy_weight_area_m2": 0.00023689028839386228,
+        "high_order_same_interpolant_moments": [
+          -2.25992602989222,
+          0.1263857741806188,
+          -0.22552919916271716
+        ],
+        "quadrature_fraction_of_analytic_discrepancy": 6.966662878026574e-05,
+        "signed_shoelace_area_m2": 0.0002368902883951307,
+        "support_area_m2": 0.0002368902883938622,
+        "vertex_count": 3
+      },
+      {
+        "analytic_density_moments": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "area_fraction": 0.0009034314792287617,
+        "boundary_support": true,
+        "category": "boundary",
+        "cell": 562,
+        "direct_moments": [
+          -0.12082982283411502,
+          0.008732095187402292,
+          0.015150550684644758
+        ],
+        "direct_vs_analytic_scaled_sup": 0.12082982283411502,
+        "direct_vs_high_order_interpolant_scaled_sup": 0.0006871496560517665,
+        "duffy_weight_area_m2": 5.0592338834298475e-05,
+        "high_order_same_interpolant_moments": [
+          -0.12151697249016678,
+          0.00878391440226573,
+          0.015233881959046028
+        ],
+        "quadrature_fraction_of_analytic_discrepancy": 0.0006871496560517665,
+        "signed_shoelace_area_m2": 5.0592338833865824e-05,
+        "support_area_m2": 5.059233883429734e-05,
+        "vertex_count": 3
+      }
+    ],
+    "seams": {
+      "domain": "actual traced clipped support",
+      "fan_orientation": "absolute Duffy Jacobian; signed shoelace reported",
+      "full_hex_substitution": false,
+      "geometry_verified": true,
+      "weight_normalisation_area_sup_absolute_m2": 2.3592239273284576e-16
+    },
+    "topology": {
+      "excluded_current_sup_a": 0.0,
+      "excluded_first_sup_a_m": 0.0,
+      "excluded_supports": 17,
+      "participating_supports": 430,
+      "raw_nonempty_supports": 447
+    },
+    "warm_cache": true
+  },
+  "representation_floor": {
+    "attributed_vs_support_absolute_fraction": 0.008234900013470492,
+    "attribution": "quadratic in-cell flux image near the separatrix",
+    "interior_m0_current_weighted_l1_fraction": 0.006805157954962066,
+    "interior_m0_current_weighted_l1_percent": 0.6805157954962066,
+    "interpretation": "Faithful direct support moments expose the representation floor. The retired degree-nine fit masked it through cancellation rather than supplying a more accurate integral.",
+    "ring_m0_current_weighted_l1_fraction": 0.0654254909409201
+  },
   "roots": {
     "coarse": {
       "cache": {
         "key": "746fbe1553c4b242",
-        "load_seconds": 0.3782059233635664,
+        "load_seconds": 0.3803744688630104,
         "warm_hit": true
       },
       "fixture": "coarse",
@@ -167,9 +380,9 @@
             "comparison": "less_than",
             "repaired": {
               "bound": 0.05,
-              "margin": 0.017874963969399096,
+              "margin": 0.017158110215339376,
               "passed": true,
-              "value": 0.032125036030600906
+              "value": 0.03284188978466063
             }
           },
           "axis": {
@@ -182,9 +395,9 @@
             "comparison": "less_than",
             "repaired": {
               "bound": 0.06,
-              "margin": 0.017476900894236314,
+              "margin": 0.016776170060984474,
               "passed": true,
-              "value": 0.042523099105763684
+              "value": 0.04322382993901552
             }
           },
           "divergence_b": {
@@ -196,10 +409,10 @@
             },
             "comparison": "less_than",
             "repaired": {
-              "bound": 0.008719874718000358,
-              "margin": 0.00761886067229965,
+              "bound": 0.008774290404404299,
+              "margin": 0.007673133301361894,
               "passed": true,
-              "value": 0.001101014045700708
+              "value": 0.0011011571030424044
             }
           },
           "divergence_j": {
@@ -211,10 +424,10 @@
             },
             "comparison": "less_than",
             "repaired": {
-              "bound": 0.008719874718000358,
-              "margin": 0.005547144136345567,
+              "bound": 0.008774290404404299,
+              "margin": 0.005599324306650094,
               "passed": true,
-              "value": 0.0031727305816547906
+              "value": 0.0031749660977542045
             }
           },
           "flux": {
@@ -227,9 +440,9 @@
             "comparison": "less_than",
             "repaired": {
               "bound": 0.1,
-              "margin": 0.034753871630148564,
+              "margin": 0.03361453018095252,
               "passed": true,
-              "value": 0.06524612836985144
+              "value": 0.06638546981904749
             }
           },
           "grad_shafranov": {
@@ -242,9 +455,9 @@
             "comparison": "less_than",
             "repaired": {
               "bound": 0.08,
-              "margin": 0.036400626409998214,
+              "margin": 0.03612854797797851,
               "passed": true,
-              "value": 0.04359937359000179
+              "value": 0.043871452022021494
             }
           },
           "internal_inductance": {
@@ -257,9 +470,9 @@
             "comparison": "less_than",
             "repaired": {
               "bound": 0.08,
-              "margin": 0.0700699070908463,
+              "margin": 0.06990923076441162,
               "passed": true,
-              "value": 0.009930092909153698
+              "value": 0.010090769235588382
             }
           },
           "physical": {
@@ -289,9 +502,9 @@
             "comparison": "less_than",
             "repaired": {
               "bound": 0.03,
-              "margin": 0.0187276917885206,
+              "margin": 0.018441684130882735,
               "passed": true,
-              "value": 0.011272308211479398
+              "value": 0.011558315869117264
             }
           },
           "poloidal_beta": {
@@ -304,9 +517,9 @@
             "comparison": "less_than",
             "repaired": {
               "bound": 0.08,
-              "margin": 0.05728565920848798,
+              "margin": 0.05736857195017413,
               "passed": true,
-              "value": 0.022714340791512022
+              "value": 0.022631428049825875
             }
           },
           "receipt_field": {
@@ -327,24 +540,24 @@
         },
         "passed": 11,
         "scores": {
-          "analytic_field_quadrature_deviation_fraction": 0.032125036030600906,
-          "axis_max_deviation_m": 0.042523099105763684,
+          "analytic_field_quadrature_deviation_fraction": 0.03284188978466063,
+          "axis_max_deviation_m": 0.04322382993901552,
           "core_cells": 376,
           "diverted": true,
-          "flux_deviation_fraction": 0.06524612836985144,
-          "grad_shafranov_residual": 0.04359937359000179,
-          "internal_inductance_deviation_fraction": 0.009930092909153698,
-          "internal_inductance_raw": 0.7957130104895056,
-          "internal_inductance_referred": 0.7919818497742617,
-          "major_radius_m": 6.17092771372397,
-          "plasma_current_a": -14823362.185969183,
-          "plasma_current_deviation_fraction": 0.011272308211479398,
-          "poloidal_beta_deviation_fraction": 0.022714340791512022,
-          "poloidal_field_integral_t2_m3": 851.9028882179717,
+          "flux_deviation_fraction": 0.06638546981904749,
+          "grad_shafranov_residual": 0.043871452022021494,
+          "internal_inductance_deviation_fraction": 0.010090769235588382,
+          "internal_inductance_raw": 0.7951756616338518,
+          "internal_inductance_referred": 0.7918533207347329,
+          "major_radius_m": 6.174095643807542,
+          "plasma_current_a": -14819074.2560039,
+          "plasma_current_deviation_fraction": 0.011558315869117264,
+          "poloidal_beta_deviation_fraction": 0.022631428049825875,
+          "poloidal_field_integral_t2_m3": 851.2719288417638,
           "receipt_field_deviation_fraction": 0.0,
-          "relative_divergence_b": 0.001101014045700708,
-          "relative_divergence_j": 0.0031727305816547906,
-          "volume_m3": 799.1060104785147
+          "relative_divergence_b": 0.0011011571030424044,
+          "relative_divergence_j": 0.0031749660977542045,
+          "volume_m3": 796.6067666204783
         },
         "unchanged_bounds": true
       },
@@ -358,22 +571,22 @@
           "topology_zero_leg_first_sup_a_m": 0.0
         },
         "drift": {
-          "attributed_vs_support_absolute_fraction": 0.008248745801046287,
+          "attributed_vs_support_absolute_fraction": 0.008193467031320179,
           "interior_m0_current_weighted_l1": 0.006757749449080329,
-          "ring_m0_current_weighted_l1": 0.06502742374729185,
-          "topology_zero_leg_current_sup_a": 506.9993607608467,
-          "topology_zero_leg_first_sup_a_m": 42.609346550263474
+          "ring_m0_current_weighted_l1": 0.06382500595607178,
+          "topology_zero_leg_current_sup_a": 0.0,
+          "topology_zero_leg_first_sup_a_m": 0.0
         },
         "measured": {
-          "attributed_vs_support_absolute_fraction": 0.0082901787831966,
-          "attributed_vs_support_signed_fraction": 0.0082901787831966,
+          "attributed_vs_support_absolute_fraction": 0.008234900013470492,
+          "attributed_vs_support_signed_fraction": 0.008234900013470492,
           "interior_m0_current_weighted_l1": 0.006805157954962066,
           "interior_supports": 351,
           "nonempty_supports": 447,
-          "ring_m0_current_weighted_l1": 0.06662790873214017,
+          "ring_m0_current_weighted_l1": 0.0654254909409201,
           "ring_supports": 96,
-          "topology_zero_leg_current_sup_a": 506.9993607608467,
-          "topology_zero_leg_first_sup_a_m": 42.609346550263474,
+          "topology_zero_leg_current_sup_a": 0.0,
+          "topology_zero_leg_first_sup_a_m": 0.0,
           "topology_zero_leg_supports": 17
         },
         "orchestrator_rebase_required": true
@@ -386,33 +599,33 @@
         },
         "measured": {
           "axis_delta_m": [
-            -0.042523099105763684,
-            0.0002887926845802635
+            -0.04322382993901552,
+            -0.0001820905237841508
           ],
-          "axis_displacement_mm": 42.52407975222118,
-          "flux_sup_fraction_of_span": 0.06602201761191255,
-          "flux_sup_percent_of_span": 6.602201761191255,
-          "plasma_current_a": -14823362.185969183,
-          "plasma_current_fractional_deviation": -0.011272308211479398,
-          "plasma_current_percent": -1.1272308211479398
+          "axis_displacement_mm": 43.22421348683845,
+          "flux_sup_fraction_of_span": 0.0671723132672168,
+          "flux_sup_percent_of_span": 6.71723132672168,
+          "plasma_current_a": -14819074.2560039,
+          "plasma_current_fractional_deviation": -0.011558315869117264,
+          "plasma_current_percent": -1.1558315869117264
         },
         "signed_difference": {
-          "axis_displacement_mm": 0.08046151340402474,
-          "flux_sup_fraction_of_span": 0.00017565934004236394,
-          "plasma_current_fractional_deviation": -8.477901182490748e-05
+          "axis_displacement_mm": 0.7805952480212923,
+          "flux_sup_fraction_of_span": 0.0013259549953466149,
+          "plasma_current_fractional_deviation": -0.0003707866694627731
         }
       },
       "state_size": 2396,
       "terminal_root": {
         "artifact": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/coarse-terminal-root.npz",
         "machine_precision": true,
-        "residual": 1.539819214615232e-15
+        "residual": 1.5407907043237626e-15
       }
     },
     "fine": {
       "cache": {
         "key": "f0f96aa214aa9459",
-        "load_seconds": 0.7786665968596935,
+        "load_seconds": 0.8616693411022425,
         "warm_hit": true
       },
       "fixture": "fine",
@@ -430,9 +643,9 @@
             "comparison": "less_than",
             "repaired": {
               "bound": 0.05,
-              "margin": 0.018226857428004853,
+              "margin": 0.017719458083601716,
               "passed": true,
-              "value": 0.03177314257199515
+              "value": 0.032280541916398287
             }
           },
           "axis": {
@@ -445,9 +658,9 @@
             "comparison": "less_than",
             "repaired": {
               "bound": 0.06,
-              "margin": 0.017466948053544262,
+              "margin": 0.01704222475649647,
               "passed": true,
-              "value": 0.042533051946455736
+              "value": 0.042957775243503526
             }
           },
           "divergence_b": {
@@ -459,10 +672,10 @@
             },
             "comparison": "less_than",
             "repaired": {
-              "bound": 0.004930046529270089,
-              "margin": 0.004241782695894815,
+              "bound": 0.004949867257678028,
+              "margin": 0.004261461532880367,
               "passed": true,
-              "value": 0.0006882638333752741
+              "value": 0.0006884057247976616
             }
           },
           "divergence_j": {
@@ -474,10 +687,10 @@
             },
             "comparison": "less_than",
             "repaired": {
-              "bound": 0.004930046529270089,
-              "margin": 0.002840502964530787,
+              "bound": 0.004949867257678028,
+              "margin": 0.002857352045699051,
               "passed": true,
-              "value": 0.0020895435647393023
+              "value": 0.0020925152119789774
             }
           },
           "flux": {
@@ -490,9 +703,9 @@
             "comparison": "less_than",
             "repaired": {
               "bound": 0.1,
-              "margin": 0.03303093174489252,
+              "margin": 0.03233988606499286,
               "passed": true,
-              "value": 0.06696906825510748
+              "value": 0.06766011393500715
             }
           },
           "grad_shafranov": {
@@ -505,9 +718,9 @@
             "comparison": "less_than",
             "repaired": {
               "bound": 0.08,
-              "margin": 0.05534976735364956,
+              "margin": 0.05525066371160986,
               "passed": true,
-              "value": 0.024650232646350443
+              "value": 0.02474933628839014
             }
           },
           "internal_inductance": {
@@ -520,9 +733,9 @@
             "comparison": "less_than",
             "repaired": {
               "bound": 0.08,
-              "margin": 0.07095328934450666,
+              "margin": 0.0707934255303662,
               "passed": true,
-              "value": 0.00904671065549334
+              "value": 0.0092065744696338
             }
           },
           "physical": {
@@ -552,9 +765,9 @@
             "comparison": "less_than",
             "repaired": {
               "bound": 0.03,
-              "margin": 0.018466535422651503,
+              "margin": 0.018287218579436576,
               "passed": true,
-              "value": 0.011533464577348496
+              "value": 0.011712781420563423
             }
           },
           "poloidal_beta": {
@@ -567,9 +780,9 @@
             "comparison": "less_than",
             "repaired": {
               "bound": 0.08,
-              "margin": 0.05749500629239883,
+              "margin": 0.05751418753575337,
               "passed": true,
-              "value": 0.022504993707601173
+              "value": 0.022485812464246635
             }
           },
           "receipt_field": {
@@ -590,24 +803,24 @@
         },
         "passed": 11,
         "scores": {
-          "analytic_field_quadrature_deviation_fraction": 0.03177314257199515,
-          "axis_max_deviation_m": 0.042533051946455736,
+          "analytic_field_quadrature_deviation_fraction": 0.032280541916398287,
+          "axis_max_deviation_m": 0.042957775243503526,
           "core_cells": 751,
           "diverted": true,
-          "flux_deviation_fraction": 0.06696906825510748,
-          "grad_shafranov_residual": 0.024650232646350443,
-          "internal_inductance_deviation_fraction": 0.00904671065549334,
-          "internal_inductance_raw": 0.7963175229015009,
-          "internal_inductance_referred": 0.7926884894835398,
-          "major_radius_m": 6.1717449302014895,
-          "plasma_current_a": -14819446.835533872,
-          "plasma_current_deviation_fraction": 0.011533464577348496,
-          "poloidal_beta_deviation_fraction": 0.022504993707601173,
-          "poloidal_field_integral_t2_m3": 852.212617330606,
+          "flux_deviation_fraction": 0.06766011393500715,
+          "grad_shafranov_residual": 0.02474933628839014,
+          "internal_inductance_deviation_fraction": 0.0092065744696338,
+          "internal_inductance_raw": 0.7959459298094709,
+          "internal_inductance_referred": 0.7925606103930551,
+          "major_radius_m": 6.173630142958578,
+          "plasma_current_a": -14816758.452741425,
+          "plasma_current_deviation_fraction": 0.011712781420563423,
+          "poloidal_beta_deviation_fraction": 0.022485812464246635,
+          "poloidal_field_integral_t2_m3": 851.7660152558874,
           "receipt_field_deviation_fraction": 0.0,
-          "relative_divergence_b": 0.0006882638333752741,
-          "relative_divergence_j": 0.0020895435647393023,
-          "volume_m3": 798.5173064358197
+          "relative_divergence_b": 0.0006884057247976616,
+          "relative_divergence_j": 0.0020925152119789774,
+          "volume_m3": 796.8136515224874
         },
         "unchanged_bounds": true
       },
@@ -620,27 +833,27 @@
         },
         "measured": {
           "axis_delta_m": [
-            -0.042533051946455736,
-            0.00024673804483277273
+            -0.042957775243503526,
+            -0.00012593629558876884
           ],
-          "axis_displacement_mm": 42.53376761518629,
-          "flux_sup_fraction_of_span": 0.06696906825510748,
-          "flux_sup_percent_of_span": 6.696906825510748,
-          "plasma_current_a": -14819446.835533872,
-          "plasma_current_fractional_deviation": -0.011533464577348496,
-          "plasma_current_percent": -1.1533464577348496
+          "axis_displacement_mm": 42.95795984240768,
+          "flux_sup_fraction_of_span": 0.06766011393500715,
+          "flux_sup_percent_of_span": 6.766011393500715,
+          "plasma_current_a": -14816758.452741425,
+          "plasma_current_fractional_deviation": -0.011712781420563423,
+          "plasma_current_percent": -1.1712781420563423
         },
         "signed_difference": {
-          "axis_displacement_mm": 0.09014937636913345,
-          "flux_sup_fraction_of_span": 0.0011227099832372966,
-          "plasma_current_fractional_deviation": -0.0003459353776940049
+          "axis_displacement_mm": 0.5143416035905233,
+          "flux_sup_fraction_of_span": 0.0018137556631369622,
+          "plasma_current_fractional_deviation": -0.0005252522209089321
         }
       },
       "state_size": 4216,
       "terminal_root": {
         "artifact": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/fine-terminal-root.npz",
         "machine_precision": true,
-        "residual": 2.063584683965597e-15
+        "residual": 2.053615568930518e-15
       }
     }
   },
@@ -651,5 +864,11 @@
     "production_path": "direct_degree_fifteen_duffy_quadrature",
     "reason": "Both routes reproduce the same coupling moments and forcing; direct quadrature has the lower fixed-shape iteration cost and does not carry a dense constrained-fit metric.",
     "single_code_path": true
+  },
+  "topology_qualification": {
+    "construction": "Axis-connected topology participation qualifies the traced core support before direct quadrature.",
+    "excluded_current_sup_a": 0.0,
+    "excluded_first_sup_a_m": 0.0,
+    "excluded_supports": 17
   }
 }

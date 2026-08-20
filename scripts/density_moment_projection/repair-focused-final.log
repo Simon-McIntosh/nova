@@ -1,0 +1,33 @@
+warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/nova/.venv` and will be ignored; use `--active` to target the active environment instead
+19:00:27 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________ test_direct_density_moments_zero_nonparticipating_supports __________
+
+    def test_direct_density_moments_zero_nonparticipating_supports():
+        """Topology-excluded supports carry exact zeros through the quadrature."""
+        mesh, centres, scale, flux_coefficient = _geometry()
+        support = mesh.traced_clip(jnp.ones(len(mesh.node_coordinates)))
+        participation = jnp.asarray([True, False])
+>       qualified = support.qualify(participation)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_equilibrium_density_moments.py:73:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = TracedClippedSupports(support_vertices=Array([[[ 1. , -0.5],
+        [ 2. , -0.5],
+        [ 2. ,  0.5],
+        [ 1. ...       , 0.08333333]]], dtype=float64), contour_area=Array(0., dtype=float64), patch_area_sum=Array(2., dtype=float64))
+participation = Array([ True, False], dtype=bool)
+
+    def qualify(self, participation):
+        """Zero every geometric measure outside a topology participation mask."""
+>       selected = jnp.asarray(participation, dtype=bool)
+                   ^^^
+E       NameError: name 'jnp' is not defined
+
+nova/equilibrium/separatrix_clip.py:188: NameError
+=========================== short test summary info ============================
+FAILED tests/test_equilibrium_density_moments.py::test_direct_density_moments_zero_nonparticipating_supports
+1 failed in 17.04s

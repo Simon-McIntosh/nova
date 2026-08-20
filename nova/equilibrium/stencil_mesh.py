@@ -388,6 +388,7 @@ def fixed_profile_current_moments(
     sampling_centre,
     coordinate_scale,
     flux_coefficient,
+    participation=None,
 ):
     """Integrate density moments by the fixed degree-fifteen Duffy rule."""
     return _direct_profile_current_moments(
@@ -398,6 +399,7 @@ def fixed_profile_current_moments(
         sampling_centre,
         coordinate_scale,
         flux_coefficient,
+        participation,
     )
 
 
@@ -409,6 +411,7 @@ def _direct_profile_current_moments(
     sampling_centre,
     coordinate_scale,
     flux_coefficient,
+    participation,
 ):
     """Integrate density and first moments with a fixed Duffy product rule."""
     vertices = jnp.asarray(support_vertices)
@@ -440,7 +443,10 @@ def _direct_profile_current_moments(
         edge_first[..., 0] * edge_second[..., 1]
         - edge_first[..., 1] * edge_second[..., 0]
     )
-    live = triangle_slot[None, :] + 1 < count[:, None]
+    included = count >= 3
+    if participation is not None:
+        included = included & jnp.asarray(participation, dtype=bool)
+    live = (triangle_slot[None, :] + 1 < count[:, None]) & included[:, None]
     weights = (
         cross[:, :, None] * (1.0 - radial)[None, None, :] * rule_weight[None, None, :]
     )
@@ -461,7 +467,6 @@ def _direct_profile_current_moments(
         weighted_density[..., None] * (points - jnp.asarray(moment_centre)[:, None, :]),
         axis=1,
     )
-    included = count >= 3
     return (
         jnp.where(included, current, 0.0),
         jnp.where(included[:, None], first, 0.0),

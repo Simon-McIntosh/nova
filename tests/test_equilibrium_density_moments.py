@@ -65,6 +65,33 @@ def test_direct_quadrature_carries_exact_affine_density_moments():
     np.testing.assert_allclose(first, expected_first, rtol=2.0e-14, atol=2.0e-14)
 
 
+def test_direct_density_moments_zero_nonparticipating_supports():
+    """Topology-excluded supports carry exact zeros through the quadrature."""
+    mesh, centres, scale, flux_coefficient = _geometry()
+    support = mesh.traced_clip(jnp.ones(len(mesh.node_coordinates)))
+    participation = jnp.asarray([True, False])
+    qualified = support.qualify(participation)
+    current, first = fixed_profile_current_moments(
+        AffineDensity(),
+        qualified.support_vertices,
+        qualified.vertex_count,
+        qualified.centroids,
+        centres,
+        scale,
+        jnp.asarray(flux_coefficient),
+        participation=participation,
+    )
+
+    assert qualified.vertex_count[1] == 0
+    assert qualified.area[1] == 0.0
+    np.testing.assert_array_equal(qualified.first_area_moment[1], np.zeros(2))
+    np.testing.assert_array_equal(qualified.second_area_moment[1], np.zeros((2, 2)))
+    assert current[0] != 0.0
+    assert np.any(np.asarray(first[0]) != 0.0)
+    assert current[1] == 0.0
+    np.testing.assert_array_equal(first[1], np.zeros(2))
+
+
 def test_direct_density_moments_trace_once_and_compose_under_vmap():
     """A moving fixed-capacity clip changes values without changing its trace."""
     mesh, _centres, _scale, _coefficient = _geometry()

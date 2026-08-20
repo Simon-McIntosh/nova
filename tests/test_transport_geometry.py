@@ -3,6 +3,7 @@
 import jax
 import jax.numpy as jnp
 import numpy as np
+import pytest
 
 from nova.jax.config import configure_dtypes
 from nova.transport import traced_flux_surface_geometry, torax_geometry_from_fsa
@@ -196,6 +197,12 @@ def test_direct_adapter_matches_torax_reader_run(monkeypatch):
     reader_geometry = _torax_reader_geometry(record)
 
     assert geometry.geometry_type.name == "EQDSK"
+    np.testing.assert_allclose(
+        geometry.torax_mesh.face_centers,
+        np.asarray(record["rho_face"]),
+        rtol=0.0,
+        atol=8.0e-15,
+    )
     assert geometry.Phi_face.shape == record["rho_face"].shape
     assert geometry.elongation_face[-1] > 1.35
     assert abs(float(geometry.R_major) - parameters[0]) < 0.04
@@ -239,3 +246,20 @@ def test_direct_adapter_matches_torax_reader_run(monkeypatch):
     direct_psi = _run_torax_step(geometry, monkeypatch)
     reader_psi = _run_torax_step(reader_geometry, monkeypatch)
     np.testing.assert_allclose(direct_psi, reader_psi, rtol=1e-10, atol=1e-12)
+
+
+def test_direct_adapter_refuses_nonuniform_radial_grid_under_jit():
+    """A traced grid cannot be silently replaced by TORAX's uniform mesh."""
+    record, _ = _shaped_record(radial_cells=8)
+    nonuniform = jnp.asarray(record["rho_face"]).at[3].add(0.02)
+
+    def build_phi_face(rho_face):
+        traced_record = dict(record)
+        traced_record["rho_face"] = rho_face
+        return torax_geometry_from_fsa(traced_record).Phi_face
+
+    with pytest.raises(
+        jax.errors.JaxRuntimeError,
+        match="rho_face must be the uniform normalized grid",
+    ):
+        jax.jit(build_phi_face)(nonuniform).block_until_ready()

@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 
+import jax
 import jax.numpy as jnp
+import numpy as np
 
 
 def _cumulative_trapezoid(values, coordinates):
@@ -31,6 +33,43 @@ def _smooth_near_axis(values, rho_face, *, polynomial_order):
     return jnp.where((index > 0) & (index < smoothing_limit), smoothed, values)
 
 
+def _validate_uniform_normalized_grid(rho_face):
+    """Validate a concrete grid received at the JAX runtime boundary."""
+    expected = np.linspace(0.0, 1.0, rho_face.size, dtype=rho_face.dtype)
+    tolerance = 32.0 * np.finfo(rho_face.dtype).eps
+    if not np.all(np.isfinite(rho_face)) or not np.all(
+        np.abs(rho_face - expected) <= tolerance
+    ):
+        raise ValueError(
+            "rho_face must be the uniform normalized grid implied by its length"
+        )
+    return rho_face
+
+
+def _validated_grid_callback(rho_face):
+    result = jax.ShapeDtypeStruct(rho_face.shape, rho_face.dtype)
+    return jax.pure_callback(
+        _validate_uniform_normalized_grid,
+        result,
+        rho_face,
+        vmap_method="sequential",
+    )
+
+
+@jax.custom_jvp
+def _require_uniform_normalized_grid(rho_face):
+    """Reject a radial grid that the static TORAX mesh would replace."""
+    if not jnp.issubdtype(rho_face.dtype, jnp.floating):
+        raise TypeError("rho_face must have a floating-point dtype")
+    return _validated_grid_callback(rho_face)
+
+
+@_require_uniform_normalized_grid.defjvp
+def _require_uniform_normalized_grid_jvp(primals, tangents):
+    (rho_face,), (rho_tangent,) = primals, tangents
+    return _validated_grid_callback(rho_face), rho_tangent
+
+
 def torax_geometry_from_fsa(record: Mapping[str, object], *, hires_factor: int = 4):
     """Construct a TORAX ``StandardGeometry`` without a host geometry reader.
 
@@ -44,7 +83,7 @@ def torax_geometry_from_fsa(record: Mapping[str, object], *, hires_factor: int =
     from torax._src.geometry.standard_geometry import StandardGeometry
     from torax._src.torax_pydantic.torax_pydantic import Grid1D
 
-    rho_face = jnp.asarray(record["rho_face"])
+    rho_face = _require_uniform_normalized_grid(jnp.asarray(record["rho_face"]))
     vpr_face = _smooth_near_axis(
         jnp.asarray(record["vpr_face"]), rho_face, polynomial_order=1
     )

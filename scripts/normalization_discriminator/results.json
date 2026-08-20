@@ -1,0 +1,242 @@
+{
+  "arms": {
+    "exact_values_exact_constants": {
+      "absolute_values": "exact_analytic_at_density_points",
+      "density_error_against_exact_case": {
+        "mean_absolute": 0.0,
+        "rms": 0.0,
+        "signed_mean": 0.0,
+        "sup": 0.0
+      },
+      "forcing": {
+        "projection_fraction": 0.00858906624197284,
+        "rms_norm_fraction": 0.010482715636709574,
+        "rms_wb": 0.009771203318256403,
+        "signed_peak_fraction": 0.008644776257190491,
+        "sup_norm_fraction": 0.04941492998851872,
+        "sup_wb": 0.06373057777764046
+      },
+      "forcing_share_percent": 0.858906624197284,
+      "normalization_constants": "exact_case",
+      "psi_norm_error_against_exact_constants": {
+        "mean_absolute": 0.0,
+        "rms": 0.0,
+        "signed_mean": 0.0,
+        "sup": 0.0
+      },
+      "root_response": {
+        "axis_signed_projection_mm": 0.5448910653296308,
+        "flux_signed_peak_percent_of_span": 0.0871207684664958,
+        "gmres_info": 0,
+        "observed_flux_peak_grid_slot": 440,
+        "plasma_current_signed_percent": -0.028495987491565098,
+        "residual_relative_sup": 3.3088196136474436e-13,
+        "residual_sup_wb": 2.1087298573974067e-14
+      }
+    },
+    "exact_values_production_constants": {
+      "absolute_values": "exact_analytic_at_density_points",
+      "density_error_against_exact_case": {
+        "mean_absolute": 5658.493121198498,
+        "rms": 11016.4014424841,
+        "signed_mean": -4375.808558145419,
+        "sup": 54335.46265264786
+      },
+      "forcing": {
+        "projection_fraction": 0.9927708932914661,
+        "rms_norm_fraction": 0.9929786008161461,
+        "rms_wb": 0.9255803682468182,
+        "signed_peak_fraction": 0.938990757694479,
+        "sup_norm_fraction": 0.9727651405259117,
+        "sup_wb": 1.2545780083482487
+      },
+      "forcing_share_percent": 99.2770893291466,
+      "normalization_constants": "production_topology",
+      "psi_norm_error_against_exact_constants": {
+        "mean_absolute": 0.003828503993706461,
+        "rms": 0.004164763906923343,
+        "signed_mean": -0.0038284662356463306,
+        "sup": 0.006621456121892466
+      },
+      "root_response": {
+        "axis_signed_projection_mm": 40.12073628367433,
+        "flux_signed_peak_percent_of_span": 6.398179666894823,
+        "gmres_info": 0,
+        "observed_flux_peak_grid_slot": 440,
+        "plasma_current_signed_percent": -1.8792864762882915,
+        "residual_relative_sup": 2.9733897277952655e-14,
+        "residual_sup_wb": 3.730349362740526e-14
+      }
+    },
+    "production_values_exact_constants": {
+      "absolute_values": "production_quadratic_interpolant",
+      "density_error_against_exact_case": {
+        "mean_absolute": 128.1300644430159,
+        "rms": 421.0530157350798,
+        "signed_mean": 8.39310850143824,
+        "sup": 8316.219166576513
+      },
+      "forcing": {
+        "projection_fraction": 0.0057653998193953095,
+        "rms_norm_fraction": 0.008249557210552018,
+        "rms_wb": 0.0076896200930615,
+        "signed_peak_fraction": 0.004364392407563975,
+        "sup_norm_fraction": 0.04615629576918536,
+        "sup_wb": 0.059527907823188286
+      },
+      "forcing_share_percent": 0.5765399819395309,
+      "normalization_constants": "exact_case",
+      "psi_norm_error_against_exact_constants": {
+        "mean_absolute": 4.0536787328687184e-05,
+        "rms": 7.380565680224833e-05,
+        "signed_mean": 6.59097580593387e-07,
+        "sup": 0.0009371797546336991
+      },
+      "root_response": {
+        "axis_signed_projection_mm": 0.37403717908368483,
+        "flux_signed_peak_percent_of_span": 0.05361272452425879,
+        "gmres_info": 0,
+        "observed_flux_peak_grid_slot": 440,
+        "plasma_current_signed_percent": -0.01813229343995385,
+        "residual_relative_sup": 3.678803768104327e-13,
+        "residual_sup_wb": 2.1899149160731213e-14
+      }
+    },
+    "production_values_production_constants": {
+      "absolute_values": "production_quadratic_interpolant",
+      "density_error_against_exact_case": {
+        "mean_absolute": 5640.743166643478,
+        "rms": 10974.488034352684,
+        "signed_mean": -4373.953427719332,
+        "sup": 58799.80040198232
+      },
+      "forcing": {
+        "projection_fraction": 0.9917626059729636,
+        "rms_norm_fraction": 0.9919726299515769,
+        "rms_wb": 0.924642677462235,
+        "signed_peak_fraction": 0.937356203302238,
+        "sup_norm_fraction": 0.9709929211988075,
+        "sup_wb": 1.2522923719688936
+      },
+      "forcing_share_percent": 99.17626059729636,
+      "normalization_constants": "production_topology",
+      "psi_norm_error_against_exact_constants": {
+        "mean_absolute": 0.0038278614433391524,
+        "rms": 0.004165596173053292,
+        "signed_mean": -0.0038278104836626478,
+        "sup": 0.0066497021555009805
+      },
+      "root_response": {
+        "axis_signed_projection_mm": 40.064973748192976,
+        "flux_signed_peak_percent_of_span": 6.385913068441038,
+        "gmres_info": 0,
+        "observed_flux_peak_grid_slot": 440,
+        "plasma_current_signed_percent": -1.8757187303383034,
+        "residual_relative_sup": 3.404361880650742e-14,
+        "residual_sup_wb": 4.263256414560601e-14
+      }
+    }
+  },
+  "artifacts": {
+    "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/normalization-constant-discriminator/scripts/normalization_discriminator/factorial.png",
+    "figure_bytes": 213260
+  },
+  "factor_effects": {
+    "banked_density_projection_percent": 99.17626059729821,
+    "classification_policy": "Normalization constants carry the collapse when exact values with production constants remain within 25 percent of the production density share and switching constants removes at least 75 percent of that share in both value rows. Exact values carry it when they remove at least 75 percent under production constants.",
+    "forcing_projection_removal": {
+      "exact_constants_with_exact_values_percentage_points": 98.41818270494932,
+      "exact_constants_with_production_values_percentage_points": 98.59972061535683,
+      "exact_values_with_production_constants_percentage_points": -0.10082873185024432,
+      "fully_exact_percentage_points": 98.31735397309907
+    }
+  },
+  "factorial": {
+    "absolute_value_factor": [
+      "production quadratic interpolant in absolute Wb",
+      "exact analytic absolute flux at each density evaluation point"
+    ],
+    "contraction": "Each arm converts the selected absolute values with the selected affine constants, then applies the same degree-nine density projection and production coupling.",
+    "normalization_factor": [
+      "production topology-derived axis and boundary flux",
+      "exact case axis and boundary flux"
+    ]
+  },
+  "fixture": {
+    "cache": {
+      "arrays_verified": 31,
+      "bytes_verified": 51411470,
+      "load_seconds": 0.5879743269179016,
+      "semantic_key": "746fbe1553c4b242",
+      "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/solovev_hex_machine.zarr",
+      "warm_hit": true
+    },
+    "density_evaluation_points_per_cell": 672,
+    "density_support_rings": 566,
+    "plasma_cells": 566,
+    "second_moment_comparator": {
+      "active_cells": 435,
+      "correction_sup_wb": 0.05092873128810195,
+      "near_source_target_pairs": 10246
+    },
+    "state_size": 2396
+  },
+  "held_fixed": [
+    "exact analytic state and production tangent inverse",
+    "production straight clipped supports and topology qualification",
+    "degree-nine weighted density projection at 672 fixed points per cell",
+    "exact clipped zeroth and first moments",
+    "first-moment coupling blocks and second-moment comparator correction"
+  ],
+  "normalization_constants": {
+    "banked_clip_to_newton_saddle": {
+      "banked_saddle_level_offset": -5.530053327573725e-05,
+      "clip_beyond_saddle_psi_norm": 5.530053327573725e-05,
+      "clip_constant_psi_norm": 1.0,
+      "newton_saddle_psi_norm": 0.9999446994667243
+    },
+    "exact_case": {
+      "axis_flux_wb": -86.01645410417784,
+      "boundary_flux_wb": -5.1227631227097294,
+      "flux_span_wb": 80.89369098146811
+    },
+    "offset_definition": "production minus exact case",
+    "offsets": {
+      "axis_flux_in_exact_psi_norm": -2.128220165258678e-05,
+      "axis_flux_wb": -0.001721595843889645,
+      "boundary_flux_in_exact_psi_norm": 0.005080641991379802,
+      "boundary_flux_wb": 0.4109918832381485,
+      "flux_span_fraction_of_exact": 0.005101924193032279,
+      "flux_span_wb": 0.41271347908202927
+    },
+    "production_constants_in_exact_coordinate": {
+      "axis_psi_norm": -2.128220165258678e-05,
+      "boundary_psi_norm": 1.0050806419913796
+    },
+    "production_topology": {
+      "axis_flux_wb": -86.01817570002173,
+      "boundary_flux_wb": -4.711771239471581,
+      "flux_span_wb": 81.30640446055014
+    }
+  },
+  "production_control_difference": {
+    "density_forcing_sup_wb": -8.526512829121202e-14,
+    "density_projection_fraction": -1.84297022087776e-14,
+    "normalised_interpolation_identity_sup": 6.5503158452884236e-15,
+    "production_image_sup_wb": 1.1368683772161603e-13
+  },
+  "schema": "nova.normalization-constant-discriminator",
+  "source_artifacts": {
+    "density_ladder": "scripts/density_forcing_ladder/results.json",
+    "forcing_decomposition": "scripts/forcing_residual_decomposition/results.json",
+    "terminal_root": "scripts/root_gate_attribution/coarse-terminal-root.npz"
+  },
+  "verdict": {
+    "collapse_carrier": "normalization_constants",
+    "exact_constants_collapse_with_exact_values": true,
+    "exact_constants_collapse_with_production_values": true,
+    "exact_values_with_production_constants_near_full": true,
+    "measurement_only": true,
+    "statement": "Both exact-constant arms collapse while exact values with production constants retain the forcing, so the affine psi-norm constants carry the density error."
+  }
+}

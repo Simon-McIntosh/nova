@@ -271,6 +271,60 @@
     proposed gates, their measured floors, and the limited branch the production seed selects.</figcaption>
   </figure>
 
+  <h2 id="accuracy-cost-ladder">§5 — the ladder: builds are 97–99% portable kernel work; the solve is 199 ms at batch one, 30 ms at batch sixteen, and the Krylov loop owns it</h2>
+
+  <p>Commit <code>0c36bf96</code> (H200 NVL under the reservation, JAX 0.11.0; the restored
+  shared environment consumed strictly read-only). <strong>Build</strong>: cold CPU totals
+  294.2 s coarse / 778.0 s fine on the oracle fixtures, with the exact polygon kernel + moment
+  stages carrying <strong>97.2% / 99.0%</strong> — the device-kernel-build plan's target
+  confirmed by measurement (conservative contraction estimate 0.12–0.15 ms per full moment
+  block on device; estimate only, no port attempted).</p>
+
+  <p><strong>Solve, the genuine timing case</strong> (moment-seeded 10×30 undamped to
+  machine-precision residual; StableHLO receipts independently confirm the 10/30 loop bounds):</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>measure</th><th>coarse 551</th><th>fine 1076</th></tr></thead>
+    <tbody>
+      <tr><td>converged solve, batch 1</td><td><strong>198.5 ms/state</strong></td><td>257.4 ms/state</td></tr>
+      <tr><td>batch 4 / batch 16 (coarse)</td><td colspan="2">56.3 / <strong>30.2 ms/state</strong></td></tr>
+      <tr><td>map evaluation median</td><td>1.120 ms</td><td>1.383 ms</td></tr>
+      <tr><td>tangent median</td><td>1.492 ms</td><td>1.660 ms</td></tr>
+      <tr><td>one Newton step inclusive (30-GMRES Krylov)</td><td>20.60 ms</td><td>24.15 ms</td></tr>
+      <tr><td>launch / H2D / D2H</td><td>0.071 / 0.187 / 0.292 ms</td><td>0.071 / 0.135 / 0.178 ms</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>The attribution is unambiguous: the map costs one millisecond and the Krylov loop
+  costs twenty.</strong> Ten Newton steps project to 1.04× / 0.94× of the measured full solves —
+  the accounting closes. Against the ≈1 ms converged-solve target the miss is 198× at batch one
+  and 30× at batch sixteen, so the target is reached not by faster physics (the map is already
+  at the target) but by <em>iteration economy and batch amortization</em>: warm-seeded few-step
+  Newton (the catalog's adjacent-slice regime) at large batch is the measured route. The
+  three-rung accuracy side: the cheap centroid rung is rejected outright (non-finite terminal
+  values, 3.36-span flux error); the production first-moment rungs converge at 2.6e-15/1.9e-15
+  with round-off standing forcing (independent seeds still enter the limited alternate basin —
+  the standing hold). Full record: <code>scripts/accuracy_cost_ladder/results.json</code>,
+  Perfetto traces and StableHLO receipts beside it.</p>
+
+  <figure>
+    <img src="/nova/figures/solovev-exact-recovery/h200-phase-profile.png"
+         alt="H200 phase profile: map, tangent, Krylov and full-solve medians on both fixtures"
+         style="max-width:100%">
+    <figcaption>The H200 phase profile (commit <code>0c36bf96</code>): the map at ~1 ms, the
+    Newton-step Krylov loop at ~21 ms — iteration economy, not kernel speed, is the lever.</figcaption>
+  </figure>
+
+  <figure>
+    <img src="/nova/figures/solovev-exact-recovery/accuracy-cost-ladder.png"
+         alt="Three-rung accuracy versus cost comparison on the oracle fixtures"
+         style="max-width:100%">
+    <figcaption>The accuracy–cost rungs: the centroid rung fails outright; the production
+    representation carries round-off accuracy at the measured costs above.</figcaption>
+  </figure>
+
   <h2 id="build-cache-activation">§6 — cached machine builds: warm loads at a quarter-second against fifty-minute cold builds, bitwise</h2>
 
   <p>Commits <code>06875269</code> (audit) and <code>0e98afcb</code> (activation). The audit

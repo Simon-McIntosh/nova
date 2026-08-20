@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-20T23:55:22",
+  "updated": "2026-08-21T00:27:38",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -13029,9 +13029,135 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260820T214257749974-negative-tail-authoritative-scoring",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a72",
+        "node": "negative-tail-authoritative-scoring",
+        "role": "implement",
+        "member": "diiid-vacuum",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T21:43:23Z",
+        "completed_at": "2026-08-20T22:08:06Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1483,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1483,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "76b48e4d2afcc37184b8eb7b6779e41df59258dd",
+        "commits": [
+          "4bb375b729697643753153c4b8934559510124f9"
+        ],
+        "changed_lines": {
+          "added": 1351,
+          "removed": 40,
+          "files": 4
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "The two-shot negative tail is a COIL-CURRENT POLARITY INVERSION, not geometry and not timing: combined exclusive shares geometry 0.0, timing 0.0136, polarity-data-quality 0.9860, unexplained 0.0004; polarity-corrected medians recover to 0.9982 and 0.9991",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T214257749974-negative-tail-authoritative-scoring/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01090-c119-7413-b062-4589e1bc160f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 15351424,
+            "cached_input_tokens_cumulative": 92467072,
+            "input_tokens": 15550700,
+            "input_tokens_cumulative": 94447659,
+            "output_tokens": 24655,
+            "output_tokens_cumulative": 210653,
+            "reasoning_output_tokens": 6804,
+            "reasoning_output_tokens_cumulative": 58528
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260820T213125849465-oracle-rebaseline",
+        "plan": "solovev-exact-recovery",
+        "section": "\u00a74",
+        "node": "oracle-rebaseline",
+        "role": "implement",
+        "member": "edge-clip",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T21:31:52Z",
+        "completed_at": "2026-08-20T22:25:05Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3193,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3193,
+        "stalled": false,
+        "time_budget": "85m",
+        "base_sha": "d39a14519c0fbfd91919446adedc5947c78a151f",
+        "commits": [
+          "0bed363d0e179fed1d4d265c6dee1998c32aa77f"
+        ],
+        "changed_lines": {
+          "added": 4628,
+          "removed": 0,
+          "files": 18
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T213125849465-oracle-rebaseline/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00738-f48f-7150-97d1-17307a705e4b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 32077696,
+            "cached_input_tokens_cumulative": 347829632,
+            "input_tokens": 32714948,
+            "input_tokens_cumulative": 354807330,
+            "output_tokens": 77303,
+            "output_tokens_cumulative": 767765,
+            "reasoning_output_tokens": 26948,
+            "reasoning_output_tokens_cumulative": 235133
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 346
+    "_version": 348
   }
 }

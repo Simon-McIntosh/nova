@@ -23,11 +23,11 @@
   <title>Solov'ev Exact Recovery | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-20">
-<meta name="plan-version" content="14">
-<meta name="plan-commits" content="eed42e520d5f544f50cdb7485cffc74249f47037,0687526990e67eee5777310a71ad60588ca7736e,0e98afcb9960247313ea955822481983d63a7fd0,27fd5f364c4bb6fa89e5042ee0c190990f965be9,0e21b3997f841be1bf5a79c8b8772619f55c2fd2,5189b08e77dc994c13ebfbf40c4fcb5e29a03f2d,10642e611aa44c805c9cc430048131826448bce8,fcee050f1cd6dd6417587997e599066abc0756e8,74635b0ae61547229228e64e74599f86c3e9c358">
+<meta name="plan-modified" content="2026-08-21">
+<meta name="plan-version" content="15">
+<meta name="plan-commits" content="eed42e520d5f544f50cdb7485cffc74249f47037,0687526990e67eee5777310a71ad60588ca7736e,0e98afcb9960247313ea955822481983d63a7fd0,27fd5f364c4bb6fa89e5042ee0c190990f965be9,0e21b3997f841be1bf5a79c8b8772619f55c2fd2,5189b08e77dc994c13ebfbf40c4fcb5e29a03f2d,10642e611aa44c805c9cc430048131826448bce8,fcee050f1cd6dd6417587997e599066abc0756e8,74635b0ae61547229228e64e74599f86c3e9c358,0bed363d0e179fed1d4d265c6dee1998c32aa77f">
 <meta name="plan-artifacts" content="docs/evidence/archive/solovev-exact-recovery-landed.html,docs/figures/solovev-exact-recovery/map-forcing-decomposition.png,docs/figures/solovev-exact-recovery/forcing-residual-decomposition.png,scripts/map_forcing_attribution/results.json,scripts/forcing_residual_decomposition/results.json,scripts/build_cache_audit/results.json,scripts/build_cache_audit/measurements-coarse.json,scripts/build_cache_audit/measurements-fine.json">
-<meta name="plan-impl" content="0.72">
+<meta name="plan-impl" content="0.78">
 </head>
 <body>
   <main class="plan-doc">
@@ -289,6 +289,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260820T2130" data-who="reckon-ship" data-when="2026-08-20T21:30:00+00:00">
     <div class="r-comment-body">analytic-oracle-fixtures landed - commit 74635b0a, merged 0b0a9d0c; gate PASSED. THE TRUE ORACLE STANDS AND THE DISCRETE MAP IS EXACT ON IT: coarse 551-cell and fine 1076-cell fixtures built entirely from the closed-form case with the exterior supplied exactly at the boundary rows (import-audited: no stored map, no IMAS), carriers cached honestly (warm 0.15/0.22 s). Exact-state forcing 4.55e-15 / 3.66e-15 Wb (2.3e-15 / 2.6e-15 of span), tangent-inverse root responses 6e-12 / 2e-12 mm. NON-TAUTOLOGY PROVEN: a 1e-4 exterior-current perturbation restores a 5.05e-4 Wb forcing - eleven orders above base - with the independent prediction closing to 2e-15. Mechanism: with exact exterior rows the residual reduces to the coupling of the moment difference, and the production degree-nine density reproduces the closed-form source moments to 3.9e-9 A. READING: every h-independent deviation chased on the stored-reference lane was reference inconsistency, never nova composition error. Next node: the re-baseline - solved roots from independent seeds and the full gate set on this lane, setting the section-4 bounds at measured round-off floors with convergence clauses; the fit-vs-direct moment adjudication (the held branch) also re-runs here where oracle-closeness and truth-closeness finally coincide.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260821T0020" data-who="reckon-ship" data-when="2026-08-21T00:20:00+00:00">
+    <div class="r-comment-body">oracle-rebaseline landed - commit 0bed363d, merged b242dcf3; gate PASSED. The recovery gate harness is authored and green (four contract tests; zero mixed-gauge gates; zero foreign anchors), standing forcing controls hold at round-off (3.83e-15 / 4.44e-15 Wb), terminal states serialized, bounds PROPOSED and awaiting the owner lock. THE SECOND ROOT: the production current-centroid seed converges at machine precision on both fixtures to a LIMITED equilibrium (no X-point) 74.84/74.19 mm from the closed-form diverted root - Ip +5.0/+5.1 percent, flux sup 0.533 span, h-independent (excess ratio 1.00098) - a genuine alternate root of the same external field; continuation at 0.50/0.75 strength collapses to vacuum. Six proposed gates correctly reject it. SEPARATION: accuracy is settled (the closed-form root is a discrete fixed point to round-off; gates lock at round-off floors with the forcing sentry), and basin selection is a distinct solver property whose repair (basin-aware seeding or globalized root find; the measured continuation is not it) routes to the owner as new scoped work. Two owner items now pending: the section-4 bound lock on the measured floors, and the basin-work routing (new section here versus its own plan).</div>
 </div>
 </section>
 </main>

@@ -235,6 +235,42 @@
     state on both fixtures, with the exterior-perturbation arm proving the zero is earned.</figcaption>
   </figure>
 
+  <h2 id="oracle-rebaseline">§4 (re-baseline) — the recovery gates land with their floors, and the map's second root surfaces</h2>
+
+  <p>Commit <code>0bed363d</code>. The Solov'ev-recovery gate harness is authored and green
+  (four contract tests, red-then-green; gauge validation finds zero mixed-gauge gates and zero
+  foreign anchors), the standing forcing controls hold at round-off
+  (3.83e-15 / 4.44e-15 Wb), and both terminal states are serialized. Bounds remain
+  <em>proposed</em>, awaiting the owner lock.</p>
+
+  <p><strong>The independent-seed measurement found a second solution branch.</strong> The
+  production current-centroid uniform-disc seed (no closed-form flux samples; 230/466 starting
+  core cells) converges undamped at the banked 10×30 budget to machine precision on both
+  fixtures (2.49e-15 / 2.17e-15) — to a <strong>limited equilibrium with no X-point</strong>,
+  not the closed-form diverted root: axis 74.84/74.19 mm away, flux sup 0.533 of span, plasma
+  current +5.01/+5.09%, field integral +11.7% — h-independent (flux-excess fine/coarse ratio
+  1.00098), i.e., a genuine alternate root of the same external field, not discretization.
+  Source-strength continuation at 0.50/0.75 collapses to the vacuum branch and returns to the
+  same alternate root at full strength. Six proposed gates correctly reject that root on both
+  grids.</p>
+
+  <p><strong>Separation of concerns, cleanly:</strong> accuracy is settled — the closed-form
+  root is a fixed point of the discrete map to round-off, so the recovery gates can lock at
+  round-off floors with the one-map-evaluation forcing gate standing sentry. Basin selection is
+  a distinct solver property: production seeding on this diverted case lands in the limited
+  basin, and the repair (basin-aware seeding or a globalized root find retaining nonempty-core
+  topology qualification — the measured continuation is not it) is its own scoped work. Full
+  record: <code>scripts/oracle_rebaseline/results.json</code>, trajectories in
+  <code>attempts-coarse.json</code>/<code>attempts-fine.json</code>.</p>
+
+  <figure>
+    <img src="/nova/figures/solovev-exact-recovery/oracle-recovery-floors.png"
+         alt="Recovery gate floors and the alternate limited root beside the closed-form diverted root on both fixtures"
+         style="max-width:100%">
+    <figcaption>Recovery floors and the alternate root (commit <code>0bed363d</code>): the
+    proposed gates, their measured floors, and the limited branch the production seed selects.</figcaption>
+  </figure>
+
   <h2 id="build-cache-activation">§6 — cached machine builds: warm loads at a quarter-second against fifty-minute cold builds, bitwise</h2>
 
   <p>Commits <code>06875269</code> (audit) and <code>0e98afcb</code> (activation). The audit

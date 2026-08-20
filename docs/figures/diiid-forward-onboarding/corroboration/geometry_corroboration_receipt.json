@@ -1,0 +1,560 @@
+{
+  "measurement": "competition-to-netCDF DIII-D geometry corroboration",
+  "sources": {
+    "competition_receipt": "docs/figures/diiid-forward-onboarding/machine-description/machine_description_receipt.json",
+    "competition_table_digest": "782e9e08f02e610e252e9cf6d6cccfb3a9aefa62b56f14865553ba2f35d213dc",
+    "netcdf_path": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+    "netcdf_backend": "imas-python netCDF DBEntry"
+  },
+  "method": {
+    "pairing": "nearest stored R-Z centre without fitting",
+    "normalization": "local width and height are edge projections; skew is the non-axis-aligned edge line angle modulo 180 degrees",
+    "coordinate_adjustment": false,
+    "fitting": false,
+    "signed_difference_convention": "netCDF minus competition"
+  },
+  "tolerances_before_scoring": {
+    "centre_distance_mm_max": 2.0,
+    "absolute_width_difference_mm_max": 2.0,
+    "absolute_height_difference_mm_max": 2.0,
+    "absolute_skew_difference_deg_max": 0.25
+  },
+  "pairing_summary": {
+    "competition_count": 19,
+    "agreed_count": 19,
+    "disagreed_count": 0,
+    "name_preserving_count": 19
+  },
+  "pairings": [
+    {
+      "competition_name": "F1A",
+      "netcdf_name": "F1A",
+      "competition_centre_m": [
+        0.8608,
+        0.1683
+      ],
+      "netcdf_centre_m": [
+        0.8608,
+        0.1683
+      ],
+      "centre_distance_mm": 0.0,
+      "signed_netcdf_minus_competition": {
+        "width_mm": 0.0,
+        "height_mm": 0.0,
+        "skew_deg": 0.0
+      },
+      "maximum_vertex_set_distance_mm": 0.0,
+      "verdict": "agreed"
+    },
+    {
+      "competition_name": "F2A",
+      "netcdf_name": "F2A",
+      "competition_centre_m": [
+        0.8614000000000002,
+        0.5081
+      ],
+      "netcdf_centre_m": [
+        0.8614000000000002,
+        0.5081
+      ],
+      "centre_distance_mm": 0.0,
+      "signed_netcdf_minus_competition": {
+        "width_mm": 0.0,
+        "height_mm": 0.0,
+        "skew_deg": 0.0
+      },
+      "maximum_vertex_set_distance_mm": 0.0,
+      "verdict": "agreed"
+    },
+    {
+      "competition_name": "F3A",
+      "netcdf_name": "F3A",
+      "competition_centre_m": [
+        0.8628,
+        0.8491
+      ],
+      "netcdf_centre_m": [
+        0.8628,
+        0.8491
+      ],
+      "centre_distance_mm": 0.0,
+      "signed_netcdf_minus_competition": {
+        "width_mm": 0.0,
+        "height_mm": 0.0,
+        "skew_deg": 0.0
+      },
+      "maximum_vertex_set_distance_mm": 0.0,
+      "verdict": "agreed"
+    },
+    {
+      "competition_name": "F4A",
+      "netcdf_name": "F4A",
+      "competition_centre_m": [
+        0.8611,
+        1.1899
+      ],
+      "netcdf_centre_m": [
+        0.8611,
+        1.1899
+      ],
+      "centre_distance_mm": 0.0,
+      "signed_netcdf_minus_competition": {
+        "width_mm": 0.0,
+        "height_mm": 0.0,
+        "skew_deg": 0.0
+      },
+      "maximum_vertex_set_distance_mm": 0.0,
+      "verdict": "agreed"
+    },
+    {
+      "competition_name": "F5A",
+      "netcdf_name": "F5A",
+      "competition_centre_m": [
+        1.0041,
+        1.5168999999999997
+      ],
+      "netcdf_centre_m": [
+        1.0041000000000002,
+        1.5168999999999997
+      ],
+      "centre_distance_mm": 2.220446049250313e-13,
+      "signed_netcdf_minus_competition": {
+        "width_mm": 0.0,
+        "height_mm": -2.220446049250313e-13,
+        "skew_deg": 2.842170943040401e-14
+      },
+      "maximum_vertex_set_distance_mm": 2.220446049250313e-13,
+      "verdict": "agreed"
+    },
+    {
+      "competition_name": "F6A",
+      "netcdf_name": "F6A",
+      "competition_centre_m": [
+        2.6124,
+        0.4376
+      ],
+      "netcdf_centre_m": [
+        2.6124,
+        0.4376
+      ],
+      "centre_distance_mm": 0.0,
+      "signed_netcdf_minus_competition": {
+        "width_mm": 4.440892098500626e-13,
+        "height_mm": 0.0,
+        "skew_deg": 1.4210854715202004e-13
+      },
+      "maximum_vertex_set_distance_mm": 4.440892098500626e-13,
+      "verdict": "agreed"
+    },
+    {
+      "competition_name": "F7A",
+      "netcdf_name": "F7A",
+      "competition_centre_m": [
+        2.3733,
+        1.1171
+      ],
+      "netcdf_centre_m": [
+        2.3733,
+        1.1171
+      ],
+      "centre_distance_mm": 0.0,
+      "signed_netcdf_minus_competition": {
+        "width_mm": 0.0,
+        "height_mm": 0.0,
+        "skew_deg": 0.0
+      },
+      "maximum_vertex_set_distance_mm": 0.0,
+      "verdict": "agreed"
+    },
+    {
+      "competition_name": "F8A",
+      "netcdf_name": "F8A",
+      "competition_centre_m": [
+        1.2518,
+        1.6019
+      ],
+      "netcdf_centre_m": [
+        1.2518,
+        1.6019
+      ],
+      "centre_distance_mm": 0.0,
+      "signed_netcdf_minus_competition": {
+        "width_mm": 0.0,
+        "height_mm": 0.0,
+        "skew_deg": 0.0
+      },
+      "maximum_vertex_set_distance_mm": 0.0,
+      "verdict": "agreed"
+    },
+    {
+      "competition_name": "F9A",
+      "netcdf_name": "F9A",
+      "competition_centre_m": [
+        1.689,
+        1.5874
+      ],
+      "netcdf_centre_m": [
+        1.689,
+        1.5874
+      ],
+      "centre_distance_mm": 0.0,
+      "signed_netcdf_minus_competition": {
+        "width_mm": 0.0,
+        "height_mm": 0.0,
+        "skew_deg": 0.0
+      },
+      "maximum_vertex_set_distance_mm": 0.0,
+      "verdict": "agreed"
+    },
+    {
+      "competition_name": "F1B",
+      "netcdf_name": "F1B",
+      "competition_centre_m": [
+        0.8608,
+        -0.17370000000000002
+      ],
+      "netcdf_centre_m": [
+        0.8608,
+        -0.17370000000000002
+      ],
+      "centre_distance_mm": 0.0,
+      "signed_netcdf_minus_competition": {
+        "width_mm": 0.0,
+        "height_mm": 0.0,
+        "skew_deg": 0.0
+      },
+      "maximum_vertex_set_distance_mm": 0.0,
+      "verdict": "agreed"
+    },
+    {
+      "competition_name": "F2B",
+      "netcdf_name": "F2B",
+      "competition_centre_m": [
+        0.8607,
+        -0.5135
+      ],
+      "netcdf_centre_m": [
+        0.8607,
+        -0.5135
+      ],
+      "centre_distance_mm": 0.0,
+      "signed_netcdf_minus_competition": {
+        "width_mm": 0.0,
+        "height_mm": 0.0,
+        "skew_deg": 0.0
+      },
+      "maximum_vertex_set_distance_mm": 0.0,
+      "verdict": "agreed"
+    },
+    {
+      "competition_name": "F3B",
+      "netcdf_name": "F3B",
+      "competition_centre_m": [
+        0.8611,
+        -0.8542999999999998
+      ],
+      "netcdf_centre_m": [
+        0.8611,
+        -0.8542999999999998
+      ],
+      "centre_distance_mm": 0.0,
+      "signed_netcdf_minus_competition": {
+        "width_mm": 0.0,
+        "height_mm": 0.0,
+        "skew_deg": 0.0
+      },
+      "maximum_vertex_set_distance_mm": 0.0,
+      "verdict": "agreed"
+    },
+    {
+      "competition_name": "F4B",
+      "netcdf_name": "F4B",
+      "competition_centre_m": [
+        0.863,
+        -1.1957
+      ],
+      "netcdf_centre_m": [
+        0.863,
+        -1.1957
+      ],
+      "centre_distance_mm": 0.0,
+      "signed_netcdf_minus_competition": {
+        "width_mm": 0.0,
+        "height_mm": 0.0,
+        "skew_deg": 0.0
+      },
+      "maximum_vertex_set_distance_mm": 0.0,
+      "verdict": "agreed"
+    },
+    {
+      "competition_name": "F5B",
+      "netcdf_name": "F5B",
+      "competition_centre_m": [
+        1.0025,
+        -1.5169
+      ],
+      "netcdf_centre_m": [
+        1.0025,
+        -1.5168999999999997
+      ],
+      "centre_distance_mm": 2.220446049250313e-13,
+      "signed_netcdf_minus_competition": {
+        "width_mm": 0.0,
+        "height_mm": -2.220446049250313e-13,
+        "skew_deg": -5.684341886080802e-14
+      },
+      "maximum_vertex_set_distance_mm": 2.220446049250313e-13,
+      "verdict": "agreed"
+    },
+    {
+      "competition_name": "F6B",
+      "netcdf_name": "F6B",
+      "competition_centre_m": [
+        2.6124,
+        -0.4376
+      ],
+      "netcdf_centre_m": [
+        2.6124,
+        -0.4376
+      ],
+      "centre_distance_mm": 0.0,
+      "signed_netcdf_minus_competition": {
+        "width_mm": 4.440892098500626e-13,
+        "height_mm": 0.0,
+        "skew_deg": -1.1368683772161603e-13
+      },
+      "maximum_vertex_set_distance_mm": 4.440892098500626e-13,
+      "verdict": "agreed"
+    },
+    {
+      "competition_name": "F7B",
+      "netcdf_name": "F7B",
+      "competition_centre_m": [
+        2.3834,
+        -1.1171
+      ],
+      "netcdf_centre_m": [
+        2.3834,
+        -1.1171
+      ],
+      "centre_distance_mm": 0.0,
+      "signed_netcdf_minus_competition": {
+        "width_mm": 0.0,
+        "height_mm": 0.0,
+        "skew_deg": 0.0
+      },
+      "maximum_vertex_set_distance_mm": 0.0,
+      "verdict": "agreed"
+    },
+    {
+      "competition_name": "F8B",
+      "netcdf_name": "F8B",
+      "competition_centre_m": [
+        1.2524,
+        -1.6027
+      ],
+      "netcdf_centre_m": [
+        1.2524,
+        -1.6027
+      ],
+      "centre_distance_mm": 0.0,
+      "signed_netcdf_minus_competition": {
+        "width_mm": 0.0,
+        "height_mm": 0.0,
+        "skew_deg": 0.0
+      },
+      "maximum_vertex_set_distance_mm": 0.0,
+      "verdict": "agreed"
+    },
+    {
+      "competition_name": "F9B",
+      "netcdf_name": "F9B",
+      "competition_centre_m": [
+        1.6889000000000003,
+        -1.578
+      ],
+      "netcdf_centre_m": [
+        1.6889000000000003,
+        -1.578
+      ],
+      "centre_distance_mm": 0.0,
+      "signed_netcdf_minus_competition": {
+        "width_mm": 0.0,
+        "height_mm": 0.0,
+        "skew_deg": 0.0
+      },
+      "maximum_vertex_set_distance_mm": 0.0,
+      "verdict": "agreed"
+    },
+    {
+      "competition_name": "ECOILA",
+      "netcdf_name": "ECOILA",
+      "competition_centre_m": [
+        0.7225,
+        0.0
+      ],
+      "netcdf_centre_m": [
+        0.722715,
+        0.0
+      ],
+      "centre_distance_mm": 0.21499999999996522,
+      "signed_netcdf_minus_competition": {
+        "width_mm": 0.3500000000000725,
+        "height_mm": -0.05999999999994898,
+        "skew_deg": 0.0
+      },
+      "maximum_vertex_set_distance_mm": null,
+      "verdict": "agreed"
+    }
+  ],
+  "skewed_conductor_set": {
+    "names": [
+      "F5A",
+      "F6A",
+      "F7A",
+      "F5B",
+      "F6B",
+      "F7B"
+    ],
+    "independently_named_by_both_sources": true,
+    "agreed_count": 6
+  },
+  "f5a_discrepancy_resolution": {
+    "competition_local_geometry": {
+      "centre_m": [
+        1.0041,
+        1.5169
+      ],
+      "extent_m": [
+        0.1392,
+        0.1194
+      ],
+      "skew_deg": 45.0
+    },
+    "discarded_legacy_descriptor": {
+      "z_extent_m": 0.2586,
+      "skew_deg": 90.0
+    },
+    "netcdf_axis_aligned_extent_m": [
+      0.1392,
+      0.2586
+    ],
+    "netcdf_first_edge_angle_deg": 90.0,
+    "normalized_signed_difference": {
+      "width_mm": 0.0,
+      "height_mm": -2.220446049250313e-13,
+      "skew_deg": 2.842170943040401e-14
+    },
+    "maximum_vertex_set_distance_mm": 2.220446049250313e-13,
+    "resolution": "the netCDF and competition polygons have the same vertices; 0.2586 m and 90 degrees are respectively an axis-aligned bounding extent and traversal-dependent first-edge angle, not the local section height and physical shear",
+    "real_machine_supports": "competition physical F5A polygon"
+  },
+  "coverage": {
+    "ampere_turn_carrying_conductors": {
+      "competition_coil_count": 19,
+      "competition_element_count": 19,
+      "netcdf_pf_active_coil_count": 24,
+      "netcdf_pf_active_element_count": 140
+    },
+    "netcdf_coils_omitted_by_competition": [
+      {
+        "name": "ECOILB",
+        "centre_m": [
+          0.722715,
+          0.0
+        ],
+        "extent_m": [
+          0.1291,
+          3.50574
+        ],
+        "element_count": 48
+      },
+      {
+        "name": "E567UP",
+        "centre_m": [
+          1.7578,
+          1.184325
+        ],
+        "extent_m": [
+          1.8709999999999998,
+          1.27345
+        ],
+        "element_count": 6
+      },
+      {
+        "name": "E567DN",
+        "centre_m": [
+          1.7576999999999998,
+          -1.184575
+        ],
+        "extent_m": [
+          1.8711999999999998,
+          1.2739500000000001
+        ],
+        "element_count": 6
+      },
+      {
+        "name": "E89DN",
+        "centre_m": [
+          1.4006,
+          -1.878025
+        ],
+        "extent_m": [
+          0.9533,
+          0.28854999999999986
+        ],
+        "element_count": 7
+      },
+      {
+        "name": "E89UP",
+        "centre_m": [
+          1.3994,
+          1.878325
+        ],
+        "extent_m": [
+          0.9525,
+          0.28874999999999984
+        ],
+        "element_count": 7
+      }
+    ],
+    "omitted_coil_count": 5,
+    "omitted_element_count": 74,
+    "expected_116_element_claim_supported": false,
+    "element_count_statement": "the five omitted coils contain 74 elements (48+6+6+7+7), not 116"
+  },
+  "limiter_against_competition_grid": {
+    "limiter_vertex_count": 82,
+    "grid_shape": [
+      65,
+      65
+    ],
+    "limiter_r_extent_m": [
+      1.017300009727478,
+      2.351099967956543
+    ],
+    "limiter_z_extent_m": [
+      -1.3589400053024292,
+      1.3629900217056274
+    ],
+    "grid_r_extent_m": [
+      0.8399999737739563,
+      2.5399999618530273
+    ],
+    "grid_z_extent_m": [
+      -1.600000023841858,
+      1.600000023841858
+    ],
+    "signed_grid_beyond_wall_margins_m": {
+      "inboard_m": 0.17730003595352173,
+      "outboard_m": 0.18889999389648438,
+      "lower_m": 0.2410600185394287,
+      "upper_m": 0.23701000213623047
+    },
+    "grid_encloses_wall": true
+  },
+  "figures": [
+    "docs/figures/diiid-forward-onboarding/corroboration/conductor_pairing_overlay.png",
+    "docs/figures/diiid-forward-onboarding/corroboration/limiter_grid_extent.png"
+  ]
+}

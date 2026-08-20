@@ -1,0 +1,435 @@
+{
+  "verdict": "pass",
+  "failed_gates": [],
+  "architecture": {
+    "cells": 566,
+    "six_vertex_material_rows": 387,
+    "canonical_offsets_collapsed": false,
+    "canonical_offset_max_deviation_m": 0.30406465419805717,
+    "canonical_offset_roundoff_bound_m": 2.3652337919603447e-13,
+    "offset_route": "fixed_per_cell_tiling_parameters",
+    "cell_offset_shape": [
+      566,
+      6,
+      2
+    ],
+    "tiling_cell_delta_m": [
+      0.2936289156888333,
+      0.2936289156888333
+    ],
+    "tiling_raw_vertex_count": 8,
+    "tiling_generator_vertex_count": 6,
+    "tiling_vertex_deduplication_epsilon_m": 2.842170943040401e-14,
+    "tiling_vertex_identity_max_deviation_m": 0.0,
+    "tiling_vertex_identity_roundoff_bound_m": 2.842170943040401e-14,
+    "unique_hex_vertices": 1652,
+    "direct_targets": 2218,
+    "samples_per_cell": 7,
+    "sample_index_shape": [
+      566,
+      7
+    ],
+    "combined_matrix_shape": [
+      2218,
+      1815
+    ],
+    "combined_matrix_bytes": 32205360,
+    "one_matmul_per_current_update": true,
+    "direct_flux_target_error_wb": 0.0,
+    "quadrature_point_shape": [
+      566,
+      672,
+      2
+    ],
+    "weighted_design_condition_max": 13692.147668900025,
+    "sampling_and_integration_support": "The sampling set and integration support are different objects. Trial-flux evaluation is grid-free, so the pre-clip hex vertices are valid targets even where the wall clipped the material polygon. The centre and six vertices define the in-cell interpolant of the smooth flux field; exact closed forms then integrate that interpolant only over the actual clipped support.",
+    "batch_compatibility": "Fixed-shape JAX array contraction; jit and vmap executed on the banked matrix with no Python branching over cells or batch items."
+  },
+  "representation": {
+    "flux_interpolant_total_degree": 2,
+    "flux_samples_per_cell": 7,
+    "current_density_total_degree": 9,
+    "current_density_basis_powers": [
+      [
+        0,
+        0
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        0,
+        3
+      ],
+      [
+        4,
+        0
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        0,
+        4
+      ],
+      [
+        5,
+        0
+      ],
+      [
+        4,
+        1
+      ],
+      [
+        3,
+        2
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        1,
+        4
+      ],
+      [
+        0,
+        5
+      ],
+      [
+        6,
+        0
+      ],
+      [
+        5,
+        1
+      ],
+      [
+        4,
+        2
+      ],
+      [
+        3,
+        3
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        1,
+        5
+      ],
+      [
+        0,
+        6
+      ],
+      [
+        7,
+        0
+      ],
+      [
+        6,
+        1
+      ],
+      [
+        5,
+        2
+      ],
+      [
+        4,
+        3
+      ],
+      [
+        3,
+        4
+      ],
+      [
+        2,
+        5
+      ],
+      [
+        1,
+        6
+      ],
+      [
+        0,
+        7
+      ],
+      [
+        8,
+        0
+      ],
+      [
+        7,
+        1
+      ],
+      [
+        6,
+        2
+      ],
+      [
+        5,
+        3
+      ],
+      [
+        4,
+        4
+      ],
+      [
+        3,
+        5
+      ],
+      [
+        2,
+        6
+      ],
+      [
+        1,
+        7
+      ],
+      [
+        0,
+        8
+      ],
+      [
+        9,
+        0
+      ],
+      [
+        8,
+        1
+      ],
+      [
+        7,
+        2
+      ],
+      [
+        6,
+        3
+      ],
+      [
+        5,
+        4
+      ],
+      [
+        4,
+        5
+      ],
+      [
+        3,
+        6
+      ],
+      [
+        2,
+        7
+      ],
+      [
+        1,
+        8
+      ],
+      [
+        0,
+        9
+      ]
+    ],
+    "projection": "weighted reduced-QR projection on the fixed pre-clip hexagon",
+    "triangle_quadrature_degree": 5,
+    "triangle_quadrature_points": 7,
+    "triangle_subdivision_depth": 2,
+    "support_edge_capacity": 70,
+    "fixed_collocation_points_per_cell": 672,
+    "priority_preservation": "The fixed density is independent of fill. Its net current and first moments match the fixed full-cell profile quadrature, then the same polynomial is integrated over the clipped domain.",
+    "previous_value_only_quadratic": {
+      "ring_current_weighted_l1": 0.10228012882939425,
+      "total_current_relative_error": 0.0057329356059026
+    }
+  },
+  "population": {
+    "nonempty_supports": 447,
+    "stencil_available_supports": 351,
+    "ring_incomplete_supports": 96,
+    "topology_zero_lower_leg_supports": 17,
+    "ring_current_bearing_supports": 73
+  },
+  "study_comparison": {
+    "reference": {
+      "ring_current_weighted_l1": 0.0016005,
+      "ring_net_relative_error": 0.0007214,
+      "first_moment_l1": 0.0011804,
+      "centroid_p95_mm": 0.3298
+    },
+    "measured": {
+      "ring_current_weighted_l1": 0.0016004849848483096,
+      "ring_net_relative_error": 0.000721405517504028,
+      "first_moment_l1": 0.001180393377279365,
+      "centroid_p95_mm": 0.32982261153438414
+    },
+    "measured_minus_reference": {
+      "ring_current_weighted_l1": -1.5015151690360093e-08,
+      "ring_net_relative_error": 5.517504027990373e-09,
+      "first_moment_l1": -6.62272063513443e-09,
+      "centroid_p95_mm": 2.2611534384153753e-05
+    }
+  },
+  "priority_ordered_errors": {
+    "net_current": {
+      "current_weighted_interior_l1": 4.740850588173696e-05,
+      "interior_limit": 0.00025,
+      "interior_net_relative_error": 9.155501607007158e-06,
+      "current_weighted_ring_l1": 0.0016004849848483096,
+      "ring_limit": 0.0025,
+      "interior_scale": 0.007646206247471605,
+      "signed_error_a": -490.2554625370158,
+      "signed_oracle_a": -679583.7440129898,
+      "signed_relative_error": 0.000721405517504028,
+      "improvement_factor_from_value_only_quadratic": 63.90570970529169,
+      "absolute_error_current_a": 1087.6635782397875,
+      "oracle_absolute_current_a": 679583.7440129898
+    },
+    "centroid": {
+      "current_weighted_mean_error_mm": 0.16515101438081922,
+      "current_weighted_p95_error_mm": 0.32982261153438414,
+      "maximum_error_mm": 8.476141752529557
+    },
+    "first_moments": {
+      "normalised_vector_l1": 0.001180393377279365,
+      "absolute_vector_error_am": 117.77105666656254,
+      "normalisation_am": 99772.71893714594,
+      "radial_absolute_error_am": 95.93581976394844,
+      "vertical_absolute_error_am": 55.50918785269815
+    }
+  },
+  "two_reference_decomposition": {
+    "attributed_vs_support_geometry": {
+      "attributed_total_current_a": -14996634.783160575,
+      "support_reference_total_current_a": -14996013.453602824,
+      "signed_total_difference_a": -621.3295577503741,
+      "total_current_relative_error": 4.1432982150313435e-05,
+      "total_current_relative_limit": 5e-05,
+      "fixed_argmax_target": 440,
+      "fixed_argmax_target_shift_wb": -0.010076012717959845,
+      "all_target_sup_wb": 0.010076012717959845,
+      "all_target_sup_index": 440,
+      "all_target_sup_limit_wb": 0.826,
+      "gate_authority": "representation"
+    },
+    "support_coverage_vs_analytic": {
+      "support_reference_total_current_a": -14996013.453602824,
+      "analytic_total_current_a": -15005421.582465796,
+      "signed_total_difference_a": 9408.12886297144,
+      "total_current_relative_error": 0.0006269819752325878,
+      "fixed_argmax_target": 440,
+      "fixed_argmax_target_shift_wb": 0.7309520152194066,
+      "all_target_sup_wb": 0.7582020831065333,
+      "all_target_sup_index": 439,
+      "classification": "tracked O(h^2) straight-chord support-coverage term"
+    },
+    "attributed_vs_analytic_tracked": {
+      "attributed_total_current_a": -14996634.783160575,
+      "analytic_total_current_a": -15005421.582465796,
+      "signed_total_difference_a": 8786.799305221066,
+      "total_current_relative_error": 0.0005855749708151281,
+      "fixed_argmax_target": 440,
+      "fixed_argmax_target_shift_wb": 0.7208760025014467,
+      "all_target_sup_wb": 0.7484368352044513,
+      "all_target_sup_index": 439,
+      "gate_authority": "coverage study"
+    }
+  },
+  "error_components": {
+    "attribution_current_sup_a": 6.184563972055912e-11,
+    "attribution_first_sup_am": 5.7039191528570795e-12,
+    "direct_node_flux_sup_wb": 0.0,
+    "psi_norm_interpolation_current_l1_a": 1163.7911307023028,
+    "support_projection_quadrature_current_l1_a": 854.5842678200254,
+    "psi_norm_interpolation_first_l1_am": 87.80782811096364,
+    "support_projection_quadrature_first_l1_am": 42.04533718015376,
+    "availability_undefined_cells": 0,
+    "zero_current_leakage_a": 0.0,
+    "clip_geometry": "held fixed to the banked linear support; prototype and oracle integrate the identical polygon"
+  },
+  "microbenchmark": {
+    "backend": "gpu",
+    "dtype": "float64",
+    "evaluation_matrix_shape": [
+      2218,
+      1815
+    ],
+    "one_matrix_multiply_per_update": true,
+    "representation_output_shape": [
+      566,
+      3
+    ],
+    "single_update_median_ms": 1.646201009862125,
+    "single_update_min_ms": 1.566319027915597,
+    "batch_size": 8,
+    "batch_update_ms": 6.225639209151268,
+    "batch_per_state_ms": 0.7782049011439085,
+    "jit_compatible": true,
+    "vmap_compatible": true,
+    "batch_first_state_sup_difference": 5.966285243630409e-10
+  },
+  "trace_cells": [
+    430,
+    513,
+    376
+  ],
+  "gates": {
+    "seven_samples_per_cell": true,
+    "one_matmul_per_update": true,
+    "all_ring_supports_attributed": true,
+    "all_cells_own_node_attributed": true,
+    "interior_current_weighted_l1": true,
+    "topology_zero_exact": true,
+    "ring_current_weighted_l1": true,
+    "support_reference_total_current": true,
+    "support_reference_field_sup": true,
+    "jit_batch_compatible": true
+  },
+  "artifacts": {
+    "matrix_bank": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/retired-path-excision/scripts/ring_attribution/inputs/direct-target-matrices.npz",
+    "cell_table": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/retired-path-excision/scripts/ring_attribution/results/ring-cell-attribution.csv",
+    "field_bank": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/retired-path-excision/scripts/ring_attribution/results/ring-attribution-fields.npz",
+    "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/retired-path-excision/scripts/ring_attribution/results/retired-path-bank.png"
+  },
+  "production_vertex_authority": "The grid constructor supplies the authoritative pre-clip vertex array."
+}

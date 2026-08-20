@@ -6,11 +6,13 @@ converged flux map and the source that produced it to plasma current,
 poloidal beta and internal inductance, and to the residuals of any targets a
 caller wants to validate against. It never changes a profile.
 
-All three follow from volume integrals over the labelled core, so none of
-them needs a traced boundary contour and all of them differentiate cleanly:
+All three follow from volume integrals over the traced core support.  The
+same fixed-capacity clip partition that attributes current supplies the
+integration domain, so boundary cells contribute their exact clipped polygon
+and topology-zero cells contribute exactly zero:
 
 .. math::
-    I_p = \sum_{\mathrm{core}} j_\phi\, \Delta A, \qquad
+    I_p = \sum_c \int_{A_c\cap\mathrm{core}} j_\phi\, \mathrm{d}A, \qquad
     \mathrm{d}V = 2 \pi R\, \Delta A, \qquad
     R_{\mathrm{ax}} = \frac{1}{V} \int_{\mathrm{core}} R\, \mathrm{d}V,
 
@@ -20,7 +22,7 @@ them needs a traced boundary contour and all of them differentiate cleanly:
     l_i = \frac{2 \int B_p^2\, \mathrm{d}V}{\mu_0^2 R_{\mathrm{ax}} I_p^2}.
 
 The reference radius is pinned as the volume-averaged major radius of the
-labelled core rather than a machine constant or a boundary extremum, so it
+clipped core rather than a machine constant or a boundary extremum, so it
 moves with the solved geometry and stays smooth in the flux map. Pressure is
 asked of the declared closure at the node radius and the converged flux span
 — a static closure integrates it inward from the boundary primitive by the
@@ -28,7 +30,8 @@ rule pinned in :mod:`nova.equilibrium.convention`, a rotating one returns its
 own major-radius-dependent primitive — so the observation is a property of
 the solve and not of a frozen grid.
 
-All three are read on the labelled CORE, whatever else the source declares.
+All three are read on the topology-qualified core support, whatever else the
+source declares.
 A continuation beyond the separatrix adds current on the open branches, and
 that current is published — per domain, and as a total — by
 :class:`CurrentLedger`; folding it into :math:`I_p` would silently change the
@@ -52,6 +55,7 @@ from typing import NamedTuple
 
 import jax
 import jax.numpy as jnp
+import numpy as np
 from scipy.constants import mu_0
 
 from nova.equilibrium.domain import DomainMasks, PlasmaDomain
@@ -59,6 +63,7 @@ from nova.equilibrium.domain import DomainMasks, PlasmaDomain
 __all__ = [
     "MOMENT_NAMES",
     "CurrentLedger",
+    "ClippedIntegralMeasure",
     "IntegralObservation",
     "MomentEnforcementError",
     "MomentTargets",
@@ -66,6 +71,7 @@ __all__ = [
     "declared_field_function_squared",
     "declared_pressure",
     "gradient_tail",
+    "clipped_support_quadrature",
     "moment_residual",
     "observe_moments",
     "reject_unsupported_enforcement",
@@ -80,6 +86,13 @@ MOMENT_NAMES: tuple[str, ...] = (
 
 #: Nodes the flux-function gradients are integrated on to recover primitives.
 PROFILE_NODES = 257
+
+# Eight Gauss nodes in each Duffy coordinate integrate polynomial content
+# through degree fifteen in either coordinate and leave ample headroom for the
+# smooth pressure closure and the 1/R field factor.
+_GAUSS_NODE, _GAUSS_WEIGHT = np.polynomial.legendre.leggauss(8)
+_UNIT_NODE = 0.5 * (_GAUSS_NODE + 1.0)
+_UNIT_WEIGHT = 0.5 * _GAUSS_WEIGHT
 
 
 class MomentEnforcementError(ValueError):
@@ -131,6 +144,92 @@ class IntegralObservation(NamedTuple):
     def stack(self) -> jax.Array:
         """Return the observations in residual-vector column order."""
         return jnp.stack([getattr(self, name) for name in MOMENT_NAMES])
+
+
+class ClippedIntegralMeasure(NamedTuple):
+    """Per-cell integrals over the topology-qualified clipped core support.
+
+    ``area`` is the exact polygon area receipt.  The volume, radial-volume,
+    pressure and field entries are fixed high-order quadratures over that same
+    polygon.  ``cell_current`` is the closed-form integral of the production
+    clip-independent current density, including its in-cell variation.
+
+    Measure survey for the equilibrium path:
+
+    * volume and major radius sum ``volume`` and ``radial_volume``;
+    * plasma current sums ``cell_current``;
+    * pressure integral and poloidal beta sum ``pressure_volume``;
+    * field integral and internal inductance sum ``field_volume``;
+    * :class:`CurrentLedger` consumes already-integrated cell current but keeps
+      domain labels because it is a receipt taxonomy, not a geometric integral;
+    * conservation residuals remain centre-point finite-difference norms whose
+      eroded stencil domain is part of their discretisation, not a volume
+      observation;
+    * flux-surface geometry uses independently traced contour line integrals,
+      while flux-surface connectivity uses a multi-level coarea estimator.
+      Neither has the single separatrix support represented here.
+    * the structured-lattice compatibility constructor has no direct pre-clip
+      sample targets and therefore cannot form the own-node polynomial.  It
+      retains its labelled finite-volume measure; the default hex construction
+      supplies direct samples and always takes the clipped route.
+    """
+
+    area: jax.Array
+    volume: jax.Array
+    radial_volume: jax.Array
+    cell_current: jax.Array
+    pressure_volume: jax.Array
+    field_volume: jax.Array
+    masks: DomainMasks
+
+
+def clipped_support_quadrature(support, selection):
+    """Return fixed-shape degree-fifteen Duffy quadrature on each support.
+
+    Convex clipped cells are fanned from their first vertex.  Padding and
+    topology qualification enter only through zero weights; points on dead
+    triangles are moved to the authored cell centroid so discarded closure
+    evaluations remain finite under differentiation.
+    """
+    vertices = jnp.asarray(support.support_vertices)
+    count = jnp.asarray(support.vertex_count)
+    selected = jnp.asarray(selection, dtype=bool)
+    capacity = vertices.shape[1]
+    triangle_slot = jnp.arange(1, capacity - 1)
+    first = jnp.broadcast_to(vertices[:, :1], (len(vertices), capacity - 2, 2))
+    second = vertices[:, triangle_slot]
+    third = vertices[:, triangle_slot + 1]
+    radial = jnp.asarray(_UNIT_NODE, dtype=vertices.dtype)
+    vertical = jnp.asarray(_UNIT_NODE, dtype=vertices.dtype)
+    radial_weight = jnp.asarray(_UNIT_WEIGHT, dtype=vertices.dtype)
+    vertical_weight = jnp.asarray(_UNIT_WEIGHT, dtype=vertices.dtype)
+    u, v = jnp.meshgrid(radial, vertical, indexing="ij")
+    wu, wv = jnp.meshgrid(radial_weight, vertical_weight, indexing="ij")
+    u = u.reshape(-1)
+    v = v.reshape(-1)
+    rule_weight = (wu * wv).reshape(-1)
+    edge_first = second - first
+    edge_second = third - first
+    points = (
+        first[:, :, None, :]
+        + u[None, None, :, None] * edge_first[:, :, None, :]
+        + (1.0 - u)[None, None, :, None]
+        * v[None, None, :, None]
+        * edge_second[:, :, None, :]
+    )
+    cross = jnp.abs(
+        edge_first[..., 0] * edge_second[..., 1]
+        - edge_first[..., 1] * edge_second[..., 0]
+    )
+    live = (triangle_slot[None, :] + 1 < count[:, None]) & selected[:, None]
+    weights = cross[:, :, None] * (1.0 - u)[None, None, :] * rule_weight[None, None, :]
+    weights = jnp.where(live[:, :, None], weights, 0.0)
+    points = points.reshape(len(vertices), -1, 2)
+    weights = weights.reshape(len(vertices), -1)
+    points = jnp.where(
+        (weights > 0.0)[..., None], points, jnp.asarray(support.centroids)[:, None, :]
+    )
+    return points, weights
 
 
 def gradient_tail(gradient, psi_norm: jax.Array, nodes: int = PROFILE_NODES):
@@ -249,30 +348,16 @@ def current_ledger(cell_current: jax.Array, masks: DomainMasks) -> CurrentLedger
 
 
 def observe_moments(
-    source,
-    masks: DomainMasks,
-    radius: jax.Array,
-    area: jax.Array,
-    cell_current: jax.Array,
-    poloidal_field_squared: jax.Array,
+    support_integrals: ClippedIntegralMeasure,
     flux_span: jax.Array,
 ) -> IntegralObservation:
-    """Return the integral observations of one converged equilibrium."""
-    volume_element = jnp.where(masks.core, 2.0 * jnp.pi * radius * area, 0.0)
-    volume = jnp.sum(volume_element)
+    """Return integral observations from one clipped-support measure."""
+    volume = jnp.sum(support_integrals.volume)
     safe_volume = jnp.where(volume > 0.0, volume, 1.0)
-    plasma_current = jnp.sum(jnp.where(masks.core, cell_current, 0.0))
-
-    major_radius = jnp.sum(radius * volume_element) / safe_volume
-    # the closure is declared on the core and need not evaluate anywhere else,
-    # so the pressure is selected by label rather than weighted by an area
-    # that vanishes off it: a zero weight does not neutralise a non-finite
-    # value, and one such cell would carry the whole integral away
-    pressure_integral = jnp.sum(
-        jnp.where(masks.core, core_pressure(source, masks, radius, flux_span), 0.0)
-        * volume_element
-    )
-    field_integral = jnp.sum(poloidal_field_squared * volume_element)
+    plasma_current = jnp.sum(support_integrals.cell_current)
+    major_radius = jnp.sum(support_integrals.radial_volume) / safe_volume
+    pressure_integral = jnp.sum(support_integrals.pressure_volume)
+    field_integral = jnp.sum(support_integrals.field_volume)
 
     reference = mu_0 * major_radius * plasma_current**2
     safe_reference = jnp.where(

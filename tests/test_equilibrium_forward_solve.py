@@ -39,6 +39,7 @@ the current ledger's declared support, and the conservation receipts.
 
 from __future__ import annotations
 
+from dataclasses import replace
 from types import SimpleNamespace
 
 import numpy as np
@@ -52,6 +53,8 @@ with skip_import("jax"):
     import jax.numpy as jnp
 
     from nova.biot.greens import hybrid_greens
+    from nova.biot.null import Null1D
+    from nova.biot.target import FluxTarget
     from nova.equilibrium.conservation import FluxLattice
     from nova.equilibrium.domain import PlasmaDomain
     from nova.equilibrium.forward import ForwardProfile
@@ -260,6 +263,113 @@ def relaxed(machine):
 def _relative(left, right, scale):
     """Return a sup-norm difference read against one flux scale."""
     return float(jnp.max(jnp.abs(left - right))) / float(scale)
+
+
+def _with_direct_samples(profile, seed):
+    """Attach exact grid-free sample rows to the synthetic structured solve."""
+    operator = profile.operator
+    coordinate = np.asarray(operator.moment_geometry.sample_node_coordinates)
+    sample = FluxTarget(
+        source_target=jnp.zeros((len(coordinate), len(operator.external_current))),
+        plasma_target=jnp.zeros((len(coordinate), operator.grid.node_number)),
+        null=Null1D(jnp.asarray(coordinate)),
+    )
+    sampled_seed = _solovev(coordinate[:, 0], coordinate[:, 1])
+    return (
+        replace(operator, sample=sample, use_linear_moments=True),
+        jnp.r_[seed, sampled_seed],
+    )
+
+
+def test_solve_path_current_moments_match_direct_stencil_and_clip(machine):
+    """Interior rings and every LCFS crossing use their direct moment rule."""
+    profile, seed, _vacuum = machine
+    operator, seed = _with_direct_samples(profile, seed)
+    masks, topology = operator.read(seed)
+    geometry = operator.moment_geometry
+    shared_flux = operator.shared_node_flux(seed)
+    clipped = geometry.atomic_mesh.traced_clip(
+        operator.polarity * (shared_flux - topology.boundary_flux)
+    )
+    sample_flux = operator.sample_node_flux(seed)
+    sample_psi_norm = (sample_flux - topology.axis_flux) / topology.flux_span
+    direct = operator.support_current_moments(
+        operator.source.core,
+        masks.psi_norm,
+        sample_psi_norm,
+        clipped,
+    )
+    closed_branch = masks.core | masks.common_sol
+    direct = type(direct)(*(jnp.where(closed_branch, entry, 0.0) for entry in direct))
+    radial_second, vertical_second, cross_second = geometry.second_moment.T
+    determinant = radial_second * vertical_second - cross_second**2
+    expected = (
+        direct.cell_current,
+        (vertical_second * direct.radial_moment - cross_second * direct.vertical_moment)
+        / determinant,
+        (radial_second * direct.vertical_moment - cross_second * direct.radial_moment)
+        / determinant,
+    )
+    actual = operator.cell_current_moments(seed)
+    for observed, direct in zip(actual, expected, strict=True):
+        np.testing.assert_allclose(observed, direct, rtol=2e-13, atol=2e-13)
+
+    crossing_closed = np.asarray(clipped.boundary & (masks.core | masks.common_sol))
+    crossing_unqualified = np.asarray(
+        clipped.boundary & ~(masks.core | masks.common_sol)
+    )
+    assert crossing_closed.sum() > 0
+    assert np.count_nonzero(np.asarray(actual.cell_current)[crossing_closed]) == int(
+        crossing_closed.sum()
+    )
+    assert np.count_nonzero(np.asarray(actual.cell_current)[crossing_unqualified]) == 0
+
+
+def test_unclipped_support_uses_the_own_node_profile_for_every_cell(machine):
+    """The full support carries every cell through the own-node profile."""
+    profile, seed, _vacuum = machine
+    operator, seed = _with_direct_samples(profile, seed)
+    masks, topology = operator.read(seed)
+    complete = operator.moment_geometry.atomic_mesh.traced_clip(
+        jnp.ones(len(operator.moment_geometry.atomic_mesh.node_coordinates))
+    )
+    sample_flux = operator.sample_node_flux(seed)
+    sample_psi_norm = (sample_flux - topology.axis_flux) / topology.flux_span
+    observed = operator.support_current_moments(
+        operator.source.core,
+        masks.psi_norm,
+        sample_psi_norm,
+        complete,
+    )
+    carried = np.sort(
+        np.concatenate(
+            [stencil.ring_centre for stencil in operator._support_moment_stencils]
+        )
+    )
+    np.testing.assert_array_equal(carried, np.arange(operator.grid.node_number))
+    for entry in observed:
+        assert np.all(np.isfinite(np.asarray(entry)))
+
+
+def test_linear_moment_construction_requires_direct_sample_targets(machine):
+    """A linear-moment operator cannot fall back to reconstructed samples."""
+    profile, _seed, _vacuum = machine
+    with pytest.raises(ValueError, match="direct pre-clip sample targets"):
+        replace(profile.operator, sample=None, use_linear_moments=True)
+
+
+def test_receipts_and_integral_observation_share_solve_current_moments(machine):
+    """Both observation entries consume the zeroth moment used by the map."""
+    profile, seed, _vacuum = machine
+    operator, seed = _with_direct_samples(profile, seed)
+    profile = replace(profile, operator=operator)
+    expected = operator.cell_current_moments(seed).cell_current
+    receipt = profile.observe(seed)
+    np.testing.assert_array_equal(receipt.cell_current, expected)
+    np.testing.assert_array_equal(
+        profile.integral_observation(seed).plasma_current,
+        receipt.moments.plasma_current,
+    )
 
 
 def _fit_dtype(profile):

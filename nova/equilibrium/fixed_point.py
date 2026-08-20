@@ -35,14 +35,21 @@ already carry.
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import NamedTuple
+from typing import Literal, NamedTuple
 
 import jax
 import jax.numpy as jnp
 
 from nova.jax.config import Precision, resolve_precision
 
-__all__ = ["FixedPointResult", "anderson", "newton_krylov", "picard"]
+__all__ = [
+    "FixedPointResult",
+    "KinkAwareResult",
+    "anderson",
+    "kink_aware_newton_krylov",
+    "newton_krylov",
+    "picard",
+]
 
 
 class FixedPointResult(NamedTuple):
@@ -57,6 +64,20 @@ class FixedPointResult(NamedTuple):
     state: jax.Array
     residual: jax.Array
     trace: jax.Array
+
+
+class KinkAwareResult(NamedTuple):
+    """Result of an explicitly selected derivative-hand-off policy.
+
+    ``trace`` records the residual at each relaxed warmup state and each
+    accepted nonlinear state.  ``crossings`` identifies nonlinear steps whose
+    unconstrained Newton proposal straddled the caller's detected surface.
+    """
+
+    state: jax.Array
+    residual: jax.Array
+    trace: jax.Array
+    crossings: jax.Array
 
 
 def _solver_state(initial: jax.Array, precision: Precision | str) -> jax.Array:
@@ -251,3 +272,211 @@ def newton_krylov(
         (state, trace[jnp.maximum(warmup - 1, 0)], trace),
     )
     return FixedPointResult(state, residual, trace)
+
+
+def kink_aware_newton_krylov(
+    map_fn: Callable[[jax.Array], jax.Array],
+    initial: jax.Array,
+    *,
+    strategy: Literal["clarke", "nonmonotone", "surface_restricted", "damped_hybrid"],
+    newton_steps: int,
+    gmres_iterations: int = 8,
+    warmup: int = 8,
+    relaxation: float = 0.5,
+    step_cap: float = 10.0,
+    surface_fn: Callable[[jax.Array], jax.Array] | None = None,
+    nonmonotone_allowance: float = 0.05,
+    hybrid_weight: float = 1.0 / 1.766,
+    hybrid_schedule: Literal["fixed", "residual_release"] = "fixed",
+    hybrid_final_weight: float = 1.0,
+    hybrid_release_residual: float = 1.0e-4,
+    precision: Precision | str = Precision.AUTOMATIC,
+) -> KinkAwareResult:
+    """Newton--Krylov with an explicit derivative-hand-off treatment.
+
+    The four policies alter only proposal acceptance; ``map_fn`` is never
+    smoothed or modified.  ``clarke`` averages exact tangents immediately on
+    either side of a detected crossing.  ``nonmonotone`` selects the longest
+    of four backtracking proposals admitted by the recent residual envelope.
+    ``surface_restricted`` shortens a straddling proposal to just beyond the
+    detected surface.  ``damped_hybrid`` blends the Newton and relaxed fixed-
+    point proposals with an explicit weight.  Its optional residual-release
+    schedule interpolates from that initial weight to ``hybrid_final_weight``
+    as the accepted residual approaches ``hybrid_release_residual``.
+
+    The surface callback returns a signed scalar whose zero set is the hand-
+    off.  It is required for the two surface-aware policies.  This function is
+    additive: the established accelerators and their trace accounting are not
+    called or altered.
+    """
+    strategies = {
+        "clarke",
+        "nonmonotone",
+        "surface_restricted",
+        "damped_hybrid",
+    }
+    if strategy not in strategies:
+        raise ValueError(f"unknown kink-aware strategy: {strategy!r}")
+    if strategy in {"clarke", "surface_restricted"} and surface_fn is None:
+        raise ValueError(f"{strategy!r} requires surface_fn")
+    if hybrid_schedule not in {"fixed", "residual_release"}:
+        raise ValueError(f"unknown hybrid schedule: {hybrid_schedule!r}")
+
+    initial = _solver_state(initial, precision)
+    trace_length = warmup + newton_steps
+
+    def warm_body(index, carry):
+        state, trace = carry
+        mapped = map_fn(state)
+        trace = trace.at[index].set(_relative_residual(mapped, state))
+        return state + relaxation * (mapped - state), trace
+
+    state, trace = jax.lax.fori_loop(
+        0,
+        warmup,
+        warm_body,
+        (initial, jnp.full(trace_length, jnp.nan, dtype=initial.dtype)),
+    )
+
+    def krylov_step(tangent, residual_vector):
+        step, _info = jax.scipy.sparse.linalg.gmres(
+            lambda vector: vector - tangent(vector),
+            residual_vector,
+            maxiter=gmres_iterations,
+            restart=gmres_iterations,
+            solve_method="batched",
+        )
+        return step
+
+    def bounded_step(step, residual_vector):
+        fallback = relaxation * residual_vector
+        step = jnp.where(jnp.all(jnp.isfinite(step)), step, fallback)
+        cap = step_cap * jnp.max(jnp.abs(fallback))
+        norm_step = jnp.max(jnp.abs(step))
+        return jnp.where(
+            norm_step > cap,
+            step * (cap / jnp.maximum(norm_step, 1.0e-300)),
+            step,
+        )
+
+    def crossing_fraction(state, proposal):
+        start = surface_fn(state)
+
+        def bisect(_index, bounds):
+            lower, upper = bounds
+            middle = 0.5 * (lower + upper)
+            value = surface_fn(state + middle * (proposal - state))
+            same_side = (value >= 0.0) == (start >= 0.0)
+            return (
+                jnp.where(same_side, middle, lower),
+                jnp.where(same_side, upper, middle),
+            )
+
+        lower, upper = jax.lax.fori_loop(
+            0,
+            16,
+            bisect,
+            (jnp.asarray(0.0, initial.dtype), jnp.asarray(1.0, initial.dtype)),
+        )
+        return 0.5 * (lower + upper)
+
+    def newton_body(index, carry):
+        state, residual, trace, crossings, recent = carry
+        mapped, tangent = jax.linearize(map_fn, state)
+        residual_vector = mapped - state
+        current_residual = _relative_residual(mapped, state)
+        step = bounded_step(krylov_step(tangent, residual_vector), residual_vector)
+        proposal = state + step
+
+        if surface_fn is None:
+            crossed = jnp.asarray(False)
+        else:
+            start_side = surface_fn(state)
+            proposal_side = surface_fn(proposal)
+            crossed = (start_side * proposal_side <= 0.0) & (
+                start_side != proposal_side
+            )
+
+        if strategy == "clarke":
+            fraction = crossing_fraction(state, proposal)
+
+            def clarke_step(_):
+                width = jnp.asarray(1.0e-3, initial.dtype)
+                left = state + jnp.maximum(0.0, fraction - width) * step
+                right = state + jnp.minimum(1.0, fraction + width) * step
+                _, left_tangent = jax.linearize(map_fn, left)
+                _, right_tangent = jax.linearize(map_fn, right)
+
+                def average_tangent(vector):
+                    return 0.5 * (left_tangent(vector) + right_tangent(vector))
+
+                return bounded_step(
+                    krylov_step(average_tangent, residual_vector), residual_vector
+                )
+
+            step = jax.lax.cond(crossed, clarke_step, lambda _: step, operand=None)
+            proposal = state + step
+            promoted = map_fn(proposal)
+            accepted_residual = _relative_residual(promoted, proposal)
+        elif strategy == "surface_restricted":
+            fraction = crossing_fraction(state, proposal)
+            restricted = fraction + 0.05 * (1.0 - fraction)
+            proposal = jnp.where(crossed, state + restricted * step, proposal)
+            promoted = map_fn(proposal)
+            accepted_residual = _relative_residual(promoted, proposal)
+        elif strategy == "nonmonotone":
+            factors = jnp.asarray((1.0, 0.5, 0.25, 0.125), dtype=initial.dtype)
+            candidates = state[None, :] + factors[:, None] * step[None, :]
+
+            def score(candidate):
+                candidate_mapped = map_fn(candidate)
+                return _relative_residual(candidate_mapped, candidate)
+
+            scores = jax.lax.map(score, candidates)
+            envelope = jnp.max(
+                jnp.where(jnp.isfinite(recent), recent, current_residual)
+            )
+            admitted = scores <= envelope * (1.0 + nonmonotone_allowance)
+            first = jnp.argmax(admitted)
+            selected = jnp.where(jnp.any(admitted), first, jnp.argmin(scores))
+            proposal = candidates[selected]
+            accepted_residual = scores[selected]
+        else:
+            if hybrid_schedule == "fixed":
+                weight = hybrid_weight
+            else:
+                released = jnp.clip(
+                    hybrid_release_residual / jnp.maximum(current_residual, 1.0e-300),
+                    0.0,
+                    1.0,
+                )
+                weight = hybrid_weight + released * (
+                    hybrid_final_weight - hybrid_weight
+                )
+            proposal = (
+                state + weight * step + (1.0 - weight) * relaxation * residual_vector
+            )
+            promoted = map_fn(proposal)
+            accepted_residual = _relative_residual(promoted, proposal)
+
+        trace = trace.at[warmup + index].set(accepted_residual)
+        crossings = crossings.at[index].set(crossed)
+        recent = recent.at[jnp.mod(index, recent.size)].set(accepted_residual)
+        return proposal, accepted_residual, trace, crossings, recent
+
+    initial_residual = jnp.where(
+        warmup > 0, trace[jnp.maximum(warmup - 1, 0)], jnp.asarray(jnp.inf)
+    )
+    state, residual, trace, crossings, _recent = jax.lax.fori_loop(
+        0,
+        newton_steps,
+        newton_body,
+        (
+            state,
+            initial_residual,
+            trace,
+            jnp.zeros(newton_steps, dtype=jnp.bool_),
+            jnp.full(4, jnp.nan, dtype=initial.dtype),
+        ),
+    )
+    return KinkAwareResult(state, residual, trace, crossings)

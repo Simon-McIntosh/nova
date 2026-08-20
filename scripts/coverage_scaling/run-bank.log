@@ -1,0 +1,708 @@
+warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/nova/.venv` and will be ignored; use `--active` to target the active environment instead
+08:09:38 INFO     Parsing data dictionary version 3.39.0 [90m@dd_zip.py:89[0m
+INFO:imas.dd_zip:Parsing data dictionary version 3.39.0
+{
+  "analytic_core_oracle": {
+    "absolute_current_delta_from_exact_a": 6183.269948940724,
+    "current_a": -14999238.312516855,
+    "exact_solovev_total_current_a": -15005421.582465796,
+    "initial_4096_8192_pair_retained": true,
+    "refinement_pairs": [
+      {
+        "current_delta_a": 1.5703263115137815,
+        "delta_fraction_of_representation_term": 0.0025273645715478375,
+        "lower_analytic_core_current_a": -14999239.882843167,
+        "lower_arc_points": 4096,
+        "lower_root_diagnostics": {
+          "bounded_maximum_double_roots": 0,
+          "current_density_absolute_bound_a_per_m2": 3422162.7370700086,
+          "distinct_boundary_points": 4096,
+          "exact_saddle_tangencies": 0,
+          "maximum_far_root_separation_m": 0.0,
+          "near_root_selected_for_every_double_root": true,
+          "oracle_area_uncertainty_m2": 2.2050571955762155e-08,
+          "oracle_current_uncertainty_bound_a": 0.0754606456780902,
+          "oracle_uncertainty_far_below_representation_term": true,
+          "oracle_uncertainty_fraction_of_representation_term": 0.00012145027503811003,
+          "oracle_uncertainty_model": "per grazing ray: 2*flux_span/min_abs_hessian_eigenvalue times level_deficit**1.5 times angular_step",
+          "ordinary_sign_change_roots": 4089,
+          "requested_angular_points": 4096,
+          "saddle_branch": "finite_below_level_throat_cut",
+          "saddle_level_offset": -5.530053327573725e-05,
+          "saddle_level_roundoff_tolerance": 1.1368683772161603e-13,
+          "saddle_psi_norm": 0.9999446994667243,
+          "saddle_throat_cut_receipts": [
+            {
+              "angular_slot": 2867,
+              "area_uncertainty_m2": 6.407743249805094e-10,
+              "current_uncertainty_bound_a": 0.0021928340178194875,
+              "distance_to_saddle_m": 0.019141313144507427,
+              "level_deficit": 1.3274323140244348e-05,
+              "maximum_coordinates_m": [
+                5.092742718333789,
+                -3.404303678668426
+              ],
+              "maximum_psi_norm": 0.9999867256768598
+            },
+            {
+              "angular_slot": 2868,
+              "area_uncertainty_m2": 2.940180370138316e-09,
+              "current_uncertainty_bound_a": 0.010061775702952051,
+              "distance_to_saddle_m": 0.012747002160951364,
+              "level_deficit": 3.665430310761941e-05,
+              "maximum_coordinates_m": [
+                5.098547883683272,
+                -3.406984601539149
+              ],
+              "maximum_psi_norm": 0.9999633456968924
+            },
+            {
+              "angular_slot": 2869,
+              "area_uncertainty_m2": 4.779028275693583e-09,
+              "current_uncertainty_bound_a": 0.016354612484482518,
+              "distance_to_saddle_m": 0.006349414901823414,
+              "level_deficit": 5.0672078376723384e-05,
+              "maximum_coordinates_m": [
+                5.104352963462745,
+                -3.4096735042843362
+              ],
+              "maximum_psi_norm": 0.9999493279216233
+            },
+            {
+              "angular_slot": 2870,
+              "area_uncertainty_m2": 5.4484994347854434e-09,
+              "current_uncertainty_bound_a": 0.01864565173866975,
+              "distance_to_saddle_m": 5.152641440905069e-05,
+              "level_deficit": 5.5300228333554635e-05,
+              "maximum_coordinates_m": [
+                5.110158002331875,
+                -3.412370460597005
+              ],
+              "maximum_psi_norm": 0.9999446997716664
+            },
+            {
+              "angular_slot": 2871,
+              "area_uncertainty_m2": 4.756315776836208e-09,
+              "current_uncertainty_bound_a": 0.016276886617227062,
+              "distance_to_saddle_m": 0.006455901628360935,
+              "level_deficit": 5.051140372436258e-05,
+              "maximum_coordinates_m": [
+                5.11596304154835,
+                -3.4150755561010673
+              ],
+              "maximum_psi_norm": 0.9999494885962756
+            },
+            {
+              "angular_slot": 2872,
+              "area_uncertainty_m2": 2.8950564438259163e-09,
+              "current_uncertainty_bound_a": 0.009907354283775463,
+              "distance_to_saddle_m": 0.012863792409830242,
+              "level_deficit": 3.627830669583609e-05,
+              "maximum_coordinates_m": [
+                5.1217681198947576,
+                -3.4177888857371133
+              ],
+              "maximum_psi_norm": 0.9999637216933042
+            },
+            {
+              "angular_slot": 2873,
+              "area_uncertainty_m2": 5.907173295021801e-10,
+              "current_uncertainty_bound_a": 0.0020215308331638666,
+              "distance_to_saddle_m": 0.019275281428398013,
+              "level_deficit": 1.257367195506287e-05,
+              "maximum_coordinates_m": [
+                5.127573275861232,
+                -3.4205105470673183
+              ],
+              "maximum_psi_norm": 0.9999874263280449
+            }
+          ],
+          "saddle_throat_cuts": 7,
+          "saddle_throat_radius_m": 0.021854856597852468
+        },
+        "representation_term_a": 621.3295577503741,
+        "required_maximum_delta_a": 6.213295577503741,
+        "upper_analytic_core_current_a": -14999238.312516855,
+        "upper_arc_points": 8192,
+        "upper_root_diagnostics": {
+          "bounded_maximum_double_roots": 0,
+          "current_density_absolute_bound_a_per_m2": 3422162.7370700086,
+          "distinct_boundary_points": 8192,
+          "exact_saddle_tangencies": 0,
+          "maximum_far_root_separation_m": 0.0,
+          "near_root_selected_for_every_double_root": true,
+          "oracle_area_uncertainty_m2": 2.1998797497626644e-08,
+          "oracle_current_uncertainty_bound_a": 0.07528346505672685,
+          "oracle_uncertainty_far_below_representation_term": true,
+          "oracle_uncertainty_fraction_of_representation_term": 0.00012116511136103524,
+          "oracle_uncertainty_model": "per grazing ray: 2*flux_span/min_abs_hessian_eigenvalue times level_deficit**1.5 times angular_step",
+          "ordinary_sign_change_roots": 8178,
+          "requested_angular_points": 8192,
+          "saddle_branch": "finite_below_level_throat_cut",
+          "saddle_level_offset": -5.530053327573725e-05,
+          "saddle_level_roundoff_tolerance": 1.1368683772161603e-13,
+          "saddle_psi_norm": 0.9999446994667243,
+          "saddle_throat_cut_receipts": [
+            {
+              "angular_slot": 5734,
+              "area_uncertainty_m2": 9.662419495413375e-11,
+              "current_uncertainty_bound_a": 0.00033066371947142447,
+              "distance_to_saddle_m": 0.02073938795884057,
+              "level_deficit": 5.969705504260681e-06,
+              "maximum_coordinates_m": [
+                5.091291408208717,
+                -3.4036346868497547
+              ],
+              "maximum_psi_norm": 0.9999940302944957
+            },
+            {
+              "angular_slot": 5735,
+              "area_uncertainty_m2": 5.923189766237753e-10,
+              "current_uncertainty_bound_a": 0.002027011930261325,
+              "distance_to_saddle_m": 0.017543038234444988,
+              "level_deficit": 1.9995521987614673e-05,
+              "maximum_coordinates_m": [
+                5.094194019920156,
+                -3.404973165923181
+              ],
+              "maximum_psi_norm": 0.9999800044780124
+            },
+            {
+              "angular_slot": 5736,
+              "area_uncertainty_m2": 1.1815618456243725e-09,
+              "current_uncertainty_bound_a": 0.004043496919639394,
+              "distance_to_saddle_m": 0.014345883963672422,
+              "level_deficit": 3.1685941824344255e-05,
+              "maximum_coordinates_m": [
+                5.097096601937735,
+                -3.406313626101689
+              ],
+              "maximum_psi_norm": 0.9999683140581757
+            },
+            {
+              "angular_slot": 5737,
+              "area_uncertainty_m2": 1.741519278489708e-09,
+              "current_uncertainty_bound_a": 0.005959762380736526,
+              "distance_to_saddle_m": 0.011147915433278942,
+              "level_deficit": 4.1037526146592285e-05,
+              "maximum_coordinates_m": [
+                5.09999915967612,
+                -3.4076560769668176
+              ],
+              "maximum_psi_norm": 0.9999589624738534
+            },
+            {
+              "angular_slot": 5738,
+              "area_uncertainty_m2": 2.2062453232893538e-09,
+              "current_uncertainty_bound_a": 0.007550130534195801,
+              "distance_to_saddle_m": 0.00794912311149546,
+              "level_deficit": 4.804684219228417e-05,
+              "maximum_coordinates_m": [
+                5.102901699099792,
+                -3.409000526468956
+              ],
+              "maximum_psi_norm": 0.9999519531578077
+            },
+            {
+              "angular_slot": 5739,
+              "area_uncertainty_m2": 2.535138960951525e-09,
+              "current_uncertainty_bound_a": 0.008675658085462688,
+              "distance_to_saddle_m": 0.004749497181024487,
+              "level_deficit": 5.271046263144452e-05,
+              "maximum_coordinates_m": [
+                5.10580422554944,
+                -3.4103469845663974
+              ],
+              "maximum_psi_norm": 0.9999472895373686
+            },
+            {
+              "angular_slot": 5740,
+              "area_uncertainty_m2": 2.7039346374713405e-09,
+              "current_uncertainty_bound_a": 0.009253304359827325,
+              "distance_to_saddle_m": 0.0015490277795196668,
+              "level_deficit": 5.502496490783493e-05,
+              "maximum_coordinates_m": [
+                5.108706744359957,
+                -3.4116954613192823
+              ],
+              "maximum_psi_norm": 0.9999449750350922
+            },
+            {
+              "angular_slot": 5741,
+              "area_uncertainty_m2": 2.701131604909694e-09,
+              "current_uncertainty_bound_a": 0.009243711926244064,
+              "distance_to_saddle_m": 0.0016522949849547726,
+              "level_deficit": 5.498693059868831e-05,
+              "maximum_coordinates_m": [
+                5.111609260899235,
+                -3.413045966769285
+              ],
+              "maximum_psi_norm": 0.9999450130694013
+            },
+            {
+              "angular_slot": 5742,
+              "area_uncertainty_m2": 2.5266655595401393e-09,
+              "current_uncertainty_bound_a": 0.008646660726896408,
+              "distance_to_saddle_m": 0.004854481476794269,
+              "level_deficit": 5.259294479098564e-05,
+              "maximum_coordinates_m": [
+                5.11451177951604,
+                -3.414398514247222
+              ],
+              "maximum_psi_norm": 0.999947407055209
+            },
+            {
+              "angular_slot": 5743,
+              "area_uncertainty_m2": 2.1919859985272487e-09,
+              "current_uncertainty_bound_a": 0.007501332804339145,
+              "distance_to_saddle_m": 0.008057541782607338,
+              "level_deficit": 4.7839595473275764e-05,
+              "maximum_coordinates_m": [
+                5.11741430535822,
+                -3.4157531146852644
+              ],
+              "maximum_psi_norm": 0.9999521604045267
+            },
+            {
+              "angular_slot": 5744,
+              "area_uncertainty_m2": 1.7215662493659637e-09,
+              "current_uncertainty_bound_a": 0.005891479867977575,
+              "distance_to_saddle_m": 0.01126148548832133,
+              "level_deficit": 4.072347294903356e-05,
+              "maximum_coordinates_m": [
+                5.120316844850987,
+                -3.417109775073036
+              ],
+              "maximum_psi_norm": 0.999959276527051
+            },
+            {
+              "angular_slot": 5745,
+              "area_uncertainty_m2": 1.156771146838487e-09,
+              "current_uncertainty_bound_a": 0.00395865911402841,
+              "distance_to_saddle_m": 0.014466324011688481,
+              "level_deficit": 3.124116926367382e-05,
+              "maximum_coordinates_m": [
+                5.123219400264879,
+                -3.418468515620464
+              ],
+              "maximum_psi_norm": 0.9999687588307363
+            },
+            {
+              "angular_slot": 5746,
+              "area_uncertainty_m2": 5.655864188204064e-10,
+              "current_uncertainty_bound_a": 0.0019355287670800663,
+              "distance_to_saddle_m": 0.0176720671759181,
+              "level_deficit": 1.9389277652992476e-05,
+              "maximum_coordinates_m": [
+                5.126121977734397,
+                -3.419829344453799
+              ],
+              "maximum_psi_norm": 0.999980610722347
+            },
+            {
+              "angular_slot": 5747,
+              "area_uncertainty_m2": 7.774730222049605e-11,
+              "current_uncertainty_bound_a": 0.00026606392056670195,
+              "distance_to_saddle_m": 0.020878725884926123,
+              "level_deficit": 5.164392007261931e-06,
+              "maximum_coordinates_m": [
+                5.129024581032704,
+                -3.4211922772887
+              ],
+              "maximum_psi_norm": 0.9999948356079927
+            }
+          ],
+          "saddle_throat_cuts": 14,
+          "saddle_throat_radius_m": 0.021854856597852468
+        },
+        "well_below_representation_term": true
+      }
+    ],
+    "refinement_threshold_fraction_of_representation_term": 0.01,
+    "root_diagnostics": {
+      "bounded_maximum_double_roots": 0,
+      "current_density_absolute_bound_a_per_m2": 3422162.7370700086,
+      "distinct_boundary_points": 8192,
+      "exact_saddle_tangencies": 0,
+      "maximum_far_root_separation_m": 0.0,
+      "near_root_selected_for_every_double_root": true,
+      "oracle_area_uncertainty_m2": 2.1998797497626644e-08,
+      "oracle_current_uncertainty_bound_a": 0.07528346505672685,
+      "oracle_uncertainty_far_below_representation_term": true,
+      "oracle_uncertainty_fraction_of_representation_term": 0.00012116511136103524,
+      "oracle_uncertainty_model": "per grazing ray: 2*flux_span/min_abs_hessian_eigenvalue times level_deficit**1.5 times angular_step",
+      "ordinary_sign_change_roots": 8178,
+      "requested_angular_points": 8192,
+      "saddle_branch": "finite_below_level_throat_cut",
+      "saddle_level_offset": -5.530053327573725e-05,
+      "saddle_level_roundoff_tolerance": 1.1368683772161603e-13,
+      "saddle_psi_norm": 0.9999446994667243,
+      "saddle_throat_cut_receipts": [
+        {
+          "angular_slot": 5734,
+          "area_uncertainty_m2": 9.662419495413375e-11,
+          "current_uncertainty_bound_a": 0.00033066371947142447,
+          "distance_to_saddle_m": 0.02073938795884057,
+          "level_deficit": 5.969705504260681e-06,
+          "maximum_coordinates_m": [
+            5.091291408208717,
+            -3.4036346868497547
+          ],
+          "maximum_psi_norm": 0.9999940302944957
+        },
+        {
+          "angular_slot": 5735,
+          "area_uncertainty_m2": 5.923189766237753e-10,
+          "current_uncertainty_bound_a": 0.002027011930261325,
+          "distance_to_saddle_m": 0.017543038234444988,
+          "level_deficit": 1.9995521987614673e-05,
+          "maximum_coordinates_m": [
+            5.094194019920156,
+            -3.404973165923181
+          ],
+          "maximum_psi_norm": 0.9999800044780124
+        },
+        {
+          "angular_slot": 5736,
+          "area_uncertainty_m2": 1.1815618456243725e-09,
+          "current_uncertainty_bound_a": 0.004043496919639394,
+          "distance_to_saddle_m": 0.014345883963672422,
+          "level_deficit": 3.1685941824344255e-05,
+          "maximum_coordinates_m": [
+            5.097096601937735,
+            -3.406313626101689
+          ],
+          "maximum_psi_norm": 0.9999683140581757
+        },
+        {
+          "angular_slot": 5737,
+          "area_uncertainty_m2": 1.741519278489708e-09,
+          "current_uncertainty_bound_a": 0.005959762380736526,
+          "distance_to_saddle_m": 0.011147915433278942,
+          "level_deficit": 4.1037526146592285e-05,
+          "maximum_coordinates_m": [
+            5.09999915967612,
+            -3.4076560769668176
+          ],
+          "maximum_psi_norm": 0.9999589624738534
+        },
+        {
+          "angular_slot": 5738,
+          "area_uncertainty_m2": 2.2062453232893538e-09,
+          "current_uncertainty_bound_a": 0.007550130534195801,
+          "distance_to_saddle_m": 0.00794912311149546,
+          "level_deficit": 4.804684219228417e-05,
+          "maximum_coordinates_m": [
+            5.102901699099792,
+            -3.409000526468956
+          ],
+          "maximum_psi_norm": 0.9999519531578077
+        },
+        {
+          "angular_slot": 5739,
+          "area_uncertainty_m2": 2.535138960951525e-09,
+          "current_uncertainty_bound_a": 0.008675658085462688,
+          "distance_to_saddle_m": 0.004749497181024487,
+          "level_deficit": 5.271046263144452e-05,
+          "maximum_coordinates_m": [
+            5.10580422554944,
+            -3.4103469845663974
+          ],
+          "maximum_psi_norm": 0.9999472895373686
+        },
+        {
+          "angular_slot": 5740,
+          "area_uncertainty_m2": 2.7039346374713405e-09,
+          "current_uncertainty_bound_a": 0.009253304359827325,
+          "distance_to_saddle_m": 0.0015490277795196668,
+          "level_deficit": 5.502496490783493e-05,
+          "maximum_coordinates_m": [
+            5.108706744359957,
+            -3.4116954613192823
+          ],
+          "maximum_psi_norm": 0.9999449750350922
+        },
+        {
+          "angular_slot": 5741,
+          "area_uncertainty_m2": 2.701131604909694e-09,
+          "current_uncertainty_bound_a": 0.009243711926244064,
+          "distance_to_saddle_m": 0.0016522949849547726,
+          "level_deficit": 5.498693059868831e-05,
+          "maximum_coordinates_m": [
+            5.111609260899235,
+            -3.413045966769285
+          ],
+          "maximum_psi_norm": 0.9999450130694013
+        },
+        {
+          "angular_slot": 5742,
+          "area_uncertainty_m2": 2.5266655595401393e-09,
+          "current_uncertainty_bound_a": 0.008646660726896408,
+          "distance_to_saddle_m": 0.004854481476794269,
+          "level_deficit": 5.259294479098564e-05,
+          "maximum_coordinates_m": [
+            5.11451177951604,
+            -3.414398514247222
+          ],
+          "maximum_psi_norm": 0.999947407055209
+        },
+        {
+          "angular_slot": 5743,
+          "area_uncertainty_m2": 2.1919859985272487e-09,
+          "current_uncertainty_bound_a": 0.007501332804339145,
+          "distance_to_saddle_m": 0.008057541782607338,
+          "level_deficit": 4.7839595473275764e-05,
+          "maximum_coordinates_m": [
+            5.11741430535822,
+            -3.4157531146852644
+          ],
+          "maximum_psi_norm": 0.9999521604045267
+        },
+        {
+          "angular_slot": 5744,
+          "area_uncertainty_m2": 1.7215662493659637e-09,
+          "current_uncertainty_bound_a": 0.005891479867977575,
+          "distance_to_saddle_m": 0.01126148548832133,
+          "level_deficit": 4.072347294903356e-05,
+          "maximum_coordinates_m": [
+            5.120316844850987,
+            -3.417109775073036
+          ],
+          "maximum_psi_norm": 0.999959276527051
+        },
+        {
+          "angular_slot": 5745,
+          "area_uncertainty_m2": 1.156771146838487e-09,
+          "current_uncertainty_bound_a": 0.00395865911402841,
+          "distance_to_saddle_m": 0.014466324011688481,
+          "level_deficit": 3.124116926367382e-05,
+          "maximum_coordinates_m": [
+            5.123219400264879,
+            -3.418468515620464
+          ],
+          "maximum_psi_norm": 0.9999687588307363
+        },
+        {
+          "angular_slot": 5746,
+          "area_uncertainty_m2": 5.655864188204064e-10,
+          "current_uncertainty_bound_a": 0.0019355287670800663,
+          "distance_to_saddle_m": 0.0176720671759181,
+          "level_deficit": 1.9389277652992476e-05,
+          "maximum_coordinates_m": [
+            5.126121977734397,
+            -3.419829344453799
+          ],
+          "maximum_psi_norm": 0.999980610722347
+        },
+        {
+          "angular_slot": 5747,
+          "area_uncertainty_m2": 7.774730222049605e-11,
+          "current_uncertainty_bound_a": 0.00026606392056670195,
+          "distance_to_saddle_m": 0.020878725884926123,
+          "level_deficit": 5.164392007261931e-06,
+          "maximum_coordinates_m": [
+            5.129024581032704,
+            -3.4211922772887
+          ],
+          "maximum_psi_norm": 0.9999948356079927
+        }
+      ],
+      "saddle_throat_cuts": 14,
+      "saddle_throat_radius_m": 0.021854856597852468
+    },
+    "saddle": {
+      "coordinates_m": [
+        5.1101112852782995,
+        -3.412348723801311
+      ],
+      "derivative_authority": "exact first and second derivatives of the RectBivariateSpline evaluated by case.flux",
+      "final_gradient_norm_wb_per_m": 6.39199559631279e-15,
+      "flux_wb": -4.716267526996987,
+      "genuine_saddle": true,
+      "gradient_norm_history_wb_per_m": [
+        0.006400895791678405,
+        3.9184018507835407e-07,
+        6.39199559631279e-15
+      ],
+      "hessian_determinant_wb2_per_m4": -354.52263783288987,
+      "hessian_eigenvalues_wb_per_m2": [
+        -18.830238611825695,
+        18.82730458923892
+      ],
+      "hessian_wb_per_m2": [
+        [
+          13.84438447608831,
+          -12.759899551892328
+        ],
+        [
+          -12.759899551892328,
+          -13.847318498675083
+        ]
+      ],
+      "machine_gradient_scale_wb_per_m": 1.6442840340556913e-12,
+      "newton_corrections": 3,
+      "seed_coordinates_m": [
+        5.110385318980776,
+        -3.4125499207818475
+      ],
+      "source_psi_norm": 0.9999446994667243,
+      "step_norm_history_m": [
+        0.000339949700046205,
+        2.080962970719207e-08,
+        3.395043150439851e-16
+      ]
+    },
+    "verdict": "The analytic-core current differs materially from the banked all-support-cell total, while angular refinement and throat ambiguity are both far below the representation term; the difference is a target-topology term, not oracle noise."
+  },
+  "curved_chord_coarse_prototype": {
+    "absolute_deficit_a": 9408.673707377166,
+    "analytic_total_current_a": -15005421.582465796,
+    "arc_points": 8192,
+    "deficit_percent": 0.06270182850691401,
+    "exact_deficit_change_from_straight_a": 0.5448444057255983,
+    "intersection_polygon_pieces": 431,
+    "like_for_like_straight_to_curved_reduction_factor": 0.9998310771467601,
+    "relative_deficit": 0.0006270182850691401,
+    "shared_analytic_core_comparison": {
+      "absolute_deficit_a": 3225.4037584364414,
+      "analytic_total_current_a": -14999238.312516855,
+      "deficit_percent": 0.02150378366710024,
+      "relative_deficit": 0.00021503783667100243,
+      "support_current_a": -14996012.908758419
+    },
+    "straight_to_curved_deficit_reduction_factor": 0.999942091263586,
+    "support_current_a": -14996012.908758419,
+    "topology_qualified_banked_oracle_comparison": {
+      "absolute_deficit_a": 186.4829288367182,
+      "analytic_total_current_a": -14995826.425829582,
+      "deficit_percent": 0.001243565533110669,
+      "relative_deficit": 1.2435655331106689e-05,
+      "support_current_a": -14996012.908758419
+    },
+    "topology_qualified_straight_to_curved_reduction_factor": 1.002921685159732,
+    "verdict": "Negative prototype: analytic-arc intersection slightly increases the unqualified all-support deficit and improves the topology-qualified residual by only 1.002922 times."
+  },
+  "gate_recommendation": {
+    "adoption_status": "recommend topology-qualified target; hold all-support target",
+    "candidate_only_no_bound_applied": true,
+    "combined_measured_floor_percent": 0.005386863748142012,
+    "corrected_geometry_residual_percent": 0.001243565533110669,
+    "headroom_policy": "two times the measured representation plus corrected-geometry floor, rounded upward to 0.001 percentage point",
+    "recommendation": "Do not promote the curved-chord prototype: it does not reduce the coverage floor, and the two-grid result refutes the expected h scaling on these fixtures. The dominant 0.0627 percent term is a target-topology mismatch: the all-support target includes current in 17 cells production correctly classifies as topology-zero. Against the topology-qualified analytic target, 0.011 percent is the evidence-backed candidate with the stated two-times headroom. Hold the 0.134 percent all-support counterfactual; it would turn a known oracle artifact into a gate.",
+    "recommended_attributed_vs_analytic_total_current_gate_percent": 0.011,
+    "recommended_relative_gate": 0.00010999999999999999,
+    "recommended_target": "topology-qualified banked analytic cell-current total",
+    "representation_error_percent": 0.0041432982150313435,
+    "unqualified_all_support_target": {
+      "candidate_gate_percent": 0.134,
+      "combined_measured_floor_percent": 0.06684512672194536,
+      "corrected_geometry_residual_percent": 0.06270182850691401,
+      "status": "hold because the target includes topology-zero leg current"
+    }
+  },
+  "inputs": {
+    "coarse_fixture": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/support-coverage-scaling/scripts/ring_quadrature/inputs/coarse-fixture-reference-inputs.npz",
+    "exact_total_current_authority": "binary64 sum of source-shift-localization analytic_m0 over the banked 566 support cells",
+    "fine_state_bank": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-nova/4c0db14a-a820-4e6a-a348-0801eab85fba/scratchpad/flux-state-bank/fine_homotopy_t5875.npz",
+    "localization_bank": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/support-coverage-scaling/scripts/ring_quadrature/inputs/source-shift-localization.npz",
+    "reference_module": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/support-coverage-scaling/tests/test_equilibrium_forward_reference.py",
+    "source_axis_flux_wb": -86.01817570002173,
+    "source_boundary_flux_wb": -4.7117712394715845
+  },
+  "method": {
+    "arc_root_absolute_tolerance_m": 2e-14,
+    "current_quadrature": "degree-three four-point triangle rule after four uniform subdivisions",
+    "curved_chord": "Equivalent exact construction: first radial roots of the analytic source psi_norm=1 contour form a densely subdivided core arc, then each authored coarse material cell is intersected with that core before the same polygon-current integration.",
+    "straight_chord": "Production shared-node quadratic reconstruction clipped at the recovered source boundary; current integrated over the resulting piecewise-linear support polygons with the banked Solovev oracle.",
+    "topology": "Straight supports below the analytic lower X point are zeroed; the curved core is the first outward root about the magnetic axis and therefore excludes the private-flux legs by construction."
+  },
+  "schema": "nova.support-coverage-scaling.v1",
+  "straight_chord_scaling": {
+    "coarse": {
+      "absolute_deficit_a": 9408.12886297144,
+      "analytic_total_current_a": -15005421.582465796,
+      "deficit_percent": 0.06269819752325433,
+      "hex_circumradius_m": 0.1468144578444171,
+      "nonempty_supports": 447,
+      "realised_cells": 566,
+      "relative_deficit": 0.0006269819752325432,
+      "requested_cells": -500,
+      "shared_analytic_core_comparison": {
+        "absolute_deficit_a": 3224.858914030716,
+        "analytic_total_current_a": -14999238.312516855,
+        "deficit_percent": 0.021500151186607742,
+        "relative_deficit": 0.00021500151186607742,
+        "support_current_a": -14996013.453602824
+      },
+      "support_current_a": -14996013.453602824,
+      "topology_qualified_banked_oracle_comparison": {
+        "absolute_deficit_a": 187.0277732424438,
+        "analytic_total_current_a": -14995826.425829582,
+        "deficit_percent": 0.0012471988400739125,
+        "relative_deficit": 1.2471988400739125e-05,
+        "support_current_a": -14996013.453602824
+      },
+      "topology_zero_lower_leg_supports": 17
+    },
+    "fine": {
+      "absolute_deficit_a": 9407.071426449344,
+      "analytic_total_current_a": -15005421.582465796,
+      "banked_node_coordinate_sup_delta_m": 0.0,
+      "banked_realised_cells": 1069,
+      "deficit_percent": 0.06269115049351054,
+      "hex_circumradius_m": 0.10381349871801371,
+      "nonempty_supports": 862,
+      "realised_cells": 1069,
+      "relative_deficit": 0.0006269115049351054,
+      "requested_cells": -1000,
+      "shared_analytic_core_comparison": {
+        "absolute_deficit_a": 3223.8014775086194,
+        "analytic_total_current_a": -14999238.312516855,
+        "deficit_percent": 0.02149310125180396,
+        "relative_deficit": 0.0002149310125180396,
+        "support_current_a": -14996014.511039346
+      },
+      "support_current_a": -14996014.511039346,
+      "topology_zero_lower_leg_supports": 26
+    },
+    "fine_support_current_change_from_coarse_a": -1.0574365220963955,
+    "fine_to_coarse_exact_deficit_ratio": 0.9998876039499992,
+    "fitted_deficit_order": 0.0009462792874987798,
+    "fitted_deficit_order_against_exact_total_control": 0.00032432467465112936,
+    "h_ratio_coarse_over_fine": 1.414213562373097,
+    "scaling_target": "one saddle-aware analytic-core current shared by the coarse and fine straight-support arms and the curved-support arm",
+    "verdict": "No material h-scaling is resolved over the banked pair: the exact-total deficit changes by only 1.057437 A out of 9408 A and both fitted orders are approximately zero."
+  },
+  "topology_decomposition": {
+    "banked_all_support_cell_current_a": -15005421.582465796,
+    "coarse_straight_vs_topology_qualified_oracle": {
+      "absolute_deficit_a": 187.0277732424438,
+      "analytic_total_current_a": -14995826.425829582,
+      "deficit_percent": 0.0012471988400739125,
+      "relative_deficit": 1.2471988400739125e-05,
+      "support_current_a": -14996013.453602824
+    },
+    "curved_vs_topology_qualified_oracle": {
+      "absolute_deficit_a": 186.4829288367182,
+      "analytic_total_current_a": -14995826.425829582,
+      "deficit_percent": 0.001243565533110669,
+      "relative_deficit": 1.2435655331106689e-05,
+      "support_current_a": -14996012.908758419
+    },
+    "topology_excluded_lower_leg_current_a": -9595.156636214253,
+    "topology_qualified_banked_analytic_current_a": -14995826.425829582,
+    "topology_zero_lower_leg_cells": 17
+  },
+  "validation": {
+    "banked_analytic_cell_current_sum_exact": true,
+    "coarse_centroid_flux_bitwise_exact": true,
+    "coarse_reference_absolute_deficit_a": 9408.12886297144,
+    "coarse_reference_deficit_percent": 0.06269819752325878,
+    "coarse_reference_reproduced": true,
+    "coarse_support_vertex_counts_exact": true,
+    "initial_arc_refinement_delta_a": 1.5703263115137815,
+    "initial_arc_refinement_pair_is_4096_8192": true,
+    "no_bound_moved_or_applied": true,
+    "oracle_uncertainty_bound_a": 0.07528346505672685
+  }
+}

@@ -112,12 +112,25 @@ class BiotPlasma(Flux, BiotBase):
     @frame_factory(PlasmaGrid)
     def plasmagrid(self):
         """Return plasma grid biot instance."""
-        return self.field_kwargs
+        return {
+            **self.field_kwargs,
+            "attrs": [
+                "Br",
+                "BrR",
+                "BrZ",
+                "Bz",
+                "BzR",
+                "BzZ",
+                "Psi",
+                "PsiR",
+                "PsiZ",
+            ],
+        }
 
     @frame_factory(PlasmaWall)
     def plasmawall(self):
         """Return plasma firstwall biot instance."""
-        return {"number": self.nwall, "attrs": ["Psi"]}
+        return {"number": self.nwall, "attrs": ["Psi", "PsiR", "PsiZ"]}
 
 
 @dataclass

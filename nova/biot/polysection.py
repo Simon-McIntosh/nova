@@ -304,6 +304,14 @@ class PolySection(Matrix):
             )
         return geometry
 
+    @staticmethod
+    def _material_area_centroid(material: Polygon | MultiPolygon) -> np.ndarray:
+        """Return the authored material's area centroid as an expansion point."""
+        if isinstance(material, Polygon) and len(material.interiors) == 0:
+            vertices = np.asarray(material.exterior.coords, dtype=np.float64)[:-1, :2]
+            return section_centroid(vertices)
+        return np.asarray(material.centroid.coords[0], dtype=np.float64)
+
     @cached_property
     def _section_components(self) -> list[tuple[tuple[np.ndarray, float], ...]]:
         """Return positive simple components and normalized source-current weights."""
@@ -367,11 +375,7 @@ class PolySection(Matrix):
             zip(np.asarray(self.source["poly"]), self._section_components, strict=True)
         ):
             material = self._material_geometry(source_value)
-            expansion_point = (
-                section_centroid(components[0][0])
-                if len(components) == 1
-                else np.asarray(material.centroid.coords[0], dtype=np.float64)
-            )
+            expansion_point = self._material_area_centroid(material)
             for vertices, weight in components:
                 flux = polygon_analytic_flux_moments(
                     target_r[:, column],

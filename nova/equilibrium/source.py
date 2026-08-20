@@ -55,6 +55,7 @@ from nova.equilibrium.convention import (
 )
 from nova.equilibrium.domain import DomainMasks, PlasmaDomain
 from nova.equilibrium.observation import gradient_tail
+from nova.equilibrium.stencil_mesh import CellCurrentMoments
 
 __all__ = [
     "ContinuationForm",
@@ -563,3 +564,76 @@ class ForwardSource:
         outside the declared support carries exactly zero.
         """
         return self.current_density(radius, masks) * area
+
+    def current_moments(
+        self,
+        masks: DomainMasks,
+        support_moments,
+        core_support,
+        common_support,
+        *,
+        sample_flux=None,
+    ) -> CellCurrentMoments:
+        """Return current moments selected by the shared-node clip partition.
+
+        The complementary core and common-SOL clips decide participation for
+        every cell. One clip-independent own-node density is integrated over the actual
+        support at every fill fraction; there is no separate full-cell and
+        clipped evaluation path. Centroid domain labels remain available for
+        closure identity and receipts, but never switch geometric
+        participation on or off.
+        """
+
+        def partitioned_moments(
+            profile,
+            centroid_flux,
+            direct_flux,
+            support,
+            selection,
+        ):
+            moments = support_moments(
+                profile,
+                centroid_flux,
+                direct_flux,
+                support,
+            )
+            return CellCurrentMoments(
+                *(jnp.where(selection, entry, 0.0) for entry in moments)
+            )
+
+        closed_branch = masks.core | masks.common_sol
+
+        core = partitioned_moments(
+            self.core,
+            masks.psi_norm,
+            sample_flux,
+            core_support,
+            closed_branch,
+        )
+        total = jnp.stack(core)
+
+        if self.common_sol is not None:
+            common = partitioned_moments(
+                self.common_sol,
+                masks.psi_norm,
+                sample_flux,
+                common_support,
+                closed_branch,
+            )
+            total = total + jnp.stack(common)
+
+        if self.private_flux is not None:
+            centroid_selection = masks.private_flux
+            private = support_moments(
+                self.private_flux,
+                jnp.maximum(masks.psi_norm, 1.0),
+                jnp.maximum(sample_flux, 1.0),
+                common_support,
+            )
+            total = total + jnp.stack(
+                CellCurrentMoments(
+                    *(jnp.where(centroid_selection, entry, 0.0) for entry in private)
+                )
+            )
+
+        return CellCurrentMoments(*total)

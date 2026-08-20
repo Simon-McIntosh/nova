@@ -1,0 +1,79 @@
+{
+  "inputs": {
+    "fixture": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/57d0f89f-c6af-4053-b5de-b938e7dd5877/zero-current-leg-attribution/scripts/ring_quadrature/inputs/coarse-fixture-reference-inputs.npz",
+    "localization": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/57d0f89f-c6af-4053-b5de-b938e7dd5877/zero-current-leg-attribution/scripts/ring_quadrature/inputs/source-shift-localization.npz",
+    "ring_fields": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/57d0f89f-c6af-4053-b5de-b938e7dd5877/zero-current-leg-attribution/scripts/ring_quadrature/results/ring-quadrature-fields.npz"
+  },
+  "population": {
+    "nonempty_cells": 447,
+    "stencil_available_cells": 351,
+    "ring_cells": 96,
+    "topology_zero_lower_leg_cells": 17,
+    "private_flux_cells": 11,
+    "open_divertor_leg_cells": 6,
+    "metric_artifact_cells": 15,
+    "no_relative_signal_cells": 2,
+    "corrected_ring_current_bearing_cells": 73
+  },
+  "probe": {
+    "source_declares_common_sol": false,
+    "source_declares_private_flux": false,
+    "support_node_psi_norm": 0.9,
+    "private_flux_core_node_density_sent_to_support_a_m2": -371252.7976578236,
+    "open_leg_core_node_density_sent_to_support_a_m2": -371252.7976578236,
+    "causal_function": "ForwardFluxOperator.cell_current_moments supplies a topology-unqualified core_support to ForwardSource.current_moments; its nested partitioned_moments evaluates the clipped core profile without a domain mask"
+  },
+  "current_weighted_error": {
+    "definition": "sum(abs(attributed - topology_oracle)) / sum(abs(topology_oracle))",
+    "interior_baseline": {
+      "cells": 351,
+      "current_bearing_cells": 350,
+      "oracle_absolute_current_a": 14316394.372488387,
+      "absolute_error_current_a": 109466.10409218803,
+      "signed_error_current_a": -67821.58874872755,
+      "l1_relative_error": 0.007646206247471605,
+      "maximum_cell_error_share": 0.00018627023566761912
+    },
+    "ring_baseline": {
+      "cells": 96,
+      "current_bearing_cells": 73,
+      "oracle_absolute_current_a": 679432.053341194,
+      "absolute_error_current_a": 679432.053341194,
+      "signed_error_current_a": 679432.053341194,
+      "l1_relative_error": 1.0,
+      "maximum_cell_error_share": 0.04276265286005408
+    },
+    "ring_own_geometry": {
+      "cells": 96,
+      "current_bearing_cells": 73,
+      "oracle_absolute_current_a": 679432.053341194,
+      "absolute_error_current_a": 84711.41456230715,
+      "signed_error_current_a": -44699.86046789054,
+      "l1_relative_error": 0.12467974412706603,
+      "maximum_cell_error_share": 0.0067747517512630724
+    },
+    "ring_one_sided": {
+      "cells": 96,
+      "current_bearing_cells": 73,
+      "oracle_absolute_current_a": 679432.053341194,
+      "absolute_error_current_a": 107412.85753587134,
+      "signed_error_current_a": -11989.690994446695,
+      "l1_relative_error": 0.1580921256329531,
+      "maximum_cell_error_share": 0.008638014676315734
+    }
+  },
+  "lower_leg_attribution": {
+    "topology_oracle_total_current_a": 0.0,
+    "bank_support_oracle_total_current_a": -9595.156636214253,
+    "baseline_total_current_a": 0.0,
+    "own_geometry_total_current_a": -18024.645467451468,
+    "one_sided_total_current_a": -19631.348006618155,
+    "own_geometry_max_absolute_cell_current_a": 3789.5286681091234,
+    "one_sided_max_absolute_cell_current_a": 3811.4829594374805
+  },
+  "artifacts": {
+    "classification": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/57d0f89f-c6af-4053-b5de-b938e7dd5877/zero-current-leg-attribution/scripts/zero_current_audit/results/leg-cell-classification.csv",
+    "worst_cells": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/57d0f89f-c6af-4053-b5de-b938e7dd5877/zero-current-leg-attribution/scripts/zero_current_audit/results/worst-leg-cells.csv",
+    "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/57d0f89f-c6af-4053-b5de-b938e7dd5877/zero-current-leg-attribution/docs/figures/boundary-ring-source-completion/ring-m0-current-weighted-error.png"
+  }
+}

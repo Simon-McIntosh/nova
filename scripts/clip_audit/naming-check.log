@@ -1,0 +1,29 @@
+docs/research/hex-clip-current-attribution.html:18:    <h2 id="s1">§1 — Localisation verdict</h2>
+docs/research/hex-clip-current-attribution.html:57:    <h2 id="s2">§2 — Runtime call path, function by function</h2>
+docs/research/hex-clip-current-attribution.html:90:    <h2 id="s3">§3 — Suspected defects: reproduced or refuted</h2>
+docs/research/hex-clip-current-attribution.html:108:    <h2 id="s4">§4 — Reproducer and evidence boundaries</h2>
+docs/research/hex-clip-current-attribution.html:128:    <h2 id="s5">§5 — Closed verification ladder ready to implement</h2>
+docs/research/hex-clip-current-attribution.html:209:    <h2 id="s6">§6 — Consequence for the implementation order</h2>
+scripts/clip_audit/audit_hex_clip.py:484:    ax.plot(closed_hex[:, 0], closed_hex[:, 1], color="#18324a", lw=2.0)
+scripts/clip_audit/audit_hex_clip.py:485:    ax.fill(closed_clip[:, 0], closed_clip[:, 1], color="#52b69a", alpha=0.48)
+scripts/clip_audit/audit_hex_clip.py:486:    ax.plot(closed_clip[:, 0], closed_clip[:, 1], color="#16856f", lw=1.6)
+scripts/clip_audit/audit_hex_clip.py:496:        color="#18324a",
+scripts/clip_audit/audit_hex_clip.py:503:        color="#16856f",
+scripts/clip_audit/audit_hex_clip.py:519:        color="#71212d",
+scripts/clip_audit/audit_hex_clip.py:548:    ax.plot(closed_hex[:, 0], closed_hex[:, 1], color="#18324a", lw=1.4)
+scripts/clip_audit/audit_hex_clip.py:564:        edgecolor="#202830",
+scripts/clip_audit/audit_hex_clip.py:599:        edgecolor="#202830",
+docs/research/hex-clip-current-attribution.html:78:        <tr><td>12</td><td><code>ForwardFluxOperator.internal</code> → <code>FluxTarget.internal</code><br><code>nova/biot/target.py</code></td><td><code>G0@m0 + GR@radial + GZ@vertical</code> gives plasma flux on grid and wall targets.</td></tr>
+docs/research/hex-clip-current-attribution.html:98:        <tr><td>Net current of a clipped affine density</td><td><strong>Refuted</strong></td><td>For <code>j=j0+g·(x-c)</code>, the independent identity <code>I=j0*A+g·Q1</code> agreed with the default cubic support path to <code>1.16e-15</code> of full-cell current.</td></tr>
+docs/research/hex-clip-current-attribution.html:99:        <tr><td>Moving-origin or current-centroid error</td><td><strong>Refuted</strong></td><td>The independent first moment <code>m=j0*Q1+Q2@g</code> agreed to <code>5.74e-16</code> of full-cell first-moment scale. Even the smallest numerically resolved slivers kept derived centroid error below <code>4.97e-7 m</code>; ordinary cuts were at round-off.</td></tr>
+docs/research/hex-clip-current-attribution.html:102:        <tr><td>Shared-node flux reconstruction moves a curved boundary</td><td><strong>Reproduced as coarse-order truncation, not a clip algebra error</strong></td><td>The ring is exact to <code>1.67e-16</code> on a general quadratic. On <code>q=((R²-R0²)²)/(8R0²)+Z²/2</code>, its quartic radial term produced <code>1.464e-3 Wb</code> maximum shared-node error on a 0.24 m ring, 1.011 times the exact six-vertex flux spread. The curved Solov'ev rung must measure convergence and induced intersection displacement.</td></tr>
+docs/research/hex-clip-current-attribution.html:130:    <p>Use fixed centroid <code>c=(R0,Z0)</code>, circumradius <code>a</code>, and vertices
+docs/research/hex-clip-current-attribution.html:134:    <code>A=integral dA</code>, <code>Q1=integral x dA=0</code>, and
+docs/research/hex-clip-current-attribution.html:135:    <code>Q2=integral x x^T dA</code>. The oracle is
+docs/research/hex-clip-current-attribution.html:136:    <code>I=j0*A+g·Q1</code> and <code>m1=j0*Q1+Q2@g</code>. Run at three radii and
+docs/research/hex-clip-current-attribution.html:157:    <code>q(R,Z)=((R²-R0²)²)/(8R0²)+Z²/2</code>. It obeys
+docs/research/hex-clip-current-attribution.html:158:    <code>DeltaStar(q)=R²/R0²+1</code>. Choose <code>R0=6.2 m</code> and set
+docs/research/hex-clip-current-attribution.html:159:    <code>q_b=((R0+a)²-R0²)²/(8R0²)</code> with <code>a=0.8 m</code>; the exact LCFS is
+docs/research/hex-clip-current-attribution.html:161:    <code>j_phi=-(R²/R0²+1)/(mu0*R)</code>, obtained from
+docs/research/hex-clip-current-attribution.html:165:    <code>|Z| &lt;= sqrt(2*(q_b-(R²-R0²)²/(8R0²)))</code>; integrate <code>j_phi</code>,
+EXIT_MARKER=0

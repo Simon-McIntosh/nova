@@ -1,0 +1,12 @@
+warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/nova/.venv` and will be ignored; use `--active` to target the active environment instead
+09:43:16 INFO     Parsing data dictionary version 3.39.0 [90m@dd_zip.py:89[0m
+INFO:imas.dd_zip:Parsing data dictionary version 3.39.0
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/saddle-gap-current-check/scripts/saddle_gap_check/measure_saddle_gap.py", line 546, in <module>
+    main()
+    ~~~~^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/saddle-gap-current-check/scripts/saddle_gap_check/measure_saddle_gap.py", line 436, in main
+    raise AssertionError(
+        f"spatial core decomposition misses by {decomposition_residual:.6f} A"
+    )
+AssertionError: spatial core decomposition misses by 2133362.305758 A

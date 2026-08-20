@@ -1,0 +1,100 @@
+warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/nova/.venv` and will be ignored; use `--active` to target the active environment instead
+22:27:44 INFO     Parsing data dictionary version 3.39.0 [90m@dd_zip.py:89[0m
+INFO:imas.dd_zip:Parsing data dictionary version 3.39.0
+BUILD fixture=coarse requested=-500 wall_nodes=3
+plasmagrid:   0%|                          | 0/4 [00:00<?, ?it/s]plasmagrid:  25%|████▌             | 1/4 [00:16<00:48, 16.13s/it]plasmagrid:  50%|█████████         | 2/4 [00:18<00:16,  8.27s/it]plasmagrid:  75%|█████████████▌    | 3/4 [03:13<01:24, 84.37s/it]plasmagrid: 100%|██████████████████| 4/4 [03:35<00:00, 59.57s/it]plasmagrid: 100%|██████████████████| 4/4 [03:35<00:00, 53.85s/it]
+plasmagrid:   0%|                          | 0/4 [00:00<?, ?it/s]plasmagrid:  25%|████▌             | 1/4 [00:34<01:42, 34.15s/it]plasmagrid:  50%|█████████         | 2/4 [00:43<00:39, 19.82s/it]plasmagrid:  75%|████████████▊    | 3/4 [06:47<02:56, 176.56s/it]plasmagrid: 100%|█████████████████| 4/4 [07:32<00:00, 124.79s/it]plasmagrid: 100%|█████████████████| 4/4 [07:32<00:00, 113.11s/it]
+plasmawall:   0%|                          | 0/4 [00:00<?, ?it/s]plasmawall:  25%|████▌             | 1/4 [00:09<00:27,  9.25s/it]plasmawall:  50%|█████████         | 2/4 [00:10<00:08,  4.28s/it]plasmawall:  75%|████████████▊    | 3/4 [06:32<02:56, 176.81s/it]plasmawall: 100%|█████████████████| 4/4 [08:10<00:00, 145.66s/it]plasmawall: 100%|█████████████████| 4/4 [08:10<00:00, 122.52s/it]
+RESIDUAL fixture=coarse rebuilt=1.1974433135758919e-15 banked=1.625101639852996e-15 difference=-4.2765832627710411e-16 pass=True
+GATES fixture=coarse passed=11/11 field=0.0319377107906 li=0.00990827122086 receipt=0 ip=0.0111875291997
+BUILD fixture=fine requested=-1000 wall_nodes=6
+plasmagrid:   0%|                          | 0/5 [00:00<?, ?it/s]plasmagrid:  20%|███▌              | 1/5 [01:05<04:22, 65.53s/it]plasmagrid:  40%|███████▏          | 2/5 [01:24<01:53, 37.93s/it]plasmagrid:  60%|██████████▏      | 3/5 [05:39<04:34, 137.32s/it]plasmagrid:  80%|█████████████▌   | 4/5 [20:17<07:09, 429.61s/it]plasmagrid: 100%|█████████████████| 5/5 [22:17<00:00, 318.03s/it]plasmagrid: 100%|█████████████████| 5/5 [22:17<00:00, 267.52s/it]
+plasmagrid:   0%|                          | 0/5 [00:00<?, ?it/s]plasmagrid:  20%|███▍             | 1/5 [02:18<09:15, 138.92s/it]plasmagrid:  40%|███████▏          | 2/5 [02:42<03:33, 71.15s/it]plasmagrid:  60%|██████████▏      | 3/5 [31:06<27:13, 816.74s/it]plasmagrid:  60%|██████████▏      | 3/5 [33:13<22:09, 664.54s/it]
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/observation-clip-rescore/scripts/observation_clip_rescore/measure.py", line 687, in <module>
+    main()
+    ~~~~^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/observation-clip-rescore/scripts/observation_clip_rescore/measure.py", line 651, in main
+    report["fixtures"][name] = measure_fixture(
+                               ~~~~~~~~~~~~~~~^
+        reference,
+        ^^^^^^^^^^
+    ...<5 lines>...
+        residual,
+        ^^^^^^^^^
+    )
+    ^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/observation-clip-rescore/scripts/observation_clip_rescore/measure.py", line 412, in measure_fixture
+    machine = reference.build_machine(case, requested, passive=True)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/observation-clip-rescore/tests/test_equilibrium_forward_reference.py", line 916, in build_machine
+    coilset.plasmagrid.solve()
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/observation-clip-rescore/nova/biot/plasmagrid.py", line 107, in solve
+    self._build_direct_samples(target)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/observation-clip-rescore/nova/biot/plasmagrid.py", line 236, in _build_direct_samples
+    self.sample_data = Solve(
+                       ~~~~~^
+        self.subframe,
+        ^^^^^^^^^^^^^^
+    ...<3 lines>...
+        name=self.name,
+        ^^^^^^^^^^^^^^^
+    ).data
+    ^
+  File "<string>", line 11, in __init__
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/observation-clip-rescore/nova/biot/solve.py", line 76, in __post_init__
+    self.compose()
+    ~~~~~~~~~~~~^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/observation-clip-rescore/nova/biot/solve.py", line 242, in compose
+    self.compute(batch)
+    ~~~~~~~~~~~~^^^^^^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/observation-clip-rescore/nova/biot/solve.py", line 352, in compute
+    matrix, target_plasma, plasma_source, plasma_plasma = generator.compute(
+                                                          ~~~~~~~~~~~~~~~~~^
+        attr
+        ^^^^
+    )
+    ^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/observation-clip-rescore/nova/biot/matrix.py", line 254, in compute
+    matrix = getattr(self, attr).copy()
+             ~~~~~~~^^^^^^^^^^^^
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/functools.py", line 1126, in __get__
+    val = self.func(instance)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/observation-clip-rescore/nova/biot/polysection.py", line 440, in BrR
+    return self._moment_coupling[2]
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/functools.py", line 1126, in __get__
+    val = self.func(instance)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/observation-clip-rescore/nova/biot/polysection.py", line 380, in _moment_coupling
+    flux = polygon_analytic_flux_moments(
+        target_r[:, column],
+    ...<2 lines>...
+        expansion_point=expansion_point,
+    )
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/observation-clip-rescore/nova/biot/polygonanalytic.py", line 1540, in polygon_analytic_flux_moments
+    high = edge.flux_and_moment_terms(
+        upper, area_centroid[0], target_z_minus_expansion_z
+    )
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/observation-clip-rescore/nova/biot/polygonanalytic.py", line 951, in flux_and_moment_terms
+    plane_residual = self._second_residual(vertex)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/observation-clip-rescore/nova/biot/polygonanalytic.py", line 599, in _second_residual
+    return graded_residual(
+        (
+    ...<15 lines>...
+        xp,
+    )
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/observation-clip-rescore/nova/biot/gradedresidual.py", line 187, in graded_residual
+    bounded = _regularised(numerator, denominator, model, sign, xp)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/observation-clip-rescore/nova/biot/gradedresidual.py", line 130, in _regularised
+    other = xp.where(positive, mirror, direct)
+KeyboardInterrupt
+Exception ignored in atexit callback <function clean_up at 0x7f56c46e1bc0>:
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/api.py", line 2765, in clean_up
+    clear_backends(_crash=True)
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/api.py", line 2743, in clear_backends
+    util.clear_all_caches()
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/util.py", line 320, in clear_all_caches
+    cache.cache_clear()
+KeyboardInterrupt: 

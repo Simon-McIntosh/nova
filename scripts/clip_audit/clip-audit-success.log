@@ -1,0 +1,56 @@
+An NVIDIA GPU may be present on this machine, but a CUDA-enabled jaxlib is not installed. Falling back to cpu.
+{
+  "chord_sweep": {
+    "chord_cases": 247,
+    "angles": 19,
+    "cuts_per_angle": 13,
+    "minimum_area_fraction": 2.6727589768243815e-10,
+    "maximum_area_error_m2": 1.5265566588595902e-16,
+    "maximum_first_area_error_m3": 2.0278928563700524e-17,
+    "maximum_second_area_error_m4": 3.737648415187499e-18,
+    "maximum_current_scaled_error": 1.1576212762238497e-15,
+    "maximum_first_current_scaled_error": 5.739701160313443e-16,
+    "maximum_current_centroid_error_m": 4.965259068043653e-07,
+    "maximum_partition_area_error_m2": 8.326672684688674e-17,
+    "maximum_partition_current_scaled_error": 8.103348933566948e-16,
+    "maximum_partition_first_current_scaled_error": 2.9995868495844107e-16,
+    "uncut_default_path_bitwise_unchanged": 1,
+    "coupling_first_moment_reconstruction_error_Am": 2.842170943040401e-14,
+    "quadratic_shared_flux_error_max": 1.6653345369377348e-16,
+    "solovev_shared_flux_error_max": 0.0014644011081142334,
+    "solovev_shared_flux_scale": 0.0014482179655542146,
+    "figure_angle_rad": 1.4881228359109546,
+    "figure_cutoff_m": 0.0382688445314561,
+    "figure_current_A": 76909.13083548628,
+    "figure_first_current_Am_r": -222.8358673330439,
+    "figure_first_current_Am_z": -5694.584549391153
+  },
+  "banked_fixture": {
+    "fixture_cells": 566,
+    "nonempty_support_cells": 447,
+    "stencil_available_cells": 351,
+    "stencil_unavailable_nonempty_cells": 96,
+    "omitted_exact_current_A": -689027.2099774083,
+    "omitted_exact_absolute_current_A": 689027.2099774083,
+    "retained_source_normalised_m0_relative_error_p95": 0.03939936632786559,
+    "retained_source_normalised_m0_relative_error_max": 1.3680678878585304,
+    "retained_exact_m0_relative_error_p95": 0.16079532413985334,
+    "retained_exact_m0_relative_error_max": 140.7726212403953,
+    "retained_exact_m0_relative_error_count": 350,
+    "banked_source_error_sup_Wb": 10.935349448551932,
+    "banked_legacy_coupling_error_sup_Wb": 0.0021853578130048845,
+    "banked_consistent_coupling_error_sup_Wb": 0.01336953862173118
+  },
+  "checks": {
+    "affine_current_at_roundoff": true,
+    "affine_first_moment_at_roundoff": true,
+    "complement_partition_at_roundoff": true,
+    "uncut_path_bitwise_unchanged": true,
+    "coupling_transform_at_roundoff": true,
+    "quadratic_shared_flux_at_roundoff": true,
+    "solovev_truncation_reproduced": true,
+    "fixture_availability_partition_reproduced": true,
+    "source_error_dominates_coupling": true
+  }
+}
+EXIT_MARKER=0

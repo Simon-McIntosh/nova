@@ -90,10 +90,12 @@ from nova.equilibrium.conservation import (
 from nova.equilibrium.domain import DomainMasks
 from nova.equilibrium.forward_operator import ForwardFluxOperator
 from nova.equilibrium.observation import (
+    ClippedIntegralMeasure,
     CurrentLedger,
     IntegralObservation,
     MomentTargets,
     current_ledger,
+    core_pressure,
     moment_residual,
     observe_moments,
     reject_unsupported_enforcement,
@@ -176,8 +178,9 @@ class ForwardProfile:
     :class:`~nova.equilibrium.source.ForwardSource` set the toroidal current
     density on the domains the topology read labels, and the equilibrium is
     the fixed point of the resulting write-then-read cycle. Fluxes are total
-    poloidal fluxes, :math:`\\Phi = 2 \\pi R A_\\phi` in Wb, concatenated over
-    the plasma grid nodes followed by the wall nodes.
+    poloidal fluxes, :math:`\\Phi = 2 \\pi R A_\\phi` in Wb. The physical grid
+    and wall prefix may be followed by fixed direct-sampling nodes used only
+    to construct the in-cell density on clipped supports.
 
     ``lattice`` is the mesh the plasma grid is carried on, meeting the
     :class:`~nova.equilibrium.conservation.FluxMesh` contract: a uniform
@@ -219,6 +222,10 @@ class ForwardProfile:
         source_to_wall,
         plasma_to_wall,
         wall_coordinate,
+        plasma_to_grid_r=None,
+        plasma_to_grid_z=None,
+        plasma_to_wall_r=None,
+        plasma_to_wall_z=None,
         polarity: int = 1,
         inside_material=None,
         maxsize: int = 5,
@@ -240,10 +247,26 @@ class ForwardProfile:
         )
         operator = ForwardFluxOperator(
             grid=FluxTarget(
-                jnp.asarray(source_to_grid), jnp.asarray(plasma_to_grid), grid_null
+                source_target=jnp.asarray(source_to_grid),
+                plasma_target=jnp.asarray(plasma_to_grid),
+                null=grid_null,
+                plasma_target_r=(
+                    None if plasma_to_grid_r is None else jnp.asarray(plasma_to_grid_r)
+                ),
+                plasma_target_z=(
+                    None if plasma_to_grid_z is None else jnp.asarray(plasma_to_grid_z)
+                ),
             ),
             wall=FluxTarget(
-                jnp.asarray(source_to_wall), jnp.asarray(plasma_to_wall), wall_null
+                source_target=jnp.asarray(source_to_wall),
+                plasma_target=jnp.asarray(plasma_to_wall),
+                null=wall_null,
+                plasma_target_r=(
+                    None if plasma_to_wall_r is None else jnp.asarray(plasma_to_wall_r)
+                ),
+                plasma_target_z=(
+                    None if plasma_to_wall_z is None else jnp.asarray(plasma_to_wall_z)
+                ),
             ),
             source=source,
             external_current=jnp.asarray(external_current),
@@ -252,6 +275,15 @@ class ForwardProfile:
             inside_material=inside_material,
             moment_geometry=MomentGeometry.from_cells(
                 moment_mesh, _lattice_cells(lattice)
+            ),
+            use_linear_moments=all(
+                block is not None
+                for block in (
+                    plasma_to_grid_r,
+                    plasma_to_grid_z,
+                    plasma_to_wall_r,
+                    plasma_to_wall_z,
+                )
             ),
         )
         return cls(operator=operator, lattice=lattice, **kwargs)
@@ -288,41 +320,47 @@ class ForwardProfile:
         the declared source and integrates, with no conservation differencing
         in the way, so ``jacfwd`` through it costs one observation.
         """
+        _current, support_integrals, _masks, topology = self._integral_state(flux)
+        return observe_moments(support_integrals, topology.flux_span)
+
+    def _integral_state(self, flux):
+        """Return current and integral state for this construction's geometry."""
+        if self.operator.use_linear_moments:
+            return self.operator.current_moments_and_observation(flux)
         masks, topology = self.operator.read(flux)
-        cell_current = self.operator.source.cell_current(
-            self.operator.radius, self.operator.area, masks
+        current_moments = self.operator.cell_current_moments(flux)
+        cell_current = current_moments.cell_current
+        radius = jnp.asarray(self.lattice.node_radius)
+        area = jnp.where(masks.core, self.operator.area, 0.0)
+        volume = 2.0 * jnp.pi * radius * area
+        radial, vertical = poloidal_field(
+            self.lattice, jnp.asarray(flux)[: self.lattice.node_count]
         )
-        radial, vertical = poloidal_field(self.lattice, flux[: self.lattice.node_count])
-        return observe_moments(
-            self.operator.source,
-            masks,
-            jnp.asarray(self.lattice.node_radius),
-            self.operator.area,
-            cell_current,
-            radial**2 + vertical**2,
-            topology.flux_span,
+        pressure = jnp.where(
+            masks.core,
+            core_pressure(self.operator.source, masks, radius, topology.flux_span),
+            0.0,
         )
+        support_integrals = ClippedIntegralMeasure(
+            area=area,
+            volume=volume,
+            radial_volume=radius * volume,
+            cell_current=jnp.where(masks.core, cell_current, 0.0),
+            pressure_volume=pressure * volume,
+            field_volume=(radial**2 + vertical**2) * volume,
+            masks=masks,
+        )
+        return current_moments, support_integrals, masks, topology
 
     def _receipt(
         self, flux: jax.Array, history: fixed_point.FixedPointResult
     ) -> ForwardEquilibrium:
         """Return the typed result of one converged or supplied flux map."""
-        masks, topology = self.operator.read(flux)
-        cell_current = self.operator.source.cell_current(
-            self.operator.radius, self.operator.area, masks
-        )
+        current_moments, support_integrals, masks, topology = self._integral_state(flux)
+        cell_current = current_moments.cell_current
         grid_flux = flux[: self.lattice.node_count]
         radius = jnp.asarray(self.lattice.node_radius)
-        radial, vertical = poloidal_field(self.lattice, grid_flux)
-        moments = observe_moments(
-            self.operator.source,
-            masks,
-            radius,
-            self.operator.area,
-            cell_current,
-            radial**2 + vertical**2,
-            topology.flux_span,
-        )
+        moments = observe_moments(support_integrals, topology.flux_span)
         conservation = conservation_ledger(
             self.lattice,
             grid_flux,
@@ -337,7 +375,7 @@ class ForwardProfile:
             topology=topology,
             fixed_point=history,
             moments=moments,
-            ledger=current_ledger(cell_current, masks),
+            ledger=current_ledger(cell_current, support_integrals.masks),
             conservation=conservation,
             normalisation=absolute_normalisation_record(flux.dtype),
             rotation=self.operator.source.rotation_record(radius, masks),

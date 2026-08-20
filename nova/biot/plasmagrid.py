@@ -36,6 +36,14 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
         ]
     )
     levels: int | list[float] | np.ndarray = 21
+    sample_data: object | None = field(init=False, repr=False, default=None)
+    _sampling_vertices: np.ndarray | None = field(init=False, repr=False, default=None)
+    _sample_coordinates: np.ndarray | None = field(init=False, repr=False, default=None)
+    _cell_sample_nodes: np.ndarray | None = field(init=False, repr=False, default=None)
+    _sampling_identity_deviation: float | None = field(
+        init=False, repr=False, default=None
+    )
+    _sampling_identity_bound: float | None = field(init=False, repr=False, default=None)
 
     def __post_init__(self):
         """Initialize psi axis and psi x versions."""
@@ -96,7 +104,216 @@ class PlasmaGrid(BaseGrid, PlasmaLoc):
             name=self.name,
         ).data
         self.tessellate(target, wall)
+        self._build_direct_samples(target)
         super().post_solve()
+
+    @staticmethod
+    def _roundoff_unique_vertices(polygon, epsilon: float) -> np.ndarray:
+        """Return one exterior without its closing or round-off duplicate rows."""
+        geometry = polygon.poly if hasattr(polygon, "poly") else polygon
+        exterior = np.asarray(geometry.exterior.coords, dtype=np.float64)[:, :2]
+        if np.linalg.norm(exterior[-1] - exterior[0]) > epsilon:
+            raise ValueError("an authored cell exterior lacks its closing coordinate")
+        vertices = []
+        for vertex in exterior[:-1]:
+            if not any(np.linalg.norm(vertex - kept) <= epsilon for kept in vertices):
+                vertices.append(vertex)
+        return np.asarray(vertices)
+
+    @staticmethod
+    def _angular_order(vertices: np.ndarray, centre: np.ndarray) -> np.ndarray:
+        """Return exterior coordinates ordered by angle about one cell centre."""
+        offset = vertices - centre
+        return vertices[np.argsort(np.arctan2(offset[:, 1], offset[:, 0]))]
+
+    def _preclip_sampling_vertices(self, target: Target) -> np.ndarray:
+        """Construct six fixed pre-clip samples for every authored plasma cell.
+
+        Material polygons are integration supports: wall clipping can change their
+        vertex count and pull their centroid away from the generator geometry.  The
+        smooth flux interpolant instead samples the tiling generator before clipping.
+        A complete authored cell supplies that generator's dimensions and exterior;
+        its round-off-deduplicated vertices are checked against the analytic hexagon
+        before those same tiling parameters construct six samples about every target
+        centre.  No statistic over clipped material offsets enters the construction.
+        """
+        centres = np.c_[np.asarray(target.x), np.asarray(target.z)]
+        sections = np.asarray(self.aloc["plasma", "section"], dtype=object).astype(str)
+        full = np.flatnonzero(sections == "hexagon")
+        if len(full) == 0:
+            raise ValueError(
+                "a hex plasma grid needs at least one complete generator cell"
+            )
+        polygons = np.asarray(self.aloc["plasma", "poly"], dtype=object)
+        dimensions = np.c_[
+            np.asarray(self.aloc["plasma", "dl"], dtype=float)[full],
+            np.asarray(self.aloc["plasma", "dt"], dtype=float)[full],
+        ]
+        scale = max(
+            float(np.max(np.abs(centres))),
+            float(np.max(np.abs(dimensions))),
+            1.0,
+        )
+        tolerance = 128.0 * np.finfo(np.float64).eps * scale
+        if float(np.max(np.abs(dimensions - dimensions[0]))) > tolerance:
+            raise ValueError(
+                "one plasma tiling cannot carry multiple generator dimensions"
+            )
+
+        width, height = dimensions[0]
+        radius = min(width / 2.0, height / np.sqrt(3.0))
+        angles = np.linspace(0.0, 2.0 * np.pi, 7)[:-1]
+        analytic_offsets = radius * np.column_stack([np.cos(angles), np.sin(angles)])
+        analytic_offsets = self._angular_order(analytic_offsets, np.zeros(2))
+        deviations = []
+        for cell in full:
+            authored = self._roundoff_unique_vertices(polygons[cell], tolerance)
+            if authored.shape != (6, 2):
+                raise ValueError(
+                    "a complete hex generator must have six deduplicated vertices"
+                )
+            authored = self._angular_order(authored, centres[cell])
+            deviations.append(
+                float(np.max(np.abs(authored - centres[cell] - analytic_offsets)))
+            )
+        deviation = max(deviations)
+        if deviation > tolerance:
+            raise ValueError(
+                "authored generator vertices differ from the analytic tiling: "
+                f"{deviation:.17g} m exceeds {tolerance:.17g} m"
+            )
+        self._sampling_identity_deviation = deviation
+        self._sampling_identity_bound = tolerance
+        return centres[:, None, :] + analytic_offsets[None, :, :]
+
+    @staticmethod
+    def _support_roundoff_bound(target: Target) -> float:
+        """Return the atomic-mesh coordinate tolerance of the material support."""
+        points = np.vstack(
+            [
+                np.asarray(polygon.poly.exterior.coords, dtype=np.float64)[:, :2]
+                for polygon in target.poly
+            ]
+        )
+        scale = max(
+            float(np.max(np.abs(points))),
+            float(np.ptp(points)),
+            1.0,
+        )
+        return 128.0 * np.finfo(np.float64).eps * scale
+
+    @staticmethod
+    def _index_sampling_vertices(
+        vertices: np.ndarray, tolerance: float
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Deduplicate fixed samples with the support mesh's node identity."""
+        flat = vertices.reshape(-1, 2)
+        lookup: dict[tuple[int, int], int] = {}
+        coordinates = []
+        inverse = np.empty(len(flat), dtype=np.intp)
+        for index, vertex in enumerate(flat):
+            key = tuple(np.rint(vertex / tolerance).astype(np.int64))
+            if key not in lookup:
+                lookup[key] = len(coordinates)
+                coordinates.append(vertex)
+            inverse[index] = lookup[key]
+        cell_nodes = inverse.reshape(len(vertices), vertices.shape[1])
+        return np.asarray(coordinates), cell_nodes
+
+    def _build_direct_samples(self, target: Target) -> None:
+        """Bank the authoritative pre-clip hex vertices and their coupling rows."""
+        vertices = self._preclip_sampling_vertices(target)
+        tolerance = self._support_roundoff_bound(target)
+        coordinates, cell_sample_nodes = self._index_sampling_vertices(
+            vertices, tolerance
+        )
+        self._sampling_vertices = vertices
+        self._sample_coordinates = coordinates
+        self._cell_sample_nodes = cell_sample_nodes
+        sample_target = Target(
+            {"x": coordinates[:, 0], "z": coordinates[:, 1]}, label="PlasmaSample"
+        )
+        self.sample_data = Solve(
+            self.subframe,
+            sample_target,
+            reduce=[True, False],
+            attrs=self.attrs,
+            name=self.name,
+        ).data
+        for name in ("target", "sample_target"):
+            self.__dict__.pop(name, None)
+
+    @property
+    def sampling_vertices(self) -> np.ndarray:
+        """Return the authoritative six pre-clip vertices of every plasma cell."""
+        if self._sampling_vertices is None:
+            raise AttributeError("solve the plasma grid before reading sample vertices")
+        return self._sampling_vertices
+
+    @property
+    def sample_coordinates(self) -> np.ndarray:
+        """Return the unique direct-target coordinates used by the vertex gather."""
+        if self._sample_coordinates is None:
+            raise AttributeError("solve the plasma grid before reading sample targets")
+        return self._sample_coordinates
+
+    @property
+    def cell_sample_nodes(self) -> np.ndarray:
+        """Return each cell's six indices into the unique sample coordinates."""
+        if self._cell_sample_nodes is None:
+            raise AttributeError("solve the plasma grid before reading sample targets")
+        return self._cell_sample_nodes
+
+    @property
+    def sampling_identity_deviation(self) -> float:
+        """Return the authored-versus-analytic generator deviation in metres."""
+        if self._sampling_identity_deviation is None:
+            raise AttributeError("solve the plasma grid before reading sample identity")
+        return self._sampling_identity_deviation
+
+    @property
+    def sampling_identity_bound(self) -> float:
+        """Return the coordinate-scaled generator round-off bound in metres."""
+        if self._sampling_identity_bound is None:
+            raise AttributeError("solve the plasma grid before reading sample identity")
+        return self._sampling_identity_bound
+
+    @cached_property
+    def target(self):
+        """Return the centre-target coupling carried by this plasma grid."""
+        import jax.numpy as jnp  # noqa: PLC0415
+
+        from nova.biot.null import Null2D  # noqa: PLC0415
+        from nova.biot.target import FluxTarget  # noqa: PLC0415
+
+        null = Null2D.from_coordinates(
+            np.c_[self.data.x, self.data.z], np.asarray(self.data.stencil), maxsize=5
+        )
+        return FluxTarget(
+            source_target=jnp.asarray(self.data["Psi"])[:, :-1],
+            plasma_target=jnp.asarray(self.data["Psi_"]),
+            null=null,
+            plasma_target_r=jnp.asarray(self.data["PsiR_"]),
+            plasma_target_z=jnp.asarray(self.data["PsiZ_"]),
+        )
+
+    @cached_property
+    def sample_target(self):
+        """Return the direct pre-clip vertex coupling target."""
+        if self.sample_data is None or self._sample_coordinates is None:
+            raise AttributeError("solve the plasma grid before reading sample targets")
+        import jax.numpy as jnp  # noqa: PLC0415
+
+        from nova.biot.null import Null1D  # noqa: PLC0415
+        from nova.biot.target import FluxTarget  # noqa: PLC0415
+
+        return FluxTarget(
+            source_target=jnp.asarray(self.sample_data["Psi"])[:, :-1],
+            plasma_target=jnp.asarray(self.sample_data["Psi_"]),
+            null=Null1D(jnp.asarray(self._sample_coordinates)),
+            plasma_target_r=jnp.asarray(self.sample_data["PsiR_"]),
+            plasma_target_z=jnp.asarray(self.sample_data["PsiZ_"]),
+        )
 
     @staticmethod
     def loop_neighbour_vertices(points, neighbor_vertices, boundary_vertices):

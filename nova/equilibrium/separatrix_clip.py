@@ -26,8 +26,24 @@ __all__ = [
     "ClippedSupports",
     "LinearCurrentMoments",
     "TracedClippedSupports",
+    "complete_polynomial_powers",
     "padded_linear_current_moments",
+    "padded_polynomial_current_moments",
 ]
+
+
+def complete_polynomial_powers(degree: int) -> tuple[tuple[int, int], ...]:
+    """Return a complete two-dimensional monomial basis through ``degree``."""
+    if degree < 0:
+        raise ValueError("polynomial degree must be non-negative")
+    return tuple(
+        (radial, total - radial)
+        for total in range(degree + 1)
+        for radial in range(total, -1, -1)
+    )
+
+
+POLYNOMIAL_POWERS = complete_polynomial_powers(3)
 
 
 def _signed_area(vertices: np.ndarray) -> float:
@@ -161,6 +177,7 @@ class TracedClippedSupports(NamedTuple):
     included: object
     boundary: object
     area: object
+    full_area: object
     first_area_moment: object
     second_area_moment: object
     contour_area: object
@@ -293,6 +310,113 @@ def padded_linear_current_moments(
         "nij,nj->ni", second_area, gradient
     )
     return current, first_current
+
+
+def padded_polynomial_current_moments(
+    support_vertices,
+    vertex_count,
+    centroids,
+    coordinate_scale,
+    coefficients,
+    powers=None,
+):
+    """Integrate one complete polynomial and its first moments over each support.
+
+    ``coefficients`` multiply total-degree monomials in coordinates centred on
+    ``centroids`` and divided by ``coordinate_scale``. If ``powers`` is omitted,
+    the complete basis is inferred from the static coefficient width. The edge
+    reductions are closed simplex moments, so moving clip vertices remain
+    traced values and no quadrature nodes or data-dependent shapes enter an
+    iteration.
+    """
+    from nova.jax.config import configure_dtypes
+
+    configure_dtypes()
+
+    import jax.numpy as jnp
+
+    vertices = jnp.asarray(support_vertices)
+    count = jnp.asarray(vertex_count)
+    centre = jnp.asarray(centroids)
+    scale = jnp.asarray(coordinate_scale)
+    coefficient = jnp.asarray(coefficients)
+    if powers is None:
+        column_count = coefficient.shape[-1]
+        degree = math.isqrt(8 * column_count + 1)
+        degree = (degree - 3) // 2
+        powers = complete_polynomial_powers(degree)
+    else:
+        powers = tuple(powers)
+    if vertices.ndim != 3 or vertices.shape[2] != 2:
+        raise ValueError("support_vertices must have shape (cells, capacity, 2)")
+    cell_count, capacity, _coordinate = vertices.shape
+    if count.shape != (cell_count,):
+        raise ValueError("vertex_count must carry one value per cell")
+    if centre.shape != (cell_count, 2) or scale.shape != (cell_count, 2):
+        raise ValueError("centroids and coordinate_scale must have shape (cells, 2)")
+    if coefficient.shape != (cell_count, len(powers)):
+        raise ValueError(
+            "coefficients must carry one complete polynomial basis per cell"
+        )
+
+    local = (vertices - centre[:, None, :]) / scale[:, None, :]
+    slot = jnp.arange(capacity)
+    valid = slot[None, :] < count[:, None]
+    following_slot = jnp.where(slot[None, :] + 1 < count[:, None], slot[None, :] + 1, 0)
+    following = jnp.take_along_axis(local, following_slot[..., None], axis=1)
+    cross = local[..., 0] * following[..., 1] - following[..., 0] * local[..., 1]
+    cross = jnp.where(valid, cross, 0.0)
+    orientation = jnp.where(jnp.sum(cross, axis=1) < 0.0, -1.0, 1.0)
+    area_scale = scale[:, 0] * scale[:, 1]
+
+    def monomial_moment(radial_power, vertical_power):
+        edge_moment = jnp.zeros((cell_count, capacity), dtype=vertices.dtype)
+        total_degree = radial_power + vertical_power
+        for radial_first in range(radial_power + 1):
+            radial_factor = (
+                math.comb(radial_power, radial_first)
+                * local[..., 0] ** radial_first
+                * following[..., 0] ** (radial_power - radial_first)
+            )
+            for vertical_first in range(vertical_power + 1):
+                first_degree = radial_first + vertical_first
+                simplex = (
+                    math.factorial(first_degree)
+                    * math.factorial(total_degree - first_degree)
+                    / math.factorial(total_degree + 2)
+                )
+                vertical_factor = (
+                    math.comb(vertical_power, vertical_first)
+                    * local[..., 1] ** vertical_first
+                    * following[..., 1] ** (vertical_power - vertical_first)
+                )
+                edge_moment = edge_moment + simplex * radial_factor * vertical_factor
+        return orientation * area_scale * jnp.sum(cross * edge_moment, axis=1)
+
+    maximum_degree = max(radial + vertical for radial, vertical in powers)
+    required_powers = tuple(
+        (radial, vertical)
+        for degree in range(maximum_degree + 2)
+        for radial in range(degree, -1, -1)
+        for vertical in (degree - radial,)
+    )
+    moments = {power: monomial_moment(*power) for power in required_powers}
+    current = sum(
+        coefficient[:, column] * moments[power] for column, power in enumerate(powers)
+    )
+    radial = scale[:, 0] * sum(
+        coefficient[:, column] * moments[(power[0] + 1, power[1])]
+        for column, power in enumerate(powers)
+    )
+    vertical = scale[:, 1] * sum(
+        coefficient[:, column] * moments[(power[0], power[1] + 1)]
+        for column, power in enumerate(powers)
+    )
+    included = count >= 3
+    return (
+        jnp.where(included, current, 0.0),
+        jnp.where(included[:, None], jnp.stack([radial, vertical], axis=1), 0.0),
+    )
 
 
 def _pack_traced_vertices(vertices, valid, capacity):
@@ -446,6 +570,9 @@ def _traced_clip(
         compact_slot[None, :, None] < vertex_count[:, None, None], support, 0.0
     )
 
+    full_area, _full_first, _full_second = _traced_polygon_moments(
+        start_point, count, centre
+    )
     area, first, second = _traced_polygon_moments(support, vertex_count, centre)
     included = area > 0.0
     vertex_count = jnp.where(included, vertex_count, 0)
@@ -484,6 +611,7 @@ def _traced_clip(
         included=included,
         boundary=boundary,
         area=area,
+        full_area=full_area,
         first_area_moment=first,
         second_area_moment=second,
         contour_area=contour_area,

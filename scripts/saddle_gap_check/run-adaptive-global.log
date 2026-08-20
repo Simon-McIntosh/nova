@@ -1,0 +1,52 @@
+warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/nova/.venv` and will be ignored; use `--active` to target the active environment instead
+09:57:48 INFO     Parsing data dictionary version 3.39.0 [90m@dd_zip.py:89[0m
+INFO:imas.dd_zip:Parsing data dictionary version 3.39.0
+throat-sector adaptive check complete
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/saddle-gap-current-check/scripts/saddle_gap_check/measure_saddle_gap.py", line 781, in <module>
+    main()
+    ~~~~^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/saddle-gap-current-check/scripts/saddle_gap_check/measure_saddle_gap.py", line 434, in main
+    adaptive_sector_coarse, coarse_radial_error = adaptive_sector_currents(
+                                                  ~~~~~~~~~~~~~~~~~~~~~~~~^
+        case,
+        ^^^^^
+    ...<3 lines>...
+        angular_order=8,
+        ^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/saddle-gap-current-check/scripts/saddle_gap_check/measure_saddle_gap.py", line 255, in adaptive_sector_currents
+    current, error = quad_vec(
+                     ~~~~~~~~^
+        radial_integrand,
+        ^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+        quadrature="gk21",
+        ^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/scipy/integrate/_quad_vec.py", line 406, in quad_vec
+    for parts in mapwrapper(_subdivide_interval, to_process):
+                 ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/scipy/integrate/_quad_vec.py", line 464, in _subdivide_interval
+    s1, err1, round1 = _quadrature(a, c, f, norm_func)
+                       ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/scipy/integrate/_quad_vec.py", line 620, in _quadrature_gk21
+    return _quadrature_gk(a, b, f, norm_func, x, w, v)
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/scipy/integrate/_quad_vec.py", line 521, in _quadrature_gk
+    ff = f(c + h*x[i])
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/saddle-gap-current-check/scripts/saddle_gap_check/measure_saddle_gap.py", line 251, in radial_integrand
+    density = source_current_density(case, points)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/saddle-gap-current-check/scripts/coverage_scaling/measure_coverage.py", line 124, in source_current_density
+    flux = case.flux(radius, height)
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/d69248a8-fa44-46d5-89a7-79b847b66cfe/saddle-gap-current-check/tests/test_equilibrium_forward_reference.py", line 588, in flux
+    return -self.spline.ev(np.asarray(radius), np.asarray(height))
+            ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/scipy/interpolate/_fitpack2.py", line 1289, in ev
+    return self.__call__(xi, yi, dx=dx, dy=dy, grid=False)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/scipy/interpolate/_fitpack2.py", line 1093, in __call__
+    z, ier = dfitpack.bispeu(tx, ty, c, kx, ky, x, y)
+             ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt

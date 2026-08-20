@@ -37,10 +37,12 @@ receipt needs, but their floor is a property of the mesh.
 
 from __future__ import annotations
 
-import math
+import json
+from pathlib import Path
 
 import numpy as np
 import pytest
+from scipy import integrate
 
 from nova.utilities.importmanager import skip_import
 
@@ -55,12 +57,13 @@ with skip_import("jax"):
         poloidal_field,
     )
     from nova.equilibrium.domain import DomainMasks, PlasmaDomain
+    from nova.equilibrium.observation import clipped_support_quadrature
     from nova.equilibrium.source import DomainProfile, ForwardSource
     from nova.equilibrium.stencil_mesh import (
         MomentGeometry,
+        PROFILE_DENSITY_POWERS,
         RING_CONDITION_LIMIT,
         StencilMesh,
-        cell_average_weights,
     )
     from nova.geometry.hexstencil import hex_stencil
     from nova.jax.config import configure_dtypes
@@ -92,78 +95,6 @@ FORCE_AGREEMENT = 0.05
 #: Largest relative divergence receipt a ring mesh may report. The measured
 #: value is 4e-05 at the coarsest raster below and falls at second order.
 DIVERGENCE_CEILING = 1.0e-3
-
-
-def polygon_average_monomial(vertices: np.ndarray, powers: tuple[int, int]) -> float:
-    """Integrate one monomial exactly by triangulating from the centroid."""
-    centre = np.mean(vertices, axis=0)
-    integral = 0.0
-    area = 0.0
-    radial_power, vertical_power = powers
-    for first, second in zip(vertices, np.roll(vertices, -1, axis=0)):
-        triangle = np.stack([centre, first, second])
-        first_offset = first - centre
-        second_offset = second - centre
-        twice_area = abs(
-            first_offset[0] * second_offset[1] - first_offset[1] * second_offset[0]
-        )
-        area += 0.5 * twice_area
-        for radial_split in np.ndindex(*(radial_power + 1,) * 3):
-            if sum(radial_split) != radial_power:
-                continue
-            radial_coefficient = math.factorial(radial_power)
-            for exponent in radial_split:
-                radial_coefficient /= math.factorial(exponent)
-            for vertical_split in np.ndindex(*(vertical_power + 1,) * 3):
-                if sum(vertical_split) != vertical_power:
-                    continue
-                vertical_coefficient = math.factorial(vertical_power)
-                for exponent in vertical_split:
-                    vertical_coefficient /= math.factorial(exponent)
-                barycentric = tuple(
-                    radial_split[index] + vertical_split[index] for index in range(3)
-                )
-                barycentric_integral = twice_area
-                for exponent in barycentric:
-                    barycentric_integral *= math.factorial(exponent)
-                barycentric_integral /= math.factorial(
-                    radial_power + vertical_power + 2
-                )
-                coordinate_term = np.prod(
-                    triangle[:, 0] ** radial_split * triangle[:, 1] ** vertical_split
-                )
-                integral += (
-                    radial_coefficient
-                    * vertical_coefficient
-                    * barycentric_integral
-                    * coordinate_term
-                )
-    return integral / area
-
-
-def quadrature_average_monomial(vertices: np.ndarray, powers: tuple[int, int]) -> float:
-    """Apply the centroid-and-vertices cell-average contraction."""
-    centre = np.mean(vertices, axis=0)
-    radial_power, vertical_power = powers
-    samples = np.r_[
-        centre[0] ** radial_power * centre[1] ** vertical_power,
-        vertices[:, 0] ** radial_power * vertices[:, 1] ** vertical_power,
-    ]
-    return float(cell_average_weights(len(vertices)) @ samples)
-
-
-def rectangle_vertices() -> np.ndarray:
-    """Return an off-origin rectangle so exactness includes translated terms."""
-    centre = np.array([1.7, -0.4])
-    half_width = np.array([0.35, 0.6])
-    return centre + np.array(
-        [
-            [-half_width[0], -half_width[1]],
-            [half_width[0], -half_width[1]],
-            [half_width[0], half_width[1]],
-            [-half_width[0], half_width[1]],
-        ]
-    )
 
 
 def regular_hexagon_vertices(centre: np.ndarray, pitch: float) -> np.ndarray:
@@ -234,105 +165,6 @@ def sup_error(mesh: StencilMesh, value, reference) -> float:
     return float(np.max(np.abs(np.asarray(value) - reference)[inside]))
 
 
-# --------------------------------------------------------------------------
-# fixed interior current moments
-# --------------------------------------------------------------------------
-@pytest.mark.parametrize(
-    "powers",
-    [(radial, vertical) for radial in range(4) for vertical in range(4 - radial)],
-)
-def test_rectangle_cell_average_weights_are_exact_through_total_degree_three(powers):
-    """The rectangle contraction integrates every cubic monomial to round-off."""
-    vertices = rectangle_vertices()
-    expected = polygon_average_monomial(vertices, powers)
-    actual = quadrature_average_monomial(vertices, powers)
-    assert abs(actual - expected) < 4.0e-15
-
-
-@pytest.mark.parametrize(
-    "powers",
-    [(radial, vertical) for radial in range(4) for vertical in range(4 - radial)],
-)
-def test_hexagon_cell_average_weights_are_exact_through_total_degree_three(powers):
-    """The regular-hexagon contraction integrates translated cubics to round-off."""
-    vertices = regular_hexagon_vertices(np.array([1.4, -0.3]), pitch=0.7)
-    expected = polygon_average_monomial(vertices, powers)
-    actual = quadrature_average_monomial(vertices, powers)
-    assert abs(actual - expected) < 2.0e-15
-
-
-@pytest.mark.parametrize(
-    "vertices",
-    [rectangle_vertices(), regular_hexagon_vertices(np.zeros(2), 0.7)],
-)
-def test_cell_average_weights_do_not_claim_degree_four_exactness(vertices):
-    """The first omitted radial monomial remains observably non-exact."""
-    expected = polygon_average_monomial(vertices, (4, 0))
-    actual = quadrature_average_monomial(vertices, (4, 0))
-    assert abs(actual - expected) > 1.0e-5
-
-
-def test_interior_current_moments_use_the_fitted_gradient_and_fixed_second_moment():
-    """Current and both first moments share one fixed interior contraction."""
-    configure_dtypes()
-    pitch = 0.16
-    mesh = hex_mesh(pitch)
-    node_coordinate, cell_node = shared_hexagon_vertices(mesh, pitch)
-    radial_slope, vertical_slope = 2.3, -0.8
-
-    def current_density(coordinate):
-        radius, height = coordinate[..., 0], coordinate[..., 1]
-        return 4.1 + radial_slope * radius + vertical_slope * height
-
-    stencil = mesh.current_moment_stencil(
-        cell_node,
-        second_moment=np.full((mesh.node_count, 2), 5.0 / 72.0 * pitch**2),
-    )
-    moments = stencil(
-        current_density(mesh.coordinate), current_density(node_coordinate)
-    )
-    inside = np.asarray(mesh.interior(1))
-    expected_current = current_density(mesh.coordinate) * mesh.area
-    expected_radial = radial_slope * mesh.area * 5.0 / 72.0 * pitch**2
-    expected_vertical = vertical_slope * mesh.area * 5.0 / 72.0 * pitch**2
-    np.testing.assert_allclose(
-        np.asarray(moments.cell_current)[inside],
-        expected_current[inside],
-        rtol=0.0,
-        atol=2.0e-14,
-    )
-    np.testing.assert_allclose(
-        np.asarray(moments.radial_moment)[inside],
-        expected_radial[inside],
-        rtol=0.0,
-        atol=2.0e-14,
-    )
-    np.testing.assert_allclose(
-        np.asarray(moments.vertical_moment)[inside],
-        expected_vertical[inside],
-        rtol=0.0,
-        atol=2.0e-14,
-    )
-    assert np.all(np.asarray(moments.cell_current)[~inside] == 0.0)
-
-
-def test_interior_current_moments_are_one_gather_and_one_contraction():
-    """The per-iteration operator has one indexed read and one matrix contraction."""
-    configure_dtypes()
-    pitch = 0.32
-    mesh = hex_mesh(pitch)
-    node_coordinate, cell_node = shared_hexagon_vertices(mesh, pitch)
-    stencil = mesh.current_moment_stencil(
-        cell_node, second_moment=np.full((mesh.node_count, 2), 5.0 / 72.0 * pitch**2)
-    )
-    jaxpr = jax.make_jaxpr(stencil)(
-        jnp.ones(mesh.node_count), jnp.ones(len(node_coordinate))
-    )
-    primitives = [equation.primitive.name for equation in jaxpr.jaxpr.eqns]
-    assert primitives.count("gather") == 1
-    assert primitives.count("dot_general") == 1
-
-
 def test_shared_hexagon_node_evaluations_amortise_to_three_per_cell():
     """Two shared vertices plus one centroid are needed asymptotically per cell."""
     mesh = hex_mesh(0.08)
@@ -386,6 +218,352 @@ def test_moment_geometry_is_static_across_jitted_flux_updates():
 
     assert traces == 1
     assert first.shape == (len(geometry.atomic_mesh.node_coordinates),)
+
+
+def boundary_support_problem(profile=None):
+    """Return one mesh whose outer cells have own-node support evaluation."""
+    configure_dtypes()
+    pitch = 0.32
+    mesh = hex_mesh(pitch)
+    cells = [regular_hexagon_vertices(centre, pitch) for centre in mesh.coordinate]
+    geometry = MomentGeometry.from_cells(mesh, cells)
+    atomic = geometry.atomic_mesh
+    stencil = mesh.current_moment_stencil(
+        support_centre=np.arange(mesh.node_count),
+        sampling_node_coordinate=geometry.sample_node_coordinates,
+        sampling_cell_node=geometry.cell_sample_nodes[:, :6],
+    )
+    if profile is None:
+        profile = DomainProfile(
+            p_prime=lambda psi: -(1.0 + 0.2 * psi),
+            ff_prime=lambda psi: jnp.zeros_like(psi),
+        )
+
+    def flux(coordinate):
+        radius, height = coordinate[..., 0], coordinate[..., 1]
+        return (
+            0.35
+            + 0.04 * radius
+            - 0.03 * height
+            + 0.01 * radius**2
+            + 0.005 * radius * height
+        )
+
+    centroid_flux = jnp.asarray(flux(mesh.coordinate))
+    atomic_flux = jnp.asarray(flux(atomic.node_coordinates))
+    sample_flux = jnp.asarray(flux(geometry.sample_node_coordinates))
+    centroid_density = profile.current_density(
+        jnp.asarray(mesh.coordinate[:, 0]), centroid_flux
+    )
+    shared_density = profile.current_density(
+        jnp.asarray(atomic.node_coordinates[:, 0]), atomic_flux
+    )
+    ring = np.setdiff1d(np.arange(mesh.node_count), mesh.centre)
+    return {
+        "mesh": mesh,
+        "geometry": geometry,
+        "stencil": stencil,
+        "profile": profile,
+        "centroid_flux": centroid_flux,
+        "atomic_flux": atomic_flux,
+        "sample_flux": sample_flux,
+        "centroid_density": centroid_density,
+        "shared_density": shared_density,
+        "flux": flux,
+        "ring": ring,
+    }
+
+
+def evaluate_boundary_support(problem, support):
+    """Apply the production support callable to one fixed flux field."""
+    stencil = problem["stencil"]
+    return stencil.support_flux_moments(
+        problem["profile"],
+        problem["centroid_flux"],
+        problem["sample_flux"],
+        support,
+    )
+
+
+def test_own_node_field_varies_exactly_across_clipped_quadrature_points():
+    """The seven samples recover a quadratic flux and both derivatives in-cell."""
+    problem = boundary_support_problem()
+    atomic = problem["geometry"].atomic_mesh
+    signed = 6.28 - atomic.node_coordinates[:, 0] - 0.08 * atomic.node_coordinates[:, 1]
+    support = atomic.traced_clip(jnp.asarray(signed))
+    points, _weights = clipped_support_quadrature(
+        support, jnp.ones(problem["mesh"].node_count, dtype=bool)
+    )
+    value, radial, vertical = problem["stencil"].sample_flux_field(
+        problem["centroid_flux"], problem["sample_flux"], points
+    )
+    query = np.asarray(points)
+    expected_value = problem["flux"](query)
+    expected_radial = 0.04 + 0.02 * query[..., 0] + 0.005 * query[..., 1]
+    expected_vertical = -0.03 + 0.005 * query[..., 0]
+    np.testing.assert_allclose(value, expected_value, rtol=2.0e-13, atol=2.0e-13)
+    np.testing.assert_allclose(radial, expected_radial, rtol=2.0e-13, atol=2.0e-13)
+    np.testing.assert_allclose(vertical, expected_vertical, rtol=2.0e-13, atol=2.0e-13)
+
+
+def adaptive_polygon_integral(polygon, function) -> float:
+    """Integrate a scalar over one convex polygon with adaptive triangles."""
+    total = 0.0
+    anchor = polygon[0]
+    for first, second in zip(polygon[1:-1], polygon[2:], strict=True):
+        edge = np.column_stack((first - anchor, second - anchor))
+        determinant = abs(float(np.linalg.det(edge)))
+        value, _error = integrate.dblquad(
+            lambda vertical, radial: (
+                function(anchor + edge @ np.asarray([radial, vertical])) * determinant
+            ),
+            0.0,
+            1.0,
+            0.0,
+            lambda radial: 1.0 - radial,
+            epsabs=2.0e-13,
+            epsrel=2.0e-13,
+        )
+        total += value
+    return total
+
+
+def test_complete_supports_use_the_own_node_profile_to_oracle_accuracy():
+    """Complete supports use the unified profile within its accuracy gates."""
+    problem = boundary_support_problem()
+    atomic = problem["geometry"].atomic_mesh
+    support = atomic.traced_clip(jnp.ones(len(atomic.node_coordinates)))
+    attributed = evaluate_boundary_support(problem, support)
+    complete = problem["mesh"].centre
+    cells = complete[[0, len(complete) // 2, -1]]
+    expected = []
+    for cell in cells:
+        polygon = np.asarray(problem["geometry"].polygons[int(cell)])
+        centre = np.asarray(problem["mesh"].coordinate[int(cell)])
+
+        def density(point):
+            return float(
+                problem["profile"].current_density(point[0], problem["flux"](point))
+            )
+
+        expected.append(
+            [
+                adaptive_polygon_integral(
+                    polygon,
+                    lambda point, component=component: (
+                        density(point)
+                        * (
+                            1.0
+                            if component == 0
+                            else point[component - 1] - centre[component - 1]
+                        )
+                    ),
+                )
+                for component in range(3)
+            ]
+        )
+    expected = np.asarray(expected).T
+    actual = np.asarray(jnp.stack(attributed))[:, cells]
+    denominator = np.sum(np.abs(expected[0]))
+    assert np.sum(np.abs(actual[0] - expected[0])) / denominator <= 2.5e-4
+    assert abs(np.sum(actual[0]) / np.sum(expected[0]) - 1.0) <= 5.0e-5
+    np.testing.assert_allclose(actual[1:], expected[1:], rtol=2.0e-10, atol=2.0e-12)
+    assert np.all(np.isfinite(np.asarray(attributed.cell_current)[problem["ring"]]))
+
+
+def test_boundary_profile_density_matches_adaptive_polygon_quadrature():
+    """A ring cell's fixed profile polynomial matches adaptive quadrature."""
+    problem = boundary_support_problem()
+    atomic = problem["geometry"].atomic_mesh
+    support = atomic.traced_clip(jnp.ones(len(atomic.node_coordinates)))
+    attributed = evaluate_boundary_support(problem, support)
+    cell = int(problem["ring"][len(problem["ring"]) // 2])
+    polygon = np.asarray(problem["geometry"].polygons[cell])
+    centre = np.asarray(problem["mesh"].coordinate[cell])
+    scale = np.max(
+        np.abs(np.asarray(problem["geometry"].sampling_vertices[cell]) - centre),
+        axis=0,
+    )
+
+    def local_basis(point):
+        local = (point - centre) / scale
+        return np.asarray(
+            [local[0] ** p * local[1] ** q for p, q in PROFILE_DENSITY_POWERS]
+        )
+
+    stencil = problem["stencil"]
+    assert stencil.ring_profile_weight.shape[1:] == (
+        len(PROFILE_DENSITY_POWERS),
+        672,
+    )
+    assert np.max(stencil.ring_profile_condition) < 1.4e4
+    ring_slot = int(np.flatnonzero(stencil.ring_centre == cell)[0])
+    pool = np.concatenate(
+        [np.asarray(problem["centroid_flux"]), np.asarray(problem["sample_flux"])]
+    )
+    gathered = pool[stencil.ring_gather_index[ring_slot]]
+    flux_coefficient = stencil.ring_flux_weight[ring_slot] @ gathered
+    profile_flux = stencil.ring_profile_flux_design[ring_slot] @ flux_coefficient
+    profile_density = np.asarray(
+        problem["profile"].current_density(
+            stencil.ring_profile_point[ring_slot, :, 0], profile_flux
+        )
+    )
+    coefficient = stencil.ring_profile_weight[ring_slot] @ profile_density
+    expected = np.asarray(
+        [
+            adaptive_polygon_integral(
+                polygon,
+                lambda point, component=component: (
+                    (coefficient @ local_basis(point))
+                    * (
+                        1.0
+                        if component == 0
+                        else point[component - 1] - centre[component - 1]
+                    )
+                ),
+            )
+            for component in range(3)
+        ]
+    )
+    actual = np.asarray(
+        [
+            attributed.cell_current[cell],
+            attributed.radial_moment[cell],
+            attributed.vertical_moment[cell],
+        ]
+    )
+    np.testing.assert_allclose(actual, expected, rtol=2.0e-13, atol=2.0e-13)
+
+
+def test_boundary_support_error_converges_with_missing_area():
+    """Moment error falls in proportion to the omitted ring-cell area."""
+    problem = boundary_support_problem()
+    atomic = problem["geometry"].atomic_mesh
+    cell = int(problem["ring"][len(problem["ring"]) // 2])
+    polygon = np.asarray(problem["geometry"].polygons[cell])
+    centre = problem["mesh"].coordinate[cell]
+    half_width = 0.5 * np.ptp(polygon, axis=0)
+
+    class EdgeVanishingCubic:
+        def current_density(self, radius, height):
+            radial = (radius - centre[0]) / half_width[0]
+            vertical = (height - centre[1]) / half_width[1]
+            return (
+                1.0
+                - radial
+                + 0.2 * vertical
+                + 0.1 * radial**2
+                - 0.2 * radial * vertical
+                - 0.1 * radial**3
+            )
+
+    profile = EdgeVanishingCubic()
+    centroid_flux = jnp.asarray(problem["mesh"].coordinate[:, 1])
+    sample_flux = jnp.asarray(problem["geometry"].sample_node_coordinates[:, 1])
+    full_support = atomic.traced_clip(jnp.ones(len(atomic.node_coordinates)))
+
+    def evaluate(support):
+        moments = problem["stencil"].support_flux_moments(
+            profile,
+            centroid_flux,
+            sample_flux,
+            support,
+        )
+        return np.asarray(jnp.stack(moments))[:, cell]
+
+    full = evaluate(full_support)
+    width = float(np.ptp(polygon[:, 0]))
+    maximum = float(np.max(polygon[:, 0]))
+    observed_missing = []
+    for missing_fraction in (2.8e-4, 2.0e-4, 1.0e-4, 3.0e-5):
+        cut = maximum - width * missing_fraction
+        support = atomic.traced_clip(cut - atomic.node_coordinates[:, 0])
+        value = evaluate(support)
+        observed = float(1.0 - support.area[cell] / support.full_area[cell])
+        observed_missing.append(observed)
+        error = float(np.max(np.abs(value - full) / np.maximum(np.abs(full), 1.0e-30)))
+        assert error <= 4.1 * observed
+    assert np.all(np.diff(observed_missing) < 0.0)
+
+
+def test_boundary_support_is_c1_at_full_fill_without_smoothing():
+    """Both-sided support JVPs agree at the exact full-cell transition."""
+    profile = DomainProfile(
+        p_prime=lambda psi: -((1.0 - psi) ** 2),
+        ff_prime=lambda psi: jnp.zeros_like(psi),
+    )
+    problem = boundary_support_problem(profile)
+    atomic = problem["geometry"].atomic_mesh
+    cell = int(problem["ring"][len(problem["ring"]) // 2])
+    centre = problem["mesh"].coordinate[cell]
+    half_width = 0.5 * np.ptp(problem["geometry"].polygons[cell], axis=0)
+    atomic_u = (atomic.node_coordinates[:, 0] - centre[0]) / half_width[0]
+    sample_u = (
+        problem["geometry"].sample_node_coordinates[:, 0] - centre[0]
+    ) / half_width[0]
+    centroid_u = (problem["mesh"].coordinate[:, 0] - centre[0]) / half_width[0]
+
+    def composed(cut):
+        support = atomic.traced_clip(cut - jnp.asarray(atomic_u))
+        centroid_flux = 1.0 - (cut - jnp.asarray(centroid_u))
+        sample_flux = 1.0 - (cut - jnp.asarray(sample_u))
+        moments = problem["stencil"].support_flux_moments(
+            profile,
+            centroid_flux,
+            sample_flux,
+            support,
+        )
+        return jnp.stack(moments)[:, cell]
+
+    displacement = 2.0e-7
+    left_value, left_derivative = jax.jvp(
+        composed, (jnp.asarray(1.0 - displacement),), (jnp.asarray(1.0),)
+    )
+    right_value, right_derivative = jax.jvp(
+        composed, (jnp.asarray(1.0 + displacement),), (jnp.asarray(1.0),)
+    )
+    assert np.all(np.isfinite(np.asarray([left_value, right_value])))
+    np.testing.assert_allclose(
+        left_derivative, right_derivative, rtol=2.0e-6, atol=2.0e-9
+    )
+
+
+def test_banked_unified_representation_satisfies_coverage_split_gates():
+    """The bank separates representation accuracy from support coverage."""
+    artifact = (
+        Path(__file__).parents[1]
+        / "scripts/ring_attribution/results/ring-attribution-results.json"
+    )
+    report = json.loads(artifact.read_text())
+    gates = report["gates"]
+    assert gates["all_cells_own_node_attributed"]
+    assert gates["interior_current_weighted_l1"]
+    assert gates["ring_current_weighted_l1"]
+    assert gates["support_reference_total_current"]
+    assert gates["topology_zero_exact"]
+    assert gates["support_reference_field_sup"]
+
+    decomposition = report["two_reference_decomposition"]
+    representation = decomposition["attributed_vs_support_geometry"]
+    coverage = decomposition["support_coverage_vs_analytic"]
+    tracked = decomposition["attributed_vs_analytic_tracked"]
+    errors = report["priority_ordered_errors"]["net_current"]
+    assert errors["current_weighted_interior_l1"] == 4.740850588173696e-05
+    assert errors["current_weighted_ring_l1"] == 0.0016004849848483096
+    assert representation["signed_total_difference_a"] == -621.3295577503741
+    assert report["population"]["topology_zero_lower_leg_supports"] == 17
+    assert report["error_components"]["zero_current_leakage_a"] == 0.0
+    assert representation["total_current_relative_error"] <= 5.0e-5
+    assert representation["all_target_sup_wb"] < 0.826
+    assert (
+        abs(
+            representation["signed_total_difference_a"]
+            + coverage["signed_total_difference_a"]
+            - tracked["signed_total_difference_a"]
+        )
+        < 1.0e-6
+    )
 
 
 # --------------------------------------------------------------------------

@@ -18,6 +18,7 @@ from typing import Any, Mapping
 
 import numpy as np
 
+from nova.biot.greens import MU0
 from nova.transport.current_diffusion import (
     EtaProfile,
     FluxSurfaceGeometry,
@@ -272,6 +273,9 @@ class TransportEngineError(RuntimeError):
 class ForwardTransport:
     """One public deterministic forward solve over the transport ladder."""
 
+    def __init__(self) -> None:
+        self._native_batch_functions: dict[tuple[Any, ...], Any] = {}
+
     def solve(self, inputs: ForwardTransportInput) -> ForwardTransportReceipt:
         """Advance one interval with the explicitly selected fidelity rung."""
         if inputs.model.rung is TransportRung.NATIVE_PSI_DIFFUSION:
@@ -279,6 +283,172 @@ class ForwardTransport:
         if inputs.model.rung is TransportRung.TORAX_MULTI_CHANNEL:
             return _solve_torax(inputs)
         raise ValueError(f"unsupported transport rung: {inputs.model.rung}")
+
+    def solve_state_batch(
+        self,
+        geometry: TransportGeometry,
+        waveforms: TransportWaveforms,
+        model: TransportModel,
+        state_channels: tuple[Any, Any, Any, Any, Any],
+        *,
+        jit: bool = False,
+    ) -> tuple[Any, Any, Any]:
+        """Advance a leading member axis inside one traced computation.
+
+        The host-facing dataclasses stay outside this boundary.  The returned
+        arrays carry evolved state channels, scalar receipt values, and integer
+        diagnostics respectively, each with the member axis leading.
+        """
+        if model.rung is TransportRung.NATIVE_PSI_DIFFUSION:
+            key = (
+                id(geometry),
+                id(waveforms),
+                model.eta.eta0,
+                model.eta.contrast,
+                model.eta.shape,
+                model.theta,
+                jit,
+            )
+            mapped = self._native_batch_functions.get(key)
+            if mapped is None:
+                mapped = _native_batch_function(geometry, waveforms, model, jit=jit)
+                self._native_batch_functions[key] = mapped
+            return mapped(
+                model.resistivity_multiplier,
+                *(state_channels),
+            )
+        if model.rung is TransportRung.TORAX_MULTI_CHANNEL:
+            return _solve_torax_batch(
+                geometry, waveforms, model, state_channels, jit=jit
+            )
+        raise ValueError(f"unsupported transport rung: {model.rung}")
+
+
+def _native_enclosed_current(geometry: TransportGeometry, psi):
+    import jax.numpy as jnp
+
+    record = geometry.record
+    rho_face = jnp.asarray(record["rho_face"], dtype=jnp.float64)
+    g2_face = jnp.asarray(record["g2_face"], dtype=jnp.float64)
+    g3_face = jnp.asarray(record["g3_face"], dtype=jnp.float64)
+    f_face = jnp.asarray(record["f_face"], dtype=jnp.float64)
+    d_face = (
+        jnp.zeros_like(rho_face).at[1:].set(g2_face[1:] * g3_face[1:] / rho_face[1:])
+    )
+    d_mid = 0.5 * (d_face[:-1] + d_face[1:])
+    f_mid = 0.5 * (f_face[:-1] + f_face[1:])
+    drho = rho_face[1] - rho_face[0]
+    i_mid = (
+        jnp.asarray(record["flux_sign"], dtype=jnp.float64)
+        * d_mid
+        * (jnp.diff(psi) / drho)
+        * f_mid
+        / (jnp.asarray(record["phi_b"], dtype=jnp.float64) * 16.0 * jnp.pi**3 * MU0)
+    )
+    return jnp.concatenate(
+        [
+            jnp.zeros(1, dtype=psi.dtype),
+            0.5 * (i_mid[:-1] + i_mid[1:]),
+            (1.5 * i_mid[-1] - 0.5 * i_mid[-2])[None],
+        ]
+    )
+
+
+def _native_batch_function(geometry, waveforms, model, *, jit: bool):
+    import jax
+    import jax.numpy as jnp
+
+    from nova.transport.current_diffusion import _diffuse_scan
+
+    record = geometry.record
+    rho_face = jnp.asarray(record["rho_face"], dtype=jnp.float64)
+    rho_cell = jnp.asarray(record["rho_cell"], dtype=jnp.float64)
+    psi_n_cell = jnp.asarray(record["psi_n_cell"], dtype=jnp.float64)
+    g2_face = jnp.asarray(record["g2_face"], dtype=jnp.float64)
+    g3_face = jnp.asarray(record["g3_face"], dtype=jnp.float64)
+    f_face = jnp.asarray(record["f_face"], dtype=jnp.float64)
+    f_cell = jnp.asarray(record["f_cell"], dtype=jnp.float64)
+    phi_b = jnp.asarray(record["phi_b"], dtype=jnp.float64)
+    flux_sign = jnp.asarray(record["flux_sign"], dtype=jnp.float64)
+    d_face = (
+        jnp.zeros_like(rho_face).at[1:].set(g2_face[1:] * g3_face[1:] / rho_face[1:])
+    )
+    d_mid = 0.5 * (d_face[:-1] + d_face[1:])
+    drho = rho_face[1] - rho_face[0]
+    eta = jnp.asarray(model.eta.eta0, dtype=jnp.float64) * jnp.exp(
+        jnp.asarray(model.eta.contrast, dtype=jnp.float64)
+        * jnp.clip(psi_n_cell, 0.0, 1.0)
+        ** jnp.asarray(model.eta.shape, dtype=jnp.float64)
+    )
+    toc_cell = (1.0 / eta) * MU0 * 16.0 * jnp.pi**2 * phi_b**2 * rho_cell / f_cell**2
+    toc_face = jnp.concatenate(
+        [
+            toc_cell[:1],
+            0.5 * (toc_cell[:-1] + toc_cell[1:]),
+            toc_cell[-1:],
+        ]
+    )
+    times = jnp.asarray(waveforms.time, dtype=jnp.float64)
+    requested_current = jnp.asarray(waveforms.plasma_current, dtype=jnp.float64)
+    intervals = jnp.diff(times)
+    gradients = (
+        flux_sign
+        * requested_current[1:]
+        * 16.0
+        * jnp.pi**3
+        * MU0
+        * phi_b
+        / (d_face[-1] * f_face[-1])
+    )
+
+    def solve_member(
+        multiplier, rho, psi, ion_temperature, electron_temperature, density
+    ):
+        scaled_toc_face = toc_face / jnp.asarray(multiplier, dtype=jnp.float64)
+        psi_history, axis_voltage, boundary_voltage = _diffuse_scan(
+            psi,
+            d_face,
+            d_mid,
+            scaled_toc_face,
+            drho,
+            intervals,
+            gradients,
+            model.theta,
+        )
+        final_psi = psi_history[-1]
+        initial_current = _native_enclosed_current(geometry, psi)[-1]
+        final_current = _native_enclosed_current(geometry, final_psi)[-1]
+        boundary_swing = final_psi[-1] - psi[-1]
+        axis_swing = final_psi[0] - psi[0]
+        state_values = jnp.stack(
+            (rho, final_psi, ion_temperature, electron_temperature, density)
+        )
+        receipt_values = jnp.stack(
+            (
+                boundary_swing,
+                axis_swing,
+                boundary_swing - axis_swing,
+                jnp.mean(axis_voltage),
+                jnp.mean(boundary_voltage),
+                requested_current[0],
+                requested_current[-1],
+                initial_current,
+                final_current,
+                final_psi[-1],
+                final_current,
+                ion_temperature[-1],
+                electron_temperature[-1],
+                density[-1],
+            )
+        )
+        steps = intervals.size
+        diagnostics = jnp.full((3,), steps, dtype=jnp.int32)
+        return state_values, receipt_values, diagnostics
+
+    mapped = jax.vmap(solve_member, in_axes=(None, 0, 0, 0, 0, 0))
+    if jit:
+        mapped = jax.jit(mapped)
+    return mapped
 
 
 def _solve_native(inputs: ForwardTransportInput) -> ForwardTransportReceipt:
@@ -407,6 +577,24 @@ def _make_torax_step(config):
     return make_step_fn(config)
 
 
+def _with_resistivity_multiplier(provider, resistivity_multiplier):
+    import jax.numpy as jnp
+    from torax._src.torax_pydantic.interpolated_param_1d import (
+        TimeVaryingScalarUpdate,
+    )
+
+    multiplier = jnp.asarray(resistivity_multiplier, dtype=jnp.float64)
+    base_multiplier = provider.numerics.resistivity_multiplier
+    return provider.update_provider(
+        lambda current: (current.numerics.resistivity_multiplier,),
+        (
+            TimeVaryingScalarUpdate(
+                value=jnp.full_like(base_multiplier.value, multiplier)
+            ),
+        ),
+    )
+
+
 @dataclass(frozen=True)
 class _ToraxStepExecution:
     states: tuple[Any, ...]
@@ -419,20 +607,11 @@ def _run_torax_steps(config, step_durations, resistivity_multiplier):
     from torax._src.orchestration.initial_state import (
         get_initial_state_and_post_processed_outputs,
     )
-    from torax._src.torax_pydantic.interpolated_param_1d import (
-        TimeVaryingScalarUpdate,
-    )
 
     step_fn = _make_torax_step(config)
     multiplier = jnp.asarray(resistivity_multiplier, dtype=jnp.float64)
-    base_multiplier = step_fn.runtime_params_provider.numerics.resistivity_multiplier
-    runtime_params = step_fn.runtime_params_provider.update_provider(
-        lambda provider: (provider.numerics.resistivity_multiplier,),
-        (
-            TimeVaryingScalarUpdate(
-                value=jnp.full_like(base_multiplier.value, multiplier)
-            ),
-        ),
+    runtime_params = _with_resistivity_multiplier(
+        step_fn.runtime_params_provider, multiplier
     )
     initial_state, post_processed = get_initial_state_and_post_processed_outputs(
         step_fn,
@@ -473,6 +652,164 @@ def _run_torax_steps(config, step_durations, resistivity_multiplier):
         if error_name != "NO_ERROR":
             break
     return _ToraxStepExecution(states=tuple(states), error_name=error_name)
+
+
+def _fixed_step_durations(provider, waveform_times) -> tuple[float, ...]:
+    if bool(provider.numerics.adaptive_dt):
+        raise ValueError("TORAX ensemble batching requires non-adaptive fixed steps")
+    fixed_dt = float(np.min(np.asarray(provider.numerics.fixed_dt.value)))
+    if fixed_dt <= 0.0:
+        raise ValueError("TORAX fixed step must be positive")
+    durations = []
+    for interval in np.diff(np.asarray(waveform_times, dtype=np.float64)):
+        remaining = float(interval)
+        while remaining > 1.0e-12:
+            duration = min(remaining, fixed_dt)
+            durations.append(duration)
+            remaining -= duration
+    return tuple(durations)
+
+
+def _solve_torax_batch(geometry, waveforms, model, state_channels, *, jit: bool):
+    import jax
+    import jax.numpy as jnp
+    from torax._src.orchestration.initial_state import (
+        get_initial_state_and_post_processed_outputs,
+    )
+
+    member_count = int(np.shape(state_channels[0])[0])
+    member_steps = []
+    providers = []
+    for index in range(member_count):
+        member_state = TransportState(
+            rho=np.asarray(state_channels[0][index]),
+            psi=np.asarray(state_channels[1][index]),
+            ion_temperature=np.asarray(state_channels[2][index]),
+            electron_temperature=np.asarray(state_channels[3][index]),
+            electron_density=np.asarray(state_channels[4][index]),
+        )
+        member_input = ForwardTransportInput(
+            geometry=geometry,
+            initial_state=member_state,
+            waveforms=waveforms,
+            model=model,
+        )
+        step_fn = _make_torax_step(_prepare_torax_config(member_input))
+        member_steps.append(step_fn)
+        providers.append(
+            _with_resistivity_multiplier(
+                step_fn.runtime_params_provider, model.resistivity_multiplier
+            )
+        )
+
+    step_fn = member_steps[0]
+    step_durations = _fixed_step_durations(
+        step_fn.runtime_params_provider, waveforms.time
+    )
+    stacked_providers = jax.tree.map(lambda *values: jnp.stack(values), *providers)
+    requested_current = jnp.asarray(waveforms.plasma_current, dtype=jnp.float64)
+
+    def solve_member(provider):
+        initial, post_processed = get_initial_state_and_post_processed_outputs(
+            step_fn,
+            runtime_params_overrides=provider,
+        )
+        current = initial
+        outer_iterations = jnp.zeros((), dtype=jnp.int32)
+        inner_iterations = jnp.zeros((), dtype=jnp.int32)
+        for duration in step_durations:
+            current, post_processed = step_fn(
+                current,
+                post_processed,
+                max_dt=jnp.asarray(duration, dtype=jnp.float64),
+                runtime_params_overrides=provider,
+            )
+            outer_iterations += current.solver_numeric_outputs.outer_solver_iterations
+            inner_iterations += current.solver_numeric_outputs.inner_solver_iterations
+
+        initial_profiles = initial.core_profiles
+        final_profiles = current.core_profiles
+        initial_psi = initial_profiles.psi.cell_plus_boundaries()
+        final_psi = final_profiles.psi.cell_plus_boundaries()
+        rho = jnp.concatenate(
+            (
+                jnp.zeros(1, dtype=current.geometry.rho_norm.dtype),
+                current.geometry.rho_norm,
+                jnp.ones(1, dtype=current.geometry.rho_norm.dtype),
+            )
+        )
+        ion_temperature = final_profiles.T_i.cell_plus_boundaries()
+        electron_temperature = final_profiles.T_e.cell_plus_boundaries()
+        electron_density = final_profiles.n_e.cell_plus_boundaries()
+        initial_current = initial_profiles.Ip_profile_face[-1]
+        final_current = final_profiles.Ip_profile_face[-1]
+        boundary_swing = final_psi[-1] - initial_psi[-1]
+        axis_swing = final_psi[0] - initial_psi[0]
+        elapsed = current.t - initial.t
+        state_values = jnp.stack(
+            (
+                rho,
+                final_psi,
+                ion_temperature,
+                electron_temperature,
+                electron_density,
+            )
+        )
+        receipt_values = jnp.stack(
+            (
+                boundary_swing,
+                axis_swing,
+                boundary_swing - axis_swing,
+                axis_swing / elapsed,
+                boundary_swing / elapsed,
+                requested_current[0],
+                requested_current[-1],
+                initial_current,
+                final_current,
+                final_psi[-1],
+                final_current,
+                ion_temperature[-1],
+                electron_temperature[-1],
+                electron_density[-1],
+            )
+        )
+        diagnostics = jnp.asarray(
+            (len(step_durations), outer_iterations, inner_iterations),
+            dtype=jnp.int32,
+        )
+        return (
+            state_values,
+            receipt_values,
+            diagnostics,
+            current,
+            post_processed,
+        )
+
+    mapped = jax.vmap(solve_member)
+    if jit:
+        mapped = jax.jit(mapped)
+    (
+        state_values,
+        receipt_values,
+        diagnostic_values,
+        final_states,
+        final_post_processed,
+    ) = mapped(stacked_providers)
+
+    if not isinstance(state_values, jax.core.Tracer):
+        for index in range(member_count):
+            member_state = jax.tree.map(lambda value: value[index], final_states)
+            member_post_processed = jax.tree.map(
+                lambda value: value[index], final_post_processed
+            )
+            error_name = step_fn.check_for_errors(
+                member_state, member_post_processed
+            ).name
+            if error_name != "NO_ERROR":
+                raise TransportEngineError(
+                    f"TORAX failed with simulation status {error_name}"
+                )
+    return state_values, receipt_values, diagnostic_values
 
 
 def _solve_torax(inputs: ForwardTransportInput) -> ForwardTransportReceipt:

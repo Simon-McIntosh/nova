@@ -90,14 +90,19 @@ def torax_geometry_from_fsa(record: Mapping[str, object], *, hires_factor: int =
     inv_r_face = jnp.asarray(record["inv_r_face"])
     g3_face = jnp.asarray(record["g3_face"])
     dvolume_dpsi = jnp.asarray(record["int_dl_over_bp_face"])
+    gradient_moment_scale = jnp.asarray(record.get("gradient_moment_scale", 1.0))
     grad_psi_face = _smooth_near_axis(
-        jnp.asarray(record["grad_psi_face"]), rho_face, polynomial_order=1
+        gradient_moment_scale * jnp.asarray(record["grad_psi_face"]),
+        rho_face,
+        polynomial_order=1,
     )
     grad_psi2_face = _smooth_near_axis(
-        jnp.asarray(record["grad_psi2_face"]), rho_face, polynomial_order=2
+        gradient_moment_scale**2 * jnp.asarray(record["grad_psi2_face"]),
+        rho_face,
+        polynomial_order=2,
     )
     grad_psi2_over_r2_face = _smooth_near_axis(
-        jnp.asarray(record["grad_psi2_over_r2_face"]),
+        gradient_moment_scale**2 * jnp.asarray(record["grad_psi2_over_r2_face"]),
         rho_face,
         polynomial_order=2,
     )

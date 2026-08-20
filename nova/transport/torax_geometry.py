@@ -13,6 +13,25 @@ def _cumulative_trapezoid(values, coordinates):
     return jnp.concatenate((jnp.zeros(1, dtype=values.dtype), jnp.cumsum(increments)))
 
 
+def _smooth_near_axis(values, rho_face, *, polynomial_order):
+    """Apply TORAX's nearest-edge Savitzky-Golay normalization near axis."""
+    if polynomial_order == 1:
+        coefficients = jnp.full(5, 0.2, dtype=values.dtype)
+    elif polynomial_order == 2:
+        coefficients = jnp.asarray([-3, 12, 17, 12, -3], dtype=values.dtype) / 35
+    else:
+        raise ValueError(f"unsupported polynomial order: {polynomial_order}")
+
+    padded = jnp.pad(values, (2, 2), mode="edge")
+    smoothed = sum(
+        coefficient * padded[offset : offset + values.size]
+        for offset, coefficient in enumerate(coefficients)
+    )
+    smoothing_limit = jnp.argmin(jnp.abs(rho_face - 0.1))
+    index = jnp.arange(values.size)
+    return jnp.where((index > 0) & (index < smoothing_limit), smoothed, values)
+
+
 def torax_geometry_from_fsa(record: Mapping[str, object], *, hires_factor: int = 4):
     """Construct a TORAX ``StandardGeometry`` without a host geometry reader.
 
@@ -27,13 +46,23 @@ def torax_geometry_from_fsa(record: Mapping[str, object], *, hires_factor: int =
     from torax._src.torax_pydantic.torax_pydantic import Grid1D
 
     rho_face = jnp.asarray(record["rho_face"])
-    vpr_face = jnp.asarray(record["vpr_face"])
+    vpr_face = _smooth_near_axis(
+        jnp.asarray(record["vpr_face"]), rho_face, polynomial_order=1
+    )
     inv_r_face = jnp.asarray(record["inv_r_face"])
     g3_face = jnp.asarray(record["g3_face"])
     dvolume_dpsi = jnp.asarray(record["int_dl_over_bp_face"])
-    grad_psi_face = jnp.asarray(record["grad_psi_face"])
-    grad_psi2_face = jnp.asarray(record["grad_psi2_face"])
-    grad_psi2_over_r2_face = jnp.asarray(record["grad_psi2_over_r2_face"])
+    grad_psi_face = _smooth_near_axis(
+        jnp.asarray(record["grad_psi_face"]), rho_face, polynomial_order=1
+    )
+    grad_psi2_face = _smooth_near_axis(
+        jnp.asarray(record["grad_psi2_face"]), rho_face, polynomial_order=2
+    )
+    grad_psi2_over_r2_face = _smooth_near_axis(
+        jnp.asarray(record["grad_psi2_over_r2_face"]),
+        rho_face,
+        polynomial_order=2,
+    )
     f_nova = jnp.asarray(record["f_face"])
     flux_sign = jnp.asarray(record["flux_sign"])
     psi_nova = jnp.asarray(record["psi_face"])
@@ -56,7 +85,7 @@ def torax_geometry_from_fsa(record: Mapping[str, object], *, hires_factor: int =
         jnp.zeros_like(rho_face).at[1:].set(g2_face[1:] * g3_face[1:] / rho_face[1:])
     )
     spr_face = vpr_face * inv_r_face / (2.0 * jnp.pi)
-    volume_face = jnp.asarray(record["volume_face"])
+    volume_face = _cumulative_trapezoid(vpr_face, rho_face)
     area_face = _cumulative_trapezoid(spr_face, rho_face)
 
     dpsi_drho = (
@@ -69,6 +98,9 @@ def torax_geometry_from_fsa(record: Mapping[str, object], *, hires_factor: int =
         )
     )
     psi_from_ip_face = psi_face[0] + _cumulative_trapezoid(dpsi_drho, rho_face)
+    psi_from_ip_face = psi_from_ip_face.at[-1].set(
+        psi_from_ip_face[-2] + dpsi_drho[-1] * (rho_face[-1] - rho_face[-2])
+    )
     j_total_face = jnp.gradient(ip_profile_face, rho_face) / jnp.maximum(
         spr_face, 1e-30
     )

@@ -153,15 +153,15 @@ def test_extended_columns_match_shaped_analytic_references_and_batch():
         _contour_reference(float(levels[index]), *parameters) for index in indices
     ]
     comparisons = {
-        "int_dl_over_bp_face": "int_dl_over_bp",
-        "grad_psi_face": "grad_psi",
-        "grad_psi2_face": "grad_psi2",
-        "inv_b2_face": "inv_b2",
+        "int_dl_over_bp_face": ("int_dl_over_bp", 0.006),
+        "grad_psi_face": ("grad_psi", 0.020),
+        "grad_psi2_face": ("grad_psi2", 0.006),
+        "inv_b2_face": ("inv_b2", 5e-5),
     }
-    for column, reference_name in comparisons.items():
+    for column, (reference_name, relative_tolerance) in comparisons.items():
         actual = np.asarray(record[column])[indices]
         expected = np.array([item[reference_name] for item in references])
-        np.testing.assert_allclose(actual, expected, rtol=0.12, atol=1e-9)
+        np.testing.assert_allclose(actual, expected, rtol=relative_tolerance, atol=1e-9)
 
     rho = np.asarray(record["rho_face"])[indices]
     np.testing.assert_allclose(

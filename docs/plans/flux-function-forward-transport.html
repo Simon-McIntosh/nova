@@ -189,20 +189,36 @@
     (1.25 &#215; surface spacing) then smears across neighbouring shells. The extrema are worse
     still — <code>min</code> and <code>max</code> over <em>selected nodes</em>, which quantises
     R_in, R_out, elongation and triangularity to one cell.</p>
+    <p><strong>The integrators for this already exist, and this record is the one place that
+    reinvented them.</strong> Nova carries exact traced clipped-cell polygon quadrature in
+    <code>nova/equilibrium/separatrix_clip.py</code> — <code>TracedClippedSupports</code> with
+    per-cell <code>area</code>, <code>full_area</code>, <code>first_area_moment</code>,
+    <code>second_area_moment</code> and <code>contour_area</code>,
+    <code>padded_polynomial_current_moments</code> over a complete polynomial basis, and
+    <code>_traced_clip</code> keeping it jit/vmap-safe — built and validated for the li and I_p
+    metrics and the edge-current representation. Nova <em>also</em> carries a second, independent
+    flux-surface read in <code>nova/equilibrium/flux_surface_geometry.py</code>, which traces
+    contours with axis refinement: the same class of method TORAX uses. So the transport record's
+    Gaussian shells are a third integration method for a problem two landed ones already solve,
+    and the fix is to migrate onto them rather than to author a fourth.</p>
     <ol>
-      <li><strong>Sub-cell enriched coarea quadrature.</strong> Use every sample the cell
-      carries — nodes, edge mid-points and the cell centre — rather than the node alone. With
-      &#968; known at a cell's four corners, the edge mid-points and centre follow from the
-      interpolant, giving a 3&#215;3 stencil per cell: the shell's within-cell occupancy becomes
-      sub-cell resolvable instead of an all-or-nothing node test, and &#8711;&#968; can be taken
-      analytically from the interpolant at those same points instead of from node-only central
-      differences that degrade to one-sided at the boundary. Sub-cell resolution is what earns
-      the right to shrink the bandwidth, so the two must move together and be reported
-      together.</li>
-      <li><strong>Interpolated surface extrema.</strong> Locate R_in, R_out and the top and
-      bottom of each surface by interpolating the level-set crossing along cell edges, not by
-      taking extrema over selected nodes. Grid quantisation is the whole of the shape error, so
-      this is a direct fix rather than a refinement.</li>
+      <li><strong>Exact clipped-cell surface integrals.</strong> Replace the Gaussian shell
+      weight with the exact clipped area each cell contributes between a shell's two bounding
+      surfaces, taken from <code>TracedClippedSupports</code>, and carry the integrand's
+      within-cell variation on the clip's own area moments rather than a single node sample.
+      This uses everything the discretisation holds — corner values, the edge crossings the clip
+      solves for, and the centroid the moments are formed about — and it removes the bandwidth
+      parameter entirely rather than tuning it: there is no smearing left to trade against
+      binning noise.</li>
+      <li><strong>Extrema from the clip's own crossings.</strong> R_in, R_out and the top and
+      bottom of each surface come from the clipped polygon vertices, which are already the
+      interpolated level-set crossings along cell edges. Grid quantisation is the whole of the
+      shape error, so this falls out of item 1 rather than needing its own machinery.</li>
+      <li><strong>Cross-check against Nova's own contour read.</strong> Compare the migrated
+      record against <code>nova/equilibrium/flux_surface_geometry.py</code>'s contour-traced
+      extraction as well as against TORAX's reader. Three independent routes over one
+      equilibrium localise any residual disagreement to a method rather than leaving it
+      unattributed — and a persistent two-against-one split is itself the diagnosis.</li>
     </ol>
     <p><strong>Acceptance.</strong> Measured against the independently read
     <code>iterhybrid_cocos17.eqdsk</code>: <code>g2g3_over_rhon</code>, <code>g0</code>,

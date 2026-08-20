@@ -1,0 +1,90 @@
+{
+  "cache": {
+    "digests_equal": true,
+    "directory": "/run/user/39486/reckon-diiid-artifact-publication-163102-cache",
+    "materialized_digest": "sha256:f0bc384f17ccc8ad2d70adf96b8228acfc8b3a5187ce112f9a09f633446d28ef",
+    "resolved_digest": "sha256:f0bc384f17ccc8ad2d70adf96b8228acfc8b3a5187ce112f9a09f633446d28ef",
+    "resolved_directory": "/run/user/39486/reckon-diiid-artifact-publication-163102-cache/sha256/f0bc384f17ccc8ad2d70adf96b8228acfc8b3a5187ce112f9a09f633446d28ef"
+  },
+  "data_dictionary_floor": {
+    "declared_data_dictionary": "3.42.2",
+    "exception": "MachineArtifactError",
+    "message": "machine-artifact publication requires data dictionary major 4, got '3.42.2'",
+    "refused": true
+  },
+  "digest_basis": {
+    "physical": "authored static IDS leaves excluding ids_properties, plus declared absences",
+    "registry": "all authored IDS leaves, source identity, dictionary versions, and declared absences"
+  },
+  "manifest": {
+    "channel_drive": [],
+    "complete": false,
+    "dd_version": "4.1.1",
+    "field_evidence": [],
+    "files": [
+      {
+        "name": "diiid_machine_description.nc",
+        "sha256": "1e560b2ad2f2f224eed064ed3ccbeedbd88d4f4d2daca4966a855e37961c05ab",
+        "size": 213703
+      }
+    ],
+    "oci": {
+      "artifact_type": "application/vnd.iter.nova.diii-d-machine-description.v1",
+      "file_media_type": "application/vnd.iter.nova.diii-d-machine-description.ids.v1",
+      "manifest_media_type": "application/vnd.oci.image.manifest.v1+json",
+      "tag": "dd-4.1.1-physical-0eaa06b66b8a27263599c2c9953f43e734d4769bba0ae2398922bec9ab8a62cd"
+    },
+    "physical_digest": "0eaa06b66b8a27263599c2c9953f43e734d4769bba0ae2398922bec9ab8a62cd",
+    "registry_digest": "3b64ad0cd92ca1d79512af2b90faa3edaee3b5f22a1be32a72e13af627d44b9a",
+    "schema": "nova-diii-d-machine-artifact",
+    "shot_ranges": [
+      {
+        "evidence": "observed",
+        "first_shot": 200000,
+        "last_shot": 200000,
+        "physical_digest": "0eaa06b66b8a27263599c2c9953f43e734d4769bba0ae2398922bec9ab8a62cd"
+      }
+    ],
+    "unresolved_gaps": [
+      "Thomson scattering line-of-sight endpoints: neither the source entry nor the competition dataset supplies endpoint pairs; representative positions are not fabricated into sightlines",
+      "pf_passive: the source entry has no pf_passive occurrence; no passive loop or vessel conductor is fabricated",
+      "tf static conductor geometry: the source tf IDS supplies a time-dependent vacuum-field signal but no static conductor geometry; the signal is excluded"
+    ]
+  },
+  "network_publication_attempted": false,
+  "output": {
+    "path": "docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc",
+    "sha256": "1e560b2ad2f2f224eed064ed3ccbeedbd88d4f4d2daca4966a855e37961c05ab",
+    "size_bytes": 213703
+  },
+  "publication": {
+    "artifact_type": "application/vnd.iter.nova.diii-d-machine-description.v1",
+    "data_dictionary": "4.1.1",
+    "data_dictionary_resolver": "publication_dd_version()",
+    "file_media_type": "application/vnd.iter.nova.diii-d-machine-description.ids.v1",
+    "manifest_digest": "sha256:f0bc384f17ccc8ad2d70adf96b8228acfc8b3a5187ce112f9a09f633446d28ef",
+    "manifest_media_type": "application/vnd.oci.image.manifest.v1+json",
+    "manifest_path": "docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.manifest.json",
+    "manifest_schema": "nova-diii-d-machine-artifact",
+    "oci_reference": "ghcr.io/registry-account/diii-d-machine-description:dd-4.1.1-physical-0eaa06b66b8a27263599c2c9953f43e734d4769bba0ae2398922bec9ab8a62cd",
+    "oci_tag": "dd-4.1.1-physical-0eaa06b66b8a27263599c2c9953f43e734d4769bba0ae2398922bec9ab8a62cd",
+    "physical_digest": "0eaa06b66b8a27263599c2c9953f43e734d4769bba0ae2398922bec9ab8a62cd",
+    "registry_digest": "3b64ad0cd92ca1d79512af2b90faa3edaee3b5f22a1be32a72e13af627d44b9a",
+    "repository": "ghcr.io/registry-account/diii-d-machine-description"
+  },
+  "publication_recipe": {
+    "local_operator_action": true,
+    "no_ci_workflow": true,
+    "path": "docs/figures/diiid-forward-onboarding/ids-set/PUBLISH.md"
+  },
+  "round_trip": {
+    "authored_leaf_count": 1549,
+    "exact_equal": true,
+    "maximum_absolute_difference": 0.0
+  },
+  "source": {
+    "data_dictionary": "3.41.0",
+    "path": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+    "shot": 200000
+  }
+}

@@ -737,6 +737,60 @@
     width &#8212; wide enough that a recorded 2.63% could drift to 3.55% without failing. That is
     defensible while the method is still moving and should narrow once the curved items settle
     it.</p>
+    <h2 id="bicubic-negative">Tensor bicubic clipped cells &#8212; a measured no</h2>
+    <p>Commit <code>47808904</code>. <strong>42 passed / 1 deselected in 297 s</strong>, ruff
+    clean, the exact-bilinear hyperbola path retired, no bandwidth or smoothing anywhere. The
+    committed surface authority is a fixed-shape C&#185; Catmull&#8211;Rom/Hermite tensor bicubic
+    through <code>nova.linalg.interpolant.Bernstein</code> pytrees, with normalised-&#968;
+    coefficients driving the clipping roots and separately reconstructed raw-Wb coefficients
+    driving physical gradients, fixed bisection for edge roots, the existing
+    <code>_arc_rule</code> 12-node Gauss&#8211;Legendre rule along in-cell arcs, oriented
+    Green-theorem corrections for area and the first and mixed moments, and constrained Newton
+    solves for extrema.</p>
+    <h3>The primitive is excellent, and that is the point</h3>
+    <table>
+      <caption>Extremum radial position under grid refinement, fixed phase.</caption>
+      <thead><tr><th>spacing</th><th>error</th><th>measured order</th></tr></thead>
+      <tbody>
+        <tr><td>0.13333</td><td>3.437e&#8722;05</td><td>&#8212;</td></tr>
+        <tr><td>0.04444</td><td>4.243e&#8722;07</td><td><strong>3.999999</strong></td></tr>
+        <tr><td>0.01481</td><td>5.239e&#8722;09</td><td><strong>4.000001</strong></td></tr>
+      </tbody>
+    </table>
+    <p>Fourth order, to six figures. Adjacent-cell C&#185; mismatches are 0, 1.73e&#8722;18 and 0;
+    the arc residual is 2.78e&#8722;17; the corrected area is within 1.43e&#8722;5 of a
+    1,442,401-sample raster. The square-root extremum regime is decisively left &#8212; which was
+    the stated claim of the whole curved-clip argument.</p>
+    <h3>And the real equilibrium says no</h3>
+    <table>
+      <thead><tr><th>Measure</th><th>clipped (bilinear)</th><th>bicubic</th><th>gate</th></tr></thead>
+      <tbody>
+        <tr><td>ITER upper triangularity</td><td>20.43%</td><td>20.22%</td><td>&lt; 2%</td></tr>
+        <tr><td>ITER <code>g2g3</code> / <code>g0</code> / <code>g1</code> / <code>g2</code></td><td>2.63 / 0.90 / 2.08 / 1.98%</td><td>2.96 / 1.03 / 2.36 / 2.31%</td><td>no regression</td></tr>
+        <tr><td>STEP clipped&#8596;contour <code>vpr</code></td><td>16.46%</td><td>18.14%</td><td>&lt; 3.92%</td></tr>
+        <tr><td>STEP clipped&#8596;contour <code>g1</code></td><td>9.78%</td><td>22.31%</td><td>&lt; 6.20%</td></tr>
+        <tr><td>STEP &#934; / volume / area</td><td>2.75 / 2.85 / 3.51%</td><td>2.76 / 2.95 / 3.60%</td><td>2.13 / 1.41 / 1.80%</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The mechanism is the finding, and it is not order of accuracy.</strong> A
+    <em>local</em> centred-tangent Hermite bicubic cannot recover the <em>global</em>-spline
+    surface information both reference readers use. Fourth order on a smooth analytic surface and
+    20% on a real EQDSK are perfectly consistent once you see why: the two constructions converge
+    to <strong>different surfaces</strong>, and both reference routes use the global one. A global
+    spline solves a system in which every cell's polynomial is informed by the whole grid and is
+    C&#178;; a local Hermite stencil is C&#185; and blind beyond its neighbours. On STEP's
+    low-aspect-ratio grid the missing within-cell gradient structure is amplified.</p>
+    <p>So the honest conclusion is architectural rather than numerical: <strong>clipped-cell
+    integration is not the right authority for accuracy on real equilibria</strong>, however
+    exactly it integrates. Nova already owns the consensual authority &#8212;
+    <code>nova/equilibrium/flux_surface_geometry.py</code>, whose
+    <code>RectBivariateSpline</code> contour route agrees with TORAX to <strong>0.16% on
+    &#934;</strong>. What that route does not currently offer is differentiability: it is host-side
+    scipy, whereas the traced clipped route exists precisely to keep the implicit window gradient
+    alive, and <code>nova.linalg.interpolant.BSpline</code> is a 1-D global fit, so a traced
+    global tensor spline would have to be composed from it as two sequential solves.</p>
+    <p>Two accuracy-vs-differentiability positions, one measured trade. COCOS twins stayed below
+    1e&#8722;7 throughout, and the characterisation half-width narrowed from 35% to 10%.</p>
   </main>
 </body>
 </html>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T00:27:38",
+  "updated": "2026-08-21T01:13:36",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -13155,9 +13155,198 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260820T221124046883-current-polarity-boundary-audit",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a78",
+        "node": "current-polarity-boundary-audit",
+        "role": "implement",
+        "member": "diiid-vacuum",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T22:11:51Z",
+        "completed_at": "2026-08-20T22:51:57Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2406,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2406,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "b4a8f4238abc5b288c9aba1bfb5c24af53107ed8",
+        "commits": [
+          "b69a083138af624f3e7b5b7ee110b36517fdcd7b"
+        ],
+        "changed_lines": {
+          "added": 547,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 4,
+        "gate": "not-run",
+        "outcome": "Half the question answered: 19/19 poloidal channels on each tail shot passed the fail-closed bitwise and sign checks, so nova's row reader and registry unit scale are NOT the inversion boundary. The full-corpus affected-shot count over 7,041 parquet shots did not fit the 45-minute fence",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T221124046883-current-polarity-boundary-audit/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01090-c119-7413-b062-4589e1bc160f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 20358144,
+            "cached_input_tokens_cumulative": 112825216,
+            "input_tokens": 20647600,
+            "input_tokens_cumulative": 115095259,
+            "output_tokens": 45283,
+            "output_tokens_cumulative": 255936,
+            "reasoning_output_tokens": 15930,
+            "reasoning_output_tokens_cumulative": 74458
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260820T225252752577-polarity-census-exact-route",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a78",
+        "node": "polarity-census-exact-route",
+        "role": "implement",
+        "member": "diiid-vacuum",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T22:52:56Z",
+        "completed_at": "2026-08-20T23:02:57Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 601,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 601,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "7a0660bd64cebefac98094e4106199a2730a34eb",
+        "commits": [
+          "92b68e9d92381d5b02a90aed1a54c11720102fb9"
+        ],
+        "changed_lines": {
+          "added": 230,
+          "removed": 25,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "not-run",
+        "outcome": "Exact-response persistence harness landed with fail-closed reload validation and filament_centre_proxy_used=false, 6/6 tests; both detached SLURM jobs died in one second on a duplicated --no-sync argument before Python started, so no census was produced",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T225252752577-polarity-census-exact-route/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01090-c119-7413-b062-4589e1bc160f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3925248,
+            "cached_input_tokens_cumulative": 116750464,
+            "input_tokens": 4082608,
+            "input_tokens_cumulative": 119177867,
+            "output_tokens": 19303,
+            "output_tokens_cumulative": 275239,
+            "reasoning_output_tokens": 5636,
+            "reasoning_output_tokens_cumulative": 80094
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260820T215753950865-curved-cell-clips-and-extrema",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a77",
+        "node": "curved-cell-clips-and-extrema",
+        "role": "implement",
+        "member": "transport-env",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T21:58:17Z",
+        "completed_at": "2026-08-20T23:12:46Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4469,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4469,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "11e788af44e2bc3d785ec39ac28c34eb3854851a",
+        "commits": [
+          "47808904f51a3bf553112538030c47a1b80c531d"
+        ],
+        "changed_lines": {
+          "added": 436,
+          "removed": 106,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "failed",
+        "outcome": "AUTHORISED MEASURED NEGATIVE. The primitive is excellent: C1 across cells to 1.7e-18, arc residual 2.8e-17, area 1.4e-5 against a 1.44M-sample raster, and the extremum converges at FOURTH order (3.437e-5, 4.243e-7, 5.239e-9 at spacings 0.133, 0.044, 0.015; measured orders 3.999999 and 4.000001), so the square-root regime is decisively left. But the real-EQDSK gates are missed and several fields regress: ITER upper triangularity 20.22 percent against a 2 percent gate, ITER coefficients drift 2.63 to 2.96, 0.90 to 1.03, 2.08 to 2.36, 1.98 to 2.31, STEP clipped-vs-contour vpr 16.46 to 18.14 and g1 9.78 to 22.31. Named mechanism: a LOCAL centred-tangent Catmull-Rom/Hermite bicubic cannot recover the GLOBAL-spline surface both reference readers use, so the disagreement is which surface is reconstructed rather than the order of accuracy. Baseline half-width narrowed 35 to 10 percent; COCOS twins below 1e-7.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T215753950865-curved-cell-clips-and-extrema/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01023-3e4f-7081-b1ab-24ffbe816152",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 32974848,
+            "cached_input_tokens_cumulative": 111756288,
+            "input_tokens": 33553460,
+            "input_tokens_cumulative": 114610044,
+            "output_tokens": 72441,
+            "output_tokens_cumulative": 279578,
+            "reasoning_output_tokens": 27217,
+            "reasoning_output_tokens_cumulative": 98923
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 348
+    "_version": 351
   }
 }

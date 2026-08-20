@@ -1,0 +1,3447 @@
+{
+  "source": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+  "backend": "imas-python netCDF",
+  "dd_version": "3.41.0",
+  "fitting_performed": false,
+  "netcdf": {
+    "current_unit": {
+      "declared_unit": "A",
+      "metadata_path": "pf_active/coil/current/data",
+      "backend_exposes_unit": true,
+      "consistent_across_all_24_coils": true,
+      "confidence": "high"
+    },
+    "current_time_unit": {
+      "declared_unit": "s",
+      "metadata_path": "pf_active/coil/current/time",
+      "confidence": "high"
+    },
+    "per_coil": [
+      {
+        "name": "ECOILA",
+        "family": "ohmic",
+        "element_count": 48,
+        "turns_with_sign": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "effective_turns_with_sign": 48.0,
+        "max_abs_current_a": 54832.67578125,
+        "max_abs_ampere_turn": 2631968.4375
+      },
+      {
+        "name": "ECOILB",
+        "family": "ohmic",
+        "element_count": 48,
+        "turns_with_sign": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "effective_turns_with_sign": 48.0,
+        "max_abs_current_a": 53401.015625,
+        "max_abs_ampere_turn": 2563248.75
+      },
+      {
+        "name": "E567UP",
+        "family": "ohmic",
+        "element_count": 6,
+        "turns_with_sign": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "effective_turns_with_sign": 6.0,
+        "max_abs_current_a": 54446.203125,
+        "max_abs_ampere_turn": 326677.21875
+      },
+      {
+        "name": "E567DN",
+        "family": "ohmic",
+        "element_count": 6,
+        "turns_with_sign": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "effective_turns_with_sign": 6.0,
+        "max_abs_current_a": 53532.6484375,
+        "max_abs_ampere_turn": 321195.890625
+      },
+      {
+        "name": "E89DN",
+        "family": "ohmic",
+        "element_count": 7,
+        "turns_with_sign": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "effective_turns_with_sign": 7.0,
+        "max_abs_current_a": 55483.703125,
+        "max_abs_ampere_turn": 388385.921875
+      },
+      {
+        "name": "E89UP",
+        "family": "ohmic",
+        "element_count": 7,
+        "turns_with_sign": [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        "effective_turns_with_sign": 7.0,
+        "max_abs_current_a": 53080.23828125,
+        "max_abs_ampere_turn": 371561.66796875
+      },
+      {
+        "name": "F1A",
+        "family": "F-coil",
+        "element_count": 1,
+        "turns_with_sign": [
+          58.0
+        ],
+        "effective_turns_with_sign": 58.0,
+        "max_abs_current_a": 50.987233129040945,
+        "max_abs_ampere_turn": 2957.259521484375
+      },
+      {
+        "name": "F2A",
+        "family": "F-coil",
+        "element_count": 1,
+        "turns_with_sign": [
+          58.0
+        ],
+        "effective_turns_with_sign": 58.0,
+        "max_abs_current_a": 40.563274515086206,
+        "max_abs_ampere_turn": 2352.669921875
+      },
+      {
+        "name": "F3A",
+        "family": "F-coil",
+        "element_count": 1,
+        "turns_with_sign": [
+          58.0
+        ],
+        "effective_turns_with_sign": 58.0,
+        "max_abs_current_a": 8.599383650154904,
+        "max_abs_ampere_turn": 498.76425170898443
+      },
+      {
+        "name": "F4A",
+        "family": "F-coil",
+        "element_count": 1,
+        "turns_with_sign": [
+          58.0
+        ],
+        "effective_turns_with_sign": 58.0,
+        "max_abs_current_a": 35.94118736530172,
+        "max_abs_ampere_turn": 2084.5888671875
+      },
+      {
+        "name": "F5A",
+        "family": "F-coil",
+        "element_count": 1,
+        "turns_with_sign": [
+          58.0
+        ],
+        "effective_turns_with_sign": 58.0,
+        "max_abs_current_a": 28.70796150996767,
+        "max_abs_ampere_turn": 1665.061767578125
+      },
+      {
+        "name": "F6A",
+        "family": "F-coil",
+        "element_count": 1,
+        "turns_with_sign": [
+          55.0
+        ],
+        "effective_turns_with_sign": 55.0,
+        "max_abs_current_a": 80.03140092329545,
+        "max_abs_ampere_turn": 4401.72705078125
+      },
+      {
+        "name": "F7A",
+        "family": "F-coil",
+        "element_count": 1,
+        "turns_with_sign": [
+          55.0
+        ],
+        "effective_turns_with_sign": 55.0,
+        "max_abs_current_a": 49.319997336647724,
+        "max_abs_ampere_turn": 2712.599853515625
+      },
+      {
+        "name": "F8A",
+        "family": "F-coil",
+        "element_count": 1,
+        "turns_with_sign": [
+          58.0
+        ],
+        "effective_turns_with_sign": 58.0,
+        "max_abs_current_a": 12.33136196794181,
+        "max_abs_ampere_turn": 715.218994140625
+      },
+      {
+        "name": "F9A",
+        "family": "F-coil",
+        "element_count": 1,
+        "turns_with_sign": [
+          55.0
+        ],
+        "effective_turns_with_sign": 55.0,
+        "max_abs_current_a": 9.383939985795454,
+        "max_abs_ampere_turn": 516.11669921875
+      },
+      {
+        "name": "F1B",
+        "family": "F-coil",
+        "element_count": 1,
+        "turns_with_sign": [
+          58.0
+        ],
+        "effective_turns_with_sign": 58.0,
+        "max_abs_current_a": 57.4718228044181,
+        "max_abs_ampere_turn": 3333.36572265625
+      },
+      {
+        "name": "F2B",
+        "family": "F-coil",
+        "element_count": 1,
+        "turns_with_sign": [
+          58.0
+        ],
+        "effective_turns_with_sign": 58.0,
+        "max_abs_current_a": 29.24755438442888,
+        "max_abs_ampere_turn": 1696.358154296875
+      },
+      {
+        "name": "F3B",
+        "family": "F-coil",
+        "element_count": 1,
+        "turns_with_sign": [
+          58.0
+        ],
+        "effective_turns_with_sign": 58.0,
+        "max_abs_current_a": 44.2230224609375,
+        "max_abs_ampere_turn": 2564.935302734375
+      },
+      {
+        "name": "F4B",
+        "family": "F-coil",
+        "element_count": 1,
+        "turns_with_sign": [
+          58.0
+        ],
+        "effective_turns_with_sign": 58.0,
+        "max_abs_current_a": 60.908405172413794,
+        "max_abs_ampere_turn": 3532.6875
+      },
+      {
+        "name": "F5B",
+        "family": "F-coil",
+        "element_count": 1,
+        "turns_with_sign": [
+          58.0
+        ],
+        "effective_turns_with_sign": 58.0,
+        "max_abs_current_a": 52.850505960398706,
+        "max_abs_ampere_turn": 3065.329345703125
+      },
+      {
+        "name": "F6B",
+        "family": "F-coil",
+        "element_count": 1,
+        "turns_with_sign": [
+          55.0
+        ],
+        "effective_turns_with_sign": 55.0,
+        "max_abs_current_a": 93.17357954545454,
+        "max_abs_ampere_turn": 5124.546875
+      },
+      {
+        "name": "F7B",
+        "family": "F-coil",
+        "element_count": 1,
+        "turns_with_sign": [
+          55.0
+        ],
+        "effective_turns_with_sign": 55.0,
+        "max_abs_current_a": 71.05689364346591,
+        "max_abs_ampere_turn": 3908.129150390625
+      },
+      {
+        "name": "F8B",
+        "family": "F-coil",
+        "element_count": 1,
+        "turns_with_sign": [
+          58.0
+        ],
+        "effective_turns_with_sign": 58.0,
+        "max_abs_current_a": 44.84317753232759,
+        "max_abs_ampere_turn": 2600.904296875
+      },
+      {
+        "name": "F9B",
+        "family": "F-coil",
+        "element_count": 1,
+        "turns_with_sign": [
+          55.0
+        ],
+        "effective_turns_with_sign": 55.0,
+        "max_abs_current_a": 18.790496271306818,
+        "max_abs_ampere_turn": 1033.477294921875
+      }
+    ],
+    "family_extrema": {
+      "ohmic_max_abs_current_a": 55483.703125,
+      "f_coil_max_abs_current_a": 93.17357954545454,
+      "ohmic_max_abs_ampere_turn": 2631968.4375,
+      "f_coil_max_abs_ampere_turn": 5124.546875
+    },
+    "interpretation": {
+      "supported_reading": "unit_inconsistency_between_families",
+      "confidence": "medium",
+      "numeric_evidence": {
+        "ohmic_to_f_max_abs_current_ratio": 595.4875126154446,
+        "ohmic_to_f_max_abs_ampere_turn_ratio": 513.600226849325,
+        "equilibrium_slice_count": 340,
+        "x_point_count_histogram": {
+          "2": 340
+        }
+      },
+      "reason": "The schema literally declares A for every coil, but applying that declaration leaves every F coil below 100 A and the strongest F-coil drive below the ohmic-family drive by more than two orders of magnitude, while all 340 reconstructed shaped slices carry two X points. That boundary evidence supports a family-specific unit inconsistency over a pulse genuinely shaped by sub-100 A F coils. The confidence is medium because the reconstructed equilibrium also contains plasma and unmodelled passive-field contributions; the topology is a physical discriminator, not an independent current calibration."
+    },
+    "equilibrium_boundary_discriminator": {
+      "slice_count": 340,
+      "x_point_count_histogram": {
+        "2": 340
+      },
+      "confidence": "high"
+    },
+    "turns": {
+      "declared_unit": "-",
+      "metadata_path": "pf_active/coil/element/turns_with_sign",
+      "coil_count": 24,
+      "ecoila_declared_effective_turns": 48.0,
+      "ecoila_element_count": 48,
+      "settles_prior_sensitivity_bracket": true,
+      "prior_bracket": [
+        1,
+        96
+      ],
+      "confidence": "high",
+      "statement": "ECOILA contains 48 declared elements, each with turns_with_sign=1, so its declared effective coil count is 48 turns."
+    }
+  },
+  "shot_identity": {
+    "status": "complete",
+    "tolerances": {
+      "declared_before_comparison": true,
+      "cohort_selection": "the first twenty competition parquet paths in lexical order, matching the established coil-only cohort",
+      "cohort_size": 20,
+      "sample_count_difference_required": 0,
+      "sample_count_difference_definition": "competition minus netCDF",
+      "time_max_abs_difference_tolerance_ms": 0.01,
+      "trace_absolute_tolerance_a_turn": 0.001,
+      "trace_relative_tolerance": 1e-09,
+      "match_rule": "time sample counts must be equal, elementwise times must meet the declared millisecond tolerance, and every common channel must meet the declared ampere-turn absolute-plus-relative tolerance",
+      "difference_for_unequal_lengths": "maximum absolute elementwise difference over the shared prefix; the nonzero sample-count difference independently prevents a match"
+    },
+    "competition_schema_metadata": {
+      "fusion_coil_units": "kA.turn/v1"
+    },
+    "competition_field_metadata": {
+      "magnetics_time": null,
+      "magnetics_ECOILA": null,
+      "magnetics_F1A": null,
+      "magnetics_F1B": null,
+      "magnetics_F2A": null,
+      "magnetics_F2B": null,
+      "magnetics_F3A": null,
+      "magnetics_F3B": null,
+      "magnetics_F4A": null,
+      "magnetics_F4B": null,
+      "magnetics_F5A": null,
+      "magnetics_F5B": null,
+      "magnetics_F6A": null,
+      "magnetics_F6B": null,
+      "magnetics_F7A": null,
+      "magnetics_F7B": null,
+      "magnetics_F8A": null,
+      "magnetics_F8B": null,
+      "magnetics_F9A": null,
+      "magnetics_F9B": null
+    },
+    "competition_current_unit": {
+      "declared_unit_attribute": "kA.turn/v1",
+      "conversion_used": "1 kA.turn = 1000 A.turn",
+      "confidence": "high"
+    },
+    "competition_time_unit": {
+      "field": "magnetics_time",
+      "declared_unit_attribute": null,
+      "comparison_unit": "ms",
+      "confidence": "medium",
+      "statement": "The Arrow field carries no unit metadata. The comparison retains the corpus millisecond convention used by the established DIII-D benchmarks and records the missing declaration rather than claiming a schema-sourced unit."
+    },
+    "shots": [
+      {
+        "netcdf_sample_count": 480256,
+        "competition_sample_count": 480256,
+        "sample_count_difference": 0,
+        "max_abs_time_difference_ms": 53.63043708801706,
+        "time_matched": false,
+        "common_channel_count": 19,
+        "channels": [
+          {
+            "name": "ECOILA",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 2695775.7163772583,
+            "netcdf_to_competition_rms_ratio": 48.648251005771414,
+            "matched": false
+          },
+          {
+            "name": "F1A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 87705.35058093071,
+            "netcdf_to_competition_rms_ratio": 0.11435628183402011,
+            "matched": false
+          },
+          {
+            "name": "F1B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 221912.9290235043,
+            "netcdf_to_competition_rms_ratio": 0.03396041590865414,
+            "matched": false
+          },
+          {
+            "name": "F2A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 227615.4462723732,
+            "netcdf_to_competition_rms_ratio": 0.023561603233526247,
+            "matched": false
+          },
+          {
+            "name": "F2B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 157842.01556253433,
+            "netcdf_to_competition_rms_ratio": 0.019901534238422315,
+            "matched": false
+          },
+          {
+            "name": "F3A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 171197.19805407524,
+            "netcdf_to_competition_rms_ratio": 0.0007593773690565315,
+            "matched": false
+          },
+          {
+            "name": "F3B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 174592.516284585,
+            "netcdf_to_competition_rms_ratio": 0.029342169220676444,
+            "matched": false
+          },
+          {
+            "name": "F4A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 251223.07783794403,
+            "netcdf_to_competition_rms_ratio": 0.015318204657888357,
+            "matched": false
+          },
+          {
+            "name": "F4B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 166949.9589650631,
+            "netcdf_to_competition_rms_ratio": 0.04175951637335926,
+            "matched": false
+          },
+          {
+            "name": "F5A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 141646.69338607788,
+            "netcdf_to_competition_rms_ratio": 0.0203320112756737,
+            "matched": false
+          },
+          {
+            "name": "F5B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 135200.37097465995,
+            "netcdf_to_competition_rms_ratio": 0.056960461863856435,
+            "matched": false
+          },
+          {
+            "name": "F6A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 189419.69147086143,
+            "netcdf_to_competition_rms_ratio": 0.05076192618033939,
+            "matched": false
+          },
+          {
+            "name": "F6B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 176658.62375110388,
+            "netcdf_to_competition_rms_ratio": 0.06298810853721026,
+            "matched": false
+          },
+          {
+            "name": "F7A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 275203.6218469739,
+            "netcdf_to_competition_rms_ratio": 0.0183803944595364,
+            "matched": false
+          },
+          {
+            "name": "F7B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 238121.38029789925,
+            "netcdf_to_competition_rms_ratio": 0.03470205839647081,
+            "matched": false
+          },
+          {
+            "name": "F8A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 207423.6160385609,
+            "netcdf_to_competition_rms_ratio": 0.007752551087404985,
+            "matched": false
+          },
+          {
+            "name": "F8B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 184431.53867530826,
+            "netcdf_to_competition_rms_ratio": 0.025731957992271005,
+            "matched": false
+          },
+          {
+            "name": "F9A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 111154.55285906792,
+            "netcdf_to_competition_rms_ratio": 0.010133016215549857,
+            "matched": false
+          },
+          {
+            "name": "F9B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 117994.14681750536,
+            "netcdf_to_competition_rms_ratio": 0.00705049659535185,
+            "matched": false
+          }
+        ],
+        "matched": false,
+        "shot": "d3d_shot_00000a10ac.parquet"
+      },
+      {
+        "netcdf_sample_count": 480256,
+        "competition_sample_count": 49152,
+        "sample_count_difference": -431104,
+        "max_abs_time_difference_ms": 16946.746320724487,
+        "time_matched": false,
+        "common_channel_count": 19,
+        "channels": [
+          {
+            "name": "ECOILA",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 66613.15154743195,
+            "netcdf_to_competition_rms_ratio": 0.02712230679774989,
+            "matched": false
+          },
+          {
+            "name": "F1A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 275633.82542586327,
+            "netcdf_to_competition_rms_ratio": 1.852206096311525e-05,
+            "matched": false
+          },
+          {
+            "name": "F1B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 281185.22891139984,
+            "netcdf_to_competition_rms_ratio": 6.149593155358199e-06,
+            "matched": false
+          },
+          {
+            "name": "F2A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 171776.57478761673,
+            "netcdf_to_competition_rms_ratio": 2.2310257490399474e-05,
+            "matched": false
+          },
+          {
+            "name": "F2B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 105840.5789141655,
+            "netcdf_to_competition_rms_ratio": 1.6299512993671154e-05,
+            "matched": false
+          },
+          {
+            "name": "F3A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 64395.9319779873,
+            "netcdf_to_competition_rms_ratio": 0.0001057597659947128,
+            "matched": false
+          },
+          {
+            "name": "F3B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 36029.67361414433,
+            "netcdf_to_competition_rms_ratio": 0.0005180736098832619,
+            "matched": false
+          },
+          {
+            "name": "F4A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 213900.68026208878,
+            "netcdf_to_competition_rms_ratio": 2.09983880083513e-05,
+            "matched": false
+          },
+          {
+            "name": "F4B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 70080.89674544336,
+            "netcdf_to_competition_rms_ratio": 3.2603469029859106e-05,
+            "matched": false
+          },
+          {
+            "name": "F5A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 195377.5193991661,
+            "netcdf_to_competition_rms_ratio": 2.542162169354976e-05,
+            "matched": false
+          },
+          {
+            "name": "F5B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 108694.93669092655,
+            "netcdf_to_competition_rms_ratio": 2.5017124928666016e-05,
+            "matched": false
+          },
+          {
+            "name": "F6A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 184104.2423826456,
+            "netcdf_to_competition_rms_ratio": 2.281628117058479e-05,
+            "matched": false
+          },
+          {
+            "name": "F6B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 224184.73281043768,
+            "netcdf_to_competition_rms_ratio": 1.642113306888158e-05,
+            "matched": false
+          },
+          {
+            "name": "F7A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 298854.35807943344,
+            "netcdf_to_competition_rms_ratio": 1.0292130110404739e-05,
+            "matched": false
+          },
+          {
+            "name": "F7B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 175358.17045462132,
+            "netcdf_to_competition_rms_ratio": 1.3177772871600917e-05,
+            "matched": false
+          },
+          {
+            "name": "F8A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 122202.22080922128,
+            "netcdf_to_competition_rms_ratio": 5.8517735012559045e-05,
+            "matched": false
+          },
+          {
+            "name": "F8B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 139289.91534829143,
+            "netcdf_to_competition_rms_ratio": 2.2703173063454124e-05,
+            "matched": false
+          },
+          {
+            "name": "F9A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 68107.36631244421,
+            "netcdf_to_competition_rms_ratio": 0.00013344681853749563,
+            "matched": false
+          },
+          {
+            "name": "F9B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 99681.01415902376,
+            "netcdf_to_competition_rms_ratio": 2.0349822653126797e-05,
+            "matched": false
+          }
+        ],
+        "matched": false,
+        "shot": "d3d_shot_00000c4a7b.parquet"
+      },
+      {
+        "netcdf_sample_count": 480256,
+        "competition_sample_count": 49152,
+        "sample_count_difference": -431104,
+        "max_abs_time_difference_ms": 17084.428937911987,
+        "time_matched": false,
+        "common_channel_count": 19,
+        "channels": [
+          {
+            "name": "ECOILA",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 41630.57207107544,
+            "netcdf_to_competition_rms_ratio": 0.07821871706980946,
+            "matched": false
+          },
+          {
+            "name": "F1A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 158649.1522293091,
+            "netcdf_to_competition_rms_ratio": 6.994781870866812e-05,
+            "matched": false
+          },
+          {
+            "name": "F1B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 198532.4431848526,
+            "netcdf_to_competition_rms_ratio": 1.8135978286994448e-05,
+            "matched": false
+          },
+          {
+            "name": "F2A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 235386.77046561244,
+            "netcdf_to_competition_rms_ratio": 4.344255597930178e-05,
+            "matched": false
+          },
+          {
+            "name": "F2B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 249331.25294828415,
+            "netcdf_to_competition_rms_ratio": 1.9573544173244643e-05,
+            "matched": false
+          },
+          {
+            "name": "F3A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 93811.76257419588,
+            "netcdf_to_competition_rms_ratio": 0.00022217542888294638,
+            "matched": false
+          },
+          {
+            "name": "F3B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 84273.48610836269,
+            "netcdf_to_competition_rms_ratio": 5.591609979385017e-05,
+            "matched": false
+          },
+          {
+            "name": "F4A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 236422.71189641953,
+            "netcdf_to_competition_rms_ratio": 4.515052164905458e-05,
+            "matched": false
+          },
+          {
+            "name": "F4B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 166568.4876666069,
+            "netcdf_to_competition_rms_ratio": 3.1594912602093866e-05,
+            "matched": false
+          },
+          {
+            "name": "F5A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 206096.55711936954,
+            "netcdf_to_competition_rms_ratio": 5.715418456018157e-05,
+            "matched": false
+          },
+          {
+            "name": "F5B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 265367.3813050389,
+            "netcdf_to_competition_rms_ratio": 2.7158103490753134e-05,
+            "matched": false
+          },
+          {
+            "name": "F6A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 365925.5612048507,
+            "netcdf_to_competition_rms_ratio": 3.0295839933545005e-05,
+            "matched": false
+          },
+          {
+            "name": "F6B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 357718.209507823,
+            "netcdf_to_competition_rms_ratio": 2.7711240211430323e-05,
+            "matched": false
+          },
+          {
+            "name": "F7A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 230166.7418282032,
+            "netcdf_to_competition_rms_ratio": 3.625365354879581e-05,
+            "matched": false
+          },
+          {
+            "name": "F7B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 222843.6053813696,
+            "netcdf_to_competition_rms_ratio": 2.9396440321812003e-05,
+            "matched": false
+          },
+          {
+            "name": "F8A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 259719.95105063915,
+            "netcdf_to_competition_rms_ratio": 5.80104065329827e-05,
+            "matched": false
+          },
+          {
+            "name": "F8B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 209860.22093081474,
+            "netcdf_to_competition_rms_ratio": 4.060647202368057e-05,
+            "matched": false
+          },
+          {
+            "name": "F9A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 161005.65926104784,
+            "netcdf_to_competition_rms_ratio": 5.313607065205168e-05,
+            "matched": false
+          },
+          {
+            "name": "F9B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 165739.99062120914,
+            "netcdf_to_competition_rms_ratio": 3.148237541516625e-05,
+            "matched": false
+          }
+        ],
+        "matched": false,
+        "shot": "d3d_shot_0003ff34e7.parquet"
+      },
+      {
+        "netcdf_sample_count": 480256,
+        "competition_sample_count": 480256,
+        "sample_count_difference": 0,
+        "max_abs_time_difference_ms": 35.63707771301779,
+        "time_matched": false,
+        "common_channel_count": 19,
+        "channels": [
+          {
+            "name": "ECOILA",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 2575817.760336399,
+            "netcdf_to_competition_rms_ratio": 68.61855947658945,
+            "matched": false
+          },
+          {
+            "name": "F1A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 146873.31815886497,
+            "netcdf_to_competition_rms_ratio": 0.043781943370129785,
+            "matched": false
+          },
+          {
+            "name": "F1B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 141669.09818935397,
+            "netcdf_to_competition_rms_ratio": 0.0478640844741001,
+            "matched": false
+          },
+          {
+            "name": "F2A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 97861.92623949052,
+            "netcdf_to_competition_rms_ratio": 0.06515217236553295,
+            "matched": false
+          },
+          {
+            "name": "F2B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 99718.00108385086,
+            "netcdf_to_competition_rms_ratio": 0.03672373091831745,
+            "matched": false
+          },
+          {
+            "name": "F3A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 108027.28765702249,
+            "netcdf_to_competition_rms_ratio": 0.0012244091194087597,
+            "matched": false
+          },
+          {
+            "name": "F3B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 96459.18884193897,
+            "netcdf_to_competition_rms_ratio": 0.04989275155165723,
+            "matched": false
+          },
+          {
+            "name": "F4A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 127556.72457778455,
+            "netcdf_to_competition_rms_ratio": 0.02550385481388313,
+            "matched": false
+          },
+          {
+            "name": "F4B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 93330.5792093277,
+            "netcdf_to_competition_rms_ratio": 0.13160525230699993,
+            "matched": false
+          },
+          {
+            "name": "F5A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 110482.5661444664,
+            "netcdf_to_competition_rms_ratio": 0.025533671463339708,
+            "matched": false
+          },
+          {
+            "name": "F5B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 258656.61958742142,
+            "netcdf_to_competition_rms_ratio": 0.025534205363233968,
+            "matched": false
+          },
+          {
+            "name": "F6A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 128839.15781748295,
+            "netcdf_to_competition_rms_ratio": 0.06705109035863092,
+            "matched": false
+          },
+          {
+            "name": "F6B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 150908.01800721884,
+            "netcdf_to_competition_rms_ratio": 0.07476396442937036,
+            "matched": false
+          },
+          {
+            "name": "F7A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 219187.4593602419,
+            "netcdf_to_competition_rms_ratio": 0.025144669779391914,
+            "matched": false
+          },
+          {
+            "name": "F7B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 285426.51789712906,
+            "netcdf_to_competition_rms_ratio": 0.0350998381138276,
+            "matched": false
+          },
+          {
+            "name": "F8A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 22456.8663854599,
+            "netcdf_to_competition_rms_ratio": 0.1201482701501518,
+            "matched": false
+          },
+          {
+            "name": "F8B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 171277.00557422638,
+            "netcdf_to_competition_rms_ratio": 0.0394086511653036,
+            "matched": false
+          },
+          {
+            "name": "F9A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 39194.92284846306,
+            "netcdf_to_competition_rms_ratio": 0.014548821042496607,
+            "matched": false
+          },
+          {
+            "name": "F9B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 78299.28615671396,
+            "netcdf_to_competition_rms_ratio": 0.01950634978835109,
+            "matched": false
+          }
+        ],
+        "matched": false,
+        "shot": "d3d_shot_0011c2afc9.parquet"
+      },
+      {
+        "netcdf_sample_count": 480256,
+        "competition_sample_count": 480256,
+        "sample_count_difference": 0,
+        "max_abs_time_difference_ms": 52.555109786990215,
+        "time_matched": false,
+        "common_channel_count": 19,
+        "channels": [
+          {
+            "name": "ECOILA",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 2586225.847137928,
+            "netcdf_to_competition_rms_ratio": 66.08549125854016,
+            "matched": false
+          },
+          {
+            "name": "F1A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 125722.52786254883,
+            "netcdf_to_competition_rms_ratio": 0.023683299969333882,
+            "matched": false
+          },
+          {
+            "name": "F1B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 135405.8168063164,
+            "netcdf_to_competition_rms_ratio": 0.024695853306765846,
+            "matched": false
+          },
+          {
+            "name": "F2A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 83190.46351337433,
+            "netcdf_to_competition_rms_ratio": 0.039791957624172425,
+            "matched": false
+          },
+          {
+            "name": "F2B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 127446.13521814348,
+            "netcdf_to_competition_rms_ratio": 0.011817935517964737,
+            "matched": false
+          },
+          {
+            "name": "F3A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 133432.85980129242,
+            "netcdf_to_competition_rms_ratio": 0.00053643469004633,
+            "matched": false
+          },
+          {
+            "name": "F3B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 28790.489666700363,
+            "netcdf_to_competition_rms_ratio": 0.15095244665732147,
+            "matched": false
+          },
+          {
+            "name": "F4A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 257871.6678775549,
+            "netcdf_to_competition_rms_ratio": 0.006224353965044772,
+            "matched": false
+          },
+          {
+            "name": "F4B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 52781.80537557602,
+            "netcdf_to_competition_rms_ratio": 0.06601365756188836,
+            "matched": false
+          },
+          {
+            "name": "F5A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 73137.21080732346,
+            "netcdf_to_competition_rms_ratio": 0.03960975818734721,
+            "matched": false
+          },
+          {
+            "name": "F5B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 36159.53445160389,
+            "netcdf_to_competition_rms_ratio": 0.10572833101010601,
+            "matched": false
+          },
+          {
+            "name": "F6A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 270587.09332990646,
+            "netcdf_to_competition_rms_ratio": 0.017460165952795773,
+            "matched": false
+          },
+          {
+            "name": "F6B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 164711.94600850344,
+            "netcdf_to_competition_rms_ratio": 0.033363056656028976,
+            "matched": false
+          },
+          {
+            "name": "F7A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 202276.3835632801,
+            "netcdf_to_competition_rms_ratio": 0.021237634936462732,
+            "matched": false
+          },
+          {
+            "name": "F7B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 128416.49340701102,
+            "netcdf_to_competition_rms_ratio": 0.03253291085321204,
+            "matched": false
+          },
+          {
+            "name": "F8A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 76603.49206864834,
+            "netcdf_to_competition_rms_ratio": 0.011485973626606789,
+            "matched": false
+          },
+          {
+            "name": "F8B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 34425.692521095276,
+            "netcdf_to_competition_rms_ratio": 0.0773283199463565,
+            "matched": false
+          },
+          {
+            "name": "F9A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 80023.86714941263,
+            "netcdf_to_competition_rms_ratio": 0.004971938096898489,
+            "matched": false
+          },
+          {
+            "name": "F9B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 32141.41810578108,
+            "netcdf_to_competition_rms_ratio": 0.019715766583194315,
+            "matched": false
+          }
+        ],
+        "matched": false,
+        "shot": "d3d_shot_001270afa9.parquet"
+      },
+      {
+        "netcdf_sample_count": 480256,
+        "competition_sample_count": 50176,
+        "sample_count_difference": -430080,
+        "max_abs_time_difference_ms": 17389.789484786987,
+        "time_matched": false,
+        "common_channel_count": 19,
+        "channels": [
+          {
+            "name": "ECOILA",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 55670.999698638916,
+            "netcdf_to_competition_rms_ratio": 0.057280193196151186,
+            "matched": false
+          },
+          {
+            "name": "F1A",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 153914.84999608996,
+            "netcdf_to_competition_rms_ratio": 3.27521163790493e-05,
+            "matched": false
+          },
+          {
+            "name": "F1B",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 160794.1709057093,
+            "netcdf_to_competition_rms_ratio": 1.0559862622845743e-05,
+            "matched": false
+          },
+          {
+            "name": "F2A",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 80420.77037930489,
+            "netcdf_to_competition_rms_ratio": 5.8319428615768266e-05,
+            "matched": false
+          },
+          {
+            "name": "F2B",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 78343.84008097649,
+            "netcdf_to_competition_rms_ratio": 2.8872941740840157e-05,
+            "matched": false
+          },
+          {
+            "name": "F3A",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 94801.97526359558,
+            "netcdf_to_competition_rms_ratio": 6.251812931608723e-05,
+            "matched": false
+          },
+          {
+            "name": "F3B",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 140019.0562053323,
+            "netcdf_to_competition_rms_ratio": 1.5500427901412163e-05,
+            "matched": false
+          },
+          {
+            "name": "F4A",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 124390.10586142541,
+            "netcdf_to_competition_rms_ratio": 4.217930006846208e-05,
+            "matched": false
+          },
+          {
+            "name": "F4B",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 113123.50391161443,
+            "netcdf_to_competition_rms_ratio": 2.3218332368477494e-05,
+            "matched": false
+          },
+          {
+            "name": "F5A",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 105582.1302061081,
+            "netcdf_to_competition_rms_ratio": 5.7766981673484616e-05,
+            "matched": false
+          },
+          {
+            "name": "F5B",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 300613.37806665903,
+            "netcdf_to_competition_rms_ratio": 9.572150374553903e-06,
+            "matched": false
+          },
+          {
+            "name": "F6A",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 204262.925698936,
+            "netcdf_to_competition_rms_ratio": 2.192187538977475e-05,
+            "matched": false
+          },
+          {
+            "name": "F6B",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 192440.5794968605,
+            "netcdf_to_competition_rms_ratio": 2.4694109255142864e-05,
+            "matched": false
+          },
+          {
+            "name": "F7A",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 206453.62848073244,
+            "netcdf_to_competition_rms_ratio": 1.7062781987525034e-05,
+            "matched": false
+          },
+          {
+            "name": "F7B",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 299536.0460693836,
+            "netcdf_to_competition_rms_ratio": 9.059503475834099e-06,
+            "matched": false
+          },
+          {
+            "name": "F8A",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 17874.123035311703,
+            "netcdf_to_competition_rms_ratio": 0.0005712797044481616,
+            "matched": false
+          },
+          {
+            "name": "F8B",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 195078.46475934982,
+            "netcdf_to_competition_rms_ratio": 1.7498129984803914e-05,
+            "matched": false
+          },
+          {
+            "name": "F9A",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 38791.418745815754,
+            "netcdf_to_competition_rms_ratio": 0.00011237359739136598,
+            "matched": false
+          },
+          {
+            "name": "F9B",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 32324.37690198422,
+            "netcdf_to_competition_rms_ratio": 0.00026067400112160456,
+            "matched": false
+          }
+        ],
+        "matched": false,
+        "shot": "d3d_shot_001554e054.parquet"
+      },
+      {
+        "netcdf_sample_count": 480256,
+        "competition_sample_count": 480256,
+        "sample_count_difference": 0,
+        "max_abs_time_difference_ms": 69.83987541198985,
+        "time_matched": false,
+        "common_channel_count": 19,
+        "channels": [
+          {
+            "name": "ECOILA",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 2675978.611325264,
+            "netcdf_to_competition_rms_ratio": 48.57945208390244,
+            "matched": false
+          },
+          {
+            "name": "F1A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 212577.25139045715,
+            "netcdf_to_competition_rms_ratio": 0.020738626945347522,
+            "matched": false
+          },
+          {
+            "name": "F1B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 214235.0759449005,
+            "netcdf_to_competition_rms_ratio": 0.022745066017283943,
+            "matched": false
+          },
+          {
+            "name": "F2A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 168883.96706485748,
+            "netcdf_to_competition_rms_ratio": 0.023202708412307246,
+            "matched": false
+          },
+          {
+            "name": "F2B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 262305.69139766693,
+            "netcdf_to_competition_rms_ratio": 0.008499162011435026,
+            "matched": false
+          },
+          {
+            "name": "F3A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 10144.521468639374,
+            "netcdf_to_competition_rms_ratio": 0.02425655406162693,
+            "matched": false
+          },
+          {
+            "name": "F3B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 177266.13837647438,
+            "netcdf_to_competition_rms_ratio": 0.015424279292748866,
+            "matched": false
+          },
+          {
+            "name": "F4A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 186603.81946122646,
+            "netcdf_to_competition_rms_ratio": 0.00948229794151878,
+            "matched": false
+          },
+          {
+            "name": "F4B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 150700.49218165877,
+            "netcdf_to_competition_rms_ratio": 0.027692695135877608,
+            "matched": false
+          },
+          {
+            "name": "F5A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 180690.70090937614,
+            "netcdf_to_competition_rms_ratio": 0.009243079193614197,
+            "matched": false
+          },
+          {
+            "name": "F5B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 242388.66503870487,
+            "netcdf_to_competition_rms_ratio": 0.013614391512348384,
+            "matched": false
+          },
+          {
+            "name": "F6A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 272385.81666606665,
+            "netcdf_to_competition_rms_ratio": 0.022994007982335155,
+            "matched": false
+          },
+          {
+            "name": "F6B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 258493.342577219,
+            "netcdf_to_competition_rms_ratio": 0.02660881235207786,
+            "matched": false
+          },
+          {
+            "name": "F7A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 310735.92793774605,
+            "netcdf_to_competition_rms_ratio": 0.012291314577722664,
+            "matched": false
+          },
+          {
+            "name": "F7B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 258891.37403082848,
+            "netcdf_to_competition_rms_ratio": 0.0217343859388456,
+            "matched": false
+          },
+          {
+            "name": "F8A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 162422.5784316063,
+            "netcdf_to_competition_rms_ratio": 0.0046271583862851585,
+            "matched": false
+          },
+          {
+            "name": "F8B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 278646.42967700964,
+            "netcdf_to_competition_rms_ratio": 0.009553168926952902,
+            "matched": false
+          },
+          {
+            "name": "F9A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 212982.78494167328,
+            "netcdf_to_competition_rms_ratio": 0.0018330032477661977,
+            "matched": false
+          },
+          {
+            "name": "F9B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 210945.94616007805,
+            "netcdf_to_competition_rms_ratio": 0.0023052195692171286,
+            "matched": false
+          }
+        ],
+        "matched": false,
+        "shot": "d3d_shot_001bc5a4ae.parquet"
+      },
+      {
+        "netcdf_sample_count": 480256,
+        "competition_sample_count": 480256,
+        "sample_count_difference": 0,
+        "max_abs_time_difference_ms": 121.02307853698949,
+        "time_matched": false,
+        "common_channel_count": 19,
+        "channels": [
+          {
+            "name": "ECOILA",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 2605112.76139307,
+            "netcdf_to_competition_rms_ratio": 66.51553734649517,
+            "matched": false
+          },
+          {
+            "name": "F1A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 140524.699331522,
+            "netcdf_to_competition_rms_ratio": 0.024564529109846512,
+            "matched": false
+          },
+          {
+            "name": "F1B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 149457.9253470898,
+            "netcdf_to_competition_rms_ratio": 0.023778943137718205,
+            "matched": false
+          },
+          {
+            "name": "F2A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 143704.01469802856,
+            "netcdf_to_competition_rms_ratio": 0.018835183094225497,
+            "matched": false
+          },
+          {
+            "name": "F2B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 93831.81708669662,
+            "netcdf_to_competition_rms_ratio": 0.0199215794101937,
+            "matched": false
+          },
+          {
+            "name": "F3A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 204038.17965078354,
+            "netcdf_to_competition_rms_ratio": 0.00029522564136986816,
+            "matched": false
+          },
+          {
+            "name": "F3B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 167961.30532085898,
+            "netcdf_to_competition_rms_ratio": 0.012762606603733484,
+            "matched": false
+          },
+          {
+            "name": "F4A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 177894.2529228926,
+            "netcdf_to_competition_rms_ratio": 0.014181382324612765,
+            "matched": false
+          },
+          {
+            "name": "F4B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 153159.4453043938,
+            "netcdf_to_competition_rms_ratio": 0.024739630174555653,
+            "matched": false
+          },
+          {
+            "name": "F5A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 231224.64604330066,
+            "netcdf_to_competition_rms_ratio": 0.006489330897942362,
+            "matched": false
+          },
+          {
+            "name": "F5B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 171882.00659477714,
+            "netcdf_to_competition_rms_ratio": 0.018264097110346243,
+            "matched": false
+          },
+          {
+            "name": "F6A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 214783.63879477978,
+            "netcdf_to_competition_rms_ratio": 0.026014929043889277,
+            "matched": false
+          },
+          {
+            "name": "F6B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 237402.5431522131,
+            "netcdf_to_competition_rms_ratio": 0.02684895122150159,
+            "matched": false
+          },
+          {
+            "name": "F7A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 294626.84692782164,
+            "netcdf_to_competition_rms_ratio": 0.008853957719963624,
+            "matched": false
+          },
+          {
+            "name": "F7B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 185216.7630341053,
+            "netcdf_to_competition_rms_ratio": 0.02263445862645991,
+            "matched": false
+          },
+          {
+            "name": "F8A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 126903.37972795963,
+            "netcdf_to_competition_rms_ratio": 0.006367753935177205,
+            "matched": false
+          },
+          {
+            "name": "F8B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 154611.07837867737,
+            "netcdf_to_competition_rms_ratio": 0.015696880019080834,
+            "matched": false
+          },
+          {
+            "name": "F9A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 119041.17896914482,
+            "netcdf_to_competition_rms_ratio": 0.004785098102859349,
+            "matched": false
+          },
+          {
+            "name": "F9B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 92857.86558431387,
+            "netcdf_to_competition_rms_ratio": 0.011652989448192728,
+            "matched": false
+          }
+        ],
+        "matched": false,
+        "shot": "d3d_shot_001cbcc9e6.parquet"
+      },
+      {
+        "netcdf_sample_count": 480256,
+        "competition_sample_count": 49152,
+        "sample_count_difference": -431104,
+        "max_abs_time_difference_ms": 16968.991437911987,
+        "time_matched": false,
+        "common_channel_count": 19,
+        "channels": [
+          {
+            "name": "ECOILA",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 54820.51826286317,
+            "netcdf_to_competition_rms_ratio": 0.05202386858585211,
+            "matched": false
+          },
+          {
+            "name": "F1A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 211536.5738735199,
+            "netcdf_to_competition_rms_ratio": 2.393007207686966e-05,
+            "matched": false
+          },
+          {
+            "name": "F1B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 180975.56802284718,
+            "netcdf_to_competition_rms_ratio": 9.384706128037373e-06,
+            "matched": false
+          },
+          {
+            "name": "F2A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 177571.20330119136,
+            "netcdf_to_competition_rms_ratio": 2.2816205132534673e-05,
+            "matched": false
+          },
+          {
+            "name": "F2B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 137360.94021952152,
+            "netcdf_to_competition_rms_ratio": 1.3868544268457292e-05,
+            "matched": false
+          },
+          {
+            "name": "F3A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 36505.93399834633,
+            "netcdf_to_competition_rms_ratio": 0.0001160046594178225,
+            "matched": false
+          },
+          {
+            "name": "F3B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 204782.99132680893,
+            "netcdf_to_competition_rms_ratio": 8.171401058281146e-06,
+            "matched": false
+          },
+          {
+            "name": "F4A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 64032.10088014603,
+            "netcdf_to_competition_rms_ratio": 0.00010364017146115825,
+            "matched": false
+          },
+          {
+            "name": "F4B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 168772.04171359542,
+            "netcdf_to_competition_rms_ratio": 1.54924196574557e-05,
+            "matched": false
+          },
+          {
+            "name": "F5A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 178694.66121649745,
+            "netcdf_to_competition_rms_ratio": 2.940652577308944e-05,
+            "matched": false
+          },
+          {
+            "name": "F5B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 229875.61474925283,
+            "netcdf_to_competition_rms_ratio": 1.2753560989587476e-05,
+            "matched": false
+          },
+          {
+            "name": "F6A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 262883.75949668884,
+            "netcdf_to_competition_rms_ratio": 1.5904267778115073e-05,
+            "matched": false
+          },
+          {
+            "name": "F6B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 226986.9022527933,
+            "netcdf_to_competition_rms_ratio": 1.7374268533472975e-05,
+            "matched": false
+          },
+          {
+            "name": "F7A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 267212.55390542746,
+            "netcdf_to_competition_rms_ratio": 1.3192776204784241e-05,
+            "matched": false
+          },
+          {
+            "name": "F7B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 411015.22352707386,
+            "netcdf_to_competition_rms_ratio": 6.402028676851399e-06,
+            "matched": false
+          },
+          {
+            "name": "F8A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 125983.83125305176,
+            "netcdf_to_competition_rms_ratio": 5.3177813383656824e-05,
+            "matched": false
+          },
+          {
+            "name": "F8B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 219096.63953757286,
+            "netcdf_to_competition_rms_ratio": 1.8897672977659445e-05,
+            "matched": false
+          },
+          {
+            "name": "F9A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 90383.69591784477,
+            "netcdf_to_competition_rms_ratio": 3.950148039100199e-05,
+            "matched": false
+          },
+          {
+            "name": "F9B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 64894.4426074624,
+            "netcdf_to_competition_rms_ratio": 7.180833054207968e-05,
+            "matched": false
+          }
+        ],
+        "matched": false,
+        "shot": "d3d_shot_002495e835.parquet"
+      },
+      {
+        "netcdf_sample_count": 480256,
+        "competition_sample_count": 480256,
+        "sample_count_difference": 0,
+        "max_abs_time_difference_ms": 17.754655838016333,
+        "time_matched": false,
+        "common_channel_count": 19,
+        "channels": [
+          {
+            "name": "ECOILA",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 2684375.7361860275,
+            "netcdf_to_competition_rms_ratio": 75.06730556437103,
+            "matched": false
+          },
+          {
+            "name": "F1A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 125658.34469699861,
+            "netcdf_to_competition_rms_ratio": 0.04380914455849316,
+            "matched": false
+          },
+          {
+            "name": "F1B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 133156.7230038643,
+            "netcdf_to_competition_rms_ratio": 0.04436432400189847,
+            "matched": false
+          },
+          {
+            "name": "F2A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 174034.54912948608,
+            "netcdf_to_competition_rms_ratio": 0.026912651160914056,
+            "matched": false
+          },
+          {
+            "name": "F2B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 215811.03651523593,
+            "netcdf_to_competition_rms_ratio": 0.011853029023951987,
+            "matched": false
+          },
+          {
+            "name": "F3A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 123507.30654537678,
+            "netcdf_to_competition_rms_ratio": 0.000979457017960992,
+            "matched": false
+          },
+          {
+            "name": "F3B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 122497.3379317522,
+            "netcdf_to_competition_rms_ratio": 0.03960192898963231,
+            "matched": false
+          },
+          {
+            "name": "F4A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 223287.4659917355,
+            "netcdf_to_competition_rms_ratio": 0.01169980431078052,
+            "matched": false
+          },
+          {
+            "name": "F4B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 213367.2913184166,
+            "netcdf_to_competition_rms_ratio": 0.028356444170841797,
+            "matched": false
+          },
+          {
+            "name": "F5A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 151462.05130720141,
+            "netcdf_to_competition_rms_ratio": 0.03074198410633894,
+            "matched": false
+          },
+          {
+            "name": "F5B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 111632.93514132501,
+            "netcdf_to_competition_rms_ratio": 0.08668186178750231,
+            "matched": false
+          },
+          {
+            "name": "F6A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 233304.68784987926,
+            "netcdf_to_competition_rms_ratio": 0.03200990285901883,
+            "matched": false
+          },
+          {
+            "name": "F6B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 223324.20902860168,
+            "netcdf_to_competition_rms_ratio": 0.03897852645764752,
+            "matched": false
+          },
+          {
+            "name": "F7A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 131834.73294204473,
+            "netcdf_to_competition_rms_ratio": 0.035399101190122274,
+            "matched": false
+          },
+          {
+            "name": "F7B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 139923.2236645222,
+            "netcdf_to_competition_rms_ratio": 0.05361138117863935,
+            "matched": false
+          },
+          {
+            "name": "F8A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 171260.67075538635,
+            "netcdf_to_competition_rms_ratio": 0.0065269903392694605,
+            "matched": false
+          },
+          {
+            "name": "F8B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 192812.07545757294,
+            "netcdf_to_competition_rms_ratio": 0.021796481352136323,
+            "matched": false
+          },
+          {
+            "name": "F9A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 98009.24729835987,
+            "netcdf_to_competition_rms_ratio": 0.00654604304679359,
+            "matched": false
+          },
+          {
+            "name": "F9B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 100477.87341737747,
+            "netcdf_to_competition_rms_ratio": 0.008205820312616045,
+            "matched": false
+          }
+        ],
+        "matched": false,
+        "shot": "d3d_shot_003ac617f1.parquet"
+      },
+      {
+        "netcdf_sample_count": 480256,
+        "competition_sample_count": 480256,
+        "sample_count_difference": 0,
+        "max_abs_time_difference_ms": 35.154719161990215,
+        "time_matched": false,
+        "common_channel_count": 19,
+        "channels": [
+          {
+            "name": "ECOILA",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 2582740.6326932907,
+            "netcdf_to_competition_rms_ratio": 69.30025828733474,
+            "matched": false
+          },
+          {
+            "name": "F1A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 231441.28206157687,
+            "netcdf_to_competition_rms_ratio": 0.01785625412173515,
+            "matched": false
+          },
+          {
+            "name": "F1B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 214207.4533932209,
+            "netcdf_to_competition_rms_ratio": 0.021499912110852695,
+            "matched": false
+          },
+          {
+            "name": "F2A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 152736.5496644974,
+            "netcdf_to_competition_rms_ratio": 0.017859939861106285,
+            "matched": false
+          },
+          {
+            "name": "F2B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 185135.16771268845,
+            "netcdf_to_competition_rms_ratio": 0.011490532494324189,
+            "matched": false
+          },
+          {
+            "name": "F3A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 19222.71930742264,
+            "netcdf_to_competition_rms_ratio": 0.014943845498660622,
+            "matched": false
+          },
+          {
+            "name": "F3B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 144137.05636763573,
+            "netcdf_to_competition_rms_ratio": 0.01905230990079559,
+            "matched": false
+          },
+          {
+            "name": "F4A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 67341.80240023136,
+            "netcdf_to_competition_rms_ratio": 0.03549393178788003,
+            "matched": false
+          },
+          {
+            "name": "F4B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 149237.21094679832,
+            "netcdf_to_competition_rms_ratio": 0.024950521937904847,
+            "matched": false
+          },
+          {
+            "name": "F5A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 218961.89841890335,
+            "netcdf_to_competition_rms_ratio": 0.008568364531531245,
+            "matched": false
+          },
+          {
+            "name": "F5B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 150837.47564673424,
+            "netcdf_to_competition_rms_ratio": 0.020522830642124054,
+            "matched": false
+          },
+          {
+            "name": "F6A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 262408.3023623228,
+            "netcdf_to_competition_rms_ratio": 0.01936519645214352,
+            "matched": false
+          },
+          {
+            "name": "F6B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 211438.35719537735,
+            "netcdf_to_competition_rms_ratio": 0.028526236485798287,
+            "matched": false
+          },
+          {
+            "name": "F7A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 237088.8784131408,
+            "netcdf_to_competition_rms_ratio": 0.011973220502382122,
+            "matched": false
+          },
+          {
+            "name": "F7B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 393488.57633042336,
+            "netcdf_to_competition_rms_ratio": 0.011524601771115492,
+            "matched": false
+          },
+          {
+            "name": "F8A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 73220.81648635864,
+            "netcdf_to_competition_rms_ratio": 0.01198665315533681,
+            "matched": false
+          },
+          {
+            "name": "F8B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 199698.74179363254,
+            "netcdf_to_competition_rms_ratio": 0.012825439013209558,
+            "matched": false
+          },
+          {
+            "name": "F9A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 86671.39513659479,
+            "netcdf_to_competition_rms_ratio": 0.0038185397608866195,
+            "matched": false
+          },
+          {
+            "name": "F9B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 96829.1358782649,
+            "netcdf_to_competition_rms_ratio": 0.011198556226742047,
+            "matched": false
+          }
+        ],
+        "matched": false,
+        "shot": "d3d_shot_0040a29bad.parquet"
+      },
+      {
+        "netcdf_sample_count": 480256,
+        "competition_sample_count": 49152,
+        "sample_count_difference": -431104,
+        "max_abs_time_difference_ms": 16968.991437911987,
+        "time_matched": false,
+        "common_channel_count": 19,
+        "channels": [
+          {
+            "name": "ECOILA",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 54813.6595416069,
+            "netcdf_to_competition_rms_ratio": 0.054765222276940306,
+            "matched": false
+          },
+          {
+            "name": "F1A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 205787.1706984043,
+            "netcdf_to_competition_rms_ratio": 2.6075912078464465e-05,
+            "matched": false
+          },
+          {
+            "name": "F1B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 178800.8552976847,
+            "netcdf_to_competition_rms_ratio": 9.973017602124191e-06,
+            "matched": false
+          },
+          {
+            "name": "F2A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 177897.62222743034,
+            "netcdf_to_competition_rms_ratio": 2.381522599924347e-05,
+            "matched": false
+          },
+          {
+            "name": "F2B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 129909.81768131256,
+            "netcdf_to_competition_rms_ratio": 1.475365871808795e-05,
+            "matched": false
+          },
+          {
+            "name": "F3A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 13595.817886710167,
+            "netcdf_to_competition_rms_ratio": 0.000732512974167508,
+            "matched": false
+          },
+          {
+            "name": "F3B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 208225.4007945657,
+            "netcdf_to_competition_rms_ratio": 8.225341528069675e-06,
+            "matched": false
+          },
+          {
+            "name": "F4A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 51812.4233698845,
+            "netcdf_to_competition_rms_ratio": 0.00011924614571496692,
+            "matched": false
+          },
+          {
+            "name": "F4B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 174553.02147781852,
+            "netcdf_to_competition_rms_ratio": 1.5523560252265675e-05,
+            "matched": false
+          },
+          {
+            "name": "F5A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 167166.1692955494,
+            "netcdf_to_competition_rms_ratio": 3.1905250872056615e-05,
+            "matched": false
+          },
+          {
+            "name": "F5B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 215950.0257881284,
+            "netcdf_to_competition_rms_ratio": 1.342592608416743e-05,
+            "matched": false
+          },
+          {
+            "name": "F6A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 258781.54328083992,
+            "netcdf_to_competition_rms_ratio": 1.7033549286997534e-05,
+            "matched": false
+          },
+          {
+            "name": "F6B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 217061.93012076616,
+            "netcdf_to_competition_rms_ratio": 1.900837691515957e-05,
+            "matched": false
+          },
+          {
+            "name": "F7A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 266707.89083725214,
+            "netcdf_to_competition_rms_ratio": 1.3411245522519268e-05,
+            "matched": false
+          },
+          {
+            "name": "F7B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 421328.10566675663,
+            "netcdf_to_competition_rms_ratio": 6.38710453106535e-06,
+            "matched": false
+          },
+          {
+            "name": "F8A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 120551.6841903925,
+            "netcdf_to_competition_rms_ratio": 5.744025527088344e-05,
+            "matched": false
+          },
+          {
+            "name": "F8B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 226667.8659911156,
+            "netcdf_to_competition_rms_ratio": 1.8383694328383945e-05,
+            "matched": false
+          },
+          {
+            "name": "F9A",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 92320.94811540842,
+            "netcdf_to_competition_rms_ratio": 4.113044743794233e-05,
+            "matched": false
+          },
+          {
+            "name": "F9B",
+            "sample_count_difference": -431104,
+            "max_abs_trace_difference_a_turn": 72155.778683424,
+            "netcdf_to_competition_rms_ratio": 6.976341609811828e-05,
+            "matched": false
+          }
+        ],
+        "matched": false,
+        "shot": "d3d_shot_0040ca9bdc.parquet"
+      },
+      {
+        "netcdf_sample_count": 480256,
+        "competition_sample_count": 480256,
+        "sample_count_difference": 0,
+        "max_abs_time_difference_ms": 17.637141036990215,
+        "time_matched": false,
+        "common_channel_count": 19,
+        "channels": [
+          {
+            "name": "ECOILA",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 2580403.568816185,
+            "netcdf_to_competition_rms_ratio": 70.44589173038159,
+            "matched": false
+          },
+          {
+            "name": "F1A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 110532.49651837349,
+            "netcdf_to_competition_rms_ratio": 0.05526482567759895,
+            "matched": false
+          },
+          {
+            "name": "F1B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 112404.26160478592,
+            "netcdf_to_competition_rms_ratio": 0.05480682206495485,
+            "matched": false
+          },
+          {
+            "name": "F2A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 122743.99059867859,
+            "netcdf_to_competition_rms_ratio": 0.03093931189522928,
+            "matched": false
+          },
+          {
+            "name": "F2B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 148220.9867401123,
+            "netcdf_to_competition_rms_ratio": 0.011887836351140406,
+            "matched": false
+          },
+          {
+            "name": "F3A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 104959.26702690125,
+            "netcdf_to_competition_rms_ratio": 0.0005591832122378307,
+            "matched": false
+          },
+          {
+            "name": "F3B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 142938.5015323162,
+            "netcdf_to_competition_rms_ratio": 0.018283730812630565,
+            "matched": false
+          },
+          {
+            "name": "F4A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 66544.0490334034,
+            "netcdf_to_competition_rms_ratio": 0.02821851230895136,
+            "matched": false
+          },
+          {
+            "name": "F4B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 308216.60932111746,
+            "netcdf_to_competition_rms_ratio": 0.019852031870950318,
+            "matched": false
+          },
+          {
+            "name": "F5A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 55123.44579410553,
+            "netcdf_to_competition_rms_ratio": 0.030794863300758722,
+            "matched": false
+          },
+          {
+            "name": "F5B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 217726.69254946712,
+            "netcdf_to_competition_rms_ratio": 0.016753206261318324,
+            "matched": false
+          },
+          {
+            "name": "F6A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 254276.60349571702,
+            "netcdf_to_competition_rms_ratio": 0.018677218769421307,
+            "matched": false
+          },
+          {
+            "name": "F6B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 208621.031578362,
+            "netcdf_to_competition_rms_ratio": 0.026735114515918274,
+            "matched": false
+          },
+          {
+            "name": "F7A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 208303.319391191,
+            "netcdf_to_competition_rms_ratio": 0.013150932455177502,
+            "matched": false
+          },
+          {
+            "name": "F7B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 191205.8078341484,
+            "netcdf_to_competition_rms_ratio": 0.022233830735871978,
+            "matched": false
+          },
+          {
+            "name": "F8A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 4546.079224824905,
+            "netcdf_to_competition_rms_ratio": 0.7521829524457192,
+            "matched": false
+          },
+          {
+            "name": "F8B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 120203.4427843094,
+            "netcdf_to_competition_rms_ratio": 0.021717678993733155,
+            "matched": false
+          },
+          {
+            "name": "F9A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 234049.542832613,
+            "netcdf_to_competition_rms_ratio": 0.001480411868771405,
+            "matched": false
+          },
+          {
+            "name": "F9B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 264218.8305655718,
+            "netcdf_to_competition_rms_ratio": 0.003530286547524875,
+            "matched": false
+          }
+        ],
+        "matched": false,
+        "shot": "d3d_shot_004f4e5bed.parquet"
+      },
+      {
+        "netcdf_sample_count": 480256,
+        "competition_sample_count": 480256,
+        "sample_count_difference": 0,
+        "max_abs_time_difference_ms": 69.83987541198985,
+        "time_matched": false,
+        "common_channel_count": 19,
+        "channels": [
+          {
+            "name": "ECOILA",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 2587727.2748031616,
+            "netcdf_to_competition_rms_ratio": 76.77951786333456,
+            "matched": false
+          },
+          {
+            "name": "F1A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 258521.30261802676,
+            "netcdf_to_competition_rms_ratio": 0.018849909970771822,
+            "matched": false
+          },
+          {
+            "name": "F1B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 263102.5641880036,
+            "netcdf_to_competition_rms_ratio": 0.020565486247832943,
+            "matched": false
+          },
+          {
+            "name": "F2A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 100529.7478275299,
+            "netcdf_to_competition_rms_ratio": 0.04794125705075017,
+            "matched": false
+          },
+          {
+            "name": "F2B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 170332.5993099213,
+            "netcdf_to_competition_rms_ratio": 0.013240208353065167,
+            "matched": false
+          },
+          {
+            "name": "F3A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 18243.07746744156,
+            "netcdf_to_competition_rms_ratio": 0.010753524320852153,
+            "matched": false
+          },
+          {
+            "name": "F3B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 39403.968610048294,
+            "netcdf_to_competition_rms_ratio": 0.45039381288879515,
+            "matched": false
+          },
+          {
+            "name": "F4A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 192207.82559931278,
+            "netcdf_to_competition_rms_ratio": 0.013142288272601754,
+            "matched": false
+          },
+          {
+            "name": "F4B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 177781.62473130226,
+            "netcdf_to_competition_rms_ratio": 0.03105497640029014,
+            "matched": false
+          },
+          {
+            "name": "F5A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 140786.57661557198,
+            "netcdf_to_competition_rms_ratio": 0.017403112320081075,
+            "matched": false
+          },
+          {
+            "name": "F5B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 156766.687022686,
+            "netcdf_to_competition_rms_ratio": 0.03456095148920608,
+            "matched": false
+          },
+          {
+            "name": "F6A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 258248.03568047288,
+            "netcdf_to_competition_rms_ratio": 0.028184191827312226,
+            "matched": false
+          },
+          {
+            "name": "F6B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 270060.91065740585,
+            "netcdf_to_competition_rms_ratio": 0.031810287280586644,
+            "matched": false
+          },
+          {
+            "name": "F7A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 350055.9745337963,
+            "netcdf_to_competition_rms_ratio": 0.01447851236825424,
+            "matched": false
+          },
+          {
+            "name": "F7B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 358278.88476735353,
+            "netcdf_to_competition_rms_ratio": 0.022376812637644947,
+            "matched": false
+          },
+          {
+            "name": "F8A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 128730.7562866211,
+            "netcdf_to_competition_rms_ratio": 0.008907114791911338,
+            "matched": false
+          },
+          {
+            "name": "F8B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 140221.2105922699,
+            "netcdf_to_competition_rms_ratio": 0.027739533212672658,
+            "matched": false
+          },
+          {
+            "name": "F9A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 122800.81423187256,
+            "netcdf_to_competition_rms_ratio": 0.005262983863191491,
+            "matched": false
+          },
+          {
+            "name": "F9B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 120138.9627377987,
+            "netcdf_to_competition_rms_ratio": 0.006591734181646376,
+            "matched": false
+          }
+        ],
+        "matched": false,
+        "shot": "d3d_shot_0065291fe9.parquet"
+      },
+      {
+        "netcdf_sample_count": 480256,
+        "competition_sample_count": 480256,
+        "sample_count_difference": 0,
+        "max_abs_time_difference_ms": 17.758562088016333,
+        "time_matched": false,
+        "common_channel_count": 19,
+        "channels": [
+          {
+            "name": "ECOILA",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 2580029.9103474617,
+            "netcdf_to_competition_rms_ratio": 56.30291892234534,
+            "matched": false
+          },
+          {
+            "name": "F1A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 56038.86239290238,
+            "netcdf_to_competition_rms_ratio": 0.05078368917484983,
+            "matched": false
+          },
+          {
+            "name": "F1B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 67022.4364628792,
+            "netcdf_to_competition_rms_ratio": 0.04521771816678544,
+            "matched": false
+          },
+          {
+            "name": "F2A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 101833.83148908617,
+            "netcdf_to_competition_rms_ratio": 0.022624731811401094,
+            "matched": false
+          },
+          {
+            "name": "F2B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 114721.66369676591,
+            "netcdf_to_competition_rms_ratio": 0.01159489915715405,
+            "matched": false
+          },
+          {
+            "name": "F3A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 20483.54500246048,
+            "netcdf_to_competition_rms_ratio": 0.0095380809103965,
+            "matched": false
+          },
+          {
+            "name": "F3B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 19378.267979502678,
+            "netcdf_to_competition_rms_ratio": 0.371437080200444,
+            "matched": false
+          },
+          {
+            "name": "F4A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 67423.48730111124,
+            "netcdf_to_competition_rms_ratio": 0.03875980388314987,
+            "matched": false
+          },
+          {
+            "name": "F4B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 68832.11256432533,
+            "netcdf_to_competition_rms_ratio": 0.051360180878717424,
+            "matched": false
+          },
+          {
+            "name": "F5A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 92188.501745224,
+            "netcdf_to_competition_rms_ratio": 0.01487460248704686,
+            "matched": false
+          },
+          {
+            "name": "F5B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 59900.069499135025,
+            "netcdf_to_competition_rms_ratio": 0.048186653488893255,
+            "matched": false
+          },
+          {
+            "name": "F6A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 130359.9559276104,
+            "netcdf_to_competition_rms_ratio": 0.03647746130611595,
+            "matched": false
+          },
+          {
+            "name": "F6B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 119978.26101011038,
+            "netcdf_to_competition_rms_ratio": 0.04588432131139031,
+            "matched": false
+          },
+          {
+            "name": "F7A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 122371.96580517292,
+            "netcdf_to_competition_rms_ratio": 0.02214796223869928,
+            "matched": false
+          },
+          {
+            "name": "F7B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 127625.57891225815,
+            "netcdf_to_competition_rms_ratio": 0.031129511981800854,
+            "matched": false
+          },
+          {
+            "name": "F8A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 95990.9069519043,
+            "netcdf_to_competition_rms_ratio": 0.009720358717564095,
+            "matched": false
+          },
+          {
+            "name": "F8B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 87447.32915401459,
+            "netcdf_to_competition_rms_ratio": 0.031230361417586585,
+            "matched": false
+          },
+          {
+            "name": "F9A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 51367.89508706331,
+            "netcdf_to_competition_rms_ratio": 0.012734737061106319,
+            "matched": false
+          },
+          {
+            "name": "F9B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 50188.84119319916,
+            "netcdf_to_competition_rms_ratio": 0.016604124586056847,
+            "matched": false
+          }
+        ],
+        "matched": false,
+        "shot": "d3d_shot_006a097379.parquet"
+      },
+      {
+        "netcdf_sample_count": 480256,
+        "competition_sample_count": 480256,
+        "sample_count_difference": 0,
+        "max_abs_time_difference_ms": 0.004655838016333291,
+        "time_matched": true,
+        "common_channel_count": 19,
+        "channels": [
+          {
+            "name": "ECOILA",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 2582027.2847075462,
+            "netcdf_to_competition_rms_ratio": 55.39603957965515,
+            "matched": false
+          },
+          {
+            "name": "F1A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 80048.91205024719,
+            "netcdf_to_competition_rms_ratio": 0.05433094811878472,
+            "matched": false
+          },
+          {
+            "name": "F1B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 76883.14761185646,
+            "netcdf_to_competition_rms_ratio": 0.05746404412830353,
+            "matched": false
+          },
+          {
+            "name": "F2A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 99329.48830127718,
+            "netcdf_to_competition_rms_ratio": 0.02728171817862643,
+            "matched": false
+          },
+          {
+            "name": "F2B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 109488.30966663362,
+            "netcdf_to_competition_rms_ratio": 0.014700554783679487,
+            "matched": false
+          },
+          {
+            "name": "F3A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 99499.84581756592,
+            "netcdf_to_competition_rms_ratio": 0.0008901670914019968,
+            "matched": false
+          },
+          {
+            "name": "F3B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 96691.34754943848,
+            "netcdf_to_competition_rms_ratio": 0.034700753986081176,
+            "matched": false
+          },
+          {
+            "name": "F4A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 108534.69473195076,
+            "netcdf_to_competition_rms_ratio": 0.019065211612749638,
+            "matched": false
+          },
+          {
+            "name": "F4B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 105099.39547681808,
+            "netcdf_to_competition_rms_ratio": 0.036538246304225364,
+            "matched": false
+          },
+          {
+            "name": "F5A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 84636.45654916765,
+            "netcdf_to_competition_rms_ratio": 0.02150181423998436,
+            "matched": false
+          },
+          {
+            "name": "F5B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 78057.27589762212,
+            "netcdf_to_competition_rms_ratio": 0.046187701823892466,
+            "matched": false
+          },
+          {
+            "name": "F6A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 163885.3810056448,
+            "netcdf_to_competition_rms_ratio": 0.026496644349251326,
+            "matched": false
+          },
+          {
+            "name": "F6B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 156202.59979242086,
+            "netcdf_to_competition_rms_ratio": 0.032815966895878214,
+            "matched": false
+          },
+          {
+            "name": "F7A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 158596.3297532797,
+            "netcdf_to_competition_rms_ratio": 0.015934630999700272,
+            "matched": false
+          },
+          {
+            "name": "F7B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 160746.24580025673,
+            "netcdf_to_competition_rms_ratio": 0.02480038068400996,
+            "matched": false
+          },
+          {
+            "name": "F8A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 101997.73624229431,
+            "netcdf_to_competition_rms_ratio": 0.0070960401992732165,
+            "matched": false
+          },
+          {
+            "name": "F8B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 88964.81253147127,
+            "netcdf_to_competition_rms_ratio": 0.031987925307856616,
+            "matched": false
+          },
+          {
+            "name": "F9A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 55384.690348923206,
+            "netcdf_to_competition_rms_ratio": 0.006752787225394362,
+            "matched": false
+          },
+          {
+            "name": "F9B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 49600.04737389088,
+            "netcdf_to_competition_rms_ratio": 0.008906175577654725,
+            "matched": false
+          }
+        ],
+        "matched": false,
+        "shot": "d3d_shot_0073c37714.parquet"
+      },
+      {
+        "netcdf_sample_count": 480256,
+        "competition_sample_count": 50176,
+        "sample_count_difference": -430080,
+        "max_abs_time_difference_ms": 17477.388117599487,
+        "time_matched": false,
+        "common_channel_count": 19,
+        "channels": [
+          {
+            "name": "ECOILA",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 42166.17754507065,
+            "netcdf_to_competition_rms_ratio": 0.06810162964786363,
+            "matched": false
+          },
+          {
+            "name": "F1A",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 183837.56098914146,
+            "netcdf_to_competition_rms_ratio": 4.656929729137953e-05,
+            "matched": false
+          },
+          {
+            "name": "F1B",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 224251.418779254,
+            "netcdf_to_competition_rms_ratio": 1.2245733741192112e-05,
+            "matched": false
+          },
+          {
+            "name": "F2A",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 89068.79420614243,
+            "netcdf_to_competition_rms_ratio": 8.799635293278397e-05,
+            "matched": false
+          },
+          {
+            "name": "F2B",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 109731.71076989174,
+            "netcdf_to_competition_rms_ratio": 3.404046901383551e-05,
+            "matched": false
+          },
+          {
+            "name": "F3A",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 55785.49956488609,
+            "netcdf_to_competition_rms_ratio": 0.00018024959896931114,
+            "matched": false
+          },
+          {
+            "name": "F3B",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 68411.29153811932,
+            "netcdf_to_competition_rms_ratio": 4.50052747096105e-05,
+            "matched": false
+          },
+          {
+            "name": "F4A",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 229551.50812661648,
+            "netcdf_to_competition_rms_ratio": 3.702642577425285e-05,
+            "matched": false
+          },
+          {
+            "name": "F4B",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 151179.56372606757,
+            "netcdf_to_competition_rms_ratio": 2.306049199720212e-05,
+            "matched": false
+          },
+          {
+            "name": "F5A",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 223021.2753953934,
+            "netcdf_to_competition_rms_ratio": 4.8821197380298784e-05,
+            "matched": false
+          },
+          {
+            "name": "F5B",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 172571.90080463886,
+            "netcdf_to_competition_rms_ratio": 3.228375205982861e-05,
+            "matched": false
+          },
+          {
+            "name": "F6A",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 294960.77020186186,
+            "netcdf_to_competition_rms_ratio": 2.5666268057768468e-05,
+            "matched": false
+          },
+          {
+            "name": "F6B",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 290814.95830106735,
+            "netcdf_to_competition_rms_ratio": 2.378554644056248e-05,
+            "matched": false
+          },
+          {
+            "name": "F7A",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 198639.504786551,
+            "netcdf_to_competition_rms_ratio": 2.9298381749983804e-05,
+            "matched": false
+          },
+          {
+            "name": "F7B",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 207258.14628481865,
+            "netcdf_to_competition_rms_ratio": 2.3117271642405193e-05,
+            "matched": false
+          },
+          {
+            "name": "F8A",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 228443.1442129016,
+            "netcdf_to_competition_rms_ratio": 6.615494315615068e-05,
+            "matched": false
+          },
+          {
+            "name": "F8B",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 122943.58997488022,
+            "netcdf_to_competition_rms_ratio": 4.204785289091687e-05,
+            "matched": false
+          },
+          {
+            "name": "F9A",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 187534.88902133703,
+            "netcdf_to_competition_rms_ratio": 4.0001260186716484e-05,
+            "matched": false
+          },
+          {
+            "name": "F9B",
+            "sample_count_difference": -430080,
+            "max_abs_trace_difference_a_turn": 179074.8713567853,
+            "netcdf_to_competition_rms_ratio": 2.4038782357926703e-05,
+            "matched": false
+          }
+        ],
+        "matched": false,
+        "shot": "d3d_shot_0079897d3b.parquet"
+      },
+      {
+        "netcdf_sample_count": 480256,
+        "competition_sample_count": 480256,
+        "sample_count_difference": 0,
+        "max_abs_time_difference_ms": 104.06292228699022,
+        "time_matched": false,
+        "common_channel_count": 19,
+        "channels": [
+          {
+            "name": "ECOILA",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 2596987.4469456673,
+            "netcdf_to_competition_rms_ratio": 94.0570325477807,
+            "matched": false
+          },
+          {
+            "name": "F1A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 95119.99445533754,
+            "netcdf_to_competition_rms_ratio": 0.03351266772880762,
+            "matched": false
+          },
+          {
+            "name": "F1B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 93250.89149403572,
+            "netcdf_to_competition_rms_ratio": 0.04012778300747478,
+            "matched": false
+          },
+          {
+            "name": "F2A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 96486.14723491669,
+            "netcdf_to_competition_rms_ratio": 0.028126327981144502,
+            "matched": false
+          },
+          {
+            "name": "F2B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 104404.02476310731,
+            "netcdf_to_competition_rms_ratio": 0.014434156922774702,
+            "matched": false
+          },
+          {
+            "name": "F3A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 16289.985346078873,
+            "netcdf_to_competition_rms_ratio": 0.007624373643571744,
+            "matched": false
+          },
+          {
+            "name": "F3B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 98483.86168193817,
+            "netcdf_to_competition_rms_ratio": 0.02425999344338227,
+            "matched": false
+          },
+          {
+            "name": "F4A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 74208.68308031559,
+            "netcdf_to_competition_rms_ratio": 0.02791748824892607,
+            "matched": false
+          },
+          {
+            "name": "F4B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 123053.05308294296,
+            "netcdf_to_competition_rms_ratio": 0.03374978704338178,
+            "matched": false
+          },
+          {
+            "name": "F5A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 40251.841158628464,
+            "netcdf_to_competition_rms_ratio": 0.042511094677422555,
+            "matched": false
+          },
+          {
+            "name": "F5B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 143079.1282769442,
+            "netcdf_to_competition_rms_ratio": 0.02084578591561317,
+            "matched": false
+          },
+          {
+            "name": "F6A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 231821.70333379507,
+            "netcdf_to_competition_rms_ratio": 0.019263178773672254,
+            "matched": false
+          },
+          {
+            "name": "F6B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 225650.03513240814,
+            "netcdf_to_competition_rms_ratio": 0.02244203575070618,
+            "matched": false
+          },
+          {
+            "name": "F7A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 131960.0810650587,
+            "netcdf_to_competition_rms_ratio": 0.019885124702321046,
+            "matched": false
+          },
+          {
+            "name": "F7B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 172733.3472285271,
+            "netcdf_to_competition_rms_ratio": 0.0235298819383985,
+            "matched": false
+          },
+          {
+            "name": "F8A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 63619.84932816029,
+            "netcdf_to_competition_rms_ratio": 0.013861142126597954,
+            "matched": false
+          },
+          {
+            "name": "F8B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 184952.4494686127,
+            "netcdf_to_competition_rms_ratio": 0.012721324532669881,
+            "matched": false
+          },
+          {
+            "name": "F9A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 35513.84724390507,
+            "netcdf_to_competition_rms_ratio": 0.013613289749311539,
+            "matched": false
+          },
+          {
+            "name": "F9B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 113844.96929073334,
+            "netcdf_to_competition_rms_ratio": 0.003421169204002584,
+            "matched": false
+          }
+        ],
+        "matched": false,
+        "shot": "d3d_shot_008b4474ec.parquet"
+      },
+      {
+        "netcdf_sample_count": 480256,
+        "competition_sample_count": 480256,
+        "sample_count_difference": 0,
+        "max_abs_time_difference_ms": 104.07073478699022,
+        "time_matched": false,
+        "common_channel_count": 19,
+        "channels": [
+          {
+            "name": "ECOILA",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 2595825.708797455,
+            "netcdf_to_competition_rms_ratio": 103.44303188269026,
+            "matched": false
+          },
+          {
+            "name": "F1A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 127394.0526237488,
+            "netcdf_to_competition_rms_ratio": 0.05080336813043813,
+            "matched": false
+          },
+          {
+            "name": "F1B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 123267.99458336832,
+            "netcdf_to_competition_rms_ratio": 0.05620001641189783,
+            "matched": false
+          },
+          {
+            "name": "F2A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 155693.14307832718,
+            "netcdf_to_competition_rms_ratio": 0.026520515837720603,
+            "matched": false
+          },
+          {
+            "name": "F2B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 175965.54853343964,
+            "netcdf_to_competition_rms_ratio": 0.015032691900935757,
+            "matched": false
+          },
+          {
+            "name": "F3A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 136300.92639613152,
+            "netcdf_to_competition_rms_ratio": 0.0007410292990274848,
+            "matched": false
+          },
+          {
+            "name": "F3B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 176761.66271841526,
+            "netcdf_to_competition_rms_ratio": 0.020936487994226663,
+            "matched": false
+          },
+          {
+            "name": "F4A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 93365.33541619778,
+            "netcdf_to_competition_rms_ratio": 0.03460298499769226,
+            "matched": false
+          },
+          {
+            "name": "F4B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 170056.47006082535,
+            "netcdf_to_competition_rms_ratio": 0.03865311177178244,
+            "matched": false
+          },
+          {
+            "name": "F5A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 86353.81290769577,
+            "netcdf_to_competition_rms_ratio": 0.03140532978267006,
+            "matched": false
+          },
+          {
+            "name": "F5B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 268498.0510009527,
+            "netcdf_to_competition_rms_ratio": 0.02228228859429593,
+            "matched": false
+          },
+          {
+            "name": "F6A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 129233.20787668228,
+            "netcdf_to_competition_rms_ratio": 0.053701721924164295,
+            "matched": false
+          },
+          {
+            "name": "F6B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 234341.22467172146,
+            "netcdf_to_competition_rms_ratio": 0.038706714318879856,
+            "matched": false
+          },
+          {
+            "name": "F7A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 68585.62702614069,
+            "netcdf_to_competition_rms_ratio": 0.16744075613934348,
+            "matched": false
+          },
+          {
+            "name": "F7B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 56995.74504375458,
+            "netcdf_to_competition_rms_ratio": 0.17565240202185178,
+            "matched": false
+          },
+          {
+            "name": "F8A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 192292.87288546562,
+            "netcdf_to_competition_rms_ratio": 0.006388685587849191,
+            "matched": false
+          },
+          {
+            "name": "F8B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 237915.01790618896,
+            "netcdf_to_competition_rms_ratio": 0.01591909581028011,
+            "matched": false
+          },
+          {
+            "name": "F9A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 210300.5107266903,
+            "netcdf_to_competition_rms_ratio": 0.0025644350878773867,
+            "matched": false
+          },
+          {
+            "name": "F9B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 263892.18037492037,
+            "netcdf_to_competition_rms_ratio": 0.002844382998481036,
+            "matched": false
+          }
+        ],
+        "matched": false,
+        "shot": "d3d_shot_0092a9ade0.parquet"
+      },
+      {
+        "netcdf_sample_count": 480256,
+        "competition_sample_count": 480256,
+        "sample_count_difference": 0,
+        "max_abs_time_difference_ms": 35.63551521301633,
+        "time_matched": false,
+        "common_channel_count": 19,
+        "channels": [
+          {
+            "name": "ECOILA",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 2570314.790160656,
+            "netcdf_to_competition_rms_ratio": 41.35386726047444,
+            "matched": false
+          },
+          {
+            "name": "F1A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 186847.04856085777,
+            "netcdf_to_competition_rms_ratio": 0.016984426202036454,
+            "matched": false
+          },
+          {
+            "name": "F1B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 182278.8658049107,
+            "netcdf_to_competition_rms_ratio": 0.018695951241369437,
+            "matched": false
+          },
+          {
+            "name": "F2A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 131986.37505149844,
+            "netcdf_to_competition_rms_ratio": 0.023422898067896315,
+            "matched": false
+          },
+          {
+            "name": "F2B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 153857.18116045,
+            "netcdf_to_competition_rms_ratio": 0.011725416536307622,
+            "matched": false
+          },
+          {
+            "name": "F3A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 132500.3083997965,
+            "netcdf_to_competition_rms_ratio": 0.0005544672902240083,
+            "matched": false
+          },
+          {
+            "name": "F3B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 102547.76328647138,
+            "netcdf_to_competition_rms_ratio": 0.031655146337088706,
+            "matched": false
+          },
+          {
+            "name": "F4A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 189020.221331954,
+            "netcdf_to_competition_rms_ratio": 0.009301716104652235,
+            "matched": false
+          },
+          {
+            "name": "F4B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 158366.54925227165,
+            "netcdf_to_competition_rms_ratio": 0.03210149282977865,
+            "matched": false
+          },
+          {
+            "name": "F5A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 103947.82622432709,
+            "netcdf_to_competition_rms_ratio": 0.016183050170190116,
+            "matched": false
+          },
+          {
+            "name": "F5B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 283536.6669473648,
+            "netcdf_to_competition_rms_ratio": 0.011944520806642243,
+            "matched": false
+          },
+          {
+            "name": "F6A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 180616.92992186546,
+            "netcdf_to_competition_rms_ratio": 0.027577819899697258,
+            "matched": false
+          },
+          {
+            "name": "F6B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 184012.97727113962,
+            "netcdf_to_competition_rms_ratio": 0.034087116741423756,
+            "matched": false
+          },
+          {
+            "name": "F7A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 268940.193397522,
+            "netcdf_to_competition_rms_ratio": 0.010817146395131332,
+            "matched": false
+          },
+          {
+            "name": "F7B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 417701.2319214344,
+            "netcdf_to_competition_rms_ratio": 0.011485361257601228,
+            "matched": false
+          },
+          {
+            "name": "F8A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 67304.20152783394,
+            "netcdf_to_competition_rms_ratio": 0.010364041919130073,
+            "matched": false
+          },
+          {
+            "name": "F8B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 221651.20647335052,
+            "netcdf_to_competition_rms_ratio": 0.011031994426755074,
+            "matched": false
+          },
+          {
+            "name": "F9A",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 79424.16873687506,
+            "netcdf_to_competition_rms_ratio": 0.004436841659354925,
+            "matched": false
+          },
+          {
+            "name": "F9B",
+            "sample_count_difference": 0,
+            "max_abs_trace_difference_a_turn": 94506.21382343769,
+            "netcdf_to_competition_rms_ratio": 0.006001919624948923,
+            "matched": false
+          }
+        ],
+        "matched": false,
+        "shot": "d3d_shot_0093deb434.parquet"
+      }
+    ],
+    "matched_shot_count": 0,
+    "confidence": "high",
+    "statement": "0 of 20 competition shots matches under the declaration written before comparison."
+  },
+  "wiring_dependency": {
+    "status": "consumed",
+    "source_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s-20260820-diiid/diiid-coil-wiring/docs/figures/diiid-forward-onboarding/wiring/diiid_coil_wiring.json",
+    "sha256": "56bba9a13450d57775b45fa3f262cdf0c531ceee6ba6d9d61a1333208bafaa2b",
+    "pair_count": 276,
+    "classification_counts": {
+      "identical": 0,
+      "exactly_negated": 0,
+      "proportional": 0,
+      "independent": 276
+    },
+    "competition_table_summary": {
+      "shipped": [
+        "F1A",
+        "F2A",
+        "F3A",
+        "F4A",
+        "F5A",
+        "F6A",
+        "F7A",
+        "F8A",
+        "F9A",
+        "F1B",
+        "F2B",
+        "F3B",
+        "F4B",
+        "F5B",
+        "F6B",
+        "F7B",
+        "F8B",
+        "F9B",
+        "ECOILA"
+      ],
+      "netcdf_coils_absent_from_competition_table": [
+        "ECOILB",
+        "E567UP",
+        "E567DN",
+        "E89DN",
+        "E89UP"
+      ],
+      "statement": "The competition table omits ECOILB and the four multi-element E-coil groups. ECOILB is the structurally incomplete ohmic-set candidate named by the vacuum-gate diagnosis and is now confirmed to have a real 48-element geometry and measured current trace in this entry."
+    },
+    "statement": "Only the wiring receipt's headline counts and competition-table coverage were consumed; its pairwise matrix is not duplicated here."
+  },
+  "artifacts": {
+    "receipt": "docs/figures/diiid-forward-onboarding/current-units/diiid_current_units.json",
+    "amplitude_figure": "docs/figures/diiid-forward-onboarding/current-units/current_amplitude_and_ampere_turn.png"
+  }
+}

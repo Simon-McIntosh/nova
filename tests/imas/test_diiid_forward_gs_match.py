@@ -27,6 +27,16 @@ def test_registered_bar_is_tied_to_the_measured_label_ceiling(tmp_path):
         pytest.approx(0.95 * 0.949)
     )
     assert record["score"]["coefficients_fitted"] == 0
+    assert record["selection"]["frames"] == 3
+    assert record["solver"]["route"] == "host"
+    assert record["solver"]["solver_tolerance"] == pytest.approx(1.0e-8)
+    assert record["solver"]["maximum_evaluations"] == 1701
+    assert record["solver"]["initial_relaxation"] == pytest.approx(0.2)
+    assert record["solver"]["minimum_relaxation"] == pytest.approx(1.0e-6)
+    assert record["solver"]["relaxation_reduction_interval"] == 100
+    assert record["solver"]["relative_residual_tolerance"] == pytest.approx(1.0e-5)
+    assert "144-turn assumption" in record["q95"]["assumption_scope"]
+    assert "do not depend" in record["q95"]["assumption_scope"]
     assert gate.require_preregistration(path)
 
 
@@ -119,24 +129,25 @@ def _frame(*, r_squared: float, converged: bool, expansion: float = 0.02):
         diverted=True,
         converged=converged,
         convergence_criterion="declared criterion",
+        solver_termination="returned within budget",
         metrics=metrics,
     )
 
 
 def test_summary_keeps_nonconvergence_visible_and_fail_closed():
-    results = [_frame(r_squared=0.95, converged=True) for _ in range(7)]
+    results = [_frame(r_squared=0.95, converged=True) for _ in range(2)]
     results.append(_frame(r_squared=0.95, converged=False))
     sensitivity = [
-        _frame(r_squared=0.949, converged=True, expansion=0.0),
         _frame(r_squared=0.950, converged=True, expansion=0.02),
         _frame(r_squared=0.948, converged=True, expansion=0.05),
     ]
     summary = gate.summarize(results, sensitivity, "hash")
-    assert summary["convergence"]["converged_frames"] == 7
+    assert summary["convergence"]["converged_frames"] == 2
     assert summary["convergence"]["nonconverged_frames"] == [
         {"shot": "shot.parquet", "frame": 4}
     ]
     assert summary["pseudo_wall"]["maximum_absolute_r_squared_move"] == (
         pytest.approx(0.002)
     )
+    assert "144-turn" in summary["metric_assumptions"]["q95"]
     assert summary["passed"] is False

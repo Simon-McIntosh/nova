@@ -1,0 +1,4 @@
+device,batch_size,precision,convergence_policy,timed_slices,elapsed_seconds,slices_per_second,maximum_relative_residual,branch_identities,conditioning_receipts,stable_conditioning_receipts
+NVIDIA H200 NVL,1,float64,fixed 2 relaxed warmup + 1 Newton steps x 4 GMRES iterations; no residual early exit,100,0.7856180658563972,127.28831520821845,0.26835428861640365,limited_plasma,100,0
+NVIDIA H200 NVL,4,float64,fixed 2 relaxed warmup + 1 Newton steps x 4 GMRES iterations; no residual early exit,400,1.1763586765155196,340.03234556388537,0.2683542886164045,limited_plasma,400,0
+NVIDIA H200 NVL,8,float64,fixed 2 relaxed warmup + 1 Newton steps x 4 GMRES iterations; no residual early exit,800,1.7000986747443676,470.560922071356,0.2683542886164038,limited_plasma,800,0

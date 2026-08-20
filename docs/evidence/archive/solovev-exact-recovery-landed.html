@@ -159,6 +159,44 @@
   <code>scripts/density_forcing_ladder/results.json</code> and
   <code>docs/figures/solovev-exact-recovery/density-forcing-ladder.png</code>.</p>
 
+  <h2 id="normalization-constant-discriminator">§3 (conviction closed) — one number carries the drift: the boundary-flux constant sits 0.41 Wb off the exact separatrix</h2>
+
+  <p>Commit <code>fcee050f</code> (CPU, warm coarse carrier; production controls reproduce the
+  banked forcing to 8.5e-14 Wb). The two-by-two factorial — in-cell flux values × ψ_N
+  normalization constants, everything else production:</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>values</th><th>constants</th><th>forcing sup</th><th>density share</th><th>projected axis</th></tr></thead>
+    <tbody>
+      <tr><td>production</td><td>production</td><td>1.2523 Wb</td><td>99.176%</td><td>+40.065 mm</td></tr>
+      <tr><td>exact</td><td>production</td><td>1.2546 Wb</td><td>99.277%</td><td>+40.121 mm</td></tr>
+      <tr><td>production</td><td><strong>exact</strong></td><td><strong>0.0595 Wb</strong></td><td><strong>0.577%</strong></td><td><strong>+0.374 mm</strong></td></tr>
+      <tr><td>exact</td><td><strong>exact</strong></td><td>0.0637 Wb</td><td>0.859%</td><td>+0.545 mm</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>Verdict: the normalization constants carry 98.6 of the 99.2 points.</strong> The
+  measured offsets at the analytic state: axis flux −1.72e-3 Wb (−2.1e-5 ψ_N, negligible);
+  <strong>boundary flux +0.410992 Wb — the production topology read's boundary constant sits at
+  ψ_N = 1.005081 in the exact coordinate</strong>, a coherent half-percent shift in every cell's
+  ψ_N that the profile slopes turn into a one-signed density bias and the soft position mode
+  amplifies into the 42 mm / 6.6% / 1.1% drift. This is two orders larger than — and distinct
+  from — the banked 5.53e-5 saddle-clip offset. The residual 0.58–0.86% forcing under exact
+  constants (~0.4–0.5 mm axis) is the next-order floor. The repair is surgical: find and fix why
+  the analytic-state topology read returns the boundary flux 0.411 Wb high, then re-score forcing,
+  roots and gates with no bound moved. Full record:
+  <code>scripts/normalization_discriminator/results.json</code>.</p>
+
+  <figure>
+    <img src="/nova/figures/solovev-exact-recovery/normalization-factorial.png"
+         alt="Four-arm factorial of flux values against normalization constants, with forcing and projected root responses"
+         style="max-width:100%">
+    <figcaption>The normalization factorial (commit <code>fcee050f</code>): exact constants
+    collapse the forcing two orders of magnitude; exact values alone change nothing.</figcaption>
+  </figure>
+
   <h2 id="build-cache-activation">§6 — cached machine builds: warm loads at a quarter-second against fifty-minute cold builds, bitwise</h2>
 
   <p>Commits <code>06875269</code> (audit) and <code>0e98afcb</code> (activation). The audit

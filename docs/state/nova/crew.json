@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-20T19:02:54",
+  "updated": "2026-08-20T19:10:03",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -12219,9 +12219,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260820T163949154734-normalization-constant-discriminator",
+        "plan": "solovev-exact-recovery",
+        "section": "\u00a73",
+        "node": "normalization-constant-discriminator",
+        "role": "implement",
+        "member": "hex-stencil",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T16:39:54Z",
+        "completed_at": "2026-08-20T17:09:34Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1780,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1780,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "a30d5667ce39e36d03ea6f0f42dc96441ae8c914",
+        "commits": [
+          "fcee050f1cd6dd6417587997e599066abc0756e8"
+        ],
+        "changed_lines": {
+          "added": 862,
+          "removed": 0,
+          "files": 7
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T163949154734-normalization-constant-discriminator/manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff707-8995-7c20-8341-70011e4a236e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 17056768,
+            "cached_input_tokens_cumulative": 136241280,
+            "input_tokens": 17461196,
+            "input_tokens_cumulative": 138471019,
+            "output_tokens": 37261,
+            "output_tokens_cumulative": 205922,
+            "reasoning_output_tokens": 14064,
+            "reasoning_output_tokens_cumulative": 69663
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 329
+    "_version": 330
   }
 }

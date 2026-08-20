@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-20T18:47:40",
+  "updated": "2026-08-20T18:51:49",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -12030,9 +12030,135 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260820T162924070469-root-existence-regenerate",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a75",
+        "node": "root-existence-regenerate",
+        "role": "implement",
+        "member": "diiid-forward-gs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T16:29:28Z",
+        "completed_at": "2026-08-20T16:40:10Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 642,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 642,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "a30d5667ce39e36d03ea6f0f42dc96441ae8c914",
+        "commits": [
+          "0b54d0bf"
+        ],
+        "changed_lines": {
+          "added": 1528,
+          "removed": 1449,
+          "files": 4
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "VERDICT: VACUUM-FIELD-DOMINATED on 5/5 frames and pooled, and NO FRAME ADMITS A NEARBY ROOT (0/5) under the criterion preregistered before scoring. This vindicates the owner's reframing and retroactively justifies pausing the globalization repair: no step-control method could have found a root that does not exist. One detached CPU-pinned run completed without restart, log recording STARTED 5/5, EVALUATED 1/5 through 5/5 in order, EXIT_MARKER=0, replacing the stale pre-correction receipt entirely. ATTRIBUTION: direct-operator fixed-boundary median fractional RMS 2.311880148e-8, matching the landed 2.29e-8 control, so the discrete operator is exact; extracted-profile fixed-boundary median 0.04058126344, matching the known 0.0429 label representability ceiling, so the flux functions are as good as the labels allow; free-boundary median 0.2156505171, five times worse; free-minus-fixed median 0.2297100316. POOLED SPLIT: vacuum share 0.8498610048 against fixed share 0.1501389952 - 85 percent of the free-boundary residual is the vacuum field. Gauged boundary discrepancy fractional RMS min/median/max 0.2904974977 / 0.3515961974 / 0.6390900066. THE MISSING COILS ACCOUNT FOR IT: the five conductors absent from the shipped current channels give an envelope of 0.3331740391 Wb/rad RMS against a measured 0.4076572465 Wb/rad discrepancy, ratio 0.8172896275 - within one order of magnitude, stated explicitly as not a fit and carrying the independent-pulse and producer-scale caveats. Region fractions sum to one within 1e-15. No root find, coefficient fit or current adjustment anywhere.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T162924070469-root-existence-regenerate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01bd8-2268-7ff3-bcd9-eb3700561ec8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8203392,
+            "cached_input_tokens_cumulative": 74749824,
+            "input_tokens": 8353289,
+            "input_tokens_cumulative": 76557727,
+            "output_tokens": 16998,
+            "output_tokens_cumulative": 210604,
+            "reasoning_output_tokens": 6063,
+            "reasoning_output_tokens_cumulative": 66136
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260820T163102710046-diiid-artifact-publication",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a77",
+        "node": "diiid-artifact-publication",
+        "role": "implement",
+        "member": "machine-artifact",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T16:31:06Z",
+        "completed_at": "2026-08-20T16:50:26Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1160,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1160,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "a30d5667ce39e36d03ea6f0f42dc96441ae8c914",
+        "commits": [
+          "5686eb1b"
+        ],
+        "changed_lines": {
+          "added": 744,
+          "removed": 0,
+          "files": 5
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "SECTION 7 MECHANICS COMPLETE. Canonical manifest built for the DDv4 IDS set: manifest digest sha256:f0bc384f17ccc8ad2d70adf96b8228acfc8b3a5187ce112f9a09f633446d28ef, physical digest 0eaa06b66b8a27263599c2c9953f43e734d4769bba0ae2398922bec9ab8a62cd, OCI tag dd-4.1.1-physical-0eaa06b6..., full reference ghcr.io/<account>/diii-d-machine-description:<tag> with the repository taken from the command line and never hardcoded. Schema nova-diii-d-machine-artifact; artifact type application/vnd.iter.nova.diii-d-machine-description.v1; file media type ...ids.v1. publication_dd_version() called with no argument resolved DD 4.1.1 at runtime. materialize_machine_artifact and an independent resolve_machine_artifact both returned the same manifest digest. THE DDv4 FLOOR IS PROVEN IN THIS SCRIPT'S OWN PATH rather than assumed from elsewhere: a real imas-python netCDF probe declaring DD 3.42.2 raised MachineArtifactError with the message retained in the receipt. The 1549 authored leaves reopen at exact equality, maximum absolute difference 0.0. PUBLISH.md carries login/push/pull/digest-verify commands with account and token placeholders, states that no CI workflow exists and publication is a local operator action, and was validated against a local OCI layout with push/pull/digest exits 0/0/0. NOTHING WAS PUSHED: receipt records network_publication_attempted=false.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T163102710046-diiid-artifact-publication/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f84-363a-7670-a60e-1e3d603a5d96",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 12953088,
+            "cached_input_tokens_cumulative": 37338112,
+            "input_tokens": 13225422,
+            "input_tokens_cumulative": 38198751,
+            "output_tokens": 48227,
+            "output_tokens_cumulative": 118758,
+            "reasoning_output_tokens": 21728,
+            "reasoning_output_tokens_cumulative": 49179
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 326
+    "_version": 328
   }
 }

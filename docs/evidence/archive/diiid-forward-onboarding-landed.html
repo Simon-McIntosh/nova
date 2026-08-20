@@ -576,6 +576,87 @@
     self-declared highest-risk physics. With no readable source anywhere, §4 needs a different answer —
     inferring the vessel from the 120-frame transient residual bank rather than sourcing its geometry —
     and that is a plan-level decision rather than an implementation detail.</p>
+
+    <h2 id="root-existence">§5 the missing root is the boundary field, not the solver — 2026-08-20</h2>
+    <p>Commit <code>0b54d0bf</code>. <strong>Verdict: vacuum-field-dominated on all five frames and
+    pooled, with no frame admitting a nearby root — 0 of 5</strong> — against a criterion written to disk
+    before scoring. One detached run completed every frame without restart, its log recording
+    <code>STARTED 5/5</code>, <code>EVALUATED 1/5</code>…<code>5/5</code> in order and
+    <code>EXIT_MARKER=0</code>, replacing an earlier stale receipt entirely.</p>
+    <p>This measurement exists because the question was reframed rather than answered: a forward solve
+    that cannot find a root implicates its <em>inputs</em>, and the labelled map is a known solution
+    whose residual can be evaluated <em>linearly</em>, with no root find at all. The alternative on the
+    table had been another node spent choosing a step-control method.</p>
+    <table>
+      <caption>Residual at the known solution, each arm cross-checking a previously landed number.
+      Nothing fitted, no coefficient adjusted, no current tuned.</caption>
+      <thead><tr><th>Arm</th><th>Median fractional RMS</th><th>Cross-check</th></tr></thead>
+      <tbody>
+        <tr><td>Direct operator, fixed boundary</td><td><strong>2.311880148e-8</strong></td><td>matches the landed 2.29e-8 control — the discrete operator is exact</td></tr>
+        <tr><td>Extracted profiles, fixed boundary</td><td>0.04058126344</td><td>matches the 0.0429 strict-GS label representability ceiling — the flux functions are as good as the labels permit</td></tr>
+        <tr><td>Free boundary</td><td><strong>0.2156505171</strong></td><td>five times worse than either</td></tr>
+        <tr><td>Free minus fixed</td><td>0.2297100316</td><td>the isolated boundary-field contribution</td></tr>
+      </tbody>
+    </table>
+    <p>The pooled split is a <strong>vacuum share of 0.8499 against a fixed share of 0.1501</strong> —
+    <strong>85 % of the free-boundary residual is the boundary field</strong>. Gauged
+    boundary-discrepancy fractional RMS runs 0.2905 / 0.3516 / 0.6391 across min, median and max, and
+    every residual's interior, boundary-band and exterior squared fractions sum to one within 1e-15.</p>
+    <p><strong>And the omitted conductors account for it.</strong> The five coils absent from the shipped
+    current channels — ECOILB, E567UP, E567DN, E89UP, E89DN — give an envelope of <strong>0.3332 Wb/rad
+    RMS</strong> against a measured discrepancy of <strong>0.4077 Wb/rad</strong>, a ratio of
+    <strong>0.817</strong>: within one order of magnitude. That is an order-of-magnitude comparison and
+    <em>not</em> a fit, and it carries its own caveats — it uses an independent pulse and inherits the
+    unresolved producer-scale question.</p>
+    <p><strong>Three consequences.</strong> The paused globalization repair was paused correctly, and for
+    a better reason than the one first recorded: not that a method choice was unclear, but that
+    <em>no root existed to be found</em>, so no step control could have succeeded — which explains why
+    all five solver policies failed in the same two ways. The §5 production gate therefore cannot be met
+    by solver work alone; it needs the boundary field completed, and the challenge dataset structurally
+    cannot supply those five currents. And this is competitive intelligence: an entrant driving a
+    free-boundary solve from the shipped coil currents alone is solving a problem whose root is displaced
+    from the label, and the 85 % attribution says by how much.</p>
+
+    <h2 id="published-artifact">§7 the reusable state, digest-pinned — 2026-08-20</h2>
+    <p>Commits <code>1df19c16</code> (layer generalisation), <code>b14ec670</code> (DDv4 IDS set),
+    <code>5686eb1b</code> (manifest and recipe). The onboarding's output is now an object rather than a
+    procedure.</p>
+    <table>
+      <caption>The published machine description and its identity.</caption>
+      <thead><tr><th>Property</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>File</td><td><code>diiid_machine_description.nc</code>, 213,703 bytes</td></tr>
+        <tr><td>Payload SHA-256</td><td><code>1e560b2ad2f2f224…</code></td></tr>
+        <tr><td>Data Dictionary</td><td><strong>4.1.1</strong> on wall, pf_active and magnetics</td></tr>
+        <tr><td>Content</td><td>82 limiter vertices · 24 coils · 140 elements · 76 B-pol + 44 flux-loop positions</td></tr>
+        <tr><td>Physical digest</td><td><code>0eaa06b66b8a2726…</code></td></tr>
+        <tr><td>Manifest digest</td><td><code>sha256:f0bc384f17ccc8ad…</code></td></tr>
+        <tr><td>OCI tag</td><td><code>dd-4.1.1-physical-0eaa06b6…</code></td></tr>
+        <tr><td>Schema</td><td><code>nova-diii-d-machine-artifact</code></td></tr>
+      </tbody>
+    </table>
+    <p><strong>The DDv4 requirement is enforced, not merely documented.</strong> The publication version
+    is resolved at runtime, so the floor stays true when 4.1.2 appears, and the refusal was proven
+    <em>in the publication script's own path</em> by a real netCDF probe declaring DD 3.42.2 that raised
+    <code>MachineArtifactError</code>, with the message retained in the receipt. The DD version
+    participates in the tag, so the DDv4 artifact takes a distinct tag rather than colliding with the
+    DDv3 one it replaced.</p>
+    <p><strong>Round-trip and identity.</strong> All 1549 authored leaves reopen at exact equality,
+    maximum absolute difference 0.0; materialising into the content-addressed cache and independently
+    resolving it returned the same manifest digest. The leaf count is 1549 against the superseded DD3
+    set's 1833 — a delta of exactly <strong>−284</strong>, which equals the identifier leaves DDv4
+    removes for 24 coils plus 140 elements plus 76 probes plus 44 loops. That arithmetic independently
+    confirms a removal the data dictionary revealed and an empirical factory probe had
+    <em>missed</em>, which is the case for asking the dictionary rather than probing an object.</p>
+    <p><strong>Publication is an operator action and nothing was sent.</strong> <code>PUBLISH.md</code>
+    carries login, push, pull and digest-verification commands with account and token placeholders,
+    states that no CI workflow exists in this repository, and was validated against a <em>local</em> OCI
+    layout with push, pull and digest all exiting 0. The receipt records
+    <code>network_publication_attempted=false</code>. The layer generalisation replaced the
+    machine-specific module in place — git records a 92 % rename and no version-suffixed pair survives —
+    with existing behaviour preserved bit-for-bit by a before-and-after manifest compare, and netCDF
+    digest stability proven across two independent writes of identical content, which was that node's one
+    real unknown.</p>
   </main>
 </body>
 </html>

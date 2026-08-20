@@ -104,6 +104,35 @@
     analytic-state forcing and their projected root responses beside the observed drift.</figcaption>
   </figure>
 
+  <h2 id="density-forcing-ladder">§3 (mechanism) — the fit, not the flux: exact samples leave the forcing flat, so the projection's moment deviation is the carrier</h2>
+
+  <p>Commit <code>5189b08e</code> (warm coarse carrier, three arms, production control
+  reproducing the bank to 1.1e-13 Wb). The discriminator arm settles the mechanism:</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>arm</th><th>samples/cell</th><th>density forcing sup</th><th>share</th><th>projected axis</th></tr></thead>
+    <tbody>
+      <tr><td>production seven-sample quadratic</td><td>7</td><td>1.252292 Wb</td><td>99.176%</td><td>+40.065 mm</td></tr>
+      <tr><td>thirteen-sample cubic</td><td>13</td><td>1.253510 Wb (+0.097%)</td><td>99.253%</td><td>+40.125 mm</td></tr>
+      <tr><td><strong>exact analytic flux at all 672 density samples</strong></td><td>672</td><td>1.254578 Wb (+0.183%)</td><td>99.277%</td><td>+40.121 mm</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>Cubic sampling halves the in-cell flux interpolation error (9.32e-4 → 4.14e-4 Wb) and the
+  density-sample error (8,197 → 3,628 A/m²) — and the forcing <em>rises</em>. Exact flux at
+  every sample eliminates interpolation and sampling error entirely — and the forcing rises
+  again. One-signed bias fractions of 0.016/0.014 refute nonlinear rectification. <strong>The
+  h-independent carrier is therefore the degree-nine least-squares density fit/projection
+  chain itself</strong>: the weighted-QR fit optimizes pointwise agreement at its 672 samples,
+  but the coupling radiates only the density's moments, and the fit's moment deviation from the
+  exact functional is the flat systematic. The repair is scoped accordingly — constrain or
+  replace the projection so the coupling's zeroth and first moments per support are exact —
+  and dispatched as the production-repair node. Full record:
+  <code>scripts/density_forcing_ladder/results.json</code> and
+  <code>docs/figures/solovev-exact-recovery/density-forcing-ladder.png</code>.</p>
+
   <h2 id="build-cache-activation">§6 — cached machine builds: warm loads at a quarter-second against fifty-minute cold builds, bitwise</h2>
 
   <p>Commits <code>06875269</code> (audit) and <code>0e98afcb</code> (activation). The audit

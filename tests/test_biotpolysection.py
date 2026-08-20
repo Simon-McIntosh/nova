@@ -1,12 +1,9 @@
-"""Contract for the polygon-section thick-filament coupling element.
+"""Contract for the exact polygon-section coupling element.
 
 The element couples a toroidal conductor of arbitrary polygonal cross-section.
-Two independent oracles pin it: for a rectangular section it must reproduce
-:class:`nova.biot.cylinder.Cylinder` (the closed-form finite-area kernel), and
-far from the section it must reproduce the point-filament loop. Between the two
-it must stay finite and smooth *through* the conductor, which is exactly where
-the point kernel is log-singular and wrong — the reason a plasma cell wants a
-thick-filament kernel at all.
+For a rectangular section it reproduces :class:`nova.biot.cylinder.Cylinder`;
+for every authored polygon it integrates the finite section without a reachable
+point-filament substitution.
 """
 
 import warnings
@@ -17,7 +14,7 @@ from dataclasses import FrozenInstanceError
 from shapely.geometry import MultiPolygon, Polygon
 
 from nova.biot.biotframe import Source, Target
-from nova.biot.greens import greens_bz_br, greens_psi
+from nova.biot.greens import greens_bz_br, greens_psi, second_moments
 from nova.biot.plasmagrid import PlasmaGrid
 from nova.biot.plasmawall import PlasmaWall
 from nova.biot.polysection import PolySection, PolySectionPolicy, TiledPolySection
@@ -49,6 +46,27 @@ def hexagon(r0=1.0, z0=0.0, radius=0.03):
     """Return the vertices of a regular hexagon section, flat-top."""
     angle = np.pi / 6 + np.linspace(0.0, 2.0 * np.pi, 6, endpoint=False)
     return np.column_stack([r0 + radius * np.cos(angle), z0 + radius * np.sin(angle)])
+
+
+def test_a_hexagon_authored_machine_couples_the_exact_section_moments():
+    """The coupling consumes the machine's exact regular-hexagon inertia."""
+    coilset = CoilSet(dplasma=-40)
+    coilset.firstwall.insert({"e": [1.0, 0, 0.3, 0.4]}, Ic=1e6)
+    authored = np.asarray(coilset.subframe["section"], dtype=str)
+    cell = int(np.flatnonzero(authored == "hexagon")[0])
+    element = PolySection(coilset.subframe, coilset.subframe, reduce=[False, False])
+    components = element._section_components[cell]
+    assert len(components) == 1
+    vertices, weight = components[0]
+    assert weight == 1.0
+
+    edge = np.linalg.norm(np.roll(vertices, -1, axis=0) - vertices, axis=1)
+    np.testing.assert_allclose(edge, edge[0], rtol=2e-14)
+    pitch = np.sqrt(3.0) * float(edge.mean())
+    radial, vertical, cross = second_moments(vertices)
+    expected = 5.0 / 72.0 * pitch**2
+    np.testing.assert_allclose([radial, vertical], expected, rtol=2e-14)
+    assert abs(cross) <= 8.0 * np.spacing(expected)
 
 
 def hex_mesh_source():
@@ -239,91 +257,21 @@ def test_the_flux_stays_finite_and_smooth_through_the_conductor():
     assert np.max(psi) < float(singular[0])
 
 
-# --- the near/far blend -----------------------------------------------------
-
-
-def test_the_blend_is_continuous_across_the_standoff_band():
-    """Flux does not step where the element switches kernels.
-
-    Both kernels are evaluated at the SAME radius, on the band edge, so the
-    comparison isolates the switch rather than the radial variation of the flux.
-    A finite band is a scoped-study setting (the shipped default is exact
-    everywhere), so one is configured explicitly here.
-    """
-    from nova.biot.polygon import polygon_greens
-
-    vertices = hexagon(radius=0.03)
-    standoff = 3.0
-    edge = np.array([1.0 + standoff * PolySection.section_radius(vertices)])
-    height = np.zeros(1)
-    policy = PolySectionPolicy(
-        arrangement="standoff",
-        exact_kernel="quadrature",
-        standoff=standoff,
-    )
-    exact = polygon_greens(edge, height, vertices)[0]
-    point = greens_psi(edge, height, 1.0, 0.0)
-    assert PolySection.near_band(edge, height, vertices, policy).tolist() == [False]
-    assert abs(float(exact[0]) - float(point[0])) < 1e-3 * abs(float(point[0]))
-
-
-def test_the_default_band_is_unbounded_and_exact_everywhere():
-    """The shipped default routes every pair through the exact kernel.
-
-    A finite standoff is a scoped-study setting: configuring one excludes far
-    targets from the near band and blends them to the point form, which agrees
-    closely far out but is not the exact path.
-    """
-    vertices = hexagon(radius=0.03)
-    far_r = np.array([1.9])
-    far_z = np.array([0.8])
-    default_policy = PolySectionPolicy()
-    assert default_policy.arrangement == "exact"
-    assert PolySection.near_band(far_r, far_z, vertices, default_policy).all()
-    exact = PolySection.section_greens(far_r, far_z, vertices)[0]
-    study_policy = PolySectionPolicy(arrangement="standoff", standoff=3.0)
-    assert not PolySection.near_band(far_r, far_z, vertices, study_policy).any()
-    blended = PolySection.section_greens(far_r, far_z, vertices, study_policy)[0]
-    # far out the two agree closely, but the exact path is not the point form
-    np.testing.assert_allclose(exact, blended, rtol=1e-3)
-    assert float(exact[0]) != float(blended[0])
-
-
-def test_route_policies_are_immutable_and_cache_distinct():
-    """One study route cannot mutate the default or collide with its cache key."""
+def test_policy_exposes_only_exact_section_kernels():
+    """Approximate production routing cannot be restored through policy data."""
     default = PolySectionPolicy()
-    study = PolySectionPolicy(
-        arrangement="standoff",
-        exact_kernel="quadrature",
-        standoff=3.0,
-        quadrature=(4, 12),
-    )
-    assert default == PolySectionPolicy()
-    assert default.key != study.key
+    reference = PolySectionPolicy(exact_kernel="quadrature", quadrature=(4, 12))
+    assert default.exact_kernel == "closed_form"
+    assert default.key != reference.key
     with pytest.raises(FrozenInstanceError):
-        study.standoff = 5.0
-
-
-def test_filament_policy_rejects_unused_exact_settings():
-    """One point-filament value has one cache identity, with no inert quadrature."""
-    with pytest.raises(ValueError, match="does not accept an exact kernel"):
-        PolySectionPolicy(
-            arrangement="filament",
-            exact_kernel="quadrature",
-            quadrature=(-1, 0),
-        )
+        reference.quadrature = (2, 4)
+    for retired in ("standoff", "banded", "filament"):
+        with pytest.raises(TypeError, match="unexpected keyword argument"):
+            PolySectionPolicy.resolve({"arrangement": retired})
 
 
 def test_policy_numeric_domains_have_one_canonical_cache_key():
-    """Equivalent scalar spellings cannot split one route into multiple keys."""
-    policies = [
-        PolySectionPolicy(arrangement="standoff", standoff=value)
-        for value in (3, 3.0, np.int64(3))
-    ]
-    assert {policy.key for policy in policies} == {policies[0].key}
-    assert all(type(policy.standoff) is float for policy in policies)
-    with pytest.raises(ValueError, match="finite distance"):
-        PolySectionPolicy(arrangement="standoff", standoff=True)
+    """Invalid scalar spellings cannot create ambiguous exact-kernel keys."""
     with pytest.raises(ValueError, match="positive integers"):
         PolySectionPolicy(exact_kernel="quadrature", quadrature=(True, 4))
     with pytest.raises(ValueError, match="positive integer"):
@@ -334,12 +282,6 @@ def test_accelerator_policy_requires_the_exact_axisymmetric_ring_lane():
     """Backend and geometry eligibility form one canonical executable identity."""
     with pytest.raises(ValueError, match="requires 'axisymmetric_ring'"):
         PolySectionPolicy(backend="jax")
-    with pytest.raises(ValueError, match="only exact routing"):
-        PolySectionPolicy(
-            arrangement="banded",
-            backend="jax",
-            device_eligibility="axisymmetric_ring",
-        )
     with pytest.raises(ValueError, match="compiled quadrature"):
         PolySectionPolicy(backend="jax", device_eligibility="axisymmetric_ring")
     policy = PolySectionPolicy(
@@ -353,7 +295,7 @@ def test_accelerator_policy_requires_the_exact_axisymmetric_ring_lane():
 
 def test_coilset_factories_reject_routes_outside_the_cache_identity():
     """Per-insert and post-construction mutations cannot bypass the stored route."""
-    banded = PolySectionPolicy(arrangement="banded")
+    reference = PolySectionPolicy(exact_kernel="quadrature")
     coilset = CoilSet()
     with pytest.raises(ValueError, match="fixed by its CoilSet constructor"):
         coilset.coil.insert(
@@ -362,9 +304,9 @@ def test_coilset_factories_reject_routes_outside_the_cache_identity():
             0.2,
             0.2,
             nturn=1,
-            polysection_policy=banded,
+            polysection_policy=reference,
         )
-    coilset.firstwall.polysection_policy = banded.key
+    coilset.firstwall.polysection_policy = reference.key
     with pytest.raises(ValueError, match="fixed by its CoilSet constructor"):
         coilset.firstwall.insert({"circle": [3.0, 0.0, 0.5]})
 
@@ -400,35 +342,6 @@ def test_the_quadrature_override_reaches_the_kernel():
     with pytest.raises(ValueError, match="does not accept"):
         PolySectionPolicy(quadrature=(2, 6))
     assert np.max(np.abs(closed - reference)) / scale < 1e-6
-
-
-def test_a_finite_band_is_a_small_fraction_of_a_grid():
-    """A configured blend is what keeps the exact kernel affordable on a grid."""
-    vertices = hexagon(radius=0.03)
-    radius, height = np.meshgrid(np.linspace(0.3, 1.7, 45), np.linspace(-1.1, 1.1, 45))
-    policy = PolySectionPolicy(arrangement="standoff", standoff=3.0)
-    near = PolySection.near_band(radius.ravel(), height.ravel(), vertices, policy)
-    assert near.mean() < 0.05
-
-
-def test_standoff_dispatch_evaluates_exact_and_filament_masks_separately(monkeypatch):
-    """Neither kernel sees targets belonging exclusively to the other route."""
-    vertices = hexagon(radius=0.03)
-    target_r = np.array([1.0, 1.8])
-    target_z = np.array([0.0, 0.4])
-    calls = []
-
-    def exact(near_r, near_z, section, policy):
-        calls.append((near_r.copy(), near_z.copy(), section.copy(), policy))
-        assert near_r.tolist() == [1.0]
-        return tuple(np.ones_like(near_r) for _ in range(3))
-
-    monkeypatch.setattr(PolySection, "exact_greens", staticmethod(exact))
-    policy = PolySectionPolicy(arrangement="standoff", standoff=2.0)
-    psi, br, bz = PolySection.section_greens(target_r, target_z, vertices, policy)
-    assert len(calls) == 1
-    assert (psi[0], br[0], bz[0]) == (1.0, 1.0, 1.0)
-    assert np.all(np.isfinite([psi[1], br[1], bz[1]]))
 
 
 def test_vector_potential_masks_the_magnetic_axis_division():
@@ -843,29 +756,17 @@ def test_the_section_orientation_does_not_change_the_field(orientation):
     np.testing.assert_allclose(bz, point_bz, rtol=1e-2, atol=1e-9)
 
 
-# --- the banded scheme, opt-in ----------------------------------------------
-
-
 def plasma_cell(r0=6.2, z0=0.0, radius=0.06):
     """Return a hexagonal plasma cell at a tokamak major radius."""
     angle = np.pi / 6 + np.linspace(0.0, 2.0 * np.pi, 6, endpoint=False)
     return np.column_stack([r0 + radius * np.cos(angle), z0 + radius * np.sin(angle)])
 
 
-def test_the_shipped_default_is_the_closed_form_everywhere_and_not_banded():
-    """Neither binning reduction is on by default, and the exact kernel is closed.
-
-    No pair is approximated: there is no standoff band handing a far pair to a
-    point filament, and no three-band split handing it to a reduced rule. Every
-    pair goes through the closed-form reduction, which the measured cost makes
-    affordable -- 171 µs/pair against the 858 the boundary quadrature spent for
-    one to two orders less accuracy.
-    """
+def test_the_shipped_default_is_the_closed_form_everywhere():
+    """Every target-source pair goes through the exact closed-form reduction."""
     from nova.biot.polygonanalytic import polygon_analytic_greens
 
     policy = PolySectionPolicy()
-    assert policy.arrangement == "exact"
-    assert policy.standoff is None
     assert policy.exact_kernel == "closed_form"
     assert (policy.backend, policy.precision, policy.device_eligibility) == (
         "numpy",
@@ -882,67 +783,13 @@ def test_the_shipped_default_is_the_closed_form_everywhere_and_not_banded():
         np.testing.assert_array_equal(got, expected)
 
 
-def test_the_banded_scheme_is_reached_through_an_instance_policy():
-    """A banded instance routes every pair through the band dispatch, and only it."""
-    from nova.biot.bandedcoupling import banded_greens
-
-    vertices = plasma_cell()
-    angle = np.linspace(0.0, 2.0 * np.pi, 12, endpoint=False)
-    target_r = 6.2 + np.geomspace(0.1, 2.0, 12) * np.cos(angle)
-    target_z = np.geomspace(0.1, 2.0, 12) * np.sin(angle)
-
-    exact = PolySection.section_greens(target_r, target_z, vertices)
-    policy = PolySectionPolicy(arrangement="banded")
-    banded = PolySection.section_greens(target_r, target_z, vertices, policy)
-    for got, expected in zip(
-        banded,
-        banded_greens(target_r, target_z, vertices, closed_form=True),
-    ):
-        np.testing.assert_array_equal(got, expected)
-    # it is a different path, not a no-op rename of the exact one
-    assert any(not np.array_equal(one, other) for one, other in zip(banded, exact))
-
-
-def test_the_banded_scheme_holds_every_component_against_the_exact_lane():
-    """Through the element's own entry point, the two lanes agree to the bound."""
-    vertices = plasma_cell()
-    angle = np.linspace(0.0, 2.0 * np.pi, 16, endpoint=False)
-    reach = np.geomspace(0.07, 2.4, 16)[:, None]
-    target_r = (6.2 + reach * np.cos(angle)).ravel()
-    target_z = (reach * np.sin(angle)).ravel()
-
-    exact = PolySection.section_greens(target_r, target_z, vertices)
-    banded = PolySection.section_greens(
-        target_r,
-        target_z,
-        vertices,
-        PolySectionPolicy(arrangement="banded"),
-    )
-    for got, expected in zip(banded, exact):
-        scale = np.max(np.abs(expected))
-        assert np.max(np.abs(got - expected)) / scale <= 1e-6
-
-
-def test_banded_and_exact_instances_coexist_without_shared_state():
-    """An opt-in batch cannot alter the policy of any following batch."""
-    exact = PolySectionPolicy()
-    banded = PolySectionPolicy(arrangement="banded")
-    assert exact.arrangement == "exact"
-    assert banded.arrangement == "banded"
-    assert PolySectionPolicy() == exact
-
-
-# --- the closed form as the exact kernel, opt-in ------------------------------
-
-
-def test_the_closed_form_is_reached_through_the_scoped_configuration():
-    """Turning it on takes every exact evaluation through the reduction instead.
+def test_the_closed_form_is_reached_through_the_production_configuration():
+    """The default takes every exact evaluation through the reduction.
 
     Bit-identity to the closed form, and a difference from the quadrature: the
     same physics through a different evaluation. Which of the two is nearer the
     truth, and by how much where, is measured in
-    :mod:`tests.test_biotbandedcoupling` -- here the contract is only that the
-    configuration selects it.
+    :mod:`tests.test_biotbandedcoupling`.
     """
     from nova.biot.polygon import polygon_greens
     from nova.biot.polygonanalytic import polygon_analytic_greens
@@ -962,92 +809,6 @@ def test_the_closed_form_is_reached_through_the_scoped_configuration():
     # a different evaluation of the same physics, not a rename of the quadrature
     quadrature = polygon_greens(target_r, target_z, vertices)
     assert any(not np.array_equal(one, other) for one, other in zip(closed, quadrature))
-    for name, one, other in zip(("psi", "br", "bz"), closed, quadrature):
+    for name, one, other in zip(("psi", "br", "bz"), closed, quadrature, strict=True):
         scale = float(np.max(np.abs(other)))
         assert np.max(np.abs(one - other)) / scale <= 1e-3, name
-
-
-def test_the_closed_form_serves_the_near_band_of_the_banded_scheme():
-    """The two knobs compose: one bins the pairs, the other evaluates the exact ones.
-
-    Where it lands is the near band, which is bit-identical to whichever exact
-    kernel is configured -- so this is the only place in the banded scheme where
-    the accuracy gain can appear, and it appears there in full.
-    """
-    from nova.biot.bandedcoupling import band, banded_greens
-    from nova.biot.polygonanalytic import polygon_analytic_greens
-
-    vertices = plasma_cell()
-    angle = np.linspace(0.0, 2.0 * np.pi, 12, endpoint=False)
-    reach = np.geomspace(0.07, 1.5, 10)[:, None]
-    target_r = (6.2 + reach * np.cos(angle)).ravel()
-    target_z = (reach * np.sin(angle)).ravel()
-
-    scheme = PolySection.section_greens(
-        target_r,
-        target_z,
-        vertices,
-        PolySectionPolicy(arrangement="banded"),
-    )
-    for got, expected in zip(
-        scheme, banded_greens(target_r, target_z, vertices, closed_form=True)
-    ):
-        np.testing.assert_array_equal(got, expected)
-
-    near = band(target_r, target_z, vertices) == 0
-    assert near.any()
-    reference = polygon_analytic_greens(target_r[near], target_z[near], vertices)
-    for got, expected in zip(scheme, reference):
-        np.testing.assert_array_equal(got[near], expected)
-
-
-def test_the_closed_form_also_serves_a_standoff_band():
-    """It replaces the exact kernel wherever the exact kernel is used, not only far.
-
-    The standoff arrangement keeps a point filament outside its band, so the two
-    routes must differ inside the band and agree bit for bit outside it -- which is
-    what says the choice is about the exact treatment alone.
-    """
-    from nova.biot.polygonanalytic import polygon_analytic_greens
-
-    vertices = plasma_cell()
-    # the band is 3 section radii = 0.18 m about the centroid: 0.04 and 0.11 m out
-    # are inside it, the third target is far outside
-    target_r = np.array([6.24, 6.31, 8.9])
-    target_z = np.array([0.01, 0.0, 1.4])
-    quadrature_policy = PolySectionPolicy(
-        arrangement="standoff",
-        exact_kernel="quadrature",
-        standoff=3.0,
-    )
-    closed_policy = PolySectionPolicy(arrangement="standoff", standoff=3.0)
-    inside = PolySection.near_band(target_r, target_z, vertices, quadrature_policy)
-    quadrature = PolySection.section_greens(
-        target_r, target_z, vertices, quadrature_policy
-    )
-    closed = PolySection.section_greens(target_r, target_z, vertices, closed_policy)
-    assert inside.tolist() == [True, True, False]
-    reference = polygon_analytic_greens(target_r[inside], target_z[inside], vertices)
-    for got, expected in zip(closed, reference):
-        np.testing.assert_array_equal(got[inside], expected)
-    for got, expected in zip(closed, quadrature):
-        np.testing.assert_array_equal(got[~inside], expected[~inside])
-
-
-def test_the_point_far_field_sits_at_the_section_area_centroid():
-    """A standoff blend places its filament at the area centroid, not the vertex mean.
-
-    The two coincide only for a section whose corners pair up. On one where they do
-    not, the vertex mean carries a first-moment error, which is a dipole the far
-    field has no way to absorb.
-    """
-    from nova.biot.greens import section_centroid
-
-    vertices = np.array([[6.15, -0.03], [6.24, -0.03], [6.26, 0.02], [6.18, 0.04]])
-    centre = section_centroid(vertices)
-    assert not np.allclose(centre, vertices.mean(axis=0), atol=1e-6)
-    far_r = np.array([7.6])
-    far_z = np.array([1.1])
-    policy = PolySectionPolicy(arrangement="standoff", standoff=3.0)
-    psi = PolySection.section_greens(far_r, far_z, vertices, policy)[0]
-    np.testing.assert_array_equal(psi, greens_psi(far_r, far_z, centre[0], centre[1]))

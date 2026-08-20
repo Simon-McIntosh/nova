@@ -100,6 +100,19 @@ def test_cylinder_rejects_invalid_section_geometry(attr, value):
         Cylinder(source, target, turns=[False, False], reduce=[False, False])
 
 
+def test_cylinder_rejects_an_authored_hexagon_section():
+    """A rectangle kernel cannot consume moments from an authored hexagon."""
+    source = Source(
+        {"x": [0.9], "z": [0.1], "dx": [0.1], "dz": [0.1]},
+        segment="cylinder",
+        section="hexagon",
+        nturn=1,
+    )
+    target = Target({"x": [1.3], "z": [0.3]}, available=[])
+    with pytest.raises(ValueError, match="require an axis-aligned rectangle"):
+        Cylinder(source, target, turns=[False, False], reduce=[False, False])
+
+
 @pytest.mark.parametrize(
     ("da", "dz", "target_r", "target_z"),
     [

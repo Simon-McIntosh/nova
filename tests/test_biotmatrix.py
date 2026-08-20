@@ -150,11 +150,11 @@ def test_solve_policy_and_plasma_lanes_are_batch_distinct(monkeypatch):
     """Equal segment names cannot merge different policies or electrical lanes."""
     monkeypatch.setitem(Solve.generator, "polysection", ScalarGenerator)
     exact = PolySectionPolicy()
-    banded = PolySectionPolicy(arrangement="banded")
+    quadrature = PolySectionPolicy(exact_kernel="quadrature")
     source = scalar_source(4, policy=exact)
     source["segment"] = np.full(4, "polysection", dtype=object)
     source["polysection_policy"] = np.array(
-        [exact.key, banded.key, exact.key, banded.key], dtype=object
+        [exact.key, quadrature.key, exact.key, quadrature.key], dtype=object
     )
     source["plasma"] = np.array([False, False, True, True])
     solve = Solve(
@@ -167,9 +167,9 @@ def test_solve_policy_and_plasma_lanes_are_batch_distinct(monkeypatch):
     identities = {(batch.lane, batch.policy.key) for batch in solve.source_batches}
     assert identities == {
         ("conductor", exact.key),
-        ("conductor", banded.key),
+        ("conductor", quadrature.key),
         ("plasma", exact.key),
-        ("plasma", banded.key),
+        ("plasma", quadrature.key),
     }
     np.testing.assert_array_equal(solve.data.Psi.data[0], source.x)
 
@@ -240,13 +240,13 @@ def test_solve_applies_nonunit_links_after_route_batching(monkeypatch, reverse):
     """A dependent keeps its circuit factor when the reference is in another batch."""
     monkeypatch.setitem(Solve.generator, "polysection", ScalarGenerator)
     exact = PolySectionPolicy()
-    banded = PolySectionPolicy(arrangement="banded")
+    quadrature = PolySectionPolicy(exact_kernel="quadrature")
     source = Source(
         {
             "x": [10.0, 2.0, 4.0],
             "z": np.zeros(3),
             "segment": np.full(3, "polysection", dtype=object),
-            "polysection_policy": [exact.key, banded.key, banded.key],
+            "polysection_policy": [exact.key, quadrature.key, quadrature.key],
             "frame": np.full(3, "coil", dtype=object),
             "nturn": np.ones(3),
             "plasma": np.zeros(3, dtype=bool),

@@ -270,10 +270,10 @@ def test_cache_key_distinguishes_source_lanes_and_target_quadrature():
     """Every route-affecting default participates in the stored operator identity."""
     fp = FilePath(filename="cache")
     exact = PolySectionPolicy()
-    banded = PolySectionPolicy(arrangement="banded")
+    quadrature = PolySectionPolicy(exact_kernel="quadrature")
     baseline = CoilSet().coilset_attrs
-    coil_opt_in = CoilSet(coil_polysection_policy=banded).coilset_attrs
-    plasma_opt_in = CoilSet(plasma_polysection_policy=banded).coilset_attrs
+    coil_opt_in = CoilSet(coil_polysection_policy=quadrature).coilset_attrs
+    plasma_opt_in = CoilSet(plasma_polysection_policy=quadrature).coilset_attrs
     accelerator = CoilSet(
         plasma_polysection_policy=PolySectionPolicy(
             exact_kernel="quadrature",
@@ -297,13 +297,13 @@ def test_cache_key_distinguishes_source_lanes_and_target_quadrature():
         )
     }
     assert len(keys) == 5
-    assert coil_opt_in["coil_polysection_policy"] == banded.key
-    assert plasma_opt_in["plasma_polysection_policy"] == banded.key
+    assert coil_opt_in["coil_polysection_policy"] == quadrature.key
+    assert plasma_opt_in["plasma_polysection_policy"] == quadrature.key
 
 
 def test_route_identity_round_trips_through_the_zarr_root_group(tmp_path):
     """A fresh CoilSet reconstructs source and target factories from stored routes."""
-    coil_policy = PolySectionPolicy(arrangement="banded")
+    coil_policy = PolySectionPolicy(exact_kernel="quadrature", quadrature=(4, 12))
     plasma_policy = PolySectionPolicy(exact_kernel="quadrature")
     target_policy = TargetQuadraturePolicy(order=4)
     stored = CoilSet(
@@ -334,8 +334,8 @@ def test_route_identity_round_trips_through_the_zarr_root_group(tmp_path):
 @pytest.mark.parametrize(
     ("attribute", "value"),
     [
-        ("coil_polysection_policy", PolySectionPolicy(arrangement="banded")),
-        ("plasma_polysection_policy", PolySectionPolicy(arrangement="banded")),
+        ("coil_polysection_policy", PolySectionPolicy(exact_kernel="quadrature")),
+        ("plasma_polysection_policy", PolySectionPolicy(exact_kernel="quadrature")),
         ("inductance_target_policy", TargetQuadraturePolicy(order=4)),
     ],
 )
@@ -485,7 +485,7 @@ def test_machine_cache_folds_dd_version(monkeypatch, tmp_path):
         wall=False,
         ninductance=5,
         dirname=str(tmp_path),
-        coil_polysection_policy=PolySectionPolicy(arrangement="banded"),
+        coil_polysection_policy=PolySectionPolicy(exact_kernel="quadrature"),
         plasma_polysection_policy=PolySectionPolicy(exact_kernel="quadrature"),
         inductance_target_policy=TargetQuadraturePolicy(order=4),
     )

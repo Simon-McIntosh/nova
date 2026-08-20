@@ -1,0 +1,7 @@
+slurmstepd: error: Unable to create TMPDIR [/run/user/39486]: Permission denied
+slurmstepd: error: Setting TMPDIR to /tmp
+warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/nova/.venv` and will be ignored; use `--active` to target the active environment instead
+CACHE_REQUEST fixture=fine requested_cells=-1000
+CACHE_RESULT fixture=fine cells=1076 hit=True key=7c94be9b777c55ba build_s=0
+FORCING fixture=fine sup_wb=3.6637359812630166e-15 grid_fraction=2.5721661453642818e-15 axis_projection_mm=2.4319488870750704e-12
+ANALYTIC_ORACLE_FIXTURES_EXIT=0

@@ -1,0 +1,11 @@
+17:29:21 INFO     Parsing data dictionary version 3.39.0 [90m@dd_zip.py:89[0m
+INFO:imas.dd_zip:Parsing data dictionary version 3.39.0
+CACHE fixture=coarse status=warm key=746fbe1553c4b242 load_s=0.310299709 build_s=0 store_s=0 validation_s=0 arrays=31 bytes=51411470 bitwise=True store=/home/ITER/mcintos/.local/share/nova/0.11.0/solovev_hex_machine.zarr
+LINEARIZE state_size=2396
+COMPARATOR contracting omitted second moments
+ARM name=seven_sample_quadratic
+ARM name=thirteen_sample_cubic
+ARM name=exact_flux_at_density_samples
+RESULT production_sup=1.25229237 cubic_ratio=1.0009723 exact_ratio=1.00182516 stage=density_fit_projection_after_exact_flux_sampling
+DENSITY_FORCING_LADDER_EXIT=0
+MEASURE_EXIT=0

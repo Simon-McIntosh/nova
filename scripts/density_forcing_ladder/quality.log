@@ -1,0 +1,24 @@
+E501 Line too long (90 > 88)
+  --> scripts/density_forcing_ladder/verify.py:22:89
+   |
+20 |     assert report["fixture"]["plasma_cells"] == 566
+21 |     assert abs(production["forcing"]["sup_wb"] - 1.252292371968979) < 1.0e-14
+22 |     assert abs(production["forcing"]["projection_fraction"] - 0.991762605972982) < 2.0e-14
+   |                                                                                         ^^
+23 |     assert report["production_control_difference"]["production_image_sup_wb"] < 2.0e-13
+24 |     assert cubic["forcing"]["sup_wb"] > production["forcing"]["sup_wb"]
+   |
+
+E501 Line too long (93 > 88)
+  --> scripts/density_forcing_ladder/verify.py:49:89
+   |
+47 |         "VERIFIED "
+48 |         f"production={production['forcing']['sup_wb']:.9f}Wb "
+49 |         f"cubic_ratio={report['mechanism']['cubic_forcing_sup_fraction_of_production']:.9f} "
+   |                                                                                         ^^^^^
+50 |         f"exact_ratio={report['mechanism']['exact_flux_forcing_sup_fraction_of_production']:.9f}"
+51 |     )
+   |
+
+Found 2 errors.
+QUALITY_EXIT=1

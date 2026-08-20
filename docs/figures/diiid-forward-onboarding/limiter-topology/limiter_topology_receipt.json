@@ -1,0 +1,198 @@
+{
+  "schema": "nova-limiter-topology-receipt",
+  "tolerances_fixed_before_scoring": {
+    "wall_contact_distance_grid_cells": 1.0
+  },
+  "synthetic_limited_round_trip": {
+    "prescribed_wall_contact_point_m": [
+      1.35,
+      0.0
+    ],
+    "recovered_wall_contact_point_m": [
+      1.35,
+      -8.983254536098898e-16
+    ],
+    "contact_distance_m": 8.983254536098898e-16,
+    "grid_cell_size_m": 0.016249999999999987,
+    "contact_distance_grid_cells": 5.5281566375993266e-14,
+    "tolerance_grid_cells": 1.0,
+    "passes": true
+  },
+  "solves": [
+    {
+      "solve_id": "synthetic-limited-round-trip",
+      "topology_class": "limited",
+      "boundary_point_m": [
+        1.35,
+        -8.983254536098898e-16
+      ],
+      "wall_contact_point_m": [
+        1.35,
+        -8.983254536098898e-16
+      ],
+      "topology_history": [
+        "limited"
+      ],
+      "transition_count": 0,
+      "transitions_without_solver_failure": 0,
+      "solver_succeeded": true
+    },
+    {
+      "solve_id": "synthetic-transition-traversal",
+      "topology_class": "diverted",
+      "boundary_point_m": [
+        1.1019047226795156,
+        -0.4448939832318258
+      ],
+      "wall_contact_point_m": null,
+      "topology_history": [
+        "limited",
+        "diverted",
+        "limited",
+        "diverted"
+      ],
+      "transition_count": 3,
+      "transitions_without_solver_failure": 3,
+      "solver_succeeded": true
+    },
+    {
+      "solve_id": "mast-limited-frame-0",
+      "prescribed_topology_class": "limited",
+      "topology_class": "limited",
+      "boundary_point_m": [
+        1.5551,
+        -0.45234039116963026
+      ],
+      "wall_contact_point_m": [
+        1.5551,
+        -0.45234039116963026
+      ],
+      "topology_history": [
+        "limited"
+      ],
+      "transition_count": 0,
+      "transitions_without_solver_failure": 0,
+      "solver_succeeded": true
+    },
+    {
+      "solve_id": "mast-limited-frame-1",
+      "prescribed_topology_class": "limited",
+      "topology_class": "limited",
+      "boundary_point_m": [
+        1.5551,
+        0.4436131781812828
+      ],
+      "wall_contact_point_m": [
+        1.5551,
+        0.4436131781812828
+      ],
+      "topology_history": [
+        "limited"
+      ],
+      "transition_count": 0,
+      "transitions_without_solver_failure": 0,
+      "solver_succeeded": true
+    },
+    {
+      "solve_id": "mast-limited-frame-2",
+      "prescribed_topology_class": "limited",
+      "topology_class": "limited",
+      "boundary_point_m": [
+        1.5551,
+        0.454158062470582
+      ],
+      "wall_contact_point_m": [
+        1.5551,
+        0.454158062470582
+      ],
+      "topology_history": [
+        "limited"
+      ],
+      "transition_count": 0,
+      "transitions_without_solver_failure": 0,
+      "solver_succeeded": true
+    },
+    {
+      "solve_id": "mast-limited-frame-3",
+      "prescribed_topology_class": "limited",
+      "topology_class": "limited",
+      "boundary_point_m": [
+        1.5551,
+        -0.44860161256555053
+      ],
+      "wall_contact_point_m": [
+        1.5551,
+        -0.44860161256555053
+      ],
+      "topology_history": [
+        "limited"
+      ],
+      "transition_count": 0,
+      "transitions_without_solver_failure": 0,
+      "solver_succeeded": true
+    },
+    {
+      "solve_id": "mast-limited-frame-4",
+      "prescribed_topology_class": "limited",
+      "topology_class": "limited",
+      "boundary_point_m": [
+        1.5551,
+        0.43949313607913926
+      ],
+      "wall_contact_point_m": [
+        1.5551,
+        0.43949313607913926
+      ],
+      "topology_history": [
+        "limited"
+      ],
+      "transition_count": 0,
+      "transitions_without_solver_failure": 0,
+      "solver_succeeded": true
+    },
+    {
+      "solve_id": "mast-limited-frame-5",
+      "prescribed_topology_class": "limited",
+      "topology_class": "limited",
+      "boundary_point_m": [
+        1.5551,
+        0.4217333096704609
+      ],
+      "wall_contact_point_m": [
+        1.5551,
+        0.4217333096704609
+      ],
+      "topology_history": [
+        "limited"
+      ],
+      "transition_count": 0,
+      "transitions_without_solver_failure": 0,
+      "solver_succeeded": true
+    }
+  ],
+  "summary": {
+    "solve_count": 8,
+    "topology_class_by_solve": {
+      "synthetic-limited-round-trip": "limited",
+      "synthetic-transition-traversal": "diverted",
+      "mast-limited-frame-0": "limited",
+      "mast-limited-frame-1": "limited",
+      "mast-limited-frame-2": "limited",
+      "mast-limited-frame-3": "limited",
+      "mast-limited-frame-4": "limited",
+      "mast-limited-frame-5": "limited"
+    },
+    "mid_solve_transition_count": 3,
+    "mid_solve_transitions_traversed_without_solver_failure": 3,
+    "mast_limited_frame_count": 6,
+    "mast_limited_classifier_agreement_count": 6,
+    "mast_limited_classifier_agreement_fraction": 1.0
+  },
+  "mast_frame_provenance": {
+    "machine_geometry": "nova/catalog/mast_geometry.json",
+    "flux_source": "analytic in-house limited-equilibrium fixture bank",
+    "reference_topology": "prescribed limited construction",
+    "efit_inputs_used": false,
+    "qualification": "classifier fixture only; not experimental reconstruction fidelity"
+  }
+}

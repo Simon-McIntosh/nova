@@ -1,0 +1,124 @@
+{
+  "artifacts": {
+    "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/fine-density-swap-confirmation/scripts/fine_density_swap/fine-density-swap.png",
+    "figure_bytes": 112971
+  },
+  "cache_carrier": {
+    "arrays_verified": 31,
+    "banked_cold_build": {
+      "arrays_verified": 31,
+      "artifact": "scripts/build_cache_audit/results.json",
+      "build_seconds": 3321.1149154752493,
+      "bytes_verified": 169311277,
+      "hit": false,
+      "key": "f0f96aa214aa9459"
+    },
+    "bytes_verified": 169311277,
+    "persisted_child_count": 31,
+    "persisted_children": [
+      "area",
+      "cell_polygon_offsets",
+      "cell_polygon_vertices",
+      "hexagon",
+      "node",
+      "passive_columns",
+      "plasma_to_grid",
+      "plasma_to_grid_r",
+      "plasma_to_grid_z",
+      "plasma_to_sample",
+      "plasma_to_sample_r",
+      "plasma_to_sample_z",
+      "plasma_to_wall",
+      "plasma_to_wall_r",
+      "plasma_to_wall_z",
+      "radial_field_0",
+      "radial_field_1",
+      "radial_field_2",
+      "radial_field_3",
+      "sample_coordinates",
+      "sampling_vertices",
+      "source_current",
+      "source_to_grid",
+      "source_to_sample",
+      "source_to_wall",
+      "stencil",
+      "vertical_field_0",
+      "vertical_field_1",
+      "vertical_field_2",
+      "vertical_field_3",
+      "wall_node"
+    ],
+    "persisted_coupling_child_count": 20,
+    "realised_cells": 1069,
+    "requested_cells": -1000,
+    "semantic_key": "f0f96aa214aa9459",
+    "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/solovev_hex_machine.zarr",
+    "warm_hit": true,
+    "warm_load_seconds": 0.5354503060225397
+  },
+  "coarse_control": {
+    "density_forcing_sup_wb": 1.252292371968979,
+    "density_projection_fraction": 0.991762605972982,
+    "density_projection_percent": 99.17626059729821,
+    "plasma_cells": 566,
+    "root_response": {
+      "axis_signed_projection_mm": 40.06497374819343,
+      "flux_signed_peak_percent_of_span": 6.38591306844158,
+      "plasma_current_signed_percent": -1.8757187303384244
+    }
+  },
+  "fine_measurement": {
+    "forcing": {
+      "projection_fraction": 0.9918757086740135,
+      "rms_norm_fraction": 0.9920561403737626,
+      "rms_wb": 0.944137910973895,
+      "signed_peak_fraction": 0.9437909262670878,
+      "sup_norm_fraction": 0.9702983981130254,
+      "sup_wb": 1.2554906353737643
+    },
+    "forcing_projection_percent": 99.18757086740135,
+    "grid_forcing": {
+      "projection_fraction": 0.9949632765569449,
+      "rms_fraction_of_span": 0.012111023905798534,
+      "rms_wb": 0.9797054253048396,
+      "sup_fraction_of_span": 0.015354727715031937,
+      "sup_wb": 1.2421005988843774
+    },
+    "plasma_cells": 1069,
+    "root_response": {
+      "axis_signed_projection_mm": 40.85238632366179,
+      "flux_signed_peak_percent_of_span": 6.39394193336063,
+      "gmres_info": 0,
+      "observed_flux_peak_grid_slot": 933,
+      "plasma_current_signed_percent": -1.8854965491303535,
+      "residual_relative_sup": 3.254202473126589e-14,
+      "residual_sup_wb": 4.085620730620576e-14
+    },
+    "second_moment_comparator": {
+      "active_cells": 842,
+      "correction_sup_wb": 0.020264548637914832,
+      "near_source_target_pairs": 17726
+    },
+    "state_size": 4216,
+    "support_cells": 862
+  },
+  "refinement": {
+    "coarse_value": 1.252292371968979,
+    "estimated_power_against_cell_width": -0.008022431804631127,
+    "fine_to_coarse_ratio": 1.0025539270831434,
+    "fine_value": 1.2554906353737643,
+    "nominal_coarse_to_fine_width_ratio": 1.3742971219882913,
+    "qualification": "Two grids determine this exponent exactly; it is a refinement estimate, not an asymptotic convergence order."
+  },
+  "schema": "nova.fine-density-swap",
+  "source_artifacts": {
+    "cache_audit": "scripts/build_cache_audit/results.json",
+    "coarse_decomposition": "scripts/forcing_residual_decomposition/results.json",
+    "fine_terminal_root": "scripts/root_gate_attribution/fine-terminal-root.npz"
+  },
+  "verdict": {
+    "basis": "The fine-to-coarse absolute sup ratio and its two-point width power distinguish persistence from decay; the two-grid result is explicitly an estimate.",
+    "density_is_h_independent_carrier_estimate": true,
+    "measurement_only": true
+  }
+}

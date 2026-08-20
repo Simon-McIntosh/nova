@@ -56,6 +56,78 @@
     the exact analytic state and the linear-response reproduction of the banked root drift.</figcaption>
   </figure>
 
+  <h2 id="forcing-residual-decomposition">§3 (verdict) — the source density carries the forcing: 99.2% of the residual, 40 of the 42 millimetres</h2>
+
+  <p>Commit <code>27fd5f36</code> (coarse 566-cell fixture at the exact analytic state). The
+  dominant comparator residual decomposes by three swaps with relative-sup additive closure
+  5.5e-15:</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>swap</th><th>share of residual</th><th>projected axis</th><th>projected flux</th></tr></thead>
+    <tbody>
+      <tr><td><strong>source density</strong> (attributed degree-nine → exact analytic j on identical supports)</td><td><strong>99.176%</strong></td><td>+40.065 mm</td><td>+6.386% span</td></tr>
+      <tr><td>support geometry (straight chords → curved analytic domain)</td><td>0.088%</td><td>−0.074 mm</td><td>−0.012%</td></tr>
+      <tr><td>topology arm (qualified-reference mismatch; production participation sub-swap exactly zero)</td><td>0.736%</td><td>+1.925 mm</td><td>+0.430%</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>Summed predictions 41.92 mm axis / 6.803% flux against the banked observed 42.44 mm /
+  6.585% — the drift is the <strong>representation's per-cell moment error radiated and
+  amplified</strong>, not the clip, not participation, not kernels, and not chord geometry. The
+  local-current projection (−2.011% summed vs −1.119% observed) stays qualified as a local
+  derivative rather than the nonlinear terminal reproduction. The saddle-aware core used 8,192
+  rays with the banked 4,096/8,192 delta at 1.57 A and a 0.075 A oracle bound. Fine 1,069-cell
+  confirmation awaits a reusable fine map-block bank (the machine-carrier cache now makes that
+  cheap); the coarse verdict stands. Consequence for §2: the exact-kernel default and hexagon
+  fidelity remain correct by ruling and by hygiene, but they are not the drift's owner — the
+  §4 gate bounds and the repair target the density's moment accuracy. Full record:
+  <code>scripts/forcing_residual_decomposition/results.json</code>.</p>
+
+  <figure>
+    <img src="/nova/figures/solovev-exact-recovery/forcing-residual-decomposition.png"
+         alt="Forcing residual decomposition by source-density, support-geometry and topology swaps, with projected root responses"
+         style="max-width:100%">
+    <figcaption>Residual decomposition (commit <code>27fd5f36</code>): component shares of the
+    analytic-state forcing and their projected root responses beside the observed drift.</figcaption>
+  </figure>
+
+  <h2 id="build-cache-activation">§6 — cached machine builds: warm loads at a quarter-second against fifty-minute cold builds, bitwise</h2>
+
+  <p>Commits <code>06875269</code> (audit) and <code>0e98afcb</code> (activation). The audit
+  confirmed nova's production cache architecture sound — a versioned user-data Zarr store keyed
+  by <code>xxh64(canonical_key(Machine.group_attrs))</code>, with coilset coupling and
+  plasma-grid operators as child method groups — and convicted the fixture waste as a
+  <strong>bypassed architecture</strong>: the reference lane built a plain CoilSet with a
+  process-local memo, and every standalone measurement program called <code>build_machine</code>
+  directly. No disabled cache, no churning key, no worktree-local store.</p>
+
+  <p>The activation persists every numerical HexMachine carrier input at native dtype in the
+  shared store, keyed semantically (reference content, locator, conductor geometry/turns/current,
+  discretisation, precision, route policies, schema — never a raw HDF5 digest), with an advisory
+  lock serializing readers against the single miss builder and in-place validated publication
+  that respects the GPFS no-clobber constraint. Measured, genuinely cold on SLURM debug nodes:</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>fixture</th><th>key</th><th>cold build</th><th>warm request</th><th>ratio</th><th>identity</th></tr></thead>
+    <tbody>
+      <tr><td>coarse 566</td><td><code>746fbe1553c4b242</code></td><td>1,246.88 s</td><td>0.266 s</td><td>4,689×</td><td>31 arrays / 51.4 MB bitwise</td></tr>
+      <tr><td>fine 1069</td><td><code>f0f96aa214aa9459</code></td><td>3,335.33 s</td><td>0.818 s</td><td>4,079×</td><td>31 arrays / 169.3 MB bitwise</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p><strong>Agent doctrine (owner directive 2026-08-20):</strong> name the semantic cached
+  instance and request it (<code>cached_machine</code>) before constructing geometry or
+  evaluating kernels; only the cache-owned locked miss path may build; bump the schema when the
+  carrier changes; worktree paths, mtimes and raw file digests never belong in identity. The
+  three standalone measurement programs now consume the cache; the in-module direct build
+  survives only for plotting tests that need a live CoilSet. Store:
+  <code>~/.local/share/nova/0.11.0/solovev_hex_machine.zarr</code> (149 MiB, shared across
+  worktrees). Full record: <code>scripts/build_cache_audit/README.md</code>.</p>
+
 </main>
 </body>
 </html>

@@ -24,10 +24,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-20">
-<meta name="plan-version" content="3">
-<meta name="plan-commits" content="eed42e520d5f544f50cdb7485cffc74249f47037,0687526990e67eee5777310a71ad60588ca7736e">
-<meta name="plan-artifacts" content="docs/evidence/archive/solovev-exact-recovery-landed.html,docs/figures/solovev-exact-recovery/map-forcing-decomposition.png,scripts/map_forcing_attribution/results.json,scripts/build_cache_audit/results.json">
-<meta name="plan-impl" content="0.13">
+<meta name="plan-version" content="5">
+<meta name="plan-commits" content="eed42e520d5f544f50cdb7485cffc74249f47037,0687526990e67eee5777310a71ad60588ca7736e,0e98afcb9960247313ea955822481983d63a7fd0,27fd5f364c4bb6fa89e5042ee0c190990f965be9">
+<meta name="plan-artifacts" content="docs/evidence/archive/solovev-exact-recovery-landed.html,docs/figures/solovev-exact-recovery/map-forcing-decomposition.png,docs/figures/solovev-exact-recovery/forcing-residual-decomposition.png,scripts/map_forcing_attribution/results.json,scripts/forcing_residual_decomposition/results.json,scripts/build_cache_audit/results.json,scripts/build_cache_audit/measurements-coarse.json,scripts/build_cache_audit/measurements-fine.json">
+<meta name="plan-impl" content="0.38">
 </head>
 <body>
   <main class="plan-doc">
@@ -189,32 +189,22 @@
     per-step launch cost regardless of body, so trip counts are read from the compiled HLO — so
     every slow figure arrives with the named region where acceleration would land.</p>
 
-    <h2 id="s6">§6 — Cached machine builds: build once, reuse everywhere</h2>
-
-    <p><strong>Owner directive 2026-08-20.</strong> Machine and coilset builds — the design
-    matrices, coupling blocks, moment companions, and fixture operators — are cached instances
-    that are reused, never rebuilt per run, and agents specify the cache in their runs. The
-    measured waste this answers: every measurement node this week paid the full fixture
-    construction again (~13 minutes coarse, ~44 minutes fine), several blocking at their time
-    fences <em>inside</em> a rebuild of operators that were bitwise identical to the previous
-    run's. Nova's netCDF caching layer exists for exactly this; whether the Solov'ev fixture
-    path uses it — and why not, if not — is the question.</p>
-
-    <p><em>Done-when:</em> (a) an audit states, for each expensive build in the forward path
-    (machine description, coilset coupling, plasma-grid operators, the two Solov'ev fixture
-    operator sets), whether it is cached and reused or rebuilt, with the cache key and store
-    each uses; (b) the reason the reference-lane fixtures rebuild every run is named — a
-    disabled cache, a churning key, a worktree-local store, or a genuinely uncacheable input —
-    with the mechanism, not a guess (the artifact-digest lesson applies: HDF5 write metadata
-    moves digests between runs, so keys must be semantic identities); (c) fix or confirm: if a
-    cache exists but is bypassed, it is wired in place; if keys churn, the key becomes a
-    semantic identity; a warm rebuild of the coarse fixture then completes in at most a small
-    fraction of the cold build with operators identical to stored precision, measured cold vs
-    warm on both fixtures; (d) the agent-facing doctrine — how a run names and reuses the
-    cached instance — is recorded for the machine-building AGENTS.md guidance this plan owes;
-    (e) committed with the mechanism in the body. Cache stores respect the platform facts:
-    no-clobber publication is node-local only on GPFS, and /tmp is never a cache home.</p>
-
+    <section id="s6" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-20</span>
+        <h2>§6 — Cached machine builds: build once, reuse everywhere</h2>
+      </header>
+      <p class="landed-summary">
+        Confirmed the production Zarr cache sound and convicted the fixture waste as a bypassed
+        architecture; activation persists the full HexMachine carrier under a semantic key with
+        GPFS-safe locked publication. Measured: coarse 1,246.9 s cold → <strong>0.266 s warm</strong>
+        (4,689×), fine 3,335.3 s cold → <strong>0.818 s warm</strong> (4,079×), all 31 arrays
+        bitwise at both resolutions; the three standalone consumers now request
+        <code>cached_machine</code>. Agent doctrine recorded for the machine-building guidance.
+        Full record: <a href="/nova/evidence/archive/solovev-exact-recovery-landed#build-cache-activation">§6 landed</a>
+        (commits <code>06875269</code>, <code>0e98afcb</code>).
+      </p>
+    </section>
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="kernel-default" data-choice="urankar-exact-everywhere" data-by="Simon McIntosh" data-when="2026-08-20T11:00:00+00:00">
@@ -276,6 +266,12 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s3" data-id="c-20260820T1350" data-who="reckon-ship" data-when="2026-08-20T13:50:00+00:00">
     <div class="r-comment-body">map-forcing-attribution landed - commit eed42e52, merged to main 9fba732d; gate PASSED. THREE RESULTS. (1) The plasma-coupling wiring is CLEAN: 383 whole hexagons + 183 clipped authored polygons, zero rectangle substitutions, correct fixed-centroid first-moment contraction at every target class - the mis-wired-at-the-last-step hypothesis is refuted for the plasma path (exact-section and centre swaps are identities at 6.1e-16 Wb/A). (2) LINEAR AMPLIFICATION CONVICTED: forcing at the exact analytic state is 1.598e-2 of span, and (I-Dg) inverse reproduces the banked root drift within 2.34% (axis 42.44 mm), 3.47% (flux 6.585% span) and 4.43% (current -1.119%) - tangent verified to 1.3e-7, inverse residual 7.1e-14 Wb. (3) The named constants are EXONERATED as dominant: omitted second moments project at -2.3e-4 of the forcing; the dominant term (~1.000 of forcing) is the second-order-comparator residual, localising the hunt to source density / support geometry / topology qualification plus the conductor-section constant the section-2 re-route will measure directly as a forcing delta. Follow-on dispatched: forcing-residual decomposition by source/support/topology swaps plus the fine-bank projection. Evidence: /nova/evidence/archive/solovev-exact-recovery-landed#map-forcing-attribution.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260820T1650" data-who="reckon-ship" data-when="2026-08-20T16:50:00+00:00">
+    <div class="r-comment-body">forcing-residual-decomposition landed - commit 27fd5f36, merged a881343b; gate PASSED. THE FORCING'S OWNER IS THE SOURCE DENSITY: swapping the attributed degree-nine density for the exact analytic density on identical supports carries 99.176 percent of the comparator residual; support geometry contributes 0.088 percent, the topology arm 0.736 percent, and the explicit production-participation sub-swap is exactly zero. Projected through the verified tangent inverse, the density component alone predicts +40.065 mm axis and +6.386 percent flux of the observed 42.444 mm / 6.585 percent (summed predictions 41.92 mm / 6.803 percent; the local-current projection stays qualified as a derivative). Additive closure 5.5e-15. CONSEQUENCE: the drift is the representation's per-cell moment error radiated and amplified - not clip, participation, kernels or chords - so the repair targets the density's moment accuracy against the exact functional, and the section-4 gate design splits plasma-composition forcing from conductor-representation forcing with the exterior analytic flux supplied directly at the boundary rows for the pure-plasma gate. Fine confirmation dispatched now that the machine-carrier cache makes the fine bank cheap.</div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-20260820T1652" data-who="reckon-ship" data-when="2026-08-20T16:52:00+00:00">
+    <div class="r-comment-body">build-cache-audit landed - commits 06875269 + 0e98afcb, merged 540bdfbe; gate PASSED (scope-changed recorded for the activation extension). Coarse 1,246.88 s cold to 0.266 s warm (4,689x); fine 3,335.33 s cold to 0.818 s warm (4,079x); 31 arrays bitwise at both resolutions; semantic key, advisory-locked single miss builder, GPFS-safe in-place validated publication, one shared store across worktrees. The three standalone measurement programs request cached_machine; agent doctrine recorded for the machine-building guidance.</div>
 </div>
 </section>
 </main>

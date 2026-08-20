@@ -373,6 +373,15 @@
     It is also why the receipts are not decoration: <strong>slow contraction is itself
     physics</strong>, and a consumer classifying model&#8211;measurement innovation needs to see
     it rather than absorb it as noise.</p>
+    <figure>
+      <img src="/nova/figures/flux-function-forward-transport/window-contraction.svg"
+           alt="Exit residual against exchange iteration on a logarithmic ordinate: the weakly coupled window falls from residual 1 to 1.6e-11 in five exchanges, the damped strongly coupled window creeps to 9.7e-11 over 124, and both share the marked iteration-cap-one point at residual 1">
+      <figcaption>Both schemes on one axis. The marked first point is where staggered
+      co-simulation stops &#8212; free when the contraction is 0.002, wrong by 0.80 when it is
+      0.840. Measured from <code>solve_window</code> (129 rows,
+      <code>scripts/window_contraction/residuals.tsv</code>), not modelled from the
+      contraction estimate.</figcaption>
+    </figure>
     <table>
       <caption>Loop conservation across the window.</caption>
       <thead><tr><th>Ledger</th><th>Absolute</th><th>Relative</th></tr></thead>
@@ -390,6 +399,44 @@
     returns a <code>WindowReceipt</code> &#8212; so a silently degraded state has no path out
     of the solve, which is the property the innovation-purity argument depends on. Initial
     geometry and source waveforms were asserted unchanged.</p>
+    <h2 id="window-gradients-blocked">Implicit window gradients &#8212; adjoint proven, one host line blocking</h2>
+    <p>Commit <code>e5c23c5d</code> (node window-implicit-gradients), <strong>held out of
+    main</strong> because its mandatory assertion fails. Recorded here because what it
+    <em>did</em> establish is most of the gate, and because the blocker is precise.</p>
+    <p><strong>The adjoint works.</strong> <code>implicit_window_state</code> adds a custom
+    VJP that solves the transposed residual-Jacobian system
+    R<sub>x</sub><sup>T</sup>&#955; = cotangent and pulls the result back through a single
+    residual evaluation &#8212; no iteration unrolled. Against a central finite difference:</p>
+    <table>
+      <tbody>
+        <tr><td>implicit-function gradient</td><td><code>2.16800413100807e&#8722;01</code></td></tr>
+        <tr><td>central finite difference</td><td><code>2.16800413095630e&#8722;01</code></td></tr>
+        <tr><td>absolute error</td><td><strong>5.18e&#8722;12</strong></td></tr>
+      </tbody>
+    </table>
+    <p>The differentiable directions are stated rather than assumed: the JAX pytree leaves in
+    the parameters that reach the pure fixed-point map. The initial state is a convergence
+    seed the VJP closes over and deliberately carries <em>no</em> fixed-point sensitivity
+    &#8212; correct, because a converged fixed point does not depend on where the iteration
+    started. <code>iteration_cap</code> and <code>tolerance</code> are static solve policy.
+    NumPy <code>Waveform</code> objects, typed host receipts and host callbacks carry no VJP
+    by construction.</p>
+    <p><strong>The blocker is one line, and it is the interesting kind.</strong>
+    <code>torax_geometry_from_fsa</code> builds its TORAX mesh with
+    <code>Grid1D(face_centers=np.asarray(rho_face))</code>. Under tracing
+    <code>rho_face</code> is a tracer and that raises
+    <code>TracerArrayConversionError</code>, so the plan's requirement that the gradient
+    survive the jnp geometry adapter cannot even be exercised. This is the residual host-side
+    operation the adapter's own docstring always declared &#8212; only the final typed TORAX
+    mesh and dataclass construction are host operations &#8212; and it turns out to sit
+    directly on the leg the locked <code>loop-differentiability</code> rationale depends on:
+    the whole reason for authoring the adapter in jnp from the traced record was to keep this
+    path intact. The fix need not be a hack, because the normalised radial face grid genuinely
+    is static in this contract while the profiles carried on it are not; the mesh can be built
+    from concrete values without touching a differentiated field.</p>
+    <p>The node stopped at its fence rather than reaching into
+    <code>nova/transport/torax_geometry.py</code>, which is why the diagnosis is this clean. A
+    wider-scoped node continues on the same member, based on this commit.</p>
   </main>
 </body>
 </html>

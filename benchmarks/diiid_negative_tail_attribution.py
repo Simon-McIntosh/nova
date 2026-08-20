@@ -14,7 +14,6 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
 
@@ -23,7 +22,6 @@ import numpy as np
 
 from benchmarks import diiid_plasma_subtraction_gate as gate
 from benchmarks.diiid_corpus_conventions import nova_total_flux_to_corpus
-from nova.biot.greens import greens_psi
 from nova.imas.diiid_description import (
     DiiidDescription,
     DiiidDescriptionRegistry,
@@ -49,7 +47,6 @@ EXPECTED_MEDIAN_FRAME_R2 = 0.9990829935347472
 SHIFT_GRID_MS = np.arange(-100.0, 100.0 + 5.0, 5.0)
 CONTROLS_PER_TAIL_SHOT = 4
 BANK_FRAME_R2_TOLERANCE = 1.0e-6
-RESPONSE_WORKERS = 8
 NUMERIC_GEOMETRY_COLUMNS = (
     "coil_R",
     "coil_Z",
@@ -183,39 +180,6 @@ def _coil_map(
     return nova_total_flux_to_corpus(flux), current
 
 
-def _filament_response(radius: np.ndarray, height: np.ndarray) -> np.ndarray:
-    """Build the unchanged full-grid response in independent target blocks."""
-
-    target_r, target_z = np.meshgrid(radius, height)
-    source_r, source_z = np.meshgrid(radius, height)
-    flat_target_r = target_r.ravel()
-    flat_target_z = target_z.ravel()
-    flat_source_r = source_r.ravel()
-    flat_source_z = source_z.ravel()
-    bounds = [
-        (start, min(start + gate.RESPONSE_CHUNK, flat_target_r.size))
-        for start in range(0, flat_target_r.size, gate.RESPONSE_CHUNK)
-    ]
-
-    def evaluate(bound: tuple[int, int]) -> tuple[int, int, np.ndarray]:
-        start, stop = bound
-        block = greens_psi(
-            flat_target_r[start:stop, None],
-            flat_target_z[start:stop, None],
-            flat_source_r[None, :],
-            flat_source_z[None, :],
-        )
-        converted = nova_total_flux_to_corpus(block)
-        converted[~np.isfinite(converted)] = 0.0
-        return start, stop, converted
-
-    response = np.empty((flat_target_r.size, flat_source_r.size), dtype=float)
-    with ThreadPoolExecutor(max_workers=RESPONSE_WORKERS) as executor:
-        for start, stop, block in executor.map(evaluate, bounds):
-            response[start:stop] = block
-    return response
-
-
 def centred_shape_slope(actual: np.ndarray, predicted: np.ndarray) -> float:
     """Return the scalar polarity and magnitude implied by centred map shapes."""
 
@@ -335,7 +299,7 @@ def attribute(
 
     first = rows[TAIL_SHOTS[0]]
     radius, height = gate._canonical_axes(first)
-    plasma_response = _filament_response(radius, height)
+    plasma_response = gate.filament_response(radius, height)
     registry = DiiidDescriptionRegistry()
     coil_responses: dict[str, tuple[tuple[str, ...], np.ndarray]] = {}
     records_by_shot: dict[str, list[dict[str, Any]]] = {}
@@ -560,7 +524,7 @@ def _share_figure(receipt: dict[str, Any], path: Path) -> None:
             ]
         )
     values_array = np.asarray(values)
-    figure, axis = plt.subplots(figsize=(10.5, 4.8), constrained_layout=True)
+    figure, axis = plt.subplots(figsize=(10.5, 5.2))
     left = np.zeros(len(labels))
     colours = ("0.75", "tab:orange", "tab:blue", "0.4")
     names = ("geometry", "time alignment", "current polarity", "unexplained")
@@ -575,8 +539,9 @@ def _share_figure(receipt: dict[str, Any], path: Path) -> None:
         left += values_array[:, index]
     axis.set_xlim(0.0, 1.0)
     axis.set_xlabel("share of R-squared-point deficit against matched controls")
-    axis.set_title("Negative-tail deficit attribution")
-    axis.legend(ncol=4, loc="lower center", bbox_to_anchor=(0.5, 1.0))
+    figure.suptitle("Negative-tail deficit attribution", y=0.99)
+    figure.legend(ncol=4, loc="upper center", bbox_to_anchor=(0.5, 0.94))
+    figure.tight_layout(rect=(0.0, 0.0, 1.0, 0.84))
     figure.savefig(path, dpi=180)
     plt.close(figure)
 

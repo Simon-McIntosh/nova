@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-20T16:59:19",
+  "updated": "2026-08-20T17:15:49",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -11146,9 +11146,135 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260820T150047755642-window-contraction-figure",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a72",
+        "node": "window-contraction-figure",
+        "role": "documentation",
+        "member": "transport-figures",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T15:00:50Z",
+        "completed_at": "2026-08-20T15:14:34Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 824,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 824,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "24fb7ac7186f8f62c03b2c64f21424fb0616dad4",
+        "commits": [
+          "7f7fd6ccbd8b5705452c199fe0e9b6daac9cb5ae"
+        ],
+        "changed_lines": {
+          "added": 689,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "measured window-contraction figure: 129 rows from direct solve_window calls reproduce the receipt (weak 0.002 contraction to 1.60e-11 in 5 exchanges, damped strong 0.840 to 9.71e-11 in 124), the shared cap-one point at residual 1.0 is measured rather than inferred, frameless transparent SVG with direct labels verified legible at 320 px",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T150047755642-window-contraction-figure/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01fb0-6ddb-7171-8bf2-aa5d6a76484d",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4865920,
+            "cached_input_tokens_cumulative": 4865920,
+            "input_tokens": 5009794,
+            "input_tokens_cumulative": 5009794,
+            "output_tokens": 31491,
+            "output_tokens_cumulative": 31491,
+            "reasoning_output_tokens": 12334,
+            "reasoning_output_tokens_cumulative": 12334
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260820T150043816274-window-implicit-gradients",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a73",
+        "node": "window-implicit-gradients",
+        "role": "implement",
+        "member": "transport-window",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T15:00:46Z",
+        "completed_at": "2026-08-20T15:10:16Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 570,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 570,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "24fb7ac7186f8f62c03b2c64f21424fb0616dad4",
+        "commits": [
+          "e5c23c5d1d3ae8f23daec462b040b623066df754"
+        ],
+        "changed_lines": {
+          "added": 217,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 4,
+        "gate": "failed",
+        "outcome": "the implicit-function adjoint itself works - implicit_window_state with a custom VJP and a transposed residual-Jacobian solve gives gradient 2.16800413100807e-01 against central difference 2.16800413095630e-01, absolute error 5.18e-12 - but the mandatory in-call geometry-adapter assertion fails outside this nodes fence: torax_geometry.py builds Grid1D with np.asarray(rho_face) on a JAX tracer and raises TracerArrayConversionError, so the gate did not pass and a wider-scoped node follows",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T150043816274-window-implicit-gradients/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f8b-c81b-70c3-a5d8-007c4d512626",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2368000,
+            "cached_input_tokens_cumulative": 14777344,
+            "input_tokens": 2484215,
+            "input_tokens_cumulative": 15153995,
+            "output_tokens": 16867,
+            "output_tokens_cumulative": 71650,
+            "reasoning_output_tokens": 7555,
+            "reasoning_output_tokens_cumulative": 30664
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 311
+    "_version": 313
   }
 }

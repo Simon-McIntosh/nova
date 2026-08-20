@@ -24,10 +24,11 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-20">
-<meta name="plan-version" content="14">
-<meta name="plan-commits" content="f7af67dc,3a438d1b,9e1b5ce2,e583d796,95a3dc72,4df7993b,5088a466,d943c12a,fc8d3313,c792f7d2,cc542659,ccb375ea,aa53e6e0">
-<meta name="plan-impl" content="0.81">
+<meta name="plan-version" content="15">
+<meta name="plan-commits" content="f7af67dc,3a438d1b,9e1b5ce2,e583d796,95a3dc72,4df7993b,5088a466,d943c12a,fc8d3313,c792f7d2,cc542659,ccb375ea,aa53e6e0,7f7fd6cc">
+<meta name="plan-impl" content="0.85">
 <meta name="plan-blocks" content="imas-ambix:sophelio-entry-master">
+<meta name="plan-artifacts" content="docs/figures/flux-function-forward-transport/window-contraction.svg,scripts/window_contraction/residuals.tsv">
 </head>
 <body>
   <main class="plan-doc">
@@ -165,6 +166,12 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260820-window-fixed-point" data-who="reckon-ship" data-when="2026-08-20T15:35:00+00:00">
     <div class="r-comment-body">window-fixed-point-receipts landed - commit aa53e6e0; gates window-contract and loop-conservation both PASSED; measure: solve_window converges the exchange to a declared 1e-10 over WindowConfig length 1.0 with equilibrium samples at 0, 0.5, 1.0 and transport samples at 0, 0.25, 0.75, 1.0. The window-versus-staggered claim is now measured rather than argued: under WEAK coupling the fixed point takes 5 iterations at contraction 0.0020 with exit residual 1.60e-11 and an iteration-cap-one run differs from it by only 0.0020, inside the asserted 3e-3 bound; under STRONG coupling the damped fixed point takes 124 iterations at contraction 0.840 with exit residual 9.71e-11 and damping 0.8, while cap-one differs by 0.80, beyond the asserted 0.75 bound. Conventional staggered co-simulation is therefore demonstrably this contract truncated at one iteration, cheap where the contraction is small and wrong where it is not. Conservation: flux closure error 1.50e-13 Wb at relative residual 8.33e-13, boundary-current continuity error 2.00e-6 A at relative residual 2.00e-12. WindowConvergenceReceipt carries iterations_used, contraction_estimate, ten exit-residual fields spanning the geometry and source coordinate maps and the profile channels, damping_applied and the residual trace; WindowConservationReceipt aggregates the per-interval flux and current ledgers with absolute and relative closure residuals. An exhausted window raises WindowConvergenceError carrying a diagnostic receipt and never returns a WindowReceipt, so a silently degraded state cannot escape. Initial geometry and source waveforms unchanged. 10 passed in 35.3 s.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260820-gradient-blocked" data-who="reckon-ship" data-when="2026-08-20T15:51:00+00:00">
+    <div class="r-comment-body">window-implicit-gradients BLOCKED - commit e5c23c5d held out of main; gate gradients NOT PASSED. The adjoint itself is demonstrated: implicit_window_state adds a custom VJP that pulls a state cotangent back through one residual evaluation after solving the transposed residual-Jacobian system, and its pure-JAX gradient is 2.16800413100807e-01 against a central finite difference of 2.16800413095630e-01, an absolute error of 5.18e-12 with no iteration unrolled. Differentiable directions are the JAX pytree leaves in the parameters that reach the pure fixed-point map; the initial state is a convergence seed the VJP closes over and intentionally carries no fixed-point sensitivity, while iteration_cap and tolerance are static solve policy, and NumPy Waveform objects, typed host receipts and host callbacks carry no VJP by construction. THE BLOCKER is one line outside the node's fence: nova/transport/torax_geometry.py builds Grid1D with np.asarray(rho_face) while rho_face is a JAX tracer, raising TracerArrayConversionError, so the plan's requirement that the gradient survive the jnp geometry adapter cannot be exercised. That line is the residual host-side operation the adapter docstring always declared, and it is exactly the leg the locked loop-differentiability rationale depends on. A wider-scoped node with torax_geometry.py granted follows on the same member, based on this commit so its adjoint work is not lost.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260820-contraction-figure" data-who="reckon-ship" data-when="2026-08-20T15:50:00+00:00">
+    <div class="r-comment-body">window-contraction-figure landed - commit 7f7fd6cc; gate figure-fidelity PASSED; measure: 129 measured rows written from direct solve_window calls reproduce the window-contract receipt quantitatively (weak trace contracting at about 0.002 to 1.60e-11 in 5 exchanges, damped strong trace at about 0.840 to 9.71e-11 in 124), and independent iteration-cap-one calls for both cases raise at maximum residual 1.0, so the shared first point the figure marks is measured rather than inferred. docs/figures/flux-function-forward-transport/window-contraction.svg is a 320x220 transparent frameless SVG on a shared logarithmic residual ordinate with directly labelled traces, no legend and no background panel; the 320 px raster was inspected for clipped text. The figure exists because the weak-versus-strong contraction contrast is this plan's central design claim, and two table rows make a reader reconstruct what one axis shows.</div>
 </div>
 </section>
 </main>

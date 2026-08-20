@@ -750,6 +750,80 @@
     this campaign has already lost 8.5 points of exterior R² to a sign applied twice, which is the whole
     argument for resolving a sign before it is needed rather than during. Correcting the generated guide
     upstream is outside this repository.</p>
+
+    <h2 id="producer-currents">§2 one scalar does not rescue the producer's currents — 2026-08-20</h2>
+    <p>Commit <code>04cc6df2</code>. The located netCDF entry declares every one of its 24 coil currents
+    in amperes, yet the ohmic family peaks at 55,483.70 A while no shaping coil exceeds 93.17 A. The
+    obvious hypothesis — one family is recorded in different units, so one scalar reconciles them — was
+    tested and <strong>refuted</strong>.</p>
+    <table>
+      <caption>Recomputed from the entry over all 480,256 common samples. Nothing per-coil was allowed to
+      float; a single positive through-origin scalar is the whole model being tested.</caption>
+      <thead><tr><th>Quantity</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Raw family extrema ratio</td><td>595.4875</td></tr>
+        <tr><td>Ratio after declared turns</td><td>513.6002</td></tr>
+        <tr><td>Best single reconciling scalar</td><td>164.6886</td></tr>
+        <tr><td>Its relative L2 residual</td><td><strong>0.6776</strong></td></tr>
+        <tr><td>Its explained energy</td><td>0.5409</td></tr>
+        <tr><td>Residual at the tidy guess of 1000</td><td>3.7913</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The independent check runs the other way too.</strong> Across all 340 recorded
+    separatrices, the internal coil-only vacuum diagnostic has a median gauge-free misclosure of
+    <strong>0.0225</strong> axis-to-boundary spans at the declared scale and <strong>1.2903</strong> at
+    the fitted scale — a <strong>57.4-fold degradation</strong>. Applying the best scalar makes the
+    machine's own reconstructed boundaries harder to close, not easier. That diagnostic omits plasma and
+    passive contributions and is therefore explicitly non-calibrating; it is used here only to rule a
+    candidate out, which is the one thing a non-calibrating diagnostic can honestly do.</p>
+    <p><strong>Verdict: the netCDF currents may not drive a solve, as stored or benchmark-scaled.</strong>
+    This closes the question the followup was raised to answer before anything depended on it. Acquiring
+    solve authority would need a producer-backed corrected description with independent validation, which
+    is outside this repository.</p>
+    <figure>
+      <img src="/nova/figures/diiid-forward-onboarding/producer-currents/producer_current_scaling.png"
+           alt="Ohmic and shaping current family envelopes over the common time base, with the all-slice vacuum misclosure diagnostic at declared and fitted scale"
+           style="max-width:100%">
+      <figcaption>The two family envelopes on one time base, and the all-slice misclosure diagnostic at
+      declared against fitted scale — the separation is not a constant factor, which is the refutation
+      in one picture.</figcaption>
+    </figure>
+
+    <h2 id="forward-gs-illustration">§5 the forward solve against the labels, shown rather than scored — 2026-08-20</h2>
+    <p>Commit <code>ddb152e3</code>. The standing directive was that the match be <em>demonstrated</em>,
+    not merely scored: predicted and labelled maps side by side with their difference field, on named
+    shots and frames. That is delivered here — with the route it is delivered on stated plainly, because
+    the route is the finding.</p>
+    <table>
+      <caption>Three named frames, all converged at relaxed fractional update ≤ 1e-8, nothing fitted
+      (<code>coefficients_fitted = 0</code>).</caption>
+      <thead><tr><th>Shot</th><th>Frame</th><th>Time</th><th>Fractional RMS</th><th>Interior R²</th><th>Iterations</th></tr></thead>
+      <tbody>
+        <tr><td><code>d3d_shot_00000a10ac</code></td><td>29</td><td>920 ms</td><td>0.04658</td><td>0.9406</td><td>1401</td></tr>
+        <tr><td><code>d3d_shot_00000c4a7b</code></td><td>179</td><td>3740 ms</td><td>0.04835</td><td>0.9299</td><td>501</td></tr>
+        <tr><td><code>d3d_shot_0003ff34e7</code></td><td>44</td><td>1080 ms</td><td><strong>0.02921</strong></td><td>0.9769</td><td>1301</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Read against the ceiling, not against zero.</strong> The 0.0429 bar is the measured
+    strict-GS label representability ceiling — 99.68 % of that residual is irreducible non-GS label
+    content, so it is the best any exact solver could do against these labels. Two of the three frames
+    sit just above it and one comfortably below. That is the extraction premise working, and it is the
+    honest shape of the result: at the ceiling, not through it.</p>
+    <p><strong>The route is <code>fixed_boundary_relaxed_picard</code> with the labelled Dirichlet
+    border, and that is not a convenience.</strong> The released conductor channels do not admit the
+    labelled free-boundary root — the boundary-field share is <strong>0.8499</strong>, read and verified
+    from the corrected five-frame root-existence receipt rather than reasserted. So the figure, the
+    receipt and the caption all state <code>production_gate_passed = false</code> in words. A
+    demonstration that let itself be mistaken for a passed kill gate would be the one way to get this
+    section wrong.</p>
+    <figure>
+      <img src="/nova/figures/diiid-forward-onboarding/forward-gs/forward_gs_fixed_boundary_illustration.png"
+           alt="Three rows, one per named shot and frame, each showing the predicted map, the labelled map and their difference on physical R-Z axes"
+           style="max-width:100%">
+      <figcaption>Three named frames, one per row: predicted, labelled, and the difference field, on
+      physical R–Z axes. The difference panels carry the residual structure the fractional RMS summarises
+      — this is the picture the score cannot show.</figcaption>
+    </figure>
   </main>
 </body>
 </html>

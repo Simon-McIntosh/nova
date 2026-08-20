@@ -545,9 +545,43 @@
     transport test modules byte-identical to merged main. One non-failing third-party JAXopt
     deprecation warning and six post-summary DLASCL diagnostics remain visible in the log.</p>
 
-    <h2 id="closing">What shipped, and what is not here</h2>
-    <p>All eight §3 items and all nine §4 gates are green; the plan is
-    <strong>shipped</strong>. Nineteen commits across sixteen nodes. Three things are worth
+    <h2 id="validation-gap">The validation gap &#8212; corrected 2026-08-20</h2>
+    <p><strong>This record overstated three results, and one gate was promoted green that is
+    not.</strong> Corrected here rather than quietly amended, because the difference decides
+    whether the capability is usable.</p>
+    <ul>
+      <li><strong>Physics gate: NOT met.</strong> Its second clause requires the multi-channel
+      rung to reproduce a <em>published</em> TORAX reference case.
+      <code>tests/test_forward_transport.py</code> instead builds
+      <code>torax._src.test_utils.default_configs.get_default_config_dict()</code>, disables
+      adaptive stepping, and compares the façade against TORAX's own entry point on that same
+      config &#8212; a plumbing check against TORAX's internal test default, with no published
+      reference output involved. The first clause (native analytic, torch-parity, slow TORAX
+      cross-check) is met.</li>
+      <li><strong>Geometry parity is a self-comparison.</strong>
+      <code>tests/test_transport_geometry.py</code> builds its "TORAX reader" reference by
+      constructing <code>StandardGeometryIntermediates</code> from <em>the same Nova record</em>
+      the adapter consumes. Once the reader's smoothing was replicated, machine precision is the
+      expected answer. It validates the adapter's arithmetic; it does not validate the record.
+      No EQDSK, CHEASE or IMAS equilibrium is read anywhere in the transport tests &#8212;
+      <code>GeometryType.EQDSK</code> is a label the adapter stamps.</li>
+      <li><strong>The contraction figures are inputs.</strong> 0.0020 and 0.840 are passed into
+      <code>_AffineWindow</code>, "an analytic two-side map with a declared combined coupling
+      strength". The test correctly shows one-iteration truncation error scaling with the
+      declared contraction &#8212; a numerical-analysis result about the solver. The earlier
+      phrase "measured, not argued" implied a statement about a real discharge and supports
+      none.</li>
+    </ul>
+    <p>Every input the transport surface has seen is synthetic: hand-written parabolic profiles
+    (<code>T_i = 8 &#8722; 7&#961;&#178;</code>, <code>n_e = 1.2e20 &#8722; 4e19&#961;&#178;</code>)
+    over a single 10 ms step on a circular or analytic-shaped record. The ten-module suite
+    completing in 158 s is itself the tell. <strong>No real machine equilibrium has ever driven
+    TORAX through this adapter</strong>, and no output has been inspected for physical
+    plausibility.</p>
+
+    <h2 id="closing">What is verified, and what is not here</h2>
+    <p>§3's implementation work is complete and stays landed; eight of nine §4 gates are green.
+    The plan is <strong>active</strong>, not shipped, pending the physics demonstration. Nineteen commits across sixteen nodes. Three things are worth
     stating plainly at the close, because each is a boundary rather than an omission.</p>
     <p><strong>Two declared limits.</strong> Differentiated façade calls and batched TORAX
     ensembles both <em>fail closed</em> unless the configuration is non-adaptive fixed-step:

@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="flux-function-forward-transport">
   <meta name="plan-title" content="Flux-Function Forward Transport">
   <meta name="plan-summary" content="Promote the transport forward solve to a Nova public capability beside ForwardProfile: a declared-fidelity ladder from the native current-diffusion rung to an embedded TORAX multi-channel step, closing the equilibrium–transport loop through the typed flux-function seam">
-  <meta name="plan-status" content="shipped">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
   <meta name="plan-capability-version" content="1.0">
@@ -24,9 +24,9 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-20">
-<meta name="plan-version" content="19">
+<meta name="plan-version" content="21">
 <meta name="plan-commits" content="f7af67dc,3a438d1b,9e1b5ce2,e583d796,95a3dc72,4df7993b,5088a466,d943c12a,fc8d3313,c792f7d2,cc542659,ccb375ea,aa53e6e0,7f7fd6cc,e5c23c5d,71b37c2e,b56c39df,3353aeb5,47cd2122">
-<meta name="plan-impl" content="1.0">
+<meta name="plan-impl" content="0.89">
 <meta name="plan-blocks" content="imas-ambix:sophelio-entry-master">
 <meta name="plan-artifacts" content="docs/figures/flux-function-forward-transport/window-contraction.svg,scripts/window_contraction/residuals.tsv,scripts/transport_verification/report.md">
 </head>
@@ -92,7 +92,10 @@
         <h2>§4 — Acceptance gates</h2>
       </header>
       <p class="landed-summary">
-        All nine gates green, verified once on merged main with the slow lane selected:
+        Eight of nine gates green; the <strong>Physics gate is NOT passed</strong> — its
+        second clause requires a <em>published</em> TORAX reference case and what ran was
+        TORAX's internal test default compared façade-against-own-entry-point. Suite verified
+        once on merged main with the slow lane selected:
         <strong>62 passed, 0 failed, 0 skipped, 0 deselected</strong> in 157.9 s across the ten
         transport modules, the previously deselected TORAX cross-check included and passing in
         1.101 s (<code>scripts/transport_verification/report.md</code>).
@@ -101,11 +104,11 @@
         <thead><tr><th>Gate</th><th>Measure achieved</th></tr></thead>
         <tbody>
           <tr><td>Environment</td><td>TORAX 1.4.3 with imas-python 2.3.0 and h5py 3.16.0 co-resolve; x64 and the FAST_COMPILE XLA preset pinned by a shared-process test</td></tr>
-          <tr><td>Geometry</td><td>one-step parity rtol 1e-10 / atol 1e-12, 22 fields element-wise at 1e-12, worst 1.73e-15; shaped analytic moments at 0.006 / 0.020 / 0.006 / 5e-5</td></tr>
+          <tr><td>Geometry</td><td>one-step parity rtol 1e-10 / atol 1e-12, 22 fields at 1e-12, worst 1.73e-15 — but a <em>self</em>-comparison: the reader reference is built from the same Nova record, so this validates the arithmetic, not the record; shaped analytic moments at 0.006 / 0.020 / 0.006 / 5e-5</td></tr>
           <tr><td>COCOS</td><td>6/6 round-trips, each sign flipped alone, forward normalisation and inverse restoration both asserted against COCOS 17 (−1, +1, +1, +1), e_bp = 1</td></tr>
-          <tr><td>Physics</td><td>native analytic, torch-parity and slow TORAX cross-check green; a TORAX reference configuration reproduced through the façade at rtol 1e-10 on ψ, T_i, T_e</td></tr>
+          <tr><td>Physics</td><td><strong>PART MET</strong> — native analytic, torch-parity and slow TORAX cross-check green; but the multi-channel clause ran TORAX's internal test default config façade-vs-own-entry-point at rtol 1e-10, not a published reference case</td></tr>
           <tr><td>Loop conservation</td><td>flux closure 1.50e-13 Wb (relative 8.33e-13); boundary I_p continuity 2.00e-06 A (relative 2.00e-12); no rung mutates its input</td></tr>
-          <tr><td>Window contract</td><td>weak: 5 iterations, contraction 0.0020, cap-one differs 0.0020; strong: 124 damped iterations, contraction 0.840, cap-one differs 0.80; exhaustion raises <code>WindowConvergenceError</code></td></tr>
+          <tr><td>Window contract</td><td>weak: 5 iterations, cap-one differs 0.0020; strong: 124 damped iterations, cap-one differs 0.80; exhaustion raises <code>WindowConvergenceError</code>. The contractions 0.0020 / 0.840 are <em>declared inputs</em> to an affine test map, not measured coupling</td></tr>
           <tr><td>Gradients</td><td>implicit adjoint vs central differences rtol 2.0e-8; caps 24 and 48 agree to atol 2.0e-13; the path crosses <code>torax_geometry_from_fsa</code> in the same call</td></tr>
           <tr><td>Numerics</td><td>jitted and eager agree at rtol 1e-10; an eight-member batch is 9.62× the eight-call loop; a non-NO_ERROR engine status raises before output access</td></tr>
           <tr><td>Seam</td><td>evolved state drives <code>ForwardProfile</code> to fixed-point residual 8.14e-15, relative Grad-Shafranov 2.70e-2 and force 2.29e-2 against the fixture's 0.1 bound</td></tr>
@@ -221,6 +224,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260820-suite-verification" data-who="reckon-ship" data-when="2026-08-20T16:45:00+00:00">
     <div class="r-comment-body">transport-suite-verification landed - commit 47cd2122; gate physics PASSED and every other acceptance gate confirmed on merged main; measure: the full ten-module transport lane with the slow marker selected gives 62 passed, 0 failed, 0 skipped, 0 deselected in 157.9 s of pytest session time (209 s outer wall), exit 0. The test that had been silently excluded from every node this session, test_solver_formulation_matches_torax_on_the_shared_circular_case, was selected and passed in 1.101 s - so the native rung's TORAX cross-check survives all sixteen implementation nodes. Per-module durations in declared order: 27.35, 5.70, 28.55, 1.08, 14.24, 8.83, 18.03, 5.81, 3.32, 0.00 s; nothing suggests the mesh guard's host callback has blown up the geometry or window paths. The tested worktree commit is an ancestor of main and a path-scoped comparison found pyproject.toml, uv.lock, nova/transport, nova/equilibrium and all ten transport test modules byte-identical to merged main, so the verdict applies to main rather than to a stale tree. No failure required defect-versus-environment classification; one non-failing third-party JAXopt deprecation warning and six post-summary DLASCL diagnostics remain visible in the full log. Report: scripts/transport_verification/report.md.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260820-gate-correction" data-who="reckon-ship" data-when="2026-08-20T18:30:00+00:00">
+    <div class="r-comment-body">GATE CORRECTION - the physics gate is NOT passed and this plan is not shipped. Three records on this page claimed more than the tests establish, and the promotion that called the physics gate green was wrong. (1) The physics gate's second clause requires the multi-channel rung to reproduce a PUBLISHED TORAX reference case through the facade. What tests/test_forward_transport.py actually runs is torax._src.test_utils.default_configs.get_default_config_dict() with adaptive stepping disabled, compared facade-against-TORAX-own-entry-point on that same configuration: a plumbing check against TORAX's internal test default, with no published reference output involved. The gate's first clause - native analytic, torch-parity and the slow TORAX cross-check staying green - is met. (2) The geometry gate's parity is a SELF-comparison: tests/test_transport_geometry.py builds its TORAX-reader reference by constructing StandardGeometryIntermediates from the same Nova record the adapter consumes, so the 1.73e-15 worst-field figure measures agreement between two constructions of identical inputs once the reader's smoothing was replicated, not agreement with an independently read equilibrium. No EQDSK, CHEASE or IMAS equilibrium is read anywhere in the transport tests; GeometryType.EQDSK is only a label the adapter stamps. (3) The window contract's contraction figures 0.0020 and 0.8400 are DECLARED INPUTS to _AffineWindow, an analytic two-side map with a declared coupling strength, not measured coupling of any equilibrium; the test correctly demonstrates that one-iteration truncation error scales with the contraction, which is a numerical-analysis result, but the earlier phrasing 'measured, not argued' implied a statement about a real discharge and does not support one. Everything the transport surface has been exercised on is synthetic: hand-written parabolic profiles over a single 10 ms step on a circular or analytic-shaped record, the whole ten-module suite completing in 158 s. What is verified is the seam as software - typed, convention-pinned, differentiable end to end through the adapter and the implicit adjoint, fail-closed, and genuinely device-batched - plus one physical result, the evolved state driving a real small free-boundary solve with I_p continuity to 2.68e-07. What is absent is any physics validation. Status returns to active pending the demonstration the owner selects; section 3's implementation work is unaffected and stays landed.</div>
 </div>
 </section>
 </main>

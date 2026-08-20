@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T01:13:36",
+  "updated": "2026-08-21T01:15:12",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -13344,9 +13344,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260820T230422732663-polarity-census-launch-repair",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a78",
+        "node": "polarity-census-launch-repair",
+        "role": "implement",
+        "member": "diiid-vacuum",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T23:04:25Z",
+        "completed_at": "2026-08-20T23:14:47Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 622,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 622,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "c2f51b42dd56f948c9442a04d5ddf6c8f3447048",
+        "commits": [
+          "a9d771d66c7684be44a0543795cf1ab68c7f9a27"
+        ],
+        "changed_lines": {
+          "added": 72310,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "The polarity fault is corpus-wide, not two shots: 603 of 7,041 shots (8.5641 percent) affected, nova_read_path_inverts_current=false with 38/38 bitwise page receipts and zero sign mismatches on both tail shots; SLURM 1252527 exit 0:0 in 5m01s",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T230422732663-polarity-census-launch-repair/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01090-c119-7413-b062-4589e1bc160f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7016832,
+            "cached_input_tokens_cumulative": 123767296,
+            "input_tokens": 7122558,
+            "input_tokens_cumulative": 126300425,
+            "output_tokens": 12334,
+            "output_tokens_cumulative": 287573,
+            "reasoning_output_tokens": 2861,
+            "reasoning_output_tokens_cumulative": 82955
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 351
+    "_version": 352
   }
 }

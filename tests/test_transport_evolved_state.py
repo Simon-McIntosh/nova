@@ -16,6 +16,7 @@ from nova.transport.evolved_state import forward_source_from_receipt
 from nova.transport.forward import (
     AchievedBoundaryValues,
     FluxConsumptionLedger,
+    ForwardTransport,
     ForwardTransportReceipt,
     PlasmaCurrentLedger,
     SolverDiagnostics,
@@ -30,12 +31,14 @@ from tests.test_equilibrium_forward_solve import (
     FF_PRIME,
     P_PRIME,
 )
+from tests.test_forward_transport import _request
 
 pytest_plugins = ("tests.test_equilibrium_forward_solve",)
 
 jax.config.update("jax_platforms", "cpu")
 
 FACES = 65
+GEOMETRY_FACES = 129
 FLUX_SPAN = -0.35
 BOUNDARY_FIELD_FUNCTION = 5.0
 ELECTRON_DENSITY = 1.0e20
@@ -43,7 +46,11 @@ FIXED_POINT_TOLERANCE = 1.0e-6
 DIVERGENCE_TOLERANCE = 1.0e-12
 FORCE_BALANCE_TOLERANCE = 0.1
 CURRENT_LEDGER_TOLERANCE = 1.0e-12
-RETURN_CURRENT_TOLERANCE = 1.0e-10
+#: The repeated TORAX axis value removes one flux interval from the derivative
+#: ladder. Interpolating the FSA current shape onto the remaining radial grid
+#: sets the measured axis ``FFprime`` and returned-current discretisation floors.
+DIAMAGNETIC_GRADIENT_TOLERANCE = 7.0e-4
+RETURN_CURRENT_TOLERANCE = 1.0e-6
 
 
 def _evolved_receipt_and_geometry(target_current):
@@ -51,27 +58,34 @@ def _evolved_receipt_and_geometry(target_current):
     rho = np.linspace(0.0, 1.0, FACES)
     psi_norm = rho**2
     physical_flux = FLUX_SPAN * psi_norm
+    physical_flux[1] = physical_flux[0]
     flux_sign = float(np.sign(FLUX_SPAN))
     pressure_amplitude = 2.0 * DRIVE * P_PRIME
     diamagnetic_amplitude = 2.0 * DRIVE * FF_PRIME
     tail_shape = 0.5 - psi_norm + 0.5 * psi_norm**2
     pressure = FLUX_SPAN * pressure_amplitude * tail_shape
+    pressure[1] = pressure[0]
     temperature_sum = pressure / (ELECTRON_DENSITY * 1.0e3 * electron_volt)
 
-    g3_face = np.ones_like(rho)
+    geometry_rho = np.linspace(0.0, 1.0, GEOMETRY_FACES)
+    geometry_psi_norm = geometry_rho**2
+    geometry_tail_shape = 0.5 - geometry_psi_norm + 0.5 * geometry_psi_norm**2
+    g3_face = np.ones_like(geometry_rho)
     current_per_volume_amplitude = -(pressure_amplitude + diamagnetic_amplitude / mu_0)
     enclosed_volume = 2.0 * target_current / current_per_volume_amplitude
-    volume_face = enclosed_volume * psi_norm
+    volume_face = enclosed_volume * geometry_psi_norm
     ip_profile_face = (
-        enclosed_volume * current_per_volume_amplitude * (psi_norm - 0.5 * psi_norm**2)
+        enclosed_volume
+        * current_per_volume_amplitude
+        * (geometry_psi_norm - 0.5 * geometry_psi_norm**2)
     )
     field_function_squared = (
         BOUNDARY_FIELD_FUNCTION**2
-        + 2.0 * FLUX_SPAN * diamagnetic_amplitude * tail_shape
+        + 2.0 * FLUX_SPAN * diamagnetic_amplitude * geometry_tail_shape
     )
     geometry = TransportGeometry(
         {
-            "rho_face": rho,
+            "rho_face": geometry_rho,
             "ip_profile_face": ip_profile_face,
             "volume_face": volume_face,
             "g3_face": g3_face,
@@ -169,7 +183,10 @@ def test_mapping_restores_the_negated_total_flux_gradient_sense(mapped_case):
         observed_pressure, expected_pressure, rtol=2.0e-11, atol=5.0e-11
     )
     np.testing.assert_allclose(
-        observed_diamagnetic, expected_diamagnetic, rtol=2.0e-11, atol=2.0e-12
+        observed_diamagnetic,
+        expected_diamagnetic,
+        rtol=DIAMAGNETIC_GRADIENT_TOLERANCE,
+        atol=2.0e-12,
     )
     radius = jnp.asarray(1.0)
     expected_current_density = -convention.TOTAL_FLUX_FACTOR * (
@@ -198,6 +215,25 @@ def test_mapping_crosses_the_callable_source_boundary_with_si_primitives(mapped_
             ff_prime=source.core.ff_prime,
         )
     assert receipt.plasma_current.achieved_final > 1.0e5
+
+
+def test_real_torax_receipt_aligns_cell_and_face_radial_grids():
+    """A stepped engine receipt maps despite its distinct radial grid."""
+    request = _request(TransportRung.TORAX_MULTI_CHANNEL)
+    receipt = ForwardTransport().solve(request)
+    geometry_rho = np.asarray(request.geometry.record["rho_face"])
+    assert receipt.state.rho.size == geometry_rho.size + 1
+
+    source = forward_source_from_receipt(
+        receipt, request.geometry, ion_density_per_electron=1.0
+    )
+    psi_norm = np.linspace(0.0, 1.0, 17)
+    assert np.all(np.isfinite(np.asarray(source.core.p_prime(psi_norm))))
+    assert np.all(np.isfinite(np.asarray(source.core.ff_prime(psi_norm))))
+    assert float(source.boundary_pressure) >= 0.0
+    assert float(source.boundary_field_function) == pytest.approx(
+        float(request.geometry.record["f_face"][-1])
+    )
 
 
 def test_mapped_source_converges_with_force_and_current_receipts(mapped_case):

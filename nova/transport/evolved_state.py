@@ -152,13 +152,15 @@ class EvolvedFluxFunction:
         )
 
 
-def _face_field(record, name: str, size: int):
-    """Return one finite FSA face field on the receipt's radial grid."""
+def _face_field(record, name: str, geometry_rho, state_rho):
+    """Interpolate one finite FSA face field onto the receipt's radial grid."""
     value = jnp.asarray(record[name])
-    if value.shape != (size,):
-        raise ValueError(f"transport geometry {name} must have shape {(size,)}")
+    if value.shape != geometry_rho.shape:
+        raise ValueError(
+            f"transport geometry {name} must match its rho_face coordinate"
+        )
     _host_validate_finite(f"transport geometry {name}", value)
-    return value
+    return jnp.interp(state_rho, geometry_rho, value)
 
 
 def _physical_flux(receipt: ForwardTransportReceipt, geometry: TransportGeometry):
@@ -214,9 +216,20 @@ def forward_source_from_receipt(
     size = state.rho.size
     if size < 3:
         raise ValueError("an evolved transport state needs at least three faces")
-    rho = _face_field(geometry.record, "rho_face", size)
+    state_rho = jnp.asarray(state.rho)
+    geometry_rho = jnp.asarray(geometry.record["rho_face"])
+    if geometry_rho.ndim != 1 or geometry_rho.size < 3:
+        raise ValueError("transport geometry rho_face needs at least three faces")
+    _host_validate_finite("transport geometry rho_face", geometry_rho)
+    _host_validate_increasing("transport geometry rho_face", geometry_rho)
     _host_validate_close(
-        "state/geometry radial boundary", state.rho[-1], rho[-1], scale=1.0
+        "state/geometry radial axis", state_rho[0], geometry_rho[0], scale=1.0
+    )
+    _host_validate_close(
+        "state/geometry radial boundary",
+        state_rho[-1],
+        geometry_rho[-1],
+        scale=1.0,
     )
     _host_validate_close(
         "receipt boundary flux",
@@ -241,7 +254,14 @@ def forward_source_from_receipt(
     flux_span = physical_flux[-1] - physical_flux[0]
     if not _is_traced(flux_span) and abs(float(np.asarray(flux_span))) <= 0.0:
         raise ValueError("evolved axis and boundary flux must differ")
-    normalised_flux = (physical_flux - physical_flux[0]) / flux_span
+    profile_slice = (
+        slice(1, None)
+        if receipt.provenance.rung is TransportRung.TORAX_MULTI_CHANNEL
+        else slice(None)
+    )
+    profile_rho = state_rho[profile_slice]
+    profile_flux = physical_flux[profile_slice]
+    normalised_flux = (profile_flux - physical_flux[0]) / flux_span
     _host_validate_increasing("evolved normalised flux", normalised_flux)
 
     electron_density = jnp.asarray(state.electron_density)
@@ -256,9 +276,12 @@ def forward_source_from_receipt(
     _host_validate_finite("evolved pressure", pressure)
     if not _is_traced(pressure) and np.any(np.asarray(pressure) < 0.0):
         raise ValueError("evolved thermal pressure must be nonnegative")
-    pressure_gradient = -_quadratic_gradient(pressure, physical_flux)
+    pressure = pressure[profile_slice]
+    pressure_gradient = -_quadratic_gradient(pressure, profile_flux)
 
-    reference_current = _face_field(geometry.record, "ip_profile_face", size)
+    reference_current = _face_field(
+        geometry.record, "ip_profile_face", geometry_rho, profile_rho
+    )
     reference_edge = reference_current[-1]
     if not _is_traced(reference_edge) and abs(float(np.asarray(reference_edge))) <= 0.0:
         raise ValueError("transport geometry needs a nonzero edge current")
@@ -267,10 +290,12 @@ def forward_source_from_receipt(
         * jnp.asarray(receipt.plasma_current.achieved_final)
         / reference_edge
     )
-    volume = _face_field(geometry.record, "volume_face", size)
+    volume = _face_field(geometry.record, "volume_face", geometry_rho, profile_rho)
     _host_validate_increasing("transport enclosed volume", volume)
     current_per_volume = _quadratic_gradient(evolved_current, volume)
-    inverse_radius_squared = _face_field(geometry.record, "g3_face", size)
+    inverse_radius_squared = _face_field(
+        geometry.record, "g3_face", geometry_rho, profile_rho
+    )
     if not _is_traced(inverse_radius_squared) and np.any(
         np.asarray(inverse_radius_squared) <= 0.0
     ):
@@ -279,7 +304,7 @@ def forward_source_from_receipt(
         -mu_0 * (current_per_volume + pressure_gradient) / inverse_radius_squared
     )
 
-    field_function = _face_field(geometry.record, "f_face", size)
+    field_function = _face_field(geometry.record, "f_face", geometry_rho, profile_rho)
     return ForwardSource(
         core=DomainProfile(
             p_prime=EvolvedFluxFunction(normalised_flux, pressure_gradient),

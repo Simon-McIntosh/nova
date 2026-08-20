@@ -15,6 +15,8 @@ from pathlib import Path, PurePosixPath
 from stat import S_ISDIR, S_ISLNK, S_ISREG
 from typing import Any, Iterable, Mapping
 
+from imas_data_dictionaries import dd_xml_versions, parse_dd_version
+
 from nova.imas.machine_drive import ChannelDrive, DriveMap
 from nova.imas.machine_evidence import (
     EvidenceLedger,
@@ -50,6 +52,7 @@ _HDF5_CONSISTENCY_FIELDS = {
     2: (11, 1),
     3: (11, 1),
 }
+_PUBLICATION_DD_MAJOR = 4
 _WINDOWS_DEVICE_NAMES = frozenset(
     {"CON", "PRN", "AUX", "NUL"}
     | {f"COM{index}" for index in range(1, 10)}
@@ -107,6 +110,36 @@ def _machine_from_schema(schema: str) -> str:
     if match is None:
         raise MachineArtifactError(f"unsupported manifest schema {schema!r}")
     return match.group("machine")
+
+
+def latest_publication_dd_version() -> str:
+    """Return the newest available data dictionary in the publication major."""
+
+    candidates = tuple(
+        version
+        for version in dd_xml_versions()
+        if parse_dd_version(version).major == _PUBLICATION_DD_MAJOR
+    )
+    if not candidates:
+        raise MachineArtifactError(
+            "no data dictionary is available for machine-artifact publication"
+        )
+    return str(max(candidates, key=parse_dd_version))
+
+
+def publication_dd_version(dd_version: str | None = None) -> str:
+    """Resolve the runtime default and refuse publication from another major."""
+
+    latest = latest_publication_dd_version()
+    selected = latest if dd_version is None else dd_version
+    if not isinstance(selected, str) or _DD_VERSION_PATTERN.fullmatch(selected) is None:
+        raise MachineArtifactError(f"malformed data dictionary version {selected!r}")
+    if parse_dd_version(selected).major != parse_dd_version(latest).major:
+        raise MachineArtifactError(
+            f"machine-artifact publication requires data dictionary major "
+            f"{parse_dd_version(latest).major}, got {selected!r}"
+        )
+    return selected
 
 
 def _sha256_bytes(data: bytes) -> str:
@@ -920,7 +953,7 @@ def create_machine_artifact_manifest(
     source_directory: Path | str,
     *,
     machine: str,
-    dd_version: str,
+    dd_version: str | None = None,
     registry_digest: str,
     physical_digest: str,
     shot_ranges: Iterable[ArtifactShotRange],
@@ -931,6 +964,7 @@ def create_machine_artifact_manifest(
 ) -> MachineArtifactManifest:
     """Hash an authored IDS directory into a canonical manifest."""
 
+    dd_version = publication_dd_version(dd_version)
     source = Path(source_directory)
     inventory = _inventory_files(source, allow_manifest=False)
     files = tuple(

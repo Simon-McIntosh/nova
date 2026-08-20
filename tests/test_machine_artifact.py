@@ -11,14 +11,17 @@ from nova.imas.machine_artifact import (
     ArtifactShotRange,
     MachineArtifactError,
     create_machine_artifact_manifest,
+    latest_publication_dd_version,
     machine_name,
     manifest_schema,
     oci_artifact_reference,
+    oci_artifact_tag,
     oci_artifact_type,
     oci_file_media_type,
+    publication_dd_version,
 )
 
-DD_VERSION = "4.1.1"
+DD_VERSION = latest_publication_dd_version()
 REGISTRY_DIGEST = "a" * 64
 PHYSICAL_DIGEST = "b" * 16
 
@@ -95,6 +98,57 @@ def test_diiid_artifact_reference_is_a_ghcr_reference(tmp_path: Path) -> None:
     assert reference == (
         "ghcr.io/simon-mcintosh/diii-d-machine-description:"
         f"dd-{DD_VERSION}-physical-{PHYSICAL_DIGEST}"
+    )
+
+
+def test_publication_resolves_latest_dictionary_and_refuses_prior_major(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    source = tmp_path / "source"
+    source.mkdir()
+    (source / "wall.nc").write_bytes(b"wall")
+    monkeypatch.setattr(
+        machine_artifact_module,
+        "dd_xml_versions",
+        lambda: ["3.42.2", "4.0.0", "4.1.0", "4.1.2"],
+    )
+    shot_ranges = (
+        ArtifactShotRange(
+            first_shot=0,
+            last_shot=0,
+            physical_digest=PHYSICAL_DIGEST,
+            evidence="observed",
+        ),
+    )
+
+    assert latest_publication_dd_version() == "4.1.2"
+    assert publication_dd_version() == "4.1.2"
+    assert publication_dd_version("4.0.0") == "4.0.0"
+    defaulted = create_machine_artifact_manifest(
+        source,
+        machine="DIII-D",
+        registry_digest=REGISTRY_DIGEST,
+        physical_digest=PHYSICAL_DIGEST,
+        shot_ranges=shot_ranges,
+        complete=False,
+        unresolved_gaps=("passive structure is absent",),
+    )
+    assert defaulted.dd_version == "4.1.2"
+    with pytest.raises(MachineArtifactError, match="requires data dictionary major 4"):
+        create_machine_artifact_manifest(
+            source,
+            machine="DIII-D",
+            dd_version="3.42.2",
+            registry_digest=REGISTRY_DIGEST,
+            physical_digest=PHYSICAL_DIGEST,
+            shot_ranges=shot_ranges,
+            complete=False,
+            unresolved_gaps=("passive structure is absent",),
+        )
+    assert oci_artifact_tag("3.42.2", PHYSICAL_DIGEST) != oci_artifact_tag(
+        "4.1.2",
+        PHYSICAL_DIGEST,
     )
 
 

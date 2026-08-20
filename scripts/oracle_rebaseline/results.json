@@ -1,0 +1,1734 @@
+{
+  "analytic_case": "moderate-rotation-conventional",
+  "artifacts": {
+    "figure": "scripts/oracle_rebaseline/recovery-floors.png",
+    "figure_bytes": 185537,
+    "terminal_roots": {
+      "coarse": "scripts/oracle_rebaseline/root-coarse.npz",
+      "fine": "scripts/oracle_rebaseline/root-fine.npz"
+    }
+  },
+  "bounds_policy": "All bounds are measured proposals with explicit headroom; owner review is required before any bound becomes normative.",
+  "fixtures": {
+    "coarse": {
+      "cache": {
+        "build_seconds": 0.0,
+        "hit": true,
+        "load_seconds": 0.13811615854501724,
+        "lock_wait_seconds": 1.3096258044242859e-05,
+        "semantic_key": "030667d40f96d904",
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_500.zarr",
+        "store_seconds": 0.0
+      },
+      "closed_form_analytic_invariants": {
+        "internal_inductance": 0.472635109241181,
+        "plasma_current_a": 1627957.0127122786,
+        "poloidal_beta": 0.734715758817039,
+        "poloidal_field_integral": 1.3994937314243965
+      },
+      "closed_form_state_conservation_floor": {
+        "checked_cells": 303,
+        "divergence_b_relative": 0.00028956385099563795,
+        "divergence_j_relative": 0.0002930790338402703,
+        "force_relative": 0.001591423884417106,
+        "grad_shafranov_relative": 0.00012662798399226346
+      },
+      "closed_form_state_observed_moments": {
+        "internal_inductance": 0.3998048930159082,
+        "major_radius_m": 1.6740837108474012,
+        "plasma_current_a": 1625644.334902816,
+        "poloidal_beta": 0.6228813337722693,
+        "poloidal_field_integral": 1.3965808340540404,
+        "volume_m3": 17.288458574262815
+      },
+      "continuation": {
+        "accepted_steps": [
+          {
+            "accepted": false,
+            "history": {
+              "criterion": 1e-10,
+              "criterion_met": false,
+              "finite_trace": [
+                0.5299939581820549
+              ],
+              "finite_trace_indices": [
+                0
+              ],
+              "first_criterion_newton_step": null,
+              "gmres_iterations_per_step": 30,
+              "map_evaluation_budget": 320,
+              "newton_steps_requested": 10,
+              "recorded_residual_evaluations": 1,
+              "terminal_residual": null
+            },
+            "initial_core_cell_count": 231,
+            "initial_topology_class": "limited",
+            "oracle_flux_sup_fraction_of_span": 6.234436635103152,
+            "reason": "solver criterion or nonempty-core qualification failed",
+            "seconds": 62.425750164315104,
+            "source_strength": 0.5,
+            "terminal_core_cell_count": 0,
+            "terminal_topology_class": "limited"
+          },
+          {
+            "accepted": false,
+            "history": {
+              "criterion": 1e-10,
+              "criterion_met": false,
+              "finite_trace": [
+                0.8807542164072152,
+                2.3024334834291738,
+                2.3024334834291738
+              ],
+              "finite_trace_indices": [
+                0,
+                31,
+                32
+              ],
+              "first_criterion_newton_step": null,
+              "gmres_iterations_per_step": 30,
+              "map_evaluation_budget": 320,
+              "newton_steps_requested": 10,
+              "recorded_residual_evaluations": 3,
+              "terminal_residual": null
+            },
+            "initial_core_cell_count": 339,
+            "initial_topology_class": "limited",
+            "oracle_flux_sup_fraction_of_span": 3.796789069105199,
+            "reason": "solver criterion or nonempty-core qualification failed",
+            "seconds": 64.37936219200492,
+            "source_strength": 0.75,
+            "terminal_core_cell_count": 0,
+            "terminal_topology_class": "limited"
+          },
+          {
+            "accepted": true,
+            "history": {
+              "criterion": 1e-10,
+              "criterion_met": true,
+              "finite_trace": [
+                1.5579324865595212,
+                0.25420324190229787,
+                0.2542032419022976,
+                0.21752624135657278,
+                0.21752624135657278,
+                0.00786787743276005,
+                0.00786787743276005,
+                0.0004062131591957521,
+                0.0004062131591957521,
+                2.921835740636566e-06,
+                2.921835740636566e-06,
+                4.59435714115027e-12,
+                4.59435714115027e-12,
+                3.361708206602089e-15,
+                3.361708206602089e-15,
+                1.8435174036205005e-15,
+                1.8435174036205005e-15,
+                2.494170604898324e-15,
+                1.951959603833469e-15,
+                2.494170604898324e-15
+              ],
+              "finite_trace_indices": [
+                0,
+                31,
+                32,
+                63,
+                64,
+                95,
+                96,
+                127,
+                128,
+                159,
+                160,
+                191,
+                192,
+                223,
+                224,
+                255,
+                256,
+                287,
+                288,
+                319
+              ],
+              "first_criterion_newton_step": 6,
+              "gmres_iterations_per_step": 30,
+              "map_evaluation_budget": 320,
+              "newton_steps_requested": 10,
+              "recorded_residual_evaluations": 20,
+              "terminal_residual": 2.494170604898324e-15
+            },
+            "initial_core_cell_count": 230,
+            "initial_topology_class": "limited",
+            "oracle_flux_sup_fraction_of_span": 0.533313502617716,
+            "seconds": 72.05160157755017,
+            "source_strength": 1.0,
+            "terminal_core_cell_count": 442,
+            "terminal_topology_class": "limited"
+          }
+        ],
+        "map_definition": "external + alpha*(production_map(state)-external)",
+        "trigger_flux_fraction": 1e-06,
+        "triggered": true
+      },
+      "direct_attempt": {
+        "criterion": 1e-10,
+        "criterion_met": true,
+        "finite_trace": [
+          1.5579324865595212,
+          0.25420324190229787,
+          0.2542032419022976,
+          0.21752624135657278,
+          0.21752624135657278,
+          0.00786787743276005,
+          0.00786787743276005,
+          0.0004062131591957521,
+          0.0004062131591957521,
+          2.921835740636566e-06,
+          2.921835740636566e-06,
+          4.59435714115027e-12,
+          4.59435714115027e-12,
+          3.361708206602089e-15,
+          3.361708206602089e-15,
+          1.8435174036205005e-15,
+          1.8435174036205005e-15,
+          2.494170604898324e-15,
+          1.951959603833469e-15,
+          2.494170604898324e-15
+        ],
+        "finite_trace_indices": [
+          0,
+          31,
+          32,
+          63,
+          64,
+          95,
+          96,
+          127,
+          128,
+          159,
+          160,
+          191,
+          192,
+          223,
+          224,
+          255,
+          256,
+          287,
+          288,
+          319
+        ],
+        "first_criterion_newton_step": 6,
+        "gmres_iterations_per_step": 30,
+        "map_evaluation_budget": 320,
+        "newton_steps_requested": 10,
+        "oracle_flux_sup_fraction_of_span": 0.533313502617716,
+        "recorded_residual_evaluations": 20,
+        "seconds": 70.67800685949624,
+        "terminal_residual": 2.494170604898324e-15
+      },
+      "fixture": "coarse",
+      "gate_results": {
+        "all_pass": false,
+        "passed": {
+          "axis_position_m": false,
+          "divergence_b_relative": true,
+          "divergence_j_relative": true,
+          "field_integral_fraction": false,
+          "fixed_point_residual": true,
+          "flux_rms_fraction_of_span": false,
+          "flux_sup_fraction_of_span": false,
+          "grad_shafranov_relative": false,
+          "internal_inductance_fraction": true,
+          "plasma_current_fraction": false,
+          "poloidal_beta_fraction": true,
+          "standing_forcing_sup_wb": true,
+          "topology_class": true,
+          "x_point_absence": true
+        }
+      },
+      "gauge_receipt": {
+        "oracle_anchors_wb": [
+          1.3810216850087467,
+          -8.673617379884035e-19
+        ],
+        "psi_norm_oracle_anchors_from": "closed_form_field",
+        "psi_norm_root_anchors_from": "root_field",
+        "psi_norm_sup_difference": 0.3776975545973289,
+        "raw_flux_comparison_gauge": "shared_exact_exterior",
+        "raw_flux_difference": "root_state - independently evaluated closed_form_state",
+        "reference_gauge_constant_used": false,
+        "root_anchors_wb": [
+          1.0241986753014278,
+          -0.24590656947069361
+        ]
+      },
+      "metric": {
+        "axis_position_m": {
+          "absolute_reference_deviation": 0.07549542622817232,
+          "recovery_value": 0.07483887226620761,
+          "representation_reference_floor": 0.0006565544884831187
+        },
+        "divergence_b_relative": {
+          "absolute_reference_deviation": 0.0024890983900854773,
+          "recovery_value": 0.002199534539089839,
+          "representation_reference_floor": 0.00028956385099563795
+        },
+        "divergence_j_relative": {
+          "absolute_reference_deviation": 0.002492076924042085,
+          "recovery_value": 0.0021989978902018145,
+          "representation_reference_floor": 0.0002930790338402703
+        },
+        "field_integral_fraction": {
+          "absolute_reference_deviation": 0.11839045849829273,
+          "recovery_value": 0.11655165471944769,
+          "representation_reference_floor": 0.0020813936532543945
+        },
+        "fixed_point_residual": {
+          "absolute_reference_deviation": 2.7110550053242652e-15,
+          "recovery_value": 2.7110550053242652e-15,
+          "representation_reference_floor": 0.0
+        },
+        "flux_rms_fraction_of_span": {
+          "absolute_reference_deviation": 0.2706765654843951,
+          "recovery_value": 0.2706765654843951,
+          "representation_reference_floor": 0.0
+        },
+        "flux_sup_fraction_of_span": {
+          "absolute_reference_deviation": 0.533313502617716,
+          "recovery_value": 0.533313502617716,
+          "representation_reference_floor": 0.0
+        },
+        "grad_shafranov_relative": {
+          "absolute_reference_deviation": 0.058311425532711916,
+          "recovery_value": 0.05818479754871965,
+          "representation_reference_floor": 0.00012662798399226346
+        },
+        "internal_inductance_fraction": {
+          "absolute_reference_deviation": 0.1343883873135388,
+          "recovery_value": 0.023295227920638917,
+          "representation_reference_floor": 0.15409396128485298
+        },
+        "plasma_current_fraction": {
+          "absolute_reference_deviation": 0.05147780982402771,
+          "recovery_value": 0.05012842104697149,
+          "representation_reference_floor": 0.0014206012759572708
+        },
+        "poloidal_beta_fraction": {
+          "absolute_reference_deviation": 0.08782170237474489,
+          "recovery_value": 0.07595417261484666,
+          "representation_reference_floor": 0.15221454515258195
+        },
+        "standing_forcing_sup_wb": {
+          "absolute_reference_deviation": 3.83026943495679e-15,
+          "recovery_value": 3.83026943495679e-15,
+          "representation_reference_floor": 0.0
+        }
+      },
+      "oracle_topology": {
+        "axis_flux_wb": 1.3810216850087467,
+        "axis_m": [
+          1.6993434455115168,
+          9.17089886430993e-16
+        ],
+        "boundary_flux_wb": -8.673617379884035e-19,
+        "class": "limited",
+        "flux_span_wb": -1.3810216850087467,
+        "x_point": null
+      },
+      "realised_cells": 551,
+      "requested_cells": -500,
+      "root_artifact": {
+        "arrays": {
+          "oracle_axis": {
+            "dtype": "<f8",
+            "sha256": "ac2af59fae3cb3b4770c31c4a9e54070d541ec7ab42a226a14156983172e70f0",
+            "shape": [
+              2
+            ]
+          },
+          "oracle_cell_current": {
+            "dtype": "<f8",
+            "sha256": "95c8fcd6a5c210427f2c69dec35e8e367ae30a3e195b9105412e23e819e1ebc6",
+            "shape": [
+              551
+            ]
+          },
+          "oracle_grid_psi_norm": {
+            "dtype": "<f8",
+            "sha256": "ef6470e869b80e84f75894b14142265f1dca0b05d78647ead038fa02fc0cff06",
+            "shape": [
+              551
+            ]
+          },
+          "oracle_state": {
+            "dtype": "<f8",
+            "sha256": "633a8fbe81dbb21d9f333079ccaf5b1e7dd8f0fe3c3adac9fd90a0c89ec5ac0e",
+            "shape": [
+              2253
+            ]
+          },
+          "residual_trace": {
+            "dtype": "<f8",
+            "sha256": "efae0a1ad01c7a2f6dd4ee6e53736abd8d608ed4dd7c54f1e3dfdaa42cdd4add",
+            "shape": [
+              320
+            ]
+          },
+          "root_axis": {
+            "dtype": "<f8",
+            "sha256": "8fb0fbbc8d629acfb994159f6a4d72f361787fb50022d57a7be1d5fee111be50",
+            "shape": [
+              2
+            ]
+          },
+          "root_cell_current": {
+            "dtype": "<f8",
+            "sha256": "a16c560a5eff9afe620dc7e7656cf6c2904c6b4e9ae997e5dd616d24a3d5d0dc",
+            "shape": [
+              551
+            ]
+          },
+          "root_grid_psi_norm": {
+            "dtype": "<f8",
+            "sha256": "a4005ff73f0411a140d79b10b355a4faefd436b4e594416646da05dbddc3d7db",
+            "shape": [
+              551
+            ]
+          },
+          "root_state": {
+            "dtype": "<f8",
+            "sha256": "143a520cec654968ffa4588604fa106203b0a5e4f03cd6989eab7c14616be6bb",
+            "shape": [
+              2253
+            ]
+          },
+          "seed_state": {
+            "dtype": "<f8",
+            "sha256": "5165da653842f23fad2fdb3150861b291bc7d33d7127d9c5f48f9370c9c70847",
+            "shape": [
+              2253
+            ]
+          }
+        },
+        "bytes": 76918,
+        "path": "scripts/oracle_rebaseline/root-coarse.npz"
+      },
+      "root_conservation": {
+        "checked_cells": 292,
+        "divergence_b_relative": 0.0024890983900854773,
+        "divergence_j_relative": 0.002492076924042085,
+        "force_relative": 0.09574029898901404,
+        "grad_shafranov_relative": 0.058311425532711916
+      },
+      "root_moments": {
+        "internal_inductance": 0.40911843912250045,
+        "major_radius_m": 1.6018712126766768,
+        "plasma_current_a": 1544153.3512101837,
+        "poloidal_beta": 0.6701917701161741,
+        "poloidal_field_integral": 1.2338070268955756,
+        "volume_m3": 16.168405901294193
+      },
+      "root_topology": {
+        "axis_flux_wb": 1.0241986753014278,
+        "axis_m": [
+          1.6245046337882392,
+          -9.51941465443805e-05
+        ],
+        "boundary_flux_wb": -0.24590656947069361,
+        "class": "limited",
+        "flux_span_wb": -1.2701052447721215,
+        "x_point": null
+      },
+      "seed": {
+        "aggregate_moment": {
+          "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+          "current_centroid_m": [
+            1.6602192201158459,
+            0.0
+          ],
+          "declared_current_a": 1627957.0127122786,
+          "quadrature_current_a": 1627957.0127122786,
+          "quadrature_nodes": 512,
+          "quadrature_relative_closure": 0.0
+        },
+        "closed_form_coupling_image_used": false,
+        "closed_form_flux_samples_used": false,
+        "current_sum_a": 1627957.0127122784,
+        "fixture_exterior_boundary_condition_used": true,
+        "independent_of_closed_form_state": true,
+        "initial_axis_m": [
+          1.7130205561029062,
+          -0.004446833246106948
+        ],
+        "initial_core_cell_count": 230,
+        "initial_topology_class": "limited",
+        "kind": "production-current-centroid-uniform-disc-zeroth-moment",
+        "limiter_midplane_extent_m": [
+          0.9783517036373888,
+          2.15
+        ],
+        "oracle_state_sup_difference_fraction_of_span": 1.290004407911919,
+        "seed_radius_fraction": 0.9,
+        "seed_radius_m": 0.4408027018957386,
+        "state_sha256_binary64": "5165da653842f23fad2fdb3150861b291bc7d33d7127d9c5f48f9370c9c70847",
+        "supported_cell_count": 161,
+        "supported_minor_distance_m": 0.489780779884154
+      },
+      "solver": {
+        "criterion": 1e-10,
+        "criterion_unchanged": true,
+        "gmres_iterations": 30,
+        "newton_steps": 10,
+        "route": "undamped_newton_krylov",
+        "selection": "lowest closed-form flux drift among independently seeded, criterion-qualified direct and continuation roots"
+      },
+      "state_size": 2253,
+      "terminal_root": {
+        "axis_m": [
+          1.6245046337882392,
+          -9.51941465443805e-05
+        ],
+        "criterion": 1e-10,
+        "criterion_met": true,
+        "finite_trace": [
+          1.5579324865595212,
+          0.25420324190229787,
+          0.2542032419022976,
+          0.21752624135657278,
+          0.21752624135657278,
+          0.00786787743276005,
+          0.00786787743276005,
+          0.0004062131591957521,
+          0.0004062131591957521,
+          2.921835740636566e-06,
+          2.921835740636566e-06,
+          4.59435714115027e-12,
+          4.59435714115027e-12,
+          3.361708206602089e-15,
+          3.361708206602089e-15,
+          1.8435174036205005e-15,
+          1.8435174036205005e-15,
+          2.494170604898324e-15,
+          1.951959603833469e-15,
+          2.494170604898324e-15
+        ],
+        "finite_trace_indices": [
+          0,
+          31,
+          32,
+          63,
+          64,
+          95,
+          96,
+          127,
+          128,
+          159,
+          160,
+          191,
+          192,
+          223,
+          224,
+          255,
+          256,
+          287,
+          288,
+          319
+        ],
+        "first_criterion_newton_step": 6,
+        "gmres_iterations_per_step": 30,
+        "map_evaluation_budget": 320,
+        "newton_steps_requested": 10,
+        "recorded_residual_evaluations": 20,
+        "selected_route": "direct_moment_seed",
+        "terminal_residual": 2.494170604898324e-15,
+        "topology_class": "limited",
+        "x_point": null
+      }
+    },
+    "fine": {
+      "cache": {
+        "build_seconds": 0.0,
+        "hit": true,
+        "load_seconds": 0.21496856771409512,
+        "lock_wait_seconds": 4.4284388422966003e-05,
+        "semantic_key": "7c94be9b777c55ba",
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_1000.zarr",
+        "store_seconds": 0.0
+      },
+      "closed_form_analytic_invariants": {
+        "internal_inductance": 0.472635109241181,
+        "plasma_current_a": 1627957.0127122786,
+        "poloidal_beta": 0.734715758817039,
+        "poloidal_field_integral": 1.3994937314243965
+      },
+      "closed_form_state_conservation_floor": {
+        "checked_cells": 681,
+        "divergence_b_relative": 0.00012341077022792833,
+        "divergence_j_relative": 0.0001226736821685071,
+        "force_relative": 0.000739045554249694,
+        "grad_shafranov_relative": 6.251784672154178e-05
+      },
+      "closed_form_state_observed_moments": {
+        "internal_inductance": 0.39963927938283095,
+        "major_radius_m": 1.6740882274455455,
+        "plasma_current_a": 1626730.8083787183,
+        "poloidal_beta": 0.6219924230201321,
+        "poloidal_field_integral": 1.397872706537786,
+        "volume_m3": 17.299950591510353
+      },
+      "continuation": {
+        "accepted_steps": [
+          {
+            "accepted": false,
+            "history": {
+              "criterion": 1e-10,
+              "criterion_met": true,
+              "finite_trace": [
+                0.5229575718668683,
+                0.6608933715343029,
+                0.6608933715343029,
+                8.72594225278607e-17,
+                8.72594225278607e-17,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "finite_trace_indices": [
+                0,
+                31,
+                32,
+                63,
+                64,
+                95,
+                96,
+                127,
+                128,
+                159,
+                160,
+                191,
+                192,
+                223,
+                224,
+                255,
+                256,
+                287,
+                288,
+                319
+              ],
+              "first_criterion_newton_step": 2,
+              "gmres_iterations_per_step": 30,
+              "map_evaluation_budget": 320,
+              "newton_steps_requested": 10,
+              "recorded_residual_evaluations": 20,
+              "terminal_residual": 0.0
+            },
+            "initial_core_cell_count": 453,
+            "initial_topology_class": "limited",
+            "oracle_flux_sup_fraction_of_span": 3.798101263505416,
+            "reason": "solver criterion or nonempty-core qualification failed",
+            "seconds": 63.56267446093261,
+            "source_strength": 0.5,
+            "terminal_core_cell_count": 0,
+            "terminal_topology_class": "limited"
+          },
+          {
+            "accepted": false,
+            "history": {
+              "criterion": 1e-10,
+              "criterion_met": true,
+              "finite_trace": [
+                0.8923863507120668,
+                2.6369864477525518,
+                2.6369864477525518,
+                0.0005245072558443353,
+                0.0005245072558443353,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              "finite_trace_indices": [
+                0,
+                31,
+                32,
+                63,
+                64,
+                95,
+                96,
+                127,
+                128,
+                159,
+                160,
+                191,
+                192,
+                223,
+                224,
+                255,
+                256,
+                287,
+                288,
+                319
+              ],
+              "first_criterion_newton_step": 3,
+              "gmres_iterations_per_step": 30,
+              "map_evaluation_budget": 320,
+              "newton_steps_requested": 10,
+              "recorded_residual_evaluations": 20,
+              "terminal_residual": 0.0
+            },
+            "initial_core_cell_count": 659,
+            "initial_topology_class": "limited",
+            "oracle_flux_sup_fraction_of_span": 3.798101263505416,
+            "reason": "solver criterion or nonempty-core qualification failed",
+            "seconds": 66.16337110288441,
+            "source_strength": 0.75,
+            "terminal_core_cell_count": 0,
+            "terminal_topology_class": "limited"
+          },
+          {
+            "accepted": true,
+            "history": {
+              "criterion": 1e-10,
+              "criterion_met": true,
+              "finite_trace": [
+                1.590824612401447,
+                0.2720743733016644,
+                0.27207437330166434,
+                0.19127612527266005,
+                0.1912761252726596,
+                0.006369004957840836,
+                0.006369004957840836,
+                0.0004319245931821315,
+                0.0004319245931821315,
+                3.073314534682763e-07,
+                3.0733145346827657e-07,
+                1.5975154841616608e-13,
+                1.6018595099513595e-13,
+                2.986517730418108e-15,
+                2.986517730418108e-15,
+                2.33491386196325e-15,
+                2.3892141843344882e-15,
+                2.124500112774703e-15,
+                2.124500112774703e-15,
+                2.172012894849535e-15
+              ],
+              "finite_trace_indices": [
+                0,
+                31,
+                32,
+                63,
+                64,
+                95,
+                96,
+                127,
+                128,
+                159,
+                160,
+                191,
+                192,
+                223,
+                224,
+                255,
+                256,
+                287,
+                288,
+                319
+              ],
+              "first_criterion_newton_step": 6,
+              "gmres_iterations_per_step": 30,
+              "map_evaluation_budget": 320,
+              "newton_steps_requested": 10,
+              "recorded_residual_evaluations": 20,
+              "terminal_residual": 2.172012894849535e-15
+            },
+            "initial_core_cell_count": 466,
+            "initial_topology_class": "limited",
+            "oracle_flux_sup_fraction_of_span": 0.5338372524988493,
+            "seconds": 72.57989052124321,
+            "source_strength": 1.0,
+            "terminal_core_cell_count": 882,
+            "terminal_topology_class": "limited"
+          }
+        ],
+        "map_definition": "external + alpha*(production_map(state)-external)",
+        "trigger_flux_fraction": 1e-06,
+        "triggered": true
+      },
+      "direct_attempt": {
+        "criterion": 1e-10,
+        "criterion_met": true,
+        "finite_trace": [
+          1.590824612401447,
+          0.2720743733016644,
+          0.27207437330166434,
+          0.19127612527266005,
+          0.1912761252726596,
+          0.006369004957840836,
+          0.006369004957840836,
+          0.0004319245931821315,
+          0.0004319245931821315,
+          3.073314534682763e-07,
+          3.0733145346827657e-07,
+          1.5975154841616608e-13,
+          1.6018595099513595e-13,
+          2.986517730418108e-15,
+          2.986517730418108e-15,
+          2.33491386196325e-15,
+          2.3892141843344882e-15,
+          2.124500112774703e-15,
+          2.124500112774703e-15,
+          2.172012894849535e-15
+        ],
+        "finite_trace_indices": [
+          0,
+          31,
+          32,
+          63,
+          64,
+          95,
+          96,
+          127,
+          128,
+          159,
+          160,
+          191,
+          192,
+          223,
+          224,
+          255,
+          256,
+          287,
+          288,
+          319
+        ],
+        "first_criterion_newton_step": 6,
+        "gmres_iterations_per_step": 30,
+        "map_evaluation_budget": 320,
+        "newton_steps_requested": 10,
+        "oracle_flux_sup_fraction_of_span": 0.5338372524988493,
+        "recorded_residual_evaluations": 20,
+        "seconds": 70.59658640809357,
+        "terminal_residual": 2.172012894849535e-15
+      },
+      "fixture": "fine",
+      "gate_results": {
+        "all_pass": false,
+        "passed": {
+          "axis_position_m": false,
+          "divergence_b_relative": true,
+          "divergence_j_relative": true,
+          "field_integral_fraction": false,
+          "fixed_point_residual": true,
+          "flux_rms_fraction_of_span": false,
+          "flux_sup_fraction_of_span": false,
+          "grad_shafranov_relative": false,
+          "internal_inductance_fraction": true,
+          "plasma_current_fraction": false,
+          "poloidal_beta_fraction": true,
+          "standing_forcing_sup_wb": true,
+          "topology_class": true,
+          "x_point_absence": true
+        }
+      },
+      "gauge_receipt": {
+        "oracle_anchors_wb": [
+          1.3811489277145976,
+          -8.673617379884035e-19
+        ],
+        "psi_norm_oracle_anchors_from": "closed_form_field",
+        "psi_norm_root_anchors_from": "root_field",
+        "psi_norm_sup_difference": 0.38185611273715914,
+        "raw_flux_comparison_gauge": "shared_exact_exterior",
+        "raw_flux_difference": "root_state - independently evaluated closed_form_state",
+        "reference_gauge_constant_used": false,
+        "root_anchors_wb": [
+          1.022745146811864,
+          -0.246971140126956
+        ]
+      },
+      "metric": {
+        "axis_position_m": {
+          "absolute_reference_deviation": 0.07453744797159592,
+          "recovery_value": 0.074188856410115,
+          "representation_reference_floor": 0.00034859217378957474
+        },
+        "divergence_b_relative": {
+          "absolute_reference_deviation": 0.0018119853951325923,
+          "recovery_value": 0.001688574624904664,
+          "representation_reference_floor": 0.00012341077022792833
+        },
+        "divergence_j_relative": {
+          "absolute_reference_deviation": 0.001807620500828018,
+          "recovery_value": 0.001684946818659511,
+          "representation_reference_floor": 0.0001226736821685071
+        },
+        "field_integral_fraction": {
+          "absolute_reference_deviation": 0.11779236374626458,
+          "recovery_value": 0.11676932314547409,
+          "representation_reference_floor": 0.0011582937816810035
+        },
+        "fixed_point_residual": {
+          "absolute_reference_deviation": 3.040818052789354e-15,
+          "recovery_value": 3.040818052789354e-15,
+          "representation_reference_floor": 0.0
+        },
+        "flux_rms_fraction_of_span": {
+          "absolute_reference_deviation": 0.2718489700074329,
+          "recovery_value": 0.2718489700074329,
+          "representation_reference_floor": 0.0
+        },
+        "flux_sup_fraction_of_span": {
+          "absolute_reference_deviation": 0.5338372524988493,
+          "recovery_value": 0.5338372524988493,
+          "representation_reference_floor": 0.0
+        },
+        "grad_shafranov_relative": {
+          "absolute_reference_deviation": 0.19321742578149934,
+          "recovery_value": 0.1931549079347778,
+          "representation_reference_floor": 6.251784672154178e-05
+        },
+        "internal_inductance_fraction": {
+          "absolute_reference_deviation": 0.13366141643114396,
+          "recovery_value": 0.024579044675625425,
+          "representation_reference_floor": 0.15444436613171922
+        },
+        "plasma_current_fraction": {
+          "absolute_reference_deviation": 0.05156741197299262,
+          "recovery_value": 0.05085249826782488,
+          "representation_reference_floor": 0.0007532166537477393
+        },
+        "poloidal_beta_fraction": {
+          "absolute_reference_deviation": 0.08872592259816348,
+          "recovery_value": 0.0764237641636299,
+          "representation_reference_floor": 0.15342441542073626
+        },
+        "standing_forcing_sup_wb": {
+          "absolute_reference_deviation": 4.440892098500626e-15,
+          "recovery_value": 4.440892098500626e-15,
+          "representation_reference_floor": 0.0
+        }
+      },
+      "oracle_topology": {
+        "axis_flux_wb": 1.3811489277145976,
+        "axis_m": [
+          1.6996514078262104,
+          5.913459967054991e-16
+        ],
+        "boundary_flux_wb": -8.673617379884035e-19,
+        "class": "limited",
+        "flux_span_wb": -1.3811489277145976,
+        "x_point": null
+      },
+      "realised_cells": 1076,
+      "requested_cells": -1000,
+      "root_artifact": {
+        "arrays": {
+          "oracle_axis": {
+            "dtype": "<f8",
+            "sha256": "5560ac2c29df3ea41287a71b0cb76c852b916534002c961e30df9064b101cf0f",
+            "shape": [
+              2
+            ]
+          },
+          "oracle_cell_current": {
+            "dtype": "<f8",
+            "sha256": "e0d2352f136d555544d92e1fc67c27df835e5cefce77c0cd0c1ed25547370e4d",
+            "shape": [
+              1076
+            ]
+          },
+          "oracle_grid_psi_norm": {
+            "dtype": "<f8",
+            "sha256": "30e404a7d51e34ed39236cd5f5b9620a197596c8e7f0851694a96c580663f428",
+            "shape": [
+              1076
+            ]
+          },
+          "oracle_state": {
+            "dtype": "<f8",
+            "sha256": "61d614384c1e4415da2d6f1ea9eefd1354b51a1485ec9d15e0eda07cbc911300",
+            "shape": [
+              4052
+            ]
+          },
+          "residual_trace": {
+            "dtype": "<f8",
+            "sha256": "a5f91144ad16b621bdb2d37541b60feb10c5e4b85813f2a9d794947118e84c6c",
+            "shape": [
+              320
+            ]
+          },
+          "root_axis": {
+            "dtype": "<f8",
+            "sha256": "b0e71e6f1729caf58c9b235dc9147dcb26d2fc784f127729c39a6f18cda373ee",
+            "shape": [
+              2
+            ]
+          },
+          "root_cell_current": {
+            "dtype": "<f8",
+            "sha256": "6eb0d0588164349f81bc6047231b306e6242b9b59d9c7f9dbc658a5fcac456a7",
+            "shape": [
+              1076
+            ]
+          },
+          "root_grid_psi_norm": {
+            "dtype": "<f8",
+            "sha256": "46d54c9404493db0adb8b2dccfa183ea75718e2fa2b64eaf55263304f6abd784",
+            "shape": [
+              1076
+            ]
+          },
+          "root_state": {
+            "dtype": "<f8",
+            "sha256": "fa725b56be8302ab230b87775dd4ca2ced410d8efa54035122b9e36a3086e738",
+            "shape": [
+              4052
+            ]
+          },
+          "seed_state": {
+            "dtype": "<f8",
+            "sha256": "b4afd6a9b9eca6e6dcceefbb6daa98ed0c94d9aa768d481690caf2d457548fb6",
+            "shape": [
+              4052
+            ]
+          }
+        },
+        "bytes": 136894,
+        "path": "scripts/oracle_rebaseline/root-fine.npz"
+      },
+      "root_conservation": {
+        "checked_cells": 663,
+        "divergence_b_relative": 0.0018119853951325923,
+        "divergence_j_relative": 0.001807620500828018,
+        "force_relative": 0.41391313275976904,
+        "grad_shafranov_relative": 0.19321742578149934
+      },
+      "root_moments": {
+        "internal_inductance": 0.4094620310849163,
+        "major_radius_m": 1.601915486957472,
+        "plasma_current_a": 1544007.4827634222,
+        "poloidal_beta": 0.6695274252685874,
+        "poloidal_field_integral": 1.2346440567518369,
+        "volume_m3": 16.166892293353072
+      },
+      "root_topology": {
+        "axis_flux_wb": 1.022745146811864,
+        "axis_m": [
+          1.6254626823425138,
+          -0.00013937914251811818
+        ],
+        "boundary_flux_wb": -0.246971140126956,
+        "class": "limited",
+        "flux_span_wb": -1.26971628693882,
+        "x_point": null
+      },
+      "seed": {
+        "aggregate_moment": {
+          "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+          "current_centroid_m": [
+            1.6602192201158459,
+            0.0
+          ],
+          "declared_current_a": 1627957.0127122786,
+          "quadrature_current_a": 1627957.0127122786,
+          "quadrature_nodes": 512,
+          "quadrature_relative_closure": 0.0
+        },
+        "closed_form_coupling_image_used": false,
+        "closed_form_flux_samples_used": false,
+        "current_sum_a": 1627957.0127122784,
+        "fixture_exterior_boundary_condition_used": true,
+        "independent_of_closed_form_state": true,
+        "initial_axis_m": [
+          1.7087000135466837,
+          -0.00014351233011437593
+        ],
+        "initial_core_cell_count": 466,
+        "initial_topology_class": "limited",
+        "kind": "production-current-centroid-uniform-disc-zeroth-moment",
+        "limiter_midplane_extent_m": [
+          0.9783517036373888,
+          2.15
+        ],
+        "oracle_state_sup_difference_fraction_of_span": 1.2788974660710344,
+        "seed_radius_fraction": 0.9,
+        "seed_radius_m": 0.4408027018957386,
+        "state_sha256_binary64": "b4afd6a9b9eca6e6dcceefbb6daa98ed0c94d9aa768d481690caf2d457548fb6",
+        "supported_cell_count": 322,
+        "supported_minor_distance_m": 0.489780779884154
+      },
+      "solver": {
+        "criterion": 1e-10,
+        "criterion_unchanged": true,
+        "gmres_iterations": 30,
+        "newton_steps": 10,
+        "route": "undamped_newton_krylov",
+        "selection": "lowest closed-form flux drift among independently seeded, criterion-qualified direct and continuation roots"
+      },
+      "state_size": 4052,
+      "terminal_root": {
+        "axis_m": [
+          1.6254626823425138,
+          -0.00013937914251811818
+        ],
+        "criterion": 1e-10,
+        "criterion_met": true,
+        "finite_trace": [
+          1.590824612401447,
+          0.2720743733016644,
+          0.27207437330166434,
+          0.19127612527266005,
+          0.1912761252726596,
+          0.006369004957840836,
+          0.006369004957840836,
+          0.0004319245931821315,
+          0.0004319245931821315,
+          3.073314534682763e-07,
+          3.0733145346827657e-07,
+          1.5975154841616608e-13,
+          1.6018595099513595e-13,
+          2.986517730418108e-15,
+          2.986517730418108e-15,
+          2.33491386196325e-15,
+          2.3892141843344882e-15,
+          2.124500112774703e-15,
+          2.124500112774703e-15,
+          2.172012894849535e-15
+        ],
+        "finite_trace_indices": [
+          0,
+          31,
+          32,
+          63,
+          64,
+          95,
+          96,
+          127,
+          128,
+          159,
+          160,
+          191,
+          192,
+          223,
+          224,
+          255,
+          256,
+          287,
+          288,
+          319
+        ],
+        "first_criterion_newton_step": 6,
+        "gmres_iterations_per_step": 30,
+        "map_evaluation_budget": 320,
+        "newton_steps_requested": 10,
+        "recorded_residual_evaluations": 20,
+        "selected_route": "direct_moment_seed",
+        "terminal_residual": 2.172012894849535e-15,
+        "topology_class": "limited",
+        "x_point": null
+      }
+    }
+  },
+  "gate_registry": {
+    "axis_position_m": {
+      "convergence_clause": {
+        "absolute_reference_deviation_by_fixture": {
+          "coarse": 0.07549542622817232,
+          "fine": 0.07453744797159592
+        },
+        "excess_above_floor_by_fixture": {
+          "coarse": 0.07480604401526504,
+          "fine": 0.07417142618911687
+        },
+        "fine_to_coarse_excess_ratio": 0.9915164899507496,
+        "flat_above_floor": true,
+        "h_independent_ratio_threshold": 0.8,
+        "passed": false,
+        "rejects_flat_above_floor": true,
+        "representation_reference_floor_by_fixture": {
+          "coarse": 0.0006565544884831187,
+          "fine": 0.00034859217378957474
+        },
+        "roundoff_slack_by_fixture": {
+          "coarse": 3.282772442415594e-05,
+          "fine": 1.742960868947874e-05
+        }
+      },
+      "fixture_pass": {
+        "coarse": false,
+        "fine": false
+      },
+      "gauge": "not_applicable",
+      "headroom": 8.0,
+      "measured_by_fixture": {
+        "coarse": 0.07483887226620761,
+        "fine": 0.074188856410115
+      },
+      "measured_floor": 0.07483887226620761,
+      "owner_lock_required": true,
+      "proposal_basis": "eightfold headroom over the measured representation/reference floor, never widened to admit an alternate-root recovery deviation",
+      "proposed_bound": 0.00525243590786495,
+      "psi_norm_anchor": "not_applicable",
+      "status": "proposed",
+      "units": "m"
+    },
+    "divergence_b_relative": {
+      "convergence_clause": {
+        "absolute_reference_deviation_by_fixture": {
+          "coarse": 0.0024890983900854773,
+          "fine": 0.0018119853951325923
+        },
+        "excess_above_floor_by_fixture": {
+          "coarse": 0.0021850563465400574,
+          "fine": 0.0016824040863932675
+        },
+        "fine_to_coarse_excess_ratio": 0.7699591312861482,
+        "flat_above_floor": false,
+        "h_independent_ratio_threshold": 0.8,
+        "passed": true,
+        "rejects_flat_above_floor": true,
+        "representation_reference_floor_by_fixture": {
+          "coarse": 0.00028956385099563795,
+          "fine": 0.00012341077022792833
+        },
+        "roundoff_slack_by_fixture": {
+          "coarse": 1.4478192549781897e-05,
+          "fine": 6.170538511396417e-06
+        }
+      },
+      "fixture_pass": {
+        "coarse": true,
+        "fine": true
+      },
+      "gauge": "not_applicable",
+      "headroom": 8.0,
+      "measured_by_fixture": {
+        "coarse": 0.002199534539089839,
+        "fine": 0.001688574624904664
+      },
+      "measured_floor": 0.002199534539089839,
+      "owner_lock_required": true,
+      "proposal_basis": "eightfold headroom over the measured representation/reference floor, never widened to admit an alternate-root recovery deviation",
+      "proposed_bound": 0.0023165108079651036,
+      "psi_norm_anchor": "not_applicable",
+      "status": "proposed",
+      "units": "relative"
+    },
+    "divergence_j_relative": {
+      "convergence_clause": {
+        "absolute_reference_deviation_by_fixture": {
+          "coarse": 0.002492076924042085,
+          "fine": 0.001807620500828018
+        },
+        "excess_above_floor_by_fixture": {
+          "coarse": 0.0021843439385098007,
+          "fine": 0.0016788131345510857
+        },
+        "fine_to_coarse_excess_ratio": 0.7685662980786819,
+        "flat_above_floor": false,
+        "h_independent_ratio_threshold": 0.8,
+        "passed": true,
+        "rejects_flat_above_floor": true,
+        "representation_reference_floor_by_fixture": {
+          "coarse": 0.0002930790338402703,
+          "fine": 0.0001226736821685071
+        },
+        "roundoff_slack_by_fixture": {
+          "coarse": 1.4653951692013516e-05,
+          "fine": 6.133684108425355e-06
+        }
+      },
+      "fixture_pass": {
+        "coarse": true,
+        "fine": true
+      },
+      "gauge": "not_applicable",
+      "headroom": 8.0,
+      "measured_by_fixture": {
+        "coarse": 0.0021989978902018145,
+        "fine": 0.001684946818659511
+      },
+      "measured_floor": 0.0021989978902018145,
+      "owner_lock_required": true,
+      "proposal_basis": "eightfold headroom over the measured representation/reference floor, never widened to admit an alternate-root recovery deviation",
+      "proposed_bound": 0.0023446322707221623,
+      "psi_norm_anchor": "not_applicable",
+      "status": "proposed",
+      "units": "relative"
+    },
+    "field_integral_fraction": {
+      "convergence_clause": {
+        "absolute_reference_deviation_by_fixture": {
+          "coarse": 0.11839045849829273,
+          "fine": 0.11779236374626458
+        },
+        "excess_above_floor_by_fixture": {
+          "coarse": 0.11620499516237562,
+          "fine": 0.11657615527549953
+        },
+        "fine_to_coarse_excess_ratio": 1.0031940116911953,
+        "flat_above_floor": true,
+        "h_independent_ratio_threshold": 0.8,
+        "passed": false,
+        "rejects_flat_above_floor": true,
+        "representation_reference_floor_by_fixture": {
+          "coarse": 0.0020813936532543945,
+          "fine": 0.0011582937816810035
+        },
+        "roundoff_slack_by_fixture": {
+          "coarse": 0.00010406968266271974,
+          "fine": 5.791468908405018e-05
+        }
+      },
+      "fixture_pass": {
+        "coarse": false,
+        "fine": false
+      },
+      "gauge": "not_applicable",
+      "headroom": 8.0,
+      "measured_by_fixture": {
+        "coarse": 0.11655165471944769,
+        "fine": 0.11676932314547409
+      },
+      "measured_floor": 0.11676932314547409,
+      "owner_lock_required": true,
+      "proposal_basis": "eightfold headroom over the measured representation/reference floor, never widened to admit an alternate-root recovery deviation",
+      "proposed_bound": 0.016651149226035156,
+      "psi_norm_anchor": "not_applicable",
+      "status": "proposed",
+      "units": "fraction"
+    },
+    "fixed_point_residual": {
+      "convergence_clause": {
+        "absolute_reference_deviation_by_fixture": {
+          "coarse": 2.7110550053242652e-15,
+          "fine": 3.040818052789354e-15
+        },
+        "excess_above_floor_by_fixture": {
+          "coarse": 0.0,
+          "fine": 0.0
+        },
+        "fine_to_coarse_excess_ratio": 0.0,
+        "flat_above_floor": false,
+        "h_independent_ratio_threshold": 0.8,
+        "passed": true,
+        "rejects_flat_above_floor": true,
+        "representation_reference_floor_by_fixture": {
+          "coarse": 0.0,
+          "fine": 0.0
+        },
+        "roundoff_slack_by_fixture": {
+          "coarse": 1e-12,
+          "fine": 1e-12
+        }
+      },
+      "fixture_pass": {
+        "coarse": true,
+        "fine": true
+      },
+      "gauge": "not_applicable",
+      "headroom": 1.0,
+      "measured_by_fixture": {
+        "coarse": 2.7110550053242652e-15,
+        "fine": 3.040818052789354e-15
+      },
+      "measured_floor": 3.040818052789354e-15,
+      "owner_lock_required": true,
+      "proposal_basis": "eightfold headroom over the measured representation/reference floor, never widened to admit an alternate-root recovery deviation",
+      "proposed_bound": 1e-12,
+      "psi_norm_anchor": "not_applicable",
+      "status": "proposed",
+      "units": "relative"
+    },
+    "flux_rms_fraction_of_span": {
+      "convergence_clause": {
+        "absolute_reference_deviation_by_fixture": {
+          "coarse": 0.2706765654843951,
+          "fine": 0.2718489700074329
+        },
+        "excess_above_floor_by_fixture": {
+          "coarse": 0.27067656548339514,
+          "fine": 0.27184897000643293
+        },
+        "fine_to_coarse_excess_ratio": 1.0043313853969738,
+        "flat_above_floor": true,
+        "h_independent_ratio_threshold": 0.8,
+        "passed": false,
+        "rejects_flat_above_floor": true,
+        "representation_reference_floor_by_fixture": {
+          "coarse": 0.0,
+          "fine": 0.0
+        },
+        "roundoff_slack_by_fixture": {
+          "coarse": 1e-12,
+          "fine": 1e-12
+        }
+      },
+      "fixture_pass": {
+        "coarse": false,
+        "fine": false
+      },
+      "gauge": "shared_exact_exterior",
+      "headroom": 1.0,
+      "measured_by_fixture": {
+        "coarse": 0.2706765654843951,
+        "fine": 0.2718489700074329
+      },
+      "measured_floor": 0.2718489700074329,
+      "owner_lock_required": true,
+      "proposal_basis": "eightfold headroom over the measured representation/reference floor, never widened to admit an alternate-root recovery deviation",
+      "proposed_bound": 1e-12,
+      "psi_norm_anchor": "local",
+      "status": "proposed",
+      "units": "fraction"
+    },
+    "flux_sup_fraction_of_span": {
+      "convergence_clause": {
+        "absolute_reference_deviation_by_fixture": {
+          "coarse": 0.533313502617716,
+          "fine": 0.5338372524988493
+        },
+        "excess_above_floor_by_fixture": {
+          "coarse": 0.5333135026167161,
+          "fine": 0.5338372524978493
+        },
+        "fine_to_coarse_excess_ratio": 1.0009820675429433,
+        "flat_above_floor": true,
+        "h_independent_ratio_threshold": 0.8,
+        "passed": false,
+        "rejects_flat_above_floor": true,
+        "representation_reference_floor_by_fixture": {
+          "coarse": 0.0,
+          "fine": 0.0
+        },
+        "roundoff_slack_by_fixture": {
+          "coarse": 1e-12,
+          "fine": 1e-12
+        }
+      },
+      "fixture_pass": {
+        "coarse": false,
+        "fine": false
+      },
+      "gauge": "shared_exact_exterior",
+      "headroom": 1.0,
+      "measured_by_fixture": {
+        "coarse": 0.533313502617716,
+        "fine": 0.5338372524988493
+      },
+      "measured_floor": 0.5338372524988493,
+      "owner_lock_required": true,
+      "proposal_basis": "eightfold headroom over the measured representation/reference floor, never widened to admit an alternate-root recovery deviation",
+      "proposed_bound": 1e-12,
+      "psi_norm_anchor": "local",
+      "status": "proposed",
+      "units": "fraction"
+    },
+    "grad_shafranov_relative": {
+      "convergence_clause": {
+        "absolute_reference_deviation_by_fixture": {
+          "coarse": 0.058311425532711916,
+          "fine": 0.19321742578149934
+        },
+        "excess_above_floor_by_fixture": {
+          "coarse": 0.05817846614952003,
+          "fine": 0.1931517820424417
+        },
+        "fine_to_coarse_excess_ratio": 3.3199875284789577,
+        "flat_above_floor": true,
+        "h_independent_ratio_threshold": 0.8,
+        "passed": false,
+        "rejects_flat_above_floor": true,
+        "representation_reference_floor_by_fixture": {
+          "coarse": 0.00012662798399226346,
+          "fine": 6.251784672154178e-05
+        },
+        "roundoff_slack_by_fixture": {
+          "coarse": 6.331399199613173e-06,
+          "fine": 3.1258923360770895e-06
+        }
+      },
+      "fixture_pass": {
+        "coarse": false,
+        "fine": false
+      },
+      "gauge": "not_applicable",
+      "headroom": 8.0,
+      "measured_by_fixture": {
+        "coarse": 0.05818479754871965,
+        "fine": 0.1931549079347778
+      },
+      "measured_floor": 0.1931549079347778,
+      "owner_lock_required": true,
+      "proposal_basis": "eightfold headroom over the measured representation/reference floor, never widened to admit an alternate-root recovery deviation",
+      "proposed_bound": 0.0010130238719381077,
+      "psi_norm_anchor": "not_applicable",
+      "status": "proposed",
+      "units": "relative"
+    },
+    "internal_inductance_fraction": {
+      "convergence_clause": {
+        "absolute_reference_deviation_by_fixture": {
+          "coarse": 0.1343883873135388,
+          "fine": 0.13366141643114396
+        },
+        "excess_above_floor_by_fixture": {
+          "coarse": 0.0,
+          "fine": 0.0
+        },
+        "fine_to_coarse_excess_ratio": 0.0,
+        "flat_above_floor": false,
+        "h_independent_ratio_threshold": 0.8,
+        "passed": true,
+        "rejects_flat_above_floor": true,
+        "representation_reference_floor_by_fixture": {
+          "coarse": 0.15409396128485298,
+          "fine": 0.15444436613171922
+        },
+        "roundoff_slack_by_fixture": {
+          "coarse": 0.007704698064242649,
+          "fine": 0.007722218306585961
+        }
+      },
+      "fixture_pass": {
+        "coarse": true,
+        "fine": true
+      },
+      "gauge": "not_applicable",
+      "headroom": 8.0,
+      "measured_by_fixture": {
+        "coarse": 0.023295227920638917,
+        "fine": 0.024579044675625425
+      },
+      "measured_floor": 0.024579044675625425,
+      "owner_lock_required": true,
+      "proposal_basis": "eightfold headroom over the measured representation/reference floor, never widened to admit an alternate-root recovery deviation",
+      "proposed_bound": 1.2355549290537537,
+      "psi_norm_anchor": "not_applicable",
+      "status": "proposed",
+      "units": "fraction"
+    },
+    "plasma_current_fraction": {
+      "convergence_clause": {
+        "absolute_reference_deviation_by_fixture": {
+          "coarse": 0.05147780982402771,
+          "fine": 0.05156741197299262
+        },
+        "excess_above_floor_by_fixture": {
+          "coarse": 0.04998617848427257,
+          "fine": 0.050776534486557494
+        },
+        "fine_to_coarse_excess_ratio": 1.0158114908210796,
+        "flat_above_floor": true,
+        "h_independent_ratio_threshold": 0.8,
+        "passed": false,
+        "rejects_flat_above_floor": true,
+        "representation_reference_floor_by_fixture": {
+          "coarse": 0.0014206012759572708,
+          "fine": 0.0007532166537477393
+        },
+        "roundoff_slack_by_fixture": {
+          "coarse": 7.103006379786355e-05,
+          "fine": 3.766083268738697e-05
+        }
+      },
+      "fixture_pass": {
+        "coarse": false,
+        "fine": false
+      },
+      "gauge": "not_applicable",
+      "headroom": 8.0,
+      "measured_by_fixture": {
+        "coarse": 0.05012842104697149,
+        "fine": 0.05085249826782488
+      },
+      "measured_floor": 0.05085249826782488,
+      "owner_lock_required": true,
+      "proposal_basis": "eightfold headroom over the measured representation/reference floor, never widened to admit an alternate-root recovery deviation",
+      "proposed_bound": 0.011364810207658166,
+      "psi_norm_anchor": "not_applicable",
+      "status": "proposed",
+      "units": "fraction"
+    },
+    "poloidal_beta_fraction": {
+      "convergence_clause": {
+        "absolute_reference_deviation_by_fixture": {
+          "coarse": 0.08782170237474489,
+          "fine": 0.08872592259816348
+        },
+        "excess_above_floor_by_fixture": {
+          "coarse": 0.0,
+          "fine": 0.0
+        },
+        "fine_to_coarse_excess_ratio": 0.0,
+        "flat_above_floor": false,
+        "h_independent_ratio_threshold": 0.8,
+        "passed": true,
+        "rejects_flat_above_floor": true,
+        "representation_reference_floor_by_fixture": {
+          "coarse": 0.15221454515258195,
+          "fine": 0.15342441542073626
+        },
+        "roundoff_slack_by_fixture": {
+          "coarse": 0.007610727257629098,
+          "fine": 0.007671220771036814
+        }
+      },
+      "fixture_pass": {
+        "coarse": true,
+        "fine": true
+      },
+      "gauge": "not_applicable",
+      "headroom": 8.0,
+      "measured_by_fixture": {
+        "coarse": 0.07595417261484666,
+        "fine": 0.0764237641636299
+      },
+      "measured_floor": 0.0764237641636299,
+      "owner_lock_required": true,
+      "proposal_basis": "eightfold headroom over the measured representation/reference floor, never widened to admit an alternate-root recovery deviation",
+      "proposed_bound": 1.22739532336589,
+      "psi_norm_anchor": "not_applicable",
+      "status": "proposed",
+      "units": "fraction"
+    },
+    "standing_forcing_sup_wb": {
+      "convergence_clause": {
+        "absolute_reference_deviation_by_fixture": {
+          "coarse": 3.83026943495679e-15,
+          "fine": 4.440892098500626e-15
+        },
+        "excess_above_floor_by_fixture": {
+          "coarse": 0.0,
+          "fine": 0.0
+        },
+        "fine_to_coarse_excess_ratio": 0.0,
+        "flat_above_floor": false,
+        "h_independent_ratio_threshold": 0.8,
+        "passed": true,
+        "rejects_flat_above_floor": true,
+        "representation_reference_floor_by_fixture": {
+          "coarse": 0.0,
+          "fine": 0.0
+        },
+        "roundoff_slack_by_fixture": {
+          "coarse": 1e-13,
+          "fine": 1e-13
+        }
+      },
+      "fixture_pass": {
+        "coarse": true,
+        "fine": true
+      },
+      "gauge": "not_applicable",
+      "headroom": 1.0,
+      "measured_by_fixture": {
+        "coarse": 3.83026943495679e-15,
+        "fine": 4.440892098500626e-15
+      },
+      "measured_floor": 4.440892098500626e-15,
+      "owner_lock_required": true,
+      "proposal_basis": "eightfold headroom over the measured representation/reference floor, never widened to admit an alternate-root recovery deviation",
+      "proposed_bound": 1e-13,
+      "psi_norm_anchor": "not_applicable",
+      "status": "proposed",
+      "units": "Wb"
+    },
+    "topology_class": {
+      "convergence_clause": {
+        "expected": "limited",
+        "passed": true,
+        "rejects_flat_above_floor": true
+      },
+      "fixture_pass": {
+        "coarse": true,
+        "fine": true
+      },
+      "gauge": "not_applicable",
+      "headroom": "exact discrete agreement",
+      "measured_by_fixture": {
+        "coarse": "limited",
+        "fine": "limited"
+      },
+      "measured_floor": {
+        "coarse": "limited",
+        "fine": "limited"
+      },
+      "owner_lock_required": true,
+      "proposed_bound": "limited",
+      "psi_norm_anchor": "not_applicable",
+      "status": "proposed",
+      "units": "discrete"
+    },
+    "x_point_absence": {
+      "convergence_clause": {
+        "expected": "absent",
+        "passed": true,
+        "rejects_flat_above_floor": true
+      },
+      "fixture_pass": {
+        "coarse": true,
+        "fine": true
+      },
+      "gauge": "not_applicable",
+      "headroom": "exact discrete agreement",
+      "measured_by_fixture": {
+        "coarse": "absent",
+        "fine": "absent"
+      },
+      "measured_floor": {
+        "coarse": "absent",
+        "fine": "absent"
+      },
+      "owner_lock_required": true,
+      "proposed_bound": "absent",
+      "psi_norm_anchor": "not_applicable",
+      "status": "proposed",
+      "units": "discrete"
+    }
+  },
+  "independent_seed_contract": "production current-centroid uniform-disc zeroth moment; exact exterior boundary supply is retained, but no closed-form flux sample or closed-form coupling image constructs the plasma seed",
+  "recovery_finding": {
+    "interpretation": "The production moment seed reached criterion-qualified physical roots outside the closed-form basin; failed source-strength steps and the full residual trajectories are retained, so small terminal residuals are not treated as recovery.",
+    "status": "alternate-root-hold",
+    "topology_qualification": "This closed-form fixture is limited and has no X-point; topology is read from each terminal field rather than inferred from the seed."
+  },
+  "schema": "nova.solovev-recovery-gates",
+  "solver_contract": {
+    "coarse_before_fine": true,
+    "criterion": 1e-10,
+    "damping": "none",
+    "gmres_iterations": 30,
+    "newton_steps": 10
+  },
+  "verdict": {
+    "all_convergence_clauses_pass": false,
+    "all_proposed_gates_pass": false,
+    "all_roots_meet_solver_criterion": true,
+    "roundoff_class_recovery": false
+  }
+}

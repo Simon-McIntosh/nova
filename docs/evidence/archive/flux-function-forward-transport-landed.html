@@ -598,6 +598,80 @@
     <p><strong>One unmeasured cost.</strong> The uniform-mesh guard adds a host callback per
     adapter construction, inside the window's iteration loop. No adapter performance gate
     exists in this plan; whoever first needs the window to be fast owns that measurement.</p>
+    <h2 id="independent-geometry-reference">The independent geometry reference &#8212; the record is not accurate enough</h2>
+    <p>Commit <code>5578e8ea</code> (node eqdsk-geometry-reference). <strong>The measurement
+    succeeded and the result is negative</strong>, which is what this node existed to find out.
+    TORAX reads <code>iterhybrid_cocos17.eqdsk</code> through its own <code>EQDSKConfig</code>
+    reader; Nova reads the <em>same file</em> through <code>nova.io.geqdsk</code> into the traced
+    FSA assembly and the direct adapter. Neither side sees the other's intermediates, so for the
+    first time there is an external reference.</p>
+    <p>The landed self-parity said 1.73e-15. Against an independently read real equilibrium, the
+    coefficients that drive the &#968; equation disagree by <strong>tens of percent</strong>.</p>
+    <table>
+      <caption>Maximum normalised relative error, faces 2&#8594;edge. <code>g2g3_over_rhon</code>
+      is the &#968;-diffusion coefficient itself.</caption>
+      <thead><tr><th>Field</th><th>ITER hybrid</th><th>STEP</th></tr></thead>
+      <tbody>
+        <tr><td><code>g2g3_over_rhon_face</code></td><td><strong>18.4%</strong></td><td><strong>25.8%</strong></td></tr>
+        <tr><td><code>g0_face</code></td><td>9.5%</td><td>24.0%</td></tr>
+        <tr><td><code>g1_face</code></td><td>18.1%</td><td>27.2%</td></tr>
+        <tr><td><code>g2_face</code></td><td>17.9%</td><td>37.4%</td></tr>
+        <tr><td><code>vpr_face</code> / <code>spr_face</code></td><td>6.2% / 5.9%</td><td>5.7% / 4.5%</td></tr>
+        <tr><td><code>Ip_profile_face</code></td><td>10.4%</td><td>16.5%</td></tr>
+        <tr><td><code>j_total_face</code></td><td>56.0%</td><td>54.1%</td></tr>
+        <tr><td>triangularity (upper / lower)</td><td>20.4% / 13.3%</td><td>19.1% / 22.0%</td></tr>
+        <tr><td><code>elongation_face</code></td><td>4.0%</td><td>2.5%</td></tr>
+        <tr><td colspan="3"><em>&#8212; and what is fine, which is what makes the diagnosis clean &#8212;</em></td></tr>
+        <tr><td><code>R_major</code>, <code>B_0</code></td><td>0.0013%</td><td>0.0000%</td></tr>
+        <tr><td><code>a_minor</code></td><td>0.32%</td><td>0.60%</td></tr>
+        <tr><td><code>F_face</code></td><td>0.034%</td><td>0.083%</td></tr>
+        <tr><td><code>psi</code></td><td>0.91%</td><td>1.06%</td></tr>
+        <tr><td><code>Phi_face</code>, <code>volume</code>, <code>area</code></td><td>1.7&#8211;1.8%</td><td>1.4&#8211;2.1%</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The cause is the kernel, not the adapter and not the conventions.</strong> Three
+    independent facts pin it. Scalars, F and &#968; are accurate to well under a percent, so the
+    file is being read correctly. The three-way convention cross-check is bit-clean &#8212; the
+    <code>cocos11</code> twin is bit-identical to the pinned COCOS-17 geometry across all 26
+    fields and <code>cocos02</code> differs by at most 9.2e&#8722;10 &#8212; so signs and
+    provenance are right. What is left is the <em>moment extraction</em>: fixed-bandwidth
+    Gaussian coarea shells against TORAX's cubic contour quadrature, with squared gradients and
+    1/R&#178; weighting amplifying the discrepancy, and STEP's low aspect ratio amplifying it
+    again. Shape errors come from grid-quantised extrema and one-cell top/bottom bands rather
+    than interpolated contour extrema. <code>j_total</code> compounds all of it and then
+    differentiates on a radial mesh TORAX itself warns about (spacing 0.0787&#8211;0.0894 against
+    its own 0.0200 recommendation), which is why 55% appears there without contaminating the
+    current or flux profiles.</p>
+    <p>This is the <em>same</em> mechanism the analytic-surface node measured at 1.8% on
+    &#10216;|&#8711;&#968;|&#10217;. On a real shaped equilibrium it is an order of magnitude
+    worse; on a spherical tokamak worse again. The analytic test could not have found this,
+    because an analytic flux surface is exactly the case a fixed-bandwidth shell handles well.</p>
+    <p>The node also found and fixed a genuine per-radian versus total-flux &#8711;&#968; scaling
+    at the real-EQDSK boundary &#8212; a factor no synthetic record could expose.</p>
+    <p><strong>One caution about the test itself.</strong> Its per-field tolerances are asserted
+    as pass/fail at up to 0.45. As written that is a characterisation baseline wearing an
+    acceptance gate's clothing: a regression to 44% on <code>g2g3</code> would pass silently.
+    The assertions need relabelling as a baseline, and tightening as the kernel improves.</p>
+
+    <h2 id="published-rampup">The published ramp-up through the fa&#231;ade</h2>
+    <p>Commit <code>d5321f40</code> (node published-rampup-benchmark). The fa&#231;ade now honours
+    a configuration's own non-circular geometry provider instead of always installing the Nova
+    adapter &#8212; without which no published case could ever run <em>as published</em>. TORAX
+    1.4.3's <code>examples/iterhybrid_rampup.py</code> then ran through
+    <code>ForwardTransport</code> over 0&#8211;2 s with its CHEASE
+    <code>iterhybrid.mat2cols</code> geometry, QLKNN transport, pedestal, bootstrap current,
+    published sources and Newton predictor-corrector solver all retained, current ramping
+    3.0&#8594;3.1875 MA on the published waveform. Evolved T_i, T_e and &#968; match TORAX's own
+    <code>run_simulation</code> at rtol 1.0e&#8722;10 / atol 1.0e&#8722;12, n_e at atol
+    1.0e8 m&#8315;&#179;, in 20.14 s. 5/5 green.</p>
+    <p><strong>The Physics gate is still not closed</strong>, on two counts the worker surfaced
+    itself. The run took <em>one</em> TORAX step over the interval, so the case's trajectory is
+    untested &#8212; and a single step against a constant geometry provider never exercises the
+    moving-grid &#934;&#775;_b term that §3 requires geometry at both t and t+&#916;t for. And no
+    numeric reference output ships with TORAX for that case (CSV, JSON, NetCDF, NPY, NPZ and Zarr
+    were all searched), so the comparison stays fa&#231;ade-against-own-entry-point. That half is
+    unavoidable in kind rather than a shortcut: no published numbers exist to check against. A
+    multi-step trajectory run follows.</p>
   </main>
 </body>
 </html>

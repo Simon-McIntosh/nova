@@ -632,14 +632,16 @@ def validate_artifacts(report: dict[str, object]) -> dict[str, object]:
 def measure_fixture(
     reference, case, banked, name: str, multiplier: int, expected_cells: int
 ):
-    """Rebuild one undamped root, serialize it, and form its references."""
+    """Load one cached operator, solve its undamped root, and form references."""
     reference.WALL_NODES = 3 * multiplier
     requested = reference.SUITE_CELLS * multiplier
     print(
-        f"BUILD fixture={name} requested={requested} wall_nodes={reference.WALL_NODES}",
+        f"CACHE_REQUEST fixture={name} requested={requested} "
+        f"wall_nodes={reference.WALL_NODES}",
         flush=True,
     )
-    machine = reference.build_machine(case, requested, passive=True)
+    machine = reference.cached_machine(case, requested, passive=True)
+    print(reference.machine_cache_summary(name, machine), flush=True)
     if len(machine.node) != expected_cells:
         raise AssertionError(
             f"expected {expected_cells} {name} cells, got {len(machine.node)}"

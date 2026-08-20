@@ -1,0 +1,35 @@
+{
+  "attribution": {
+    "both": "neither component meets its dominance rule",
+    "component_split": "RMS magnitude divided by fixed-boundary plus vacuum-difference RMS magnitudes; the two reported shares sum to one",
+    "dominant_component_fraction": 0.6666666666666666,
+    "flux_function_dominated": "fixed-boundary share is at least two thirds",
+    "vacuum_field_dominated": "vacuum-difference share is at least two thirds and the gauged border discrepancy exceeds the nearby-root scale"
+  },
+  "coefficients_fitted": 0,
+  "coil_currents_adjusted": false,
+  "evaluation_point": "the labelled psi map; no root search or iteration",
+  "external_field": "nineteen released conductors and released currents",
+  "fixed_boundary_control": {
+    "banked_median_fractional_rms": 2.29e-08,
+    "source": "Delta-star applied directly to the same label"
+  },
+  "gauge": "one additive constant from the landed plasma-subtraction measure",
+  "measurement": "free-boundary residual evaluated at labelled DIII-D maps",
+  "nearby_root_criterion": {
+    "basis": "the 0.05-class measured strict-GS representability scale; a map farther away than that is not treated as evidence for a nearby root",
+    "maximum_free_boundary_fractional_rms": 0.05,
+    "normalisation": "whole-grid RMS divided by total labelled psi range"
+  },
+  "profiles": "p-prime and FF-prime from extract_flux_functions on the label",
+  "regions": {
+    "boundary_band": "one-cell dilation minus one-cell erosion of label core",
+    "exterior": "all remaining grid nodes",
+    "measure": "fraction of squared residual; three fractions sum to one",
+    "plasma_interior": "label core eroded by one grid cell"
+  },
+  "selection": {
+    "frames": 5,
+    "rule": "first five lexicographic shots with a finite diverted frame; the eligible time nearest each shot's median eligible time"
+  }
+}

@@ -24,9 +24,9 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-20">
-<meta name="plan-version" content="13">
-<meta name="plan-commits" content="f7af67dc,3a438d1b,9e1b5ce2,e583d796,95a3dc72,4df7993b,5088a466,d943c12a,fc8d3313,c792f7d2,cc542659,ccb375ea">
-<meta name="plan-impl" content="0.75">
+<meta name="plan-version" content="14">
+<meta name="plan-commits" content="f7af67dc,3a438d1b,9e1b5ce2,e583d796,95a3dc72,4df7993b,5088a466,d943c12a,fc8d3313,c792f7d2,cc542659,ccb375ea,aa53e6e0">
+<meta name="plan-impl" content="0.81">
 <meta name="plan-blocks" content="imas-ambix:sophelio-entry-master">
 </head>
 <body>
@@ -162,6 +162,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260820-waveform-sweeps" data-who="reckon-ship" data-when="2026-08-20T15:06:00+00:00">
     <div class="r-comment-body">waveform-exchange-primitives landed - commit ccb375ea; gate window-coordinate-map PASSED; measure: an analytically known profile is recovered to atol 2.0e-14 through temporal interpolation under a deliberately varying Phi_b of 1.5 to 4.5 on differing radial grids, which is the coordinate-map guarantee the plan demands extended to time; transport_sweep against an interpolated geometry waveform reproduces the equivalent single-interval facade solve at rtol = atol = 2.0e-13; equilibrium_sweep consuming an interpolated source waveform returns finite conservation ledgers below 1.0e-6 at 2 coarse sample times. 7 passed in 202.5 s. nova/transport/coupled_window.py publishes immutable Waveform and WaveformSample coordinate maps carrying phi_boundary, axis_reference, boundary_reference and a per-slice radial grid, plus equilibrium_sweep and transport_sweep as public pure functions. The mechanism that earns the 2e-14: each bracketing profile is resampled onto one common normalised radial grid BEFORE blending in time, so a moving coordinate map can never be blended as if it were fixed. Waveform, transport state, geometry waveform, equilibrium source and initial flux were all asserted unchanged.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260820-window-fixed-point" data-who="reckon-ship" data-when="2026-08-20T15:35:00+00:00">
+    <div class="r-comment-body">window-fixed-point-receipts landed - commit aa53e6e0; gates window-contract and loop-conservation both PASSED; measure: solve_window converges the exchange to a declared 1e-10 over WindowConfig length 1.0 with equilibrium samples at 0, 0.5, 1.0 and transport samples at 0, 0.25, 0.75, 1.0. The window-versus-staggered claim is now measured rather than argued: under WEAK coupling the fixed point takes 5 iterations at contraction 0.0020 with exit residual 1.60e-11 and an iteration-cap-one run differs from it by only 0.0020, inside the asserted 3e-3 bound; under STRONG coupling the damped fixed point takes 124 iterations at contraction 0.840 with exit residual 9.71e-11 and damping 0.8, while cap-one differs by 0.80, beyond the asserted 0.75 bound. Conventional staggered co-simulation is therefore demonstrably this contract truncated at one iteration, cheap where the contraction is small and wrong where it is not. Conservation: flux closure error 1.50e-13 Wb at relative residual 8.33e-13, boundary-current continuity error 2.00e-6 A at relative residual 2.00e-12. WindowConvergenceReceipt carries iterations_used, contraction_estimate, ten exit-residual fields spanning the geometry and source coordinate maps and the profile channels, damping_applied and the residual trace; WindowConservationReceipt aggregates the per-interval flux and current ledgers with absolute and relative closure residuals. An exhausted window raises WindowConvergenceError carrying a diagnostic receipt and never returns a WindowReceipt, so a silently degraded state cannot escape. Initial geometry and source waveforms unchanged. 10 passed in 35.3 s.</div>
 </div>
 </section>
 </main>

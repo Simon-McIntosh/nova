@@ -344,6 +344,52 @@
     bracketing profiles onto one common normalised grid before blending in time</em>.
     Recovering an analytically known profile to 2e&#8722;14 while &#934;_b triples is the
     demonstration that the coordinate map is being carried rather than assumed fixed.</p>
+    <h2 id="window-fixed-point">Converged window and its receipts &#8212; 2026-08-20</h2>
+    <p>Commit <code>aa53e6e0</code> (node window-fixed-point-receipts).
+    <code>solve_window</code> converges the equilibrium&#8596;transport exchange to a declared
+    tolerance of 1e&#8722;10 and returns its convergence behaviour as typed receipts.
+    <strong>10 passed in 35.3 s.</strong> The window ran at length 1.0 with equilibrium
+    samples at &#123;0, 0.5, 1&#125; and transport samples at &#123;0, 0.25, 0.75, 1&#125;.</p>
+    <p><strong>The plan's central claim is now measured, not argued.</strong> §2 asserts that
+    conventional staggered co-simulation <em>is</em> this contract truncated at one iteration
+    &#8212; two points on one axis rather than two competing designs. Running the same window
+    both ways, at two coupling strengths, is what turns that into a number.</p>
+    <table>
+      <caption>The same window solved to its fixed point and truncated at iteration cap one.</caption>
+      <thead><tr><th></th><th>weak coupling</th><th>strong coupling</th></tr></thead>
+      <tbody>
+        <tr><td>iterations to converge</td><td>5</td><td>124 (damping 0.8)</td></tr>
+        <tr><td>contraction estimate</td><td>0.0020</td><td>0.840</td></tr>
+        <tr><td>exit residual</td><td>1.60e&#8722;11</td><td>9.71e&#8722;11</td></tr>
+        <tr><td>cap-one difference from the fixed point</td><td>0.0020</td><td>0.80</td></tr>
+        <tr><td>asserted bound</td><td>&lt; 3e&#8722;3 (agree)</td><td>&gt; 0.75 (diverge)</td></tr>
+      </tbody>
+    </table>
+    <p>Read across the last two rows: where the contraction is 0.002 the staggered scheme is
+    <em>indistinguishable</em> from the converged answer and costs a fifth of the work; where
+    it is 0.84 the staggered scheme is wrong by 0.80 and no amount of care in the staggering
+    fixes it. That is why the contraction estimate travels in the receipt as the adaptive
+    signal, and why window length is a policy the receipts justify rather than a constant.
+    It is also why the receipts are not decoration: <strong>slow contraction is itself
+    physics</strong>, and a consumer classifying model&#8211;measurement innovation needs to see
+    it rather than absorb it as noise.</p>
+    <table>
+      <caption>Loop conservation across the window.</caption>
+      <thead><tr><th>Ledger</th><th>Absolute</th><th>Relative</th></tr></thead>
+      <tbody>
+        <tr><td>flux consumption closure</td><td>1.50e&#8722;13 Wb</td><td>8.33e&#8722;13</td></tr>
+        <tr><td>boundary plasma-current continuity</td><td>2.00e&#8722;06 A</td><td>2.00e&#8722;12</td></tr>
+      </tbody>
+    </table>
+    <p><code>WindowConvergenceReceipt</code> carries <code>iterations_used</code>, the
+    contraction estimate, <strong>ten</strong> exit-residual fields spanning both exchanged
+    coordinate maps and every profile channel, the damping applied, and the residual trace;
+    <code>WindowConservationReceipt</code> aggregates the per-interval flux and current
+    ledgers with absolute and relative closure residuals. An exhausted window raises
+    <code>WindowConvergenceError</code> carrying a diagnostic receipt and <em>never</em>
+    returns a <code>WindowReceipt</code> &#8212; so a silently degraded state has no path out
+    of the solve, which is the property the innovation-purity argument depends on. Initial
+    geometry and source waveforms were asserted unchanged.</p>
   </main>
 </body>
 </html>

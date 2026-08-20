@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-20T13:53:10",
+  "updated": "2026-08-20T15:23:04",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -54,6 +54,13 @@
         "created": "2026-08-16"
       },
       {
+        "id": "diiid-current-units",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a01f40-52f6-7f23-af36-adcdcdaa0665",
+        "created": "2026-08-20"
+      },
+      {
         "id": "diiid-forward-gs",
         "harness": "codex",
         "role": "implement",
@@ -64,8 +71,15 @@
         "id": "diiid-ids-read",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a01f23-6ec6-7692-aed3-cc2bf2e6bbad",
         "created": "2026-08-19"
+      },
+      {
+        "id": "diiid-poloidal-figures",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a01f36-5f8a-7212-a4d6-18ab97d716ca",
+        "created": "2026-08-20"
       },
       {
         "id": "diiid-vacuum",
@@ -327,11 +341,25 @@
         "created": "2026-08-13"
       },
       {
+        "id": "transport-cocos",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a01f49-aac3-7d52-810d-616e52b0ce09",
+        "created": "2026-08-20"
+      },
+      {
         "id": "transport-env",
         "harness": "codex",
         "role": "implement",
         "session_id": "01a01023-3e4f-7081-b1ab-24ffbe816152",
         "created": "2026-08-17"
+      },
+      {
+        "id": "transport-facade",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a01f49-d28d-76c0-a01f-00215a8049e2",
+        "created": "2026-08-20"
       },
       {
         "id": "vacuum-diagnosis",
@@ -9747,9 +9775,392 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260820T122703596571-diiid-netcdf-content-census",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a72",
+        "node": "diiid-netcdf-content-census",
+        "role": "implement",
+        "member": "diiid-forward-gs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T12:27:08Z",
+        "completed_at": "2026-08-20T12:39:32Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 744,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 744,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "9417c3cda756583f218a0ebd4b922f775c193ed5",
+        "commits": [
+          "7af48b66"
+        ],
+        "changed_lines": {
+          "added": 3576,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "outcome": "Census of the located DIII-D netCDF: 174/174 backend-populated DD leaf paths inventoried with 0 omitted and 0 unclassified - 54 MACHINE DESCRIPTION, 15 NOT ADMISSIBLE (magnetics signal families), 105 FIREWALLED (every equilibrium leaf, EFIT product). Five populated IDSs, each independently reporting DD 3.41.0: equilibrium 105 leaves with 340 slices spanning 0.10-7.22 s and constraint blocks of 76 bpol / 44 flux loops / 24 pf_current / 69 MSE; magnetics 33 leaves, 15 inadmissible signal families against 18 admissible geometry leaves; pf_active 20 leaves with all 24 coils on one 480256-sample current time base; tf 7; wall 9. Reading: a physical shot-derived reconstruction, not a geometry-only synthetic reference. Nothing fitted.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T122703596571-diiid-netcdf-content-census/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01bd8-2268-7ff3-bcd9-eb3700561ec8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4514048,
+            "cached_input_tokens_cumulative": 32648960,
+            "input_tokens": 4693668,
+            "input_tokens_cumulative": 33720826,
+            "output_tokens": 22224,
+            "output_tokens_cumulative": 105635,
+            "reasoning_output_tokens": 5486,
+            "reasoning_output_tokens_cumulative": 31512
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260820T122645435195-diiid-netcdf-machine-description",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a72",
+        "node": "diiid-netcdf-machine-description",
+        "role": "implement",
+        "member": "diiid-ids-read",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T12:26:50Z",
+        "completed_at": "2026-08-20T12:44:40Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1070,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1070,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "9417c3cda756583f218a0ebd4b922f775c193ed5",
+        "commits": [
+          "29d0fcd2"
+        ],
+        "changed_lines": {
+          "added": 5495,
+          "removed": 355,
+          "files": 7
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "Static machine description read from the located netCDF through nova's dataclass seam, DD 3.41.0 per IDS, autoconvert=False. Limiter reads UNMODIFIED at 82 vertices, R [1.0173,2.3511] m Z [-1.3589,1.3630] m. pf_active reads after a named rectangle-to-outline routing change preserving 24 coils over 140 elements: ECOILA 48, ECOILB 48, E567UP 6, E567DN 6, E89DN 7, E89UP 7, plus F1A-F9A and F1B-F9B at one element each; the six source-outline elements are F5A/F6A/F7A/F5B/F6B/F7B, independently matching the competition set's six skewed conductors. tf carries only a time-dependent vacuum-field signal and no static geometry, recorded cannot_reach with the signal excluded. pf_passive has NO occurrence: 0 loops, nothing fabricated. IDS COCOS 11 to nova 17 is psi -1, dodpsi -1, Ip +1, B0 +1, q +1, kept separate from corpus COCOS 5. No magnetics signal and no equilibrium label used.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T122645435195-diiid-netcdf-machine-description/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f23-6ec6-7692-aed3-cc2bf2e6bbad",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7034112,
+            "cached_input_tokens_cumulative": 7034112,
+            "input_tokens": 7243772,
+            "input_tokens_cumulative": 7243772,
+            "output_tokens": 31964,
+            "output_tokens_cumulative": 31964,
+            "reasoning_output_tokens": 9421,
+            "reasoning_output_tokens_cumulative": 9421
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260820T124725553217-diiid-poloidal-contour-figures",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a72",
+        "node": "diiid-poloidal-contour-figures",
+        "role": "implement",
+        "member": "diiid-poloidal-figures",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T12:47:31Z",
+        "completed_at": "2026-08-20T13:11:24Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1433,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1433,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "3319ff82ed989b42c7a9fc79f03442810bb0c438",
+        "commits": [
+          "cf2bd3c6"
+        ],
+        "changed_lines": {
+          "added": 1042,
+          "removed": 0,
+          "files": 7
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "outcome": "Four poloidal-plane figures in the imas-ink house style, all on physical R-Z axes in metres with equal aspect: grey unfilled contour lines via colors=#999999 linewidths=0.35, no contourf, no imshow, no colormap; coils unfilled edgecolor #888888 lw 0.4; wall #000000 lw 1.0; separatrix #cc0000 lw 1.5. Style values copied from imas_ink/style.py and cited in the docstring with NO imas-ink dependency added. machine_geometry.png draws all 140 elements but emits exactly 24 labels, fixing the unreadable 140-label rendering. thomson_and_magnetics_geometry.png draws 2 collinearity-derived sightlines AS LINES at 0.0 m maximum fit residual with 70 Thomson points, 76 B-pol and 44 flux-loop positions, and marks the midplane tangential row unrecoverable. plasma_subtraction_sequence.png replaces the grid-index panels with five grey-contour panels on physical axes. competition_psi.png on banked shot d3d_shot_00000c4a7b frame 192 at 4000 ms, whole-grid R-squared 0.9957560317. Equilibrium IDS never opened, no magnetics signal dereferenced.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T124725553217-diiid-poloidal-contour-figures/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f36-5f8a-7212-a4d6-18ab97d716ca",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 10826240,
+            "cached_input_tokens_cumulative": 10826240,
+            "input_tokens": 11041326,
+            "input_tokens_cumulative": 11041326,
+            "output_tokens": 38235,
+            "output_tokens_cumulative": 38235,
+            "reasoning_output_tokens": 12597,
+            "reasoning_output_tokens_cumulative": 12597
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260820T124755270895-diiid-coil-wiring",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a72",
+        "node": "diiid-coil-wiring",
+        "role": "implement",
+        "member": "diiid-forward-gs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T12:48:03Z",
+        "completed_at": "2026-08-20T13:09:07Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1264,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1264,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "3319ff82ed989b42c7a9fc79f03442810bb0c438",
+        "commits": [
+          "a06b7072"
+        ],
+        "changed_lines": {
+          "added": 4872,
+          "removed": 0,
+          "files": 5
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "outcome": "NEGATIVE RESULT CONFIRMED THROUGH THE ACCESS LAYER, not a header grep: pf_active/circuit, pf_active/circuit/connections and pf_active/supply are all unfilled with counts 0/0/0, so the entry declares neither a circuit matrix nor power supplies. Wiring recovered from data instead: all 24 coils share the same 480256-sample time base exactly (max difference 0.0 s) spanning -4.0978 to 19.9150 s, and all 276 off-diagonal pairs classify INDEPENDENT under tolerances fixed beforehand (1e-6 A absolute, 1e-12 relative, 1e-10 proportional residual, 0.9999999999 correlation floor) - 0 common-drive, 0 series-opposition, 0 fixed-ratio. This FALSIFIES the orchestrator's series-ohmic hypothesis. Closest pair ECOILA/E567UP correlates at 0.9999961721 with 316.361 A maximum fixed-ratio residual, still below floor; independence is explicitly qualified as absence of those exact relations, not proof of separate physical supplies. coil.function index 0 on the six ohmic groups, 1 on all eighteen F-coils. Intra-coil series structure is 140 elements across 24 coils.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T124755270895-diiid-coil-wiring/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01bd8-2268-7ff3-bcd9-eb3700561ec8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 14145024,
+            "cached_input_tokens_cumulative": 46793984,
+            "input_tokens": 14300556,
+            "input_tokens_cumulative": 48021382,
+            "output_tokens": 25986,
+            "output_tokens_cumulative": 131621,
+            "reasoning_output_tokens": 7094,
+            "reasoning_output_tokens_cumulative": 38606
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260820T124807290366-diiid-geometry-corroboration",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a72",
+        "node": "diiid-geometry-corroboration",
+        "role": "implement",
+        "member": "diiid-ids-read",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T12:48:14Z",
+        "completed_at": "2026-08-20T13:03:43Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 929,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 929,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "3319ff82ed989b42c7a9fc79f03442810bb0c438",
+        "commits": [
+          "3f654bc9"
+        ],
+        "changed_lines": {
+          "added": 1187,
+          "removed": 0,
+          "files": 5
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "outcome": "19/19 conductors AGREED against the independent description, tolerances fixed before scoring at 2.0 mm centre, 2.0 mm width/height, 0.25 degree skew. Worst observed: 0.215 mm centre, 0.350 mm width, 0.060 mm height, 1.421e-13 degree skew - sub-millimetre across the whole set. Both sources independently name F5A/F6A/F7A/F5B/F6B/F7B and all six agree. F5A RESOLVED: outlines are identical vertex sets to 2.22e-13 mm, so the competition polygon (1.0041,1.5169) m / (0.1392,0.1194) m / 45 degrees is the physical geometry and the 0.2586 m Z bound with 90-degree first edge are representation-dependent bounding and traversal values, NOT a disagreement - the orchestrator's earlier disagree-on-section framing was wrong. netCDF-only coils are ECOILB 48, E567UP 6, E567DN 6, E89DN 7, E89UP 7 = 74 elements, correcting the orchestrator's 116 expectation. Coverage 19 coils/19 elements versus 24 coils/140. Grid encloses the wall with margins +0.1773 inboard, +0.1889 outboard, +0.2411 lower, +0.2370 upper m.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T124807290366-diiid-geometry-corroboration/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f23-6ec6-7692-aed3-cc2bf2e6bbad",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4163072,
+            "cached_input_tokens_cumulative": 11197184,
+            "input_tokens": 4318991,
+            "input_tokens_cumulative": 11562763,
+            "output_tokens": 23451,
+            "output_tokens_cumulative": 55415,
+            "reasoning_output_tokens": 5300,
+            "reasoning_output_tokens_cumulative": 14721
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": {
+          "attempt": 2,
+          "kind": "redispatch",
+          "previous_run_id": "r-20260819T203455937558-diiid-geometry-corroboration",
+          "root_run_id": "r-20260819T203455937558-diiid-geometry-corroboration"
+        }
+      },
+      {
+        "run_id": "r-20260820T125817457993-diiid-current-units-and-turns",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a72",
+        "node": "diiid-current-units-and-turns",
+        "role": "implement",
+        "member": "diiid-current-units",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T12:58:23Z",
+        "completed_at": "2026-08-20T13:20:54Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1351,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1351,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "3319ff82ed989b42c7a9fc79f03442810bb0c438",
+        "commits": [
+          "97a35d9f"
+        ],
+        "changed_lines": {
+          "added": 4196,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "outcome": "Three questions answered. UNITS: pf_active/coil/current/data declares unit A consistently across all 24 coils and turns_with_sign is dimensionless, yet the ohmic maximum 55483.703125 A stands against the F-coil maximum 93.1735795 A - ratio 595.49 - and after declared turns 2631968.4375 versus 5124.546875 A.turn, ratio 513.60. All 340 equilibrium slices carry exactly two X points, so the plasma is genuinely shaped; verdict is a PRODUCER-SIDE UNIT INCONSISTENCY BETWEEN FAMILIES at MEDIUM confidence, qualified because reconstructed topology includes plasma and passive contributions and is not an independent current calibration. TURNS: full table settled - ECOILA 48 at HIGH confidence, closing the prior 1-to-96 bracket; ECOILB 48; E567UP/DN 6; E89UP/DN 7; F1A-F5A and F8A 58; F6A/F7A/F9A 55; same pattern on the B side. Competition schema separately declares fusion_coil_units=kA.turn/v1 while individual Arrow fields carry no unit metadata, recorded explicitly. SHOT IDENTITY: 0/20 matched at HIGH confidence under preregistered exact sample-count equality, 0.01 ms time and 1e-3 A.turn tolerances; 14 shots equal counts, 4 differ by -431104, 2 by -430080; closest time base d3d_shot_0073c37714 at 0.004656 ms with equal counts but channel differences spanning 49600 to 2582027 A.turn and RMS ratios 0.00089 to 55.40. Consumed the wiring receipt by SHA-256 without duplicating its matrix.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T125817457993-diiid-current-units-and-turns/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f40-52f6-7f23-af36-adcdcdaa0665",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8232192,
+            "cached_input_tokens_cumulative": 8232192,
+            "input_tokens": 8426266,
+            "input_tokens_cumulative": 8426266,
+            "output_tokens": 39034,
+            "output_tokens_cumulative": 39034,
+            "reasoning_output_tokens": 13801,
+            "reasoning_output_tokens_cumulative": 13801
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 270
+    "_version": 285
   }
 }

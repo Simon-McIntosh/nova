@@ -373,15 +373,18 @@
       candidates at the three thresholds.</figcaption>
     </figure>
     <figure>
-      <img src="/nova/figures/diiid-forward-onboarding/differencing/plasma_differencing.png"
-           alt="Five panels: labelled flux map, projected plasma flux, vacuum remainder, coil model with gauge, and the remainder minus coil residual"
+      <img src="/nova/figures/diiid-forward-onboarding/poloidal/plasma_subtraction_sequence.png"
+           alt="Five poloidal-plane panels of grey unfilled flux contours on physical R-Z axes: competition label, projected plasma, vacuum remainder, coil model with gauge, and the remainder minus coil residual, each with the limiter and a reference boundary contour"
            style="max-width:100%">
-      <figcaption>The differencing on one frame, and the mechanism is visible rather than argued. The
-      labelled map carries a deep plasma well; the projected plasma flux reproduces it; the vacuum
-      remainder has the well <em>removed</em>, leaving only conductor structure; the coil model is
-      visually indistinguishable from that remainder. The residual is one to two orders of magnitude
-      below the signal and concentrated at high R, exactly where F6/F7/F9 and the vessel sit — which is
-      the passive signal §4 is looking for, not a defect in the coil model.</figcaption>
+      <figcaption>The differencing on one frame, on physical R–Z axes with grey unfilled contours, and
+      the mechanism is visible rather than argued. The labelled map carries closed nested flux surfaces;
+      the projected plasma flux reproduces them; the vacuum remainder has those closed surfaces
+      <em>gone</em>, leaving only smooth conductor field; the coil model is visually indistinguishable
+      from that remainder. The residual is one to two orders of magnitude below the signal and sits at
+      high R where F6/F7/F9 and the vessel are — the passive signal §4 wants, not a defect in the coil
+      model. Shot <code>d3d_shot_00000c4a7b</code>, frame 192 at 4000 ms, banked whole-grid R² 0.995756.
+      The red contour is repeated on the vacuum panels as a fixed spatial reference only; a vacuum field
+      has no separatrix.</figcaption>
     </figure>
     <p><strong>What this settles.</strong> The coil model is verified against a plasma-free field derived
     from the labels themselves, which is what the differencing formulation was locked to deliver. The
@@ -455,6 +458,129 @@
     at the time of writing, immediately after a seventy-commit lineage merge reworked
     <code>fixed_point.py</code> (+233 lines), <code>forward_operator.py</code> (+301) and
     <code>forward.py</code> (+98) — the precise solver path of this defect.</p>
+
+    <h2 id="netcdf-description">§2 the located machine description — wall closed, passive still open — 2026-08-20</h2>
+    <p>Commits <code>7af48b66</code> (census, 4/4 tests), <code>29d0fcd2</code> (description, 3/3),
+    <code>3f654bc9</code> (corroboration, 5/5), <code>a06b7072</code> (wiring, 4/4),
+    <code>97a35d9f</code> (units and turns, 5/5). Source
+    <code>/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc</code> — 441 MB,
+    <code>Conventions = "IMAS"</code>, DD 3.41.0 — read through imas-python's netCDF
+    <code>DBEntry</code> with <code>autoconvert=False</code>. <code>netCDF4</code> was already
+    installed, so the authorised environment sync proved unnecessary and none was performed.</p>
+    <p>This entry supersedes the earlier partial description entirely. Where that one carried four
+    conductors and a fifteen-vertex limiter, this one carries the machine.</p>
+    <table>
+      <caption>What the entry holds, and how each part is admissible. Sixty percent of the file by leaf
+      count is reconstruction product, so the doctrine boundary is load-bearing, not notional.</caption>
+      <thead><tr><th>IDS</th><th>Content</th><th>Admissibility</th></tr></thead>
+      <tbody>
+        <tr><td><code>wall</code></td><td><strong>82-vertex limiter</strong>, R [1.0173, 2.3511] m, Z [−1.3589, 1.3630] m</td><td>machine description — reads <strong>unmodified</strong></td></tr>
+        <tr><td><code>pf_active</code></td><td><strong>24 coils over 140 elements</strong>; ECOILA 48, ECOILB 48, E567UP/DN 6 each, E89UP/DN 7 each, eighteen F-coils at one each</td><td>machine description — reads after a named rectangle-to-outline change</td></tr>
+        <tr><td><code>magnetics</code></td><td>76 B-pol probes, 44 flux loops, Ip, diamagnetic flux</td><td><strong>positions admissible; all 15 signal families NOT admissible</strong></td></tr>
+        <tr><td><code>equilibrium</code></td><td>340 slices, 0.10–7.22 s, constrained by 76 bpol / 44 loops / 24 pf_current / 69 MSE</td><td><strong>all 105 leaves FIREWALLED</strong> — EFIT product</td></tr>
+        <tr><td><code>tf</code></td><td>time-dependent vacuum-field signal, no static conductor geometry</td><td><code>cannot_reach</code>; signal excluded</td></tr>
+        <tr><td><code>pf_passive</code></td><td><strong>no occurrence at all</strong></td><td>— the passive gap is <strong>not</strong> closed</td></tr>
+      </tbody>
+    </table>
+    <p>The census inventoried <strong>174 of 174</strong> backend-populated leaves with zero omitted and
+    zero unclassified: 54 machine description, 15 inadmissible, 105 firewalled. Reading of the pulse
+    itself: a physical shot-derived reconstruction, not a geometry-only synthetic reference.</p>
+    <figure>
+      <img src="/nova/figures/diiid-forward-onboarding/poloidal/machine_geometry.png"
+           alt="Poloidal-plane drawing of the 82-vertex limiter with all 140 pf_active element outlines in unfilled grey, labelled once per coil group"
+           style="max-width:100%">
+      <figcaption>The machine on physical R–Z axes: the 82-vertex limiter in black with all 140
+      <code>pf_active</code> element outlines unfilled in grey. All 140 elements are drawn but exactly
+      24 labels are emitted, one per coil group — labelling per element made the 96-element ohmic stack
+      an illegible overprint in the first rendering, and that is fixed here rather than tolerated.</figcaption>
+    </figure>
+
+    <h3 id="netcdf-corroboration">The shipped geometry is validated at sub-millimetre</h3>
+    <p>Tolerances were fixed before scoring at 2.0 mm centre, 2.0 mm width and height, 0.25° skew.
+    <strong>All 19 conductors agreed</strong>, and the worst case across the whole set was
+    <strong>0.215 mm</strong> centre, <strong>0.350 mm</strong> width, <strong>0.060 mm</strong> height
+    and <strong>1.421e-13°</strong> skew. Both sources independently name the same six skewed
+    conductors — F5A, F6A, F7A, F5B, F6B, F7B — and all six agree. The 65×65 grid encloses the wall,
+    with margins +0.1773 m inboard, +0.1889 m outboard, +0.2411 m lower and +0.2370 m upper.</p>
+    <p><strong>Two earlier claims in this record were wrong and are corrected here.</strong> The F5A
+    "discrepancy" does not exist: the outlines are <em>identical vertex sets</em> to 2.22e-13 mm. The
+    competition polygon — centre (1.0041, 1.5169) m, extent (0.1392, 0.1194) m, 45° — is the physical
+    geometry, and the 0.2586 m Z-bound with a 90° first edge are representation-dependent bounding and
+    traversal values. The earlier "agree on position, disagree on section" reading was the artifact of
+    comparing a bounding box against a polygon, a trap this project has met before. And the omitted
+    element count is <strong>74</strong>, not the 116 the dispatch expected: ECOILB 48 plus E567UP 6,
+    E567DN 6, E89UP 7, E89DN 7.</p>
+    <figure>
+      <img src="/nova/figures/diiid-forward-onboarding/corroboration/conductor_pairing_overlay.png"
+           alt="Both conductor sets overlaid on one poloidal axis with the nineteen matched pairs annotated and the five entry-only coil groups distinctly marked"
+           style="max-width:100%">
+      <figcaption>Both conductor sets on one axis. The nineteen matched pairs are annotated; the five
+      coil groups the shipped table omits are marked distinctly. Nothing was fitted and no coordinate
+      was adjusted to improve agreement.</figcaption>
+    </figure>
+
+    <h3 id="netcdf-wiring">No circuit matrix, no supplies — and the ohmic coils are independent</h3>
+    <p>The declared wiring was looked for and is not there: <code>pf_active/circuit</code>,
+    <code>pf_active/circuit/connections</code> and <code>pf_active/supply</code> are all unfilled at
+    access-layer counts 0/0/0 — confirmed through imas-python, not inferred from a header scan. So there
+    is no connection matrix to read wiring off, and no power supplies are described.</p>
+    <p>Wiring was therefore recovered from the currents themselves. All 24 coils share the same
+    480,256-sample time base <em>exactly</em> (maximum difference 0.0 s, spanning −4.0978 to 19.9150 s),
+    and under tolerances fixed beforehand — 1e-6 A absolute, 1e-12 relative, 1e-10 proportional
+    residual, 0.9999999999 correlation floor — <strong>all 276 off-diagonal pairs classify
+    independent</strong>: zero common-drive, zero series-opposition, zero fixed-ratio.</p>
+    <p><strong>This falsifies a hypothesis recorded earlier in this campaign.</strong> The six ohmic
+    coils' near-identical amplitudes had been read as evidence of one series circuit, which would have
+    meant the shipped <code>ECOILA</code> channel drove all six and the newly available geometry became
+    usable. It does not. The closest pair, ECOILA/E567UP, correlates at 0.9999961721 yet carries a
+    <strong>316.361 A</strong> fixed-ratio residual and sits below the floor. Independence here is
+    correctly qualified as the absence of those exact relations rather than proof of separate physical
+    supplies — but it is more than enough to refuse the inference.</p>
+    <p><strong>The consequence is structural rather than fixable.</strong> The shipped set carries 20
+    current channels — ECOILA, the eighteen F-coils, bcoil — and no channel for ECOILB or the E567/E89
+    set. Those five coils are absent in <em>both</em> geometry and current, and with independence
+    established their currents cannot be recovered from ECOILA. The challenge data structurally cannot
+    represent the full DIII-D ohmic field. One reconciling observation belongs beside that: the
+    differencing gate already reaches per-frame median R² 0.99908 <em>without</em> those five coils, so
+    their omission evidently costs little on the whole-grid vacuum remainder — plausibly absorbed by the
+    per-frame additive flux gauge.</p>
+
+    <h3 id="netcdf-units-turns">Turn counts settled; a producer-side unit inconsistency found</h3>
+    <p><strong>The turn counts the shipped table leaves unresolved are declared here.</strong> ECOILA is
+    <strong>48 turns</strong> at high confidence, closing the 1-to-96 bracket the landed vacuum-gate
+    sensitivity sweep could only span. ECOILB 48; E567UP/DN 6; E89UP/DN 7; F1A–F5A and F8A 58;
+    F6A/F7A/F9A 55; the same pattern on the B side.</p>
+    <p><code>pf_active/coil/current/data</code> declares unit <strong>A</strong> across all 24 coils and
+    <code>turns_with_sign</code> is dimensionless — yet the ohmic family peaks at 55483.703125 A while
+    every shaping coil sits below 93.1735795 A, a ratio of <strong>595.49</strong> raw and
+    <strong>513.60</strong> after declared turns. All 340 reconstructed slices carry exactly two X
+    points, so the discharge is genuinely shaped and sub-100 A shaping currents are not credible. The
+    verdict is a <strong>producer-side unit inconsistency between families</strong> at medium
+    confidence, qualified honestly: reconstructed topology carries plasma and passive contributions and
+    is therefore not an independent current calibration. This is not blocking — the entry drives its
+    forwards from the shipped <code>kA.turn</code> channels and never from this file's currents — and it
+    is carried as a followup so it is resolved before anything uses them, not during.</p>
+    <p><strong>Shot identity: 0 of 20 matched</strong>, at high confidence. Fourteen shots share the
+    exact sample count and the closest time base, <code>d3d_shot_0073c37714</code>, agrees to
+    0.004656 ms — but its channel differences span 49,600 to 2,582,027 A·turn with RMS ratios from
+    0.00089 to 55.40. Shared acquisition infrastructure is established; a shared discharge is refuted.</p>
+    <figure>
+      <img src="/nova/figures/diiid-forward-onboarding/poloidal/thomson_and_magnetics_geometry.png"
+           alt="Poloidal plane with Thomson lines of sight drawn as lines through the collinear scattering-volume strings, the midplane tangential row annotated as unrecoverable, and B-pol probe and flux-loop positions overlaid"
+           style="max-width:100%">
+      <figcaption>Diagnostic geometry, with the Thomson sightlines drawn <em>as lines</em> rather than
+      points: two lines recovered from the collinearity of the vertical scattering-volume strings at
+      0.0 m maximum fit residual and extended to the limiter. Neither source ships endpoint pairs, so
+      these are labelled derived, and the midplane tangential row is marked explicitly as the one whose
+      sightline is <strong>not</strong> recoverable this way. The 76 B-pol probe and 44 flux-loop
+      positions come from the admissible geometry leaves; no signal from either was read.</figcaption>
+    </figure>
+    <p><strong>What remains open, and it is on the critical path.</strong> Wall contour is now sourced,
+    so §5's pseudo-wall can be retired. Passive structure is not: this entry has no
+    <code>pf_passive</code> occurrence, and §4's passive-conductor forwards are this plan's
+    self-declared highest-risk physics. With no readable source anywhere, §4 needs a different answer —
+    inferring the vessel from the 120-frame transient residual bank rather than sourcing its geometry —
+    and that is a plan-level decision rather than an implementation detail.</p>
   </main>
 </body>
 </html>

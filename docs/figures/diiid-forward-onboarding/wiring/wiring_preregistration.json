@@ -1,0 +1,15 @@
+{
+  "declared_before_pairwise_current_comparison": true,
+  "current_absolute_tolerance_A": 1e-06,
+  "current_relative_tolerance": 1e-12,
+  "proportional_residual_relative_tolerance": 1e-10,
+  "proportional_correlation_floor": 0.9999999999,
+  "time_base_absolute_tolerance_s": 0.0,
+  "classification_order": [
+    "identical",
+    "exactly_negated",
+    "proportional",
+    "independent"
+  ],
+  "rationale": "The absolute floor is far below operational PF-current resolution; the relative bounds distinguish shared numeric traces and fixed gains from merely correlated control waveforms."
+}

@@ -400,9 +400,10 @@
     of the solve, which is the property the innovation-purity argument depends on. Initial
     geometry and source waveforms were asserted unchanged.</p>
     <h2 id="window-gradients-blocked">Implicit window gradients &#8212; adjoint proven, one host line blocking</h2>
-    <p>Commit <code>e5c23c5d</code> (node window-implicit-gradients), <strong>held out of
-    main</strong> because its mandatory assertion fails. Recorded here because what it
-    <em>did</em> establish is most of the gate, and because the blocker is precise.</p>
+    <p>Commit <code>e5c23c5d</code> (node window-implicit-gradients), on main with its
+    single test <strong>red</strong>: the mandatory geometry-adapter assertion cannot pass
+    yet. The failure is left visible rather than hidden, because what the node established is
+    most of the gate and its blocker is one precisely located line.</p>
     <p><strong>The adjoint works.</strong> <code>implicit_window_state</code> adds a custom
     VJP that solves the transposed residual-Jacobian system
     R<sub>x</sub><sup>T</sup>&#955; = cotangent and pulls the result back through a single

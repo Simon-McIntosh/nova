@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-20T23:30:21",
+  "updated": "2026-08-20T23:55:22",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -12777,9 +12777,261 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260820T210038345429-diiid-producer-current-scaling",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a72",
+        "node": "diiid-producer-current-scaling",
+        "role": "implement",
+        "member": "diiid-current-units",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T21:01:02Z",
+        "completed_at": "2026-08-20T21:40:01Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2339,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2339,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "fe9d1f221d54e9a558b7e5c28aa032efaa70fc31",
+        "commits": [
+          "04cc6df22bc36bad157efb6a9c07b2bb14cb2938"
+        ],
+        "changed_lines": {
+          "added": 2086,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "outcome": "One scalar does NOT reconcile the netCDF families: best through-origin scalar 164.689 leaves relative L2 residual 0.678; the internal vacuum diagnostic degrades 57.4x at that scale; verdict, these currents may never drive a solve",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T210038345429-diiid-producer-current-scaling/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f40-52f6-7f23-af36-adcdcdaa0665",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 11273728,
+            "cached_input_tokens_cumulative": 19505920,
+            "input_tokens": 11655847,
+            "input_tokens_cumulative": 20082113,
+            "output_tokens": 32423,
+            "output_tokens_cumulative": 71457,
+            "reasoning_output_tokens": 7871,
+            "reasoning_output_tokens_cumulative": 21672
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260820T210136950704-forward-gs-illustration",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a75",
+        "node": "forward-gs-illustration",
+        "role": "implement",
+        "member": "diiid-forward-gs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T21:02:03Z",
+        "completed_at": "2026-08-20T21:31:40Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1777,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1777,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "fe9d1f221d54e9a558b7e5c28aa032efaa70fc31",
+        "commits": [
+          "ddb152e3789a79464fa9868472f7df2a5918c744"
+        ],
+        "changed_lines": {
+          "added": 709,
+          "removed": 0,
+          "files": 7
+        },
+        "tests_added": 6,
+        "gate": "passed",
+        "outcome": "Owner directive delivered: 3/3 named frames converged on the fixed-boundary route at fractional RMS 0.0466/0.0483/0.0292 against the 0.0429 ceiling, interior R-squared 0.9406/0.9299/0.9769, production_gate_passed=false stated on the figure",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T210136950704-forward-gs-illustration/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01bd8-2268-7ff3-bcd9-eb3700561ec8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 16012544,
+            "cached_input_tokens_cumulative": 90762368,
+            "input_tokens": 16484816,
+            "input_tokens_cumulative": 93042543,
+            "output_tokens": 32079,
+            "output_tokens_cumulative": 242683,
+            "reasoning_output_tokens": 8170,
+            "reasoning_output_tokens_cumulative": 74306
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260820T210038349726-diiid-negative-tail-attribution",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a72",
+        "node": "diiid-negative-tail-attribution",
+        "role": "implement",
+        "member": "diiid-vacuum",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T21:01:02Z",
+        "completed_at": "2026-08-20T21:39:58Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2336,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2336,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "fe9d1f221d54e9a558b7e5c28aa032efaa70fc31",
+        "commits": [
+          "99e148ad55cb36aa35090f91c2be005c0542e69c"
+        ],
+        "changed_lines": {
+          "added": 690,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 4,
+        "gate": "not-run",
+        "outcome": "Harness built, tested 4/4 and merged; the authoritative scoring run did not fit the 40-minute fence because the analytic 4225x4225 filament response construction did not finish. Gate bank and preregistration verified byte-identical",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T210038349726-diiid-negative-tail-attribution/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01090-c119-7413-b062-4589e1bc160f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 29231104,
+            "cached_input_tokens_cumulative": 77115648,
+            "input_tokens": 29577729,
+            "input_tokens_cumulative": 78896959,
+            "output_tokens": 34620,
+            "output_tokens_cumulative": 185998,
+            "reasoning_output_tokens": 10661,
+            "reasoning_output_tokens_cumulative": 51724
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260820T202849147824-clipped-cell-surface-moments",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a77",
+        "node": "clipped-cell-surface-moments",
+        "role": "implement",
+        "member": "transport-env",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T20:29:12Z",
+        "completed_at": "2026-08-20T21:53:42Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 5070,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 5070,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "a0798fe28a342dd8fb922ef1dae2ddc917db4e3c",
+        "commits": [
+          "c51c09fcf73d5f77d1de5d5b1fd0dcb6bb04031a"
+        ],
+        "changed_lines": {
+          "added": 437,
+          "removed": 142,
+          "files": 2
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "outcome": "exact clipped-cell quadrature lands and the bandwidth is gone from the module entirely: ITER g2g3 18.39 to 2.63 percent, g0 9.52 to 0.90, g1 18.09 to 2.08, g2 17.94 to 1.98, all under the 5 percent gate; STEP g2g3 25.83 to 8.18, g0 23.98 to 2.29, g2 37.37 to 4.48 with g1 stuck at 16.04. The capacity-truncation hypothesis was tested and FALSIFIED - required vertex count 5 against capacity 8. The three-way split localises the residual instead: on STEP, TORAX and nova own contour route agree with each other far better than either agrees with the clipped route (Phi 0.16 percent between them versus 2.75 and 2.58 against clipped), so the outlier is the clipped route straight edge crossings of a bilinear nodal field against two independent bicubic contour treatments. 42 passed.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T202849147824-clipped-cell-surface-moments/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01023-3e4f-7081-b1ab-24ffbe816152",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 78781440,
+            "cached_input_tokens_cumulative": 78781440,
+            "input_tokens": 81056584,
+            "input_tokens_cumulative": 81056584,
+            "output_tokens": 207137,
+            "output_tokens_cumulative": 207137,
+            "reasoning_output_tokens": 71706,
+            "reasoning_output_tokens_cumulative": 71706
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 342
+    "_version": 346
   }
 }

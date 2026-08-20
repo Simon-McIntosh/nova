@@ -672,6 +672,71 @@
     were all searched), so the comparison stays fa&#231;ade-against-own-entry-point. That half is
     unavoidable in kind rather than a shortcut: no published numbers exist to check against. A
     multi-step trajectory run follows.</p>
+    <h2 id="clipped-cell-moments">Exact clipped-cell moments &#8212; and what the third route revealed</h2>
+    <p>Commit <code>c51c09fc</code>. The shell integrals now come from exact
+    <code>TracedClippedSupports</code> polygon moments contracted with bilinear cell
+    interpolants, with R_in, R_out and the surface top and bottom read from live clipped
+    vertices. <strong>42 passed / 1 deselected in 642 s</strong>, scoped ruff clean. The
+    <code>bandwidth</code> parameter and the Gaussian-CDF whole-cell weighting are gone from the
+    module outright &#8212; zero occurrences remain &#8212; so there is no smoothing left to trade
+    against binning noise.</p>
+    <table>
+      <caption>Relative error against the independently read equilibrium, Gaussian shells
+      &#8594; exact clipped cells. Gate was 5% on the four ITER coefficients.</caption>
+      <thead><tr><th>Field</th><th>ITER before</th><th>ITER after</th><th>STEP before</th><th>STEP after</th></tr></thead>
+      <tbody>
+        <tr><td><code>g2g3_over_rhon</code></td><td>18.39%</td><td><strong>2.63%</strong></td><td>25.83%</td><td>8.18%</td></tr>
+        <tr><td><code>g0</code></td><td>9.52%</td><td><strong>0.90%</strong></td><td>23.98%</td><td>2.29%</td></tr>
+        <tr><td><code>g1</code></td><td>18.09%</td><td><strong>2.08%</strong></td><td>27.20%</td><td>16.04%</td></tr>
+        <tr><td><code>g2</code></td><td>17.94%</td><td><strong>1.98%</strong></td><td>37.37%</td><td>4.48%</td></tr>
+      </tbody>
+    </table>
+    <p>Seven to nine times better on the &#968;-diffusion coefficient, and the integrators were
+    already in the tree &#8212; this was a migration, not an invention.</p>
+
+    <h3>A hypothesis tested and falsified</h3>
+    <p>The orchestrator's guess was that <code>TracedClippedSupports</code>' fixed-capacity
+    padded vertex arrays were silently truncating STEP's low-aspect-ratio cells, which would have
+    explained both the residual and a small regression in one stroke. It was measured directly
+    rather than assumed: <strong>required vertex count 5 against capacity 8</strong> on both
+    equilibria &#8212; three spare slots, nothing truncated. Wrong hypothesis, cheaply killed,
+    and worth recording because the alternative was quietly widening a capacity constant that
+    would have reappeared on the next machine.</p>
+
+    <h3>Two against one</h3>
+    <p><strong>This is what the third route was for.</strong> On STEP, TORAX and Nova's <em>own</em>
+    contour extraction agree with each other markedly better than either agrees with the clipped
+    route:</p>
+    <table>
+      <thead><tr><th>Field</th><th>clipped &#8596; TORAX</th><th>clipped &#8596; contour</th><th>TORAX &#8596; contour</th></tr></thead>
+      <tbody>
+        <tr><td>&#934;</td><td>2.75%</td><td>2.58%</td><td><strong>0.16%</strong></td></tr>
+        <tr><td>&#968;</td><td>1.28%</td><td>1.21%</td><td><strong>0.18%</strong></td></tr>
+        <tr><td><code>vpr</code></td><td>&#8212;</td><td>16.46%</td><td><strong>3.92%</strong></td></tr>
+        <tr><td>volume</td><td>2.85%</td><td>4.14%</td><td><strong>1.25%</strong></td></tr>
+        <tr><td>area</td><td>3.51%</td><td>6.02%</td><td><strong>2.43%</strong></td></tr>
+        <tr><td><code>g1</code></td><td>16.04%</td><td>9.78%</td><td><strong>6.20%</strong></td></tr>
+      </tbody>
+    </table>
+    <p>Two routes agree; one is the outlier; and the two that agree <em>share a method</em>. Both
+    trace a <strong>bicubic</strong> flux interpolant as a contour. The clipped route takes
+    <strong>straight edge crossings of a bilinear nodal field</strong>. So what remains is the
+    within-cell <em>surface representation</em>, not the quadrature &#8212; the quadrature is now
+    exact. That is precisely the deficiency §7's curved-clip items address, which means their
+    motivation has moved from a convergence-rate argument to a measured disagreement between a
+    method and its two independent alternatives.</p>
+    <p>STEP's retained &#934; 2.75%, volume 2.85% and area 3.51% remain <em>degraded</em> against
+    the pre-migration 2.13%, 1.41% and 1.80%, landed attributed to that same method difference
+    rather than recovered by reintroducing smoothing. A named few percent on STEP area is worth
+    more than a hidden 26% on the diffusion coefficient. TORAX's own STEP <code>j_total</code>
+    error of 88.98% stays out of these figures: TORAX warns that its max &#961;&#770; spacing of
+    0.0787&#8211;0.0894 exceeds its own 0.0200 recommendation and distorts differentiated
+    quantities. A direct <code>|F|/R dA</code> toroidal-flux shortcut was tried and rejected for
+    worsening STEP &#934; parity to 4.38%.</p>
+    <p><strong>One caution.</strong> The new two-sided baselines carry a 35% characterisation
+    width &#8212; wide enough that a recorded 2.63% could drift to 3.55% without failing. That is
+    defensible while the method is still moving and should narrow once the curved items settle
+    it.</p>
   </main>
 </body>
 </html>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-20T15:23:04",
+  "updated": "2026-08-20T15:27:14",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -10158,9 +10158,261 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260820T130818341146-geometry-parity-tolerance",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a73",
+        "node": "geometry-parity-tolerance",
+        "role": "implement",
+        "member": "transport-env",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T13:08:26Z",
+        "completed_at": "2026-08-20T13:20:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 743,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 743,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "778bb450c83492d979c6528850bcf40331b33d14",
+        "commits": [
+          "9e1b5ce25736564d7ff05ec2c66b0c08958bcc32"
+        ],
+        "changed_lines": {
+          "added": 69,
+          "removed": 11,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "geometry parity tightened from rtol 0.12 to rtol 1e-10 / atol 1e-12; worst per-field relative error 1.73e-15 across 22 fields; dominant mechanism was TORAX reader-only near-axis Savitzky-Golay normalisation, now reproduced inside the adapter",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T130818341146-geometry-parity-tolerance/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01023-3e4f-7081-b1ab-24ffbe816152",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5441536,
+            "cached_input_tokens_cumulative": 14621440,
+            "input_tokens": 5713082,
+            "input_tokens_cumulative": 15474926,
+            "output_tokens": 15741,
+            "output_tokens_cumulative": 64583,
+            "reasoning_output_tokens": 5353,
+            "reasoning_output_tokens_cumulative": 25482
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260820T130829018593-cocos-sign-round-trip",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a73",
+        "node": "cocos-sign-round-trip",
+        "role": "implement",
+        "member": "transport-cocos",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T13:08:35Z",
+        "completed_at": "2026-08-20T13:18:42Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 607,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 607,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "778bb450c83492d979c6528850bcf40331b33d14",
+        "commits": [
+          "e583d796d162d128eb7131f9b2bd1cf4cb8d9ed2"
+        ],
+        "changed_lines": {
+          "added": 182,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 6,
+        "gate": "passed",
+        "outcome": "six COCOS 17 sign round-trips banked: psi, Ip, F, Phi, pprime, FFprime each flipped alone, forward normalisation and inverse restoration both asserted",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T130829018593-cocos-sign-round-trip/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f49-aac3-7d52-810d-616e52b0ce09",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4425216,
+            "cached_input_tokens_cumulative": 4425216,
+            "input_tokens": 4584165,
+            "input_tokens_cumulative": 4584165,
+            "output_tokens": 21340,
+            "output_tokens_cumulative": 21340,
+            "reasoning_output_tokens": 9206,
+            "reasoning_output_tokens_cumulative": 9206
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260820T130838572447-forward-transport-facade",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a73",
+        "node": "forward-transport-facade",
+        "role": "implement",
+        "member": "transport-facade",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T13:08:45Z",
+        "completed_at": "2026-08-20T13:22:57Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 852,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 852,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "778bb450c83492d979c6528850bcf40331b33d14",
+        "commits": [
+          "95a3dc721ab7fe87eee040d4ec88223712aae984"
+        ],
+        "changed_lines": {
+          "added": 800,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "ForwardTransport facade exposes both landed rungs behind one typed contract with flux, current, boundary, diagnostic and provenance receipts; engine failure raises; TORAX rung currently drives run_simulation rather than the declared make_step_fn, so the rung differentiability the ladder declares is not yet delivered",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T130838572447-forward-transport-facade/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f49-d28d-76c0-a01f-00215a8049e2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5320704,
+            "cached_input_tokens_cumulative": 5320704,
+            "input_tokens": 5469815,
+            "input_tokens_cumulative": 5469815,
+            "output_tokens": 27294,
+            "output_tokens_cumulative": 27294,
+            "reasoning_output_tokens": 9439,
+            "reasoning_output_tokens_cumulative": 9439
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260820T121524305180-map-forcing-attribution",
+        "plan": "solovev-exact-recovery",
+        "section": "\u00a73",
+        "node": "map-forcing-attribution",
+        "role": "implement",
+        "member": "edge-clip",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T12:15:28Z",
+        "completed_at": "2026-08-20T13:26:25Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4257,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4257,
+        "stalled": false,
+        "time_budget": "85m",
+        "base_sha": "9417c3cda756583f218a0ebd4b922f775c193ed5",
+        "commits": [
+          "eed42e520d5f544f50cdb7485cffc74249f47037"
+        ],
+        "changed_lines": {
+          "added": 1040,
+          "removed": 0,
+          "files": 5
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T121524305180-map-forcing-attribution/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00738-f48f-7150-97d1-17307a705e4b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 39080192,
+            "cached_input_tokens_cumulative": 134786816,
+            "input_tokens": 39633318,
+            "input_tokens_cumulative": 138217603,
+            "output_tokens": 42887,
+            "output_tokens_cumulative": 356693,
+            "reasoning_output_tokens": 10737,
+            "reasoning_output_tokens_cumulative": 111429
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 285
+    "_version": 289
   }
 }

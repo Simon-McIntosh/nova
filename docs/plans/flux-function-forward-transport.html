@@ -24,9 +24,9 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-20">
-<meta name="plan-version" content="9">
-<meta name="plan-commits" content="f7af67dc,3a438d1b">
-<meta name="plan-impl" content="0.4">
+<meta name="plan-version" content="10">
+<meta name="plan-commits" content="f7af67dc,3a438d1b,9e1b5ce2,e583d796,95a3dc72">
+<meta name="plan-impl" content="0.43">
 <meta name="plan-blocks" content="imas-ambix:sophelio-entry-master">
 </head>
 <body>
@@ -135,6 +135,15 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260817-transport-geometry" data-who="reckon-ship" data-when="2026-08-17T16:40:00+00:00">
     <div class="r-comment-body">transport-geometry landed: commit 3a438d1b; gate geometry-parity PASSED. The traced FSA record now carries the 13 TORAX-facing face columns the plan listed (volume, enclosed current, the poloidal dl-over-Bp integral, three grad-psi moments, B-squared and inverse-B-squared, inner and outer radii, elongation and both triangularities) plus an inverse-R moment, and a direct StandardGeometry adapter constructs TORAX geometry without the experimental IMAS layer, with explicit outward-flux, positive-current and positive-F normalisation. One TORAX transport step driven from the Nova-built record matches the same case through TORAX own StandardGeometryIntermediates reader and build route at rtol 0.12 and atol 1e-8; shaped analytic validation covers four coarea moments at rtol 0.12, inner/outer radii at rtol 0.04 and atol 0.02 m, elongation at rtol 0.08 and triangularities below 0.12, with a nontrivial 2 by 25 vmap. Tests 2/2 plus the 5/5 FSA regression. TWO QUALIFICATIONS: the 0.12 relative tolerance is loose for a parity claim and should tighten before the record is trusted for the coupled window, and the direct-adapter route is implemented as the working assumption only, so the geometry-handoff decision stays open with this receipt as its evidence rather than being locked from a worker result. Root cause of the earlier blocked attempt was a missing worktree uv sync, not the design.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260820-parity-tolerance" data-who="reckon-ship" data-when="2026-08-20T13:30:00+00:00">
+    <div class="r-comment-body">geometry-parity-tolerance landed - commit 9e1b5ce2; gate geometry PASSED; measure: the Nova-record-driven TORAX step now matches the reader-and-build route at rtol 1e-10 / atol 1e-12, up from rtol 0.12, with 22 geometry fields asserted element-wise at 1e-12 and a worst achieved per-field relative error of 1.73e-15. The dominant mechanism was TORAX reader-only nearest-edge Savitzky-Golay normalisation of the near-axis vpr and grad-psi moments, propagating through volume and area integration, g2g3, psi_from_Ip and j_total, plus TORAX's terminal current-consistent psi stencil; the direct JAX adapter now reproduces all three, confined to the adapter boundary so the FSA record and the native rung keep their exact coarea moments. No field remains above rtol 1e-3, so the qualification the geometry landing left on this page is closed. Tests 31 passed / 1 deselected. Artifacts: parity-metrics.tsv in the run directory.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260820-cocos-signs" data-who="reckon-ship" data-when="2026-08-20T13:31:00+00:00">
+    <div class="r-comment-body">cocos-sign-round-trip landed - commit e583d796; gate COCOS PASSED; measure: 6/6 tests green in 34.1 s in tests/test_transport_cocos.py, asserting forward normalisation and inverse restoration for psi, Ip, F, Phi, pprime and FFprime with each of the six signs flipped alone. Provenance pinned as COCOS 17 digits (-1, +1, +1, +1) with e_bp = 1, so Nova psi is total poloidal flux in Wb; the psi and both flux-function-derivative assertions pin reciprocal flux_sign factors, and the Ip, F and Phi assertions pin TORAX's absolute-value normalisation against restoration from provenance.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260820-facade" data-who="reckon-ship" data-when="2026-08-20T13:32:00+00:00">
+    <div class="r-comment-body">forward-transport-facade landed - commit 95a3dc72; gate physics PASSED; measure: 31 passed / 1 deselected in 26.0 s. nova/transport/forward.py exposes ForwardTransport over both landed rungs behind one frozen typed input, returning flux-consumption, plasma-current, achieved-boundary, solver-diagnostic and provenance receipts; the flux ledger asserts boundary = resistive + internal, input snapshots stay byte-for-byte unchanged with read-only arrays, and a non-NO_ERROR TORAX status raises TransportEngineError before any output access so no state can be fabricated. The same prepared configuration run through TORAX's own entry point matches the facade to rtol 1e-10 / atol 1e-12 on psi, T_i and T_e and atol 1e8 m^-3 on n_e. ONE QUALIFICATION: the TORAX rung drives run_simulation, not the make_step_fn step API the fidelity ladder declares for it, so that rung's declared grad-through-steps differentiability is not yet delivered and the coupled window cannot drive it step-wise; a corrective node returns to the same member before the return channel is built.</div>
 </div>
 </section>
 </main>

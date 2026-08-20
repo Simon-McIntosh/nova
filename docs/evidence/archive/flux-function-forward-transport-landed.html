@@ -60,6 +60,118 @@
     falling back to a system Python that cannot parse this checkout). The implementation was
     sound; the dispatch omitted worktree provisioning. Adding an explicit
     <code>uv sync --extra test</code> to the redispatch was the entire fix.</p>
+    <h2 id="adapter-boundary-closed">Geometry adapter boundary closed — 2026-08-20</h2>
+    <p>Two nodes landed in one wave and together retire both open questions about the
+    Nova&#8594;TORAX geometry boundary: it is now faithful to machine precision, and every sign
+    it carries is pinned in both directions.</p>
+
+    <h3>Parity at numerical precision</h3>
+    <p>Commit <code>9e1b5ce2</code> (node geometry-parity-tolerance, 876 s wall). The
+    one-step assertion moved from <strong>rtol 0.12, atol 1e-8</strong> to
+    <strong>rtol 1e-10, atol 1e-12</strong>, and 22 geometry fields are now compared
+    element-wise against the reader-built geometry at rtol = atol = 1e-12. The
+    <strong>worst per-field relative error after repair is 1.73e-15</strong>; nothing
+    remains above rtol 1e-3, so the qualification the adapter landing left on this page has
+    no residual mechanism to name.</p>
+    <p>The 12% was not a discretisation limit — it was a <em>reader-only</em> operation the
+    direct route skipped. TORAX's <code>StandardGeometryIntermediates</code> path applies a
+    nearest-edge five-point Savitzky&#8211;Golay normalisation to the near-axis
+    <code>vpr</code> and &#8711;&#968; moments (order 1 for <code>vpr</code> and
+    &#10216;|&#8711;&#968;|&#10217;, order 2 for the two second moments, inside
+    &#961;&#770; &#8776; 0.1), then integrates volume and area <em>from the smoothed
+    profiles</em>, and closes <code>psi_from_Ip</code> with a one-sided terminal stencil.
+    Each of those propagated: into <code>g2g3</code>, into <code>j_total</code>, and through
+    to the stepped &#968;. The adapter now reproduces all three.</p>
+    <p><strong>Where the smoothing lives matters.</strong> It is applied inside
+    <code>torax_geometry_from_fsa</code> only — the same boundary that already applies the
+    outward-flux, positive-current and positive-F sign normalisations. The traced FSA record
+    and the native &#968;-diffusion rung keep their exact coarea moments, so this is a
+    convention adopted at the handoff, not an approximation pushed back into Nova's physics.
+    <code>current_diffusion.py</code> was not touched.</p>
+    <table>
+      <caption>Maximum relative error against the reader-built geometry, before &#8594; after.
+      Fields already exact (<code>g3</code>, <code>gm4</code>, <code>gm5</code>,
+      <code>F</code>, <code>R_in</code>, <code>R_out</code>, <code>elongation</code>, both
+      triangularities) are omitted.</caption>
+      <thead><tr><th>Field</th><th>before</th><th>after</th></tr></thead>
+      <tbody>
+        <tr><td><code>Phi_face</code></td><td>1.53e-16</td><td>1.53e-16</td></tr>
+        <tr><td><code>volume_face</code></td><td>9.79e-03</td><td>1.29e-16</td></tr>
+        <tr><td><code>area_face</code></td><td>4.35e-03</td><td>1.52e-16</td></tr>
+        <tr><td><code>vpr_face</code></td><td>4.61e-02</td><td>3.42e-16</td></tr>
+        <tr><td><code>spr_face</code></td><td>4.61e-02</td><td>2.69e-16</td></tr>
+        <tr><td><code>g0_face</code></td><td>8.60e-03</td><td>1.43e-16</td></tr>
+        <tr><td><code>g1_face</code></td><td>9.58e-04</td><td>1.79e-16</td></tr>
+        <tr><td><code>g2_face</code></td><td>9.42e-04</td><td>1.98e-16</td></tr>
+        <tr><td><code>g2g3_over_rhon_face</code></td><td>2.14e-02</td><td>4.20e-16</td></tr>
+        <tr><td><code>psi_from_Ip_face</code></td><td>2.13e-02</td><td>8.43e-17</td></tr>
+        <tr><td><code>j_total_face</code></td><td>3.89e-01</td><td>1.73e-15</td></tr>
+        <tr><td>TORAX step psi (pointwise)</td><td>8.57e-02</td><td>7.39e-16</td></tr>
+        <tr><td>TORAX step psi (scale-normalised)</td><td>1.08e-02</td><td>1.69e-16</td></tr>
+      </tbody>
+    </table>
+    <p>Tests: 31 passed, 1 deselected (2 geometry + 28 current-diffusion + 1 environment) in
+    93.9 s, plus the focused CPU parity test green in 56.6 s. Per-field figures are preserved
+    as <code>parity-metrics.tsv</code> in the run directory. One incidental fact worth
+    keeping: the first parity re-measurement hit a transient GPU command-buffer OOM on the
+    login node, and the log was retained rather than overwritten — the CPU re-run is the
+    quoted result.</p>
+    <p><strong>What is still loose, deliberately.</strong> The <em>shaped analytic</em>
+    validation — the coarea moments against a closed-form flux surface — still asserts
+    rtol 0.12. That is a different claim from parity: it measures the coarea kernel's own
+    accuracy at the test grid resolution, not agreement between two routes, and it was not
+    in this node's scope. It remains a candidate for its own measurement.</p>
+
+    <h3>COCOS 17 sign round-trips</h3>
+    <p>Commit <code>e583d796</code> (node cocos-sign-round-trip, 868 s wall).
+    <code>tests/test_transport_cocos.py</code> banks <strong>6/6 green in 34.1 s</strong>,
+    one case per independently flipped sign, asserting the forward normalisation
+    <em>and</em> the inverse restoration for all six transported quantities. Provenance is
+    pinned as <strong>COCOS 17, digits (&#8722;1, +1, +1, +1) with e_bp = 1</strong>, so Nova
+    &#968; is total poloidal flux in Wb.</p>
+    <table>
+      <thead><tr><th>Quantity</th><th>What the assertion pins</th></tr></thead>
+      <tbody>
+        <tr><td>&#968;</td><td>multiplication by <code>flux_sign</code> to make TORAX &#968; increase outward, and by the same factor on return</td></tr>
+        <tr><td>I_p</td><td>TORAX <code>abs(Ip_profile_face)</code> in A, with the input current sign restored from provenance</td></tr>
+        <tr><td>F</td><td>TORAX <code>abs(F_face)</code> in T&#183;m, with the field-function branch sign restored from provenance</td></tr>
+        <tr><td>&#934;</td><td>positive <code>abs(Phi_b)</code> in Wb, its <code>rho_face**2</code> expansion, and toroidal-flux polarity restored from provenance</td></tr>
+        <tr><td>p&#8242;</td><td>the reciprocal &#968;-orientation factor on dp/d&#968; in Pa/Wb, both directions</td></tr>
+        <tr><td>FF&#8242;</td><td>the same reciprocal &#968;-orientation factor on F&#183;dF/d&#968;, both directions</td></tr>
+      </tbody>
+    </table>
+    <p>This is the gate TORAX's undeclared-COCOS status (upstream issue open since 2024) made
+    mandatory: the boundary is now tested rather than trusted.</p>
+
+    <h2 id="forward-transport-facade">ForwardTransport facade — 2026-08-20</h2>
+    <p>Commit <code>95a3dc72</code> (node forward-transport-facade, 859 s wall). One public
+    entry point, <strong>31 passed / 1 deselected in 26.0 s</strong>.
+    <code>nova/transport/forward.py</code> carries both landed rungs behind one frozen typed
+    input (<code>TransportGeometry</code>, <code>TransportState</code>,
+    <code>TransportWaveforms</code>, <code>TransportModel</code>) and returns one
+    <code>ForwardTransportReceipt</code>: a flux-consumption ledger, a plasma-current
+    ledger, achieved boundary values, solver diagnostics, and provenance carrying the rung
+    as <code>native-psi-diffusion</code> or <code>torax-multi-channel</code>.</p>
+    <p>The receipts are asserted, not merely present: the flux ledger closes as
+    <em>boundary = resistive + internal</em>; 4 current-ledger values, 5 achieved boundary
+    values and 4 solver diagnostics are checked; all four TORAX channels (T_i, T_e, n_e,
+    &#968;) come back. Two invariants the plan demands are tested directly — every input
+    channel snapshot stays <strong>byte-for-byte unchanged</strong> with its stored arrays
+    read-only, and a non-<code>NO_ERROR</code> TORAX status raises
+    <code>TransportEngineError</code> <em>before</em> any output access, so a zero-filled or
+    otherwise fabricated state cannot escape. Running the identical prepared configuration
+    through TORAX's own entry point reproduces the facade state at rtol 1e-10 / atol 1e-12
+    on &#968;, T_i and T_e, and atol 1e8 m&#8315;&#179; on n_e.</p>
+    <p><strong>One qualification, and it is load-bearing.</strong> The TORAX rung drives
+    <code>run_simulation</code> — a whole-run call — where the fidelity ladder declares
+    <code>make_step_fn</code> for that rung. Two consequences follow. The rung's declared
+    <em>grad-through-steps</em> differentiability is not delivered, because
+    <code>run_simulation</code> owns its own adaptive time loop and output writing; and the
+    coupled window cannot drive this rung step-wise, which is the entire mechanism &#167;3.7
+    specifies. The engine-failure guard removes the silent-degradation risk that whole-run
+    calls are criticised for, so the landing is sound as far as it goes — but a corrective
+    node returns to the same member to move the rung onto the step API before the return
+    channel and the window are built on it.</p>
   </main>
 </body>
 </html>

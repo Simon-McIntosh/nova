@@ -1,0 +1,83 @@
+{
+  "fixture_miss_mechanism": "bypassed existing persistent cache architecture",
+  "source_contract": {
+    "fixture_builder_is_direct": true,
+    "fixture_has_process_local_machine_memo": true,
+    "machine_group_uses_semantic_hash": true,
+    "machine_store_rejects_identity_drift": true,
+    "observation_rescore_calls_direct_builder": true,
+    "root_attribution_calls_direct_builder": true,
+    "seed_adjudication_calls_direct_builder": true
+  },
+  "stores": {
+    "production_coupling": {
+      "key": "machine semantic identity plus method group name",
+      "status": "cached_and_reused_with_machine",
+      "store": "<machine-store>/<machine-key>/<method-name>"
+    },
+    "production_machine": {
+      "key": "xxh64(canonical_key(Machine.group_attrs))",
+      "status": "cached_and_reused",
+      "store": "${user_data_dir}/nova/${nova_version}/${machine_filename}.zarr"
+    },
+    "production_plasma_grid": {
+      "key": "machine semantic identity plus method group name",
+      "status": "cached_and_reused_with_machine",
+      "store": "<machine-store>/<machine-key>/plasmagrid and plasmawall"
+    },
+    "reference_coarse": {
+      "key": null,
+      "status": "rebuilt_per_standalone_run",
+      "store": null
+    },
+    "reference_fine": {
+      "key": null,
+      "status": "rebuilt_per_standalone_run",
+      "store": null
+    }
+  },
+  "timings": {
+    "coarse": {
+      "cold_max_seconds": 1157,
+      "cold_median_seconds": 794,
+      "cold_min_seconds": 785,
+      "cold_samples": [
+        {
+          "log": "/home/ITER/mcintos/Code/nova/scripts/root_gate_attribution/run.log",
+          "seconds": 785
+        },
+        {
+          "log": "/home/ITER/mcintos/Code/nova/scripts/analytic_seed_adjudication/run.log",
+          "seconds": 794
+        },
+        {
+          "log": "/home/ITER/mcintos/Code/nova/scripts/observation_clip_rescore/run.log",
+          "seconds": 1157
+        }
+      ],
+      "warm_measurement_blocker": "the standalone consumers call build_machine directly and no persistent fixture entry exists to load",
+      "warm_samples": []
+    },
+    "fine": {
+      "cold_max_seconds": 3260,
+      "cold_median_seconds": 2614,
+      "cold_min_seconds": 2278,
+      "cold_samples": [
+        {
+          "log": "/home/ITER/mcintos/Code/nova/scripts/root_gate_attribution/run.log",
+          "seconds": 2278
+        },
+        {
+          "log": "/home/ITER/mcintos/Code/nova/scripts/analytic_seed_adjudication/run.log",
+          "seconds": 2614
+        },
+        {
+          "log": "/home/ITER/mcintos/Code/nova/scripts/observation_clip_rescore/fine-run.log",
+          "seconds": 3260
+        }
+      ],
+      "warm_measurement_blocker": "the standalone consumers call build_machine directly and no persistent fixture entry exists to load",
+      "warm_samples": []
+    }
+  }
+}

@@ -1,0 +1,110 @@
+{
+  "competition_frame": {
+    "banked_whole_grid_r2": 0.9957560317083745,
+    "frame": 192,
+    "shot": "d3d_shot_00000c4a7b.parquet",
+    "time_ms": 4000.0
+  },
+  "content_fence": {
+    "competition_columns": [
+      "efit_times",
+      "efit_grid_R",
+      "efit_grid_Z",
+      "efit_psirz",
+      "efit_r_axis",
+      "efit_z_axis",
+      "efit_lcfs_n",
+      "efit_lcfs_r",
+      "efit_lcfs_z",
+      "thomson_chord_name",
+      "thomson_chord_R",
+      "thomson_chord_Z",
+      "coil_name",
+      "coil_input_column",
+      "coil_R",
+      "coil_Z",
+      "coil_width",
+      "coil_height",
+      "coil_angle1",
+      "coil_angle2",
+      "magnetics_time",
+      "magnetics_F1A",
+      "magnetics_F2A",
+      "magnetics_F3A",
+      "magnetics_F4A",
+      "magnetics_F5A",
+      "magnetics_F6A",
+      "magnetics_F7A",
+      "magnetics_F8A",
+      "magnetics_F9A",
+      "magnetics_F1B",
+      "magnetics_F2B",
+      "magnetics_F3B",
+      "magnetics_F4B",
+      "magnetics_F5B",
+      "magnetics_F6B",
+      "magnetics_F7B",
+      "magnetics_F8B",
+      "magnetics_F9B",
+      "magnetics_ECOILA"
+    ],
+    "netcdf_equilibrium_ids_opened": false,
+    "netcdf_magnetics_signal_arrays_read": []
+  },
+  "diagnostic_geometry": {
+    "bpol_probe_positions": 76,
+    "derived_from": "collinearity of core and divertor coordinate strings",
+    "derived_sightlines": 2,
+    "flux_loop_positions": 44,
+    "maximum_collinearity_residual_m": 0.0,
+    "tangential_sightline": "not recoverable from projected coordinate row",
+    "thomson_points": 70
+  },
+  "figure_count": 4,
+  "figures": [
+    "docs/figures/diiid-forward-onboarding/poloidal/machine_geometry.png",
+    "docs/figures/diiid-forward-onboarding/poloidal/competition_psi.png",
+    "docs/figures/diiid-forward-onboarding/poloidal/plasma_subtraction_sequence.png",
+    "docs/figures/diiid-forward-onboarding/poloidal/thomson_and_magnetics_geometry.png"
+  ],
+  "machine_geometry": {
+    "active_coils": 24,
+    "active_elements": 140,
+    "coil_labels": 24,
+    "dd_versions": {
+      "magnetics": "3.41.0",
+      "pf_active": "3.41.0",
+      "wall": "3.41.0"
+    },
+    "label_unit": "one label per coil",
+    "limiter_vertices": 82,
+    "source": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc"
+  },
+  "physical_axes": "R-Z in metres with equal aspect",
+  "rendering": {
+    "colormap_used": false,
+    "contourf_used": false,
+    "flux": "unfilled contour lines via colors and linewidths",
+    "imshow_used": false,
+    "style": {
+      "coil_edgecolor": "#888888",
+      "coil_facecolor": "none",
+      "coil_linewidth": 0.4,
+      "contour_color": "#999999",
+      "contour_linewidth": 0.35,
+      "figure_dpi": 120,
+      "flux_color": "#3366cc",
+      "flux_linewidth": 0.7,
+      "flux_loop_color": "#666666",
+      "flux_loop_markersize": 3.0,
+      "label_fontsize": 8.0,
+      "probe_color": "#888888",
+      "probe_markersize": 2.5,
+      "separatrix_color": "#cc0000",
+      "separatrix_linewidth": 1.5,
+      "wall_color": "#000000",
+      "wall_linewidth": 1.0
+    },
+    "style_source": "/home/ITER/mcintos/Code/imas-ink/imas_ink/style.py"
+  }
+}

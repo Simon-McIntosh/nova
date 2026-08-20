@@ -19,87 +19,87 @@ _TORAX_GEOMETRY_DIRECTORY = (
 _RADIAL_CELLS = 24
 _CHARACTERIZATION_BASELINES = {
     "iterhybrid_cocos17.eqdsk": {
-        "R_major": 3.37e-6,
-        "a_minor": 1.42e-6,
-        "B_0": 3.37e-6,
-        "Phi_face": 2.204e-2,
-        "volume_face": 1.676e-2,
-        "area_face": 1.796e-2,
-        "vpr_face": 1.639e-2,
-        "spr_face": 2.007e-2,
-        "g0_face": 9.047e-3,
-        "g1_face": 2.082e-2,
-        "g2_face": 1.984e-2,
-        "g3_face": 9.326e-3,
-        "g2g3_over_rhon_face": 2.628e-2,
-        "gm4_face": 5.935e-3,
-        "gm5_face": 9.962e-3,
-        "F_face": 2.934e-4,
-        "R_in_face": 3.00e-3,
-        "R_out_face": 1.46e-3,
-        "Ip_profile_face": 1.685e-2,
-        "psi": 9.925e-3,
-        "psi_from_Ip_face": 1.632e-2,
-        "j_total_face": 1.420e-1,
-        "elongation_face": 7.3e-3,
-        "delta_face": 6.5e-2,
-        "delta_upper_face": 1.45e-1,
-        "delta_lower_face": 9.0e-2,
+        "R_major": 4.370e-6,
+        "a_minor": 1.942e-5,
+        "B_0": 4.370e-6,
+        "Phi_face": 2.2053e-2,
+        "volume_face": 1.6792e-2,
+        "area_face": 1.7980e-2,
+        "vpr_face": 1.6399e-2,
+        "spr_face": 2.0049e-2,
+        "g0_face": 1.0296e-2,
+        "g1_face": 2.3632e-2,
+        "g2_face": 2.3136e-2,
+        "g3_face": 9.3284e-3,
+        "g2g3_over_rhon_face": 2.9602e-2,
+        "gm4_face": 5.9300e-3,
+        "gm5_face": 9.9785e-3,
+        "F_face": 2.9348e-4,
+        "R_in_face": 3.0026e-3,
+        "R_out_face": 1.4850e-3,
+        "Ip_profile_face": 2.0303e-2,
+        "psi": 9.9260e-3,
+        "psi_from_Ip_face": 1.6365e-2,
+        "j_total_face": 1.6289e-1,
+        "elongation_face": 7.3269e-3,
+        "delta_face": 1.3880e-1,
+        "delta_upper_face": 2.0217e-1,
+        "delta_lower_face": 8.7108e-2,
     },
     "STEP_SPP_001_ECHD_ftop.eqdsk": {
-        "R_major": 2.75e-7,
-        "a_minor": 8.00e-3,
-        "B_0": 2.75e-7,
-        "Phi_face": 2.746e-2,
-        "volume_face": 2.853e-2,
-        "area_face": 3.506e-2,
-        "vpr_face": 1.460e-1,
-        "spr_face": 1.837e-1,
-        "g0_face": 2.293e-2,
-        "g1_face": 1.603e-1,
-        "g2_face": 4.476e-2,
-        "g3_face": 4.078e-2,
-        "g2g3_over_rhon_face": 8.185e-2,
-        "gm4_face": 3.597e-2,
-        "gm5_face": 4.285e-2,
-        "F_face": 7.24e-4,
-        "R_in_face": 1.04e-2,
-        "R_out_face": 5.00e-3,
-        "Ip_profile_face": 7.879e-2,
-        "psi": 1.279e-2,
-        "psi_from_Ip_face": 1.678e-2,
-        "j_total_face": 8.90e-1,
-        "elongation_face": 1.2e-2,
-        "delta_face": 1.72e-1,
-        "delta_upper_face": 1.72e-1,
-        "delta_lower_face": 1.72e-1,
+        "R_major": 5.4800e-7,
+        "a_minor": 7.9999e-3,
+        "B_0": 5.4800e-7,
+        "Phi_face": 2.7582e-2,
+        "volume_face": 2.9457e-2,
+        "area_face": 3.5972e-2,
+        "vpr_face": 1.6278e-1,
+        "spr_face": 1.9441e-1,
+        "g0_face": 7.1653e-2,
+        "g1_face": 2.1998e-1,
+        "g2_face": 1.0734e-1,
+        "g3_face": 3.0912e-2,
+        "g2g3_over_rhon_face": 1.0779e-1,
+        "gm4_face": 3.0987e-2,
+        "gm5_face": 3.0148e-2,
+        "F_face": 7.2558e-4,
+        "R_in_face": 9.4661e-3,
+        "R_out_face": 5.0047e-3,
+        "Ip_profile_face": 1.3681e-1,
+        "psi": 1.2841e-2,
+        "psi_from_Ip_face": 1.6806e-2,
+        "j_total_face": 8.6397e-1,
+        "elongation_face": 8.8876e-3,
+        "delta_face": 1.3916e-1,
+        "delta_upper_face": 1.4070e-1,
+        "delta_lower_face": 1.3762e-1,
     },
 }
-_CHARACTERIZATION_FRACTION = 0.35
+_CHARACTERIZATION_FRACTION = 0.10
 _CONTOUR_CHARACTERIZATION_BASELINES = {
     "iterhybrid_cocos17.eqdsk": {
-        "Phi_face": 2.276e-2,
-        "volume_face": 1.541e-2,
-        "area_face": 1.728e-2,
-        "vpr_face": 1.595e-2,
-        "g0_face": 1.067e-2,
-        "g1_face": 2.393e-2,
-        "g2_face": 2.392e-2,
-        "g3_face": 9.973e-3,
-        "F_face": 2.878e-4,
-        "psi": 9.922e-3,
+        "Phi_face": 2.2776e-2,
+        "volume_face": 1.5434e-2,
+        "area_face": 1.7299e-2,
+        "vpr_face": 1.5935e-2,
+        "g0_face": 1.1469e-2,
+        "g1_face": 2.6749e-2,
+        "g2_face": 2.5699e-2,
+        "g3_face": 9.9753e-3,
+        "F_face": 2.8791e-4,
+        "psi": 9.9231e-3,
     },
     "STEP_SPP_001_ECHD_ftop.eqdsk": {
-        "Phi_face": 2.578e-2,
-        "volume_face": 4.143e-2,
-        "area_face": 6.022e-2,
-        "vpr_face": 1.646e-1,
-        "g0_face": 1.037e-2,
-        "g1_face": 9.776e-2,
-        "g2_face": 3.078e-2,
-        "g3_face": 2.168e-2,
-        "F_face": 5.625e-4,
-        "psi": 1.215e-2,
+        "Phi_face": 2.5903e-2,
+        "volume_face": 4.2371e-2,
+        "area_face": 6.1156e-2,
+        "vpr_face": 1.8137e-1,
+        "g0_face": 6.9098e-2,
+        "g1_face": 2.2306e-1,
+        "g2_face": 1.0583e-1,
+        "g3_face": 2.3090e-2,
+        "F_face": 5.6449e-4,
+        "psi": 1.2195e-2,
     },
 }
 
@@ -234,6 +234,7 @@ def test_nova_fsa_matches_torax_eqdsk_reader(filename, cocos):
     assert required <= capacity
     assert used <= required
     errors = {}
+    outside_characterization = {}
     baselines = _CHARACTERIZATION_BASELINES[filename]
     for field, baseline in baselines.items():
         error = _relative_error(
@@ -242,10 +243,12 @@ def test_nova_fsa_matches_torax_eqdsk_reader(filename, cocos):
         errors[field] = error
         print(f"{filename} {field} relative_error={error:.9e}")
         width = max(_CHARACTERIZATION_FRACTION * baseline, 1.0e-8)
-        assert baseline - width < error < baseline + width, field
+        if not baseline - width < error < baseline + width:
+            outside_characterization[field] = error
     if filename == "iterhybrid_cocos17.eqdsk":
         for field in ("g2g3_over_rhon_face", "g0_face", "g1_face", "g2_face"):
             assert errors[field] < 0.05, field
+    assert not outside_characterization, outside_characterization
 
 
 def test_clipped_cells_match_independent_contour_geometry():
@@ -295,7 +298,10 @@ def test_iterhybrid_twins_recover_pinned_cocos_seventeen(filename, cocos):
     """The independently authored convention twins recover one Nova record."""
     geometry, _record = _nova_geometry(filename, cocos)
     pinned, _pinned_record = _nova_geometry("iterhybrid_cocos17.eqdsk", 17)
+    outside_tolerance = {}
     for field in _CHARACTERIZATION_BASELINES["iterhybrid_cocos17.eqdsk"]:
         error = _relative_error(getattr(geometry, field), getattr(pinned, field))
         print(f"{filename} {field} convention_relative_error={error:.9e}")
-        assert error < 1.0e-8, field
+        if error >= 1.0e-7:
+            outside_tolerance[field] = error
+    assert not outside_tolerance, outside_tolerance

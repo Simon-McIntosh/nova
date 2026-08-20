@@ -438,6 +438,36 @@
     <p>The node stopped at its fence rather than reaching into
     <code>nova/transport/torax_geometry.py</code>, which is why the diagnosis is this clean. A
     wider-scoped node continues on the same member, based on this commit.</p>
+    <h3>Resolved, and the whole fix is one line</h3>
+    <p>Commit <code>71b37c2e</code> (node traced-geometry-mesh-gradient).
+    <code>Grid1D(face_centers=np.asarray(rho_face))</code> became
+    <code>Grid1D(nx=rho_face.size - 1)</code>. That works because <code>.size</code> is a
+    static shape attribute a tracer carries happily, while <code>asarray</code> is a
+    conversion it refuses &#8212; and the <code>numpy</code> import left the module with it, so
+    the adapter is now pure <code>jnp</code> end to end. <strong>15 passed, exit 0</strong>:
+    the red test is green.</p>
+    <table>
+      <thead><tr><th>Measure</th><th>Achieved</th><th>What it establishes</th></tr></thead>
+      <tbody>
+        <tr><td>gradient vs central differences</td><td>rtol 2.0e&#8722;08, atol 2.0e&#8722;10</td><td>the adjoint is right</td></tr>
+        <tr><td>iteration caps 24 and 48 agree</td><td>atol 2.0e&#8722;13</td><td>the path is implicit, not unrolled &#8212; an unrolled gradient moves with the trip count</td></tr>
+        <tr><td>fixed-point exit residual</td><td>&#8804; 1.0e&#8722;13</td><td>the window really converged before differentiating</td></tr>
+        <tr><td>22-field geometry parity</td><td>rtol 1e&#8722;12 retained</td><td>the mesh change is behaviour-preserving</td></tr>
+        <tr><td>one-step TORAX parity</td><td>rtol 1e&#8722;10 retained</td><td>&#8221;</td></tr>
+      </tbody>
+    </table>
+    <p>The acceptance direction perturbs <code>source_strength</code> and reaches the adapter
+    through &#934;_b <em>inside the same differentiated call</em>, so the geometry leg is on the
+    gradient path rather than merely traced alongside it. Mesh topology and cell count stay
+    static Pydantic structure and cannot carry a gradient; changing topology needs a
+    separately traced solve.</p>
+    <p><strong>One thing this fix opens, found at review.</strong>
+    <code>Grid1D(nx=...)</code> implies the uniform normalised mesh, so a record carrying a
+    <em>non-uniform</em> <code>rho_face</code> would now be re-gridded onto a uniform mesh
+    without complaint. In TORAX that coordinate is uniform by construction and the reader path
+    builds its mesh the same way, so no current input is affected &#8212; but §1 of this plan
+    states the solve "never rescales its inputs silently", and a silently substituted
+    coordinate grid is exactly that. A guard node follows rather than a note.</p>
   </main>
 </body>
 </html>

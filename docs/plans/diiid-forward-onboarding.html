@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-20">
-<meta name="plan-version" content="21">
+<meta name="plan-version" content="22">
 <meta name="plan-commits" content="7d9743fd,92a4a00e,685a7602,11bac959,26a06b78,4ae27c42,52e4ad17,d1aaa089,a6f8bdf4,86f6f38a,10b5c850,e2ffa796,10049a7a,db55fe58,a3d7e947,7af48b66,29d0fcd2,cf2bd3c6,a06b7072,3f654bc9,97a35d9f">
 <meta name="plan-impl" content="0.72">
 <meta name="plan-artifacts" content="docs/figures/diiid-forward-onboarding/machine-description/machine_description_receipt.json,docs/figures/diiid-forward-onboarding/machine-description/conductor_sections.png,docs/figures/diiid-forward-onboarding/machine-description/skewed_conductor_sections.png,docs/figures/diiid-forward-onboarding/machine-description/thomson_grid_extent.png,docs/figures/diiid-forward-onboarding/differencing/quiescent_selection.png,docs/figures/diiid-forward-onboarding/differencing/plasma_differencing.png,docs/figures/diiid-forward-onboarding/cocos/corpus_cocos_receipt.json,docs/figures/diiid-forward-onboarding/cocos/corpus_cocos_discriminators.png,/work/projects/imas_gpu/sophelio/vacuum-gate/diiid_plasma_subtraction_gate.json,/work/projects/imas_gpu/sophelio/vacuum-gate/diiid_transient_plasma_subtracted_residuals.jsonl">
@@ -149,6 +149,36 @@
     assumed compute envelope with a measured one.</p>
     <p><strong>Done-when:</strong> budget table published (device, batch, precision, convergence policy);
     conditioning receipt wired through the seam; branch-continuity behaviour pinned by tests.</p>
+
+    <h2 id="s7">§7 — The reusable DIII-D machine description as a published artifact</h2>
+    <p>The onboarding is only reusable if its output is a <em>thing</em> rather than a procedure: a
+    DIII-D machine-description IDS set written as IMAS netCDF, content-addressed, digest-pinned, and
+    resolvable from the project's GHCR registry the way the MAST description already is. Owner goal,
+    2026-08-20. Everything upstream of this section has been a read; this section is the first write.</p>
+    <p><strong>What already exists.</strong> The artifact lifecycle is built and proven for MAST —
+    manifest schema, content-addressed cache with no-clobber publication, DD-version pinning, the
+    semantic-identity pin that survives the digest moving between writes, and an OCI reference helper.
+    It is only four identifiers away from machine-generic, and netCDF is HDF5 underneath, so its
+    file-consistency handling should carry over. nova can already write IDSs
+    (<code>nova/io/egress.py</code>), and the per-machine solve-input builder is the precedent for a
+    per-machine set.</p>
+    <p><strong>Owner rulings, 2026-08-20.</strong> (a) <em>Generalise in nova and retire together</em>:
+    the MAST-specific artifact module becomes machine-parameterised and serves both machines through one
+    path, rather than a second machine-specific copy beside it. This knowingly extends a layer that
+    <code>machine-description-retirement</code> is drafted to remove — and whose precondition has now
+    landed, both ambix producer plans being shipped at impl 1.0 — on the reasoning that one generic
+    module retires more cleanly than two bespoke ones. (b) <em>Local push with a documented recipe</em>:
+    the node produces the manifest and content-addressed layout, and publication is an <code>oras</code>
+    command run against the owner's own GHCR credentials. No CI exists in either repository and none is
+    created here; adding the first workflow to this repo is an outward-facing change that stays a
+    separate, explicitly authorised decision.</p>
+    <p><strong>Done-when:</strong> a DIII-D IDS set — wall, pf_active, and the admissible magnetics
+    diagnostic geometry — is written as netCDF through imas-python and read back to byte-or-value
+    equality; its manifest validates and its reference resolves; every quantity the sources do not
+    supply (pf_passive, static tf, Thomson line-of-sight endpoints) is declared absent in the artifact
+    rather than omitted silently; and the publication recipe is executable as written. <em>Note that the
+    producer-side current inconsistency does not gate this section: a machine description is static
+    geometry and carries no currents.</em></p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>

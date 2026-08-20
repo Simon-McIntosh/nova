@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-20T16:19:10",
+  "updated": "2026-08-20T16:43:50",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -365,7 +365,7 @@
         "id": "transport-ensemble",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a01f8b-b375-7642-897c-7c1c78c8b1c3",
         "created": "2026-08-20"
       },
       {
@@ -393,7 +393,7 @@
         "id": "transport-window",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a01f8b-c81b-70c3-a5d8-007c4d512626",
         "created": "2026-08-20"
       },
       {
@@ -10761,9 +10761,198 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260820T141143206768-diiid-machine-ids-writer",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a77",
+        "node": "diiid-machine-ids-writer",
+        "role": "implement",
+        "member": "diiid-ids-writer",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T14:11:46Z",
+        "completed_at": "2026-08-20T14:23:53Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 727,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 727,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "6f3efea570da6ecfee345cf80e24ccf0b5564292",
+        "commits": [
+          "fd4637ec"
+        ],
+        "changed_lines": {
+          "added": 7681,
+          "removed": 0,
+          "files": 5
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "FIRST WRITE of the effort: a DIII-D machine-description IDS set as IMAS netCDF, 262087 bytes, sha256 a6ef157f. Content is 82 limiter vertices, 24 pf_active coils over 140 elements with name, identifier, turns_with_sign and every outline vertex, 76 b_field_pol_probe and 44 flux_loop positions. ROUND-TRIP EXACT: 1833 per-leaf comparisons (7 wall, 917 pf_active, 909 magnetics) all exactly equal, with maximum absolute difference 0.0 for the wall outline and 0.0 across every element vertex leaf. Content firewall VERIFIED rather than intended: exactly zero pf_passive, tf and equilibrium occurrences, zero magnetics signal arrays, no plasma-current array. Absences declared with reasons - pf_passive has no source occurrence, static tf geometry because the source carries only a time-dependent vacuum-field signal, Thomson line-of-sight endpoints because neither authoritative source ships endpoint pairs. Each IDS records its source entry, DD 3.41.0 and a static-geometry-only provenance node.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T141143206768-diiid-machine-ids-writer/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f83-8666-7423-89e5-d382bf6e9cf2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5677568,
+            "cached_input_tokens_cumulative": 5677568,
+            "input_tokens": 5854812,
+            "input_tokens_cumulative": 5854812,
+            "output_tokens": 26646,
+            "output_tokens_cumulative": 26646,
+            "reasoning_output_tokens": 6575,
+            "reasoning_output_tokens_cumulative": 6575
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260820T142040375082-ensemble-traced-batching",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a73",
+        "node": "ensemble-traced-batching",
+        "role": "implement",
+        "member": "transport-ensemble",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T14:20:43Z",
+        "completed_at": "2026-08-20T14:42:41Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1318,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1318,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "a7d12ddd5ac8a177568594106ac510e075239132",
+        "commits": [
+          "cc542659c715910ac603d35b30ea5171fdc4c727"
+        ],
+        "changed_lines": {
+          "added": 409,
+          "removed": 102,
+          "files": 3
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "outcome": "ensemble batching moved inside the traced region: 0 pure_callback references, native rung vmaps the traced diffusion scan and TORAX stacks member runtime-provider pytrees and vmaps initialisation plus every fixed step; a batch of 8 beats the eight-call loop 9.62x on CPU/x64 (316 us vs 3037 us median over 50 reps) and jax.grad now flows through the batched TORAX call, agreeing with the scalar path at rtol 5e-10; 14/14 green",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T142040375082-ensemble-traced-batching/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f8b-b375-7642-897c-7c1c78c8b1c3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8941568,
+            "cached_input_tokens_cumulative": 8941568,
+            "input_tokens": 9135389,
+            "input_tokens_cumulative": 9135389,
+            "output_tokens": 30243,
+            "output_tokens_cumulative": 30243,
+            "reasoning_output_tokens": 12198,
+            "reasoning_output_tokens_cumulative": 12198
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260820T142045401426-waveform-exchange-primitives",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a73",
+        "node": "waveform-exchange-primitives",
+        "role": "implement",
+        "member": "transport-window",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T14:20:49Z",
+        "completed_at": "2026-08-20T14:40:40Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1191,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1191,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "a7d12ddd5ac8a177568594106ac510e075239132",
+        "commits": [
+          "ccb375eaf4c07d9b9f1199ec916bd031f25fff18"
+        ],
+        "changed_lines": {
+          "added": 638,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "Waveform carries phi_boundary, axis and boundary references and a per-slice radial grid; temporal interpolation resamples both bracketing profiles onto one common normalised grid before blending, recovering an analytic profile to atol 2e-14 under Phi_b 1.5->4.5 on differing radial grids; transport_sweep reproduces the equivalent single-interval facade solve at rtol=atol=2e-13 and equilibrium_sweep returns finite conservation ledgers below 1e-6 at 2 coarse samples; no input mutated; 7 passed",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T142045401426-waveform-exchange-primitives/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f8b-c81b-70c3-a5d8-007c4d512626",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7434496,
+            "cached_input_tokens_cumulative": 7434496,
+            "input_tokens": 7601389,
+            "input_tokens_cumulative": 7601389,
+            "output_tokens": 29475,
+            "output_tokens_cumulative": 29475,
+            "reasoning_output_tokens": 12000,
+            "reasoning_output_tokens_cumulative": 12000
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 302
+    "_version": 307
   }
 }

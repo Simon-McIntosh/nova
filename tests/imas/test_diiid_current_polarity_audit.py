@@ -71,3 +71,69 @@ def test_gate_artifact_digests_are_fully_pinned():
     assert audit.EXPECTED_PREREGISTRATION_SHA256 == (
         "7e60861de8c104a8d736bd5300993071da35fce93e206ad5bfb3010213f972fc"
     )
+
+
+def test_exact_polygon_response_is_persisted_validated_and_reused(
+    tmp_path, monkeypatch
+):
+    path = tmp_path / "response.npz"
+    radius = np.array([1.0, 1.5, 2.0])
+    height = np.array([-1.0, 0.0, 1.0])
+    target_mask = audit._boundary_mask(radius, height)
+    turns = SimpleNamespace(affects_axisymmetric_poloidal_flux=True)
+    description = SimpleNamespace(
+        physical_digest="geometry-digest",
+        conductors=(
+            SimpleNamespace(name="F1A", vertices=np.ones((4, 2)), turns=turns),
+            SimpleNamespace(name="F2A", vertices=np.ones((4, 2)), turns=turns),
+        ),
+    )
+    calls = []
+
+    def exact_response(*_args):
+        calls.append(True)
+        return ("F1A", "F2A"), np.arange(16, dtype=float).reshape(2, 8)
+
+    monkeypatch.setattr(audit, "_exact_polygon_response", exact_response)
+    first, first_receipt = audit.persisted_exact_polygon_response(
+        path, description, radius, height, target_mask
+    )
+    second, second_receipt = audit.persisted_exact_polygon_response(
+        path, description, radius, height, target_mask
+    )
+
+    assert len(calls) == 1
+    assert first_receipt["built_in_this_run"]
+    assert not second_receipt["built_in_this_run"]
+    assert first_receipt["kernel_route"] == "nova.biot.polygon.polygon_greens"
+    assert first_receipt["filament_centre_proxy_used"] is False
+    assert first[0] == second[0] == ("F1A", "F2A")
+    np.testing.assert_array_equal(first[1], second[1])
+
+
+def test_persisted_response_rejects_a_different_geometry(tmp_path, monkeypatch):
+    path = tmp_path / "response.npz"
+    radius = np.array([1.0, 1.5, 2.0])
+    height = np.array([-1.0, 0.0, 1.0])
+    target_mask = audit._boundary_mask(radius, height)
+    turns = SimpleNamespace(affects_axisymmetric_poloidal_flux=True)
+    conductor = SimpleNamespace(name="F1A", vertices=np.ones((4, 2)), turns=turns)
+    description = SimpleNamespace(
+        physical_digest="first-geometry", conductors=(conductor,)
+    )
+    monkeypatch.setattr(
+        audit,
+        "_exact_polygon_response",
+        lambda *_args: (("F1A",), np.arange(8, dtype=float).reshape(1, 8)),
+    )
+    audit.persisted_exact_polygon_response(
+        path, description, radius, height, target_mask
+    )
+    changed = SimpleNamespace(
+        physical_digest="different-geometry", conductors=(conductor,)
+    )
+
+    with np.testing.assert_raises_regex(ValueError, "geometry digest"):
+        audit.persisted_exact_polygon_response(
+            path, changed, radius, height, target_mask
+        )

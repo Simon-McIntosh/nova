@@ -10,8 +10,10 @@ transformation.
 The corpus census classifies one labelled frame per shot.  It chooses the
 lowest all-coil native-rate derivative and records the sign of the centred
 inner product between the labelled flux and the recorded-current coil map on
-the rectangular grid boundary, which is outside every shipped LCFS.  A
-negative inner product is the affected-shot predicate.  The normalised inner
+the rectangular grid boundary, which is outside every shipped LCFS.  The
+analytic polygon-section response is built once, persisted with its complete
+geometry and grid identity, then validated and reloaded before the census.
+A negative inner product is the affected-shot predicate.  The normalised inner
 product is diagnostic only; no coefficient is applied to a prediction or
 written back to the corpus.
 """
@@ -51,6 +53,7 @@ DEFAULT_PREREGISTRATION = Path(
     "diiid_plasma_subtraction_preregistration.json"
 )
 DEFAULT_OUTPUT = Path("docs/figures/diiid-forward-onboarding/current-polarity")
+RESPONSE_ARTIFACT_NAME = "exact_polygon_boundary_response.npz"
 TAIL_SHOTS = (
     "d3d_shot_009875548f.parquet",
     "d3d_shot_001bc5a4ae.parquet",
@@ -235,6 +238,146 @@ def affected_from_orientation(value: float) -> bool:
     return bool(np.isfinite(value) and value < 0.0)
 
 
+def _boundary_mask(radius: np.ndarray, height: np.ndarray) -> np.ndarray:
+    mask = np.zeros((height.size, radius.size), dtype=bool)
+    mask[[0, -1], :] = True
+    mask[:, [0, -1]] = True
+    return mask
+
+
+def _exact_polygon_response(
+    description: DiiidDescription,
+    radius: np.ndarray,
+    height: np.ndarray,
+    target_mask: np.ndarray,
+) -> tuple[tuple[str, ...], np.ndarray]:
+    """Evaluate the unchanged analytic polygon-section discriminator."""
+
+    target_r, target_z = np.meshgrid(radius, height)
+    names = []
+    responses = []
+    for conductor in description.conductors:
+        if (
+            conductor.vertices is None
+            or not conductor.turns.affects_axisymmetric_poloidal_flux
+        ):
+            continue
+        names.append(conductor.name)
+        responses.append(
+            polygon_greens(
+                target_r[target_mask], target_z[target_mask], conductor.vertices
+            )[0]
+        )
+    return tuple(names), np.stack(responses)
+
+
+def _write_response_artifact(
+    path: Path,
+    description: DiiidDescription,
+    radius: np.ndarray,
+    height: np.ndarray,
+    target_mask: np.ndarray,
+) -> None:
+    names, matrix = _exact_polygon_response(description, radius, height, target_mask)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(".building.npz")
+    np.savez_compressed(
+        temporary,
+        conductor_names=np.asarray(names, dtype=np.str_),
+        response=np.asarray(matrix, dtype=np.float64),
+        radius=np.asarray(radius, dtype=np.float64),
+        height=np.asarray(height, dtype=np.float64),
+        target_indices=np.flatnonzero(target_mask).astype(np.int64),
+        geometry_digest=np.asarray(description.physical_digest, dtype=np.str_),
+        kernel_route=np.asarray("nova.biot.polygon.polygon_greens", dtype=np.str_),
+    )
+    temporary.replace(path)
+
+
+def _load_response_artifact(
+    path: Path,
+    description: DiiidDescription,
+    radius: np.ndarray,
+    height: np.ndarray,
+    target_mask: np.ndarray,
+) -> tuple[tuple[str, ...], np.ndarray]:
+    expected_names = tuple(
+        conductor.name
+        for conductor in description.conductors
+        if conductor.vertices is not None
+        and conductor.turns.affects_axisymmetric_poloidal_flux
+    )
+    with np.load(path, allow_pickle=False) as artifact:
+        names = tuple(str(value) for value in artifact["conductor_names"])
+        matrix = np.asarray(artifact["response"], dtype=float)
+        stored_radius = np.asarray(artifact["radius"], dtype=float)
+        stored_height = np.asarray(artifact["height"], dtype=float)
+        target_indices = np.asarray(artifact["target_indices"], dtype=np.int64)
+        stored_digest = str(artifact["geometry_digest"].item())
+        kernel_route = str(artifact["kernel_route"].item())
+    expected_indices = np.flatnonzero(target_mask)
+    if names != expected_names:
+        raise ValueError("persisted response conductor order does not match geometry")
+    if stored_digest != description.physical_digest:
+        raise ValueError("persisted response geometry digest does not match corpus")
+    if kernel_route != "nova.biot.polygon.polygon_greens":
+        raise ValueError(
+            "persisted response does not declare the analytic polygon route"
+        )
+    if not np.array_equal(stored_radius, radius):
+        raise ValueError("persisted response radial grid does not match corpus")
+    if not np.array_equal(stored_height, height):
+        raise ValueError("persisted response vertical grid does not match corpus")
+    if not np.array_equal(target_indices, expected_indices):
+        raise ValueError(
+            "persisted response target boundary does not match discriminator"
+        )
+    if matrix.shape != (len(names), expected_indices.size):
+        raise ValueError("persisted response has an invalid matrix shape")
+    if not np.all(np.isfinite(matrix)):
+        raise ValueError("persisted response contains non-finite values")
+    return names, matrix
+
+
+def persisted_exact_polygon_response(
+    path: Path,
+    description: DiiidDescription,
+    radius: np.ndarray,
+    height: np.ndarray,
+    target_mask: np.ndarray,
+) -> tuple[tuple[tuple[str, ...], np.ndarray], dict[str, Any]]:
+    """Build once, then validate and reload the exact response from disk."""
+
+    built = not path.exists()
+    if built:
+        _write_response_artifact(path, description, radius, height, target_mask)
+    response = _load_response_artifact(path, description, radius, height, target_mask)
+    names, matrix = response
+    return response, {
+        "path": str(path),
+        "sha256": _sha256(path),
+        "size_bytes": path.stat().st_size,
+        "built_in_this_run": built,
+        "persisted_before_census": True,
+        "loaded_from_persisted_artifact": True,
+        "kernel_route": "nova.biot.polygon.polygon_greens",
+        "geometry_digest": description.physical_digest,
+        "source_section_count": len(names),
+        "target_boundary_point_count": int(matrix.shape[1]),
+        "response_shape": list(matrix.shape),
+        "filament_centre_proxy_used": False,
+    }
+
+
+def _limit_arrow_threads() -> None:
+    """Give each census process one Arrow CPU and I/O worker."""
+
+    import pyarrow
+
+    pyarrow.set_cpu_count(1)
+    pyarrow.set_io_thread_count(1)
+
+
 def _census_shot(
     path: Path,
     description: DiiidDescription,
@@ -276,7 +419,11 @@ def _census_shot(
 
 
 def census_polarity(
-    paths: list[Path], first_row: dict[str, Any], *, workers: int
+    paths: list[Path],
+    first_row: dict[str, Any],
+    response_path: Path,
+    *,
+    workers: int,
 ) -> dict[str, Any]:
     """Evaluate the polarity predicate on one lowest-derivative frame per shot."""
 
@@ -285,25 +432,10 @@ def census_polarity(
     expected_digest = description.physical_digest
     radius = np.asarray(first_row["efit_grid_R"], dtype=float)
     height = np.asarray(first_row["efit_grid_Z"], dtype=float)
-    target_mask = np.zeros((height.size, radius.size), dtype=bool)
-    target_mask[[0, -1], :] = True
-    target_mask[:, [0, -1]] = True
-    target_r, target_z = np.meshgrid(radius, height)
-    names = []
-    responses = []
-    for conductor in description.conductors:
-        if (
-            conductor.vertices is None
-            or not conductor.turns.affects_axisymmetric_poloidal_flux
-        ):
-            continue
-        names.append(conductor.name)
-        responses.append(
-            polygon_greens(
-                target_r[target_mask], target_z[target_mask], conductor.vertices
-            )[0]
-        )
-    response = tuple(names), np.stack(responses)
+    target_mask = _boundary_mask(radius, height)
+    response, response_receipt = persisted_exact_polygon_response(
+        response_path, description, radius, height, target_mask
+    )
 
     evaluate = partial(
         _census_shot,
@@ -313,7 +445,9 @@ def census_polarity(
         expected_geometry_digest=expected_digest,
     )
     records = []
-    with ProcessPoolExecutor(max_workers=workers) as executor:
+    with ProcessPoolExecutor(
+        max_workers=workers, initializer=_limit_arrow_threads
+    ) as executor:
         for number, record in enumerate(
             executor.map(evaluate, paths, chunksize=4), start=1
         ):
@@ -337,6 +471,7 @@ def census_polarity(
         ),
         "affected_shot_count": len(affected),
         "affected_shots": sorted(affected),
+        "exact_polygon_response": response_receipt,
         "orientation_cosine": {
             "minimum": float(np.min(orientations)),
             "q25": float(np.quantile(orientations, 0.25)),
@@ -352,6 +487,7 @@ def audit(
     data_root: Path = DEFAULT_DATA,
     bank_path: Path = DEFAULT_BANK,
     preregistration_path: Path = DEFAULT_PREREGISTRATION,
+    response_path: Path = DEFAULT_OUTPUT / RESPONSE_ARTIFACT_NAME,
     *,
     workers: int = 8,
 ) -> dict[str, Any]:
@@ -378,7 +514,7 @@ def audit(
     }
     if not all(item["all_channels_bitwise_equal"] for item in boundary.values()):
         raise RuntimeError("a tail current array changes across the read boundary")
-    census = census_polarity(paths, first_row, workers=workers)
+    census = census_polarity(paths, first_row, response_path, workers=workers)
     for shot in TAIL_SHOTS:
         if shot not in census["affected_shots"]:
             raise RuntimeError(f"known polarity tail {shot} was not reproduced")
@@ -438,15 +574,18 @@ def main() -> None:
     parser.add_argument("--bank", type=Path, default=DEFAULT_BANK)
     parser.add_argument("--preregistration", type=Path, default=DEFAULT_PREREGISTRATION)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--response", type=Path)
     parser.add_argument("--workers", type=int, default=8)
     args = parser.parse_args()
+    args.output.mkdir(parents=True, exist_ok=True)
+    response_path = args.response or args.output / RESPONSE_ARTIFACT_NAME
     receipt = audit(
         args.data,
         args.bank,
         args.preregistration,
+        response_path,
         workers=args.workers,
     )
-    args.output.mkdir(parents=True, exist_ok=True)
     receipt_path = args.output / "current_polarity_audit_receipt.json"
     figure_path = args.output / "current_polarity_census.png"
     receipt_path.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")

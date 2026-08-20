@@ -1,0 +1,228 @@
+{
+  "arms": {
+    "exact_flux_at_density_samples": {
+      "cost": {
+        "backend": "cpu",
+        "compile_and_first_evaluation_seconds": 7.545782659901306,
+        "cost_scope": "device-resident sample-to-density-moments-to-coupling image; sample generation and host-device transfer excluded",
+        "device": "cpu:0",
+        "flux_samples_per_cell": 672,
+        "host_to_device_transfer_included": false,
+        "incremental_samples_per_cell_over_production": 665,
+        "steady_maximum_microseconds": 100002.04481184483,
+        "steady_cost_ratio_over_production": 0.9821791507600862,
+        "steady_median_microseconds": 90263.69149796665,
+        "steady_minimum_microseconds": 19007.324939593673,
+        "steady_repetitions": 10,
+        "total_flux_sample_values": 380352
+      },
+      "flux_polynomial_total_degree": null,
+      "forcing": {
+        "projection_fraction": 0.9927708932914661,
+        "rms_norm_fraction": 0.9929786008161461,
+        "rms_wb": 0.9255803682468182,
+        "signed_peak_fraction": 0.938990757694479,
+        "sup_norm_fraction": 0.9727651405259117,
+        "sup_wb": 1.2545780083482487
+      },
+      "forcing_share_percent": 99.2770893291466,
+      "interpolation": {
+        "density_error": {
+          "absolute_mean_over_mean_absolute": 0.0,
+          "mean_absolute": 0.0,
+          "negative_fraction": 0.0,
+          "positive_fraction": 0.0,
+          "rms": 0.0,
+          "signed_mean": 0.0,
+          "sup": 0.0
+        },
+        "flux_interpolation_error_wb": {
+          "absolute_mean_over_mean_absolute": 0.0,
+          "mean_absolute": 0.0,
+          "negative_fraction": 0.0,
+          "positive_fraction": 0.0,
+          "rms": 0.0,
+          "signed_mean": 0.0,
+          "sup": 0.0
+        }
+      },
+      "root_response": {
+        "axis_signed_projection_mm": 40.12073628367433,
+        "flux_signed_peak_percent_of_span": 6.398179666894823,
+        "gmres_info": 0,
+        "observed_flux_peak_grid_slot": 440,
+        "plasma_current_signed_percent": -1.8792864762882915,
+        "residual_relative_sup": 2.9733897277952655e-14,
+        "residual_sup_wb": 3.730349362740526e-14
+      }
+    },
+    "seven_sample_quadratic": {
+      "cost": {
+        "backend": "cpu",
+        "compile_and_first_evaluation_seconds": 8.09350617788732,
+        "cost_scope": "device-resident sample-to-density-moments-to-coupling image; sample generation and host-device transfer excluded",
+        "device": "cpu:0",
+        "flux_samples_per_cell": 7,
+        "host_to_device_transfer_included": false,
+        "incremental_samples_per_cell_over_production": 0,
+        "steady_maximum_microseconds": 101109.38781872392,
+        "steady_cost_ratio_over_production": 1.0,
+        "steady_median_microseconds": 91901.45344473422,
+        "steady_minimum_microseconds": 22186.212008818984,
+        "steady_repetitions": 10,
+        "total_flux_sample_values": 3962
+      },
+      "flux_polynomial_total_degree": 2,
+      "forcing": {
+        "projection_fraction": 0.9917626059729945,
+        "rms_norm_fraction": 0.9919726299516077,
+        "rms_wb": 0.9246426774622638,
+        "signed_peak_fraction": 0.9373562033022821,
+        "sup_norm_fraction": 0.9709929211988737,
+        "sup_wb": 1.252292371968979
+      },
+      "forcing_share_percent": 99.17626059729945,
+      "interpolation": {
+        "density_error": {
+          "absolute_mean_over_mean_absolute": 0.014396459387006127,
+          "mean_absolute": 128.86018541352706,
+          "negative_fraction": 0.3582155477031802,
+          "positive_fraction": 0.34261158085142185,
+          "rms": 418.3429426560975,
+          "signed_mean": 1.8551304259079218,
+          "sup": 8197.474572952604
+        },
+        "flux_interpolation_error_wb": {
+          "absolute_mean_over_mean_absolute": 0.016259245586049666,
+          "mean_absolute": 4.0331021514290855e-05,
+          "negative_fraction": 0.5046667297661114,
+          "positive_fraction": 0.4953332702338886,
+          "rms": 7.343101731847617e-05,
+          "signed_mean": 6.557519835371077e-07,
+          "sup": 0.0009324226051866669
+        }
+      },
+      "root_response": {
+        "axis_signed_projection_mm": 40.064973748198476,
+        "flux_signed_peak_percent_of_span": 6.385913068441684,
+        "gmres_info": 0,
+        "observed_flux_peak_grid_slot": 440,
+        "plasma_current_signed_percent": -1.875718730338471,
+        "residual_relative_sup": 3.900831321578709e-14,
+        "residual_sup_wb": 4.884981308350689e-14
+      }
+    },
+    "thirteen_sample_cubic": {
+      "cost": {
+        "backend": "cpu",
+        "compile_and_first_evaluation_seconds": 7.433792079100385,
+        "cost_scope": "device-resident sample-to-density-moments-to-coupling image; sample generation and host-device transfer excluded",
+        "device": "cpu:0",
+        "flux_samples_per_cell": 13,
+        "host_to_device_transfer_included": false,
+        "incremental_samples_per_cell_over_production": 6,
+        "steady_maximum_microseconds": 98298.19877631962,
+        "steady_cost_ratio_over_production": 0.9837997936210667,
+        "steady_median_microseconds": 90412.63093240559,
+        "steady_minimum_microseconds": 22533.2360714674,
+        "steady_repetitions": 10,
+        "total_flux_sample_values": 7358
+      },
+      "flux_polynomial_total_degree": 3,
+      "forcing": {
+        "projection_fraction": 0.9925266196869745,
+        "rms_norm_fraction": 0.9927364271097986,
+        "rms_wb": 0.9253546320344602,
+        "signed_peak_fraction": 0.9380995856744152,
+        "sup_norm_fraction": 0.9719370136627815,
+        "sup_wb": 1.2535099707435666
+      },
+      "forcing_share_percent": 99.25266196869745,
+      "interpolation": {
+        "density_error": {
+          "absolute_mean_over_mean_absolute": 0.007206867033660751,
+          "mean_absolute": 26.00482774510392,
+          "negative_fraction": 0.3583049385832071,
+          "positive_fraction": 0.3424512030960794,
+          "rms": 130.18042460902143,
+          "signed_mean": 0.1874133357922159,
+          "sup": 3628.3922778364504
+        },
+        "flux_interpolation_error_wb": {
+          "absolute_mean_over_mean_absolute": 0.05225248021210561,
+          "mean_absolute": 8.13555805244501e-06,
+          "negative_fraction": 0.5051741544674407,
+          "positive_fraction": 0.4948258455325593,
+          "rms": 2.3002226467489002e-05,
+          "signed_mean": 4.251030861498193e-07,
+          "sup": 0.00041437836560598296
+        }
+      },
+      "root_response": {
+        "axis_signed_projection_mm": 40.125131730384545,
+        "flux_signed_peak_percent_of_span": 6.397814364619404,
+        "gmres_info": 0,
+        "observed_flux_peak_grid_slot": 440,
+        "plasma_current_signed_percent": -1.878392193666293,
+        "residual_relative_sup": 3.3301997351599554e-14,
+        "residual_sup_wb": 4.1744385725905886e-14
+      }
+    }
+  },
+  "artifacts": {
+    "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-forcing-ladder/scripts/density_forcing_ladder/density-forcing-ladder.png",
+    "figure_bytes": 184235
+  },
+  "cost_qualification": "CPU medians price the common device-resident density projection, exact support moments, and coupling image. The wide min-to-max range shows shared-node scheduling noise, so the three approximately equal medians are not a resolved speed ordering. Additional flux-value generation is excluded from timing and priced explicitly by the per-cell sample counts.",
+  "fixture": {
+    "cache": {
+      "arrays_verified": 31,
+      "bytes_verified": 51411470,
+      "load_seconds": 0.31029970897361636,
+      "semantic_key": "746fbe1553c4b242",
+      "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/solovev_hex_machine.zarr",
+      "warm_hit": true
+    },
+    "plasma_cells": 566,
+    "second_moment_comparator": {
+      "active_cells": 435,
+      "correction_sup_wb": 0.05092873128810195,
+      "near_source_target_pairs": 10246
+    },
+    "state_size": 2396,
+    "support_cells": 447
+  },
+  "held_fixed": [
+    "exact analytic state and production tangent inverse",
+    "production straight clipped supports and topology qualification",
+    "degree-nine weighted density projection",
+    "exact clipped zeroth and first moments",
+    "first-moment coupling blocks and second-moment comparator correction"
+  ],
+  "mechanism": {
+    "classification_policy": "Interpolation owns the flat term when exact flux at every density sample leaves less than 25 percent of production forcing. Nonlinear rectification is detected when density-error bias exceeds flux-error bias by more than 0.1.",
+    "cubic_forcing_sup_fraction_of_production": 1.0009722959285245,
+    "dominant_stage": "density_fit_projection_after_exact_flux_sampling",
+    "exact_flux_forcing_sup_fraction_of_production": 1.0018251619433536,
+    "nonlinear_rectification_detected": false,
+    "production_density_error_bias_fraction": 0.014396459387006127,
+    "production_flux_error_bias_fraction": 0.016259245586049666,
+    "statement": "The exact-flux arm removes the in-cell interpolant while retaining the degree-nine density fit, exact clipped moments, topology, and coupling. Its residual fraction therefore assigns the flat term between interpolation and the downstream fit-and-projection chain."
+  },
+  "production_control_difference": {
+    "density_forcing_sup_wb": 0.0,
+    "density_projection_fraction": 1.2434497875801753e-14,
+    "production_image_sup_wb": 1.1368683772161603e-13
+  },
+  "sample_sets": {
+    "exact_flux_at_density_samples": "exact analytic normalised flux at all 672 fixed density-projection quadrature points per cell",
+    "seven_sample_quadratic": "cell centroid and six pre-clip vertices",
+    "thirteen_sample_cubic": "cell centroid, six pre-clip vertices, and six edge midpoints"
+  },
+  "schema": "nova.density-forcing-ladder",
+  "verdict": {
+    "density_forcing_falls_with_cubic_sampling": false,
+    "flat_term_carrier_stage": "density_fit_projection_after_exact_flux_sampling",
+    "measurement_only": true
+  }
+}

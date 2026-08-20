@@ -1,0 +1,105 @@
+{
+  "node": "merged-main-suite-verification",
+  "verdict": "failure_list_classified",
+  "complete": true,
+  "tested_commit": "3b3122fa546a7e2d558ad223faf5ce9c019a8c74",
+  "pre_merge_parent": "8890a26923fcc3db9e2965f5cc7707ff46a0d88e",
+  "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/nova/.venv PYTHONPATH=$PWD uv run --no-sync pytest",
+  "configured_pytest_lane": "pyproject.toml addopts selects -m 'not slow'",
+  "exit_code": 1,
+  "duration_seconds": 3331.53,
+  "counts": {
+    "passed": 5199,
+    "failed": 4,
+    "skipped": 91,
+    "deselected": 735,
+    "xfailed": 4,
+    "warnings": 123
+  },
+  "failures": [
+    {
+      "test": "tests/test_machine_artifact_concurrency.py::test_four_scoring_partitions_share_one_verified_artifact",
+      "merged_tip_cause": "four spawned scoring processes could not create CUDA stream executors because device memory was exhausted, so at least one partition returned a non-complete result",
+      "provenance": "environmental",
+      "parent_checks": [
+        {
+          "run": 1,
+          "result": "failed",
+          "duration_seconds": 374.44,
+          "cause": "CUDA allocation failures culminated in an XLA BFC allocator central-gap fatal error and a missing scoring-partition result"
+        },
+        {
+          "run": 2,
+          "result": "failed",
+          "duration_seconds": 350.16,
+          "cause": "CUDA allocation failures and XLA worker crashes again prevented the scoring partitions from completing"
+        }
+      ],
+      "classification_basis": "the environment-sensitive multiprocessing failure reproduced twice at the pre-merge parent with the same CUDA resource-exhaustion mechanism"
+    },
+    {
+      "test": "tests/test_mast_solve_inputs.py::test_each_probe_channel_reads_the_sensor_it_is_mapped_to[15000]",
+      "merged_tip_cause": "probe angle was +1.5707963267948966 rad instead of the expected -1.5708 rad",
+      "provenance": "pre-existing",
+      "parent_checks": [
+        {
+          "run": 1,
+          "result": "failed",
+          "cause": "identical +1.5707963267948966 rad versus -1.5708 rad assertion"
+        }
+      ],
+      "classification_basis": "the identical assertion failed at the pre-merge parent"
+    },
+    {
+      "test": "tests/test_mast_solve_inputs.py::test_each_probe_channel_reads_the_sensor_it_is_mapped_to[13500]",
+      "merged_tip_cause": "probe angle was +1.5707963267948966 rad instead of the expected -1.5708 rad",
+      "provenance": "pre-existing",
+      "parent_checks": [
+        {
+          "run": 1,
+          "result": "failed",
+          "cause": "identical +1.5707963267948966 rad versus -1.5708 rad assertion"
+        }
+      ],
+      "classification_basis": "the identical assertion failed at the pre-merge parent"
+    },
+    {
+      "test": "tests/test_mast_solve_inputs.py::test_a_channel_off_its_own_clock_is_refused_rather_than_aligned",
+      "merged_tip_cause": "expected channel fl_cc10 to be classified as misaligned, but misaligned_channels was empty",
+      "provenance": "pre-existing",
+      "parent_checks": [
+        {
+          "run": 1,
+          "result": "failed",
+          "cause": "identical empty misaligned_channels assertion"
+        }
+      ],
+      "classification_basis": "the identical assertion failed at the pre-merge parent"
+    }
+  ],
+  "provenance_counts": {
+    "pre-existing": 3,
+    "environmental": 1,
+    "merge-introduced": 0
+  },
+  "merge_introduced_failures": [],
+  "required_pins": [
+    {
+      "test": "tests/test_equilibrium_stencil_mesh.py::test_banked_unified_representation_satisfies_coverage_split_gates",
+      "result": "passed in the complete merged-tip suite"
+    },
+    {
+      "test": "tests/test_equilibrium_separatrix_clip.py::test_clipped_observation_quadrature_carries_exact_area_and_linear_current",
+      "result": "passed in the complete merged-tip suite"
+    },
+    {
+      "test": "tests/test_equilibrium_separatrix_clip.py::test_clipped_observation_quadrature_matches_adaptive_smooth_oracle",
+      "result": "passed in the complete merged-tip suite"
+    },
+    {
+      "test": "tests/test_equilibrium_stencil_mesh.py::test_own_node_field_varies_exactly_across_clipped_quadrature_points",
+      "result": "passed in the complete merged-tip suite"
+    }
+  ],
+  "conclusion": "The complete merged-tip suite is not green, but none of its four failures was introduced by the merge: three are identical pre-existing MAST assertions and one is an environment-sensitive CUDA multiprocessing failure reproduced twice at the parent. All required representation and clipped-support observation pins pass."
+}

@@ -24,10 +24,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-20">
-<meta name="plan-version" content="5">
-<meta name="plan-commits" content="eed42e520d5f544f50cdb7485cffc74249f47037,0687526990e67eee5777310a71ad60588ca7736e,0e98afcb9960247313ea955822481983d63a7fd0,27fd5f364c4bb6fa89e5042ee0c190990f965be9">
+<meta name="plan-version" content="6">
+<meta name="plan-commits" content="eed42e520d5f544f50cdb7485cffc74249f47037,0687526990e67eee5777310a71ad60588ca7736e,0e98afcb9960247313ea955822481983d63a7fd0,27fd5f364c4bb6fa89e5042ee0c190990f965be9,0e21b3997f841be1bf5a79c8b8772619f55c2fd2">
 <meta name="plan-artifacts" content="docs/evidence/archive/solovev-exact-recovery-landed.html,docs/figures/solovev-exact-recovery/map-forcing-decomposition.png,docs/figures/solovev-exact-recovery/forcing-residual-decomposition.png,scripts/map_forcing_attribution/results.json,scripts/forcing_residual_decomposition/results.json,scripts/build_cache_audit/results.json,scripts/build_cache_audit/measurements-coarse.json,scripts/build_cache_audit/measurements-fine.json">
-<meta name="plan-impl" content="0.38">
+<meta name="plan-impl" content="0.5">
 </head>
 <body>
   <main class="plan-doc">
@@ -269,6 +269,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260820T1650" data-who="reckon-ship" data-when="2026-08-20T16:50:00+00:00">
     <div class="r-comment-body">forcing-residual-decomposition landed - commit 27fd5f36, merged a881343b; gate PASSED. THE FORCING'S OWNER IS THE SOURCE DENSITY: swapping the attributed degree-nine density for the exact analytic density on identical supports carries 99.176 percent of the comparator residual; support geometry contributes 0.088 percent, the topology arm 0.736 percent, and the explicit production-participation sub-swap is exactly zero. Projected through the verified tangent inverse, the density component alone predicts +40.065 mm axis and +6.386 percent flux of the observed 42.444 mm / 6.585 percent (summed predictions 41.92 mm / 6.803 percent; the local-current projection stays qualified as a derivative). Additive closure 5.5e-15. CONSEQUENCE: the drift is the representation's per-cell moment error radiated and amplified - not clip, participation, kernels or chords - so the repair targets the density's moment accuracy against the exact functional, and the section-4 gate design splits plasma-composition forcing from conductor-representation forcing with the exterior analytic flux supplied directly at the boundary rows for the pure-plasma gate. Fine confirmation dispatched now that the machine-carrier cache makes the fine bank cheap.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260820T1730" data-who="reckon-ship" data-when="2026-08-20T17:30:00+00:00">
+    <div class="r-comment-body">fine-density-swap-confirmation landed - commit 0e21b399, merged 39f601b3; gate PASSED. THE CONVICTION IS COMPLETE: the source-density share holds at 99.1876 percent on fine versus 99.1763 coarse, the forcing sup ratio is 1.00255 with a two-point width exponent of -0.008, so the density representation error is the h-independent drift carrier by measurement. Fine tangent-inverse response +40.85 mm / +6.394 percent / -1.885 percent beside coarse +40.06 / +6.386 / -1.876 and the observed 42.44 mm / 6.585 / -1.119. The fine carrier warm-loaded in 0.535 s from the semantic cache - first consumer of the section-6 activation. Next: the density-forcing ladder measures how the component falls with in-cell flux-interpolant order and sampling, with an exact-flux-at-samples arm separating interpolation bias from the density-fit chain - the repair-route and section-4 bound evidence.</div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20260820T1652" data-who="reckon-ship" data-when="2026-08-20T16:52:00+00:00">
     <div class="r-comment-body">build-cache-audit landed - commits 06875269 + 0e98afcb, merged 540bdfbe; gate PASSED (scope-changed recorded for the activation extension). Coarse 1,246.88 s cold to 0.266 s warm (4,689x); fine 3,335.33 s cold to 0.818 s warm (4,079x); 31 arrays bitwise at both resolutions; semantic key, advisory-locked single miss builder, GPFS-safe in-place validated publication, one shared store across worktrees. The three standalone measurement programs request cached_machine; agent doctrine recorded for the machine-building guidance.</div>

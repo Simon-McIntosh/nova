@@ -85,6 +85,17 @@
   §4 gate bounds and the repair target the density's moment accuracy. Full record:
   <code>scripts/forcing_residual_decomposition/results.json</code>.</p>
 
+  <p><strong>Fine confirmation (commit <code>0e21b399</code>): the density term is the
+  h-independent carrier, measured.</strong> On the 1069-cell fixture the density share reads
+  99.1876% against 99.1763% coarse (+0.011 points); the forcing sup moves 1.2523 → 1.2555 Wb
+  (ratio 1.00255), a two-point width exponent of <strong>−0.008</strong> — flat. The fine
+  tangent-inverse response, +40.85 mm axis / +6.394% flux / −1.885% current, sits beside the
+  coarse +40.06 / +6.386 / −1.876 and the observed 42.44 mm / 6.585% / −1.119%. The fine
+  carrier warm-loaded from the semantic cache in 0.535 s (key <code>f0f96aa214aa9459</code>,
+  all 31 arrays plus 20 persisted coupling/field children) — the first consumer of the §6
+  activation. Full record: <code>scripts/fine_density_swap/results.json</code> and the
+  three-panel figure <code>docs/figures/solovev-exact-recovery/fine-density-swap.png</code>.</p>
+
   <figure>
     <img src="/nova/figures/solovev-exact-recovery/forcing-residual-decomposition.png"
          alt="Forcing residual decomposition by source-density, support-geometry and topology swaps, with projected root responses"

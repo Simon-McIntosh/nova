@@ -22,8 +22,8 @@
   <title>MAST Corrected Read Layer | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-12">
-<meta name="plan-version" content="6">
+<meta name="plan-modified" content="2026-08-20">
+<meta name="plan-version" content="7">
 <meta name="plan-commits" content="08150c40,60df29bb,0f878cd6,bd6b5d9c">
 <meta name="plan-artifacts" content="docs/evidence/archive/mast-corrected-read-layer-landed.html">
 <meta name="plan-impl" content="1.0">
@@ -216,6 +216,11 @@
     <div class="r-fu-body"><p>The door is closed and the full chain applies, so the two remaining items are the write side and the consumer contract: point <code>nova/scripts/mast_acquisition_sweep.py --promote-to</code> at <code>nova/calibrate/corrections/mast/magnetics.yaml</code> with a set-version bump and stamped provenance instead of a JSON table, and expose the corrected read as the documented input contract for the GPU catalog's solve-ready shard staging so that ingest inherits corrections by construction. This plan cannot ship, and spine-efit-parity stays blocked, until both land.</p></div>
     <pre class="r-fu-prompt">/reckon-ship mast-corrected-read-layer §3</pre>
     <p class="r-fu-outcome">done — no followup. §3 items 3-4 landed (0f878cd6, bd6b5d9c) and the plan is complete. The sweep promotes into the correction document with a version bump and stamped provenance (108 of 113 fixture records, 5 refused, round-trip preserved), and read_corrected_solve_inputs is the documented solve-input contract with no opt-out argument, 102 of 102 sensors carrying dispositions and 0.914 kB per slice. Together with items 1-2 the guarantee is now structural at every layer: one door, one guard proving no bypass, the full promoted chain in stage order, one named raw reader, and one ingest contract that cannot be handed raw data. The chain closes here: this plan's own work is finished, and the two plans it unblocks — spine-efit-parity and mast-catalog-gpu-solve — have their own lifecycles and are surfaced by roadmap.</p>
+    </article>
+<article class="r-fu" data-id="f-mcrl-suite-defects" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-20" data-recommends-skill="/reckon-ship mast-corrected-read-layer" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Two pre-existing signal defects surfaced by the merged-main suite classification</h4>
+    <div class="r-fu-body"><p>Exemption: foreign-owner from the surfacing plan's perspective - this plan owns the read layer. The boundary-ring merge verification classified two failures as pre-existing with parent-revision evidence (commit 65d2d68c, scripts/merge_suite_verification/summary.json): (1) probe-pose polarity - shots 15000 and 13500 return probe angle +1.5707963268 rad where -1.5708 rad is asserted, so a probe channel reads a sensor with inverted pose sign; (2) the off-clock refusal misses fl_cc10 - a channel off its own clock is expected in misaligned_channels but the tuple comes back empty. Both reproduce identically at pre-merge parent 8890a269, so they predate the equilibrium work entirely. Classification only; no fix was attempted in the surfacing node.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship mast-corrected-read-layer</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

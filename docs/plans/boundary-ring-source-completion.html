@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="boundary-ring-source-completion">
   <meta name="plan-title" content="Boundary Ring Source Completion">
   <meta name="plan-summary" content="Give every nonempty support a defined moment-source evaluation at the stencil-availability seam, then re-adjudicate the analytic gates and the held lineage merge">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="10.0">
   <meta name="plan-capability-version" content="1.0">
@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-20">
-<meta name="plan-version" content="53">
-<meta name="plan-commits" content="f943bacba9ac64c404afe92c94d43f023950b349,919bafcea9422ff5b0c6de8607d86d4a9418ea86,f332f8426c672f6cdc6bb09fe68e07dd7ecf94a0,3f2312e743289492bc3b4a4a58d4a16dc339d11d,66a62016108c856e1868fe12790ccc9f10d69c43,ba1dab86fa30ed4198ae01c8748dff722b7d3540,3964883b2cd62bbcd691cb735ab141b2bb3dec2a,ca77200c287c0151c87bba832a4c889a3b02edcb,4f2f98a5b69ce1befee2f0c43907ad8b1722b296,55394aa5849157002b84961c09461bdc7dc3c2f2,5e838c92f53e7e3f81663ed69e7eed8336dc050f,6282acd5c41117c61c855becaef3088e9df9700e,75c99039a66231fdc36f51f2016e8ccdc846ed02,9ef0e8ddfa73bbefbef7bf78854af160e20d7aa8,a5998281a6ab6a8c5ae786c29d369753222b45d3,cb5a3c1d20504123e8462b8d7ebe065a97e054f6,b820c424c863e1db5ed4535bc07799e0b3b1a94e,25c9846995b5bfe637b50f55693b309c9a51a31b,274caa239ae0193ddbaf55c4ac5c011457388ea1,9d4d3f4fd9eefee936f7849bc2ea158541a5e30d,fd2e10a0e50b89bd4876773c3963b4a6653332ed">
+<meta name="plan-version" content="55">
+<meta name="plan-commits" content="f943bacba9ac64c404afe92c94d43f023950b349,919bafcea9422ff5b0c6de8607d86d4a9418ea86,f332f8426c672f6cdc6bb09fe68e07dd7ecf94a0,3f2312e743289492bc3b4a4a58d4a16dc339d11d,66a62016108c856e1868fe12790ccc9f10d69c43,ba1dab86fa30ed4198ae01c8748dff722b7d3540,3964883b2cd62bbcd691cb735ab141b2bb3dec2a,ca77200c287c0151c87bba832a4c889a3b02edcb,4f2f98a5b69ce1befee2f0c43907ad8b1722b296,55394aa5849157002b84961c09461bdc7dc3c2f2,5e838c92f53e7e3f81663ed69e7eed8336dc050f,6282acd5c41117c61c855becaef3088e9df9700e,75c99039a66231fdc36f51f2016e8ccdc846ed02,9ef0e8ddfa73bbefbef7bf78854af160e20d7aa8,a5998281a6ab6a8c5ae786c29d369753222b45d3,cb5a3c1d20504123e8462b8d7ebe065a97e054f6,b820c424c863e1db5ed4535bc07799e0b3b1a94e,25c9846995b5bfe637b50f55693b309c9a51a31b,274caa239ae0193ddbaf55c4ac5c011457388ea1,9d4d3f4fd9eefee936f7849bc2ea158541a5e30d,fd2e10a0e50b89bd4876773c3963b4a6653332ed,3b3122fa546a7e2d558ad223faf5ce9c019a8c74,65d2d68c543b3c5267fc92f51556dc62389645c9">
 <meta name="plan-artifacts" content="docs/evidence/archive/boundary-ring-source-completion-landed.html,docs/figures/boundary-ring-source-completion/ring-m0-relative-error.png,docs/figures/boundary-ring-source-completion/fixed-cubic-errors.png,docs/figures/boundary-ring-source-completion/ring-attribution-errors-degree-nine.png,docs/figures/boundary-ring-source-completion/ring-attribution-errors-unified.png,docs/figures/boundary-ring-source-completion/saddle-gap-localization.png,docs/figures/boundary-ring-source-completion/analytic-seed-defect-comparison.png,docs/figures/boundary-ring-source-completion/analytic-seed-direct-residuals.png,docs/figures/boundary-ring-source-completion/root-gate-attribution.png,docs/figures/boundary-ring-source-completion/observation-clip-rescore.png,docs/research/hex-clip-current-attribution.html,docs/figures/hex-clip-current-attribution/clip-audit.png,scripts/ring_quadrature/results/ring-quadrature-results.json (lineage f943bacb),scripts/clip_audit/results/clip-audit-results.json (lineage 919bafce),scripts/own_node_interior_score/results.json (lineage ba1dab86),scripts/in_cell_order_study/results.json (lineage 3964883b),scripts/ring_attribution/results/ring-attribution-results.json (lineage 9ef0e8dd),scripts/clip_independent_representation/results.json (lineage 4f2f98a5),scripts/cubic_sample_clip_independent/results.json (lineage 55394aa5),scripts/coverage_scaling/results.json (lineage 75c99039),scripts/saddle_gap_check/results.json (lineage a5998281),scripts/analytic_seed_adjudication/results.json (lineage 25c98469),scripts/root_gate_attribution/results.json (lineage 274caa23),scripts/root_gate_attribution/coarse-terminal-root.npz (lineage 274caa23),scripts/root_gate_attribution/fine-terminal-root.npz (lineage 274caa23),scripts/observation_clip_rescore/results.json (lineage fd2e10a0)">
-<meta name="plan-impl" content="0.97">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -220,22 +220,24 @@
       </p>
     </section>
 
-    <h2 id="s9">§9 — Continuation, full gates, and the merge adjudication</h2>
-
-    <p>The decisive solve: the fine 1069-cell continuation from fraction 0 at zero smoothing under
-    the repaired map, identical step policy and unchanged 10×30 budget, every accepted fraction
-    logged. Historical brackets for scale: two-path unsmoothed 0.5875/0.6, smoothed 0.4375/0.45,
-    pre-repair consistent 0.3/0.3125 (a one-cell participation birth, not a topology change).</p>
-
-    <p><strong>Done when:</strong> (a) the continuation reaches fraction 1 at the unchanged 1e-6
-    residual gate and the complete unchanged physics gate set passes at the full-moment-map root, with
-    the terminal state serialized — in which case the lineage (consistent quadrature + ring
-    completion) merges to <code>main</code> with <code>--no-ff</code>, the smoothing branch is
-    formally retired, and the held plasma-edge-current-representation §6 routing merge plus the
-    sol-current-demonstration kickoff unblock; or (b) a bracket appears, the rejected state is banked,
-    one census pass names the surface class it straddles, and the plan stops for owner adjudication
-    with the map's remaining obstruction stated in mechanism terms. No gate, fixture physics, or
-    route default moves in either branch.</p>
+    <section id="s9" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ merged 2026-08-20 — owner ruling; zero merge-introduced failures</span>
+        <h2>§9 — Continuation, full gates, and the merge adjudication</h2>
+      </header>
+      <p class="landed-summary">
+        Owner ruled MERGE: main <code>3b3122fa</code> lands the complete lineage with
+        <code>--no-ff</code>. The written continuation was superseded by a stronger result —
+        direct full-map roots at 1.6e-15 / 1.0e-15 on both fixtures, 22/22 gates green after the
+        clipped-support observation repair, terminal states serialized, smoothing formally
+        retired. Integration verified (commit <code>65d2d68c</code>): 5,199 passed, zero
+        merge-introduced failures — three pre-existing MAST defects and one environmental
+        failure classified with parent-revision evidence and routed to their owners. The
+        pecr §6 routing merge and the sol-current kickoff unblock; the analytic-drift question
+        is owned by solovev-exact-recovery. Full record:
+        <a href="/nova/evidence/archive/boundary-ring-source-completion-landed#lineage-merge">§9 landed</a>.
+      </p>
+    </section>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -344,6 +346,11 @@
     <pre class="r-fu-prompt">/reckon-ship boundary-ring-source-completion §9</pre>
     <p class="r-fu-outcome">Owner ruled 2026-08-20: MERGE. The lineage merged to main with --no-ff as 3b3122fa; the direct-root route is accepted in place of the written continuation (a stronger result by the same measure); the ~2-point h-independent residual support term (solved-boundary displacement vs the analytic contour) and the seed-defect-vs-legacy regression are accepted inside the passing gates and routed onward. Standing directives issued with the ruling: Urankar-exact section kernels become the default everywhere (the far-field filament truncation is retired - its runtime advantage was never significant); hexagon cells couple through hexagon sections with no rectangle fallback, ever, verified; the cell-moment wiring is investigated (the accurate moment scheme must be wired correctly end to end); the Solov'ev solution is the fixed oracle - any disagreement is a nova defect to fix; and all further progress gates on developed Solov'ev agreement gates plus a benchmarked accuracy-cost ladder targeting a converged NK or Newton-only GPU fixed point in about 1 ms. Continuation owned by the solovev-exact-recovery plan; merged-main full-suite verification in flight.</p>
     </article>
+<article class="r-fu" data-id="f-brs-007" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-20" data-recommends-skill="/reckon-ship solovev-exact-recovery" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">The analytic-drift recovery continues in its own plan</h4>
+    <div class="r-fu-body"><p>Exemption: foreign-owner - solovev-exact-recovery owns the continuation by owner ruling 2026-08-20. This plan ships complete: the unified source is merged, every gate is green, and the remaining distance to the analytic oracle (the h-independent root drift) is that plan's mandate, with the exact-kernel defaults, forcing conviction, cache activation, agreement gates and accuracy-cost ladder already in flight there.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship solovev-exact-recovery</pre>
+    </article>
 </section>
 
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -418,6 +425,9 @@
 </div>
 <div class="r-comment" data-section="s9" data-id="c-20260820T1128" data-who="reckon-ship" data-when="2026-08-20T11:28:00+00:00">
     <div class="r-comment-body">Section-9 merge EXECUTED on the owner ruling: main 3b3122fa merges the complete lineage (consistent quadrature, unified degree-nine source, production repairs, clipped-support observation) with --no-ff, pushed. The smoothing branch stands formally retired (excised at 9ef0e8dd, now on main). Per the section contract this unblocks the held plasma-edge-current-representation section-6 routing merge (its routing, centres, participation and clip-partition commits are inside this lineage) and the sol-current-demonstration kickoff. Full-suite verification node merged-main-suite-verification in flight on member hex-stencil; the section collapses and the plan ships when it reports green.</div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-20260820T1420" data-who="reckon-ship" data-when="2026-08-20T14:20:00+00:00">
+    <div class="r-comment-body">merged-main-suite-verification landed - commit 65d2d68c, merged 1aacf1f8; gate PASSED. Complete suite at the merge tip: 5,199 passed / 4 failed / 91 skipped in 55m31s, ZERO merge-introduced failures. Provenance verdicts: probe-angle polarity on shots 15000 and 13500 (+pi/2 where -pi/2 asserted) and the fl_cc10 off-clock refusal reproduce identically at pre-merge parent 8890a269 - pre-existing MAST signal defects, routed to the corrected-read-layer owner; the scoring-partition multiprocessing failure is environmental (CUDA resource exhaustion, reproduced twice at the parent), routed to the test-lane owner. All four required pins pass at the tip. THE PLAN SHIPS: impl 1.0, every followup resolved, continuation owned by solovev-exact-recovery per the owner ruling recorded in f-brs-006.</div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

@@ -16,12 +16,12 @@
 <meta name="plan-effort" content="S">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-owner" content="Simon McIntosh">
-<meta name="plan-modified" content="2026-08-13">
+<meta name="plan-modified" content="2026-08-20">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="general">
 <meta name="plan-capability-reasoning" content="deep">
 <meta name="plan-capability-verification" content="strict">
-<meta name="plan-version" content="15">
+<meta name="plan-version" content="16">
 <meta name="plan-commits" content="459cecce,1c33c365,80c3b507,a5e1245c,eb242d80,d6998319,dc618673,7b15ed64,cc1f8f2c,ee5f7e02,5d003a26">
 <meta name="plan-artifacts" content="docs/evidence/archive/nova-test-lane-health-landed.html,benchmarks/BASELINE.md,benchmarks/lane_resource_accumulation.py,benchmarks/measurement_provenance.py">
 <meta name="plan-impl" content="1.0">
@@ -127,6 +127,11 @@
     <h4 class="r-fu-title">The probe-to-sensor mapping failures outlive their shipped plan</h4>
     <div class="r-fu-body"><p><strong>Exemption: foreign-owner — mast-corrected-read-layer owns the probe-to-sensor mapping.</strong> The other two enabled failures are <code>tests/test_mast_solve_inputs.py::test_each_probe_channel_reads_the_sensor_it_is_mapped_to</code> at [15000] and [13500]. They are long-standing: earlier gates recorded them as the two pre-existing probe-orientation failures in fenced files, and the classification confirmed they fail in a fresh process rather than being suite-order effects. They belong to the corrected read layer, not to lane health.</p><p><strong>Note the ownership problem rather than papering over it:</strong> mast-corrected-read-layer is status shipped, so no active plan carries this work. Resolving it therefore starts with a decision the lane plan cannot make — reopen that plan to cover the mapping defect, or accept the two failures as a recorded permanent exception with a stated reason. Read its current state before assuming either, and do not reopen a shipped plan without that judgement.</p></div>
     <pre class="r-fu-prompt">/reckon-ship mast-corrected-read-layer</pre>
+    </article>
+<article class="r-fu" data-id="f-ntlh-mp-isolation" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-20" data-recommends-skill="/reckon-ship nova-test-lane-health" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">The scoring-partition multiprocessing test needs resource isolation</h4>
+    <div class="r-fu-body"><p>Exemption: foreign-owner from the surfacing plan's perspective - this plan owns the test lane. The merged-main suite classification (commit 65d2d68c) convicted test_four_scoring_partitions_share_one_verified_artifact as ENVIRONMENTAL, not code: it reproduced twice at the pre-merge parent with CUDA resource exhaustion and XLA worker/allocator crashes preventing all four multiprocessing partitions from completing on a loaded login node with a visible GPU. The test needs CPU isolation (JAX_PLATFORMS=cpu in its spawned workers) or exclusive GPU resource control before its verdict means anything on shared hosts; today it fails or passes with the machine's load. Classification evidence at scripts/merge_suite_verification/summary.json.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship nova-test-lane-health</pre>
     </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">

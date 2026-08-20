@@ -662,5 +662,33 @@
     before/after gate readings and same-domain decompositions on both banked roots.</figcaption>
   </figure>
 
+  <h2 id="lineage-merge">§9 (merge) — the lineage lands on main with every condition met by a stronger route</h2>
+
+  <p><strong>Owner ruling 2026-08-20: merge.</strong> Main <code>3b3122fa</code> merges the
+  complete lineage — consistent support quadrature, the unified degree-nine source, the §8
+  production repairs, and the clipped-support observation — with <code>--no-ff</code>. The
+  written §9(a) route (a damped continuation to fraction 1) was superseded by a stronger result:
+  the full moment map admits <em>direct</em> analytic-seed roots at 1.625e-15 / 1.026e-15 of
+  span on both fixtures, with the complete unchanged physics gate set green (22/22 after the
+  clipped-support observation repair, no bound moved) and both terminal states serialized. The
+  smoothing branch stands formally retired.</p>
+
+  <p><strong>Integration verification (commit <code>65d2d68c</code>): zero merge-introduced
+  failures.</strong> The complete suite at the merge tip reads 5,199 passed / 4 failed /
+  91 skipped in 55:31; every one of the four failures is classified with parent-revision
+  evidence — three pre-existing MAST signal defects (probe angle +π/2 where −π/2 is asserted on
+  shots 15000 and 13500; fl_cc10 absent from the misaligned-channels refusal), each producing
+  identical assertions at pre-merge parent <code>8890a269</code>, and one environmental
+  multiprocessing failure (CUDA resource exhaustion, reproduced twice at the parent). All four
+  required pins pass at the tip. The pre-existing defects are routed to their owning plans;
+  nothing was fixed inside the classification node. Full record:
+  <code>scripts/merge_suite_verification/summary.json</code>.</p>
+
+  <p>Per the section contract the merge unblocks the held plasma-edge-current-representation §6
+  routing merge (its routing, canonical-centre, participation and clip-partition commits are
+  inside this lineage) and the sol-current-demonstration kickoff. The remaining accuracy
+  question — the h-independent root drift against the analytic oracle — is owned by
+  solovev-exact-recovery with the owner's standing directives recorded there.</p>
+
 </main></body>
 </html>

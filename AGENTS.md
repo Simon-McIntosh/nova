@@ -6,12 +6,18 @@
 
 ### One Environment per Repository
 
-The repo's single `.venv` at the root is provisioned by the user — agents use
-it and never rebuild it. Do not run `uv sync`, `uv venv`, or `pip install` as
-setup; a duplicate worktree environment is ~70k files / ~1.8 GiB on GPFS.
+The binding policy is `~/.agents/AGENTS.md` "Development Environment". For
+nova: the one environment is the root `.venv` at `~/Code/nova/.venv`; syncing it
+is ordinary work (`uv sync`, or plain `uv run`, which syncs first), and bringing
+a stale one up to date is the agent's job. Dependency changes go through
+`uv add` / `uv remove` so they land in `pyproject.toml` + `uv.lock` — never
+`pip install`. What is banned is a *second* environment: a duplicate worktree
+environment is ~70k files / ~1.8 GiB on GPFS.
 
-In a worktree, reuse the main checkout's environment. `PYTHONPATH="$PWD"`
-makes the worktree's own code shadow the main checkout's editable install:
+In a worktree, reuse the main checkout's environment. `PYTHONPATH="$PWD"` makes
+the worktree's own code shadow the main checkout's editable install, and
+`--no-sync` keeps an incidental sync from mutating an environment the main
+checkout and concurrent workers share:
 
 ```bash
 UV_PROJECT_ENVIRONMENT=~/Code/nova/.venv PYTHONPATH="$PWD" \
@@ -24,11 +30,11 @@ The pre-commit hook runs checks through `.venv/bin/python3`, so it needs the
 environment reachable at that path:
 
 ```bash
-# Main checkout: uv run resolves the root .venv (recommended)
+# Main checkout: uv run resolves and syncs the root .venv (recommended)
 uv run git commit -m 'type: description'
 
-# Worktree: link the main checkout's environment once (never copy or sync),
-# then always pass --no-sync so nothing mutates the shared venv
+# Worktree: link the main checkout's environment once (never build a second
+# one), and pass --no-sync because peers share that environment
 ln -s ~/Code/nova/.venv .venv
 uv run --no-sync git commit -m 'type: description'
 ```
@@ -129,7 +135,7 @@ the whole message. Verify before push:
 
 ```bash
 # In a worktree, reuse the main checkout's environment (see One Environment
-# per Repository above) — never sync a worktree venv:
+# per Repository above); --no-sync because peers share that environment:
 # UV_PROJECT_ENVIRONMENT=~/Code/nova/.venv PYTHONPATH="$PWD" uv run --no-sync pytest
 
 # Run all tests
@@ -154,6 +160,9 @@ branch or move commits between branches with cherry-pick.
 A worktree never builds its own environment: run everything through the main
 checkout's `.venv` with `UV_PROJECT_ENVIRONMENT` + `--no-sync`, and link
 `.venv` (`ln -s ~/Code/nova/.venv .venv`) only so the pre-commit hook resolves.
+When the work genuinely changes dependencies, make the change durable in
+`pyproject.toml` first, then drop `--no-sync` deliberately and say so in the
+report so the orchestrator can serialize it against other workers.
 
 Commit and push from the worktree on its assigned branch:
 

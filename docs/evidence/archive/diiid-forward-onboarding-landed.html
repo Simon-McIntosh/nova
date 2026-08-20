@@ -869,6 +869,55 @@
     audited before the current channels are treated as universally signed. This campaign has now met a
     sign fault three times: a global sign applied twice in the vacuum composition, a migration guide
     displaying the wrong current factor, and now two shots recording an inverted polarity.</p>
+
+    <h2 id="current-polarity">§8 the polarity fault is 603 shots, and it is not ours — 2026-08-21</h2>
+    <p>Commits <code>b69a0831</code> (boundary audit), <code>92b68e9d</code> (persisted exact response),
+    <code>a9d771d6</code> (corpus census). SLURM job 1252527, 36 CPUs, exit 0:0 in <strong>5 m 01 s</strong>,
+    one <code>EXIT_MARKER=0</code> after <code>CENSUS 7000/7041</code>. The two-shot tail the §2
+    attribution found was the visible corner of a corpus-wide fault.</p>
+    <table>
+      <caption>Census over every shot in the corpus. Nothing sampled, nothing extrapolated.</caption>
+      <thead><tr><th>Quantity</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Shots classified</td><td>7,041 / 7,041</td></tr>
+        <tr><td><strong>Affected shots</strong></td><td><strong>603 — 8.5641 %</strong></td></tr>
+        <tr><td>Quiescent shots</td><td>6,550</td></tr>
+        <tr><td>Orientation cosine (min / median / max)</td><td>−0.98299 / 0.95536 / 0.98689</td></tr>
+        <tr><td>Named tail-frame cosines</td><td>−0.95469 and −0.94712 — both classify affected</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The boundary is named, and it is outside our code:</strong>
+    <code>nova_read_path_inverts_current = false</code>. On both named tail shots all 19 of 19 poloidal
+    channels were compared with <strong>38 of 38 compressed-page SHA receipts</strong>, 38 of 38 positive
+    registry scales, every array bitwise equal, and <strong>zero</strong> raw-to-read and
+    <strong>zero</strong> read-to-registry sign mismatches. The inversion is therefore in the corpus
+    producer or in storage before nova reads — established by elimination against fail-closed checks
+    rather than by inspecting the producer, which we cannot do.</p>
+    <p><strong>The discriminator was kept, not swapped.</strong> Two earlier attempts ran out of fence,
+    and the second reported that replacing the exact analytic polygon response with a filament-centre
+    proxy would change the scientific discriminator. It was refused: a polarity census whose
+    discriminator differs from the attribution that motivated it cannot corroborate that attribution.
+    Instead the exact <code>polygon_greens</code> response was built once at shape 19×256, persisted,
+    validated on reload against conductor order, physical geometry digest
+    <code>782e9e08…</code>, grid, boundary indices, matrix shape, finite values and artifact hash — with
+    <code>filament_centre_proxy_used = false</code> recorded in the receipt — and the whole census then
+    ran in five minutes. The two lost attempts cost time and bought the right number.</p>
+    <p><strong>The gate is untouched, checked three times.</strong> The authoritative bank and its
+    preregistration were verified byte-identical <em>before, inside and after</em> the run at SHA-256
+    <code>5b53ffc3…</code> and <code>7e60861d…</code>.</p>
+    <figure>
+      <img src="/nova/figures/diiid-forward-onboarding/current-polarity/current_polarity_census.png"
+           alt="Distribution of the orientation cosine across all 7,041 corpus shots, with the affected negative-cosine population marked, beside a panel locating the two named tail shots within it"
+           style="max-width:100%">
+      <figcaption>Orientation cosine across all 7,041 shots. The distribution is bimodal, not a tail:
+      the 603 affected shots sit as a distinct negative-cosine population, and the two shots the §2
+      attribution named fall inside it rather than at its edge.</figcaption>
+    </figure>
+    <p><strong>What this changes for anyone using the corpus.</strong> The differencing gate's per-frame
+    median R² of 0.99908 was measured on a 20-shot cohort; roughly one shot in twelve corpus-wide records
+    its coil-current polarity inverted, so any consumer driving forwards from these channels must screen
+    for it rather than assume a uniform sign. The orientation cosine is a cheap screen — it separates the
+    two populations without a solve.</p>
   </main>
 </body>
 </html>

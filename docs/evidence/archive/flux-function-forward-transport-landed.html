@@ -143,6 +143,39 @@
     <p>This is the gate TORAX's undeclared-COCOS status (upstream issue open since 2024) made
     mandatory: the boundary is now tested rather than trusted.</p>
 
+    <h3>What bounds the coarea moments, measured</h3>
+    <p>Commit <code>5088a466</code> (node coarea-moment-accuracy). The <em>other</em> 12% on
+    this page — the shaped analytic assertion, a different claim from parity — is now four
+    per-moment bounds set by measurement rather than one permissive shared threshold.</p>
+    <table>
+      <caption>Achieved maximum relative error at the 101&#215;101 test grid, the tolerance
+      now asserted, and the observed convergence order across 51&#8594;101 and
+      101&#8594;201.</caption>
+      <thead><tr><th>Moment</th><th>achieved</th><th>asserted rtol</th><th>observed order</th></tr></thead>
+      <tbody>
+        <tr><td><code>int_dl_over_bp_face</code></td><td>5.28e-03</td><td>0.006</td><td>&#8722;0.048, &#8722;0.008</td></tr>
+        <tr><td><code>grad_psi_face</code></td><td>1.83e-02</td><td>0.020</td><td>&#8722;0.008, &#8722;0.001</td></tr>
+        <tr><td><code>grad_psi2_face</code></td><td>5.26e-03</td><td>0.006</td><td>&#8722;0.047, &#8722;0.008</td></tr>
+        <tr><td><code>inv_b2_face</code></td><td>3.07e-05</td><td>5e-5</td><td>+0.100, &#8722;0.007</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The orders are the finding.</strong> They tend to zero — the errors
+    <em>plateau</em> at roughly 0.53%, 1.83%, 0.53% and 0.0031% no matter how fine the
+    spatial grid gets. So this is not a discretisation error that refinement removes; it is a
+    <strong>systematic bias set by the coarea kernel's own smoothing</strong>: the finite
+    Gaussian-CDF bandwidth h = 1.25 &#215; the normalised-flux bin spacing, plus interpolation
+    from the fixed 28 surface bins. Only &#10216;|&#8711;&#968;|&#10217; exceeds rtol 1e-2, at
+    1.83%; halving the bandwidth takes it to 8.55e-3 and 56 surface bins to 5.39e-3.</p>
+    <p><strong>Production settings were deliberately not changed.</strong> The bandwidth
+    trades analytic bias against cell-binning noise on general equilibria, and an
+    analytic-surface test cannot adjudicate that trade — it only sees the bias half. So the
+    right outcome is the one taken: leave the kernel, and make its default-resolution
+    accuracy an explicit, asserted number instead of hiding it behind a 12% threshold. Anyone
+    consuming the record now knows that its &#10216;|&#8711;&#968;|&#10217; carries a ~2%
+    systematic, and knows the two knobs that reduce it.</p>
+    <p>Tests: 30 passed, 1 deselected in 73.7 s; focused analytic test green in 11.4 s;
+    per-resolution figures preserved as <code>coarea-convergence.tsv</code>.</p>
+
     <h2 id="forward-transport-facade">ForwardTransport facade — 2026-08-20</h2>
     <p>Commit <code>95a3dc72</code> (node forward-transport-facade, 859 s wall). One public
     entry point, <strong>31 passed / 1 deselected in 26.0 s</strong>.
@@ -172,6 +205,27 @@
     calls are criticised for, so the landing is sound as far as it goes — but a corrective
     node returns to the same member to move the rung onto the step API before the return
     channel and the window are built on it.</p>
+    <p><strong>Qualification resolved the same day</strong> &#8212; commit
+    <code>4df7993b</code> (node torax-step-driven-rung). The rung now builds the engine with
+    <code>make_step_fn</code>, initialises through
+    <code>get_initial_state_and_post_processed_outputs</code>, and advances typed state
+    through <code>SimulationStepFn</code>; <code>run_simulation</code> survives only inside
+    the independent reference test. No evolved profile is routed through xarray, so JAX
+    tracers stay intact across initialisation, the step, and every receipt field. The
+    declared differentiability is now demonstrated rather than asserted:
+    <strong>reverse-mode <code>jax.grad</code> of the final axis flux with respect to the
+    scalar resistivity multiplier agrees with a central difference at rtol 2e-3, atol
+    1e-10</strong> (6 passed in 48.0 s; targeted gradient test green in 38.0 s). TORAX error
+    checks still run after every step, and the receipt, byte-for-byte immutability and
+    raise-before-output assertions stay green.</p>
+    <p><strong>One declared limit, kept visible.</strong> Differentiated calls
+    <em>fail closed</em> unless the configuration is non-adaptive fixed-step with each
+    waveform interval no longer than one configured TORAX step; a static multi-interval step
+    sequence stays differentiable, and adaptive stepping remains available for ordinary
+    solves. Differentiating through a <em>data-dependent</em> adaptive step count is not
+    exposed &#8212; and is not owed: the coupled window differentiates by the
+    implicit-function adjoint at its converged fixed point, which never needs a gradient
+    through a dynamic trip count.</p>
   </main>
 </body>
 </html>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-20T15:31:55",
+  "updated": "2026-08-20T15:43:16",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -10494,9 +10494,135 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260820T132909728186-torax-step-driven-rung",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a73",
+        "node": "torax-step-driven-rung",
+        "role": "implement",
+        "member": "transport-facade",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T13:29:14Z",
+        "completed_at": "2026-08-20T13:41:06Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 712,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 712,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "1c53d36215a6ccb58cb438678c827b8adcd43320",
+        "commits": [
+          "4df7993b15944babe7e1d97b52a8a784c5726840"
+        ],
+        "changed_lines": {
+          "added": 169,
+          "removed": 52,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "TORAX rung moved onto make_step_fn; reverse-mode grad of final axis flux w.r.t. the resistivity multiplier matches central differences at rtol 2e-3; run_simulation now appears only in the independent reference test; differentiated calls fail closed unless the configuration is fixed-step",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T132909728186-torax-step-driven-rung/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f49-d28d-76c0-a01f-00215a8049e2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8764928,
+            "cached_input_tokens_cumulative": 14085632,
+            "input_tokens": 8877305,
+            "input_tokens_cumulative": 14347120,
+            "output_tokens": 19304,
+            "output_tokens_cumulative": 46598,
+            "reasoning_output_tokens": 8763,
+            "reasoning_output_tokens_cumulative": 18202
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260820T132915752014-coarea-moment-accuracy",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a73",
+        "node": "coarea-moment-accuracy",
+        "role": "implement",
+        "member": "transport-env",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T13:29:21Z",
+        "completed_at": "2026-08-20T13:38:23Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 542,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 542,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "1c53d36215a6ccb58cb438678c827b8adcd43320",
+        "commits": [
+          "5088a4664d67c405c7d1896ae362d1a24c7278df"
+        ],
+        "changed_lines": {
+          "added": 6,
+          "removed": 6,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "analytic coarea tolerances tightened from a shared 0.12 to per-moment 0.006/0.020/0.006/5e-5; errors plateau under grid refinement (observed order ~0), so the bound is the deliberate Gaussian-CDF coarea bandwidth h=1.25 x bin spacing and the 28-bin surface grid, not the stencil",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T132915752014-coarea-moment-accuracy/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01023-3e4f-7081-b1ab-24ffbe816152",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6572032,
+            "cached_input_tokens_cumulative": 21193472,
+            "input_tokens": 6647729,
+            "input_tokens_cumulative": 22122655,
+            "output_tokens": 11964,
+            "output_tokens_cumulative": 76547,
+            "reasoning_output_tokens": 3583,
+            "reasoning_output_tokens_cumulative": 29065
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 293
+    "_version": 295
   }
 }

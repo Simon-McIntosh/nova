@@ -24,9 +24,9 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-20">
-<meta name="plan-version" content="10">
-<meta name="plan-commits" content="f7af67dc,3a438d1b,9e1b5ce2,e583d796,95a3dc72">
-<meta name="plan-impl" content="0.43">
+<meta name="plan-version" content="11">
+<meta name="plan-commits" content="f7af67dc,3a438d1b,9e1b5ce2,e583d796,95a3dc72,4df7993b,5088a466">
+<meta name="plan-impl" content="0.53">
 <meta name="plan-blocks" content="imas-ambix:sophelio-entry-master">
 </head>
 <body>
@@ -144,6 +144,12 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260820-facade" data-who="reckon-ship" data-when="2026-08-20T13:32:00+00:00">
     <div class="r-comment-body">forward-transport-facade landed - commit 95a3dc72; gate physics PASSED; measure: 31 passed / 1 deselected in 26.0 s. nova/transport/forward.py exposes ForwardTransport over both landed rungs behind one frozen typed input, returning flux-consumption, plasma-current, achieved-boundary, solver-diagnostic and provenance receipts; the flux ledger asserts boundary = resistive + internal, input snapshots stay byte-for-byte unchanged with read-only arrays, and a non-NO_ERROR TORAX status raises TransportEngineError before any output access so no state can be fabricated. The same prepared configuration run through TORAX's own entry point matches the facade to rtol 1e-10 / atol 1e-12 on psi, T_i and T_e and atol 1e8 m^-3 on n_e. ONE QUALIFICATION: the TORAX rung drives run_simulation, not the make_step_fn step API the fidelity ladder declares for it, so that rung's declared grad-through-steps differentiability is not yet delivered and the coupled window cannot drive it step-wise; a corrective node returns to the same member before the return channel is built.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260820-step-rung" data-who="reckon-ship" data-when="2026-08-20T13:55:00+00:00">
+    <div class="r-comment-body">torax-step-driven-rung landed - commit 4df7993b; gate gradients PASSED; measure: reverse-mode jax.grad of the final axis flux with respect to the scalar resistivity multiplier agrees with a central difference at rtol 2e-3 / atol 1e-10; 6 passed in 48.0 s plus the targeted gradient test green in 38.0 s. The facade now builds the embedded engine with make_step_fn, initialises through get_initial_state_and_post_processed_outputs and advances typed state through SimulationStepFn; run_simulation survives only inside the independent reference test, and no evolved profile is routed through xarray, so JAX tracers stay intact across initialisation, the step and every receipt field. TORAX error checks still run after every step, and the receipt, byte-for-byte immutability and raise-before-output assertions stay green. DECLARED LIMIT: differentiated calls fail closed unless the configuration is non-adaptive fixed-step with each waveform interval no longer than one TORAX step; a static multi-interval step sequence remains differentiable, and adaptive stepping remains available for ordinary solves. Differentiating through a data-dependent adaptive step count is not exposed and is not required by the window contract, which differentiates by the implicit-function adjoint at the converged fixed point.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260820-coarea-accuracy" data-who="reckon-ship" data-when="2026-08-20T13:56:00+00:00">
+    <div class="r-comment-body">coarea-moment-accuracy landed - commit 5088a466; gate geometry PASSED; measure: the shaped analytic assertion moved from one shared rtol 0.12 to per-moment bounds 0.006 (dl/Bp), 0.020 (grad-psi), 0.006 (grad-psi squared) and 5e-5 (inverse B squared), matching achieved errors of 5.28e-3, 1.83e-2, 5.26e-3 and 3.07e-5 at the 101x101 test grid; 30 passed / 1 deselected in 73.7 s. The mechanism is now named: errors PLATEAU under refinement across 51, 101 and 201 grids (observed orders tend to zero), so the bound is not the grid stencil but the deliberate finite Gaussian-CDF coarea bandwidth h = 1.25 times the normalised-flux bin spacing together with interpolation from the fixed 28 surface bins. Only the grad-psi moment exceeds rtol 1e-2, at 1.83%; halving the bandwidth takes it to 8.55e-3 and 56 surface bins to 5.39e-3. Production bandwidth was deliberately preserved because it trades analytic bias against cell-binning noise on general equilibria, a trade an analytic-surface test cannot adjudicate; the test now states the measured default-resolution accuracy instead of hiding it behind one permissive threshold.</div>
 </div>
 </section>
 </main>

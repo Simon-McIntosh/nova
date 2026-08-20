@@ -120,6 +120,56 @@
     <p>The dependency gate is first and alone; it is small but it gates every other item. The FSA record completion and COCOS tests can proceed against the native rung in parallel once the environment resolves. The coupled loop lands last, after <code>ForwardProfile</code>'s static absolute-source contract is green in the sibling plan, which this plan depends on.</p>
     <p>Excluded: developing turbulent-transport or pedestal models (TORAX owns its physics; Nova validates the boundary); any measurement fitting or profile identification inside the forward solve; field-aligned/poloidal SOL current (deferred with the same boundary-current reasoning as the equilibrium sibling); porting TORAX's geometry construction to jnp for end-to-end differentiability, unless the loop-differentiability decision is revisited with a load-bearing gradient consumer. Consumer-side migrations — lifting the ambix estimators off whole-run TORAX calls and retiring the torch donor — belong to the ambix integration plan, not here.</p>
 
+    <h2 id="s6">§6 — Physics demonstration</h2>
+    <p><strong>The seam is verified; the physics is not.</strong> Every input the transport
+    surface has been exercised on is synthetic — hand-written parabolic profiles over a single
+    10 ms step on a circular or analytic-shaped record — and the geometry parity that reads
+    1.73e-15 compares two constructions built from the same Nova record. No real machine
+    equilibrium has ever driven TORAX through this adapter, and no output has been inspected
+    for physical plausibility. This section closes that gap. Its items are validation, not new
+    capability: nothing here changes the contract, and a failure here is a finding about the
+    record or the kernel rather than about the interface.</p>
+    <p>TORAX ships the data that makes an <em>independent</em> reference possible, which is what
+    makes these items cheap. <code>data/third_party/geo/iterhybrid_cocos17.eqdsk</code> is a real
+    ITER hybrid equilibrium already in Nova's pinned COCOS 17, with
+    <code>cocos02</code> and <code>cocos11</code> twins of the same equilibrium; both codes can
+    read that one file independently, Nova through its geqdsk reader and TORAX through its own.
+    <code>STEP_SPP_001_ECHD_ftop.eqdsk</code> adds a low-aspect-ratio spherical tokamak, and
+    <code>examples/iterhybrid_rampup.py</code> is the canonical published ramp-up with real
+    sources, pedestal, bootstrap and turbulent transport over seconds.</p>
+    <ol>
+      <li><strong>Published ramp-up benchmark.</strong> Run <code>iterhybrid_rampup</code>
+      unmodified through the <code>ForwardTransport</code> façade. This requires the façade to
+      honour a configuration's <em>own</em> geometry provider instead of always installing the
+      Nova adapter — without which no published case can ever be run as published, and the
+      Physics gate cannot be met on principle rather than on effort. Compare against TORAX's own
+      entry point on the same case, and against any numeric reference TORAX ships for it.</li>
+      <li><strong>Independent geometry reference.</strong> Read
+      <code>iterhybrid_cocos17.eqdsk</code> twice — once through TORAX's own EQDSK reader, once
+      through Nova's geqdsk reader into the traced FSA assembly and the direct adapter — and
+      compare the two geometries field by field. This is the test the landed parity check is
+      not: disagreement here is a defect in the FSA record or the coarea kernel, not in the
+      adapter's arithmetic. Repeat on the STEP equilibrium, whose aspect ratio stresses the
+      coarea moments hardest, and use the cocos02/cocos11 twins as a three-way convention
+      cross-check on the COCOS-17 provenance the sign tests pin.</li>
+      <li><strong>A real coupled window.</strong> Drive one window on a real equilibrium and
+      report what the receipts actually say: iterations used, the <em>measured</em> contraction,
+      exit residual per exchanged field, and whether the flux-consumption and plasma-current
+      ledgers close. The landed contraction figures are declared inputs to an affine test map;
+      this is the first measurement of how strongly a real equilibrium couples to its transport,
+      and a contraction at or above one is a publishable negative result, not a failure.</li>
+      <li><strong>Physics inspection.</strong> Put the evolved state on figures — T_e(ρ,t),
+      q(ρ,t) and the bootstrap fraction — beside TORAX's own run of the same case, so that
+      somebody has looked at what comes out and can say whether it resembles a tokamak. A
+      capability nobody has eyeballed is not a demonstrated capability.</li>
+    </ol>
+    <p><strong>Acceptance.</strong> §4's Physics gate closes on item 1 and stays open until it
+    does. Item 2 declares a tolerance per geometry field against the independently read
+    equilibrium and states the mechanism bounding any field that misses it — the ~1.8%
+    ⟨|∇ψ|⟩ smoothing bias already measured is the expected floor, so a field far outside it is
+    news. Item 3 reports its receipts whatever they say. Item 4 is accepted on the figures
+    existing and being legible, not on the profiles being good.</p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="transport-engine" data-choice="torax-embedded-ladder" data-by="Simon McIntosh" data-when="2026-08-10T15:38:11+00:00">

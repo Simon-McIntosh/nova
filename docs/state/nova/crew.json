@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-20T17:24:35",
+  "updated": "2026-08-20T17:38:08",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -11398,9 +11398,135 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260820T152620484687-uniform-mesh-guard",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a73",
+        "node": "uniform-mesh-guard",
+        "role": "implement",
+        "member": "transport-window",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T15:26:24Z",
+        "completed_at": "2026-08-20T15:36:43Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 619,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 619,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "bca40d3d061e998083779221b638bc247f024f05",
+        "commits": [
+          "b56c39dfa1afc1d40585ad4938484e9546805af8"
+        ],
+        "changed_lines": {
+          "added": 64,
+          "removed": 1,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "the adapter now rejects a rho_face differing from the uniform normalised grid by more than 32 dtype eps, validated through a data-dependent pure_callback with a custom identity JVP so the radial tangent still crosses the boundary; perturbing interior face 3 by 0.02 raises under jit, the uniform case is unchanged within atol 8e-15, and the 1e-12 / 1e-10 parity gates hold; 10 passed",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T152620484687-uniform-mesh-guard/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f8b-c81b-70c3-a5d8-007c4d512626",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8342016,
+            "cached_input_tokens_cumulative": 26887680,
+            "input_tokens": 8431630,
+            "input_tokens_cumulative": 27427569,
+            "output_tokens": 16289,
+            "output_tokens_cumulative": 97147,
+            "reasoning_output_tokens": 7970,
+            "reasoning_output_tokens_cumulative": 42027
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260820T152625798500-transport-public-surface",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a73",
+        "node": "transport-public-surface",
+        "role": "implement",
+        "member": "transport-facade",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T15:26:29Z",
+        "completed_at": "2026-08-20T15:32:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 349,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 349,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "bca40d3d061e998083779221b638bc247f024f05",
+        "commits": [
+          "3353aeb5671bb034efe50ec309e8ece95df33267"
+        ],
+        "changed_lines": {
+          "added": 149,
+          "removed": 18,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "outcome": "nova.transport publishes 52 non-None bindings covering the native rung, the typed facade, the traced ensemble batch, the evolved-state seam mapping and the coupled-window primitives, errors and receipts; CurrentDiffusion, ForwardTransport and solve_window import directly and the docstring names all three ladder rungs plus the window contract; 16/16 green",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T152625798500-transport-public-surface/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f49-d28d-76c0-a01f-00215a8049e2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1810688,
+            "cached_input_tokens_cumulative": 15896320,
+            "input_tokens": 2111260,
+            "input_tokens_cumulative": 16458380,
+            "output_tokens": 9510,
+            "output_tokens_cumulative": 56108,
+            "reasoning_output_tokens": 2803,
+            "reasoning_output_tokens_cumulative": 21005
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 315
+    "_version": 317
   }
 }

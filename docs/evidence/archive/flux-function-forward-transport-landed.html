@@ -468,6 +468,45 @@
     builds its mesh the same way, so no current input is affected &#8212; but §1 of this plan
     states the solve "never rescales its inputs silently", and a silently substituted
     coordinate grid is exactly that. A guard node follows rather than a note.</p>
+    <h2 id="mesh-guard-and-surface">Mesh guard and public surface &#8212; 2026-08-20</h2>
+    <h3>Refusing a grid the mesh would silently replace</h3>
+    <p>Commit <code>b56c39df</code> (node uniform-mesh-guard). The adapter now rejects a
+    <code>rho_face</code> whose values differ from the uniform normalised grid its
+    <code>Grid1D</code> cell count implies by more than 32 dtype eps, so §1's promise that the
+    solve "never rescales its inputs silently" holds at the mesh boundary rather than only in
+    prose. Perturbing interior face index 3 by 0.02 raises under jit; the uniform case comes
+    back unchanged within atol 8.0e&#8722;15; the 22-field parity at rtol 1e&#8722;12 and the
+    one-step parity at rtol 1e&#8722;10 both hold. <strong>10 passed in 77.0 s.</strong></p>
+    <p>Two mechanism notes worth keeping, because both are traps. A Python branch cannot
+    inspect a non-concrete tracer, so the check runs as a <em>data-dependent</em>
+    <code>jax.pure_callback</code> that returns its input unchanged, carrying a custom identity
+    JVP so the <code>rho_face</code> tangent still crosses the validation boundary &#8212;
+    which is why the guard test and the gradient test pass together rather than one at a time.
+    And the first attempt used an <em>ordered</em> debug callback: after the expected failure it
+    retained a failed global effect token that poisoned the <em>next</em> test in the file. A
+    guard that corrupts the run it is protecting is worse than no guard, and the data-dependent
+    form has no such residual state.</p>
+    <p><strong>One cost stated rather than assumed.</strong> The guard adds a host callback per
+    adapter construction, and adapter construction sits inside the window's iteration loop
+    &#8212; up to 124 exchanges in the strongly coupled case. This plan declares no adapter
+    performance gate, so the cost is unmeasured; per-file suite durations from the verification
+    pass are the coarse check, and a targeted measurement belongs to whoever first needs the
+    window to be fast.</p>
+
+    <h3>The public surface</h3>
+    <p>Commit <code>3353aeb5</code> (node transport-public-surface).
+    <code>nova.transport.__all__</code> now carries <strong>52 non-None bindings</strong>
+    spanning the native &#968;-diffusion rung, the typed façade over both engines, the traced
+    ensemble batch, the evolved-state seam mapping, and the coupled-window primitives with
+    their errors and receipts. <code>CurrentDiffusion</code>, <code>ForwardTransport</code> and
+    <code>solve_window</code> &#8212; one entry point per ladder rung &#8212; import directly
+    from <code>nova.transport</code> with no private submodule path, and the module docstring
+    names all three rungs alongside the waveform coordinate-map and the convergence and
+    conservation receipt contract. <strong>16/16 green in 59.0 s.</strong></p>
+    <p>This closes the return-channel node's follow_on: <code>__init__.py</code> was outside
+    that node's fence, which had left <code>forward_source_from_receipt</code> reachable only
+    as <code>nova.transport.evolved_state.forward_source_from_receipt</code> &#8212; a public
+    capability with a private-looking address.</p>
   </main>
 </body>
 </html>

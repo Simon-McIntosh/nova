@@ -1,0 +1,3177 @@
+{
+  "source": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+  "backend": "imas-python netCDF",
+  "configured_written_dd_version": "3.41.0",
+  "populated_ids": [
+    "equilibrium",
+    "magnetics",
+    "pf_active",
+    "tf",
+    "wall"
+  ],
+  "shape_semantics": "shape prepends populated concrete-instance count when a DD leaf repeats through an array of structures; instance_shapes retains each leaf value shape before that aggregation",
+  "classification_reasons": {
+    "MACHINE DESCRIPTION": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+    "NOT ADMISSIBLE": "Magnetics signal-channel samples, errors, validity and time bases are measurements; the magnetics-free entry fits no measurement.",
+    "FIREWALLED": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets."
+  },
+  "overview": {
+    "equilibrium_slice_count": 340,
+    "equilibrium_time_span_s": [
+      0.1,
+      7.22
+    ],
+    "pf_active_coil_count": 24,
+    "pf_active_current_time_base_lengths": [
+      480256
+    ],
+    "equilibrium_constraint_channels": {
+      "bpol_probe": 76,
+      "flux_loop": 44,
+      "pf_current": 24,
+      "mse_polarisation_angle": 69
+    },
+    "magnetics_signal_channels": {
+      "bpol_probe": 76,
+      "flux_loop": 44,
+      "ip": 2,
+      "diamagnetic_flux": 1
+    },
+    "case_reading": "physical shot-derived reconstruction",
+    "case_reading_evidence": "The entry combines 340 EFIT slices over 0.10-7.22 s with independently sampled diagnostic and actuator streams (44 flux loops, 76 bpol probes, 24 PF currents and 69 MSE constraints; raw time bases reach 480256 samples). That content is characteristic of a physical discharge and its reconstruction, not a geometry-only synthetic reference case."
+  },
+  "ids": {
+    "equilibrium": {
+      "dd_version": "3.41.0",
+      "homogeneous_time": 1,
+      "filled_leaf_count": 105,
+      "fields": [
+        {
+          "path": "code/name",
+          "shape": [],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 1,
+          "dtype": "str",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "code/version",
+          "shape": [],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 1,
+          "dtype": "str",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "ids_properties/homogeneous_time",
+          "shape": [],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 1,
+          "dtype": "int64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "ids_properties/version_put/access_layer",
+          "shape": [],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 1,
+          "dtype": "str",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "ids_properties/version_put/access_layer_language",
+          "shape": [],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 1,
+          "dtype": "str",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "ids_properties/version_put/data_dictionary",
+          "shape": [],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 1,
+          "dtype": "str",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "time",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            [
+              340
+            ]
+          ],
+          "populated_instances": 1,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/boundary/outline/r",
+          "shape": [
+            79
+          ],
+          "instance_shapes": [
+            [
+              79
+            ],
+            [
+              80
+            ],
+            [
+              82
+            ],
+            [
+              83
+            ],
+            [
+              84
+            ],
+            [
+              85
+            ],
+            [
+              86
+            ],
+            [
+              87
+            ],
+            [
+              88
+            ],
+            [
+              89
+            ],
+            [
+              90
+            ],
+            [
+              91
+            ]
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/boundary/outline/z",
+          "shape": [
+            79
+          ],
+          "instance_shapes": [
+            [
+              79
+            ],
+            [
+              80
+            ],
+            [
+              82
+            ],
+            [
+              83
+            ],
+            [
+              84
+            ],
+            [
+              85
+            ],
+            [
+              86
+            ],
+            [
+              87
+            ],
+            [
+              88
+            ],
+            [
+              89
+            ],
+            [
+              90
+            ],
+            [
+              91
+            ]
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/boundary/x_point/r",
+          "shape": [
+            680
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 680,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/boundary/x_point/z",
+          "shape": [
+            680
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 680,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/boundary_separatrix/closest_wall_point/distance",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/boundary_separatrix/elongation",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/boundary_separatrix/gap/name",
+          "shape": [
+            1360
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 1360,
+          "dtype": "str",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/boundary_separatrix/gap/value",
+          "shape": [
+            1360
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 1360,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/boundary_separatrix/geometric_axis/r",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/boundary_separatrix/geometric_axis/z",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/boundary_separatrix/minor_radius",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/boundary_separatrix/outline/r",
+          "shape": [
+            79
+          ],
+          "instance_shapes": [
+            [
+              79
+            ],
+            [
+              80
+            ],
+            [
+              82
+            ],
+            [
+              83
+            ],
+            [
+              84
+            ],
+            [
+              85
+            ],
+            [
+              86
+            ],
+            [
+              87
+            ],
+            [
+              88
+            ],
+            [
+              89
+            ],
+            [
+              90
+            ],
+            [
+              91
+            ]
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/boundary_separatrix/outline/z",
+          "shape": [
+            79
+          ],
+          "instance_shapes": [
+            [
+              79
+            ],
+            [
+              80
+            ],
+            [
+              82
+            ],
+            [
+              83
+            ],
+            [
+              84
+            ],
+            [
+              85
+            ],
+            [
+              86
+            ],
+            [
+              87
+            ],
+            [
+              88
+            ],
+            [
+              89
+            ],
+            [
+              90
+            ],
+            [
+              91
+            ]
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/boundary_separatrix/psi",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/boundary_separatrix/strike_point/r",
+          "shape": [
+            1360
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 1360,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/boundary_separatrix/strike_point/z",
+          "shape": [
+            1360
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 1360,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/boundary_separatrix/triangularity_lower",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/boundary_separatrix/triangularity_upper",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/boundary_separatrix/x_point/r",
+          "shape": [
+            680
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 680,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/boundary_separatrix/x_point/z",
+          "shape": [
+            680
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 680,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/bpol_probe/chi_squared",
+          "shape": [
+            25840
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 25840,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/bpol_probe/measured",
+          "shape": [
+            25840
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 25840,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/bpol_probe/measured_error_upper",
+          "shape": [
+            25840
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 25840,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/bpol_probe/reconstructed",
+          "shape": [
+            25840
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 25840,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/bpol_probe/weight",
+          "shape": [
+            25840
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 25840,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/diamagnetic_flux/chi_squared",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/diamagnetic_flux/measured",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/diamagnetic_flux/measured_error_upper",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/diamagnetic_flux/reconstructed",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/diamagnetic_flux/weight",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/flux_loop/chi_squared",
+          "shape": [
+            14960
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 14960,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/flux_loop/measured",
+          "shape": [
+            14960
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 14960,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/flux_loop/measured_error_upper",
+          "shape": [
+            14960
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 14960,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/flux_loop/reconstructed",
+          "shape": [
+            14960
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 14960,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/flux_loop/weight",
+          "shape": [
+            14960
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 14960,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/ip/chi_squared",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/ip/measured",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/ip/measured_error_upper",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/ip/reconstructed",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/ip/weight",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/j_tor/measured",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/j_tor/position/psi",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/mse_polarisation_angle/chi_squared",
+          "shape": [
+            23460
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 23460,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/mse_polarisation_angle/measured",
+          "shape": [
+            23460
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 23460,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/mse_polarisation_angle/measured_error_upper",
+          "shape": [
+            23460
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 23460,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/mse_polarisation_angle/reconstructed",
+          "shape": [
+            23460
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 23460,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/mse_polarisation_angle/weight",
+          "shape": [
+            23460
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 23460,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/pf_current/chi_squared",
+          "shape": [
+            8160
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 8160,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/pf_current/measured",
+          "shape": [
+            8160
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 8160,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/pf_current/measured_error_upper",
+          "shape": [
+            8160
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 8160,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/pf_current/reconstructed",
+          "shape": [
+            8160
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 8160,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/pf_current/weight",
+          "shape": [
+            8160
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 8160,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/pressure/chi_squared",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/pressure/measured",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/pressure/measured_error_upper",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/pressure/position/psi",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/pressure/reconstructed",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/constraints/pressure/weight",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/convergence/grad_shafranov_deviation_expression/index",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "int64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/convergence/grad_shafranov_deviation_value",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/convergence/iterations_n",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "int64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/global_quantities/area",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/global_quantities/beta_normal",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/global_quantities/beta_pol",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/global_quantities/beta_tor",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/global_quantities/ip",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/global_quantities/li_3",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/global_quantities/magnetic_axis/b_field_tor",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/global_quantities/magnetic_axis/r",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/global_quantities/magnetic_axis/z",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/global_quantities/psi_axis",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/global_quantities/psi_boundary",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/global_quantities/q_95",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/global_quantities/q_axis",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/global_quantities/q_min/value",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/global_quantities/surface",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/global_quantities/volume",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/profiles_1d/dpressure_dpsi",
+          "shape": [
+            340,
+            65
+          ],
+          "instance_shapes": [
+            [
+              65
+            ]
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/profiles_1d/f",
+          "shape": [
+            340,
+            65
+          ],
+          "instance_shapes": [
+            [
+              65
+            ]
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/profiles_1d/f_df_dpsi",
+          "shape": [
+            340,
+            65
+          ],
+          "instance_shapes": [
+            [
+              65
+            ]
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/profiles_1d/j_parallel",
+          "shape": [
+            340,
+            65
+          ],
+          "instance_shapes": [
+            [
+              65
+            ]
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/profiles_1d/j_tor",
+          "shape": [
+            340,
+            65
+          ],
+          "instance_shapes": [
+            [
+              65
+            ]
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/profiles_1d/pressure",
+          "shape": [
+            340,
+            65
+          ],
+          "instance_shapes": [
+            [
+              65
+            ]
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/profiles_1d/psi",
+          "shape": [
+            340,
+            65
+          ],
+          "instance_shapes": [
+            [
+              65
+            ]
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/profiles_1d/q",
+          "shape": [
+            340,
+            65
+          ],
+          "instance_shapes": [
+            [
+              65
+            ]
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/profiles_1d/rho_tor_norm",
+          "shape": [
+            340,
+            65
+          ],
+          "instance_shapes": [
+            [
+              65
+            ]
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/profiles_1d/volume",
+          "shape": [
+            340,
+            65
+          ],
+          "instance_shapes": [
+            [
+              65
+            ]
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/profiles_2d/b_field_r",
+          "shape": [
+            340,
+            65,
+            65
+          ],
+          "instance_shapes": [
+            [
+              65,
+              65
+            ]
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/profiles_2d/b_field_tor",
+          "shape": [
+            340,
+            65,
+            65
+          ],
+          "instance_shapes": [
+            [
+              65,
+              65
+            ]
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/profiles_2d/b_field_z",
+          "shape": [
+            340,
+            65,
+            65
+          ],
+          "instance_shapes": [
+            [
+              65,
+              65
+            ]
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/profiles_2d/grid/dim1",
+          "shape": [
+            340,
+            65
+          ],
+          "instance_shapes": [
+            [
+              65
+            ]
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/profiles_2d/grid/dim2",
+          "shape": [
+            340,
+            65
+          ],
+          "instance_shapes": [
+            [
+              65
+            ]
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/profiles_2d/grid_type/index",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "int64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/profiles_2d/psi",
+          "shape": [
+            340,
+            65,
+            65
+          ],
+          "instance_shapes": [
+            [
+              65,
+              65
+            ]
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/profiles_2d/type/index",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "int64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "time_slice/time",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 340,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "vacuum_toroidal_field/b0",
+          "shape": [
+            340
+          ],
+          "instance_shapes": [
+            [
+              340
+            ]
+          ],
+          "populated_instances": 1,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            340
+          ]
+        },
+        {
+          "path": "vacuum_toroidal_field/r0",
+          "shape": [],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 1,
+          "dtype": "float64",
+          "admissibility": "FIREWALLED",
+          "reason": "Equilibrium leaves, including reconstructed constraint blocks, are EFIT products and may be audited but never used as labels or fitting targets.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        }
+      ],
+      "unclassified": []
+    },
+    "magnetics": {
+      "dd_version": "3.41.0",
+      "homogeneous_time": 0,
+      "filled_leaf_count": 33,
+      "fields": [
+        {
+          "path": "b_field_pol_probe/field/data",
+          "shape": [
+            1
+          ],
+          "instance_shapes": [
+            [
+              1
+            ],
+            [
+              327680
+            ],
+            [
+              480256
+            ]
+          ],
+          "populated_instances": 76,
+          "dtype": "float64",
+          "admissibility": "NOT ADMISSIBLE",
+          "reason": "Magnetics signal-channel samples, errors, validity and time bases are measurements; the magnetics-free entry fits no measurement.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            1,
+            327680,
+            480256
+          ]
+        },
+        {
+          "path": "b_field_pol_probe/field/data_error_upper",
+          "shape": [
+            1
+          ],
+          "instance_shapes": [
+            [
+              1
+            ],
+            [
+              327680
+            ],
+            [
+              480256
+            ]
+          ],
+          "populated_instances": 76,
+          "dtype": "float64",
+          "admissibility": "NOT ADMISSIBLE",
+          "reason": "Magnetics signal-channel samples, errors, validity and time bases are measurements; the magnetics-free entry fits no measurement.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            1,
+            327680,
+            480256
+          ]
+        },
+        {
+          "path": "b_field_pol_probe/field/time",
+          "shape": [
+            1
+          ],
+          "instance_shapes": [
+            [
+              1
+            ],
+            [
+              327680
+            ],
+            [
+              480256
+            ]
+          ],
+          "populated_instances": 76,
+          "dtype": "float64",
+          "admissibility": "NOT ADMISSIBLE",
+          "reason": "Magnetics signal-channel samples, errors, validity and time bases are measurements; the magnetics-free entry fits no measurement.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            1,
+            327680,
+            480256
+          ]
+        },
+        {
+          "path": "b_field_pol_probe/field/validity",
+          "shape": [
+            76
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 76,
+          "dtype": "int64",
+          "admissibility": "NOT ADMISSIBLE",
+          "reason": "Magnetics signal-channel samples, errors, validity and time bases are measurements; the magnetics-free entry fits no measurement.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "b_field_pol_probe/identifier",
+          "shape": [
+            76
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 76,
+          "dtype": "str",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "b_field_pol_probe/length",
+          "shape": [
+            76
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 76,
+          "dtype": "float64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "b_field_pol_probe/name",
+          "shape": [
+            76
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 76,
+          "dtype": "str",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "b_field_pol_probe/poloidal_angle",
+          "shape": [
+            76
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 76,
+          "dtype": "float64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "b_field_pol_probe/position/r",
+          "shape": [
+            76
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 76,
+          "dtype": "float64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "b_field_pol_probe/position/z",
+          "shape": [
+            76
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 76,
+          "dtype": "float64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "b_field_pol_probe/toroidal_angle",
+          "shape": [
+            76
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 76,
+          "dtype": "float64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "b_field_pol_probe/turns",
+          "shape": [
+            76
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 76,
+          "dtype": "int64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "b_field_pol_probe/type/index",
+          "shape": [
+            76
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 76,
+          "dtype": "int64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "diamagnetic_flux/data",
+          "shape": [
+            480256
+          ],
+          "instance_shapes": [
+            [
+              480256
+            ]
+          ],
+          "populated_instances": 1,
+          "dtype": "float64",
+          "admissibility": "NOT ADMISSIBLE",
+          "reason": "Magnetics signal-channel samples, errors, validity and time bases are measurements; the magnetics-free entry fits no measurement.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            480256
+          ]
+        },
+        {
+          "path": "diamagnetic_flux/data_error_upper",
+          "shape": [
+            480256
+          ],
+          "instance_shapes": [
+            [
+              480256
+            ]
+          ],
+          "populated_instances": 1,
+          "dtype": "float64",
+          "admissibility": "NOT ADMISSIBLE",
+          "reason": "Magnetics signal-channel samples, errors, validity and time bases are measurements; the magnetics-free entry fits no measurement.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            480256
+          ]
+        },
+        {
+          "path": "diamagnetic_flux/time",
+          "shape": [
+            480256
+          ],
+          "instance_shapes": [
+            [
+              480256
+            ]
+          ],
+          "populated_instances": 1,
+          "dtype": "float64",
+          "admissibility": "NOT ADMISSIBLE",
+          "reason": "Magnetics signal-channel samples, errors, validity and time bases are measurements; the magnetics-free entry fits no measurement.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            480256
+          ]
+        },
+        {
+          "path": "flux_loop/flux/data",
+          "shape": [
+            44,
+            327680
+          ],
+          "instance_shapes": [
+            [
+              327680
+            ]
+          ],
+          "populated_instances": 44,
+          "dtype": "float64",
+          "admissibility": "NOT ADMISSIBLE",
+          "reason": "Magnetics signal-channel samples, errors, validity and time bases are measurements; the magnetics-free entry fits no measurement.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            327680
+          ]
+        },
+        {
+          "path": "flux_loop/flux/data_error_upper",
+          "shape": [
+            44,
+            327680
+          ],
+          "instance_shapes": [
+            [
+              327680
+            ]
+          ],
+          "populated_instances": 44,
+          "dtype": "float64",
+          "admissibility": "NOT ADMISSIBLE",
+          "reason": "Magnetics signal-channel samples, errors, validity and time bases are measurements; the magnetics-free entry fits no measurement.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            327680
+          ]
+        },
+        {
+          "path": "flux_loop/flux/time",
+          "shape": [
+            44,
+            327680
+          ],
+          "instance_shapes": [
+            [
+              327680
+            ]
+          ],
+          "populated_instances": 44,
+          "dtype": "float64",
+          "admissibility": "NOT ADMISSIBLE",
+          "reason": "Magnetics signal-channel samples, errors, validity and time bases are measurements; the magnetics-free entry fits no measurement.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            327680
+          ]
+        },
+        {
+          "path": "flux_loop/flux/validity",
+          "shape": [
+            44
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 44,
+          "dtype": "int64",
+          "admissibility": "NOT ADMISSIBLE",
+          "reason": "Magnetics signal-channel samples, errors, validity and time bases are measurements; the magnetics-free entry fits no measurement.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "flux_loop/identifier",
+          "shape": [
+            44
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 44,
+          "dtype": "str",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "flux_loop/name",
+          "shape": [
+            44
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 44,
+          "dtype": "str",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "flux_loop/position/r",
+          "shape": [
+            44
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 44,
+          "dtype": "float64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "flux_loop/position/z",
+          "shape": [
+            44
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 44,
+          "dtype": "float64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "flux_loop/type/index",
+          "shape": [
+            44
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 44,
+          "dtype": "int64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "ids_properties/homogeneous_time",
+          "shape": [],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 1,
+          "dtype": "int64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "ids_properties/version_put/access_layer",
+          "shape": [],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 1,
+          "dtype": "str",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "ids_properties/version_put/access_layer_language",
+          "shape": [],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 1,
+          "dtype": "str",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "ids_properties/version_put/data_dictionary",
+          "shape": [],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 1,
+          "dtype": "str",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "ip/data",
+          "shape": [
+            44204
+          ],
+          "instance_shapes": [
+            [
+              44204
+            ],
+            [
+              480256
+            ]
+          ],
+          "populated_instances": 2,
+          "dtype": "float64",
+          "admissibility": "NOT ADMISSIBLE",
+          "reason": "Magnetics signal-channel samples, errors, validity and time bases are measurements; the magnetics-free entry fits no measurement.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            44204,
+            480256
+          ]
+        },
+        {
+          "path": "ip/data_error_upper",
+          "shape": [
+            44204
+          ],
+          "instance_shapes": [
+            [
+              44204
+            ],
+            [
+              480256
+            ]
+          ],
+          "populated_instances": 2,
+          "dtype": "float64",
+          "admissibility": "NOT ADMISSIBLE",
+          "reason": "Magnetics signal-channel samples, errors, validity and time bases are measurements; the magnetics-free entry fits no measurement.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            44204,
+            480256
+          ]
+        },
+        {
+          "path": "ip/method_name",
+          "shape": [
+            2
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 2,
+          "dtype": "str",
+          "admissibility": "NOT ADMISSIBLE",
+          "reason": "Magnetics signal-channel samples, errors, validity and time bases are measurements; the magnetics-free entry fits no measurement.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "ip/time",
+          "shape": [
+            44204
+          ],
+          "instance_shapes": [
+            [
+              44204
+            ],
+            [
+              480256
+            ]
+          ],
+          "populated_instances": 2,
+          "dtype": "float64",
+          "admissibility": "NOT ADMISSIBLE",
+          "reason": "Magnetics signal-channel samples, errors, validity and time bases are measurements; the magnetics-free entry fits no measurement.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            44204,
+            480256
+          ]
+        }
+      ],
+      "unclassified": []
+    },
+    "pf_active": {
+      "dd_version": "3.41.0",
+      "homogeneous_time": 0,
+      "filled_leaf_count": 20,
+      "fields": [
+        {
+          "path": "coil/current/data",
+          "shape": [
+            24,
+            480256
+          ],
+          "instance_shapes": [
+            [
+              480256
+            ]
+          ],
+          "populated_instances": 24,
+          "dtype": "float64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            480256
+          ]
+        },
+        {
+          "path": "coil/current/data_error_upper",
+          "shape": [
+            24,
+            480256
+          ],
+          "instance_shapes": [
+            [
+              480256
+            ]
+          ],
+          "populated_instances": 24,
+          "dtype": "float64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            480256
+          ]
+        },
+        {
+          "path": "coil/current/time",
+          "shape": [
+            24,
+            480256
+          ],
+          "instance_shapes": [
+            [
+              480256
+            ]
+          ],
+          "populated_instances": 24,
+          "dtype": "float64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            480256
+          ]
+        },
+        {
+          "path": "coil/element/geometry/geometry_type",
+          "shape": [
+            140
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 140,
+          "dtype": "int64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "coil/element/geometry/outline/r",
+          "shape": [
+            6,
+            4
+          ],
+          "instance_shapes": [
+            [
+              4
+            ]
+          ],
+          "populated_instances": 6,
+          "dtype": "float64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "coil/element/geometry/outline/z",
+          "shape": [
+            6,
+            4
+          ],
+          "instance_shapes": [
+            [
+              4
+            ]
+          ],
+          "populated_instances": 6,
+          "dtype": "float64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "coil/element/geometry/rectangle/height",
+          "shape": [
+            134
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 134,
+          "dtype": "float64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "coil/element/geometry/rectangle/r",
+          "shape": [
+            134
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 134,
+          "dtype": "float64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "coil/element/geometry/rectangle/width",
+          "shape": [
+            134
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 134,
+          "dtype": "float64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "coil/element/geometry/rectangle/z",
+          "shape": [
+            134
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 134,
+          "dtype": "float64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "coil/element/identifier",
+          "shape": [
+            140
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 140,
+          "dtype": "str",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "coil/element/name",
+          "shape": [
+            140
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 140,
+          "dtype": "str",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "coil/element/turns_with_sign",
+          "shape": [
+            140
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 140,
+          "dtype": "float64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "coil/function/index",
+          "shape": [
+            24
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 24,
+          "dtype": "int64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "coil/identifier",
+          "shape": [
+            24
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 24,
+          "dtype": "str",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "coil/name",
+          "shape": [
+            24
+          ],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 24,
+          "dtype": "str",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "ids_properties/homogeneous_time",
+          "shape": [],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 1,
+          "dtype": "int64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "ids_properties/version_put/access_layer",
+          "shape": [],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 1,
+          "dtype": "str",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "ids_properties/version_put/access_layer_language",
+          "shape": [],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 1,
+          "dtype": "str",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "ids_properties/version_put/data_dictionary",
+          "shape": [],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 1,
+          "dtype": "str",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        }
+      ],
+      "unclassified": []
+    },
+    "tf": {
+      "dd_version": "3.41.0",
+      "homogeneous_time": 0,
+      "filled_leaf_count": 7,
+      "fields": [
+        {
+          "path": "b_field_tor_vacuum_r/data",
+          "shape": [
+            480256
+          ],
+          "instance_shapes": [
+            [
+              480256
+            ]
+          ],
+          "populated_instances": 1,
+          "dtype": "float64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            480256
+          ]
+        },
+        {
+          "path": "b_field_tor_vacuum_r/data_error_upper",
+          "shape": [
+            480256
+          ],
+          "instance_shapes": [
+            [
+              480256
+            ]
+          ],
+          "populated_instances": 1,
+          "dtype": "float64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            480256
+          ]
+        },
+        {
+          "path": "b_field_tor_vacuum_r/time",
+          "shape": [
+            480256
+          ],
+          "instance_shapes": [
+            [
+              480256
+            ]
+          ],
+          "populated_instances": 1,
+          "dtype": "float64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            480256
+          ]
+        },
+        {
+          "path": "ids_properties/homogeneous_time",
+          "shape": [],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 1,
+          "dtype": "int64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "ids_properties/version_put/access_layer",
+          "shape": [],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 1,
+          "dtype": "str",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "ids_properties/version_put/access_layer_language",
+          "shape": [],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 1,
+          "dtype": "str",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "ids_properties/version_put/data_dictionary",
+          "shape": [],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 1,
+          "dtype": "str",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        }
+      ],
+      "unclassified": []
+    },
+    "wall": {
+      "dd_version": "3.41.0",
+      "homogeneous_time": 1,
+      "filled_leaf_count": 9,
+      "fields": [
+        {
+          "path": "description_2d/limiter/type/index",
+          "shape": [],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 1,
+          "dtype": "int64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "description_2d/limiter/type/name",
+          "shape": [],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 1,
+          "dtype": "str",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "description_2d/limiter/unit/outline/r",
+          "shape": [
+            82
+          ],
+          "instance_shapes": [
+            [
+              82
+            ]
+          ],
+          "populated_instances": 1,
+          "dtype": "float64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "description_2d/limiter/unit/outline/z",
+          "shape": [
+            82
+          ],
+          "instance_shapes": [
+            [
+              82
+            ]
+          ],
+          "populated_instances": 1,
+          "dtype": "float64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "ids_properties/homogeneous_time",
+          "shape": [],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 1,
+          "dtype": "int64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "ids_properties/version_put/access_layer",
+          "shape": [],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 1,
+          "dtype": "str",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "ids_properties/version_put/access_layer_language",
+          "shape": [],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 1,
+          "dtype": "str",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "ids_properties/version_put/data_dictionary",
+          "shape": [],
+          "instance_shapes": [
+            []
+          ],
+          "populated_instances": 1,
+          "dtype": "str",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": false,
+          "time_base_lengths": []
+        },
+        {
+          "path": "time",
+          "shape": [
+            1
+          ],
+          "instance_shapes": [
+            [
+              1
+            ]
+          ],
+          "populated_instances": 1,
+          "dtype": "float64",
+          "admissibility": "MACHINE DESCRIPTION",
+          "reason": "Machine and diagnostic geometry, identifiers, outlines, turns, wall contour, and declared actuator waveforms are admissible entry inputs.",
+          "time_dependent": true,
+          "time_base_lengths": [
+            1
+          ]
+        }
+      ],
+      "unclassified": []
+    }
+  },
+  "class_totals": {
+    "MACHINE DESCRIPTION": 54,
+    "NOT ADMISSIBLE": 15,
+    "FIREWALLED": 105
+  },
+  "total_populated_leaf_paths": 174,
+  "unclassified": [],
+  "fitting_performed": false
+}

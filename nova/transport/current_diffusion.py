@@ -52,8 +52,10 @@ from functools import partial
 
 import numpy as np
 
+from nova.biot.arcbandedcoupling import _arc_rule
 from nova.biot.greens import MU0
 from nova.jax.config import Precision, resolve_precision
+from nova.linalg.interpolant import Bernstein
 from nova.utilities.importmanager import skip_import
 
 with skip_import("jax"):
@@ -64,6 +66,7 @@ with skip_import("jax"):
 _TWO_PI = 2.0 * np.pi
 _16PI3 = 16.0 * np.pi**3
 _16PI2 = 16.0 * np.pi**2
+_BICUBIC_ARC_POINT, _BICUBIC_ARC_WEIGHT = _arc_rule(12)
 
 
 @dataclass(frozen=True)
@@ -271,8 +274,270 @@ def _surface_interpolation(rho, rho_samples, values, axis_value, edge_value):
     return jnp.where(inner, inner_value, interpolated)
 
 
-def _integrate_bilinear(supports, corner_values, dr, dz):
-    """Integrate cellwise bilinear values over fixed clipped polygons."""
+def _tensor_bicubic_coefficients(values):
+    """Return C1 tensor-bicubic Bernstein coefficients for every grid cell."""
+    nz, nr = values.shape
+    row = jnp.clip(jnp.arange(nz - 1)[:, None] + jnp.arange(-1, 3)[None, :], 0, nz - 1)
+    column = jnp.clip(
+        jnp.arange(nr - 1)[:, None] + jnp.arange(-1, 3)[None, :], 0, nr - 1
+    )
+    stencil = values[row[:, None, :, None], column[None, :, None, :]]
+    transform = jnp.asarray(
+        (
+            (0.0, 1.0, 0.0, 0.0),
+            (-1.0 / 6.0, 1.0, 1.0 / 6.0, 0.0),
+            (0.0, 1.0 / 6.0, 1.0, -1.0 / 6.0),
+            (0.0, 0.0, 1.0, 0.0),
+        ),
+        dtype=values.dtype,
+    )
+    coefficient = jnp.einsum("ij,...jk,lk->...il", transform, stencil, transform)
+    return coefficient.reshape(-1, 4, 4)
+
+
+def _bernstein_matrix(coordinate, order):
+    """Evaluate Nova's traced Bernstein basis without changing leading shape."""
+    coordinate = jnp.asarray(coordinate)
+    return (
+        Bernstein(order=order)
+        .coefficent_matrix(coordinate.reshape(-1))
+        .reshape(coordinate.shape + (order + 1,))
+    )
+
+
+def _tensor_bernstein(coefficient, radial, vertical, radial_order, vertical_order):
+    """Evaluate a tensor Bernstein polynomial at paired coordinates."""
+    radial_basis = _bernstein_matrix(radial, radial_order)
+    vertical_basis = _bernstein_matrix(vertical, vertical_order)
+    return jnp.einsum("...i,...ij,...j->...", vertical_basis, coefficient, radial_basis)
+
+
+def _bicubic_derivatives(coefficient, radial, vertical):
+    """Evaluate a bicubic and its first and second local derivatives."""
+    radial_coefficient = 3.0 * jnp.diff(coefficient, axis=-1)
+    vertical_coefficient = 3.0 * jnp.diff(coefficient, axis=-2)
+    radial_second = 2.0 * jnp.diff(radial_coefficient, axis=-1)
+    vertical_second = 2.0 * jnp.diff(vertical_coefficient, axis=-2)
+    mixed = 3.0 * jnp.diff(vertical_coefficient, axis=-1)
+    return (
+        _tensor_bernstein(coefficient, radial, vertical, 3, 3),
+        _tensor_bernstein(radial_coefficient, radial, vertical, 2, 3),
+        _tensor_bernstein(vertical_coefficient, radial, vertical, 3, 2),
+        _tensor_bernstein(radial_second, radial, vertical, 1, 3),
+        _tensor_bernstein(mixed, radial, vertical, 2, 2),
+        _tensor_bernstein(vertical_second, radial, vertical, 3, 1),
+    )
+
+
+def _bicubic_edge_coordinates(edge, fraction):
+    """Map counter-clockwise unit-cell edge coordinates to the cell interior."""
+    radial = jnp.where(
+        edge == 0,
+        fraction,
+        jnp.where(edge == 1, 1.0, jnp.where(edge == 2, 1.0 - fraction, 0.0)),
+    )
+    vertical = jnp.where(
+        edge == 0,
+        0.0,
+        jnp.where(edge == 1, fraction, jnp.where(edge == 2, 1.0, 1.0 - fraction)),
+    )
+    return radial, vertical
+
+
+def _bicubic_edge_crossings(level, coefficient, corner_flux):
+    """Locate all sign-changing bicubic edge roots by fixed bisection."""
+    inside = corner_flux < level
+    crossing = inside != jnp.roll(inside, -1, axis=1)
+    edge = jnp.broadcast_to(jnp.arange(4), corner_flux.shape)
+    low = jnp.zeros_like(corner_flux)
+    high = jnp.ones_like(corner_flux)
+    low_value = corner_flux - level
+
+    def bisect(_, state):
+        lower, upper, lower_value = state
+        middle = 0.5 * (lower + upper)
+        radial, vertical = _bicubic_edge_coordinates(edge, middle)
+        value = (
+            _bicubic_derivatives(coefficient[:, None, :, :], radial, vertical)[0]
+            - level
+        )
+        same_side = jnp.signbit(value) == jnp.signbit(lower_value)
+        return (
+            jnp.where(same_side, middle, lower),
+            jnp.where(same_side, upper, middle),
+            jnp.where(same_side, value, lower_value),
+        )
+
+    low, high, _ = jax.lax.fori_loop(0, 18, bisect, (low, high, low_value))
+    fraction = 0.5 * (low + high)
+    radial, vertical = _bicubic_edge_coordinates(edge, fraction)
+    return jnp.stack((radial, vertical), axis=-1), crossing, inside
+
+
+def _solve_bicubic_ordinate(
+    coefficient, level, independent, initial, *, solve_vertical
+):
+    """Follow one bicubic level-set branch at fixed traced coordinates."""
+
+    def update(_, ordinate):
+        radial = jnp.where(solve_vertical, independent, ordinate)
+        vertical = jnp.where(solve_vertical, ordinate, independent)
+        value, radial_gradient, vertical_gradient, *_ = _bicubic_derivatives(
+            coefficient, radial, vertical
+        )
+        derivative = jnp.where(solve_vertical, vertical_gradient, radial_gradient)
+        safe_derivative = jnp.where(
+            jnp.abs(derivative) > 1e-12,
+            derivative,
+            jnp.where(derivative < 0.0, -1e-12, 1e-12),
+        )
+        step = jnp.clip((value - level) / safe_derivative, -0.2, 0.2)
+        return jnp.clip(ordinate - step, 0.0, 1.0)
+
+    return jax.lax.fori_loop(0, 10, update, initial)
+
+
+def _bicubic_arc_moment_correction(level, coefficient, corner_flux, dr, dz):
+    """Return Green-theorem chord-to-bicubic corrections and arc samples."""
+    crossing_points, crossing, inside = _bicubic_edge_crossings(
+        level, coefficient, corner_flux
+    )
+    following_inside = jnp.roll(inside, -1, axis=1)
+    leaving = crossing & inside & ~following_inside
+    entering = crossing & ~inside & following_inside
+    leaving_index = jnp.argmax(leaving, axis=1)
+    entering_index = jnp.argmax(entering, axis=1)
+    start = jnp.take_along_axis(crossing_points, leaving_index[:, None, None], axis=1)[
+        :, 0
+    ]
+    end = jnp.take_along_axis(crossing_points, entering_index[:, None, None], axis=1)[
+        :, 0
+    ]
+
+    point = jnp.asarray(_BICUBIC_ARC_POINT, dtype=corner_flux.dtype)
+    weight = jnp.asarray(_BICUBIC_ARC_WEIGHT, dtype=corner_flux.dtype)
+    radial_span = end[:, 0] - start[:, 0]
+    vertical_span = end[:, 1] - start[:, 1]
+    radial_parameter = start[:, 0, None] + radial_span[:, None] * point
+    vertical_seed = start[:, 1, None] + vertical_span[:, None] * point
+    vertical_arc = _solve_bicubic_ordinate(
+        coefficient[:, None],
+        level,
+        radial_parameter,
+        vertical_seed,
+        solve_vertical=True,
+    )
+    vertical_parameter = start[:, 1, None] + vertical_span[:, None] * point
+    radial_seed = start[:, 0, None] + radial_span[:, None] * point
+    radial_arc = _solve_bicubic_ordinate(
+        coefficient[:, None],
+        level,
+        vertical_parameter,
+        radial_seed,
+        solve_vertical=False,
+    )
+    use_radial = jnp.abs(radial_span) >= jnp.abs(vertical_span)
+    arc_radial = jnp.where(use_radial[:, None], radial_parameter, radial_arc)
+    arc_vertical = jnp.where(use_radial[:, None], vertical_arc, vertical_parameter)
+
+    local_radial = dr * (radial_parameter - 0.5)
+    arc_height = dz * (vertical_arc - 0.5)
+    line_height = dz * (vertical_seed - 0.5)
+    radial_measure = dr * radial_span[:, None] * weight
+    height_difference = arc_height - line_height
+    height_squared_difference = arc_height**2 - line_height**2
+    radial_correction = jnp.stack(
+        (
+            -jnp.sum(height_difference * radial_measure, axis=1),
+            -jnp.sum(local_radial * height_difference * radial_measure, axis=1),
+            -0.5 * jnp.sum(height_squared_difference * radial_measure, axis=1),
+            -0.5
+            * jnp.sum(
+                local_radial * height_squared_difference * radial_measure, axis=1
+            ),
+        ),
+        axis=1,
+    )
+
+    local_vertical = dz * (vertical_parameter - 0.5)
+    arc_radius = dr * (radial_arc - 0.5)
+    line_radius = dr * (radial_seed - 0.5)
+    vertical_measure = dz * vertical_span[:, None] * weight
+    radius_difference = arc_radius - line_radius
+    radius_squared_difference = arc_radius**2 - line_radius**2
+    vertical_correction = jnp.stack(
+        (
+            jnp.sum(radius_difference * vertical_measure, axis=1),
+            0.5 * jnp.sum(radius_squared_difference * vertical_measure, axis=1),
+            jnp.sum(local_vertical * radius_difference * vertical_measure, axis=1),
+            0.5
+            * jnp.sum(
+                local_vertical * radius_squared_difference * vertical_measure,
+                axis=1,
+            ),
+        ),
+        axis=1,
+    )
+    correction = jnp.where(use_radial[:, None], radial_correction, vertical_correction)
+    arc_value = _bicubic_derivatives(coefficient[:, None], arc_radial, arc_vertical)[0]
+    two_crossings = jnp.sum(crossing, axis=1) == 2
+    tolerance = 2.0e-8 * jnp.maximum(1.0, jnp.abs(level))
+    valid = (
+        two_crossings
+        & jnp.all(jnp.isfinite(correction), axis=1)
+        & (jnp.max(jnp.abs(arc_value - level), axis=1) < tolerance)
+    )
+    correction = jnp.where(valid[:, None], correction, 0.0)
+    return correction, crossing_points, crossing, arc_radial, arc_vertical, valid
+
+
+def _bicubic_stationary_point(coefficient, level, radial, vertical, *, radial_extremum):
+    """Refine a coordinate extremum constrained to a bicubic level set."""
+
+    def update(_, state):
+        current_radial, current_vertical = state
+        value, gradient_r, gradient_z, hessian_rr, hessian_rz, hessian_zz = (
+            _bicubic_derivatives(coefficient, current_radial, current_vertical)
+        )
+        constrained_gradient = jnp.where(radial_extremum, gradient_z, gradient_r)
+        second_r = jnp.where(radial_extremum, hessian_rz, hessian_rr)
+        second_z = jnp.where(radial_extremum, hessian_zz, hessian_rz)
+        determinant = gradient_r * second_z - gradient_z * second_r
+        safe_determinant = jnp.where(
+            jnp.abs(determinant) > 1e-14,
+            determinant,
+            jnp.where(determinant < 0.0, -1e-14, 1e-14),
+        )
+        residual = value - level
+        radial_step = (second_z * residual - gradient_z * constrained_gradient) / (
+            safe_determinant
+        )
+        vertical_step = (
+            -second_r * residual + gradient_r * constrained_gradient
+        ) / safe_determinant
+        return (
+            jnp.clip(current_radial - jnp.clip(radial_step, -0.2, 0.2), -0.1, 1.1),
+            jnp.clip(current_vertical - jnp.clip(vertical_step, -0.2, 0.2), -0.1, 1.1),
+        )
+
+    radial, vertical = jax.lax.fori_loop(0, 10, update, (radial, vertical))
+    value, gradient_r, gradient_z, *_ = _bicubic_derivatives(
+        coefficient, radial, vertical
+    )
+    constrained_gradient = jnp.where(radial_extremum, gradient_z, gradient_r)
+    valid = (
+        (radial >= 0.0)
+        & (radial <= 1.0)
+        & (vertical >= 0.0)
+        & (vertical <= 1.0)
+        & (jnp.abs(value - level) < 2.0e-8 * jnp.maximum(1.0, jnp.abs(level)))
+        & (jnp.abs(constrained_gradient) < 2.0e-7)
+    )
+    return radial, vertical, valid
+
+
+def _integrate_bilinear(supports, corner_values, dr, dz, correction):
+    """Integrate cellwise bilinear values over bicubic level-set clips."""
     lower_left, lower_right, upper_right, upper_left = jnp.moveaxis(
         corner_values, -1, 0
     )
@@ -280,11 +545,15 @@ def _integrate_bilinear(supports, corner_values, dr, dz):
     radial = 0.5 * (-lower_left + lower_right + upper_right - upper_left)
     vertical = 0.5 * (-lower_left - lower_right + upper_right + upper_left)
     cross = lower_left - lower_right + upper_right - upper_left
+    area = supports.area + correction[:, 0]
+    radial_moment = supports.first_area_moment[:, 0] + correction[:, 1]
+    vertical_moment = supports.first_area_moment[:, 1] + correction[:, 2]
+    mixed_moment = supports.second_area_moment[:, 0, 1] + correction[:, 3]
     return (
-        constant * supports.area
-        + radial * supports.first_area_moment[:, 0] / dr
-        + vertical * supports.first_area_moment[:, 1] / dz
-        + cross * supports.second_area_moment[:, 0, 1] / (dr * dz)
+        constant * area
+        + radial * radial_moment / dr
+        + vertical * vertical_moment / dz
+        + cross * mixed_moment / (dr * dz)
     )
 
 
@@ -322,23 +591,15 @@ def _clipped_surface_geometry(
     cell_count = cell_nodes.shape[0]
     vertex_count = jnp.full(cell_count, 4, dtype=jnp.int32)
 
-    psi_cells = psi2d.reshape(-1)[cell_nodes]
-    lower_left, lower_right, upper_right, upper_left = jnp.moveaxis(psi_cells, -1, 0)
-    gradient_r_lower = (lower_right - lower_left) / dr
-    gradient_r_upper = (upper_right - upper_left) / dr
-    gradient_z_left = (upper_left - lower_left) / dz
-    gradient_z_right = (upper_right - lower_right) / dz
-    gradient_flux = jnp.sqrt(
-        jnp.stack(
-            (
-                gradient_r_lower**2 + gradient_z_left**2,
-                gradient_r_lower**2 + gradient_z_right**2,
-                gradient_r_upper**2 + gradient_z_right**2,
-                gradient_r_upper**2 + gradient_z_left**2,
-            ),
-            axis=-1,
-        )
+    psi_n_cells = psi_n_grid.reshape(-1)[cell_nodes]
+    normalised_coefficient = _tensor_bicubic_coefficients(psi_n_grid)
+    physical_coefficient = _tensor_bicubic_coefficients(psi2d)
+    corner_radial = jnp.asarray((0.0, 1.0, 1.0, 0.0), dtype=dtype)
+    corner_vertical = jnp.asarray((0.0, 0.0, 1.0, 1.0), dtype=dtype)
+    _, gradient_r, gradient_z, *_ = _bicubic_derivatives(
+        physical_coefficient[:, None], corner_radial, corner_vertical
     )
+    gradient_flux = jnp.sqrt((gradient_r / dr) ** 2 + (gradient_z / dz) ** 2)
     radius_cells = node_coordinates[cell_nodes, 0]
     field_cells = f_grid.reshape(-1)[cell_nodes]
     gradient_psi = gradient_flux / _TWO_PI
@@ -382,8 +643,13 @@ def _clipped_surface_geometry(
 
     def cumulative(level):
         supports = clip(level)
+        correction, *_ = _bicubic_arc_moment_correction(
+            level, normalised_coefficient, psi_n_cells, dr, dz
+        )
         integrals = jax.vmap(
-            lambda values: jnp.sum(_integrate_bilinear(supports, values, dr, dz))
+            lambda values: jnp.sum(
+                _integrate_bilinear(supports, values, dr, dz, correction)
+            )
         )(volume_weighted_values)
         return (
             integrals,
@@ -400,18 +666,76 @@ def _clipped_surface_geometry(
     shell_volume = jnp.maximum(shell_values[:, 0], 1e-30)
     surface_values = shell_values[:, 1:] / shell_volume[:, None]
 
+    cell_origin = node_coordinates[cell_nodes[:, 0]]
+
     def extrema(level):
         supports = clip(level)
-        slots = jnp.arange(supports.support_vertices.shape[1])
-        live = slots[None, :] < supports.vertex_count[:, None]
-        radial = supports.support_vertices[..., 0]
-        vertical = supports.support_vertices[..., 1]
-        r_in = jnp.min(jnp.where(live, radial, jnp.inf))
-        r_out = jnp.max(jnp.where(live, radial, -jnp.inf))
-        lower_slot = jnp.argmin(jnp.where(live, vertical, jnp.inf).reshape(-1))
-        upper_slot = jnp.argmax(jnp.where(live, vertical, -jnp.inf).reshape(-1))
+        (
+            _,
+            crossing_points,
+            crossing,
+            arc_radial,
+            arc_vertical,
+            arc_valid,
+        ) = _bicubic_arc_moment_correction(
+            level, normalised_coefficient, psi_n_cells, dr, dz
+        )
+        samples = jnp.concatenate(
+            (crossing_points, jnp.stack((arc_radial, arc_vertical), axis=-1)),
+            axis=1,
+        )
+        sample_valid = jnp.concatenate(
+            (
+                crossing,
+                jnp.broadcast_to(arc_valid[:, None], arc_radial.shape),
+            ),
+            axis=1,
+        )
+
+        def initial(coordinate, largest):
+            fill = -jnp.inf if largest else jnp.inf
+            candidate = jnp.where(sample_valid, samples[..., coordinate], fill)
+            index = (
+                jnp.argmax(candidate, axis=1)
+                if largest
+                else jnp.argmin(candidate, axis=1)
+            )
+            return jnp.take_along_axis(samples, index[:, None, None], axis=1)[:, 0]
+
+        radial_low = initial(0, False)
+        radial_high = initial(0, True)
+        vertical_low = initial(1, False)
+        vertical_high = initial(1, True)
+        stationary = []
+        stationary_valid = []
+        for seed, radial_extremum in (
+            (radial_low, True),
+            (radial_high, True),
+            (vertical_low, False),
+            (vertical_high, False),
+        ):
+            point_r, point_z, point_valid = _bicubic_stationary_point(
+                normalised_coefficient,
+                level,
+                seed[:, 0],
+                seed[:, 1],
+                radial_extremum=radial_extremum,
+            )
+            stationary.append(jnp.stack((point_r, point_z), axis=-1))
+            stationary_valid.append(point_valid & arc_valid)
+        samples = jnp.concatenate((samples, jnp.stack(stationary, axis=1)), axis=1)
+        sample_valid = jnp.concatenate(
+            (sample_valid, jnp.stack(stationary_valid, axis=1)), axis=1
+        )
+        radial = cell_origin[:, None, 0] + dr * samples[..., 0]
+        vertical = cell_origin[:, None, 1] + dz * samples[..., 1]
+        flat_valid = sample_valid.reshape(-1)
         flat_radial = radial.reshape(-1)
         flat_vertical = vertical.reshape(-1)
+        r_in = jnp.min(jnp.where(flat_valid, flat_radial, jnp.inf))
+        r_out = jnp.max(jnp.where(flat_valid, flat_radial, -jnp.inf))
+        lower_slot = jnp.argmin(jnp.where(flat_valid, flat_vertical, jnp.inf))
+        upper_slot = jnp.argmax(jnp.where(flat_valid, flat_vertical, -jnp.inf))
         return jnp.asarray(
             (
                 r_in,

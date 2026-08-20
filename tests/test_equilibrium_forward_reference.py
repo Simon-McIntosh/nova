@@ -188,15 +188,23 @@ running the suite.
 
 from __future__ import annotations
 
+from contextlib import contextmanager
+import fcntl
 import getpass
+import hashlib
+import json
 import sys
 from dataclasses import dataclass, field, replace
 from functools import cached_property, lru_cache
 from pathlib import Path
+from time import perf_counter
 
 import numpy as np
 import pytest
 from scipy.constants import mu_0
+import xarray
+
+from nova.database.zarrstore import ZarrStore
 
 from nova.utilities.importmanager import skip_import
 
@@ -790,7 +798,7 @@ def require_reference() -> ReferenceCase:
 class HexMachine:
     """Machine geometry, its hexagonal plasma mesh and their couplings."""
 
-    coilset: CoilSet = field(repr=False)
+    coilset: CoilSet | None = field(repr=False)
     source_current: np.ndarray
     passive_columns: int
     node: np.ndarray
@@ -815,6 +823,7 @@ class HexMachine:
     plasma_to_wall_z: np.ndarray
     radial_field: tuple[np.ndarray, ...]
     vertical_field: tuple[np.ndarray, ...]
+    cache_receipt: MachineCacheReceipt | None = field(default=None, repr=False)
 
     @cached_property
     def moment_geometry(self) -> MomentGeometry:
@@ -870,6 +879,385 @@ class HexMachine:
             )
         )
         return radial**2 + vertical**2
+
+
+@dataclass(frozen=True)
+class MachineCacheReceipt:
+    """Describe one persistent fixture-machine cache request."""
+
+    store: str
+    key: str
+    hit: bool
+    lock_wait_seconds: float
+    load_seconds: float
+    build_seconds: float
+    store_seconds: float
+    validation_seconds: float
+    arrays_verified: int
+    bytes_verified: int
+    bitwise_stored_precision: bool
+
+
+MACHINE_CACHE_SCHEMA = "hex-machine-native-array-carrier"
+MACHINE_CACHE_FILENAME = "solovev_hex_machine"
+_MACHINE_ARRAY_FIELDS = (
+    "source_current",
+    "node",
+    "area",
+    "hexagon",
+    "stencil",
+    "wall_node",
+    "source_to_grid",
+    "plasma_to_grid",
+    "plasma_to_grid_r",
+    "plasma_to_grid_z",
+    "sampling_vertices",
+    "sample_coordinates",
+    "source_to_sample",
+    "plasma_to_sample",
+    "plasma_to_sample_r",
+    "plasma_to_sample_z",
+    "source_to_wall",
+    "plasma_to_wall",
+    "plasma_to_wall_r",
+    "plasma_to_wall_z",
+)
+_REFERENCE_ARRAY_FIELDS = (
+    "axis",
+    "psi_norm",
+    "p_prime",
+    "ff_prime",
+    "pressure",
+    "field_function",
+    "safety_factor",
+    "boundary",
+    "separatrix",
+    "x_point",
+    "wall",
+    "grid_radius",
+    "grid_height",
+    "grid_flux",
+)
+_REFERENCE_SCALAR_FIELDS = (
+    "time",
+    "plasma_current",
+    "poloidal_beta",
+    "internal_inductance",
+    "flux_axis",
+    "flux_boundary",
+    "reference_radius",
+)
+
+
+def _array_identity(value) -> dict[str, object]:
+    """Return shape, dtype and semantic content hash for one numerical array."""
+    array = np.ascontiguousarray(np.asarray(value))
+    return {
+        "dtype": array.dtype.str,
+        "shape": list(array.shape),
+        "sha256": hashlib.sha256(array.tobytes(order="C")).hexdigest(),
+    }
+
+
+def _conductor_identity(conductor: Conductor) -> dict[str, object]:
+    """Return the placed conductor content that determines one coupling column."""
+    return {
+        "name": conductor.name,
+        "current": float(conductor.current),
+        "turns": float(conductor.turns),
+        "rectangle": conductor.rectangle,
+        "polygon": (
+            None if conductor.polygon is None else _array_identity(conductor.polygon)
+        ),
+    }
+
+
+def machine_cache_identity(
+    case: ReferenceCase, cells: int, *, passive: bool = True
+) -> dict[str, object]:
+    """Return the complete semantic identity of one fixture operator carrier."""
+    configuration = CoilSet(
+        dcoil=COIL_FILAMENTS,
+        dplasma=cells,
+        tplasma="hex",
+        nwall=WALL_NODES,
+    )
+    precision = getattr(configuration.precision, "value", configuration.precision)
+    reference = {name: float(getattr(case, name)) for name in _REFERENCE_SCALAR_FIELDS}
+    reference["arrays"] = {
+        name: _array_identity(getattr(case, name)) for name in _REFERENCE_ARRAY_FIELDS
+    }
+    reference["active"] = [_conductor_identity(conductor) for conductor in case.active]
+    reference["passive"] = [
+        _conductor_identity(conductor) for conductor in case.passive
+    ]
+    reference["unplaced"] = [list(item) for item in case.unplaced]
+    return {
+        "schema": MACHINE_CACHE_SCHEMA,
+        "reference_locator": {
+            "pulse": PULSE,
+            "run": RUN,
+            "dd_version": DD_VERSION,
+            "time_slice": TIME_SLICE,
+        },
+        "reference_content": reference,
+        "discretisation": {
+            "cells": int(cells),
+            "coil_filaments": COIL_FILAMENTS,
+            "wall_nodes": WALL_NODES,
+            "passive_elements": PASSIVE_ELEMENTS,
+            "passive": bool(passive),
+            "plasma_shape": configuration.tplasma,
+        },
+        "precision": str(precision),
+        "routes": configuration.route_attrs,
+    }
+
+
+def _packed_machine_arrays(machine: HexMachine) -> dict[str, np.ndarray]:
+    """Return every numerical input needed to reconstruct a fixture machine."""
+    arrays = {
+        name: np.array(getattr(machine, name), copy=True)
+        for name in _MACHINE_ARRAY_FIELDS
+    }
+    for position, array in enumerate(machine.radial_field):
+        arrays[f"radial_field_{position}"] = np.array(array, copy=True)
+    for position, array in enumerate(machine.vertical_field):
+        arrays[f"vertical_field_{position}"] = np.array(array, copy=True)
+    offsets = np.zeros(len(machine.cell_polygons) + 1, dtype=np.int64)
+    for position, polygon in enumerate(machine.cell_polygons):
+        offsets[position + 1] = offsets[position] + len(polygon)
+    arrays["cell_polygon_offsets"] = offsets
+    arrays["cell_polygon_vertices"] = np.concatenate(machine.cell_polygons, axis=0)
+    arrays["passive_columns"] = np.asarray(machine.passive_columns, dtype=np.int64)
+    for name, array in arrays.items():
+        if array.dtype.kind == "O":
+            raise TypeError(f"fixture cache array {name} has object dtype")
+    return arrays
+
+
+def _payload_digest(arrays: dict[str, np.ndarray]) -> str:
+    """Return an ordered digest of every stored array including dtype and shape."""
+    digest = hashlib.sha256()
+    for name in sorted(arrays):
+        array = np.ascontiguousarray(arrays[name])
+        digest.update(name.encode("utf-8"))
+        digest.update(array.dtype.str.encode("ascii"))
+        digest.update(json.dumps(array.shape).encode("ascii"))
+        digest.update(array.tobytes(order="C"))
+    return digest.hexdigest()
+
+
+def _machine_dataset(
+    machine: HexMachine, identity: dict[str, object], key: str
+) -> xarray.Dataset:
+    """Return a native-dtype Zarr payload for one fixture machine."""
+    arrays = _packed_machine_arrays(machine)
+    variables = {
+        name: (tuple(f"{name}_axis_{axis}" for axis in range(array.ndim)), array)
+        for name, array in arrays.items()
+    }
+    return xarray.Dataset(
+        variables,
+        attrs={
+            "cache_schema": MACHINE_CACHE_SCHEMA,
+            "cache_key": key,
+            "semantic_identity": json.dumps(
+                identity, sort_keys=True, separators=(",", ":"), allow_nan=False
+            ),
+            "payload_digest": _payload_digest(arrays),
+        },
+    )
+
+
+def _machine_from_dataset(
+    data: xarray.Dataset, identity: dict[str, object], key: str
+) -> HexMachine:
+    """Validate and reconstruct a fixture machine from one loaded Zarr group."""
+    expected_identity = json.dumps(
+        identity, sort_keys=True, separators=(",", ":"), allow_nan=False
+    )
+    if data.attrs.get("cache_schema") != MACHINE_CACHE_SCHEMA:
+        raise ValueError("fixture cache schema differs from the requested carrier")
+    if data.attrs.get("cache_key") != key:
+        raise ValueError("fixture cache group does not carry its requested key")
+    if data.attrs.get("semantic_identity") != expected_identity:
+        raise ValueError("fixture cache semantic descriptor differs from the request")
+    arrays = {name: np.array(data[name].values, copy=True) for name in data.data_vars}
+    if data.attrs.get("payload_digest") != _payload_digest(arrays):
+        raise ValueError("fixture cache payload digest does not match its arrays")
+    required = set(_MACHINE_ARRAY_FIELDS) | {
+        "cell_polygon_offsets",
+        "cell_polygon_vertices",
+        "passive_columns",
+        *(f"radial_field_{position}" for position in range(4)),
+        *(f"vertical_field_{position}" for position in range(4)),
+    }
+    if arrays.keys() != required:
+        missing = sorted(required - arrays.keys())
+        extra = sorted(arrays.keys() - required)
+        raise ValueError(
+            f"fixture cache arrays differ: missing={missing}, extra={extra}"
+        )
+    offsets = arrays.pop("cell_polygon_offsets")
+    vertices = arrays.pop("cell_polygon_vertices")
+    polygons = tuple(
+        np.array(vertices[offsets[position] : offsets[position + 1]], copy=True)
+        for position in range(len(offsets) - 1)
+    )
+    passive_columns = int(arrays.pop("passive_columns"))
+    radial_field = tuple(
+        arrays.pop(f"radial_field_{position}") for position in range(4)
+    )
+    vertical_field = tuple(
+        arrays.pop(f"vertical_field_{position}") for position in range(4)
+    )
+    return HexMachine(
+        coilset=None,
+        passive_columns=passive_columns,
+        cell_polygons=polygons,
+        radial_field=radial_field,
+        vertical_field=vertical_field,
+        **arrays,
+    )
+
+
+def assert_machine_arrays_bitwise_identical(
+    first: HexMachine, second: HexMachine
+) -> tuple[int, int]:
+    """Assert native dtype, shape and bytes agree for every cached input array."""
+    first_arrays = _packed_machine_arrays(first)
+    second_arrays = _packed_machine_arrays(second)
+    if first_arrays.keys() != second_arrays.keys():
+        raise AssertionError("fixture machines expose different cached array names")
+    bytes_verified = 0
+    for name in first_arrays:
+        left = np.ascontiguousarray(first_arrays[name])
+        right = np.ascontiguousarray(second_arrays[name])
+        if left.dtype != right.dtype:
+            raise AssertionError(
+                f"fixture cache dtype changed for {name}: {left.dtype} != {right.dtype}"
+            )
+        if left.shape != right.shape:
+            raise AssertionError(
+                f"fixture cache shape changed for {name}: {left.shape} != {right.shape}"
+            )
+        if left.tobytes(order="C") != right.tobytes(order="C"):
+            raise AssertionError(f"fixture cache bytes changed for {name}")
+        bytes_verified += left.nbytes
+    return len(first_arrays), bytes_verified
+
+
+def _machine_cache_store(
+    case: ReferenceCase, cells: int, *, passive: bool = True
+) -> tuple[ZarrStore, dict[str, object]]:
+    """Return the shared user-data store and semantic identity for one request."""
+    identity = machine_cache_identity(case, cells, passive=passive)
+    store = ZarrStore(filename=MACHINE_CACHE_FILENAME, dirname=".nova")
+    store.group = store.hash_attrs(identity)
+    return store, identity
+
+
+@contextmanager
+def _machine_cache_lock(store: ZarrStore):
+    """Serialize readers and the miss builder without a GPFS rename."""
+    lock_path = store.filepath.with_suffix(".lock")
+    with lock_path.open("a+b") as lock:
+        before = perf_counter()
+        fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+        waited = perf_counter() - before
+        try:
+            yield waited
+        finally:
+            fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
+
+
+def _load_cached_machine(store: ZarrStore, identity: dict[str, object]) -> HexMachine:
+    """Load and validate one fixture machine group."""
+    reader = ZarrStore(
+        filename=store.filename,
+        dirname=store.dirname,
+        group=store.group,
+    )
+    reader.load()
+    return _machine_from_dataset(reader.data, identity, store.group)
+
+
+def cached_machine(
+    case: ReferenceCase, cells: int, *, passive: bool = True
+) -> HexMachine:
+    """Load one shared fixture machine, building and publishing only on a miss."""
+    store, identity = _machine_cache_store(case, cells, passive=passive)
+    with _machine_cache_lock(store) as lock_wait_seconds:
+        load_started = perf_counter()
+        try:
+            machine = _load_cached_machine(store, identity)
+        except FileNotFoundError, KeyError, OSError, ValueError, AssertionError:
+            load_seconds = perf_counter() - load_started
+        else:
+            load_seconds = perf_counter() - load_started
+            arrays_verified, bytes_verified = assert_machine_arrays_bitwise_identical(
+                machine, machine
+            )
+            machine.cache_receipt = MachineCacheReceipt(
+                store=str(store.filepath),
+                key=store.group,
+                hit=True,
+                lock_wait_seconds=lock_wait_seconds,
+                load_seconds=load_seconds,
+                build_seconds=0.0,
+                store_seconds=0.0,
+                validation_seconds=0.0,
+                arrays_verified=arrays_verified,
+                bytes_verified=bytes_verified,
+                bitwise_stored_precision=True,
+            )
+            return machine
+
+        store.delete_group()
+        build_started = perf_counter()
+        machine = build_machine(case, cells, passive=passive)
+        build_seconds = perf_counter() - build_started
+        store.data = _machine_dataset(machine, identity, store.group)
+        store_started = perf_counter()
+        store.store(mode=store.get_mode())
+        store_seconds = perf_counter() - store_started
+        validation_started = perf_counter()
+        stored = _load_cached_machine(store, identity)
+        arrays_verified, bytes_verified = assert_machine_arrays_bitwise_identical(
+            machine, stored
+        )
+        validation_seconds = perf_counter() - validation_started
+        machine.cache_receipt = MachineCacheReceipt(
+            store=str(store.filepath),
+            key=store.group,
+            hit=False,
+            lock_wait_seconds=lock_wait_seconds,
+            load_seconds=load_seconds,
+            build_seconds=build_seconds,
+            store_seconds=store_seconds,
+            validation_seconds=validation_seconds,
+            arrays_verified=arrays_verified,
+            bytes_verified=bytes_verified,
+            bitwise_stored_precision=True,
+        )
+        return machine
+
+
+def machine_cache_summary(name: str, machine: HexMachine) -> str:
+    """Return one compact cache receipt line for a run log."""
+    receipt = machine.cache_receipt
+    if receipt is None:
+        raise ValueError("machine was not requested through the persistent cache")
+    status = "warm" if receipt.hit else "cold"
+    return (
+        f"CACHE fixture={name} status={status} key={receipt.key} "
+        f"load_s={receipt.load_seconds:.9g} build_s={receipt.build_seconds:.9g} "
+        f"store_s={receipt.store_seconds:.9g} "
+        f"validation_s={receipt.validation_seconds:.9g} "
+        f"arrays={receipt.arrays_verified} bytes={receipt.bytes_verified} "
+        f"bitwise={receipt.bitwise_stored_precision} store={receipt.store}"
+    )
 
 
 def build_machine(
@@ -1281,6 +1669,81 @@ def _machine(cells: int, passive: bool) -> tuple[ReferenceCase, HexMachine]:
     configure_dtypes()
     case = require_reference()
     return case, build_machine(case, cells, passive=passive)
+
+
+def test_persistent_fixture_machine_cache_builds_once(monkeypatch, tmp_path):
+    """A semantic miss publishes once and the next request restores native bytes."""
+
+    def values(shape, dtype=np.float64):
+        return np.arange(np.prod(shape), dtype=dtype).reshape(shape)
+
+    machine = HexMachine(
+        coilset=None,
+        source_current=values((2,), np.float32),
+        passive_columns=1,
+        node=values((3, 2)),
+        area=values((3,), np.float32),
+        cell_polygons=(values((4, 2)), values((5, 2)), values((6, 2))),
+        hexagon=np.array([True, False, True]),
+        stencil=values((2, 3), np.int32),
+        wall_node=values((2, 2)),
+        source_to_grid=values((3, 2)),
+        plasma_to_grid=values((3, 3)),
+        plasma_to_grid_r=values((3, 3)),
+        plasma_to_grid_z=values((3, 3)),
+        sampling_vertices=values((3, 6), np.int16),
+        sample_coordinates=values((4, 2)),
+        source_to_sample=values((4, 2)),
+        plasma_to_sample=values((4, 3)),
+        plasma_to_sample_r=values((4, 3)),
+        plasma_to_sample_z=values((4, 3)),
+        source_to_wall=values((2, 2)),
+        plasma_to_wall=values((2, 3)),
+        plasma_to_wall_r=values((2, 3)),
+        plasma_to_wall_z=values((2, 3)),
+        radial_field=(
+            values((3, 2)),
+            values((3, 3)),
+            values((3, 3)),
+            values((3, 3)),
+        ),
+        vertical_field=(
+            values((3, 2)),
+            values((3, 3)),
+            values((3, 3)),
+            values((3, 3)),
+        ),
+    )
+    identity = {"schema": MACHINE_CACHE_SCHEMA, "content": "synthetic"}
+
+    def synthetic_store(_case, _cells, *, passive=True):
+        assert passive
+        store = ZarrStore(filename="fixture_machine", dirname=tmp_path)
+        store.group = store.hash_attrs(identity)
+        return store, identity
+
+    builds = []
+
+    def synthetic_build(_case, _cells, *, passive=True):
+        assert passive
+        builds.append(True)
+        return machine
+
+    module = sys.modules[__name__]
+    monkeypatch.setattr(module, "_machine_cache_store", synthetic_store)
+    monkeypatch.setattr(module, "build_machine", synthetic_build)
+    cold = cached_machine(None, -3, passive=True)
+    warm = cached_machine(None, -3, passive=True)
+    arrays_verified, bytes_verified = assert_machine_arrays_bitwise_identical(
+        cold, warm
+    )
+    assert builds == [True]
+    assert not cold.cache_receipt.hit
+    assert warm.cache_receipt.hit
+    assert arrays_verified == 31
+    assert bytes_verified > 0
+    assert cold.cache_receipt.bitwise_stored_precision
+    assert warm.cache_receipt.bitwise_stored_precision
 
 
 @lru_cache(maxsize=4)

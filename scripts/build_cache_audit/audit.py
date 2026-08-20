@@ -34,7 +34,7 @@ def _fixture_build_times(path: Path) -> dict[str, int]:
 
 
 def _require_source_contract(source_root: Path) -> dict[str, bool]:
-    """Assert the cache and bypass mechanisms this audit reports are present."""
+    """Assert the production and fixture cache mechanisms are wired."""
     machine = (source_root / "nova/imas/machine.py").read_text(encoding="utf-8")
     fixture = (source_root / "tests/test_equilibrium_forward_reference.py").read_text(
         encoding="utf-8"
@@ -58,9 +58,23 @@ def _require_source_contract(source_root: Path) -> dict[str, bool]:
         "fixture_has_process_local_machine_memo": (
             "@lru_cache(maxsize=4)\ndef _machine" in fixture
         ),
-        "fixture_builder_is_direct": "def build_machine(" in fixture,
+        "fixture_retains_cache_owned_miss_builder": "def build_machine(" in fixture,
+        "fixture_cache_uses_shared_user_data": (
+            'ZarrStore(filename=MACHINE_CACHE_FILENAME, dirname=".nova")' in fixture
+        ),
+        "fixture_key_carries_reference_content": '"reference_content": reference'
+        in fixture,
+        "fixture_key_carries_precision": '"precision": str(precision)' in fixture,
+        "fixture_key_carries_routes": '"routes": configuration.route_attrs' in fixture,
+        "fixture_cache_serializes_access": "fcntl.flock" in fixture,
+        "fixture_cache_checks_native_bytes": (
+            "assert_machine_arrays_bitwise_identical" in fixture
+        ),
         **{
-            f"{name}_calls_direct_builder": "reference.build_machine(" in text
+            f"{name}_calls_persistent_loader": (
+                "reference.cached_machine(" in text
+                and "reference.build_machine(" not in text
+            )
             for name, text in consumers.items()
         },
     }
@@ -70,9 +84,30 @@ def _require_source_contract(source_root: Path) -> dict[str, bool]:
     return checks
 
 
-def _summary(source_root: Path, logs: list[Path]) -> dict[str, object]:
+def _summary(
+    source_root: Path, logs: list[Path], measurement_paths: list[Path]
+) -> dict[str, object]:
     """Build the machine-readable audit summary."""
     checks = _require_source_contract(source_root)
+    measurements = {}
+    for path in measurement_paths:
+        report = json.loads(path.read_text(encoding="utf-8"))
+        if report.get("schema") != "shared-fixture-cache-measurement":
+            raise AssertionError(f"unexpected measurement schema in {path}")
+        for fixture, measurement in report["fixtures"].items():
+            if measurement["cold"]["hit"]:
+                raise AssertionError(f"{fixture} measurement did not start cold")
+            if not measurement["warm"]["hit"]:
+                raise AssertionError(f"{fixture} measurement did not reload warm")
+            identity = measurement["identity"]
+            if not (
+                identity["same_key"]
+                and identity["native_dtype_shape_and_bytes_identical"]
+            ):
+                raise AssertionError(f"{fixture} warm payload differs from cold")
+            if fixture in measurements:
+                raise AssertionError(f"duplicate {fixture} measurement")
+            measurements[fixture] = measurement | {"artifact": str(path)}
     samples: dict[str, list[dict[str, object]]] = {"coarse": [], "fine": []}
     for path in logs:
         for fixture, seconds in _fixture_build_times(path).items():
@@ -88,12 +123,11 @@ def _summary(source_root: Path, logs: list[Path]) -> dict[str, object]:
             "cold_min_seconds": ordered[0],
             "cold_median_seconds": ordered[len(ordered) // 2],
             "cold_max_seconds": ordered[-1],
-            "warm_samples": [],
-            "warm_measurement_blocker": (
-                "the standalone consumers call build_machine directly and no "
-                "persistent fixture entry exists to load"
-            ),
+            "cache_measurement": measurements.get(fixture),
         }
+    fixture_status = (
+        "cached_and_reused" if set(measurements) == {"coarse", "fine"} else "wired"
+    )
     return {
         "source_contract": checks,
         "stores": {
@@ -115,17 +149,33 @@ def _summary(source_root: Path, logs: list[Path]) -> dict[str, object]:
                 "key": "machine semantic identity plus method group name",
             },
             "reference_coarse": {
-                "status": "rebuilt_per_standalone_run",
-                "store": None,
-                "key": None,
+                "status": fixture_status,
+                "store": measurements.get("coarse", {})
+                .get("warm", {})
+                .get(
+                    "store",
+                    "${user_data_dir}/nova/${nova_version}/solovev_hex_machine.zarr",
+                ),
+                "key": measurements.get("coarse", {}).get("cold", {}).get("key"),
             },
             "reference_fine": {
-                "status": "rebuilt_per_standalone_run",
-                "store": None,
-                "key": None,
+                "status": fixture_status,
+                "store": measurements.get("fine", {})
+                .get("warm", {})
+                .get(
+                    "store",
+                    "${user_data_dir}/nova/${nova_version}/solovev_hex_machine.zarr",
+                ),
+                "key": measurements.get("fine", {}).get("cold", {}).get("key"),
             },
         },
-        "fixture_miss_mechanism": "bypassed existing persistent cache architecture",
+        "fixture_miss_mechanism": {
+            "measured_original": "bypassed existing persistent cache architecture",
+            "resolution": (
+                "standalone consumers request a semantic shared-user-data cache; "
+                "only its locked miss path calls the direct builder"
+            ),
+        },
         "timings": timings,
     }
 
@@ -135,9 +185,10 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source-root", type=Path, default=Path.cwd())
     parser.add_argument("--timing-log", type=Path, action="append", default=[])
+    parser.add_argument("--measurement", type=Path, action="append", default=[])
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    result = _summary(args.source_root.resolve(), args.timing_log)
+    result = _summary(args.source_root.resolve(), args.timing_log, args.measurement)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(
         json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"

@@ -1,13 +1,22 @@
 {
-  "fixture_miss_mechanism": "bypassed existing persistent cache architecture",
+  "fixture_miss_mechanism": {
+    "measured_original": "bypassed existing persistent cache architecture",
+    "resolution": "standalone consumers request a semantic shared-user-data cache; only its locked miss path calls the direct builder"
+  },
   "source_contract": {
-    "fixture_builder_is_direct": true,
+    "fixture_cache_checks_native_bytes": true,
+    "fixture_cache_serializes_access": true,
+    "fixture_cache_uses_shared_user_data": true,
     "fixture_has_process_local_machine_memo": true,
+    "fixture_key_carries_precision": true,
+    "fixture_key_carries_reference_content": true,
+    "fixture_key_carries_routes": true,
+    "fixture_retains_cache_owned_miss_builder": true,
     "machine_group_uses_semantic_hash": true,
     "machine_store_rejects_identity_drift": true,
-    "observation_rescore_calls_direct_builder": true,
-    "root_attribution_calls_direct_builder": true,
-    "seed_adjudication_calls_direct_builder": true
+    "observation_rescore_calls_persistent_loader": true,
+    "root_attribution_calls_persistent_loader": true,
+    "seed_adjudication_calls_persistent_loader": true
   },
   "stores": {
     "production_coupling": {
@@ -26,18 +35,59 @@
       "store": "<machine-store>/<machine-key>/plasmagrid and plasmawall"
     },
     "reference_coarse": {
-      "key": null,
-      "status": "rebuilt_per_standalone_run",
-      "store": null
+      "key": "746fbe1553c4b242",
+      "status": "cached_and_reused",
+      "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/solovev_hex_machine.zarr"
     },
     "reference_fine": {
-      "key": null,
-      "status": "rebuilt_per_standalone_run",
-      "store": null
+      "key": "f0f96aa214aa9459",
+      "status": "cached_and_reused",
+      "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/solovev_hex_machine.zarr"
     }
   },
   "timings": {
     "coarse": {
+      "cache_measurement": {
+        "artifact": "scripts/build_cache_audit/measurements-coarse.json",
+        "cold": {
+          "arrays_verified": 31,
+          "bitwise_stored_precision": true,
+          "build_seconds": 1242.5918406005949,
+          "bytes_verified": 51411470,
+          "hit": false,
+          "key": "746fbe1553c4b242",
+          "load_seconds": 0.05760412849485874,
+          "lock_wait_seconds": 8.380040526390076e-05,
+          "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/solovev_hex_machine.zarr",
+          "store_seconds": 0.5977010056376457,
+          "validation_seconds": 0.3549179472029209
+        },
+        "cold_request_seconds": 1246.8801447339356,
+        "identity": {
+          "arrays_verified": 31,
+          "bytes_verified": 51411470,
+          "native_dtype_shape_and_bytes_identical": true,
+          "same_key": true
+        },
+        "realised_cells": 566,
+        "requested_cells": -500,
+        "wall_nodes_per_segment": 3,
+        "warm": {
+          "arrays_verified": 31,
+          "bitwise_stored_precision": true,
+          "build_seconds": 0.0,
+          "bytes_verified": 51411470,
+          "hit": true,
+          "key": "746fbe1553c4b242",
+          "load_seconds": 0.21376323886215687,
+          "lock_wait_seconds": 4.557892680168152e-06,
+          "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/solovev_hex_machine.zarr",
+          "store_seconds": 0.0,
+          "validation_seconds": 0.0
+        },
+        "warm_fraction_of_cold": 0.00021328372748868242,
+        "warm_request_seconds": 0.2659392450004816
+      },
       "cold_max_seconds": 1157,
       "cold_median_seconds": 794,
       "cold_min_seconds": 785,
@@ -54,11 +104,56 @@
           "log": "/home/ITER/mcintos/Code/nova/scripts/observation_clip_rescore/run.log",
           "seconds": 1157
         }
-      ],
-      "warm_measurement_blocker": "the standalone consumers call build_machine directly and no persistent fixture entry exists to load",
-      "warm_samples": []
+      ]
     },
     "fine": {
+      "cache_measurement": {
+        "artifact": "scripts/build_cache_audit/measurements-fine.json",
+        "cold": {
+          "arrays_verified": 31,
+          "bitwise_stored_precision": true,
+          "build_seconds": 3321.1149154752493,
+          "bytes_verified": 169311277,
+          "hit": false,
+          "key": "f0f96aa214aa9459",
+          "load_seconds": 0.06805073283612728,
+          "lock_wait_seconds": 4.153326153755188e-05,
+          "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/solovev_hex_machine.zarr",
+          "store_seconds": 0.7857837192714214,
+          "validation_seconds": 0.8786570858210325
+        },
+        "cold_request_seconds": 3335.325393402949,
+        "identity": {
+          "arrays_verified": 31,
+          "bytes_verified": 169311277,
+          "native_dtype_shape_and_bytes_identical": true,
+          "same_key": true
+        },
+        "realised_cells": 1069,
+        "requested_cells": -1000,
+        "wall_nodes_per_segment": 6,
+        "warm": {
+          "arrays_verified": 31,
+          "bitwise_stored_precision": true,
+          "build_seconds": 0.0,
+          "bytes_verified": 169311277,
+          "hit": true,
+          "key": "f0f96aa214aa9459",
+          "load_seconds": 0.6082682460546494,
+          "lock_wait_seconds": 4.712492227554321e-06,
+          "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/solovev_hex_machine.zarr",
+          "store_seconds": 0.0,
+          "validation_seconds": 0.0
+        },
+        "warm_fraction_of_cold": 0.00024515211075898434,
+        "warm_operator_reconstructed": {
+          "grid_nodes": 1069,
+          "sample_nodes": 2817,
+          "state_nodes": 4216,
+          "wall_nodes": 330
+        },
+        "warm_request_seconds": 0.8176620602607727
+      },
       "cold_max_seconds": 3260,
       "cold_median_seconds": 2614,
       "cold_min_seconds": 2278,
@@ -75,9 +170,7 @@
           "log": "/home/ITER/mcintos/Code/nova/scripts/observation_clip_rescore/fine-run.log",
           "seconds": 3260
         }
-      ],
-      "warm_measurement_blocker": "the standalone consumers call build_machine directly and no persistent fixture entry exists to load",
-      "warm_samples": []
+      ]
     }
   }
 }

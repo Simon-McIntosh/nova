@@ -1,0 +1,53 @@
+{
+  "all_bitwise_stored_precision": true,
+  "all_warm_hits": true,
+  "fixtures": {
+    "fine": {
+      "cold": {
+        "arrays_verified": 31,
+        "bitwise_stored_precision": true,
+        "build_seconds": 3321.1149154752493,
+        "bytes_verified": 169311277,
+        "hit": false,
+        "key": "f0f96aa214aa9459",
+        "load_seconds": 0.06805073283612728,
+        "lock_wait_seconds": 4.153326153755188e-05,
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/solovev_hex_machine.zarr",
+        "store_seconds": 0.7857837192714214,
+        "validation_seconds": 0.8786570858210325
+      },
+      "cold_request_seconds": 3335.325393402949,
+      "identity": {
+        "arrays_verified": 31,
+        "bytes_verified": 169311277,
+        "native_dtype_shape_and_bytes_identical": true,
+        "same_key": true
+      },
+      "realised_cells": 1069,
+      "requested_cells": -1000,
+      "wall_nodes_per_segment": 6,
+      "warm": {
+        "arrays_verified": 31,
+        "bitwise_stored_precision": true,
+        "build_seconds": 0.0,
+        "bytes_verified": 169311277,
+        "hit": true,
+        "key": "f0f96aa214aa9459",
+        "load_seconds": 0.6082682460546494,
+        "lock_wait_seconds": 4.712492227554321e-06,
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/solovev_hex_machine.zarr",
+        "store_seconds": 0.0,
+        "validation_seconds": 0.0
+      },
+      "warm_fraction_of_cold": 0.00024515211075898434,
+      "warm_operator_reconstructed": {
+        "grid_nodes": 1069,
+        "sample_nodes": 2817,
+        "state_nodes": 4216,
+        "wall_nodes": 330
+      },
+      "warm_request_seconds": 0.8176620602607727
+    }
+  },
+  "schema": "shared-fixture-cache-measurement"
+}

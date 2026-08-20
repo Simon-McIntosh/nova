@@ -364,11 +364,12 @@ def main() -> None:
     save(report)
 
     print(
-        f"BUILD fixture=coarse requested={reference.SUITE_CELLS} "
+        f"CACHE_REQUEST fixture=coarse requested={reference.SUITE_CELLS} "
         f"wall_nodes={reference.WALL_NODES}",
         flush=True,
     )
-    coarse = reference.build_machine(case, reference.SUITE_CELLS, passive=True)
+    coarse = reference.cached_machine(case, reference.SUITE_CELLS, passive=True)
+    print(reference.machine_cache_summary("coarse", coarse), flush=True)
     if len(coarse.node) != 566:
         raise AssertionError(f"expected 566 coarse cells, got {len(coarse.node)}")
     measure_fixture(reference, case, coarse, "coarse", report)
@@ -376,11 +377,12 @@ def main() -> None:
     reference.WALL_NODES *= 2
     fine_request = 2 * reference.SUITE_CELLS
     print(
-        f"BUILD fixture=fine requested={fine_request} "
+        f"CACHE_REQUEST fixture=fine requested={fine_request} "
         f"wall_nodes={reference.WALL_NODES}",
         flush=True,
     )
-    fine = reference.build_machine(case, fine_request, passive=True)
+    fine = reference.cached_machine(case, fine_request, passive=True)
+    print(reference.machine_cache_summary("fine", fine), flush=True)
     if len(fine.node) != 1069:
         raise AssertionError(f"expected 1069 fine cells, got {len(fine.node)}")
     measure_fixture(reference, case, fine, "fine", report)

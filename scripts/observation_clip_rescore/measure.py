@@ -402,14 +402,16 @@ def score_decomposition(case, operator, state, repaired, masks, topology):
 
 
 def measure_fixture(reference, case, baseline_score, name, multiplier, cells, banked):
-    """Rebuild one operator, qualify its loaded root, and score observations."""
+    """Load one cached operator, qualify its root, and score observations."""
     reference.WALL_NODES = 3 * multiplier
     requested = reference.SUITE_CELLS * multiplier
     print(
-        f"BUILD fixture={name} requested={requested} wall_nodes={reference.WALL_NODES}",
+        f"CACHE_REQUEST fixture={name} requested={requested} "
+        f"wall_nodes={reference.WALL_NODES}",
         flush=True,
     )
-    machine = reference.build_machine(case, requested, passive=True)
+    machine = reference.cached_machine(case, requested, passive=True)
+    print(reference.machine_cache_summary(name, machine), flush=True)
     if len(machine.node) != cells:
         raise AssertionError(f"expected {cells} {name} cells, got {len(machine.node)}")
     operator = reference.forward_operator(case, machine)

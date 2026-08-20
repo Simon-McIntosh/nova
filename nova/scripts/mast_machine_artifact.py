@@ -28,7 +28,7 @@ from typing import Callable
 
 from nova.catalog.mast_geometry import MachineGeometryRegistry
 from nova.imas.machine_evidence import FieldEvidence
-from nova.imas.mast_artifact import VerifiedMachineArtifact
+from nova.imas.machine_artifact import VerifiedMachineArtifact
 from nova.imas.mast_geometry import (
     REPRESENTATIVE_SHOT,
     publish_provisional_artifact,

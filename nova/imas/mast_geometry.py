@@ -27,7 +27,7 @@ from nova.catalog.mast_geometry import (
 from nova.imas.machine import GeomData, MachineGeometryReader
 from nova.imas.machine_drive import DriveMap
 from nova.imas.machine_evidence import EvidenceLedger, FieldEvidence
-from nova.imas.mast_artifact import (
+from nova.imas.machine_artifact import (
     ArtifactShotRange,
     VerifiedMachineArtifact,
     create_machine_artifact_manifest,
@@ -552,6 +552,7 @@ def publish_refined_artifact(
         write_and_reopen(bundle, source)
         manifest = create_machine_artifact_manifest(
             source,
+            machine="mast",
             dd_version=DD_VERSION,
             registry_digest=registry.registry_digest,
             physical_digest=selection.configuration.physical_digest,
@@ -604,6 +605,7 @@ def publish_provisional_artifact(
         write_and_reopen(bundle, source)
         manifest = create_machine_artifact_manifest(
             source,
+            machine="mast",
             dd_version=DD_VERSION,
             registry_digest=registry.registry_digest,
             physical_digest=selection.configuration.physical_digest,

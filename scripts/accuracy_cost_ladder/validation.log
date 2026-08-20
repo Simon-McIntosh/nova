@@ -1,0 +1,6 @@
+VALIDATION_EXIT=0
+cold_build_seconds {'coarse': 294.217432083562, 'fine': 778.0442922655493}
+coarse_batch_ms {'1': 198.5446671023965, '16': 30.24408535566181, '4': 56.311405496671796}
+fine_batch1_ms 257.39336013793945
+stablehlo_bounds {'coarse': (True, True), 'fine': (True, True)}
+EXIT_MARKER=0

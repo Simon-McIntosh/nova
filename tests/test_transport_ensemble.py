@@ -5,6 +5,7 @@ from __future__ import annotations
 import dataclasses
 
 import jax
+import jax.numpy as jnp
 import numpy as np
 import pytest
 
@@ -250,3 +251,37 @@ def test_member_state_batch_is_immutable_and_rejects_ambiguous_identity():
         batch.psi[0, 0] = 1.0
     with pytest.raises(ValueError, match="unique"):
         EnsembleTransportState.from_members((("same", state), ("same", state)))
+
+
+def test_batched_member_gradient_matches_scalar_path():
+    jax.config.update("jax_platforms", "cpu")
+    request = _ensemble_request(TransportRung.TORAX_MULTI_CHANNEL)
+    member_id = request.initial_states.member_ids[0]
+    scalar_input = request.member(0)
+
+    def batched_functional(multiplier):
+        model = dataclasses.replace(request.model, resistivity_multiplier=multiplier)
+        evolved = (
+            EnsembleForwardTransport()
+            .solve(dataclasses.replace(request, model=model))
+            .for_member(member_id)
+        )
+        return jnp.sum(evolved.state.psi**2)
+
+    def scalar_functional(multiplier):
+        model = dataclasses.replace(
+            scalar_input.model, resistivity_multiplier=multiplier
+        )
+        evolved = ForwardTransport().solve(
+            dataclasses.replace(scalar_input, model=model)
+        )
+        return jnp.sum(evolved.state.psi**2)
+
+    batched_gradient = jax.grad(batched_functional)(1.0)
+    scalar_gradient = jax.grad(scalar_functional)(1.0)
+    np.testing.assert_allclose(
+        batched_gradient,
+        scalar_gradient,
+        rtol=5.0e-10,
+        atol=1.0e-12,
+    )

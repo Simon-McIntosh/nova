@@ -12,10 +12,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from importlib.metadata import version
-from typing import Callable
 
 import jax
-import jax.numpy as jnp
 import numpy as np
 
 from nova.transport.forward import (
@@ -173,60 +171,22 @@ class EnsembleForwardTransport:
         self, inputs: EnsembleTransportInput, *, jit: bool = False
     ) -> EnsembleTransportReceipt:
         """Advance all members with ``vmap`` and preserve scalar receipts."""
-        callback = self._member_callback(inputs)
-        radial_samples = inputs.initial_states.rho.shape[1]
-        if inputs.model.rung is TransportRung.TORAX_MULTI_CHANNEL:
-            radial_samples = np.asarray(inputs.geometry.record["rho_face"]).size + 1
-        output_spec = (
-            jax.ShapeDtypeStruct((len(_STATE_CHANNELS), radial_samples), jnp.float64),
-            jax.ShapeDtypeStruct((14,), jnp.float64),
-            jax.ShapeDtypeStruct((3,), jnp.int32),
-        )
-
-        def solve_member(rho, psi, ion_temperature, electron_temperature, density):
-            return jax.pure_callback(
-                callback,
-                output_spec,
-                rho,
-                psi,
-                ion_temperature,
-                electron_temperature,
-                density,
-                vmap_method="sequential",
-            )
-
-        mapped: Callable[..., tuple[jax.Array, jax.Array, jax.Array]] = jax.vmap(
-            solve_member
-        )
-        if jit:
-            mapped = jax.jit(mapped)
-        state_values, receipt_values, diagnostic_values = mapped(
-            *(
-                jnp.asarray(getattr(inputs.initial_states, name), dtype=jnp.float64)
-                for name in _STATE_CHANNELS
+        state_values, receipt_values, diagnostic_values = (
+            self._forward.solve_state_batch(
+                inputs.geometry,
+                inputs.waveforms,
+                inputs.model,
+                tuple(getattr(inputs.initial_states, name) for name in _STATE_CHANNELS),
+                jit=jit,
             )
         )
+        tracing = isinstance(state_values, jax.core.Tracer)
         return self._restore_receipts(
             inputs,
-            np.asarray(state_values),
-            np.asarray(receipt_values),
-            np.asarray(diagnostic_values),
+            state_values if tracing else np.asarray(state_values),
+            receipt_values if tracing else np.asarray(receipt_values),
+            diagnostic_values if tracing else np.asarray(diagnostic_values),
         )
-
-    def _member_callback(self, inputs: EnsembleTransportInput):
-        def callback(*channels):
-            request = ForwardTransportInput(
-                geometry=inputs.geometry,
-                initial_state=TransportState(
-                    **dict(zip(_STATE_CHANNELS, channels, strict=True))
-                ),
-                waveforms=inputs.waveforms,
-                model=inputs.model,
-            )
-            receipt = self._forward.solve(request)
-            return _pack_receipt(receipt)
-
-        return callback
 
     @staticmethod
     def _restore_receipts(
@@ -261,52 +221,27 @@ class EnsembleForwardTransport:
                                 is TransportRung.NATIVE_PSI_DIFFUSION
                                 else "NO_ERROR"
                             ),
-                            steps=int(diagnostics[0]),
-                            outer_iterations=int(diagnostics[1]),
-                            inner_iterations=int(diagnostics[2]),
+                            steps=(
+                                diagnostics[0]
+                                if isinstance(diagnostics, jax.core.Tracer)
+                                else int(diagnostics[0])
+                            ),
+                            outer_iterations=(
+                                diagnostics[1]
+                                if isinstance(diagnostics, jax.core.Tracer)
+                                else int(diagnostics[1])
+                            ),
+                            inner_iterations=(
+                                diagnostics[2]
+                                if isinstance(diagnostics, jax.core.Tracer)
+                                else int(diagnostics[2])
+                            ),
                         ),
                         provenance=provenance,
                     ),
                 )
             )
         return EnsembleTransportReceipt(tuple(members))
-
-
-def _pack_receipt(receipt: ForwardTransportReceipt):
-    state = np.stack(
-        [
-            np.asarray(getattr(receipt.state, name), dtype=np.float64)
-            for name in _STATE_CHANNELS
-        ]
-    )
-    values = np.asarray(
-        (
-            receipt.flux_consumption.boundary,
-            receipt.flux_consumption.resistive,
-            receipt.flux_consumption.internal,
-            receipt.flux_consumption.mean_axis_voltage,
-            receipt.flux_consumption.mean_boundary_voltage,
-            receipt.plasma_current.requested_initial,
-            receipt.plasma_current.requested_final,
-            receipt.plasma_current.achieved_initial,
-            receipt.plasma_current.achieved_final,
-            receipt.boundary.psi,
-            receipt.boundary.plasma_current,
-            receipt.boundary.ion_temperature,
-            receipt.boundary.electron_temperature,
-            receipt.boundary.electron_density,
-        ),
-        dtype=np.float64,
-    )
-    diagnostics = np.asarray(
-        (
-            receipt.diagnostics.steps,
-            receipt.diagnostics.outer_iterations,
-            receipt.diagnostics.inner_iterations,
-        ),
-        dtype=np.int32,
-    )
-    return state, values, diagnostics
 
 
 def _provenance(rung: TransportRung) -> TransportProvenance:

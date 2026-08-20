@@ -24,7 +24,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-20">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
+<meta name="plan-commits" content="eed42e520d5f544f50cdb7485cffc74249f47037,0687526990e67eee5777310a71ad60588ca7736e">
+<meta name="plan-artifacts" content="docs/evidence/archive/solovev-exact-recovery-landed.html,docs/figures/solovev-exact-recovery/map-forcing-decomposition.png,scripts/map_forcing_attribution/results.json,scripts/build_cache_audit/results.json">
+<meta name="plan-impl" content="0.13">
 </head>
 <body>
   <main class="plan-doc">
@@ -270,6 +273,11 @@
     <pre class="r-fu-prompt">/reckon-ship solovev-exact-recovery</pre>
     </article>
 </section>
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s3" data-id="c-20260820T1350" data-who="reckon-ship" data-when="2026-08-20T13:50:00+00:00">
+    <div class="r-comment-body">map-forcing-attribution landed - commit eed42e52, merged to main 9fba732d; gate PASSED. THREE RESULTS. (1) The plasma-coupling wiring is CLEAN: 383 whole hexagons + 183 clipped authored polygons, zero rectangle substitutions, correct fixed-centroid first-moment contraction at every target class - the mis-wired-at-the-last-step hypothesis is refuted for the plasma path (exact-section and centre swaps are identities at 6.1e-16 Wb/A). (2) LINEAR AMPLIFICATION CONVICTED: forcing at the exact analytic state is 1.598e-2 of span, and (I-Dg) inverse reproduces the banked root drift within 2.34% (axis 42.44 mm), 3.47% (flux 6.585% span) and 4.43% (current -1.119%) - tangent verified to 1.3e-7, inverse residual 7.1e-14 Wb. (3) The named constants are EXONERATED as dominant: omitted second moments project at -2.3e-4 of the forcing; the dominant term (~1.000 of forcing) is the second-order-comparator residual, localising the hunt to source density / support geometry / topology qualification plus the conductor-section constant the section-2 re-route will measure directly as a forcing delta. Follow-on dispatched: forcing-residual decomposition by source/support/topology swaps plus the fine-bank projection. Evidence: /nova/evidence/archive/solovev-exact-recovery-landed#map-forcing-attribution.</div>
+</div>
+</section>
+</main>
 </body>
 </html>

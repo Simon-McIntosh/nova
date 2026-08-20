@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import copy
+import dataclasses
 
 import jax
+import jax.numpy as jnp
 import numpy as np
 import pytest
 
@@ -192,15 +194,14 @@ def test_native_and_torax_rungs_share_the_typed_call_and_receipt(monkeypatch):
             "electron_density",
         )
     }
-    real_run = forward_module._run_torax_simulation
-    engine_calls = []
+    real_make_step = forward_module._make_torax_step
+    engine_configs = []
 
-    def recorded_run(config):
-        result = real_run(config)
-        engine_calls.append((config, result))
-        return result
+    def recorded_make_step(config):
+        engine_configs.append(config)
+        return real_make_step(config)
 
-    monkeypatch.setattr(forward_module, "_run_torax_simulation", recorded_run)
+    monkeypatch.setattr(forward_module, "_make_torax_step", recorded_make_step)
     torax_receipt = ForwardTransport().solve(torax_request)
     _assert_common_receipt(torax_receipt, torax_request)
     assert torax_receipt.provenance.engine == "torax"
@@ -219,8 +220,12 @@ def test_native_and_torax_rungs_share_the_typed_call_and_receipt(monkeypatch):
             getattr(torax_request.initial_state, name), snapshot
         )
 
-    assert len(engine_calls) == 1
-    direct_output, direct_history = real_run(engine_calls[0][0])
+    assert len(engine_configs) == 1
+    from torax._src.orchestration.run_simulation import run_simulation
+
+    direct_output, direct_history = run_simulation(
+        engine_configs[0], progress_bar=False
+    )
     assert direct_history.sim_error.name == "NO_ERROR"
     direct_profiles = direct_output.children["profiles"].dataset
     np.testing.assert_allclose(
@@ -252,19 +257,38 @@ def test_native_and_torax_rungs_share_the_typed_call_and_receipt(monkeypatch):
 def test_engine_failure_raises_without_a_fabricated_state(monkeypatch):
     request = _request(TransportRung.TORAX_MULTI_CHANNEL)
 
-    class ErrorStatus:
-        name = "NAN_DETECTED"
-
-    class FailedHistory:
-        sim_error = ErrorStatus()
+    class FailedExecution:
+        error_name = "NAN_DETECTED"
 
     monkeypatch.setattr(
         forward_module,
-        "_run_torax_simulation",
-        lambda _config: (None, FailedHistory()),
+        "_run_torax_steps",
+        lambda _config, _durations, _multiplier: FailedExecution(),
     )
     with pytest.raises(TransportEngineError, match="NAN_DETECTED"):
         ForwardTransport().solve(request)
+
+
+def test_torax_step_gradient_matches_central_difference():
+    base_request = _request(TransportRung.TORAX_MULTI_CHANNEL)
+    facade = ForwardTransport()
+
+    def final_axis_flux(multiplier):
+        model = dataclasses.replace(
+            base_request.model, resistivity_multiplier=multiplier
+        )
+        request = dataclasses.replace(base_request, model=model)
+        return facade.solve(request).state.psi[0]
+
+    multiplier = jnp.asarray(1.0, dtype=jnp.float64)
+    automatic = jax.grad(final_axis_flux)(multiplier)
+    interval = 1.0e-3
+    central = (
+        final_axis_flux(multiplier + interval) - final_axis_flux(multiplier - interval)
+    ) / (2.0 * interval)
+
+    assert jnp.isfinite(automatic)
+    np.testing.assert_allclose(automatic, central, rtol=2.0e-3, atol=1.0e-10)
 
 
 def test_input_containers_own_immutable_copies():

@@ -28,6 +28,8 @@ from nova.transport.torax_geometry import torax_geometry_from_fsa
 
 
 def _readonly_array(value: object) -> np.ndarray:
+    if hasattr(value, "aval"):
+        return value
     array = np.array(value, dtype=np.float64, copy=True)
     array.setflags(write=False)
     return array
@@ -146,10 +148,11 @@ class TransportState:
             )
         ):
             raise ValueError("all transport state channels must share one 1D grid")
-        if self.rho.size < 3 or not np.all(np.diff(self.rho) > 0.0):
-            raise ValueError("transport state rho must be strictly increasing")
-        if self.rho[0] < 0.0 or self.rho[-1] > 1.0:
-            raise ValueError("transport state rho must lie in [0, 1]")
+        if not hasattr(self.rho, "aval"):
+            if self.rho.size < 3 or not np.all(np.diff(self.rho) > 0.0):
+                raise ValueError("transport state rho must be strictly increasing")
+            if self.rho[0] < 0.0 or self.rho[-1] > 1.0:
+                raise ValueError("transport state rho must lie in [0, 1]")
 
 
 @dataclass(frozen=True)
@@ -178,6 +181,7 @@ class TransportModel:
     eta: EtaProfile = field(default_factory=EtaProfile)
     theta: float = 1.0
     torax_config: Mapping[str, Any] = field(default_factory=dict)
+    resistivity_multiplier: Any = 1.0
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "rung", TransportRung(self.rung))
@@ -397,42 +401,131 @@ def _prepare_torax_config(inputs: ForwardTransportInput):
     return config
 
 
-def _run_torax_simulation(config):
-    from torax._src.orchestration.run_simulation import run_simulation
+def _make_torax_step(config):
+    from torax._src.orchestration.run_simulation import make_step_fn
 
-    return run_simulation(config, progress_bar=False)
+    return make_step_fn(config)
+
+
+@dataclass(frozen=True)
+class _ToraxStepExecution:
+    states: tuple[Any, ...]
+    error_name: str
+
+
+def _run_torax_steps(config, step_durations, resistivity_multiplier):
+    import jax
+    import jax.numpy as jnp
+    from torax._src.orchestration.initial_state import (
+        get_initial_state_and_post_processed_outputs,
+    )
+    from torax._src.torax_pydantic.interpolated_param_1d import (
+        TimeVaryingScalarUpdate,
+    )
+
+    step_fn = _make_torax_step(config)
+    multiplier = jnp.asarray(resistivity_multiplier, dtype=jnp.float64)
+    base_multiplier = step_fn.runtime_params_provider.numerics.resistivity_multiplier
+    runtime_params = step_fn.runtime_params_provider.update_provider(
+        lambda provider: (provider.numerics.resistivity_multiplier,),
+        (
+            TimeVaryingScalarUpdate(
+                value=jnp.full_like(base_multiplier.value, multiplier)
+            ),
+        ),
+    )
+    initial_state, post_processed = get_initial_state_and_post_processed_outputs(
+        step_fn,
+        runtime_params_overrides=runtime_params,
+    )
+    states = [initial_state]
+    current_state = initial_state
+    error_name = "NO_ERROR"
+    tracing = isinstance(multiplier, jax.core.Tracer)
+    for duration in step_durations:
+        remaining = float(duration)
+        if tracing:
+            fixed_dt = float(np.min(runtime_params.numerics.fixed_dt.value))
+            if runtime_params.numerics.adaptive_dt or fixed_dt < remaining:
+                raise ValueError(
+                    "TORAX gradients require non-adaptive waveform intervals no "
+                    "longer than the configured fixed step"
+                )
+        while remaining > 1.0e-12:
+            previous_time = current_state.t
+            current_state, post_processed = step_fn(
+                current_state,
+                post_processed,
+                max_dt=jnp.asarray(remaining, dtype=jnp.float64),
+                runtime_params_overrides=runtime_params,
+            )
+            states.append(current_state)
+            if tracing:
+                break
+            error_name = step_fn.check_for_errors(current_state, post_processed).name
+            if error_name != "NO_ERROR":
+                break
+            elapsed = float(current_state.t - previous_time)
+            if elapsed <= 0.0:
+                error_name = "NON_ADVANCING_STEP"
+                break
+            remaining -= elapsed
+        if error_name != "NO_ERROR":
+            break
+    return _ToraxStepExecution(states=tuple(states), error_name=error_name)
 
 
 def _solve_torax(inputs: ForwardTransportInput) -> ForwardTransportReceipt:
-    output, history = _run_torax_simulation(_prepare_torax_config(inputs))
-    if history.sim_error.name != "NO_ERROR":
+    execution = _run_torax_steps(
+        _prepare_torax_config(inputs),
+        np.diff(inputs.waveforms.time),
+        inputs.model.resistivity_multiplier,
+    )
+    if execution.error_name != "NO_ERROR":
         raise TransportEngineError(
-            f"TORAX failed with simulation status {history.sim_error.name}"
+            f"TORAX failed with simulation status {execution.error_name}"
         )
 
-    profiles = output.children["profiles"].dataset
-    scalars = output.children["scalars"].dataset
-    numerics = output.children["numerics"].dataset
-    psi_history = np.asarray(profiles["psi"], dtype=np.float64)
-    rho = np.asarray(output.coords["rho_norm"], dtype=np.float64)
-    ion_temperature = np.asarray(profiles["T_i"][-1], dtype=np.float64)
-    electron_temperature = np.asarray(profiles["T_e"][-1], dtype=np.float64)
-    electron_density = np.asarray(profiles["n_e"][-1], dtype=np.float64)
-    current_history = np.asarray(scalars["Ip"], dtype=np.float64)
+    import jax.numpy as jnp
+
+    initial = execution.states[0]
+    final = execution.states[-1]
+    initial_profiles = initial.core_profiles
+    final_profiles = final.core_profiles
+    initial_psi = initial_profiles.psi.cell_plus_boundaries()
+    final_psi = final_profiles.psi.cell_plus_boundaries()
+    rho = jnp.concatenate(
+        [
+            jnp.zeros(1, dtype=final.geometry.rho_norm.dtype),
+            final.geometry.rho_norm,
+            jnp.ones(1, dtype=final.geometry.rho_norm.dtype),
+        ]
+    )
+    ion_temperature = final_profiles.T_i.cell_plus_boundaries()
+    electron_temperature = final_profiles.T_e.cell_plus_boundaries()
+    electron_density = final_profiles.n_e.cell_plus_boundaries()
+    initial_current = initial_profiles.Ip_profile_face[-1]
+    final_current = final_profiles.Ip_profile_face[-1]
     state = TransportState(
         rho=rho,
-        psi=psi_history[-1],
+        psi=final_psi,
         ion_temperature=ion_temperature,
         electron_temperature=electron_temperature,
         electron_density=electron_density,
     )
-    boundary_swing = float(psi_history[-1, -1] - psi_history[0, -1])
-    axis_swing = float(psi_history[-1, 0] - psi_history[0, 0])
-    elapsed = float(history.times[-1] - history.times[0])
-    mean_axis_voltage = axis_swing / elapsed if elapsed else 0.0
-    mean_boundary_voltage = boundary_swing / elapsed if elapsed else 0.0
-    outer_iterations = int(np.asarray(numerics["outer_solver_iterations"]).sum())
-    inner_iterations = int(np.asarray(numerics["inner_solver_iterations"]).sum())
+    boundary_swing = final_psi[-1] - initial_psi[-1]
+    axis_swing = final_psi[0] - initial_psi[0]
+    elapsed = final.t - initial.t
+    mean_axis_voltage = axis_swing / elapsed
+    mean_boundary_voltage = boundary_swing / elapsed
+    outer_iterations = sum(
+        state.solver_numeric_outputs.outer_solver_iterations
+        for state in execution.states[1:]
+    )
+    inner_iterations = sum(
+        state.solver_numeric_outputs.inner_solver_iterations
+        for state in execution.states[1:]
+    )
     return ForwardTransportReceipt(
         state=state,
         flux_consumption=FluxConsumptionLedger(
@@ -445,19 +538,19 @@ def _solve_torax(inputs: ForwardTransportInput) -> ForwardTransportReceipt:
         plasma_current=PlasmaCurrentLedger(
             requested_initial=float(inputs.waveforms.plasma_current[0]),
             requested_final=float(inputs.waveforms.plasma_current[-1]),
-            achieved_initial=float(current_history[0]),
-            achieved_final=float(current_history[-1]),
+            achieved_initial=initial_current,
+            achieved_final=final_current,
         ),
         boundary=AchievedBoundaryValues(
-            psi=float(state.psi[-1]),
-            plasma_current=float(current_history[-1]),
-            ion_temperature=float(state.ion_temperature[-1]),
-            electron_temperature=float(state.electron_temperature[-1]),
-            electron_density=float(state.electron_density[-1]),
+            psi=state.psi[-1],
+            plasma_current=final_current,
+            ion_temperature=state.ion_temperature[-1],
+            electron_temperature=state.electron_temperature[-1],
+            electron_density=state.electron_density[-1],
         ),
         diagnostics=SolverDiagnostics(
-            engine_status=history.sim_error.name,
-            steps=len(history.times) - 1,
+            engine_status=execution.error_name,
+            steps=len(execution.states) - 1,
             outer_iterations=outer_iterations,
             inner_iterations=inner_iterations,
         ),

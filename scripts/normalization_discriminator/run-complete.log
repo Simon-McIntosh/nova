@@ -1,0 +1,22 @@
+warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/nova/.venv` and will be ignored; use `--active` to target the active environment instead
+18:49:50 INFO     Parsing data dictionary version 3.39.0 [90m@dd_zip.py:89[0m
+INFO:imas.dd_zip:Parsing data dictionary version 3.39.0
+CACHE fixture=coarse status=warm key=746fbe1553c4b242 load_s=0.482612165 build_s=0 store_s=0 validation_s=0 arrays=31 bytes=51411470 bitwise=True store=/home/ITER/mcintos/.local/share/nova/0.11.0/solovev_hex_machine.zarr
+LINEARIZE state_size=2396
+COMPARATOR contracting omitted second moments
+ARM name=production_values_production_constants
+Traceback (most recent call last):
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/normalization-constant-discriminator/scripts/normalization_discriminator/measure.py", line 507, in <module>
+    main()
+    ~~~~^^
+  File "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/normalization-constant-discriminator/scripts/normalization_discriminator/measure.py", line 268, in main
+    jax.block_until_ready(internal)
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/api.py", line 2696, in block_until_ready
+    try_to_block(arrays[0])
+    ~~~~~~~~~~~~^^^^^^^^^^^
+  File "/home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jax/_src/api.py", line 2679, in try_to_block
+    return x.block_until_ready()
+           ~~~~~~~~~~~~~~~~~~~^^
+jax.errors.JaxRuntimeError: RESOURCE_EXHAUSTED: [0] Failed to load in-memory CUBIN (compiled for a different GPU?).: CUDA_ERROR_OUT_OF_MEMORY: out of memory [executable_name='jit_evaluate']
+MEASURE_EXIT_CODE=1

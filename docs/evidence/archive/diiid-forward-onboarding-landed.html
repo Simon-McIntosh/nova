@@ -240,19 +240,14 @@
       skew convention scores better than all three reversals, so the orientation drawn here is the
       measured-best one and not an assumption.</figcaption>
     </figure>
-    <figure>
-      <img src="/nova/figures/diiid-forward-onboarding/machine-description/thomson_grid_extent.png"
-           alt="Seventy Thomson chord coordinates in the R-Z plane inside the rectangular 65 by 65 EFIT grid extent"
-           style="max-width:100%">
-      <figcaption>Seventy Thomson coordinates against the 65×65 <code>efit_grid</code> extent, R
-      [0.840, 2.540] m and Z [−1.600, 1.600] m. Four sub-systems are visible and physical: a dense core
-      vertical string at R≈1.94 m spanning Z 0.03–0.70 m, an upper string at R≈1.48 m over Z 0.97–1.21 m,
-      a midplane row at Z≈−0.05 m across R 1.68–2.07 m, and two lower-divertor points near Z≈−1.03 m.
-      These are scattering-volume <em>positions</em>; the dataset ships no explicit endpoint pair, so the
-      records carry <code>start</code> and <code>end</code> as absent and no chord is fabricated. For the
-      vertical sub-systems the laser path is the string itself, which is the line of sight in all but
-      name; the midplane row is the tangential system, whose sightline is not recoverable this way.</figcaption>
-    </figure>
+    <p>Seventy Thomson coordinates are carried as diagnostic-geometry records, in four physically
+    distinct sub-systems: a dense core vertical string at R≈1.94 m over Z 0.03–0.70 m, an upper string at
+    R≈1.48 m over Z 0.97–1.21 m, a midplane row at Z≈−0.05 m across R 1.68–2.07 m, and lower-divertor
+    points near Z≈−1.03 m. The 65×65 <code>efit_grid</code> spans R [0.840, 2.540] m and Z
+    [−1.600, 1.600] m. These are scattering-volume <em>positions</em>; the dataset ships no endpoint
+    pair, so the records carry <code>start</code> and <code>end</code> as absent and no chord is
+    fabricated. The sightlines themselves are drawn as lines under
+    <a href="#netcdf-units-turns">the located-description section</a>, against the real wall.</p>
     <p>Provenance is pinned by conductor-table digest
     <code>782e9e08f02e610e252e9cf6d6cccfb3a9aefa62b56f14865553ba2f35d213dc</code>, which the
     plasma-subtraction gate recorded <em>independently</em> — a genuine cross-node agreement rather than

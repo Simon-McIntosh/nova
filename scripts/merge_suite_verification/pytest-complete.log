@@ -1,0 +1,769 @@
+warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/nova/.venv` and will be ignored; use `--active` to target the active environment instead
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/merged-main-suite-verification
+configfile: pyproject.toml
+testpaths: tests, nova/imas/database.py, nova/imas/equilibrium.py, nova/imas/extrapolate.py, nova/imas/machine.py, nova/imas/operate.py, nova/imas/pulsedesign.py
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collected 6031 items / 735 deselected / 2 skipped / 5296 selected
+
+tests/calibrate/test_banked_reproduction.py ...............              [  0%]
+tests/calibrate/test_correction_instances.py ....................        [  0%]
+tests/calibrate/test_correction_set.py ................................. [  1%]
+.....                                                                    [  1%]
+tests/calibrate/test_corrections.py .....................                [  1%]
+tests/calibrate/test_coupling.py ...............                         [  2%]
+tests/calibrate/test_gain.py .................                           [  2%]
+tests/calibrate/test_gain_check.py .......                               [  2%]
+tests/calibrate/test_generated_artifacts.py ss.                          [  2%]
+tests/calibrate/test_instrument.py .....................                 [  2%]
+tests/calibrate/test_inversion.py ................                       [  3%]
+tests/calibrate/test_localize.py ...............                         [  3%]
+tests/calibrate/test_noise.py ..                                         [  3%]
+tests/calibrate/test_pair_state.py ....                                  [  3%]
+tests/calibrate/test_partial.py ...                                      [  3%]
+tests/calibrate/test_portability.py .                                    [  3%]
+tests/calibrate/test_promotion_route.py ...                              [  3%]
+tests/calibrate/test_read_path_equivalence.py ........................   [  4%]
+tests/calibrate/test_scale_step.py .....                                 [  4%]
+tests/calibrate/test_sensor_door_guard.py ..                             [  4%]
+tests/calibrate/test_sweep.py ........                                   [  4%]
+tests/calibrate/test_transition.py ......                                [  4%]
+tests/calibrate/test_windows.py ....................                     [  5%]
+tests/imas/test_diiid_corpus_conventions.py ...                          [  5%]
+tests/imas/test_diiid_description.py .....                               [  5%]
+tests/imas/test_diiid_ids_machine_description.py ...                     [  5%]
+tests/imas/test_diiid_label_resolve.py ......                            [  5%]
+tests/imas/test_diiid_machine_description.py .....                       [  5%]
+tests/imas/test_diiid_plasma_subtraction_gate.py ....                    [  5%]
+tests/imas/test_diiid_quiescent_gate.py ......                           [  5%]
+tests/imas/test_diiid_vacuum_composition_audit.py ...                    [  5%]
+tests/imas/test_mast_chain_factory_axis_centre.py .                      [  5%]
+tests/test_animate.py ....................                               [  6%]
+tests/test_arc.py .............                                          [  6%]
+tests/test_basis.py ......                                               [  6%]
+tests/test_biot_import_without_jax.py ......                             [  6%]
+tests/test_biotarc.py .........                                          [  6%]
+tests/test_biotarcamplitude.py ......................................... [  7%]
+................                                                         [  7%]
+tests/test_biotarcbandedcoupling.py ..............                       [  8%]
+tests/test_biotarcrows.py .......................................        [  8%]
+tests/test_biotarctiledbackend.py ....                                   [  8%]
+tests/test_biotarray.py ....                                             [  8%]
+tests/test_biotbandedcoupling.py .....................................   [  9%]
+tests/test_biotbow.py .......                                            [  9%]
+tests/test_biotcircle.py ............                                    [ 10%]
+tests/test_biotcompleteelliptic.py ..................................... [ 10%]
+....                                                                     [ 10%]
+tests/test_biotconstants.py ......................................       [ 11%]
+tests/test_biotcoupling.py .................                             [ 11%]
+tests/test_biotcylinder.py ...................                           [ 12%]
+tests/test_biotelliptic.py ............................................. [ 13%]
+........................................................................ [ 14%]
+........................................................................ [ 15%]
+.......................................................................  [ 17%]
+tests/test_biotfluxcoupling.py .......                                   [ 17%]
+tests/test_biotframe.py ..............                                   [ 17%]
+tests/test_biotgeometryautograd.py ........                              [ 17%]
+tests/test_biotgeometryparameters.py ...............................     [ 18%]
+tests/test_biotgeometrysolve.py ...........                              [ 18%]
+tests/test_biotgreens.py ...............................xxx.........     [ 19%]
+tests/test_biotincompleteelliptic.py ................................... [ 19%]
+........................................................................ [ 21%]
+........................................................................ [ 22%]
+........................................................................ [ 23%]
+........................................................................ [ 25%]
+........................................................................ [ 26%]
+........................................................................ [ 28%]
+..............................................................sss....... [ 29%]
+........................................................................ [ 30%]
+........................................................................ [ 32%]
+........................................................................ [ 33%]
+.                                                                        [ 33%]
+tests/test_biotincompletemoments.py .................................... [ 34%]
+........................................................................ [ 35%]
+........................................................................ [ 36%]
+......................................                                   [ 37%]
+tests/test_biotmatrix.py ....................                            [ 38%]
+tests/test_biotoperate.py .................................              [ 38%]
+tests/test_biotpolybeam.py ..........................                    [ 39%]
+tests/test_biotpolybow.py .........................                      [ 39%]
+tests/test_biotpolygonanalytic.py ...................................... [ 40%]
+........................................................................ [ 41%]
+.........                                                                [ 41%]
+tests/test_biotpolygonarc.py ........................................... [ 42%]
+.......                                                                  [ 42%]
+tests/test_biotpolygongradient.py ..........                             [ 42%]
+tests/test_biotpolygonmoments.py ........                                [ 43%]
+tests/test_biotpolysection.py ..................................         [ 43%]
+tests/test_biotrangefunction.py ...................................      [ 44%]
+tests/test_biotsectionaverage.py .................................       [ 45%]
+tests/test_biotsinemoments.py .......................................... [ 45%]
+........................................................................ [ 47%]
+........................................................................ [ 48%]
+........................................................................ [ 49%]
+................................................                         [ 50%]
+tests/test_biotsymmetricelliptic.py .................................... [ 51%]
+........................................................................ [ 52%]
+......................                                                   [ 53%]
+tests/test_biottargetmoments.py ....                                     [ 53%]
+tests/test_biottiledassembly.py ..........                               [ 53%]
+tests/test_biottoroidalaverage.py ..                                     [ 53%]
+tests/test_biottoroidalharmonic.py ..................................... [ 54%]
+.......................................................................  [ 55%]
+tests/test_biotzeta.py .....................                             [ 56%]
+tests/test_bokeh.py .sss                                                 [ 56%]
+tests/test_callstate.py .....                                            [ 56%]
+tests/test_chain_factory.py .....                                        [ 56%]
+tests/test_circuit_linkage.py ........                                   [ 56%]
+tests/test_circuit_passive.py ................                           [ 56%]
+tests/test_circuit_resistance.py .................                       [ 57%]
+tests/test_circuit_screening.py ...                                      [ 57%]
+tests/test_codac_uda.py ......ssssss                                     [ 57%]
+tests/test_coil.py ......                                                [ 57%]
+tests/test_coil_section.py ..................                            [ 57%]
+tests/test_coilset.py .................................................. [ 58%]
+..                                                                       [ 58%]
+tests/test_columnar.py .......................                           [ 59%]
+tests/test_current_diffusion.py ............................             [ 59%]
+tests/test_dataarray.py ...............................                  [ 60%]
+tests/test_database.py .ssssssss.ssssss..sss...ss.................       [ 61%]
+tests/test_dataframe.py .......................                          [ 61%]
+tests/test_datasource.py .......                                         [ 61%]
+tests/test_dd_version_identity.py ..                                     [ 61%]
+tests/test_deferred.py ..............                                    [ 62%]
+tests/test_domain_participation_continuity.py ...                        [ 62%]
+tests/test_efit_referee.py ..........                                    [ 62%]
+tests/test_energize.py ........                                          [ 62%]
+tests/test_equilibrium_diagnostics.py .................................. [ 63%]
+....................                                                     [ 63%]
+tests/test_equilibrium_flux_surface_geometry.py ............             [ 63%]
+tests/test_equilibrium_forward.py ...................................    [ 64%]
+tests/test_equilibrium_harmonic.py ......................                [ 64%]
+tests/test_equilibrium_moment.py ...................                     [ 65%]
+tests/test_equilibrium_profile.py .......                                [ 65%]
+tests/test_equilibrium_rotation.py ..............................        [ 65%]
+tests/test_equilibrium_separatrix_clip.py ...................            [ 66%]
+tests/test_equilibrium_sol.py ........................                   [ 66%]
+tests/test_equilibrium_stencil_mesh.py ...................               [ 66%]
+tests/test_example_galleries.py ............................             [ 67%]
+tests/test_ferritic.py .......                                           [ 67%]
+tests/test_field.py .................                                    [ 67%]
+tests/test_filepath.py .........................ss...s.                  [ 68%]
+tests/test_firstwall.py .........                                        [ 68%]
+tests/test_flux_surface_geometry.py .....                                [ 68%]
+tests/test_force.py .......................x.......                      [ 69%]
+tests/test_frame_ingest_import.py ...                                    [ 69%]
+tests/test_frameconstruction.py ...                                      [ 69%]
+tests/test_frameindex.py .                                               [ 69%]
+tests/test_framelink.py ...................................              [ 70%]
+tests/test_frameset.py ......                                            [ 70%]
+tests/test_framesetloc.py ....................                           [ 70%]
+tests/test_framespace.py ..........                                      [ 70%]
+tests/test_frenet.py ....................                                [ 71%]
+tests/test_geqdsk.py ........                                            [ 71%]
+tests/test_getslice.py ..............                                    [ 71%]
+tests/test_groupset.py ........                                          [ 71%]
+tests/test_hexcell_moment_equivalence.py ...............                 [ 72%]
+tests/test_hexstencil.py .............                                   [ 72%]
+tests/test_idsindex.py .ssssss..ssss...                                  [ 72%]
+tests/test_imas.py ....ssssssss                                          [ 72%]
+tests/test_interpolant.py .......                                        [ 72%]
+tests/test_io_cocos.py ...................                               [ 73%]
+tests/test_io_sourcemap.py ......................                        [ 73%]
+tests/test_jax_config.py ............                                    [ 73%]
+tests/test_jax_null.py .....                                             [ 74%]
+tests/test_label.py ......                                               [ 74%]
+tests/test_machine.py ..............                                     [ 74%]
+tests/test_machine_artifact_concurrency.py ...F                          [ 74%]
+tests/test_map_extraction.py ....                                        [ 74%]
+tests/test_mast_acquisition_scale.py ..................                  [ 74%]
+tests/test_mast_array_amplitude.py ................                      [ 75%]
+tests/test_mast_artifact.py ............................................ [ 76%]
+.................                                                        [ 76%]
+tests/test_mast_block_scale.py .......................                   [ 76%]
+tests/test_mast_block_scale_read_path.py ......                          [ 76%]
+tests/test_mast_calibration_cohort.py .................................. [ 77%]
+                                                                         [ 77%]
+tests/test_mast_catalog_geometry.py ..................                   [ 77%]
+tests/test_mast_channel_drive.py .....................                   [ 78%]
+tests/test_mast_error_field_screen.py ...........................        [ 78%]
+tests/test_mast_evidence.py ................                             [ 79%]
+tests/test_mast_flux_loop_adjudication.py ...........................    [ 79%]
+tests/test_mast_flux_loop_gains.py .........................             [ 80%]
+tests/test_mast_flux_loop_positions.py ................................. [ 80%]
+.......                                                                  [ 80%]
+tests/test_mast_misfit_harmonics.py .................................... [ 81%]
+...                                                                      [ 81%]
+tests/test_mast_passive_calibration.py ..............                    [ 81%]
+tests/test_mast_passive_decay_modes.py ................................. [ 82%]
+....                                                                     [ 82%]
+tests/test_mast_passive_inductance.py .............................      [ 83%]
+tests/test_mast_probe_calibration.py ................                    [ 83%]
+tests/test_mast_probe_discriminant.py ...............                    [ 83%]
+tests/test_mast_provisional_ids.py ............                          [ 83%]
+tests/test_mast_registry_reproduction.py ....                            [ 84%]
+tests/test_mast_seed_parameters.py ....................                  [ 84%]
+tests/test_mast_solve_inputs.py .......................................F [ 85%]
+F....F......                                                             [ 85%]
+tests/test_mast_vacuum_refinement.py ................................... [ 86%]
+......                                                                   [ 86%]
+tests/test_mast_winding_lattice.py ..................................... [ 86%]
+.......                                                                  [ 86%]
+tests/test_mastcocos.py ............................                     [ 87%]
+tests/test_measurement_provenance.py ...                                 [ 87%]
+tests/test_metaframe.py .........                                        [ 87%]
+tests/test_multipoint.py ................                                [ 88%]
+tests/test_netcdf.py ....                                                [ 88%]
+tests/test_null_benchmark_precision.py .......                           [ 88%]
+tests/test_overlap.py .......                                            [ 88%]
+tests/test_parity_chain.py ....                                          [ 88%]
+tests/test_parity_flux_ledger.py ....                                    [ 88%]
+tests/test_parity_gate.py ...............                                [ 88%]
+tests/test_parity_tolerances.py ......                                   [ 88%]
+tests/test_plasmawall_first_wall.py ...                                  [ 88%]
+tests/test_plot_import.py .                                              [ 89%]
+tests/test_point.py ............                                         [ 89%]
+tests/test_pointconstraint.py .....ssssssssssssss                        [ 89%]
+tests/test_polygen.py .......                                            [ 89%]
+tests/test_polygeom.py .............                                     [ 89%]
+tests/test_polygon.py .................                                  [ 90%]
+tests/test_polygrid.py ...........................                       [ 90%]
+tests/test_polyline.py ................................................. [ 91%]
+......................................ss........                         [ 92%]
+tests/test_real_slice_convergence.py ...                                 [ 92%]
+tests/test_regression.py .....................ssssss...                  [ 93%]
+tests/test_rotate.py ..............                                      [ 93%]
+tests/test_rotating_equilibrium_references.py .......................... [ 94%]
+..............................                                           [ 94%]
+tests/test_select.py .......                                             [ 94%]
+tests/test_shellgrid.py ............                                     [ 94%]
+tests/test_space.py ....                                                 [ 95%]
+tests/test_stencil_nulls.py ...............                              [ 95%]
+tests/test_strike.py ssss                                                [ 95%]
+tests/test_subspace.py .......................................           [ 96%]
+tests/test_sultan.py .........................................           [ 96%]
+tests/test_thermalhydralic.py .......................................... [ 97%]
+.........                                                                [ 97%]
+tests/test_topology_read_equivalence.py ...                              [ 97%]
+tests/test_transport_environment.py .                                    [ 97%]
+tests/test_transport_geometry.py ..                                      [ 97%]
+tests/test_uri.py ..............................................         [ 98%]
+tests/test_volume.py .....................                               [ 99%]
+tests/test_vtk.py ...........                                            [ 99%]
+tests/test_wall_mask.py .........                                        [ 99%]
+tests/test_winding.py ............                                       [ 99%]
+nova/imas/equilibrium.py ssss                                            [ 99%]
+nova/imas/extrapolate.py sss                                             [ 99%]
+nova/imas/machine.py s                                                   [ 99%]
+nova/imas/pulsedesign.py s                                               [100%]
+
+=================================== FAILURES ===================================
+___________ test_four_scoring_partitions_share_one_verified_artifact ___________
+
+tmp_path = PosixPath('/run/user/39486/pytest-of-mcintos/pytest-1032/test_four_scoring_partitions_s0')
+
+    def test_four_scoring_partitions_share_one_verified_artifact(tmp_path: Path) -> None:
+        _require_shared_artifact()
+        if not (SHOT_STORE / f"{SHOT}.zarr").is_dir():
+            pytest.skip("corrected MAST shot store is not mounted")
+        context = get_context("spawn")
+        start_event = context.Event()
+        result_queue = context.Queue()
+        starts = (0, 1, 2, 3)
+        workers = [
+            context.Process(
+                target=_score_partition_worker,
+                args=(
+                    start,
+                    tmp_path / f"partition-{start}.json",
+                    start_event,
+                    result_queue,
+                ),
+            )
+            for start in starts
+        ]
+        for worker in workers:
+            worker.start()
+        start_event.set()
+        results = []
+        try:
+            for _ in workers:
+                results.append(result_queue.get(timeout=300))
+        except Empty as error:
+            raise AssertionError("a scoring partition did not complete") from error
+        finally:
+            for worker in workers:
+                worker.join(30)
+                if worker.is_alive():
+                    worker.kill()
+                    worker.join()
+    
+        by_start = {result[0]: result[1:] for result in results}
+        assert set(by_start) == set(starts)
+>       assert all(result[0] == "complete" for result in by_start.values())
+E       assert False
+E        +  where False = all(<generator object test_four_scoring_partitions_share_one_verified_artifact.<locals>.<genexpr> at 0x7f79743aacf0>)
+
+tests/test_machine_artifact_concurrency.py:263: AssertionError
+----------------------------- Captured stderr call -----------------------------
+15:09:43 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+INFO:imas.dd_zip:Parsing data dictionary version 4.1.1
+15:09:43 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+INFO:imas.dd_zip:Parsing data dictionary version 4.1.1
+15:09:43 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+INFO:imas.dd_zip:Parsing data dictionary version 4.1.1
+15:09:43 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+INFO:imas.dd_zip:Parsing data dictionary version 4.1.1
+E0820 15:10:16.075854 3386792 platform_util.cc:279] Failed to create stream executor for device CUDA:0: : CUDA_ERROR_OUT_OF_MEMORY: out of memory
+E0820 15:10:16.079814 3386789 platform_util.cc:279] Failed to create stream executor for device CUDA:0: : CUDA_ERROR_OUT_OF_MEMORY: out of memory
+E0820 15:10:16.079841 3386791 platform_util.cc:279] Failed to create stream executor for device CUDA:0: : CUDA_ERROR_OUT_OF_MEMORY: out of memory
+E0820 15:10:16.267830 3386790 platform_util.cc:279] Failed to create stream executor for device CUDA:0: : CUDA_ERROR_OUT_OF_MEMORY: out of memory
+_______ test_each_probe_channel_reads_the_sensor_it_is_mapped_to[15000] ________
+
+shot = 15000
+description = OpenedDescription(ids={'pf_active': <IDSToplevel (IDS:pf_active)>, 'pf_passive': <IDSToplevel (IDS:pf_passive)>, 'magn...A'))))), dd_version='4.1.1', artifact_digest='sha256:7019d6731d40124238f6c8a7334bfbd7edebd57b46702f99012511c9f02adfea')
+published_map = SourceSignalMap(signals=(SourceSignal(standard_name='poloidal_magnetic_field_of_poloidal_magnetic_field_probe', catalo...source signals', unmet='tf/r0 is not sourced and a fixed-factor conversion cannot express a product of two channels')))
+
+    @_needs_store
+    @pytest.mark.parametrize("shot", (JOIN_SHOT, REVERSED_SHOTS[0]))
+    def test_each_probe_channel_reads_the_sensor_it_is_mapped_to(
+        shot, description, published_map
+    ):
+        """Checked against the reconstruction's own poses, not against an index convention.
+    
+        The outer arrays are co-located pairs -- a radial and an axial probe at each of
+        nineteen positions -- so an index correspondence alone would not distinguish
+        them.  Position and sensitive axis together do.
+        """
+    
+        poses = reconstruction_probe_poses(shot)
+        described = description.machine.probe_poses
+        rows = {
+            row.source_channel: row.target_index
+            for row in published_map.signals
+            if row.standard_name == PROBE_FIELD_NAME
+        }
+        matches = trace_matched_columns(shot, sorted(rows), "magpr_x")
+        checked = 0
+        for channel, match in matches.items():
+            column, residual, runner_up = match
+            if residual >= DISCRIMINATING_RESIDUAL:
+                continue
+            if runner_up <= DISCRIMINATING_MARGIN * residual:
+                continue
+            target = described[rows[channel]]
+            assert np.hypot(*(poses[column, :2] - target[:2])) <= PROBE_POSITION_TOLERANCE
+>           assert poses[column, 2] == pytest.approx(target[2], abs=1e-4)
+E           assert np.float64(1.5707963267948966) == -1.5708 ± 1.0e-04
+E             
+E             comparison failed
+E             Obtained: 1.5707963267948966
+E             Expected: -1.5708 ± 1.0e-04
+
+tests/test_mast_solve_inputs.py:726: AssertionError
+_______ test_each_probe_channel_reads_the_sensor_it_is_mapped_to[13500] ________
+
+shot = 13500
+description = OpenedDescription(ids={'pf_active': <IDSToplevel (IDS:pf_active)>, 'pf_passive': <IDSToplevel (IDS:pf_passive)>, 'magn...A'))))), dd_version='4.1.1', artifact_digest='sha256:7019d6731d40124238f6c8a7334bfbd7edebd57b46702f99012511c9f02adfea')
+published_map = SourceSignalMap(signals=(SourceSignal(standard_name='poloidal_magnetic_field_of_poloidal_magnetic_field_probe', catalo...source signals', unmet='tf/r0 is not sourced and a fixed-factor conversion cannot express a product of two channels')))
+
+    @_needs_store
+    @pytest.mark.parametrize("shot", (JOIN_SHOT, REVERSED_SHOTS[0]))
+    def test_each_probe_channel_reads_the_sensor_it_is_mapped_to(
+        shot, description, published_map
+    ):
+        """Checked against the reconstruction's own poses, not against an index convention.
+    
+        The outer arrays are co-located pairs -- a radial and an axial probe at each of
+        nineteen positions -- so an index correspondence alone would not distinguish
+        them.  Position and sensitive axis together do.
+        """
+    
+        poses = reconstruction_probe_poses(shot)
+        described = description.machine.probe_poses
+        rows = {
+            row.source_channel: row.target_index
+            for row in published_map.signals
+            if row.standard_name == PROBE_FIELD_NAME
+        }
+        matches = trace_matched_columns(shot, sorted(rows), "magpr_x")
+        checked = 0
+        for channel, match in matches.items():
+            column, residual, runner_up = match
+            if residual >= DISCRIMINATING_RESIDUAL:
+                continue
+            if runner_up <= DISCRIMINATING_MARGIN * residual:
+                continue
+            target = described[rows[channel]]
+            assert np.hypot(*(poses[column, :2] - target[:2])) <= PROBE_POSITION_TOLERANCE
+>           assert poses[column, 2] == pytest.approx(target[2], abs=1e-4)
+E           assert np.float64(1.5707963267948966) == -1.5708 ± 1.0e-04
+E             
+E             comparison failed
+E             Obtained: 1.5707963267948966
+E             Expected: -1.5708 ± 1.0e-04
+
+tests/test_mast_solve_inputs.py:726: AssertionError
+_______ test_a_channel_off_its_own_clock_is_refused_rather_than_aligned ________
+
+published_map = SourceSignalMap(signals=(SourceSignal(standard_name='poloidal_magnetic_field_of_poloidal_magnetic_field_probe', catalo...source signals', unmet='tf/r0 is not sourced and a fixed-factor conversion cannot express a product of two channels')))
+
+    @_needs_store
+    @_needs_standard_names
+    def test_a_channel_off_its_own_clock_is_refused_rather_than_aligned(published_map):
+        """Aligning a channel to a clock it does not fit moves every sample in time."""
+    
+        signals = read_solve_inputs(published_map, REVERSED_SHOTS[0])
+>       assert "fl_cc10" in signals.misaligned_channels
+E       AssertionError: assert 'fl_cc10' in ()
+E        +  where () = ShotSignals(shot=13500, dataset=<xarray.Dataset> Size: 4MB\nDimensions:                                                ...didates=(1.0,)), ScaleCorrection(channel='obv19', shot=13500, scale=1.0, disposition='unmeasured', candidates=(1.0,)))).misaligned_channels
+
+tests/test_mast_solve_inputs.py:807: AssertionError
+=============================== warnings summary ===============================
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_animate.py::test_sin, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_animate.py::test_ramp, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_biotarc.py::test_jacobi_amplitude, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_biotsavart.py::test_axial_vertical_field, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_biotsavart.py::test_magnetic_field_analytic_poloidal_plane, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_biotsavart.py::test_magnetic_field_analytic_non_axisymmetric, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_biotsavart.py::test_3d_line_arc, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_biotsavart_3d.py::test_segment_field_attrs_axisymmetric, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_biotsavart_3d.py::test_segment_field_attrs_non_axisymmetric, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_deferred.py::test_with_defer_import, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_frenet.py::test_helix, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_groupset.py::test_source_axes, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_overlap.py::test_number_getter, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_plasmaprofile.py::test_profile_axis, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_plasmaprofile.py::test_limiter_profile, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_plasmaprofile.py::test_sn_profile, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_plasmaprofile.py::test_quadrant, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_plasmaprofile.py::test_zero_squareness, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_plasmaprofile.py::test_unit_squareness, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_pointconstraint.py::test_control_plot, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_pointconstraint.py::test_control_fit, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_polyline.py::test_shifted_arc_length, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_rotate.py::test_dot, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+tests/test_sultan.py:34
+  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/merged-main-suite-verification/tests/test_sultan.py:34: DeprecationWarning: In ftputil 6.0.0, the default file path encoding will change from Latin-1 to UTF-8. Explicitly specify encoding="latin-1" for the path encoding if the remote file system uses Latin-1 encoding.
+    import ftputil  # noqa: F401
+
+<frozen importlib._bootstrap>:491
+  <frozen importlib._bootstrap>:491: RuntimeWarning: numpy.ndarray size changed, may indicate binary incompatibility. Expected 16 from C header, got 96 from PyObject
+
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_uri.py::test_uri_format, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+tests/test_biotelliptic.py: 12 warnings
+  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/merged-main-suite-verification/tests/test_biotelliptic.py:492: IntegrationWarning: The occurrence of roundoff error is detected, which prevents 
+    the requested tolerance from being achieved.  The error may be 
+    underestimated.
+    expected, _ = scipy.integrate.quad(
+
+tests/test_biotelliptic.py: 14 warnings
+  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/merged-main-suite-verification/tests/test_biotelliptic.py:832: IntegrationWarning: The occurrence of roundoff error is detected, which prevents 
+    the requested tolerance from being achieved.  The error may be 
+    underestimated.
+    value, _ = scipy.integrate.quad(
+
+tests/test_biotelliptic.py: 24 warnings
+  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/merged-main-suite-verification/tests/test_biotelliptic.py:918: IntegrationWarning: The occurrence of roundoff error is detected, which prevents 
+    the requested tolerance from being achieved.  The error may be 
+    underestimated.
+    expected, _ = scipy.integrate.quad(
+
+tests/test_coilset.py: 7 warnings
+tests/test_force.py: 3 warnings
+tests/test_shellgrid.py: 3 warnings
+  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/merged-main-suite-verification/nova/geometry/rdp.py:36: DeprecationWarning: Arrays of 2-dimensional vectors are deprecated. Use arrays of 3-dimensional vectors instead. (deprecated in NumPy 2.0)
+    np.abs(np.linalg.norm(np.cross(end - start, start - point))),
+
+tests/test_idsindex.py::test_coil_current_array
+tests/test_idsindex.py::test_ids_node_length
+tests/test_idsindex.py::test_set_coil_turns
+tests/test_idsindex.py::test_set_coil_name
+  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/merged-main-suite-verification/nova/imas/ids_index.py:117: DeprecationWarning: 'maxsplit' is passed as positional argument
+    match re.split(r"\[|\]", ids_node.strip("."), 2):
+
+tests/test_mast_misfit_harmonics.py::test_assemble_refuses_a_group_no_channel_survives
+  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/merged-main-suite-verification/nova/imas/mast_misfit_harmonics.py:219: RuntimeWarning: All-NaN slice encountered
+    value = np.nanmedian(sample, axis=0)
+
+tests/test_mast_passive_decay_modes.py::TestFit::test_the_fit_recovers_the_planted_multipliers
+tests/test_mast_passive_inductance.py::TestRegistryCircuits::test_one_circuit_per_disjoint_section
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/fixtures.py:1313: PytestRemovedIn10Warning: Class-scoped fixture defined as instance method is deprecated.
+  Instance attributes set in this fixture will NOT be visible to test methods,
+  as each test gets a new instance while the fixture runs only once per class.
+  Use @classmethod decorator and set attributes on cls instead.
+  See https://docs.pytest.org/en/stable/deprecations.html#class-scoped-fixture-as-instance-method
+    fixturefunc = resolve_fixture_function(fixturedef, request)
+
+tests/test_mast_solve_inputs.py::test_both_field_polarities_reach_the_description_unflipped
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/yaml/error.py:6: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x7f7c48757f10>
+    def __init__(self, name, index, line, column, buffer, pointer):
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/test_mast_solve_inputs.py::test_both_field_polarities_reach_the_description_unflipped
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/yaml/error.py:6: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x7f7c48754220>
+    def __init__(self, name, index, line, column, buffer, pointer):
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/test_mast_solve_inputs.py::test_a_coil_publishing_two_channels_measures_its_own_turn_count
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/yaml/reader.py:99: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x7f7c48757100>
+    def forward(self, length=1):
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/test_mastcocos.py::test_corpus_sample_re_derives_cocos_three
+  /home/ITER/mcintos/.local/share/uv/python/cpython-3.14.2-linux-x86_64-gnu/lib/python3.14/json/decoder.py:361: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x7f7c487565c0>
+    obj, end = self.scan_once(s, idx)
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/test_netcdf.py::test_store_load_roundtrip
+  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/merged-main-suite-verification/nova/database/netcdf.py:49: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x7f7c48757790>
+    gc.collect()
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/test_netcdf.py::test_store_load_roundtrip
+  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/merged-main-suite-verification/nova/database/netcdf.py:49: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x7f7c48757880>
+    gc.collect()
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/test_thermalhydralic.py: 20 warnings
+  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/merged-main-suite-verification/nova/thermalhydralic/cold_test.py:314: UserWarning: nperseg=256 is greater than signal length max(len(x), len(y)) = 115, using nperseg = 115
+    __, psd = scipy.signal.welch(data.loc[:, col].to_numpy(), 1 / dt)
+
+tests/test_transport_environment.py::test_nova_transport_and_torax_share_the_expected_jax_runtime
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/jaxopt/__init__.py:59: DeprecationWarning: JAXopt is no longer maintained. See https://docs.jax.dev/en/latest/ for alternatives.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_machine_artifact_concurrency.py::test_four_scoring_partitions_share_one_verified_artifact
+FAILED tests/test_mast_solve_inputs.py::test_each_probe_channel_reads_the_sensor_it_is_mapped_to[15000]
+FAILED tests/test_mast_solve_inputs.py::test_each_probe_channel_reads_the_sensor_it_is_mapped_to[13500]
+FAILED tests/test_mast_solve_inputs.py::test_a_channel_off_its_own_clock_is_refused_rather_than_aligned
+SKIPPED [2] tests/test_matrix.py:15: Requisite IDSs unavailable. Unable to initiate matrix benchmark, skipping tests
+SKIPPED [1] tests/calibrate/test_generated_artifacts.py:41: gen-pydantic is in the schema extra, which is not installed
+SKIPPED [1] tests/calibrate/test_generated_artifacts.py:41: gen-json-schema is in the schema extra, which is not installed
+SKIPPED [3] tests/test_biotincompleteelliptic.py:545: the denormal partner, whose boundary its own test measures
+SKIPPED [1] tests/test_bokeh.py:19: equilibrium database unavalible
+SKIPPED [1] tests/test_bokeh.py:26: equilibrium database unavalible
+SKIPPED [1] tests/test_bokeh.py:34: equilibrium database unavalible
+SKIPPED [1] tests/test_codac_uda.py:46: Optional dependencies [codac_uda] not installed. Try pip install .[codac_uda]. The external CODAC_UDA library is required.
+SKIPPED [1] tests/test_codac_uda.py:54: Optional dependencies [codac_uda] not installed. Try pip install .[codac_uda]. The external CODAC_UDA library is required.
+SKIPPED [1] tests/test_codac_uda.py:68: Optional dependencies [codac_uda] not installed. Try pip install .[codac_uda]. The external CODAC_UDA library is required.
+SKIPPED [1] tests/test_codac_uda.py:78: Optional dependencies [codac_uda] not installed. Try pip install .[codac_uda]. The external CODAC_UDA library is required.
+SKIPPED [1] tests/test_codac_uda.py:90: Optional dependencies [codac_uda] not installed. Try pip install .[codac_uda]. The external CODAC_UDA library is required.
+SKIPPED [1] tests/test_codac_uda.py:99: Optional dependencies [codac_uda] not installed. Try pip install .[codac_uda]. The external CODAC_UDA library is required.
+SKIPPED [1] tests/test_database.py:34: pf_active database unavalible
+SKIPPED [1] tests/test_database.py:42: pf_active database unavalible
+SKIPPED [1] tests/test_database.py:48: pf_active database unavalible
+SKIPPED [1] tests/test_database.py:54: pf_active database unavalible
+SKIPPED [1] tests/test_database.py:60: pf_active database unavalible
+SKIPPED [1] tests/test_database.py:67: pf_active database unavalible
+SKIPPED [1] tests/test_database.py:74: equilibrium database unavalible
+SKIPPED [1] tests/test_database.py:81: equilibrium database unavalible
+SKIPPED [1] tests/test_database.py:101: equilibrium database unavalible
+SKIPPED [1] tests/test_database.py:111: equilibrium database unavalible
+SKIPPED [1] tests/test_database.py:122: equilibrium database unavalible
+SKIPPED [1] tests/test_database.py:130: equilibrium database unavalible
+SKIPPED [1] tests/test_database.py:138: equilibrium database unavalible
+SKIPPED [1] tests/test_database.py:150: equilibrium database unavalible
+SKIPPED [1] tests/test_database.py:172: pf_active database unavalible
+SKIPPED [1] tests/test_database.py:179: pf_active database unavalible
+SKIPPED [1] tests/test_database.py:189: equilibrium database unavalible
+SKIPPED [1] tests/test_database.py:212: pf_active database unavalible
+SKIPPED [1] tests/test_database.py:220: pf_active_iter database unavalible
+SKIPPED [1] tests/test_filepath.py:101: Optional dependencies [ssh] not installed. Try pip install .[ssh].
+SKIPPED [1] tests/test_filepath.py:109: Optional dependencies [ssh] not installed. Try pip install .[ssh].
+SKIPPED [1] tests/test_filepath.py:142: Optional dependencies [ssh] not installed. Try pip install .[ssh].
+SKIPPED [1] tests/test_idsindex.py:21: pf_active_iter database unavalible
+SKIPPED [1] tests/test_idsindex.py:28: pf_active_iter database unavalible
+SKIPPED [1] tests/test_idsindex.py:41: pf_active_iter database unavalible
+SKIPPED [1] tests/test_idsindex.py:48: pf_active_iter database unavalible
+SKIPPED [1] tests/test_idsindex.py:57: pf_active_iter database unavalible
+SKIPPED [1] tests/test_idsindex.py:65: pf_active_iter database unavalible
+SKIPPED [3] tests/test_idsindex.py:80: pf_active_iter database unavalible
+SKIPPED [1] tests/test_idsindex.py:91: pf_active_iter database unavalible
+SKIPPED [1] tests/test_imas.py:68: equilibrium database unavalible
+SKIPPED [1] tests/test_imas.py:76: equilibrium database unavalible
+SKIPPED [1] tests/test_imas.py:87: equilibrium database unavalible
+SKIPPED [1] tests/test_imas.py:96: wall database unavalible
+SKIPPED [1] tests/test_imas.py:104: pf_active database unavalible
+SKIPPED [1] tests/test_imas.py:113: pf_active database unavalible
+SKIPPED [1] tests/test_imas.py:126: equilibrium database unavalible
+SKIPPED [1] tests/test_imas.py:138: equilibrium database unavalible
+SKIPPED [4] tests/test_pointconstraint.py:86: wall database unavalible
+SKIPPED [1] tests/test_pointconstraint.py:95: wall database unavalible
+SKIPPED [1] tests/test_pointconstraint.py:102: wall database unavalible
+SKIPPED [8] tests/test_pointconstraint.py:117: wall database unavalible
+SKIPPED [1] tests/test_polyline.py:348: coils_non_axisymmetric database unavalible
+SKIPPED [1] tests/test_polyline.py:370: coils_non_axisymmetric database unavalible
+SKIPPED [3] tests/test_regression.py:152: Optional dependencies [optimize] not installed. Try pip install .[optimize].
+SKIPPED [3] tests/test_regression.py:161: Optional dependencies [optimize] not installed. Try pip install .[optimize].
+SKIPPED [1] tests/test_strike.py:8: wall database unavalible
+SKIPPED [1] tests/test_strike.py:15: wall database unavalible
+SKIPPED [1] tests/test_strike.py:22: wall database unavalible
+SKIPPED [1] tests/test_strike.py:29: wall database unavalible
+SKIPPED [4] nova/imas/equilibrium.py: IMAS pulse data unavailable (offline lane)
+SKIPPED [3] nova/imas/extrapolate.py: IMAS pulse data unavailable (offline lane)
+SKIPPED [1] nova/imas/machine.py: IMAS pulse data unavailable (offline lane)
+SKIPPED [1] nova/imas/pulsedesign.py: IMAS pulse data unavailable (offline lane)
+= 4 failed, 5199 passed, 91 skipped, 735 deselected, 4 xfailed, 123 warnings in 3331.53s (0:55:31) =
+ ** On entry to DLASCL parameter number  4 had an illegal value
+ ** On entry to DLASCL parameter number  4 had an illegal value
+ ** On entry to DLASCL parameter number  4 had an illegal value
+ ** On entry to DLASCL parameter number  4 had an illegal value
+ ** On entry to DLASCL parameter number  5 had an illegal value
+ ** On entry to DLASCL parameter number  4 had an illegal value
+
+PYTEST_EXIT_CODE=1

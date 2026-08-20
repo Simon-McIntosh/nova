@@ -4,25 +4,27 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="nova">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="solovev-exact-recovery">
-  <meta name="plan-title"     content="Solov'ev Exact Recovery — correct first, then fast">
-  <meta name="plan-summary"   content="Recover the analytic Solov'ev equilibrium as the fixed oracle: Urankar-exact section kernels everywhere by default, hexagon sections with no rectangle fallback, the cell-moment coupling wired correctly end to end, pre-registered agreement gates that all downstream progress rides on, and a benchmarked accuracy-cost ladder targeting a converged Newton fixed point in about one millisecond on GPU">
-  <meta name="plan-status"    content="active">
-  <meta name="plan-roi"       content="high">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="solovev-exact-recovery">
+  <meta name="plan-title" content="Solov&#x27;ev Exact Recovery — correct first, then fast">
+  <meta name="plan-summary" content="Recover the analytic Solov&#x27;ev equilibrium as the fixed oracle: Urankar-exact section kernels everywhere by default, hexagon sections with no rectangle fallback, the cell-moment coupling wired correctly end to end, pre-registered agreement gates that all downstream progress rides on, and a benchmarked accuracy-cost ladder targeting a converged Newton fixed point in about one millisecond on GPU">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="6.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-capability-risk" content="elevated">
-  <meta name="plan-sprint"    content="S7">
-  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-sprint" content="S7">
+  <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-depends-on" content="boundary-ring-source-completion">
-  <meta name="plan-blocks"    content="efit-forward-parity">
+  <meta name="plan-blocks" content="efit-forward-parity">
   <title>Solov'ev Exact Recovery | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-20">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -178,64 +180,90 @@
     cumulative evidence with the benchmark harness committed so the ladder re-runs on any future
     change.</p>
 
+    <h2 id="s6">§6 — Cached machine builds: build once, reuse everywhere</h2>
+
+    <p><strong>Owner directive 2026-08-20.</strong> Machine and coilset builds — the design
+    matrices, coupling blocks, moment companions, and fixture operators — are cached instances
+    that are reused, never rebuilt per run, and agents specify the cache in their runs. The
+    measured waste this answers: every measurement node this week paid the full fixture
+    construction again (~13 minutes coarse, ~44 minutes fine), several blocking at their time
+    fences <em>inside</em> a rebuild of operators that were bitwise identical to the previous
+    run's. Nova's netCDF caching layer exists for exactly this; whether the Solov'ev fixture
+    path uses it — and why not, if not — is the question.</p>
+
+    <p><em>Done-when:</em> (a) an audit states, for each expensive build in the forward path
+    (machine description, coilset coupling, plasma-grid operators, the two Solov'ev fixture
+    operator sets), whether it is cached and reused or rebuilt, with the cache key and store
+    each uses; (b) the reason the reference-lane fixtures rebuild every run is named — a
+    disabled cache, a churning key, a worktree-local store, or a genuinely uncacheable input —
+    with the mechanism, not a guess (the artifact-digest lesson applies: HDF5 write metadata
+    moves digests between runs, so keys must be semantic identities); (c) fix or confirm: if a
+    cache exists but is bypassed, it is wired in place; if keys churn, the key becomes a
+    semantic identity; a warm rebuild of the coarse fixture then completes in at most a small
+    fraction of the cold build with operators identical to stored precision, measured cold vs
+    warm on both fixtures; (d) the agent-facing doctrine — how a run names and reuses the
+    cached instance — is recorded for the machine-building AGENTS.md guidance this plan owes;
+    (e) committed with the mechanism in the body. Cache stores respect the platform facts:
+    no-clobber publication is node-local only on GPFS, and /tmp is never a cache home.</p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="kernel-default" data-choice="urankar-exact-everywhere" data-by="Simon McIntosh" data-when="2026-08-20T11:00:00+00:00">
-        <p class="r-dec-q">Which section kernel is the production default across all coupling paths?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt chosen" data-value="urankar-exact-everywhere">Urankar/Part V exact sections everywhere; far-field filament truncation retired</button>
-          <button class="r-opt" data-value="hybrid-near-far">keep the hybrid near/far split with filament far field</button>
-          <button class="r-opt" data-value="quadrupole-far">quadrupole-corrected far field</button>
-        </p>
-        <p class="r-dec-rat">Owner ruling 2026-08-20: there were never significant runtime
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="kernel-default" data-choice="urankar-exact-everywhere" data-by="Simon McIntosh" data-when="2026-08-20T11:00:00+00:00">
+    <p class="r-dec-q">Which section kernel is the production default across all coupling paths?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="urankar-exact-everywhere">Urankar/Part V exact sections everywhere; far-field filament truncation retired</button>
+      <button class="r-opt" data-value="hybrid-near-far">keep the hybrid near/far split with filament far field</button>
+      <button class="r-opt" data-value="quadrupole-far">quadrupole-corrected far field</button>
+      </p>
+    <p class="r-dec-rat">Owner ruling 2026-08-20: there were never significant runtime
         advantages to the far-field filament truncation — the exact kernel costs 4 primitive
-        evaluations against the quadrupole's ~5 and is more accurate, and the banked
+        evaluations against the quadrupole&#x27;s ~5 and is more accurate, and the banked
         filament-truncation measurement already showed the exact section as the better buy at
-        production's own far-field fraction. Exact is the default; speed is recovered at the
+        production&#x27;s own far-field fraction. Exact is the default; speed is recovered at the
         ladder (§5), never by kernel truncation.</p>
-      </div>
-      <div class="r-dec" data-key="section-fidelity" data-choice="authored-shape-exact" data-by="Simon McIntosh" data-when="2026-08-20T11:00:00+00:00">
-        <p class="r-dec-q">May a coupling substitute a simpler section shape for the authored cell geometry?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt chosen" data-value="authored-shape-exact">never — hexagons couple through exact hexagon sections; shape-mismatched construction fails loudly</button>
-          <button class="r-opt" data-value="rectangle-fallback">rectangle substitution permitted where kernels are cheaper</button>
-        </p>
-        <p class="r-dec-rat">Owner ruling 2026-08-20: if we select hex then we use hex — no
+    </div>
+<div class="r-dec" data-key="section-fidelity" data-choice="authored-shape-exact" data-by="Simon McIntosh" data-when="2026-08-20T11:00:00+00:00">
+    <p class="r-dec-q">May a coupling substitute a simpler section shape for the authored cell geometry?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="authored-shape-exact">never — hexagons couple through exact hexagon sections; shape-mismatched construction fails loudly</button>
+      <button class="r-opt" data-value="rectangle-fallback">rectangle substitution permitted where kernels are cheaper</button>
+      </p>
+    <p class="r-dec-rat">Owner ruling 2026-08-20: if we select hex then we use hex — no
         fallback to rectangle sections, ever, and the absence of the fallback is verified by
         construction and by test, not by convention. Measured basis: the substitution carries a
         stable ~3.5% share of the composition error with +20%/−10% second-moment distortion.</p>
-      </div>
-      <div class="r-dec" data-key="oracle-authority" data-choice="solovev-exact" data-by="Simon McIntosh" data-when="2026-08-20T11:00:00+00:00">
-        <p class="r-dec-q">What is the accuracy authority for the forward model?</p>
-        <p class="r-dec-rat">Owner ruling 2026-08-20: the Solov'ev solution is the fixed oracle
+    </div>
+<div class="r-dec" data-key="oracle-authority" data-choice="solovev-exact" data-by="Simon McIntosh" data-when="2026-08-20T11:00:00+00:00">
+    <p class="r-dec-q">What is the accuracy authority for the forward model?</p>
+    <p class="r-dec-rat">Owner ruling 2026-08-20: the Solov&#x27;ev solution is the fixed oracle
         and there is no confusion here — any disagreement between the discrete forward model and
-        the analytic solution is nova's defect to fix. No gate is relaxed to accommodate a
+        the analytic solution is nova&#x27;s defect to fix. No gate is relaxed to accommodate a
         disagreement; an h-independent deviation is a defect whatever its size. Further forward
         progress gates on the §4 agreement set.</p>
-      </div>
-      <div class="r-dec" data-key="runtime-target" data-choice="one-millisecond-gpu-fixed-point" data-by="Simon McIntosh" data-when="2026-08-20T11:00:00+00:00">
-        <p class="r-dec-q">What is the runtime target for the production forward solve?</p>
-        <p class="r-dec-rat">Owner ruling 2026-08-20: a converged Newton-Krylov or Newton-only
+    </div>
+<div class="r-dec" data-key="runtime-target" data-choice="one-millisecond-gpu-fixed-point" data-by="Simon McIntosh" data-when="2026-08-20T11:00:00+00:00">
+    <p class="r-dec-q">What is the runtime target for the production forward solve?</p>
+    <p class="r-dec-rat">Owner ruling 2026-08-20: a converged Newton-Krylov or Newton-only
         free-boundary fixed point in about one millisecond on GPU, with design-matrix build time
         reasonable on both CPU and GPU. Accuracy is bought at build time through exact
         precomputed matrices; runtime stays fixed-shape matvecs. The §5 ladder prices every
         accuracy increment so the operating point is chosen on numbers.</p>
-      </div>
-    </section>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-ser-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-08-20" data-recommends-skill="/reckon-ship solovev-exact-recovery" data-resolved-at="" data-resolved-by="">
-        <h4 class="r-fu-title">Execute the recovery: defaults, wiring conviction, gates, ladder</h4>
-        <div class="r-fu-body"><p>All four framing decisions are owner-locked at creation. §2
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-ser-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-08-20" data-recommends-skill="/reckon-ship solovev-exact-recovery" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Execute the recovery: defaults, wiring conviction, gates, ladder</h4>
+    <div class="r-fu-body"><p>All four framing decisions are owner-locked at creation. §2
         (exact defaults + hex enforcement) and §3 (wiring audit + forcing decomposition) are
         independent write scopes and open the plan; §4's gate bounds lock with the owner after
         §3's conviction evidence; §5 benchmarks the ladder on the repaired defaults. The
         boundary-ring merge (main 3b3122fa) is the substrate; the serialized terminal roots and
         the variant machinery from the decomposition ladder are the measurement inputs.</p></div>
-        <pre class="r-fu-prompt">/reckon-ship solovev-exact-recovery</pre>
-      </article>
-    </section>
+    <pre class="r-fu-prompt">/reckon-ship solovev-exact-recovery</pre>
+    </article>
+</section>
   </main>
 </body>
 </html>

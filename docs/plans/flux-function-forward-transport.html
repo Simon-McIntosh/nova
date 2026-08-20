@@ -23,8 +23,8 @@
   <title>Flux-Function Forward Transport | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-17">
-<meta name="plan-version" content="8">
+<meta name="plan-modified" content="2026-08-20">
+<meta name="plan-version" content="9">
 <meta name="plan-commits" content="f7af67dc,3a438d1b">
 <meta name="plan-impl" content="0.4">
 <meta name="plan-blocks" content="imas-ambix:sophelio-entry-master">
@@ -94,14 +94,14 @@
       </p>
     <p class="r-dec-rat">Locked at the 2026-08-10 coupling-contract brainstorm: the embedded ladder carries the multi-channel physics while the native ψ-diffusion rung remains the dependency-free differentiable floor. The windowed coupling contract presumes the embedded TORAX step as the high-fidelity engine, and rebuilding its verified closure surface in Nova is person-years the Apache-2.0 dependency already provides.</p>
     </div>
-<div class="r-dec" data-key="torax-pin-resolution" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="torax-pin-resolution" data-choice="uv-override-plus-upstream" data-by="Simon McIntosh" data-when="2026-08-20T12:59:46+00:00">
     <p class="r-dec-q">How is the TORAX imas-python==2.1.0 / h5py&lt;3.15 pin conflict resolved against the imas-python ≥2.2 stack? Recommendation: a uv override-dependencies entry now, validated by the full IMAS round-trip suites, with an upstream issue asking TORAX to relax the equality pin — because the override is reversible and unblocks immediately while the upstream fix removes it permanently.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="uv-override-plus-upstream">uv-override-plus-upstream</button>
+      <button class="r-opt chosen" data-value="uv-override-plus-upstream">uv-override-plus-upstream</button>
       <button class="r-opt" data-value="relax-imas-ink">relax-imas-ink</button>
       <button class="r-opt" data-value="wait-for-upstream">wait-for-upstream</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Owner ruling 2026-08-20: the project allows pinning to the latest TORAX version - use it. The landed evidence is the mechanism: uv override entries (imas-python &gt;= 2.2, h5py &gt;= 3.15) plus the optional transport extra co-resolve TORAX 1.4.3 with imas-python 2.3.0 and h5py 3.16.0 on Python 3.14.2, with the shared-process x64/XLA pin green. The upstream ask to relax the equality pin remains owed so the override can eventually be dropped.</p>
     </div>
 <div class="r-dec" data-key="geometry-handoff" data-choice="" data-by="" data-when="">
     <p class="r-dec-q">Which route hands the Nova FSA record to TORAX? Recommendation: construct the standard geometry adapter object directly — explicit fields, explicit signs, no experimental layer — keeping the in-memory IMAS equilibrium IDS as the interchange/egress format rather than the coupling mechanism, because TORAX&#x27;s IMAS geometry path is marked experimental and only its file route is integration-tested.</p>

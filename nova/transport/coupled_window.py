@@ -11,6 +11,11 @@ Radial profiles are first evaluated on a common *normalised* radial grid in
 each bracketing slice and only then interpolated in time.  This ordering is
 load-bearing when the physical flux map evolves: interpolating samples at a
 fixed physical-flux index would mix different flux surfaces.
+
+``solve_window`` composes the pure side sweeps into a damped waveform fixed
+point.  It reports the observed contraction and every exchanged-field
+residual, aggregates the interval conservation ledgers, and raises if either
+convergence or conservation misses the declared tolerance.
 """
 
 from __future__ import annotations
@@ -26,9 +31,11 @@ import numpy as np
 from nova.equilibrium.forward import ForwardEquilibrium, ForwardProfile, SolveRoute
 from nova.equilibrium.source import ForwardSource
 from nova.transport.forward import (
+    FluxConsumptionLedger,
     ForwardTransport,
     ForwardTransportInput,
     ForwardTransportReceipt,
+    PlasmaCurrentLedger,
     TransportGeometry,
     TransportModel,
     TransportState,
@@ -37,10 +44,18 @@ from nova.transport.forward import (
 
 __all__ = [
     "EquilibriumSweepReceipt",
+    "ExchangeSweepResult",
     "TransportSweepReceipt",
     "Waveform",
     "WaveformSample",
+    "WindowConfig",
+    "WindowConservationError",
+    "WindowConservationReceipt",
+    "WindowConvergenceError",
+    "WindowConvergenceReceipt",
+    "WindowReceipt",
     "equilibrium_sweep",
+    "solve_window",
     "transport_sweep",
 ]
 
@@ -313,6 +328,405 @@ class EquilibriumSweepReceipt:
     def conservation(self) -> tuple[Any, ...]:
         """Return the conservation ledger emitted at every coarse sample."""
         return tuple(equilibrium.conservation for equilibrium in self.equilibria)
+
+
+@dataclass(frozen=True)
+class WindowConfig:
+    """The four declared controls of one coupled exchange window.
+
+    ``length`` fixes the physical window.  The equilibrium and transport time
+    arrays jointly form the per-side sample-grid control; both span the whole
+    window but may have different interior samples.  ``iteration_cap`` and
+    ``tolerance`` control the fixed-point solve without changing either side's
+    native temporal resolution.
+    """
+
+    length: float
+    equilibrium_grid: np.ndarray
+    transport_grid: np.ndarray
+    iteration_cap: int
+    tolerance: float
+
+    def __post_init__(self) -> None:
+        equilibrium_grid = _readonly(self.equilibrium_grid, dtype=np.float64)
+        transport_grid = _readonly(self.transport_grid, dtype=np.float64)
+        if not np.isfinite(self.length) or self.length <= 0.0:
+            raise ValueError("window length must be finite and positive")
+        if self.iteration_cap < 1:
+            raise ValueError("window iteration cap must be at least one")
+        if not np.isfinite(self.tolerance) or self.tolerance <= 0.0:
+            raise ValueError("window convergence tolerance must be finite and positive")
+        for name, grid in (
+            ("equilibrium", equilibrium_grid),
+            ("transport", transport_grid),
+        ):
+            if grid.ndim != 1 or grid.size < 2:
+                raise ValueError(f"{name} sample grid needs at least two times")
+            if not np.all(np.diff(grid) > 0.0):
+                raise ValueError(f"{name} sample grid must be strictly increasing")
+            scale = max(abs(self.length), 1.0)
+            if not np.isclose(grid[0], 0.0, rtol=0.0, atol=1.0e-14 * scale):
+                raise ValueError(f"{name} sample grid must start at zero")
+            if not np.isclose(grid[-1], self.length, rtol=0.0, atol=1.0e-14 * scale):
+                raise ValueError(f"{name} sample grid must end at the window length")
+        object.__setattr__(self, "equilibrium_grid", equilibrium_grid)
+        object.__setattr__(self, "transport_grid", transport_grid)
+
+
+@dataclass(frozen=True)
+class ExchangeSweepResult:
+    """A waveform produced by one side together with that side's receipt."""
+
+    waveform: Waveform
+    receipt: Any
+
+
+@dataclass(frozen=True)
+class WindowConvergenceReceipt:
+    """Measured behaviour of a converged or exhausted waveform iteration."""
+
+    iterations_used: int
+    contraction_estimate: float | None
+    exit_residual: Mapping[str, float]
+    damping_applied: float
+    residual_trace: tuple[Mapping[str, float], ...]
+
+    def __post_init__(self) -> None:
+        exit_residual = MappingProxyType(
+            {str(name): float(value) for name, value in self.exit_residual.items()}
+        )
+        trace = tuple(
+            MappingProxyType({str(name): float(value) for name, value in row.items()})
+            for row in self.residual_trace
+        )
+        object.__setattr__(self, "exit_residual", exit_residual)
+        object.__setattr__(self, "residual_trace", trace)
+
+    @property
+    def maximum_residual(self) -> float:
+        """Return the largest final exchanged-field residual."""
+        return max(self.exit_residual.values(), default=0.0)
+
+
+@dataclass(frozen=True)
+class WindowConservationReceipt:
+    """Aggregated flux and current closure across a transport window."""
+
+    flux_consumption: FluxConsumptionLedger
+    plasma_current: PlasmaCurrentLedger
+    flux_closure_error: float
+    flux_closure_residual: float
+    current_continuity_error: float
+    current_continuity_residual: float
+
+
+@dataclass(frozen=True)
+class WindowReceipt:
+    """Converged exchanged waveforms with side and window-level receipts."""
+
+    geometry_waveform: Waveform
+    source_waveform: Waveform
+    equilibrium_receipt: Any
+    transport_receipt: TransportSweepReceipt
+    convergence: WindowConvergenceReceipt
+    conservation: WindowConservationReceipt
+
+
+class WindowConvergenceError(RuntimeError):
+    """The waveform iteration exhausted its cap before reaching tolerance."""
+
+    def __init__(
+        self,
+        convergence: WindowConvergenceReceipt,
+        geometry_waveform: Waveform,
+        source_waveform: Waveform,
+        equilibrium_receipt: Any,
+        transport_receipt: TransportSweepReceipt,
+    ) -> None:
+        super().__init__(
+            "window exchange did not converge: "
+            f"residual {convergence.maximum_residual:.6g} after "
+            f"{convergence.iterations_used} iterations"
+        )
+        self.convergence = convergence
+        self.geometry_waveform = geometry_waveform
+        self.source_waveform = source_waveform
+        self.equilibrium_receipt = equilibrium_receipt
+        self.transport_receipt = transport_receipt
+
+
+class WindowConservationError(RuntimeError):
+    """A converged exchange failed its flux or current closure."""
+
+    def __init__(self, conservation: WindowConservationReceipt) -> None:
+        super().__init__(
+            "window conservation did not close: "
+            f"flux residual {conservation.flux_closure_residual:.6g}, "
+            "current residual "
+            f"{conservation.current_continuity_residual:.6g}"
+        )
+        self.conservation = conservation
+
+
+def _require_waveform_grid(waveform: Waveform, expected: np.ndarray, name: str) -> None:
+    """Require one exchanged waveform to use its declared side time grid."""
+    if waveform.time.shape != expected.shape or not np.array_equal(
+        waveform.time, expected
+    ):
+        raise ValueError(f"{name} waveform must use its declared sample grid")
+
+
+def _relative_residual(previous, candidate) -> float:
+    """Return a scale-normalised sup residual between two exchanged fields."""
+    previous_array = np.asarray(previous)
+    candidate_array = np.asarray(candidate)
+    if previous_array.shape != candidate_array.shape:
+        raise ValueError("an exchanged field changed shape within a window")
+    if np.issubdtype(previous_array.dtype, np.bool_) or np.issubdtype(
+        candidate_array.dtype, np.bool_
+    ):
+        return 0.0 if np.array_equal(previous_array, candidate_array) else 1.0
+    scale = max(
+        float(np.max(np.abs(previous_array), initial=0.0)),
+        float(np.max(np.abs(candidate_array), initial=0.0)),
+        np.finfo(np.float64).tiny,
+    )
+    return float(np.max(np.abs(candidate_array - previous_array), initial=0.0)) / scale
+
+
+def _waveform_residual(
+    name: str, previous: Waveform, candidate: Waveform
+) -> dict[str, float]:
+    """Return one residual for every coordinate-map and profile field."""
+    if set(previous.values) != set(candidate.values):
+        raise ValueError(f"{name} waveform fields changed within the window")
+    fields = {
+        "radial_grid": (previous.radial_grid, candidate.radial_grid),
+        "phi_boundary": (previous.phi_boundary, candidate.phi_boundary),
+        "axis_reference": (previous.axis_reference, candidate.axis_reference),
+        "boundary_reference": (
+            previous.boundary_reference,
+            candidate.boundary_reference,
+        ),
+        **{
+            field: (previous.values[field], candidate.values[field])
+            for field in sorted(previous.values)
+        },
+    }
+    return {
+        f"{name}.{field}": _relative_residual(left, right)
+        for field, (left, right) in fields.items()
+    }
+
+
+def _blend_field(previous, candidate, damping: float):
+    """Relax one numeric field while preserving stable boolean metadata."""
+    previous_array = np.asarray(previous)
+    candidate_array = np.asarray(candidate)
+    if previous_array.shape != candidate_array.shape:
+        raise ValueError("an exchanged field changed shape within a window")
+    if np.issubdtype(previous_array.dtype, np.bool_) or np.issubdtype(
+        candidate_array.dtype, np.bool_
+    ):
+        if not np.array_equal(previous_array, candidate_array):
+            raise ValueError("boolean exchange metadata changed within a window")
+        return previous_array
+    return previous_array + damping * (candidate_array - previous_array)
+
+
+def _blend_waveform(
+    previous: Waveform, candidate: Waveform, damping: float
+) -> Waveform:
+    """Return an immutable relaxed waveform on one unchanged time grid."""
+    if not np.array_equal(previous.time, candidate.time):
+        raise ValueError("an exchanged waveform changed its time grid")
+    if set(previous.values) != set(candidate.values):
+        raise ValueError("an exchanged waveform changed its fields")
+    return Waveform(
+        time=previous.time,
+        radial_grid=_blend_field(previous.radial_grid, candidate.radial_grid, damping),
+        phi_boundary=_blend_field(
+            previous.phi_boundary, candidate.phi_boundary, damping
+        ),
+        axis_reference=_blend_field(
+            previous.axis_reference, candidate.axis_reference, damping
+        ),
+        boundary_reference=_blend_field(
+            previous.boundary_reference, candidate.boundary_reference, damping
+        ),
+        values={
+            name: _blend_field(previous.values[name], candidate.values[name], damping)
+            for name in previous.values
+        },
+    )
+
+
+def _contraction_estimate(trace: Sequence[Mapping[str, float]]) -> float | None:
+    """Estimate the final observed sup-residual contraction."""
+    if len(trace) < 2:
+        return None
+    previous = max(trace[-2].values(), default=0.0)
+    current = max(trace[-1].values(), default=0.0)
+    if previous == 0.0:
+        return 0.0 if current == 0.0 else None
+    return current / previous
+
+
+def _window_conservation(
+    transport: TransportSweepReceipt,
+) -> WindowConservationReceipt:
+    """Aggregate interval ledgers and quantify their closure."""
+    if not transport.receipts:
+        raise ValueError("a window transport receipt needs at least one interval")
+    durations = np.diff(transport.time)
+    if durations.size != len(transport.receipts):
+        raise ValueError("transport interval receipts must match the transport grid")
+    elapsed = float(np.sum(durations))
+    ledgers = [receipt.flux_consumption for receipt in transport.receipts]
+    boundary = sum(float(ledger.boundary) for ledger in ledgers)
+    resistive = sum(float(ledger.resistive) for ledger in ledgers)
+    internal = sum(float(ledger.internal) for ledger in ledgers)
+    flux_error = abs(boundary - resistive - internal)
+    flux_scale = max(abs(boundary), abs(resistive), abs(internal), 1.0e-30)
+    flux = FluxConsumptionLedger(
+        boundary=boundary,
+        resistive=resistive,
+        internal=internal,
+        mean_axis_voltage=sum(
+            float(ledger.mean_axis_voltage) * duration
+            for ledger, duration in zip(ledgers, durations, strict=True)
+        )
+        / elapsed,
+        mean_boundary_voltage=sum(
+            float(ledger.mean_boundary_voltage) * duration
+            for ledger, duration in zip(ledgers, durations, strict=True)
+        )
+        / elapsed,
+    )
+
+    currents = [receipt.plasma_current for receipt in transport.receipts]
+    boundary_errors = [
+        abs(float(currents[0].requested_initial - currents[0].achieved_initial)),
+        abs(float(currents[-1].requested_final - currents[-1].achieved_final)),
+    ]
+    for left, right in zip(currents[:-1], currents[1:], strict=True):
+        boundary_errors.extend(
+            [
+                abs(float(left.achieved_final - right.achieved_initial)),
+                abs(float(left.requested_final - right.requested_initial)),
+            ]
+        )
+    current_error = max(boundary_errors, default=0.0)
+    current_scale = max(
+        *(
+            abs(float(value))
+            for ledger in currents
+            for value in (
+                ledger.requested_initial,
+                ledger.requested_final,
+                ledger.achieved_initial,
+                ledger.achieved_final,
+            )
+        ),
+        1.0,
+    )
+    current = PlasmaCurrentLedger(
+        requested_initial=float(currents[0].requested_initial),
+        requested_final=float(currents[-1].requested_final),
+        achieved_initial=float(currents[0].achieved_initial),
+        achieved_final=float(currents[-1].achieved_final),
+    )
+    return WindowConservationReceipt(
+        flux_consumption=flux,
+        plasma_current=current,
+        flux_closure_error=flux_error,
+        flux_closure_residual=flux_error / flux_scale,
+        current_continuity_error=current_error,
+        current_continuity_residual=current_error / current_scale,
+    )
+
+
+def solve_window(
+    initial_geometry: Waveform,
+    initial_source: Waveform,
+    config: WindowConfig,
+    equilibrium_update: Callable[[Waveform, np.ndarray], ExchangeSweepResult],
+    transport_update: Callable[[Waveform, np.ndarray], ExchangeSweepResult],
+    *,
+    damping: float = 1.0,
+) -> WindowReceipt:
+    """Converge one equilibrium--transport waveform exchange or raise.
+
+    The transport side first consumes the current geometry trajectory and
+    emits a source trajectory.  The equilibrium side consumes that source and
+    emits the next geometry trajectory.  Residuals are measured on every
+    exchanged profile and coordinate-map field before relaxation.  Exhausting
+    the cap raises :class:`WindowConvergenceError`; the exception retains the
+    final candidate and convergence receipt for diagnosis, but no degraded
+    :class:`WindowReceipt` is returned.
+    """
+    if not np.isfinite(damping) or not 0.0 < damping <= 1.0:
+        raise ValueError("window damping must lie in (0, 1]")
+    _require_waveform_grid(initial_geometry, config.equilibrium_grid, "geometry")
+    _require_waveform_grid(initial_source, config.transport_grid, "source")
+    geometry = initial_geometry
+    source = initial_source
+    residual_trace: list[Mapping[str, float]] = []
+
+    for iteration in range(1, config.iteration_cap + 1):
+        transported = transport_update(geometry, config.transport_grid)
+        if not isinstance(transported, ExchangeSweepResult):
+            raise TypeError("transport update must return ExchangeSweepResult")
+        if not isinstance(transported.receipt, TransportSweepReceipt):
+            raise TypeError("transport update must return a TransportSweepReceipt")
+        source_candidate = transported.waveform
+        _require_waveform_grid(source_candidate, config.transport_grid, "source")
+
+        equilibrated = equilibrium_update(source_candidate, config.equilibrium_grid)
+        if not isinstance(equilibrated, ExchangeSweepResult):
+            raise TypeError("equilibrium update must return ExchangeSweepResult")
+        geometry_candidate = equilibrated.waveform
+        _require_waveform_grid(geometry_candidate, config.equilibrium_grid, "geometry")
+
+        residual = {
+            **_waveform_residual("geometry", geometry, geometry_candidate),
+            **_waveform_residual("source", source, source_candidate),
+        }
+        residual_trace.append(residual)
+        convergence = WindowConvergenceReceipt(
+            iterations_used=iteration,
+            contraction_estimate=_contraction_estimate(residual_trace),
+            exit_residual=residual,
+            damping_applied=float(damping),
+            residual_trace=tuple(residual_trace),
+        )
+        if convergence.maximum_residual <= config.tolerance:
+            conservation = _window_conservation(transported.receipt)
+            if (
+                conservation.flux_closure_residual > config.tolerance
+                or conservation.current_continuity_residual > config.tolerance
+            ):
+                raise WindowConservationError(conservation)
+            return WindowReceipt(
+                geometry_waveform=geometry_candidate,
+                source_waveform=source_candidate,
+                equilibrium_receipt=equilibrated.receipt,
+                transport_receipt=transported.receipt,
+                convergence=convergence,
+                conservation=conservation,
+            )
+        if iteration == config.iteration_cap:
+            raise WindowConvergenceError(
+                convergence,
+                geometry_candidate,
+                source_candidate,
+                equilibrated.receipt,
+                transported.receipt,
+            )
+        geometry = _blend_waveform(geometry, geometry_candidate, damping)
+        source = _blend_waveform(source, source_candidate, damping)
+
+    raise AssertionError("unreachable window iteration state")
 
 
 def transport_sweep(

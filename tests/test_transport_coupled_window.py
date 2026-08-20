@@ -7,15 +7,32 @@ import dataclasses
 
 import jax
 import numpy as np
+import pytest
 
 from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.transport.coupled_window import (
+    ExchangeSweepResult,
+    TransportSweepReceipt,
     Waveform,
+    WindowConfig,
+    WindowConvergenceError,
     equilibrium_sweep,
+    solve_window,
     transport_sweep,
 )
 from nova.transport.evolved_state import EvolvedFluxFunction
-from nova.transport.forward import ForwardTransport, TransportGeometry, TransportRung
+from nova.transport.forward import (
+    AchievedBoundaryValues,
+    FluxConsumptionLedger,
+    ForwardTransport,
+    ForwardTransportReceipt,
+    PlasmaCurrentLedger,
+    SolverDiagnostics,
+    TransportGeometry,
+    TransportProvenance,
+    TransportRung,
+    TransportState,
+)
 from tests.test_equilibrium_forward_solve import DRIVE, EVALUATIONS, FF_PRIME, P_PRIME
 from tests.test_forward_transport import _request
 
@@ -26,6 +43,10 @@ jax.config.update("jax_platforms", "cpu")
 PROFILE_INTERPOLATION_TOLERANCE = 2.0e-14
 TRANSPORT_SWEEP_TOLERANCE = 2.0e-13
 EQUILIBRIUM_RESIDUAL_TOLERANCE = 1.0e-6
+WINDOW_CONVERGENCE_TOLERANCE = 1.0e-10
+WEAK_COUPLING_AGREEMENT = 3.0e-3
+STRONG_COUPLING_DIVERGENCE = 0.75
+LEDGER_CLOSURE_TOLERANCE = 3.0e-12
 
 
 def test_profile_time_interpolation_stays_on_normalised_radial_coordinates():
@@ -218,3 +239,279 @@ def test_equilibrium_sweep_consumes_interpolated_sources_and_returns_receipts(
         assert np.isfinite(float(equilibrium.conservation.relative_divergence_j))
     assert profile.source is source_before
     np.testing.assert_array_equal(converged.flux, flux_before)
+
+
+def _exchange_waveform(time, radial_points, channel, value):
+    """Return one fixed-shape exchanged field on its side's sample grid."""
+    time = np.asarray(time, dtype=np.float64)
+    radial_grid = np.broadcast_to(
+        np.linspace(0.0, 1.0, radial_points), (time.size, radial_points)
+    )
+    return Waveform(
+        time=time,
+        radial_grid=radial_grid,
+        phi_boundary=np.full(time.shape, 2.5),
+        axis_reference=np.full(time.shape, -0.35),
+        boundary_reference=np.full(time.shape, 0.02),
+        values={channel: np.full(radial_grid.shape, value)},
+    )
+
+
+def _transport_window_receipt(time):
+    """Return exactly closing interval ledgers with a measured round-off floor."""
+    time = np.asarray(time, dtype=np.float64)
+    rho = np.linspace(0.0, 1.0, 5)
+    state = TransportState(
+        rho=rho,
+        psi=0.2 * rho**2,
+        ion_temperature=8.0 - 7.0 * rho,
+        electron_temperature=7.0 - 6.0 * rho,
+        electron_density=1.2e20 - 2.0e19 * rho,
+    )
+    current = 1.0e6
+    achieved_current = current + 2.0e-6
+    receipts = []
+    for index in range(time.size - 1):
+        boundary_flux = 0.03 * (index + 1)
+        resistive_flux = 0.4 * boundary_flux
+        internal_flux = boundary_flux - resistive_flux + 5.0e-14
+        receipts.append(
+            ForwardTransportReceipt(
+                state=state,
+                flux_consumption=FluxConsumptionLedger(
+                    boundary=boundary_flux,
+                    resistive=resistive_flux,
+                    internal=internal_flux,
+                    mean_axis_voltage=resistive_flux
+                    / float(time[index + 1] - time[index]),
+                    mean_boundary_voltage=boundary_flux
+                    / float(time[index + 1] - time[index]),
+                ),
+                plasma_current=PlasmaCurrentLedger(
+                    requested_initial=current,
+                    requested_final=current,
+                    achieved_initial=achieved_current,
+                    achieved_final=achieved_current,
+                ),
+                boundary=AchievedBoundaryValues(
+                    psi=float(state.psi[-1]),
+                    plasma_current=achieved_current,
+                    ion_temperature=float(state.ion_temperature[-1]),
+                    electron_temperature=float(state.electron_temperature[-1]),
+                    electron_density=float(state.electron_density[-1]),
+                ),
+                diagnostics=SolverDiagnostics(
+                    engine_status="converged",
+                    steps=1,
+                    outer_iterations=1,
+                    inner_iterations=1,
+                ),
+                provenance=TransportProvenance(
+                    rung=TransportRung.NATIVE_PSI_DIFFUSION,
+                    engine="coupled-fixture",
+                    engine_version="analytic",
+                ),
+            )
+        )
+    return TransportSweepReceipt(
+        time=time,
+        geometry_time=0.5 * (time[:-1] + time[1:]),
+        receipts=tuple(receipts),
+    )
+
+
+class _AffineWindow:
+    """Analytic two-side map with a declared combined coupling strength."""
+
+    def __init__(self, config, coupling):
+        self.config = config
+        self.coupling = coupling
+        self.geometry_template = _exchange_waveform(
+            config.equilibrium_grid, 5, "geometry", 0.0
+        )
+        self.source_template = _exchange_waveform(
+            config.transport_grid, 7, "source", 0.0
+        )
+
+    @staticmethod
+    def _map(input_waveform, template, input_channel, output_channel, gain, offset):
+        values = np.stack(
+            [
+                gain
+                * input_waveform.sample(
+                    float(time), radial_grid=template.radial_grid[index]
+                ).values[input_channel]
+                + offset
+                for index, time in enumerate(template.time)
+            ]
+        )
+        return Waveform(
+            time=template.time,
+            radial_grid=template.radial_grid,
+            phi_boundary=template.phi_boundary,
+            axis_reference=template.axis_reference,
+            boundary_reference=template.boundary_reference,
+            values={output_channel: values},
+        )
+
+    def transport(self, geometry, sample_grid):
+        source = self._map(
+            geometry,
+            self.source_template,
+            "geometry",
+            "source",
+            gain=1.0,
+            offset=1.0,
+        )
+        return ExchangeSweepResult(
+            waveform=source,
+            receipt=_transport_window_receipt(sample_grid),
+        )
+
+    def equilibrium(self, source, _sample_grid):
+        geometry = self._map(
+            source,
+            self.geometry_template,
+            "source",
+            "geometry",
+            gain=self.coupling,
+            offset=0.0,
+        )
+        return ExchangeSweepResult(
+            waveform=geometry,
+            receipt={"finite_conservation_receipts": True},
+        )
+
+
+def _field_difference(left, right, name):
+    """Return the scale-normalised separation of two waveform fields."""
+    left_value = np.asarray(left.values[name])
+    right_value = np.asarray(right.values[name])
+    scale = max(float(np.max(np.abs(left_value))), 1.0e-30)
+    return float(np.max(np.abs(left_value - right_value))) / scale
+
+
+def _solve_affine_window(coupling, *, damping=1.0, iteration_cap=180):
+    """Return one analytic converged window and its cap-one diagnostic."""
+    config = WindowConfig(
+        length=1.0,
+        equilibrium_grid=np.array([0.0, 0.5, 1.0]),
+        transport_grid=np.array([0.0, 0.25, 0.75, 1.0]),
+        iteration_cap=iteration_cap,
+        tolerance=WINDOW_CONVERGENCE_TOLERANCE,
+    )
+    exchange = _AffineWindow(config, coupling)
+    converged = solve_window(
+        exchange.geometry_template,
+        exchange.source_template,
+        config,
+        exchange.equilibrium,
+        exchange.transport,
+        damping=damping,
+    )
+    one_iteration = dataclasses.replace(config, iteration_cap=1)
+    with pytest.raises(WindowConvergenceError) as raised:
+        solve_window(
+            exchange.geometry_template,
+            exchange.source_template,
+            one_iteration,
+            exchange.equilibrium,
+            exchange.transport,
+            damping=damping,
+        )
+    return converged, raised.value, exchange, config
+
+
+def test_converged_and_cap_one_windows_share_one_measured_coupling_axis():
+    """One staggered pass is close when coupling is weak and far when strong."""
+    weak, weak_single, weak_exchange, weak_config = _solve_affine_window(0.002)
+    strong, strong_single, strong_exchange, strong_config = _solve_affine_window(
+        0.8, damping=0.8
+    )
+
+    weak_difference = _field_difference(
+        weak.geometry_waveform, weak_single.geometry_waveform, "geometry"
+    )
+    strong_difference = _field_difference(
+        strong.geometry_waveform, strong_single.geometry_waveform, "geometry"
+    )
+    assert weak_difference < WEAK_COUPLING_AGREEMENT
+    assert strong_difference > STRONG_COUPLING_DIVERGENCE
+    assert weak.convergence.maximum_residual <= weak_config.tolerance
+    assert strong.convergence.maximum_residual <= strong_config.tolerance
+    assert weak.convergence.iterations_used > 1
+    assert strong.convergence.iterations_used > weak.convergence.iterations_used
+    assert weak.convergence.contraction_estimate is not None
+    assert strong.convergence.contraction_estimate is not None
+    assert weak.convergence.contraction_estimate < 1.0
+    assert strong.convergence.contraction_estimate < 1.0
+    assert weak.convergence.damping_applied == 1.0
+    assert strong.convergence.damping_applied == 0.8
+    assert set(weak.convergence.exit_residual) == {
+        "geometry.axis_reference",
+        "geometry.boundary_reference",
+        "geometry.geometry",
+        "geometry.phi_boundary",
+        "geometry.radial_grid",
+        "source.axis_reference",
+        "source.boundary_reference",
+        "source.phi_boundary",
+        "source.radial_grid",
+        "source.source",
+    }
+    np.testing.assert_array_equal(
+        weak_exchange.geometry_template.values["geometry"], 0.0
+    )
+    np.testing.assert_array_equal(weak_exchange.source_template.values["source"], 0.0)
+    np.testing.assert_array_equal(
+        strong_exchange.geometry_template.values["geometry"], 0.0
+    )
+    np.testing.assert_array_equal(strong_exchange.source_template.values["source"], 0.0)
+
+
+def test_window_receipt_closes_flux_and_boundary_current_ledgers():
+    """The window aggregates interval conservation without hiding residuals."""
+    window, _single, _exchange, config = _solve_affine_window(0.002)
+    conservation = window.conservation
+    flux = conservation.flux_consumption
+    current = conservation.plasma_current
+
+    np.testing.assert_allclose(
+        flux.boundary,
+        flux.resistive + flux.internal,
+        rtol=LEDGER_CLOSURE_TOLERANCE,
+        atol=0.0,
+    )
+    assert conservation.flux_closure_residual < LEDGER_CLOSURE_TOLERANCE
+    assert conservation.current_continuity_residual < LEDGER_CLOSURE_TOLERANCE
+    assert conservation.flux_closure_residual < config.tolerance
+    assert conservation.current_continuity_residual < config.tolerance
+    assert conservation.current_continuity_error > 0.0
+    assert current.requested_initial == current.requested_final
+    assert current.achieved_initial == current.achieved_final
+
+
+def test_nonconverging_window_raises_with_its_exhaustion_receipt():
+    """A divergent exchange cannot escape as a degraded window result."""
+    config = WindowConfig(
+        length=1.0,
+        equilibrium_grid=np.array([0.0, 0.5, 1.0]),
+        transport_grid=np.array([0.0, 0.25, 0.75, 1.0]),
+        iteration_cap=4,
+        tolerance=WINDOW_CONVERGENCE_TOLERANCE,
+    )
+    exchange = _AffineWindow(config, coupling=1.05)
+
+    with pytest.raises(WindowConvergenceError, match="did not converge") as raised:
+        solve_window(
+            exchange.geometry_template,
+            exchange.source_template,
+            config,
+            exchange.equilibrium,
+            exchange.transport,
+        )
+
+    assert raised.value.convergence.iterations_used == config.iteration_cap
+    assert raised.value.convergence.maximum_residual > config.tolerance
+    assert raised.value.convergence.contraction_estimate is not None
+    assert np.isfinite(raised.value.convergence.contraction_estimate)

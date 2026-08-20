@@ -293,6 +293,57 @@
     than a serialisation problem. The host boundary is Nova's. A corrective node moves the
     batch inside the traced region — vmapping the step over stacked member state and
     constructing the typed receipts once, outside, from the batched arrays.</p>
+    <p><strong>Qualification closed</strong> &#8212; commit <code>cc542659</code> (node
+    ensemble-traced-batching). <code>nova/transport/ensemble.py</code> now holds
+    <strong>zero <code>pure_callback</code> references</strong> and routes every member
+    through <code>ForwardTransport.solve_state_batch</code>: the native rung vmaps the traced
+    diffusion scan and reuses the compiled batch executable, while the TORAX rung stacks
+    member-specific runtime-provider pytrees and vmaps initialisation together with every
+    fixed step. Both things the callback route could not do now hold.</p>
+    <table>
+      <caption>Native rung, batch of 8, warmed CPU/x64, 50 repetitions.</caption>
+      <thead><tr><th></th><th>batch</th><th>eight-call loop</th><th>ratio</th></tr></thead>
+      <tbody>
+        <tr><td>median</td><td>315.67 &#181;s</td><td>3037.06 &#181;s</td><td>9.62&#215;</td></tr>
+        <tr><td>minimum</td><td>302.90 &#181;s</td><td>2936.11 &#181;s</td><td>9.69&#215;</td></tr>
+      </tbody>
+    </table>
+    <p>A 9.6&#215; ratio on eight members is super-linear against the loop, which is what
+    distinguishes a real batch from a renamed one &#8212; a sequential callback cannot beat
+    its own loop. And the gradient crosses it: <code>jax.grad</code> of
+    &#8721;&#968;&#178; for one named member with respect to its resistivity multiplier flows
+    through the batched TORAX call and agrees with the equivalent scalar path at rtol
+    5e&#8722;10, atol 1e&#8722;12. Batches of 3 on both rungs still match the
+    member-by-member loop at rtol 1e&#8722;10, keep ordered unique member ids and recover each
+    receipt by identity. 14/14 green. The declared limit is unchanged in kind: TORAX ensemble
+    batching fails closed for adaptive stepping, because one traced computation requires the
+    members to share a static fixed-step schedule.</p>
+    <h2 id="waveform-primitives">Waveform exchange primitives &#8212; 2026-08-20</h2>
+    <p>Commit <code>ccb375ea</code> (node waveform-exchange-primitives).
+    <code>nova/transport/coupled_window.py</code> publishes the immutable
+    <code>Waveform</code> and <code>WaveformSample</code> coordinate maps together with
+    <code>equilibrium_sweep</code> and <code>transport_sweep</code> as public pure functions
+    &#8212; the two single-sweep primitives the plan keeps public beside the converged solve.
+    <strong>7 passed in 202.5 s.</strong></p>
+    <table>
+      <thead><tr><th>Assertion</th><th>Achieved</th></tr></thead>
+      <tbody>
+        <tr><td>analytic profile recovered through temporal interpolation, &#934;_b sweeping 1.5&#8594;4.5 on differing radial grids</td><td>atol 2.0e&#8722;14</td></tr>
+        <tr><td><code>transport_sweep</code> against an interpolated geometry waveform vs the equivalent single-interval fa&#231;ade solve</td><td>rtol = atol = 2.0e&#8722;13</td></tr>
+        <tr><td><code>equilibrium_sweep</code> conservation ledgers at 2 coarse sample times</td><td>residual &lt; 1.0e&#8722;06</td></tr>
+        <tr><td>waveform, transport state, geometry waveform, source and initial flux</td><td>asserted unchanged</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The first row is the one that matters, and 2e&#8722;14 is the point.</strong>
+    The plan's subtlety is that profiles interpolate in time on a <em>normalised</em> radial
+    coordinate while the coordinate map itself evolves &#8212; so a naive time blend of two
+    slices silently mixes two different radial coordinates and manufactures profile
+    structure that no physics put there. <code>Waveform</code> therefore carries
+    <code>phi_boundary</code>, <code>axis_reference</code>, <code>boundary_reference</code>
+    and a per-slice <code>radial_grid</code>, and the interpolation <em>resamples both
+    bracketing profiles onto one common normalised grid before blending in time</em>.
+    Recovering an analytically known profile to 2e&#8722;14 while &#934;_b triples is the
+    demonstration that the coordinate map is being carried rather than assumed fixed.</p>
   </main>
 </body>
 </html>

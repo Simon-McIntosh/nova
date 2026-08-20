@@ -1,0 +1,88 @@
+{
+  "adjudication": {
+    "authority_matching_definitions": "Nova convention engine",
+    "correct_ip_like_factor": 1.0,
+    "reason": "COCOS 11 and 17 both have sigma_RphiZ=+1, so Sauter and Medvedev Eq. 39 gives sigma_Ip_eff=(+1)*(+1)=+1. Only sigma_Bp changes, from +1 to -1; that flips psi_like and dodpsi_like, not ip_like or b0_like. The guide's displayed -1 ip_like factor is therefore inconsistent with both the COCOS definition and the DD's ip_like expression sigma_ip_eff.",
+    "wrong_authority": "IMAS Data Dictionary migration guide display for the COCOS-11 to COCOS-17 ip_like factor"
+  },
+  "authority_claims": {
+    "imas_data_dictionary_migration_guide": {
+      "displayed_factor": -1.0,
+      "matches_definition_derivation": false,
+      "paths": [
+        "pf_active/coil/current",
+        "pf_active/circuit/current",
+        "pf_active/supply/current"
+      ],
+      "quantity_class": "ip_like"
+    },
+    "nova_convention_engine": {
+      "factors": {
+        "b0_like": 1.0,
+        "dodpsi_like": -1.0,
+        "ip_like": 1.0,
+        "psi_like": -1.0,
+        "q_like": 1.0
+      },
+      "matches_definition_derivation": true
+    }
+  },
+  "conventions": {
+    "source": {
+      "e_bp": 1,
+      "identifier": 11,
+      "sigma_bp": 1,
+      "sigma_r_phi_z": 1,
+      "sigma_rho_theta_phi": 1
+    },
+    "target": {
+      "e_bp": 1,
+      "identifier": 17,
+      "sigma_bp": -1,
+      "sigma_r_phi_z": 1,
+      "sigma_rho_theta_phi": 1
+    }
+  },
+  "current_round_trip": {
+    "exact_equal": true,
+    "forward_factor": 1.0,
+    "restored_value_a": -123456.75,
+    "reverse_factor": 1.0,
+    "source_value_a": -123456.75,
+    "target_value_a": -123456.75
+  },
+  "derivation": {
+    "b0_like": "sigma_r_phi_z_eff",
+    "dodpsi_like": "1 / psi_like",
+    "factors": {
+      "b0_like": 1.0,
+      "dodpsi_like": -1.0,
+      "ip_like": 1.0,
+      "psi_like": -1.0,
+      "q_like": 1.0
+    },
+    "ip_like": "sigma_r_phi_z_eff",
+    "psi_like": "sigma_bp_eff * sigma_r_phi_z_eff * (2*pi)^e_bp_delta",
+    "q_like": "sigma_rho_theta_phi_eff * sigma_r_phi_z_eff"
+  },
+  "effective_signs": {
+    "e_bp_delta": 0,
+    "sigma_bp_eff": -1,
+    "sigma_r_phi_z_eff": 1,
+    "sigma_rho_theta_phi_eff": 1
+  },
+  "measurement": "COCOS current-sign adjudication from defining signs",
+  "sources": {
+    "dd_metadata": {
+      "statement": "The DD developer guide labels pf_active coil current ip_like and specifies the expression sigma_ip_eff.",
+      "url": "https://imas-data-dictionary.readthedocs.io/en/4.1.1/dd_developer_guide.html"
+    },
+    "definition": {
+      "authors": "O. Sauter and S. Yu. Medvedev",
+      "doi": "10.1016/j.cpc.2012.09.010",
+      "title": "Tokamak coordinate conventions: COCOS",
+      "url": "https://www.epfl.ch/research/domains/swiss-plasma-center/wp-content/uploads/2018/10/Sauter_COCOS_Tokamak_Coordinate_Conventions.pdf",
+      "used_parts": "Table I and Eqs. 39-42"
+    }
+  }
+}

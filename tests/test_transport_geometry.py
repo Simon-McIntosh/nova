@@ -204,12 +204,38 @@ def test_direct_adapter_matches_torax_reader_run(monkeypatch):
     np.testing.assert_allclose(
         np.asarray(geometry.gm4_face), np.asarray(record["inv_b2_face"]), rtol=1e-12
     )
-    np.testing.assert_allclose(
-        np.asarray(geometry.g2_face),
-        np.asarray(record["grad_psi2_over_r2_face"])
-        * np.asarray(record["int_dl_over_bp_face"]) ** 2,
-        rtol=1e-12,
+    parity_fields = (
+        "Phi_face",
+        "volume_face",
+        "area_face",
+        "vpr_face",
+        "spr_face",
+        "g0_face",
+        "g1_face",
+        "g2_face",
+        "g3_face",
+        "g2g3_over_rhon_face",
+        "gm4_face",
+        "gm5_face",
+        "F_face",
+        "R_in_face",
+        "R_out_face",
+        "Ip_profile_face",
+        "psi",
+        "psi_from_Ip_face",
+        "j_total_face",
+        "elongation_face",
+        "delta_upper_face",
+        "delta_lower_face",
     )
+    for field in parity_fields:
+        np.testing.assert_allclose(
+            np.asarray(getattr(geometry, field)),
+            np.asarray(getattr(reader_geometry, field)),
+            rtol=1e-12,
+            atol=1e-12,
+            err_msg=field,
+        )
     direct_psi = _run_torax_step(geometry, monkeypatch)
     reader_psi = _run_torax_step(reader_geometry, monkeypatch)
-    np.testing.assert_allclose(direct_psi, reader_psi, rtol=0.12, atol=1e-8)
+    np.testing.assert_allclose(direct_psi, reader_psi, rtol=1e-10, atol=1e-12)

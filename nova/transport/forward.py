@@ -519,13 +519,24 @@ def _profile(coordinate: np.ndarray, values: np.ndarray, time: float) -> dict:
     }
 
 
+def _uses_configured_torax_geometry(config_data: Mapping[str, Any]) -> bool:
+    """Return whether TORAX owns a declared non-circular geometry provider."""
+    geometry = config_data.get("geometry")
+    if not isinstance(geometry, Mapping):
+        return False
+    geometry_type = str(geometry.get("geometry_type", "circular")).lower()
+    return geometry_type not in {"circular", "geometrytype.circular", "0"}
+
+
 def _prepare_torax_config(inputs: ForwardTransportInput):
     from torax._src.geometry.geometry_provider import ConstantGeometryProvider
     from torax._src.torax_pydantic.model_config import ToraxConfig
 
     config_data = _thaw_mapping(inputs.model.torax_config)
-    n_rho = int(np.asarray(inputs.geometry.record["rho_face"]).size - 1)
-    config_data["geometry"] = {"geometry_type": "circular", "n_rho": n_rho}
+    uses_configured_geometry = _uses_configured_torax_geometry(config_data)
+    if not uses_configured_geometry:
+        n_rho = int(np.asarray(inputs.geometry.record["rho_face"]).size - 1)
+        config_data["geometry"] = {"geometry_type": "circular", "n_rho": n_rho}
 
     initial = inputs.initial_state
     start = float(inputs.waveforms.time[0])
@@ -543,6 +554,8 @@ def _prepare_torax_config(inputs: ForwardTransportInput):
             "T_i": _profile(initial.rho, initial.ion_temperature, start),
             "T_e": _profile(initial.rho, initial.electron_temperature, start),
             "n_e": _profile(initial.rho, initial.electron_density, start),
+            "n_e_nbar_is_fGW": False,
+            "normalize_n_e_to_nbar": False,
             "psi": _profile(initial.rho, initial.psi, start),
             "initial_psi_mode": "profile_conditions",
         }
@@ -564,6 +577,8 @@ def _prepare_torax_config(inputs: ForwardTransportInput):
     config_data["numerics"] = numerics
 
     config = ToraxConfig.from_dict(config_data)
+    if uses_configured_geometry:
+        return config
     geometry = dataclasses.replace(
         torax_geometry_from_fsa(inputs.geometry.record), Ip_from_parameters=True
     )

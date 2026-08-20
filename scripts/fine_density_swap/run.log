@@ -1,0 +1,13 @@
+17:02:22 INFO     Parsing data dictionary version 3.39.0 [90m@dd_zip.py:89[0m
+INFO:imas.dd_zip:Parsing data dictionary version 3.39.0
+CACHE_REQUEST fixture=fine requested=-1000 expectation=warm
+CACHE fixture=fine status=warm key=f0f96aa214aa9459 load_s=0.535450306 build_s=0 store_s=0 validation_s=0 arrays=31 bytes=169311277 bitwise=True store=/home/ITER/mcintos/.local/share/nova/0.11.0/solovev_hex_machine.zarr
+CACHE_CHILDREN key=f0f96aa214aa9459 count=31 coupling=20
+OPERATOR reconstructing from cached carrier
+LINEARIZE state_size=4216
+COMPARATOR evaluating omitted second moments
+DENSITY_SWAP integrating analytic density over production supports
+LINEAR_RESPONSE applying tangent inverse
+RESULT density_share_percent=99.187570867 axis_mm=40.852386324 flux_percent=6.393941933 current_percent=-1.885496549 width_power=-0.008022432
+FINE_DENSITY_SWAP_EXIT=0
+MEASURE_EXIT=0

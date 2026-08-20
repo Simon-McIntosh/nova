@@ -1,0 +1,109 @@
+{
+  "artifacts": {
+    "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/candidate-comparison.png",
+    "figure_bytes": 101312
+  },
+  "banked_control": {
+    "axis_projection_mm": 40.0649737482,
+    "density_forcing_sup_wb": 1.252292371968979,
+    "density_projection_fraction": 0.991762605972982,
+    "flux_projection_percent_of_span": 6.38591306844
+  },
+  "candidate_moment_sup_difference": 1.4551915228366852e-11,
+  "candidate_routes": {
+    "constrained_projection": {
+      "cost": {
+        "compile_and_first_seconds": 6.7537919618189335,
+        "cost_qualification": "The losing comparator is measured on a fixed eight-cell batch and scaled linearly; it is not retained in the production operator.",
+        "extrapolated_fixture_seconds": 1.6657259087078273,
+        "fixture_cells": 566,
+        "fixture_iteration_seconds": 1.6657259087078273,
+        "measurement_batch_cells": 8,
+        "moment_sup_difference_from_direct": 1.4551915228366852e-11,
+        "moving_iterations": 10,
+        "steady_median_seconds_per_batch": 0.02354382909834385,
+        "steady_median_seconds_per_cell": 0.002942978637292981,
+        "trace_count": 1,
+        "vmap_compatible": true
+      },
+      "forcing": {
+        "projection_fraction": 0.9917682790054673,
+        "rms_norm_fraction": 0.9919773584409438,
+        "rms_wb": 0.9265278977355949,
+        "signed_peak_fraction": 0.9376131929823239,
+        "sup_norm_fraction": 0.9704526033710706,
+        "sup_wb": 1.2567512140430956
+      },
+      "forcing_share_percent": 99.17682790054673,
+      "forcing_source": "direct map image reused because the rank-three comparator reproduces all coupling moments by construction",
+      "root_response": {
+        "axis_signed_projection_mm": 41.047973877440036,
+        "flux_signed_peak_percent_of_span": 6.562687590579817,
+        "gmres_info": 0,
+        "observed_flux_peak_grid_slot": 440,
+        "plasma_current_signed_percent": -1.9130346596822911,
+        "residual_relative_sup": 2.7562303486358175e-14,
+        "residual_sup_wb": 3.4638958368304884e-14
+      }
+    },
+    "direct_quadrature": {
+      "cost": {
+        "backend": "cpu",
+        "compile_and_first_seconds": 0.9422087408602238,
+        "device": "cpu:0",
+        "fixture_iteration_seconds": 0.10010993853211403,
+        "moving_iterations": 10,
+        "steady_maximum_seconds": 0.10081208124756813,
+        "steady_median_seconds": 0.10010993853211403,
+        "steady_minimum_seconds": 0.09454428032040596,
+        "steady_repetitions": 7,
+        "trace_count": 1,
+        "vmap_compatible": true,
+        "vmap_sequential_sup_absolute_difference": 1.1041265679523349e-09,
+        "vmap_sequential_sup_relative_difference": 6.544323495551514e-11
+      },
+      "forcing": {
+        "projection_fraction": 0.9917682790054673,
+        "rms_norm_fraction": 0.9919773584409438,
+        "rms_wb": 0.9265278977355949,
+        "signed_peak_fraction": 0.9376131929823239,
+        "sup_norm_fraction": 0.9704526033710706,
+        "sup_wb": 1.2567512140430956
+      },
+      "forcing_share_percent": 99.17682790054673,
+      "forcing_source": "executed production map image",
+      "moment_vector_sup": 219563.0494239425,
+      "root_response": {
+        "axis_signed_projection_mm": 41.047973877440036,
+        "flux_signed_peak_percent_of_span": 6.562687590579817,
+        "gmres_info": 0,
+        "observed_flux_peak_grid_slot": 440,
+        "plasma_current_signed_percent": -1.9130346596822911,
+        "residual_relative_sup": 2.7562303486358175e-14,
+        "residual_sup_wb": 3.4638958368304884e-14
+      }
+    }
+  },
+  "fixture": {
+    "active_second_moment_cells": 436,
+    "cache_key": "746fbe1553c4b242",
+    "near_source_target_pairs": 10286,
+    "plasma_cells": 566,
+    "state_size": 2396,
+    "warm_hit": true
+  },
+  "held_fixed": [
+    "warm coarse carrier and exact analytic state",
+    "quadratic in-cell flux interpolant",
+    "straight clipped supports and topology qualification",
+    "exact first-moment coupling blocks",
+    "weighted-projection second-moment comparator correction"
+  ],
+  "schema": "nova.density-moment-projection",
+  "selection": {
+    "direct_cost_fraction_of_constrained": 0.06009988678736075,
+    "policy": "Both routes must have one trace and indistinguishable forcing. The lower measured device-resident per-iteration cost wins.",
+    "winner": "direct_quadrature"
+  },
+  "stage": "candidate_comparison"
+}

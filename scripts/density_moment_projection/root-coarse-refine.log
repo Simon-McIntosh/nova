@@ -1,0 +1,10 @@
+slurmstepd: error: Unable to create TMPDIR [/run/user/39486]: Permission denied
+slurmstepd: error: Setting TMPDIR to /tmp
+warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/nova/.venv` and will be ignored; use `--active` to target the active environment instead
+18:23:39 INFO     Parsing data dictionary version 3.39.0 [90m@dd_zip.py:89[0m
+INFO:imas.dd_zip:Parsing data dictionary version 3.39.0
+CACHE fixture=coarse status=warm key=746fbe1553c4b242 load_s=0.378205923 build_s=0 store_s=0 validation_s=0 arrays=31 bytes=51411470 bitwise=True store=/home/ITER/mcintos/.local/share/nova/0.11.0/solovev_hex_machine.zarr
+ROOT_SOLVE fixture=coarse state_size=2396 seed=saved_terminal
+ROOT_RESULT fixture=coarse residual=1.53981921462e-15 gates=11/11 axis_mm=42.5240797522 flux_percent=6.60220176119 current_percent=-1.12723082115
+DENSITY_MOMENT_ROOT_COARSE_EXIT=0
+EXIT=0

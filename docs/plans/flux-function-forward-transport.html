@@ -219,7 +219,36 @@
       extraction as well as against TORAX's reader. Three independent routes over one
       equilibrium localise any residual disagreement to a method rather than leaving it
       unattributed — and a persistent two-against-one split is itself the diagnosis.</li>
+      <li><strong>Curved cell clips, and the extremum they unlock.</strong> A straight clip
+      represents the surface inside a cell as a chord, so the surface's topmost point can only
+      ever be an edge crossing. Near its own turning point the surface is locally
+      <em>parabolic</em> in R about that point, which makes the R error of a chord endpoint scale
+      as &#8730;(&#916;z/&#954;) — a square-root rate, and the likely whole of the 10&#8211;22%
+      triangularity error, since no amount of area accuracy touches it. Clipping against the arc
+      instead moves the extremum to <strong>O(h&#178;)</strong> while improving the area only
+      from O(h&#178;) to O(h&#179;): significant for shape, marginal for the moments, which is
+      why it does not compete with item 1's coefficient target.</li>
+      <li><strong>The arc is exact, not fitted.</strong> For bilinear &#968; on a cell the level
+      set is a hyperbola, Z = (k &#8722; a &#8722; bR)/(c + dR), so the chord-to-arc area
+      correction has a closed form and <em>adds</em> to the existing polygon moments rather than
+      replacing them — <code>TracedClippedSupports</code> keeps its contract and gains a sagitta
+      term. The turning point follows from setting the arc's tangent horizontal or vertical,
+      again in closed form per cell. Where a fitted route is preferred over the analytic one,
+      nova already carries both halves: <code>Curve</code> and <code>Peak</code> in
+      <code>nova/geometry/curve.py</code> do arc-length quadratic interpolation with a bounded
+      extremum search host-side, and <code>nova/linalg/interpolant.py</code> supplies the traced
+      equivalents — <code>Bernstein</code>, <code>Polynomial</code>, <code>BSpline</code>,
+      <code>Interp</code> — as registered JAX pytrees, which is what the FSA assembly needs to
+      stay jit, vmap and grad safe. This work stays inside the transport tree and only
+      <em>consumes</em> <code>separatrix_clip</code>: that module is shared with the
+      edge-current and boundary-ring plans and must not be written from here.</li>
     </ol>
+    <p><strong>Acceptance for the curved items.</strong> Triangularity and elongation against the
+    independently read equilibrium fall below <strong>2%</strong> on ITER and are reported on
+    STEP, and the measured convergence order of the extremum position under grid refinement is
+    reported and exceeds one — the point being to demonstrate the rate has left the square-root
+    regime, not merely that one number improved. The coefficient errors from item 1 must not
+    regress, and the traced assembly stays jit and vmap safe.</p>
     <p><strong>Acceptance.</strong> Measured against the independently read
     <code>iterhybrid_cocos17.eqdsk</code>: <code>g2g3_over_rhon</code>, <code>g0</code>,
     <code>g1</code> and <code>g2</code> each below <strong>5%</strong> on the ITER equilibrium,

@@ -76,7 +76,26 @@ class Coil(PoloidalGrid):
                 "coil polygon-section policy is fixed by its CoilSet constructor"
             )
         additional["polysection_policy"] = current
-        return super().insert(*args, required=required, iloc=iloc, **additional)
+        index = super().insert(*args, required=required, iloc=iloc, **additional)
+        self._route_authored_sections(index)
+        return index
+
+    def _route_authored_sections(self, index):
+        """Keep the rectangle shortcut only on axis-aligned authored material."""
+        import numpy as np
+
+        from nova.biot.polybow import section_corners
+        from nova.geometry.section import is_axis_aligned_rectangle
+
+        membership = np.asarray(self.subframe["frame"], dtype=object)
+        segments = np.asarray(self.subframe["segment"], dtype=object)
+        polygons = np.asarray(self.subframe["poly"], dtype=object)
+        positions = np.flatnonzero(np.isin(membership, np.asarray(index)))
+        for position in positions:
+            if segments[position] != "cylinder":
+                continue
+            if not is_axis_aligned_rectangle(section_corners(polygons[position])):
+                self.subframe.iloc[position, "segment"] = "polysection"
 
     def set_conditional_attributes(self):
         """Set conditional attrs."""

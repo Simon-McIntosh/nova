@@ -8,6 +8,8 @@ import numpy as np
 
 from nova.biot.greens import MU0, cylinder_greens
 from nova.biot.matrix import Matrix
+from nova.biot.polybow import section_corners
+from nova.geometry.section import is_axis_aligned_rectangle
 
 
 @dataclass
@@ -43,11 +45,17 @@ class Cylinder(Matrix):
         self._validate_source_geometry()
 
     def _validate_source_geometry(self):
-        """Reject source sections without finite positive dimensions and area."""
+        """Reject dimensions or authored sections that are not rectangles."""
         for attr in ("dx", "dz", "area"):
             values = np.asarray(self.source[attr], dtype=float)
             if np.any(~np.isfinite(values) | (values <= 0.0)):
                 raise ValueError(f"cylinder source {attr} must be finite and positive")
+        if "poly" in self.source.columns:
+            for poly in np.asarray(self.source["poly"], dtype=object):
+                if not is_axis_aligned_rectangle(section_corners(poly)):
+                    raise ValueError(
+                        "cylinder sources require an axis-aligned rectangle"
+                    )
 
     @cached_property
     def _fields(self):

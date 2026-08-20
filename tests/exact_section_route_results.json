@@ -1,0 +1,4110 @@
+{
+  "authoritative_geometry_measurement": {
+    "classification": "The fixture authors skewed polygonal passive supports. Their vertices are authoritative; the rectangle route was the defect.",
+    "cylinder_routed_rows": 321,
+    "first_offending_row": {
+      "authored_vertices_rz_m": [
+        [
+          7.083676036667241,
+          -2.9999721871011173
+        ],
+        [
+          7.083676036667241,
+          -3.0347586091790157
+        ],
+        [
+          6.860271714249773,
+          -3.2078165613033516
+        ],
+        [
+          6.860271706711015,
+          -3.2078165613033516
+        ],
+        [
+          6.823528110001724,
+          -3.1603834429446973
+        ],
+        [
+          6.823528110001724,
+          -3.1603834354059392
+        ],
+        [
+          7.030606523884328,
+          -2.9999721871011173
+        ]
+      ],
+      "axis_alignment_residual_m": 0.17305795212433583,
+      "axis_alignment_tolerance_m": 1e-09,
+      "coordinate_scale_m": 7.083676036667241,
+      "declared_section": "polygon",
+      "frame_index": "TRI_SUPP",
+      "name": "TRI_SUPP",
+      "part": "passive",
+      "previous_segment": "cylinder"
+    },
+    "method": "Materialized the FrameSpace segment, poly, frame, part, and section columns once, then indexed those arrays by row position. The frame column is the owning conductor name and the frame index distinguishes its subdivisions.",
+    "non_axis_aligned_authored_polygons": 296
+  },
+  "build_cost_verdict": {
+    "cache_scope": "one-time fixture design-matrix construction",
+    "coarse_relative_increase_percent": 5.883587880891317,
+    "verdict": "Exact-everywhere costs 5.88 percent more on the coarse fixture; the cost is paid once under the fixture cache."
+  },
+  "conductor_reroute_headline": {
+    "after_route_counts": {
+      "cylinder": 25,
+      "polysection": 657
+    },
+    "before_route_counts": {
+      "cylinder": 321,
+      "polysection": 361
+    },
+    "coarse_target_rows": {
+      "grid_flux_argmax_cell": 363,
+      "grid_flux_argmax_rz_m": [
+        6.755426582850075,
+        -2.662608570518239
+      ],
+      "grid_flux_sup_wb": 8.162124254293772e-05,
+      "grid_poloidal_field_argmax_cell": 361,
+      "grid_poloidal_field_argmax_rz_m": [
+        6.5387361374513775,
+        -2.8162275438703257
+      ],
+      "grid_poloidal_field_vector_sup_t": 5.032160398166031e-06,
+      "grid_radial_field_sup_t": 3.63247437619194e-06,
+      "grid_vertical_field_sup_t": 4.783555382405306e-06,
+      "wall_flux_argmax_row": 2,
+      "wall_flux_argmax_rz_m": [
+        6.9436333333333335,
+        -2.5174000000000003
+      ],
+      "wall_flux_sup_wb": 8.575483138726176e-05
+    },
+    "coarse_wall_rows": {
+      "after_route_counts": {
+        "cylinder": 25,
+        "polysection": 657
+      },
+      "before_route_counts": {
+        "cylinder": 321,
+        "polysection": 361
+      },
+      "components": {
+        "flux": {
+          "actual_current_argmax_row": 2,
+          "actual_current_argmax_rz_m": [
+            6.9436333333333335,
+            -2.5174000000000003
+          ],
+          "actual_current_signed_at_sup": -8.575483138726176e-05,
+          "actual_current_sup": 8.575483138726176e-05,
+          "matrix_changed_entries": 12870,
+          "matrix_sup_per_a": 5.973938210788782e-08,
+          "unit": "Wb"
+        },
+        "radial_field": {
+          "actual_current_argmax_row": 2,
+          "actual_current_argmax_rz_m": [
+            6.9436333333333335,
+            -2.5174000000000003
+          ],
+          "actual_current_signed_at_sup": -4.219536138093416e-06,
+          "actual_current_sup": 4.219536138093416e-06,
+          "matrix_changed_entries": 12870,
+          "matrix_sup_per_a": 3.2138792262037776e-09,
+          "unit": "T"
+        },
+        "vertical_field": {
+          "actual_current_argmax_row": 1,
+          "actual_current_argmax_rz_m": [
+            6.604866666666666,
+            -2.7804
+          ],
+          "actual_current_signed_at_sup": -5.383666130376714e-06,
+          "actual_current_sup": 5.383666130376714e-06,
+          "matrix_changed_entries": 12870,
+          "matrix_sup_per_a": 3.886281577206657e-09,
+          "unit": "T"
+        }
+      },
+      "fixture": "coarse",
+      "interpretation": "Only external conductor coupling is evaluated. It is independent of the plasma source mesh; the fixture name changes only the fixed wall sampling density.",
+      "poloidal_field_vector": {
+        "actual_current_argmax_row": 1,
+        "actual_current_argmax_rz_m": [
+          6.604866666666666,
+          -2.7804
+        ],
+        "actual_current_sup": 5.383853519994376e-06,
+        "unit": "T"
+      },
+      "source_elements": 682,
+      "wall_rows": 165,
+      "wall_seconds": {
+        "after": 30.08597356081009,
+        "before": 15.38096521049738
+      }
+    },
+    "fine_target_rows": {
+      "grid_flux_argmax_cell": 714,
+      "grid_flux_argmax_rz_m": [
+        6.902306341747956,
+        -2.5269121823410257
+      ],
+      "grid_flux_sup_wb": 8.367382305469932e-05,
+      "grid_poloidal_field_argmax_cell": 693,
+      "grid_poloidal_field_argmax_rz_m": [
+        7.2063920719983345,
+        -2.3121381022123426
+      ],
+      "grid_poloidal_field_vector_sup_t": 4.921622042520532e-06,
+      "grid_radial_field_sup_t": 4.362377041129254e-06,
+      "grid_vertical_field_sup_t": 4.48632051882748e-06,
+      "wall_flux_argmax_row": 4,
+      "wall_flux_argmax_rz_m": [
+        6.9436333333333335,
+        -2.5174000000000003
+      ],
+      "wall_flux_sup_wb": 8.575483138726176e-05
+    },
+    "fine_wall_rows": {
+      "after_route_counts": {
+        "cylinder": 25,
+        "polysection": 657
+      },
+      "before_route_counts": {
+        "cylinder": 321,
+        "polysection": 361
+      },
+      "components": {
+        "flux": {
+          "actual_current_argmax_row": 4,
+          "actual_current_argmax_rz_m": [
+            6.9436333333333335,
+            -2.5174000000000003
+          ],
+          "actual_current_signed_at_sup": -8.575483138726176e-05,
+          "actual_current_sup": 8.575483138726176e-05,
+          "matrix_changed_entries": 25740,
+          "matrix_sup_per_a": 5.973938210788782e-08,
+          "unit": "Wb"
+        },
+        "radial_field": {
+          "actual_current_argmax_row": 5,
+          "actual_current_argmax_rz_m": [
+            7.113016666666667,
+            -2.3859
+          ],
+          "actual_current_signed_at_sup": -4.364782283329393e-06,
+          "actual_current_sup": 4.364782283329393e-06,
+          "matrix_changed_entries": 25740,
+          "matrix_sup_per_a": 3.2984412307691427e-09,
+          "unit": "T"
+        },
+        "vertical_field": {
+          "actual_current_argmax_row": 2,
+          "actual_current_argmax_rz_m": [
+            6.604866666666666,
+            -2.7804
+          ],
+          "actual_current_signed_at_sup": -5.383666130376714e-06,
+          "actual_current_sup": 5.383666130376714e-06,
+          "matrix_changed_entries": 25740,
+          "matrix_sup_per_a": 3.886281577206657e-09,
+          "unit": "T"
+        }
+      },
+      "fixture": "fine",
+      "interpretation": "Only external conductor coupling is evaluated. It is independent of the plasma source mesh; the fixture name changes only the fixed wall sampling density.",
+      "poloidal_field_vector": {
+        "actual_current_argmax_row": 2,
+        "actual_current_argmax_rz_m": [
+          6.604866666666666,
+          -2.7804
+        ],
+        "actual_current_sup": 5.383853519994376e-06,
+        "unit": "T"
+      },
+      "source_elements": 682,
+      "wall_rows": 330,
+      "wall_seconds": {
+        "after": 36.48925609141588,
+        "before": 19.4390589017421
+      }
+    },
+    "forcing_interpretation": "The external conductor matrices do not depend on the plasma source mesh. Coarse/fine variation here comes only from the target and wall row coordinates; any common correction is an h-independent forcing term available to root-drift attribution.",
+    "rerouted_source_elements": 296
+  },
+  "coupling_construction_audit": [
+    {
+      "after": {
+        "kernel": "Solve source-segment dispatch; exact closed-form Part V PolySection or exact rectangular Cylinder only",
+        "section_shape": "the authored polygon for every non-axis-aligned section; Cylinder only when that polygon is exactly axis-aligned"
+      },
+      "before": {
+        "kernel": "Solve source-segment dispatch; PolySection closed-form exact by default, with approximate policy branches still reachable",
+        "section_shape": "authored polygon except 296 non-axis-aligned passive subdivisions substituted by their Cylinder bounding rectangle"
+      },
+      "path": "nova/biot/fluxcoupling.py",
+      "row_role": "linked-flux rows"
+    },
+    {
+      "after": {
+        "kernel": "Solve source-segment dispatch; exact closed-form Part V PolySection or exact rectangular Cylinder only",
+        "section_shape": "the authored polygon for every non-axis-aligned section; Cylinder only when that polygon is exactly axis-aligned"
+      },
+      "before": {
+        "kernel": "Solve source-segment dispatch; PolySection closed-form exact by default, with approximate policy branches still reachable",
+        "section_shape": "authored polygon except 296 non-axis-aligned passive subdivisions substituted by their Cylinder bounding rectangle"
+      },
+      "path": "nova/biot/loop.py",
+      "row_role": "loop-sensor rows"
+    },
+    {
+      "after": {
+        "kernel": "Solve source-segment dispatch; exact closed-form Part V PolySection or exact rectangular Cylinder only",
+        "section_shape": "the authored polygon for every non-axis-aligned section; Cylinder only when that polygon is exactly axis-aligned"
+      },
+      "before": {
+        "kernel": "Solve source-segment dispatch; PolySection closed-form exact by default, with approximate policy branches still reachable",
+        "section_shape": "authored polygon except 296 non-axis-aligned passive subdivisions substituted by their Cylinder bounding rectangle"
+      },
+      "path": "nova/biot/inductance.py",
+      "row_role": "inductance rows"
+    },
+    {
+      "after": {
+        "kernel": "Solve source-segment dispatch; exact closed-form Part V PolySection or exact rectangular Cylinder only",
+        "section_shape": "the authored polygon for every non-axis-aligned section; Cylinder only when that polygon is exactly axis-aligned"
+      },
+      "before": {
+        "kernel": "Solve source-segment dispatch; PolySection closed-form exact by default, with approximate policy branches still reachable",
+        "section_shape": "authored polygon except 296 non-axis-aligned passive subdivisions substituted by their Cylinder bounding rectangle"
+      },
+      "path": "nova/biot/toroidalaverage.py",
+      "row_role": "toroidal-average sensor rows"
+    },
+    {
+      "after": {
+        "kernel": "Solve source-segment dispatch; exact closed-form Part V PolySection or exact rectangular Cylinder only",
+        "section_shape": "the authored polygon for every non-axis-aligned section; Cylinder only when that polygon is exactly axis-aligned"
+      },
+      "before": {
+        "kernel": "Solve source-segment dispatch; PolySection closed-form exact by default, with approximate policy branches still reachable",
+        "section_shape": "authored polygon except 296 non-axis-aligned passive subdivisions substituted by their Cylinder bounding rectangle"
+      },
+      "path": "nova/biot/point.py",
+      "row_role": "point-sensor rows"
+    },
+    {
+      "after": {
+        "kernel": "Solve source-segment dispatch; exact closed-form Part V PolySection or exact rectangular Cylinder only",
+        "section_shape": "the authored polygon for every non-axis-aligned section; Cylinder only when that polygon is exactly axis-aligned"
+      },
+      "before": {
+        "kernel": "Solve source-segment dispatch; PolySection closed-form exact by default, with approximate policy branches still reachable",
+        "section_shape": "authored polygon except 296 non-axis-aligned passive subdivisions substituted by their Cylinder bounding rectangle"
+      },
+      "path": "nova/biot/grid.py",
+      "row_role": "grid rows"
+    },
+    {
+      "after": {
+        "kernel": "Solve source-segment dispatch; exact closed-form Part V PolySection or exact rectangular Cylinder only",
+        "section_shape": "the authored polygon for every non-axis-aligned section; Cylinder only when that polygon is exactly axis-aligned"
+      },
+      "before": {
+        "kernel": "Solve source-segment dispatch; PolySection closed-form exact by default, with approximate policy branches still reachable",
+        "section_shape": "authored polygon except 296 non-axis-aligned passive subdivisions substituted by their Cylinder bounding rectangle"
+      },
+      "path": "nova/biot/plasmagrid.py",
+      "row_role": "plasma-centre rows"
+    },
+    {
+      "after": {
+        "kernel": "Solve source-segment dispatch; exact closed-form Part V PolySection or exact rectangular Cylinder only",
+        "section_shape": "the authored polygon for every non-axis-aligned section; Cylinder only when that polygon is exactly axis-aligned"
+      },
+      "before": {
+        "kernel": "Solve source-segment dispatch; PolySection closed-form exact by default, with approximate policy branches still reachable",
+        "section_shape": "authored polygon except 296 non-axis-aligned passive subdivisions substituted by their Cylinder bounding rectangle"
+      },
+      "path": "nova/biot/plasmagrid.py",
+      "row_role": "pre-clip plasma-sample rows"
+    },
+    {
+      "after": {
+        "kernel": "Solve source-segment dispatch; exact closed-form Part V PolySection or exact rectangular Cylinder only",
+        "section_shape": "the authored polygon for every non-axis-aligned section; Cylinder only when that polygon is exactly axis-aligned"
+      },
+      "before": {
+        "kernel": "Solve source-segment dispatch; PolySection closed-form exact by default, with approximate policy branches still reachable",
+        "section_shape": "authored polygon except 296 non-axis-aligned passive subdivisions substituted by their Cylinder bounding rectangle"
+      },
+      "path": "nova/biot/force.py",
+      "row_role": "radial-force rows"
+    },
+    {
+      "after": {
+        "kernel": "Solve source-segment dispatch; exact closed-form Part V PolySection or exact rectangular Cylinder only",
+        "section_shape": "the authored polygon for every non-axis-aligned section; Cylinder only when that polygon is exactly axis-aligned"
+      },
+      "before": {
+        "kernel": "Solve source-segment dispatch; PolySection closed-form exact by default, with approximate policy branches still reachable",
+        "section_shape": "authored polygon except 296 non-axis-aligned passive subdivisions substituted by their Cylinder bounding rectangle"
+      },
+      "path": "nova/biot/force.py",
+      "row_role": "vertical-force rows"
+    },
+    {
+      "after": {
+        "kernel": "Solve source-segment dispatch; exact closed-form Part V PolySection or exact rectangular Cylinder only",
+        "section_shape": "the authored polygon for every non-axis-aligned section; Cylinder only when that polygon is exactly axis-aligned"
+      },
+      "before": {
+        "kernel": "Solve source-segment dispatch; PolySection closed-form exact by default, with approximate policy branches still reachable",
+        "section_shape": "authored polygon except 296 non-axis-aligned passive subdivisions substituted by their Cylinder bounding rectangle"
+      },
+      "path": "nova/biot/overlap.py",
+      "row_role": "overlap rows"
+    },
+    {
+      "after": {
+        "kernel": "Solve source-segment dispatch; exact closed-form Part V PolySection or exact rectangular Cylinder only",
+        "section_shape": "the authored polygon for every non-axis-aligned section; Cylinder only when that polygon is exactly axis-aligned"
+      },
+      "before": {
+        "kernel": "Solve source-segment dispatch; PolySection closed-form exact by default, with approximate policy branches still reachable",
+        "section_shape": "authored polygon except 296 non-axis-aligned passive subdivisions substituted by their Cylinder bounding rectangle"
+      },
+      "path": "nova/biot/hexgrid.py",
+      "row_role": "hex-grid rows"
+    },
+    {
+      "after": {
+        "kernel": "Solve source-segment dispatch; exact closed-form Part V PolySection or exact rectangular Cylinder only",
+        "section_shape": "the authored polygon for every non-axis-aligned section; Cylinder only when that polygon is exactly axis-aligned"
+      },
+      "before": {
+        "kernel": "Solve source-segment dispatch; PolySection closed-form exact by default, with approximate policy branches still reachable",
+        "section_shape": "authored polygon except 296 non-axis-aligned passive subdivisions substituted by their Cylinder bounding rectangle"
+      },
+      "path": "nova/biot/field.py",
+      "row_role": "field-sensor rows"
+    },
+    {
+      "after": {
+        "kernel": "Solve source-segment dispatch; exact closed-form Part V PolySection or exact rectangular Cylinder only",
+        "section_shape": "the authored polygon for every non-axis-aligned section; Cylinder only when that polygon is exactly axis-aligned"
+      },
+      "before": {
+        "kernel": "Solve source-segment dispatch; PolySection closed-form exact by default, with approximate policy branches still reachable",
+        "section_shape": "authored polygon except 296 non-axis-aligned passive subdivisions substituted by their Cylinder bounding rectangle"
+      },
+      "path": "nova/biot/plasmagap.py",
+      "row_role": "plasma-gap sensor rows"
+    }
+  ],
+  "drift_attribution_context": {
+    "banked_map_forcing_fraction_of_span": 0.01598,
+    "coarse_conductor_correction": {
+      "grid_radial_field_sup_t": 3.63247437619194e-06,
+      "grid_vertical_field_sup_t": 4.783555382405306e-06,
+      "wall_flux_sup_wb": 8.575483138726176e-05
+    },
+    "independent_source_density_attribution_percent": 99.18,
+    "verdict": "The authored-section reroute is geometry hygiene, not the root-drift carrier: its coarse conductor-field correction is small beside the banked map forcing, while the independent residual decomposition assigns 99.18 percent to the source density."
+  },
+  "fixtures": {
+    "coarse": {
+      "design_matrices": {
+        "cells": 566,
+        "cpu_design_matrix_wall_seconds": {
+          "after_exact_only_policy": 1214.2444929461926,
+          "after_over_before": 1.0588358788089132,
+          "before_reachable_route_excision": 1146.7730903793126
+        },
+        "driven_field_correction": {
+          "grid_flux_argmax_cell": 363,
+          "grid_flux_argmax_rz_m": [
+            6.755426582850075,
+            -2.662608570518239
+          ],
+          "grid_flux_sup_wb": 8.162124254293772e-05,
+          "grid_poloidal_field_argmax_cell": 361,
+          "grid_poloidal_field_argmax_rz_m": [
+            6.5387361374513775,
+            -2.8162275438703257
+          ],
+          "grid_poloidal_field_vector_sup_t": 5.032160398166031e-06,
+          "grid_radial_field_sup_t": 3.63247437619194e-06,
+          "grid_vertical_field_sup_t": 4.783555382405306e-06,
+          "wall_flux_argmax_row": 2,
+          "wall_flux_argmax_rz_m": [
+            6.9436333333333335,
+            -2.5174000000000003
+          ],
+          "wall_flux_sup_wb": 8.575483138726176e-05
+        },
+        "fixture": "coarse",
+        "matrix_comparison": {
+          "accounting": "Every changed entry is generated by replacing the rectangle-kernel substitution on a non-axis-aligned authored source with the exact polygon-section kernel; rows already using an exact shape-matched kernel are checked separately for bit identity.",
+          "all_bitwise_equal": false,
+          "changed_entries": 275184,
+          "fields": {
+            "plasma_to_grid": {
+              "bitwise_equal": true,
+              "changed_entries": 0,
+              "maximum_absolute_change": 0.0,
+              "shape": [
+                566,
+                566
+              ]
+            },
+            "plasma_to_grid_r": {
+              "bitwise_equal": true,
+              "changed_entries": 0,
+              "maximum_absolute_change": 0.0,
+              "shape": [
+                566,
+                566
+              ]
+            },
+            "plasma_to_grid_z": {
+              "bitwise_equal": true,
+              "changed_entries": 0,
+              "maximum_absolute_change": 0.0,
+              "shape": [
+                566,
+                566
+              ]
+            },
+            "plasma_to_sample": {
+              "bitwise_equal": true,
+              "changed_entries": 0,
+              "maximum_absolute_change": 0.0,
+              "shape": [
+                1665,
+                566
+              ]
+            },
+            "plasma_to_sample_r": {
+              "bitwise_equal": true,
+              "changed_entries": 0,
+              "maximum_absolute_change": 0.0,
+              "shape": [
+                1665,
+                566
+              ]
+            },
+            "plasma_to_sample_z": {
+              "bitwise_equal": true,
+              "changed_entries": 0,
+              "maximum_absolute_change": 0.0,
+              "shape": [
+                1665,
+                566
+              ]
+            },
+            "plasma_to_wall": {
+              "bitwise_equal": true,
+              "changed_entries": 0,
+              "maximum_absolute_change": 0.0,
+              "shape": [
+                165,
+                566
+              ]
+            },
+            "plasma_to_wall_r": {
+              "bitwise_equal": true,
+              "changed_entries": 0,
+              "maximum_absolute_change": 0.0,
+              "shape": [
+                165,
+                566
+              ]
+            },
+            "plasma_to_wall_z": {
+              "bitwise_equal": true,
+              "changed_entries": 0,
+              "maximum_absolute_change": 0.0,
+              "shape": [
+                165,
+                566
+              ]
+            },
+            "radial_field_0": {
+              "bitwise_equal": false,
+              "changed_entries": 44148,
+              "maximum_absolute_change": 2.745494992368721e-09,
+              "shape": [
+                566,
+                117
+              ]
+            },
+            "radial_field_1": {
+              "bitwise_equal": true,
+              "changed_entries": 0,
+              "maximum_absolute_change": 0.0,
+              "shape": [
+                566,
+                566
+              ]
+            },
+            "radial_field_2": {
+              "bitwise_equal": true,
+              "changed_entries": 0,
+              "maximum_absolute_change": 0.0,
+              "shape": [
+                566,
+                566
+              ]
+            },
+            "radial_field_3": {
+              "bitwise_equal": true,
+              "changed_entries": 0,
+              "maximum_absolute_change": 0.0,
+              "shape": [
+                566,
+                566
+              ]
+            },
+            "source_to_grid": {
+              "bitwise_equal": false,
+              "changed_entries": 44148,
+              "maximum_absolute_change": 5.837324187979784e-08,
+              "shape": [
+                566,
+                117
+              ]
+            },
+            "source_to_sample": {
+              "bitwise_equal": false,
+              "changed_entries": 129870,
+              "maximum_absolute_change": 7.754889598141104e-08,
+              "shape": [
+                1665,
+                117
+              ]
+            },
+            "source_to_wall": {
+              "bitwise_equal": false,
+              "changed_entries": 12870,
+              "maximum_absolute_change": 5.973938210788782e-08,
+              "shape": [
+                165,
+                117
+              ]
+            },
+            "vertical_field_0": {
+              "bitwise_equal": false,
+              "changed_entries": 44148,
+              "maximum_absolute_change": 3.4602253407599003e-09,
+              "shape": [
+                566,
+                117
+              ]
+            },
+            "vertical_field_1": {
+              "bitwise_equal": true,
+              "changed_entries": 0,
+              "maximum_absolute_change": 0.0,
+              "shape": [
+                566,
+                566
+              ]
+            },
+            "vertical_field_2": {
+              "bitwise_equal": true,
+              "changed_entries": 0,
+              "maximum_absolute_change": 0.0,
+              "shape": [
+                566,
+                566
+              ]
+            },
+            "vertical_field_3": {
+              "bitwise_equal": true,
+              "changed_entries": 0,
+              "maximum_absolute_change": 0.0,
+              "shape": [
+                566,
+                566
+              ]
+            }
+          },
+          "maximum_absolute_change": 7.754889598141104e-08
+        },
+        "receipt_verification": {
+          "after": {
+            "cells": 566,
+            "cpu_design_matrix_wall_seconds": 1214.2444929461926,
+            "fixture": "coarse",
+            "fixture_sha256": "cff4e4d27419623626dadc4e6150512dcdbd2eb125bbd7de6bd4ca6961df4a94",
+            "route": "after",
+            "route_counts": {
+              "cylinder": 25,
+              "polysection": 657
+            },
+            "sample_rows": 1665,
+            "snapshot_path": "tests/exact_section_coarse_after.npz",
+            "snapshot_sha256": "854d144095c98fb771ded59a8bd5f84aaf79b46ca0eac8fa3033da6cb1085048",
+            "source_columns": 117,
+            "source_elements": 682,
+            "wall_rows": 165
+          },
+          "before": {
+            "cells": 566,
+            "cpu_design_matrix_wall_seconds": 1146.7730903793126,
+            "fixture": "coarse",
+            "fixture_sha256": "cff4e4d27419623626dadc4e6150512dcdbd2eb125bbd7de6bd4ca6961df4a94",
+            "route": "before",
+            "route_counts": {
+              "cylinder": 321,
+              "polysection": 361
+            },
+            "sample_rows": 1665,
+            "snapshot_path": "tests/exact_section_coarse_before.npz",
+            "snapshot_sha256": "06a3aa3bfeff1dabc73afb8c45e1c1ad0dcf5d4dbd3960d40bdfaac6b5a7c309",
+            "source_columns": 117,
+            "source_elements": 682,
+            "wall_rows": 165
+          },
+          "fixture_inputs_identical": true,
+          "shared_fixture_sha256": "cff4e4d27419623626dadc4e6150512dcdbd2eb125bbd7de6bd4ca6961df4a94",
+          "source_current_bitwise_equal": true,
+          "source_order_bitwise_equal": true
+        },
+        "row_accounting_summary": {
+          "all_unchanged_columns_bitwise_equal": true,
+          "bitwise_unchanged_source_columns": 39,
+          "change_mechanism": "Every changed column belonged to an authored non-axis-aligned polygon previously substituted by a rectangular Cylinder. Exact shape-matched source columns remain bitwise identical.",
+          "changed_conductors": [
+            "TRI_SUPP",
+            "COPP_CLAD",
+            "VES_7",
+            "VES_8",
+            "VES_9",
+            "VES_10",
+            "VES_11",
+            "VES_12",
+            "VES_13",
+            "VES_14",
+            "VES_15",
+            "VES_16",
+            "VES_17",
+            "VES_18",
+            "VES_19",
+            "VES_20",
+            "VES_21",
+            "VES_22",
+            "VES_23",
+            "VES_24",
+            "VES_25",
+            "VES_26",
+            "VES_27",
+            "VES_28",
+            "VES_29",
+            "VES_30",
+            "VES_31",
+            "VES_32",
+            "VES_33",
+            "VES_34",
+            "VES_35",
+            "VES_36",
+            "VES_37",
+            "VES_38",
+            "VES_39",
+            "VES_40",
+            "VES_41",
+            "VES_42",
+            "VES_43",
+            "VES_44",
+            "VES_51",
+            "VES_52",
+            "VES_53",
+            "VES_54",
+            "VES_55",
+            "VES_56",
+            "VES_57",
+            "VES_58",
+            "VES_59",
+            "VES_60",
+            "VES_61",
+            "VES_62",
+            "VES_63",
+            "VES_64",
+            "VES_65",
+            "VES_66",
+            "VES_67",
+            "VES_68",
+            "VES_69",
+            "VES_70",
+            "VES_71",
+            "VES_72",
+            "VES_73",
+            "VES_74",
+            "VES_75",
+            "VES_76",
+            "VES_77",
+            "VES_78",
+            "VES_79",
+            "VES_80",
+            "VES_81",
+            "VES_94",
+            "VES_95",
+            "VES_96",
+            "VES_97",
+            "VES_98",
+            "VES_99",
+            "VES_100"
+          ],
+          "changed_source_columns": 78,
+          "source_columns": 117
+        },
+        "source_column_accounting": [
+          {
+            "bitwise_equal": true,
+            "column": 0,
+            "conductor": "CS3U",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 1,
+            "conductor": "CS2U",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 2,
+            "conductor": "CS1U",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 3,
+            "conductor": "CS1L",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 4,
+            "conductor": "CS2L",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 5,
+            "conductor": "CS3L",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 6,
+            "conductor": "PF1",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 7,
+            "conductor": "PF2",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 8,
+            "conductor": "PF3",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 9,
+            "conductor": "PF4",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 10,
+            "conductor": "PF5",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 11,
+            "conductor": "PF6",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 12,
+            "conductor": "VS3U",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 13,
+            "conductor": "VS3L",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 14,
+            "conductor": "TRI_SUPP",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 5.837324187979784e-08,
+              "grid_radial_field_t_per_a": 2.745494992368721e-09,
+              "grid_vertical_field_t_per_a": 3.4602253407599003e-09,
+              "sample_flux_wb_per_a": 7.754889598141104e-08,
+              "wall_flux_wb_per_a": 5.973938210788782e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 15,
+            "conductor": "COPP_CLAD",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 2.224988582029549e-09,
+              "grid_radial_field_t_per_a": 1.0229486317683037e-10,
+              "grid_vertical_field_t_per_a": 1.2808300011834262e-10,
+              "sample_flux_wb_per_a": 3.2080995323602866e-09,
+              "wall_flux_wb_per_a": 2.194451128661811e-09
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 16,
+            "conductor": "INB_RAIL",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 17,
+            "conductor": "VES_1",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 18,
+            "conductor": "VES_2",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 19,
+            "conductor": "VES_3",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 20,
+            "conductor": "VES_4",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 21,
+            "conductor": "VES_5",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 22,
+            "conductor": "VES_6",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 23,
+            "conductor": "VES_7",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 2.752124706463353e-10,
+              "grid_radial_field_t_per_a": 2.6978222108632455e-11,
+              "grid_vertical_field_t_per_a": 2.262956033363302e-11,
+              "sample_flux_wb_per_a": 3.764224858007634e-10,
+              "wall_flux_wb_per_a": 2.664827279299359e-10
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 24,
+            "conductor": "VES_8",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 5.065960370719574e-09,
+              "grid_radial_field_t_per_a": 5.466331735517341e-10,
+              "grid_vertical_field_t_per_a": 4.5928385331797e-10,
+              "sample_flux_wb_per_a": 7.28336805612497e-09,
+              "wall_flux_wb_per_a": 6.408018720894203e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 25,
+            "conductor": "VES_9",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 9.647736195630971e-09,
+              "grid_radial_field_t_per_a": 7.350791267085271e-10,
+              "grid_vertical_field_t_per_a": 1.0017837497433567e-09,
+              "sample_flux_wb_per_a": 1.370496472143001e-08,
+              "wall_flux_wb_per_a": 1.0395704387588321e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 26,
+            "conductor": "VES_10",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.2046036261038374e-08,
+              "grid_radial_field_t_per_a": 1.5834634637192054e-09,
+              "grid_vertical_field_t_per_a": 8.916087409865793e-10,
+              "sample_flux_wb_per_a": 1.8718647309631955e-08,
+              "wall_flux_wb_per_a": 1.40665844300847e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 27,
+            "conductor": "VES_11",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.7036414760926292e-08,
+              "grid_radial_field_t_per_a": 1.5290621574573632e-09,
+              "grid_vertical_field_t_per_a": 1.0013432218927316e-09,
+              "sample_flux_wb_per_a": 2.8048349136938476e-08,
+              "wall_flux_wb_per_a": 1.871424038288379e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 28,
+            "conductor": "VES_12",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 2.124051693158877e-09,
+              "grid_radial_field_t_per_a": 2.121072987761482e-10,
+              "grid_vertical_field_t_per_a": 2.482846248237147e-10,
+              "sample_flux_wb_per_a": 3.4849873279702178e-09,
+              "wall_flux_wb_per_a": 2.1408852674357495e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 29,
+            "conductor": "VES_13",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 9.059570020949803e-09,
+              "grid_radial_field_t_per_a": 8.569086056454213e-10,
+              "grid_vertical_field_t_per_a": 5.986887721270948e-10,
+              "sample_flux_wb_per_a": 1.458935171007688e-08,
+              "wall_flux_wb_per_a": 9.590884110469454e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 30,
+            "conductor": "VES_14",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.1433057711253105e-08,
+              "grid_radial_field_t_per_a": 8.979256091025621e-10,
+              "grid_vertical_field_t_per_a": 7.396154028055371e-10,
+              "sample_flux_wb_per_a": 1.76365827528399e-08,
+              "wall_flux_wb_per_a": 1.5596543736831592e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 31,
+            "conductor": "VES_15",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.3262713544774424e-08,
+              "grid_radial_field_t_per_a": 8.789103348867132e-10,
+              "grid_vertical_field_t_per_a": 9.250140875218113e-10,
+              "sample_flux_wb_per_a": 2.041472725936022e-08,
+              "wall_flux_wb_per_a": 1.4691145914791777e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 32,
+            "conductor": "VES_16",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.4914563109262222e-08,
+              "grid_radial_field_t_per_a": 8.718972189268153e-10,
+              "grid_vertical_field_t_per_a": 9.705709725656565e-10,
+              "sample_flux_wb_per_a": 2.3006166059351765e-08,
+              "wall_flux_wb_per_a": 1.6527769115700475e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 33,
+            "conductor": "VES_17",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.4494732031532898e-08,
+              "grid_radial_field_t_per_a": 7.440372524009672e-10,
+              "grid_vertical_field_t_per_a": 8.712558387724506e-10,
+              "sample_flux_wb_per_a": 2.0722484258058223e-08,
+              "wall_flux_wb_per_a": 1.5923092297802854e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 34,
+            "conductor": "VES_18",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.715612794873472e-08,
+              "grid_radial_field_t_per_a": 9.2315552409406e-10,
+              "grid_vertical_field_t_per_a": 9.509942185956699e-10,
+              "sample_flux_wb_per_a": 2.67362675201939e-08,
+              "wall_flux_wb_per_a": 1.9271861474810527e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 35,
+            "conductor": "VES_19",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.50555002579766e-08,
+              "grid_radial_field_t_per_a": 8.555851182001072e-10,
+              "grid_vertical_field_t_per_a": 8.649432767436698e-10,
+              "sample_flux_wb_per_a": 2.3940146249397458e-08,
+              "wall_flux_wb_per_a": 1.848512913058502e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 36,
+            "conductor": "VES_20",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.5783003478257024e-08,
+              "grid_radial_field_t_per_a": 5.74311089289944e-10,
+              "grid_vertical_field_t_per_a": 7.131649045550611e-10,
+              "sample_flux_wb_per_a": 2.30067746227969e-08,
+              "wall_flux_wb_per_a": 1.891732211786875e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 37,
+            "conductor": "VES_21",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 2.2524571297953663e-08,
+              "grid_radial_field_t_per_a": 9.599269663871815e-10,
+              "grid_vertical_field_t_per_a": 1.1166371769795167e-09,
+              "sample_flux_wb_per_a": 3.291757037723558e-08,
+              "wall_flux_wb_per_a": 2.3176762978667194e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 38,
+            "conductor": "VES_22",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.9280667634808242e-08,
+              "grid_radial_field_t_per_a": 8.144011146595102e-10,
+              "grid_vertical_field_t_per_a": 1.2581413247197475e-09,
+              "sample_flux_wb_per_a": 3.217674613693433e-08,
+              "wall_flux_wb_per_a": 2.001267697446021e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 39,
+            "conductor": "VES_23",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 8.263430639702255e-09,
+              "grid_radial_field_t_per_a": 5.563192646333463e-10,
+              "grid_vertical_field_t_per_a": 5.142117793290462e-10,
+              "sample_flux_wb_per_a": 1.3654789959681316e-08,
+              "wall_flux_wb_per_a": 9.424325492724472e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 40,
+            "conductor": "VES_24",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 2.5178130431534763e-09,
+              "grid_radial_field_t_per_a": 1.7603403736329032e-10,
+              "grid_vertical_field_t_per_a": 1.5528379890528754e-10,
+              "sample_flux_wb_per_a": 4.171407871276763e-09,
+              "wall_flux_wb_per_a": 3.225376652151807e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 41,
+            "conductor": "VES_25",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 9.002388549311899e-10,
+              "grid_radial_field_t_per_a": 5.832377050539981e-11,
+              "grid_vertical_field_t_per_a": 5.3446154933506664e-11,
+              "sample_flux_wb_per_a": 1.461237521939798e-09,
+              "wall_flux_wb_per_a": 1.1261342932690802e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 42,
+            "conductor": "VES_26",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 6.452723466746904e-09,
+              "grid_radial_field_t_per_a": 3.9711054075150684e-10,
+              "grid_vertical_field_t_per_a": 3.788065585134256e-10,
+              "sample_flux_wb_per_a": 1.0345790053605338e-08,
+              "wall_flux_wb_per_a": 7.2071263317263984e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 43,
+            "conductor": "VES_27",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 2.064830567582605e-08,
+              "grid_radial_field_t_per_a": 8.889761384669553e-10,
+              "grid_vertical_field_t_per_a": 1.2286944733439203e-09,
+              "sample_flux_wb_per_a": 3.268270273570895e-08,
+              "wall_flux_wb_per_a": 2.2919837819737404e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 44,
+            "conductor": "VES_28",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 2.1237086740504116e-08,
+              "grid_radial_field_t_per_a": 8.999084084121741e-10,
+              "grid_vertical_field_t_per_a": 1.4842150188313169e-09,
+              "sample_flux_wb_per_a": 3.5841121986096406e-08,
+              "wall_flux_wb_per_a": 2.4452145829401833e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 45,
+            "conductor": "VES_29",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 2.177739417582572e-08,
+              "grid_radial_field_t_per_a": 9.318277342161054e-10,
+              "grid_vertical_field_t_per_a": 1.444209691240361e-09,
+              "sample_flux_wb_per_a": 3.5520951295701106e-08,
+              "wall_flux_wb_per_a": 2.5337931810004107e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 46,
+            "conductor": "VES_30",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.874750794257063e-08,
+              "grid_radial_field_t_per_a": 7.659443336248146e-10,
+              "grid_vertical_field_t_per_a": 1.0287069367209988e-09,
+              "sample_flux_wb_per_a": 2.7284339548527294e-08,
+              "wall_flux_wb_per_a": 1.9764689023515675e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 47,
+            "conductor": "VES_31",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.5057887471325014e-08,
+              "grid_radial_field_t_per_a": 5.990838800363164e-10,
+              "grid_vertical_field_t_per_a": 6.827051956822352e-10,
+              "sample_flux_wb_per_a": 2.1950053514068466e-08,
+              "wall_flux_wb_per_a": 1.3416924421959345e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 48,
+            "conductor": "VES_32",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 8.269627530968986e-09,
+              "grid_radial_field_t_per_a": 4.3532838158062904e-10,
+              "grid_vertical_field_t_per_a": 3.213711577482025e-10,
+              "sample_flux_wb_per_a": 1.1415258819199957e-08,
+              "wall_flux_wb_per_a": 8.723007037771466e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 49,
+            "conductor": "VES_33",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 5.5907648702547305e-09,
+              "grid_radial_field_t_per_a": 2.3915028522960453e-10,
+              "grid_vertical_field_t_per_a": 1.982450905301153e-10,
+              "sample_flux_wb_per_a": 7.581925682617196e-09,
+              "wall_flux_wb_per_a": 5.61038300313452e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 50,
+            "conductor": "VES_34",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 3.869622418902049e-09,
+              "grid_radial_field_t_per_a": 1.1960907083370082e-10,
+              "grid_vertical_field_t_per_a": 1.469010461456596e-10,
+              "sample_flux_wb_per_a": 4.84741507191319e-09,
+              "wall_flux_wb_per_a": 4.017831182235194e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 51,
+            "conductor": "VES_35",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 3.5186727442463673e-09,
+              "grid_radial_field_t_per_a": 1.3574781150134857e-10,
+              "grid_vertical_field_t_per_a": 9.245540016497424e-11,
+              "sample_flux_wb_per_a": 4.489656102301548e-09,
+              "wall_flux_wb_per_a": 3.6863423824958e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 52,
+            "conductor": "VES_36",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 2.7233561686845054e-09,
+              "grid_radial_field_t_per_a": 2.476524144671292e-10,
+              "grid_vertical_field_t_per_a": 1.8728134214017926e-10,
+              "sample_flux_wb_per_a": 3.7188124159072736e-09,
+              "wall_flux_wb_per_a": 3.2542841805173407e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 53,
+            "conductor": "VES_37",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.009892050000399e-08,
+              "grid_radial_field_t_per_a": 3.053024342069943e-10,
+              "grid_vertical_field_t_per_a": 8.119509228150245e-10,
+              "sample_flux_wb_per_a": 1.457567147885333e-08,
+              "wall_flux_wb_per_a": 1.2333028051993242e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 54,
+            "conductor": "VES_38",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 3.0940144770571208e-09,
+              "grid_radial_field_t_per_a": 3.31650147758287e-10,
+              "grid_vertical_field_t_per_a": 4.811129103227317e-10,
+              "sample_flux_wb_per_a": 6.6831038031402135e-09,
+              "wall_flux_wb_per_a": 3.567448067900628e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 55,
+            "conductor": "VES_39",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.572845150559025e-09,
+              "grid_radial_field_t_per_a": 1.0083314488552668e-10,
+              "grid_vertical_field_t_per_a": 3.591638477137425e-11,
+              "sample_flux_wb_per_a": 2.2901509402015066e-09,
+              "wall_flux_wb_per_a": 1.8476106719904578e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 56,
+            "conductor": "VES_40",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 5.0367623314203855e-09,
+              "grid_radial_field_t_per_a": 1.3989074531752313e-10,
+              "grid_vertical_field_t_per_a": 2.669818075037019e-10,
+              "sample_flux_wb_per_a": 6.457599623984494e-09,
+              "wall_flux_wb_per_a": 5.438360127084808e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 57,
+            "conductor": "VES_41",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 3.336832117968209e-09,
+              "grid_radial_field_t_per_a": 2.5378890346751866e-10,
+              "grid_vertical_field_t_per_a": 3.945417139799867e-10,
+              "sample_flux_wb_per_a": 4.019005433591609e-09,
+              "wall_flux_wb_per_a": 3.68747591720714e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 58,
+            "conductor": "VES_42",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 7.733652722156193e-09,
+              "grid_radial_field_t_per_a": 5.567076702196557e-10,
+              "grid_vertical_field_t_per_a": 4.117621688858371e-10,
+              "sample_flux_wb_per_a": 1.1114421374336359e-08,
+              "wall_flux_wb_per_a": 1.1134856342349549e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 59,
+            "conductor": "VES_43",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 3.003554816463305e-09,
+              "grid_radial_field_t_per_a": 4.753063940089998e-10,
+              "grid_vertical_field_t_per_a": 3.1604077209027837e-10,
+              "sample_flux_wb_per_a": 5.1499182417688095e-09,
+              "wall_flux_wb_per_a": 3.9539733067335976e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 60,
+            "conductor": "VES_44",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.4526901974095188e-10,
+              "grid_radial_field_t_per_a": 1.483504349156923e-11,
+              "grid_vertical_field_t_per_a": 1.5777586637631928e-11,
+              "sample_flux_wb_per_a": 2.1621641143182424e-10,
+              "wall_flux_wb_per_a": 1.8406157724036034e-10
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 61,
+            "conductor": "VES_45",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 62,
+            "conductor": "VES_46",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 63,
+            "conductor": "VES_47",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 64,
+            "conductor": "VES_48",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 65,
+            "conductor": "VES_49",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 66,
+            "conductor": "VES_50",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 67,
+            "conductor": "VES_51",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 3.933436987586027e-09,
+              "grid_radial_field_t_per_a": 1.8145005698248513e-10,
+              "grid_vertical_field_t_per_a": 1.45439592969898e-10,
+              "sample_flux_wb_per_a": 5.1378980860325045e-09,
+              "wall_flux_wb_per_a": 4.70250089841767e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 68,
+            "conductor": "VES_52",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 4.412602842173612e-09,
+              "grid_radial_field_t_per_a": 1.7971164898055335e-10,
+              "grid_vertical_field_t_per_a": 1.6713940810437042e-10,
+              "sample_flux_wb_per_a": 5.625860331032965e-09,
+              "wall_flux_wb_per_a": 4.934126219744133e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 69,
+            "conductor": "VES_53",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 5.213156112702225e-09,
+              "grid_radial_field_t_per_a": 1.7060910891411003e-10,
+              "grid_vertical_field_t_per_a": 1.7657096037208743e-10,
+              "sample_flux_wb_per_a": 6.6995631721269186e-09,
+              "wall_flux_wb_per_a": 5.094378463622531e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 70,
+            "conductor": "VES_54",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 4.725350831954897e-09,
+              "grid_radial_field_t_per_a": 1.7853698261131932e-10,
+              "grid_vertical_field_t_per_a": 1.7389193099594885e-10,
+              "sample_flux_wb_per_a": 6.08508167256218e-09,
+              "wall_flux_wb_per_a": 5.175677055535013e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 71,
+            "conductor": "VES_55",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 5.9685824490860536e-09,
+              "grid_radial_field_t_per_a": 1.578532533119427e-10,
+              "grid_vertical_field_t_per_a": 1.8111049865043556e-10,
+              "sample_flux_wb_per_a": 7.577554183804707e-09,
+              "wall_flux_wb_per_a": 6.260341843575647e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 72,
+            "conductor": "VES_56",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 5.467464611230748e-09,
+              "grid_radial_field_t_per_a": 1.492467217388833e-10,
+              "grid_vertical_field_t_per_a": 1.790684996860434e-10,
+              "sample_flux_wb_per_a": 6.868902366076571e-09,
+              "wall_flux_wb_per_a": 6.018194583104426e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 73,
+            "conductor": "VES_57",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 4.882903696034154e-09,
+              "grid_radial_field_t_per_a": 1.1288075525529676e-10,
+              "grid_vertical_field_t_per_a": 1.720478716588899e-10,
+              "sample_flux_wb_per_a": 6.157568867468745e-09,
+              "wall_flux_wb_per_a": 5.541713647613653e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 74,
+            "conductor": "VES_58",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 4.627194589804388e-09,
+              "grid_radial_field_t_per_a": 1.139028283931183e-10,
+              "grid_vertical_field_t_per_a": 1.3780817861350935e-10,
+              "sample_flux_wb_per_a": 5.780517190631077e-09,
+              "wall_flux_wb_per_a": 4.8280779357626495e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 75,
+            "conductor": "VES_59",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 4.572108203346317e-09,
+              "grid_radial_field_t_per_a": 1.3166050604072144e-10,
+              "grid_vertical_field_t_per_a": 1.6363783492993908e-10,
+              "sample_flux_wb_per_a": 6.055299898842124e-09,
+              "wall_flux_wb_per_a": 4.903287602277175e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 76,
+            "conductor": "VES_60",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 2.660311813078482e-09,
+              "grid_radial_field_t_per_a": 9.919135536261477e-11,
+              "grid_vertical_field_t_per_a": 8.7014466180455e-11,
+              "sample_flux_wb_per_a": 3.356940308669727e-09,
+              "wall_flux_wb_per_a": 2.972617768778852e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 77,
+            "conductor": "VES_61",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 7.376483777199797e-10,
+              "grid_radial_field_t_per_a": 2.85934568312116e-11,
+              "grid_vertical_field_t_per_a": 2.3075559674512244e-11,
+              "sample_flux_wb_per_a": 9.42942995214147e-10,
+              "wall_flux_wb_per_a": 7.69381476863301e-10
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 78,
+            "conductor": "VES_62",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.1619623247422297e-09,
+              "grid_radial_field_t_per_a": 4.4300698041388674e-11,
+              "grid_vertical_field_t_per_a": 3.817593872427995e-11,
+              "sample_flux_wb_per_a": 1.4668380568410894e-09,
+              "wall_flux_wb_per_a": 1.268301979885395e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 79,
+            "conductor": "VES_63",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 3.4330392878352794e-09,
+              "grid_radial_field_t_per_a": 1.2717416927131328e-10,
+              "grid_vertical_field_t_per_a": 1.149658798104523e-10,
+              "sample_flux_wb_per_a": 4.466467431211909e-09,
+              "wall_flux_wb_per_a": 3.773188124144971e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 80,
+            "conductor": "VES_64",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 6.594360223032187e-09,
+              "grid_radial_field_t_per_a": 1.7771843988004864e-10,
+              "grid_vertical_field_t_per_a": 2.1717468033199654e-10,
+              "sample_flux_wb_per_a": 8.50142979874868e-09,
+              "wall_flux_wb_per_a": 6.996269166945974e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 81,
+            "conductor": "VES_65",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 4.3925891602184224e-09,
+              "grid_radial_field_t_per_a": 1.2444962523393144e-10,
+              "grid_vertical_field_t_per_a": 1.6154583803686404e-10,
+              "sample_flux_wb_per_a": 5.549743804519425e-09,
+              "wall_flux_wb_per_a": 4.882474997080919e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 82,
+            "conductor": "VES_66",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 4.281021112740701e-09,
+              "grid_radial_field_t_per_a": 1.0557144381279255e-10,
+              "grid_vertical_field_t_per_a": 1.525368236605545e-10,
+              "sample_flux_wb_per_a": 5.546595662805746e-09,
+              "wall_flux_wb_per_a": 4.641693860156314e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 83,
+            "conductor": "VES_67",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 3.8877830894741235e-09,
+              "grid_radial_field_t_per_a": 9.720618493454001e-11,
+              "grid_vertical_field_t_per_a": 1.1690659799202931e-10,
+              "sample_flux_wb_per_a": 4.780668695109232e-09,
+              "wall_flux_wb_per_a": 4.059573051731145e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 84,
+            "conductor": "VES_68",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 3.32410582453842e-09,
+              "grid_radial_field_t_per_a": 7.746298987380713e-11,
+              "grid_vertical_field_t_per_a": 9.383001611974451e-11,
+              "sample_flux_wb_per_a": 4.074840558821401e-09,
+              "wall_flux_wb_per_a": 3.2461113496834774e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 85,
+            "conductor": "VES_69",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 2.2789341504025472e-09,
+              "grid_radial_field_t_per_a": 6.3172149453015e-11,
+              "grid_vertical_field_t_per_a": 6.321608065204996e-11,
+              "sample_flux_wb_per_a": 2.747471702396916e-09,
+              "wall_flux_wb_per_a": 2.3874665606106915e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 86,
+            "conductor": "VES_70",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.9932106352610297e-09,
+              "grid_radial_field_t_per_a": 5.360758914540083e-11,
+              "grid_vertical_field_t_per_a": 6.30369765015794e-11,
+              "sample_flux_wb_per_a": 2.3683819246564668e-09,
+              "wall_flux_wb_per_a": 2.0324303100829324e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 87,
+            "conductor": "VES_71",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 2.015486303304497e-09,
+              "grid_radial_field_t_per_a": 5.829807887788713e-11,
+              "grid_vertical_field_t_per_a": 4.4720515042395225e-11,
+              "sample_flux_wb_per_a": 2.4361927953005865e-09,
+              "wall_flux_wb_per_a": 2.08943020908705e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 88,
+            "conductor": "VES_72",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.611285964025431e-09,
+              "grid_radial_field_t_per_a": 6.087126372446079e-11,
+              "grid_vertical_field_t_per_a": 6.678329013536358e-11,
+              "sample_flux_wb_per_a": 1.8943121405749086e-09,
+              "wall_flux_wb_per_a": 1.6672409957254334e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 89,
+            "conductor": "VES_73",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 2.8376418014048276e-09,
+              "grid_radial_field_t_per_a": 5.306310410979639e-11,
+              "grid_vertical_field_t_per_a": 1.2789729933195065e-10,
+              "sample_flux_wb_per_a": 3.5454849565207222e-09,
+              "wall_flux_wb_per_a": 3.1621787386813886e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 90,
+            "conductor": "VES_74",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 3.4966819903511096e-09,
+              "grid_radial_field_t_per_a": 1.838527707956039e-10,
+              "grid_vertical_field_t_per_a": 4.0711797516411006e-11,
+              "sample_flux_wb_per_a": 4.573988706813427e-09,
+              "wall_flux_wb_per_a": 4.236072814114159e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 91,
+            "conductor": "VES_75",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 3.7305967144876293e-10,
+              "grid_radial_field_t_per_a": 2.4489082090490364e-11,
+              "grid_vertical_field_t_per_a": 6.385421351291806e-11,
+              "sample_flux_wb_per_a": 6.130944746178692e-10,
+              "wall_flux_wb_per_a": 4.06825203501054e-10
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 92,
+            "conductor": "VES_76",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.6759586219472304e-09,
+              "grid_radial_field_t_per_a": 7.443210462840471e-11,
+              "grid_vertical_field_t_per_a": 2.6665107734864952e-11,
+              "sample_flux_wb_per_a": 2.06412126440909e-09,
+              "wall_flux_wb_per_a": 1.9306761403311597e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 93,
+            "conductor": "VES_77",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 2.7838662643470423e-09,
+              "grid_radial_field_t_per_a": 8.152572384554218e-11,
+              "grid_vertical_field_t_per_a": 8.219977013767594e-11,
+              "sample_flux_wb_per_a": 3.32879922387208e-09,
+              "wall_flux_wb_per_a": 2.8541114133695343e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 94,
+            "conductor": "VES_78",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 3.0847411517904657e-09,
+              "grid_radial_field_t_per_a": 1.5924895997034616e-10,
+              "grid_vertical_field_t_per_a": 7.83884280858594e-11,
+              "sample_flux_wb_per_a": 3.7193149340918763e-09,
+              "wall_flux_wb_per_a": 3.3437723644117853e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 95,
+            "conductor": "VES_79",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 4.184430906857565e-09,
+              "grid_radial_field_t_per_a": 2.125190971685944e-10,
+              "grid_vertical_field_t_per_a": 1.3466476181193638e-10,
+              "sample_flux_wb_per_a": 5.304938191759465e-09,
+              "wall_flux_wb_per_a": 5.229396271442594e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 96,
+            "conductor": "VES_80",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 2.875425705985561e-09,
+              "grid_radial_field_t_per_a": 9.055313751130283e-11,
+              "grid_vertical_field_t_per_a": 2.1427876739580331e-10,
+              "sample_flux_wb_per_a": 3.9244156113564315e-09,
+              "wall_flux_wb_per_a": 3.171582436736821e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 97,
+            "conductor": "VES_81",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.1738986615183935e-10,
+              "grid_radial_field_t_per_a": 1.032982828821442e-11,
+              "grid_vertical_field_t_per_a": 4.714688810568132e-12,
+              "sample_flux_wb_per_a": 1.4780831921537834e-10,
+              "wall_flux_wb_per_a": 1.1837009913307698e-10
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 98,
+            "conductor": "VES_82",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 99,
+            "conductor": "VES_83",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 100,
+            "conductor": "VES_84",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 101,
+            "conductor": "VES_85",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 102,
+            "conductor": "VES_86",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 103,
+            "conductor": "VES_87",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 104,
+            "conductor": "VES_88",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 105,
+            "conductor": "VES_89",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 106,
+            "conductor": "VES_90",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 107,
+            "conductor": "VES_91",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 108,
+            "conductor": "VES_92",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 109,
+            "conductor": "VES_93",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 110,
+            "conductor": "VES_94",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.972430336683193e-09,
+              "grid_radial_field_t_per_a": 1.5143010829745596e-10,
+              "grid_vertical_field_t_per_a": 1.327780527670629e-10,
+              "sample_flux_wb_per_a": 2.589045167740213e-09,
+              "wall_flux_wb_per_a": 2.327944958579247e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 111,
+            "conductor": "VES_95",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 4.560333513629688e-09,
+              "grid_radial_field_t_per_a": 1.971121715059947e-10,
+              "grid_vertical_field_t_per_a": 3.0313302870454916e-10,
+              "sample_flux_wb_per_a": 5.883787680182673e-09,
+              "wall_flux_wb_per_a": 4.760352571735067e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 112,
+            "conductor": "VES_96",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 6.950920984242909e-09,
+              "grid_radial_field_t_per_a": 3.7814937279501875e-10,
+              "grid_vertical_field_t_per_a": 3.3084234751617844e-10,
+              "sample_flux_wb_per_a": 9.186714407760532e-09,
+              "wall_flux_wb_per_a": 7.0776660371199335e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 113,
+            "conductor": "VES_97",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 5.622994493703081e-09,
+              "grid_radial_field_t_per_a": 3.1655022421464803e-10,
+              "grid_vertical_field_t_per_a": 2.4396587631885084e-10,
+              "sample_flux_wb_per_a": 7.364091319203941e-09,
+              "wall_flux_wb_per_a": 6.023430350443046e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 114,
+            "conductor": "VES_98",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 3.0997621933892734e-09,
+              "grid_radial_field_t_per_a": 1.7101413750307348e-10,
+              "grid_vertical_field_t_per_a": 2.1200008972628168e-10,
+              "sample_flux_wb_per_a": 3.909895424367824e-09,
+              "wall_flux_wb_per_a": 3.2880693557769806e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 115,
+            "conductor": "VES_99",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 5.168796917541941e-10,
+              "grid_radial_field_t_per_a": 3.4955507205825774e-11,
+              "grid_vertical_field_t_per_a": 3.5515876315182666e-11,
+              "sample_flux_wb_per_a": 6.786325645451738e-10,
+              "wall_flux_wb_per_a": 6.087871233214829e-10
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 116,
+            "conductor": "VES_100",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 3.8199024911709595e-09,
+              "grid_radial_field_t_per_a": 2.1511531671152095e-10,
+              "grid_vertical_field_t_per_a": 1.465149774154965e-10,
+              "sample_flux_wb_per_a": 5.049605510550173e-09,
+              "wall_flux_wb_per_a": 4.104927609786929e-09
+            }
+          }
+        ]
+      },
+      "external_wall": {
+        "after_route_counts": {
+          "cylinder": 25,
+          "polysection": 657
+        },
+        "before_route_counts": {
+          "cylinder": 321,
+          "polysection": 361
+        },
+        "components": {
+          "flux": {
+            "actual_current_argmax_row": 2,
+            "actual_current_argmax_rz_m": [
+              6.9436333333333335,
+              -2.5174000000000003
+            ],
+            "actual_current_signed_at_sup": -8.575483138726176e-05,
+            "actual_current_sup": 8.575483138726176e-05,
+            "matrix_changed_entries": 12870,
+            "matrix_sup_per_a": 5.973938210788782e-08,
+            "unit": "Wb"
+          },
+          "radial_field": {
+            "actual_current_argmax_row": 2,
+            "actual_current_argmax_rz_m": [
+              6.9436333333333335,
+              -2.5174000000000003
+            ],
+            "actual_current_signed_at_sup": -4.219536138093416e-06,
+            "actual_current_sup": 4.219536138093416e-06,
+            "matrix_changed_entries": 12870,
+            "matrix_sup_per_a": 3.2138792262037776e-09,
+            "unit": "T"
+          },
+          "vertical_field": {
+            "actual_current_argmax_row": 1,
+            "actual_current_argmax_rz_m": [
+              6.604866666666666,
+              -2.7804
+            ],
+            "actual_current_signed_at_sup": -5.383666130376714e-06,
+            "actual_current_sup": 5.383666130376714e-06,
+            "matrix_changed_entries": 12870,
+            "matrix_sup_per_a": 3.886281577206657e-09,
+            "unit": "T"
+          }
+        },
+        "fixture": "coarse",
+        "interpretation": "Only external conductor coupling is evaluated. It is independent of the plasma source mesh; the fixture name changes only the fixed wall sampling density.",
+        "poloidal_field_vector": {
+          "actual_current_argmax_row": 1,
+          "actual_current_argmax_rz_m": [
+            6.604866666666666,
+            -2.7804
+          ],
+          "actual_current_sup": 5.383853519994376e-06,
+          "unit": "T"
+        },
+        "source_elements": 682,
+        "wall_rows": 165,
+        "wall_seconds": {
+          "after": 30.08597356081009,
+          "before": 15.38096521049738
+        }
+      }
+    },
+    "fine": {
+      "design_matrices": {
+        "cells": 1069,
+        "cpu_design_matrix_wall_seconds": {
+          "after_exact_only_policy": 2951.500812754035,
+          "after_over_before": 1.052032597249562,
+          "before_reachable_route_excision": 2805.522205747664
+        },
+        "driven_field_correction": {
+          "grid_flux_argmax_cell": 714,
+          "grid_flux_argmax_rz_m": [
+            6.902306341747956,
+            -2.5269121823410257
+          ],
+          "grid_flux_sup_wb": 8.367382305469932e-05,
+          "grid_poloidal_field_argmax_cell": 693,
+          "grid_poloidal_field_argmax_rz_m": [
+            7.2063920719983345,
+            -2.3121381022123426
+          ],
+          "grid_poloidal_field_vector_sup_t": 4.921622042520532e-06,
+          "grid_radial_field_sup_t": 4.362377041129254e-06,
+          "grid_vertical_field_sup_t": 4.48632051882748e-06,
+          "wall_flux_argmax_row": 4,
+          "wall_flux_argmax_rz_m": [
+            6.9436333333333335,
+            -2.5174000000000003
+          ],
+          "wall_flux_sup_wb": 8.575483138726176e-05
+        },
+        "fixture": "fine",
+        "matrix_comparison": {
+          "accounting": "Every changed entry is generated by replacing the rectangle-kernel substitution on a non-axis-aligned authored source with the exact polygon-section kernel; rows already using an exact shape-matched kernel are checked separately for bit identity.",
+          "all_bitwise_equal": false,
+          "changed_entries": 495612,
+          "fields": {
+            "plasma_to_grid": {
+              "bitwise_equal": true,
+              "changed_entries": 0,
+              "maximum_absolute_change": 0.0,
+              "shape": [
+                1069,
+                1069
+              ]
+            },
+            "plasma_to_grid_r": {
+              "bitwise_equal": true,
+              "changed_entries": 0,
+              "maximum_absolute_change": 0.0,
+              "shape": [
+                1069,
+                1069
+              ]
+            },
+            "plasma_to_grid_z": {
+              "bitwise_equal": true,
+              "changed_entries": 0,
+              "maximum_absolute_change": 0.0,
+              "shape": [
+                1069,
+                1069
+              ]
+            },
+            "plasma_to_sample": {
+              "bitwise_equal": true,
+              "changed_entries": 0,
+              "maximum_absolute_change": 0.0,
+              "shape": [
+                2817,
+                1069
+              ]
+            },
+            "plasma_to_sample_r": {
+              "bitwise_equal": true,
+              "changed_entries": 0,
+              "maximum_absolute_change": 0.0,
+              "shape": [
+                2817,
+                1069
+              ]
+            },
+            "plasma_to_sample_z": {
+              "bitwise_equal": true,
+              "changed_entries": 0,
+              "maximum_absolute_change": 0.0,
+              "shape": [
+                2817,
+                1069
+              ]
+            },
+            "plasma_to_wall": {
+              "bitwise_equal": true,
+              "changed_entries": 0,
+              "maximum_absolute_change": 0.0,
+              "shape": [
+                330,
+                1069
+              ]
+            },
+            "plasma_to_wall_r": {
+              "bitwise_equal": true,
+              "changed_entries": 0,
+              "maximum_absolute_change": 0.0,
+              "shape": [
+                330,
+                1069
+              ]
+            },
+            "plasma_to_wall_z": {
+              "bitwise_equal": true,
+              "changed_entries": 0,
+              "maximum_absolute_change": 0.0,
+              "shape": [
+                330,
+                1069
+              ]
+            },
+            "radial_field_0": {
+              "bitwise_equal": false,
+              "changed_entries": 83382,
+              "maximum_absolute_change": 3.2420032356111953e-09,
+              "shape": [
+                1069,
+                117
+              ]
+            },
+            "radial_field_1": {
+              "bitwise_equal": true,
+              "changed_entries": 0,
+              "maximum_absolute_change": 0.0,
+              "shape": [
+                1069,
+                1069
+              ]
+            },
+            "radial_field_2": {
+              "bitwise_equal": true,
+              "changed_entries": 0,
+              "maximum_absolute_change": 0.0,
+              "shape": [
+                1069,
+                1069
+              ]
+            },
+            "radial_field_3": {
+              "bitwise_equal": true,
+              "changed_entries": 0,
+              "maximum_absolute_change": 0.0,
+              "shape": [
+                1069,
+                1069
+              ]
+            },
+            "source_to_grid": {
+              "bitwise_equal": false,
+              "changed_entries": 83382,
+              "maximum_absolute_change": 5.851646355972578e-08,
+              "shape": [
+                1069,
+                117
+              ]
+            },
+            "source_to_sample": {
+              "bitwise_equal": false,
+              "changed_entries": 219726,
+              "maximum_absolute_change": 7.64279152651632e-08,
+              "shape": [
+                2817,
+                117
+              ]
+            },
+            "source_to_wall": {
+              "bitwise_equal": false,
+              "changed_entries": 25740,
+              "maximum_absolute_change": 5.973938210788782e-08,
+              "shape": [
+                330,
+                117
+              ]
+            },
+            "vertical_field_0": {
+              "bitwise_equal": false,
+              "changed_entries": 83382,
+              "maximum_absolute_change": 3.2259907044779594e-09,
+              "shape": [
+                1069,
+                117
+              ]
+            },
+            "vertical_field_1": {
+              "bitwise_equal": true,
+              "changed_entries": 0,
+              "maximum_absolute_change": 0.0,
+              "shape": [
+                1069,
+                1069
+              ]
+            },
+            "vertical_field_2": {
+              "bitwise_equal": true,
+              "changed_entries": 0,
+              "maximum_absolute_change": 0.0,
+              "shape": [
+                1069,
+                1069
+              ]
+            },
+            "vertical_field_3": {
+              "bitwise_equal": true,
+              "changed_entries": 0,
+              "maximum_absolute_change": 0.0,
+              "shape": [
+                1069,
+                1069
+              ]
+            }
+          },
+          "maximum_absolute_change": 7.64279152651632e-08
+        },
+        "receipt_verification": {
+          "after": {
+            "cells": 1069,
+            "cpu_design_matrix_wall_seconds": 2951.500812754035,
+            "fixture": "fine",
+            "fixture_sha256": "20333a7c180703e62f8d3c9eb9caaa2c7519a6b85a2355230b5dd2019500bfc8",
+            "route": "after",
+            "route_counts": {
+              "cylinder": 25,
+              "polysection": 657
+            },
+            "sample_rows": 2817,
+            "snapshot_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/exact-kernel-defaults/tests/exact_section_fine_after.npz",
+            "snapshot_sha256": "c218b0b6f884f1c0b649400e7b604bd2ed29358450408d1820cff90b9b4f406e",
+            "source_columns": 117,
+            "source_elements": 682,
+            "wall_rows": 330
+          },
+          "before": {
+            "cells": 1069,
+            "cpu_design_matrix_wall_seconds": 2805.522205747664,
+            "fixture": "fine",
+            "fixture_sha256": "20333a7c180703e62f8d3c9eb9caaa2c7519a6b85a2355230b5dd2019500bfc8",
+            "route": "before",
+            "route_counts": {
+              "cylinder": 321,
+              "polysection": 361
+            },
+            "sample_rows": 2817,
+            "snapshot_path": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/exact-kernel-defaults/tests/exact_section_fine_before.npz",
+            "snapshot_sha256": "2dd7b57ed9c22e020d07921b4e4d5a5353798dc7c71950e5773d675889a74429",
+            "source_columns": 117,
+            "source_elements": 682,
+            "wall_rows": 330
+          },
+          "fixture_inputs_identical": true,
+          "shared_fixture_sha256": "20333a7c180703e62f8d3c9eb9caaa2c7519a6b85a2355230b5dd2019500bfc8",
+          "source_current_bitwise_equal": true,
+          "source_order_bitwise_equal": true
+        },
+        "row_accounting_summary": {
+          "all_unchanged_columns_bitwise_equal": true,
+          "bitwise_unchanged_source_columns": 39,
+          "change_mechanism": "Every changed column belonged to an authored non-axis-aligned polygon previously substituted by a rectangular Cylinder. Exact shape-matched source columns remain bitwise identical.",
+          "changed_conductors": [
+            "TRI_SUPP",
+            "COPP_CLAD",
+            "VES_7",
+            "VES_8",
+            "VES_9",
+            "VES_10",
+            "VES_11",
+            "VES_12",
+            "VES_13",
+            "VES_14",
+            "VES_15",
+            "VES_16",
+            "VES_17",
+            "VES_18",
+            "VES_19",
+            "VES_20",
+            "VES_21",
+            "VES_22",
+            "VES_23",
+            "VES_24",
+            "VES_25",
+            "VES_26",
+            "VES_27",
+            "VES_28",
+            "VES_29",
+            "VES_30",
+            "VES_31",
+            "VES_32",
+            "VES_33",
+            "VES_34",
+            "VES_35",
+            "VES_36",
+            "VES_37",
+            "VES_38",
+            "VES_39",
+            "VES_40",
+            "VES_41",
+            "VES_42",
+            "VES_43",
+            "VES_44",
+            "VES_51",
+            "VES_52",
+            "VES_53",
+            "VES_54",
+            "VES_55",
+            "VES_56",
+            "VES_57",
+            "VES_58",
+            "VES_59",
+            "VES_60",
+            "VES_61",
+            "VES_62",
+            "VES_63",
+            "VES_64",
+            "VES_65",
+            "VES_66",
+            "VES_67",
+            "VES_68",
+            "VES_69",
+            "VES_70",
+            "VES_71",
+            "VES_72",
+            "VES_73",
+            "VES_74",
+            "VES_75",
+            "VES_76",
+            "VES_77",
+            "VES_78",
+            "VES_79",
+            "VES_80",
+            "VES_81",
+            "VES_94",
+            "VES_95",
+            "VES_96",
+            "VES_97",
+            "VES_98",
+            "VES_99",
+            "VES_100"
+          ],
+          "changed_source_columns": 78,
+          "source_columns": 117
+        },
+        "source_column_accounting": [
+          {
+            "bitwise_equal": true,
+            "column": 0,
+            "conductor": "CS3U",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 1,
+            "conductor": "CS2U",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 2,
+            "conductor": "CS1U",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 3,
+            "conductor": "CS1L",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 4,
+            "conductor": "CS2L",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 5,
+            "conductor": "CS3L",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 6,
+            "conductor": "PF1",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 7,
+            "conductor": "PF2",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 8,
+            "conductor": "PF3",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 9,
+            "conductor": "PF4",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 10,
+            "conductor": "PF5",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 11,
+            "conductor": "PF6",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 12,
+            "conductor": "VS3U",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 13,
+            "conductor": "VS3L",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 14,
+            "conductor": "TRI_SUPP",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 5.851646355972578e-08,
+              "grid_radial_field_t_per_a": 3.2420032356111953e-09,
+              "grid_vertical_field_t_per_a": 3.2259907044779594e-09,
+              "sample_flux_wb_per_a": 7.64279152651632e-08,
+              "wall_flux_wb_per_a": 5.973938210788782e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 15,
+            "conductor": "COPP_CLAD",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 2.1536014067582336e-09,
+              "grid_radial_field_t_per_a": 1.2002315210430812e-10,
+              "grid_vertical_field_t_per_a": 1.2012738995513686e-10,
+              "sample_flux_wb_per_a": 2.7041648194622977e-09,
+              "wall_flux_wb_per_a": 2.258411533227544e-09
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 16,
+            "conductor": "INB_RAIL",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 17,
+            "conductor": "VES_1",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 18,
+            "conductor": "VES_2",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 19,
+            "conductor": "VES_3",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 20,
+            "conductor": "VES_4",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 21,
+            "conductor": "VES_5",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 22,
+            "conductor": "VES_6",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 23,
+            "conductor": "VES_7",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 2.591695061498648e-10,
+              "grid_radial_field_t_per_a": 3.290469252316615e-11,
+              "grid_vertical_field_t_per_a": 2.7661765784163695e-11,
+              "sample_flux_wb_per_a": 3.441070382060934e-10,
+              "wall_flux_wb_per_a": 3.0682022996561986e-10
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 24,
+            "conductor": "VES_8",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 5.44475972575332e-09,
+              "grid_radial_field_t_per_a": 5.574865239145997e-10,
+              "grid_vertical_field_t_per_a": 6.030278628604072e-10,
+              "sample_flux_wb_per_a": 7.353877227175512e-09,
+              "wall_flux_wb_per_a": 6.408018720894203e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 25,
+            "conductor": "VES_9",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 8.765876896799641e-09,
+              "grid_radial_field_t_per_a": 6.759348338188075e-10,
+              "grid_vertical_field_t_per_a": 9.07727455508762e-10,
+              "sample_flux_wb_per_a": 1.1775378311072723e-08,
+              "wall_flux_wb_per_a": 1.0395704387588321e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 26,
+            "conductor": "VES_10",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.2347982529944959e-08,
+              "grid_radial_field_t_per_a": 1.4108984729396673e-09,
+              "grid_vertical_field_t_per_a": 8.137073997834765e-10,
+              "sample_flux_wb_per_a": 1.6574293176508753e-08,
+              "wall_flux_wb_per_a": 1.40665844300847e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 27,
+            "conductor": "VES_11",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.6516767372164377e-08,
+              "grid_radial_field_t_per_a": 1.6626263217959955e-09,
+              "grid_vertical_field_t_per_a": 1.0509694920679823e-09,
+              "sample_flux_wb_per_a": 2.308972118283304e-08,
+              "wall_flux_wb_per_a": 1.8862408318595295e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 28,
+            "conductor": "VES_12",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 2.052338452041214e-09,
+              "grid_radial_field_t_per_a": 2.1557045890991274e-10,
+              "grid_vertical_field_t_per_a": 3.0596455180721495e-10,
+              "sample_flux_wb_per_a": 3.119842120181905e-09,
+              "wall_flux_wb_per_a": 2.361201733159894e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 29,
+            "conductor": "VES_13",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 9.168381250050292e-09,
+              "grid_radial_field_t_per_a": 8.17135301628234e-10,
+              "grid_vertical_field_t_per_a": 8.809395893252213e-10,
+              "sample_flux_wb_per_a": 1.2844682515284226e-08,
+              "wall_flux_wb_per_a": 9.590884110469454e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 30,
+            "conductor": "VES_14",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.447256966305183e-08,
+              "grid_radial_field_t_per_a": 1.1690392730167295e-09,
+              "grid_vertical_field_t_per_a": 8.00951683833848e-10,
+              "sample_flux_wb_per_a": 2.0293110302366447e-08,
+              "wall_flux_wb_per_a": 1.5596543736831592e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 31,
+            "conductor": "VES_15",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.6146123822160103e-08,
+              "grid_radial_field_t_per_a": 9.912664237726986e-10,
+              "grid_vertical_field_t_per_a": 1.244551974364255e-09,
+              "sample_flux_wb_per_a": 2.2313421912468004e-08,
+              "wall_flux_wb_per_a": 1.6049776199666494e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 32,
+            "conductor": "VES_16",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.4490824637586466e-08,
+              "grid_radial_field_t_per_a": 9.401216478422137e-10,
+              "grid_vertical_field_t_per_a": 9.213160981744474e-10,
+              "sample_flux_wb_per_a": 1.956499499960524e-08,
+              "wall_flux_wb_per_a": 1.6527769115700475e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 33,
+            "conductor": "VES_17",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.557184794557205e-08,
+              "grid_radial_field_t_per_a": 9.423457191686025e-10,
+              "grid_vertical_field_t_per_a": 8.935446989173199e-10,
+              "sample_flux_wb_per_a": 2.134341099312563e-08,
+              "wall_flux_wb_per_a": 1.5923092297802854e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 34,
+            "conductor": "VES_18",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.87447330584172e-08,
+              "grid_radial_field_t_per_a": 8.092452875754474e-10,
+              "grid_vertical_field_t_per_a": 1.0692440439019356e-09,
+              "sample_flux_wb_per_a": 2.506715821643096e-08,
+              "wall_flux_wb_per_a": 1.9271861474810527e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 35,
+            "conductor": "VES_19",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.6598457570220665e-08,
+              "grid_radial_field_t_per_a": 8.952026702294579e-10,
+              "grid_vertical_field_t_per_a": 9.72920844844842e-10,
+              "sample_flux_wb_per_a": 2.2000299197428436e-08,
+              "wall_flux_wb_per_a": 1.848512913058502e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 36,
+            "conductor": "VES_20",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.613634676580171e-08,
+              "grid_radial_field_t_per_a": 8.813679002769363e-10,
+              "grid_vertical_field_t_per_a": 1.0244627791279882e-09,
+              "sample_flux_wb_per_a": 2.2533402630130716e-08,
+              "wall_flux_wb_per_a": 1.891732211786875e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 37,
+            "conductor": "VES_21",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 2.000937059120329e-08,
+              "grid_radial_field_t_per_a": 1.0673084152848862e-09,
+              "grid_vertical_field_t_per_a": 1.345463874127892e-09,
+              "sample_flux_wb_per_a": 2.838700991446207e-08,
+              "wall_flux_wb_per_a": 2.5409842576353957e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 38,
+            "conductor": "VES_22",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.9790360740017934e-08,
+              "grid_radial_field_t_per_a": 9.283392595639085e-10,
+              "grid_vertical_field_t_per_a": 1.2787127254846278e-09,
+              "sample_flux_wb_per_a": 2.8239295489707788e-08,
+              "wall_flux_wb_per_a": 2.001267697446021e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 39,
+            "conductor": "VES_23",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 8.672984408205356e-09,
+              "grid_radial_field_t_per_a": 6.060055416256498e-10,
+              "grid_vertical_field_t_per_a": 5.143201533046486e-10,
+              "sample_flux_wb_per_a": 1.208017542731122e-08,
+              "wall_flux_wb_per_a": 9.424325492724472e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 40,
+            "conductor": "VES_24",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 2.728085411128736e-09,
+              "grid_radial_field_t_per_a": 1.828870721979975e-10,
+              "grid_vertical_field_t_per_a": 1.568491681424201e-10,
+              "sample_flux_wb_per_a": 3.771284526436362e-09,
+              "wall_flux_wb_per_a": 3.225376652151807e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 41,
+            "conductor": "VES_25",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 9.374598150031386e-10,
+              "grid_radial_field_t_per_a": 6.003045330772238e-11,
+              "grid_vertical_field_t_per_a": 5.210763979773115e-11,
+              "sample_flux_wb_per_a": 1.2584760024411787e-09,
+              "wall_flux_wb_per_a": 1.1261342932690802e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 42,
+            "conductor": "VES_26",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 6.643450817949998e-09,
+              "grid_radial_field_t_per_a": 4.3590848108606896e-10,
+              "grid_vertical_field_t_per_a": 3.7363725544862703e-10,
+              "sample_flux_wb_per_a": 8.937755862071893e-09,
+              "wall_flux_wb_per_a": 7.33576685362991e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 43,
+            "conductor": "VES_27",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 2.077407954892348e-08,
+              "grid_radial_field_t_per_a": 1.0153165253144228e-09,
+              "grid_vertical_field_t_per_a": 1.4215195765130967e-09,
+              "sample_flux_wb_per_a": 2.9421155061084485e-08,
+              "wall_flux_wb_per_a": 2.2919837819737404e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 44,
+            "conductor": "VES_28",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 2.3809850632599395e-08,
+              "grid_radial_field_t_per_a": 1.2582118734246293e-09,
+              "grid_vertical_field_t_per_a": 1.2369213054911453e-09,
+              "sample_flux_wb_per_a": 3.184628199059817e-08,
+              "wall_flux_wb_per_a": 2.5048787925821222e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 45,
+            "conductor": "VES_29",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 2.398632644001991e-08,
+              "grid_radial_field_t_per_a": 1.1014832555683785e-09,
+              "grid_vertical_field_t_per_a": 1.3569843801730285e-09,
+              "sample_flux_wb_per_a": 3.3223782404636146e-08,
+              "wall_flux_wb_per_a": 2.5337931810004107e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 46,
+            "conductor": "VES_30",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.6624000175466055e-08,
+              "grid_radial_field_t_per_a": 9.634888122422635e-10,
+              "grid_vertical_field_t_per_a": 9.952757050954063e-10,
+              "sample_flux_wb_per_a": 2.275969904109258e-08,
+              "wall_flux_wb_per_a": 1.9764689023515675e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 47,
+            "conductor": "VES_31",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.4486272611322944e-08,
+              "grid_radial_field_t_per_a": 6.211490731629743e-10,
+              "grid_vertical_field_t_per_a": 6.929951216194788e-10,
+              "sample_flux_wb_per_a": 1.8547718024379724e-08,
+              "wall_flux_wb_per_a": 1.5391108293814795e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 48,
+            "conductor": "VES_32",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 9.400971097541449e-09,
+              "grid_radial_field_t_per_a": 5.109892317152167e-10,
+              "grid_vertical_field_t_per_a": 3.8024517226158955e-10,
+              "sample_flux_wb_per_a": 1.18651968278953e-08,
+              "wall_flux_wb_per_a": 9.578383398317159e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 49,
+            "conductor": "VES_33",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 5.293050616871824e-09,
+              "grid_radial_field_t_per_a": 2.4690917298533304e-10,
+              "grid_vertical_field_t_per_a": 1.8424882021993055e-10,
+              "sample_flux_wb_per_a": 6.465823786217748e-09,
+              "wall_flux_wb_per_a": 5.61038300313452e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 50,
+            "conductor": "VES_34",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 3.866454664550441e-09,
+              "grid_radial_field_t_per_a": 1.0921169082028788e-10,
+              "grid_vertical_field_t_per_a": 1.5001530359509694e-10,
+              "sample_flux_wb_per_a": 4.52118327700179e-09,
+              "wall_flux_wb_per_a": 4.131704179455271e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 51,
+            "conductor": "VES_35",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 3.5675804235020552e-09,
+              "grid_radial_field_t_per_a": 1.3667296124027674e-10,
+              "grid_vertical_field_t_per_a": 9.650201137652355e-11,
+              "sample_flux_wb_per_a": 4.231805304404969e-09,
+              "wall_flux_wb_per_a": 3.732875021299908e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 52,
+            "conductor": "VES_36",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 2.9206379743968548e-09,
+              "grid_radial_field_t_per_a": 3.2792818588347625e-10,
+              "grid_vertical_field_t_per_a": 2.1041738368856471e-10,
+              "sample_flux_wb_per_a": 3.6968898153993414e-09,
+              "wall_flux_wb_per_a": 3.2542841805173407e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 53,
+            "conductor": "VES_37",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.2170208183477497e-08,
+              "grid_radial_field_t_per_a": 3.4798970876390834e-10,
+              "grid_vertical_field_t_per_a": 1.1853965651347717e-09,
+              "sample_flux_wb_per_a": 1.6947114663200767e-08,
+              "wall_flux_wb_per_a": 1.2333028051993242e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 54,
+            "conductor": "VES_38",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 3.351394536047674e-09,
+              "grid_radial_field_t_per_a": 4.1210297967014425e-10,
+              "grid_vertical_field_t_per_a": 7.466831475972264e-10,
+              "sample_flux_wb_per_a": 6.7999911233230755e-09,
+              "wall_flux_wb_per_a": 3.567448067900628e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 55,
+            "conductor": "VES_39",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.810006493355832e-09,
+              "grid_radial_field_t_per_a": 1.0541131579068635e-10,
+              "grid_vertical_field_t_per_a": 7.552064574776925e-11,
+              "sample_flux_wb_per_a": 2.3917561552436965e-09,
+              "wall_flux_wb_per_a": 1.8476106719904578e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 56,
+            "conductor": "VES_40",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 5.209461688781658e-09,
+              "grid_radial_field_t_per_a": 1.6217920281715476e-10,
+              "grid_vertical_field_t_per_a": 2.4966668396589483e-10,
+              "sample_flux_wb_per_a": 6.188037786482536e-09,
+              "wall_flux_wb_per_a": 5.438360127084808e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 57,
+            "conductor": "VES_41",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 3.554583999498405e-09,
+              "grid_radial_field_t_per_a": 2.4521313121000095e-10,
+              "grid_vertical_field_t_per_a": 4.651997147258104e-10,
+              "sample_flux_wb_per_a": 4.109673480897377e-09,
+              "wall_flux_wb_per_a": 3.68747591720714e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 58,
+            "conductor": "VES_42",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 8.873422880514861e-09,
+              "grid_radial_field_t_per_a": 7.023556374750035e-10,
+              "grid_vertical_field_t_per_a": 5.037551890274199e-10,
+              "sample_flux_wb_per_a": 1.1671387810734091e-08,
+              "wall_flux_wb_per_a": 1.1134856342349549e-08
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 59,
+            "conductor": "VES_43",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 3.619939694077292e-09,
+              "grid_radial_field_t_per_a": 6.280568807397354e-10,
+              "grid_vertical_field_t_per_a": 3.230697890458206e-10,
+              "sample_flux_wb_per_a": 4.8038794037040875e-09,
+              "wall_flux_wb_per_a": 3.9539733067335976e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 60,
+            "conductor": "VES_44",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.6051265459672364e-10,
+              "grid_radial_field_t_per_a": 1.467318360784007e-11,
+              "grid_vertical_field_t_per_a": 1.784008272132615e-11,
+              "sample_flux_wb_per_a": 2.1818590567284474e-10,
+              "wall_flux_wb_per_a": 1.8406157724036034e-10
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 61,
+            "conductor": "VES_45",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 62,
+            "conductor": "VES_46",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 63,
+            "conductor": "VES_47",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 64,
+            "conductor": "VES_48",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 65,
+            "conductor": "VES_49",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 66,
+            "conductor": "VES_50",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 67,
+            "conductor": "VES_51",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 4.482667763040774e-09,
+              "grid_radial_field_t_per_a": 2.132522768182726e-10,
+              "grid_vertical_field_t_per_a": 1.5559887437158656e-10,
+              "sample_flux_wb_per_a": 5.469725063172952e-09,
+              "wall_flux_wb_per_a": 4.70250089841767e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 68,
+            "conductor": "VES_52",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 4.715944734914117e-09,
+              "grid_radial_field_t_per_a": 1.7891924708860487e-10,
+              "grid_vertical_field_t_per_a": 1.9437792875174722e-10,
+              "sample_flux_wb_per_a": 5.5595070091345785e-09,
+              "wall_flux_wb_per_a": 4.934126219744133e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 69,
+            "conductor": "VES_53",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 5.246863273808297e-09,
+              "grid_radial_field_t_per_a": 1.8697353990796735e-10,
+              "grid_vertical_field_t_per_a": 1.8309423486806757e-10,
+              "sample_flux_wb_per_a": 6.246222132546468e-09,
+              "wall_flux_wb_per_a": 5.379474112212235e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 70,
+            "conductor": "VES_54",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 5.275525627680873e-09,
+              "grid_radial_field_t_per_a": 1.9162423067546559e-10,
+              "grid_vertical_field_t_per_a": 1.7316904306446718e-10,
+              "sample_flux_wb_per_a": 6.140492883148485e-09,
+              "wall_flux_wb_per_a": 5.440562517586631e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 71,
+            "conductor": "VES_55",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 6.04418591546824e-09,
+              "grid_radial_field_t_per_a": 1.7968330239939842e-10,
+              "grid_vertical_field_t_per_a": 1.9081317066537451e-10,
+              "sample_flux_wb_per_a": 7.055073851002441e-09,
+              "wall_flux_wb_per_a": 6.260341843575647e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 72,
+            "conductor": "VES_56",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 5.829404321201195e-09,
+              "grid_radial_field_t_per_a": 1.553091453331451e-10,
+              "grid_vertical_field_t_per_a": 1.82976498500821e-10,
+              "sample_flux_wb_per_a": 6.927033394557271e-09,
+              "wall_flux_wb_per_a": 6.018194583104426e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 73,
+            "conductor": "VES_57",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 5.287789225719288e-09,
+              "grid_radial_field_t_per_a": 1.2294773214649388e-10,
+              "grid_vertical_field_t_per_a": 1.880420436848457e-10,
+              "sample_flux_wb_per_a": 6.364087721241263e-09,
+              "wall_flux_wb_per_a": 5.541713647613653e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 74,
+            "conductor": "VES_58",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 4.6626603072982636e-09,
+              "grid_radial_field_t_per_a": 1.2905199680694956e-10,
+              "grid_vertical_field_t_per_a": 1.5250213122293465e-10,
+              "sample_flux_wb_per_a": 5.451800159795152e-09,
+              "wall_flux_wb_per_a": 4.8280779357626495e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 75,
+            "conductor": "VES_59",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 4.716911109719748e-09,
+              "grid_radial_field_t_per_a": 1.4596665969332452e-10,
+              "grid_vertical_field_t_per_a": 1.6794635072362142e-10,
+              "sample_flux_wb_per_a": 5.633649681621792e-09,
+              "wall_flux_wb_per_a": 4.903287602277175e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 76,
+            "conductor": "VES_60",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 2.672844858822961e-09,
+              "grid_radial_field_t_per_a": 9.952783675485327e-11,
+              "grid_vertical_field_t_per_a": 8.703833398617463e-11,
+              "sample_flux_wb_per_a": 3.198069608342357e-09,
+              "wall_flux_wb_per_a": 2.972617768778852e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 77,
+            "conductor": "VES_61",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 7.447253175706309e-10,
+              "grid_radial_field_t_per_a": 2.920693907274766e-11,
+              "grid_vertical_field_t_per_a": 2.3980124707424348e-11,
+              "sample_flux_wb_per_a": 8.775877924141191e-10,
+              "wall_flux_wb_per_a": 7.987079320408846e-10
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 78,
+            "conductor": "VES_62",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.1776229353238675e-09,
+              "grid_radial_field_t_per_a": 4.447600177058486e-11,
+              "grid_vertical_field_t_per_a": 3.7857522618455767e-11,
+              "sample_flux_wb_per_a": 1.4068135946066905e-09,
+              "wall_flux_wb_per_a": 1.2888970461194115e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 79,
+            "conductor": "VES_63",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 3.511835353271921e-09,
+              "grid_radial_field_t_per_a": 1.342141386989536e-10,
+              "grid_vertical_field_t_per_a": 1.1819370191379683e-10,
+              "sample_flux_wb_per_a": 4.1816963694219715e-09,
+              "wall_flux_wb_per_a": 3.773188124144971e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 80,
+            "conductor": "VES_64",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 6.633490477539608e-09,
+              "grid_radial_field_t_per_a": 1.6403234143823918e-10,
+              "grid_vertical_field_t_per_a": 2.43053687644049e-10,
+              "sample_flux_wb_per_a": 8.034567729291447e-09,
+              "wall_flux_wb_per_a": 6.996269166945974e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 81,
+            "conductor": "VES_65",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 4.673349869042172e-09,
+              "grid_radial_field_t_per_a": 1.2667526348644365e-10,
+              "grid_vertical_field_t_per_a": 1.504751988158254e-10,
+              "sample_flux_wb_per_a": 5.53938587731292e-09,
+              "wall_flux_wb_per_a": 4.882474997080919e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 82,
+            "conductor": "VES_66",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 4.69077645226957e-09,
+              "grid_radial_field_t_per_a": 9.919970472322667e-11,
+              "grid_vertical_field_t_per_a": 1.5780357705733582e-10,
+              "sample_flux_wb_per_a": 5.43536196550388e-09,
+              "wall_flux_wb_per_a": 4.7076153675177734e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 83,
+            "conductor": "VES_67",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 3.780063527051073e-09,
+              "grid_radial_field_t_per_a": 1.018898157864354e-10,
+              "grid_vertical_field_t_per_a": 1.2404520046928554e-10,
+              "sample_flux_wb_per_a": 4.398680031630529e-09,
+              "wall_flux_wb_per_a": 4.059573051731145e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 84,
+            "conductor": "VES_68",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 3.251481638230966e-09,
+              "grid_radial_field_t_per_a": 7.959245431410226e-11,
+              "grid_vertical_field_t_per_a": 1.0199597560735221e-10,
+              "sample_flux_wb_per_a": 3.734521004318845e-09,
+              "wall_flux_wb_per_a": 3.3619864400122313e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 85,
+            "conductor": "VES_69",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 2.45585681708476e-09,
+              "grid_radial_field_t_per_a": 6.691583241489822e-11,
+              "grid_vertical_field_t_per_a": 6.066817042808776e-11,
+              "sample_flux_wb_per_a": 2.8168787878666624e-09,
+              "wall_flux_wb_per_a": 2.4925568701968353e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 86,
+            "conductor": "VES_70",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.941040400318508e-09,
+              "grid_radial_field_t_per_a": 5.413890782106677e-11,
+              "grid_vertical_field_t_per_a": 6.317554230010408e-11,
+              "sample_flux_wb_per_a": 2.220264927609055e-09,
+              "wall_flux_wb_per_a": 2.0324303100829324e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 87,
+            "conductor": "VES_71",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 2.034384436993132e-09,
+              "grid_radial_field_t_per_a": 5.819196188220174e-11,
+              "grid_vertical_field_t_per_a": 4.4797927945348884e-11,
+              "sample_flux_wb_per_a": 2.3232510613901134e-09,
+              "wall_flux_wb_per_a": 2.114462110162243e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 88,
+            "conductor": "VES_72",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.6354908843319423e-09,
+              "grid_radial_field_t_per_a": 7.613711842712485e-11,
+              "grid_vertical_field_t_per_a": 7.146174637751328e-11,
+              "sample_flux_wb_per_a": 1.8336448926230075e-09,
+              "wall_flux_wb_per_a": 1.6710908784776403e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 89,
+            "conductor": "VES_73",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 3.1386425419200438e-09,
+              "grid_radial_field_t_per_a": 5.824375471153842e-11,
+              "grid_vertical_field_t_per_a": 1.5594196746426632e-10,
+              "sample_flux_wb_per_a": 3.74822028933848e-09,
+              "wall_flux_wb_per_a": 3.1621787386813886e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 90,
+            "conductor": "VES_74",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 4.142560842227628e-09,
+              "grid_radial_field_t_per_a": 2.2951075099361741e-10,
+              "grid_vertical_field_t_per_a": 4.309594213751173e-11,
+              "sample_flux_wb_per_a": 5.063210520133622e-09,
+              "wall_flux_wb_per_a": 4.236072814114159e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 91,
+            "conductor": "VES_75",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 3.771904418357631e-10,
+              "grid_radial_field_t_per_a": 2.3499225636563802e-11,
+              "grid_vertical_field_t_per_a": 8.047188551291221e-11,
+              "sample_flux_wb_per_a": 5.110427965305836e-10,
+              "wall_flux_wb_per_a": 4.06825203501054e-10
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 92,
+            "conductor": "VES_76",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.898409712045948e-09,
+              "grid_radial_field_t_per_a": 8.3353222837823e-11,
+              "grid_vertical_field_t_per_a": 3.207143996274097e-11,
+              "sample_flux_wb_per_a": 2.2230718873585966e-09,
+              "wall_flux_wb_per_a": 1.9306761403311597e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 93,
+            "conductor": "VES_77",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 2.7768898465888042e-09,
+              "grid_radial_field_t_per_a": 8.650103056164602e-11,
+              "grid_vertical_field_t_per_a": 8.733201033871806e-11,
+              "sample_flux_wb_per_a": 3.1066469981205324e-09,
+              "wall_flux_wb_per_a": 2.8541114133695343e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 94,
+            "conductor": "VES_78",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 3.0109273423166655e-09,
+              "grid_radial_field_t_per_a": 1.711520416955186e-10,
+              "grid_vertical_field_t_per_a": 9.641603148622297e-11,
+              "sample_flux_wb_per_a": 3.5416449416422115e-09,
+              "wall_flux_wb_per_a": 3.3437723644117853e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 95,
+            "conductor": "VES_79",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 4.546370259951009e-09,
+              "grid_radial_field_t_per_a": 2.5050388993865057e-10,
+              "grid_vertical_field_t_per_a": 1.4190839049865223e-10,
+              "sample_flux_wb_per_a": 5.416943001784837e-09,
+              "wall_flux_wb_per_a": 5.229396271442594e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 96,
+            "conductor": "VES_80",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 3.0703219654661925e-09,
+              "grid_radial_field_t_per_a": 1.1368438897551104e-10,
+              "grid_vertical_field_t_per_a": 2.465776620165494e-10,
+              "sample_flux_wb_per_a": 3.868430885632361e-09,
+              "wall_flux_wb_per_a": 3.1725686387795666e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 97,
+            "conductor": "VES_81",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 1.1527303527726363e-10,
+              "grid_radial_field_t_per_a": 1.0775073193841123e-11,
+              "grid_vertical_field_t_per_a": 6.352597619582735e-12,
+              "sample_flux_wb_per_a": 1.3474865477812708e-10,
+              "wall_flux_wb_per_a": 1.1837009913307698e-10
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 98,
+            "conductor": "VES_82",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 99,
+            "conductor": "VES_83",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 100,
+            "conductor": "VES_84",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 101,
+            "conductor": "VES_85",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 102,
+            "conductor": "VES_86",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 103,
+            "conductor": "VES_87",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 104,
+            "conductor": "VES_88",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 105,
+            "conductor": "VES_89",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 106,
+            "conductor": "VES_90",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 107,
+            "conductor": "VES_91",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 108,
+            "conductor": "VES_92",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": true,
+            "column": 109,
+            "conductor": "VES_93",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 0.0,
+              "grid_radial_field_t_per_a": 0.0,
+              "grid_vertical_field_t_per_a": 0.0,
+              "sample_flux_wb_per_a": 0.0,
+              "wall_flux_wb_per_a": 0.0
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 110,
+            "conductor": "VES_94",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 2.1103552968595586e-09,
+              "grid_radial_field_t_per_a": 1.3337444793034086e-10,
+              "grid_vertical_field_t_per_a": 1.5391494979460885e-10,
+              "sample_flux_wb_per_a": 2.53989042149804e-09,
+              "wall_flux_wb_per_a": 2.327944958579247e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 111,
+            "conductor": "VES_95",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 4.414086030542284e-09,
+              "grid_radial_field_t_per_a": 1.926038823216332e-10,
+              "grid_vertical_field_t_per_a": 2.948084137821149e-10,
+              "sample_flux_wb_per_a": 5.1695630826181004e-09,
+              "wall_flux_wb_per_a": 4.760352571735067e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 112,
+            "conductor": "VES_96",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 6.6191314754151484e-09,
+              "grid_radial_field_t_per_a": 3.401274958205816e-10,
+              "grid_vertical_field_t_per_a": 3.34490106220101e-10,
+              "sample_flux_wb_per_a": 7.984212055360884e-09,
+              "wall_flux_wb_per_a": 7.0776660371199335e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 113,
+            "conductor": "VES_97",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 5.569765854916188e-09,
+              "grid_radial_field_t_per_a": 3.1812911698386066e-10,
+              "grid_vertical_field_t_per_a": 2.2643754059027246e-10,
+              "sample_flux_wb_per_a": 6.68714971124271e-09,
+              "wall_flux_wb_per_a": 6.023430350443046e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 114,
+            "conductor": "VES_98",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 3.1648264649511215e-09,
+              "grid_radial_field_t_per_a": 1.8581919382687128e-10,
+              "grid_vertical_field_t_per_a": 2.0247257360841133e-10,
+              "sample_flux_wb_per_a": 3.797845826718118e-09,
+              "wall_flux_wb_per_a": 3.2880693557769806e-09
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 115,
+            "conductor": "VES_99",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 5.357380338780107e-10,
+              "grid_radial_field_t_per_a": 3.7955418536329145e-11,
+              "grid_vertical_field_t_per_a": 3.641234927064777e-11,
+              "sample_flux_wb_per_a": 6.527822762198554e-10,
+              "wall_flux_wb_per_a": 6.087871233214829e-10
+            }
+          },
+          {
+            "bitwise_equal": false,
+            "column": 116,
+            "conductor": "VES_100",
+            "maximum_absolute_change": {
+              "grid_flux_wb_per_a": 3.840914097899903e-09,
+              "grid_radial_field_t_per_a": 2.1369262205665431e-10,
+              "grid_vertical_field_t_per_a": 1.7774575673267532e-10,
+              "sample_flux_wb_per_a": 4.669640392880264e-09,
+              "wall_flux_wb_per_a": 4.123383506020344e-09
+            }
+          }
+        ]
+      },
+      "external_wall": {
+        "after_route_counts": {
+          "cylinder": 25,
+          "polysection": 657
+        },
+        "before_route_counts": {
+          "cylinder": 321,
+          "polysection": 361
+        },
+        "components": {
+          "flux": {
+            "actual_current_argmax_row": 4,
+            "actual_current_argmax_rz_m": [
+              6.9436333333333335,
+              -2.5174000000000003
+            ],
+            "actual_current_signed_at_sup": -8.575483138726176e-05,
+            "actual_current_sup": 8.575483138726176e-05,
+            "matrix_changed_entries": 25740,
+            "matrix_sup_per_a": 5.973938210788782e-08,
+            "unit": "Wb"
+          },
+          "radial_field": {
+            "actual_current_argmax_row": 5,
+            "actual_current_argmax_rz_m": [
+              7.113016666666667,
+              -2.3859
+            ],
+            "actual_current_signed_at_sup": -4.364782283329393e-06,
+            "actual_current_sup": 4.364782283329393e-06,
+            "matrix_changed_entries": 25740,
+            "matrix_sup_per_a": 3.2984412307691427e-09,
+            "unit": "T"
+          },
+          "vertical_field": {
+            "actual_current_argmax_row": 2,
+            "actual_current_argmax_rz_m": [
+              6.604866666666666,
+              -2.7804
+            ],
+            "actual_current_signed_at_sup": -5.383666130376714e-06,
+            "actual_current_sup": 5.383666130376714e-06,
+            "matrix_changed_entries": 25740,
+            "matrix_sup_per_a": 3.886281577206657e-09,
+            "unit": "T"
+          }
+        },
+        "fixture": "fine",
+        "interpretation": "Only external conductor coupling is evaluated. It is independent of the plasma source mesh; the fixture name changes only the fixed wall sampling density.",
+        "poloidal_field_vector": {
+          "actual_current_argmax_row": 2,
+          "actual_current_argmax_rz_m": [
+            6.604866666666666,
+            -2.7804
+          ],
+          "actual_current_sup": 5.383853519994376e-06,
+          "unit": "T"
+        },
+        "source_elements": 682,
+        "wall_rows": 330,
+        "wall_seconds": {
+          "after": 36.48925609141588,
+          "before": 19.4390589017421
+        }
+      }
+    }
+  },
+  "route_invariants": {
+    "cylinder_requirement": "authored axis-aligned rectangle",
+    "grep_proof": "No PolySection arrangement, standoff, near-band, or banded_greens production reference remains. banded_greens survives only as the definition in its comparator module.",
+    "mismatch_failure": "cylinder sources require an axis-aligned rectangle",
+    "polysection_default": "closed_form exact Part V",
+    "polysection_reference": "exact boundary quadrature",
+    "reachable_far_field_filament_branch": false
+  },
+  "tests": {
+    "all_lanes_scheduler_result": "zero failures through 91 percent; timed out after 30m29s in test_the_stored_boundary_encloses_the_stored_axis",
+    "complete_equilibrium_and_biot_suites": "2852 passed, 3 skipped, 364 slow tests deselected, 3 xfailed",
+    "focused_exact_section_tests": "64 passed, 3 deselected",
+    "route_identity_tests": "5 passed",
+    "unified_representation_remeasurement": {
+      "comparison": {
+        "interior_m0_l1": {
+          "delta": -4.228388472693467e-18,
+          "exact_equal": false,
+          "remeasured": 4.7408505881732735e-05,
+          "stored": 4.740850588173696e-05
+        },
+        "leg_zeros": {
+          "delta": 0,
+          "exact_equal": true,
+          "remeasured": 17,
+          "stored": 17
+        },
+        "ring_m0_l1": {
+          "delta": -3.881443777498106e-17,
+          "exact_equal": false,
+          "remeasured": 0.0016004849848482708,
+          "stored": 0.0016004849848483096
+        },
+        "support_signed_a": {
+          "delta": 0.0,
+          "exact_equal": true,
+          "remeasured": -621.3295577503741,
+          "stored": -621.3295577503741
+        },
+        "zero_current_leakage_a": {
+          "delta": 0.0,
+          "exact_equal": true,
+          "remeasured": 0.0,
+          "stored": 0.0
+        }
+      },
+      "orchestrator_rebase_required": true,
+      "verdict": "Support current and topology digits reproduce exactly; interior and ring L1 move only at floating-point round-off."
+    }
+  },
+  "verdict": "The exact Part V polygon-section kernel is the only production PolySection route, and authored non-axis-aligned polygons are no longer substituted by a rectangular section."
+}

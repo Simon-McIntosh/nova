@@ -398,6 +398,8 @@ def traced_assemble_flux_surface_geometry(
     ip_amperes,
     major_radius,
     boundary_toroidal_field,
+    field_function_psi_n=None,
+    field_function=None,
     n_pressure: int,
     n_diamagnetic: int,
     n_radial_cells: int = 24,
@@ -414,7 +416,9 @@ def traced_assemble_flux_surface_geometry(
     mid-levels and may be nonuniform. ``profile_coefficients`` and
     ``coefficient_scale`` are the pressure-gradient columns followed by the
     diamagnetic columns; their product has toroidal-current-density units
-    [A m-2].
+    [A m-2]. A reader may instead supply ``field_function`` on
+    ``field_function_psi_n``; that preserves the equilibrium's measured F and
+    poloidal-flux profiles while the coarea moments supply its current profile.
 
     The returned dictionary is a JAX PyTree. Face arrays have
     ``n_radial_cells + 1`` entries, cell arrays have ``n_radial_cells`` entries,
@@ -429,6 +433,10 @@ def traced_assemble_flux_surface_geometry(
     inside_limiter = jnp.asarray(inside_limiter, dtype=bool)
     profile_coefficients = jnp.asarray(profile_coefficients, dtype=dtype)
     coefficient_scale = jnp.asarray(coefficient_scale, dtype=dtype)
+    if (field_function is None) != (field_function_psi_n is None):
+        raise ValueError(
+            "field_function and field_function_psi_n must be supplied together"
+        )
 
     poloidal_flux_span = boundary_psi - axis_psi
     safe_span = jnp.where(
@@ -439,30 +447,31 @@ def traced_assemble_flux_surface_geometry(
     mesh_radius = jnp.broadcast_to(radius[jnp.newaxis, :], psi2d.shape)
 
     scaled_coefficients = profile_coefficients * coefficient_scale
-    pressure_shapes = _traced_profile_shapes(
-        psi_n_grid, n_pressure, nonnegative=nonnegative
-    )
-    diamagnetic_shapes = _traced_profile_shapes(
-        psi_n_grid, n_diamagnetic, nonnegative=nonnegative
-    )
-    pressure_drive = pressure_shapes @ scaled_coefficients[:n_pressure]
-    diamagnetic_drive = diamagnetic_shapes @ scaled_coefficients[n_pressure:]
-    current_density = (
-        mesh_radius / major_radius * pressure_drive
-        + major_radius / mesh_radius * diamagnetic_drive
-    )
-
     psi_n_profile = jnp.linspace(0.0, 1.0, 101, dtype=dtype)
-    diamagnetic_profile = (
-        _traced_profile_shapes(psi_n_profile, n_diamagnetic, nonnegative=nonnegative)
-        @ scaled_coefficients[n_pressure:]
-    )
-    f_profile, f_well_posed = _integrate_diamagnetic_drive(
-        psi_n_profile,
-        MU0 * major_radius * diamagnetic_profile,
-        boundary_f=major_radius * boundary_toroidal_field,
-        poloidal_flux_span=safe_span,
-    )
+    if field_function is None:
+        diamagnetic_profile = (
+            _traced_profile_shapes(
+                psi_n_profile, n_diamagnetic, nonnegative=nonnegative
+            )
+            @ scaled_coefficients[n_pressure:]
+        )
+        f_profile, f_well_posed = _integrate_diamagnetic_drive(
+            psi_n_profile,
+            MU0 * major_radius * diamagnetic_profile,
+            boundary_f=major_radius * boundary_toroidal_field,
+            poloidal_flux_span=safe_span,
+        )
+    else:
+        supplied_psi_n = jnp.asarray(field_function_psi_n, dtype=dtype)
+        supplied_field_function = jnp.asarray(field_function, dtype=dtype)
+        f_profile = jnp.interp(psi_n_profile, supplied_psi_n, supplied_field_function)
+        f_well_posed = (
+            (supplied_psi_n.ndim == 1)
+            & (supplied_field_function.shape == supplied_psi_n.shape)
+            & jnp.all(jnp.diff(supplied_psi_n) > 0.0)
+            & jnp.all(jnp.isfinite(supplied_field_function))
+            & jnp.all(jnp.abs(supplied_field_function) > 0.0)
+        )
 
     psi_n_surface = jnp.asarray(surface_bins["pn_s"], dtype=dtype)
     volume_derivative = jnp.asarray(surface_bins["dv_dpn"], dtype=dtype)
@@ -570,34 +579,30 @@ def traced_assemble_flux_surface_geometry(
         (volume_derivative_per_flux_face**2 * gradient_squared_face).at[0].set(0.0)
     )
 
-    # The fitted profile ladder supplies the initial enclosed-current shape.
-    # Smooth cumulative weights preserve fixed shapes and accelerator batching;
-    # the edge is normalised to the measured total current.
-    dr = radius[1] - radius[0]
-    dz = height[1] - height[0]
-    normal_cdf = 0.5 * (
-        1.0
-        + jax.scipy.special.erf(
-            (psi_n_face[:, jnp.newaxis, jnp.newaxis] - psi_n_grid[jnp.newaxis, :, :])
-            / (jnp.sqrt(2.0) * bandwidth)
-        )
+    # Ampere's law supplies the enclosed current from the same coarea moments:
+    # I = <Bp^2> int(dl/Bp) / mu0.  This keeps the geometry record tied to the
+    # supplied equilibrium rather than to the profile ladder used by the solver.
+    enclosed_current_surface = (
+        gradient_squared_over_radius_squared
+        / (4.0 * jnp.pi**2)
+        * volume_derivative_per_flux
+        / MU0
     )
-    enclosed_current = jnp.sum(
-        normal_cdf
-        * core[jnp.newaxis, :, :]
-        * current_density[jnp.newaxis, :, :]
-        * dr
-        * dz,
-        axis=(1, 2),
+    enclosed_current = _surface_interpolation(
+        rho_face,
+        rho_surface,
+        enclosed_current_surface,
+        0.0,
+        enclosed_current_surface[-1],
     )
-    enclosed_current = enclosed_current - enclosed_current[0]
     current_edge = enclosed_current[-1]
-    enclosed_current = (
-        enclosed_current
-        * jnp.abs(ip_amperes)
-        / jnp.maximum(jnp.abs(current_edge), 1e-30)
-        * jnp.sign(current_edge)
-    )
+    if field_function is None:
+        enclosed_current = (
+            enclosed_current
+            * jnp.abs(ip_amperes)
+            / jnp.maximum(jnp.abs(current_edge), 1e-30)
+            * jnp.sign(current_edge)
+        )
     enclosed_current = enclosed_current.at[0].set(0.0)
 
     diffusion_face = jnp.zeros_like(rho_face)
@@ -635,16 +640,19 @@ def traced_assemble_flux_surface_geometry(
         / jnp.maximum(jnp.abs(readback_edge_current), 1e-30)
         * jnp.sign(readback_edge_current)
     )
-    psi_face = axis_psi + jnp.concatenate(
-        [
-            jnp.zeros(1, dtype=dtype),
-            jnp.cumsum(
-                0.5
-                * (poloidal_flux_gradient[1:] + poloidal_flux_gradient[:-1])
-                * radial_spacing
-            ),
-        ]
-    )
+    if field_function is None:
+        psi_face = axis_psi + jnp.concatenate(
+            [
+                jnp.zeros(1, dtype=dtype),
+                jnp.cumsum(
+                    0.5
+                    * (poloidal_flux_gradient[1:] + poloidal_flux_gradient[:-1])
+                    * radial_spacing
+                ),
+            ]
+        )
+    else:
+        psi_face = axis_psi + safe_span * psi_n_face
 
     axis_radius = torax_columns["axis_radius"]
 
@@ -725,6 +733,9 @@ def traced_assemble_flux_surface_geometry(
         "elongation_face": elongation_face,
         "delta_upper_face": delta_upper_face,
         "delta_lower_face": delta_lower_face,
+        "gradient_moment_scale": jnp.asarray(
+            _TWO_PI if field_function is not None else 1.0, dtype=dtype
+        ),
         "flux_sign": flux_sign,
         "valid": valid,
     }
@@ -753,6 +764,8 @@ def traced_flux_surface_geometry(
     ip_amperes,
     major_radius,
     boundary_toroidal_field,
+    field_function_psi_n=None,
+    field_function=None,
     n_pressure: int,
     n_diamagnetic: int,
     n_radial_cells: int = 24,
@@ -767,6 +780,8 @@ def traced_flux_surface_geometry(
     This device entry point composes Nova's connectivity bins with
     :func:`traced_assemble_flux_surface_geometry`; it is safe under ``jit`` and
     ``vmap`` when slices share a machine grid and the static shape parameters.
+    EQDSK-like callers may pass the paired ``field_function`` inputs to preserve
+    the reader's measured F and poloidal-flux profiles.
     """
     from nova.equilibrium.flux_surface_connectivity import traced_flux_surface_bins
 
@@ -795,6 +810,8 @@ def traced_flux_surface_geometry(
         ip_amperes=ip_amperes,
         major_radius=major_radius,
         boundary_toroidal_field=boundary_toroidal_field,
+        field_function_psi_n=field_function_psi_n,
+        field_function=field_function,
         n_pressure=n_pressure,
         n_diamagnetic=n_diamagnetic,
         n_radial_cells=n_radial_cells,

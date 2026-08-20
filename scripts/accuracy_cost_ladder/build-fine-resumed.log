@@ -1,0 +1,4 @@
+slurmstepd: error: Unable to create TMPDIR [/run/user/39486]: Permission denied
+slurmstepd: error: Setting TMPDIR to /tmp
+BUILD_PROFILE fixture=fine cells=1076 total_s=778.044292 kernel_s=768.107644
+EXIT_MARKER=0

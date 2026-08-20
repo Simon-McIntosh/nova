@@ -1,0 +1,439 @@
+{
+  "schema": "accuracy-cost-ladder",
+  "oracle": "closed-form moderate-rotation-conventional",
+  "bounds": {
+    "moved_applied_or_widened": false,
+    "source": "scripts/oracle_rebaseline/results.json",
+    "status": "proposed_owner_lock_required"
+  },
+  "cpu_cold_builds": {
+    "coarse": {
+      "realised_cells": 551,
+      "total_seconds": 294.217432083562,
+      "stage_seconds": {
+        "assembly_seconds": 0.026978187263011932,
+        "kernel_family_seconds": 286.02342617698014,
+        "moment_order_seconds": 0.764723913744092,
+        "section_shape_seconds": 7.402298219501972
+      },
+      "kernel_target_family_seconds": {
+        "grid": 76.67684297636151,
+        "sample": 163.33236978016794,
+        "wall": 46.01420504786074
+      },
+      "production_cache_identity_verified": true,
+      "additive_closure_fraction": 1.8986206095895483E-8
+    },
+    "fine": {
+      "realised_cells": 1076,
+      "total_seconds": 778.0442922655493,
+      "stage_seconds": {
+        "assembly_seconds": 0.05102376267313957,
+        "kernel_family_seconds": 768.1076443400234,
+        "moment_order_seconds": 1.8411136157810688,
+        "section_shape_seconds": 8.044505886733532
+      },
+      "kernel_target_family_seconds": {
+        "grid": 229.93040480837226,
+        "sample": 458.7380753234029,
+        "wall": 79.43915657699108
+      },
+      "production_cache_identity_verified": true,
+      "additive_closure_fraction": 5.989810875426697E-9
+    }
+  },
+  "device_kernel_build_feasibility": {
+    "by_fixture": {
+      "coarse": {
+        "basis": "exact kernels and fixed moment geometry are array-block work; authored shape construction and host carrier assembly remain host work",
+        "h200_one_block_throughput_estimate": {
+          "basis": "the measured H200 map contracts nine full blocks and also pays topology, clipping and density work; dividing its inclusive map time by nine is a conservative contraction-side feasibility estimate, not a measured device build kernel",
+          "block_definition": "one dense source-to-target matrix for one of three target families and one of three moment orders",
+          "full_moment_blocks_per_second": 8036.822600993825,
+          "seconds_per_full_moment_block": 0.00012442728297577964
+        },
+        "host_only_shape_and_assembly_seconds": 7.429281992837787,
+        "projected_device_side_seconds": 286.78815009072423,
+        "projected_device_side_share": 0.9747490081052446
+      },
+      "fine": {
+        "basis": "exact kernels and fixed moment geometry are array-block work; authored shape construction and host carrier assembly remain host work",
+        "h200_one_block_throughput_estimate": {
+          "basis": "the measured H200 map contracts nine full blocks and also pays topology, clipping and density work; dividing its inclusive map time by nine is a conservative contraction-side feasibility estimate, not a measured device build kernel",
+          "block_definition": "one dense source-to-target matrix for one of three target families and one of three moment orders",
+          "full_moment_blocks_per_second": 6508.429058845873,
+          "seconds_per_full_moment_block": 0.00015364690787262388
+        },
+        "host_only_shape_and_assembly_seconds": 8.095534309744835,
+        "projected_device_side_seconds": 769.9487579558045,
+        "projected_device_side_share": 0.9895950212729254
+      }
+    },
+    "one_block_throughput_estimate": {
+      "conservative_grid_plus_wall_pairs": 370272,
+      "definition": "source-target polygon moment blocks per measured CPU kernel second; sample-family work omitted, making this a conservative host denominator rather than a GPU claim",
+      "device_projection": "requires a device-native exact polygon kernel; no speedup factor is assumed",
+      "fixture": "coarse",
+      "host_measured_pairs_per_second": 1294.551306335622
+    },
+    "status": "estimate_only_no_port_attempted"
+  },
+  "runtime_target": {
+    "coarse_batch_one_measured_seconds": 0.1985446671023965,
+    "coarse_batch_one_multiple": 198.5446671023965,
+    "seconds_per_state": 0.001,
+    "verdict": "measured_against_target_not_locked"
+  },
+  "accuracy_cost_rungs": {
+    "coarse_centroid": {
+      "fixture": "coarse",
+      "realised_cells": 551,
+      "moment_order": 0,
+      "density_degree": 9,
+      "cpu_build_seconds": 102.77041846575837,
+      "cpu_build_cost_status": "projected from measured production stages with one of three moment blocks",
+      "batch_one_solve": {
+        "per_state_median_seconds": 0.012205740436911583,
+        "multiple_of_target": 12.205740436911583
+      },
+      "accuracy": {
+        "axis_position_m": null,
+        "core_cell_count": 10,
+        "fixed_point_residual": null,
+        "flux_rms_fraction_of_span": 2.403259886649799,
+        "flux_sup_fraction_of_span": 3.3614948043778,
+        "map_residual_sup_wb": null,
+        "plasma_current_a": null,
+        "plasma_current_fraction": null,
+        "standing_forcing_sup_wb": 0.0469307866612178,
+        "topology_class": "limited"
+      },
+      "proposed_gate_margins": {
+        "axis_position_m": {
+          "bound_over_value": null,
+          "owner_locked": false,
+          "pass": false,
+          "proposed_bound": 0.00525243590786495,
+          "signed_margin": null,
+          "value": null
+        },
+        "fixed_point_residual": {
+          "bound_over_value": null,
+          "owner_locked": false,
+          "pass": false,
+          "proposed_bound": 1E-12,
+          "signed_margin": null,
+          "value": null
+        },
+        "flux_rms_fraction_of_span": {
+          "bound_over_value": 4.161014818060412E-13,
+          "owner_locked": false,
+          "pass": false,
+          "proposed_bound": 1E-12,
+          "signed_margin": -2.403259886648799,
+          "value": 2.403259886649799
+        },
+        "flux_sup_fraction_of_span": {
+          "bound_over_value": 2.9748670106455695E-13,
+          "owner_locked": false,
+          "pass": false,
+          "proposed_bound": 1E-12,
+          "signed_margin": -3.3614948043768,
+          "value": 3.3614948043778
+        },
+        "plasma_current_fraction": {
+          "bound_over_value": null,
+          "owner_locked": false,
+          "pass": false,
+          "proposed_bound": 0.011364810207658166,
+          "signed_margin": null,
+          "value": null
+        },
+        "topology_class": {
+          "owner_locked": false,
+          "pass": true,
+          "proposed_bound": "limited",
+          "value": "limited"
+        }
+      }
+    },
+    "coarse_first_moment": {
+      "fixture": "coarse",
+      "realised_cells": 551,
+      "moment_order": 1,
+      "density_degree": 9,
+      "cpu_build_seconds": 294.217432083562,
+      "cpu_build_cost_status": "measured cold",
+      "batch_one_solve": {
+        "per_state_median_seconds": 0.1985446671023965,
+        "multiple_of_target": 198.5446671023965
+      },
+      "accuracy": {
+        "axis_position_m": 0.07549542622817432,
+        "core_cell_count": 442,
+        "fixed_point_residual": 2.60261280511129E-15,
+        "flux_rms_fraction_of_span": 0.27067656548439434,
+        "flux_sup_fraction_of_span": 0.5333135026177149,
+        "map_residual_sup_wb": 5.218048215738236E-15,
+        "plasma_current_a": 1544153.3512101844,
+        "plasma_current_fraction": 0.05147780982402728,
+        "standing_forcing_sup_wb": 2.886579864025407E-15,
+        "topology_class": "limited"
+      },
+      "proposed_gate_margins": {
+        "axis_position_m": {
+          "bound_over_value": 0.06957290223105966,
+          "owner_locked": false,
+          "pass": false,
+          "proposed_bound": 0.00525243590786495,
+          "signed_margin": -0.07024299032030937,
+          "value": 0.07549542622817432
+        },
+        "fixed_point_residual": {
+          "bound_over_value": 384.229263006811,
+          "owner_locked": false,
+          "pass": true,
+          "proposed_bound": 1E-12,
+          "signed_margin": 9.973973871948888E-13,
+          "value": 2.60261280511129E-15
+        },
+        "flux_rms_fraction_of_span": {
+          "bound_over_value": 3.694446167552153E-12,
+          "owner_locked": false,
+          "pass": false,
+          "proposed_bound": 1E-12,
+          "signed_margin": -0.27067656548339436,
+          "value": 0.27067656548439434
+        },
+        "flux_sup_fraction_of_span": {
+          "bound_over_value": 1.8750697199519646E-12,
+          "owner_locked": false,
+          "pass": false,
+          "proposed_bound": 1E-12,
+          "signed_margin": -0.533313502616715,
+          "value": 0.5333135026177149
+        },
+        "plasma_current_fraction": {
+          "bound_over_value": 0.22077105157557883,
+          "owner_locked": false,
+          "pass": false,
+          "proposed_bound": 0.011364810207658166,
+          "signed_margin": -0.04011299961636912,
+          "value": 0.05147780982402728
+        },
+        "topology_class": {
+          "owner_locked": false,
+          "pass": true,
+          "proposed_bound": "limited",
+          "value": "limited"
+        }
+      }
+    },
+    "fine_first_moment": {
+      "fixture": "fine",
+      "realised_cells": 1076,
+      "moment_order": 1,
+      "density_degree": 9,
+      "cpu_build_seconds": 778.0442922655493,
+      "cpu_build_cost_status": "measured cold",
+      "batch_one_solve": {
+        "per_state_median_seconds": 0.25739336013793945,
+        "multiple_of_target": 257.39336013793945
+      },
+      "accuracy": {
+        "axis_position_m": 0.07453744797159817,
+        "core_cell_count": 882,
+        "fixed_point_residual": 1.9005112829933445E-15,
+        "flux_rms_fraction_of_span": 0.2718489700074329,
+        "flux_sup_fraction_of_span": 0.5338372524988483,
+        "map_residual_sup_wb": 6.217248937900877E-15,
+        "plasma_current_a": 1544007.4827634222,
+        "plasma_current_fraction": 0.05156741197299262,
+        "standing_forcing_sup_wb": 2.4424906541753444E-15,
+        "topology_class": "limited"
+      },
+      "proposed_gate_margins": {
+        "axis_position_m": {
+          "bound_over_value": 0.07046707461551868,
+          "owner_locked": false,
+          "pass": false,
+          "proposed_bound": 0.00525243590786495,
+          "signed_margin": -0.06928501206373322,
+          "value": 0.07453744797159817
+        },
+        "fixed_point_residual": {
+          "bound_over_value": 526.1741979373988,
+          "owner_locked": false,
+          "pass": true,
+          "proposed_bound": 1E-12,
+          "signed_margin": 9.980994887170067E-13,
+          "value": 1.9005112829933445E-15
+        },
+        "flux_rms_fraction_of_span": {
+          "bound_over_value": 3.67851310958676E-12,
+          "owner_locked": false,
+          "pass": false,
+          "proposed_bound": 1E-12,
+          "signed_margin": -0.27184897000643293,
+          "value": 0.2718489700074329
+        },
+        "flux_sup_fraction_of_span": {
+          "bound_over_value": 1.8732300814884727E-12,
+          "owner_locked": false,
+          "pass": false,
+          "proposed_bound": 1E-12,
+          "signed_margin": -0.5338372524978483,
+          "value": 0.5338372524988483
+        },
+        "plasma_current_fraction": {
+          "bound_over_value": 0.22038744573045965,
+          "owner_locked": false,
+          "pass": false,
+          "proposed_bound": 0.011364810207658166,
+          "signed_margin": -0.04020260176533445,
+          "value": 0.05156741197299262
+        },
+        "topology_class": {
+          "owner_locked": false,
+          "pass": true,
+          "proposed_bound": "limited",
+          "value": "limited"
+        }
+      }
+    }
+  },
+  "recommendation": {
+    "operating_point": "coarse_first_moment",
+    "reason": "production first moments preserve the exact-state round-off forcing; the alternate-root gate failures remain a basin-selection HOLD rather than an accuracy-cost trade",
+    "status": "owner_decision_required"
+  },
+  "artifacts": {
+    "figure": "scripts/accuracy_cost_ladder/accuracy-cost-ladder.png",
+    "run_logs": [
+      "scripts/accuracy_cost_ladder/build-coarse.log",
+      "scripts/accuracy_cost_ladder/build-fine.log",
+      "scripts/accuracy_cost_ladder/gpu-coarse.log",
+      "scripts/accuracy_cost_ladder/gpu-fine.log"
+    ]
+  },
+  "h200": {
+    "coarse": {
+      "device": {
+        "device_kind": "NVIDIA H200 NVL",
+        "jax_backend": "gpu",
+        "jax_version": "0.11.0",
+        "platform": "gpu"
+      },
+      "solver": {
+        "newton_steps": 10,
+        "gmres_iterations": 30,
+        "criterion": 1E-10
+      },
+      "batch_timings": {
+        "1": {
+          "per_state_median_seconds": 0.1985446671023965,
+          "states_per_second": 5.036650012282952,
+          "multiple_of_target": 198.5446671023965
+        },
+        "16": {
+          "per_state_median_seconds": 0.03024408535566181,
+          "states_per_second": 33.06431615439136,
+          "multiple_of_target": 30.24408535566181
+        },
+        "4": {
+          "per_state_median_seconds": 0.056311405496671796,
+          "states_per_second": 17.758391771256775,
+          "multiple_of_target": 56.311405496671796
+        }
+      },
+      "phase_probes": {
+        "krylov_one_newton_inclusive": {
+          "median_seconds": 0.020599771291017532
+        },
+        "launch_identity": {
+          "median_seconds": 0.00007103150710463524
+        },
+        "map_evaluation": {
+          "median_seconds": 0.0011198455467820168
+        },
+        "tangent_action": {
+          "median_seconds": 0.0014919210225343704
+        },
+        "transfer": {
+          "host_to_device_median_seconds": 0.00018656952306628227,
+          "device_to_host_median_seconds": 0.00029246415942907333
+        }
+      },
+      "compiled_hlo": {
+        "stablehlo_while_count": 8,
+        "required_newton_trip_count_observed": true,
+        "required_krylov_trip_count_observed": true
+      },
+      "trace_artifacts": {
+        "krylov_inner_matvec": {
+          "total_bytes": 37008
+        },
+        "map_evaluation": {
+          "total_bytes": 31272
+        },
+        "tangent_action": {
+          "total_bytes": 37058
+        }
+      }
+    },
+    "fine": {
+      "device": {
+        "device_kind": "NVIDIA H200 NVL",
+        "jax_backend": "gpu",
+        "jax_version": "0.11.0",
+        "platform": "gpu"
+      },
+      "solver": {
+        "newton_steps": 10,
+        "gmres_iterations": 30,
+        "criterion": 1E-10
+      },
+      "batch_timings": {
+        "1": {
+          "per_state_median_seconds": 0.25739336013793945,
+          "states_per_second": 3.885104104721625,
+          "multiple_of_target": 257.39336013793945
+        }
+      },
+      "phase_probes": {
+        "krylov_one_newton_inclusive": {
+          "median_seconds": 0.02414858713746071
+        },
+        "launch_identity": {
+          "median_seconds": 0.00007096724584698677
+        },
+        "map_evaluation": {
+          "median_seconds": 0.0013828221708536148
+        },
+        "tangent_action": {
+          "median_seconds": 0.00165999261662364
+        },
+        "transfer": {
+          "host_to_device_median_seconds": 0.00013471860438585281,
+          "device_to_host_median_seconds": 0.00017794594168663025
+        }
+      },
+      "compiled_hlo": {
+        "stablehlo_while_count": 8,
+        "required_newton_trip_count_observed": true,
+        "required_krylov_trip_count_observed": true
+      },
+      "trace_artifacts": {
+        "krylov_inner_matvec": {
+          "total_bytes": 30392
+        },
+        "map_evaluation": {
+          "total_bytes": 19548
+        },
+        "tangent_action": {
+          "total_bytes": 23061
+        }
+      }
+    }
+  }
+}

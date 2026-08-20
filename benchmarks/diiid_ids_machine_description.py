@@ -1,208 +1,201 @@
-"""Publish a receipt for the DIII-D IMAS machine description.
+"""Publish the static DIII-D geometry stored in an IMAS netCDF entry.
 
-The source is a legacy MDSplus entry and is read only through the official IMAS
-Python access layer.  The extraction subprocess exists because that entry uses
-the legacy pulse layout, while Nova's project environment uses the current
-imas-python API.  No MDSplus file is opened or interpreted directly.
+The entry is read only through IMAS-Python's netCDF ``DBEntry`` backend.  IDSs
+are requested with ``autoconvert=False`` so the receipt reports and uses the
+Data Dictionary version written into each IDS.  Magnetics signals and
+equilibrium labels are outside this machine-description route.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
-import math
 from pathlib import Path
-import subprocess
-import sys
 from typing import Any
 
+import numpy as np
 
-DATABASE = "DIII-D"
-USER = "hoeneno"
-RUN = 0
-MACHINE_SHOT = 1000
-CORROBORATING_SHOT = 133221
+
+SOURCE_PATH = Path("/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc")
+COMPETITION_RECEIPT = Path(
+    "docs/figures/diiid-forward-onboarding/machine-description/"
+    "machine_description_receipt.json"
+)
 SOURCE_COCOS = 11
 TARGET_COCOS = 17
-LEGACY_IMAS_MODULE = "IMAS/3.39.0-4.11.10-foss-2023b"
 
 
-def _plain(value: Any) -> Any:
-    """Return an Access Layer scalar without changing its numerical value."""
-    return value.value if hasattr(value, "value") else value
+def _text(value: Any) -> str:
+    """Return an IMAS string scalar as plain text."""
+    return str(value).strip()
 
 
-def _legacy_entry(shot: int) -> dict[str, Any]:
-    """Read one legacy MDSplus entry with the official IMAS Python API."""
+def _geometry_record(element: Any, fallback_name: str) -> dict[str, Any]:
+    """Extract one poloidal element without changing stored coordinates."""
+    geometry = element.geometry
+    geometry_type = int(geometry.geometry_type)
+    name = _text(element.identifier) or _text(element.name) or fallback_name
+    if geometry_type == 1:
+        return {
+            "name": name,
+            "geometry_type": geometry_type,
+            "r": [float(value) for value in np.asarray(geometry.outline.r)],
+            "z": [float(value) for value in np.asarray(geometry.outline.z)],
+        }
+    if geometry_type == 2:
+        rectangle = geometry.rectangle
+        return {
+            "name": name,
+            "geometry_type": geometry_type,
+            "r": float(rectangle.r),
+            "z": float(rectangle.z),
+            "width": float(rectangle.width),
+            "height": float(rectangle.height),
+        }
+    raise ValueError(f"unsupported pf_active geometry type {geometry_type}")
+
+
+def read_entry(source_path: Path = SOURCE_PATH) -> dict[str, Any]:
+    """Read static geometry and content fences through the IMAS netCDF backend."""
     import imas
 
-    entry = imas.DBEntry(
-        imas.imasdef.MDSPLUS_BACKEND,
-        DATABASE,
-        shot,
-        RUN,
-        USER,
-        "3",
-    )
-    entry.open()
-    try:
-        wall = entry.get("wall")
-        active = entry.get("pf_active")
-        passive = entry.get("pf_passive")
-        tf = entry.get("tf")
-        thomson = entry.get("thomson_scattering")
+    with imas.DBEntry(source_path, "r") as entry:
+        occurrences = {
+            name: entry.list_all_occurrences(name)
+            for name in (
+                "wall",
+                "pf_active",
+                "pf_passive",
+                "tf",
+                "magnetics",
+                "equilibrium",
+            )
+        }
+        for required in ("wall", "pf_active", "tf", "magnetics", "equilibrium"):
+            if occurrences[required] != [0]:
+                raise ValueError(
+                    f"expected exactly occurrence 0 for {required}, "
+                    f"found {occurrences[required]}"
+                )
+
+        wall = entry.get("wall", 0, autoconvert=False)
+        active = entry.get("pf_active", 0, autoconvert=False)
+        toroidal = entry.get("tf", 0, lazy=True, autoconvert=False)
+        magnetics = entry.get("magnetics", 0, lazy=True, autoconvert=False)
+        equilibrium = entry.get("equilibrium", 0, lazy=True, autoconvert=False)
 
         descriptions = wall.description_2d
-        contour = None
-        if len(descriptions):
-            description = descriptions[0]
-            units = description.vessel.unit
-            kind = "vessel"
-            if not len(units):
-                units = description.limiter.unit
-                kind = "limiter"
-            if len(units):
-                outline = units[0].outline
-                contour = {
-                    "kind": kind,
-                    "r": [float(value) for value in outline.r],
-                    "z": [float(value) for value in outline.z],
-                }
+        if len(descriptions) != 1 or len(descriptions[0].limiter.unit) != 1:
+            raise ValueError("expected one wall description with one limiter unit")
+        limiter = descriptions[0].limiter.unit[0].outline
+        contour = {
+            "kind": "limiter",
+            "r": [float(value) for value in np.asarray(limiter.r)],
+            "z": [float(value) for value in np.asarray(limiter.z)],
+        }
 
-        sections = []
-        for index, coil in enumerate(active.coil):
-            for element_index, element in enumerate(coil.element):
-                geometry = element.geometry
-                geometry_type = int(_plain(geometry.geometry_type))
-                name = str(
-                    _plain(coil.identifier) or _plain(coil.name) or f"coil_{index}"
-                )
-                if len(coil.element) > 1:
-                    name = f"{name}_{element_index}"
-                if geometry_type == 1:
-                    section = geometry.outline
-                    record = {
-                        "geometry_type": geometry_type,
-                        "name": name,
-                        "r": [float(value) for value in section.r],
-                        "z": [float(value) for value in section.z],
-                    }
-                elif geometry_type == 2:
-                    section = geometry.rectangle
-                    record = {
-                        "geometry_type": geometry_type,
-                        "name": name,
-                        "r": float(_plain(section.r)),
-                        "z": float(_plain(section.z)),
-                        "width": float(_plain(section.width)),
-                        "height": float(_plain(section.height)),
-                    }
-                elif geometry_type == 3:
-                    section = geometry.oblique
-                    record = {
-                        "geometry_type": geometry_type,
-                        "name": name,
-                        "r": float(_plain(section.r)),
-                        "z": float(_plain(section.z)),
-                        "length_alpha": float(_plain(section.length_alpha)),
-                        "length_beta": float(_plain(section.length_beta)),
-                        "alpha": float(_plain(section.alpha)),
-                        "beta": float(_plain(section.beta)),
-                    }
-                else:
-                    record = {"geometry_type": geometry_type, "name": name}
-                sections.append(record)
-
-        channels = []
-        for index, channel in enumerate(thomson.channel):
-            position = channel.position
-            channels.append(
+        coils = []
+        for coil_index, coil in enumerate(active.coil):
+            name = _text(coil.identifier) or _text(coil.name) or f"coil_{coil_index}"
+            elements = [
+                _geometry_record(element, f"{name}_{element_index}")
+                for element_index, element in enumerate(coil.element)
+            ]
+            coils.append(
                 {
-                    "name": str(
-                        _plain(channel.identifier)
-                        or _plain(channel.name)
-                        or f"channel_{index}"
-                    ),
-                    "position": [
-                        float(_plain(position.r)),
-                        float(_plain(position.z)),
-                        float(_plain(position.phi)),
-                    ],
-                    "start": None,
-                    "end": None,
+                    "name": name,
+                    "identifier": _text(coil.identifier),
+                    "elements": elements,
                 }
             )
 
-        versions = {}
-        for name, ids in (
-            ("wall", wall),
-            ("pf_active", active),
-            ("pf_passive", passive),
-            ("tf", tf),
-            ("thomson_scattering", thomson),
-        ):
-            version = str(_plain(ids.ids_properties.version_put.data_dictionary))
-            if version:
-                versions[name] = version
+        ids_versions = {
+            "wall": _text(wall.ids_properties.version_put.data_dictionary),
+            "pf_active": _text(active.ids_properties.version_put.data_dictionary),
+            "tf": _text(toroidal.ids_properties.version_put.data_dictionary),
+            "magnetics": _text(magnetics.ids_properties.version_put.data_dictionary),
+            "equilibrium": _text(
+                equilibrium.ids_properties.version_put.data_dictionary
+            ),
+            "pf_passive": None,
+        }
+        tf_paths = entry.list_filled_paths("tf", 0, autoconvert=False)
+        equilibrium_paths = entry.list_filled_paths("equilibrium", 0, autoconvert=False)
         return {
-            "shot": shot,
-            "run": RUN,
-            "database": DATABASE,
-            "user": USER,
-            "dd_versions": versions,
+            "source_path": str(source_path),
+            "backend": "imas-python netCDF DBEntry",
+            "mode": "read-only",
+            "occurrences": occurrences,
+            "dd_versions": ids_versions,
             "contour": contour,
-            "pf_active": sections,
-            "pf_passive_loop_count": len(passive.loop),
-            "tf_coil_count": len(tf.coil),
-            "thomson_scattering": channels,
+            "pf_active": coils,
+            "pf_passive_loop_count": 0,
+            "tf_coil_count": 0,
+            "tf": {
+                "occurrence_present": True,
+                "filled_paths": tf_paths,
+                "static_geometry_present": any(
+                    path.startswith(("coil/", "r0")) for path in tf_paths
+                ),
+            },
+            "doctrine_fence": {
+                "magnetics_occurrence_present": True,
+                "equilibrium_occurrence_present": True,
+                "equilibrium_time_slice_count": len(equilibrium.time_slice),
+                "equilibrium_constraints_present": any(
+                    path.startswith("time_slice/constraints/")
+                    for path in equilibrium_paths
+                ),
+            },
         }
-    finally:
-        entry.close()
 
 
-def read_entries() -> list[dict[str, Any]]:
-    """Read both named entries in an isolated legacy-AL subprocess."""
-    command = (
-        "module purge >/dev/null 2>&1; "
-        f"module load {LEGACY_IMAS_MODULE}; "
-        f"python {Path(__file__).resolve()} --extract-only"
-    )
-    process = subprocess.run(
-        ["bash", "-lc", command],
-        check=True,
-        capture_output=True,
-        text=True,
-    )
-    return json.loads(process.stdout)
-
-
-def _section_metrics(section: Any) -> dict[str, Any]:
-    name = section.section.name
-    data = section.section.data
-    if name == "rectangle":
-        return {
-            "geometry_class": name,
-            "r_m": data["r"],
-            "z_m": data["z"],
-            "width_m": data["width"],
-            "height_m": data["height"],
-            "skew_rad": 0.0,
-        }
-    r = list(data["r"])
-    z = list(data["z"])
-    skew = math.atan2(z[1] - z[0], r[1] - r[0]) if len(r) > 1 else None
+def read_competition_grid(
+    receipt_path: Path = COMPETITION_RECEIPT,
+) -> dict[str, Any]:
+    """Read the released competition grid extent from its existing receipt."""
+    receipt = json.loads(receipt_path.read_text())
+    grid = receipt["quantities"]["efit_grid"]
     return {
-        "geometry_class": name,
-        "r_m": 0.5 * (min(r) + max(r)),
-        "z_m": 0.5 * (min(z) + max(z)),
-        "width_m": max(r) - min(r),
-        "height_m": max(z) - min(z),
-        "skew_rad": skew,
+        "shape": list(grid["shape"]),
+        "r_extent_m": list(grid["r_extent_m"]),
+        "z_extent_m": list(grid["z_extent_m"]),
+        "source_receipt": str(receipt_path),
+        "provenance": grid["provenance"],
     }
 
 
-def build_receipt(entries: list[dict[str, Any]]) -> tuple[dict[str, Any], Any]:
-    """Route the machine entry through Nova and classify every quantity."""
+def _element_receipt(section: Any, source: dict[str, Any]) -> dict[str, Any]:
+    """Describe one element using only values exposed by the dataclass seam."""
+    source_geometry = {1: "outline", 2: "rectangle"}[source["geometry_type"]]
+    if source_geometry == "outline":
+        status = "read_unmodified"
+        change = None
+    else:
+        status = "read_after_named_change"
+        change = (
+            "expand the stored centre, width and height through "
+            "CrossSection.transform[2] into the canonical polygon outline"
+        )
+    return {
+        "name": section.name,
+        "status": status,
+        "change": change,
+        "source_geometry": source_geometry,
+        "outline_vertex_count": len(section.outline),
+        "outline_vertices_m": [list(vertex) for vertex in section.outline],
+        "centre_m": list(section.centre),
+        "width_m": section.width,
+        "height_m": section.height,
+        "skew_rad": section.skew,
+        "skew_definition": "directed angle of the first non-zero outline edge",
+    }
+
+
+def build_receipt(
+    source: dict[str, Any], competition_grid: dict[str, Any]
+) -> tuple[dict[str, Any], Any]:
+    """Route the static entry through Nova and classify every quantity."""
     from nova.imas.machine import StaticMachineDescription
     from nova.io.cocos import (
         B0_LIKE,
@@ -213,201 +206,277 @@ def build_receipt(entries: list[dict[str, Any]]) -> tuple[dict[str, Any], Any]:
         convention_transform,
     )
 
-    source = next(entry for entry in entries if entry["shot"] == MACHINE_SHOT)
     machine = StaticMachineDescription.from_record(source)
+    if len(machine.active_coils) != len(source["pf_active"]):
+        raise ValueError("machine dataclass route did not preserve pf_active coils")
+    coil_receipts = []
+    for coil, coil_source in zip(
+        machine.active_coils, source["pf_active"], strict=True
+    ):
+        elements = [
+            _element_receipt(element, element_source)
+            for element, element_source in zip(
+                coil.elements, coil_source["elements"], strict=True
+            )
+        ]
+        coil_receipts.append(
+            {
+                "name": coil.name,
+                "identifier": coil.identifier,
+                "element_count": len(elements),
+                "elements": elements,
+            }
+        )
+
     contour = machine.contour
-    contour_receipt = {
-        "status": "read_after_named_change",
-        "change": "accept DDv3 limiter outline when vessel units are absent",
-        "kind": contour.kind if contour else None,
-        "vertex_count": len(contour.r) if contour else 0,
-        "r_extent_m": [min(contour.r), max(contour.r)] if contour else None,
-        "z_extent_m": [min(contour.z), max(contour.z)] if contour else None,
-    }
-    coils = [
-        {"name": section.name, **_section_metrics(section)}
-        for section in machine.active_sections
-    ]
-    endpoints_present = sum(
-        sightline.start is not None and sightline.end is not None
-        for sightline in machine.sightlines
-    )
     transform = convention_transform(source=SOURCE_COCOS, target=TARGET_COCOS)
+    factors = {
+        quantity: transform.factor(quantity)
+        for quantity in (PSI_LIKE, IP_LIKE, B0_LIKE, Q_LIKE, DODPSI_LIKE)
+    }
+    element_count = sum(coil["element_count"] for coil in coil_receipts)
+    non_rectangular_count = sum(
+        element["source_geometry"] == "outline"
+        for coil in coil_receipts
+        for element in coil["elements"]
+    )
     receipt = {
-        "measurement": "DIII-D IMAS static machine-description read",
-        "source_entries": entries,
-        "selected_entry": {"shot": MACHINE_SHOT, "run": RUN},
+        "measurement": "DIII-D netCDF static machine-description read",
+        "source": {
+            "path": source["source_path"],
+            "backend": source["backend"],
+            "mode": source["mode"],
+            "occurrences": source["occurrences"],
+        },
         "dd_version_policy": (
-            "read from ids_properties/version_put/data_dictionary for each "
-            "non-empty IDS"
+            "each IDS is read with autoconvert=False and its version is copied "
+            "from ids_properties.version_put.data_dictionary"
         ),
+        "dd_versions": source["dd_versions"],
+        "machine_dataclass_route": {
+            "class": "nova.imas.machine.StaticMachineDescription",
+            "coil_class": "nova.imas.machine.MachineCoil",
+            "element_class": "nova.imas.machine.MachineSection",
+            "section_dispatch": "nova.imas.machine.CrossSection.transform",
+        },
         "cocos": {
-            "source_index": SOURCE_COCOS,
-            "source": "IMAS Data Dictionary coordinate convention",
-            "target_index": TARGET_COCOS,
-            "factors": {
-                PSI_LIKE: transform.factor(PSI_LIKE),
-                IP_LIKE: transform.factor(IP_LIKE),
-                B0_LIKE: transform.factor(B0_LIKE),
-                Q_LIKE: transform.factor(Q_LIKE),
-                DODPSI_LIKE: transform.factor(DODPSI_LIKE),
+            "ids": {
+                "source_index": SOURCE_COCOS,
+                "source": "IMAS Data Dictionary coordinate convention",
+                "target_index": TARGET_COCOS,
+                "transform_to_nova": factors,
+            },
+            "competition_corpus": {
+                "source_index": 5,
+                "source": "separate empirical corpus determination",
+                "used_for_this_ids_read": False,
             },
         },
         "quantities": {
-            "wall_or_limiter": contour_receipt,
+            "wall_limiter": {
+                "status": "read_unmodified",
+                "change": None,
+                "kind": contour.kind if contour else None,
+                "vertex_count": len(contour.r) if contour else 0,
+                "r_extent_m": [min(contour.r), max(contour.r)] if contour else None,
+                "z_extent_m": [min(contour.z), max(contour.z)] if contour else None,
+            },
             "pf_active": {
                 "status": "read_after_named_change",
                 "change": (
-                    "route legacy scalar and outline records through the tabular "
-                    "geometry reader"
+                    "retain IDS coil-to-element grouping and expand rectangle "
+                    "records through the canonical CrossSection polygon route"
                 ),
-                "coil_count": len(coils),
-                "coils": coils,
-            },
-            "pf_passive": {
-                "status": "cannot_reach",
-                "loop_count": machine.passive_loop_count,
-                "reason": "the selected entry carries no pf_passive loops",
+                "coil_count": len(coil_receipts),
+                "element_count": element_count,
+                "non_rectangular_element_count": non_rectangular_count,
+                "coils": coil_receipts,
             },
             "tf": {
                 "status": "cannot_reach",
-                "coil_count": machine.toroidal_coil_count,
+                "occurrence_present": source["tf"]["occurrence_present"],
+                "static_geometry_present": source["tf"]["static_geometry_present"],
+                "toroidal_coil_count": machine.toroidal_coil_count,
                 "reason": (
-                    "the selected entry carries no tf coils or static tf parameters"
+                    "the tf IDS contains a time-dependent vacuum-field signal but "
+                    "no static toroidal-conductor geometry; the signal is excluded"
                 ),
             },
-            "thomson_scattering": {
-                "status": (
-                    "cannot_reach" if not endpoints_present else "read_unmodified"
-                ),
-                "chord_count": len(machine.sightlines),
-                "endpoint_pair_count": endpoints_present,
+            "pf_passive": {
+                "status": "cannot_reach",
+                "occurrence_present": bool(source["occurrences"]["pf_passive"]),
+                "loop_count": machine.passive_loop_count,
                 "reason": (
-                    "DD 3.28 channels carry one position each and no line-of-sight "
-                    "endpoint fields"
-                    if not endpoints_present
-                    else None
+                    "the netCDF entry contains no pf_passive occurrence; no loop "
+                    "or vessel conductor is fabricated"
                 ),
-                "channels": [
-                    {
-                        "name": sightline.name,
-                        "position_r_z_phi": sightline.position,
-                        "start_r_z_phi": sightline.start,
-                        "end_r_z_phi": sightline.end,
-                    }
-                    for sightline in machine.sightlines
+            },
+            "competition_efit_grid": competition_grid,
+        },
+        "doctrine_fence": {
+            "additional_entry_content": {
+                "magnetics_ids": source["doctrine_fence"][
+                    "magnetics_occurrence_present"
+                ],
+                "constrained_equilibrium": source["doctrine_fence"][
+                    "equilibrium_constraints_present"
+                ],
+                "equilibrium_time_slice_count": source["doctrine_fence"][
+                    "equilibrium_time_slice_count"
                 ],
             },
+            "admissible_machine_description": (
+                "diagnostic and conductor geometry only"
+            ),
+            "magnetics_signal_used": False,
+            "equilibrium_label_used": False,
+            "statement": (
+                "no magnetics signal and no equilibrium label from this file is "
+                "used anywhere in this node"
+            ),
         },
     }
     return receipt, machine
 
 
-def write_figures(machine: Any, output: Path) -> list[Path]:
-    """Draw carried geometry and make absent geometry visible as absence."""
+def write_figures(machine: Any, receipt: dict[str, Any], output: Path) -> list[Path]:
+    """Draw the limiter, every active element, outline detail and grid extent."""
     import matplotlib.pyplot as plt
     from matplotlib.patches import Polygon as PolygonPatch
+    from matplotlib.patches import Rectangle as RectanglePatch
 
     output.mkdir(parents=True, exist_ok=True)
     paths = []
 
-    def base_axes():
-        figure, axes = plt.subplots(figsize=(6.2, 6.4), constrained_layout=True)
-        contour = machine.contour
-        if contour:
-            axes.plot(
-                contour.r,
-                contour.z,
-                color="black",
-                linewidth=1.6,
-                label=contour.kind,
+    figure, axes = plt.subplots(figsize=(10, 9), constrained_layout=True)
+    contour = machine.contour
+    axes.plot(contour.r, contour.z, color="black", linewidth=1.8)
+    for coil in machine.active_coils:
+        for element in coil.elements:
+            outline = np.asarray(element.outline)
+            axes.add_patch(
+                PolygonPatch(
+                    outline,
+                    fill=False,
+                    edgecolor="tab:blue",
+                    linewidth=0.65,
+                )
             )
+            centre_r, centre_z = element.centre
+            axes.text(
+                centre_r,
+                centre_z,
+                element.name,
+                fontsize=3.2,
+                ha="center",
+                va="center",
+            )
+    axes.set_aspect("equal")
+    axes.set_xlabel("R [m]")
+    axes.set_ylabel("Z [m]")
+    axes.set_title("netCDF limiter and every pf_active element")
+    path = output / "limiter_pf_active_elements.png"
+    figure.savefig(path, dpi=220)
+    plt.close(figure)
+    paths.append(path)
+
+    outlines = [
+        element
+        for coil in machine.active_coils
+        for element in coil.elements
+        if element.section.name == "outline"
+    ]
+    if not outlines:
+        raise ValueError("no non-rectangular element outlines found")
+    columns = 3
+    rows = (len(outlines) + columns - 1) // columns
+    figure, axes_array = plt.subplots(
+        rows,
+        columns,
+        figsize=(9, 2.8 * rows),
+        constrained_layout=True,
+        squeeze=False,
+    )
+    for axes, element in zip(axes_array.flat, outlines, strict=False):
+        outline = np.asarray(element.outline)
+        closed = np.vstack([outline, outline[0]])
+        axes.plot(closed[:, 0], closed[:, 1], "o-", color="tab:blue")
+        for index, vertex in enumerate(outline):
+            axes.text(vertex[0], vertex[1], str(index), fontsize=7)
+        axes.set_title(f"{element.name}: skew {element.skew:.4f} rad")
         axes.set_aspect("equal")
         axes.set_xlabel("R [m]")
         axes.set_ylabel("Z [m]")
-        return figure, axes
-
-    figure, axes = base_axes()
-    for section in machine.active_sections:
-        polygon = section.section.poly
-        axes.add_patch(
-            PolygonPatch(
-                list(zip(*polygon.exterior.xy, strict=True)),
-                fill=False,
-                edgecolor="tab:blue",
-                linewidth=1.3,
-            )
-        )
-        centre = polygon.centroid
-        axes.text(centre.x, centre.y, section.name, fontsize=7)
-    axes.set_title("Limiter and active-coil cross-sections")
-    path = output / "limiter_pf_active.png"
-    figure.savefig(path, dpi=180)
+    for axes in axes_array.flat[len(outlines) :]:
+        axes.remove()
+    path = output / "non_rectangular_element_outlines.png"
+    figure.savefig(path, dpi=220)
     plt.close(figure)
     paths.append(path)
 
-    figure, axes = base_axes()
-    positions = [sightline.position for sightline in machine.sightlines]
-    if positions:
-        axes.scatter(
-            [position[0] for position in positions],
-            [position[1] for position in positions],
-            s=20,
-            color="tab:orange",
-            label="reported scattering position",
+    grid = receipt["quantities"]["competition_efit_grid"]
+    r_min, r_max = grid["r_extent_m"]
+    z_min, z_max = grid["z_extent_m"]
+    figure, axes = plt.subplots(figsize=(7, 7), constrained_layout=True)
+    axes.plot(contour.r, contour.z, color="black", linewidth=1.8, label="limiter")
+    axes.add_patch(
+        RectanglePatch(
+            (r_min, z_min),
+            r_max - r_min,
+            z_max - z_min,
+            fill=False,
+            edgecolor="tab:orange",
+            linestyle="--",
+            linewidth=1.8,
+            label=f"competition efit_grid {grid['shape'][0]}x{grid['shape'][1]}",
         )
-    axes.text(
-        0.02,
-        0.02,
-        "No line-of-sight endpoints are stored; no chord is fabricated.",
-        transform=axes.transAxes,
-        fontsize=8,
     )
-    axes.set_title("Thomson geometry carried by the IDS")
-    path = output / "thomson_geometry.png"
-    figure.savefig(path, dpi=180)
-    plt.close(figure)
-    paths.append(path)
-
-    figure, axes = base_axes()
-    axes.text(
-        0.5,
-        0.5,
-        f"pf_passive loops stored: {machine.passive_loop_count}",
-        ha="center",
-        va="center",
-        transform=axes.transAxes,
-    )
-    axes.set_title("Passive-structure availability")
-    path = output / "passive_structure.png"
-    figure.savefig(path, dpi=180)
+    axes.set_aspect("equal")
+    axes.set_xlabel("R [m]")
+    axes.set_ylabel("Z [m]")
+    axes.legend(frameon=False)
+    axes.set_title("netCDF limiter against the released competition grid")
+    path = output / "limiter_competition_grid_extent.png"
+    figure.savefig(path, dpi=220)
     plt.close(figure)
     paths.append(path)
     return paths
 
 
 def main() -> None:
+    """Read the source and publish its receipt and figures."""
     parser = argparse.ArgumentParser()
-    parser.add_argument("--extract-only", action="store_true")
+    parser.add_argument("--source", type=Path, default=SOURCE_PATH)
+    parser.add_argument("--competition-receipt", type=Path, default=COMPETITION_RECEIPT)
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path("docs/figures/diiid-forward-onboarding/ids-description"),
+        default=Path("docs/figures/diiid-forward-onboarding/netcdf-description"),
     )
     args = parser.parse_args()
-    if args.extract_only:
-        json.dump(
-            [_legacy_entry(MACHINE_SHOT), _legacy_entry(CORROBORATING_SHOT)],
-            sys.stdout,
-        )
-        return
-    entries = read_entries()
-    receipt, machine = build_receipt(entries)
-    figures = write_figures(machine, args.output)
+    source = read_entry(args.source)
+    competition_grid = read_competition_grid(args.competition_receipt)
+    receipt, machine = build_receipt(source, competition_grid)
+    figures = write_figures(machine, receipt, args.output)
     receipt["figures"] = [str(path) for path in figures]
-    receipt_path = args.output / "ids_description_receipt.json"
+    receipt_path = args.output / "netcdf_description_receipt.json"
     receipt_path.write_text(json.dumps(receipt, indent=2) + "\n")
-    print(json.dumps({"receipt": str(receipt_path), "figures": len(figures)}))
+    print(
+        json.dumps(
+            {
+                "receipt": str(receipt_path),
+                "figures": len(figures),
+                "limiter_vertices": receipt["quantities"]["wall_limiter"][
+                    "vertex_count"
+                ],
+                "pf_active_coils": receipt["quantities"]["pf_active"]["coil_count"],
+                "pf_active_elements": receipt["quantities"]["pf_active"][
+                    "element_count"
+                ],
+                "pf_passive_loops": receipt["quantities"]["pf_passive"]["loop_count"],
+            }
+        )
+    )
 
 
 if __name__ == "__main__":

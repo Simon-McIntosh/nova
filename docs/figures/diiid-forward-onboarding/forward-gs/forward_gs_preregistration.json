@@ -45,10 +45,10 @@
   },
   "solver": {
     "entry_point": "nova.equilibrium.forward.ForwardProfile",
+    "gmres_iterations": 24,
     "grid_stride": 2,
-    "initial_relaxation": 0.2,
-    "maximum_evaluations": 1701,
-    "minimum_relaxation": 1e-06,
+    "history_reporting": "all finite relative residuals from ForwardProfile.fixed_point.trace",
+    "newton_steps": 24,
     "policy_history": [
       {
         "gmres_iterations": 8,
@@ -66,18 +66,36 @@
       {
         "initial_relaxation": 0.2,
         "maximum_evaluations": 1701,
-        "minimum_relaxation": 1e-06,
-        "relaxation_reduction_interval": 100,
+        "outcome": "discarded diagnostic: relative residual 6.597034616e-9 after 88 evaluations by leaving the plasma for the non-diverted vacuum branch; the free-boundary map is non-contractive, so relaxed routes are inapplicable",
         "route": "host",
-        "solver_tolerance": 1e-08,
-        "status": "active scoring policy"
+        "solver_tolerance": 1e-08
+      },
+      {
+        "function_tolerance": 1e-08,
+        "inner_maximum_iterations": 40,
+        "maximum_iterations": 100,
+        "outcome": "quarantined: finite diverted state at final relative residual 1.982164465; the 100-iteration absolute residual history cycles near 5.61 to 5.84 with a jump near 10.50 every fifteen iterations, rather than descending",
+        "profile_evaluations": 100,
+        "route": "host_krylov"
+      },
+      {
+        "gmres_iterations": 24,
+        "newton_steps": 24,
+        "profile_evaluations": 180,
+        "relaxation": 0.5,
+        "route": "newton_krylov",
+        "status": "active scoring policy",
+        "step_cap": 10.0,
+        "warmup": 8
       }
     ],
+    "profile_evaluations": 180,
     "relative_residual_tolerance": 1e-05,
-    "relaxation_reduction_interval": 100,
-    "route": "host",
+    "relaxation": 0.5,
+    "route": "newton_krylov",
     "seed": "the convention-clean labelled map, used only as a branch seed",
-    "solver_tolerance": 1e-08
+    "step_cap": 10.0,
+    "warmup": 8
   },
   "source": "extract_flux_functions(label) p-prime and FF-prime plus the shipped nineteen poloidal-conductor currents; zero fitted coefficients"
 }

@@ -28,12 +28,13 @@ def test_registered_bar_is_tied_to_the_measured_label_ceiling(tmp_path):
     )
     assert record["score"]["coefficients_fitted"] == 0
     assert record["selection"]["frames"] == 3
-    assert record["solver"]["route"] == "host"
-    assert record["solver"]["solver_tolerance"] == pytest.approx(1.0e-8)
-    assert record["solver"]["maximum_evaluations"] == 1701
-    assert record["solver"]["initial_relaxation"] == pytest.approx(0.2)
-    assert record["solver"]["minimum_relaxation"] == pytest.approx(1.0e-6)
-    assert record["solver"]["relaxation_reduction_interval"] == 100
+    assert record["solver"]["route"] == "newton_krylov"
+    assert record["solver"]["profile_evaluations"] == 180
+    assert record["solver"]["newton_steps"] == 24
+    assert record["solver"]["gmres_iterations"] == 24
+    assert record["solver"]["warmup"] == 8
+    assert record["solver"]["relaxation"] == pytest.approx(0.5)
+    assert record["solver"]["step_cap"] == pytest.approx(10.0)
     assert record["solver"]["relative_residual_tolerance"] == pytest.approx(1.0e-5)
     assert "144-turn assumption" in record["q95"]["assumption_scope"]
     assert "do not depend" in record["q95"]["assumption_scope"]
@@ -130,6 +131,7 @@ def _frame(*, r_squared: float, converged: bool, expansion: float = 0.02):
         converged=converged,
         convergence_criterion="declared criterion",
         solver_termination="returned within budget",
+        residual_history=(1.0e-3, 1.0e-5, 1.0e-7),
         metrics=metrics,
     )
 

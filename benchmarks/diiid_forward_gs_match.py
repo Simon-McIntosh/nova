@@ -72,12 +72,13 @@ REGISTERED_MEDIAN_INTERIOR_R2_BAR = (
 REGISTERED_FRAME_COUNT = 3
 REGISTERED_GRID_STRIDE = 2
 REGISTERED_RESIDUAL_TOLERANCE = 1.0e-5
-REGISTERED_SOLVER_ROUTE = "host"
-REGISTERED_HOST_TOLERANCE = 1.0e-8
-REGISTERED_HOST_MAXIMUM_EVALUATIONS = 1701
-REGISTERED_HOST_INITIAL_RELAXATION = 0.2
-REGISTERED_HOST_MINIMUM_RELAXATION = 1.0e-6
-REGISTERED_HOST_RELAXATION_REDUCTION_INTERVAL = 100
+REGISTERED_SOLVER_ROUTE = "newton_krylov"
+REGISTERED_PROFILE_EVALUATIONS = 180
+REGISTERED_ACCELERATED_NEWTON_STEPS = 24
+REGISTERED_ACCELERATED_GMRES_ITERATIONS = 24
+REGISTERED_ACCELERATED_WARMUP = 8
+REGISTERED_ACCELERATED_RELAXATION = 0.5
+REGISTERED_ACCELERATED_STEP_CAP = 10.0
 REGISTERED_BASELINE_PSEUDO_WALL_EXPANSION = 0.02
 PSEUDO_WALL_EXPANSIONS = (0.02, 0.05)
 TOROIDAL_FIELD_TURNS = 144
@@ -161,6 +162,7 @@ class FrameResult:
     converged: bool
     convergence_criterion: str
     solver_termination: str
+    residual_history: tuple[float, ...]
     metrics: MatchMetrics
 
 
@@ -193,15 +195,17 @@ def preregistration() -> dict[str, Any]:
             "entry_point": "nova.equilibrium.forward.ForwardProfile",
             "route": REGISTERED_SOLVER_ROUTE,
             "grid_stride": REGISTERED_GRID_STRIDE,
-            "solver_tolerance": REGISTERED_HOST_TOLERANCE,
-            "maximum_evaluations": REGISTERED_HOST_MAXIMUM_EVALUATIONS,
-            "initial_relaxation": REGISTERED_HOST_INITIAL_RELAXATION,
-            "minimum_relaxation": REGISTERED_HOST_MINIMUM_RELAXATION,
-            "relaxation_reduction_interval": (
-                REGISTERED_HOST_RELAXATION_REDUCTION_INTERVAL
-            ),
+            "profile_evaluations": REGISTERED_PROFILE_EVALUATIONS,
+            "newton_steps": REGISTERED_ACCELERATED_NEWTON_STEPS,
+            "gmres_iterations": REGISTERED_ACCELERATED_GMRES_ITERATIONS,
+            "warmup": REGISTERED_ACCELERATED_WARMUP,
+            "relaxation": REGISTERED_ACCELERATED_RELAXATION,
+            "step_cap": REGISTERED_ACCELERATED_STEP_CAP,
             "relative_residual_tolerance": REGISTERED_RESIDUAL_TOLERANCE,
             "seed": "the convention-clean labelled map, used only as a branch seed",
+            "history_reporting": (
+                "all finite relative residuals from ForwardProfile.fixed_point.trace"
+            ),
             "policy_history": [
                 {
                     "route": "newton_krylov",
@@ -224,14 +228,38 @@ def preregistration() -> dict[str, Any]:
                     ),
                 },
                 {
-                    "route": REGISTERED_SOLVER_ROUTE,
-                    "solver_tolerance": REGISTERED_HOST_TOLERANCE,
-                    "maximum_evaluations": REGISTERED_HOST_MAXIMUM_EVALUATIONS,
-                    "initial_relaxation": REGISTERED_HOST_INITIAL_RELAXATION,
-                    "minimum_relaxation": REGISTERED_HOST_MINIMUM_RELAXATION,
-                    "relaxation_reduction_interval": (
-                        REGISTERED_HOST_RELAXATION_REDUCTION_INTERVAL
+                    "route": "host",
+                    "solver_tolerance": 1.0e-8,
+                    "maximum_evaluations": 1701,
+                    "initial_relaxation": 0.2,
+                    "outcome": (
+                        "discarded diagnostic: relative residual 6.597034616e-9 "
+                        "after 88 evaluations by leaving the plasma for the "
+                        "non-diverted vacuum branch; the free-boundary map is "
+                        "non-contractive, so relaxed routes are inapplicable"
                     ),
+                },
+                {
+                    "route": "host_krylov",
+                    "profile_evaluations": 100,
+                    "function_tolerance": 1.0e-8,
+                    "maximum_iterations": 100,
+                    "inner_maximum_iterations": 40,
+                    "outcome": (
+                        "quarantined: finite diverted state at final relative "
+                        "residual 1.982164465; the 100-iteration absolute residual "
+                        "history cycles near 5.61 to 5.84 with a jump near 10.50 "
+                        "every fifteen iterations, rather than descending"
+                    ),
+                },
+                {
+                    "route": REGISTERED_SOLVER_ROUTE,
+                    "profile_evaluations": REGISTERED_PROFILE_EVALUATIONS,
+                    "newton_steps": REGISTERED_ACCELERATED_NEWTON_STEPS,
+                    "gmres_iterations": REGISTERED_ACCELERATED_GMRES_ITERATIONS,
+                    "warmup": REGISTERED_ACCELERATED_WARMUP,
+                    "relaxation": REGISTERED_ACCELERATED_RELAXATION,
+                    "step_cap": REGISTERED_ACCELERATED_STEP_CAP,
                     "status": "active scoring policy",
                 },
             ],
@@ -589,6 +617,8 @@ def build_profile(
         wall_coordinate=wall,
         polarity=1,
         inside_material=np.ones(lattice.node_count, dtype=bool),
+        evaluations=REGISTERED_PROFILE_EVALUATIONS,
+        newton_steps=REGISTERED_ACCELERATED_NEWTON_STEPS,
     )
     spline = RectBivariateSpline(radius, height, label, kx=3, ky=3, s=0)
     seed = np.r_[label.ravel(), spline.ev(wall[:, 0], wall[:, 1])]
@@ -650,45 +680,19 @@ def contour_separation(
 
 
 def _solve_registered(profile: ForwardProfile, seed: np.ndarray):
-    """Run the preregistered relaxed host schedule and report its termination."""
+    """Run the preregistered fixed-shape Newton-Krylov root solve."""
 
-    state = np.asarray(seed, dtype=float)
-    relaxation = REGISTERED_HOST_INITIAL_RELAXATION
-    evaluations = 0
-    equilibrium = None
-    while evaluations < REGISTERED_HOST_MAXIMUM_EVALUATIONS:
-        budget = min(
-            REGISTERED_HOST_RELAXATION_REDUCTION_INTERVAL,
-            REGISTERED_HOST_MAXIMUM_EVALUATIONS - evaluations,
-        )
-        equilibrium = profile.solve(
-            state,
-            route=REGISTERED_SOLVER_ROUTE,
-            evaluations=budget,
-            relaxation=relaxation,
-            tolerance=REGISTERED_HOST_TOLERANCE,
-        )
-        used = int(
-            np.count_nonzero(np.isfinite(np.asarray(equilibrium.fixed_point.trace)))
-        )
-        evaluations += used
-        residual = float(equilibrium.fixed_point.residual)
-        if residual <= REGISTERED_HOST_TOLERANCE:
-            return (
-                equilibrium,
-                f"converged after {evaluations} relaxed host evaluations; "
-                f"final relaxation={relaxation:.9g}",
-            )
-        state = np.asarray(equilibrium.flux, dtype=float)
-        if used < budget:
-            break
-        relaxation = max(REGISTERED_HOST_MINIMUM_RELAXATION, relaxation / 2.0)
-    if equilibrium is None:
-        raise RuntimeError("the registered host schedule performed no evaluations")
+    equilibrium = profile.solve(
+        seed,
+        route=REGISTERED_SOLVER_ROUTE,
+        gmres_iterations=REGISTERED_ACCELERATED_GMRES_ITERATIONS,
+        warmup=REGISTERED_ACCELERATED_WARMUP,
+        relaxation=REGISTERED_ACCELERATED_RELAXATION,
+        step_cap=REGISTERED_ACCELERATED_STEP_CAP,
+    )
     return (
         equilibrium,
-        f"exhausted {evaluations} relaxed host evaluations; "
-        f"final relaxation={relaxation:.9g}",
+        "accelerated Newton-Krylov exhausted its preregistered fixed-shape budget",
     )
 
 
@@ -754,6 +758,11 @@ def solve_frame(
         and np.isfinite(residual)
         and residual <= REGISTERED_RESIDUAL_TOLERANCE
     )
+    residual_history = tuple(
+        float(value)
+        for value in np.asarray(equilibrium.fixed_point.trace, dtype=float)
+        if np.isfinite(value)
+    )
     result = FrameResult(
         shot=Path(row["_source_path"]).name,
         frame=frame,
@@ -772,6 +781,7 @@ def solve_frame(
             f"<= {REGISTERED_RESIDUAL_TOLERANCE:g}"
         ),
         solver_termination=solver_termination,
+        residual_history=residual_history,
         metrics=MatchMetrics(
             interior_r_squared=r_squared,
             interior_fractional_rms=fractional_rms,
@@ -1039,6 +1049,19 @@ def run(
         result, frame_fields = solve_frame(
             row, selected_frame.frame, baseline_expansion
         )
+        print(
+            "RESIDUAL_HISTORY "
+            + json.dumps(
+                {
+                    "shot": result.shot,
+                    "frame": result.frame,
+                    "route": REGISTERED_SOLVER_ROUTE,
+                    "relative_residual": list(result.residual_history),
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
         if not result.converged:
             raise RuntimeError(
                 f"non-converged frame {result.shot}:{result.frame}: "
@@ -1063,6 +1086,20 @@ def run(
             sensitivity.append(results[0])
         else:
             expanded = solve_frame(first_row, first.frame, expansion)[0]
+            print(
+                "RESIDUAL_HISTORY "
+                + json.dumps(
+                    {
+                        "shot": expanded.shot,
+                        "frame": expanded.frame,
+                        "route": REGISTERED_SOLVER_ROUTE,
+                        "pseudo_wall_expansion": expansion,
+                        "relative_residual": list(expanded.residual_history),
+                    },
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
             if not expanded.converged:
                 raise RuntimeError(
                     f"non-converged pseudo-wall sensitivity for "

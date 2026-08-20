@@ -657,6 +657,99 @@
     with existing behaviour preserved bit-for-bit by a before-and-after manifest compare, and netCDF
     digest stability proven across two independent writes of identical content, which was that node's one
     real unknown.</p>
+
+    <h2 id="limiter-topology">§3 the limiting boundary mode is now something a receipt says — 2026-08-20</h2>
+    <p>Commit <code>c3092ace</code>. A solve no longer leaves its boundary mode to be inferred from the
+    flux map: <code>TopologySolveReceipt</code> is the host-visible boundary over the device booleans,
+    and every completed solve emits its topology class, its boundary point, any wall-contact point, the
+    class history, the transition count, how many transitions survived without solver failure, and
+    whether the solver succeeded.</p>
+    <table>
+      <caption>The three things §3 asked for, each measured against a bar written down before scoring.</caption>
+      <thead><tr><th>Claim</th><th>Measured</th><th>Bar</th></tr></thead>
+      <tbody>
+        <tr><td>Synthetic limited round-trip recovers the prescribed wall contact</td><td><strong>5.53e-14 grid cells</strong> (8.98e-16 m on a 0.01625 m cell)</td><td>1.0 grid cell</td></tr>
+        <tr><td>Mid-solve topology churn traversed without solver failure</td><td><strong>3 of 3</strong></td><td>no solver failure</td></tr>
+        <tr><td>Classifier agreement on in-house MAST limited frames</td><td><strong>6 of 6 — 1.0</strong></td><td>reported with its frame count</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The MAST arm is qualified rather than oversold.</strong> Its six frames are analytic
+    in-house limited-equilibrium fixtures on the repository's own MAST limiter with prescribed limited
+    truth and <code>efit_inputs_used = false</code>. That makes it evidence about the
+    <em>classifier</em> and not about experimental reconstruction fidelity, and the receipt says so in
+    its own provenance block rather than leaving a reader to assume the stronger claim.</p>
+    <figure>
+      <img src="/nova/figures/diiid-forward-onboarding/limiter-topology/limiter_topology_modes.png"
+           alt="Two panels: the synthetic limited round-trip showing prescribed and recovered wall-contact points on the limiter, and the MAST limited-frame bank with each frame's classified boundary"
+           style="max-width:100%">
+      <figcaption>Left, the synthetic round-trip with prescribed and recovered contact at
+      (1.35, 0.0) m — the two markers are separated by less than a femtometre and are drawn on top of
+      each other. Right, the six MAST limited-frame fixtures with their classified boundaries.</figcaption>
+    </figure>
+    <p>One honest note on how the number was obtained: the first benchmark run selected the shared login
+    GPU and stopped before scoring with <code>CUDA_ERROR_OUT_OF_MEMORY</code>. The single corrective run
+    was pinned to CPU and completed. Nothing was retried until it passed — the failure was capacity, the
+    rerun changed the device and not the measurement.</p>
+
+    <h2 id="throughput-budget">§6 the compute envelope is measured, and it is not the assumed one — 2026-08-20</h2>
+    <p>Commit <code>2d6f9b37</code>. The assumed compute envelope is replaced by a measured budget table
+    from a real H200 run — SLURM job 1252481, exit 0:0, 37 s against a 45-minute ceiling — on
+    NVIDIA H200 NVL with JAX 0.11.0 in float64.</p>
+    <table>
+      <caption>Measured batched forward-solve budget. Convergence policy fixed at two relaxed warmups
+      plus one Newton step at four GMRES iterations, with no residual early exit, so every row solves
+      the same amount of problem.</caption>
+      <thead><tr><th>Batch</th><th>Timed slices</th><th>Elapsed (s)</th><th>Slices / s</th><th>Per-member speed-up</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>100</td><td>0.7856</td><td>127.288</td><td>1.00×</td></tr>
+        <tr><td>4</td><td>400</td><td>1.1764</td><td>340.032</td><td>2.67×</td></tr>
+        <tr><td>8</td><td>800</td><td>1.7001</td><td><strong>470.561</strong></td><td><strong>3.70×</strong></td></tr>
+      </tbody>
+    </table>
+    <p><strong>Branch continuity held and is pinned by a test.</strong> All 1,300 solves retained
+    <code>limited_plasma</code> with <strong>zero accepted branch switches</strong>, and the test fails a
+    batch that silently changes branch rather than reporting the throughput anyway.</p>
+    <p><strong>Two qualifications the number must be read with, both from the run's own receipts.</strong>
+    The maximum fixed-budget relative residual is <strong>0.268</strong>, so this is a
+    <em>compute-throughput</em> receipt and not convergence evidence — it measures how fast the machine
+    executes a fixed policy, not how well that policy solves. And every one of the 1,300
+    conditioning receipts reports a <em>negative</em> stability margin, spanning −0.6393 to −0.6304, so
+    <strong>0 of 1,300</strong> sit inside the open (0, 1.5) decay-index window. The workload is nova's
+    bootstrapped free-boundary production route rather than a labelled DIII-D discharge, which keeps this
+    section clear of the boundary-field qualification §5 carries — at the cost of saying plainly that the
+    conditioning receipt is wired and exercised here, not yet exercised on DIII-D frames.</p>
+
+    <h2 id="cocos-ip-sign">§7 the current sign settled from the definitions, and the guide is wrong — 2026-08-20</h2>
+    <p>Commit <code>213cc9a4</code>. Two authorities disagreed on whether plasma current flips from
+    COCOS 11 to COCOS 17. Neither was believed: the factors were re-derived from the published sign
+    tuple, which is the only authority that cannot be a generator bug.</p>
+    <table>
+      <caption>The 11→17 transform, derived from Sauter–Medvedev Table I independently of both
+      disputed implementations. COCOS 11 is (σ<sub>Bp</sub>=+1, e<sub>Bp</sub>=1, σ<sub>RφZ</sub>=+1,
+      σ<sub>ρθφ</sub>=+1); COCOS 17 differs in σ<sub>Bp</sub> alone.</caption>
+      <thead><tr><th>Quantity class</th><th>Definition-derived factor</th><th>nova's engine</th><th>DD migration guide</th></tr></thead>
+      <tbody>
+        <tr><td><code>psi_like</code></td><td>−1</td><td>−1 ✓</td><td>—</td></tr>
+        <tr><td><code>ip_like</code></td><td><strong>+1</strong></td><td><strong>+1 ✓</strong></td><td><strong>−1 ✗</strong></td></tr>
+        <tr><td><code>b0_like</code></td><td>+1</td><td>+1 ✓</td><td>—</td></tr>
+        <tr><td><code>q_like</code></td><td>+1</td><td>+1 ✓</td><td>—</td></tr>
+        <tr><td><code>dodpsi_like</code></td><td>−1</td><td>−1 ✓</td><td>—</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Verdict: nova's convention engine is right and the migration guide's displayed factor is
+    wrong.</strong> Only σ<sub>Bp</sub> changes between the two indices, so ψ and dO/dψ flip while
+    toroidal current and field do not. The guide's own defining equation agrees:
+    σ<sub>Ip,eff</sub> = σ<sub>RφZ,target</sub> × σ<sub>RφZ,source</sub> = (+1)(+1) = +1, and the data
+    dictionary's developer guide separately labels <code>pf_active/coil/current</code> as
+    <code>ip_like</code> with expression <code>sigma_ip_eff</code> — contradicting the −1 the generated
+    display shows for that same path. A current-bearing value of −123456.75 A round-tripped
+    11→17→11 at exact equality.</p>
+    <p><strong>Why it was worth settling while still inert.</strong> The published machine description
+    writes geometry only and its firewall verified zero current arrays, so nothing shipped depends on
+    this today. It becomes load-bearing the moment an artifact carries <code>coil/current</code> — and
+    this campaign has already lost 8.5 points of exterior R² to a sign applied twice, which is the whole
+    argument for resolving a sign before it is needed rather than during. Correcting the generated guide
+    upstream is outside this repository.</p>
   </main>
 </body>
 </html>

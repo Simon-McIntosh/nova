@@ -1,0 +1,516 @@
+{
+  "cache": {
+    "build_seconds": 0.0,
+    "hit": true,
+    "load_seconds": 0.13811615854501724,
+    "lock_wait_seconds": 1.3096258044242859e-05,
+    "semantic_key": "030667d40f96d904",
+    "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/analytic_oracle_hex_machine_500.zarr",
+    "store_seconds": 0.0
+  },
+  "closed_form_analytic_invariants": {
+    "internal_inductance": 0.472635109241181,
+    "plasma_current_a": 1627957.0127122786,
+    "poloidal_beta": 0.734715758817039,
+    "poloidal_field_integral": 1.3994937314243965
+  },
+  "closed_form_state_conservation_floor": {
+    "checked_cells": 303,
+    "divergence_b_relative": 0.00028956385099563795,
+    "divergence_j_relative": 0.0002930790338402703,
+    "force_relative": 0.001591423884417106,
+    "grad_shafranov_relative": 0.00012662798399226346
+  },
+  "closed_form_state_observed_moments": {
+    "internal_inductance": 0.3998048930159082,
+    "major_radius_m": 1.6740837108474012,
+    "plasma_current_a": 1625644.334902816,
+    "poloidal_beta": 0.6228813337722693,
+    "poloidal_field_integral": 1.3965808340540404,
+    "volume_m3": 17.288458574262815
+  },
+  "continuation": {
+    "accepted_steps": [
+      {
+        "accepted": false,
+        "history": {
+          "criterion": 1e-10,
+          "criterion_met": false,
+          "finite_trace": [
+            0.5299939581820549
+          ],
+          "finite_trace_indices": [
+            0
+          ],
+          "first_criterion_newton_step": null,
+          "gmres_iterations_per_step": 30,
+          "map_evaluation_budget": 320,
+          "newton_steps_requested": 10,
+          "recorded_residual_evaluations": 1,
+          "terminal_residual": null
+        },
+        "initial_core_cell_count": 231,
+        "initial_topology_class": "limited",
+        "oracle_flux_sup_fraction_of_span": 6.234436635103152,
+        "reason": "solver criterion or nonempty-core qualification failed",
+        "seconds": 62.425750164315104,
+        "source_strength": 0.5,
+        "terminal_core_cell_count": 0,
+        "terminal_topology_class": "limited"
+      },
+      {
+        "accepted": false,
+        "history": {
+          "criterion": 1e-10,
+          "criterion_met": false,
+          "finite_trace": [
+            0.8807542164072152,
+            2.3024334834291738,
+            2.3024334834291738
+          ],
+          "finite_trace_indices": [
+            0,
+            31,
+            32
+          ],
+          "first_criterion_newton_step": null,
+          "gmres_iterations_per_step": 30,
+          "map_evaluation_budget": 320,
+          "newton_steps_requested": 10,
+          "recorded_residual_evaluations": 3,
+          "terminal_residual": null
+        },
+        "initial_core_cell_count": 339,
+        "initial_topology_class": "limited",
+        "oracle_flux_sup_fraction_of_span": 3.796789069105199,
+        "reason": "solver criterion or nonempty-core qualification failed",
+        "seconds": 64.37936219200492,
+        "source_strength": 0.75,
+        "terminal_core_cell_count": 0,
+        "terminal_topology_class": "limited"
+      },
+      {
+        "accepted": true,
+        "history": {
+          "criterion": 1e-10,
+          "criterion_met": true,
+          "finite_trace": [
+            1.5579324865595212,
+            0.25420324190229787,
+            0.2542032419022976,
+            0.21752624135657278,
+            0.21752624135657278,
+            0.00786787743276005,
+            0.00786787743276005,
+            0.0004062131591957521,
+            0.0004062131591957521,
+            2.921835740636566e-06,
+            2.921835740636566e-06,
+            4.59435714115027e-12,
+            4.59435714115027e-12,
+            3.361708206602089e-15,
+            3.361708206602089e-15,
+            1.8435174036205005e-15,
+            1.8435174036205005e-15,
+            2.494170604898324e-15,
+            1.951959603833469e-15,
+            2.494170604898324e-15
+          ],
+          "finite_trace_indices": [
+            0,
+            31,
+            32,
+            63,
+            64,
+            95,
+            96,
+            127,
+            128,
+            159,
+            160,
+            191,
+            192,
+            223,
+            224,
+            255,
+            256,
+            287,
+            288,
+            319
+          ],
+          "first_criterion_newton_step": 6,
+          "gmres_iterations_per_step": 30,
+          "map_evaluation_budget": 320,
+          "newton_steps_requested": 10,
+          "recorded_residual_evaluations": 20,
+          "terminal_residual": 2.494170604898324e-15
+        },
+        "initial_core_cell_count": 230,
+        "initial_topology_class": "limited",
+        "oracle_flux_sup_fraction_of_span": 0.533313502617716,
+        "seconds": 72.05160157755017,
+        "source_strength": 1.0,
+        "terminal_core_cell_count": 442,
+        "terminal_topology_class": "limited"
+      }
+    ],
+    "map_definition": "external + alpha*(production_map(state)-external)",
+    "trigger_flux_fraction": 1e-06,
+    "triggered": true
+  },
+  "direct_attempt": {
+    "criterion": 1e-10,
+    "criterion_met": true,
+    "finite_trace": [
+      1.5579324865595212,
+      0.25420324190229787,
+      0.2542032419022976,
+      0.21752624135657278,
+      0.21752624135657278,
+      0.00786787743276005,
+      0.00786787743276005,
+      0.0004062131591957521,
+      0.0004062131591957521,
+      2.921835740636566e-06,
+      2.921835740636566e-06,
+      4.59435714115027e-12,
+      4.59435714115027e-12,
+      3.361708206602089e-15,
+      3.361708206602089e-15,
+      1.8435174036205005e-15,
+      1.8435174036205005e-15,
+      2.494170604898324e-15,
+      1.951959603833469e-15,
+      2.494170604898324e-15
+    ],
+    "finite_trace_indices": [
+      0,
+      31,
+      32,
+      63,
+      64,
+      95,
+      96,
+      127,
+      128,
+      159,
+      160,
+      191,
+      192,
+      223,
+      224,
+      255,
+      256,
+      287,
+      288,
+      319
+    ],
+    "first_criterion_newton_step": 6,
+    "gmres_iterations_per_step": 30,
+    "map_evaluation_budget": 320,
+    "newton_steps_requested": 10,
+    "oracle_flux_sup_fraction_of_span": 0.533313502617716,
+    "recorded_residual_evaluations": 20,
+    "seconds": 70.67800685949624,
+    "terminal_residual": 2.494170604898324e-15
+  },
+  "fixture": "coarse",
+  "gauge_receipt": {
+    "oracle_anchors_wb": [
+      1.3810216850087467,
+      -8.673617379884035e-19
+    ],
+    "psi_norm_oracle_anchors_from": "closed_form_field",
+    "psi_norm_root_anchors_from": "root_field",
+    "psi_norm_sup_difference": 0.3776975545973289,
+    "raw_flux_comparison_gauge": "shared_exact_exterior",
+    "raw_flux_difference": "root_state - independently evaluated closed_form_state",
+    "reference_gauge_constant_used": false,
+    "root_anchors_wb": [
+      1.0241986753014278,
+      -0.24590656947069361
+    ]
+  },
+  "metric": {
+    "axis_position_m": {
+      "absolute_reference_deviation": 0.07549542622817232,
+      "recovery_value": 0.07483887226620761,
+      "representation_reference_floor": 0.0006565544884831187
+    },
+    "divergence_b_relative": {
+      "absolute_reference_deviation": 0.0024890983900854773,
+      "recovery_value": 0.002199534539089839,
+      "representation_reference_floor": 0.00028956385099563795
+    },
+    "divergence_j_relative": {
+      "absolute_reference_deviation": 0.002492076924042085,
+      "recovery_value": 0.0021989978902018145,
+      "representation_reference_floor": 0.0002930790338402703
+    },
+    "field_integral_fraction": {
+      "absolute_reference_deviation": 0.11839045849829273,
+      "recovery_value": 0.11655165471944769,
+      "representation_reference_floor": 0.0020813936532543945
+    },
+    "fixed_point_residual": {
+      "absolute_reference_deviation": 2.7110550053242652e-15,
+      "recovery_value": 2.7110550053242652e-15,
+      "representation_reference_floor": 0.0
+    },
+    "flux_rms_fraction_of_span": {
+      "absolute_reference_deviation": 0.2706765654843951,
+      "recovery_value": 0.2706765654843951,
+      "representation_reference_floor": 0.0
+    },
+    "flux_sup_fraction_of_span": {
+      "absolute_reference_deviation": 0.533313502617716,
+      "recovery_value": 0.533313502617716,
+      "representation_reference_floor": 0.0
+    },
+    "grad_shafranov_relative": {
+      "absolute_reference_deviation": 0.058311425532711916,
+      "recovery_value": 0.05818479754871965,
+      "representation_reference_floor": 0.00012662798399226346
+    },
+    "internal_inductance_fraction": {
+      "absolute_reference_deviation": 0.1343883873135388,
+      "recovery_value": 0.023295227920638917,
+      "representation_reference_floor": 0.15409396128485298
+    },
+    "plasma_current_fraction": {
+      "absolute_reference_deviation": 0.05147780982402771,
+      "recovery_value": 0.05012842104697149,
+      "representation_reference_floor": 0.0014206012759572708
+    },
+    "poloidal_beta_fraction": {
+      "absolute_reference_deviation": 0.08782170237474489,
+      "recovery_value": 0.07595417261484666,
+      "representation_reference_floor": 0.15221454515258195
+    },
+    "standing_forcing_sup_wb": {
+      "absolute_reference_deviation": 3.83026943495679e-15,
+      "recovery_value": 3.83026943495679e-15,
+      "representation_reference_floor": 0.0
+    }
+  },
+  "oracle_topology": {
+    "axis_flux_wb": 1.3810216850087467,
+    "axis_m": [
+      1.6993434455115168,
+      9.17089886430993e-16
+    ],
+    "boundary_flux_wb": -8.673617379884035e-19,
+    "class": "limited",
+    "flux_span_wb": -1.3810216850087467,
+    "x_point": null
+  },
+  "realised_cells": 551,
+  "requested_cells": -500,
+  "root_artifact": {
+    "arrays": {
+      "oracle_axis": {
+        "dtype": "<f8",
+        "sha256": "ac2af59fae3cb3b4770c31c4a9e54070d541ec7ab42a226a14156983172e70f0",
+        "shape": [
+          2
+        ]
+      },
+      "oracle_cell_current": {
+        "dtype": "<f8",
+        "sha256": "95c8fcd6a5c210427f2c69dec35e8e367ae30a3e195b9105412e23e819e1ebc6",
+        "shape": [
+          551
+        ]
+      },
+      "oracle_grid_psi_norm": {
+        "dtype": "<f8",
+        "sha256": "ef6470e869b80e84f75894b14142265f1dca0b05d78647ead038fa02fc0cff06",
+        "shape": [
+          551
+        ]
+      },
+      "oracle_state": {
+        "dtype": "<f8",
+        "sha256": "633a8fbe81dbb21d9f333079ccaf5b1e7dd8f0fe3c3adac9fd90a0c89ec5ac0e",
+        "shape": [
+          2253
+        ]
+      },
+      "residual_trace": {
+        "dtype": "<f8",
+        "sha256": "efae0a1ad01c7a2f6dd4ee6e53736abd8d608ed4dd7c54f1e3dfdaa42cdd4add",
+        "shape": [
+          320
+        ]
+      },
+      "root_axis": {
+        "dtype": "<f8",
+        "sha256": "8fb0fbbc8d629acfb994159f6a4d72f361787fb50022d57a7be1d5fee111be50",
+        "shape": [
+          2
+        ]
+      },
+      "root_cell_current": {
+        "dtype": "<f8",
+        "sha256": "a16c560a5eff9afe620dc7e7656cf6c2904c6b4e9ae997e5dd616d24a3d5d0dc",
+        "shape": [
+          551
+        ]
+      },
+      "root_grid_psi_norm": {
+        "dtype": "<f8",
+        "sha256": "a4005ff73f0411a140d79b10b355a4faefd436b4e594416646da05dbddc3d7db",
+        "shape": [
+          551
+        ]
+      },
+      "root_state": {
+        "dtype": "<f8",
+        "sha256": "143a520cec654968ffa4588604fa106203b0a5e4f03cd6989eab7c14616be6bb",
+        "shape": [
+          2253
+        ]
+      },
+      "seed_state": {
+        "dtype": "<f8",
+        "sha256": "5165da653842f23fad2fdb3150861b291bc7d33d7127d9c5f48f9370c9c70847",
+        "shape": [
+          2253
+        ]
+      }
+    },
+    "bytes": 76918,
+    "path": "scripts/oracle_rebaseline/root-coarse.npz"
+  },
+  "root_conservation": {
+    "checked_cells": 292,
+    "divergence_b_relative": 0.0024890983900854773,
+    "divergence_j_relative": 0.002492076924042085,
+    "force_relative": 0.09574029898901404,
+    "grad_shafranov_relative": 0.058311425532711916
+  },
+  "root_moments": {
+    "internal_inductance": 0.40911843912250045,
+    "major_radius_m": 1.6018712126766768,
+    "plasma_current_a": 1544153.3512101837,
+    "poloidal_beta": 0.6701917701161741,
+    "poloidal_field_integral": 1.2338070268955756,
+    "volume_m3": 16.168405901294193
+  },
+  "root_topology": {
+    "axis_flux_wb": 1.0241986753014278,
+    "axis_m": [
+      1.6245046337882392,
+      -9.51941465443805e-05
+    ],
+    "boundary_flux_wb": -0.24590656947069361,
+    "class": "limited",
+    "flux_span_wb": -1.2701052447721215,
+    "x_point": null
+  },
+  "seed": {
+    "aggregate_moment": {
+      "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+      "current_centroid_m": [
+        1.6602192201158459,
+        0.0
+      ],
+      "declared_current_a": 1627957.0127122786,
+      "quadrature_current_a": 1627957.0127122786,
+      "quadrature_nodes": 512,
+      "quadrature_relative_closure": 0.0
+    },
+    "closed_form_coupling_image_used": false,
+    "closed_form_flux_samples_used": false,
+    "current_sum_a": 1627957.0127122784,
+    "fixture_exterior_boundary_condition_used": true,
+    "independent_of_closed_form_state": true,
+    "initial_axis_m": [
+      1.7130205561029062,
+      -0.004446833246106948
+    ],
+    "initial_core_cell_count": 230,
+    "initial_topology_class": "limited",
+    "kind": "production-current-centroid-uniform-disc-zeroth-moment",
+    "limiter_midplane_extent_m": [
+      0.9783517036373888,
+      2.15
+    ],
+    "oracle_state_sup_difference_fraction_of_span": 1.290004407911919,
+    "seed_radius_fraction": 0.9,
+    "seed_radius_m": 0.4408027018957386,
+    "state_sha256_binary64": "5165da653842f23fad2fdb3150861b291bc7d33d7127d9c5f48f9370c9c70847",
+    "supported_cell_count": 161,
+    "supported_minor_distance_m": 0.489780779884154
+  },
+  "solver": {
+    "criterion": 1e-10,
+    "criterion_unchanged": true,
+    "gmres_iterations": 30,
+    "newton_steps": 10,
+    "route": "undamped_newton_krylov",
+    "selection": "lowest closed-form flux drift among independently seeded, criterion-qualified direct and continuation roots"
+  },
+  "state_size": 2253,
+  "terminal_root": {
+    "axis_m": [
+      1.6245046337882392,
+      -9.51941465443805e-05
+    ],
+    "criterion": 1e-10,
+    "criterion_met": true,
+    "finite_trace": [
+      1.5579324865595212,
+      0.25420324190229787,
+      0.2542032419022976,
+      0.21752624135657278,
+      0.21752624135657278,
+      0.00786787743276005,
+      0.00786787743276005,
+      0.0004062131591957521,
+      0.0004062131591957521,
+      2.921835740636566e-06,
+      2.921835740636566e-06,
+      4.59435714115027e-12,
+      4.59435714115027e-12,
+      3.361708206602089e-15,
+      3.361708206602089e-15,
+      1.8435174036205005e-15,
+      1.8435174036205005e-15,
+      2.494170604898324e-15,
+      1.951959603833469e-15,
+      2.494170604898324e-15
+    ],
+    "finite_trace_indices": [
+      0,
+      31,
+      32,
+      63,
+      64,
+      95,
+      96,
+      127,
+      128,
+      159,
+      160,
+      191,
+      192,
+      223,
+      224,
+      255,
+      256,
+      287,
+      288,
+      319
+    ],
+    "first_criterion_newton_step": 6,
+    "gmres_iterations_per_step": 30,
+    "map_evaluation_budget": 320,
+    "newton_steps_requested": 10,
+    "recorded_residual_evaluations": 20,
+    "selected_route": "direct_moment_seed",
+    "terminal_residual": 2.494170604898324e-15,
+    "topology_class": "limited",
+    "x_point": null
+  }
+}

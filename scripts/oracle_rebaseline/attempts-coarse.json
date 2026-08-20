@@ -1,0 +1,218 @@
+{
+  "continuation": [
+    {
+      "accepted": false,
+      "history": {
+        "criterion": 1e-10,
+        "criterion_met": false,
+        "finite_trace": [
+          0.5299939581820549
+        ],
+        "finite_trace_indices": [
+          0
+        ],
+        "first_criterion_newton_step": null,
+        "gmres_iterations_per_step": 30,
+        "map_evaluation_budget": 320,
+        "newton_steps_requested": 10,
+        "recorded_residual_evaluations": 1,
+        "terminal_residual": null
+      },
+      "initial_core_cell_count": 231,
+      "initial_topology_class": "limited",
+      "oracle_flux_sup_fraction_of_span": 6.234436635103152,
+      "reason": "solver criterion or nonempty-core qualification failed",
+      "seconds": 62.425750164315104,
+      "source_strength": 0.5,
+      "terminal_core_cell_count": 0,
+      "terminal_topology_class": "limited"
+    },
+    {
+      "accepted": false,
+      "history": {
+        "criterion": 1e-10,
+        "criterion_met": false,
+        "finite_trace": [
+          0.8807542164072152,
+          2.3024334834291738,
+          2.3024334834291738
+        ],
+        "finite_trace_indices": [
+          0,
+          31,
+          32
+        ],
+        "first_criterion_newton_step": null,
+        "gmres_iterations_per_step": 30,
+        "map_evaluation_budget": 320,
+        "newton_steps_requested": 10,
+        "recorded_residual_evaluations": 3,
+        "terminal_residual": null
+      },
+      "initial_core_cell_count": 339,
+      "initial_topology_class": "limited",
+      "oracle_flux_sup_fraction_of_span": 3.796789069105199,
+      "reason": "solver criterion or nonempty-core qualification failed",
+      "seconds": 64.37936219200492,
+      "source_strength": 0.75,
+      "terminal_core_cell_count": 0,
+      "terminal_topology_class": "limited"
+    },
+    {
+      "accepted": true,
+      "history": {
+        "criterion": 1e-10,
+        "criterion_met": true,
+        "finite_trace": [
+          1.5579324865595212,
+          0.25420324190229787,
+          0.2542032419022976,
+          0.21752624135657278,
+          0.21752624135657278,
+          0.00786787743276005,
+          0.00786787743276005,
+          0.0004062131591957521,
+          0.0004062131591957521,
+          2.921835740636566e-06,
+          2.921835740636566e-06,
+          4.59435714115027e-12,
+          4.59435714115027e-12,
+          3.361708206602089e-15,
+          3.361708206602089e-15,
+          1.8435174036205005e-15,
+          1.8435174036205005e-15,
+          2.494170604898324e-15,
+          1.951959603833469e-15,
+          2.494170604898324e-15
+        ],
+        "finite_trace_indices": [
+          0,
+          31,
+          32,
+          63,
+          64,
+          95,
+          96,
+          127,
+          128,
+          159,
+          160,
+          191,
+          192,
+          223,
+          224,
+          255,
+          256,
+          287,
+          288,
+          319
+        ],
+        "first_criterion_newton_step": 6,
+        "gmres_iterations_per_step": 30,
+        "map_evaluation_budget": 320,
+        "newton_steps_requested": 10,
+        "recorded_residual_evaluations": 20,
+        "terminal_residual": 2.494170604898324e-15
+      },
+      "initial_core_cell_count": 230,
+      "initial_topology_class": "limited",
+      "oracle_flux_sup_fraction_of_span": 0.533313502617716,
+      "seconds": 72.05160157755017,
+      "source_strength": 1.0,
+      "terminal_core_cell_count": 442,
+      "terminal_topology_class": "limited"
+    }
+  ],
+  "direct_attempt": {
+    "criterion": 1e-10,
+    "criterion_met": true,
+    "finite_trace": [
+      1.5579324865595212,
+      0.25420324190229787,
+      0.2542032419022976,
+      0.21752624135657278,
+      0.21752624135657278,
+      0.00786787743276005,
+      0.00786787743276005,
+      0.0004062131591957521,
+      0.0004062131591957521,
+      2.921835740636566e-06,
+      2.921835740636566e-06,
+      4.59435714115027e-12,
+      4.59435714115027e-12,
+      3.361708206602089e-15,
+      3.361708206602089e-15,
+      1.8435174036205005e-15,
+      1.8435174036205005e-15,
+      2.494170604898324e-15,
+      1.951959603833469e-15,
+      2.494170604898324e-15
+    ],
+    "finite_trace_indices": [
+      0,
+      31,
+      32,
+      63,
+      64,
+      95,
+      96,
+      127,
+      128,
+      159,
+      160,
+      191,
+      192,
+      223,
+      224,
+      255,
+      256,
+      287,
+      288,
+      319
+    ],
+    "first_criterion_newton_step": 6,
+    "gmres_iterations_per_step": 30,
+    "map_evaluation_budget": 320,
+    "newton_steps_requested": 10,
+    "oracle_flux_sup_fraction_of_span": 0.533313502617716,
+    "recorded_residual_evaluations": 20,
+    "seconds": 70.67800685949624,
+    "terminal_residual": 2.494170604898324e-15
+  },
+  "fixture": "coarse",
+  "seed": {
+    "aggregate_moment": {
+      "construction": "closed-form current-density quadrature for I_p and its first radial moment; no closed-form flux value is evaluated",
+      "current_centroid_m": [
+        1.6602192201158459,
+        0.0
+      ],
+      "declared_current_a": 1627957.0127122786,
+      "quadrature_current_a": 1627957.0127122786,
+      "quadrature_nodes": 512,
+      "quadrature_relative_closure": 0.0
+    },
+    "closed_form_coupling_image_used": false,
+    "closed_form_flux_samples_used": false,
+    "current_sum_a": 1627957.0127122784,
+    "fixture_exterior_boundary_condition_used": true,
+    "independent_of_closed_form_state": true,
+    "initial_axis_m": [
+      1.7130205561029062,
+      -0.004446833246106948
+    ],
+    "initial_core_cell_count": 230,
+    "initial_topology_class": "limited",
+    "kind": "production-current-centroid-uniform-disc-zeroth-moment",
+    "limiter_midplane_extent_m": [
+      0.9783517036373888,
+      2.15
+    ],
+    "oracle_state_sup_difference_fraction_of_span": 1.290004407911919,
+    "seed_radius_fraction": 0.9,
+    "seed_radius_m": 0.4408027018957386,
+    "state_sha256_binary64": "5165da653842f23fad2fdb3150861b291bc7d33d7127d9c5f48f9370c9c70847",
+    "supported_cell_count": 161,
+    "supported_minor_distance_m": 0.489780779884154
+  }
+}

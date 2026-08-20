@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-20T22:27:12",
+  "updated": "2026-08-20T23:30:21",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -229,6 +229,13 @@
         "created": "2026-08-13"
       },
       {
+        "id": "limiter-topology",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a020fb-2d2e-7701-93b4-413c3f5adf68",
+        "created": "2026-08-20"
+      },
+      {
         "id": "loop-records",
         "harness": "claude",
         "role": "implement",
@@ -346,6 +353,13 @@
         "role": "implement",
         "session_id": "01a00a54-6e81-7761-85eb-33e193da78cc",
         "created": "2026-08-16"
+      },
+      {
+        "id": "throughput-budget",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a020fb-2c64-70d1-8adc-c298b0dbd365",
+        "created": "2026-08-20"
       },
       {
         "id": "topology-parity",
@@ -12511,9 +12525,261 @@
           "utilisation_pct": null
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260820T202520958947-analytic-oracle-fixtures",
+        "plan": "solovev-exact-recovery",
+        "section": "\u00a74",
+        "node": "analytic-oracle-fixtures",
+        "role": "implement",
+        "member": "edge-clip",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T20:25:45Z",
+        "completed_at": "2026-08-20T21:27:22Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3697,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3697,
+        "stalled": false,
+        "time_budget": "85m",
+        "base_sha": "a90c76ae512d5501ed209f1a400af51eb9402ea6",
+        "commits": [
+          "74635b0ae61547229228e64e74599f86c3e9c358"
+        ],
+        "changed_lines": {
+          "added": 1591,
+          "removed": 0,
+          "files": 12
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T202520958947-analytic-oracle-fixtures/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00738-f48f-7150-97d1-17307a705e4b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 30865920,
+            "cached_input_tokens_cumulative": 315751936,
+            "input_tokens": 31827859,
+            "input_tokens_cumulative": 322092382,
+            "output_tokens": 79484,
+            "output_tokens_cumulative": 690462,
+            "reasoning_output_tokens": 23935,
+            "reasoning_output_tokens_cumulative": 208185
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260820T210038345520-cocos-ip-like-sign-adjudication",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a77",
+        "node": "cocos-ip-like-sign-adjudication",
+        "role": "implement",
+        "member": "diiid-ids-writer",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T21:01:02Z",
+        "completed_at": "2026-08-20T21:13:56Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 774,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 774,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "fe9d1f221d54e9a558b7e5c28aa032efaa70fc31",
+        "commits": [
+          "213cc9a49b582aa2e0a1a44c4dc09cc581f91dc8"
+        ],
+        "changed_lines": {
+          "added": 414,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "COCOS 11-to-17 ip_like settled from the Sauter-Medvedev definitions: psi -1, ip +1, b0 +1, q +1, dodpsi -1; nova's engine correct, the DD migration-guide display wrong",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T210038345520-cocos-ip-like-sign-adjudication/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f83-8666-7423-89e5-d382bf6e9cf2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 11217408,
+            "cached_input_tokens_cumulative": 25554432,
+            "input_tokens": 11473593,
+            "input_tokens_cumulative": 26344867,
+            "output_tokens": 21611,
+            "output_tokens_cumulative": 89823,
+            "reasoning_output_tokens": 8355,
+            "reasoning_output_tokens_cumulative": 28279
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260820T210136845519-limiter-topology-receipts",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a73",
+        "node": "limiter-topology-receipts",
+        "role": "implement",
+        "member": "limiter-topology",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T21:02:03Z",
+        "completed_at": "2026-08-20T21:26:59Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1496,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1496,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "fe9d1f221d54e9a558b7e5c28aa032efaa70fc31",
+        "commits": [
+          "c3092ace65081ca18fa8235f5c3daa19e71edf5b"
+        ],
+        "changed_lines": {
+          "added": 717,
+          "removed": 0,
+          "files": 5
+        },
+        "tests_added": 6,
+        "gate": "passed",
+        "outcome": "Limited-versus-diverted mode receipt-visible: contact recovered at 5.53e-14 grid cells against a 1.0-cell predeclared bar, 3/3 transitions traversed, MAST limited-frame classifier agreement 6/6",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T210136845519-limiter-topology-receipts/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a020fb-2d2e-7701-93b4-413c3f5adf68",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 15650048,
+            "cached_input_tokens_cumulative": 15650048,
+            "input_tokens": 15906847,
+            "input_tokens_cumulative": 15906847,
+            "output_tokens": 36477,
+            "output_tokens_cumulative": 36477,
+            "reasoning_output_tokens": 12268,
+            "reasoning_output_tokens_cumulative": 12268
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260820T210136946770-batched-throughput-budget",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a76",
+        "node": "batched-throughput-budget",
+        "role": "implement",
+        "member": "throughput-budget",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T21:02:03Z",
+        "completed_at": "2026-08-20T21:20:55Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1132,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1132,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "fe9d1f221d54e9a558b7e5c28aa032efaa70fc31",
+        "commits": [
+          "2d6f9b3722da7ab10044257c804a94ec9656c7a4"
+        ],
+        "changed_lines": {
+          "added": 30583,
+          "removed": 0,
+          "files": 6
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "outcome": "H200 budget table published at 127.288/340.032/470.561 slices per second for batch 1/4/8, float64; 1,300 solves all retained branch with zero accepted switches; decay-index margin emitted per solve",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T210136946770-batched-throughput-budget/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a020fb-2c64-70d1-8adc-c298b0dbd365",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 10941952,
+            "cached_input_tokens_cumulative": 10941952,
+            "input_tokens": 11169412,
+            "input_tokens_cumulative": 11169412,
+            "output_tokens": 30420,
+            "output_tokens_cumulative": 30420,
+            "reasoning_output_tokens": 9119,
+            "reasoning_output_tokens_cumulative": 9119
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 334
+    "_version": 342
   }
 }

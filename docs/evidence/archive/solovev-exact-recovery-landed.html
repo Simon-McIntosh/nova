@@ -197,6 +197,44 @@
     collapse the forcing two orders of magnitude; exact values alone change nothing.</figcaption>
   </figure>
 
+  <h2 id="analytic-oracle-fixtures">§4 (the true oracle) — on a self-consistent reference, the discrete map is exact at the analytic state</h2>
+
+  <p>Commit <code>74635b0a</code>. The closed-form oracle lane stands: coarse 551-cell and fine
+  1,076-cell fixtures built entirely from the moderate-rotation closed-form case — constants,
+  field, profiles and current from one construction, the exterior supplied as exact analytic
+  flux at the boundary rows, no stored map or IMAS read anywhere (import-audited by test), the
+  closed-form separatrix constant 0 Wb read by production topology at −3.4e-20 Wb. Carriers
+  cache under honest names (<code>analytic_oracle_hex_machine_500/1000</code>, warm 0.15/0.22 s);
+  the stored-reference cache is untouched.</p>
+
+  <p><strong>The exact-state forcing is round-off, and the non-tautology is proven.</strong>
+  x_a is the closed form evaluated independently at every target (state digests banked; no
+  coupling image). g(x_a) − x_a reads <strong>4.55e-15 Wb coarse / 3.66e-15 Wb fine</strong>
+  (2.3e-15 / 2.6e-15 of span); tangent-inverse root responses are 6e-12 / 2e-12 mm. Perturbing
+  the sole exterior current by 1e-4 restores a finite 5.05e-4 / 5.09e-4 Wb forcing — eleven
+  orders above the base — with the independent prescribed-exterior prediction closing to
+  2.0e-15 Wb, so the zero is earned, not circular. The mechanism: with exact exterior rows the
+  residual reduces to the coupling of the moment difference, and <strong>the production
+  degree-nine density reproduces the closed-form source moments to 3.9e-9 A (m0 L1)</strong> —
+  binary64 scale. The sibling roundtrip lane's 1e-3-class figures measured a different
+  composition (Green image → discrete Δ* → Green image on rectangular sections) and are not in
+  tension.</p>
+
+  <p><strong>Reading:</strong> every h-independent deviation this programme chased on the
+  stored-reference lane was reference inconsistency, never nova composition error — on a
+  self-consistent oracle the representation, kernels, moments, clip, participation and
+  normalization compose to machine precision at the analytic state. The re-baseline (solved
+  roots and the full gate set on this lane) sets the §4 bounds at round-off floors with
+  convergence clauses. Full record: <code>scripts/analytic_oracle_fixtures/results.json</code>.</p>
+
+  <figure>
+    <img src="/nova/figures/solovev-exact-recovery/analytic-oracle-forcing.png"
+         alt="True-oracle forcing and tangent responses on both fixtures beside the perturbation check"
+         style="max-width:100%">
+    <figcaption>The true-oracle forcing (commit <code>74635b0a</code>): round-off at the exact
+    state on both fixtures, with the exterior-perturbation arm proving the zero is earned.</figcaption>
+  </figure>
+
   <h2 id="build-cache-activation">§6 — cached machine builds: warm loads at a quarter-second against fifty-minute cold builds, bitwise</h2>
 
   <p>Commits <code>06875269</code> (audit) and <code>0e98afcb</code> (activation). The audit

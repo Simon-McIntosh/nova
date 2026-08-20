@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-17T22:16:23",
+  "updated": "2026-08-20T17:53:06",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -526,7 +526,7 @@
       },
       {
         "id": "S9",
-        "status": "planned",
+        "status": "done",
         "theme": "Transport forward model",
         "items": [
           {
@@ -547,7 +547,7 @@
         ],
         "description": "Promote the transport forward solve to a public Nova capability beside ForwardProfile: a declared-fidelity ladder from the landed native current-diffusion rung to an embedded TORAX multi-channel step, the jnp FSA geometry adapter, COCOS boundary tests, and the coupled equilibrium\u2013transport solve as a windowed waveform exchange \u2014 Nova owns the converged window fixed point with typed convergence receipts and implicit-function gradients; staggered co-simulation is the contract's one-iteration point. Sequenced after the S7 spine-parity gate that hardens ForwardProfile; grounded in the transport-forward-contract research record (capability-gap inventory, embed-not-reimplement verdict, imas-python pin gate, window-coupling selection).",
         "starts": "2026-08-17",
-        "ends": "2026-09-13"
+        "ends": "2026-08-20"
       },
       {
         "id": "S3",
@@ -736,6 +736,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 43
+    "_version": 44
   }
 }

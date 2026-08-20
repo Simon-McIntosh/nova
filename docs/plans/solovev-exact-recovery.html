@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-20">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
@@ -178,7 +178,13 @@
     catalog use case; (c) the recommended production operating point is stated with its gate
     margins and its costs, and locked with the owner; (d) results and figures are banked in the
     cumulative evidence with the benchmark harness committed so the ladder re-runs on any future
-    change.</p>
+    change; (e) <strong>owner directive 2026-08-20: any benchmark that comes up slow ships with a
+    profile, not just a number</strong> — build times decompose by stage (kernel family, section
+    shape, moment order, assembly), and solve times decompose by phase (map evaluation, Krylov
+    inner loop, tangent, dispatch/launch overhead and host-device transfer), read from traced
+    profiles and HLO structure rather than guessed — on-device scan iterations carry a fixed
+    per-step launch cost regardless of body, so trip counts are read from the compiled HLO — so
+    every slow figure arrives with the named region where acceleration would land.</p>
 
     <h2 id="s6">§6 — Cached machine builds: build once, reuse everywhere</h2>
 

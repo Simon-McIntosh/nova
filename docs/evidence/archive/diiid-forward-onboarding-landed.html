@@ -395,6 +395,66 @@
     <p><strong>Carried forward, not swept:</strong> the two-shot negative tail needs a data, geometry or
     current-alignment diagnosis before the 0.999 median is treated as universal. The preregistered gate
     and its bank are not to be altered to accommodate that study.</p>
+
+    <h2 id="forward-root-globalization">§5 forward solve — the root cannot hold the branch and close the residual — 2026-08-20</h2>
+    <p>Commits <code>10049a7a</code>, <code>db55fe58</code> and <code>a3d7e947</code>, 7/7 contract tests
+    green on merged main. <strong>No match receipt and no figures were produced, because nothing
+    converged honestly.</strong> What the node delivered instead is a located defect in nova's production
+    free-boundary solve, with two residual histories precise enough to validate a repair against — and
+    that is the more transferable result, because it blocks the entry's forward claim rather than
+    decorating it.</p>
+    <p>The bar was preregistered before any scoring at <strong>0.90155</strong>, 95 % of the measured
+    0.949 median strict-GS label representability ceiling, rather than at a discretisation floor the
+    labels cannot satisfy. It was never loosened, across four solver policies.</p>
+    <table>
+      <caption>Four preregistered solver policies on the first selected diverted frame. The two
+      properties the gate needs — a converged residual and a retained diverted branch — were never
+      obtained together.</caption>
+      <thead><tr><th>Policy</th><th>Diverted branch</th><th>Residual reached</th><th>Reading</th></tr></thead>
+      <tbody>
+        <tr><td>accelerated <code>newton_krylov</code>, 4 Newton steps (default)</td><td>held</td><td>1.057 — no movement from seed</td><td>apparent R²=1.0 was <strong>seed identity</strong>, refused</td></tr>
+        <tr><td>relaxed <code>host</code>, 4 warm-up sweeps</td><td><strong>lost</strong></td><td>0 — exactly</td><td>trivial vacuum branch, no plasma; refused</td></tr>
+        <tr><td><code>host_krylov</code>, 100 outer / 40 inner</td><td><strong>held</strong></td><td>1.982164465</td><td><strong>cycles with period 15</strong> — a globalization cycle</td></tr>
+        <tr><td>accelerated <code>newton_krylov</code>, 24 Newton / 24 GMRES</td><td><strong>lost on first Newton promotion</strong></td><td>8.698827868e-19</td><td>closes the residual only by leaving the basin</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The two histories are complementary, which is what localises the fault.</strong> The
+    <code>host_krylov</code> arm holds the branch and never closes: absolute residual 5.63398 → 5.61892 →
+    5.61507, then an excursion to 10.515 at iteration 3, recurring near 10.50 at iterations 18, 33, 48,
+    63, 78 and 93. A period-15 excursion is a line-search or globalization cycle, and it
+    <em>falsifies</em> the hypothesis that the earlier attempt merely wanted more budget. The accelerated
+    arm halves cleanly <em>on</em> the diverted branch — relative residual 1.057120826, 0.551393684,
+    0.471138175, 0.363907449, 0.181953725, 0.090976862, 0.045488431, 0.022744216, 0.011372108 — and then
+    jumps to 8.7e-19 on its first true Newton promotion, having crossed out of the diverted basin. One
+    route retains the branch without converging; the other converges by abandoning it. The defect is
+    <strong>root globalization</strong>, not budget, not seed, not route family.</p>
+    <p><strong>Two orchestrator errors are recorded here rather than quietly dropped, because both
+    changed what the worker spent attempts on.</strong> First, the relaxed-route arm was advised on the
+    strength of this plan's own label-resolve measurement — a relaxed update meeting 1e-8 on 300/300
+    cases within 1701 iterations. That measurement came from the <em>Dirichlet fixed-boundary</em>
+    harness, where the map contracts. This is the <em>free-boundary prescribed-source</em> problem, and
+    <code>nova/equilibrium/forward.py</code> lines 33–51 state in advance that a non-contractive
+    elongated free-boundary map walks relaxed or mixed iterations to the vacuum root
+    <em>however they are damped or seeded</em>, and that the vacuum branch reaches a <em>better</em>
+    residual than the equilibrium it left. The observed 6.597e-9 at <code>diverted=false</code> is that
+    prediction, met exactly. Transplanting fixed-boundary convergence intelligence across the boundary
+    condition was a category error. Second, the follow-on budget hypothesis was falsified by the host
+    cycle above. The module had documented the first failure before it happened; the second was settled
+    by data within one attempt.</p>
+    <p><strong>What stands regardless of the blocker.</strong> The harness is the instrument any repair
+    validates against, and it is merged and green: a fail-closed corpus runner that preregisters its
+    bar and every solver policy before scoring, retains complete residual histories on disk, reduces its
+    cohort only under recorded authorisation, and <em>raises before publishing</em> any receipt or figure
+    when finiteness, diverted topology or the 1e-5 relative criterion fails. Across four policies it
+    refused a perfect-looking R² of 1.0 that was seed identity, refused a residual of exactly zero that
+    was the vacuum solution, and refused a residual of 8.7e-19 that had left the plasma behind. A
+    prescribed-source solve cannot be qualified by its residual alone, and this harness is built so that
+    it cannot be.</p>
+    <p>The repair is solver-owned work in <code>nova/equilibrium/</code> and is routed to the plan that
+    owns that tree rather than dispatched from here: it was actively claimed by a live verification run
+    at the time of writing, immediately after a seventy-commit lineage merge reworked
+    <code>fixed_point.py</code> (+233 lines), <code>forward_operator.py</code> (+301) and
+    <code>forward.py</code> (+98) — the precise solver path of this defect.</p>
   </main>
 </body>
 </html>

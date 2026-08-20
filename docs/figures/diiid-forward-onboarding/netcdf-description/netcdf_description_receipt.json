@@ -1,0 +1,4927 @@
+{
+  "measurement": "DIII-D netCDF static machine-description read",
+  "source": {
+    "path": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+    "backend": "imas-python netCDF DBEntry",
+    "mode": "read-only",
+    "occurrences": {
+      "wall": [
+        0
+      ],
+      "pf_active": [
+        0
+      ],
+      "pf_passive": [],
+      "tf": [
+        0
+      ],
+      "magnetics": [
+        0
+      ],
+      "equilibrium": [
+        0
+      ]
+    }
+  },
+  "dd_version_policy": "each IDS is read with autoconvert=False and its version is copied from ids_properties.version_put.data_dictionary",
+  "dd_versions": {
+    "wall": "3.41.0",
+    "pf_active": "3.41.0",
+    "tf": "3.41.0",
+    "magnetics": "3.41.0",
+    "equilibrium": "3.41.0",
+    "pf_passive": null
+  },
+  "machine_dataclass_route": {
+    "class": "nova.imas.machine.StaticMachineDescription",
+    "coil_class": "nova.imas.machine.MachineCoil",
+    "element_class": "nova.imas.machine.MachineSection",
+    "section_dispatch": "nova.imas.machine.CrossSection.transform"
+  },
+  "cocos": {
+    "ids": {
+      "source_index": 11,
+      "source": "IMAS Data Dictionary coordinate convention",
+      "target_index": 17,
+      "transform_to_nova": {
+        "psi_like": -1.0,
+        "ip_like": 1.0,
+        "b0_like": 1.0,
+        "q_like": 1.0,
+        "dodpsi_like": -1.0
+      }
+    },
+    "competition_corpus": {
+      "source_index": 5,
+      "source": "separate empirical corpus determination",
+      "used_for_this_ids_read": false
+    }
+  },
+  "quantities": {
+    "wall_limiter": {
+      "status": "read_unmodified",
+      "change": null,
+      "kind": "limiter",
+      "vertex_count": 82,
+      "r_extent_m": [
+        1.017300009727478,
+        2.351099967956543
+      ],
+      "z_extent_m": [
+        -1.3589400053024292,
+        1.3629900217056274
+      ]
+    },
+    "pf_active": {
+      "status": "read_after_named_change",
+      "change": "retain IDS coil-to-element grouping and expand rectangle records through the canonical CrossSection polygon route",
+      "coil_count": 24,
+      "element_count": 140,
+      "non_rectangular_element_count": 6,
+      "coils": [
+        {
+          "name": "ECOILA",
+          "identifier": "ECOILA",
+          "element_count": 48,
+          "elements": [
+            {
+              "name": "ECOILA",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  0.0009899999999999978
+                ],
+                [
+                  0.716835,
+                  0.07541
+                ],
+                [
+                  0.658165,
+                  0.07541
+                ],
+                [
+                  0.658165,
+                  0.0009899999999999978
+                ]
+              ],
+              "centre_m": [
+                0.6875,
+                0.0382
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07442000000000001,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_1",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  0.07749
+                ],
+                [
+                  0.786835,
+                  0.15191
+                ],
+                [
+                  0.728165,
+                  0.15191
+                ],
+                [
+                  0.728165,
+                  0.07749
+                ]
+              ],
+              "centre_m": [
+                0.7575000000000001,
+                0.1147
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999999,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_2",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  0.15399000000000002
+                ],
+                [
+                  0.716835,
+                  0.22841
+                ],
+                [
+                  0.658165,
+                  0.22841
+                ],
+                [
+                  0.658165,
+                  0.15399000000000002
+                ]
+              ],
+              "centre_m": [
+                0.6875,
+                0.1912
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999999,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_3",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  0.23049
+                ],
+                [
+                  0.786835,
+                  0.30491
+                ],
+                [
+                  0.728165,
+                  0.30491
+                ],
+                [
+                  0.728165,
+                  0.23049
+                ]
+              ],
+              "centre_m": [
+                0.7575,
+                0.26769999999999994
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07442000000000001,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_4",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  0.30699
+                ],
+                [
+                  0.716835,
+                  0.38141
+                ],
+                [
+                  0.658165,
+                  0.38141
+                ],
+                [
+                  0.658165,
+                  0.30699
+                ]
+              ],
+              "centre_m": [
+                0.6875000000000001,
+                0.34419999999999995
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07442000000000004,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_5",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  0.38349
+                ],
+                [
+                  0.786835,
+                  0.45791000000000004
+                ],
+                [
+                  0.728165,
+                  0.45791000000000004
+                ],
+                [
+                  0.728165,
+                  0.38349
+                ]
+              ],
+              "centre_m": [
+                0.7575,
+                0.42069999999999996
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07442000000000004,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_6",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  0.45998999999999995
+                ],
+                [
+                  0.716835,
+                  0.5344099999999999
+                ],
+                [
+                  0.658165,
+                  0.5344099999999999
+                ],
+                [
+                  0.658165,
+                  0.45998999999999995
+                ]
+              ],
+              "centre_m": [
+                0.6875,
+                0.4972
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999999,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_7",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  0.53649
+                ],
+                [
+                  0.786835,
+                  0.61091
+                ],
+                [
+                  0.728165,
+                  0.61091
+                ],
+                [
+                  0.728165,
+                  0.53649
+                ]
+              ],
+              "centre_m": [
+                0.7574999999999998,
+                0.5736999999999999
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_8",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  0.61299
+                ],
+                [
+                  0.716835,
+                  0.68741
+                ],
+                [
+                  0.658165,
+                  0.68741
+                ],
+                [
+                  0.658165,
+                  0.61299
+                ]
+              ],
+              "centre_m": [
+                0.6875000000000001,
+                0.6502
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_9",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  0.68949
+                ],
+                [
+                  0.786835,
+                  0.76391
+                ],
+                [
+                  0.728165,
+                  0.76391
+                ],
+                [
+                  0.728165,
+                  0.68949
+                ]
+              ],
+              "centre_m": [
+                0.7574999999999998,
+                0.7266999999999999
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_10",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  0.7659900000000001
+                ],
+                [
+                  0.716835,
+                  0.84041
+                ],
+                [
+                  0.658165,
+                  0.84041
+                ],
+                [
+                  0.658165,
+                  0.7659900000000001
+                ]
+              ],
+              "centre_m": [
+                0.6875000000000001,
+                0.8032000000000001
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_11",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  0.8424900000000001
+                ],
+                [
+                  0.786835,
+                  0.91691
+                ],
+                [
+                  0.728165,
+                  0.91691
+                ],
+                [
+                  0.728165,
+                  0.8424900000000001
+                ]
+              ],
+              "centre_m": [
+                0.7574999999999998,
+                0.8797
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_12",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  0.9189900000000001
+                ],
+                [
+                  0.716835,
+                  0.99341
+                ],
+                [
+                  0.658165,
+                  0.99341
+                ],
+                [
+                  0.658165,
+                  0.9189900000000001
+                ]
+              ],
+              "centre_m": [
+                0.6875000000000001,
+                0.9561999999999999
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_13",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  0.99539
+                ],
+                [
+                  0.786835,
+                  1.06981
+                ],
+                [
+                  0.728165,
+                  1.06981
+                ],
+                [
+                  0.728165,
+                  0.99539
+                ]
+              ],
+              "centre_m": [
+                0.7574999999999998,
+                1.0326
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_14",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  1.07189
+                ],
+                [
+                  0.716835,
+                  1.14631
+                ],
+                [
+                  0.658165,
+                  1.14631
+                ],
+                [
+                  0.658165,
+                  1.07189
+                ]
+              ],
+              "centre_m": [
+                0.6875000000000001,
+                1.1091
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_15",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  1.14809
+                ],
+                [
+                  0.786835,
+                  1.22251
+                ],
+                [
+                  0.728165,
+                  1.22251
+                ],
+                [
+                  0.728165,
+                  1.14809
+                ]
+              ],
+              "centre_m": [
+                0.7574999999999998,
+                1.1853
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_16",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  1.224795
+                ],
+                [
+                  0.716835,
+                  1.298205
+                ],
+                [
+                  0.658165,
+                  1.298205
+                ],
+                [
+                  0.658165,
+                  1.224795
+                ]
+              ],
+              "centre_m": [
+                0.6875,
+                1.2615
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07340999999999998,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_17",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  1.299425
+                ],
+                [
+                  0.786835,
+                  1.3707749999999999
+                ],
+                [
+                  0.728165,
+                  1.3707749999999999
+                ],
+                [
+                  0.728165,
+                  1.299425
+                ]
+              ],
+              "centre_m": [
+                0.7574999999999998,
+                1.3351
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.0713499999999998,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_18",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  1.374395
+                ],
+                [
+                  0.716835,
+                  1.444605
+                ],
+                [
+                  0.658165,
+                  1.444605
+                ],
+                [
+                  0.658165,
+                  1.374395
+                ]
+              ],
+              "centre_m": [
+                0.6875,
+                1.4095000000000002
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07020999999999988,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_19",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  1.44699
+                ],
+                [
+                  0.786835,
+                  1.51321
+                ],
+                [
+                  0.728165,
+                  1.51321
+                ],
+                [
+                  0.728165,
+                  1.44699
+                ]
+              ],
+              "centre_m": [
+                0.7575,
+                1.4801
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.06621999999999995,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_20",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  1.51715
+                ],
+                [
+                  0.716835,
+                  1.57925
+                ],
+                [
+                  0.658165,
+                  1.57925
+                ],
+                [
+                  0.658165,
+                  1.51715
+                ]
+              ],
+              "centre_m": [
+                0.6875,
+                1.5482
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.062100000000000044,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_21",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.7846650000000001,
+                  1.58182
+                ],
+                [
+                  0.7846650000000001,
+                  1.63978
+                ],
+                [
+                  0.735135,
+                  1.63978
+                ],
+                [
+                  0.735135,
+                  1.58182
+                ]
+              ],
+              "centre_m": [
+                0.7599,
+                1.6108
+              ],
+              "width_m": 0.049530000000000074,
+              "height_m": 0.05796000000000001,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_22",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.719765,
+                  1.6406500000000002
+                ],
+                [
+                  0.719765,
+                  1.69615
+                ],
+                [
+                  0.6702349999999999,
+                  1.69615
+                ],
+                [
+                  0.6702349999999999,
+                  1.6406500000000002
+                ]
+              ],
+              "centre_m": [
+                0.6949999999999998,
+                1.6684000000000003
+              ],
+              "width_m": 0.049530000000000074,
+              "height_m": 0.05549999999999988,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_23",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.787265,
+                  1.6981300000000001
+                ],
+                [
+                  0.787265,
+                  1.75287
+                ],
+                [
+                  0.7377349999999999,
+                  1.75287
+                ],
+                [
+                  0.7377349999999999,
+                  1.6981300000000001
+                ]
+              ],
+              "centre_m": [
+                0.7625,
+                1.7255000000000003
+              ],
+              "width_m": 0.049530000000000074,
+              "height_m": 0.05473999999999979,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_24",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  -0.07541
+                ],
+                [
+                  0.786835,
+                  -0.0009899999999999978
+                ],
+                [
+                  0.728165,
+                  -0.0009899999999999978
+                ],
+                [
+                  0.728165,
+                  -0.07541
+                ]
+              ],
+              "centre_m": [
+                0.7575,
+                -0.0382
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07442000000000001,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_25",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  -0.15191
+                ],
+                [
+                  0.716835,
+                  -0.07749
+                ],
+                [
+                  0.658165,
+                  -0.07749
+                ],
+                [
+                  0.658165,
+                  -0.15191
+                ]
+              ],
+              "centre_m": [
+                0.6875,
+                -0.1147
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999999,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_26",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  -0.22841
+                ],
+                [
+                  0.786835,
+                  -0.15399000000000002
+                ],
+                [
+                  0.728165,
+                  -0.15399000000000002
+                ],
+                [
+                  0.728165,
+                  -0.22841
+                ]
+              ],
+              "centre_m": [
+                0.7575000000000001,
+                -0.1912
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999999,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_27",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  -0.30491
+                ],
+                [
+                  0.716835,
+                  -0.23049
+                ],
+                [
+                  0.658165,
+                  -0.23049
+                ],
+                [
+                  0.658165,
+                  -0.30491
+                ]
+              ],
+              "centre_m": [
+                0.6875,
+                -0.26769999999999994
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07442000000000001,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_28",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  -0.38141
+                ],
+                [
+                  0.786835,
+                  -0.30699
+                ],
+                [
+                  0.728165,
+                  -0.30699
+                ],
+                [
+                  0.728165,
+                  -0.38141
+                ]
+              ],
+              "centre_m": [
+                0.7575,
+                -0.34419999999999995
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07442000000000004,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_29",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  -0.45791000000000004
+                ],
+                [
+                  0.716835,
+                  -0.38349
+                ],
+                [
+                  0.658165,
+                  -0.38349
+                ],
+                [
+                  0.658165,
+                  -0.45791000000000004
+                ]
+              ],
+              "centre_m": [
+                0.6875000000000001,
+                -0.42069999999999996
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07442000000000004,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_30",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  -0.5344099999999999
+                ],
+                [
+                  0.786835,
+                  -0.45998999999999995
+                ],
+                [
+                  0.728165,
+                  -0.45998999999999995
+                ],
+                [
+                  0.728165,
+                  -0.5344099999999999
+                ]
+              ],
+              "centre_m": [
+                0.7575000000000001,
+                -0.4972
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999999,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_31",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  -0.61091
+                ],
+                [
+                  0.716835,
+                  -0.53649
+                ],
+                [
+                  0.658165,
+                  -0.53649
+                ],
+                [
+                  0.658165,
+                  -0.61091
+                ]
+              ],
+              "centre_m": [
+                0.6875000000000001,
+                -0.5736999999999999
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_32",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  -0.68741
+                ],
+                [
+                  0.786835,
+                  -0.61299
+                ],
+                [
+                  0.728165,
+                  -0.61299
+                ],
+                [
+                  0.728165,
+                  -0.68741
+                ]
+              ],
+              "centre_m": [
+                0.7574999999999998,
+                -0.6502
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_33",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  -0.76391
+                ],
+                [
+                  0.716835,
+                  -0.68949
+                ],
+                [
+                  0.658165,
+                  -0.68949
+                ],
+                [
+                  0.658165,
+                  -0.76391
+                ]
+              ],
+              "centre_m": [
+                0.6875000000000001,
+                -0.7266999999999999
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_34",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  -0.84041
+                ],
+                [
+                  0.786835,
+                  -0.7659900000000001
+                ],
+                [
+                  0.728165,
+                  -0.7659900000000001
+                ],
+                [
+                  0.728165,
+                  -0.84041
+                ]
+              ],
+              "centre_m": [
+                0.7574999999999998,
+                -0.8032000000000001
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_35",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  -0.91691
+                ],
+                [
+                  0.716835,
+                  -0.8424900000000001
+                ],
+                [
+                  0.658165,
+                  -0.8424900000000001
+                ],
+                [
+                  0.658165,
+                  -0.91691
+                ]
+              ],
+              "centre_m": [
+                0.6875000000000001,
+                -0.8797
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_36",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  -0.99341
+                ],
+                [
+                  0.786835,
+                  -0.9189900000000001
+                ],
+                [
+                  0.728165,
+                  -0.9189900000000001
+                ],
+                [
+                  0.728165,
+                  -0.99341
+                ]
+              ],
+              "centre_m": [
+                0.7574999999999998,
+                -0.9561999999999999
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_37",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  -1.06981
+                ],
+                [
+                  0.716835,
+                  -0.99539
+                ],
+                [
+                  0.658165,
+                  -0.99539
+                ],
+                [
+                  0.658165,
+                  -1.06981
+                ]
+              ],
+              "centre_m": [
+                0.6875000000000001,
+                -1.0326
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_38",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  -1.14631
+                ],
+                [
+                  0.786835,
+                  -1.07189
+                ],
+                [
+                  0.728165,
+                  -1.07189
+                ],
+                [
+                  0.728165,
+                  -1.14631
+                ]
+              ],
+              "centre_m": [
+                0.7574999999999998,
+                -1.1091
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_39",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  -1.22251
+                ],
+                [
+                  0.716835,
+                  -1.14809
+                ],
+                [
+                  0.658165,
+                  -1.14809
+                ],
+                [
+                  0.658165,
+                  -1.22251
+                ]
+              ],
+              "centre_m": [
+                0.6875000000000001,
+                -1.1853
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_40",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  -1.298205
+                ],
+                [
+                  0.786835,
+                  -1.224795
+                ],
+                [
+                  0.728165,
+                  -1.224795
+                ],
+                [
+                  0.728165,
+                  -1.298205
+                ]
+              ],
+              "centre_m": [
+                0.7575,
+                -1.2615
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07340999999999998,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_41",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  -1.3707749999999999
+                ],
+                [
+                  0.716835,
+                  -1.299425
+                ],
+                [
+                  0.658165,
+                  -1.299425
+                ],
+                [
+                  0.658165,
+                  -1.3707749999999999
+                ]
+              ],
+              "centre_m": [
+                0.6874999999999999,
+                -1.3351
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.0713499999999998,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_42",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  -1.444605
+                ],
+                [
+                  0.786835,
+                  -1.374395
+                ],
+                [
+                  0.728165,
+                  -1.374395
+                ],
+                [
+                  0.728165,
+                  -1.444605
+                ]
+              ],
+              "centre_m": [
+                0.7575,
+                -1.4095000000000002
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07020999999999988,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_43",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  -1.51321
+                ],
+                [
+                  0.716835,
+                  -1.44699
+                ],
+                [
+                  0.658165,
+                  -1.44699
+                ],
+                [
+                  0.658165,
+                  -1.51321
+                ]
+              ],
+              "centre_m": [
+                0.6874999999999999,
+                -1.4801
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.06621999999999995,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_44",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  -1.57925
+                ],
+                [
+                  0.786835,
+                  -1.51715
+                ],
+                [
+                  0.728165,
+                  -1.51715
+                ],
+                [
+                  0.728165,
+                  -1.57925
+                ]
+              ],
+              "centre_m": [
+                0.7574999999999998,
+                -1.5482
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.062100000000000044,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_45",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.714765,
+                  -1.63978
+                ],
+                [
+                  0.714765,
+                  -1.58182
+                ],
+                [
+                  0.6652349999999999,
+                  -1.58182
+                ],
+                [
+                  0.6652349999999999,
+                  -1.63978
+                ]
+              ],
+              "centre_m": [
+                0.6899999999999998,
+                -1.6108
+              ],
+              "width_m": 0.049530000000000074,
+              "height_m": 0.05796000000000001,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_46",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.787265,
+                  -1.69615
+                ],
+                [
+                  0.787265,
+                  -1.6406500000000002
+                ],
+                [
+                  0.7377349999999999,
+                  -1.6406500000000002
+                ],
+                [
+                  0.7377349999999999,
+                  -1.69615
+                ]
+              ],
+              "centre_m": [
+                0.7624999999999998,
+                -1.6684000000000003
+              ],
+              "width_m": 0.049530000000000074,
+              "height_m": 0.05549999999999988,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILA_47",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.727265,
+                  -1.75287
+                ],
+                [
+                  0.727265,
+                  -1.6981300000000001
+                ],
+                [
+                  0.677735,
+                  -1.6981300000000001
+                ],
+                [
+                  0.677735,
+                  -1.75287
+                ]
+              ],
+              "centre_m": [
+                0.7025,
+                -1.7255000000000003
+              ],
+              "width_m": 0.049530000000000074,
+              "height_m": 0.05473999999999979,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            }
+          ]
+        },
+        {
+          "name": "ECOILB",
+          "identifier": "ECOILB",
+          "element_count": 48,
+          "elements": [
+            {
+              "name": "ECOILB",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  0.0009899999999999978
+                ],
+                [
+                  0.786835,
+                  0.07541
+                ],
+                [
+                  0.728165,
+                  0.07541
+                ],
+                [
+                  0.728165,
+                  0.0009899999999999978
+                ]
+              ],
+              "centre_m": [
+                0.7575,
+                0.0382
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07442000000000001,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_1",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  0.07749
+                ],
+                [
+                  0.716835,
+                  0.15191
+                ],
+                [
+                  0.658165,
+                  0.15191
+                ],
+                [
+                  0.658165,
+                  0.07749
+                ]
+              ],
+              "centre_m": [
+                0.6875,
+                0.1147
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999999,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_2",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  0.15399000000000002
+                ],
+                [
+                  0.786835,
+                  0.22841
+                ],
+                [
+                  0.728165,
+                  0.22841
+                ],
+                [
+                  0.728165,
+                  0.15399000000000002
+                ]
+              ],
+              "centre_m": [
+                0.7575000000000001,
+                0.1912
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999999,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_3",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  0.23049
+                ],
+                [
+                  0.716835,
+                  0.30491
+                ],
+                [
+                  0.658165,
+                  0.30491
+                ],
+                [
+                  0.658165,
+                  0.23049
+                ]
+              ],
+              "centre_m": [
+                0.6875,
+                0.26769999999999994
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07442000000000001,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_4",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  0.30699
+                ],
+                [
+                  0.786835,
+                  0.38141
+                ],
+                [
+                  0.728165,
+                  0.38141
+                ],
+                [
+                  0.728165,
+                  0.30699
+                ]
+              ],
+              "centre_m": [
+                0.7575,
+                0.34419999999999995
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07442000000000004,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_5",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  0.38349
+                ],
+                [
+                  0.716835,
+                  0.45791000000000004
+                ],
+                [
+                  0.658165,
+                  0.45791000000000004
+                ],
+                [
+                  0.658165,
+                  0.38349
+                ]
+              ],
+              "centre_m": [
+                0.6875000000000001,
+                0.42069999999999996
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07442000000000004,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_6",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  0.45998999999999995
+                ],
+                [
+                  0.786835,
+                  0.5344099999999999
+                ],
+                [
+                  0.728165,
+                  0.5344099999999999
+                ],
+                [
+                  0.728165,
+                  0.45998999999999995
+                ]
+              ],
+              "centre_m": [
+                0.7575000000000001,
+                0.4972
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999999,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_7",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  0.53649
+                ],
+                [
+                  0.716835,
+                  0.61091
+                ],
+                [
+                  0.658165,
+                  0.61091
+                ],
+                [
+                  0.658165,
+                  0.53649
+                ]
+              ],
+              "centre_m": [
+                0.6875000000000001,
+                0.5736999999999999
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_8",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  0.61299
+                ],
+                [
+                  0.786835,
+                  0.68741
+                ],
+                [
+                  0.728165,
+                  0.68741
+                ],
+                [
+                  0.728165,
+                  0.61299
+                ]
+              ],
+              "centre_m": [
+                0.7574999999999998,
+                0.6502
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_9",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  0.68949
+                ],
+                [
+                  0.716835,
+                  0.76391
+                ],
+                [
+                  0.658165,
+                  0.76391
+                ],
+                [
+                  0.658165,
+                  0.68949
+                ]
+              ],
+              "centre_m": [
+                0.6875000000000001,
+                0.7266999999999999
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_10",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  0.7659900000000001
+                ],
+                [
+                  0.786835,
+                  0.84041
+                ],
+                [
+                  0.728165,
+                  0.84041
+                ],
+                [
+                  0.728165,
+                  0.7659900000000001
+                ]
+              ],
+              "centre_m": [
+                0.7574999999999998,
+                0.8032000000000001
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_11",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  0.8424900000000001
+                ],
+                [
+                  0.716835,
+                  0.91691
+                ],
+                [
+                  0.658165,
+                  0.91691
+                ],
+                [
+                  0.658165,
+                  0.8424900000000001
+                ]
+              ],
+              "centre_m": [
+                0.6875000000000001,
+                0.8797
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_12",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  0.9189900000000001
+                ],
+                [
+                  0.786835,
+                  0.99341
+                ],
+                [
+                  0.728165,
+                  0.99341
+                ],
+                [
+                  0.728165,
+                  0.9189900000000001
+                ]
+              ],
+              "centre_m": [
+                0.7574999999999998,
+                0.9561999999999999
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_13",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  0.99539
+                ],
+                [
+                  0.716835,
+                  1.06981
+                ],
+                [
+                  0.658165,
+                  1.06981
+                ],
+                [
+                  0.658165,
+                  0.99539
+                ]
+              ],
+              "centre_m": [
+                0.6875000000000001,
+                1.0326
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_14",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  1.07189
+                ],
+                [
+                  0.786835,
+                  1.14631
+                ],
+                [
+                  0.728165,
+                  1.14631
+                ],
+                [
+                  0.728165,
+                  1.07189
+                ]
+              ],
+              "centre_m": [
+                0.7574999999999998,
+                1.1091
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_15",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  1.14809
+                ],
+                [
+                  0.716835,
+                  1.22251
+                ],
+                [
+                  0.658165,
+                  1.22251
+                ],
+                [
+                  0.658165,
+                  1.14809
+                ]
+              ],
+              "centre_m": [
+                0.6875000000000001,
+                1.1853
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_16",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  1.224795
+                ],
+                [
+                  0.786835,
+                  1.298205
+                ],
+                [
+                  0.728165,
+                  1.298205
+                ],
+                [
+                  0.728165,
+                  1.224795
+                ]
+              ],
+              "centre_m": [
+                0.7575,
+                1.2615
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07340999999999998,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_17",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  1.299425
+                ],
+                [
+                  0.716835,
+                  1.3707749999999999
+                ],
+                [
+                  0.658165,
+                  1.3707749999999999
+                ],
+                [
+                  0.658165,
+                  1.299425
+                ]
+              ],
+              "centre_m": [
+                0.6874999999999999,
+                1.3351
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.0713499999999998,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_18",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  1.374395
+                ],
+                [
+                  0.786835,
+                  1.444605
+                ],
+                [
+                  0.728165,
+                  1.444605
+                ],
+                [
+                  0.728165,
+                  1.374395
+                ]
+              ],
+              "centre_m": [
+                0.7575,
+                1.4095000000000002
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07020999999999988,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_19",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  1.44699
+                ],
+                [
+                  0.716835,
+                  1.51321
+                ],
+                [
+                  0.658165,
+                  1.51321
+                ],
+                [
+                  0.658165,
+                  1.44699
+                ]
+              ],
+              "centre_m": [
+                0.6874999999999999,
+                1.4801
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.06621999999999995,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_20",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  1.51715
+                ],
+                [
+                  0.786835,
+                  1.57925
+                ],
+                [
+                  0.728165,
+                  1.57925
+                ],
+                [
+                  0.728165,
+                  1.51715
+                ]
+              ],
+              "centre_m": [
+                0.7574999999999998,
+                1.5482
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.062100000000000044,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_21",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.714765,
+                  1.58182
+                ],
+                [
+                  0.714765,
+                  1.63978
+                ],
+                [
+                  0.6652349999999999,
+                  1.63978
+                ],
+                [
+                  0.6652349999999999,
+                  1.58182
+                ]
+              ],
+              "centre_m": [
+                0.6899999999999998,
+                1.6108
+              ],
+              "width_m": 0.049530000000000074,
+              "height_m": 0.05796000000000001,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_22",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.787265,
+                  1.6406500000000002
+                ],
+                [
+                  0.787265,
+                  1.69615
+                ],
+                [
+                  0.7377349999999999,
+                  1.69615
+                ],
+                [
+                  0.7377349999999999,
+                  1.6406500000000002
+                ]
+              ],
+              "centre_m": [
+                0.7624999999999998,
+                1.6684000000000003
+              ],
+              "width_m": 0.049530000000000074,
+              "height_m": 0.05549999999999988,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_23",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.727265,
+                  1.6981300000000001
+                ],
+                [
+                  0.727265,
+                  1.75287
+                ],
+                [
+                  0.677735,
+                  1.75287
+                ],
+                [
+                  0.677735,
+                  1.6981300000000001
+                ]
+              ],
+              "centre_m": [
+                0.7025,
+                1.7255000000000003
+              ],
+              "width_m": 0.049530000000000074,
+              "height_m": 0.05473999999999979,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_24",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  -0.07541
+                ],
+                [
+                  0.716835,
+                  -0.0009899999999999978
+                ],
+                [
+                  0.658165,
+                  -0.0009899999999999978
+                ],
+                [
+                  0.658165,
+                  -0.07541
+                ]
+              ],
+              "centre_m": [
+                0.6875,
+                -0.0382
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07442000000000001,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_25",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  -0.15191
+                ],
+                [
+                  0.786835,
+                  -0.07749
+                ],
+                [
+                  0.728165,
+                  -0.07749
+                ],
+                [
+                  0.728165,
+                  -0.15191
+                ]
+              ],
+              "centre_m": [
+                0.7575000000000001,
+                -0.1147
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999999,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_26",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  -0.22841
+                ],
+                [
+                  0.716835,
+                  -0.15399000000000002
+                ],
+                [
+                  0.658165,
+                  -0.15399000000000002
+                ],
+                [
+                  0.658165,
+                  -0.22841
+                ]
+              ],
+              "centre_m": [
+                0.6875,
+                -0.1912
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999999,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_27",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  -0.30491
+                ],
+                [
+                  0.786835,
+                  -0.23049
+                ],
+                [
+                  0.728165,
+                  -0.23049
+                ],
+                [
+                  0.728165,
+                  -0.30491
+                ]
+              ],
+              "centre_m": [
+                0.7575,
+                -0.26769999999999994
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07442000000000001,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_28",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  -0.38141
+                ],
+                [
+                  0.716835,
+                  -0.30699
+                ],
+                [
+                  0.658165,
+                  -0.30699
+                ],
+                [
+                  0.658165,
+                  -0.38141
+                ]
+              ],
+              "centre_m": [
+                0.6875000000000001,
+                -0.34419999999999995
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07442000000000004,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_29",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  -0.45791000000000004
+                ],
+                [
+                  0.786835,
+                  -0.38349
+                ],
+                [
+                  0.728165,
+                  -0.38349
+                ],
+                [
+                  0.728165,
+                  -0.45791000000000004
+                ]
+              ],
+              "centre_m": [
+                0.7575,
+                -0.42069999999999996
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07442000000000004,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_30",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  -0.5344099999999999
+                ],
+                [
+                  0.716835,
+                  -0.45998999999999995
+                ],
+                [
+                  0.658165,
+                  -0.45998999999999995
+                ],
+                [
+                  0.658165,
+                  -0.5344099999999999
+                ]
+              ],
+              "centre_m": [
+                0.6875,
+                -0.4972
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999999,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_31",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  -0.61091
+                ],
+                [
+                  0.786835,
+                  -0.53649
+                ],
+                [
+                  0.728165,
+                  -0.53649
+                ],
+                [
+                  0.728165,
+                  -0.61091
+                ]
+              ],
+              "centre_m": [
+                0.7574999999999998,
+                -0.5736999999999999
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_32",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  -0.68741
+                ],
+                [
+                  0.716835,
+                  -0.61299
+                ],
+                [
+                  0.658165,
+                  -0.61299
+                ],
+                [
+                  0.658165,
+                  -0.68741
+                ]
+              ],
+              "centre_m": [
+                0.6875000000000001,
+                -0.6502
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_33",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  -0.76391
+                ],
+                [
+                  0.786835,
+                  -0.68949
+                ],
+                [
+                  0.728165,
+                  -0.68949
+                ],
+                [
+                  0.728165,
+                  -0.76391
+                ]
+              ],
+              "centre_m": [
+                0.7574999999999998,
+                -0.7266999999999999
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_34",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  -0.84041
+                ],
+                [
+                  0.716835,
+                  -0.7659900000000001
+                ],
+                [
+                  0.658165,
+                  -0.7659900000000001
+                ],
+                [
+                  0.658165,
+                  -0.84041
+                ]
+              ],
+              "centre_m": [
+                0.6875000000000001,
+                -0.8032000000000001
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_35",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  -0.91691
+                ],
+                [
+                  0.786835,
+                  -0.8424900000000001
+                ],
+                [
+                  0.728165,
+                  -0.8424900000000001
+                ],
+                [
+                  0.728165,
+                  -0.91691
+                ]
+              ],
+              "centre_m": [
+                0.7574999999999998,
+                -0.8797
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_36",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  -0.99341
+                ],
+                [
+                  0.716835,
+                  -0.9189900000000001
+                ],
+                [
+                  0.658165,
+                  -0.9189900000000001
+                ],
+                [
+                  0.658165,
+                  -0.99341
+                ]
+              ],
+              "centre_m": [
+                0.6875000000000001,
+                -0.9561999999999999
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_37",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  -1.06981
+                ],
+                [
+                  0.786835,
+                  -0.99539
+                ],
+                [
+                  0.728165,
+                  -0.99539
+                ],
+                [
+                  0.728165,
+                  -1.06981
+                ]
+              ],
+              "centre_m": [
+                0.7574999999999998,
+                -1.0326
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_38",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  -1.14631
+                ],
+                [
+                  0.716835,
+                  -1.07189
+                ],
+                [
+                  0.658165,
+                  -1.07189
+                ],
+                [
+                  0.658165,
+                  -1.14631
+                ]
+              ],
+              "centre_m": [
+                0.6875000000000001,
+                -1.1091
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_39",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  -1.22251
+                ],
+                [
+                  0.786835,
+                  -1.14809
+                ],
+                [
+                  0.728165,
+                  -1.14809
+                ],
+                [
+                  0.728165,
+                  -1.22251
+                ]
+              ],
+              "centre_m": [
+                0.7574999999999998,
+                -1.1853
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07441999999999993,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_40",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  -1.298205
+                ],
+                [
+                  0.716835,
+                  -1.224795
+                ],
+                [
+                  0.658165,
+                  -1.224795
+                ],
+                [
+                  0.658165,
+                  -1.298205
+                ]
+              ],
+              "centre_m": [
+                0.6875,
+                -1.2615
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07340999999999998,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_41",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  -1.3707749999999999
+                ],
+                [
+                  0.786835,
+                  -1.299425
+                ],
+                [
+                  0.728165,
+                  -1.299425
+                ],
+                [
+                  0.728165,
+                  -1.3707749999999999
+                ]
+              ],
+              "centre_m": [
+                0.7574999999999998,
+                -1.3351
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.0713499999999998,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_42",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  -1.444605
+                ],
+                [
+                  0.716835,
+                  -1.374395
+                ],
+                [
+                  0.658165,
+                  -1.374395
+                ],
+                [
+                  0.658165,
+                  -1.444605
+                ]
+              ],
+              "centre_m": [
+                0.6875,
+                -1.4095000000000002
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.07020999999999988,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_43",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.786835,
+                  -1.51321
+                ],
+                [
+                  0.786835,
+                  -1.44699
+                ],
+                [
+                  0.728165,
+                  -1.44699
+                ],
+                [
+                  0.728165,
+                  -1.51321
+                ]
+              ],
+              "centre_m": [
+                0.7575,
+                -1.4801
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.06621999999999995,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_44",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.716835,
+                  -1.57925
+                ],
+                [
+                  0.716835,
+                  -1.51715
+                ],
+                [
+                  0.658165,
+                  -1.51715
+                ],
+                [
+                  0.658165,
+                  -1.57925
+                ]
+              ],
+              "centre_m": [
+                0.6875,
+                -1.5482
+              ],
+              "width_m": 0.05867,
+              "height_m": 0.062100000000000044,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_45",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.7846650000000001,
+                  -1.63978
+                ],
+                [
+                  0.7846650000000001,
+                  -1.58182
+                ],
+                [
+                  0.735135,
+                  -1.58182
+                ],
+                [
+                  0.735135,
+                  -1.63978
+                ]
+              ],
+              "centre_m": [
+                0.7599,
+                -1.6108
+              ],
+              "width_m": 0.049530000000000074,
+              "height_m": 0.05796000000000001,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_46",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.719765,
+                  -1.69615
+                ],
+                [
+                  0.719765,
+                  -1.6406500000000002
+                ],
+                [
+                  0.6702349999999999,
+                  -1.6406500000000002
+                ],
+                [
+                  0.6702349999999999,
+                  -1.69615
+                ]
+              ],
+              "centre_m": [
+                0.6949999999999998,
+                -1.6684000000000003
+              ],
+              "width_m": 0.049530000000000074,
+              "height_m": 0.05549999999999988,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "ECOILB_47",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.787265,
+                  -1.75287
+                ],
+                [
+                  0.787265,
+                  -1.6981300000000001
+                ],
+                [
+                  0.7377349999999999,
+                  -1.6981300000000001
+                ],
+                [
+                  0.7377349999999999,
+                  -1.75287
+                ]
+              ],
+              "centre_m": [
+                0.7625,
+                -1.7255000000000003
+              ],
+              "width_m": 0.049530000000000074,
+              "height_m": 0.05473999999999979,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            }
+          ]
+        },
+        {
+          "name": "E567UP",
+          "identifier": "E567UP",
+          "element_count": 6,
+          "elements": [
+            {
+              "name": "E567UP",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.9360999999999999,
+                  1.6976499999999999
+                ],
+                [
+                  0.9360999999999999,
+                  1.72695
+                ],
+                [
+                  0.8223,
+                  1.72695
+                ],
+                [
+                  0.8223,
+                  1.6976499999999999
+                ]
+              ],
+              "centre_m": [
+                0.8792000000000001,
+                1.7123000000000002
+              ],
+              "width_m": 0.1137999999999999,
+              "height_m": 0.029300000000000104,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "E567UP_1",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.9360999999999999,
+                  1.72905
+                ],
+                [
+                  0.9360999999999999,
+                  1.75835
+                ],
+                [
+                  0.8223,
+                  1.75835
+                ],
+                [
+                  0.8223,
+                  1.72905
+                ]
+              ],
+              "centre_m": [
+                0.8792000000000001,
+                1.7436999999999998
+              ],
+              "width_m": 0.1137999999999999,
+              "height_m": 0.029300000000000104,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "E567UP_2",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.9360999999999999,
+                  1.7604499999999998
+                ],
+                [
+                  0.9360999999999999,
+                  1.78975
+                ],
+                [
+                  0.8223,
+                  1.78975
+                ],
+                [
+                  0.8223,
+                  1.7604499999999998
+                ]
+              ],
+              "centre_m": [
+                0.8792000000000001,
+                1.7751
+              ],
+              "width_m": 0.1137999999999999,
+              "height_m": 0.029300000000000104,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "E567UP_3",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.9360999999999999,
+                  1.79175
+                ],
+                [
+                  0.9360999999999999,
+                  1.82105
+                ],
+                [
+                  0.8223,
+                  1.82105
+                ],
+                [
+                  0.8223,
+                  1.79175
+                ]
+              ],
+              "centre_m": [
+                0.8792000000000001,
+                1.8064
+              ],
+              "width_m": 0.1137999999999999,
+              "height_m": 0.029300000000000104,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "E567UP_4",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  2.431,
+                  1.2159
+                ],
+                [
+                  2.431,
+                  1.2412999999999998
+                ],
+                [
+                  2.2618,
+                  1.2412999999999998
+                ],
+                [
+                  2.2618,
+                  1.2159
+                ]
+              ],
+              "centre_m": [
+                2.3464,
+                1.2285999999999997
+              ],
+              "width_m": 0.16920000000000002,
+              "height_m": 0.025399999999999867,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "E567UP_5",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  2.6933,
+                  0.5476
+                ],
+                [
+                  2.6933,
+                  0.5730000000000001
+                ],
+                [
+                  2.5241,
+                  0.5730000000000001
+                ],
+                [
+                  2.5241,
+                  0.5476
+                ]
+              ],
+              "centre_m": [
+                2.6086999999999994,
+                0.5603
+              ],
+              "width_m": 0.16920000000000002,
+              "height_m": 0.02540000000000009,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            }
+          ]
+        },
+        {
+          "name": "E567DN",
+          "identifier": "E567DN",
+          "element_count": 6,
+          "elements": [
+            {
+              "name": "E567DN",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.9359,
+                  -1.7274500000000002
+                ],
+                [
+                  0.9359,
+                  -1.69815
+                ],
+                [
+                  0.8221,
+                  -1.69815
+                ],
+                [
+                  0.8221,
+                  -1.7274500000000002
+                ]
+              ],
+              "centre_m": [
+                0.8790000000000001,
+                -1.7128000000000003
+              ],
+              "width_m": 0.1137999999999999,
+              "height_m": 0.029300000000000104,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "E567DN_1",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.9359,
+                  -1.75875
+                ],
+                [
+                  0.9359,
+                  -1.72945
+                ],
+                [
+                  0.8221,
+                  -1.72945
+                ],
+                [
+                  0.8221,
+                  -1.75875
+                ]
+              ],
+              "centre_m": [
+                0.8790000000000001,
+                -1.7441000000000002
+              ],
+              "width_m": 0.1137999999999999,
+              "height_m": 0.029300000000000104,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "E567DN_2",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.9359,
+                  -1.7901500000000001
+                ],
+                [
+                  0.9359,
+                  -1.76085
+                ],
+                [
+                  0.8221,
+                  -1.76085
+                ],
+                [
+                  0.8221,
+                  -1.7901500000000001
+                ]
+              ],
+              "centre_m": [
+                0.8790000000000001,
+                -1.7754999999999999
+              ],
+              "width_m": 0.1137999999999999,
+              "height_m": 0.029300000000000104,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "E567DN_3",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.9359,
+                  -1.82155
+                ],
+                [
+                  0.9359,
+                  -1.79225
+                ],
+                [
+                  0.8221,
+                  -1.79225
+                ],
+                [
+                  0.8221,
+                  -1.82155
+                ]
+              ],
+              "centre_m": [
+                0.8790000000000001,
+                -1.8068999999999997
+              ],
+              "width_m": 0.1137999999999999,
+              "height_m": 0.029300000000000104,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "E567DN_4",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  2.4411,
+                  -1.2412999999999998
+                ],
+                [
+                  2.4411,
+                  -1.2159
+                ],
+                [
+                  2.2719,
+                  -1.2159
+                ],
+                [
+                  2.2719,
+                  -1.2412999999999998
+                ]
+              ],
+              "centre_m": [
+                2.3565,
+                -1.2285999999999997
+              ],
+              "width_m": 0.16920000000000002,
+              "height_m": 0.025399999999999867,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "E567DN_5",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  2.6933,
+                  -0.5730000000000001
+                ],
+                [
+                  2.6933,
+                  -0.5476
+                ],
+                [
+                  2.5241,
+                  -0.5476
+                ],
+                [
+                  2.5241,
+                  -0.5730000000000001
+                ]
+              ],
+              "centre_m": [
+                2.6086999999999994,
+                -0.5603
+              ],
+              "width_m": 0.16920000000000002,
+              "height_m": 0.02540000000000009,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            }
+          ]
+        },
+        {
+          "name": "E89DN",
+          "identifier": "E89DN",
+          "element_count": 7,
+          "elements": [
+            {
+              "name": "E89DN",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.98265,
+                  -1.97335
+                ],
+                [
+                  0.98265,
+                  -1.91745
+                ],
+                [
+                  0.92395,
+                  -1.91745
+                ],
+                [
+                  0.92395,
+                  -1.97335
+                ]
+              ],
+              "centre_m": [
+                0.9533000000000001,
+                -1.9454
+              ],
+              "width_m": 0.058699999999999974,
+              "height_m": 0.05589999999999984,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "E89DN_1",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  1.04255,
+                  -1.9860499999999999
+                ],
+                [
+                  1.04255,
+                  -1.93015
+                ],
+                [
+                  0.9838500000000001,
+                  -1.93015
+                ],
+                [
+                  0.9838500000000001,
+                  -1.9860499999999999
+                ]
+              ],
+              "centre_m": [
+                1.0132,
+                -1.9581000000000002
+              ],
+              "width_m": 0.058699999999999974,
+              "height_m": 0.05589999999999984,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "E89DN_2",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  1.12915,
+                  -2.0223
+                ],
+                [
+                  1.12915,
+                  -1.9479000000000002
+                ],
+                [
+                  1.0704500000000001,
+                  -1.9479000000000002
+                ],
+                [
+                  1.0704500000000001,
+                  -2.0223
+                ]
+              ],
+              "centre_m": [
+                1.0998,
+                -1.9851
+              ],
+              "width_m": 0.058699999999999974,
+              "height_m": 0.0743999999999998,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "E89DN_3",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  1.19415,
+                  -2.0223
+                ],
+                [
+                  1.19415,
+                  -1.9479000000000002
+                ],
+                [
+                  1.13545,
+                  -1.9479000000000002
+                ],
+                [
+                  1.13545,
+                  -2.0223
+                ]
+              ],
+              "centre_m": [
+                1.1648,
+                -1.9851
+              ],
+              "width_m": 0.058699999999999974,
+              "height_m": 0.0743999999999998,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "E89DN_4",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  1.3977,
+                  -1.91095
+                ],
+                [
+                  1.3977,
+                  -1.83605
+                ],
+                [
+                  1.3089,
+                  -1.83605
+                ],
+                [
+                  1.3089,
+                  -1.91095
+                ]
+              ],
+              "centre_m": [
+                1.3533,
+                -1.8734999999999997
+              ],
+              "width_m": 0.08879999999999999,
+              "height_m": 0.07489999999999997,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "E89DN_5",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  1.3977,
+                  -1.9879499999999999
+                ],
+                [
+                  1.3977,
+                  -1.91305
+                ],
+                [
+                  1.3089,
+                  -1.91305
+                ],
+                [
+                  1.3089,
+                  -1.9879499999999999
+                ]
+              ],
+              "centre_m": [
+                1.3533,
+                -1.9505
+              ],
+              "width_m": 0.08879999999999999,
+              "height_m": 0.07489999999999997,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "E89DN_6",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  1.87725,
+                  -1.76165
+                ],
+                [
+                  1.87725,
+                  -1.7337500000000001
+                ],
+                [
+                  1.69795,
+                  -1.7337500000000001
+                ],
+                [
+                  1.69795,
+                  -1.76165
+                ]
+              ],
+              "centre_m": [
+                1.7876,
+                -1.7477
+              ],
+              "width_m": 0.17930000000000001,
+              "height_m": 0.027899999999999814,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            }
+          ]
+        },
+        {
+          "name": "E89UP",
+          "identifier": "E89UP",
+          "element_count": 7,
+          "elements": [
+            {
+              "name": "E89UP",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.98185,
+                  1.91785
+                ],
+                [
+                  0.98185,
+                  1.97375
+                ],
+                [
+                  0.92315,
+                  1.97375
+                ],
+                [
+                  0.92315,
+                  1.91785
+                ]
+              ],
+              "centre_m": [
+                0.9524999999999999,
+                1.9457999999999998
+              ],
+              "width_m": 0.058699999999999974,
+              "height_m": 0.05589999999999984,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "E89UP_1",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  1.04175,
+                  1.93055
+                ],
+                [
+                  1.04175,
+                  1.9864499999999998
+                ],
+                [
+                  0.98305,
+                  1.9864499999999998
+                ],
+                [
+                  0.98305,
+                  1.93055
+                ]
+              ],
+              "centre_m": [
+                1.0124,
+                1.9585000000000001
+              ],
+              "width_m": 0.058699999999999974,
+              "height_m": 0.05589999999999984,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "E89UP_2",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  1.12845,
+                  1.9483000000000001
+                ],
+                [
+                  1.12845,
+                  2.0227
+                ],
+                [
+                  1.06975,
+                  2.0227
+                ],
+                [
+                  1.06975,
+                  1.9483000000000001
+                ]
+              ],
+              "centre_m": [
+                1.0991,
+                1.9855000000000003
+              ],
+              "width_m": 0.058699999999999974,
+              "height_m": 0.0743999999999998,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "E89UP_3",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  1.19345,
+                  1.9483000000000001
+                ],
+                [
+                  1.19345,
+                  2.0227
+                ],
+                [
+                  1.13475,
+                  2.0227
+                ],
+                [
+                  1.13475,
+                  1.9483000000000001
+                ]
+              ],
+              "centre_m": [
+                1.1641,
+                1.9855000000000003
+              ],
+              "width_m": 0.058699999999999974,
+              "height_m": 0.0743999999999998,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "E89UP_4",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  1.3956,
+                  1.83705
+                ],
+                [
+                  1.3956,
+                  1.91195
+                ],
+                [
+                  1.3068,
+                  1.91195
+                ],
+                [
+                  1.3068,
+                  1.83705
+                ]
+              ],
+              "centre_m": [
+                1.3512,
+                1.8745
+              ],
+              "width_m": 0.08879999999999999,
+              "height_m": 0.07489999999999997,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "E89UP_5",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  1.3956,
+                  1.91405
+                ],
+                [
+                  1.3956,
+                  1.98895
+                ],
+                [
+                  1.3068,
+                  1.98895
+                ],
+                [
+                  1.3068,
+                  1.91405
+                ]
+              ],
+              "centre_m": [
+                1.3512,
+                1.9515
+              ],
+              "width_m": 0.08879999999999999,
+              "height_m": 0.07489999999999997,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            },
+            {
+              "name": "E89UP_6",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  1.87565,
+                  1.73395
+                ],
+                [
+                  1.87565,
+                  1.76185
+                ],
+                [
+                  1.69635,
+                  1.76185
+                ],
+                [
+                  1.69635,
+                  1.73395
+                ]
+              ],
+              "centre_m": [
+                1.7859999999999998,
+                1.7478999999999998
+              ],
+              "width_m": 0.17930000000000001,
+              "height_m": 0.027899999999999814,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            }
+          ]
+        },
+        {
+          "name": "F1A",
+          "identifier": "F1A",
+          "element_count": 1,
+          "elements": [
+            {
+              "name": "F1A",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.8862,
+                  0.007769999999999999
+                ],
+                [
+                  0.8862,
+                  0.32883
+                ],
+                [
+                  0.8354,
+                  0.32883
+                ],
+                [
+                  0.8354,
+                  0.007769999999999999
+                ]
+              ],
+              "centre_m": [
+                0.8608,
+                0.1683
+              ],
+              "width_m": 0.050799999999999956,
+              "height_m": 0.32106,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            }
+          ]
+        },
+        {
+          "name": "F2A",
+          "identifier": "F2A",
+          "element_count": 1,
+          "elements": [
+            {
+              "name": "F2A",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.8868,
+                  0.34757
+                ],
+                [
+                  0.8868,
+                  0.6686300000000001
+                ],
+                [
+                  0.8360000000000001,
+                  0.6686300000000001
+                ],
+                [
+                  0.8360000000000001,
+                  0.34757
+                ]
+              ],
+              "centre_m": [
+                0.8613999999999999,
+                0.5081
+              ],
+              "width_m": 0.050799999999999956,
+              "height_m": 0.32106000000000007,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            }
+          ]
+        },
+        {
+          "name": "F3A",
+          "identifier": "F3A",
+          "element_count": 1,
+          "elements": [
+            {
+              "name": "F3A",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.8882,
+                  0.6885699999999999
+                ],
+                [
+                  0.8882,
+                  1.00963
+                ],
+                [
+                  0.8374,
+                  1.00963
+                ],
+                [
+                  0.8374,
+                  0.6885699999999999
+                ]
+              ],
+              "centre_m": [
+                0.8628000000000001,
+                0.8491000000000001
+              ],
+              "width_m": 0.050799999999999956,
+              "height_m": 0.3210600000000001,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            }
+          ]
+        },
+        {
+          "name": "F4A",
+          "identifier": "F4A",
+          "element_count": 1,
+          "elements": [
+            {
+              "name": "F4A",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.8865,
+                  1.02937
+                ],
+                [
+                  0.8865,
+                  1.35043
+                ],
+                [
+                  0.8357,
+                  1.35043
+                ],
+                [
+                  0.8357,
+                  1.02937
+                ]
+              ],
+              "centre_m": [
+                0.8611000000000001,
+                1.1899
+              ],
+              "width_m": 0.050799999999999956,
+              "height_m": 0.3210600000000001,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            }
+          ]
+        },
+        {
+          "name": "F5A",
+          "identifier": "F5A",
+          "element_count": 1,
+          "elements": [
+            {
+              "name": "F5A",
+              "status": "read_unmodified",
+              "change": null,
+              "source_geometry": "outline",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.9345,
+                  1.3876
+                ],
+                [
+                  0.9345,
+                  1.507
+                ],
+                [
+                  1.0737,
+                  1.6461999999999999
+                ],
+                [
+                  1.0737,
+                  1.5268
+                ]
+              ],
+              "centre_m": [
+                1.0041000000000002,
+                1.5169
+              ],
+              "width_m": 0.1392000000000001,
+              "height_m": 0.25859999999999994,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            }
+          ]
+        },
+        {
+          "name": "F6A",
+          "identifier": "F6A",
+          "element_count": 1,
+          "elements": [
+            {
+              "name": "F6A",
+              "status": "read_unmodified",
+              "change": null,
+              "source_geometry": "outline",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  2.529878078275369,
+                  0.3403
+                ],
+                [
+                  2.521721921724631,
+                  0.5348999999999999
+                ],
+                [
+                  2.694921921724631,
+                  0.5348999999999999
+                ],
+                [
+                  2.703078078275369,
+                  0.3403
+                ]
+              ],
+              "centre_m": [
+                2.6124000000000005,
+                0.43760000000000004
+              ],
+              "width_m": 0.18135615655073778,
+              "height_m": 0.19459999999999994,
+              "skew_rad": 1.6126842288427616,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            }
+          ]
+        },
+        {
+          "name": "F7A",
+          "identifier": "F7A",
+          "element_count": 1,
+          "elements": [
+            {
+              "name": "F7A",
+              "status": "read_unmodified",
+              "change": null,
+              "source_geometry": "outline",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  2.3068861855905696,
+                  1.0325
+                ],
+                [
+                  2.2517138144094306,
+                  1.2017
+                ],
+                [
+                  2.4397138144094304,
+                  1.2017
+                ],
+                [
+                  2.4948861855905693,
+                  1.0325
+                ]
+              ],
+              "centre_m": [
+                2.3733,
+                1.1171000000000002
+              ],
+              "width_m": 0.24317237118113866,
+              "height_m": 0.16920000000000002,
+              "skew_rad": 1.886002789705072,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            }
+          ]
+        },
+        {
+          "name": "F8A",
+          "identifier": "F8A",
+          "element_count": 1,
+          "elements": [
+            {
+              "name": "F8A",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  1.36925,
+                  1.55935
+                ],
+                [
+                  1.36925,
+                  1.6444500000000002
+                ],
+                [
+                  1.13435,
+                  1.6444500000000002
+                ],
+                [
+                  1.13435,
+                  1.55935
+                ]
+              ],
+              "centre_m": [
+                1.2517999999999998,
+                1.6018999999999999
+              ],
+              "width_m": 0.2349000000000001,
+              "height_m": 0.08510000000000018,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            }
+          ]
+        },
+        {
+          "name": "F9A",
+          "identifier": "F9A",
+          "element_count": 1,
+          "elements": [
+            {
+              "name": "F9A",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  1.7737,
+                  1.5208499999999998
+                ],
+                [
+                  1.7737,
+                  1.65395
+                ],
+                [
+                  1.6043,
+                  1.65395
+                ],
+                [
+                  1.6043,
+                  1.5208499999999998
+                ]
+              ],
+              "centre_m": [
+                1.6890000000000003,
+                1.5874
+              ],
+              "width_m": 0.1694,
+              "height_m": 0.13310000000000022,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            }
+          ]
+        },
+        {
+          "name": "F1B",
+          "identifier": "F1B",
+          "element_count": 1,
+          "elements": [
+            {
+              "name": "F1B",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.8862,
+                  -0.33423
+                ],
+                [
+                  0.8862,
+                  -0.013169999999999987
+                ],
+                [
+                  0.8354,
+                  -0.013169999999999987
+                ],
+                [
+                  0.8354,
+                  -0.33423
+                ]
+              ],
+              "centre_m": [
+                0.8608,
+                -0.17370000000000002
+              ],
+              "width_m": 0.050799999999999956,
+              "height_m": 0.32106,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            }
+          ]
+        },
+        {
+          "name": "F2B",
+          "identifier": "F2B",
+          "element_count": 1,
+          "elements": [
+            {
+              "name": "F2B",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.8861,
+                  -0.6740299999999999
+                ],
+                [
+                  0.8861,
+                  -0.35296999999999995
+                ],
+                [
+                  0.8353,
+                  -0.35296999999999995
+                ],
+                [
+                  0.8353,
+                  -0.6740299999999999
+                ]
+              ],
+              "centre_m": [
+                0.8607,
+                -0.5135
+              ],
+              "width_m": 0.050799999999999956,
+              "height_m": 0.32105999999999996,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            }
+          ]
+        },
+        {
+          "name": "F3B",
+          "identifier": "F3B",
+          "element_count": 1,
+          "elements": [
+            {
+              "name": "F3B",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.8865,
+                  -1.01483
+                ],
+                [
+                  0.8865,
+                  -0.69377
+                ],
+                [
+                  0.8357,
+                  -0.69377
+                ],
+                [
+                  0.8357,
+                  -1.01483
+                ]
+              ],
+              "centre_m": [
+                0.8611000000000001,
+                -0.8543
+              ],
+              "width_m": 0.050799999999999956,
+              "height_m": 0.3210599999999999,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            }
+          ]
+        },
+        {
+          "name": "F4B",
+          "identifier": "F4B",
+          "element_count": 1,
+          "elements": [
+            {
+              "name": "F4B",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.8884,
+                  -1.35623
+                ],
+                [
+                  0.8884,
+                  -1.03517
+                ],
+                [
+                  0.8376,
+                  -1.03517
+                ],
+                [
+                  0.8376,
+                  -1.35623
+                ]
+              ],
+              "centre_m": [
+                0.8629999999999999,
+                -1.1957
+              ],
+              "width_m": 0.050799999999999956,
+              "height_m": 0.3210600000000001,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            }
+          ]
+        },
+        {
+          "name": "F5B",
+          "identifier": "F5B",
+          "element_count": 1,
+          "elements": [
+            {
+              "name": "F5B",
+              "status": "read_unmodified",
+              "change": null,
+              "source_geometry": "outline",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  0.9329,
+                  -1.507
+                ],
+                [
+                  0.9329,
+                  -1.3876
+                ],
+                [
+                  1.0720999999999998,
+                  -1.5268
+                ],
+                [
+                  1.0720999999999998,
+                  -1.6461999999999999
+                ]
+              ],
+              "centre_m": [
+                1.0025,
+                -1.5168999999999997
+              ],
+              "width_m": 0.13919999999999988,
+              "height_m": 0.25859999999999994,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            }
+          ]
+        },
+        {
+          "name": "F6B",
+          "identifier": "F6B",
+          "element_count": 1,
+          "elements": [
+            {
+              "name": "F6B",
+              "status": "read_unmodified",
+              "change": null,
+              "source_geometry": "outline",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  2.521721921724631,
+                  -0.5348999999999999
+                ],
+                [
+                  2.529878078275369,
+                  -0.3403
+                ],
+                [
+                  2.703078078275369,
+                  -0.3403
+                ],
+                [
+                  2.694921921724631,
+                  -0.5348999999999999
+                ]
+              ],
+              "centre_m": [
+                2.6124000000000005,
+                -0.43760000000000004
+              ],
+              "width_m": 0.18135615655073778,
+              "height_m": 0.19459999999999994,
+              "skew_rad": 1.5289084247470317,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            }
+          ]
+        },
+        {
+          "name": "F7B",
+          "identifier": "F7B",
+          "element_count": 1,
+          "elements": [
+            {
+              "name": "F7B",
+              "status": "read_unmodified",
+              "change": null,
+              "source_geometry": "outline",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  2.2618138144094306,
+                  -1.2017
+                ],
+                [
+                  2.3169861855905696,
+                  -1.0325
+                ],
+                [
+                  2.5049861855905693,
+                  -1.0325
+                ],
+                [
+                  2.4498138144094304,
+                  -1.2017
+                ]
+              ],
+              "centre_m": [
+                2.3834000000000004,
+                -1.1171
+              ],
+              "width_m": 0.24317237118113866,
+              "height_m": 0.16920000000000002,
+              "skew_rad": 1.2555898638847212,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            }
+          ]
+        },
+        {
+          "name": "F8B",
+          "identifier": "F8B",
+          "element_count": 1,
+          "elements": [
+            {
+              "name": "F8B",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  1.36985,
+                  -1.64525
+                ],
+                [
+                  1.36985,
+                  -1.56015
+                ],
+                [
+                  1.13495,
+                  -1.56015
+                ],
+                [
+                  1.13495,
+                  -1.64525
+                ]
+              ],
+              "centre_m": [
+                1.2524,
+                -1.6027
+              ],
+              "width_m": 0.2349000000000001,
+              "height_m": 0.08510000000000018,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            }
+          ]
+        },
+        {
+          "name": "F9B",
+          "identifier": "F9B",
+          "element_count": 1,
+          "elements": [
+            {
+              "name": "F9B",
+              "status": "read_after_named_change",
+              "change": "expand the stored centre, width and height through CrossSection.transform[2] into the canonical polygon outline",
+              "source_geometry": "rectangle",
+              "outline_vertex_count": 4,
+              "outline_vertices_m": [
+                [
+                  1.7736,
+                  -1.6445500000000002
+                ],
+                [
+                  1.7736,
+                  -1.51145
+                ],
+                [
+                  1.6042,
+                  -1.51145
+                ],
+                [
+                  1.6042,
+                  -1.6445500000000002
+                ]
+              ],
+              "centre_m": [
+                1.6889,
+                -1.5780000000000003
+              ],
+              "width_m": 0.1694,
+              "height_m": 0.13310000000000022,
+              "skew_rad": 1.5707963267948966,
+              "skew_definition": "directed angle of the first non-zero outline edge"
+            }
+          ]
+        }
+      ]
+    },
+    "tf": {
+      "status": "cannot_reach",
+      "occurrence_present": true,
+      "static_geometry_present": false,
+      "toroidal_coil_count": 0,
+      "reason": "the tf IDS contains a time-dependent vacuum-field signal but no static toroidal-conductor geometry; the signal is excluded"
+    },
+    "pf_passive": {
+      "status": "cannot_reach",
+      "occurrence_present": false,
+      "loop_count": 0,
+      "reason": "the netCDF entry contains no pf_passive occurrence; no loop or vessel conductor is fabricated"
+    },
+    "competition_efit_grid": {
+      "shape": [
+        65,
+        65
+      ],
+      "r_extent_m": [
+        0.8399999737739563,
+        2.5399999618530273
+      ],
+      "z_extent_m": [
+        -1.600000023841858,
+        1.600000023841858
+      ],
+      "source_receipt": "docs/figures/diiid-forward-onboarding/machine-description/machine_description_receipt.json",
+      "provenance": {
+        "fields": [
+          "efit_grid_R",
+          "efit_grid_Z"
+        ],
+        "locator": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000a10ac.parquet:efit_grid_R,efit_grid_Z",
+        "source": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+        "unit": "m,m",
+        "statement": "released 65 by 65 EFIT coordinate axes copied unmodified"
+      }
+    }
+  },
+  "doctrine_fence": {
+    "additional_entry_content": {
+      "magnetics_ids": true,
+      "constrained_equilibrium": true,
+      "equilibrium_time_slice_count": 340
+    },
+    "admissible_machine_description": "diagnostic and conductor geometry only",
+    "magnetics_signal_used": false,
+    "equilibrium_label_used": false,
+    "statement": "no magnetics signal and no equilibrium label from this file is used anywhere in this node"
+  },
+  "figures": [
+    "docs/figures/diiid-forward-onboarding/netcdf-description/limiter_pf_active_elements.png",
+    "docs/figures/diiid-forward-onboarding/netcdf-description/non_rectangular_element_outlines.png",
+    "docs/figures/diiid-forward-onboarding/netcdf-description/limiter_competition_grid_extent.png"
+  ]
+}

@@ -407,6 +407,43 @@ class MachineSection:
     name: str
     section: GeomData
 
+    @property
+    def outline(self) -> tuple[tuple[float, float], ...]:
+        """Return the canonical section outline without its closing vertex."""
+        radius, height = self.section.poly.exterior.xy
+        return tuple(
+            (float(r_value), float(z_value))
+            for r_value, z_value in zip(radius[:-1], height[:-1], strict=True)
+        )
+
+    @property
+    def centre(self) -> tuple[float, float]:
+        """Return the area centroid of the routed section."""
+        centroid = self.section.poly.centroid
+        return float(centroid.x), float(centroid.y)
+
+    @property
+    def width(self) -> float:
+        """Return the radial extent of the routed section."""
+        r_min, _, r_max, _ = self.section.poly.bounds
+        return float(r_max - r_min)
+
+    @property
+    def height(self) -> float:
+        """Return the vertical extent of the routed section."""
+        _, z_min, _, z_max = self.section.poly.bounds
+        return float(z_max - z_min)
+
+    @property
+    def skew(self) -> float:
+        """Return the directed angle of the first non-zero outline edge."""
+        for start, end in itertools.pairwise(self.outline + self.outline[:1]):
+            delta_r = end[0] - start[0]
+            delta_z = end[1] - start[1]
+            if not np.isclose(delta_r, 0.0) or not np.isclose(delta_z, 0.0):
+                return float(np.arctan2(delta_z, delta_r))
+        raise ValueError(f"machine section {self.name!r} has no non-zero edge")
+
     @classmethod
     def from_record(cls, record: dict) -> MachineSection:
         """Route a flat IDS receipt through the canonical section classes."""
@@ -418,6 +455,28 @@ class MachineSection:
         return cls(
             name=str(record["name"]),
             section=TabularGeometryReader(record).section(geometry),
+        )
+
+
+@dataclass(frozen=True)
+class MachineCoil:
+    """Named active coil retaining its ordered poloidal elements."""
+
+    name: str
+    identifier: str
+    elements: tuple[MachineSection, ...]
+
+    @classmethod
+    def from_record(cls, record: dict) -> MachineCoil:
+        """Build one coil and route every element through ``MachineSection``."""
+        elements = tuple(
+            MachineSection.from_record(element)
+            for element in record.get("elements", ())
+        )
+        return cls(
+            name=str(record["name"]),
+            identifier=str(record.get("identifier", "")),
+            elements=elements,
         )
 
 
@@ -460,27 +519,46 @@ class StaticMachineDescription:
     passive_loop_count: int
     toroidal_coil_count: int
     sightlines: tuple[DiagnosticSightline, ...]
+    active_coils: tuple[MachineCoil, ...] = ()
 
     @classmethod
     def from_record(cls, record: dict) -> StaticMachineDescription:
         """Route an IMAS extraction record through Nova's machine dataclasses."""
         contour_record = record.get("contour")
+        active_records = tuple(record.get("pf_active", ()))
+        if active_records and "elements" in active_records[0]:
+            active_coils = tuple(
+                MachineCoil.from_record(coil) for coil in active_records
+            )
+            active_sections = tuple(
+                element for coil in active_coils for element in coil.elements
+            )
+        else:
+            active_sections = tuple(
+                MachineSection.from_record(section) for section in active_records
+            )
+            active_coils = tuple(
+                MachineCoil(
+                    name=section.name,
+                    identifier=section.name,
+                    elements=(section,),
+                )
+                for section in active_sections
+            )
         return cls(
             contour=(
                 MachineContour.from_record(contour_record)
                 if contour_record is not None
                 else None
             ),
-            active_sections=tuple(
-                MachineSection.from_record(section)
-                for section in record.get("pf_active", ())
-            ),
+            active_sections=active_sections,
             passive_loop_count=int(record.get("pf_passive_loop_count", 0)),
             toroidal_coil_count=int(record.get("tf_coil_count", 0)),
             sightlines=tuple(
                 DiagnosticSightline.from_record(sightline)
                 for sightline in record.get("thomson_scattering", ())
             ),
+            active_coils=active_coils,
         )
 
 

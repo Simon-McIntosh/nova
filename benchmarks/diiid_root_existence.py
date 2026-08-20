@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -541,6 +542,38 @@ def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def run_completion(
+    selected_count: int,
+    completed_count: int,
+    started_at: str,
+    finished_at: str,
+) -> dict[str, Any]:
+    """Record that one cohort run selected and completed every required frame."""
+
+    if selected_count != FRAME_COUNT:
+        raise RuntimeError(
+            f"root-existence run selected {selected_count} of {FRAME_COUNT} frames"
+        )
+    if completed_count != selected_count:
+        raise RuntimeError(
+            f"root-existence run completed {completed_count} of {selected_count} frames"
+        )
+    return {
+        "started_at_utc": started_at,
+        "finished_at_utc": finished_at,
+        "frame_count_at_start": {
+            "selected": selected_count,
+            "required": FRAME_COUNT,
+            "display": f"{selected_count} of {FRAME_COUNT}",
+        },
+        "frame_count_at_end": {
+            "completed": completed_count,
+            "required": FRAME_COUNT,
+            "display": f"{completed_count} of {FRAME_COUNT}",
+        },
+    }
+
+
 def residual_figure(fields: dict[str, np.ndarray], path: Path) -> None:
     """Plot fixed, free, and vacuum-attributed residual contours."""
 
@@ -639,6 +672,8 @@ def run(data: Path, output: Path) -> dict[str, Any]:
     preregistration_path = write_preregistration(output)
     preregistration_digest = require_preregistration(preregistration_path)
     selected = select_frames(sorted(data.glob("*.parquet")), FRAME_COUNT)
+    started_at = datetime.now(UTC).isoformat()
+    print(f"STARTED {len(selected)}/{FRAME_COUNT} selected frames", flush=True)
     first_columns = _LABEL_COLUMNS + _GEOMETRY_COLUMNS + _CURRENT_COLUMNS
     first_row = _read(selected[0].path, first_columns)
     radius, height = canonical_axes(first_row)
@@ -666,6 +701,12 @@ def run(data: Path, output: Path) -> dict[str, Any]:
     omitted = omitted_coil_envelope(
         first_fields["border_coordinate"], measured_boundary_rms
     )
+    completion = run_completion(
+        len(selected),
+        len(records),
+        started_at,
+        datetime.now(UTC).isoformat(),
+    )
     receipt = {
         "preregistration": preregistration(),
         "preregistration_path": str(preregistration_path),
@@ -675,6 +716,7 @@ def run(data: Path, output: Path) -> dict[str, Any]:
             "no_root_find": True,
             "no_fitting": True,
             "coil_currents_adjusted": False,
+            "run_completion": completion,
             "frames": records,
             "pooled": summarize(records),
             "omitted_coil_magnitude_comparison": omitted,

@@ -103,6 +103,29 @@ def test_attribution_verdict_uses_the_declared_numeric_split(
     assert result["share_sum"] == pytest.approx(1.0)
 
 
+def test_run_completion_requires_and_records_the_full_cohort():
+    completion = root_existence.run_completion(
+        5,
+        5,
+        "2026-08-20T12:00:00+00:00",
+        "2026-08-20T12:05:00+00:00",
+    )
+    assert completion["frame_count_at_start"] == {
+        "selected": 5,
+        "required": 5,
+        "display": "5 of 5",
+    }
+    assert completion["frame_count_at_end"] == {
+        "completed": 5,
+        "required": 5,
+        "display": "5 of 5",
+    }
+    with pytest.raises(RuntimeError, match="selected 4 of 5"):
+        root_existence.run_completion(4, 4, "start", "finish")
+    with pytest.raises(RuntimeError, match="completed 4 of 5"):
+        root_existence.run_completion(5, 4, "start", "finish")
+
+
 def test_benchmark_source_contains_no_root_find_route():
     source = MODULE_PATH.read_text()
     forbidden = (

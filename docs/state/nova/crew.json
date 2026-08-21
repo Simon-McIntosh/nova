@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T00:45:50",
+  "updated": "2026-08-22T00:54:49",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -19483,9 +19483,129 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T220834067696-transported-map-arc-repair",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a78",
+        "node": "transported-map-arc-repair",
+        "role": "implement",
+        "member": "transport-env",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T22:08:36Z",
+        "completed_at": "2026-08-21T22:53:43Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2707,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2707,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "6278395d31b3c670ee271bbb7c11faab8b15995a",
+        "commits": [
+          "130fe478cf09e8b3aed0390d020245e523d20594"
+        ],
+        "changed_lines": {
+          "added": 136,
+          "removed": 16,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "the transported-map defect is a phantom split: midpoint-seeded Newton attached two mirrored corner arcs (cells 702/1614 at psi_n 0.81625, offsets ~2.4e-5) to a disconnected stationary branch, inventing intervals with level residual 0.076-0.079. The service now accepts a stationary split only when every proposed interval meets the 2e-8 level contract, all roots use the full 28-step bisection, and the mirrored pair is pinned in one regression by construction. Transported map valid=False/4 to valid=True/0; extraction 9/9 and reference 5/5 green in sequential fresh processes; no floor lowered, no smoothing introduced",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T220834067696-transported-map-arc-repair/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01023-3e4f-7081-b1ab-24ffbe816152",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 31671296,
+            "cached_input_tokens_cumulative": 302336512,
+            "input_tokens": 32183785,
+            "input_tokens_cumulative": 307923714,
+            "output_tokens": 44478,
+            "output_tokens_cumulative": 565718,
+            "reasoning_output_tokens": 8404,
+            "reasoning_output_tokens_cumulative": 176855
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260821T215344875475-window-demonstration-rerun",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a76",
+        "node": "window-demonstration-rerun",
+        "role": "implement",
+        "member": "transport-window",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T21:53:47Z",
+        "completed_at": "2026-08-21T22:07:32Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 825,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 825,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "ceb1a0565cca7bff1ab79fd09a06688b00a40917",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "superseded: this attempt proved the full seam composes (exact evaluation, valid baseline geometry, TORAX step, equilibrium update inside solve_window) and its fail-closed refusal surfaced the phantom-split arc defect now repaired on main; the third attempt runs on the repaired tree",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T215344875475-window-demonstration-rerun/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f8b-c81b-70c3-a5d8-007c4d512626",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4016640,
+            "cached_input_tokens_cumulative": 40550400,
+            "input_tokens": 4350318,
+            "input_tokens_cumulative": 41863819,
+            "output_tokens": 23251,
+            "output_tokens_cumulative": 152569,
+            "reasoning_output_tokens": 5066,
+            "reasoning_output_tokens_cumulative": 56554
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 480
+    "_version": 482
   }
 }

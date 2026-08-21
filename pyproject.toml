@@ -36,6 +36,7 @@ dependencies = [
   "netcdf4>=1.7",
   "numpy>=2",
   "packaging>=23.2",
+  "pyarrow>=24",
   # Diagnostic-correction documents are read through the models generated from
   # their LinkML schema; the generators themselves live in the schema extra.
   "pydantic>=2.9",

@@ -34,9 +34,12 @@ from benchmarks.diiid_forward_gs_match import (
     _GEOMETRY_COLUMNS,
     _LABEL_COLUMNS,
 )
-from nova.biot.polygon import polygon_greens
 from nova.equilibrium.map_extraction import apply_delta_star
-from nova.imas.diiid_description import DiiidDescriptionRegistry, vacuum_response
+from nova.imas.diiid_description import (
+    DiiidDescriptionRegistry,
+    active_coil_response_from_imas,
+    vacuum_response,
+)
 from nova.jax.config import configure_dtypes
 
 
@@ -136,62 +139,19 @@ def banked_cohort(
 def _omitted_full_response(
     radius: np.ndarray, height: np.ndarray
 ) -> tuple[np.ndarray, dict[str, Any]]:
-    """Return exact polygon flux maps for the five netCDF-only conductors."""
-
-    import imas
+    """Return shared exact flux maps for the five netCDF-only conductors."""
 
     target_r, target_z = np.meshgrid(radius, height)
-    maps = []
-    records = []
-    with imas.DBEntry(
+    names, maps, receipt = active_coil_response_from_imas(
         recovery.NETCDF_ENTRY,
-        "r",
-        dd_version=recovery.NETCDF_DD_VERSION,
-    ) as entry:
-        active = entry.get("pf_active", autoconvert=False)
-        written_dd = str(active.ids_properties.version_put.data_dictionary)
-        if written_dd != recovery.NETCDF_DD_VERSION:
-            raise RuntimeError(
-                f"expected DD {recovery.NETCDF_DD_VERSION}, read {written_dd}"
-            )
-        coils = {str(coil.name): coil for coil in active.coil}
-        for name in recovery.OMITTED_COILS:
-            flux = np.zeros(target_r.shape, dtype=float)
-            turn_sum = 0.0
-            for element in coils[name].element:
-                geometry = element.geometry
-                geometry_type = int(geometry.geometry_type)
-                if geometry_type == 1:
-                    vertices = np.c_[
-                        np.asarray(geometry.outline.r, dtype=float),
-                        np.asarray(geometry.outline.z, dtype=float),
-                    ]
-                elif geometry_type == 2:
-                    vertices = recovery._rectangle_vertices(geometry)
-                else:
-                    raise ValueError(
-                        f"unsupported geometry type {geometry_type} for {name}"
-                    )
-                turns = float(element.turns_with_sign)
-                turn_sum += turns
-                flux += turns * polygon_greens(
-                    target_r.ravel(), target_z.ravel(), vertices
-                )[0].reshape(target_r.shape)
-            maps.append(flux)
-            records.append(
-                {
-                    "coil": name,
-                    "elements": len(coils[name].element),
-                    "signed_turn_sum": turn_sum,
-                }
-            )
-    return np.stack(maps), {
-        "entry": str(recovery.NETCDF_ENTRY),
-        "dd_version": recovery.NETCDF_DD_VERSION,
-        "coils": records,
-        "grid_points": int(target_r.size),
-        "kernel": "nova.biot.polygon.polygon_greens",
-    }
+        recovery.NETCDF_DD_VERSION,
+        recovery.OMITTED_COILS,
+        target_r,
+        target_z,
+    )
+    if names != recovery.OMITTED_COILS:
+        raise RuntimeError("shared omitted-coil response changed column order")
+    return maps, receipt
 
 
 def current_residual_metrics(

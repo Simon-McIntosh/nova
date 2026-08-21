@@ -3,9 +3,9 @@
 
 The slice is selected only from the committed native-grid decomposition bank.
 Its declared pressure and diamagnetic gradients drive ``ForwardProfile.solve``
-on the 65-point normalized-flux base after conversion to Nova's total-flux
-COCOS 17 convention. The fitted conductor state is primary and the archived
-experimental state is a side arm.
+on the 65-point normalized-flux base after conversion to Nova's negated-total-
+flux COCOS 17 convention. The fitted conductor state is primary and the
+archived experimental state is a side arm.
 
 The current image is evaluated in the reference's declared flux coordinate.
 Both its normalized-flux argument and its support use the declared axis and
@@ -272,8 +272,8 @@ def build_profile(
     psi_norm = np.asarray(group["psi_norm"], dtype=np.float64)
     if psi_norm.shape != (65,) or not np.allclose(psi_norm, np.linspace(0.0, 1.0, 65)):
         raise ValueError("efm/psi_norm is not the declared uniform 65-point base")
-    p_prime = np.asarray(group["pprime"][row], dtype=np.float64) / TOTAL_FLUX_FACTOR
-    ff_prime = np.asarray(group["ffprime"][row], dtype=np.float64) / TOTAL_FLUX_FACTOR
+    p_prime = -np.asarray(group["pprime"][row], dtype=np.float64) / TOTAL_FLUX_FACTOR
+    ff_prime = -np.asarray(group["ffprime"][row], dtype=np.float64) / TOTAL_FLUX_FACTOR
     source = ForwardSource(
         core=DomainProfile(
             p_prime=_profile_function(psi_norm, p_prime),
@@ -321,8 +321,14 @@ def build_profile(
         "current_mapping": mapping,
         "target_cocos": 17,
         "profile_base": "efm/psi_norm, 65 uniform points from 0 to 1",
-        "pprime_source": "efm/pprime divided by 2*pi into Pa/Wb",
-        "ffprime_source": "efm/ffprime divided by 2*pi into T*m/Wb convention",
+        "gradient_conversion_expression": (
+            "p_prime = -efm/pprime / (2*pi); ff_prime = -efm/ffprime / (2*pi)"
+        ),
+        "gradient_convention": (
+            "DomainProfile gradients with respect to negated total poloidal flux"
+        ),
+        "pprime_source": "-efm/pprime / (2*pi) into Pa/Wb",
+        "ffprime_source": "-efm/ffprime / (2*pi) into T*m/Wb convention",
         "seed_source": "efm/psirz multiplied by 2*pi into total Wb",
         "declared_axis_flux_wb": axis_flux,
         "declared_boundary_flux_wb": boundary_flux,
@@ -412,30 +418,41 @@ def diagnose_branch(
     profile: ForwardProfile, seed: np.ndarray, reference_current: float
 ) -> dict[str, Any]:
     """Identify where the prescribed-anchor trajectory enters the vacuum basin."""
+    vacuum_limit = 0.01 * abs(reference_current)
     seed_state = _state_diagnosis(profile, seed)
-    first_state = _newton_promotion(profile, seed)
-    second_state = _newton_promotion(profile, first_state)
-    standard = [
-        {"state": "seed_before_promotion", **seed_state},
-        {"state": "after_promotion_1", **_state_diagnosis(profile, first_state)},
-        {"state": "after_promotion_2", **_state_diagnosis(profile, second_state)},
-    ]
+    standard = [{"state": "seed_before_promotion", **seed_state}]
+    standard_state = seed
+    for promotion in range(1, NEWTON_STEPS + 1):
+        standard_state = _newton_promotion(profile, standard_state)
+        item = {
+            "state": f"after_promotion_{promotion}",
+            **_state_diagnosis(profile, standard_state),
+        }
+        standard.append(item)
+        if abs(item["plasma_current_integral_a"]) < vacuum_limit:
+            break
 
-    damped_first = seed + CONTROL_FIRST_STEP_SCALE * (first_state - seed)
-    damped_second = _newton_promotion(profile, damped_first)
+    damped_first = seed + CONTROL_FIRST_STEP_SCALE * (
+        _newton_promotion(profile, seed) - seed
+    )
     control = [
         {"state": "seed_before_promotion", **seed_state},
         {
             "state": "after_damped_promotion_1",
             **_state_diagnosis(profile, damped_first),
         },
-        {
-            "state": "after_promotion_2",
-            **_state_diagnosis(profile, damped_second),
-        },
     ]
+    control_state = damped_first
+    for promotion in range(2, NEWTON_STEPS + 1):
+        control_state = _newton_promotion(profile, control_state)
+        item = {
+            "state": f"after_promotion_{promotion}",
+            **_state_diagnosis(profile, control_state),
+        }
+        control.append(item)
+        if abs(item["plasma_current_integral_a"]) < vacuum_limit:
+            break
 
-    vacuum_limit = 0.01 * abs(reference_current)
     seed_current = float(seed_state["plasma_current_integral_a"])
     seed_sign_matches = bool(np.signbit(seed_current) == np.signbit(reference_current))
     seed_is_plasma = (
@@ -447,32 +464,58 @@ def diagnose_branch(
         abs(item["plasma_current_integral_a"]) < vacuum_limit for item in standard[1:]
     ]
     first_vacuum_promotion = next(
-        (index + 1 for index, vacuum in enumerate(standard_vacuum) if vacuum),
+        (index for index, vacuum in enumerate(standard_vacuum, start=1) if vacuum),
         None,
     )
     control_keeps_plasma = all(
         abs(item["plasma_current_integral_a"]) >= vacuum_limit for item in control[1:]
     )
-    if seed_is_plasma and seed_sign_matches:
+    seed_magnitude_error = abs(abs(seed_current) / abs(reference_current) - 1.0)
+    full_support_admitted = bool(
+        seed_state["admitted_support_cells"] == seed_state["declared_support_cells"]
+    )
+    seed_agrees = bool(
+        seed_is_plasma
+        and full_support_admitted
+        and seed_sign_matches
+        and seed_magnitude_error <= 1.0e-3
+    )
+    if seed_agrees and first_vacuum_promotion is not None:
         verdict = (
-            "BASIN: prescribed-anchor support and normalization carry a finite "
-            "signed reference-scale plasma current at the reference seed; the Newton "
-            f"trajectory first enters the vacuum branch after promotion "
-            f"{first_vacuum_promotion}, so the failure is operator-basin reachability, "
-            "owned by dual-basin-solve."
+            "RESIDUAL_BASIN_FINDING: the corrected conversion admits the full "
+            "declared support with the reference current sign and magnitude, but "
+            f"the standard trajectory first enters the vacuum branch after "
+            f"promotion {first_vacuum_promotion}. Two bounded trajectories are "
+            "banked; no further retry is made."
         )
-        classification = "BASIN"
-    elif seed_is_plasma:
+        classification = "RESIDUAL_BASIN_FINDING"
+    elif seed_agrees:
+        verdict = (
+            "CORRECTED_SEED_RETAINED: the corrected conversion admits the full "
+            "declared support with the reference current sign and magnitude, and "
+            "the standard trajectory remains on the plasma branch through the "
+            "bounded promotion budget."
+        )
+        classification = "CORRECTED_SEED_RETAINED"
+    elif seed_is_plasma and not seed_sign_matches:
         verdict = (
             f"WIRING: all {seed_state['admitted_support_cells']} prescribed-anchor "
             f"cells are admitted and the seed current magnitude is reference-scale, "
             f"but its sign is reversed ({seed_current:.6f} A against "
             f"{reference_current:.6f} A). The exact defect is the expressions "
-            "p_prime = efm/pprime / (2*pi) and ff_prime = efm/ffprime / "
+            "p_prime = -efm/pprime / (2*pi) and ff_prime = -efm/ffprime / "
             "(2*pi) entering DomainProfile.current_density, whose "
             "toroidal_current_density = -2*pi*(R*p_prime + ff_prime/(mu_0*R)) "
             "expects gradients with respect to negated total flux. This "
             "prescribed-anchor COCOS sign defect is fixable in this plan."
+        )
+        classification = "WIRING"
+    elif seed_is_plasma:
+        verdict = (
+            "WIRING: the corrected seed current has the reference sign but misses "
+            f"the 0.1 percent magnitude requirement (relative error "
+            f"{seed_magnitude_error:.9g}) or does not admit the full declared "
+            "support."
         )
         classification = "WIRING"
     else:
@@ -486,11 +529,18 @@ def diagnose_branch(
         "classification": classification,
         "verdict": verdict,
         "reference_plasma_current_a": reference_current,
-        "seed_current_signed_ratio_to_reference": seed_current / reference_current,
-        "seed_current_magnitude_relative_error": (
-            abs(seed_current) / abs(reference_current) - 1.0
+        "gradient_conversion_expression": (
+            "p_prime = -efm/pprime / (2*pi); ff_prime = -efm/ffprime / (2*pi)"
         ),
+        "gradient_convention": (
+            "DomainProfile gradients with respect to negated total poloidal flux"
+        ),
+        "seed_current_signed_ratio_to_reference": seed_current / reference_current,
+        "seed_current_magnitude_relative_error": seed_magnitude_error,
         "seed_current_sign_matches_reference": seed_sign_matches,
+        "seed_current_magnitude_tolerance_fraction": 1.0e-3,
+        "seed_current_agrees_with_reference": seed_agrees,
+        "full_declared_support_admitted": full_support_admitted,
         "support_and_normalization_expression": (
             "psi_norm = (grid_flux - declared_axis_flux) / "
             "(declared_boundary_flux - declared_axis_flux); admitted = "
@@ -500,16 +550,16 @@ def diagnose_branch(
             "absolute current below 1 percent of efm/plasma_current_c"
         ),
         "standard_trajectory": standard,
+        "bounded_attempt_count": 2,
         "damped_first_step_control": {
             "first_step_scale": CONTROL_FIRST_STEP_SCALE,
             "trajectory": control,
-            "keeps_plasma_root_through_two_promotions": control_keeps_plasma,
+            "keeps_plasma_root_through_bounded_promotions": control_keeps_plasma,
             "verdict": (
-                "The quarter first step retains prescribed support through the "
-                "first promotion but the next full promotion still collapses to "
-                "vacuum."
+                "The quarter-first-step trajectory still collapses to vacuum "
+                "within the bounded promotion budget."
                 if not control_keeps_plasma
-                else "The quarter first step retains the plasma branch through both promotions."
+                else "The quarter-first-step trajectory retains the plasma branch through the bounded promotion budget."
             ),
         },
     }
@@ -770,13 +820,13 @@ def _diagnosis_figure(diagnosis: dict[str, Any], path: Path) -> None:
     """Plot current and axis-flux trajectories for the standard and control runs."""
     standard = diagnosis["standard_trajectory"]
     control = diagnosis["damped_first_step_control"]["trajectory"]
-    steps = np.arange(3)
     reference_current = float(diagnosis["reference_plasma_current_a"])
     figure, axes = plt.subplots(1, 2, figsize=(8.2, 3.2), constrained_layout=True)
     for trajectory, label, style in (
         (standard, "full Newton step", "o-"),
         (control, "quarter first step", "s--"),
     ):
+        steps = np.arange(len(trajectory))
         axes[0].plot(
             steps,
             [item["plasma_current_integral_a"] / 1.0e3 for item in trajectory],
@@ -792,8 +842,9 @@ def _diagnosis_figure(diagnosis: dict[str, Any], path: Path) -> None:
     axes[0].axhline(reference_current / 1.0e3, color="0.35", lw=0.8, ls=":")
     axes[0].set_ylabel("Integrated plasma current [kA]")
     axes[1].set_ylabel("Topology axis flux [Wb]")
+    longest = max(len(standard), len(control))
     for axis in axes:
-        axis.set_xticks(steps, ["seed", "promotion 1", "promotion 2"])
+        axis.set_xticks(np.arange(longest))
         axis.set_xlabel("Newton trajectory")
         axis.grid(axis="y", color="0.88", lw=0.6)
     axes[0].legend(frameon=False)
@@ -881,7 +932,7 @@ def main() -> None:
         f"classification={diagnosis['classification']} "
         f"seed_cells={diagnosis['standard_trajectory'][0]['admitted_support_cells']} "
         f"seed_current_a={diagnosis['standard_trajectory'][0]['plasma_current_integral_a']:.9g} "
-        f"control_keeps_plasma={diagnosis['damped_first_step_control']['keeps_plasma_root_through_two_promotions']}"
+        f"control_keeps_plasma={diagnosis['damped_first_step_control']['keeps_plasma_root_through_bounded_promotions']}"
     )
 
 

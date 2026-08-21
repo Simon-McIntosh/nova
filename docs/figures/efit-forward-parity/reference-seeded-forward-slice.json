@@ -148,8 +148,10 @@
       ],
       "target_cocos": 17,
       "profile_base": "efm/psi_norm, 65 uniform points from 0 to 1",
-      "pprime_source": "efm/pprime divided by 2*pi into Pa/Wb",
-      "ffprime_source": "efm/ffprime divided by 2*pi into T*m/Wb convention",
+      "gradient_conversion_expression": "p_prime = -efm/pprime / (2*pi); ff_prime = -efm/ffprime / (2*pi)",
+      "gradient_convention": "DomainProfile gradients with respect to negated total poloidal flux",
+      "pprime_source": "-efm/pprime / (2*pi) into Pa/Wb",
+      "ffprime_source": "-efm/ffprime / (2*pi) into T*m/Wb convention",
       "seed_source": "efm/psirz multiplied by 2*pi into total Wb",
       "declared_axis_flux_wb": 0.33908170628553735,
       "declared_boundary_flux_wb": -0.2193531903351262,
@@ -160,8 +162,8 @@
       "entry_point": "ForwardProfile.solve",
       "route": "newton_krylov",
       "reference_seeded": true,
-      "newton_iteration_count": 2,
-      "map_evaluations_to_criterion": 28,
+      "newton_iteration_count": 5,
+      "map_evaluations_to_criterion": 70,
       "fixed_point_defect": 0.0,
       "separated_field_defect": {
         "grid_relative_sup": 0.0,
@@ -170,7 +172,7 @@
       "registered_criterion": 1e-08,
       "passes_registered_criterion": true,
       "residual_trace": [
-        0.8339391633963562,
+        0.07041714353013297,
         null,
         null,
         null,
@@ -183,8 +185,8 @@
         null,
         null,
         null,
-        0.1941888566316737,
-        0.1941888566316737,
+        0.09024469722225695,
+        0.09024469722225695,
         null,
         null,
         null,
@@ -197,8 +199,8 @@
         null,
         null,
         null,
-        2.1234394545207303e-16,
-        2.1234394545207303e-16,
+        0.43044444918308655,
+        0.43044444918308655,
         null,
         null,
         null,
@@ -211,8 +213,8 @@
         null,
         null,
         null,
-        0.0,
-        0.0,
+        1.0156469072904528,
+        1.0156469072904528,
         null,
         null,
         null,
@@ -225,8 +227,8 @@
         null,
         null,
         null,
-        0.0,
-        0.0,
+        1.0712665610045786,
+        1.0712665610045786,
         null,
         null,
         null,
@@ -239,8 +241,8 @@
         null,
         null,
         null,
-        0.0,
-        0.0,
+        1.1678916999864016e-15,
+        1.1678916999864016e-15,
         null,
         null,
         null,
@@ -398,12 +400,17 @@
     },
     "parity_verdict": "FAIL_VACUUM_BRANCH",
     "diagnosis": {
-      "classification": "WIRING",
-      "verdict": "WIRING: all 227 prescribed-anchor cells are admitted and the seed current magnitude is reference-scale, but its sign is reversed (-934020.099212 A against 934383.875000 A). The exact defect is the expressions p_prime = efm/pprime / (2*pi) and ff_prime = efm/ffprime / (2*pi) entering DomainProfile.current_density, whose toroidal_current_density = -2*pi*(R*p_prime + ff_prime/(mu_0*R)) expects gradients with respect to negated total flux. This prescribed-anchor COCOS sign defect is fixable in this plan.",
+      "classification": "RESIDUAL_BASIN_FINDING",
+      "verdict": "RESIDUAL_BASIN_FINDING: the corrected conversion admits the full declared support with the reference current sign and magnitude, but the standard trajectory first enters the vacuum branch after promotion 4. Two bounded trajectories are banked; no further retry is made.",
       "reference_plasma_current_a": 934383.875,
-      "seed_current_signed_ratio_to_reference": -0.9996106784394073,
-      "seed_current_magnitude_relative_error": -0.0003893215605926814,
-      "seed_current_sign_matches_reference": false,
+      "gradient_conversion_expression": "p_prime = -efm/pprime / (2*pi); ff_prime = -efm/ffprime / (2*pi)",
+      "gradient_convention": "DomainProfile gradients with respect to negated total poloidal flux",
+      "seed_current_signed_ratio_to_reference": 0.9996106784394073,
+      "seed_current_magnitude_relative_error": 0.0003893215605926814,
+      "seed_current_sign_matches_reference": true,
+      "seed_current_magnitude_tolerance_fraction": 0.001,
+      "seed_current_agrees_with_reference": true,
+      "full_declared_support_admitted": true,
       "support_and_normalization_expression": "psi_norm = (grid_flux - declared_axis_flux) / (declared_boundary_flux - declared_axis_flux); admitted = declared_support & (psi_norm >= 0) & (psi_norm <= 1)",
       "vacuum_branch_criterion_reused_from_banked_receipt": "absolute current below 1 percent of efm/plasma_current_c",
       "standard_trajectory": [
@@ -415,26 +422,52 @@
             0.0004057353032341258,
             0.998995511720867
           ],
-          "plasma_current_integral_a": -934020.0992115923,
+          "plasma_current_integral_a": 934020.0992115923,
           "axis_flux_wb": 0.00451771810248837
         },
         {
           "state": "after_promotion_1",
           "declared_support_cells": 227,
-          "admitted_support_cells": 0,
-          "psi_norm_range_over_admitted_support": null,
-          "plasma_current_integral_a": 0.0,
-          "axis_flux_wb": -0.018119527685364935
+          "admitted_support_cells": 219,
+          "psi_norm_range_over_admitted_support": [
+            0.002108640465425396,
+            0.9997558156088996
+          ],
+          "plasma_current_integral_a": 961234.886539128,
+          "axis_flux_wb": 0.0050734048790196705
         },
         {
           "state": "after_promotion_2",
           "declared_support_cells": 227,
+          "admitted_support_cells": 140,
+          "psi_norm_range_over_admitted_support": [
+            0.0020134410885255557,
+            0.998820985082169
+          ],
+          "plasma_current_integral_a": 744142.0027476284,
+          "axis_flux_wb": 0.5136615384791884
+        },
+        {
+          "state": "after_promotion_3",
+          "declared_support_cells": 227,
+          "admitted_support_cells": 128,
+          "psi_norm_range_over_admitted_support": [
+            0.02355700106929419,
+            0.9053981623286248
+          ],
+          "plasma_current_integral_a": 747845.1704780151,
+          "axis_flux_wb": 1.2306130924066436
+        },
+        {
+          "state": "after_promotion_4",
+          "declared_support_cells": 227,
           "admitted_support_cells": 0,
           "psi_norm_range_over_admitted_support": null,
           "plasma_current_integral_a": 0.0,
-          "axis_flux_wb": -0.04177331104929047
+          "axis_flux_wb": -2.427711733819135
         }
       ],
+      "bounded_attempt_count": 2,
       "damped_first_step_control": {
         "first_step_scale": 0.25,
         "trajectory": [
@@ -446,31 +479,144 @@
               0.0004057353032341258,
               0.998995511720867
             ],
-            "plasma_current_integral_a": -934020.0992115923,
+            "plasma_current_integral_a": 934020.0992115923,
             "axis_flux_wb": 0.00451771810248837
           },
           {
             "state": "after_damped_promotion_1",
             "declared_support_cells": 227,
-            "admitted_support_cells": 186,
+            "admitted_support_cells": 225,
             "psi_norm_range_over_admitted_support": [
-              0.44534192574105086,
-              0.9975132408304398
+              0.009987622527615196,
+              0.9987025851047583
             ],
-            "plasma_current_integral_a": -546604.7399714483,
-            "axis_flux_wb": -0.0012606986886626419
+            "plasma_current_integral_a": 939129.431946361,
+            "axis_flux_wb": 0.004651591711505292
           },
           {
             "state": "after_promotion_2",
             "declared_support_cells": 227,
-            "admitted_support_cells": 0,
-            "psi_norm_range_over_admitted_support": null,
-            "plasma_current_integral_a": 0.0,
-            "axis_flux_wb": -0.01768753576038565
+            "admitted_support_cells": 221,
+            "psi_norm_range_over_admitted_support": [
+              3.218893574410863e-05,
+              0.9943787885973907
+            ],
+            "plasma_current_integral_a": 1020145.0950161011,
+            "axis_flux_wb": 0.008426316211273866
+          },
+          {
+            "state": "after_promotion_3",
+            "declared_support_cells": 227,
+            "admitted_support_cells": 215,
+            "psi_norm_range_over_admitted_support": [
+              0.0016705098090569735,
+              0.9990344715275455
+            ],
+            "plasma_current_integral_a": 1013324.2417155255,
+            "axis_flux_wb": 0.35284015192777585
+          },
+          {
+            "state": "after_promotion_4",
+            "declared_support_cells": 227,
+            "admitted_support_cells": 222,
+            "psi_norm_range_over_admitted_support": [
+              0.006101393902976558,
+              0.9831720159938718
+            ],
+            "plasma_current_integral_a": 1016963.1029831858,
+            "axis_flux_wb": 0.006148502508328374
+          },
+          {
+            "state": "after_promotion_5",
+            "declared_support_cells": 227,
+            "admitted_support_cells": 212,
+            "psi_norm_range_over_admitted_support": [
+              0.0004657190468424859,
+              0.9988335052528958
+            ],
+            "plasma_current_integral_a": 1029102.147962888,
+            "axis_flux_wb": 0.3667417018159099
+          },
+          {
+            "state": "after_promotion_6",
+            "declared_support_cells": 227,
+            "admitted_support_cells": 221,
+            "psi_norm_range_over_admitted_support": [
+              0.0007318658916000225,
+              0.9812703249476703
+            ],
+            "plasma_current_integral_a": 1039416.4140129462,
+            "axis_flux_wb": 0.0071423869167096575
+          },
+          {
+            "state": "after_promotion_7",
+            "declared_support_cells": 227,
+            "admitted_support_cells": 217,
+            "psi_norm_range_over_admitted_support": [
+              0.007896605871972846,
+              0.9998822027366885
+            ],
+            "plasma_current_integral_a": 1033321.3854974415,
+            "axis_flux_wb": 0.37273295476221296
+          },
+          {
+            "state": "after_promotion_8",
+            "declared_support_cells": 227,
+            "admitted_support_cells": 220,
+            "psi_norm_range_over_admitted_support": [
+              0.013099233275108497,
+              0.9993776599470154
+            ],
+            "plasma_current_integral_a": 1010057.0330980334,
+            "axis_flux_wb": 0.010906689823526059
+          },
+          {
+            "state": "after_promotion_9",
+            "declared_support_cells": 227,
+            "admitted_support_cells": 218,
+            "psi_norm_range_over_admitted_support": [
+              0.005804131735026195,
+              0.9996968080311887
+            ],
+            "plasma_current_integral_a": 997554.7597473189,
+            "axis_flux_wb": 0.3490841654797701
+          },
+          {
+            "state": "after_promotion_10",
+            "declared_support_cells": 227,
+            "admitted_support_cells": 222,
+            "psi_norm_range_over_admitted_support": [
+              0.007012846570072465,
+              0.9821801405092467
+            ],
+            "plasma_current_integral_a": 995148.4922189909,
+            "axis_flux_wb": 0.003544695219701497
+          },
+          {
+            "state": "after_promotion_11",
+            "declared_support_cells": 227,
+            "admitted_support_cells": 207,
+            "psi_norm_range_over_admitted_support": [
+              0.008268592426005868,
+              0.9975220121428101
+            ],
+            "plasma_current_integral_a": 1025229.3603170034,
+            "axis_flux_wb": 0.3828794470941594
+          },
+          {
+            "state": "after_promotion_12",
+            "declared_support_cells": 227,
+            "admitted_support_cells": 212,
+            "psi_norm_range_over_admitted_support": [
+              0.003344602021276291,
+              0.9923095729862638
+            ],
+            "plasma_current_integral_a": 1004189.8019284031,
+            "axis_flux_wb": 0.012979488808702762
           }
         ],
-        "keeps_plasma_root_through_two_promotions": false,
-        "verdict": "The quarter first step retains prescribed support through the first promotion but the next full promotion still collapses to vacuum."
+      "keeps_plasma_root_through_bounded_promotions": true,
+        "verdict": "The quarter-first-step trajectory retains the plasma branch through the bounded promotion budget."
       }
     }
   },
@@ -598,8 +744,10 @@
       ],
       "target_cocos": 17,
       "profile_base": "efm/psi_norm, 65 uniform points from 0 to 1",
-      "pprime_source": "efm/pprime divided by 2*pi into Pa/Wb",
-      "ffprime_source": "efm/ffprime divided by 2*pi into T*m/Wb convention",
+      "gradient_conversion_expression": "p_prime = -efm/pprime / (2*pi); ff_prime = -efm/ffprime / (2*pi)",
+      "gradient_convention": "DomainProfile gradients with respect to negated total poloidal flux",
+      "pprime_source": "-efm/pprime / (2*pi) into Pa/Wb",
+      "ffprime_source": "-efm/ffprime / (2*pi) into T*m/Wb convention",
       "seed_source": "efm/psirz multiplied by 2*pi into total Wb",
       "declared_axis_flux_wb": 0.33908170628553735,
       "declared_boundary_flux_wb": -0.2193531903351262,
@@ -610,8 +758,8 @@
       "entry_point": "ForwardProfile.solve",
       "route": "newton_krylov",
       "reference_seeded": true,
-      "newton_iteration_count": 2,
-      "map_evaluations_to_criterion": 28,
+      "newton_iteration_count": 9,
+      "map_evaluations_to_criterion": 126,
       "fixed_point_defect": 0.0,
       "separated_field_defect": {
         "grid_relative_sup": 0.0,
@@ -620,7 +768,7 @@
       "registered_criterion": 1e-08,
       "passes_registered_criterion": true,
       "residual_trace": [
-        0.8346414872358345,
+        0.07231633420061453,
         null,
         null,
         null,
@@ -633,8 +781,8 @@
         null,
         null,
         null,
-        0.19561495645344468,
-        0.19561495645344468,
+        0.11347237948236259,
+        0.11347237948236259,
         null,
         null,
         null,
@@ -647,8 +795,8 @@
         null,
         null,
         null,
-        1.060265514647535e-16,
-        1.060265514647535e-16,
+        0.23282096800721924,
+        0.23282096800721924,
         null,
         null,
         null,
@@ -661,8 +809,8 @@
         null,
         null,
         null,
-        0.0,
-        0.0,
+        0.3921878859835749,
+        0.3921878859835749,
         null,
         null,
         null,
@@ -675,8 +823,8 @@
         null,
         null,
         null,
-        0.0,
-        0.0,
+        0.41586917399893597,
+        0.41586917399893597,
         null,
         null,
         null,
@@ -689,8 +837,8 @@
         null,
         null,
         null,
-        0.0,
-        0.0,
+        0.3886929494070411,
+        0.3886929494070411,
         null,
         null,
         null,
@@ -703,8 +851,8 @@
         null,
         null,
         null,
-        0.0,
-        0.0,
+        0.661966497232743,
+        0.661966497232743,
         null,
         null,
         null,
@@ -717,8 +865,8 @@
         null,
         null,
         null,
-        0.0,
-        0.0,
+        1.727191047969279,
+        1.727191047969279,
         null,
         null,
         null,
@@ -731,8 +879,8 @@
         null,
         null,
         null,
-        0.0,
-        0.0,
+        0.10931803931874234,
+        0.10931803931874234,
         null,
         null,
         null,
@@ -745,8 +893,8 @@
         null,
         null,
         null,
-        0.0,
-        0.0,
+        1.5903982719713026e-16,
+        1.5903982719713026e-16,
         null,
         null,
         null,

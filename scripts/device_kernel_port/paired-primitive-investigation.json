@@ -1,0 +1,40 @@
+{
+  "status": "blocked",
+  "source_column": 184,
+  "oracle": {
+    "artifact": "arbitrary-precision-oracle.json",
+    "decimal_digits": 100,
+    "terminal_nodes": 1024,
+    "required_max_relative_deviation": 0.0000804
+  },
+  "single_target_smoke": {
+    "production_numpy_relative_deviation": 0.00006454322160180172,
+    "packed_numpy_relative_deviation": 0.00007248638877936673,
+    "traced_jax_relative_deviation": 0.0000708822665300398,
+    "verdict": "all three lanes are below the oracle ceiling"
+  },
+  "full_column": {
+    "paired_contractions_only": {
+      "max_relative_deviation": 0.0033254222996408895,
+      "source_self_relative_deviation": 0.00008309298395725553
+    },
+    "paired_moments_and_residual_accumulation": {
+      "max_absolute_deviation": 2.1943132523783075e-09,
+      "max_relative_deviation": 0.0032008753935073024,
+      "median_absolute_deviation": 4.314613990919779e-10,
+      "source_self_relative_deviation": 0.00001794225425440622,
+      "worst_target_index": 525
+    },
+    "verdict": "the source self target passes, but the far-target maximum misses the full-column ceiling by 39.81 times"
+  },
+  "mechanism": {
+    "repaired": "paired-fp64 products and sums now retain residues through root and pole moment descent, primitive contractions, endpoint differencing, residual quadrature accumulation and closed-contour accumulation",
+    "remaining": "range-function bulk and end coefficients are still assembled as scalar fp64 before the paired contractions receive them, discarding the low parts that the far-target contour needs"
+  },
+  "rejected_placement": {
+    "method": "paired difference-of-products for the edge plane offset alone",
+    "observed_max_relative_deviation": 0.0034408635326742044,
+    "verdict": "worse than the unchanged plane-offset construction"
+  },
+  "next_required_change": "carry paired coefficients through range_function product, total, scale, harmonic conversion and denominator factorisation, then feed those pairs directly into the existing paired moment contractions"
+}

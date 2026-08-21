@@ -35,7 +35,20 @@ from __future__ import annotations
 
 import numpy as np
 
-from nova.biot.elliptic import harmonic_pole_moments, harmonic_root_moments
+from nova.biot.elliptic import (
+    harmonic_pole_moments,
+    harmonic_pole_moments_paired,
+    harmonic_root_moments,
+    harmonic_root_moments_paired,
+)
+from nova.biot.pairedfloat import add as paired_add
+from nova.biot.pairedfloat import contract as paired_contract
+from nova.biot.pairedfloat import contract_paired
+from nova.biot.pairedfloat import multiply as paired_multiply
+from nova.biot.pairedfloat import scale as paired_scale
+from nova.biot.pairedfloat import subtract as paired_subtract
+from nova.biot.pairedfloat import value as paired_value
+from nova.biot.pairedfloat import wrap as paired_wrap
 from nova.biot.rangefunction import (
     across_the_range,
     contract,
@@ -116,13 +129,34 @@ class Channel:
     reduction's numerators reach, which is what the pole family is built to.
     """
 
-    def __init__(self, moments, parameter, *, harmonics, cn_seed, sn_seed, xp=np):
+    def __init__(
+        self,
+        moments,
+        parameter,
+        *,
+        harmonics,
+        cn_seed,
+        sn_seed,
+        paired_moments=None,
+        paired_parameter=None,
+        paired_cn_seed=None,
+        paired_sn_seed=None,
+        xp=np,
+    ):
         self.xp = xp
         self.moments = moments
         self.root_moments = harmonic_root_moments(moments, parameter, xp=xp)
+        self.paired_moments = paired_moments
+        self.paired_root_moments = (
+            harmonic_root_moments_paired(paired_moments, paired_parameter)
+            if paired_moments is not None
+            else None
+        )
         self.harmonics = harmonics
         self._cn_seed = cn_seed
         self._sn_seed = sn_seed
+        self._paired_cn_seed = paired_cn_seed
+        self._paired_sn_seed = paired_sn_seed
 
     def poles(self, factors: tuple) -> tuple:
         """Return ``(seed_y, seed_x, family_y, family_x)`` for one factorisation.
@@ -150,7 +184,32 @@ class Channel:
     def split(self, denominator: tuple) -> tuple:
         """Return ``(factors, poles)`` for a denominator against this family alone."""
         factors = factorise(denominator, self.xp)
-        return (factors, self.poles(factors))
+        paired_poles = None
+        if self.paired_moments is not None:
+            shift_y = paired_wrap(factors[3])
+            shift_x = paired_wrap(factors[4])
+            seed_y = self._paired_cn_seed(shift_y)
+            seed_x = self._paired_sn_seed(shift_x)
+            paired_poles = (
+                shift_y,
+                shift_x,
+                seed_y,
+                seed_x,
+                self._family_paired(shift_y, seed_y, False),
+                self._family_paired(shift_x, seed_x, True),
+            )
+        return factors, self.poles(factors), paired_poles
+
+    def _family_paired(self, shift, seed, mirrored: bool):
+        if self.xp is np and not np.any(shift[0] > POLE_SWITCH):
+            return None
+        return harmonic_pole_moments_paired(
+            shift,
+            seed,
+            self.paired_moments,
+            self.harmonics + 1,
+            mirrored=mirrored,
+        )
 
     def _family(self, shift, seed, mirrored: bool):
         """Return the pole family, or nothing where no root is far enough out.
@@ -176,9 +235,21 @@ class Channel:
         """Return ``integral term/Delta da`` over the range."""
         return contract(across_the_range(term), self.moments)
 
+    def plain_paired(self, term: tuple):
+        """Return the same contraction with retained fp64 residues."""
+        if self.paired_moments is None:
+            return paired_contract(across_the_range(term), self.moments)
+        return contract_paired(across_the_range(term), self.paired_moments)
+
     def against_root(self, term: tuple):
         """Return ``integral term Delta da`` over the range."""
         return contract(across_the_range(term), self.root_moments)
+
+    def against_root_paired(self, term: tuple):
+        """Return the radical contraction with retained fp64 residues."""
+        if self.paired_root_moments is None:
+            return paired_contract(across_the_range(term), self.root_moments)
+        return contract_paired(across_the_range(term), self.paired_root_moments)
 
     def _pole(self, numerator: tuple, shift, seed, family, mirrored: bool):
         """Return ``integral numerator/((v + shift) Delta) da`` past one end.
@@ -225,6 +296,55 @@ class Channel:
             contract(across_the_range(numerator), family),
         )
 
+    def _pole_paired(self, numerator: tuple, shift, seed, family, mirrored: bool):
+        """Evaluate one pole contraction while retaining its arithmetic residues."""
+        bulk, near, far = numerator
+        end, other = (far, near) if mirrored else (near, far)
+        shift_value = paired_value(shift)
+        one_plus_shift = paired_add(paired_wrap(1.0), shift)
+        root = (1.0 if mirrored else -1.0) * (1.0 + 2.0 * shift_value)
+        quotient, remainder = deflate(bulk, root) if bulk else ([], 0.0)
+        held = paired_add(
+            paired_add(
+                paired_multiply(
+                    paired_subtract(
+                        paired_multiply(paired_wrap(end), one_plus_shift),
+                        paired_multiply(paired_wrap(other), shift),
+                    ),
+                    seed,
+                ),
+                paired_multiply(
+                    paired_subtract(paired_wrap(other), paired_wrap(end)),
+                    self.paired_moments[0],
+                ),
+            ),
+            contract_paired(
+                harmonic_multiply([0.5 + shift_value, 0.5 if mirrored else -0.5], bulk),
+                self.paired_moments,
+            ),
+        )
+        deflated = paired_add(
+            paired_multiply(paired_wrap(remainder), seed),
+            paired_scale(
+                contract_paired(quotient, self.paired_moments),
+                -2.0 if mirrored else 2.0,
+            ),
+        )
+        held = paired_subtract(
+            held,
+            paired_multiply(
+                paired_multiply(shift, one_plus_shift),
+                deflated,
+            ),
+        )
+        if family is None:
+            return held
+        direct = contract_paired(across_the_range(numerator), family)
+        return tuple(
+            self.xp.where(shift_value <= POLE_SWITCH, near_value, far_value)
+            for near_value, far_value in zip(held, direct, strict=True)
+        )
+
     def across(self, numerator: tuple, split: tuple):
         """Return ``integral numerator/(denominator Delta) da``.
 
@@ -241,4 +361,48 @@ class Channel:
             weight_plain * self.plain(numerator)
             + weight_y * self._pole(numerator, shift_y, seed_y, family_y, False)
             + weight_x * self._pole(numerator, shift_x, seed_x, family_x, True)
+        )
+
+    def across_paired(self, numerator: tuple, split: tuple):
+        """Return the denominator contraction with retained fp64 residues."""
+        (weight_y, weight_x, weight_plain, shift_y, shift_x) = split[0]
+        if split[2] is None:
+            seed_y, seed_x, family_y, family_x = split[1]
+            paired_shift_y = paired_wrap(shift_y)
+            paired_shift_x = paired_wrap(shift_x)
+            paired_seed_y = paired_wrap(seed_y)
+            paired_seed_x = paired_wrap(seed_x)
+        else:
+            (
+                paired_shift_y,
+                paired_shift_x,
+                paired_seed_y,
+                paired_seed_x,
+                family_y,
+                family_x,
+            ) = split[2]
+        return paired_add(
+            paired_add(
+                paired_scale(self.plain_paired(numerator), weight_plain),
+                paired_scale(
+                    self._pole_paired(
+                        numerator,
+                        paired_shift_y,
+                        paired_seed_y,
+                        family_y,
+                        False,
+                    ),
+                    weight_y,
+                ),
+            ),
+            paired_scale(
+                self._pole_paired(
+                    numerator,
+                    paired_shift_x,
+                    paired_seed_x,
+                    family_x,
+                    True,
+                ),
+                weight_x,
+            ),
         )

@@ -62,7 +62,22 @@ from __future__ import annotations
 
 import numpy as np
 
-__all__ = ["TRIPS", "complete_kind", "complete_pole"]
+from nova.biot.pairedfloat import add as paired_add
+from nova.biot.pairedfloat import divide as paired_divide
+from nova.biot.pairedfloat import multiply as paired_multiply
+from nova.biot.pairedfloat import scale as paired_scale
+from nova.biot.pairedfloat import square_root as paired_square_root
+from nova.biot.pairedfloat import value as paired_value
+from nova.biot.pairedfloat import where as paired_where
+from nova.biot.pairedfloat import wrap as paired_wrap
+
+__all__ = [
+    "TRIPS",
+    "complete_kind",
+    "complete_kind_paired",
+    "complete_pole",
+    "complete_pole_paired",
+]
 
 # Trips of the descent.  Each one takes the geometric mean of the running modulus
 # pair, so the number of correct digits DOUBLES per trip once the two are of the
@@ -132,6 +147,46 @@ def _accumulate(radicals, arithmetic, pole, cosine_weight, sine_weight, xp):
     )
 
 
+def _descent_paired(complement, xp, trips: int = TRIPS):
+    reachable = paired_value(complement) > 0.0
+    held = paired_where(reachable, complement, paired_wrap(1.0), xp)
+    modulus = paired_square_root(held, xp)
+    radical = modulus
+    arithmetic = paired_wrap(xp.ones_like(modulus[0]))
+    radicals = []
+    for _ in range(trips):
+        radicals.append(radical)
+        arithmetic = paired_add(arithmetic, modulus)
+        modulus = paired_scale(paired_square_root(radical, xp), 2.0)
+        radical = paired_multiply(modulus, arithmetic)
+    return radicals, arithmetic
+
+
+def _accumulate_paired(radicals, arithmetic, pole, cosine_weight, sine_weight, xp):
+    pole_root = paired_square_root(pole, xp)
+    cosine_part = paired_wrap(cosine_weight + xp.zeros_like(arithmetic[0]))
+    sine_pair = (
+        sine_weight
+        if isinstance(sine_weight, tuple)
+        else paired_wrap(sine_weight + xp.zeros_like(arithmetic[0]))
+    )
+    sine_part = paired_divide(sine_pair, pole_root)
+    for radical in radicals:
+        previous = cosine_part
+        cosine_part = paired_add(cosine_part, paired_divide(sine_part, pole_root))
+        gain = paired_divide(radical, pole_root)
+        sine_part = paired_scale(
+            paired_add(sine_part, paired_multiply(previous, gain)), 2.0
+        )
+        pole_root = paired_add(pole_root, gain)
+    numerator = paired_scale(
+        paired_add(sine_part, paired_multiply(cosine_part, arithmetic)),
+        _HALF_PI,
+    )
+    denominator = paired_multiply(arithmetic, paired_add(arithmetic, pole_root))
+    return paired_divide(numerator, denominator)
+
+
 def _finite_part(pole, cosine_weight, sine_weight, xp):
     """Return ``cel`` less its divergence, for a modulus complement of zero.
 
@@ -197,6 +252,20 @@ def complete_kind(complement, *, xp=np, trips: int = TRIPS):
     )
 
 
+def complete_kind_paired(complement, *, xp=np, trips: int = TRIPS):
+    """Return paired first- and second-kind values from a paired complement."""
+    reachable = paired_value(complement) > 0.0
+    held = paired_where(reachable, complement, paired_wrap(1.0), xp)
+    radicals, arithmetic = _descent_paired(held, xp, trips)
+    one = paired_wrap(xp.ones_like(arithmetic[0]))
+    first = _accumulate_paired(radicals, arithmetic, one, 1.0, 1.0, xp)
+    second = _accumulate_paired(radicals, arithmetic, one, 1.0, held, xp)
+    return (
+        paired_where(reachable, first, paired_wrap(0.0 * arithmetic[0]), xp),
+        paired_where(reachable, second, paired_wrap(xp.ones_like(arithmetic[0])), xp),
+    )
+
+
 def complete_pole(pole, complement, *, xp=np, trips: int = TRIPS):
     """Return ``integral_0^(pi/2) da/((cos^2 a + p sin^2 a) sqrt(1 - k^2 sin^2 a))``.
 
@@ -225,3 +294,16 @@ def complete_pole(pole, complement, *, xp=np, trips: int = TRIPS):
         _finite_part(held_pole, 1.0, 1.0, xp),
     )
     return xp.where(live, value, 0.0)
+
+
+def complete_pole_paired(pole, complement, *, xp=np, trips: int = TRIPS):
+    """Return the complete pole integral with paired descent arithmetic."""
+    live = paired_value(pole) > 0.0
+    held_pole = paired_where(live, pole, paired_wrap(1.0), xp)
+    reachable = paired_value(complement) > 0.0
+    held_complement = paired_where(reachable, complement, paired_wrap(1.0), xp)
+    radicals, arithmetic = _descent_paired(held_complement, xp, trips)
+    evaluated = _accumulate_paired(radicals, arithmetic, held_pole, 1.0, 1.0, xp)
+    finite = paired_wrap(_finite_part(paired_value(held_pole), 1.0, 1.0, xp))
+    value = paired_where(reachable, evaluated, finite, xp)
+    return paired_where(live, value, paired_wrap(0.0 * value[0]), xp)

@@ -147,12 +147,21 @@ import numpy as np
 from nova.biot.elliptic import (
     POLE_HEADROOM,
     cn_pole_moment,
+    cn_pole_moment_paired,
     harmonic_moments,
+    harmonic_moments_paired,
     sn_pole_moment,
+    sn_pole_moment_paired,
 )
 from nova.biot.gradedresidual import QUARTER, graded_residual
-from nova.biot.greens import traced_filament_greens
 from nova.biot.momentchannel import Channel
+from nova.biot.pairedfloat import add as paired_add
+from nova.biot.pairedfloat import divide as paired_divide
+from nova.biot.pairedfloat import multiply as paired_multiply
+from nova.biot.pairedfloat import scale as paired_scale
+from nova.biot.pairedfloat import subtract as paired_subtract
+from nova.biot.pairedfloat import value as paired_value
+from nova.biot.pairedfloat import wrap as paired_wrap
 from nova.biot.polygon import _held_edge, _packed_topology, pack_section
 from nova.biot.rangefunction import (
     across_the_range,
@@ -186,15 +195,6 @@ _HARMONICS = 9
 # being the most slender section's near-contour targets.
 _NODES = 128
 
-# A contour sum loses useful digits when a section is tiny compared with its
-# major radius: the per-edge antiderivatives retain the major-radius scale while
-# their closed sum is proportional to the section area.  Outside the finite
-# section's near field, the area-normalised limit is the centroid filament.  The
-# fixed ratios keep this decision geometric and identical in every array
-# namespace; the exact finite-section contour remains authoritative nearby.
-_SMALL_SECTION_RATIO = 1.0e-4
-_FAR_SECTION_RADII = 256.0
-
 # Both panels span one end of the quarter range to the other: over a full turn every
 # amplitude is the same right angle, so neither panel stops short of its own end.
 _PANEL = (0.0, QUARTER)
@@ -204,60 +204,6 @@ _PANEL = (0.0, QUARTER)
 # built once out of scalars rather than once per column.
 _RING_SLOPE_OVER_RADIUS_SQUARED = range_function([], -4.0, 4.0)
 _VARIABLE = range_function([], -1.0, 1.0)
-
-
-def _conditioned_uniform_section(
-    xp,
-    target_r,
-    target_z,
-    edge,
-    weight,
-    direct,
-):
-    """Use the uniform-section limit where contour cancellation is ill-scaled."""
-    signed = xp.asarray(target_r)
-    radius = xp.abs(signed)
-    height = xp.asarray(target_z) + xp.zeros_like(signed)
-    present = ~xp.signbit(weight)
-
-    # Translate before forming shoelace products.  Each packed row carries both
-    # endpoints, so padding does not need a topology-dependent roll here.
-    origin_r = edge[0][0]
-    origin_z = edge[0][1]
-    start_r = edge[:, 0] - origin_r
-    start_z = edge[:, 1] - origin_z
-    end_r = edge[:, 2] - origin_r
-    end_z = edge[:, 3] - origin_z
-    cross = xp.where(present, start_r * end_z - end_r * start_z, 0.0)
-    signed_twice_area = xp.sum(cross, axis=0)
-    valid = signed_twice_area != 0.0
-    held_area = xp.where(valid, signed_twice_area, 1.0)
-    centre_r = origin_r + xp.sum((start_r + end_r) * cross, axis=0) / (3.0 * held_area)
-    centre_z = origin_z + xp.sum((start_z + end_z) * cross, axis=0) / (3.0 * held_area)
-    vertex_distance = xp.sqrt(
-        (edge[:, 0] - centre_r) ** 2 + (edge[:, 1] - centre_z) ** 2
-    )
-    section_radius = xp.max(xp.where(present, vertex_distance, 0.0), axis=0)
-    coordinate_scale = xp.maximum(xp.abs(centre_r), 1.0)
-    small = section_radius <= _SMALL_SECTION_RATIO * coordinate_scale
-    standoff = xp.sqrt((radius - centre_r) ** 2 + (height - centre_z) ** 2)
-    far = (
-        valid
-        & small
-        & (section_radius > 0.0)
-        & (standoff >= _FAR_SECTION_RADII * section_radius)
-    )
-
-    # Both branches trace.  Held geometry keeps the unused filament branch away
-    # from its physical singularity, including under forward differentiation.
-    held_source_r = xp.where(far, centre_r, radius + coordinate_scale)
-    held_source_z = xp.where(far, centre_z, height + coordinate_scale)
-    filament = traced_filament_greens(xp, radius, height, held_source_r, held_source_z)
-    filament = (filament[0], xp.sign(signed) * filament[1], filament[2])
-    return tuple(
-        xp.where(far, limiting, finite)
-        for limiting, finite in zip(filament, direct, strict=True)
-    )
 
 
 def _oscillatory_primitive(weight: list) -> list:
@@ -298,7 +244,9 @@ class _Vertex:
     and so cancels around an unbroken chain of edges, and there it is not formed.
     """
 
-    def __init__(self, r, z, corner_r, corner_z, nodes, *, residual: bool, xp=np):
+    def __init__(
+        self, r, z, corner_r, corner_z, nodes, *, residual: bool, paired=False, xp=np
+    ):
         self.xp = xp
         r = xp.asarray(r)
         z = xp.asarray(z)
@@ -335,6 +283,31 @@ class _Vertex:
         # given it.
         self.parameter = parameter
         self.parameter_complement = complement = (u * u + offset**2) / a2
+        paired_parameter = None
+        paired_complement = None
+        paired_moments = None
+        if paired:
+            paired_a2 = paired_add(
+                paired_multiply(paired_wrap(u), paired_wrap(u)),
+                paired_multiply(paired_wrap(radius_sum), paired_wrap(radius_sum)),
+            )
+            paired_parameter = paired_divide(
+                paired_scale(paired_multiply(paired_wrap(r), paired_wrap(rp)), 4.0),
+                paired_a2,
+            )
+            paired_complement = paired_divide(
+                paired_add(
+                    paired_multiply(paired_wrap(u), paired_wrap(u)),
+                    paired_multiply(paired_wrap(offset), paired_wrap(offset)),
+                ),
+                paired_a2,
+            )
+            paired_moments = harmonic_moments_paired(
+                paired_parameter,
+                _HARMONICS + POLE_HEADROOM + 2,
+                complement=paired_complement,
+                xp=xp,
+            )
         one = xp.ones_like(parameter)
         self.one = one
 
@@ -351,6 +324,26 @@ class _Vertex:
             ),
             sn_seed=lambda shift: sn_pole_moment(
                 shift, parameter, parameter_complement=complement, xp=xp
+            ),
+            paired_moments=paired_moments,
+            paired_parameter=paired_parameter,
+            paired_cn_seed=(
+                lambda shift: (
+                    cn_pole_moment_paired(
+                        shift, parameter_complement=paired_complement, xp=xp
+                    )
+                    if paired
+                    else None
+                )
+            ),
+            paired_sn_seed=(
+                lambda shift: (
+                    sn_pole_moment_paired(
+                        shift, parameter_complement=paired_complement, xp=xp
+                    )
+                    if paired
+                    else None
+                )
             ),
             xp=xp,
         )
@@ -385,13 +378,25 @@ class _Vertex:
         """Return ``integral term/Delta da`` over the quarter range."""
         return self.channel.plain(term)
 
+    def plain_paired(self, term: tuple):
+        """Return the same contraction with retained fp64 residues."""
+        return self.channel.plain_paired(term)
+
     def against_root(self, term: tuple):
         """Return ``integral term Delta da`` over the quarter range."""
         return self.channel.against_root(term)
 
+    def against_root_paired(self, term: tuple):
+        """Return the radical contraction with retained fp64 residues."""
+        return self.channel.against_root_paired(term)
+
     def across(self, numerator: tuple, split: tuple):
         """Return ``integral numerator/(denominator Delta) da``."""
         return self.channel.across(numerator, split)
+
+    def across_paired(self, numerator: tuple, split: tuple):
+        """Return the denominator contraction with retained fp64 residues."""
+        return self.channel.across_paired(numerator, split)
 
     def _first_residual(self, nodes: int):
         """Evaluate the ``arsinh beta1`` integral, over the ring denominator.
@@ -614,7 +619,7 @@ class _Edge:
             [], -4.0 * r1 - 4.0 * b1 * b1 * r, -4.0 * r1 + 4.0 * b1 * b1 * r
         )
 
-    def _second_residual(self, vertex: _Vertex):
+    def _second_residual(self, vertex: _Vertex, *, paired: bool = False):
         """Evaluate the ``arsinh beta2`` integral, over the plane denominator.
 
         Its boundary layers are set by the target's offset from the edge's extended
@@ -678,9 +683,10 @@ class _Edge:
             pieces,
             self.nodes,
             xp,
+            paired=paired,
         )
 
-    def terms(self, vertex: _Vertex):
+    def terms(self, vertex: _Vertex, *, paired: bool = False):
         """Return ``(W_psi, W_r, W_z)``, this edge's integrands at one limit.
 
         Each is ``4 integral_0^(pi/2) da`` of one of the paper's edge integrands,
@@ -699,7 +705,7 @@ class _Edge:
         r1 = self.plane_radius_value
         # the plane denominator is the edge's, its split this corner's modulus
         plane = vertex.split(self.plane_squared)
-        plane_residual = self._second_residual(vertex)
+        plane_residual = self._second_residual(vertex, paired=paired)
         gamma = range_function([], u + b1 * vertex.offset, u + b1 * vertex.radius_sum)
         # N = u X - b1 G^2.  Its value at either end collapses onto u times the
         # plane radius there, because r' - b1 u is r1 exactly -- which is what makes
@@ -815,6 +821,138 @@ class _Edge:
                 - r * vertex.across(product(weight, over_ring), vertex.ring)
                 - vertex.across(product(weight, over_plane), plane)
             )
+
+        if paired:
+
+            def against_second_arsinh_paired(build):
+                weight = across_the_range(build()) + [0.0 * one] * 4
+                mean = weight[0]
+                core = sine_squared_times(
+                    [
+                        0.5 * weight[1] + weight[3] / 6.0,
+                        0.5 * weight[2],
+                        weight[3] / 3.0,
+                    ]
+                )
+                return paired_add(
+                    paired_add(
+                        paired_multiply(paired_wrap(mean), plane_residual),
+                        paired_scale(
+                            vertex.plain_paired(core),
+                            2.0 * b1 * r / (a0 * a),
+                        ),
+                    ),
+                    paired_scale(
+                        vertex.across_paired(product(core, plane_derivative), plane),
+                        0.5 / (a0 * a),
+                    ),
+                )
+
+            def against_arctan_paired(weighting):
+                primitive = [0.0] + [
+                    coefficient / (order + 1.0)
+                    for order, coefficient in enumerate(weighting)
+                ]
+                upper = sum(primitive)
+                lower = sum(
+                    coefficient * (-1.0) ** order
+                    for order, coefficient in enumerate(primitive)
+                )
+                boundary = -0.5 * (lower * at_half - upper * at_zero)
+                weight = range_function([], 0.0, 0.0)
+                for coefficient in reversed(primitive):
+                    weight = total(
+                        product(weight, _VARIABLE),
+                        range_function([], coefficient, coefficient),
+                    )
+                interior = paired_subtract(
+                    paired_subtract(
+                        paired_scale(
+                            vertex.plain_paired(
+                                product(weight, arctan_slope_over_radius)
+                            ),
+                            2.0,
+                        ),
+                        paired_scale(
+                            vertex.across_paired(
+                                product(weight, over_ring), vertex.ring
+                            ),
+                            r,
+                        ),
+                    ),
+                    vertex.across_paired(product(weight, over_plane), plane),
+                )
+                return paired_add(
+                    paired_wrap(boundary), paired_scale(interior, 0.25 / a)
+                )
+
+            flux_second = against_second_arsinh_paired(
+                lambda: scaled(
+                    product(
+                        vertex.cosine,
+                        total(
+                            self.plane_squared,
+                            scaled(
+                                product(vertex.cosine, self.plane_radius),
+                                2.0 * a02 * r,
+                            ),
+                        ),
+                    ),
+                    0.5 / (a02 * a0),
+                )
+            )
+            flux_arctangent = against_arctan_paired([0.0 * one, 0.0 * one, one])
+            flux = paired_subtract(
+                paired_add(
+                    paired_scale(
+                        vertex.against_root_paired(product(vertex.cosine, gamma)),
+                        2.0 * a / a02,
+                    ),
+                    paired_scale(flux_second, 4.0),
+                ),
+                paired_multiply(
+                    paired_multiply(paired_wrap(4.0), paired_wrap(r * r)),
+                    flux_arctangent,
+                ),
+            )
+
+            radial_second = against_second_arsinh_paired(
+                lambda: scaled(
+                    product(
+                        vertex.cosine,
+                        total(
+                            range_function([], r1 * one, r1 * one),
+                            scaled(vertex.cosine, b1 * b1 * r),
+                        ),
+                    ),
+                    -b1 / (a02 * a0),
+                )
+            )
+            radial = paired_add(
+                paired_scale(vertex.against_root_paired(vertex.cosine), 4.0 * a / a02),
+                paired_scale(radial_second, 4.0),
+            )
+
+            vertical_second = against_second_arsinh_paired(
+                lambda: scaled(
+                    total(
+                        range_function([], b1 * b1 * r1 * one, b1 * b1 * r1 * one),
+                        scaled(vertex.cosine, -(2.0 * a02 - 1.0) * r),
+                    ),
+                    1.0 / (a02 * a0),
+                )
+            )
+            vertical = paired_subtract(
+                paired_subtract(
+                    paired_scale(vertical_second, 4.0),
+                    paired_scale(against_arctan_paired([one]), 4.0 * r),
+                ),
+                paired_scale(
+                    paired_wrap(vertex.root_moments[0]),
+                    (4.0 * b1 / a02) * a,
+                ),
+            )
+            return flux, radial, vertical
 
         # the flux, eq 10b weighted by cos phi
         flux = (
@@ -1372,18 +1510,11 @@ def polygon_analytic_greens(
             )
             for row, values in zip(rows, computed, strict=True):
                 row[off_axis] = values
-        direct = tuple(row.reshape(shape) for row in rows)
-        return _conditioned_uniform_section(
-            np,
-            signed,
-            z.reshape(shape),
-            edges,
-            weights,
-            direct,
-        )
-    flux = np.zeros_like(r)
-    radial = np.zeros_like(r)
-    vertical = np.zeros_like(r)
+        return tuple(row.reshape(shape) for row in rows)
+    zero = np.zeros_like(r)
+    flux = paired_wrap(zero)
+    radial = paired_wrap(zero)
+    vertical = paired_wrap(zero)
     sides = len(edges)
     live = weights != 0.0
     # The signed number of live edges leaving each corner: +1 for the edge that
@@ -1404,7 +1535,13 @@ def polygon_analytic_greens(
     def corner_part(index: int, corner_r: float, corner_z: float) -> _Vertex:
         if index not in corners:
             corners[index] = _Vertex(
-                r, z, corner_r, corner_z, nodes, residual=bool(chain[index])
+                r,
+                z,
+                corner_r,
+                corner_z,
+                nodes,
+                residual=bool(chain[index]),
+                paired=True,
             )
         return corners[index]
 
@@ -1418,11 +1555,11 @@ def polygon_analytic_greens(
         # the antiderivative is of order the squared major radius where the flux is
         # not, so an edge's two limits are differenced against each other before
         # anything else is added to them
-        high = edge.terms(upper)
-        low = edge.terms(lower)
-        flux = flux - (high[0] - low[0])
-        radial = radial - (high[1] - low[1])
-        vertical = vertical - (high[2] - low[2])
+        high = edge.terms(upper, paired=True)
+        low = edge.terms(lower, paired=True)
+        flux = paired_add(flux, paired_subtract(low[0], high[0]))
+        radial = paired_add(radial, paired_subtract(low[1], high[1]))
+        vertical = paired_add(vertical, paired_subtract(low[2], high[2]))
         # this edge's own two corners, once each -- a one-sided section would name
         # the same one twice -- and each released if this was its later edge
         for corner in dict.fromkeys((index, (index + 1) % sides)):
@@ -1430,27 +1567,23 @@ def polygon_analytic_greens(
                 continue
             if chain[corner]:
                 one_flux, one_radial, one_vertical = corners[corner].arsinh_terms()
-                flux = flux + chain[corner] * one_flux
-                radial = radial + chain[corner] * one_radial
-                vertical = vertical + chain[corner] * one_vertical
+                flux = paired_add(flux, paired_wrap(chain[corner] * one_flux))
+                radial = paired_add(radial, paired_wrap(chain[corner] * one_radial))
+                vertical = paired_add(
+                    vertical, paired_wrap(chain[corner] * one_vertical)
+                )
             # nothing here holds the corner part by name, so dropping it from the
             # dictionary is what frees its moment stack
             del corners[corner]
     # the packed norm folds in the [0, pi] doubling the quarter range already has,
     # so psi keeps the 2 pi R of the total flux and the field does not
-    direct = (
-        (0.5 * norm * r * flux).reshape(shape),
+    return (
+        (0.5 * norm * r * paired_value(flux)).reshape(shape),
         # B_R is ODD in r, which is what makes it exactly zero on the axis
-        (norm / (4.0 * np.pi) * np.sign(signed).ravel() * radial).reshape(shape),
-        (norm / (4.0 * np.pi) * vertical).reshape(shape),
-    )
-    return _conditioned_uniform_section(
-        np,
-        signed,
-        height,
-        edges,
-        weights,
-        direct,
+        (norm / (4.0 * np.pi) * np.sign(signed).ravel() * paired_value(radial)).reshape(
+            shape
+        ),
+        (norm / (4.0 * np.pi) * paired_value(vertical)).reshape(shape),
     )
 
 
@@ -1959,6 +2092,7 @@ def packed_analytic_greens(
         corner_z.reshape(-1),
         nodes,
         residual=True,
+        paired=True,
         xp=xp,
     )
     part = _Edge(
@@ -1968,14 +2102,17 @@ def packed_analytic_greens(
         nodes,
         xp=xp,
     )
-    terms = tuple(value.reshape(endpoint_shape) for value in part.terms(vertex))
+    terms = tuple(
+        tuple(value.reshape(endpoint_shape) for value in pair)
+        for pair in part.terms(vertex, paired=True)
+    )
     residual = tuple(value.reshape(endpoint_shape) for value in vertex.arsinh_terms())
 
     def ordered_edge_sum(values):
-        """Match the host contour order without duplicating the moment graph."""
-        total = xp.zeros_like(values[0])
+        """Match the host contour order without discarding paired residues."""
+        total = paired_wrap(xp.zeros_like(values[0][0]))
         for index in range(sides):
-            total = total + values[index]
+            total = paired_add(total, (values[0][index], values[1][index]))
         return total
 
     rows = []
@@ -1984,13 +2121,22 @@ def packed_analytic_greens(
         # not, so each edge's two limits are differenced before the edge axis is
         # reduced.  Only the lower copy owns the corner residual; the two contour
         # passes retain the scalar host's accumulation order.
+        edge_total = paired_scale(
+            paired_subtract(
+                (edge_term[0][0], edge_term[1][0]),
+                (edge_term[0][1], edge_term[1][1]),
+            ),
+            weight,
+        )
+        corner_total = (chain * corner_term[0], xp.zeros_like(corner_term[0]))
         rows.append(
-            ordered_edge_sum(-weight * (edge_term[1] - edge_term[0]))
-            + ordered_edge_sum(chain * corner_term[0])
+            paired_value(
+                paired_add(ordered_edge_sum(edge_total), ordered_edge_sum(corner_total))
+            )
         )
     flux, radial, vertical = rows
     axis_vertical = _packed_axis_vertical_field(xp, height, edge, present, norm)
-    direct = (
+    return (
         xp.where(axis, 0.0, 0.5 * norm * radius * flux),
         # B_R is ODD in r, which is what makes it exactly zero on the axis
         xp.where(
@@ -1999,12 +2145,4 @@ def packed_analytic_greens(
             norm / (4.0 * np.pi) * xp.sign(signed) * radial,
         ),
         xp.where(axis, axis_vertical, norm / (4.0 * np.pi) * vertical),
-    )
-    return _conditioned_uniform_section(
-        xp,
-        signed,
-        height,
-        edge,
-        weight,
-        direct,
     )

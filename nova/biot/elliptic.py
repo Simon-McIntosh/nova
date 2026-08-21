@@ -48,22 +48,40 @@ from __future__ import annotations
 
 import numpy as np
 
-from nova.biot.completeelliptic import complete_kind, complete_pole
+from nova.biot.completeelliptic import (
+    complete_kind,
+    complete_kind_paired,
+    complete_pole,
+    complete_pole_paired,
+)
+from nova.biot.pairedfloat import add as paired_add
+from nova.biot.pairedfloat import divide as paired_divide
+from nova.biot.pairedfloat import multiply as paired_multiply
+from nova.biot.pairedfloat import scale as paired_scale
+from nova.biot.pairedfloat import subtract as paired_subtract
+from nova.biot.pairedfloat import value as paired_value
+from nova.biot.pairedfloat import where as paired_where
+from nova.biot.pairedfloat import wrap as paired_wrap
 
 __all__ = [
     "cn_pole_moment",
     "cn_pole_moments",
     "complete_pi",
     "harmonic_moments",
+    "harmonic_moments_paired",
     "harmonic_pole_moments",
+    "harmonic_pole_moments_paired",
     "harmonic_root_moments",
+    "harmonic_root_moments_paired",
     "pole_moment",
     "pole_moments",
     "sn_moments",
     "sn_cn_moments",
     "sn_pole_moment",
+    "sn_pole_moment_paired",
     "sn_pole_moments",
     "stable_cn_moments",
+    "cn_pole_moment_paired",
 ]
 
 # Below this the upward moment recursions divide by a small number once per
@@ -301,6 +319,69 @@ def harmonic_moments(
     ]
 
 
+def harmonic_moments_paired(parameter, count: int, *, complement, xp=np):
+    """Return the harmonic family with paired descent and recurrences."""
+    complete_k, complete_e = complete_kind_paired(complement, xp=xp)
+    degenerate = paired_value(parameter) > _HARMONIC_SWITCH
+    one = paired_wrap(xp.ones_like(parameter[0]))
+    zero = paired_wrap(xp.zeros_like(parameter[0]))
+    held = paired_where(degenerate, parameter, one, xp)
+    held_complement = paired_where(degenerate, complement, zero, xp)
+    upward = [
+        zero,
+        paired_divide(
+            paired_scale(
+                paired_subtract(
+                    complete_e, paired_multiply(held_complement, complete_k)
+                ),
+                2.0,
+            ),
+            held,
+        ),
+    ]
+    for order in range(1, count - 1):
+        numerator = paired_add(
+            paired_add(
+                paired_scale(
+                    paired_multiply(paired_add(one, held_complement), upward[order]),
+                    4.0 * order,
+                ),
+                paired_scale(paired_multiply(held, upward[order - 1]), 2 * order - 1),
+            ),
+            paired_scale(
+                paired_multiply(held_complement, complete_k),
+                (-1.0) ** order * 8.0 * order,
+            ),
+        )
+        upward.append(
+            paired_scale(paired_divide(numerator, held), -1.0 / (2 * order + 1))
+        )
+
+    ratio = zero
+    ratios = [None] * (count + _HARMONIC_HEADROOM + 1)
+    for order in range(count + _HARMONIC_HEADROOM, 0, -1):
+        numerator = paired_scale(parameter, -(2 * order - 1))
+        denominator = paired_add(
+            paired_scale(paired_multiply(parameter, ratio), 2 * order + 1),
+            paired_scale(paired_add(one, complement), 4.0 * order),
+        )
+        ratio = paired_divide(numerator, denominator)
+        if order <= count:
+            ratios[order] = ratio
+    downward = [complete_k]
+    for order in range(1, count):
+        downward.append(paired_multiply(downward[order - 1], ratios[order]))
+    return [
+        paired_where(
+            degenerate,
+            paired_add(upward[order], paired_scale(complete_k, (-1.0) ** order)),
+            downward[order],
+            xp,
+        )
+        for order in range(count)
+    ]
+
+
 def harmonic_pole_moments(
     shift: np.ndarray,
     seed: np.ndarray,
@@ -347,6 +428,41 @@ def harmonic_pole_moments(
     return values[:count]
 
 
+def harmonic_pole_moments_paired(
+    shift, seed, moments, count: int, *, mirrored: bool = False
+):
+    """Return the diagonally solved pole family as paired values."""
+    sign = -1.0 if mirrored else 1.0
+    diagonal = paired_scale(
+        paired_add(paired_wrap(2.0), paired_scale(shift, 4.0)), sign
+    )
+    top = count + POLE_HEADROOM
+    ratio = [paired_divide(paired_wrap(1.0), diagonal)]
+    solution = [
+        paired_divide(
+            paired_subtract(paired_scale(moments[1], 4.0 * sign), seed),
+            diagonal,
+        )
+    ]
+    for order in range(2, top + 1):
+        pivot = paired_subtract(diagonal, ratio[-1])
+        ratio.append(paired_divide(paired_wrap(1.0), pivot))
+        solution.append(
+            paired_divide(
+                paired_subtract(paired_scale(moments[order], 4.0 * sign), solution[-1]),
+                pivot,
+            )
+        )
+    values = [None] * (top + 1)
+    values[top] = solution[top - 1]
+    for order in range(top - 1, 0, -1):
+        values[order] = paired_subtract(
+            solution[order - 1], paired_multiply(ratio[order - 1], values[order + 1])
+        )
+    values[0] = seed
+    return values[:count]
+
+
 def harmonic_root_moments(
     moments: list[np.ndarray], parameter: np.ndarray, *, xp=np
 ) -> list[np.ndarray]:
@@ -363,6 +479,24 @@ def harmonic_root_moments(
     return [
         mean * moments[order]
         + 0.25 * parameter * (moments[order + 1] + moments[abs(order - 1)])
+        for order in range(len(moments) - 1)
+    ]
+
+
+def harmonic_root_moments_paired(moments, parameter):
+    """Return radical moments with paired recurrence arithmetic."""
+    mean = paired_subtract(paired_wrap(1.0), paired_scale(parameter, 0.5))
+    return [
+        paired_add(
+            paired_multiply(mean, moments[order]),
+            paired_scale(
+                paired_multiply(
+                    parameter,
+                    paired_add(moments[order + 1], moments[abs(order - 1)]),
+                ),
+                0.25,
+            ),
+        )
         for order in range(len(moments) - 1)
     ]
 
@@ -607,6 +741,15 @@ def cn_pole_moment(
     )
 
 
+def cn_pole_moment_paired(shift, *, parameter_complement, xp=np):
+    """Return the near-end pole seed with paired special-function arithmetic."""
+    one_plus = paired_add(paired_wrap(1.0), shift)
+    pole = paired_divide(shift, one_plus)
+    return paired_divide(
+        complete_pole_paired(pole, parameter_complement, xp=xp), one_plus
+    )
+
+
 def sn_pole_moments(
     shift: np.ndarray,
     parameter: np.ndarray,
@@ -677,6 +820,17 @@ def sn_pole_moment(
         complete_pole((1.0 + held) / held, parameter_complement, xp=xp) / held,
         0.0,
     )
+
+
+def sn_pole_moment_paired(shift, *, parameter_complement, xp=np):
+    """Return the far-end pole seed with paired special-function arithmetic."""
+    live = paired_value(shift) > 0.0
+    held = paired_where(live, shift, paired_wrap(1.0), xp)
+    pole = paired_divide(paired_add(paired_wrap(1.0), held), held)
+    evaluated = paired_divide(
+        complete_pole_paired(pole, parameter_complement, xp=xp), held
+    )
+    return paired_where(live, evaluated, paired_wrap(0.0 * held[0]), xp)
 
 
 def pole_moments(

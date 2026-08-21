@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T22:03:14",
+  "updated": "2026-08-21T22:31:26",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -18658,9 +18658,136 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T201009660071-diverted-solve-overlay-figure",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a710",
+        "node": "diverted-solve-overlay-figure",
+        "role": "documentation",
+        "member": "diiid-poloidal-figures",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T20:10:14Z",
+        "completed_at": "2026-08-21T20:24:11Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 837,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 837,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "a9d9692b07106990f271e82caa3e0e6d193bd6be",
+        "commits": [
+          "086312b3",
+          "2733be70"
+        ],
+        "changed_lines": {
+          "added": 1021,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": 6,
+        "gate": "passed",
+        "outcome": "Overlay rendered on 15 shared levels applied verbatim to both maps; the solve reproduced 1.59e-09 in 4 iterations diverted with current error 0.0, but sits 0.2472 gauge-matched fractional RMS from the label against the 0.0429 ceiling - LCFS 5.37 cm and X-point 45.5 cm apart, with a negligible -0.003 Wb/rad gauge, so the disagreement is shape not gauge",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T201009660071-diverted-solve-overlay-figure/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f36-5f8a-7212-a4d6-18ab97d716ca",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5960576,
+            "cached_input_tokens_cumulative": 30574720,
+            "input_tokens": 6333786,
+            "input_tokens_cumulative": 31671206,
+            "output_tokens": 25811,
+            "output_tokens_cumulative": 110491,
+            "reasoning_output_tokens": 5780,
+            "reasoning_output_tokens_cumulative": 31053
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260821T192839095262-arc-line-integral-averages",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a79",
+        "node": "arc-line-integral-averages",
+        "role": "implement",
+        "member": "transport-env",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T19:28:45Z",
+        "completed_at": "2026-08-21T20:30:06Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3681,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3681,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "9ccc13e703e8aa7255e9f19970442df7f62da7db",
+        "commits": [
+          "93fa2cf24e7eece68a02783247145597ebcf7a30"
+        ],
+        "changed_lines": {
+          "added": 167,
+          "removed": 67,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "outcome": "the estimator change lands and the STEP consensus gate is MET: service-versus-contour vpr 4.41 to 2.35 percent and g1 21.14 to 3.88 percent, both below the TORAX-versus-contour 3.92 and 6.20, so the traced route joins the consensus class; the old g1 residual was localised to the discarded edge arc at rho=1. ITER shifted +0.05 to +0.19 points against the previous estimator ceilings - accepted by the orchestrator as the price of estimator unification, all four coefficients well inside the original 5 percent acceptance, no smoothing reintroduced. 19 passed in 884 s, analytic ellipse identities at machine precision to 8.5e-4",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T192839095262-arc-line-integral-averages/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01023-3e4f-7081-b1ab-24ffbe816152",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 42799104,
+            "cached_input_tokens_cumulative": 246886144,
+            "input_tokens": 43269948,
+            "input_tokens_cumulative": 251764723,
+            "output_tokens": 40473,
+            "output_tokens_cumulative": 499556,
+            "reasoning_output_tokens": 10799,
+            "reasoning_output_tokens_cumulative": 164658
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 460
+    "_version": 462
   }
 }

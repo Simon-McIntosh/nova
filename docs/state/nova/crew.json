@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T14:14:06",
+  "updated": "2026-08-21T14:32:18",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -15122,9 +15122,137 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T115945516651-exact-clipped-cell-tare",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a710",
+        "node": "exact-clipped-cell-tare",
+        "role": "implement",
+        "member": "diiid-vacuum",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T11:59:49Z",
+        "completed_at": "2026-08-21T12:21:14Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1285,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1285,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "55c1d9c4614f13459f25f44f742229bbf9b24c30",
+        "commits": [
+          "b18073978e0b20e2f860214cc14fd0a8f3ae1b81",
+          "7978702b0926cb5e2813efa7269bcb46cee26fa6",
+          "6b9ff9646afde3c5c15fb3f9abb2019932151a01"
+        ],
+        "changed_lines": {
+          "added": 2865,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "outcome": "Exact clipped-cell moments cut the median interior Delta-star residual 7.3x, from 3.5395 percent for node-centred filaments to 0.4842 percent, below both the 2.0 percent landed floor and the 2.3267 percent profile-projection RMS; synthetic unit exact to rtol 2e-12. Full-corpus cost measured: 62.91 h serial and 52.7 GB",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T115945516651-exact-clipped-cell-tare/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01090-c119-7413-b062-4589e1bc160f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7743616,
+            "cached_input_tokens_cumulative": 131510912,
+            "input_tokens": 8284258,
+            "input_tokens_cumulative": 134584683,
+            "output_tokens": 34825,
+            "output_tokens_cumulative": 322398,
+            "reasoning_output_tokens": 11683,
+            "reasoning_output_tokens_cumulative": 94638
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260821T112739085498-monotone-arc-intervals",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a78",
+        "node": "monotone-arc-intervals",
+        "role": "implement",
+        "member": "transport-env",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T11:27:45Z",
+        "completed_at": "2026-08-21T12:30:20Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3755,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3755,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "0a25e9abc3294507126b1d39f74760abcb3cb074",
+        "commits": [
+          "78e266de84090f9c239421f7c4072a16e6109bec"
+        ],
+        "changed_lines": {
+          "added": 501,
+          "removed": 158,
+          "files": 3
+        },
+        "tests_added": 1,
+        "gate": "failed",
+        "outcome": "primary targets met - ITER valid=True with zero invalid arcs, the cell-9285 even root pair resolved at the pinned local-R 0.03308514 and 0.42126222 within 2e-8, monotone intervals with 12 Gauss nodes each, every locked ITER metric unchanged to four decimals, STEP confirmed as the coarea-concentration negative - but the gate is the green exact suite and one legacy characterization failure remains: the shared even-root bracketing moved the LEGACY clipped route STEP scalars (R_major 0.36 percent, a_minor 1.46, B_0 0.36, R_out_face 0.97) outside their two-sided bands, which is the band mechanism catching an unattributed drift exactly as designed. Commit held unmerged; a corrective node on the same member diagnoses whether single-root selection drifted or the even-pair resolution is the more correct answer",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T112739085498-monotone-arc-intervals/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01023-3e4f-7081-b1ab-24ffbe816152",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 31176448,
+            "cached_input_tokens_cumulative": 193573632,
+            "input_tokens": 31506436,
+            "input_tokens_cumulative": 197756215,
+            "output_tokens": 56120,
+            "output_tokens_cumulative": 436725,
+            "reasoning_output_tokens": 18883,
+            "reasoning_output_tokens_cumulative": 149022
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 392
+    "_version": 394
   }
 }

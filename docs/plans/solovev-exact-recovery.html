@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="21">
+<meta name="plan-version" content="22">
 <meta name="plan-commits" content="eed42e520d5f544f50cdb7485cffc74249f47037,0687526990e67eee5777310a71ad60588ca7736e,0e98afcb9960247313ea955822481983d63a7fd0,27fd5f364c4bb6fa89e5042ee0c190990f965be9,0e21b3997f841be1bf5a79c8b8772619f55c2fd2,5189b08e77dc994c13ebfbf40c4fcb5e29a03f2d,10642e611aa44c805c9cc430048131826448bce8,fcee050f1cd6dd6417587997e599066abc0756e8,74635b0ae61547229228e64e74599f86c3e9c358,0bed363d0e179fed1d4d265c6dee1998c32aa77f,0c36bf9667a3408494c67e1337b559771ba70c23,50a1b0d868b04fd86a886bbd6138452ea3a0e498,04c61de0814fb9fd984bf56e9d1a0205b951535d,c3ff6142f599cb2fc6112f03c8117b2eac21646d,5d282612b79c677be76a76a841edefb8cdd1d1e1,82f1a29a3225d1f903667f7694419ce50d6b6a94">
 <meta name="plan-artifacts" content="docs/evidence/archive/solovev-exact-recovery-landed.html,docs/figures/solovev-exact-recovery/map-forcing-decomposition.png,docs/figures/solovev-exact-recovery/forcing-residual-decomposition.png,scripts/map_forcing_attribution/results.json,scripts/forcing_residual_decomposition/results.json,scripts/build_cache_audit/results.json,scripts/build_cache_audit/measurements-coarse.json,scripts/build_cache_audit/measurements-fine.json">
 <meta name="plan-impl" content="0.95">
@@ -235,6 +235,10 @@
         precomputed matrices; runtime stays fixed-shape matvecs. The §5 ladder prices every
         accuracy increment so the operating point is chosen on numbers.</p>
     </div>
+<div class="r-dec" data-key="recovery-gate-bounds" data-choice="round-off-floors-with-convergence-clauses" data-by="Simon McIntosh" data-when="2026-08-21T11:30:00+00:00">
+    <p class="r-dec-q">recovery-gate-bounds</p>
+    <p class="r-dec-rat">Owner ruling 2026-08-21: lock as proposed - bounds at roughly ten times the measured round-off floors (standing forcing 3.83e-15/4.44e-15 Wb of span; the closed-form root a discrete fixed point at 1e-15; tangent responses at picometres), with the convergence clauses binding (any h-independent deviation fails whatever its size), the gauge pins in force, and the one-map-evaluation forcing gate standing sentry. Packaging is two-tier per the standing directive: a seconds-class reduced closed-form fixture in the always-on default lane and the full warm-cached fixtures in the slow lane.</p>
+    </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
@@ -248,6 +252,11 @@
         boundary-ring merge (main 3b3122fa) is the substrate; the serialized terminal roots and
         the variant machinery from the decomposition ladder are the measurement inputs.</p></div>
     <pre class="r-fu-prompt">/reckon-ship solovev-exact-recovery</pre>
+    </article>
+<article class="r-fu" data-id="f-ser-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-21" data-recommends-skill="/reckon-ship solovev-exact-recovery §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Package the locked gates and record the operating point</h4>
+    <div class="r-fu-body"><p>All bounds are owner-locked (recovery-gate-bounds). One node remains: commit the locked bounds into tests/test_solovev_recovery_gates.py, author the reduced seconds-class closed-form fixture pin for the always-on lane (same construction, ~100-150 cells, forcing at round-off by construction), keep the full warm-cached fixtures in the slow lane, and record the section-5 operating point (faithful moment route at the measured ladder costs) in the plan. The plan ships when this lands.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship solovev-exact-recovery §4</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -298,6 +307,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260821T0020" data-who="reckon-ship" data-when="2026-08-21T00:20:00+00:00">
     <div class="r-comment-body">oracle-rebaseline landed - commit 0bed363d, merged b242dcf3; gate PASSED. The recovery gate harness is authored and green (four contract tests; zero mixed-gauge gates; zero foreign anchors), standing forcing controls hold at round-off (3.83e-15 / 4.44e-15 Wb), terminal states serialized, bounds PROPOSED and awaiting the owner lock. THE SECOND ROOT: the production current-centroid seed converges at machine precision on both fixtures to a LIMITED equilibrium (no X-point) 74.84/74.19 mm from the closed-form diverted root - Ip +5.0/+5.1 percent, flux sup 0.533 span, h-independent (excess ratio 1.00098) - a genuine alternate root of the same external field; continuation at 0.50/0.75 strength collapses to vacuum. Six proposed gates correctly reject it. SEPARATION: accuracy is settled (the closed-form root is a discrete fixed point to round-off; gates lock at round-off floors with the forcing sentry), and basin selection is a distinct solver property whose repair (basin-aware seeding or globalized root find; the measured continuation is not it) routes to the owner as new scoped work. Two owner items now pending: the section-4 bound lock on the measured floors, and the basin-work routing (new section here versus its own plan).</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260821T1140" data-who="reckon-ship" data-when="2026-08-21T11:40:00+00:00">
+    <div class="r-comment-body">OWNER INTERVIEW 2026-08-21, rulings affecting this plan: (1) the recovery gate bounds LOCK as proposed (decision recovery-gate-bounds) - the remaining executable node is the section-4/5 packaging: commit the locked bounds into the registered harness, author the reduced always-on closed-form fixture pin, and record the section-5 operating point (the faithful moment route at the ladder's measured costs, with the 1 ms route being iteration economy times batching); (2) the basin/solve-economics work is commissioned as its own plan, dual-basin-solve (S8), carrying the owner's imas-efit strategy - solve both basins where they exist, hysteresis selection, topology-pinned branches; (3) S7 closes deterministically - this plan ships when the packaging node lands, and the sprint keeps only the well-specified remainder.</div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20260821T0125" data-who="reckon-ship" data-when="2026-08-21T01:25:00+00:00">
     <div class="r-comment-body">accuracy-cost-ladder landed - commit 0c36bf96, merged ce482a73; gate PASSED (one environment incident en route: the worker synced the shared venv, stripping optional extras; the orchestrator restored all declared extras and the resumed run consumed the environment strictly read-only). MEASURED: cold oracle builds 294.2/778.0 s with exact polygon kernel+moment work at 97.2/99.0 percent - the device-kernel-build target confirmed; H200 converged solve 198.5 ms/state batch-1, 56.3 batch-4, 30.2 batch-16 (fine batch-1 257.4); phase medians map 1.12/1.38 ms, tangent 1.49/1.66 ms, one Newton step inclusive of its 30-GMRES Krylov loop 20.6/24.1 ms, launch 0.071 ms - the ten-step projection closes to 1.04/0.94 of the measured solves and StableHLO receipts confirm the 10/30 loop bounds independently. VERDICT AGAINST THE 1 MS TARGET: missed 198x/30x, and the attribution is unambiguous - the map is already at the target and the Krylov loop owns twenty of every twenty-one milliseconds, so the route is iteration economy (warm-seeded few-step Newton, the catalog adjacent-slice regime) times batch amortization, not faster physics. Centroid rung rejected non-finite. The section-5 operating-point lock joins the owner package beside the section-4 bound lock and the basin routing.</div>

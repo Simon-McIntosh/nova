@@ -22,8 +22,8 @@
   <title>EFIT Flux Decomposition | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-16">
-<meta name="plan-version" content="17">
+<meta name="plan-modified" content="2026-08-21">
+<meta name="plan-version" content="18">
 <meta name="plan-commits" content="8fffa5c7,971c06e5,e25d1eb4,1164a8e8,c63ab4d7,6f8fd170,92399e7a,8d98a57e,80dd9ebe,17d14f95,c45490c7,766ab2b4,e5acd9a6,a25b3b3c,d82587cd">
 <meta name="plan-artifacts" content="benchmarks/efit_flux_decomposition.py,benchmarks/efit_roundtrip_identity.py,benchmarks/efit_operator_consistency_order.py,benchmarks/efit_analytic_roundtrip_floor.py,benchmarks/efit_filament_truncation_contribution.py,benchmarks/efit_constant_current_attribution.py,benchmarks/efit_cell_current_representation.py,benchmarks/efit_section_shape_zeta_order.py,benchmarks/efit_roundtrip_linear_moments.py">
 <meta name="plan-impl" content="0.85">
@@ -252,6 +252,10 @@
         masking or region exclusion — the exact contamination the LCFS-mask decision was made to prevent.
         A large residual holds downstream work by being reported, not by failing a threshold.</p>
     </div>
+<div class="r-dec" data-key="identity-criterion" data-choice="convergence-order-criterion" data-by="Simon McIntosh" data-when="2026-08-21T11:30:00+00:00">
+    <p class="r-dec-q">identity-criterion</p>
+    <p class="r-dec-rat">Owner ruling 2026-08-21, closing the question the linear-moments node re-posed: the 1e-6 fixed identity is measured infeasible at any working resolution (the composition extrapolates to it only at ~25x linear refinement on an O(N^2) product) while the operator pair converges cleanly at order ~2.1 with R-squared above 0.999 on both the EFIT and analytic series. The identity becomes a registered convergence-order criterion - fitted order at least 2 with a stated R-squared floor across the banked resolution series - consistent with how the closed-form oracle gates treat truncation. No residual threshold is introduced; the residual stays report-only per the locked residual-threshold-policy.</p>
+    </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
@@ -309,6 +313,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20260815-boundaryverdict" data-who="reckon-ship" data-when="2026-08-15T12:10:00+00:00">
     <div class="r-comment-body">boundary-method-comparison landed - commit e5acd9a6; gate PASSED; worker 1858 s. THE DESIGN QUESTION IS ANSWERED BY MEASUREMENT. Precondition held (clip conservative at &lt;=6.6e-16 every grid; exact reference self-drift 7.8e-8 of span at finest). Finest-grid sup of span / fitted order (R2) / per-iteration cost: production centroid 9.724559062e-3 / 1.797 (0.930) / 0 Green 1 matvec; repaired clipped centroid 6.641216063e-4 / 1.997 (0.999989) / 0 Green 1 matvec; moving current-centroid filament 7.670355774e-3 / 1.331 (0.878) / 72-266 Green 1 matvec; FIXED LINEAR BLOCKS G0/GR/GZ 1.239092403e-4 / 1.922 (0.9996) / 0 Green 3 matvecs. THE FIXED BLOCKS WIN ON EVERY AXIS: 78x below production, 5.4x below plain clipping, 61.9x below the moving filament - which pays up to 266 per-step Green evaluations to LOSE, because a point filament at zero standoff drops every section moment exactly where coupling is strongest, degrading to order 1.33 with visible non-monotonicity. Blocks built once by true midpoint subdivision of the full fixed sections (contraction drift 2.3e-5 of span at finest, below every separation), clipped zeroth and first moments riding in three per-iteration vectors, fixed shapes throughout. THE RE-AUDIT SHIFTS THE BANKED CLIPPED FIGURES BY -71%: under the conservative clip the clipped-centroid series falls from 2.104e-2/7.755e-3/3.981e-3/2.235e-3 to 5.965e-3/2.188e-3/1.136e-3/6.641e-4 - the T-junction defect was inflating clipped errors ~3.5x, and the corrected rule converges at 1.997 with R2 0.999989. SOL: a J(psi_N&gt;1) support adds exterior moments to the same three vectors, no new blocks. ASSEMBLED DESIGN NOW BACKED END TO END: interior degree-3 stencil (order 3.76, 2-3 shared evaluations per cell) + conservative clip (machine-precision area) + fixed exact linear blocks (1.24e-4 of span, zero per-step Greens, three matvecs, traceable). REMAINING PRODUCTION STEP awaiting owner selection: implement the exact closed-form GR/GZ Part V blocks (one harmonic order + two weighted companions) in nova/biot/polygonanalytic.py and wire the representation into the solve path. The moving point filament is not to be promoted for near-field boundary cells. Record at /nova/evidence/archive/efit-flux-decomposition-landed#boundary-method-comparison</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260821T1150" data-who="reckon-ship" data-when="2026-08-21T11:50:00+00:00">
+    <div class="r-comment-body">OWNER INTERVIEW 2026-08-21: the 2026-08-16 hold is LIFTED - both of its conditions are met. The linear representation replaced the piecewise-constant elements throughout the solve path (the unified degree-nine source and the adjudicated faithful moment route are merged, boundary-ring 3b3122fa and solovev-exact-recovery 3c0b825e), and the analytic validation is complete on the true closed-form oracle (the discrete map exact at the analytic state to 4.6e-15 Wb of span; recovery gates locked at round-off floors). Sections 3-4 (the fcoil_c primary decomposition with the fcoil_x figure beside it, on the native 65x65 grid, and the residual's implied-current localisation) are OPEN in S7. The section-2 identity criterion is locked as a convergence-order criterion (decision identity-criterion). One design note from the recovery programme applies: DINA 135011/7 carries a declared psi_boundary 0.411 Wb from its own map saddle - the efm reference must be checked for the same internal-inconsistency class before any localisation is attributed, and the reproduction normalization uses the reference's own declared anchors per the efit-forward-parity prescribed-anchor ruling.</div>
 </div>
 </section>
 </main>

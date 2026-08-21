@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="dual-basin-solve">
+  <meta name="plan-title"     content="Dual-Basin Solve — both roots, hysteresis selection, warm-start economy">
+  <meta name="plan-summary"   content="Solve the diverted and limited free-boundary roots side by side wherever both exist, each pinned to its topology class so no in-solve topology switch can crash convergence, select between converged branches by history, and drive the warm-start iteration economy that carries the one-millisecond solve target">
+  <meta name="plan-status"    content="pending">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort-hours" content="8.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-sprint"    content="S8">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-depends-on" content="solovev-exact-recovery">
+  <title>Dual-Basin Solve | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — The finding and the owner's strategy</h2>
+
+    <p><strong>The free-boundary map has multiple genuine roots.</strong> On the closed-form
+    oracle fixtures the same external field supports both the diverted analytic equilibrium and
+    a limited equilibrium 75 mm away, each a machine-precision fixed point (residuals 2.5e-15
+    and 2.2e-15), h-independent — measured by the recovery re-baseline (commit
+    <code>0bed363d</code>). Production's cold current-centroid seed converges to the limited
+    branch; source-strength continuation collapses to the vacuum branch at intermediate
+    amplitudes. Accuracy is settled — the recovery gates hold each root to round-off — but
+    <em>which</em> root a cold solve reaches is unmanaged.</p>
+
+    <p><strong>Owner strategy 2026-08-21 (the imas-efit precedent):</strong> where both basins
+    exist, solve both — a diverted solve and a limited solve side by side — and make the
+    selection <em>afterwards</em>, from history (hysteresis). The GPU route makes the second
+    solve nearly free: the batched fixed point already amortizes to 30 ms/state at batch
+    sixteen, so a two-branch portfolio rides the same batch. Solving each branch with its
+    topology pinned also removes the failure mode where a solve switches topology class
+    mid-iteration and crashes convergence — the branch never has to decide its own topology,
+    only converge within it.</p>
+
+    <h2 id="s2">§2 — The two-branch solve</h2>
+
+    <p>Each branch is a topology-pinned fixed point: the diverted branch seeds and iterates with
+    saddle-anchored normalization and the clip against its separatrix; the limited branch seeds
+    and iterates with wall-contact normalization and its own boundary read. Neither branch may
+    change class mid-solve — a branch whose topology read contradicts its pin reports that fact
+    in its receipts rather than switching. Branch construction reuses the production machinery
+    end to end (one code path per quantity; the pin is a mask/anchor selection, never a parallel
+    solver).</p>
+
+    <p><em>Done-when:</em> on the oracle fixtures, the two-branch solve recovers <strong>both</strong>
+    banked roots from cold production seeds — the diverted branch reaching the closed-form root
+    at the recovery-gate floors and the limited branch reproducing the banked alternate root —
+    with per-branch convergence receipts (residual, iterations, topology-consistency flag) and
+    fixed shapes under jit/vmap so both branches batch together; a branch that cannot converge
+    in its class reports non-convergence explicitly and never silently degrades.</p>
+
+    <h2 id="s3">§3 — Hysteresis selection</h2>
+
+    <p>Selection between converged branches is a declared policy over history, not an in-solve
+    heuristic: a shot evolving diverted stays on the diverted branch while that branch converges
+    and its class is topologically admissible, switching only on a declared criterion (branch
+    disappearance, or a persistent admissibility change), with the switch recorded in the
+    receipts. Cold starts with no history select by a stated rule (e.g., the physically
+    admissible branch of larger confined current, or the declared scenario class).</p>
+
+    <p><em>Done-when:</em> the selection policy is a pure function of branch receipts plus
+    declared history state; a synthetic sequence crossing a limited-to-diverted transition
+    selects correctly with hysteresis (no chattering across the transition), pinned by test; the
+    policy and its criteria are recorded as data in the result provenance.</p>
+
+    <h2 id="s4">§4 — Warm-start economy toward the one-millisecond solve</h2>
+
+    <p>The ladder measured the map at 1.12 ms and one Newton step at 20.6 ms — the 30-iteration
+    Krylov loop owns the solve. The route to the locked ~1 ms target is iteration economy times
+    batch amortization: adjacent-state warm starts (the catalog's regime) should cut Newton
+    steps from ten toward one-to-two, and the two-branch portfolio batches with everything
+    else. This section measures that economy on real sequences: iterations and wall time per
+    state as a function of seed distance, batch size, and branch, against the banked
+    198.5/56.3/30.2 ms ladder points.</p>
+
+    <p><em>Done-when:</em> a warm-start ladder reports converged wall time per state versus seed
+    distance and batch size on the H200 for both branches, with the profiled phase decomposition
+    (the slow-benchmark profiling mandate applies); the measured trajectory toward the 1 ms
+    target is stated with the remaining gap attributed by phase; and the catalog-regime
+    projection (adjacent-slice seeding at production batch sizes) is a number beside the target,
+    not a belief.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="dual-basin-strategy" data-choice="solve-both-select-by-history" data-by="Simon McIntosh" data-when="2026-08-21T11:30:00+00:00">
+        <p class="r-dec-q">How does the solver handle the coexistence of diverted and limited roots?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt chosen" data-value="solve-both-select-by-history">solve both basins where they exist; select afterwards by history (hysteresis)</button>
+          <button class="r-opt" data-value="basin-aware-seed-only">engineer the seed to select the intended basin per solve</button>
+          <button class="r-opt" data-value="globalized-single-solve">globalize one root find (deflation/continuation) to the intended root</button>
+        </p>
+        <p class="r-dec-rat">Owner ruling 2026-08-21, from the strategy proven in imas-efit:
+        solve a diverted AND a limited version wherever both exist and make the selection from
+        history — the GPU route makes the second solve cheap (the batched fixed point already
+        amortizes to 30 ms/state at batch sixteen), and pinning each branch to its topology
+        class blocks the in-solve topology switches that crash convergence. Selection becomes a
+        recorded policy over converged receipts instead of a property of the seed.</p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-dbs-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-08-21" data-recommends-skill="/reckon-ship dual-basin-solve" data-resolved-at="" data-resolved-by="">
+        <h4 class="r-fu-title">Build the two-branch solve, then the selection policy, then the warm-start ladder</h4>
+        <div class="r-fu-body"><p>The framing decision is owner-locked at creation. §2's
+        topology-pinned branches open the plan (the oracle fixtures and both banked roots are
+        the test substrate, warm-cached); §3's hysteresis policy follows; §4's warm-start
+        economy closes it against the one-millisecond target with the profiling mandate in
+        force. Scheduled with the GPU-catalog sprint, which consumes all three.</p></div>
+        <pre class="r-fu-prompt">/reckon-ship dual-basin-solve</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

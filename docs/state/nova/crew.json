@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T11:50:06",
+  "updated": "2026-08-21T12:08:13",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -13799,9 +13799,261 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T093250780998-competition-dataset-recheck",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a79",
+        "node": "competition-dataset-recheck",
+        "role": "implement",
+        "member": "diiid-ids-read",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T09:32:53Z",
+        "completed_at": "2026-08-21T09:51:52Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1139,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1139,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "55e7e476eda90ee7b342a503eb80bb1ef6ee0f24",
+        "commits": [
+          "6166a4046ec03dad741464bacefd8fd798e40894"
+        ],
+        "changed_lines": {
+          "added": 666,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 8,
+        "gate": "passed",
+        "outcome": "The competition data has NOT been updated: live check at 2026-08-21T09:49:53Z, all three source channels HTTP 200, 0/5 target conductors published, geometry 19 and currents 20 unchanged, source parquet byte-identical to the landed object",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T093250780998-competition-dataset-recheck/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f23-6ec6-7692-aed3-cc2bf2e6bbad",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9165312,
+            "cached_input_tokens_cumulative": 20362496,
+            "input_tokens": 9460018,
+            "input_tokens_cumulative": 21022781,
+            "output_tokens": 32305,
+            "output_tokens_cumulative": 87720,
+            "reasoning_output_tokens": 6007,
+            "reasoning_output_tokens_cumulative": 20728
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260821T093254537144-ohmic-circuit-retest",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a79",
+        "node": "ohmic-circuit-retest",
+        "role": "implement",
+        "member": "diiid-current-units",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T09:32:58Z",
+        "completed_at": "2026-08-21T09:44:06Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 668,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 668,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "55e7e476eda90ee7b342a503eb80bb1ef6ee0f24",
+        "commits": [
+          "7c013864c160170e3d54bc1c441e337763671a61"
+        ],
+        "changed_lines": {
+          "added": 1184,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "outcome": "2 of 5 ARE deterministic functions of ECOILA at the preregistered 1.0 percent bound - E567UP 0.570 percent and E89DN 0.706 percent - while ECOILB 7.26, E567DN 5.43 and E89UP 5.76 percent fail; all five scales lie within 2 percent of unity and all polarities are positive",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T093254537144-ohmic-circuit-retest/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f40-52f6-7f23-af36-adcdcdaa0665",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8566272,
+            "cached_input_tokens_cumulative": 28072192,
+            "input_tokens": 8805719,
+            "input_tokens_cumulative": 28887832,
+            "output_tokens": 24526,
+            "output_tokens_cumulative": 95983,
+            "reasoning_output_tokens": 7203,
+            "reasoning_output_tokens_cumulative": 28875
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260821T093257738944-boundary-current-recovery",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a79",
+        "node": "boundary-current-recovery",
+        "role": "implement",
+        "member": "diiid-forward-gs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T09:33:01Z",
+        "completed_at": "2026-08-21T09:52:47Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1186,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1186,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "55e7e476eda90ee7b342a503eb80bb1ef6ee0f24",
+        "commits": [
+          "b59e32a7d82e5104390958366945aeccd5a428d7"
+        ],
+        "changed_lines": {
+          "added": 5196,
+          "removed": 0,
+          "files": 6
+        },
+        "tests_added": 6,
+        "gate": "passed",
+        "outcome": "SPLIT VERDICT: the five currents ARE strongly predictable from the twenty shipped channels on held-out shots (R-squared 0.9743 to 0.9979), but they do NOT close the boundary - the exact five-coil design leaves median relative residual 0.2304 at condition number 10.83, and inserting the recovered currents WORSENS the root residual from 0.2157 to 0.3439",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T093257738944-boundary-current-recovery/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01bd8-2268-7ff3-bcd9-eb3700561ec8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8774656,
+            "cached_input_tokens_cumulative": 99537024,
+            "input_tokens": 9169858,
+            "input_tokens_cumulative": 102212401,
+            "output_tokens": 30142,
+            "output_tokens_cumulative": 272825,
+            "reasoning_output_tokens": 6749,
+            "reasoning_output_tokens_cumulative": 81055
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260821T095404032533-root-residual-screened-remeasure",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a79",
+        "node": "root-residual-screened-remeasure",
+        "role": "implement",
+        "member": "diiid-forward-gs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T09:54:07Z",
+        "completed_at": "2026-08-21T10:07:13Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 786,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 786,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "885f854feb79d44a2a37678d050225473df7d02d",
+        "commits": [
+          "75a6ff83b85fad4205aee664ce61733e4064fe6e"
+        ],
+        "changed_lines": {
+          "added": 507,
+          "removed": 147,
+          "files": 5
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "outcome": "CONFOUND REFUTED, COHORT DEPENDENCE EXPOSED: dropping the polarity-affected frame raises the worsening from 59.48 to 68.05 percent, but an independent screened five-shot cohort IMPROVES 80.25 percent (1.8706 to 0.3694). The sign of the recovered-current effect is cohort-dependent and its mechanism is unidentified",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T095404032533-root-residual-screened-remeasure/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01bd8-2268-7ff3-bcd9-eb3700561ec8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 10561152,
+            "cached_input_tokens_cumulative": 110098176,
+            "input_tokens": 10680490,
+            "input_tokens_cumulative": 112892891,
+            "output_tokens": 18987,
+            "output_tokens_cumulative": 291812,
+            "reasoning_output_tokens": 4375,
+            "reasoning_output_tokens_cumulative": 85430
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 361
+    "_version": 365
   }
 }

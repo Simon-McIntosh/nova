@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="spine-efit-parity">
   <meta name="plan-title" content="Spine Reconstruction Parity vs EFIT">
   <meta name="plan-summary" content="Prove the nova physics spine reconstructs MAST equilibria comparably to the existing EFIT solutions — GS-balanced flux maps through the accelerated boundary-push solve plus 1D current-diffusion consistency, on corrected reads, scored against the firewalled EFIT referee — before any ML-assisted step and before the GPU catalog run">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
   <meta name="plan-capability-version" content="1.0">
@@ -22,9 +22,9 @@
   <title>Spine Reconstruction Parity vs EFIT | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-13">
-<meta name="plan-impl" content="0.99">
-<meta name="plan-version" content="21">
+<meta name="plan-modified" content="2026-08-21">
+<meta name="plan-impl" content="1.0">
+<meta name="plan-version" content="22">
 <meta name="plan-commits" content="ee60c7d2,27baad59,b46bc103,99dfc6a6,41ddd617,9eb129e4,125c00a2,bdaf0844,73336ac0,43e2a091,f39af125,4c2c1796,dc62e52c,7ddeb717,de672204,c058f214,a23fdcdb,41fb859d,faac79e8">
 <meta name="plan-artifacts" content="nova/imas/mast_parity_chain.py,nova/imas/parity_tolerances.py,nova/imas/mast_efit_referee.py,docs/evidence/archive/spine-efit-parity-landed.html">
 </head>
@@ -343,6 +343,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s7" data-id="c-20260813-artifactconcurrency" data-who="reckon-ship" data-when="2026-08-13T12:55:00+00:00">
     <div class="r-comment-body">artifact-read-concurrency landed - commit faac79e8; gate PASSED 4/4 concurrency tests in 90.10 s plus 61/61 artifact regression tests. Scope was extended mid-node to nova/imas/mast_artifact.py on the worker's request, which was correct: it had established that changing only machine.py cannot affect resolve_machine_artifact or open_description verification, and it asked rather than reaching outside the fence. THE CAUSE WAS DETERMINISTIC, NOT AN UNLUCKY RACE - pre-fix failure rate 20/20. HDF5's version-zero superblock begins at byte 1024 and bytes 1044-1047 hold the file-consistency flags, which HDF5 sets while any handle is open; the observed mutation is exactly byte 1044 going 0 to 1 and reverting on close. A raw whole-file digest of an HDF5 container therefore can never be a stable identity while concurrent readers exist, which is what cancelled SLURM 1245311 after three checksum races and forced 105 of 180 partitions to be recomputed in private caches. MEASURED: verification under four concurrent opens went 0/20 to 20/20 succeeding, while the raw master digest STILL mismatches 20/20 - the mutation was not suppressed and the fix does not pretend it stopped. A four-partition run now completes against ONE shared artifact with no private per-task copy and no checksum retry. Only the four consistency-flag bytes are canonicalized, and manifest creation and reader verification both call the same _file_identity so the two cannot disagree; verification stays mandatory for manifest, inventory, sizes and canonical per-file digests. NARROWNESS PROVEN EXHAUSTIVELY: a synthetic-image test rejects a change to every one of the 2,044 bytes outside the four-byte field, so widening the exemption would fail the suite - that is what keeps this from trading a deterministic failure for an undetectable one. NO RE-PUBLICATION REQUIRED, and this was checked rather than hoped for: closed consistency flags are already zero, so the manifest master.h5 sha256, the new canonical identity and the closed raw sha256 all remain 488c3db17800f4667b118efd54f3f33230b58c778202ab7581e8e2d87eeb84b0, and no cache-key migration follows - unlike the dd_version identity change which did move every key. Artifacts: /nova/evidence/archive/spine-efit-parity-landed#artifact-concurrency</div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-20260821T1158" data-who="reckon-ship" data-when="2026-08-21T11:58:00+00:00">
+    <div class="r-comment-body">OWNER RULING 2026-08-21: the plan ships with the section-8 extension recorded as transferred, not spent. The pre-registered held-out shots (11794, 12417, 27000, 22500) stay drawn-once and unspent; their trigger - a real-slice solve reaching its registered convergence bound - is owned by the efit-forward-parity chain, and the extension fires inside that plan's future gate run under the unchanged twelve-field registry. Everything this plan could say is said: the chain assembles and transports, the referee firewall is structural, the reconstruction verdict is banked with its mechanism, the metric identity is separated, and the forward claim moved to its rightful owner. f-sep-006 stays open as the standing foreign-owner pointer to that chain.</div>
 </div>
 </section>
 </main>

@@ -24,8 +24,8 @@
   <title>EFIT Forward Parity | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-20">
-<meta name="plan-version" content="4">
+<meta name="plan-modified" content="2026-08-21">
+<meta name="plan-version" content="5">
 </head>
 <body>
   <main class="plan-doc">
@@ -191,15 +191,15 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="forward-parity-seed" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="forward-parity-seed" data-choice="reference-seed" data-by="Simon McIntosh" data-when="2026-08-21T10:09:38+00:00">
     <p class="r-dec-q">Which seeding condition carries the parity claim: the reference&#x27;s own flux map,
         an independent moment seed, or both reported side by side?</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="both-reported">both, with the independent seed carrying the claim</button>
-      <button class="r-opt" data-value="reference-seed">the reference map, as the tightest available start</button>
+      <button class="r-opt chosen" data-value="reference-seed">the reference map, as the tightest available start</button>
       <button class="r-opt" data-value="independent-seed-only">an independent seed only</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Owner ruling 2026-08-21: the reference-seeded solve carries the initial parity demonstration, and the independent-seed claim upgrades through the dual-basin strategy rather than through seed engineering - where both basins exist, solve a diverted AND a limited version side by side (cheap on the batched GPU route) with the selection made afterwards from history (hysteresis), which also blocks the in-solve topology switches that crash convergence. The dual-basin machinery is owned by the dual-basin-solve plan (S8); this plan consumes it when the independent-seed parity claim is made.</p>
     </div>
 <div class="r-dec" data-key="magnetics-metrics-in-forward-gate" data-choice="excluded-from-forward-verdict" data-by="Simon McIntosh" data-when="2026-08-13T13:20:00+00:00">
     <p class="r-dec-q">Do the whitened raw-magnetics residual and the qualified-magnetics bar form
@@ -213,6 +213,10 @@
         so a whitened magnetics residual has no input to score and the cross-source budget that referees
         it has nothing to referee. Both stay valid for reconstruction work and are retained in the
         registry for that use; they are excluded from this plan&#x27;s verdict rather than deleted.</p>
+    </div>
+<div class="r-dec" data-key="normalization-anchors" data-choice="prescribed-reference-anchors" data-by="Simon McIntosh" data-when="2026-08-21T11:30:00+00:00">
+    <p class="r-dec-q">normalization-anchors</p>
+    <p class="r-dec-rat">Owner ruling 2026-08-21, forced by the DINA finding: a stored reference&#x27;s profiles are tabulated against ITS declared psi_axis/psi_boundary, and those declarations can disagree with the reference&#x27;s own flux map (DINA 135011/7: 0.411 Wb, half a percent of span - the drift that consumed the recovery programme until convicted). Reproduction runs therefore normalize psi_norm AND bound the plasma support in the reference&#x27;s own declared coordinate (the prescribed-anchor mode); nova&#x27;s own topology read stays authoritative for free-standing solves. Gauge discipline binds: nova&#x27;s Biot-Savart composition sets its flux gauge, and no comparison may mix nova-gauge amplitudes with reference-gauge constants. Every stored reference is checked for the declared-boundary-vs-map-saddle inconsistency class before any deviation is attributed.</p>
     </div>
 </section>
 
@@ -230,6 +234,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260820T1140" data-who="reckon-ship" data-when="2026-08-20T11:40:00+00:00">
     <div class="r-comment-body">Owner ruling 2026-08-20 adds a hard prerequisite: all further forward-model progress gates on agreement with the Solov'ev oracle. solovev-exact-recovery owns that gate set (pre-registered agreement gates with convergence clauses, Urankar-exact kernel defaults, hexagon-section enforcement, the cell-moment wiring conviction, and the accuracy-cost ladder with the ~1 ms GPU fixed-point target). This plan's entry now waits on that plan in the DAG. Calibration note this plan already carries: the DINA demonstration's axis 41.2 mm / Ip -1.12% deviations match the Solov'ev root drift (42 mm / -1.15%) - the same composition systematic - so the recovery work directly sharpens what a forward-parity deviation here will mean.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260821T1200" data-who="reckon-ship" data-when="2026-08-21T12:00:00+00:00">
+    <div class="r-comment-body">OWNER INTERVIEW 2026-08-21: both entry-design decisions are locked - prescribed reference anchors for reproduction normalization (normalization-anchors) and the reference-seeded initial demonstration with the dual-basin upgrade path (forward-parity-seed). The entry gate readings also moved decisively in this plan's favour this week: the analytic-validation prerequisite is complete (the closed-form oracle proves the composed forward map exact at the analytic state to 4.6e-15 Wb with the recovery gates locked at round-off floors), efit-flux-decomposition sections 3-4 have reopened in S7 to deliver the external-field verdict this plan's entry consumes, and the faithful moment route plus exact kernels are production defaults. Remaining before entry: the decomposition verdict and, for the independent-seed claim only, dual-basin-solve.</div>
 </div>
 </section>
 </main>

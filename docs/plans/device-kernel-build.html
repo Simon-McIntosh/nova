@@ -4,21 +4,24 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="nova">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="device-kernel-build">
-  <meta name="plan-title"     content="Device Kernel Build — exact Green matrices in minutes, differentiable by design">
-  <meta name="plan-summary"   content="Port the exact Part V section-kernel evaluation to single-source JAX so design matrices build on the H200 in the minutes class from one code path, with compute-provenance cache keys, tolerance-based cross-device verification, and a measured route to geometry gradients for the inversion consumer">
-  <meta name="plan-status"    content="draft">
-  <meta name="plan-roi"       content="mid">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="device-kernel-build">
+  <meta name="plan-title" content="Device Kernel Build — exact Green matrices in minutes, differentiable by design">
+  <meta name="plan-summary" content="Port the exact Part V section-kernel evaluation to single-source JAX so design matrices build on the H200 in the minutes class from one code path, with compute-provenance cache keys, tolerance-based cross-device verification, and a measured route to geometry gradients for the inversion consumer">
+  <meta name="plan-status" content="pending">
+  <meta name="plan-roi" content="mid">
   <meta name="plan-effort-hours" content="6.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
   <meta name="plan-capability-verification" content="strict">
-  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-owner" content="Simon McIntosh">
   <title>Device Kernel Build | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-sprint" content="S8">
+<meta name="plan-modified" content="2026-08-21">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -87,10 +90,14 @@
       is two code generators) is binding. The semantic cache key gains a compute-provenance
       field, verification pins compare per provenance, and no cross-device artifact ever
       masquerades as its sibling.</li>
-      <li><strong>Tolerance-based cross-device verification.</strong> Device blocks verify
-      against host blocks at a stated tolerance derived from the Richardson pins (the flux and
-      field blocks carry 4.2e-12 to 3.9e-9 worst-relative pins today); each device re-runs the
-      pin set. Bitwise identity is asserted only within a provenance, never across.</li>
+      <li><strong>Numerical parity across devices (owner ruling 2026-08-21, superseding the
+      drafted tolerance-based form).</strong> The GPU-built matrices must be close to
+      byte-identical to the CPU build: element-wise agreement within a small ULP bound
+      everywhere, byte-identical wherever the path is arithmetic-only, with the prototype
+      measuring and reporting the full ULP distribution and byte-identical fraction (device
+      transcendental intrinsics differ in last ulps, so the measured distribution is what the
+      owner reviews at go/no-go). Each device additionally re-runs the Richardson pin set; the
+      compute-provenance cache field stays until byte-identity is proven.</li>
       <li><strong>Memory by construction.</strong> Whole-pair-array evaluation of ~10⁷ pairs ×
       nine blocks in fp64 sits comfortably inside the H200's HBM; if a configuration outgrows it,
       the evaluation chunks at fixed shape rather than falling back.</li>
@@ -138,61 +145,66 @@
     </ul>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="execution-substrate" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Which substrate carries the device kernel evaluation? Recommendation:
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="execution-substrate" data-choice="jax-single-source" data-by="Simon McIntosh" data-when="2026-08-21T10:07:50+00:00">
+    <p class="r-dec-q">Which substrate carries the device kernel evaluation? Recommendation:
         single-source JAX replacing the NumPy evaluation in place — one code path serving CPU and
         GPU by runtime placement — because a CuPy or hand-CUDA fork would create the parallel
         kernel family the no-wrappers discipline forbids, and JAX is already the solve-side
         substrate so the build inherits jit/vmap and the future gradient path for free.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="jax-single-source">jax-single-source</button>
-          <button class="r-opt" data-value="cupy-device-only">cupy-device-only</button>
-          <button class="r-opt" data-value="keep-numpy-host">keep-numpy-host (decline the port)</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="port-go-threshold" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">What prototype result authorises the full port? Recommendation: the
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="jax-single-source">jax-single-source</button>
+      <button class="r-opt" data-value="cupy-device-only">cupy-device-only</button>
+      <button class="r-opt" data-value="keep-numpy-host">keep-numpy-host (decline the port)</button>
+      </p>
+    <p class="r-dec-rat">Owner ruling 2026-08-21: single-source JAX replacing the NumPy evaluation in place - one code path serving CPU and GPU by runtime placement, per the no-parallel-modules discipline, inheriting jit/vmap and the future gradient path.</p>
+    </div>
+<div class="r-dec" data-key="port-go-threshold" data-choice="two-minutes-and-numerical-parity" data-by="Simon McIntosh" data-when="2026-08-21T10:07:50+00:00">
+    <p class="r-dec-q">What prototype result authorises the full port? Recommendation: the
         one-block H200 prototype must project a full nine-block fine-fixture build under two
         minutes AND the single-source CPU evaluation of that block must hold within 1.5× of the
         NumPy stage time — otherwise the port is declined on measurement and the plan closes with
         the prototype banked, because the cache already covers every consumer except
         per-gradient-step rebuilds.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="two-minutes-and-cpu-parity">two-minutes-and-cpu-parity</button>
-          <button class="r-opt" data-value="any-order-of-magnitude">any order-of-magnitude speedup</button>
-          <button class="r-opt" data-value="owner-adjudicates-prototype">owner adjudicates on the prototype numbers</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="gradient-scope" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Does this plan deliver geometry gradients, or only measure their
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="two-minutes-and-cpu-parity">two-minutes-and-cpu-parity</button>
+      <button class="r-opt" data-value="any-order-of-magnitude">any order-of-magnitude speedup</button>
+      <button class="r-opt" data-value="owner-adjudicates-prototype">owner adjudicates on the prototype numbers</button>
+      </p>
+    <p class="r-dec-rat">Owner ruling 2026-08-21, revising the drafted time-parity form: the go criterion is a projected full fine-fixture build under two minutes AND numerical parity of the built matrices across devices - the GPU-built matrices must be close to byte-identical to the CPU build. Encoded strictly: element-wise agreement within a small ULP bound everywhere, byte-identical wherever the path is arithmetic-only, with the prototype measuring and reporting the full ULP distribution and byte-identical fraction (device transcendental intrinsics differ in last ulps, so the measured distribution is the deliverable the owner reviews at go/no-go). CPU-lane build time additionally must not regress materially, reported beside the parity numbers rather than gating alone.</p>
+    </div>
+<div class="r-dec" data-key="gradient-scope" data-choice="measure-only" data-by="Simon McIntosh" data-when="2026-08-21T10:07:50+00:00">
+    <p class="r-dec-q">Does this plan deliver geometry gradients, or only measure their
         feasibility? Recommendation: measure only — bank the jacfwd memory and time per target on
         the ported blocks and hand the adoption decision to coil-geometry-inversion, which owns
         the consumer — because the banked 12.2 GiB failure was measured on a different
         composition and the port changes the arithmetic enough that commitment before
         measurement would repeat the original mistake in reverse.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="measure-only">measure-only</button>
-          <button class="r-opt" data-value="deliver-gradients">deliver gradients in this plan</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="measure-only">measure-only</button>
+      <button class="r-opt" data-value="deliver-gradients">deliver gradients in this plan</button>
+      </p>
+    <p class="r-dec-rat">Owner ruling 2026-08-21: this plan measures jacfwd memory and time per target on the ported blocks and hands adoption to coil-geometry-inversion, which owns the consumer; commitment before measurement would repeat the original AD mistake in reverse.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-dkb-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-08-20" data-recommends-skill="/reckon-ship device-kernel-build" data-resolved-at="" data-resolved-by="">
-        <h4 class="r-fu-title">Profile first, prototype second, and let the go-threshold decide</h4>
-        <div class="r-fu-body"><p>Deliberately backlog until the solovev-exact-recovery §5 ladder
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-dkb-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-08-20" data-recommends-skill="/reckon-ship device-kernel-build" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Profile first, prototype second, and let the go-threshold decide</h4>
+    <div class="r-fu-body"><p>Deliberately backlog until the solovev-exact-recovery §5 ladder
         lands its profiled build decomposition — item 1 consumes it, and the three framing
         decisions above lock against the prototype's measured numbers rather than in advance.
         The plan starts at the one-block H200 prototype once the profile names the dominant
         stages.</p></div>
-        <pre class="r-fu-prompt">/reckon-ship device-kernel-build</pre>
-      </article>
-    </section>
-  </main>
+    <pre class="r-fu-prompt">/reckon-ship device-kernel-build</pre>
+    </article>
+</section>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s1" data-id="c-20260821T1145" data-who="reckon-ship" data-when="2026-08-21T11:45:00+00:00">
+    <div class="r-comment-body">OWNER INTERVIEW 2026-08-21: all three framing decisions locked and the plan scheduled into S8 beside the GPU catalog. The go-threshold is revised from the drafted time-parity form to NUMERICAL parity: the GPU-built matrices must be close to byte-identical to the CPU build - the one-block H200 prototype measures the element-wise ULP distribution and byte-identical fraction as its central deliverable, with build-time projection and CPU-lane cost reported beside it. The section-5 ladder already satisfied the entry input: builds are 97.2/99.0 percent exact-kernel work with device contraction estimates of 0.12-0.15 ms per moment block banked.</div>
+</div>
+</section>
+</main>
 </body>
 </html>

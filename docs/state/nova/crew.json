@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T12:28:10",
+  "updated": "2026-08-21T12:37:04",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -376,10 +376,24 @@
         "created": "2026-08-17"
       },
       {
-        "id": "sol-demo-scout",
+        "id": "saddle-partition",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
+        "created": "2026-08-21"
+      },
+      {
+        "id": "sol-closure",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-21"
+      },
+      {
+        "id": "sol-demo-scout",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a023de-30d7-7cb1-bbae-c02d5ad36be5",
         "created": "2026-08-21"
       },
       {
@@ -14149,9 +14163,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T102914224125-reuse-map-sol-demonstration",
+        "plan": "sol-current-demonstration",
+        "section": "\u00a71",
+        "node": "reuse-map-sol-demonstration",
+        "role": "implement",
+        "member": "sol-demo-scout",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T10:29:18Z",
+        "completed_at": "2026-08-21T10:34:45Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 327,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 327,
+        "stalled": false,
+        "time_budget": "15m",
+        "base_sha": "b15455305c1bc316417056ff6f06127d4e9e36a3",
+        "commits": [
+          "11105450c19afc09153b2c5940b9fe4e04cc46ec"
+        ],
+        "changed_lines": {
+          "added": 48,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T102914224125-reuse-map-sol-demonstration/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a023de-30d7-7cb1-bbae-c02d5ad36be5",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3600896,
+            "cached_input_tokens_cumulative": 3600896,
+            "input_tokens": 3804265,
+            "input_tokens_cumulative": 3804265,
+            "output_tokens": 14233,
+            "output_tokens_cumulative": 14233,
+            "reasoning_output_tokens": 4750,
+            "reasoning_output_tokens_cumulative": 4750
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 371
+    "_version": 375
   }
 }

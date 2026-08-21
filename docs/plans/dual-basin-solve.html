@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-commits" content="4a4cf70f,46c55d1d,1d795411,f53ddc39,e3e55311,87ed6fdf,b16d032c,a86857ac,6f889817">
+<meta name="plan-commits" content="4a4cf70f,46c55d1d,1d795411,f53ddc39,e3e55311,87ed6fdf,b16d032c,a86857ac,6f889817,d3093912">
 <meta name="plan-artifacts" content="scripts/dual_basin_reuse/reuse-report.md,scripts/dual_basin_fixtures/topology-classification.json,scripts/dual_basin_fixtures/diverted-receipt.json,scripts/dual_basin_fixtures/diverted-state.npz,scripts/dual_basin_fixtures/diverted-root-receipt.json,scripts/dual_basin_audit/diverted-separatrix-audit.json,docs/figures/dual-basin-solve/topology-classification.png,docs/figures/dual-basin-solve/diverted-separatrix-audit.png,docs/evidence/archive/dual-basin-solve-landed.html">
-<meta name="plan-impl" content="0.75">
-<meta name="plan-version" content="14">
+<meta name="plan-impl" content="0.82">
+<meta name="plan-version" content="16">
 </head>
 <body>
   <main class="plan-doc">
@@ -57,29 +57,26 @@
     mid-iteration and crashes convergence — the branch never has to decide its own topology,
     only converge within it.</p>
 
-    <h2 id="s2">§2 — The two-branch solve</h2>
-
-    <p>Each branch is a topology-pinned fixed point: the diverted branch seeds and iterates with
-    saddle-anchored normalization and the clip against its separatrix; the limited branch seeds
-    and iterates with wall-contact normalization and its own boundary read. Neither branch may
-    change class mid-solve — a branch whose topology read contradicts its pin reports that fact
-    in its receipts rather than switching. Branch construction reuses the production machinery
-    end to end (one code path per quantity; the pin is a mask/anchor selection, never a parallel
-    solver).</p>
-
-    <p><em>Done-when (restated twice on measurement — 2026-08-21 classification, commit
-    <code>46c55d1d</code>; then the continuation campaign, per the locked strategy):</em> the
-    limited branch recovers both banked limited roots from cold production seeds at the
-    recovery-gate floors; the diverted branch recovers the banked well-separated fixture from a
-    pre-registered <strong>near-basin</strong> perturbed-seed ladder at the same floors, with
-    the largest passing perturbation stated; and the cold geometry-seed portfolio executes both
-    branches with honest receipts — a terminal wrong-basin or non-converged outcome is recorded
-    data, never silent success. Per the locked <code>dual-basin-strategy</code>, cold basin
-    membership is not engineered by the seed: two bounded composed-map continuation campaigns
-    (21 and 41 rungs) both terminated converged on the dominating limited root even against the
-    well-separated fixture, and that negative result is banked rather than escalated into the
-    rejected globalized-continuation option. Per-branch receipts (residual, iterations,
-    topology-consistency) and fixed shapes under jit/vmap bind throughout.</p>
+    <section id="s2" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-21</span>
+        <h2>§2 — The two-branch solve</h2>
+      </header>
+      <p class="landed-summary">
+        Built the topology-pinned portfolio — an int-valued pin through the one
+        read/support-partition path, branch receipts composing <code>ForwardEquilibrium</code>,
+        fixed-shape jit/vmap batching, per-class cold seeds — and closed the two-class
+        acceptance: both banked limited roots recover cold at the 1e-10 floors; the rebuilt
+        well-separated diverted fixture (2.84 pitches clearance, 8.7%/5.6% span margins, a
+        1.58e-16 pinned root) recovers from every pre-registered near-basin amplitude up to 5%
+        of span; cold wrong-basin termination is honest receipt data. The banked negative
+        stands: scalar homotopies terminate converged on the dominating limited root, so cold
+        basin membership is not seed-engineered, per the locked strategy. Full record:
+        <a href="/nova/evidence/archive/dual-basin-solve-landed#s2-two-class-closed">§2 landed</a>
+        (commits <code>1d795411</code>, <code>87ed6fdf</code>, <code>b16d032c</code>,
+        <code>e3e55311</code>, <code>6f889817</code>, <code>d3093912</code>).
+      </p>
+    </section>
 
     <section id="s3" class="section-landed">
       <header>
@@ -172,6 +169,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260821T1750-continuation-negative" data-who="reckon-ship" data-when="2026-08-21T17:50:00+00:00">
     <div class="r-comment-body">basin-entry-rebuilt-fixture landed NEGATIVE - no commit merged (prototype salvaged); gate FAILED honestly, and the failure is the finding. Against the rebuilt well-separated fixture, both bounded composed-map schedules (restored 21-rung terminal-qualified ladder; corrective 41-rung, 5 Newton steps, 30 GMRES per rung) terminate CONVERGED on the same limited production root: residual 3.43e-17 then exactly 0, achieved class limited, fixture parity error 5.055e-2, pin contradictions clustered over fractions 0.475-1.0 and every rung receipt retained. CONCLUSION: a scalar homotopy does not select a coexisting basin - the limited root dominates cold dynamics regardless of fixture separation. Per the locked dual-basin-strategy (selection is a recorded policy over converged receipts, not a property of the seed; basin-aware-seed-only and globalized-single-solve were rejected), the section-2 acceptance is restated to near-basin per-branch recovery plus honest cold-portfolio receipts, and pseudo-arclength / topology-aware-corrector designs are NOT pursued - they would reopen the rejected option. The closing acceptance node runs the pre-registered perturbed-seed ladder on the basin-branches session.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260821T1815-two-class-closed" data-who="reckon-ship" data-when="2026-08-21T18:15:00+00:00">
+    <div class="r-comment-body">two-class-acceptance landed - commit d3093912, merged 0546453d; gate PASSED (5/5 acceptance, 27/27 regression); SECTION 2 CLOSES and is collapsed. The rebuilt fixture recovers through the pinned diverted branch at all three pre-registered amplitudes (residuals/parities 1.58e-16 vs 1e-10 floors, largest passing amplitude 0.05 span in the ForwardPerturbedSeedReceipt); limited cold recoveries green; the cold portfolio records its limited-root termination honestly. Remaining in this plan: section 4 warm-start economy on the H200. Record: /nova/evidence/archive/dual-basin-solve-landed#s2-two-class-closed.</div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260821T1415-selector" data-who="reckon-ship" data-when="2026-08-21T14:15:00+00:00">
     <div class="r-comment-body">hysteresis-selector landed - commit f53ddc39, merged fcf45671; gate PASSED: 14/14 selector matrix tests, 27/27 forward-solve regression, ruff zero findings. Pure selection over completed portfolio receipts plus immutable SelectionHistory with declared BranchAdmissibility and SelectionPolicy; cold start selects the declared class; disappearance switches immediately only when the alternate is selectable; admissibility loss switches only after the declared consecutive-slice threshold; the six-slice limited-to-diverted sequence selected limited x4 then diverted x2 with exactly 1 switch and 0 elsewhere; every criterion and fired reason serialize through SelectionReceipt.as_dict. Section 3 collapsed. Record: /nova/evidence/archive/dual-basin-solve-landed#s3-selector.</div>

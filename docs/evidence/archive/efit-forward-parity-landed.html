@@ -58,6 +58,44 @@
   <code>free-anchor-arm.json</code>, <code>mast-dina-composition-diff.json</code>,
   <code>boundary-imbalance-attribution.json</code> with their figures.</p>
 
+  <h2 id="s4-verdict">§4 — the frozen-six verdict: no reproduction at the registered bounds, DINA-class closest approaches</h2>
+
+  <p><strong>Landed 2026-08-21, commit <code>f771f90d</code> (merge <code>5735f33d</code>);
+  aggregate verdict FAIL — the free-boundary fixed point does not reproduce the reference
+  within the registered bounds.</strong> Scored on the passive-inclusive reference-seeded
+  prescribed-anchor arm, best-qualified rows, with the exact 1126×101 response reused across
+  shots under a digest key covering only its true inputs (6/6 digest sets bit-identical).</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>shot/row</th><th>outcome</th><th>closest residual</th><th>closest I<sub>p</sub> dev</th><th>closest flux sup (of span)</th></tr></thead>
+    <tbody>
+      <tr><td>21978/35</td><td>bounded</td><td>1.242e-2</td><td>+1.267%</td><td>3.43%</td></tr>
+      <tr><td>21983/35</td><td>bounded</td><td>6.148e-3</td><td>−0.265%</td><td>3.50%</td></tr>
+      <tr><td>21985/51</td><td>bounded</td><td>1.971e-3</td><td>+0.443%</td><td>1.58%</td></tr>
+      <tr><td>21986/46</td><td>bounded, terminal limited</td><td>3.589e-3</td><td>−0.219%</td><td>1.06%</td></tr>
+      <tr><td>21989/55</td><td><strong>vacuum collapse</strong></td><td>0 (vacuum)</td><td>−100%</td><td>64.9%</td></tr>
+      <tr><td>22086/43</td><td>bounded</td><td>1.502e-2</td><td>+0.217%</td><td>1.89%</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>0/6 converge at the registered 1e-8 criterion; 0/6 pass the carried axis
+  (1.01344e-3 m) / LCFS (3.3047e-4 m) / x-point (0.014 m) set; five of six hold DINA-class
+  moment deviations (0.2–1.3% I<sub>p</sub>) <em>without formal convergence</em>. Per the
+  plan's own clause the GPU catalog is <strong>held on this verdict</strong>; the hold ruling
+  and any follow-on diagnosis (the remaining 0.41%-of-span boundary residual, the +1.86%
+  plasma-field term, mesh refinement) are owner-owned. Receipt:
+  <code>docs/figures/efit-forward-parity/passive-inclusive-frozen-six-scorecard.json</code>.</p>
+
+  <figure>
+    <img src="/nova/figures/efit-forward-parity/passive-inclusive-frozen-six-trajectories.png"
+         alt="Six-panel accepted-residual trajectories against the 1e-8 criterion"
+         style="max-width:100%;height:auto">
+    <figcaption>The six accepted-residual trajectories against the registered 1e-8 line: five
+    bounded non-convergences orbiting at 2e-3–1.5e-2, one vacuum collapse (21989).</figcaption>
+  </figure>
+
   <h2 id="s6-dual-route">§6 — the DINA reference's flux functions by two routes: reliable extraction, and a quantified disagreement neither route may absorb</h2>
 
   <p><strong>Landed 2026-08-21, commit <code>71c1ec36</code> (merge <code>dabbb783</code>); gate

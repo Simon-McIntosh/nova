@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="7">
 </head>
 <body>
   <main class="plan-doc">
@@ -189,6 +189,34 @@
     capability with real value — it is simply Ambix's side of the seam in the intended architecture, and
     <code>ReconstructProfile</code> remains nova's implementation of it for callers who want it.</p>
 
+    <h2 id="s6">§6 — The DINA reference's flux functions, by two routes</h2>
+
+    <p><strong>Owner directive 2026-08-21.</strong> The stored DINA reproduction lane derives its flux
+    functions two ways and consumes both. Route one is extraction from the stored flux map through the
+    existing affine projection — <code>nova/equilibrium/map_extraction.extract_flux_functions</code>
+    reads Δ*Φ into R·j<sub>φ</sub> and projects it onto (μ₀R², 1) per normalised-flux shell, with the
+    extraction receipt qualifying every surface (projection residual, design condition, uncertainty
+    inflation near the axis and near |∇ψ_N| → 0). Route two is the profiles the dataset itself declares:
+    <code>equilibrium/time_slice/profiles_1d/dpressure_dpsi</code> [Pa/Wb] and
+    <code>profiles_1d/f_df_dpsi</code> [T²·m²/Wb] on <code>profiles_1d/psi</code> [Wb], read with
+    imas-python (<code>imas.DBEntry</code>) at the entry's written DD version 3.39.0 — never h5py —
+    with the declared anchors <code>global_quantities/psi_axis</code> and <code>psi_boundary</code>
+    read beside them.</p>
+
+    <p><strong>The comparison is the point, not a redundancy.</strong> The declared profiles are
+    tabulated against the reference's declared boundary constant while the map extraction normalises to
+    the stored field itself, so a declared-versus-extracted deviation localises the banked
+    declared-boundary-vs-map-saddle inconsistency (0.411 Wb, 0.51% of span) in the profile domain —
+    the input qualification the normalization-anchors ruling requires before any reproduction deviation
+    is attributed. Where the two routes agree, the reproduction gains a source vector with stated
+    uncertainty; where they disagree, the disagreement is the finding and is reported unbounded.</p>
+
+    <p><em>Done-when:</em> a banked dual-route receipt for 135011/7 slice 353 reports both profile sets
+    on a common ψ_N base with extraction uncertainty and reliability masks, their deviation profiles,
+    integral cross-checks against <code>profiles_1d/pressure</code> and <code>profiles_1d/f</code>, and
+    the reproduction-lane forcing under each route on the cached stored-reference fixtures, with gauge
+    and anchor provenance stated in every figure.</p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="forward-parity-seed" data-choice="reference-seed" data-by="Simon McIntosh" data-when="2026-08-21T10:09:38+00:00">
@@ -217,6 +245,15 @@
 <div class="r-dec" data-key="normalization-anchors" data-choice="prescribed-reference-anchors" data-by="Simon McIntosh" data-when="2026-08-21T11:30:00+00:00">
     <p class="r-dec-q">normalization-anchors</p>
     <p class="r-dec-rat">Owner ruling 2026-08-21, forced by the DINA finding: a stored reference&#x27;s profiles are tabulated against ITS declared psi_axis/psi_boundary, and those declarations can disagree with the reference&#x27;s own flux map (DINA 135011/7: 0.411 Wb, half a percent of span - the drift that consumed the recovery programme until convicted). Reproduction runs therefore normalize psi_norm AND bound the plasma support in the reference&#x27;s own declared coordinate (the prescribed-anchor mode); nova&#x27;s own topology read stays authoritative for free-standing solves. Gauge discipline binds: nova&#x27;s Biot-Savart composition sets its flux gauge, and no comparison may mix nova-gauge amplitudes with reference-gauge constants. Every stored reference is checked for the declared-boundary-vs-map-saddle inconsistency class before any deviation is attributed.</p>
+    </div>
+<div class="r-dec" data-key="dina-flux-function-source" data-choice="dual-route" data-by="Simon McIntosh" data-when="2026-08-21T10:20:00+00:00">
+    <p class="r-dec-q">Which flux-function source drives the stored DINA reproduction: the declared profiles_1d, extraction from the stored map, or both?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="dual-route">both — map extraction through the existing affine projection, beside the declared profiles_1d</button>
+      <button class="r-opt" data-value="declared-only">the declared profiles_1d alone</button>
+      <button class="r-opt" data-value="extracted-only">map extraction alone</button>
+      </p>
+    <p class="r-dec-rat">Owner directive 2026-08-21: use the existing infrastructure to extract the flux functions from the flux maps (the affine per-surface projection) in addition to the profiles the dataset lists (equilibrium IDS profiles_1d, paths located with the imas-dd tools; read with imas-python at the written DD version). The two routes bound the reference&#x27;s internal consistency in the profile domain; neither is discarded, and route disagreement is reported rather than reconciled.</p>
     </div>
 </section>
 

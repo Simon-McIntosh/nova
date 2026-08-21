@@ -1,0 +1,48 @@
+11:13:41 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/moment-branch-integration
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collected 22 items
+
+tests/test_equilibrium_stencil_mesh.py .....F.............               [ 86%]
+tests/test_equilibrium_density_moments.py ...                            [100%]
+
+=================================== FAILURES ===================================
+______ test_boundary_profile_density_matches_adaptive_polygon_quadrature _______
+
+    def test_boundary_profile_density_matches_adaptive_polygon_quadrature():
+        """A ring cell's fixed profile polynomial matches adaptive quadrature."""
+        problem = boundary_support_problem()
+        atomic = problem["geometry"].atomic_mesh
+        support = atomic.traced_clip(jnp.ones(len(atomic.node_coordinates)))
+        attributed = evaluate_boundary_support(problem, support)
+        cell = int(problem["ring"][len(problem["ring"]) // 2])
+        polygon = np.asarray(problem["geometry"].polygons[cell])
+        centre = np.asarray(problem["mesh"].coordinate[cell])
+        scale = np.max(
+            np.abs(np.asarray(problem["geometry"].sampling_vertices[cell]) - centre),
+            axis=0,
+        )
+
+        def local_basis(point):
+            local = (point - centre) / scale
+            return np.asarray(
+                [local[0] ** p * local[1] ** q for p, q in PROFILE_DENSITY_POWERS]
+            )
+
+        stencil = problem["stencil"]
+>       assert stencil.ring_profile_weight.shape[1:] == (
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            len(PROFILE_DENSITY_POWERS),
+            672,
+        )
+E       AttributeError: 'InteriorCurrentMomentStencil' object has no attribute 'ring_profile_weight'. Did you mean: 'ring_flux_weight'?
+
+tests/test_equilibrium_stencil_mesh.py:395: AttributeError
+=========================== short test summary info ============================
+FAILED tests/test_equilibrium_stencil_mesh.py::test_boundary_profile_density_matches_adaptive_polygon_quadrature
+======================== 1 failed, 21 passed in 28.78s =========================
+EXIT=1

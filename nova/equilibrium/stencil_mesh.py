@@ -63,7 +63,6 @@ from nova.equilibrium.conservation import STENCIL_MARGIN
 from nova.equilibrium.separatrix_clip import (
     AtomicCellMesh,
     complete_polynomial_powers,
-    padded_polynomial_current_moments,
 )
 
 __all__ = [
@@ -74,6 +73,7 @@ __all__ = [
     "PROFILE_DENSITY_POWERS",
     "SharedNodeFluxStencil",
     "StencilMesh",
+    "fixed_profile_current_moments",
     "ring_condition",
 ]
 
@@ -89,6 +89,12 @@ RING_CONDITION_LIMIT = 1.0e3
 #: weighted full-cell design is projected once at geometry construction time;
 #: exact support moments then require monomials through one degree higher.
 PROFILE_DENSITY_POWERS = complete_polynomial_powers(9)
+
+_DENSITY_QUADRATURE_NODE, _DENSITY_QUADRATURE_WEIGHT = np.polynomial.legendre.leggauss(
+    8
+)
+_DENSITY_UNIT_NODE = 0.5 * (_DENSITY_QUADRATURE_NODE + 1.0)
+_DENSITY_UNIT_WEIGHT = 0.5 * _DENSITY_QUADRATURE_WEIGHT
 
 #: Coefficients of the fitted quadratic, in design-matrix column order.
 _VALUE, _RADIAL, _VERTICAL, _RADIAL_CURVATURE, _CROSS, _VERTICAL_CURVATURE = range(6)
@@ -112,10 +118,6 @@ class InteriorCurrentMomentStencil:
     ring_flux_weight: np.ndarray | None = field(default=None, repr=False)
     ring_coordinate_scale: np.ndarray | None = field(default=None, repr=False)
     ring_sampling_centre: np.ndarray | None = field(default=None, repr=False)
-    ring_profile_point: np.ndarray | None = field(default=None, repr=False)
-    ring_profile_flux_design: np.ndarray | None = field(default=None, repr=False)
-    ring_profile_weight: np.ndarray | None = field(default=None, repr=False)
-    ring_profile_condition: np.ndarray | None = field(default=None, repr=False)
     ring_sample_node_count: int = 0
 
     def __post_init__(self):
@@ -124,10 +126,6 @@ class InteriorCurrentMomentStencil:
             "ring_flux_weight",
             "ring_coordinate_scale",
             "ring_sampling_centre",
-            "ring_profile_point",
-            "ring_profile_flux_design",
-            "ring_profile_weight",
-            "ring_profile_condition",
         ):
             value = getattr(self, name)
             if value is not None:
@@ -172,9 +170,6 @@ class InteriorCurrentMomentStencil:
             jnp.asarray(self.ring_sampling_centre, dtype=value_pool.dtype),
             jnp.asarray(self.ring_coordinate_scale, dtype=value_pool.dtype),
             flux_coefficient,
-            jnp.asarray(self.ring_profile_point, dtype=value_pool.dtype),
-            jnp.asarray(self.ring_profile_flux_design, dtype=value_pool.dtype),
-            jnp.asarray(self.ring_profile_weight, dtype=value_pool.dtype),
         )
         entries = jnp.stack([current, first[:, 0], first[:, 1]])
         vectors = jnp.zeros((3, self.cell_count), dtype=entries.dtype)
@@ -369,32 +364,6 @@ def _quadratic_design(local: np.ndarray) -> np.ndarray:
     )
 
 
-def _polynomial_design(
-    local: np.ndarray, powers: tuple[tuple[int, int], ...]
-) -> np.ndarray:
-    """Evaluate a fixed complete monomial basis at local coordinates."""
-    radial, vertical = local[..., 0], local[..., 1]
-    return np.stack([radial**p * vertical**q for p, q in powers], axis=-1)
-
-
-def _subdivide_triangles(triangles: np.ndarray) -> np.ndarray:
-    """Split every triangle into four fixed equal-area children."""
-    first, second, third = np.moveaxis(triangles, -2, 0)
-    first_second = 0.5 * (first + second)
-    second_third = 0.5 * (second + third)
-    third_first = 0.5 * (third + first)
-    children = np.stack(
-        [
-            np.stack([first, first_second, third_first], axis=-2),
-            np.stack([first_second, second, second_third], axis=-2),
-            np.stack([third_first, second_third, third], axis=-2),
-            np.stack([first_second, second_third, third_first], axis=-2),
-        ],
-        axis=-3,
-    )
-    return children.reshape(*triangles.shape[:-2], 4, 3, 2)
-
-
 def _quadratic_flux_design(local):
     """Evaluate the complete quadratic basis with the input array namespace."""
     radial, vertical = local[..., 0], local[..., 1]
@@ -419,31 +388,89 @@ def fixed_profile_current_moments(
     sampling_centre,
     coordinate_scale,
     flux_coefficient,
-    profile_point,
-    profile_flux_design,
-    profile_weight,
+    participation=None,
 ):
-    """Integrate one clip-independent profile polynomial over changing supports."""
-    vertices = jnp.asarray(support_vertices)
-    count = jnp.asarray(vertex_count)
-    included = count >= 3
-    flux = jnp.einsum("nqi,ni->nq", profile_flux_design, flux_coefficient)
-    density = profile.current_density(profile_point[..., 0], flux)
-    polynomial = jnp.einsum("niq,nq->ni", profile_weight, density)
-    current, first_about_sampling = padded_polynomial_current_moments(
-        vertices,
-        count,
+    """Integrate density moments by the fixed degree-fifteen Duffy rule."""
+    return _direct_profile_current_moments(
+        profile,
+        support_vertices,
+        vertex_count,
+        moment_centre,
         sampling_centre,
         coordinate_scale,
-        jnp.where(included[:, None], polynomial, 0.0),
-        PROFILE_DENSITY_POWERS,
+        flux_coefficient,
+        participation,
     )
-    first_about_moment = first_about_sampling + current[:, None] * (
-        sampling_centre - moment_centre
+
+
+def _direct_profile_current_moments(
+    profile,
+    support_vertices,
+    vertex_count,
+    moment_centre,
+    sampling_centre,
+    coordinate_scale,
+    flux_coefficient,
+    participation,
+):
+    """Integrate density and first moments with a fixed Duffy product rule."""
+    vertices = jnp.asarray(support_vertices)
+    count = jnp.asarray(vertex_count)
+    capacity = vertices.shape[1]
+    triangle_slot = jnp.arange(1, capacity - 1)
+    first = jnp.broadcast_to(vertices[:, :1], (len(vertices), capacity - 2, 2))
+    second = vertices[:, triangle_slot]
+    third = vertices[:, triangle_slot + 1]
+    node = jnp.asarray(_DENSITY_UNIT_NODE, dtype=vertices.dtype)
+    node_weight = jnp.asarray(_DENSITY_UNIT_WEIGHT, dtype=vertices.dtype)
+    radial, vertical = jnp.meshgrid(node, node, indexing="ij")
+    radial_weight, vertical_weight = jnp.meshgrid(
+        node_weight, node_weight, indexing="ij"
     )
-    current = jnp.where(included, current, 0.0)
-    first_about_moment = jnp.where(included[:, None], first_about_moment, 0.0)
-    return current, first_about_moment
+    radial = radial.reshape(-1)
+    vertical = vertical.reshape(-1)
+    rule_weight = (radial_weight * vertical_weight).reshape(-1)
+    edge_first = second - first
+    edge_second = third - first
+    points = (
+        first[:, :, None, :]
+        + radial[None, None, :, None] * edge_first[:, :, None, :]
+        + (1.0 - radial)[None, None, :, None]
+        * vertical[None, None, :, None]
+        * edge_second[:, :, None, :]
+    )
+    cross = jnp.abs(
+        edge_first[..., 0] * edge_second[..., 1]
+        - edge_first[..., 1] * edge_second[..., 0]
+    )
+    included = count >= 3
+    if participation is not None:
+        included = included & jnp.asarray(participation, dtype=bool)
+    live = (triangle_slot[None, :] + 1 < count[:, None]) & included[:, None]
+    weights = (
+        cross[:, :, None] * (1.0 - radial)[None, None, :] * rule_weight[None, None, :]
+    )
+    weights = jnp.where(live[:, :, None], weights, 0.0)
+    points = points.reshape(len(vertices), -1, 2)
+    weights = weights.reshape(len(vertices), -1)
+    points = jnp.where(
+        (weights > 0.0)[..., None], points, jnp.asarray(sampling_centre)[:, None, :]
+    )
+    local = (points - jnp.asarray(sampling_centre)[:, None, :]) / jnp.asarray(
+        coordinate_scale
+    )[:, None, :]
+    flux = jnp.einsum("nqi,ni->nq", _quadratic_flux_design(local), flux_coefficient)
+    density = profile.current_density(points[..., 0], flux)
+    weighted_density = density * weights
+    current = jnp.sum(weighted_density, axis=1)
+    first = jnp.sum(
+        weighted_density[..., None] * (points - jnp.asarray(moment_centre)[:, None, :]),
+        axis=1,
+    )
+    return (
+        jnp.where(included, current, 0.0),
+        jnp.where(included[:, None], first, 0.0),
+    )
 
 
 def _polygon_monomial_integral(
@@ -656,10 +683,6 @@ class StencilMesh:
         ring_flux_weight = None
         ring_coordinate_scale = None
         ring_sampling_centre = None
-        ring_profile_point = None
-        ring_profile_flux_design = None
-        ring_profile_weight = None
-        ring_profile_condition = None
         ring_sample_node_count = 0
         if support_centre is not None:
             if sampling_node_coordinate is None or sampling_cell_node is None:
@@ -694,66 +717,6 @@ class StencilMesh:
                 ring_points - ring_sampling_centre[:, None, :]
             ) / ring_coordinate_scale[:, None, :]
             ring_flux_weight = np.linalg.pinv(_quadratic_design(ring_local))
-            barycentric = np.asarray(
-                [
-                    [1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0],
-                    [0.059715871789770, 0.470142064105115, 0.470142064105115],
-                    [0.470142064105115, 0.059715871789770, 0.470142064105115],
-                    [0.470142064105115, 0.470142064105115, 0.059715871789770],
-                    [0.797426985353087, 0.101286507323456, 0.101286507323456],
-                    [0.101286507323456, 0.797426985353087, 0.101286507323456],
-                    [0.101286507323456, 0.101286507323456, 0.797426985353087],
-                ]
-            )
-            rule_weight = np.asarray(
-                [
-                    0.225,
-                    0.132394152788506,
-                    0.132394152788506,
-                    0.132394152788506,
-                    0.125939180544827,
-                    0.125939180544827,
-                    0.125939180544827,
-                ]
-            )
-            following = np.roll(ring_vertices, -1, axis=1)
-            triangles = np.stack(
-                [
-                    np.broadcast_to(
-                        ring_sampling_centre[:, None, :], ring_vertices.shape
-                    ),
-                    ring_vertices,
-                    following,
-                ],
-                axis=2,
-            )
-            for _ in range(2):
-                triangles = _subdivide_triangles(triangles)
-            triangles = triangles.reshape(len(ring_centre), -1, 3, 2)
-            first = triangles[:, :, 1] - triangles[:, :, 0]
-            second = triangles[:, :, 2] - triangles[:, :, 0]
-            triangle_area = 0.5 * np.abs(
-                first[..., 0] * second[..., 1] - first[..., 1] * second[..., 0]
-            )
-            ring_profile_point = np.einsum(
-                "qa,ntad->ntqd", barycentric, triangles
-            ).reshape(len(ring_centre), -1, 2)
-            quadrature_weight = (
-                triangle_area[:, :, None] * rule_weight[None, None, :]
-            ).reshape(len(ring_centre), -1)
-            profile_local = (
-                ring_profile_point - ring_sampling_centre[:, None, :]
-            ) / ring_coordinate_scale[:, None, :]
-            ring_profile_flux_design = _quadratic_design(profile_local)
-            density_design = _polynomial_design(profile_local, PROFILE_DENSITY_POWERS)
-            square_root_weight = np.sqrt(quadrature_weight)
-            weighted_design = density_design * square_root_weight[..., None]
-            orthogonal, triangular = np.linalg.qr(weighted_design, mode="reduced")
-            weighted_right = (
-                np.swapaxes(orthogonal, 1, 2) * square_root_weight[:, None, :]
-            )
-            ring_profile_weight = np.linalg.solve(triangular, weighted_right)
-            ring_profile_condition = np.linalg.cond(triangular)
         return InteriorCurrentMomentStencil(
             cell_count=self.node_count,
             ring_centre=ring_centre,
@@ -761,10 +724,6 @@ class StencilMesh:
             ring_flux_weight=ring_flux_weight,
             ring_coordinate_scale=ring_coordinate_scale,
             ring_sampling_centre=ring_sampling_centre,
-            ring_profile_point=ring_profile_point,
-            ring_profile_flux_design=ring_profile_flux_design,
-            ring_profile_weight=ring_profile_weight,
-            ring_profile_condition=ring_profile_condition,
             ring_sample_node_count=ring_sample_node_count,
         )
 

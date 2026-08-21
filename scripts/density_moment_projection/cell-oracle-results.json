@@ -1,0 +1,196 @@
+{
+  "fixture": "coarse",
+  "plasma_cells": 566,
+  "quadrature": {
+    "defect_convicted": false,
+    "finding": "The production rule and the independent high-order rule agree far more closely than either agrees with the analytic-density oracle. The large attribution floor is carried by the in-cell flux representation near the separatrix, not polygon integration.",
+    "maximum_fraction_of_analytic_discrepancy": 0.017760624777599477,
+    "same_interpolant_scaled_sup": 0.0006871496560517665,
+    "sample_count": 6
+  },
+  "sampled_cells": [
+    {
+      "analytic_density_moments": [
+        -1.7957980175808228,
+        -0.1284904480599078,
+        -0.20750271057885658
+      ],
+      "area_fraction": 0.4529509503196349,
+      "boundary_support": true,
+      "category": "interior",
+      "cell": 19,
+      "direct_moments": [
+        -287.7674105654526,
+        -17.41180223990599,
+        -16.439907831043836
+      ],
+      "direct_vs_analytic_scaled_sup": 0.9938007974891532,
+      "direct_vs_high_order_interpolant_scaled_sup": 4.1506089915093314e-05,
+      "duffy_weight_area_m2": 0.025365341457274218,
+      "high_order_same_interpolant_moments": [
+        -287.7554669611674,
+        -17.410909371346747,
+        -16.44113090142603
+      ],
+      "quadrature_fraction_of_analytic_discrepancy": 4.176499960551333e-05,
+      "signed_shoelace_area_m2": 0.025365341457272983,
+      "support_area_m2": 0.025365341457274218,
+      "vertex_count": 4
+    },
+    {
+      "analytic_density_moments": [
+        -19976.707938025094,
+        16.111665008359513,
+        -26.66226036324625
+      ],
+      "area_fraction": 1.0,
+      "boundary_support": false,
+      "category": "interior",
+      "cell": 274,
+      "direct_moments": [
+        -19835.608593585337,
+        16.978785785703728,
+        -26.261156249474624
+      ],
+      "direct_vs_analytic_scaled_sup": 0.007113446015844352,
+      "direct_vs_high_order_interpolant_scaled_sup": 1.321637113816782e-06,
+      "duffy_weight_area_m2": 0.056000194810000126,
+      "high_order_same_interpolant_moments": [
+        -19835.582378143492,
+        16.9790703657074,
+        -26.25960541767313
+      ],
+      "quadrature_fraction_of_analytic_discrepancy": 0.0001857942143474475,
+      "signed_shoelace_area_m2": 0.05600019480999929,
+      "support_area_m2": 0.056000194810000126,
+      "vertex_count": 6
+    },
+    {
+      "analytic_density_moments": [
+        -26960.23436188329,
+        162.63257587767185,
+        174.8257275022499
+      ],
+      "area_fraction": 1.0,
+      "boundary_support": false,
+      "category": "interior",
+      "cell": 552,
+      "direct_moments": [
+        -27497.33225190372,
+        107.92362336165458,
+        113.87144147497926
+      ],
+      "direct_vs_analytic_scaled_sup": 0.019539505732266267,
+      "direct_vs_high_order_interpolant_scaled_sup": 0.00034703382965053524,
+      "duffy_weight_area_m2": 0.056000194810000126,
+      "high_order_same_interpolant_moments": [
+        -27487.793057810228,
+        107.84272947249798,
+        114.39486318448985
+      ],
+      "quadrature_fraction_of_analytic_discrepancy": 0.017760624777599477,
+      "signed_shoelace_area_m2": 0.056000194809998405,
+      "support_area_m2": 0.05600019481000012,
+      "vertex_count": 6
+    },
+    {
+      "analytic_density_moments": [
+        -217.28897151792785,
+        10.075879109911881,
+        -22.128057609183365
+      ],
+      "area_fraction": 0.2802716497957756,
+      "boundary_support": true,
+      "category": "boundary",
+      "cell": 13,
+      "direct_moments": [
+        -616.0549901609004,
+        25.676572559674593,
+        -54.54583545903247
+      ],
+      "direct_vs_analytic_scaled_sup": 0.6472790721047532,
+      "direct_vs_high_order_interpolant_scaled_sup": 1.634102661070443e-05,
+      "duffy_weight_area_m2": 0.015695266988283465,
+      "high_order_same_interpolant_moments": [
+        -616.0650572963956,
+        25.67726748244841,
+        -54.54700478096293
+      ],
+      "quadrature_fraction_of_analytic_discrepancy": 2.524572060945585e-05,
+      "signed_shoelace_area_m2": 0.015695266988283052,
+      "support_area_m2": 0.01569526698828346,
+      "vertex_count": 5
+    },
+    {
+      "analytic_density_moments": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "area_fraction": 0.005538523848066151,
+      "boundary_support": true,
+      "category": "boundary",
+      "cell": 366,
+      "direct_moments": [
+        -2.259768599432074,
+        0.12646464905627763,
+        -0.2254449196896978
+      ],
+      "direct_vs_analytic_scaled_sup": 0.9999303382243208,
+      "direct_vs_high_order_interpolant_scaled_sup": 8.427947301936634e-05,
+      "duffy_weight_area_m2": 0.00023689028839386228,
+      "high_order_same_interpolant_moments": [
+        -2.25992602989222,
+        0.1263857741806188,
+        -0.22552919916271716
+      ],
+      "quadrature_fraction_of_analytic_discrepancy": 6.966662878026574e-05,
+      "signed_shoelace_area_m2": 0.0002368902883951307,
+      "support_area_m2": 0.0002368902883938622,
+      "vertex_count": 3
+    },
+    {
+      "analytic_density_moments": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "area_fraction": 0.0009034314792287617,
+      "boundary_support": true,
+      "category": "boundary",
+      "cell": 562,
+      "direct_moments": [
+        -0.12082982283411502,
+        0.008732095187402292,
+        0.015150550684644758
+      ],
+      "direct_vs_analytic_scaled_sup": 0.12082982283411502,
+      "direct_vs_high_order_interpolant_scaled_sup": 0.0006871496560517665,
+      "duffy_weight_area_m2": 5.0592338834298475e-05,
+      "high_order_same_interpolant_moments": [
+        -0.12151697249016678,
+        0.00878391440226573,
+        0.015233881959046028
+      ],
+      "quadrature_fraction_of_analytic_discrepancy": 0.0006871496560517665,
+      "signed_shoelace_area_m2": 5.0592338833865824e-05,
+      "support_area_m2": 5.059233883429734e-05,
+      "vertex_count": 3
+    }
+  ],
+  "seams": {
+    "domain": "actual traced clipped support",
+    "fan_orientation": "absolute Duffy Jacobian; signed shoelace reported",
+    "full_hex_substitution": false,
+    "geometry_verified": true,
+    "weight_normalisation_area_sup_absolute_m2": 2.3592239273284576e-16
+  },
+  "topology": {
+    "excluded_current_sup_a": 0.0,
+    "excluded_first_sup_a_m": 0.0,
+    "excluded_supports": 17,
+    "participating_supports": 430,
+    "raw_nonempty_supports": 447
+  },
+  "warm_cache": true
+}

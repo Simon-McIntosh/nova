@@ -1,0 +1,26 @@
+warning: `VIRTUAL_ENV=/home/ITER/mcintos/Code/reckon/.venv` does not match the project environment path `/home/ITER/mcintos/Code/nova/.venv` and will be ignored; use `--active` to target the active environment instead
+18:44:11 INFO     Parsing data dictionary version 4.1.1 [90m@dd_zip.py:89[0m
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________ test_direct_density_moments_zero_nonparticipating_supports __________
+
+    def test_direct_density_moments_zero_nonparticipating_supports():
+        """Topology-excluded supports carry exact zeros through the quadrature."""
+        mesh, centres, scale, flux_coefficient = _geometry()
+        support = mesh.traced_clip(jnp.ones(len(mesh.node_coordinates)))
+>       current, first = fixed_profile_current_moments(
+            AffineDensity(),
+            support.support_vertices,
+            support.vertex_count,
+            support.centroids,
+            centres,
+            scale,
+            jnp.asarray(flux_coefficient),
+            participation=jnp.asarray([True, False]),
+        )
+E       TypeError: fixed_profile_current_moments() got an unexpected keyword argument 'participation'
+
+tests/test_equilibrium_density_moments.py:72: TypeError
+=========================== short test summary info ============================
+FAILED tests/test_equilibrium_density_moments.py::test_direct_density_moments_zero_nonparticipating_supports
+1 failed in 20.21s

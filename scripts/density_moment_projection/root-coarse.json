@@ -1,0 +1,263 @@
+{
+  "cache": {
+    "key": "746fbe1553c4b242",
+    "load_seconds": 0.3803744688630104,
+    "warm_hit": true
+  },
+  "fixture": "coarse",
+  "physics_gates": {
+    "all_passed": true,
+    "count": 11,
+    "gates": {
+      "analytic_field": {
+        "baseline": {
+          "bound": 0.05,
+          "margin": -0.05124260849102606,
+          "passed": false,
+          "value": 0.10124260849102606
+        },
+        "comparison": "less_than",
+        "repaired": {
+          "bound": 0.05,
+          "margin": 0.017158110215339376,
+          "passed": true,
+          "value": 0.03284188978466063
+        }
+      },
+      "axis": {
+        "baseline": {
+          "bound": 0.06,
+          "margin": 0.01755784074181882,
+          "passed": true,
+          "value": 0.04244215925818118
+        },
+        "comparison": "less_than",
+        "repaired": {
+          "bound": 0.06,
+          "margin": 0.016776170060984474,
+          "passed": true,
+          "value": 0.04322382993901552
+        }
+      },
+      "divergence_b": {
+        "baseline": {
+          "bound": 0.008711464412268109,
+          "margin": 0.007610486596723338,
+          "passed": true,
+          "value": 0.001100977815544771
+        },
+        "comparison": "less_than",
+        "repaired": {
+          "bound": 0.008774290404404299,
+          "margin": 0.007673133301361894,
+          "passed": true,
+          "value": 0.0011011571030424044
+        }
+      },
+      "divergence_j": {
+        "baseline": {
+          "bound": 0.008711464412268109,
+          "margin": 0.00553886637507613,
+          "passed": true,
+          "value": 0.0031725980371919795
+        },
+        "comparison": "less_than",
+        "repaired": {
+          "bound": 0.008774290404404299,
+          "margin": 0.005599324306650094,
+          "passed": true,
+          "value": 0.0031749660977542045
+        }
+      },
+      "flux": {
+        "baseline": {
+          "bound": 0.1,
+          "margin": 0.034949632462422164,
+          "passed": true,
+          "value": 0.06505036753757784
+        },
+        "comparison": "less_than",
+        "repaired": {
+          "bound": 0.1,
+          "margin": 0.03361453018095252,
+          "passed": true,
+          "value": 0.06638546981904749
+        }
+      },
+      "grad_shafranov": {
+        "baseline": {
+          "bound": 0.08,
+          "margin": 0.03644267793865946,
+          "passed": true,
+          "value": 0.04355732206134054
+        },
+        "comparison": "less_than",
+        "repaired": {
+          "bound": 0.08,
+          "margin": 0.03612854797797851,
+          "passed": true,
+          "value": 0.043871452022021494
+        }
+      },
+      "internal_inductance": {
+        "baseline": {
+          "bound": 0.08,
+          "margin": -0.046302728863251,
+          "passed": false,
+          "value": 0.126302728863251
+        },
+        "comparison": "less_than",
+        "repaired": {
+          "bound": 0.08,
+          "margin": 0.06990923076441162,
+          "passed": true,
+          "value": 0.010090769235588382
+        }
+      },
+      "physical": {
+        "baseline": {
+          "passed": true,
+          "value": {
+            "core_cells": 376,
+            "diverted": true
+          }
+        },
+        "comparison": "nonempty_diverted_topology",
+        "repaired": {
+          "passed": true,
+          "value": {
+            "core_cells": 376,
+            "diverted": true
+          }
+        }
+      },
+      "plasma_current": {
+        "baseline": {
+          "bound": 0.03,
+          "margin": 0.018812470800345288,
+          "passed": true,
+          "value": 0.011187529199654711
+        },
+        "comparison": "less_than",
+        "repaired": {
+          "bound": 0.03,
+          "margin": 0.018441684130882735,
+          "passed": true,
+          "value": 0.011558315869117264
+        }
+      },
+      "poloidal_beta": {
+        "baseline": {
+          "bound": 0.08,
+          "margin": 0.05428625236955724,
+          "passed": true,
+          "value": 0.025713747630442763
+        },
+        "comparison": "less_than",
+        "repaired": {
+          "bound": 0.08,
+          "margin": 0.05736857195017413,
+          "passed": true,
+          "value": 0.022631428049825875
+        }
+      },
+      "receipt_field": {
+        "baseline": {
+          "bound": 0.03,
+          "margin": -0.028914971799305716,
+          "passed": false,
+          "value": 0.058914971799305715
+        },
+        "comparison": "less_than",
+        "repaired": {
+          "bound": 0.03,
+          "margin": 0.03,
+          "passed": true,
+          "value": 0.0
+        }
+      }
+    },
+    "passed": 11,
+    "scores": {
+      "analytic_field_quadrature_deviation_fraction": 0.03284188978466063,
+      "axis_max_deviation_m": 0.04322382993901552,
+      "core_cells": 376,
+      "diverted": true,
+      "flux_deviation_fraction": 0.06638546981904749,
+      "grad_shafranov_residual": 0.043871452022021494,
+      "internal_inductance_deviation_fraction": 0.010090769235588382,
+      "internal_inductance_raw": 0.7951756616338518,
+      "internal_inductance_referred": 0.7918533207347329,
+      "major_radius_m": 6.174095643807542,
+      "plasma_current_a": -14819074.2560039,
+      "plasma_current_deviation_fraction": 0.011558315869117264,
+      "poloidal_beta_deviation_fraction": 0.022631428049825875,
+      "poloidal_field_integral_t2_m3": 851.2719288417638,
+      "receipt_field_deviation_fraction": 0.0,
+      "relative_divergence_b": 0.0011011571030424044,
+      "relative_divergence_j": 0.0031749660977542045,
+      "volume_m3": 796.6067666204783
+    },
+    "unchanged_bounds": true
+  },
+  "plasma_cells": 566,
+  "representation_pins": {
+    "banked": {
+      "attributed_vs_support_fraction": 4.1432982150313435e-05,
+      "interior_m0_current_weighted_l1": 4.740850588173696e-05,
+      "ring_m0_current_weighted_l1": 0.0016004849848483096,
+      "topology_zero_leg_current_sup_a": 0.0,
+      "topology_zero_leg_first_sup_a_m": 0.0
+    },
+    "drift": {
+      "attributed_vs_support_absolute_fraction": 0.008193467031320179,
+      "interior_m0_current_weighted_l1": 0.006757749449080329,
+      "ring_m0_current_weighted_l1": 0.06382500595607178,
+      "topology_zero_leg_current_sup_a": 0.0,
+      "topology_zero_leg_first_sup_a_m": 0.0
+    },
+    "measured": {
+      "attributed_vs_support_absolute_fraction": 0.008234900013470492,
+      "attributed_vs_support_signed_fraction": 0.008234900013470492,
+      "interior_m0_current_weighted_l1": 0.006805157954962066,
+      "interior_supports": 351,
+      "nonempty_supports": 447,
+      "ring_m0_current_weighted_l1": 0.0654254909409201,
+      "ring_supports": 96,
+      "topology_zero_leg_current_sup_a": 0.0,
+      "topology_zero_leg_first_sup_a_m": 0.0,
+      "topology_zero_leg_supports": 17
+    },
+    "orchestrator_rebase_required": true
+  },
+  "root_drift": {
+    "banked": {
+      "axis_displacement_mm": 42.44361823881716,
+      "flux_sup_fraction_of_span": 0.06584635827187019,
+      "plasma_current_fractional_deviation": -0.01118752919965449
+    },
+    "measured": {
+      "axis_delta_m": [
+        -0.04322382993901552,
+        -0.0001820905237841508
+      ],
+      "axis_displacement_mm": 43.22421348683845,
+      "flux_sup_fraction_of_span": 0.0671723132672168,
+      "flux_sup_percent_of_span": 6.71723132672168,
+      "plasma_current_a": -14819074.2560039,
+      "plasma_current_fractional_deviation": -0.011558315869117264,
+      "plasma_current_percent": -1.1558315869117264
+    },
+    "signed_difference": {
+      "axis_displacement_mm": 0.7805952480212923,
+      "flux_sup_fraction_of_span": 0.0013259549953466149,
+      "plasma_current_fractional_deviation": -0.0003707866694627731
+    }
+  },
+  "state_size": 2396,
+  "terminal_root": {
+    "artifact": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/density-moment-projection/scripts/density_moment_projection/coarse-terminal-root.npz",
+    "machine_precision": true,
+    "residual": 1.5407907043237626e-15
+  }
+}

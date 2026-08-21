@@ -1,0 +1,22 @@
+{
+  "forcing_grid_sup_fraction_of_span": 3.0544472976200846e-15,
+  "forcing_rms_wb": 1.446149282569973e-15,
+  "forcing_sup_wb": 4.773959005888173e-15,
+  "map_minus_moment_closure_sup_wb": 4.440892098500626e-16,
+  "moment_forcing_sup_wb": 4.440892098500626e-15,
+  "physical_moment_delta_sup": {
+    "m0_a": 2.7284841053187847e-12,
+    "mR_a_m": 2.6645352591003757e-13,
+    "mZ_a_m": 7.616129948928574e-14
+  },
+  "round_off_ceiling_wb": 1e-13,
+  "round_off_class": true
+}
+{
+  "excluded_current_sup_a": 0.0,
+  "excluded_first_sup_a_m": 0.0,
+  "excluded_supports": 61,
+  "nonempty_supports": 490,
+  "participating_supports": 490
+}
+EXIT=0

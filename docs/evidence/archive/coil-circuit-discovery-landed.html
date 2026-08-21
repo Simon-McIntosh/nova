@@ -91,6 +91,55 @@
     per-frame thresholds independent of the cohort median, scoring the label-recovered and
     circuit-derived arms on the same 60-frame cohort.</p>
 
+    <h2 id="flux-adjudication">§2 flux-space adjudication — preregistered, sensitivity-proven, and undecidable — 2026-08-22</h2>
+    <p>Commits <code>d0935260</code> (the omitted-coil response assembly refactored into one reusable
+    exact-polygon target-coordinate builder shared by both studies), <code>995b133c</code> (the
+    preregistration, committed before any scoring; independent review verified the chronology and that
+    the file never changed afterwards), and <code>d5a7c0dc</code> (study, receipt, figure, test),
+    merged at <code>bdf58a45</code>. 9 adjudication tests pass.</p>
+    <p>The metric is a gauge-free boundary/exterior flux RMS on 256 fit points with a disjoint exterior
+    mask, and its per-frame threshold is that same frame's exact-clipped versus node-centred plasma-field
+    RMS — a plasma-representation error bar, never a cohort statistic. Sensitivity was proven rather than
+    assumed: all 600 declared 1 kA perturbation receipts (60 frames × 5 conductors × 2 arms) pass, with
+    median field responses 3.06–4.49e-3 Wb per kA and minimum 2.87e-3 Wb.</p>
+    <table>
+      <caption>Preregistered discriminators over the same 60-frame diverted polarity-screened cohort.
+      The promotion rule required 54/60; neither arm approaches it.</caption>
+      <thead><tr><th>Discriminator</th><th>Label-recovered arm</th><th>Circuit-derived arm</th></tr></thead>
+      <tbody>
+        <tr><td>Closes within the per-frame threshold</td><td>2/60 (median ratio 4.143)</td><td><strong>0/60</strong> (median ratio 37.862)</td></tr>
+        <tr><td>Dominates the other arm</td><td>60/60</td><td>0/60</td></tr>
+        <tr><td>Matches the ohmic current pattern</td><td><strong>0/60</strong></td><td>by construction</td></tr>
+        <tr><td>Temporally stable within shot</td><td>27/60</td><td>by construction</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Verdict: undecidable from this dataset's flux — which is itself the adjudication.</strong>
+    The label-recovered arm fits best on every frame yet never matches the ohmic pattern and is
+    temporally stable on fewer than half the frames: it behaves as an artefact absorber, not a current
+    measurement. The circuit-derived arm — physical per the 480,256-sample traces — leaves a boundary
+    flux residual 37.9× the plasma-representation threshold, so the labels' boundary content is dominated
+    by something no five-conductor assignment can produce, consistent with the banked 4.3 % non-GS
+    ceiling. Independent review reconstructed the preregistration chronology, every count, and the
+    per-frame threshold independence, and passed the verdict. One bookkeeping clarification carried here
+    per that review: the 0/60 ohmic-pattern discriminator is contextual evidence about what the
+    label-recovered coefficients are, not an authority gate in the 54/60 rule.</p>
+    <figure>
+      <img src="/nova/figures/coil-circuit-discovery/flux_space_adjudication.png"
+           alt="Four panels: per-frame residual-to-threshold ratios for both arms, circuit versus label RMS scatter entirely above the identity line, per-conductor 1 kA sensitivity bars, and ohmic-pattern mismatch never reaching its threshold"
+           style="max-width:100%">
+      <figcaption>Circuit residuals run 10–300× the per-frame threshold (top left, red), every frame
+      sits above the identity line (top right), sensitivity is proven per conductor (bottom left), and
+      the recovered pattern never approaches the ohmic pattern bound (bottom right, orange).</figcaption>
+    </figure>
+    <p><strong>What this settles for the plan.</strong> The three decisions locked on this evidence:
+    relations are fit-once-static; promotion requires both tests, which in practice promotes only what
+    independent deterministic measurement sustains — E567UP (0.9929 of ECOILA, 0.570 %) and E89DN
+    (1.0165, 0.706 %) knowable through the ohmic relation with its residual carried as uncertainty and
+    the different-pulse transfer caveat stated, ECOILB/E567DN/E89UP unknown-tier free parameters; and
+    unknown-tier currents enter through an outer loop around the unchanged inner solve. §3's corpus
+    discovery is closed as refuted: fitting non-currents at corpus scale would produce stable, precise,
+    wrong constants. §4's tier seam is the remaining build.</p>
+
   </main>
 </body>
 </html>

@@ -23,9 +23,11 @@
   <title>Coil Circuit Discovery | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="5">
-<meta name="plan-impl" content="0.3">
+<meta name="plan-modified" content="2026-08-22">
+<meta name="plan-version" content="8">
+<meta name="plan-impl" content="0.5">
+<meta name="plan-commits" content="5855f2ba,31e10c89,d5a7c0dc,bdf58a45">
+<meta name="plan-artifacts" content="docs/figures/coil-circuit-discovery/five_column_residual_adjudication_receipt.json,docs/figures/coil-circuit-discovery/flux_space_adjudication_preregistration.json,docs/figures/coil-circuit-discovery/flux_space_adjudication_receipt.json,docs/evidence/archive/coil-circuit-discovery-landed.html">
 </head>
 <body>
   <main class="plan-doc">
@@ -53,48 +55,30 @@
     are absent — otherwise the residual is not what we think it is. That last clause is the whole
     scientific content of this plan.</p>
 
-    <h2 id="s2">§2 — The adjudication that must come first</h2>
-    <p><strong>Two independent estimates of the same five currents disagree by more than either's error
-    budget, and no discovery run should proceed before that is resolved.</strong></p>
-    <table>
-      <caption>The same five conductors, two routes, on DIII-D.</caption>
-      <thead><tr><th>Route</th><th>Spread across the five</th><th>Basis</th></tr></thead>
-      <tbody>
-        <tr><td>Recovered from label flux</td><td><strong>2.20×</strong> (30,468 → 66,907 A)</td><td>five-column projection, 200 frames</td></tr>
-        <tr><td>Ohmic circuit relation</td><td><strong>≈1.04×</strong> (scales 0.9806 → 1.0172 of ECOILA)</td><td>480,256-sample netCDF traces</td></tr>
-      </tbody>
-    </table>
-    <p>The recovery's own conditioning cannot reconcile them. At condition number 10.83 and a 0.484 % tare
-    floor, the coefficient-error budget is about <strong>5 %</strong> — nowhere near a factor of 2.2. So the
-    recovered coefficients are <em>fitting the data well while not being the physical currents</em>: the
-    five-column subspace is absorbing something else. The candidates are passive-structure current, the
-    labels' own 4.3 % non-GS content, and the Δ* boundary-stencil artefacts already located at the grid
-    edges — all of which are smooth or edge-concentrated over a grid the five conductors sit largely
-    outside, and therefore all of which are partially degenerate with the five columns.</p>
-    <p><strong>Done-when:</strong> the residual remaining <em>after</em> five-column recovery is measured
-    against the 0.484 % tare floor. If the five columns explain the residual down to that floor, the
-    recovery is trustworthy and the circuit measurement needs re-examination. If structure survives, the
-    recovered values are not currents and the discovery must be reformulated to include the competing
-    terms explicitly. Either outcome is decisive; the plan does not proceed to §3 on an unresolved
-    disagreement.</p>
+    <h2 id="s2">§2 — The adjudication that must come first <span class="badge badge-shipped">✓ landed 2026-08-22</span></h2>
+    <p class="landed-summary">
+    Adjudicated in two reviewed rounds. The posed tare-floor measurement was run exactly as written and
+    refuted by review: interior Δ* annihilates external vacuum-coil fields, so the five columns move the
+    interior residual −7.1e-6 pp by construction and the comparison cannot decide. The preregistered
+    flux-space rerun, sensitivity-proven per conductor (600/600 receipts), decided it: the label-recovered
+    arm matches the ohmic pattern on <strong>0/60</strong> frames (temporally stable 27/60, spread
+    1.95–31.6×) and the circuit arm closes on <strong>0/60</strong> at median 37.9× the per-frame
+    threshold — the recovered coefficients are not currents, the independent ohmic relation is the only
+    current authority, and flux-side validation is undecidable on this dataset. Full record:
+    <a href="/nova/evidence/archive/coil-circuit-discovery-landed#residual-adjudication">§2 landed</a>
+    (commits <code>5855f2ba</code>, <code>d5a7c0dc</code>).
+    </p>
 
-    <h2 id="s3">§3 — Corpus-scale circuit discovery</h2>
-    <p>With the adjudication settled, recover the five currents per frame across the corpus — polarity-screened,
-    stratified by recorded plasma current since 29 of 60 diverted frames were measured below 50 kA and are
-    ill-conditioned for current normalisation — and record every per-frame design condition number and
-    post-recovery residual alongside the coefficients, so a later reader can filter on recovery quality
-    rather than trusting the whole set.</p>
-    <p>Then look for <strong>static</strong> structure: does each recovered current stand in a fixed
-    relation to one or more shipped channels, stable across shots, campaigns and current level? A relation
-    that holds to a tight residual over thousands of frames is a discovered circuit constraint with error
-    bars. A relation that drifts with campaign or amplitude is not a circuit and must not be promoted.</p>
-    <p>Cost is measured before it is spent: the landed tare extrapolation is 0.145 s/frame and 52.7 GB for
-    all 1,559,340 frames, so a full-corpus pass is an authorisation, not an assumption. A stratified
-    sample sufficient to bound the relations is the default.</p>
-    <p><strong>Done-when:</strong> per-conductor relation coefficients are reported with their residual
-    spread, their stability across shot blocks and current level, and the count of frames each was fitted
-    over; the acquisition-scale and polarity faults already banked for this corpus are screened for
-    explicitly, because both have previously manufactured phantom campaign structure.</p>
+    <h2 id="s3">§3 — Corpus-scale circuit discovery <span class="badge badge-shipped">✓ closed by adjudication 2026-08-22</span></h2>
+    <p class="landed-summary">
+    Closed as refuted rather than run: §2's verdict shows per-frame label recovery does not measure these
+    currents (ohmic-shape match 0/60), so a corpus-scale least squares would manufacture stable, precise,
+    wrong constants — the exact outcome this section's gate existed to prevent. The discovered static
+    constraint set is the fit-once ohmic relation itself, measured over 480,256 independent trace samples:
+    E567UP (0.9929 of ECOILA, residual 0.570 %) and E89DN (1.0165, 0.706 %) pass the preregistered 1 %
+    bound; ECOILB, E567DN and E89UP fail it (5.4–7.3 %) and stay unknown-tier. No corpus pass was spent.
+    Record: <a href="/nova/evidence/archive/coil-circuit-discovery-landed#flux-adjudication">adjudication</a>.
+    </p>
 
     <h2 id="s4">§4 — Known, knowable, unknown: the discipline that makes the model honest</h2>
     <p>The point of discovery is to shrink the prescribed set to what is defensible and to make the rest
@@ -141,53 +125,41 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="relation-fit-scope" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="relation-fit-scope" data-choice="fit-once-static" data-by="reckon-ship" data-when="2026-08-21T22:34:43+00:00">
     <p class="r-dec-q">Are discovered circuit relations fitted once over a training corpus and applied deterministically, or re-fitted per shot or per frame?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="fit-once-static">fitted once, applied deterministically</button>
+      <button class="r-opt chosen" data-value="fit-once-static">fitted once, applied deterministically</button>
       <button class="r-opt" data-value="fit-per-shot">re-fitted per shot</button>
       <button class="r-opt" data-value="fit-per-frame">re-fitted per frame</button>
       </p>
-    <p class="r-dec-rat">Open, and it decides admissibility rather than accuracy. A once-fitted static
-        constant is calibration of the same class as a turn count and reproduces at inference. A per-frame
-        re-fit against label flux does not reproduce at inference and would repeat the mistake the DIII-D
-        plan already made once. Per-shot sits between and needs a stated justification for what physically
-        changes shot to shot.</p>
+    <p class="r-dec-rat">Locked on the plan&#x27;s own admissibility argument and the two adjudication rounds: a per-frame refit against label flux is exactly the label-absorption failure measured twice (recovered spread 1.95-31.6x, ohmic-shape match 0/60), while the ohmic relation — the only surviving relation — is fitted once over 480,256 independent trace samples and reproduces at inference from shipped ECOILA.</p>
     </div>
-<div class="r-dec" data-key="knowable-promotion-test" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="knowable-promotion-test" data-choice="both-required" data-by="reckon-ship" data-when="2026-08-21T22:34:43+00:00">
     <p class="r-dec-q">What test promotes a recovered current from unknown to knowable?</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="held-out-prediction">held-out predictive accuracy from shipped channels</button>
       <button class="r-opt" data-value="residual-closure">post-recovery residual reaching the tare floor</button>
-      <button class="r-opt" data-value="both-required">both, jointly required</button>
+      <button class="r-opt chosen" data-value="both-required">both, jointly required</button>
       </p>
-    <p class="r-dec-rat">Open. Held-out prediction alone is insufficient and this campaign has the
-        counter-example: the five currents were predictable from shipped channels at held-out R-squared
-        0.974 to 0.998 and still failed to close the boundary, because a well-fitted coefficient need not be
-        a physical current. Residual closure tests whether the subspace is the right one at all. Requiring
-        both is the conservative reading and is probably correct, at the cost of promoting fewer
-        quantities.</p>
+    <p class="r-dec-rat">Locked conservative, with the measured consequence stated: both label-referenced tests fail for every label-recovered quantity (held-out R-squared up to 0.998 with ohmic-shape match 0/60 confirms the counter-example; closure is unattainable for external conductors — interior Delta-star is insensitive by construction and the flux-space circuit arm closes 0/60). Promotion therefore rests on independent deterministic measurement: E567UP (scale 0.9929, residual 0.570%) and E89DN (1.0165, 0.706%) pass the preregistered 1% bound of the ohmic retest and are knowable through that fit-once relation with its residual carried as uncertainty and the different-pulse transfer caveat stated; ECOILB, E567DN, E89UP fail it and stay unknown.</p>
     </div>
-<div class="r-dec" data-key="unknown-parameter-entry" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="unknown-parameter-entry" data-choice="outer-loop" data-by="reckon-ship" data-when="2026-08-21T22:34:43+00:00">
     <p class="r-dec-q">How do unknown-tier currents enter the solve as free parameters?</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="augmented-unknowns">augmented unknowns in the same Newton system</button>
-      <button class="r-opt" data-value="outer-loop">an outer loop around a converged inner equilibrium</button>
+      <button class="r-opt chosen" data-value="outer-loop">an outer loop around a converged inner equilibrium</button>
       </p>
-    <p class="r-dec-rat">Open. Augmenting the Newton system keeps one solve and one convergence
-        criterion but changes the Jacobian structure and its conditioning, which matters on a map already
-        measured at Picard spectral radius 1.15 to 1.40. An outer loop preserves the inner solve exactly as
-        landed and is easier to reason about, at the cost of nested convergence and more map evaluations.
-        The measured 470.561 slices per second batched throughput is the budget either choice spends.</p>
+    <p class="r-dec-rat">Locked on conditioning risk: the inner solve is landed on a map measured at Picard spectral radius 1.15-1.40, and augmenting the Newton system changes Jacobian structure and conditioning on exactly that map. The outer loop preserves the inner solve unchanged, its nested cost is affordable within the measured 470.561 slices/s budget, and the choice is reversible through the dissent flow if the nested convergence proves too slow.</p>
     </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-ccd-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-21" data-recommends-skill="/reckon-ship coil-circuit-discovery §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ccd-001" data-status="resolved" data-written-by="reckon-create" data-written-at="2026-08-21" data-recommends-skill="/reckon-ship coil-circuit-discovery §2" data-resolved-at="2026-08-21T22:34:43+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Adjudicate the 2.20x versus 1.04x current disagreement before any discovery run (§2)</h4>
     <div class="r-fu-body"><p><strong>This is the gate on the whole plan and it must run first.</strong> Two independent estimates of the same five conductor currents disagree by far more than either's error budget: label-flux recovery gives a <strong>2.20×</strong> spread across the five (30,468 → 66,907 A) while the netCDF ohmic circuit measurement puts every one of them within <strong>2 %</strong> of ECOILA, a <strong>~1.04×</strong> spread. At design condition number 10.83 and a 0.484 % tare floor the recovery's coefficient-error budget is about 5 %, so conditioning cannot reconcile a factor of 2.2.</p><p><strong>The decisive measurement:</strong> take the residual remaining <em>after</em> five-column recovery and compare it against the 0.484 % exact-tare floor. If the five columns explain the residual down to that floor, the recovered values are trustworthy and the circuit measurement needs re-examination. If structure survives, the recovered coefficients are absorbing something other than these five currents — the candidates being passive-structure current, the labels' own 4.3 % non-GS content, and the Δ* boundary-stencil artefacts already localised at the grid edges, all of which are smooth or edge-concentrated over a grid the five conductors sit largely outside and therefore partially degenerate with the five columns.</p><p><strong>Report:</strong> post-recovery residual against the tare floor per frame; the spatial structure of what survives, since edge-concentrated and smooth residuals implicate different competing terms; and an explicit verdict naming which of the two estimates is to be believed. A live diagnostic already dispatched under <code>current-constrained-forward-solve</code> §5 tests the circuit-derived currents against the tared vacuum map directly and should be read alongside this rather than duplicated.</p><p>Do not proceed to §3's corpus discovery on an unresolved disagreement — a corpus-scale least squares over a subspace that is absorbing the wrong physics would produce stable, precise, wrong circuit constants, which is the most expensive possible outcome.</p></div>
     <pre class="r-fu-prompt">/reckon-ship coil-circuit-discovery §2</pre>
+    <p class="r-fu-outcome">Adjudicated in two reviewed rounds. Round one ran the followup's posed measurement exactly and review refuted the instrument: interior Delta-star annihilates external vacuum-coil fields, so the tare-floor comparison cannot decide (five columns move the interior residual -7.1e-6 pp; above-floor membership identical before and after recovery). Round two, preregistered and flux-space with per-conductor sensitivity proven, delivered the verdict: the label-flux estimate is NOT to be believed as currents (ohmic-shape match 0/60, temporal stability 27/60, spread 1.95-31.6x), the independent ohmic circuit relation is the only current authority (E567UP/E89DN deterministic at the 1% bound), and flux-side validation is undecidable from this dataset (circuit arm closes 0/60 at median 37.9x the per-frame threshold — the labels' non-GS content dominates the boundary flux). Consequence recorded in the locked decisions: §3 corpus discovery is closed as refuted, §4 proceeds with knowable={E567UP,E89DN} and unknown={ECOILB,E567DN,E89UP}. The corroborating circuit-driven diagnostic under current-constrained-forward-solve §5 was read, not duplicated.</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -199,6 +171,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260821T2212" data-who="reckon-ship" data-when="2026-08-21T22:12:00Z">
     <div class="r-comment-body">adjudication-review landed — run r-20260821T214847932930, gate passed, no repo commits (report-only fence). Measure: independent receipt recomputation reproduced all requested medians, the 30/60 count and the 504-cell edge exclusion; verdict line FAIL on the adjudication logic with the insensitivity mechanism named. Report: ~/.config/reckon/crew/reports/nova/coil-circuit-discovery/adjudication-review.md.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260822T0040" data-who="reckon-ship" data-when="2026-08-22T00:40:00Z">
+    <div class="r-comment-body">flux-space-adjudication landed — run r-20260821T215906764957, commits d0935260 (shared exact active-coil builder refactor) + 995b133c (preregistration, committed before scoring) + d5a7c0dc (study), merged at bdf58a45, 5 tests added, 9 total passing. Measure: metric sensitivity proven per conductor (600/600 receipts, min field response 2.867e-3 Wb/kA); label-recovered arm closes 2/60, dominates 60/60, matches the ohmic pattern 0/60, temporally stable 27/60, median threshold ratio 4.143; circuit-derived arm closes 0/60, median threshold ratio 37.862; neither clears the preregistered 54/60 rule — verdict UNDECIDABLE from this dataset's flux. flux-adjudication-review (run r-20260821T222638348571, gate passed) independently reconstructed the preregistration chronology, all counts, and the per-frame threshold independence; one bookkeeping note (the 0/60 ohmic-shape discriminator is contextual, not an authority gate) is carried in the evidence record. Net adjudication: label-flux recovery does not measure these currents; the independent ohmic traces are the only current authority, with flux-side validation unavailable on this dataset. Evidence: /nova/evidence/archive/coil-circuit-discovery-landed#flux-adjudication.</div>
 </div>
 </section>
 </main>

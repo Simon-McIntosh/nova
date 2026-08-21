@@ -1,0 +1,925 @@
+"""Measure whether an exact plasma-current constraint changes the forward map.
+
+The experiment keeps Nova's absolute-source production policy untouched.  It
+wraps the existing free-boundary map in two benchmark-only current constraints:
+closed-form elimination of one common profile amplitude, and a square augmented
+root with that amplitude as an explicit unknown.  The recorded plasma current is
+a prescribed benchmark constraint; it is neither fitted nor available to an
+actuator-only inference path.
+"""
+
+from __future__ import annotations
+
+import argparse
+from dataclasses import dataclass
+import hashlib
+import json
+from pathlib import Path
+from typing import Any, Callable
+
+import jax
+import jax.numpy as jnp
+import matplotlib.pyplot as plt
+import numpy as np
+import scipy.optimize
+
+from benchmarks.diiid_boundary_current_recovery import (
+    POLARITY_RECEIPT,
+    RECEIPT_NAME as RECOVERY_RECEIPT_NAME,
+    DEFAULT_OUTPUT as RECOVERY_OUTPUT,
+)
+from benchmarks.diiid_diverted_root_full_currents import (
+    FRAME_COUNT,
+    POLARITY_AFFECTED_SHOT_COUNT,
+    FrameInput,
+    _omitted_vertices,
+    append_recovered_conductors,
+    current_arms,
+    selected_inputs,
+)
+from benchmarks.diiid_forward_gs_match import (
+    DEFAULT_DATA,
+    _CURRENT_COLUMNS,
+    _GEOMETRY_COLUMNS,
+    _LABEL_COLUMNS,
+    _read,
+    build_profile,
+)
+from nova.equilibrium import fixed_point
+from nova.equilibrium.forward import ForwardProfile
+from nova.equilibrium.stencil_mesh import CellCurrentMoments
+from nova.equilibrium.topology import TopologyClass
+from nova.jax.config import configure_dtypes
+
+
+DEFAULT_OUTPUT = Path("docs/figures/diiid-forward-onboarding/current-pinned")
+PREREGISTRATION_NAME = "current_pinned_forward_preregistration.json"
+CHECKPOINT_NAME = "current_pinned_forward_frames.jsonl"
+RECEIPT_NAME = "current_pinned_forward_receipt.json"
+FIGURE_NAME = "current_pinned_forward.png"
+ARM_NAMES = ("unpinned", "pinned_eliminated", "pinned_augmented")
+AUGMENTED_ALPHAS = (0.1, 1.0, 10.0)
+NOMINAL_ALPHA = 1.0
+LAMBDA_BAND = (1.0e-6, 1.0e6)
+RELATIVE_RESIDUAL_CRITERION = 1.0e-6
+CURRENT_CONSTRAINT_CRITERION = 1.0e-10
+UNPINNED_PLATEAU_CONTROL = 3.491124178554655e-2
+UNPINNED_CONTROL_ABSOLUTE_TOLERANCE = 2.0e-7
+HOST_OUTER_ITERATIONS = 100
+HOST_INNER_ITERATIONS = 40
+POWER_ITERATIONS = 16
+POWER_RELATIVE_STEP = 1.0e-6
+PSEUDO_WALL_EXPANSION = 0.02
+PLASMA_CURRENT_COLUMNS = (
+    "magnetics_plasma_current",
+    "magnetics_plasma_current_times",
+)
+
+
+class LambdaOutOfBand(RuntimeError):
+    """Report a profile amplitude outside the declared admissible band."""
+
+    def __init__(self, value: float):
+        self.value = float(value)
+        super().__init__(
+            f"profile amplitude {self.value:.12g} is outside {LAMBDA_BAND}"
+        )
+
+
+class _CriterionReached(Exception):
+    """Stop a host root immediately after both declared criteria are met."""
+
+    def __init__(self, state: np.ndarray):
+        self.state = np.asarray(state, dtype=float)
+        super().__init__("declared residual criteria reached")
+
+
+@dataclass(frozen=True)
+class MapEvaluation:
+    """One constrained image and its current-amplitude diagnostics."""
+
+    image: np.ndarray
+    amplitude: float
+    unscaled_current_a: float
+    achieved_current_a: float
+
+
+def preregistration() -> dict[str, Any]:
+    """Return the complete declaration fixed before any corpus score."""
+
+    return {
+        "measurement": "plasma-current constrained free-boundary map",
+        "selection": {
+            "frames": FRAME_COUNT,
+            "source": str(RECOVERY_OUTPUT / RECOVERY_RECEIPT_NAME),
+            "rule": "the five banked distinct-shot diverted replacement frames",
+            "polarity_screen": (
+                "every selected shot is absent from the landed 603-shot population"
+            ),
+        },
+        "shared_inputs": {
+            "seed": "the same convention-clean labelled branch seed in every arm",
+            "poloidal_conductors": 24,
+            "current_set": (
+                "nineteen shipped poloidal currents plus five recovered currents; "
+                "the shipped bcoil channel supplies the toroidal-field function"
+            ),
+            "coefficients_fitted": 0,
+            "currents_adjusted": 0,
+        },
+        "target_current": {
+            "source": "magnetics_plasma_current interpolated at the labelled time",
+            "unit_crossing": "recorded kA multiplied by 1000 exactly once",
+            "status": "declared constraint, not a fitted coefficient",
+            "inference_availability": (
+                "not available to an actuator-only inference input"
+            ),
+        },
+        "arms": {
+            "unpinned": {
+                "route": "accelerated newton_krylov",
+                "newton_steps": 24,
+                "gmres_iterations": 24,
+                "warmup": 8,
+                "relaxation": 0.5,
+                "step_cap": 10.0,
+                "first_frame_plateau_control": UNPINNED_PLATEAU_CONTROL,
+                "control_absolute_tolerance": UNPINNED_CONTROL_ABSOLUTE_TOLERANCE,
+            },
+            "pinned_eliminated": {
+                "definition": (
+                    "lambda = target Ip / unscaled clipped-support Ip at every "
+                    "map evaluation; lambda multiplies all current moments"
+                ),
+                "unknowns_and_rows": "N flux unknowns and N flux residual rows",
+                "route": "host Jacobian-free Newton-Krylov with Armijo search",
+            },
+            "pinned_augmented": {
+                "definition": (
+                    "lambda is an explicit extra unknown and alpha times relative "
+                    "current error is an explicit extra residual row"
+                ),
+                "unknowns_and_rows": (
+                    "N flux unknowns plus lambda and N flux rows plus one current row"
+                ),
+                "alphas": list(AUGMENTED_ALPHAS),
+                "nominal_alpha": NOMINAL_ALPHA,
+                "flux_block": (
+                    "full flux residual direction rescaled so its Euclidean norm "
+                    "equals the exact clipped-cell area-weighted grid L2 norm "
+                    "divided by the instantaneous flux span"
+                ),
+                "route": "host Jacobian-free Newton-Krylov with Armijo search",
+            },
+        },
+        "host_budget": {
+            "maximum_outer_iterations": HOST_OUTER_ITERATIONS,
+            "maximum_inner_iterations": HOST_INNER_ITERATIONS,
+        },
+        "lambda_guard": {
+            "inclusive_band": list(LAMBDA_BAND),
+            "policy": (
+                "no clipping: evaluation raises LambdaOutOfBand and the arm records "
+                "a loud guard termination"
+            ),
+        },
+        "qualification": {
+            "relative_flux_residual": RELATIVE_RESIDUAL_CRITERION,
+            "relative_current_error": CURRENT_CONSTRAINT_CRITERION,
+            "requires_terminal_diverted": True,
+        },
+        "spectral_estimate": {
+            "method": (
+                "central-difference map action inside fixed-count power iteration"
+            ),
+            "iterations": POWER_ITERATIONS,
+            "relative_step": POWER_RELATIVE_STEP,
+            "comparison_band": [1.25, 1.40],
+        },
+        "nova_equilibrium_modified": False,
+    }
+
+
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def write_preregistration(output: Path) -> Path:
+    """Write once and fail closed if an existing declaration differs."""
+
+    output.mkdir(parents=True, exist_ok=True)
+    path = output / PREREGISTRATION_NAME
+    encoded = json.dumps(preregistration(), indent=2, sort_keys=True) + "\n"
+    if path.exists() and path.read_text() != encoded:
+        raise RuntimeError("on-disk current-pinned preregistration differs")
+    path.write_text(encoded)
+    return path
+
+
+def _target_current(row: dict[str, Any], time_ms: float) -> float:
+    """Return the recorded target current after its single kA-to-A crossing."""
+
+    value = float(
+        np.interp(
+            time_ms,
+            np.asarray(row["magnetics_plasma_current_times"], dtype=float),
+            np.asarray(row["magnetics_plasma_current"], dtype=float),
+        )
+    )
+    target = 1000.0 * value
+    if not np.isfinite(target) or abs(target) <= np.finfo(float).tiny:
+        raise RuntimeError(f"target plasma current {target} A is not qualified")
+    return target
+
+
+def _scaled_moments(
+    moments: CellCurrentMoments, amplitude: jax.Array
+) -> CellCurrentMoments:
+    """Scale the common p-prime and FF-prime amplitude at current-image level."""
+
+    return CellCurrentMoments(*(amplitude * value for value in moments))
+
+
+def _lambda_value(target_current_a: float, unscaled_current_a: float) -> float:
+    """Return the eliminated amplitude or raise on the declared guard."""
+
+    amplitude = float(target_current_a / unscaled_current_a)
+    if not np.isfinite(amplitude) or not (
+        LAMBDA_BAND[0] <= amplitude <= LAMBDA_BAND[1]
+    ):
+        raise LambdaOutOfBand(amplitude)
+    return amplitude
+
+
+def eliminated_map(
+    profile: ForwardProfile, current: np.ndarray, target_current_a: float
+) -> tuple[Callable[[jax.Array], jax.Array], Callable[[np.ndarray], MapEvaluation]]:
+    """Return the exact-amplitude map and a guarded host evaluation wrapper."""
+
+    operator = profile.operator
+    external = operator.external(jnp.asarray(current))
+
+    def traced(state: jax.Array):
+        moments = operator.cell_current_moments(state, TopologyClass.DIVERTED)
+        unscaled = jnp.sum(moments.cell_current)
+        amplitude = jnp.asarray(target_current_a, dtype=unscaled.dtype) / unscaled
+        image = external + operator.current_moment_image(
+            _scaled_moments(moments, amplitude)
+        )
+        return image, amplitude, unscaled
+
+    compiled = jax.jit(traced)
+
+    def mapped(state: jax.Array) -> jax.Array:
+        return traced(state)[0]
+
+    def evaluated(state: np.ndarray) -> MapEvaluation:
+        image, amplitude, unscaled = compiled(jnp.asarray(state))
+        amplitude_value = _lambda_value(target_current_a, float(unscaled))
+        return MapEvaluation(
+            image=np.asarray(image, dtype=float),
+            amplitude=amplitude_value,
+            unscaled_current_a=float(unscaled),
+            achieved_current_a=amplitude_value * float(unscaled),
+        )
+
+    return mapped, evaluated
+
+
+def fixed_amplitude_map(
+    profile: ForwardProfile, current: np.ndarray, amplitude: float
+) -> Callable[[jax.Array], jax.Array]:
+    """Return the physical flux map at one fixed common source amplitude."""
+
+    external = profile.operator.external(jnp.asarray(current))
+
+    def mapped(state: jax.Array) -> jax.Array:
+        moments = profile.operator.cell_current_moments(state, TopologyClass.DIVERTED)
+        return external + profile.operator.current_moment_image(
+            _scaled_moments(moments, jnp.asarray(amplitude))
+        )
+
+    return mapped
+
+
+def _relative_sup(image: np.ndarray, state: np.ndarray) -> float:
+    return float(
+        np.max(np.abs(np.asarray(image) - np.asarray(state)))
+        / max(np.max(np.abs(image)), 1.0e-30)
+    )
+
+
+def _topology(profile: ForwardProfile, state: np.ndarray) -> tuple[str, np.ndarray]:
+    _masks, topology = profile.operator.read(jnp.asarray(state))
+    name = "diverted" if bool(topology.diverted) else "limited"
+    return name, np.asarray(topology.x_point, dtype=float)
+
+
+def solve_eliminated(
+    profile: ForwardProfile,
+    seed: np.ndarray,
+    current: np.ndarray,
+    target_current_a: float,
+) -> dict[str, Any]:
+    """Solve the square eliminated system and retain every accepted residual."""
+
+    mapped, evaluate = eliminated_map(profile, current, target_current_a)
+    history: list[float] = []
+    amplitude_history: list[float] = []
+    maximum_current_error = 0.0
+    evaluations = 0
+
+    def residual(state: np.ndarray) -> np.ndarray:
+        nonlocal evaluations, maximum_current_error
+        item = evaluate(state)
+        evaluations += 1
+        error = abs(item.achieved_current_a - target_current_a) / abs(target_current_a)
+        maximum_current_error = max(maximum_current_error, error)
+        return item.image - state
+
+    initial = np.asarray(seed, dtype=float)
+    terminal = initial
+    termination = "outer iteration ceiling exhausted"
+    guard_value: float | None = None
+
+    def record(state: np.ndarray, value: np.ndarray) -> None:
+        item = evaluate(state)
+        relative = _relative_sup(item.image, state)
+        history.append(relative)
+        amplitude_history.append(item.amplitude)
+        if relative <= RELATIVE_RESIDUAL_CRITERION:
+            raise _CriterionReached(state)
+
+    try:
+        terminal = scipy.optimize.newton_krylov(
+            residual,
+            initial,
+            method="gmres",
+            inner_maxiter=HOST_INNER_ITERATIONS,
+            maxiter=HOST_OUTER_ITERATIONS,
+            f_tol=0.0,
+            line_search="armijo",
+            callback=record,
+        )
+        termination = "host solver returned"
+    except _CriterionReached as reached:
+        terminal = reached.state
+        termination = "declared flux criterion reached"
+    except scipy.optimize.NoConvergence as error:
+        terminal = np.asarray(error.args[0], dtype=float)
+    except LambdaOutOfBand as error:
+        guard_value = error.value
+        termination = str(error)
+
+    try:
+        final = evaluate(terminal)
+        achieved = _relative_sup(final.image, terminal)
+        amplitude = final.amplitude
+        current_error = abs(final.achieved_current_a - target_current_a) / abs(
+            target_current_a
+        )
+    except LambdaOutOfBand as error:
+        guard_value = error.value
+        achieved = float("inf")
+        amplitude = error.value
+        current_error = float("inf")
+    topology, x_point = _topology(profile, terminal)
+    return {
+        "state": terminal,
+        "relative_residual": achieved,
+        "current_relative_error": current_error,
+        "current_constraint_required": True,
+        "amplitude": amplitude,
+        "iterations": len(history),
+        "map_evaluations": evaluations,
+        "residual_history": history,
+        "amplitude_history": amplitude_history,
+        "maximum_map_current_relative_error": maximum_current_error,
+        "topology": topology,
+        "x_point_rz_m": x_point,
+        "termination": termination,
+        "lambda_guard_triggered": guard_value is not None,
+        "lambda_guard_value": guard_value,
+        "mapped": mapped,
+    }
+
+
+def _augmented_evaluator(
+    profile: ForwardProfile,
+    current: np.ndarray,
+    target_current_a: float,
+    alpha: float,
+) -> Callable[[np.ndarray], tuple[np.ndarray, dict[str, float]]]:
+    """Return the square augmented residual and its scalar diagnostics."""
+
+    operator = profile.operator
+    external = operator.external(jnp.asarray(current))
+    grid_count = profile.lattice.node_count
+
+    def traced(unknown: jax.Array):
+        state = unknown[:-1]
+        amplitude = unknown[-1]
+        moments, measure, _masks, topology = operator.current_moments_and_observation(
+            state, TopologyClass.DIVERTED
+        )
+        unscaled = jnp.sum(moments.cell_current)
+        image = external + operator.current_moment_image(
+            _scaled_moments(moments, amplitude)
+        )
+        raw = image - state
+        area = measure.area
+        area_sum = jnp.maximum(jnp.sum(area), 1.0e-300)
+        flux_span = jnp.maximum(jnp.abs(topology.flux_span), 1.0e-300)
+        clipped_l2 = (
+            jnp.sqrt(jnp.sum(area * raw[:grid_count] ** 2) / area_sum) / flux_span
+        )
+        raw_norm = jnp.linalg.norm(raw)
+        block = raw * clipped_l2 / jnp.maximum(raw_norm, 1.0e-300)
+        current_error = (amplitude * unscaled - target_current_a) / abs(
+            target_current_a
+        )
+        residual = jnp.r_[block, alpha * current_error]
+        return residual, clipped_l2, current_error, unscaled
+
+    compiled = jax.jit(traced)
+
+    def evaluated(unknown: np.ndarray) -> tuple[np.ndarray, dict[str, float]]:
+        amplitude = float(unknown[-1])
+        if not np.isfinite(amplitude) or not (
+            LAMBDA_BAND[0] <= amplitude <= LAMBDA_BAND[1]
+        ):
+            raise LambdaOutOfBand(amplitude)
+        residual, flux_l2, current_error, unscaled = compiled(jnp.asarray(unknown))
+        return np.asarray(residual, dtype=float), {
+            "amplitude": amplitude,
+            "flux_l2_relative_residual": float(flux_l2),
+            "current_relative_error": float(current_error),
+            "unscaled_current_a": float(unscaled),
+            "combined_l2_relative_residual": float(jnp.linalg.norm(residual)),
+        }
+
+    return evaluated
+
+
+def solve_augmented(
+    profile: ForwardProfile,
+    seed: np.ndarray,
+    current: np.ndarray,
+    target_current_a: float,
+    alpha: float,
+) -> dict[str, Any]:
+    """Solve the square explicit-amplitude system at one registered alpha."""
+
+    _mapped, seed_evaluate = eliminated_map(profile, current, target_current_a)
+    seed_amplitude = seed_evaluate(seed).amplitude
+    evaluate = _augmented_evaluator(profile, current, target_current_a, alpha)
+    initial = np.r_[np.asarray(seed, dtype=float), seed_amplitude]
+    terminal = initial
+    history: list[float] = []
+    termination = "outer iteration ceiling exhausted"
+    guard_value: float | None = None
+    evaluations = 0
+
+    def residual(unknown: np.ndarray) -> np.ndarray:
+        nonlocal evaluations
+        evaluations += 1
+        return evaluate(unknown)[0]
+
+    def record(unknown: np.ndarray, value: np.ndarray) -> None:
+        _residual, metrics = evaluate(unknown)
+        history.append(metrics["combined_l2_relative_residual"])
+        if (
+            metrics["flux_l2_relative_residual"] <= RELATIVE_RESIDUAL_CRITERION
+            and abs(metrics["current_relative_error"]) <= CURRENT_CONSTRAINT_CRITERION
+        ):
+            raise _CriterionReached(unknown)
+
+    try:
+        terminal = scipy.optimize.newton_krylov(
+            residual,
+            initial,
+            method="gmres",
+            inner_maxiter=HOST_INNER_ITERATIONS,
+            maxiter=HOST_OUTER_ITERATIONS,
+            f_tol=0.0,
+            line_search="armijo",
+            callback=record,
+        )
+        termination = "host solver returned"
+    except _CriterionReached as reached:
+        terminal = reached.state
+        termination = "declared flux and current criteria reached"
+    except scipy.optimize.NoConvergence as error:
+        terminal = np.asarray(error.args[0], dtype=float)
+    except LambdaOutOfBand as error:
+        guard_value = error.value
+        termination = str(error)
+
+    try:
+        _residual, metrics = evaluate(terminal)
+    except LambdaOutOfBand as error:
+        guard_value = error.value
+        metrics = {
+            "amplitude": error.value,
+            "flux_l2_relative_residual": float("inf"),
+            "current_relative_error": float("inf"),
+            "unscaled_current_a": float("nan"),
+            "combined_l2_relative_residual": float("inf"),
+        }
+    state = terminal[:-1]
+    amplitude = float(terminal[-1])
+    physical_map = fixed_amplitude_map(profile, current, amplitude)
+    image = np.asarray(jax.jit(physical_map)(jnp.asarray(state)), dtype=float)
+    topology, x_point = _topology(profile, state)
+    return {
+        "state": state,
+        "relative_residual": metrics["combined_l2_relative_residual"],
+        "flux_l2_relative_residual": metrics["flux_l2_relative_residual"],
+        "physical_sup_relative_residual": _relative_sup(image, state),
+        "current_relative_error": abs(metrics["current_relative_error"]),
+        "current_constraint_required": True,
+        "unscaled_current_a": metrics["unscaled_current_a"],
+        "amplitude": metrics["amplitude"],
+        "iterations": len(history),
+        "map_evaluations": evaluations,
+        "residual_history": history,
+        "topology": topology,
+        "x_point_rz_m": x_point,
+        "termination": termination,
+        "lambda_guard_triggered": guard_value is not None,
+        "lambda_guard_value": guard_value,
+        "mapped": physical_map,
+    }
+
+
+def power_iteration(
+    mapped: Callable[[jax.Array], jax.Array], state: np.ndarray
+) -> dict[str, Any]:
+    """Estimate the dominant map eigenvalue with finite-difference actions."""
+
+    compiled = jax.jit(mapped)
+    state = np.asarray(state, dtype=float)
+    generator = np.random.default_rng(11)
+    vector = generator.normal(size=state.shape)
+    vector /= np.linalg.norm(vector)
+    state_scale = max(float(np.max(np.abs(state))), 1.0)
+    growth: list[float] = []
+
+    def action(direction: np.ndarray) -> np.ndarray:
+        direction_scale = max(float(np.max(np.abs(direction))), 1.0e-300)
+        delta = POWER_RELATIVE_STEP * state_scale / direction_scale
+        plus = np.asarray(compiled(jnp.asarray(state + delta * direction)), dtype=float)
+        minus = np.asarray(
+            compiled(jnp.asarray(state - delta * direction)), dtype=float
+        )
+        return (plus - minus) / (2.0 * delta)
+
+    finite = True
+    for _ in range(POWER_ITERATIONS):
+        image = action(vector)
+        norm = float(np.linalg.norm(image))
+        if not np.isfinite(norm) or norm <= 1.0e-300:
+            finite = False
+            break
+        growth.append(norm)
+        vector = image / norm
+    if finite:
+        final = action(vector)
+        rayleigh = float(np.dot(vector, final))
+    else:
+        rayleigh = float("nan")
+    return {
+        "method": "central-difference map action in fixed-count power iteration",
+        "iterations": len(growth),
+        "relative_step": POWER_RELATIVE_STEP,
+        "rayleigh_quotient": rayleigh,
+        "absolute_dominant_eigenvalue_estimate": abs(rayleigh),
+        "last_five_norm_growth_estimates": growth[-5:],
+        "finite": finite and np.isfinite(rayleigh),
+        "banked_diverted_state_comparison_band": [1.25, 1.40],
+    }
+
+
+def _serialise_arm(result: dict[str, Any]) -> dict[str, Any]:
+    """Remove runtime arrays and attach the simultaneous qualification."""
+
+    serial = {
+        key: value for key, value in result.items() if key not in {"state", "mapped"}
+    }
+    for key in ("relative_residual", "current_relative_error"):
+        value = float(serial[key])
+        serial[key] = value if np.isfinite(value) else None
+    serial["x_point_rz_m"] = (
+        np.asarray(serial["x_point_rz_m"], dtype=float).tolist()
+        if np.all(np.isfinite(serial["x_point_rz_m"]))
+        else None
+    )
+    current_ok = bool(
+        not serial.get("current_constraint_required", False)
+        or (
+            serial["current_relative_error"] is not None
+            and serial["current_relative_error"] <= CURRENT_CONSTRAINT_CRITERION
+        )
+    )
+    serial["simultaneously_meets_1e-6_and_diverted"] = bool(
+        serial["relative_residual"] is not None
+        and serial["relative_residual"] <= RELATIVE_RESIDUAL_CRITERION
+        and current_ok
+        and serial["topology"] == "diverted"
+        and not serial["lambda_guard_triggered"]
+    )
+    return serial
+
+
+def solve_frame(
+    row: dict[str, Any],
+    frame_input: FrameInput,
+    geometry: dict[str, tuple[tuple[np.ndarray, float], ...]],
+) -> dict[str, Any]:
+    """Run every registered arm from one identical labelled branch seed."""
+
+    profile, seed, _label, _wall, _reliable, _statement = build_profile(
+        row, frame_input.frame, PSEUDO_WALL_EXPANSION
+    )
+    profile = append_recovered_conductors(profile, geometry)
+    current = current_arms(profile, frame_input.recovered_currents_a)[1]
+    time_ms = float(row["efit_times"][frame_input.frame])
+    target = _target_current(row, time_ms)
+
+    unpinned_map = profile.flux_map(jnp.asarray(current), TopologyClass.DIVERTED)
+    accelerated = fixed_point.newton_krylov(
+        unpinned_map,
+        jnp.asarray(seed),
+        newton_steps=24,
+        gmres_iterations=24,
+        warmup=8,
+        relaxation=0.5,
+        step_cap=10.0,
+    )
+    unpinned_state = np.asarray(accelerated.state, dtype=float)
+    unpinned_image = np.asarray(jax.jit(unpinned_map)(accelerated.state), dtype=float)
+    unpinned_topology, unpinned_x = _topology(profile, unpinned_state)
+    unpinned_current = float(
+        np.sum(
+            np.asarray(
+                profile.operator.cell_current(accelerated.state, TopologyClass.DIVERTED)
+            )
+        )
+    )
+    unpinned = {
+        "state": unpinned_state,
+        "mapped": unpinned_map,
+        "relative_residual": _relative_sup(unpinned_image, unpinned_state),
+        "current_relative_error": abs(unpinned_current - target) / abs(target),
+        "current_constraint_required": False,
+        "amplitude": 1.0,
+        "achieved_current_a": unpinned_current,
+        "iterations": 24,
+        "map_evaluations": int(np.count_nonzero(np.isfinite(accelerated.trace))),
+        "residual_history": [
+            float(value)
+            for value in np.asarray(accelerated.trace)
+            if np.isfinite(value)
+        ],
+        "topology": unpinned_topology,
+        "x_point_rz_m": unpinned_x,
+        "termination": "fixed accelerated budget completed",
+        "lambda_guard_triggered": False,
+        "lambda_guard_value": None,
+    }
+    eliminated = solve_eliminated(profile, seed, current, target)
+    augmented_trials = {
+        str(alpha): solve_augmented(profile, seed, current, target, alpha)
+        for alpha in AUGMENTED_ALPHAS
+    }
+    nominal = augmented_trials[str(NOMINAL_ALPHA)]
+
+    for result in (unpinned, eliminated, nominal):
+        result["dominant_map_eigenvalue"] = power_iteration(
+            result["mapped"], result["state"]
+        )
+    alpha_serial = {
+        alpha: _serialise_arm(result) for alpha, result in augmented_trials.items()
+    }
+    alpha_verdicts = {
+        value["simultaneously_meets_1e-6_and_diverted"]
+        for value in alpha_serial.values()
+    }
+    record = {
+        "shot": frame_input.shot,
+        "frame": frame_input.frame,
+        "time_ms": time_ms,
+        "screened_out_of_affected_polarity_population": True,
+        "target_plasma_current_a": target,
+        "target_current_role": (
+            "declared constraint, not fitted and unavailable to actuator-only inference"
+        ),
+        "poloidal_conductor_count": 24,
+        "same_label_branch_seed_all_arms": True,
+        "coefficients_fitted": 0,
+        "currents_adjusted": 0,
+        "arms": {
+            ARM_NAMES[0]: _serialise_arm(unpinned),
+            ARM_NAMES[1]: _serialise_arm(eliminated),
+            ARM_NAMES[2]: _serialise_arm(nominal),
+        },
+        "augmented_alpha_trials": alpha_serial,
+        "augmented_verdict_stable_across_alpha": len(alpha_verdicts) == 1,
+    }
+    return record
+
+
+def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
+    """Return cohort medians and the pinning verdict without hiding failures."""
+
+    def values(arm: str, key: str) -> list[float]:
+        return [
+            float(item["arms"][arm][key])
+            for item in records
+            if item["arms"][arm][key] is not None
+        ]
+
+    arms = {}
+    for arm in ARM_NAMES:
+        residuals = values(arm, "relative_residual")
+        radii = [
+            float(
+                item["arms"][arm]["dominant_map_eigenvalue"][
+                    "absolute_dominant_eigenvalue_estimate"
+                ]
+            )
+            for item in records
+            if item["arms"][arm]["dominant_map_eigenvalue"]["finite"]
+        ]
+        amplitudes = values(arm, "amplitude")
+        arms[arm] = {
+            "median_relative_residual": (
+                float(np.median(residuals)) if residuals else None
+            ),
+            "median_dominant_map_eigenvalue": (
+                float(np.median(radii)) if radii else None
+            ),
+            "median_amplitude": float(np.median(amplitudes)) if amplitudes else None,
+            "simultaneously_converged_and_diverted_frames": int(
+                sum(
+                    item["arms"][arm]["simultaneously_meets_1e-6_and_diverted"]
+                    for item in records
+                )
+            ),
+            "lambda_guard_terminations": int(
+                sum(item["arms"][arm]["lambda_guard_triggered"] for item in records)
+            ),
+        }
+    first_control = records[0]["arms"][ARM_NAMES[0]]["relative_residual"]
+    control_reproduced = bool(
+        first_control is not None
+        and abs(first_control - UNPINNED_PLATEAU_CONTROL)
+        <= UNPINNED_CONTROL_ABSOLUTE_TOLERANCE
+    )
+    pin_passes = arms[ARM_NAMES[1]]["simultaneously_converged_and_diverted_frames"]
+    return {
+        "frame_count": len(records),
+        "distinct_shots": len({item["shot"] for item in records}),
+        "all_shots_screened_free_of_affected_population": all(
+            item["screened_out_of_affected_polarity_population"] for item in records
+        ),
+        "unpinned_first_frame_plateau": first_control,
+        "unpinned_plateau_control": UNPINNED_PLATEAU_CONTROL,
+        "unpinned_control_reproduced": control_reproduced,
+        "arms": arms,
+        "augmented_verdict_stable_across_alpha_all_frames": all(
+            item["augmented_verdict_stable_across_alpha"] for item in records
+        ),
+        "current_pinning_removes_vacuum_root_and_orbiting_plateau": bool(
+            control_reproduced and pin_passes == len(records)
+        ),
+        "frames": records,
+    }
+
+
+def _figure(summary: dict[str, Any], path: Path) -> None:
+    """Plot residual, source amplitude and spectral-radius comparisons."""
+
+    records = summary["frames"]
+    labels = [f"{item['shot'][9:17]}:{item['frame']}" for item in records]
+    x = np.arange(len(records))
+    width = 0.24
+    colors = ("#4477aa", "#228833", "#cc6677")
+    figure, axes = plt.subplots(1, 3, figsize=(14.5, 4.8), constrained_layout=True)
+    for offset, (arm, color) in enumerate(zip(ARM_NAMES, colors, strict=True)):
+        residual = [
+            item["arms"][arm]["relative_residual"] or np.nan for item in records
+        ]
+        radius = [
+            item["arms"][arm]["dominant_map_eigenvalue"][
+                "absolute_dominant_eigenvalue_estimate"
+            ]
+            for item in records
+        ]
+        amplitude = [item["arms"][arm]["amplitude"] for item in records]
+        shift = (offset - 1) * width
+        axes[0].bar(x + shift, residual, width, color=color, label=arm)
+        axes[1].bar(x + shift, amplitude, width, color=color)
+        axes[2].bar(x + shift, radius, width, color=color)
+    axes[0].set_yscale("log")
+    axes[0].axhline(RELATIVE_RESIDUAL_CRITERION, color="black", linestyle="--")
+    axes[0].set_ylabel("terminal relative residual")
+    axes[0].legend(frameon=False, fontsize=8)
+    axes[1].axhline(1.0, color="black", linestyle="--")
+    axes[1].set_ylabel("profile amplitude lambda")
+    axes[2].axhspan(1.25, 1.40, color="#bbbbbb", alpha=0.35)
+    axes[2].axhline(1.0, color="black", linestyle="--")
+    axes[2].set_ylabel("dominant map eigenvalue magnitude")
+    for axis in axes:
+        axis.set_xticks(x, labels, rotation=35, ha="right")
+    figure.savefig(path, dpi=180)
+    plt.close(figure)
+
+
+def run(data: Path, output: Path) -> dict[str, Any]:
+    """Run the fixed cohort and publish incremental, receipt and plot artifacts."""
+
+    configure_dtypes()
+    declaration = write_preregistration(output)
+    recovery_path = RECOVERY_OUTPUT / RECOVERY_RECEIPT_NAME
+    recovery = json.loads(recovery_path.read_text())
+    polarity = json.loads(POLARITY_RECEIPT.read_text())["full_corpus_census"]
+    affected = set(polarity["affected_shots"])
+    if len(affected) != POLARITY_AFFECTED_SHOT_COUNT:
+        raise RuntimeError("polarity authority is not the landed 603-shot population")
+    selected = selected_inputs(recovery, affected)
+    geometry = _omitted_vertices()
+    columns = tuple(
+        dict.fromkeys(
+            (
+                *_LABEL_COLUMNS,
+                *_CURRENT_COLUMNS,
+                *_GEOMETRY_COLUMNS,
+                *PLASMA_CURRENT_COLUMNS,
+            )
+        )
+    )
+    checkpoint = output / CHECKPOINT_NAME
+    checkpoint.write_text("")
+    records = []
+    for number, frame_input in enumerate(selected, start=1):
+        path = data / frame_input.shot
+        row = _read(path, columns)
+        row["_source_path"] = str(path)
+        record = solve_frame(row, frame_input, geometry)
+        records.append(record)
+        with checkpoint.open("a") as stream:
+            stream.write(json.dumps(record, sort_keys=True, allow_nan=False) + "\n")
+        print(
+            f"SOLVED {number}/{len(selected)} {frame_input.shot}:{frame_input.frame} "
+            + " ".join(
+                f"{arm}={record['arms'][arm]['relative_residual']}/"
+                f"{record['arms'][arm]['topology']}"
+                for arm in ARM_NAMES
+            ),
+            flush=True,
+        )
+    result = summarize(records)
+    receipt = {
+        "preregistration": preregistration(),
+        "preregistration_path": str(declaration),
+        "preregistration_sha256": _sha256(declaration),
+        "authorities": {
+            "recovery_receipt": str(recovery_path),
+            "recovery_receipt_sha256": _sha256(recovery_path),
+            "polarity_receipt": str(POLARITY_RECEIPT),
+            "polarity_receipt_sha256": _sha256(POLARITY_RECEIPT),
+            "affected_shot_count": len(affected),
+        },
+        "interpretation": (
+            "Prescribed Ip is a declared benchmark constraint rather than a fitted "
+            "coefficient and is not available as an actuator-only inference input."
+        ),
+        "result": result,
+    }
+    (output / RECEIPT_NAME).write_text(
+        json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    )
+    _figure(result, output / FIGURE_NAME)
+    if not result["unpinned_control_reproduced"]:
+        raise RuntimeError("the unpinned first-frame plateau control did not reproduce")
+    return receipt
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--data", type=Path, default=DEFAULT_DATA)
+    parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--preregister-only", action="store_true")
+    arguments = parser.parse_args()
+    if arguments.preregister_only:
+        print(f"PREREGISTERED {write_preregistration(arguments.output)}")
+        return
+    receipt = run(arguments.data, arguments.output)
+    headline = dict(receipt["result"])
+    headline.pop("frames", None)
+    print(json.dumps(headline, indent=2, sort_keys=True))
+
+
+if __name__ == "__main__":
+    main()

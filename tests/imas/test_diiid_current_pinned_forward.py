@@ -21,6 +21,10 @@ def test_declaration_keeps_the_constraint_explicit_and_the_system_square() -> No
         in declaration["target_current"]["inference_availability"]
     )
     assert declaration["selection"]["absolute_recorded_ip_floor_a"] == 200_000.0
+    assert (
+        declaration["selection"]["preflight_reproducibility_relative_tolerance"]
+        == 2.0e-6
+    )
     assert len(declaration["selection"]["cohort_declared_before_solver_scoring"]) == 5
     assert all(
         item["seed_lambda"] > 0.0

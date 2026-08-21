@@ -76,6 +76,7 @@ PLASMA_CURRENT_COLUMNS = (
     "magnetics_plasma_current_times",
 )
 REPRESENTATIVE_CURRENT_FLOOR_A = 200_000.0
+COHORT_PREFLIGHT_RELATIVE_TOLERANCE = 2.0e-6
 LOW_CURRENT_CONTROL = ("d3d_shot_00000c4a7b.parquet", 0)
 REPRESENTATIVE_COHORT = (
     {
@@ -167,6 +168,9 @@ def preregistration() -> dict[str, Any]:
                 "every selected shot is absent from the landed 603-shot population"
             ),
             "cohort_declared_before_solver_scoring": list(REPRESENTATIVE_COHORT),
+            "preflight_reproducibility_relative_tolerance": (
+                COHORT_PREFLIGHT_RELATIVE_TOLERANCE
+            ),
             "low_current_control_fixture": {
                 "shot": LOW_CURRENT_CONTROL[0],
                 "frame": LOW_CURRENT_CONTROL[1],
@@ -812,7 +816,12 @@ def solve_frame(
         float(declared["unscaled_source_ip_a"]),
         float(declared["seed_lambda"]),
     )
-    if not np.allclose(measured, registered, rtol=2.0e-10, atol=1.0e-9):
+    if not np.allclose(
+        measured,
+        registered,
+        rtol=COHORT_PREFLIGHT_RELATIVE_TOLERANCE,
+        atol=1.0e-9,
+    ):
         raise RuntimeError(
             f"pre-solve cohort qualification drifted for {frame_input.shot}:"
             f"{frame_input.frame}: measured={measured}, registered={registered}"

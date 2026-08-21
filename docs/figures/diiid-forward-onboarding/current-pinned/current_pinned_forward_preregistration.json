@@ -101,6 +101,7 @@
       "time_ms": 160.0
     },
     "polarity_screen": "every selected shot is absent from the landed 603-shot population",
+    "preflight_reproducibility_relative_tolerance": 2e-06,
     "rule": "one maximum-absolute-current banked diverted frame per distinct shot, absolute recorded Ip at least 200 kA, retained only when target Ip and extracted unscaled source Ip have the same sign",
     "source": "docs/figures/diiid-forward-onboarding/boundary-recovery/boundary_current_recovery_frames.jsonl"
   },

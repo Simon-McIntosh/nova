@@ -1016,6 +1016,96 @@
       onto a narrow vertical band is the whole finding: the recovered field sets the residual rather than
       reducing it.</figcaption>
     </figure>
+
+    <h2 id="exact-tare">§10 the tare made exact, and what it found was the labels — 2026-08-21</h2>
+    <p>Commits <code>573a0292</code> (vessel mesh), <code>b1807397</code>/<code>7978702b</code>/<code>6b9ff964</code>
+    (exact tare), <code>8c77ee35</code>/<code>e3e9bc15</code> (patches), <code>0b10e948</code> (origin).
+    An owner-specified pipeline: tare exactly, then read what is left. It worked, and the answer it
+    returned is about the dataset rather than the machine.</p>
+
+    <h3 id="exact-tare-floor">Exact clipped-cell moments cut the tare residual 7.3-fold</h3>
+    <p>The landed differencing gate represented plasma current by node-centred point filaments —
+    <code>j<sub>φ</sub> × cell_area</code> at each centroid. Replacing that with the zeroth, radial and
+    vertical moments over the true LCFS-clipped polygon changes the closure by most of an order of
+    magnitude.</p>
+    <table>
+      <caption>Interior Δ* signed-current residual after taring, as a fraction of extracted plasma
+      current. 60 diverted frames from 20 shots, all outside the 603-shot polarity population, nothing
+      fitted.</caption>
+      <thead><tr><th>Route</th><th>median</th><th>IQR</th></tr></thead>
+      <tbody>
+        <tr><td>Node-centred filaments</td><td>3.5395 %</td><td>1.752–5.542 %</td></tr>
+        <tr><td><strong>Exact clipped-cell moments</strong></td><td><strong>0.4842 %</strong></td><td>0.217–0.924 %</td></tr>
+      </tbody>
+    </table>
+    <p>That is below both the 2.0 % landed projection floor and the measured 2.3267 % profile-projection
+    RMS, and the synthetic unit recovers uniform-profile cell current to <strong>rtol 2e-12</strong>. The
+    integration is exact; the closure test is local, and its correct answer is known to be zero.</p>
+    <p><strong>A consistency check worth keeping.</strong> On <em>total</em> current the two routes barely
+    differ — recovered/recorded I<sub>p</sub> median 0.9957 exact against 0.9939 node-centred over the 31
+    frames at |I<sub>p</sub>| ≥ 50 kA. That is correct: total current is an integral and is insensitive to
+    intra-cell distribution. The entire gain appears in the <em>local</em> residual. Two routes agreeing on
+    the integral while diverging 7× locally is evidence the improvement is real rather than bookkeeping.
+    Note 29 of 60 diverted frames carry |I<sub>p</sub>| below 50 kA, which makes current-normalised ratios
+    ill-conditioned; every downstream figure keeps that split.</p>
+    <p><strong>Full-corpus cost, measured before spending it:</strong> 0.1452 s/frame after a 168 s
+    response build, so 1,559,340 frames extrapolate to <strong>62.91 h</strong> serial and
+    <strong>52.7 GB</strong> of tared maps (105.4 GB retaining both routes). A production run remains
+    separately unauthorised — and the science below did not need it.</p>
+
+    <h3 id="exact-tare-vessel">The vessel mesh, and a defect in our own artifact</h3>
+    <p>99 hex cells on the 82-point limiter at 0.2078 m characteristic width close the wall area to
+    <strong>4.16e-05</strong> relative against a 1e-04 bar set beforehand. The 99×99 self-interaction
+    operator is <em>exactly</em> symmetric in reciprocal form, condition number 372.66, minimum-row
+    diagonal dominance 0.0298.</p>
+    <p>Two facts that constrain any passive work: the mesh is ~10× coarser than the 65×65 flux grid's
+    0.021 m cell, and a diagonal dominance of 0.0298 means <strong>individual cell currents are not
+    independently recoverable from field data — only a reduced eigenmode set is</strong>. That is §4's
+    eigenmode-reduced scope reached from the opposite direction. Separately, the authored limiter chain is
+    <strong>self-intersecting</strong>; validity repair retained two positive components, and the same
+    outline ships inside our own digest-pinned DDv4 description (<code>f-dfo-012</code>).</p>
+
+    <h3 id="exact-tare-unclaimed">The unclaimed current is real, large, and not physical</h3>
+    <p>With the tare floor at 0.4842 %, Δ* outside the LCFS returns a median <strong>452,071
+    A·turn</strong> of unclaimed current — <strong>61.5 % of the extracted plasma current</strong>, with
+    <strong>96.6 %</strong> of it above the tare floor. So it is not tare error. It is also not
+    conductors, and four discriminators declared before scoring say so.</p>
+    <table>
+      <caption>Origin discriminators. The verdict is <strong>artefact</strong>, carried by the first two
+      rows.</caption>
+      <thead><tr><th>Discriminator</th><th>Result</th><th>Reads as</th></tr></thead>
+      <tbody>
+        <tr><td>Non-GS accounting</td><td><strong>450,094 A·turn = 99.56 %</strong> of the unclaimed median</td><td><strong>artefact</strong></td></tr>
+        <tr><td>Resolution dependence</td><td>÷2 decimation moves the median <strong>−37.57 %</strong>, patches 391 → 288</td><td><strong>artefact</strong></td></tr>
+        <tr><td>Position stability</td><td>2 of 11 clusters stable across 19–20 shots within 0.021 m; the <em>largest</em> clusters spread 3.47–3.52 cells in Z</td><td>mixed — counter-evidence</td></tr>
+        <tr><td>Magnitude plausibility</td><td>2.18× the largest single released conductor, 0.277× the released L1 sum</td><td>conductor-scale, not absurd</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The non-GS row is the finding.</strong> The labels' own already-measured inconsistency
+    generates 450,094 A·turn of apparent exterior current under Δ* — <strong>99.56 %</strong> of what the
+    patch search found — and that figure independently agrees with the separately landed 0.9968 irreducible
+    non-GS residual share. Δ* is a second-derivative operator, so a map that is not GS-consistent
+    manufactures apparent current that is not current. The patch population's shape said the same thing
+    before the accounting did: 384 compact conductor-shaped specks against 7 vessel-shaped, when only five
+    conductors are missing, and a Lenz anti-alignment of 0.5141 — a coin flip, where a passive eddy current
+    must oppose dI/dt.</p>
+    <p><strong>The counter-evidence is retained rather than tidied away.</strong> Two clusters did hold
+    position across 19 and 20 shots to within one native cell in both R and Z, which is the signature a
+    real conductor would leave. With 391 patches and DBSCAN at 0.042 m that could be chance clustering on a
+    geometric feature, and 99.56 % of the magnitude is accounted for elsewhere — so they are a lead, not a
+    finding, and they are recorded as one.</p>
+    <p><strong>What the pipeline actually established, which is more useful than the hardware it did not
+    find.</strong> The method is sound and now demonstrated end to end: exact taring reaches a 0.48 %
+    local floor, and everything above that floor in this dataset is the labels' own 4.3 % non-GS content.
+    Passive-structure extraction and the re-tared coil-current regression are therefore <em>not
+    obstructed</em> by our machinery — they are <strong>unavailable in this dataset</strong>, because there
+    is no passive signal above the label noise to extract. That retires §4's passive scope on a measurement
+    instead of leaving it deferred on a hope, and it names the real ceiling on the whole entry: the labels
+    are 4.3 % from being GS-consistent, and no amount of exact geometry beats that.</p>
+    <p><em>Reproducibility caveat, recorded rather than smoothed over:</em> the authoritative SLURM run for
+    the origin discriminators executed under <code>~/Code/imas-ambix/.venv</code> rather than nova's own
+    environment. It exited 0 and the focused suite ran under nova's venv, but the benchmark's package set
+    was therefore not the documented one, and a re-run should use nova's environment.</p>
   </main>
 </body>
 </html>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T17:03:24",
+  "updated": "2026-08-21T17:07:06",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -16675,9 +16675,66 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T143810197187-diverted-basin-entry",
+        "plan": "dual-basin-solve",
+        "section": "\u00a72",
+        "node": "diverted-basin-entry",
+        "role": "implement",
+        "member": "basin-branches",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T14:38:14Z",
+        "completed_at": "2026-08-21T14:52:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 875,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 875,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "5065604e3b1b37f934d8f5b7912c7545180aba8c",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "failed",
+        "outcome": "Three continuation mechanisms measured, none entering the banked fixture basin: external-field-only (terminal residual 0.254), all-rungs-consistent composed-map homotopy (5 handoff contradictions at fractions 0.35-0.75), and the terminal-qualified homotopy (terminal diverted-consistent but residual 3.46e-2 / root parity 1.55e-2 against 1e-10, machine-converged through fraction 0.30 then never recovering after the handoff). The concurrent separatrix audit then adjudicated the fixture genuine-marginal - 1.445 carrier pitches wall clearance and 2.32% span flux margin against declared 2-pitch/5% floors - so the ladder machinery is retargeted at a rebuilt fixture rather than redesigned; the uncommitted terminal-qualified prototype is salvaged as a patch in the run directory and the basin-branches session retains the full context.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T143810197187-diverted-basin-entry/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0247c-dbe2-78c0-95b0-14590b75d1dd",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6138112,
+            "cached_input_tokens_cumulative": 37035264,
+            "input_tokens": 6446721,
+            "input_tokens_cumulative": 38346228,
+            "output_tokens": 23297,
+            "output_tokens_cumulative": 135348,
+            "reasoning_output_tokens": 7876,
+            "reasoning_output_tokens_cumulative": 52559
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 427
+    "_version": 428
   }
 }

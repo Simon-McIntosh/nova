@@ -122,6 +122,31 @@
   receipts; the diverted fixture has none — <code>diverted-root-qualification</code> measures
   exactly that before any continuation-ladder design.</p>
 
+  <h2 id="s2-separatrix-audit">§2 — the separatrix audit: a genuine X-point, a marginal fixture</h2>
+
+  <p><strong>Landed 2026-08-21, commit <code>a86857ac</code> (merge <code>cef9129c</code>); gate
+  PASSED; verdict <em>genuine-marginal</em> — prompted by the owner challenging the marker-only
+  figure.</strong> The X-point is real: the digest-pinned coefficients give an indefinite local
+  Hessian (determinant −0.526 Wb²/m⁴), the exact saddle-flux level set has four legs with a
+  28.3° minimum opening, the production locator finds the saddle independently to 0.046 carrier
+  pitches, and the exact separatrix has zero wall intersections. But the configuration fails its
+  declared separation floors at stored resolution: saddle-to-wall clearance
+  <strong>1.445 median carrier pitches</strong> (floor: 2), production boundary-minus-wall flux
+  margin <strong>2.324% of span</strong> (floor: 5%; exact sampled-wall margin 1.526%, the
+  production quadratic wall fit overshooting the sampled maximum by 7.12e-4 Wb). The marginality
+  is the probable cause of the basin-entry ladder failures. The fixture is rebuilt to the
+  declared floors; the terminal-qualified ladder re-runs against the rebuilt bank. Receipt:
+  <code>scripts/dual_basin_audit/diverted-separatrix-audit.json</code>.</p>
+
+  <figure>
+    <img src="/nova/figures/dual-basin-solve/diverted-separatrix-audit.png"
+         alt="Honest-scale wall view and equal-scale local saddle view with the exact saddle-flux contour, axis, analytic saddle and production locator"
+         style="max-width:100%;height:auto">
+    <figcaption>The audit figure the claim needed: full-wall and equal-scale local views with the
+    exact saddle-flux contour. The four-legged saddle structure is visible and genuinely
+    in-domain — and visibly marginal against the wall.</figcaption>
+  </figure>
+
   <h2 id="s3-selector">§3 — the hysteresis selector</h2>
 
   <p><strong>Landed 2026-08-21, commit <code>f53ddc39</code> (merge <code>fcf45671</code>); gate

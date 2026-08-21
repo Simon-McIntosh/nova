@@ -44,8 +44,10 @@ def _frame(*, label_rms: float = 0.5, full_pass: bool = True) -> dict:
 
 def test_declaration_separates_root_gate_from_label_diagnostic() -> None:
     declared = roots.preregistration()
-    assert declared["solver"]["route"] == "newton_krylov"
+    assert declared["solver"]["route"] == "host_newton_krylov"
     assert declared["solver"]["relative_residual_criterion"] == 1.0e-6
+    assert declared["solver"]["maximum_outer_iterations"] == 1000
+    assert declared["solver"]["maximum_inner_gmres_iterations"] == 400
     assert declared["current_arms"]["poloidal_conductor_count"] == 24
     assert declared["current_arms"]["coefficients_fitted"] == 0
     assert declared["label_distance"]["representability_ceiling"] == 0.0429
@@ -106,6 +108,53 @@ def test_current_arms_append_recovered_values_without_adjustment() -> None:
     np.testing.assert_array_equal(arms[0, -5:], 0.0)
     np.testing.assert_array_equal(arms[1, -5:], recovered)
     np.testing.assert_array_equal(arms[0, :-5], arms[1, :-5])
+
+
+def test_large_budget_receipt_separates_root_from_terminal_topology() -> None:
+    path = roots.DEFAULT_OUTPUT / "host_large_budget_receipt.json"
+    receipt = json.loads(path.read_text())
+    solver = receipt["solver"]
+    assert solver["fixed_point_converged"]
+    assert solver["relative_residual"] < 1.0e-6
+    assert solver["terminal_topology"] == "limited"
+    assert solver["simultaneously_converged_and_diverted"] is False
+    assert solver["accepted_iterations"] == 89
+    assert solver["map_evaluations"] == 457
+    assert len(solver["accepted_residual_history"]) == 90
+    assert [item["accepted_iteration"] for item in solver["topology_transitions"]] == [
+        31,
+        50,
+        88,
+    ]
+    assert receipt["label_map_diagnostic"]["used_as_pass_criterion"] is False
+
+
+def test_plateau_diagnostic_identifies_nonfinite_exact_tangent() -> None:
+    path = roots.DEFAULT_OUTPUT / "plateau_jacobian_receipt.json"
+    receipt = json.loads(path.read_text())
+    exact = receipt["arnoldi"]
+    assert exact["first_nonfinite_action_column"] == 0
+    assert exact["exact_first_direction_finite"] is False
+    gmres = receipt["fixed_inner_gmres"]
+    assert gmres["finite_step"]
+    assert gmres["finite_linear_action"] is False
+    assert gmres["maximum_absolute_step_wb"] == 0.0
+    assert gmres["proposed_nonlinear_relative_residual"] == receipt["relative_residual"]
+
+    numerical = receipt["finite_difference_arnoldi"]
+    assert numerical["completed_dimension"] == 64
+    assert numerical["projected_numerical_rank"] == 64
+    assert numerical["projected_condition_number"] > 1000.0
+    smoothness = receipt["central_difference_smoothness"]
+    assert all(item["central_difference_finite"] for item in smoothness)
+    assert all(
+        item["minus_topology"] == item["plus_topology"] == "diverted"
+        for item in smoothness
+    )
+    assert (
+        max(item["relative_change_from_previous_scale"] for item in smoothness[1:])
+        < 1.0e-5
+    )
 
 
 def test_committed_receipt_carries_five_paired_diverted_roots() -> None:

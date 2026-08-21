@@ -26,6 +26,7 @@ import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy.optimize
 
 from benchmarks.diiid_boundary_current_recovery import (
     NETCDF_DD_VERSION,
@@ -38,11 +39,6 @@ from benchmarks.diiid_boundary_current_recovery import (
 )
 from benchmarks.diiid_forward_gs_match import (
     DEFAULT_DATA,
-    REGISTERED_ACCELERATED_GMRES_ITERATIONS,
-    REGISTERED_ACCELERATED_NEWTON_STEPS,
-    REGISTERED_ACCELERATED_RELAXATION,
-    REGISTERED_ACCELERATED_STEP_CAP,
-    REGISTERED_ACCELERATED_WARMUP,
     _CURRENT_COLUMNS,
     _GEOMETRY_COLUMNS,
     _LABEL_COLUMNS,
@@ -51,7 +47,8 @@ from benchmarks.diiid_forward_gs_match import (
     build_profile,
 )
 from nova.biot.polygon import polygon_greens
-from nova.equilibrium.forward import ForwardProfile, SaddleSeedGeometry
+from nova.equilibrium import fixed_point
+from nova.equilibrium.forward import ForwardProfile
 from nova.equilibrium.topology import TopologyClass
 from nova.imas.diiid_description import POLOIDAL_CONDUCTORS
 from nova.jax.config import configure_dtypes
@@ -67,6 +64,10 @@ POLARITY_AFFECTED_SHOT_COUNT = 603
 FIXED_POINT_CRITERION = 1.0e-6
 LABEL_REPRESENTABILITY_CEILING = 0.0429
 CURRENT_ARM_NAMES = ("shipped_20_only", "shipped_20_plus_recovered_5")
+HOST_OUTER_ITERATIONS = 1000
+HOST_INNER_ITERATIONS = 400
+PLATEAU_KRYLOV_DIMENSION = 64
+_OMITTED_RESPONSE_CACHE: dict[tuple[tuple[int, ...], bytes], np.ndarray] = {}
 
 
 @dataclass(frozen=True)
@@ -108,19 +109,17 @@ def preregistration() -> dict[str, Any]:
             "current_adjustments": 0,
         },
         "solver": {
-            "entry_point": "ForwardProfile.solve_branch",
-            "route": "newton_krylov",
+            "entry_point": "scipy.optimize.newton_krylov over ForwardProfile.flux_map",
+            "route": "host_newton_krylov",
             "requested_class": "diverted",
             "relative_residual_criterion": FIXED_POINT_CRITERION,
-            "newton_steps": REGISTERED_ACCELERATED_NEWTON_STEPS,
-            "gmres_iterations": REGISTERED_ACCELERATED_GMRES_ITERATIONS,
-            "warmup": REGISTERED_ACCELERATED_WARMUP,
-            "relaxation": REGISTERED_ACCELERATED_RELAXATION,
-            "step_cap": REGISTERED_ACCELERATED_STEP_CAP,
+            "maximum_outer_iterations": HOST_OUTER_ITERATIONS,
+            "maximum_inner_gmres_iterations": HOST_INNER_ITERATIONS,
+            "budget_multiplier_over_recorded_100_by_40_host_fixture": 10,
+            "line_search": "armijo",
             "seed": (
-                "production topology-anchored cold seed constructed from plasma "
-                "current, current centroid, and the label-read axis/saddle geometry; "
-                "no stored flux sample is copied into the seed"
+                "the convention-clean labelled map, used only to select the "
+                "diverted branch; it is not an equilibrium input"
             ),
         },
         "pass_criterion": (
@@ -226,13 +225,19 @@ def omitted_response(
     """Return total-flux response at arbitrary targets for the five conductors."""
 
     target = np.asarray(coordinates, dtype=float)
+    key = (target.shape, np.ascontiguousarray(target).tobytes())
+    cached = _OMITTED_RESPONSE_CACHE.get(key)
+    if cached is not None:
+        return cached
     columns = []
     for name in OMITTED_COILS:
         response = np.zeros(len(target), dtype=float)
         for vertices, turns in geometry[name]:
             response += turns * polygon_greens(target[:, 0], target[:, 1], vertices)[0]
         columns.append(response)
-    return np.column_stack(columns)
+    result = np.column_stack(columns)
+    _OMITTED_RESPONSE_CACHE[key] = result
+    return result
 
 
 def append_recovered_conductors(
@@ -281,51 +286,350 @@ def current_arms(profile: ForwardProfile, recovered: tuple[float, ...]) -> np.nd
     return np.stack((control, full))
 
 
-def diverted_cold_seeds(
-    profile: ForwardProfile, label_seed: np.ndarray, arms: np.ndarray
-) -> tuple[np.ndarray, dict[str, Any]]:
-    """Construct one production cold seed per current arm from topology geometry."""
+class _HostCriterionReached(Exception):
+    """Stop the host solve immediately after the registered criterion is met."""
 
-    requested = TopologyClass.DIVERTED
-    _masks, topology = profile.operator.read(jnp.asarray(label_seed))
-    axis = np.asarray(topology.axis, dtype=float)
-    saddle = np.asarray(topology.x_point, dtype=float)
-    if not bool(topology.diverted) or not np.all(np.isfinite(axis + saddle)):
-        raise RuntimeError("the selected label does not supply diverted seed geometry")
-    cell_current = np.asarray(
-        profile.operator.cell_current(label_seed, requested), dtype=float
+    def __init__(self, state: np.ndarray):
+        super().__init__("registered relative residual reached")
+        self.state = np.asarray(state, dtype=float)
+
+
+def _relative_residual(image: np.ndarray, state: np.ndarray) -> float:
+    """Return the solver's registered max-norm fixed-point defect."""
+
+    return float(np.max(np.abs(image - state)) / max(np.max(np.abs(image)), 1.0e-30))
+
+
+def solve_host_pinned(
+    profile: ForwardProfile, seed: np.ndarray, current: np.ndarray
+) -> dict[str, Any]:
+    """Run the large-budget host Newton--Krylov solve on the diverted map."""
+
+    mapped = jax.jit(profile.flux_map(jnp.asarray(current), TopologyClass.DIVERTED))
+    evaluations = 0
+    accepted_history: list[float] = []
+    topology_history: list[str] = []
+
+    def image(state: np.ndarray) -> np.ndarray:
+        nonlocal evaluations
+        evaluations += 1
+        return np.asarray(mapped(jnp.asarray(state)), dtype=float)
+
+    def residual(state: np.ndarray) -> np.ndarray:
+        return image(state) - state
+
+    initial = np.asarray(seed, dtype=float)
+    accepted_history.append(_relative_residual(image(initial), initial))
+    _initial_masks, initial_topology = profile.operator.read(jnp.asarray(initial))
+    topology_history.append(
+        "diverted" if bool(initial_topology.diverted) else "limited"
     )
-    plasma_current = float(np.sum(cell_current))
-    if abs(plasma_current) <= np.finfo(float).tiny:
-        raise RuntimeError("the selected label has zero source-driven plasma current")
-    coordinates = np.asarray(profile.lattice.coordinate, dtype=float)
-    centroid = np.sum(cell_current[:, None] * coordinates, axis=0) / plasma_current
-    geometry = SaddleSeedGeometry(tuple(axis), tuple(saddle))
-    seeds = []
-    receipts = []
-    for current in arms:
-        portfolio = profile.cold_seed_portfolio(
-            plasma_current,
-            centroid,
-            current=current,
-            diverted_geometry=geometry,
+
+    def record(state: np.ndarray, value: np.ndarray) -> None:
+        scale = max(np.max(np.abs(state + value)), 1.0e-30)
+        relative = float(np.max(np.abs(value)) / scale)
+        accepted_history.append(relative)
+        _accepted_masks, accepted_topology = profile.operator.read(jnp.asarray(state))
+        topology_class = "diverted" if bool(accepted_topology.diverted) else "limited"
+        topology_history.append(topology_class)
+        print(
+            f"HOST_ACCEPTED {len(accepted_history) - 1} "
+            f"residual={relative:.12e} topology={topology_class}",
+            flush=True,
         )
-        branch = jax.tree.map(
-            lambda value: value[int(TopologyClass.DIVERTED)], portfolio.branches
+        if relative <= FIXED_POINT_CRITERION:
+            raise _HostCriterionReached(state)
+
+    try:
+        terminal = scipy.optimize.newton_krylov(
+            residual,
+            initial,
+            method="gmres",
+            inner_maxiter=HOST_INNER_ITERATIONS,
+            maxiter=HOST_OUTER_ITERATIONS,
+            f_tol=0.0,
+            line_search="armijo",
+            callback=record,
         )
-        seeds.append(np.asarray(branch.flux, dtype=float))
-        receipts.append(
+        termination = "host solver returned before its outer ceiling"
+    except _HostCriterionReached as reached:
+        terminal = reached.state
+        termination = "registered relative residual reached"
+    except scipy.optimize.NoConvergence as error:
+        terminal = np.asarray(error.args[0], dtype=float)
+        termination = "host outer-iteration ceiling exhausted"
+    terminal_image = image(terminal)
+    relative = _relative_residual(terminal_image, terminal)
+    _masks, topology = profile.operator.read(jnp.asarray(terminal))
+    return {
+        "state": np.asarray(terminal),
+        "relative_residual": relative,
+        "finite": bool(np.all(np.isfinite(terminal_image + terminal))),
+        "diverted": bool(topology.diverted),
+        "x_point": np.asarray(topology.x_point, dtype=float),
+        "accepted_residual_history": np.asarray(accepted_history, dtype=float),
+        "accepted_topology_history": topology_history,
+        "accepted_iterations": len(accepted_history) - 1,
+        "map_evaluations": evaluations,
+        "termination": termination,
+    }
+
+
+def accelerated_plateau(
+    profile: ForwardProfile, seed: np.ndarray, current: np.ndarray
+) -> dict[str, Any]:
+    """Reproduce the fixed-budget accelerator state used by the first attempt."""
+
+    result = fixed_point.newton_krylov(
+        profile.flux_map(jnp.asarray(current), TopologyClass.DIVERTED),
+        jnp.asarray(seed),
+        newton_steps=24,
+        gmres_iterations=24,
+        warmup=8,
+        relaxation=0.5,
+        step_cap=10.0,
+    )
+    _masks, topology = profile.operator.read(result.state)
+    return {
+        "state": np.asarray(result.state, dtype=float),
+        "relative_residual": float(result.residual),
+        "trace": np.asarray(result.trace, dtype=float),
+        "diverted": bool(topology.diverted),
+    }
+
+
+def residual_jacobian_diagnostic(
+    profile: ForwardProfile,
+    state: np.ndarray,
+    current: np.ndarray,
+    *,
+    krylov_dimension: int = PLATEAU_KRYLOV_DIMENSION,
+) -> dict[str, Any]:
+    """Measure exact-tangent Krylov rank and local smoothness at a plateau."""
+
+    state = np.asarray(state, dtype=float)
+    trial = jnp.asarray(state)
+    mapped = profile.flux_map(jnp.asarray(current), TopologyClass.DIVERTED)
+    image, tangent = jax.linearize(mapped, trial)
+    residual = image - trial
+    residual_np = np.asarray(residual, dtype=float)
+
+    def action(vector: np.ndarray) -> np.ndarray:
+        direction = jnp.asarray(vector)
+        return np.asarray(direction - tangent(direction), dtype=float)
+
+    residual_norm = float(np.linalg.norm(residual_np))
+    basis = np.zeros((state.size, krylov_dimension + 1), dtype=float)
+    hessenberg = np.zeros((krylov_dimension + 1, krylov_dimension), dtype=float)
+    basis[:, 0] = residual_np / residual_norm
+    completed = 0
+    nonfinite_action_column: int | None = None
+    breakdown_threshold = np.finfo(float).eps * np.sqrt(state.size)
+    for column in range(krylov_dimension):
+        vector = action(basis[:, column]).copy()
+        if not np.all(np.isfinite(vector)):
+            nonfinite_action_column = column
+            break
+        for row in range(column + 1):
+            coefficient = float(np.dot(basis[:, row], vector))
+            hessenberg[row, column] += coefficient
+            vector -= coefficient * basis[:, row]
+        for row in range(column + 1):
+            coefficient = float(np.dot(basis[:, row], vector))
+            hessenberg[row, column] += coefficient
+            vector -= coefficient * basis[:, row]
+        next_norm = float(np.linalg.norm(vector))
+        hessenberg[column + 1, column] = next_norm
+        completed = column + 1
+        if next_norm <= breakdown_threshold:
+            break
+        basis[:, column + 1] = vector / next_norm
+    projected = hessenberg[: completed + 1, :completed]
+    if completed:
+        singular = np.linalg.svd(projected, compute_uv=False)
+        rank_threshold = singular[0] * max(projected.shape) * np.finfo(state.dtype).eps
+        rank = int(np.count_nonzero(singular > rank_threshold))
+    else:
+        singular = np.empty(0, dtype=float)
+        rank_threshold = float("nan")
+        rank = 0
+
+    def jax_action(vector):
+        return vector - tangent(vector)
+
+    step, info = jax.scipy.sparse.linalg.gmres(
+        jax_action,
+        residual,
+        maxiter=24,
+        restart=24,
+        solve_method="batched",
+    )
+    step_np = np.asarray(step, dtype=float)
+    step_finite = bool(np.all(np.isfinite(step_np)))
+    if step_finite:
+        linear_residual = action(step_np) - residual_np
+        proposed = state + step_np
+        proposed_image = np.asarray(mapped(jnp.asarray(proposed)), dtype=float)
+        _proposed_masks, proposed_topology = profile.operator.read(
+            jnp.asarray(proposed)
+        )
+        linear_action_finite = bool(np.all(np.isfinite(linear_residual)))
+        linear_relative = (
+            float(np.linalg.norm(linear_residual) / residual_norm)
+            if linear_action_finite
+            else None
+        )
+        proposed_relative = (
+            _relative_residual(proposed_image, proposed)
+            if np.all(np.isfinite(proposed_image))
+            else None
+        )
+        proposed_class = "diverted" if bool(proposed_topology.diverted) else "limited"
+        maximum_step = float(np.max(np.abs(step_np)))
+    else:
+        linear_action_finite = False
+        linear_relative = None
+        proposed_relative = None
+        proposed_class = None
+        maximum_step = None
+
+    direction = basis[:, 0]
+    exact_direction = action(direction)
+    exact_direction_finite = bool(np.all(np.isfinite(exact_direction)))
+    state_scale = max(float(np.max(np.abs(state))), 1.0e-30)
+    smoothness = []
+    previous_finite_difference: np.ndarray | None = None
+    for fraction in (1.0e-8, 1.0e-7, 1.0e-6, 1.0e-5, 1.0e-4, 1.0e-3):
+        delta = fraction * state_scale
+        plus = state + delta * direction
+        minus = state - delta * direction
+        plus_residual = plus - np.asarray(mapped(jnp.asarray(plus)), dtype=float)
+        minus_residual = minus - np.asarray(mapped(jnp.asarray(minus)), dtype=float)
+        finite_difference = (plus_residual - minus_residual) / (2.0 * delta)
+        finite_difference_norm = float(np.linalg.norm(finite_difference))
+        change = (
+            None
+            if previous_finite_difference is None
+            else float(
+                np.linalg.norm(finite_difference - previous_finite_difference)
+                / max(finite_difference_norm, 1.0e-30)
+            )
+        )
+        tangent_error = (
+            float(
+                np.linalg.norm(finite_difference - exact_direction)
+                / max(np.linalg.norm(exact_direction), 1.0e-30)
+            )
+            if exact_direction_finite
+            else None
+        )
+        _plus_masks, plus_topology = profile.operator.read(jnp.asarray(plus))
+        _minus_masks, minus_topology = profile.operator.read(jnp.asarray(minus))
+        smoothness.append(
             {
-                "plasma_current_a": float(branch.plasma_current),
-                "current_centroid_rz_m": np.asarray(branch.centroid).tolist(),
-                "declared_axis_rz_m": np.asarray(branch.declared_axis).tolist(),
-                "declared_saddle_rz_m": np.asarray(branch.declared_boundary).tolist(),
-                "stored_flux_samples_used": bool(branch.stored_flux_samples_used),
-                "supported_cells": int(branch.supported_cells),
+                "relative_state_perturbation": fraction,
+                "central_difference_tangent_relative_error": tangent_error,
+                "central_difference_finite": bool(
+                    np.all(np.isfinite(finite_difference))
+                ),
+                "central_difference_l2_norm": finite_difference_norm,
+                "relative_change_from_previous_scale": change,
+                "minus_topology": (
+                    "diverted" if bool(minus_topology.diverted) else "limited"
+                ),
+                "plus_topology": (
+                    "diverted" if bool(plus_topology.diverted) else "limited"
+                ),
             }
         )
-    return np.stack(seeds), {
-        "arms": dict(zip(CURRENT_ARM_NAMES, receipts, strict=True))
+        previous_finite_difference = finite_difference
+
+    finite_difference_fraction = 1.0e-6
+
+    def finite_difference_action(vector: np.ndarray) -> np.ndarray:
+        vector_scale = max(float(np.max(np.abs(vector))), 1.0e-30)
+        delta = finite_difference_fraction * state_scale / vector_scale
+        plus = state + delta * vector
+        minus = state - delta * vector
+        plus_residual = plus - np.asarray(mapped(jnp.asarray(plus)), dtype=float)
+        minus_residual = minus - np.asarray(mapped(jnp.asarray(minus)), dtype=float)
+        return (plus_residual - minus_residual) / (2.0 * delta)
+
+    fd_basis = np.zeros_like(basis)
+    fd_hessenberg = np.zeros_like(hessenberg)
+    fd_basis[:, 0] = residual_np / residual_norm
+    fd_completed = 0
+    fd_nonfinite_column: int | None = None
+    for column in range(krylov_dimension):
+        vector = finite_difference_action(fd_basis[:, column]).copy()
+        if not np.all(np.isfinite(vector)):
+            fd_nonfinite_column = column
+            break
+        for row in range(column + 1):
+            coefficient = float(np.dot(fd_basis[:, row], vector))
+            fd_hessenberg[row, column] += coefficient
+            vector -= coefficient * fd_basis[:, row]
+        for row in range(column + 1):
+            coefficient = float(np.dot(fd_basis[:, row], vector))
+            fd_hessenberg[row, column] += coefficient
+            vector -= coefficient * fd_basis[:, row]
+        next_norm = float(np.linalg.norm(vector))
+        fd_hessenberg[column + 1, column] = next_norm
+        fd_completed = column + 1
+        if next_norm <= breakdown_threshold:
+            break
+        fd_basis[:, column + 1] = vector / next_norm
+    fd_projected = fd_hessenberg[: fd_completed + 1, :fd_completed]
+    fd_singular = np.linalg.svd(fd_projected, compute_uv=False)
+    fd_rank_threshold = (
+        fd_singular[0] * max(fd_projected.shape) * np.finfo(state.dtype).eps
+    )
+    fd_rank = int(np.count_nonzero(fd_singular > fd_rank_threshold))
+    return {
+        "state_dimension": int(state.size),
+        "relative_residual": _relative_residual(np.asarray(image), state),
+        "arnoldi": {
+            "requested_dimension": krylov_dimension,
+            "completed_dimension": completed,
+            "breakdown": bool(
+                completed < krylov_dimension and nonfinite_action_column is None
+            ),
+            "first_nonfinite_action_column": nonfinite_action_column,
+            "exact_first_direction_finite": exact_direction_finite,
+            "projected_numerical_rank": rank,
+            "rank_threshold": (
+                float(rank_threshold) if np.isfinite(rank_threshold) else None
+            ),
+            "largest_singular_value": (float(singular[0]) if singular.size else None),
+            "smallest_singular_value": (float(singular[-1]) if singular.size else None),
+            "projected_condition_number": (
+                float(singular[0] / singular[-1]) if singular.size else None
+            ),
+            "singular_values": singular.tolist(),
+        },
+        "fixed_inner_gmres": {
+            "iterations": 24,
+            "info": None if info is None else int(info),
+            "finite_step": step_finite,
+            "finite_linear_action": linear_action_finite,
+            "maximum_absolute_step_wb": maximum_step,
+            "relative_linear_residual_l2": linear_relative,
+            "proposed_nonlinear_relative_residual": proposed_relative,
+            "proposed_topology": proposed_class,
+        },
+        "finite_difference_arnoldi": {
+            "relative_state_perturbation": finite_difference_fraction,
+            "requested_dimension": krylov_dimension,
+            "completed_dimension": fd_completed,
+            "first_nonfinite_action_column": fd_nonfinite_column,
+            "projected_numerical_rank": fd_rank,
+            "rank_threshold": float(fd_rank_threshold),
+            "largest_singular_value": float(fd_singular[0]),
+            "smallest_singular_value": float(fd_singular[-1]),
+            "projected_condition_number": float(fd_singular[0] / fd_singular[-1]),
+            "singular_values": fd_singular.tolist(),
+        },
+        "central_difference_smoothness": smoothness,
     }
 
 
@@ -399,41 +703,30 @@ def solve_frame(
     )
     profile = append_recovered_conductors(profile, geometry)
     arms = current_arms(profile, frame_input.recovered_currents_a)
-    seeds, seed_receipt = diverted_cold_seeds(profile, seed, arms)
-
-    def solve_one(initial, current):
-        return profile.solve_branch(
-            initial,
-            TopologyClass.DIVERTED,
-            route="newton_krylov",
-            current=current,
-            tolerance=FIXED_POINT_CRITERION,
-            gmres_iterations=REGISTERED_ACCELERATED_GMRES_ITERATIONS,
-            warmup=REGISTERED_ACCELERATED_WARMUP,
-            relaxation=REGISTERED_ACCELERATED_RELAXATION,
-            step_cap=REGISTERED_ACCELERATED_STEP_CAP,
-        )
-
-    branches = jax.jit(jax.vmap(solve_one))(jnp.asarray(seeds), jnp.asarray(arms))
     radius = profile.lattice.radius
     height = profile.lattice.height
     interior = _plasma_mask(row, frame_input.frame, radius, height)
     records = {}
     for index, name in enumerate(CURRENT_ARM_NAMES):
-        branch = jax.tree.map(lambda value: value[index], branches)
-        equilibrium = branch.equilibrium
-        _masks, topology = profile.operator.read(equilibrium.flux)
-        solved = np.asarray(equilibrium.flux[: profile.lattice.node_count]).reshape(
+        host = solve_host_pinned(profile, seed, arms[index])
+        solved = np.asarray(host["state"][: profile.lattice.node_count]).reshape(
             profile.lattice.shape
         )
         records[name] = qualify_arm(
-            residual=float(branch.residual),
-            finite=bool(equilibrium.finite.passed),
-            diverted=bool(topology.diverted),
-            iterations=int(branch.iterations),
-            x_point=np.asarray(topology.x_point),
+            residual=host["relative_residual"],
+            finite=host["finite"],
+            diverted=host["diverted"],
+            iterations=host["accepted_iterations"],
+            x_point=host["x_point"],
             diagnostic=label_distance(label, solved, interior),
-            trace=np.asarray(equilibrium.fixed_point.trace, dtype=float),
+            trace=host["accepted_residual_history"],
+        )
+        records[name]["fixed_point"].update(
+            {
+                "map_evaluations": host["map_evaluations"],
+                "termination": host["termination"],
+                "topology_history": host["accepted_topology_history"],
+            }
         )
     return {
         "shot": frame_input.shot,
@@ -447,7 +740,10 @@ def solve_frame(
         ),
         "coefficients_fitted": 0,
         "current_adjustments": 0,
-        "cold_seed_receipt": seed_receipt,
+        "seed": {
+            "kind": "convention-clean labelled map used only as a branch seed",
+            "stored_map_used_as_equilibrium_input": False,
+        },
         "arms": records,
     }
 

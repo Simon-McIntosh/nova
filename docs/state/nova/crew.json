@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T13:25:58",
+  "updated": "2026-08-21T13:35:50",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -178,6 +178,13 @@
         "role": "implement",
         "session_id": "019ff706-9a2b-7243-97f3-9e101baa0562",
         "created": "2026-08-12"
+      },
+      {
+        "id": "forward-slice",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-21"
       },
       {
         "id": "gate-packet",
@@ -14737,9 +14744,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T105131723070-sol-two-solution-demonstration",
+        "plan": "sol-current-demonstration",
+        "section": "\u00a73",
+        "node": "sol-two-solution-demonstration",
+        "role": "implement",
+        "member": "sol-demo",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T10:51:35Z",
+        "completed_at": "2026-08-21T11:31:41Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2406,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2406,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "2c9037edc44309ba36ebabc47d0ad8d62b8cef08",
+        "commits": [
+          "39555e0f32e61d45d29648257cf9b2c4951db755"
+        ],
+        "changed_lines": {
+          "added": 8671,
+          "removed": 0,
+          "files": 5
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T105131723070-sol-two-solution-demonstration/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a023f2-97eb-7f92-9ee6-46521d5246bb",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 19241984,
+            "cached_input_tokens_cumulative": 19241984,
+            "input_tokens": 19759965,
+            "input_tokens_cumulative": 19759965,
+            "output_tokens": 76604,
+            "output_tokens_cumulative": 76604,
+            "reasoning_output_tokens": 29361,
+            "reasoning_output_tokens_cumulative": 29361
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 385
+    "_version": 387
   }
 }

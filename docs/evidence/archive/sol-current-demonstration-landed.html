@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="sol-current-demonstration-landed">
+  <meta name="plan-title" content="SOL Current Demonstration — cumulative execution evidence">
+  <meta name="plan-summary" content="Landed outcomes of the SOL current demonstration: the Eich closure, the four-crossing saddle partition, and the two-solution proof of finite continuous current to the divertor target">
+  <meta name="plan-evidence-for" content="sol-current-demonstration">
+  <title>SOL Current Demonstration — landed | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <h1>SOL Current Demonstration — cumulative execution evidence</h1>
+
+  <h2 id="reuse-map">§1 — the reuse map: two seams fit, three holds named</h2>
+
+  <p><strong>Landed 2026-08-21, commit <code>11105450</code> (merge <code>cc5a0deb</code>).</strong>
+  Seven seams audited: the exterior-moment route (SOL supports ride the three per-iteration
+  vectors, no new coupling blocks) and the matched-level Solov'ev contour-overlay benchmark were
+  fit; the topology mask suppliers and forward-solve current conditioning were qualified; and
+  three holds were named that the composes-only plan text had missed — no Eich expression
+  existed anywhere in the repository, the landed SOL continuation demanded a finite truncating
+  support contrary to the locked no-cutoff decision, and the production clip drew one chord
+  through the four-crossing saddle cell. Report:
+  <code>scripts/sol_demonstration_reuse/report.md</code>.</p>
+
+  <h2 id="eich-closure">§2 — the Eich closure: width from the field, support from topology</h2>
+
+  <p><strong>Landed 2026-08-21, commit <code>88d60dd8</code> (merge <code>5cfbbda0</code>); 6 tests
+  added, 15 existing continuation tests green.</strong>
+  <code>nova/equilibrium/sol_closure.py</code> evaluates λ_q[mm] = 0.63·B<sub>p,OMP</sub>[T]<sup>−1.19</sup>
+  from the equilibrium outboard-midplane poloidal field and maps it into normalised total flux
+  (λ_ψN = 2πR·B<sub>p</sub>·λ_q/|span|). Both variants — single-length and dual e-folding (4λ_q
+  spreading length, fraction 0.35) — start exactly from the confined separatrix value with
+  first-derivative continuity at ~4e-8 absolute residual. The common-SOL support is bounded by
+  topology and material only (receipt <code>support=inf</code>, <code>truncated_fraction=0</code>),
+  implementing the locked no-cutoff decision; private-flux cells receive exactly zero by label.</p>
+
+  <h2 id="saddle-partition">§2 — the saddle cell partitions through explicit branch lanes</h2>
+
+  <p><strong>Landed 2026-08-21, commit <code>f2bce371</code> (merge <code>e8206bab</code>); 3 tests
+  added, 19 existing clip tests green.</strong> The four-crossing path carries the X-point as an
+  explicit fixed-capacity clip vertex with branch-paired chords: common-SOL plus private-flux
+  lobes close the whole cell area within 2.0e-16 m², quadrature closes within 2.0e-15 m², and
+  the audited 0.214040 A single-chord current error is removed to 2.0e-15 A. The branch lanes
+  (vertices, counts, areas, first/second moments, linear current moments, saddle identity) are
+  additive; every pre-existing <code>TracedClippedSupports</code> field keeps its name, order
+  prefix and shape — the transport-consumer pin honoured.</p>
+
+  <h2 id="two-solution">§3 — two solutions, one net current: the demonstration</h2>
+
+  <p><strong>Landed 2026-08-21, commits <code>a67dc1b3</code>+<code>39555e0f</code> (merge
+  <code>903e09d9</code>); gate PASSED after one answered NEEDS-HELP.</strong> The stored DINA
+  core profile terminates with exactly zero gradient at ψ_N = 1 — a property of that reference,
+  banked by the dual-route receipt — so a finite Eich crossing cannot anchor on it. Per the
+  answered brief, both arms share an analytic cubic-Hermite C1 shoulder over the final tabulated
+  interval ψ_N ∈ [0.985610, 1.0] (p′: 3336.766 → 143.084 Pa/Wb at exact endpoint slopes; FF′:
+  −0.028224 → −0.001210 T²m²/Wb), declared in the receipt as a demonstration choice. The
+  continuation guard saw a true C1 anchor (value jump exactly 0, gradient mismatch 5.7e-16) with
+  no tolerance change and no product-code edit.</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>assertion / measure</th><th>confined control</th><th>SOL-carrying arm</th></tr></thead>
+    <tbody>
+      <tr><td>converged (residual)</td><td>1.370e-15</td><td>8.346e-16 (joint)</td></tr>
+      <tr><td>net current ledger</td><td>−14,819,192.090 A (core only)</td><td>−14,819,195.378 core + 3.288 common-SOL + 0 private; identity error exactly 0</td></tr>
+      <tr><td>private-flux current</td><td>0</td><td>exactly 0 by topology label</td></tr>
+      <tr><td>separatrix j_φ</td><td>−6365.876 A/m²</td><td>−6365.910 A/m² — finite, continuous</td></tr>
+      <tr><td>measured 1e-6 extent</td><td>—</td><td>ψ_N = 1.005943 single · 1.023637 dual (outcomes, not inputs)</td></tr>
+      <tr><td>strike-adjacent common-SOL cells</td><td>—</td><td>cells [77, 5] carry [−0.753, 0.251] A — current to the target</td></tr>
+      <tr><td>saddle cell</td><td colspan="2">two four-vertex lanes per branch family; additive closure 0.0; private integral 0.0; area closure −2.0e-18 m²</td></tr>
+      <tr><td>equilibrium displacement</td><td colspan="2">axis 2.70e-5 m · X-point 2.75e-5 m; strike samples unchanged at this carrier resolution (no sub-grid claim)</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <figure>
+    <img src="/nova/figures/sol-current-demonstration/current-profiles.svg" alt="Flux-surface-averaged toroidal current density for both solutions across the full normalised-flux range including the SOL leg" style="max-width:100%">
+    <figcaption>Full-range ⟨j⟩ profiles: the finite continuous crossing at ψ_N = 1 and the
+    Eich-scaled single/dual decays with their measured extents.</figcaption>
+  </figure>
+
+  <figure>
+    <img src="/nova/figures/sol-current-demonstration/flux-map-contours.svg" alt="Matched-level flux contours of the confined control and SOL-carrying solution with axis, X-point and strike markers" style="max-width:100%">
+    <figcaption>Matched-ψ_N-level overlay localising where the SOL current moves the
+    equilibrium: boundary, X-point and strike geometry.</figcaption>
+  </figure>
+
+  <p>Artifacts: <code>benchmarks/sol_current_demonstration.py</code> (re-runnable, warm-cache
+  fail-closed, 24.2 s control / 108.2 s SOL solves),
+  <code>docs/figures/sol-current-demonstration/results.json</code> (strict receipt),
+  <code>solutions.npz</code> (both 2,396-state roots, 56 FSA bins, 10 finite bins at ψ_N ≥ 1).</p>
+
+</main>
+</body>
+</html>

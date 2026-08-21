@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="sol-current-demonstration">
   <meta name="plan-title" content="SOL Current Demonstration — finite j across the separatrix to the divertor target">
   <meta name="plan-summary" content="Proof of principle that scrape-off-layer current operates in the forward solve: a finite, continuous toroidal current density crossing the separatrix, decaying on an Eich-scaled width through the common SOL all the way to the divertor target, with zero current in the private-flux region — demonstrated by two forward solutions at identical net plasma current, one confined and one carrying SOL current">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="2.0">
   <meta name="plan-capability-version" content="1.0">
@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="5">
-<meta name="plan-commits" content="11105450,88d60dd8,f2bce371">
-<meta name="plan-artifacts" content="scripts/sol_demonstration_reuse/report.md,nova/equilibrium/sol_closure.py,tests/test_sol_closure.py,tests/test_saddle_partition.py">
-<meta name="plan-impl" content="0.75">
+<meta name="plan-version" content="7">
+<meta name="plan-commits" content="11105450,88d60dd8,f2bce371,a67dc1b3,39555e0f">
+<meta name="plan-artifacts" content="scripts/sol_demonstration_reuse/report.md,nova/equilibrium/sol_closure.py,tests/test_sol_closure.py,tests/test_saddle_partition.py,benchmarks/sol_current_demonstration.py,docs/figures/sol-current-demonstration/results.json,docs/evidence/archive/sol-current-demonstration-landed.html">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -66,30 +66,22 @@
     values sit below the support limit. This is the connectivity distinction the domain machinery
     already draws; the demonstration asserts it live.</p>
 
-    <h2 id="s3">§3 — Two solutions, one net current</h2>
-
-    <p>Run two forward solutions on the same machine at <strong>identical net plasma current</strong> and
-    p′/FF′ profiles as close as the closure permits: one with all current inside the LCFS (the confined
-    control), one with part of the current flowing in the SOL under the §2 closure. Report:</p>
-
-    <ul>
-      <li><strong>⟨j⟩ flux-surface-average profiles</strong> for both solutions across the full ψ_N range
-      including the SOL leg, showing the finite continuous crossing at ψ_N = 1 and the Eich-scaled decay;</li>
-      <li><strong>discrete-contour flux-map comparisons</strong> of the two solutions (matched levels),
-      localising where the SOL current moves the equilibrium — boundary shape, x-point, strike-point
-      geometry;</li>
-      <li>the measured support extent per width variant: the ψ_N at which j falls below a stated
-      insignificance floor (e.g. 1e-6 of its separatrix value) — an outcome of the closure, never an
-      imposed limit;</li>
-      <li>live assertions: zero current on the private-flux mask in every case; net-current identity
-      between the two solutions to solver precision; current present on common-SOL cells adjacent to the
-      strike points (maintained to the target).</li>
-    </ul>
-
-    <p><em>Done-when:</em> both solutions converge on the same machine with the net-current identity and
-    private-flux-zero assertions green; the ⟨j⟩ profiles and matched-level contour overlays are banked as
-    figures with the measured support extent per width variant; and the divertor-target continuity is
-    asserted on the strike-point cells rather than claimed.</p>
+    <section id="s3" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-21</span>
+        <h2>§3 — Two solutions, one net current</h2>
+      </header>
+      <p class="landed-summary">
+        Both arms converged at identical net current (−14.819 MA, relative error exactly 0):
+        finite continuous j across ψ_N = 1 (−6365.9 A/m²), Eich decay at measured extents
+        1.00594/1.02364, exactly zero private-flux current, current on strike-adjacent common-SOL
+        cells at both legs, saddle branch lanes closing to machine precision, axis/X-point moved
+        2.7e-5 m. The shared analytic C1 shoulder over the reference's zero-gradient edge is a
+        declared demonstration choice. Full record:
+        <a href="/nova/evidence/archive/sol-current-demonstration-landed#two-solution">§3 landed</a>
+        (commits <code>a67dc1b3</code>, <code>39555e0f</code>).
+      </p>
+    </section>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -132,7 +124,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-scd-001" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-16" data-recommends-skill="/reckon-ship sol-current-demonstration" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-scd-001" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-16" data-recommends-skill="/reckon-ship sol-current-demonstration" data-resolved-at="2026-08-21T11:36:52+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Run the demonstration once the solve-path routing has landed</h4>
     <div class="r-fu-body"><p>All three decisions are locked by owner direction. The demonstration needs
         the wired linear representation (the routing node of plasma-edge-current-representation §6) so the
@@ -140,6 +132,7 @@
         §2's closure and §3's two-solution comparison are one node each, with the figures and live
         assertions inside the demonstration node.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sol-current-demonstration</pre>
+    <p class="r-fu-outcome">done - the demonstration ran end to end on the landed routing: Eich closure (88d60dd8), four-crossing saddle partition (f2bce371), and the two-solution proof (a67dc1b3/39555e0f) - both arms converged at identical net current (relative error exactly 0), finite continuous j across psi_N=1 (-6365.9 A/m2 at the separatrix), zero private-flux current, current on strike-adjacent common-SOL cells, measured extents 1.00594/1.02364. No followup owed: the proof of principle is complete; SOL physics in production solves is owned by flux-function-forward-equilibrium (plan-informs).</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -157,6 +150,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-20260821T1035" data-who="reckon-ship" data-when="2026-08-21T10:35:00+00:00">
     <div class="r-comment-body">reuse-map-sol-demonstration landed - commit 11105450, merged cc5a0deb; gate PASSED; worker 327 s. Seven seams audited: 2 FIT, 2 QUALIFIED, 3 HOLD. FIT: the exterior-moment route (SOL supports ride the three per-iteration vectors with no new coupling blocks) and the 21 matched-level Solovev contour-overlay benchmark. THREE HOLDS THE DEMONSTRATION NODES MUST CLEAR, so the plan's composes-only claim was stale: (1) no Eich lambda_q or heat-flux-width expression exists anywhere in the repository (0 hits) - the width closure is new machinery with nothing to reuse; (2) the landed SOL continuation is value-and-first-derivative continuous but its exponential REQUIRES a finite truncating support, contrary to the locked closure-driven no-cutoff decision - the material-bounded common-SOL support must replace that truncation; (3) the production clip accepts exactly 2 crossings while the audited saddle cell carries 4 - the X-point vertex, branch-paired chords and per-branch integration named by the boundary-ring audit are unbuilt. Also missing: an equal core-plus-SOL total-current policy in ForwardProfile and topology-qualified common-SOL j_phi averaging (reconstruction's current KKT and transport's confined FSA exist as patterns). Execution decomposes to three nodes: sol-closure (Eich width + material-bounded exponential), saddle-partition (four-crossing clip), then the two-solution demonstration. Reuse map: scripts/sol_demonstration_reuse/report.md.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260821T1240" data-who="reckon-ship" data-when="2026-08-21T12:40:00+00:00">
+    <div class="r-comment-body">sol-two-solution-demonstration landed - commits a67dc1b3/39555e0f, merged 903e09d9; gate PASSED after one answered NEEDS-HELP; worker 2406 s. THE PLAN SHIPS. The stored DINA core profile ends with exactly zero gradient at psi_N=1 (a banked property of that reference), so both arms share a declared analytic cubic-Hermite C1 shoulder over the final tabulated interval (value jump exactly 0, gradient mismatch 5.7e-16, no tolerance or product-code change; continuation.py, source.py and forward.py untouched). Both roots converged (residuals 1.4e-15 / 8.3e-16) at identical net current -14,819,192.090 A with relative identity error exactly 0; SOL ledger core/common-SOL/private = -14,819,195.378/+3.288/0 A; private-flux current exactly zero by topology label; strike-adjacent common-SOL cells carry current at both legs; the saddle machine cell partitions through the additive branch lanes with area closure -2e-18 m2. Separatrix crossing finite and continuous at -6365.9 A/m2; measured 1e-6 extents psi_N=1.005943 single / 1.023637 dual with Bp,OMP=1.3299 T, lambda_q=0.4488 mm. Axis/X-point displacements 2.7e-5 m; strike samples unchanged at carrier resolution, not overclaimed. Record: /nova/evidence/archive/sol-current-demonstration-landed#two-solution.</div>
 </div>
 </section>
 </main>

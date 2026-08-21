@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T12:53:55",
+  "updated": "2026-08-21T13:25:58",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -393,7 +393,7 @@
         "id": "sol-demo",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a023f2-97eb-7f92-9ee6-46521d5246bb",
         "created": "2026-08-21"
       },
       {
@@ -14611,9 +14611,135 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T104053907961-fcoil-primary-decomposition",
+        "plan": "efit-flux-decomposition",
+        "section": "\u00a74",
+        "node": "fcoil-primary-decomposition",
+        "role": "implement",
+        "member": "decomp-native",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T10:40:58Z",
+        "completed_at": "2026-08-21T11:22:58Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2520,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2520,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "137961eafb2caeafe275c6aaa9ea159f495cb745",
+        "commits": [
+          "1b9fb2bfb9f5f2125a0e29771593058643a75611"
+        ],
+        "changed_lines": {
+          "added": 7996,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T104053907961-fcoil-primary-decomposition/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a023e8-dd90-7122-bfe1-ae2755e5d05f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 24370688,
+            "cached_input_tokens_cumulative": 24370688,
+            "input_tokens": 24647598,
+            "input_tokens_cumulative": 24647598,
+            "output_tokens": 40314,
+            "output_tokens_cumulative": 40314,
+            "reasoning_output_tokens": 13633,
+            "reasoning_output_tokens_cumulative": 13633
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260821T105055369573-spline-gradient-integrands",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a78",
+        "node": "spline-gradient-integrands",
+        "role": "implement",
+        "member": "transport-env",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T10:50:58Z",
+        "completed_at": "2026-08-21T11:25:05Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2047,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2047,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "7ab1de56a044b5625ce15414a7186f4d65271fd9",
+        "commits": [
+          "bf6fd7da"
+        ],
+        "changed_lines": {
+          "added": 228,
+          "removed": 36,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "one-authority integrands land: all five moment integrands evaluate the global spline derivative at the 12 Gauss nodes per arc, no corner-bilinear sample remains. ITER improves across the board (g2g3 2.6478 to 2.4449, g0 0.9245 to 0.8377, g1 2.1188 to 1.9434, g2 2.0017 to 1.7365 percent) and flips from strict xfail to a passing numeric assertion with every no-regression bound met. STEP worsens sharply (g1 15.36 to 27.45, g2g3 9.07 to 19.84) with the mechanism measured, not guessed: the fixed single-ordinate 12-node arc parameterisation meets sharper low-aspect-ratio coarea peaks (min ordinate derivative 0.00218 vs ITER 0.00321). The ITER valid=False flag is a GENUINE arc-topology defect pinned to cell 9285 at psi_n 0.0406: an even edge-root pair invisible to endpoint-sign bisection, branch residual 1.25e-5 against the 2e-8 tolerance, kept fail-closed. Both residual defects share one cause - the monotone single-root arc assumption - which the repair node now targets. 44 passed, 1 strict xfail, ruff clean",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T105055369573-spline-gradient-integrands/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01023-3e4f-7081-b1ab-24ffbe816152",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 21340672,
+            "cached_input_tokens_cumulative": 162397184,
+            "input_tokens": 21732472,
+            "input_tokens_cumulative": 166249779,
+            "output_tokens": 35686,
+            "output_tokens_cumulative": 380605,
+            "reasoning_output_tokens": 13169,
+            "reasoning_output_tokens_cumulative": 130139
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 382
+    "_version": 385
   }
 }

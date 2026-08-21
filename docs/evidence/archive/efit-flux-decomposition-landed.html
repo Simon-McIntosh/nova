@@ -597,5 +597,43 @@
   control (3.537e-3). The masked result is therefore not promoted as an identity repair; the remask
   mechanism is measured separately before the fcoil_c primary measurement opens.</p>
 
+  <h2 id="native-grid-primary">§3–§4 — the fcoil_c primary on the native grid: the external field is fit, and P4-lower retracts</h2>
+
+  <p><strong>Landed 2026-08-21, commit <code>1b9fb2bf</code> (merge <code>d4e35f52</code>); gate
+  PASSED; SLURM all_debug 1252743, 32 CPUs, 29m14s.</strong> Eighteen complete-input slices of the
+  frozen six, every one on the stored 65×65 plane with zero interpolation and zero grid transfers
+  in the localisation path: native delta_star, exact fixed G0/GR/GZ blocks, masked-once support
+  admission (exterior cells removed, admitted boundary moments kept whole, unmasked plasma arm
+  reported per slice), native loop_response_matrix, native residual delta_star.</p>
+
+  <p><strong>Verdict one — FIT.</strong> The external field driven from <code>efm/fcoil_c</code>
+  cancels 95.1381–98.2027% of the exterior absolute current (median 97.4720%) on every slice,
+  above the experimental <code>fcoil_x</code> arm (median 96.4744%), and both locked round-trip
+  convergence-order criteria pass (EFIT series order 2.069958, R² 0.999422, 33×49 control
+  5.152549e-3 of span reproduced; linear series 2.156, R² 0.99913). The external field is fit to
+  serve as the free-boundary boundary condition; no residual threshold was applied or registered.
+  Unthresholded residual fractions of span: sup 0.041934–0.251538 (median 0.133781), RMS
+  0.017754–0.109418 (median 0.057290).</p>
+
+  <p><strong>Verdict two — P4-lower RETRACTS.</strong> No fitted-current native-grid global peak
+  localises in <code>p4_lower</code>: 16/18 peaks sit inside the solenoid conductor
+  (<code>sol</code>) and 2/18 in <code>p5_upper</code>. The bank-global peak is +3.545840 MA/m²
+  at R=0.150938 m, Z=1.4375 m (shot 21986 slice 46; implied signed/absolute integrals
+  79.859/282.858 kA); implied residual currents span 0.7165–3.5458 MA/m² peak, 10.563–79.859 kA
+  signed, 74.818–282.858 kA absolute. The earlier interpolated P4-lower point does not survive
+  the native-grid fitted-current cohort.</p>
+
+  <p><strong>Reference qualification, preserved with the verdicts.</strong> Each localisation was
+  preceded by an internal-consistency check of the reference in its own declared coordinate:
+  stored-LCFS contour sup discrepancies reach 0.005181 of declared span, 3/18 slices resolve no
+  typed saddle, and the largest declared-boundary-to-map-saddle offset is 0.163360 of declared
+  span, concentrated in early slices — the same inconsistency class banked for DINA 135011/7 at
+  0.508% of span. Early-slice residual magnitudes must not be attributed solely to nova.</p>
+
+  <p>Artifacts: <code>benchmarks/efit_native_grid_decomposition.py</code>;
+  <code>docs/figures/efit-flux-decomposition/native-grid-decomposition.json</code> (18-slice
+  receipt) and <code>native-grid-decomposition.png</code> (both current arms plus residual Δ*
+  maps for all six shots); <code>roundtrip-convergence.png</code>.</p>
+
 </main></body>
 </html>

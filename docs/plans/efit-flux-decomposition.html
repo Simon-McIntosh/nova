@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="efit-flux-decomposition">
   <meta name="plan-title" content="EFIT Flux Decomposition — separate plasma, external and residual flux">
   <meta name="plan-summary" content="Split a stored EFIT flux map into the plasma term our coupling operator reproduces, the external term our conductor model reproduces, and a residual; then read the residual&#x27;s Grad-Shafranov operator as an implied missing current and localise it">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="4.0">
   <meta name="plan-capability-version" content="1.0">
@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="18">
-<meta name="plan-commits" content="8fffa5c7,971c06e5,e25d1eb4,1164a8e8,c63ab4d7,6f8fd170,92399e7a,8d98a57e,80dd9ebe,17d14f95,c45490c7,766ab2b4,e5acd9a6,a25b3b3c,d82587cd">
-<meta name="plan-artifacts" content="benchmarks/efit_flux_decomposition.py,benchmarks/efit_roundtrip_identity.py,benchmarks/efit_operator_consistency_order.py,benchmarks/efit_analytic_roundtrip_floor.py,benchmarks/efit_filament_truncation_contribution.py,benchmarks/efit_constant_current_attribution.py,benchmarks/efit_cell_current_representation.py,benchmarks/efit_section_shape_zeta_order.py,benchmarks/efit_roundtrip_linear_moments.py">
-<meta name="plan-impl" content="0.85">
+<meta name="plan-version" content="21">
+<meta name="plan-commits" content="8fffa5c7,971c06e5,e25d1eb4,1164a8e8,c63ab4d7,6f8fd170,92399e7a,8d98a57e,80dd9ebe,17d14f95,c45490c7,766ab2b4,e5acd9a6,a25b3b3c,d82587cd,1b9fb2bf">
+<meta name="plan-artifacts" content="benchmarks/efit_flux_decomposition.py,benchmarks/efit_roundtrip_identity.py,benchmarks/efit_operator_consistency_order.py,benchmarks/efit_analytic_roundtrip_floor.py,benchmarks/efit_filament_truncation_contribution.py,benchmarks/efit_constant_current_attribution.py,benchmarks/efit_cell_current_representation.py,benchmarks/efit_section_shape_zeta_order.py,benchmarks/efit_roundtrip_linear_moments.py,benchmarks/efit_native_grid_decomposition.py,docs/figures/efit-flux-decomposition/native-grid-decomposition.json">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -95,58 +95,36 @@
     effects this ladder is trying to resolve</em>. Any interpolation must therefore be named and its own
     error reported separately, so an interpolation artefact is never attributed to a missing conductor.</p>
 
-    <h2 id="s3">§3 — The external term, from the fitted currents</h2>
-
-    <p>Reconstruct the external contribution on the same grid from the recorded conductor currents,
-    reusing the described-response machinery in <code>nova/imas/mast_vacuum_response.py</code> and the
-    prediction form already proven in <code>nova/calibrate/gain_check.py</code> — that path forms an
-    exact vacuum prediction as recorded currents times a described response row and is validated at
-    sensor locations, so this rung extends a proven operator to a grid rather than writing a second
-    vacuum-prediction path.</p>
-
-    <p><strong>The external field is driven from EFIT's fitted currents, <code>efm/fcoil_c</code>, and
-    this is not a firewall breach.</strong> The firewall exists to stop EFIT's solution leaking into a
-    <em>fit</em> that is then scored against EFIT, which would be circular. Nothing here is fitted: the
-    question is whether nova's forward solve, given identical sources and currents, produces the same
-    field. Since the stored map was produced with <code>fcoil_c</code>, driving our external field from
-    the experimental <code>fcoil_x</code> instead would confound a solver difference with an input
-    difference — the experimental vector makes the comparison weaker, not more independent. The DINA
-    demonstration that already succeeded used its reference's own declared currents for the same reason.</p>
-
-    <p>Report the <code>fcoil_x</code> figure beside it where that is cheap. The difference between the
-    two vectors quantifies how far EFIT moved the currents from experiment, which bears directly on the
-    vacuum-field question this plan exists to settle: a residual that shrinks under fitted currents but
-    survives under experimental ones is a statement about the current measurement rather than about our
-    field model.</p>
-
-    <p><strong>These routines have value beyond this diagnosis, which raises the bar on how they are
-    written.</strong> Separating the plasma term from a stored flux map is what yields flux-surface-averaged
-    geometry, and that geometry is the input to training one-dimensional transport equations for the
-    competition entry — the same record
-    <a href="/nova/flux-function-forward-transport.html">flux-function-forward-transport</a> consumes as a
-    public output contract of <code>ForwardProfile</code>. So the decomposition should be built as a
-    reusable capability with the reference read behind an adapter, not as a one-slice diagnostic script
-    that happens to answer this question.</p>
-
-    <h2 id="s4">§4 — The residual and the current it implies</h2>
-
-    <p>Report <code>stored − masked plasma − external</code> as a sup-norm and a root-mean-square, each
-    as a fraction of the stored flux span. <strong>These figures carry no threshold and none may be
-    applied.</strong> A large residual is the informative outcome of this plan and must not be reduced by
-    fitting, by masking beyond the stated LCFS mask, or by excluding regions.</p>
-
-    <p>Then apply <code>delta_star</code> to the residual. Because Δ* returns a current density from a
-    flux, the residual's operator <em>is</em> a map of the current our model does not carry: report its
-    peak in A/m², its integral in A, and the R,Z coordinates of its largest magnitude relative to the
-    named conductors. A residual current that localises on a known conductor is a current-magnitude or
-    turns error; one that localises on the vessel wall is a passive-structure omission; one that
-    localises where no conductor exists is either a geometry error or an artefact, and the interpolation
-    figure from §2 is what discriminates the last case.</p>
-
-    <p><em>Done-when:</em> the round trip meets its 1e-6 bound or the operator defect is named; the
-    external term and the residual are reported as fractions of the flux span; and the residual's implied
-    current is quantified and localised, with a stated verdict on whether the external field is fit to
-    serve as a free-boundary boundary condition.</p>
+    <section id="s3" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-21</span>
+        <h2>§3 — The external term, from the fitted currents</h2>
+      </header>
+      <p class="landed-summary">
+        The external field from <code>efm/fcoil_c</code> through the proven drive-times-response
+        path cancels 95.14–98.20% of the exterior absolute current (median 97.47%, above
+        <code>fcoil_x</code> at 96.47%) on all 18 native-grid complete-input slices. Full record:
+        <a href="/nova/evidence/archive/efit-flux-decomposition-landed#native-grid-primary">§3–§4 landed</a>
+        (commit <code>1b9fb2bf</code>).
+      </p>
+    </section>
+    <section id="s4" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-21</span>
+        <h2>§4 — The residual and the current it implies</h2>
+      </header>
+      <p class="landed-summary">
+        Unthresholded residuals across 18 slices: sup 4.19–25.15% of span (median 13.38%), RMS
+        1.78–10.94% (median 5.73%). The implied current localises in the solenoid conductor on
+        16/18 slices and p5_upper on 2/18 — <strong>P4-lower retracts</strong> (reported into
+        mast-misfit-toroidal-harmonics §3). The reference itself is qualified per slice: 3/18
+        without a typed saddle, declared-boundary offsets to 16.34% of span on early slices.
+        Verdict: the external field is FIT as a free-boundary boundary condition; the §5 handoff
+        to coil-geometry-inversion is open as f-efd-003. Full record:
+        <a href="/nova/evidence/archive/efit-flux-decomposition-landed#native-grid-primary">§3–§4 landed</a>
+        (commit <code>1b9fb2bf</code>).
+      </p>
+    </section>
 
     <h2 id="s5">§5 — Handing a plasma-subtracted map to the geometry solve</h2>
 
@@ -260,20 +238,30 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-efd-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship efit-flux-decomposition §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-efd-001" data-status="resolved" data-written-by="reckon-create" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship efit-flux-decomposition §2" data-resolved-at="2026-08-21T11:25:09+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Decompose one slice under the LCFS mask and read the residual</h4>
     <div class="r-fu-body"><p>The exterior signal is already quantified by the sibling plan: 2783 cells outside the stored LCFS carry −9.605046 MA signed and 10.080226 MA absolute against a 0.925 MA plasma current. The leading hypothesis is the ordinary one — that most of it is the real poloidal field coil current, correctly recovered by <code>delta_star</code>, in which case reconstructing the external field from <code>fcoil_x</code> should cancel most of it and the residual is negligible. A superseded unmasked probe measured an external term at 1.2726 of the flux span and a residual sup-norm at 1.2156, which if reproduced under the mask would mean our external field does not reproduce the reference's. Run §2–§4 on one slice: the round trip against its 1e-6 bound, the external term from <code>fcoil_x</code> reusing <code>mast_vacuum_response.py</code> and the <code>gain_check.py</code> prediction form, the residual reported without any threshold, and <code>delta_star</code> of the residual localised against the named conductors. Report the interpolation error separately — the unmasked probe put it at 4.16e-02 of the flux span, larger than several effects this ladder resolves, so it must not be mistaken for a missing conductor.</p></div>
     <pre class="r-fu-prompt">/reckon-ship efit-flux-decomposition §2</pre>
+    <p class="r-fu-outcome">done - the masked decomposition ran first as the 8fffa5c7 probe and then as the native-grid fcoil_c primary (1b9fb2bf): round trip settled by the locked convergence-order criterion, external term validated at 95.1-98.2% cancellation on 18 slices, residual reported unthresholded, implied current localised.</p>
     </article>
-<article class="r-fu" data-id="f-efd-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship efit-flux-decomposition §4" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-efd-002" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship efit-flux-decomposition §4" data-resolved-at="2026-08-21T11:25:09+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Confirm or retract the P4-lower localisation, and report it back to the misfit verdict</h4>
     <div class="r-fu-body"><p>The first masked decomposition put the residual current peak at 1.660757 MA/m2, R=1.53834 m, Z=-1.15313 m, inside <code>p4_lower</code> — the same conductor the 77-probe harmonic localiser implicates from a completely separate sensor and calibration chain. That agreement is worth a great deal <em>if it survives</em>, and two measured facts say it may not: the coupling round trip failed at 5.152549e-03 of stored span against its 1e-6 bound, so the localisation was drawn through a path known to be defective; and bilinear interpolation carries 4.162463% of the flux span against a residual RMS of 3.797384%, so on the interpolated grid the residual is comparable to its own interpolation error.</p><p>Settle it: fix or bypass the coupling defect, work on the native 65x65 grid so no interpolation enters the localisation at all, drive the external term from <code>fcoil_c</code> as the locked decision requires with the <code>fcoil_x</code> figure reported beside it, and repeat across slices and shots rather than one slice of one shot. Then state plainly whether the P4-lower peak is a physical result or an artefact of the defective operator path. Report the outcome into <code>mast-misfit-toroidal-harmonics</code> §3 either way — that plan's verdict is one node from closing and must cite both instruments where they agree and name the disagreement where they do not. A retraction is as useful there as a confirmation, because a verdict resting on a corroboration that later evaporates is worse than one resting on magnetics alone.</p></div>
     <pre class="r-fu-prompt">/reckon-ship efit-flux-decomposition §4</pre>
+    <p class="r-fu-outcome">done - P4-LOWER RETRACTS on the native 65x65 grid with zero interpolation and fcoil_c drive: no global residual peak localises in p4_lower on any of 18 slices (16 in the solenoid conductor, 2 in p5_upper). Reported into mast-misfit-toroidal-harmonics section 3: the flux-map corroboration of the P4-lower survivor evaporates; that verdict now rests on magnetics alone. Early-slice reference defects (declared-boundary-to-map-saddle up to 0.1634 of span, 3/18 slices without a typed saddle) are banked beside the retraction.</p>
+    </article>
+<article class="r-fu" data-id="f-efd-003" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-21" data-recommends-skill="/reckon-ship coil-geometry-inversion" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Hand the plasma-subtracted maps and residual current fields to the flux-map-space geometry solve (foreign-owner)</h4>
+    <div class="r-fu-body"><p>Exemption: foreign-owner - coil-geometry-inversion owns the flux-map-space problem class (currents fixed, match a plasma-subtracted flux map). The section-5 trigger is met: the surviving residual localises on named conductors (16/18 slices in the solenoid, 2/18 in p5_upper; peaks 0.72-3.55 MA/m2, absolute integrals 74.8-282.9 kA). The handoff is the 18-slice receipt docs/figures/efit-flux-decomposition/native-grid-decomposition.json plus the committed benchmark that regenerates the plasma-subtracted maps. Qualification travels with it: early reference slices carry declared-boundary defects up to 0.1634 of span, so a geometry solve should weight late-slice residuals and must not fit the reference's own inconsistency.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship coil-geometry-inversion</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s4" data-id="c-20260813-decompprobe" data-who="reckon-ship" data-when="2026-08-13T14:20:00+00:00">
     <div class="r-comment-body">First masked decomposition landed as a probe - commit 8fffa5c7; shot 21978 slice 46 at 0.24499999 s. FOUR RESULTS, AND THE VACUUM FIELD IS LARGELY EXONERATED WHILE OUR OPERATOR IS NOT. (1) THE ROUND TRIP FAILS: 5.152548851e-3 of stored span against the 1e-6 bound, so the coupling-operator or grid path is defective and this decomposition is diagnostic only, not a validated boundary condition. That is the honest gate failure and it is ours, not the reference's. (2) The exterior receipt independently reproduces the affine node to the ampere: -9,605,045.714913 A signed and 10,080,225.951117 A absolute, -10.38x and 10.89x the stored 925,345.9375 A plasma current. (3) THE EXTERNAL FIELD SUBSTANTIALLY VALIDATES: driving 13 geometry-validated active circuits through loop_response_matrix and the gain-check drive-times-response form cancels 96.554825% of the native-grid exterior absolute current, leaving 347,281 A - so most of that 10 MA IS the real coils, correctly recovered, which was the leading hypothesis. On the interpolated nova grid cancellation drops to 80.178433%, leaving 161,147 A. (4) THE SURVIVING RESIDUAL LOCALISES IN P4 LOWER: unthresholded residual 8.717128% sup and 3.797384% RMS of span; residual delta_star gives 10,946.849 A signed and 181,809.098 A absolute, peaking at 1,660,756.548 A/m2 at R=1.53833375 m, Z=-1.153125 m, inside p4_lower. An INDEPENDENT INSTRUMENT has landed on the conductor the magnetics misfit maps already implicated - see mast-misfit-localization-maps, where the P4-lower survivor was stable at +0.92 split-half, and mast-p4p5-feeder-candidates-null, where the conductor hunt closed null. Two unrelated data paths agreeing on one conductor is worth more than either alone. CAVEAT KEPT IN VIEW: bilinear EFIT-to-nova-to-EFIT interpolation error is 4.162463% of span over 3422 overlap points, larger than the 3.797% residual RMS though smaller than the 8.717% sup, so the interpolated-grid figures are partly artefact and the 96.55% native-grid cancellation is the more trustworthy number. NOTE ON SCOPE: this probe used fcoil_x throughout, on my instruction before the owner locked fcoil_c; efm/fcoil_c was never read. The fcoil_x cancellation is therefore the experimental-current reading and is worth keeping as the comparison the locked decision asks for, but the primary measurement must be redone on fcoil_c. No residual threshold, fit, exclusion or current tuning was applied.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260821T1210" data-who="reckon-ship" data-when="2026-08-21T12:10:00+00:00">
+    <div class="r-comment-body">fcoil-primary-decomposition landed - commit 1b9fb2bf, merged d4e35f52; gate PASSED; SLURM all_debug 1252743, 29m14s at 32 CPUs; worker 2520 s. THE PLAN SHIPS ON THIS NODE, both verdicts delivered. VERDICT 1, FIT: fcoil_c cancels 95.1381-98.2027% of exterior absolute current (median 97.4720%, above fcoil_x 96.4744%) on all 18 native-65x65 complete-input slices of the frozen six, zero interpolation or grid transfer anywhere in the localisation path, masked-once semantics with the unmasked arm reported per slice, and both locked convergence-order criteria pass (2.069958/R2 0.999422 EFIT; 2.156/0.99913 linear) - the external field is fit to serve as the free-boundary boundary condition, so efit-forward-parity entry OPENS. VERDICT 2, P4-LOWER RETRACTS: no fitted-current global peak in p4_lower on any slice; 16/18 in the solenoid conductor, 2/18 in p5_upper; bank-global peak +3.545840 MA/m2 at R=0.150938, Z=1.4375 (21986/46). Unthresholded residuals: sup 4.19-25.15% of span (median 13.38%), RMS 1.78-10.94% (median 5.73%) - reported, never bounded. REFERENCE QUALIFIED PER SLICE before attribution: stored-LCFS contour discrepancies to 0.005181 of declared span; 3/18 slices resolve no typed saddle; declared-boundary-to-map-saddle offsets reach 0.163360 of declared span on early slices - the DINA inconsistency class at 32x the DINA magnitude, so early-slice residuals are not solely nova's. Record: /nova/evidence/archive/efit-flux-decomposition-landed#native-grid-primary.</div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260813-roundtrip" data-who="reckon-ship" data-when="2026-08-13T14:40:00+00:00">
     <div class="r-comment-body">roundtrip-operator-identity landed - commit 971c06e5; NODE MEASURE MET, IDENTITY BOUND STILL FAILED, AND THE BOUND WAS NOT MOVED. The 0.008467436183 Wb = 5.152548851e-3-of-span error reproduces exactly and now closes VECTORIALLY WITH ZERO UNEXPLAINED REMAINDER (closure sup fraction 0). At the max-error coordinate R=1.265715 m, Z=0.076875 m the finite-cell Green / conservation delta_star pair contributes signed 1.865846318e-3 of span and mandatory LCFS remasking contributes signed 3.286702533e-3; their sum is exactly the measured 5.152548851e-3. Their SEPARATE global sup fractions are 2.034417830e-3 and 3.995299357e-3 and are deliberately NOT added, because the suprema fall at different coordinates and adding them would manufacture a total the field does not have. Stages exonerated quantitatively: the independently rewritten drive packing and plasma_to_grid contraction is byte-numerically identical to the public drive and contributes 0, and the Wb/rad-to-total-Wb conversion contributes 2.056897820e-7 of span - so neither the drive nor the convention is the defect. Grid interoperation contributes 2.712239960e-3 as a counterfactual path difference and is correctly EXCLUDED from the exact repeat-error sum; bilinear EFIT-to-nova-to-EFIT interpolation stays its own 4.162463354e-2-of-span receipt over 3,422 overlap points and is never folded into another stage. DEFECTIVE STAGE NAMED: incompatibility between the finite-cell Green coupling and the discrete conservation delta_star operator on nova's grid, amplified by the LCFS remasking; delta_star recovery differs from the supplied current by 2.821503582e-2 peak and 7.620079859e-3 RMS of peak input cell current, and no third exact discrete inverse exists to assign the pair contribution to either operator alone. CONSEQUENCE FOR THE LADDER, STATED RATHER THAN WORKED AROUND: S2's own contract says a residual computed on top of a defective operator is meaningless, so the fcoil_c primary measurement in S3-S4 stays SHUT and efit-forward-parity's entry gate cannot be given. The node also reports that no benchmark-only correction can make the two physical operators mutual inverses without changing the implementation it measures - which raises whether the 1e-6 identity is asking an integral coupling and a finite-difference differential operator for a discrete-inverse property that pair does not have. That question is handed to the owner unresolved; the bound is not weakened in the meantime. Record at /nova/evidence/archive/efit-flux-decomposition-landed#roundtrip-accounting</div>

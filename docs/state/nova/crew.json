@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T15:57:31",
+  "updated": "2026-08-21T15:59:08",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -16044,9 +16044,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T130212255177-transport-kernel-retirement",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a78",
+        "node": "transport-kernel-retirement",
+        "role": "implement",
+        "member": "transport-facade",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T13:02:16Z",
+        "completed_at": "2026-08-21T13:58:08Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3352,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3352,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "7f5838664913ad83ce2431df8db3e47fc4cbbe60",
+        "commits": [
+          "23d98097"
+        ],
+        "changed_lines": {
+          "added": 1583,
+          "removed": 1531,
+          "files": 6
+        },
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "the migration itself is complete and structurally verified: 19 function implementations moved from nova.transport.current_diffusion to nova.equilibrium.flux_surface_extraction with zero implementations left behind, every public nova.transport name preserved by re-export (focused public-surface test green), the legacy clipped path relocated byte-for-byte, ruff clean. The gate is not-run because the 79-test acceptance suite completed only 4 tests in 44 minutes under peer-fleet login-node contention (load has since dropped to 1.15 on 48 cores) and the fence expired mid-suite at EXIT=143; a dedicated test node verifies the held commit before integration",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T130212255177-transport-kernel-retirement/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a01f49-d28d-76c0-a01f-00215a8049e2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 20089344,
+            "cached_input_tokens_cumulative": 53065728,
+            "input_tokens": 20607938,
+            "input_tokens_cumulative": 54464777,
+            "output_tokens": 38087,
+            "output_tokens_cumulative": 135073,
+            "reasoning_output_tokens": 16226,
+            "reasoning_output_tokens_cumulative": 52146
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 416
+    "_version": 417
   }
 }

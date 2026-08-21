@@ -88,6 +88,22 @@
   receipt physics was introduced. Remaining for §2: the two-class recovery acceptance against
   the banked limited roots and the diverted fixture.</p>
 
+  <h2 id="s2-diverted-fixture">§2 — the diverted oracle fixture</h2>
+
+  <p><strong>Landed 2026-08-21, commit <code>e3e55311</code> (merge <code>3823cac7</code>); gate
+  PASSED.</strong> <code>build_diverted_fixture.py</code> constructs an exact static
+  Solov'ev polynomial (Δ*Φ = 8aR² + 2b, zero analytic gradient at axis and saddle) whose flux
+  carries one finite in-domain X-point — construction consumes no topology label. At stored
+  binary64 precision the production locator reads exactly one finite X-point at
+  [1.15950, −0.50316] m against the analytic saddle [1.15776, −0.50448] m (localization error
+  2.18 mm), Hessian eigenvalues [−2.8566, +0.1843] Wb/m², selects it as the boundary
+  (boundary-minus-wall flux −4.303e-4 Wb, inside-wall clearance 69.5 mm) and classifies
+  <strong>diverted</strong>. All three stored arrays are SHA-256 pinned (state
+  <code>1e6e1043…</code>). The five-read classification vector is
+  [limited ×4, diverted]: the bank evidences both topology classes without relabeling any
+  prior receipt. Receipt: <code>scripts/dual_basin_fixtures/diverted-receipt.json</code>;
+  figure: the three-panel classification image above (updated in place).</p>
+
   <h2 id="s3-selector">§3 — the hysteresis selector</h2>
 
   <p><strong>Landed 2026-08-21, commit <code>f53ddc39</code> (merge <code>fcf45671</code>); gate

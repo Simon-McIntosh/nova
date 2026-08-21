@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-commits" content="4a4cf70f,46c55d1d,1d795411,f53ddc39">
-<meta name="plan-artifacts" content="scripts/dual_basin_reuse/reuse-report.md,scripts/dual_basin_fixtures/topology-classification.json,scripts/dual_basin_fixtures/topology-classification.md,docs/figures/dual-basin-solve/topology-classification.png,docs/evidence/archive/dual-basin-solve-landed.html">
-<meta name="plan-impl" content="0.57">
-<meta name="plan-version" content="7">
+<meta name="plan-commits" content="4a4cf70f,46c55d1d,1d795411,f53ddc39,e3e55311">
+<meta name="plan-artifacts" content="scripts/dual_basin_reuse/reuse-report.md,scripts/dual_basin_fixtures/topology-classification.json,scripts/dual_basin_fixtures/topology-classification.md,scripts/dual_basin_fixtures/diverted-receipt.json,scripts/dual_basin_fixtures/diverted-state.npz,docs/figures/dual-basin-solve/topology-classification.png,docs/evidence/archive/dual-basin-solve-landed.html">
+<meta name="plan-impl" content="0.71">
+<meta name="plan-version" content="8">
 </head>
 <body>
   <main class="plan-doc">
@@ -148,6 +148,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260821T1402-branch-pin" data-who="reckon-ship" data-when="2026-08-21T14:02:00+00:00">
     <div class="r-comment-body">branch-pin-portfolio landed - commit 1d795411, merged 4f5776bf; gate PASSED: focused mechanism gate 5/5 (declared class selects its boundary anchor; a terminal class contradiction stays in its branch receipt with converged false; an unavailable requested class is explicitly non-converged; the portfolio matches per-branch solves under jit and vmap), regression suites 64/64 across forward-solve, topology-boundary, limiter-receipt and separatrix-clip lanes. TopologyClass is an int-valued device pin through the one read/support-partition path (wall contact for limited, saddle for diverted, limited connectivity not cut by saddle shadows); ForwardBranchReceipt composes the existing ForwardEquilibrium with requested_class, achieved_class, converged, residual, iterations, topology_consistent; ForwardPortfolio stacks a fixed 2-entry branch axis in limited/diverted order; ForwardProfile.solve and solve_batch unchanged; no parallel physics introduced. Remaining for section 2: the two-class recovery acceptance against the banked limited roots plus the diverted fixture now in flight on basin-fixtures. Record: /nova/evidence/archive/dual-basin-solve-landed#s2-branch-pin.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260821T1425-diverted-fixture" data-who="reckon-ship" data-when="2026-08-21T14:25:00+00:00">
+    <div class="r-comment-body">diverted-oracle-fixture landed - commit e3e55311, merged 3823cac7; gate PASSED. An exact static Solovev polynomial (Delta-star(Phi)=8aR^2+2b) whose flux carries one finite in-domain X-point: the production locator selects the saddle as boundary at [1.15950, -0.50316] m against the analytic saddle [1.15776, -0.50448] m (localization error 2.18 mm), Hessian eigenvalues [-2.8566, +0.1843] Wb/m^2, boundary-minus-wall flux -4.303e-4 Wb, inside-wall clearance 69.5 mm; all three stored arrays SHA-256 pinned (state 1e6e1043). Construction consumes no topology label. The five-read classification vector is [limited x4, diverted]: the bank now evidences both classes without relabeling any receipt, and the original closed-form/alternate roots remain limited. The two-class recovery acceptance is dispatched as the closing section-2 node. Record: /nova/evidence/archive/dual-basin-solve-landed#s2-diverted-fixture.</div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260821T1415-selector" data-who="reckon-ship" data-when="2026-08-21T14:15:00+00:00">
     <div class="r-comment-body">hysteresis-selector landed - commit f53ddc39, merged fcf45671; gate PASSED: 14/14 selector matrix tests, 27/27 forward-solve regression, ruff zero findings. Pure selection over completed portfolio receipts plus immutable SelectionHistory with declared BranchAdmissibility and SelectionPolicy; cold start selects the declared class; disappearance switches immediately only when the alternate is selectable; admissibility loss switches only after the declared consecutive-slice threshold; the six-slice limited-to-diverted sequence selected limited x4 then diverted x2 with exactly 1 switch and 0 elsewhere; every criterion and fired reason serialize through SelectionReceipt.as_dict. Section 3 collapsed. Record: /nova/evidence/archive/dual-basin-solve-landed#s3-selector.</div>

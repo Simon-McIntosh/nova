@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T11:39:42",
+  "updated": "2026-08-21T11:40:42",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -197,7 +197,7 @@
         "id": "geometry-spline",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a023a6-2d79-7d41-a0aa-cca5b54eecff",
         "created": "2026-08-21"
       },
       {
@@ -13739,6 +13739,6 @@
       }
     ],
     "holds": [],
-    "_version": 359
+    "_version": 360
   }
 }

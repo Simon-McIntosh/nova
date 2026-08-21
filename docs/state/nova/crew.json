@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T12:47:34",
+  "updated": "2026-08-21T12:50:14",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -14415,9 +14415,135 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T095127161612-flux-surface-extraction-service",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a78",
+        "node": "flux-surface-extraction-service",
+        "role": "implement",
+        "member": "transport-env",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T09:51:30Z",
+        "completed_at": "2026-08-21T10:48:06Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3396,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3396,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "833e4c829b40a15c5d26f0580e32757f5ba2ecf0",
+        "commits": [
+          "7fc36372f8b4b7adbcfea7f91e4828d66c10e1f2"
+        ],
+        "changed_lines": {
+          "added": 955,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "outcome": "the service lands on the locked four-layer stack with the triangularity question RESOLVED as a reference-convention finding: service and host-contour agree on ITER upper delta to 3.45 percent at equal rho (2.64 at equal psi) while TORAX-vs-host-contour is 21.1 percent - two against one with TORAX the outlier, dominated by its inner-contour axis extension at face 2, and the shared-definition candidate tested and rejected. Shape gradient flows at rel err 2.5e-8, extremum order 4.26, ellipse triangularity machine-zero, dtype repair of the shared primitives proven at both precisions. STEP moment gates land as the authorized strict-xfail negative with the mechanism named: corner-bilinear FSA integrands retained under a globally cubic surface. 46 passed, 2 strict xfails, ruff clean; scope extension to current_diffusion granted mid-flight",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T095127161612-flux-surface-extraction-service/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a01023-3e4f-7081-b1ab-24ffbe816152",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 29300224,
+            "cached_input_tokens_cumulative": 141056512,
+            "input_tokens": 29907263,
+            "input_tokens_cumulative": 144517307,
+            "output_tokens": 65341,
+            "output_tokens_cumulative": 344919,
+            "reasoning_output_tokens": 18047,
+            "reasoning_output_tokens_cumulative": 116970
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260821T103818138026-saddle-partition",
+        "plan": "sol-current-demonstration",
+        "section": "\u00a72",
+        "node": "saddle-partition",
+        "role": "implement",
+        "member": "saddle-partition",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T10:38:22Z",
+        "completed_at": "2026-08-21T10:49:36Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 674,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 674,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "b4c316d9ee30033f66c7ca9cc1ab91c9df3602b3",
+        "commits": [
+          "f2bce371306a5c7f8085c50857d1c3a3a2d6b44b"
+        ],
+        "changed_lines": {
+          "added": 344,
+          "removed": 27,
+          "files": 2
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T103818138026-saddle-partition/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a023e6-7c55-7933-b9ef-d636244fd7fe",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4568832,
+            "cached_input_tokens_cumulative": 4568832,
+            "input_tokens": 4721537,
+            "input_tokens_cumulative": 4721537,
+            "output_tokens": 25914,
+            "output_tokens_cumulative": 25914,
+            "reasoning_output_tokens": 12328,
+            "reasoning_output_tokens_cumulative": 12328
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 378
+    "_version": 380
   }
 }

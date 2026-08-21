@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T18:59:25",
+  "updated": "2026-08-21T19:03:09",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -17861,9 +17861,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T155910201039-retirement-batch-verification",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a78",
+        "node": "retirement-batch-verification",
+        "role": "test",
+        "member": "transport-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T15:59:14Z",
+        "completed_at": "2026-08-21T17:01:30Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3736,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3736,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "2a80b890bf3cd869ae96123c0b1265b276e794bb",
+        "commits": [
+          "bbd2ea54"
+        ],
+        "changed_lines": {
+          "added": 68,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Batch A GREEN at integrated HEAD 2a80b890: 46 passed, 1 xfailed, 1 deselected in 921 s, covering the extraction service, the reference gates, current_diffusion and the tensor spline - the migration-critical surface verifies. Batch B produced no verdict: a FRESH process completed one test of 32 and then sat CPU-active for 40+ minutes inside test_transport_geometry, whose second test is the one-step TORAX adapter parity that historically ran inside a 94-second file - so this is not multi-test compile accumulation, and the earlier py-spy localization at torax_geometry_from_fsa initial pad now reads as the same signature. The adapter path was never isolated-measured across recent commits (the 1.02x acquittal measured the referee test, which does not exercise the adapter); a measurement node does that next",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T155910201039-retirement-batch-verification/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0250c-408a-7872-941c-d240b995b47f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 19036160,
+            "cached_input_tokens_cumulative": 19036160,
+            "input_tokens": 19275256,
+            "input_tokens_cumulative": 19275256,
+            "output_tokens": 20360,
+            "output_tokens_cumulative": 20360,
+            "reasoning_output_tokens": 4613,
+            "reasoning_output_tokens_cumulative": 4613
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 446
+    "_version": 447
   }
 }

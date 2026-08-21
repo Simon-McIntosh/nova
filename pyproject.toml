@@ -127,6 +127,7 @@ dev = [
   "ipython>=9.2.0",
   "ipykernel>=6.29.5",
   "ipywidgets>=8.1.7",
+  "mpmath>=1.4.1",
 ]
 
 [project.scripts]

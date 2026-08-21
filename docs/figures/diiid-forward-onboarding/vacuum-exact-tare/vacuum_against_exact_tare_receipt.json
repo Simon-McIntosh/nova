@@ -1,0 +1,4081 @@
+{
+  "artifacts": {
+    "figure": "docs/figures/diiid-forward-onboarding/vacuum-exact-tare/vacuum_against_exact_tare.png",
+    "receipt": "docs/figures/diiid-forward-onboarding/vacuum-exact-tare/vacuum_against_exact_tare_receipt.json"
+  },
+  "cost": {
+    "response_build_wall_seconds": 169.02636968530715,
+    "total_wall_seconds": 258.4217042308301
+  },
+  "paired_exact_tare_effect": {
+    "exact_minus_node_fractional_rms": {
+      "maximum": 0.0024755995930074576,
+      "mean": -0.0026040706033264543,
+      "median": -0.0013653843174755848,
+      "minimum": -0.026165756801859466,
+      "q25": -0.002538231718953581,
+      "q75": -0.0002542888508101134
+    },
+    "exact_minus_node_r_squared": {
+      "maximum": 0.0032122628067707826,
+      "mean": 0.000290816907303885,
+      "median": 0.00010510883892084211,
+      "minimum": -0.0006101724660795282,
+      "q25": 2.430794999677688e-05,
+      "q75": 0.0005026237287242552
+    },
+    "fraction_frames_exact_has_higher_r_squared": 0.7833333333333333,
+    "fraction_frames_exact_has_lower_fractional_rms": 0.7833333333333333
+  },
+  "physics": {
+    "coil_model_coefficients_fitted": 0,
+    "coil_response": "landed DiiidDescriptionRegistry polygon-section response",
+    "gauge": "one reported additive constant per frame and tare route",
+    "geometry_digests": [
+      "782e9e08f02e610e252e9cf6d6cccfb3a9aefa62b56f14865553ba2f35d213dc"
+    ],
+    "geometry_provenance_complete": true,
+    "plasma_tares": [
+      "exact clipped-cell zeroth, radial, and vertical moments",
+      "landed node-centred filament control"
+    ],
+    "score_region": "all finite nodes on the shipped 65 by 65 grid",
+    "spatial_decomposition": "diagnostic orthogonal projection of the gauge-free residual onto normalised first-order R and Z; never applied to the prediction"
+  },
+  "records": [
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": -0.3043731949302563,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 6.289673788118778,
+          "r_squared": -38.5599963609484,
+          "residual_rms_wb_per_radian": 0.30466357894594004,
+          "squared_error_wb2_per_radian2": 392.1640620202296,
+          "total_sum_squares_wb2_per_radian2": 9.913147070138606
+        },
+        "reference_shape_rms_wb_per_radian": 0.04843869319923251,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.6710215475174198,
+          "lowest_order_rms_wb_per_radian": 0.010893723416060421,
+          "orthogonality_relative_error": 1.1143678060096623e-15,
+          "radial_coefficient_wb_per_radian": -0.010893472593465568,
+          "remainder_rms_wb_per_radian": 0.007627668990695958,
+          "residual_rms_wb_per_radian": 0.01329866700452523,
+          "vertical_coefficient_wb_per_radian": 7.392375151216066e-05
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.2745463621371177,
+          "r_squared": 0.9246242950372746,
+          "residual_rms_wb_per_radian": 0.01329866700452523,
+          "squared_error_wb2_per_radian2": 0.7472104488108728,
+          "total_sum_squares_wb2_per_radian2": 9.913147070138606
+        }
+      },
+      "frame": 0,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": -0.3046466127399345,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 6.299981839386223,
+          "r_squared": -38.68977117659622,
+          "residual_rms_wb_per_radian": 0.3049382824080428,
+          "squared_error_wb2_per_radian2": 392.8715794294118,
+          "total_sum_squares_wb2_per_radian2": 9.898559950909355
+        },
+        "reference_shape_rms_wb_per_radian": 0.048403041497934146,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.6690010303953045,
+          "lowest_order_rms_wb_per_radian": 0.01090626700077531,
+          "orthogonality_relative_error": 2.8080940733187204e-15,
+          "radial_coefficient_wb_per_radian": -0.010906118243234538,
+          "remainder_rms_wb_per_radian": 0.007671425171340234,
+          "residual_rms_wb_per_radian": 0.01333407004825134,
+          "vertical_coefficient_wb_per_radian": 5.696276667479437e-05
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.2754800036444082,
+          "r_squared": 0.9241107675920769,
+          "residual_rms_wb_per_radian": 0.01333407004825134,
+          "squared_error_wb2_per_radian2": 0.7511941166183205,
+          "total_sum_squares_wb2_per_radian2": 9.898559950909355
+        }
+      },
+      "shot": "d3d_shot_00000c4a7b.parquet",
+      "time_ms": 160.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.3505099963659008,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.9117414793065555,
+          "r_squared": -2.654755483701217,
+          "residual_rms_wb_per_radian": 0.3507053738266243,
+          "squared_error_wb2_per_radian2": 519.6507452504355,
+          "total_sum_squares_wb2_per_radian2": 142.18481853789535
+        },
+        "reference_shape_rms_wb_per_radian": 0.18344811661137123,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.5422715282239455,
+          "lowest_order_rms_wb_per_radian": 0.008619287066893994,
+          "orthogonality_relative_error": 1.4385298962781737e-15,
+          "radial_coefficient_wb_per_radian": 0.00861792062624665,
+          "remainder_rms_wb_per_radian": 0.007918937359709104,
+          "residual_rms_wb_per_radian": 0.01170477161026745,
+          "vertical_coefficient_wb_per_radian": 0.0001534718907116859
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.06380426153441314,
+          "r_squared": 0.9959290162100483,
+          "residual_rms_wb_per_radian": 0.01170477161026745,
+          "squared_error_wb2_per_radian2": 0.5788320914450091,
+          "total_sum_squares_wb2_per_radian2": 142.18481853789535
+        }
+      },
+      "frame": 179,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.3489769095470549,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.9080371712646704,
+          "r_squared": -2.6406058469276847,
+          "residual_rms_wb_per_radian": 0.3491622541351877,
+          "squared_error_wb2_per_radian2": 515.0878317864338,
+          "total_sum_squares_wb2_per_radian2": 141.48409727494052
+        },
+        "reference_shape_rms_wb_per_radian": 0.18299551989532714,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.5247673915745401,
+          "lowest_order_rms_wb_per_radian": 0.008240325666898796,
+          "orthogonality_relative_error": 3.3507771849204064e-15,
+          "radial_coefficient_wb_per_radian": 0.008240228848043324,
+          "remainder_rms_wb_per_radian": 0.00784176948497491,
+          "residual_rms_wb_per_radian": 0.011375250140196266,
+          "vertical_coefficient_wb_per_radian": 3.9945317944353975e-05
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.06216135863163685,
+          "r_squared": 0.996135965493069,
+          "residual_rms_wb_per_radian": 0.011375250140196266,
+          "squared_error_wb2_per_radian2": 0.5466994340523487,
+          "total_sum_squares_wb2_per_radian2": 141.48409727494052
+        }
+      },
+      "shot": "d3d_shot_00000c4a7b.parquet",
+      "time_ms": 3740.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.5718969161419543,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 3.2063502265682957,
+          "r_squared": -9.280681775414564,
+          "residual_rms_wb_per_radian": 0.5723283578326661,
+          "squared_error_wb2_per_radian2": 1383.9399402831186,
+          "total_sum_squares_wb2_per_radian2": 134.61558002823327
+        },
+        "reference_shape_rms_wb_per_radian": 0.17849839143904744,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.6303228804600038,
+          "lowest_order_rms_wb_per_radian": 0.017639990984136673,
+          "orthogonality_relative_error": 7.452086832019519e-16,
+          "radial_coefficient_wb_per_radian": 0.017637420486178976,
+          "remainder_rms_wb_per_radian": 0.013509152632139788,
+          "residual_rms_wb_per_radian": 0.022218606769076967,
+          "vertical_coefficient_wb_per_radian": -0.000301132054317041
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.12447510921499841,
+          "r_squared": 0.9845059471859142,
+          "residual_rms_wb_per_radian": 0.022218606769076967,
+          "squared_error_wb2_per_radian2": 2.0857409065562376,
+          "total_sum_squares_wb2_per_radian2": 134.61558002823327
+        }
+      },
+      "frame": 358,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.5700585001005672,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 3.207312564947444,
+          "r_squared": -9.286853889269752,
+          "residual_rms_wb_per_radian": 0.5704713523183088,
+          "squared_error_wb2_per_radian2": 1374.9737071220934,
+          "total_sum_squares_wb2_per_radian2": 133.6631901184416
+        },
+        "reference_shape_rms_wb_per_radian": 0.17786584274727735,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.6251095574314451,
+          "lowest_order_rms_wb_per_radian": 0.017156500566714056,
+          "orthogonality_relative_error": 6.696740706382376e-16,
+          "radial_coefficient_wb_per_radian": 0.017153057228571706,
+          "remainder_rms_wb_per_radian": 0.013286262351621067,
+          "residual_rms_wb_per_radian": 0.021699545593669992,
+          "vertical_coefficient_wb_per_radian": -0.0003437141384983324
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.12199950962199095,
+          "r_squared": 0.9851161196519937,
+          "residual_rms_wb_per_radian": 0.021699545593669992,
+          "squared_error_wb2_per_radian2": 1.9894269286556978,
+          "total_sum_squares_wb2_per_radian2": 133.6631901184416
+        }
+      },
+      "shot": "d3d_shot_00000c4a7b.parquet",
+      "time_ms": 7340.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": -0.2014787186535033,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 3.2841623483714617,
+          "r_squared": -9.785722330460752,
+          "residual_rms_wb_per_radian": 0.201745164437107,
+          "squared_error_wb2_per_radian2": 171.9621955541163,
+          "total_sum_squares_wb2_per_radian2": 15.943502927797912
+        },
+        "reference_shape_rms_wb_per_radian": 0.06142971724194684,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.7550034447702744,
+          "lowest_order_rms_wb_per_radian": 0.009006416281610967,
+          "orthogonality_relative_error": 3.3018868397655824e-15,
+          "radial_coefficient_wb_per_radian": -0.008967629042048654,
+          "remainder_rms_wb_per_radian": 0.005130474564806921,
+          "residual_rms_wb_per_radian": 0.010365196741876068,
+          "vertical_coefficient_wb_per_radian": -0.0008349632338448507
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.16873261358263697,
+          "r_squared": 0.9715293051135725,
+          "residual_rms_wb_per_radian": 0.010365196741876068,
+          "squared_error_wb2_per_radian2": 0.45392260727819755,
+          "total_sum_squares_wb2_per_radian2": 15.943502927797912
+        }
+      },
+      "frame": 0,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": -0.2017238983546646,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 3.2876495948971662,
+          "r_squared": -9.808639858827503,
+          "residual_rms_wb_per_radian": 0.20198950739594815,
+          "squared_error_wb2_per_radian2": 172.3789906392942,
+          "total_sum_squares_wb2_per_radian2": 15.948259252852328
+        },
+        "reference_shape_rms_wb_per_radian": 0.061438879529454885,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.7508247360000755,
+          "lowest_order_rms_wb_per_radian": 0.008972785764474514,
+          "orthogonality_relative_error": 4.901144275299793e-16,
+          "radial_coefficient_wb_per_radian": -0.008934403711596667,
+          "remainder_rms_wb_per_radian": 0.005169046941128511,
+          "residual_rms_wb_per_radian": 0.01035518858615074,
+          "vertical_coefficient_wb_per_radian": -0.0008290444459521877
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.16854455461197465,
+          "r_squared": 0.9715927331106511,
+          "residual_rms_wb_per_radian": 0.01035518858615074,
+          "squared_error_wb2_per_radian2": 0.4530464570163042,
+          "total_sum_squares_wb2_per_radian2": 15.948259252852328
+        }
+      },
+      "shot": "d3d_shot_0003ff34e7.parquet",
+      "time_ms": 200.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.11996840146407249,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.812852104286317,
+          "r_squared": 0.3392714565573064,
+          "residual_rms_wb_per_radian": 0.12000376982823037,
+          "squared_error_wb2_per_radian2": 60.843822665869624,
+          "total_sum_squares_wb2_per_radian2": 92.08596067130061
+        },
+        "reference_shape_rms_wb_per_radian": 0.14763296938696308,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.30635776205637966,
+          "lowest_order_rms_wb_per_radian": 0.0016125098323467417,
+          "orthogonality_relative_error": 1.741526906848431e-15,
+          "radial_coefficient_wb_per_radian": 0.001484326706916536,
+          "remainder_rms_wb_per_radian": 0.002426362541461094,
+          "residual_rms_wb_per_radian": 0.0029133182356241944,
+          "vertical_coefficient_wb_per_radian": 0.0006300493524710814
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.019733520552499696,
+          "r_squared": 0.9996105881666041,
+          "residual_rms_wb_per_radian": 0.0029133182356241944,
+          "squared_error_wb2_per_radian2": 0.035859362775036485,
+          "total_sum_squares_wb2_per_radian2": 92.08596067130061
+        }
+      },
+      "frame": 44,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.11896363948825081,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.8076823015836755,
+          "r_squared": 0.34764929970849656,
+          "residual_rms_wb_per_radian": 0.11900355524571529,
+          "squared_error_wb2_per_radian2": 59.83380003073205,
+          "total_sum_squares_wb2_per_radian2": 91.72029707946243
+        },
+        "reference_shape_rms_wb_per_radian": 0.14733956038454382,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.22923235266494363,
+          "lowest_order_rms_wb_per_radian": 0.0014756001438284642,
+          "orthogonality_relative_error": 1.2967711237980633e-15,
+          "radial_coefficient_wb_per_radian": 0.0013202152421340732,
+          "remainder_rms_wb_per_radian": 0.002705779932854444,
+          "residual_rms_wb_per_radian": 0.0030819865070282827,
+          "vertical_coefficient_wb_per_radian": 0.000659111143058175
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.02091757637245936,
+          "r_squared": 0.9995624549987023,
+          "residual_rms_wb_per_radian": 0.0030819865070282827,
+          "squared_error_wb2_per_radian2": 0.04013175750465607,
+          "total_sum_squares_wb2_per_radian2": 91.72029707946243
+        }
+      },
+      "shot": "d3d_shot_0003ff34e7.parquet",
+      "time_ms": 1080.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.32589682883351134,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.3537374739499048,
+          "r_squared": -0.8326051483762698,
+          "residual_rms_wb_per_radian": 0.32603767099734804,
+          "squared_error_wb2_per_radian2": 449.1198782921092,
+          "total_sum_squares_wb2_per_radian2": 245.07181958428947
+        },
+        "reference_shape_rms_wb_per_radian": 0.24084261333627902,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.4849899463132869,
+          "lowest_order_rms_wb_per_radian": 0.0066732085015579375,
+          "orthogonality_relative_error": 1.0016474920502884e-15,
+          "radial_coefficient_wb_per_radian": 0.006671182049832034,
+          "remainder_rms_wb_per_radian": 0.0068766382724896455,
+          "residual_rms_wb_per_radian": 0.00958226829283832,
+          "vertical_coefficient_wb_per_radian": 0.00016444379971283907
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.03978643214379582,
+          "r_squared": 0.9984170398172671,
+          "residual_rms_wb_per_radian": 0.00958226829283832,
+          "squared_error_wb2_per_radian2": 0.3879389323118237,
+          "total_sum_squares_wb2_per_radian2": 245.07181958428947
+        }
+      },
+      "frame": 89,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.32397043200101794,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.3484059877374566,
+          "r_squared": -0.8181987077662254,
+          "residual_rms_wb_per_radian": 0.32411148670746326,
+          "squared_error_wb2_per_radian2": 443.82888082142597,
+          "total_sum_squares_wb2_per_radian2": 244.10361690703127
+        },
+        "reference_shape_rms_wb_per_radian": 0.24036639532527046,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.44834447184409576,
+          "lowest_order_rms_wb_per_radian": 0.006401985008095301,
+          "orthogonality_relative_error": 1.580988531741804e-15,
+          "radial_coefficient_wb_per_radian": 0.006399734648364016,
+          "remainder_rms_wb_per_radian": 0.007101379637232338,
+          "residual_rms_wb_per_radian": 0.009561119432157263,
+          "vertical_coefficient_wb_per_radian": 0.0001697305936067196
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.039777271773863775,
+          "r_squared": 0.9984177686502281,
+          "residual_rms_wb_per_radian": 0.009561119432157263,
+          "squared_error_wb2_per_radian2": 0.3862283952629953,
+          "total_sum_squares_wb2_per_radian2": 244.10361690703127
+        }
+      },
+      "shot": "d3d_shot_0003ff34e7.parquet",
+      "time_ms": 1980.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": -0.3416196440980724,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 6.716306624533581,
+          "r_squared": -44.10877467475366,
+          "residual_rms_wb_per_radian": 0.3419665453622928,
+          "squared_error_wb2_per_radian2": 494.07622417116403,
+          "total_sum_squares_wb2_per_radian2": 10.952995902318026
+        },
+        "reference_shape_rms_wb_per_radian": 0.050915862613113046,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.683408849973025,
+          "lowest_order_rms_wb_per_radian": 0.01273033641437871,
+          "orthogonality_relative_error": 2.7702844392451786e-15,
+          "radial_coefficient_wb_per_radian": -0.012726652358151857,
+          "remainder_rms_wb_per_radian": 0.008664608941214813,
+          "residual_rms_wb_per_radian": 0.015399250414466183,
+          "vertical_coefficient_wb_per_radian": -0.00030624333136307027
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.3024450460847187,
+          "r_squared": 0.9085269940988123,
+          "residual_rms_wb_per_radian": 0.015399250414466183,
+          "squared_error_wb2_per_radian2": 1.001903458808421,
+          "total_sum_squares_wb2_per_radian2": 10.952995902318026
+        }
+      },
+      "frame": 0,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": -0.34192323332805513,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 6.728654433178138,
+          "r_squared": -44.27479048112782,
+          "residual_rms_wb_per_radian": 0.3422721096738883,
+          "squared_error_wb2_per_radian2": 494.9595825810951,
+          "total_sum_squares_wb2_per_radian2": 10.932343967166723
+        },
+        "reference_shape_rms_wb_per_radian": 0.05086783889304645,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.6812585757615812,
+          "lowest_order_rms_wb_per_radian": 0.012752102957717936,
+          "orthogonality_relative_error": 4.4034378305897335e-15,
+          "radial_coefficient_wb_per_radian": -0.012748252435924784,
+          "remainder_rms_wb_per_radian": 0.008722582258616565,
+          "residual_rms_wb_per_radian": 0.015449905213384709,
+          "vertical_coefficient_wb_per_radian": -0.00031335231637304693
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.30372639273843194,
+          "r_squared": 0.9077502783540997,
+          "residual_rms_wb_per_radian": 0.015449905213384709,
+          "squared_error_wb2_per_radian2": 1.008505687908367,
+          "total_sum_squares_wb2_per_radian2": 10.932343967166723
+        }
+      },
+      "shot": "d3d_shot_0011c2afc9.parquet",
+      "time_ms": 160.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": -0.10184727849511707,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.8423939173923404,
+          "r_squared": 0.29037248794038695,
+          "residual_rms_wb_per_radian": 0.10205326873367457,
+          "squared_error_wb2_per_radian2": 44.002824310236605,
+          "total_sum_squares_wb2_per_radian2": 62.00834037919896
+        },
+        "reference_shape_rms_wb_per_radian": 0.12114673032016186,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.7894771865739831,
+          "lowest_order_rms_wb_per_radian": 0.005758406351506403,
+          "orthogonality_relative_error": 6.41272106875942e-15,
+          "radial_coefficient_wb_per_radian": -0.0057378039571987305,
+          "remainder_rms_wb_per_radian": 0.0029735969223476234,
+          "residual_rms_wb_per_radian": 0.006480858150404529,
+          "vertical_coefficient_wb_per_radian": -0.00048667181737169457
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.053495939455214095,
+          "r_squared": 0.997138184461804,
+          "residual_rms_wb_per_radian": 0.006480858150404529,
+          "squared_error_wb2_per_radian2": 0.17745643199493383,
+          "total_sum_squares_wb2_per_radian2": 62.00834037919896
+        }
+      },
+      "frame": 36,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": -0.10283858509003169,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.8522689144915098,
+          "r_squared": 0.2736376973914637,
+          "residual_rms_wb_per_radian": 0.10306074024550127,
+          "squared_error_wb2_per_radian2": 44.87590586029164,
+          "total_sum_squares_wb2_per_radian2": 61.781710998948874
+        },
+        "reference_shape_rms_wb_per_radian": 0.12092514286642793,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.756812602175395,
+          "lowest_order_rms_wb_per_radian": 0.005883690744249131,
+          "orthogonality_relative_error": 5.816573611012921e-15,
+          "radial_coefficient_wb_per_radian": -0.005866335558893548,
+          "remainder_rms_wb_per_radian": 0.003335233103852692,
+          "residual_rms_wb_per_radian": 0.006763253405795026,
+          "vertical_coefficient_wb_per_radian": -0.0004515793224052785
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.05592925710466692,
+          "r_squared": 0.9968719181997201,
+          "residual_rms_wb_per_radian": 0.006763253405795026,
+          "squared_error_wb2_per_radian2": 0.19325824576596662,
+          "total_sum_squares_wb2_per_radian2": 61.781710998948874
+        }
+      },
+      "shot": "d3d_shot_0011c2afc9.parquet",
+      "time_ms": 980.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": -0.058956387861017034,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.6521590907699889,
+          "r_squared": 0.5746885203260612,
+          "residual_rms_wb_per_radian": 0.05910198016634738,
+          "squared_error_wb2_per_radian2": 14.758111151739522,
+          "total_sum_squares_wb2_per_radian2": 34.6995363563986
+        },
+        "reference_shape_rms_wb_per_radian": 0.09062509593566664,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.7979493825921576,
+          "lowest_order_rms_wb_per_radian": 0.0037034396390435687,
+          "orthogonality_relative_error": 5.947955235915805e-15,
+          "radial_coefficient_wb_per_radian": -0.003653028695865102,
+          "remainder_rms_wb_per_radian": 0.001863578494349657,
+          "residual_rms_wb_per_radian": 0.004145888320329166,
+          "vertical_coefficient_wb_per_radian": 0.0006089716801504547
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.04574768476131896,
+          "r_squared": 0.997907149338979,
+          "residual_rms_wb_per_radian": 0.004145888320329166,
+          "squared_error_wb2_per_radian2": 0.07262094760061158,
+          "total_sum_squares_wb2_per_radian2": 34.6995363563986
+        }
+      },
+      "frame": 72,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": -0.06065147877977689,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.6756956209967446,
+          "r_squared": 0.5434354277658235,
+          "residual_rms_wb_per_radian": 0.06085279199906557,
+          "squared_error_wb2_per_radian2": 15.6454381924945,
+          "total_sum_squares_wb2_per_radian2": 34.267744682716646
+        },
+        "reference_shape_rms_wb_per_radian": 0.09005947368624244,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.6919903934350559,
+          "lowest_order_rms_wb_per_radian": 0.004114167331019972,
+          "orthogonality_relative_error": 4.498570172550904e-15,
+          "radial_coefficient_wb_per_radian": -0.004072852035813775,
+          "remainder_rms_wb_per_radian": 0.002744821138103538,
+          "residual_rms_wb_per_radian": 0.004945747254744435,
+          "vertical_coefficient_wb_per_radian": 0.0005815918861191158
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.05491645745093835,
+          "r_squared": 0.9969841827010393,
+          "residual_rms_wb_per_radian": 0.004945747254744435,
+          "squared_error_wb2_per_radian2": 0.10334525721050618,
+          "total_sum_squares_wb2_per_radian2": 34.267744682716646
+        }
+      },
+      "shot": "d3d_shot_0011c2afc9.parquet",
+      "time_ms": 1720.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": -0.24285228217642138,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 6.546219899821412,
+          "r_squared": -41.852994976817854,
+          "residual_rms_wb_per_radian": 0.24312636675423033,
+          "squared_error_wb2_per_radian2": 249.74156764195035,
+          "total_sum_squares_wb2_per_radian2": 5.8278672885536436
+        },
+        "reference_shape_rms_wb_per_radian": 0.03713996328795235,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.7269494035466981,
+          "lowest_order_rms_wb_per_radian": 0.009840178727426048,
+          "orthogonality_relative_error": 8.581653691778096e-15,
+          "radial_coefficient_wb_per_radian": -0.009837246720322212,
+          "remainder_rms_wb_per_radian": 0.00603076574148164,
+          "residual_rms_wb_per_radian": 0.011541198066765767,
+          "vertical_coefficient_wb_per_radian": 0.00024019648456626212
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.3107487742323526,
+          "r_squared": 0.9034351993130904,
+          "residual_rms_wb_per_radian": 0.011541198066765767,
+          "squared_error_wb2_per_radian2": 0.562766843148943,
+          "total_sum_squares_wb2_per_radian2": 5.8278672885536436
+        }
+      },
+      "frame": 0,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": -0.2430124885101649,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 6.5512564994796865,
+          "r_squared": -41.91896172197483,
+          "residual_rms_wb_per_radian": 0.24328644644471617,
+          "squared_error_wb2_per_radian2": 250.070546475123,
+          "total_sum_squares_wb2_per_radian2": 5.826574931962648
+        },
+        "reference_shape_rms_wb_per_radian": 0.03713584508010615,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.7254645193953795,
+          "lowest_order_rms_wb_per_radian": 0.009831090395142903,
+          "orthogonality_relative_error": 4.142052598614207e-15,
+          "radial_coefficient_wb_per_radian": -0.009827304442149801,
+          "remainder_rms_wb_per_radian": 0.0060477362241770985,
+          "residual_rms_wb_per_radian": 0.0115423330308346,
+          "vertical_coefficient_wb_per_radian": 0.00027281084797679383
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.31081379744924353,
+          "r_squared": 0.9033947833151806,
+          "residual_rms_wb_per_radian": 0.0115423330308346,
+          "squared_error_wb2_per_radian2": 0.5628775338325883,
+          "total_sum_squares_wb2_per_radian2": 5.826574931962648
+        }
+      },
+      "shot": "d3d_shot_001270afa9.parquet",
+      "time_ms": 100.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.13770109346573187,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.9878513592598236,
+          "r_squared": 0.024149692008518908,
+          "residual_rms_wb_per_radian": 0.13774880558583735,
+          "squared_error_wb2_per_radian2": 80.16824878537236,
+          "total_sum_squares_wb2_per_radian2": 82.15219909124853
+        },
+        "reference_shape_rms_wb_per_radian": 0.13944284663337372,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.41931212991284156,
+          "lowest_order_rms_wb_per_radian": 0.002347493396335919,
+          "orthogonality_relative_error": 8.747626696423952e-16,
+          "radial_coefficient_wb_per_radian": 0.002342640941880742,
+          "remainder_rms_wb_per_radian": 0.0027625302569844338,
+          "residual_rms_wb_per_radian": 0.0036252308432147104,
+          "vertical_coefficient_wb_per_radian": -0.00015085974699984863
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.025997969280892902,
+          "r_squared": 0.9993241055932698,
+          "residual_rms_wb_per_radian": 0.0036252308432147104,
+          "squared_error_wb2_per_radian2": 0.055526211866364895,
+          "total_sum_squares_wb2_per_radian2": 82.15219909124853
+        }
+      },
+      "frame": 126,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.13656807629987933,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.9822799240355413,
+          "r_squared": 0.035126150836730874,
+          "residual_rms_wb_per_radian": 0.13661990845678312,
+          "squared_error_wb2_per_radian2": 78.85962240897567,
+          "total_sum_squares_wb2_per_radian2": 81.73050029012819
+        },
+        "reference_shape_rms_wb_per_radian": 0.13908449629663802,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.32318917884073084,
+          "lowest_order_rms_wb_per_radian": 0.0021392367148206862,
+          "orthogonality_relative_error": 3.479556657632139e-16,
+          "radial_coefficient_wb_per_radian": 0.0021377666050432062,
+          "remainder_rms_wb_per_radian": 0.0030957371929967487,
+          "residual_rms_wb_per_radian": 0.003762967245424837,
+          "vertical_coefficient_wb_per_radian": -7.929479427331502e-05
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.027055260259915802,
+          "r_squared": 0.9992680128922682,
+          "residual_rms_wb_per_radian": 0.003762967245424837,
+          "squared_error_wb2_per_radian2": 0.05982567252084228,
+          "total_sum_squares_wb2_per_radian2": 81.73050029012819
+        }
+      },
+      "shot": "d3d_shot_001270afa9.parquet",
+      "time_ms": 2660.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.17137817293373253,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 2.1422233584000376,
+          "r_squared": -3.5891209172747365,
+          "residual_rms_wb_per_radian": 0.17150830906483114,
+          "squared_error_wb2_per_radian2": 124.27879783072302,
+          "total_sum_squares_wb2_per_radian2": 27.08117743485529
+        },
+        "reference_shape_rms_wb_per_radian": 0.08006089019257336,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.6258136361466813,
+          "lowest_order_rms_wb_per_radian": 0.005284411614882296,
+          "orthogonality_relative_error": 1.3250058011156116e-15,
+          "radial_coefficient_wb_per_radian": 0.004857583073980011,
+          "remainder_rms_wb_per_radian": 0.0040861857590914746,
+          "residual_rms_wb_per_radian": 0.0066799640847316644,
+          "vertical_coefficient_wb_per_radian": -0.0020805991432483644
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.08343604559809546,
+          "r_squared": 0.9930384262949525,
+          "residual_rms_wb_per_radian": 0.0066799640847316644,
+          "squared_error_wb2_per_radian2": 0.1885276127322134,
+          "total_sum_squares_wb2_per_radian2": 27.08117743485529
+        }
+      },
+      "frame": 251,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.1707285025979865,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 2.1401165979818244,
+          "r_squared": -3.580099052957296,
+          "residual_rms_wb_per_radian": 0.17085551508156546,
+          "squared_error_wb2_per_radian2": 123.33453971775026,
+          "total_sum_squares_wb2_per_radian2": 26.928356415810512
+        },
+        "reference_shape_rms_wb_per_radian": 0.07983467594367796,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.6113865451422078,
+          "lowest_order_rms_wb_per_radian": 0.0051502690094340255,
+          "orthogonality_relative_error": 1.135640410479253e-15,
+          "radial_coefficient_wb_per_radian": 0.00472516660107398,
+          "remainder_rms_wb_per_radian": 0.004106112951054561,
+          "residual_rms_wb_per_radian": 0.00658676206009861,
+          "vertical_coefficient_wb_per_radian": -0.0020489195839835943
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.08250502657198058,
+          "r_squared": 0.9931929205903568,
+          "residual_rms_wb_per_radian": 0.00658676206009861,
+          "squared_error_wb2_per_radian2": 0.1833034604935977,
+          "total_sum_squares_wb2_per_radian2": 26.928356415810512
+        }
+      },
+      "shot": "d3d_shot_001270afa9.parquet",
+      "time_ms": 6040.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": -0.2445177484742924,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 3.221661929454639,
+          "r_squared": -9.379105587697389,
+          "residual_rms_wb_per_radian": 0.24479137339039658,
+          "squared_error_wb2_per_radian2": 253.17389965485646,
+          "total_sum_squares_wb2_per_radian2": 24.39265093853075
+        },
+        "reference_shape_rms_wb_per_radian": 0.07598294878563956,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.7127927692198891,
+          "lowest_order_rms_wb_per_radian": 0.009769022716104291,
+          "orthogonality_relative_error": 2.55145501308871e-15,
+          "radial_coefficient_wb_per_radian": -0.009769018059706704,
+          "remainder_rms_wb_per_radian": 0.006201077534708828,
+          "residual_rms_wb_per_radian": 0.011570962251223211,
+          "vertical_coefficient_wb_per_radian": -9.538180429348407e-06
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.15228366937780746,
+          "r_squared": 0.9768096840408307,
+          "residual_rms_wb_per_radian": 0.011570962251223211,
+          "squared_error_wb2_per_radian2": 0.5656732823462574,
+          "total_sum_squares_wb2_per_radian2": 24.39265093853075
+        }
+      },
+      "frame": 0,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": -0.24489817509599598,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 3.229896026977235,
+          "r_squared": -9.43222834508333,
+          "residual_rms_wb_per_radian": 0.24517487370350702,
+          "squared_error_wb2_per_radian2": 253.96778648861687,
+          "total_sum_squares_wb2_per_radian2": 24.34453868221845
+        },
+        "reference_shape_rms_wb_per_radian": 0.07590797711620426,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.7089785245322177,
+          "lowest_order_rms_wb_per_radian": 0.009805064088057489,
+          "orthogonality_relative_error": 2.7129623027395843e-15,
+          "radial_coefficient_wb_per_radian": -0.009804334575892642,
+          "remainder_rms_wb_per_radian": 0.006281978065114837,
+          "residual_rms_wb_per_radian": 0.011644849942420854,
+          "vertical_coefficient_wb_per_radian": 0.00011960474434846671
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.15340745972711475,
+          "r_squared": 0.9764661513000736,
+          "residual_rms_wb_per_radian": 0.011644849942420854,
+          "squared_error_wb2_per_radian2": 0.5729206900168331,
+          "total_sum_squares_wb2_per_radian2": 24.34453868221845
+        }
+      },
+      "shot": "d3d_shot_001554e054.parquet",
+      "time_ms": 340.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": -0.016527095885306955,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.10706226256703683,
+          "r_squared": 0.9885376719340269,
+          "residual_rms_wb_per_radian": 0.01671023578809552,
+          "squared_error_wb2_per_radian2": 1.1797551158960864,
+          "total_sum_squares_wb2_per_radian2": 102.92456376277406
+        },
+        "reference_shape_rms_wb_per_radian": 0.15607960627240097,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.7437750210298955,
+          "lowest_order_rms_wb_per_radian": 0.0021277733227940414,
+          "orthogonality_relative_error": 2.5294475594092376e-15,
+          "radial_coefficient_wb_per_radian": -0.001750272968746621,
+          "remainder_rms_wb_per_radian": 0.0012488644355670307,
+          "residual_rms_wb_per_radian": 0.0024672011858821257,
+          "vertical_coefficient_wb_per_radian": -0.0012099437375633977
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.01580732579230239,
+          "r_squared": 0.999750128451296,
+          "residual_rms_wb_per_radian": 0.0024672011858821257,
+          "squared_error_wb2_per_radian2": 0.02571792014708676,
+          "total_sum_squares_wb2_per_radian2": 102.92456376277406
+        }
+      },
+      "frame": 144,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": -0.018491917356976573,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.12090215194158849,
+          "r_squared": 0.985382669655893,
+          "residual_rms_wb_per_radian": 0.018791812215064072,
+          "squared_error_wb2_per_radian2": 1.4919835717283272,
+          "total_sum_squares_wb2_per_radian2": 102.06949809612999
+        },
+        "reference_shape_rms_wb_per_radian": 0.15542992339907208,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.5914709697138006,
+          "lowest_order_rms_wb_per_radian": 0.0025716443164404967,
+          "orthogonality_relative_error": 2.497031876258822e-15,
+          "radial_coefficient_wb_per_radian": -0.002299389928203597,
+          "remainder_rms_wb_per_radian": 0.002137251575902835,
+          "residual_rms_wb_per_radian": 0.0033438299581437883,
+          "vertical_coefficient_wb_per_radian": -0.001151590399559047
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.021513424731982794,
+          "r_squared": 0.9995371725563013,
+          "residual_rms_wb_per_radian": 0.0033438299581437883,
+          "squared_error_wb2_per_radian2": 0.047240564883440035,
+          "total_sum_squares_wb2_per_radian2": 102.06949809612999
+        }
+      },
+      "shot": "d3d_shot_001554e054.parquet",
+      "time_ms": 3240.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.13511594827811815,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.1149506970537009,
+          "r_squared": -0.24311505686053314,
+          "residual_rms_wb_per_radian": 0.13524384339873136,
+          "squared_error_wb2_per_radian2": 77.2790405739259,
+          "total_sum_squares_wb2_per_radian2": 62.165637965236186
+        },
+        "reference_shape_rms_wb_per_radian": 0.12130029045779181,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.5682051243923832,
+          "lowest_order_rms_wb_per_radian": 0.0044325190679018345,
+          "orthogonality_relative_error": 3.9897597156917636e-15,
+          "radial_coefficient_wb_per_radian": 0.004429805758107258,
+          "remainder_rms_wb_per_radian": 0.003863997008041911,
+          "residual_rms_wb_per_radian": 0.005880280449559385,
+          "vertical_coefficient_wb_per_radian": 0.00015506847762563404
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.04847705168196208,
+          "r_squared": 0.9976499754602244,
+          "residual_rms_wb_per_radian": 0.005880280449559385,
+          "squared_error_wb2_per_radian2": 0.14609077474911214,
+          "total_sum_squares_wb2_per_radian2": 62.165637965236186
+        }
+      },
+      "frame": 289,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.13372418743118625,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.1066588247066937,
+          "r_squared": -0.2246937543012011,
+          "residual_rms_wb_per_radian": 0.1338504729029075,
+          "squared_error_wb2_per_radian2": 75.69488493200261,
+          "total_sum_squares_wb2_per_radian2": 61.807194383214124
+        },
+        "reference_shape_rms_wb_per_radian": 0.12095007956800319,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.5118873591748471,
+          "lowest_order_rms_wb_per_radian": 0.00415897576143079,
+          "orthogonality_relative_error": 6.804452644058656e-16,
+          "radial_coefficient_wb_per_radian": 0.0041566692785267745,
+          "remainder_rms_wb_per_radian": 0.004061245229825236,
+          "residual_rms_wb_per_radian": 0.005812984792767573,
+          "vertical_coefficient_wb_per_radian": 0.00013849149114843456
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.04806102495781551,
+          "r_squared": 0.9976901378800043,
+          "residual_rms_wb_per_radian": 0.005812984792767573,
+          "squared_error_wb2_per_radian2": 0.14276609704900137,
+          "total_sum_squares_wb2_per_radian2": 61.807194383214124
+        }
+      },
+      "shot": "d3d_shot_001554e054.parquet",
+      "time_ms": 6140.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": -0.046589134104868174,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.5009889285588037,
+          "r_squared": 0.7490100934615018,
+          "residual_rms_wb_per_radian": 0.046716382938467464,
+          "squared_error_wb2_per_radian2": 9.220726337256183,
+          "total_sum_squares_wb2_per_radian2": 36.73743882542088
+        },
+        "reference_shape_rms_wb_per_radian": 0.09324833399583622,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.7691726948597478,
+          "lowest_order_rms_wb_per_radian": 0.003021986335897825,
+          "orthogonality_relative_error": 1.5907438037389632e-15,
+          "radial_coefficient_wb_per_radian": -0.0030080520435289766,
+          "remainder_rms_wb_per_radian": 0.0016554808358269103,
+          "residual_rms_wb_per_radian": 0.0034457246280199683,
+          "vertical_coefficient_wb_per_radian": 0.0002898694840342998
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.036952130728403455,
+          "r_squared": 0.998634540034631,
+          "residual_rms_wb_per_radian": 0.0034457246280199683,
+          "squared_error_wb2_per_radian2": 0.050163501946305644,
+          "total_sum_squares_wb2_per_radian2": 36.73743882542088
+        }
+      },
+      "frame": 0,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": -0.047130417066587695,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.5073101663575331,
+          "r_squared": 0.7426363951102921,
+          "residual_rms_wb_per_radian": 0.04726476723419845,
+          "squared_error_wb2_per_radian2": 9.438473486695003,
+          "total_sum_squares_wb2_per_radian2": 36.673691646259854
+        },
+        "reference_shape_rms_wb_per_radian": 0.09316739613865341,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.7342862012029362,
+          "lowest_order_rms_wb_per_radian": 0.0030515936966130134,
+          "orthogonality_relative_error": 1.942525558175694e-16,
+          "radial_coefficient_wb_per_radian": -0.0030433718832454633,
+          "remainder_rms_wb_per_radian": 0.0018356973452207605,
+          "residual_rms_wb_per_radian": 0.0035611808199611018,
+          "vertical_coefficient_wb_per_radian": 0.00022385635903238637
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.03822346622912256,
+          "r_squared": 0.9985389666294311,
+          "residual_rms_wb_per_radian": 0.0035611808199611018,
+          "squared_error_wb2_per_radian2": 0.05358148731713854,
+          "total_sum_squares_wb2_per_radian2": 36.673691646259854
+        }
+      },
+      "shot": "d3d_shot_001cbcc9e6.parquet",
+      "time_ms": 500.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.10098884688904809,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.6271772204982662,
+          "r_squared": 0.6066487340880693,
+          "residual_rms_wb_per_radian": 0.10102239770442151,
+          "squared_error_wb2_per_radian2": 43.118342440340044,
+          "total_sum_squares_wb2_per_radian2": 109.61790688629438
+        },
+        "reference_shape_rms_wb_per_radian": 0.1610747240216464,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.252621460754593,
+          "lowest_order_rms_wb_per_radian": 0.0013085021265214593,
+          "orthogonality_relative_error": 8.481115051900861e-16,
+          "radial_coefficient_wb_per_radian": 0.0012562617669949375,
+          "remainder_rms_wb_per_radian": 0.0022506586048519207,
+          "residual_rms_wb_per_radian": 0.0026033904760341233,
+          "vertical_coefficient_wb_per_radian": 0.0003660385060317267
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.016162625712053125,
+          "r_squared": 0.9997387695300921,
+          "residual_rms_wb_per_radian": 0.0026033904760341233,
+          "squared_error_wb2_per_radian2": 0.028635537326229386,
+          "total_sum_squares_wb2_per_radian2": 109.61790688629438
+        }
+      },
+      "frame": 126,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.09975245275214047,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.6205737809854286,
+          "r_squared": 0.6148881823534493,
+          "residual_rms_wb_per_radian": 0.09979461051332052,
+          "squared_error_wb2_per_radian2": 42.07662411471007,
+          "total_sum_squares_wb2_per_radian2": 109.25820031138932
+        },
+        "reference_shape_rms_wb_per_radian": 0.1608102268756078,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.14869681882499577,
+          "lowest_order_rms_wb_per_radian": 0.0011184389386243018,
+          "orthogonality_relative_error": 2.9284102142086673e-16,
+          "radial_coefficient_wb_per_radian": 0.001075999769486764,
+          "remainder_rms_wb_per_radian": 0.0026761075796564973,
+          "residual_rms_wb_per_radian": 0.0029004236651437687,
+          "vertical_coefficient_wb_per_radian": 0.0003051723373693709
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.018036313495082282,
+          "r_squared": 0.9996746913955071,
+          "residual_rms_wb_per_radian": 0.0029004236651437687,
+          "squared_error_wb2_per_radian2": 0.035542632672702405,
+          "total_sum_squares_wb2_per_radian2": 109.25820031138932
+        }
+      },
+      "shot": "d3d_shot_001cbcc9e6.parquet",
+      "time_ms": 3040.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.24763468239155426,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.8648113047151043,
+          "r_squared": -2.4775212021932496,
+          "residual_rms_wb_per_radian": 0.24777757375663445,
+          "squared_error_wb2_per_radian2": 259.3884925896607,
+          "total_sum_squares_wb2_per_radian2": 74.59005352032537
+        },
+        "reference_shape_rms_wb_per_radian": 0.13287005131840326,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.551887760739534,
+          "lowest_order_rms_wb_per_radian": 0.006250456646680979,
+          "orthogonality_relative_error": 4.640030099808996e-16,
+          "radial_coefficient_wb_per_radian": 0.006238780949768007,
+          "remainder_rms_wb_per_radian": 0.005632222054077326,
+          "residual_rms_wb_per_radian": 0.008413687274820322,
+          "vertical_coefficient_wb_per_radian": 0.0003818645739660061
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.06332267648981467,
+          "r_squared": 0.9959902386421663,
+          "residual_rms_wb_per_radian": 0.008413687274820322,
+          "squared_error_wb2_per_radian2": 0.2990883142845502,
+          "total_sum_squares_wb2_per_radian2": 74.59005352032537
+        }
+      },
+      "frame": 252,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.24658645306225627,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.8605937676195516,
+          "r_squared": -2.4618091681047174,
+          "residual_rms_wb_per_radian": 0.2467258325120098,
+          "squared_error_wb2_per_radian2": 257.19111391144475,
+          "total_sum_squares_wb2_per_radian2": 74.2938450452636
+        },
+        "reference_shape_rms_wb_per_radian": 0.13260596526004248,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.5393646612098922,
+          "lowest_order_rms_wb_per_radian": 0.006089779707808088,
+          "orthogonality_relative_error": 2.388596858739791e-15,
+          "radial_coefficient_wb_per_radian": 0.006075374730844343,
+          "remainder_rms_wb_per_radian": 0.0056278040149214175,
+          "residual_rms_wb_per_radian": 0.008292019954148504,
+          "vertical_coefficient_wb_per_radian": 0.00041861530006581063
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.06253127404855216,
+          "r_squared": 0.9960898397658648,
+          "residual_rms_wb_per_radian": 0.008292019954148504,
+          "squared_error_wb2_per_radian2": 0.29050083853698716,
+          "total_sum_squares_wb2_per_radian2": 74.2938450452636
+        }
+      },
+      "shot": "d3d_shot_001cbcc9e6.parquet",
+      "time_ms": 5600.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": -0.2361188454213886,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 2.9720966852536637,
+          "r_squared": -7.833358706495812,
+          "residual_rms_wb_per_radian": 0.23635510344356378,
+          "squared_error_wb2_per_radian2": 236.0242800531299,
+          "total_sum_squares_wb2_per_radian2": 26.7196530669092
+        },
+        "reference_shape_rms_wb_per_radian": 0.07952470207859044,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.7002598767225819,
+          "lowest_order_rms_wb_per_radian": 0.008841212666740204,
+          "orthogonality_relative_error": 1.530144486336316e-15,
+          "radial_coefficient_wb_per_radian": -0.008837240163946795,
+          "remainder_rms_wb_per_radian": 0.005784351240164494,
+          "residual_rms_wb_per_radian": 0.010565309303949418,
+          "vertical_coefficient_wb_per_radian": 0.00026500510042835857
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.13285569172592726,
+          "r_squared": 0.9823493651760253,
+          "residual_rms_wb_per_radian": 0.010565309303949418,
+          "squared_error_wb2_per_radian2": 0.4716188389073075,
+          "total_sum_squares_wb2_per_radian2": 26.7196530669092
+        }
+      },
+      "frame": 0,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": -0.23670385881751552,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 2.9857422482018774,
+          "r_squared": -7.9146567726976045,
+          "residual_rms_wb_per_radian": 0.2369474572645246,
+          "squared_error_wb2_per_radian2": 237.20881195492268,
+          "total_sum_squares_wb2_per_radian2": 26.608855282169493
+        },
+        "reference_shape_rms_wb_per_radian": 0.079359649148289,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.6943175652768017,
+          "lowest_order_rms_wb_per_radian": 0.008950467254659174,
+          "orthogonality_relative_error": 3.871677497008968e-15,
+          "radial_coefficient_wb_per_radian": -0.008945102608088814,
+          "remainder_rms_wb_per_radian": 0.00593884340125811,
+          "residual_rms_wb_per_radian": 0.010741542022512112,
+          "vertical_coefficient_wb_per_radian": 0.000309844166459242
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.13535269041374914,
+          "r_squared": 0.9816796491977597,
+          "residual_rms_wb_per_radian": 0.010741542022512112,
+          "squared_error_wb2_per_radian2": 0.4874835632153879,
+          "total_sum_squares_wb2_per_radian2": 26.608855282169493
+        }
+      },
+      "shot": "d3d_shot_002495e835.parquet",
+      "time_ms": 260.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.13826443626778323,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.6224006325590447,
+          "r_squared": 0.6126174525901011,
+          "residual_rms_wb_per_radian": 0.1383304232562672,
+          "squared_error_wb2_per_radian2": 80.84666784264019,
+          "total_sum_squares_wb2_per_radian2": 208.69981981169212
+        },
+        "reference_shape_rms_wb_per_radian": 0.22225302485235562,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.41823021392251714,
+          "lowest_order_rms_wb_per_radian": 0.0027628601888795745,
+          "orthogonality_relative_error": 5.398988112386939e-16,
+          "radial_coefficient_wb_per_radian": 0.002761493878168997,
+          "remainder_rms_wb_per_radian": 0.003258567996350985,
+          "residual_rms_wb_per_radian": 0.004272196368396301,
+          "vertical_coefficient_wb_per_radian": -8.687913518694345e-05
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.01922221923069148,
+          "r_squared": 0.9996305062878472,
+          "residual_rms_wb_per_radian": 0.004272196368396301,
+          "squared_error_wb2_per_radian2": 0.07711327114783534,
+          "total_sum_squares_wb2_per_radian2": 208.69981981169212
+        }
+      },
+      "frame": 146,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.13646034569593343,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.6157062716221461,
+          "r_squared": 0.620905787085156,
+          "residual_rms_wb_per_radian": 0.13653143633210127,
+          "squared_error_wb2_per_radian2": 78.75751987668049,
+          "total_sum_squares_wb2_per_radian2": 207.75183897194393
+        },
+        "reference_shape_rms_wb_per_radian": 0.22174767843828216,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.29755025867707324,
+          "lowest_order_rms_wb_per_radian": 0.002403040847638016,
+          "orthogonality_relative_error": 1.0155067297001224e-15,
+          "radial_coefficient_wb_per_radian": 0.002397647128082405,
+          "remainder_rms_wb_per_radian": 0.003692228884772419,
+          "residual_rms_wb_per_radian": 0.004405355769170594,
+          "vertical_coefficient_wb_per_radian": 0.00016091477438392123
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.019866524872758536,
+          "r_squared": 0.9996053211894801,
+          "residual_rms_wb_per_radian": 0.004405355769170594,
+          "squared_error_wb2_per_radian2": 0.08199524868877558,
+          "total_sum_squares_wb2_per_radian2": 207.75183897194393
+        }
+      },
+      "shot": "d3d_shot_002495e835.parquet",
+      "time_ms": 3180.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.24071053215954744,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.1837295401339416,
+          "r_squared": -0.40121562418571255,
+          "residual_rms_wb_per_radian": 0.24083504686394563,
+          "squared_error_wb2_per_radian2": 245.0564211463763,
+          "total_sum_squares_wb2_per_radian2": 174.88844465946187
+        },
+        "reference_shape_rms_wb_per_radian": 0.20345445365559994,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.5245791930608461,
+          "lowest_order_rms_wb_per_radian": 0.00560834280094305,
+          "orthogonality_relative_error": 2.684303190813665e-15,
+          "radial_coefficient_wb_per_radian": 0.005404161906275564,
+          "remainder_rms_wb_per_radian": 0.00533910071580174,
+          "residual_rms_wb_per_radian": 0.007743352337738775,
+          "vertical_coefficient_wb_per_radian": 0.0014995142759072972
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.03805938969931044,
+          "r_squared": 0.998551482855716,
+          "residual_rms_wb_per_radian": 0.007743352337738775,
+          "squared_error_wb2_per_radian2": 0.2533289104263902,
+          "total_sum_squares_wb2_per_radian2": 174.88844465946187
+        }
+      },
+      "frame": 292,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.23892548840209496,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.177279994715167,
+          "r_squared": -0.3859881859565437,
+          "residual_rms_wb_per_radian": 0.23905230998773538,
+          "squared_error_wb2_per_radian2": 241.4418791967456,
+          "total_sum_squares_wb2_per_radian2": 174.20197491085668
+        },
+        "reference_shape_rms_wb_per_radian": 0.20305476272496423,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.4660059813805688,
+          "lowest_order_rms_wb_per_radian": 0.005314913456224179,
+          "orthogonality_relative_error": 1.7339740931034369e-15,
+          "radial_coefficient_wb_per_radian": 0.005126051896439276,
+          "remainder_rms_wb_per_radian": 0.005689428551759154,
+          "residual_rms_wb_per_radian": 0.00778574995056515,
+          "vertical_coefficient_wb_per_radian": 0.001404242501195628
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.03834310432359016,
+          "r_squared": 0.9985298063508303,
+          "residual_rms_wb_per_radian": 0.00778574995056515,
+          "squared_error_wb2_per_radian2": 0.2561106371867641,
+          "total_sum_squares_wb2_per_radian2": 174.20197491085668
+        }
+      },
+      "shot": "d3d_shot_002495e835.parquet",
+      "time_ms": 6100.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": -0.19982614645736352,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 2.4939691194915525,
+          "r_squared": -5.21988196897747,
+          "residual_rms_wb_per_radian": 0.2000628099482279,
+          "squared_error_wb2_per_radian2": 169.10616548050868,
+          "total_sum_squares_wb2_per_radian2": 27.188002332511985
+        },
+        "reference_shape_rms_wb_per_radian": 0.0802186395912612,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.7371067740305497,
+          "lowest_order_rms_wb_per_radian": 0.008352193351015112,
+          "orthogonality_relative_error": 8.329790802144124e-16,
+          "radial_coefficient_wb_per_radian": -0.00835217996691005,
+          "remainder_rms_wb_per_radian": 0.004987983821977939,
+          "residual_rms_wb_per_radian": 0.009728263790679956,
+          "vertical_coefficient_wb_per_radian": 1.4952360598611496e-05
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.12127186200424829,
+          "r_squared": 0.9852931354860226,
+          "residual_rms_wb_per_radian": 0.009728263790679956,
+          "squared_error_wb2_per_radian2": 0.3998502667099564,
+          "total_sum_squares_wb2_per_radian2": 27.188002332511985
+        }
+      },
+      "frame": 0,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": -0.20051377582192972,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 2.5070306527298176,
+          "r_squared": -5.2852026937268946,
+          "residual_rms_wb_per_radian": 0.20075603363416525,
+          "squared_error_wb2_per_radian2": 170.2801117962058,
+          "total_sum_squares_wb2_per_radian2": 27.09222281186861
+        },
+        "reference_shape_rms_wb_per_radian": 0.0800772154164007,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.7322780657719515,
+          "lowest_order_rms_wb_per_radian": 0.008437137972478151,
+          "orthogonality_relative_error": 5.271131505698336e-15,
+          "radial_coefficient_wb_per_radian": -0.008436838098279642,
+          "remainder_rms_wb_per_radian": 0.005101514381864305,
+          "residual_rms_wb_per_radian": 0.009859551011836267,
+          "vertical_coefficient_wb_per_radian": 7.113416935540173e-05
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.123125547767448,
+          "r_squared": 0.9848400994869658,
+          "residual_rms_wb_per_radian": 0.009859551011836267,
+          "squared_error_wb2_per_radian2": 0.4107154025048817,
+          "total_sum_squares_wb2_per_radian2": 27.09222281186861
+        }
+      },
+      "shot": "d3d_shot_0040a29bad.parquet",
+      "time_ms": 260.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.10281866639926227,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.4956950572555577,
+          "r_squared": 0.7542864102124094,
+          "residual_rms_wb_per_radian": 0.10285012596588416,
+          "squared_error_wb2_per_radian2": 44.69267703731256,
+          "total_sum_squares_wb2_per_radian2": 181.88931705384127
+        },
+        "reference_shape_rms_wb_per_radian": 0.2074866885607442,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.07719674759872457,
+          "lowest_order_rms_wb_per_radian": 0.0007067406449131543,
+          "orthogonality_relative_error": 2.5382967882566022e-16,
+          "radial_coefficient_wb_per_radian": 8.979998943470393e-06,
+          "remainder_rms_wb_per_radian": 0.002443515650918273,
+          "residual_rms_wb_per_radian": 0.002543668821889912,
+          "vertical_coefficient_wb_per_radian": 0.0007066835917093566
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.012259431385860796,
+          "r_squared": 0.9998497063420954,
+          "residual_rms_wb_per_radian": 0.002543668821889912,
+          "squared_error_wb2_per_radian2": 0.027336810793796584,
+          "total_sum_squares_wb2_per_radian2": 181.88931705384127
+        }
+      },
+      "frame": 114,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.10193583886510951,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.4919657733845972,
+          "r_squared": 0.7579696778180951,
+          "residual_rms_wb_per_radian": 0.10198545478508993,
+          "squared_error_wb2_per_radian2": 43.94436437312385,
+          "total_sum_squares_wb2_per_radian2": 181.56553268600865
+        },
+        "reference_shape_rms_wb_per_radian": 0.20730193095234328,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.0766310428441168,
+          "lowest_order_rms_wb_per_radian": 0.0008805300481813582,
+          "orthogonality_relative_error": 1.6232294290077677e-16,
+          "radial_coefficient_wb_per_radian": -0.00010898082759123688,
+          "remainder_rms_wb_per_radian": 0.0030565355260973653,
+          "residual_rms_wb_per_radian": 0.0031808399186450055,
+          "vertical_coefficient_wb_per_radian": 0.0008737598897682326
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.015343995610809095,
+          "r_squared": 0.9997645617986954,
+          "residual_rms_wb_per_radian": 0.0031808399186450055,
+          "squared_error_wb2_per_radian2": 0.04274746243449251,
+          "total_sum_squares_wb2_per_radian2": 181.56553268600865
+        }
+      },
+      "shot": "d3d_shot_0040a29bad.parquet",
+      "time_ms": 2540.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.26676284649160875,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.2647365706581126,
+          "r_squared": -0.5995585931600433,
+          "residual_rms_wb_per_radian": 0.2668504591569942,
+          "squared_error_wb2_per_radian2": 300.8587329084617,
+          "total_sum_squares_wb2_per_radian2": 188.0885978137841
+        },
+        "reference_shape_rms_wb_per_radian": 0.2109929176936325,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.3274616798496818,
+          "lowest_order_rms_wb_per_radian": 0.003912704178888013,
+          "orthogonality_relative_error": 9.836215209440726e-16,
+          "radial_coefficient_wb_per_radian": 0.0038923175698437128,
+          "remainder_rms_wb_per_radian": 0.005607319324021425,
+          "residual_rms_wb_per_radian": 0.006837491059813663,
+          "vertical_coefficient_wb_per_radian": -0.0003988958848793133
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.03240625862969433,
+          "r_squared": 0.9989498344016253,
+          "residual_rms_wb_per_radian": 0.006837491059813663,
+          "squared_error_wb2_per_radian2": 0.1975241748705592,
+          "total_sum_squares_wb2_per_radian2": 188.0885978137841
+        }
+      },
+      "frame": 227,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.2652329124799531,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.2597788724653294,
+          "r_squared": -0.5870428075100165,
+          "residual_rms_wb_per_radian": 0.2653290070279607,
+          "squared_error_wb2_per_radian2": 297.4378113251243,
+          "total_sum_squares_wb2_per_radian2": 187.41637586435868
+        },
+        "reference_shape_rms_wb_per_radian": 0.21061553962142898,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.2695896660823553,
+          "lowest_order_rms_wb_per_radian": 0.0037073964731972374,
+          "orthogonality_relative_error": 6.442563464650143e-16,
+          "radial_coefficient_wb_per_radian": 0.003675256834333354,
+          "remainder_rms_wb_per_radian": 0.006102402742826336,
+          "residual_rms_wb_per_radian": 0.007140315668451202,
+          "vertical_coefficient_wb_per_radian": -0.00048710965003917044
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.03390213125434888,
+          "r_squared": 0.9988506454964129,
+          "residual_rms_wb_per_radian": 0.007140315668451202,
+          "squared_error_wb2_per_radian2": 0.2154078556456731,
+          "total_sum_squares_wb2_per_radian2": 187.41637586435868
+        }
+      },
+      "shot": "d3d_shot_0040a29bad.parquet",
+      "time_ms": 4800.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": -0.24003993494225895,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 3.100592197433217,
+          "r_squared": -8.613671974783744,
+          "residual_rms_wb_per_radian": 0.24026740203070363,
+          "squared_error_wb2_per_radian2": 243.9025934220164,
+          "total_sum_squares_wb2_per_radian2": 25.370388553069276
+        },
+        "reference_shape_rms_wb_per_radian": 0.0774908103779677,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.7002965571215004,
+          "lowest_order_rms_wb_per_radian": 0.008747015384387453,
+          "orthogonality_relative_error": 1.2025848582596478e-15,
+          "radial_coefficient_wb_per_radian": -0.0087454243483805,
+          "remainder_rms_wb_per_radian": 0.0057222227643753286,
+          "residual_rms_wb_per_radian": 0.010452469158043287,
+          "vertical_coefficient_wb_per_radian": 0.00016682656102755882
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.1348865640591513,
+          "r_squared": 0.9818056148363165,
+          "residual_rms_wb_per_radian": 0.010452469158043287,
+          "squared_error_wb2_per_radian2": 0.4615986210868499,
+          "total_sum_squares_wb2_per_radian2": 25.370388553069276
+        }
+      },
+      "frame": 0,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": -0.2407153192588635,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 3.1163516801961717,
+          "r_squared": -8.711647794661502,
+          "residual_rms_wb_per_radian": 0.24094958927936544,
+          "squared_error_wb2_per_radian2": 245.2895768247059,
+          "total_sum_squares_wb2_per_radian2": 25.257256236119037
+        },
+        "reference_shape_rms_wb_per_radian": 0.0773178427873063,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.6973929053444263,
+          "lowest_order_rms_wb_per_radian": 0.008870939632056516,
+          "orthogonality_relative_error": 1.86299539246038e-15,
+          "radial_coefficient_wb_per_radian": -0.008868091604237939,
+          "remainder_rms_wb_per_radian": 0.0058434645581819985,
+          "residual_rms_wb_per_radian": 0.010622600811398325,
+          "vertical_coefficient_wb_per_radian": 0.00022476933606605646
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.13738873755984168,
+          "r_squared": 0.9811243347917129,
+          "residual_rms_wb_per_radian": 0.010622600811398325,
+          "squared_error_wb2_per_radian2": 0.4767475127929035,
+          "total_sum_squares_wb2_per_radian2": 25.257256236119037
+        }
+      },
+      "shot": "d3d_shot_0040ca9bdc.parquet",
+      "time_ms": 260.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.11194098230535006,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.5071454172936103,
+          "r_squared": 0.7428035257180898,
+          "residual_rms_wb_per_radian": 0.11197862209151092,
+          "squared_error_wb2_per_radian2": 52.978169878294196,
+          "total_sum_squares_wb2_per_radian2": 205.98326639666695
+        },
+        "reference_shape_rms_wb_per_radian": 0.2208018021519087,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.1466725760781777,
+          "lowest_order_rms_wb_per_radian": 0.0011118446040089432,
+          "orthogonality_relative_error": 7.794428177667321e-16,
+          "radial_coefficient_wb_per_radian": 0.0011095122977975312,
+          "remainder_rms_wb_per_radian": 0.0026818067796288945,
+          "residual_rms_wb_per_radian": 0.0029031510513108532,
+          "vertical_coefficient_wb_per_radian": -7.197836133065346e-05
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.013148221722001726,
+          "r_squared": 0.9998271242655491,
+          "residual_rms_wb_per_radian": 0.0029031510513108532,
+          "squared_error_wb2_per_radian2": 0.03560950846292289,
+          "total_sum_squares_wb2_per_radian2": 205.98326639666695
+        }
+      },
+      "frame": 137,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.11056166429663214,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.5017882014333014,
+          "r_squared": 0.7482086009023325,
+          "residual_rms_wb_per_radian": 0.11061248639703841,
+          "squared_error_wb2_per_radian2": 51.6933910708004,
+          "total_sum_squares_wb2_per_radian2": 205.30244978999076
+        },
+        "reference_shape_rms_wb_per_radian": 0.22043660269628962,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.06463513998840222,
+          "lowest_order_rms_wb_per_radian": 0.0008523693720488228,
+          "orthogonality_relative_error": 2.92217722362356e-16,
+          "radial_coefficient_wb_per_radian": 0.0008485134393207465,
+          "remainder_rms_wb_per_radian": 0.0032425300842734185,
+          "residual_rms_wb_per_radian": 0.003352690694625004,
+          "vertical_coefficient_wb_per_radian": 8.098450283222258e-05
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.015209319385330176,
+          "r_squared": 0.9997686766038351,
+          "residual_rms_wb_per_radian": 0.003352690694625004,
+          "squared_error_wb2_per_radian2": 0.04749125992641101,
+          "total_sum_squares_wb2_per_radian2": 205.30244978999076
+        }
+      },
+      "shot": "d3d_shot_0040ca9bdc.parquet",
+      "time_ms": 3000.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.26966011070212914,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.295842824507939,
+          "r_squared": -0.6792086258287131,
+          "residual_rms_wb_per_radian": 0.2697856568807868,
+          "squared_error_wb2_per_radian2": 307.51367028257505,
+          "total_sum_squares_wb2_per_radian2": 183.13011590850584
+        },
+        "reference_shape_rms_wb_per_radian": 0.20819319425041427,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.4786352892245576,
+          "lowest_order_rms_wb_per_radian": 0.005693482654838076,
+          "orthogonality_relative_error": 1.5520017960647816e-15,
+          "radial_coefficient_wb_per_radian": 0.004960063470636056,
+          "remainder_rms_wb_per_radian": 0.005942188988256879,
+          "residual_rms_wb_per_radian": 0.008229541585842036,
+          "vertical_coefficient_wb_per_radian": 0.002795266554052373
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.039528389078576524,
+          "r_squared": 0.9984375064568527,
+          "residual_rms_wb_per_radian": 0.008229541585842036,
+          "squared_error_wb2_per_radian2": 0.28613962366286205,
+          "total_sum_squares_wb2_per_radian2": 183.13011590850584
+        }
+      },
+      "frame": 274,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.26840982864491003,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.2905437157999844,
+          "r_squared": -0.6655030823908306,
+          "residual_rms_wb_per_radian": 0.2685420124905722,
+          "squared_error_wb2_per_radian2": 304.685082696256,
+          "total_sum_squares_wb2_per_radian2": 182.93876842237987
+        },
+        "reference_shape_rms_wb_per_radian": 0.208084398229089,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.47255779150169896,
+          "lowest_order_rms_wb_per_radian": 0.005791410156262768,
+          "orthogonality_relative_error": 1.4809138309634097e-15,
+          "radial_coefficient_wb_per_radian": 0.004965820007715546,
+          "remainder_rms_wb_per_radian": 0.006118490638924137,
+          "residual_rms_wb_per_radian": 0.008424746838728505,
+          "vertical_coefficient_wb_per_radian": 0.002980111281317445
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.040487162470745845,
+          "r_squared": 0.9983607896750675,
+          "residual_rms_wb_per_radian": 0.008424746838728505,
+          "squared_error_wb2_per_radian2": 0.2998751180284136,
+          "total_sum_squares_wb2_per_radian2": 182.93876842237987
+        }
+      },
+      "shot": "d3d_shot_0040ca9bdc.parquet",
+      "time_ms": 5740.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": -0.1970075242405233,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 3.1391820531509116,
+          "r_squared": -8.854463962824774,
+          "residual_rms_wb_per_radian": 0.19722768750546021,
+          "squared_error_wb2_per_radian2": 164.34726403672494,
+          "total_sum_squares_wb2_per_radian2": 16.67744330454834
+        },
+        "reference_shape_rms_wb_per_radian": 0.0628277316084601,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.686251247655074,
+          "lowest_order_rms_wb_per_radian": 0.007717767793864215,
+          "orthogonality_relative_error": 3.86005446785593e-15,
+          "radial_coefficient_wb_per_radian": -0.007714929478539813,
+          "remainder_rms_wb_per_radian": 0.005218445328933237,
+          "residual_rms_wb_per_radian": 0.009316443064339156,
+          "vertical_coefficient_wb_per_radian": -0.00020929133084081092
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.14828552338000767,
+          "r_squared": 0.9780114035559172,
+          "residual_rms_wb_per_radian": 0.009316443064339156,
+          "squared_error_wb2_per_radian2": 0.36671357054278414,
+          "total_sum_squares_wb2_per_radian2": 16.67744330454834
+        }
+      },
+      "frame": 0,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": -0.19751531256934926,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 3.151648529670463,
+          "r_squared": -8.932888454573991,
+          "residual_rms_wb_per_radian": 0.1977405266860305,
+          "squared_error_wb2_per_radian2": 165.20305965244043,
+          "total_sum_squares_wb2_per_radian2": 16.631925386856242
+        },
+        "reference_shape_rms_wb_per_radian": 0.06274193483963972,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.6775100391026121,
+          "lowest_order_rms_wb_per_radian": 0.007765954098671763,
+          "orthogonality_relative_error": 9.593851099427684e-16,
+          "radial_coefficient_wb_per_radian": -0.007764036288708623,
+          "remainder_rms_wb_per_radian": 0.005357905527192443,
+          "residual_rms_wb_per_radian": 0.009434892405374646,
+          "vertical_coefficient_wb_per_radian": -0.00017257917108495628
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.150376178699127,
+          "r_squared": 0.9773870048798482,
+          "residual_rms_wb_per_radian": 0.009434892405374646,
+          "squared_error_wb2_per_radian2": 0.37609764761170883,
+          "total_sum_squares_wb2_per_radian2": 16.631925386856242
+        }
+      },
+      "shot": "d3d_shot_004f4e5bed.parquet",
+      "time_ms": 420.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.0731122081133892,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.6149352806441662,
+          "r_squared": 0.6218546006190805,
+          "residual_rms_wb_per_radian": 0.07314438166591684,
+          "squared_error_wb2_per_radian2": 22.604174905247344,
+          "total_sum_squares_wb2_per_radian2": 59.776411248831145
+        },
+        "reference_shape_rms_wb_per_radian": 0.11894647122750143,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.09704105996216685,
+          "lowest_order_rms_wb_per_radian": 0.0006757483530657609,
+          "orthogonality_relative_error": 1.7450950152671736e-16,
+          "radial_coefficient_wb_per_radian": 2.973160385070484e-05,
+          "remainder_rms_wb_per_radian": 0.0020613001327091382,
+          "residual_rms_wb_per_radian": 0.002169238132104864,
+          "vertical_coefficient_wb_per_radian": 0.0006750939700542088
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.018237095306138998,
+          "r_squared": 0.9996674083547948,
+          "residual_rms_wb_per_radian": 0.002169238132104864,
+          "squared_error_wb2_per_radian2": 0.0198811349617112,
+          "total_sum_squares_wb2_per_radian2": 59.776411248831145
+        }
+      },
+      "frame": 110,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.07185195417336906,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.6065410432951418,
+          "r_squared": 0.632107962798441,
+          "residual_rms_wb_per_radian": 0.07191502188087286,
+          "squared_error_wb2_per_radian2": 21.85072982223413,
+          "total_sum_squares_wb2_per_radian2": 59.39440817595803
+        },
+        "reference_shape_rms_wb_per_radian": 0.11856579645489734,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.1006781431029471,
+          "lowest_order_rms_wb_per_radian": 0.0009554339952653019,
+          "orthogonality_relative_error": 1.8113290445324918e-16,
+          "radial_coefficient_wb_per_radian": -0.0002655732694075847,
+          "remainder_rms_wb_per_radian": 0.0028555558960009822,
+          "residual_rms_wb_per_radian": 0.00301115486059661,
+          "vertical_coefficient_wb_per_radian": 0.0009177826310651033
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.025396488284393712,
+          "r_squared": 0.9993550183828207,
+          "residual_rms_wb_per_radian": 0.00301115486059661,
+          "squared_error_wb2_per_radian2": 0.038308301436739634,
+          "total_sum_squares_wb2_per_radian2": 59.39440817595803
+        }
+      },
+      "shot": "d3d_shot_004f4e5bed.parquet",
+      "time_ms": 2720.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.1634607422642529,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.4637123891548403,
+          "r_squared": -1.1424539581653703,
+          "residual_rms_wb_per_radian": 0.16352371028976,
+          "squared_error_wb2_per_radian2": 112.97651616877656,
+          "total_sum_squares_wb2_per_radian2": 52.73229594418953
+        },
+        "reference_shape_rms_wb_per_radian": 0.11171847112955023,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.4083382339240282,
+          "lowest_order_rms_wb_per_radian": 0.002899570097758799,
+          "orthogonality_relative_error": 2.871566353381986e-15,
+          "radial_coefficient_wb_per_radian": 0.0027476043305170563,
+          "remainder_rms_wb_per_radian": 0.0034902805900161155,
+          "residual_rms_wb_per_radian": 0.004537572627392346,
+          "vertical_coefficient_wb_per_radian": 0.0009263785375001359
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.04061613609203903,
+          "r_squared": 0.998350329488953,
+          "residual_rms_wb_per_radian": 0.004537572627392346,
+          "squared_error_wb2_per_radian2": 0.08699091359893465,
+          "total_sum_squares_wb2_per_radian2": 52.73229594418953
+        }
+      },
+      "frame": 221,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.16164500683761024,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.4546595892160485,
+          "r_squared": -1.1160345204982027,
+          "residual_rms_wb_per_radian": 0.16171163014415796,
+          "squared_error_wb2_per_radian2": 110.48650184339695,
+          "total_sum_squares_wb2_per_radian2": 52.21394111159577
+        },
+        "reference_shape_rms_wb_per_radian": 0.11116802263772811,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.2898854303773396,
+          "lowest_order_rms_wb_per_radian": 0.0024990052897018713,
+          "orthogonality_relative_error": 1.2197632768204649e-15,
+          "radial_coefficient_wb_per_radian": 0.0022923202532822776,
+          "remainder_rms_wb_per_radian": 0.003911273566488026,
+          "residual_rms_wb_per_radian": 0.004641453258395039,
+          "vertical_coefficient_wb_per_radian": 0.0009951358170369557
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.04175169395178058,
+          "r_squared": 0.9982567960521569,
+          "residual_rms_wb_per_radian": 0.004641453258395039,
+          "squared_error_wb2_per_radian2": 0.09101954827818354,
+          "total_sum_squares_wb2_per_radian2": 52.21394111159577
+        }
+      },
+      "shot": "d3d_shot_004f4e5bed.parquet",
+      "time_ms": 5060.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": -0.2311051320292603,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 3.881632945837802,
+          "r_squared": -14.067074326213454,
+          "residual_rms_wb_per_radian": 0.23143902137515635,
+          "squared_error_wb2_per_radian2": 226.30798709875558,
+          "total_sum_squares_wb2_per_radian2": 15.020035223761296
+        },
+        "reference_shape_rms_wb_per_radian": 0.059624138759262084,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.7323228706781253,
+          "lowest_order_rms_wb_per_radian": 0.010634796337420425,
+          "orthogonality_relative_error": 1.956706103676085e-15,
+          "radial_coefficient_wb_per_radian": -0.010608449185687645,
+          "remainder_rms_wb_per_radian": 0.006429593431143801,
+          "residual_rms_wb_per_radian": 0.012427331363901855,
+          "vertical_coefficient_wb_per_radian": 0.0007481303449894366
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.2084278552697984,
+          "r_squared": 0.956557829147632,
+          "residual_rms_wb_per_radian": 0.012427331363901855,
+          "squared_error_wb2_per_radian2": 0.6525029363992241,
+          "total_sum_squares_wb2_per_radian2": 15.020035223761296
+        }
+      },
+      "frame": 0,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": -0.2315619984542502,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 3.8965488137258872,
+          "r_squared": -14.18309265774862,
+          "residual_rms_wb_per_radian": 0.2319018147673389,
+          "squared_error_wb2_per_radian2": 227.21395840032733,
+          "total_sum_squares_wb2_per_radian2": 14.96493260774311
+        },
+        "reference_shape_rms_wb_per_radian": 0.059514669481477364,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.7292872060761267,
+          "lowest_order_rms_wb_per_radian": 0.010717150375272693,
+          "orthogonality_relative_error": 1.1679426081777736e-15,
+          "radial_coefficient_wb_per_radian": -0.01068740028299111,
+          "remainder_rms_wb_per_radian": 0.00652956752724004,
+          "residual_rms_wb_per_radian": 0.012549604147501841,
+          "vertical_coefficient_wb_per_radian": 0.0007979895721932439
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.2108657286823651,
+          "r_squared": 0.9555356444672551,
+          "residual_rms_wb_per_radian": 0.012549604147501841,
+          "squared_error_wb2_per_radian2": 0.6654060839942556,
+          "total_sum_squares_wb2_per_radian2": 14.96493260774311
+        }
+      },
+      "shot": "d3d_shot_0065291fe9.parquet",
+      "time_ms": 200.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.13853097790146685,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.7502816929636777,
+          "r_squared": 0.43707738120355755,
+          "residual_rms_wb_per_radian": 0.13856489066684624,
+          "squared_error_wb2_per_radian2": 81.1209672103011,
+          "total_sum_squares_wb2_per_radian2": 144.1067821785913
+        },
+        "reference_shape_rms_wb_per_radian": 0.18468382204489478,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.148646941937671,
+          "lowest_order_rms_wb_per_radian": 0.0011818833581128138,
+          "orthogonality_relative_error": 3.495427298338099e-16,
+          "radial_coefficient_wb_per_radian": 0.0008559582389774791,
+          "remainder_rms_wb_per_radian": 0.002828469357474107,
+          "residual_rms_wb_per_radian": 0.003065466877712759,
+          "vertical_coefficient_wb_per_radian": 0.0008149747022519131
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.016598459159934294,
+          "r_squared": 0.999724491153516,
+          "residual_rms_wb_per_radian": 0.003065466877712759,
+          "squared_error_wb2_per_radian2": 0.0397026933285457,
+          "total_sum_squares_wb2_per_radian2": 144.1067821785913
+        }
+      },
+      "frame": 68,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.137315371935912,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.744976209915366,
+          "r_squared": 0.44501044666013656,
+          "residual_rms_wb_per_radian": 0.13735891018999966,
+          "squared_error_wb2_per_radian2": 79.71506163126907,
+          "total_sum_squares_wb2_per_radian2": 143.6334452631639
+        },
+        "reference_shape_rms_wb_per_radian": 0.1843802639088361,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.09998610892510736,
+          "lowest_order_rms_wb_per_radian": 0.0010934887962527667,
+          "orthogonality_relative_error": 1.3733287950880832e-16,
+          "radial_coefficient_wb_per_radian": 0.0006607027018281594,
+          "remainder_rms_wb_per_radian": 0.0032807195764056342,
+          "residual_rms_wb_per_radian": 0.0034581553878536876,
+          "vertical_coefficient_wb_per_radian": 0.0008713149185726681
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.01875556154732221,
+          "r_squared": 0.9996482289110447,
+          "residual_rms_wb_per_radian": 0.0034581553878536876,
+          "squared_error_wb2_per_radian2": 0.050526093450637785,
+          "total_sum_squares_wb2_per_radian2": 143.6334452631639
+        }
+      },
+      "shot": "d3d_shot_0065291fe9.parquet",
+      "time_ms": 1560.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.18761570528534724,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.0319216952303936,
+          "r_squared": -0.06486238508716924,
+          "residual_rms_wb_per_radian": 0.18769194733336128,
+          "squared_error_wb2_per_radian2": 148.83942847125965,
+          "total_sum_squares_wb2_per_radian2": 139.77339283993555
+        },
+        "reference_shape_rms_wb_per_radian": 0.18188584288990645,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.3941206888620999,
+          "lowest_order_rms_wb_per_radian": 0.003358192624331149,
+          "orthogonality_relative_error": 1.3775037883226229e-15,
+          "radial_coefficient_wb_per_radian": 0.0031005335151461032,
+          "remainder_rms_wb_per_radian": 0.004163744272752047,
+          "residual_rms_wb_per_radian": 0.005349226492773291,
+          "vertical_coefficient_wb_per_radian": 0.0012900192337976506
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.02940980126755176,
+          "r_squared": 0.9991350635894031,
+          "residual_rms_wb_per_radian": 0.005349226492773291,
+          "squared_error_wb2_per_radian2": 0.1208950966999228,
+          "total_sum_squares_wb2_per_radian2": 139.77339283993555
+        }
+      },
+      "frame": 137,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.1860325176740132,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.0256166674491063,
+          "r_squared": -0.051889548549410414,
+          "residual_rms_wb_per_radian": 0.1861183698762807,
+          "squared_error_wb2_per_radian2": 146.354201132832,
+          "total_sum_squares_wb2_per_radian2": 139.13457105326236
+        },
+        "reference_shape_rms_wb_per_radian": 0.18146972039679374,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.3058297847090928,
+          "lowest_order_rms_wb_per_radian": 0.0031259004218360557,
+          "orthogonality_relative_error": 9.252637331370615e-16,
+          "radial_coefficient_wb_per_radian": 0.0028477913277044336,
+          "remainder_rms_wb_per_radian": 0.004709428821498203,
+          "residual_rms_wb_per_radian": 0.00565243074013232,
+          "vertical_coefficient_wb_per_radian": 0.001288929013206797
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.031148065516235782,
+          "r_squared": 0.9990297980145962,
+          "residual_rms_wb_per_radian": 0.00565243074013232,
+          "squared_error_wb2_per_radian2": 0.1349886370741696,
+          "total_sum_squares_wb2_per_radian2": 139.13457105326236
+        }
+      },
+      "shot": "d3d_shot_0065291fe9.parquet",
+      "time_ms": 2940.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": -0.2697524941766194,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 4.210113016688317,
+          "r_squared": -16.725051613288404,
+          "residual_rms_wb_per_radian": 0.270036222339441,
+          "squared_error_wb2_per_radian2": 308.0851468108792,
+          "total_sum_squares_wb2_per_radian2": 17.381339898604807
+        },
+        "reference_shape_rms_wb_per_radian": 0.06413989868420493,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.6981214659069557,
+          "lowest_order_rms_wb_per_radian": 0.010340192404994477,
+          "orthogonality_relative_error": 1.8873391713688924e-15,
+          "radial_coefficient_wb_per_radian": -0.010337041290700247,
+          "remainder_rms_wb_per_radian": 0.006799535416236393,
+          "residual_rms_wb_per_radian": 0.012375510528820974,
+          "vertical_coefficient_wb_per_radian": -0.0002552573733775607
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.1929455889812399,
+          "r_squared": 0.9627719996926825,
+          "residual_rms_wb_per_radian": 0.012375510528820974,
+          "squared_error_wb2_per_radian2": 0.6470725270868508,
+          "total_sum_squares_wb2_per_radian2": 17.381339898604807
+        }
+      },
+      "frame": 0,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": -0.2701364906162742,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 4.220335624097118,
+          "r_squared": -16.81123278002321,
+          "residual_rms_wb_per_radian": 0.27042304168183745,
+          "squared_error_wb2_per_radian2": 308.96842572112996,
+          "total_sum_squares_wb2_per_radian2": 17.346829921153123
+        },
+        "reference_shape_rms_wb_per_radian": 0.06407619340456855,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.6946921901126552,
+          "lowest_order_rms_wb_per_radian": 0.010373348944682581,
+          "orthogonality_relative_error": 4.325916567019611e-15,
+          "radial_coefficient_wb_per_radian": -0.010370705543567803,
+          "remainder_rms_wb_per_radian": 0.006876884589131771,
+          "residual_rms_wb_per_radian": 0.012445798888797212,
+          "vertical_coefficient_wb_per_radian": -0.0002341684367271537
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.194234367360372,
+          "r_squared": 0.962273010536116,
+          "residual_rms_wb_per_radian": 0.012445798888797212,
+          "squared_error_wb2_per_radian2": 0.6544436696671305,
+          "total_sum_squares_wb2_per_radian2": 17.346829921153123
+        }
+      },
+      "shot": "d3d_shot_006a097379.parquet",
+      "time_ms": 300.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.04191205372119343,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.4955648611738817,
+          "r_squared": 0.7544154683697113,
+          "residual_rms_wb_per_radian": 0.04192429578697299,
+          "squared_error_wb2_per_radian2": 7.426056788811964,
+          "total_sum_squares_wb2_per_radian2": 30.238292043537186
+        },
+        "reference_shape_rms_wb_per_radian": 0.08459900826637255,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.14251185745601927,
+          "lowest_order_rms_wb_per_radian": 0.0003824450413890966,
+          "orthogonality_relative_error": 3.0003901956744786e-16,
+          "radial_coefficient_wb_per_radian": -0.00014612171751772024,
+          "remainder_rms_wb_per_radian": 0.0009381182738405303,
+          "residual_rms_wb_per_radian": 0.0010130795158311337,
+          "vertical_coefficient_wb_per_radian": 0.0003534298421932978
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.011975075554565631,
+          "r_squared": 0.9998565975654624,
+          "residual_rms_wb_per_radian": 0.0010130795158311337,
+          "squared_error_wb2_per_radian2": 0.004336244695300822,
+          "total_sum_squares_wb2_per_radian2": 30.238292043537186
+        }
+      },
+      "frame": 144,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.04075073809618381,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.4839437763768423,
+          "r_squared": 0.7657984213061209,
+          "residual_rms_wb_per_radian": 0.04078425337974047,
+          "squared_error_wb2_per_radian2": 7.027676242813633,
+          "total_sum_squares_wb2_per_radian2": 30.00695504277273
+        },
+        "reference_shape_rms_wb_per_radian": 0.0842747760598995,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.10675624692899618,
+          "lowest_order_rms_wb_per_radian": 0.0005401198182992555,
+          "orthogonality_relative_error": 3.0050147631932957e-16,
+          "radial_coefficient_wb_per_radian": -0.0003664783571247855,
+          "remainder_rms_wb_per_radian": 0.001562350453958693,
+          "residual_rms_wb_per_radian": 0.001653078449168265,
+          "vertical_coefficient_wb_per_radian": 0.00039676571409175327
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.019615340751464184,
+          "r_squared": 0.9996152384072039,
+          "residual_rms_wb_per_radian": 0.001653078449168265,
+          "squared_error_wb2_per_radian2": 0.011545523817216748,
+          "total_sum_squares_wb2_per_radian2": 30.00695504277273
+        }
+      },
+      "shot": "d3d_shot_006a097379.parquet",
+      "time_ms": 3220.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.2832872799125747,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 3.6187973683129195,
+          "r_squared": -12.095694392908515,
+          "residual_rms_wb_per_radian": 0.28347146148787244,
+          "squared_error_wb2_per_radian2": 339.5043935448473,
+          "total_sum_squares_wb2_per_radian2": 25.924886711520486
+        },
+        "reference_shape_rms_wb_per_radian": 0.07833305726648812,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.6013925630241979,
+          "lowest_order_rms_wb_per_radian": 0.007923211185363715,
+          "orthogonality_relative_error": 4.3423837981704875e-15,
+          "radial_coefficient_wb_per_radian": 0.007909843334887482,
+          "remainder_rms_wb_per_radian": 0.006450522639061751,
+          "residual_rms_wb_per_radian": 0.010216972046791619,
+          "vertical_coefficient_wb_per_radian": 0.0004600585891044425
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.13042989005310493,
+          "r_squared": 0.982988043780735,
+          "residual_rms_wb_per_radian": 0.010216972046791619,
+          "squared_error_wb2_per_radian2": 0.4410330377257926,
+          "total_sum_squares_wb2_per_radian2": 25.924886711520486
+        }
+      },
+      "frame": 288,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.2825687749741637,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 3.6187065899162607,
+          "r_squared": -12.095037383903373,
+          "residual_rms_wb_per_radian": 0.2827502438208758,
+          "squared_error_wb2_per_radian2": 337.77903410873097,
+          "total_sum_squares_wb2_per_radian2": 25.794430684400666
+        },
+        "reference_shape_rms_wb_per_radian": 0.07813571970957138,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.5931428121780579,
+          "lowest_order_rms_wb_per_radian": 0.0078005903925480275,
+          "orthogonality_relative_error": 2.5614615486829256e-16,
+          "radial_coefficient_wb_per_radian": 0.007785642425318319,
+          "remainder_rms_wb_per_radian": 0.006460540216795188,
+          "residual_rms_wb_per_radian": 0.010128563094789935,
+          "vertical_coefficient_wb_per_radian": 0.00048268260523460035
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.12962782108410295,
+          "r_squared": 0.9831966280009878,
+          "residual_rms_wb_per_radian": 0.010128563094789935,
+          "squared_error_wb2_per_radian2": 0.4334334142927192,
+          "total_sum_squares_wb2_per_radian2": 25.794430684400666
+        }
+      },
+      "shot": "d3d_shot_006a097379.parquet",
+      "time_ms": 6100.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": -0.28415932305726443,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 3.800060216893312,
+          "r_squared": -13.440457652015244,
+          "residual_rms_wb_per_radian": 0.28443539937526857,
+          "squared_error_wb2_per_radian2": 341.81727236507203,
+          "total_sum_squares_wb2_per_radian2": 23.67080605076042
+        },
+        "reference_shape_rms_wb_per_radian": 0.07485023477017554,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.6880294773106558,
+          "lowest_order_rms_wb_per_radian": 0.010392487524738375,
+          "orthogonality_relative_error": 4.938255475634969e-15,
+          "radial_coefficient_wb_per_radian": -0.010391185849848848,
+          "remainder_rms_wb_per_radian": 0.00699798116987422,
+          "residual_rms_wb_per_radian": 0.012528987884332784,
+          "vertical_coefficient_wb_per_radian": -0.0001644797426548307
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.16738742266877998,
+          "r_squared": 0.9719814507323032,
+          "residual_rms_wb_per_radian": 0.012528987884332784,
+          "squared_error_wb2_per_radian2": 0.6632216455393262,
+          "total_sum_squares_wb2_per_radian2": 23.67080605076042
+        }
+      },
+      "frame": 0,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": -0.2846307334171888,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 3.810355522336371,
+          "r_squared": -13.51880920659928,
+          "residual_rms_wb_per_radian": 0.28491053943515054,
+          "squared_error_wb2_per_radian2": 342.9602154081903,
+          "total_sum_squares_wb2_per_radian2": 23.621786782093913
+        },
+        "reference_shape_rms_wb_per_radian": 0.07477269188268652,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.6843458529861816,
+          "lowest_order_rms_wb_per_radian": 0.010443088203644188,
+          "orthogonality_relative_error": 3.09173694893342e-15,
+          "radial_coefficient_wb_per_radian": -0.010441623237179667,
+          "remainder_rms_wb_per_radian": 0.007092459685648946,
+          "residual_rms_wb_per_radian": 0.0126238296733459,
+          "vertical_coefficient_wb_per_radian": -0.0001749154135059758
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.16882941292459905,
+          "r_squared": 0.9714966293315352,
+          "residual_rms_wb_per_radian": 0.0126238296733459,
+          "squared_error_wb2_per_radian2": 0.6733005445014646,
+          "total_sum_squares_wb2_per_radian2": 23.621786782093913
+        }
+      },
+      "shot": "d3d_shot_0073c37714.parquet",
+      "time_ms": 300.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": -0.2062050294479279,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.8156342933371696,
+          "r_squared": -2.296527887141963,
+          "residual_rms_wb_per_radian": 0.20640299416765037,
+          "squared_error_wb2_per_radian2": 179.99427810579294,
+          "total_sum_squares_wb2_per_radian2": 54.60116955414113
+        },
+        "reference_shape_rms_wb_per_radian": 0.11368092953800615,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.694853780888346,
+          "lowest_order_rms_wb_per_radian": 0.0075337195077582585,
+          "orthogonality_relative_error": 5.187495958900657e-15,
+          "radial_coefficient_wb_per_radian": -0.007527234170723729,
+          "remainder_rms_wb_per_radian": 0.004992484564694814,
+          "residual_rms_wb_per_radian": 0.009037800161006755,
+          "vertical_coefficient_wb_per_radian": 0.00031253057557043397
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.0795014625384921,
+          "r_squared": 0.9936795174542408,
+          "residual_rms_wb_per_radian": 0.009037800161006755,
+          "squared_error_wb2_per_radian2": 0.345105739144991,
+          "total_sum_squares_wb2_per_radian2": 54.60116955414113
+        }
+      },
+      "frame": 132,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": -0.20679287192915635,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.8229631842019567,
+          "r_squared": -2.323194770955738,
+          "residual_rms_wb_per_radian": 0.20699713296012553,
+          "squared_error_wb2_per_radian2": 181.03201015193275,
+          "total_sum_squares_wb2_per_radian2": 54.47529339361251
+        },
+        "reference_shape_rms_wb_per_radian": 0.11354981535227394,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.6895085304754078,
+          "lowest_order_rms_wb_per_radian": 0.0076340074529473705,
+          "orthogonality_relative_error": 5.829338474765383e-15,
+          "radial_coefficient_wb_per_radian": -0.007630501129757909,
+          "remainder_rms_wb_per_radian": 0.005122802281152206,
+          "residual_rms_wb_per_radian": 0.009193539742853932,
+          "vertical_coefficient_wb_per_radian": 0.00023134887166198468
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.08096481455590339,
+          "r_squared": 0.9934446988039282,
+          "residual_rms_wb_per_radian": 0.009193539742853932,
+          "squared_error_wb2_per_radian2": 0.3571019559395118,
+          "total_sum_squares_wb2_per_radian2": 54.47529339361251
+        }
+      },
+      "shot": "d3d_shot_0073c37714.parquet",
+      "time_ms": 2960.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": -0.019207697593013003,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.4765696725239044,
+          "r_squared": 0.7728813472304585,
+          "residual_rms_wb_per_radian": 0.01925833579359038,
+          "squared_error_wb2_per_radian2": 1.5669827771009412,
+          "total_sum_squares_wb2_per_radian2": 6.899401515431527
+        },
+        "reference_shape_rms_wb_per_radian": 0.040410325926949105,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.7291165200104713,
+          "lowest_order_rms_wb_per_radian": 0.0011917256958401366,
+          "orthogonality_relative_error": 3.2672289743109894e-15,
+          "radial_coefficient_wb_per_radian": -0.0011175073084114175,
+          "remainder_rms_wb_per_radian": 0.0007263887250784239,
+          "residual_rms_wb_per_radian": 0.0013956542243860842,
+          "vertical_coefficient_wb_per_radian": 0.0004139897942857127
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.034537069235943504,
+          "r_squared": 0.9988071908485916,
+          "residual_rms_wb_per_radian": 0.0013956542243860842,
+          "squared_error_wb2_per_radian2": 0.008229669266847402,
+          "total_sum_squares_wb2_per_radian2": 6.899401515431527
+        }
+      },
+      "frame": 263,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": -0.020053076385666214,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.5014973007802412,
+          "r_squared": 0.7485004573101322,
+          "residual_rms_wb_per_radian": 0.02013611813539255,
+          "squared_error_wb2_per_radian2": 1.713082246301498,
+          "total_sum_squares_wb2_per_radian2": 6.8114726093715205
+        },
+        "reference_shape_rms_wb_per_radian": 0.04015199703779922,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.5729015655550705,
+          "lowest_order_rms_wb_per_radian": 0.0013827475614618596,
+          "orthogonality_relative_error": 2.2144723100159076e-15,
+          "radial_coefficient_wb_per_radian": -0.0013008908308468387,
+          "remainder_rms_wb_per_radian": 0.0011938970702669884,
+          "residual_rms_wb_per_radian": 0.001826850030276384,
+          "vertical_coefficient_wb_per_radian": 0.0004686937859064709
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.04549836035693521,
+          "r_squared": 0.9979298992048304,
+          "residual_rms_wb_per_radian": 0.001826850030276384,
+          "squared_error_wb2_per_radian2": 0.014100434864935486,
+          "total_sum_squares_wb2_per_radian2": 6.8114726093715205
+        }
+      },
+      "shot": "d3d_shot_0073c37714.parquet",
+      "time_ms": 6880.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": -0.19530541652332992,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 3.440292525640827,
+          "r_squared": -10.835612661980141,
+          "residual_rms_wb_per_radian": 0.19546465589540296,
+          "squared_error_wb2_per_radian2": 161.42217395070253,
+          "total_sum_squares_wb2_per_radian2": 13.63868340075401
+        },
+        "reference_shape_rms_wb_per_radian": 0.0568162894400945,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.6642514828083279,
+          "lowest_order_rms_wb_per_radian": 0.006429129032756275,
+          "orthogonality_relative_error": 1.214086454706173e-15,
+          "radial_coefficient_wb_per_radian": -0.006427163332571349,
+          "remainder_rms_wb_per_radian": 0.004570807460075229,
+          "residual_rms_wb_per_radian": 0.007888344627164123,
+          "vertical_coefficient_wb_per_radian": -0.00015897048870771064
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.13883948960590556,
+          "r_squared": 0.9807235961259716,
+          "residual_rms_wb_per_radian": 0.007888344627164123,
+          "squared_error_wb2_per_radian2": 0.26290476954294084,
+          "total_sum_squares_wb2_per_radian2": 13.63868340075401
+        }
+      },
+      "frame": 0,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": -0.19565447828033986,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 3.4497288826718853,
+          "r_squared": -10.900629363940617,
+          "residual_rms_wb_per_radian": 0.19581584495080534,
+          "squared_error_wb2_per_radian2": 162.00274569029588,
+          "total_sum_squares_wb2_per_radian2": 13.612956150131916
+        },
+        "reference_shape_rms_wb_per_radian": 0.05676267660754314,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.6603757440431633,
+          "lowest_order_rms_wb_per_radian": 0.006458800910088842,
+          "orthogonality_relative_error": 1.0399461288366889e-15,
+          "radial_coefficient_wb_per_radian": -0.0064567929834809645,
+          "remainder_rms_wb_per_radian": 0.004631862848757445,
+          "residual_rms_wb_per_radian": 0.007947972234844806,
+          "vertical_coefficient_wb_per_radian": -0.0001610390158794633
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.14002109678155325,
+          "r_squared": 0.9803940924560909,
+          "residual_rms_wb_per_radian": 0.007947972234844806,
+          "squared_error_wb2_per_radian2": 0.2668943596787752,
+          "total_sum_squares_wb2_per_radian2": 13.612956150131916
+        }
+      },
+      "shot": "d3d_shot_0079897d3b.parquet",
+      "time_ms": 180.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.21684622218439895,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.2132624169807262,
+          "r_squared": -0.47200569245791324,
+          "residual_rms_wb_per_radian": 0.21693118396136454,
+          "squared_error_wb2_per_radian2": 198.8248604788654,
+          "total_sum_squares_wb2_per_radian2": 135.0707143984432
+        },
+        "reference_shape_rms_wb_per_radian": 0.17879988774498626,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.44997834029956507,
+          "lowest_order_rms_wb_per_radian": 0.004072312168502601,
+          "orthogonality_relative_error": 1.78251425096456e-15,
+          "radial_coefficient_wb_per_radian": 0.004072289910077039,
+          "remainder_rms_wb_per_radian": 0.0045023075012627185,
+          "residual_rms_wb_per_radian": 0.006070790659680249,
+          "vertical_coefficient_wb_per_radian": 1.346424966690735e-05
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.03395298921182058,
+          "r_squared": 0.998847194523582,
+          "residual_rms_wb_per_radian": 0.006070790659680249,
+          "squared_error_wb2_per_radian2": 0.15571025926221754,
+          "total_sum_squares_wb2_per_radian2": 135.0707143984432
+        }
+      },
+      "frame": 71,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.21552841233970027,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.2081919686006048,
+          "r_squared": -0.4597278329910046,
+          "residual_rms_wb_per_radian": 0.21561631812290147,
+          "squared_error_wb2_per_radian2": 196.42192580770214,
+          "total_sum_squares_wb2_per_radian2": 134.56064984746547
+        },
+        "reference_shape_rms_wb_per_radian": 0.17846196939435072,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.3943573302638235,
+          "lowest_order_rms_wb_per_radian": 0.0038660300372209033,
+          "orthogonality_relative_error": 3.4666739001656223e-16,
+          "radial_coefficient_wb_per_radian": 0.003865008964773865,
+          "remainder_rms_wb_per_radian": 0.00479102566844459,
+          "residual_rms_wb_per_radian": 0.006156306945270774,
+          "vertical_coefficient_wb_per_radian": 8.884790887755229e-05
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.03449646423920756,
+          "r_squared": 0.998809993954993,
+          "residual_rms_wb_per_radian": 0.006156306945270774,
+          "squared_error_wb2_per_radian2": 0.16012798673854425,
+          "total_sum_squares_wb2_per_radian2": 134.56064984746547
+        }
+      },
+      "shot": "d3d_shot_0079897d3b.parquet",
+      "time_ms": 1600.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.26908344870061457,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.692986306009662,
+          "r_squared": -1.866202632336241,
+          "residual_rms_wb_per_radian": 0.2692677337149054,
+          "squared_error_wb2_per_radian2": 306.33409997433614,
+          "total_sum_squares_wb2_per_radian2": 106.87803315728704
+        },
+        "reference_shape_rms_wb_per_radian": 0.1590489732604894,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.6496469651952964,
+          "lowest_order_rms_wb_per_radian": 0.008028169864402837,
+          "orthogonality_relative_error": 7.946009488785794e-16,
+          "radial_coefficient_wb_per_radian": -0.00800078821036483,
+          "remainder_rms_wb_per_radian": 0.005895637707088762,
+          "residual_rms_wb_per_radian": 0.00996042445606374,
+          "vertical_coefficient_wb_per_radian": -0.0006624948185404989
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.06262489000636691,
+          "r_squared": 0.9960781231516904,
+          "residual_rms_wb_per_radian": 0.00996042445606374,
+          "squared_error_wb2_per_radian2": 0.4191624838324248,
+          "total_sum_squares_wb2_per_radian2": 106.87803315728704
+        }
+      },
+      "frame": 142,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.2668617273555868,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.6868095174360296,
+          "r_squared": -1.8453263481127715,
+          "residual_rms_wb_per_radian": 0.26708441701699637,
+          "squared_error_wb2_per_radian2": 301.3865125612298,
+          "total_sum_squares_wb2_per_radian2": 105.9233548942923
+        },
+        "reference_shape_rms_wb_per_radian": 0.15833703465401822,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.6160570135262652,
+          "lowest_order_rms_wb_per_radian": 0.008558727673610884,
+          "orthogonality_relative_error": 1.104984054825436e-15,
+          "radial_coefficient_wb_per_radian": -0.008533160099748527,
+          "remainder_rms_wb_per_radian": 0.00675666091425759,
+          "residual_rms_wb_per_radian": 0.010904324192781922,
+          "vertical_coefficient_wb_per_radian": -0.0006610583204925988
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.06886780604808553,
+          "r_squared": 0.9952572252901233,
+          "residual_rms_wb_per_radian": 0.010904324192781922,
+          "squared_error_wb2_per_radian2": 0.5023706087779466,
+          "total_sum_squares_wb2_per_radian2": 105.9233548942923
+        }
+      },
+      "shot": "d3d_shot_0079897d3b.parquet",
+      "time_ms": 3020.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": -0.059982992892864045,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.8085663141628696,
+          "r_squared": 0.3462205156010716,
+          "residual_rms_wb_per_radian": 0.06015799719668318,
+          "squared_error_wb2_per_radian2": 15.290210047875698,
+          "total_sum_squares_wb2_per_radian2": 23.387411830356235
+        },
+        "reference_shape_rms_wb_per_radian": 0.07440082049295656,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.8191087879803318,
+          "lowest_order_rms_wb_per_radian": 0.004149929899273795,
+          "orthogonality_relative_error": 4.84300912606104e-15,
+          "radial_coefficient_wb_per_radian": -0.004097324506413134,
+          "remainder_rms_wb_per_radian": 0.0019501979801742496,
+          "residual_rms_wb_per_radian": 0.004585323361635735,
+          "vertical_coefficient_wb_per_radian": 0.0006586729522555007
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.0616300106807266,
+          "r_squared": 0.9962017417834935,
+          "residual_rms_wb_per_radian": 0.004585323361635735,
+          "squared_error_wb2_per_radian2": 0.0888314291474713,
+          "total_sum_squares_wb2_per_radian2": 23.387411830356235
+        }
+      },
+      "frame": 0,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": -0.060818247539673284,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.8224430055845385,
+          "r_squared": 0.32358750256507096,
+          "residual_rms_wb_per_radian": 0.06101350690474213,
+          "squared_error_wb2_per_radian2": 15.72818790484344,
+          "total_sum_squares_wb2_per_radian2": 23.25236148723951
+        },
+        "reference_shape_rms_wb_per_radian": 0.07418569613997475,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.7777702111569974,
+          "lowest_order_rms_wb_per_radian": 0.004301419883395369,
+          "orthogonality_relative_error": 3.1757696535861506e-15,
+          "radial_coefficient_wb_per_radian": -0.004222435011136875,
+          "remainder_rms_wb_per_radian": 0.0022992559676488404,
+          "residual_rms_wb_per_radian": 0.004877375423118248,
+          "vertical_coefficient_wb_per_radian": 0.0008205215353630652
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.06574549646222283,
+          "r_squared": 0.9956775296949358,
+          "residual_rms_wb_per_radian": 0.004877375423118248,
+          "squared_error_wb2_per_radian2": 0.10050764205121016,
+          "total_sum_squares_wb2_per_radian2": 23.25236148723951
+        }
+      },
+      "shot": "d3d_shot_008b4474ec.parquet",
+      "time_ms": 720.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.06698892930651691,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.45810444277517137,
+          "r_squared": 0.7901403195096498,
+          "residual_rms_wb_per_radian": 0.06700424081258373,
+          "squared_error_wb2_per_radian2": 18.96842601202875,
+          "total_sum_squares_wb2_per_radian2": 90.38623316164326
+        },
+        "reference_shape_rms_wb_per_radian": 0.14626411480900675,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.17446836147219766,
+          "lowest_order_rms_wb_per_radian": 0.000598285706922502,
+          "orthogonality_relative_error": 1.0006287433725842e-16,
+          "radial_coefficient_wb_per_radian": -3.951191529856284e-05,
+          "remainder_rms_wb_per_radian": 0.0013014190140310342,
+          "residual_rms_wb_per_radian": 0.0014323537402434034,
+          "vertical_coefficient_wb_per_radian": 0.0005969795605020303
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.00979292659798192,
+          "r_squared": 0.9999040985886465,
+          "residual_rms_wb_per_radian": 0.0014323537402434034,
+          "squared_error_wb2_per_radian2": 0.008668167327124655,
+          "total_sum_squares_wb2_per_radian2": 90.38623316164326
+        }
+      },
+      "frame": 136,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.06590489759355884,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.45228168147345343,
+          "r_squared": 0.7954412806035456,
+          "residual_rms_wb_per_radian": 0.06593968170025752,
+          "squared_error_wb2_per_radian2": 18.37047585603964,
+          "total_sum_squares_wb2_per_radian2": 89.80539138219719
+        },
+        "reference_shape_rms_wb_per_radian": 0.1457933946947348,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.10158838819428799,
+          "lowest_order_rms_wb_per_radian": 0.0006825643500704692,
+          "orthogonality_relative_error": 1.7905662935035072e-16,
+          "radial_coefficient_wb_per_radian": -0.00041924102662245765,
+          "remainder_rms_wb_per_radian": 0.0020298280276443647,
+          "residual_rms_wb_per_radian": 0.002141517199043177,
+          "vertical_coefficient_wb_per_radian": 0.0005386381471671588
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.014688712088274847,
+          "r_squared": 0.9997842417371877,
+          "residual_rms_wb_per_radian": 0.002141517199043177,
+          "squared_error_wb2_per_radian2": 0.019376255235795427,
+          "total_sum_squares_wb2_per_radian2": 89.80539138219719
+        }
+      },
+      "shot": "d3d_shot_008b4474ec.parquet",
+      "time_ms": 3440.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.0988202003763075,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.8614492889091241,
+          "r_squared": 0.2579051226379646,
+          "residual_rms_wb_per_radian": 0.09886508264929782,
+          "squared_error_wb2_per_radian2": 41.29643679664176,
+          "total_sum_squares_wb2_per_radian2": 55.648459592445136
+        },
+        "reference_shape_rms_wb_per_radian": 0.11476599252231466,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.42053524241376816,
+          "lowest_order_rms_wb_per_radian": 0.0019316382180335188,
+          "orthogonality_relative_error": 1.4808270503244662e-15,
+          "radial_coefficient_wb_per_radian": 0.001930582492031348,
+          "remainder_rms_wb_per_radian": 0.00226745201350629,
+          "residual_rms_wb_per_radian": 0.0029786850855572917,
+          "vertical_coefficient_wb_per_radian": 6.385488884758088e-05
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.025954422735272625,
+          "r_squared": 0.9993263679404788,
+          "residual_rms_wb_per_radian": 0.0029786850855572917,
+          "squared_error_wb2_per_radian2": 0.037486586444443123,
+          "total_sum_squares_wb2_per_radian2": 55.648459592445136
+        }
+      },
+      "frame": 271,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.09782471765400777,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.8546960893344813,
+          "r_squared": 0.2694945948763444,
+          "residual_rms_wb_per_radian": 0.0978795349165292,
+          "squared_error_wb2_per_radian2": 40.47720417688635,
+          "total_sum_squares_wb2_per_radian2": 55.409862669030645
+        },
+        "reference_shape_rms_wb_per_radian": 0.11451969435445084,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.29673177568619974,
+          "lowest_order_rms_wb_per_radian": 0.001784188891340341,
+          "orthogonality_relative_error": 1.0716277895600278e-15,
+          "radial_coefficient_wb_per_radian": 0.0017792351761516893,
+          "remainder_rms_wb_per_radian": 0.0027467510607511224,
+          "residual_rms_wb_per_radian": 0.0032753582078483725,
+          "vertical_coefficient_wb_per_radian": 0.00013286153667161176
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.028600829109015825,
+          "r_squared": 0.9991819925742769,
+          "residual_rms_wb_per_radian": 0.0032753582078483725,
+          "squared_error_wb2_per_radian2": 0.045325679121565744,
+          "total_sum_squares_wb2_per_radian2": 55.409862669030645
+        }
+      },
+      "shot": "d3d_shot_008b4474ec.parquet",
+      "time_ms": 6600.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": -0.07389345416206555,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.2767806200138407,
+          "r_squared": -0.6301687516429275,
+          "residual_rms_wb_per_radian": 0.07403082856047,
+          "squared_error_wb2_per_radian2": 23.155381114302486,
+          "total_sum_squares_wb2_per_radian2": 14.204284734918318
+        },
+        "reference_shape_rms_wb_per_radian": 0.057982418749172024,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.677888215930367,
+          "lowest_order_rms_wb_per_radian": 0.003711518930721404,
+          "orthogonality_relative_error": 1.778037593181987e-15,
+          "radial_coefficient_wb_per_radian": -0.0036434682834455166,
+          "remainder_rms_wb_per_radian": 0.0025584441708418346,
+          "residual_rms_wb_per_radian": 0.004507883022929716,
+          "vertical_coefficient_wb_per_radian": -0.0007074684732409879
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.07774568774770348,
+          "r_squared": 0.9939556080366366,
+          "residual_rms_wb_per_radian": 0.004507883022929716,
+          "squared_error_wb2_per_radian2": 0.08585626449706585,
+          "total_sum_squares_wb2_per_radian2": 14.204284734918318
+        }
+      },
+      "frame": 0,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": -0.07524910031604502,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.3104724521876079,
+          "r_squared": -0.7173380479426021,
+          "residual_rms_wb_per_radian": 0.07541612499896613,
+          "squared_error_wb2_per_radian2": 24.03007581915717,
+          "total_sum_squares_wb2_per_radian2": 13.992629958874769
+        },
+        "reference_shape_rms_wb_per_radian": 0.05754880606080037,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.646750291709772,
+          "lowest_order_rms_wb_per_radian": 0.004034271826371291,
+          "orthogonality_relative_error": 0.0,
+          "radial_coefficient_wb_per_radian": -0.0039893312121016215,
+          "remainder_rms_wb_per_radian": 0.002981520135169817,
+          "residual_rms_wb_per_radian": 0.005016454074889572,
+          "vertical_coefficient_wb_per_radian": -0.000600487842678731
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.08716869068647025,
+          "r_squared": 0.9924016193640065,
+          "residual_rms_wb_per_radian": 0.005016454074889572,
+          "squared_error_wb2_per_radian2": 0.10632132852613692,
+          "total_sum_squares_wb2_per_radian2": 13.992629958874769
+        }
+      },
+      "shot": "d3d_shot_0092a9ade0.parquet",
+      "time_ms": 640.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.04862895032342146,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.6813646445316407,
+          "r_squared": 0.5357422211822709,
+          "residual_rms_wb_per_radian": 0.04865288151859562,
+          "squared_error_wb2_per_radian2": 10.001009668264075,
+          "total_sum_squares_wb2_per_radian2": 21.541932358640224
+        },
+        "reference_shape_rms_wb_per_radian": 0.07140505734934169,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.34476794556539103,
+          "lowest_order_rms_wb_per_radian": 0.0008959040601764036,
+          "orthogonality_relative_error": 1.3227223056717629e-15,
+          "radial_coefficient_wb_per_radian": 0.00011706319039674393,
+          "remainder_rms_wb_per_radian": 0.0012350815437331846,
+          "residual_rms_wb_per_radian": 0.0015258015941500764,
+          "vertical_coefficient_wb_per_radian": -0.0008882231107636756
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.021368256686431237,
+          "r_squared": 0.9995433976061828,
+          "residual_rms_wb_per_radian": 0.0015258015941500764,
+          "squared_error_wb2_per_radian2": 0.009836097882403614,
+          "total_sum_squares_wb2_per_radian2": 21.541932358640224
+        }
+      },
+      "frame": 37,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.04666113944515237,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.6603021113858994,
+          "r_squared": 0.5640011216993234,
+          "residual_rms_wb_per_radian": 0.046733065354503854,
+          "squared_error_wb2_per_radian2": 9.227312954134687,
+          "total_sum_squares_wb2_per_radian2": 21.163616269148477
+        },
+        "reference_shape_rms_wb_per_radian": 0.07077527778370485,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.11563575239960504,
+          "lowest_order_rms_wb_per_radian": 0.0008813506117053383,
+          "orthogonality_relative_error": 2.444883918092267e-16,
+          "radial_coefficient_wb_per_radian": -0.000362614743842635,
+          "remainder_rms_wb_per_radian": 0.0024373518842424565,
+          "residual_rms_wb_per_radian": 0.002591806919578237,
+          "vertical_coefficient_wb_per_radian": -0.0008032991026394305
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.03662022955952239,
+          "r_squared": 0.9986589587870078,
+          "residual_rms_wb_per_radian": 0.002591806919578237,
+          "squared_error_wb2_per_radian2": 0.02838128163287858,
+          "total_sum_squares_wb2_per_radian2": 21.163616269148477
+        }
+      },
+      "shot": "d3d_shot_0092a9ade0.parquet",
+      "time_ms": 1420.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.055621708089460466,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.1385670707294635,
+          "r_squared": -0.29633497454947144,
+          "residual_rms_wb_per_radian": 0.05567182442793489,
+          "squared_error_wb2_per_radian2": 13.094762348444565,
+          "total_sum_squares_wb2_per_radian2": 10.101372411861002
+        },
+        "reference_shape_rms_wb_per_radian": 0.04889639430048399,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.4905267459017035,
+          "lowest_order_rms_wb_per_radian": 0.0016540779667649063,
+          "orthogonality_relative_error": 2.9445184017868725e-16,
+          "radial_coefficient_wb_per_radian": 0.0013531793791512743,
+          "remainder_rms_wb_per_radian": 0.0016857195571979434,
+          "residual_rms_wb_per_radian": 0.0023616994613321896,
+          "vertical_coefficient_wb_per_radian": 0.0009512515377001486
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.04830007396493882,
+          "r_squared": 0.9976671028549814,
+          "residual_rms_wb_per_radian": 0.0023616994613321896,
+          "squared_error_wb2_per_radian2": 0.02356546286039979,
+          "total_sum_squares_wb2_per_radian2": 10.101372411861002
+        }
+      },
+      "frame": 74,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.05275130942848837,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.101631112839482,
+          "r_squared": -0.21359110877595566,
+          "residual_rms_wb_per_radian": 0.05287224006971847,
+          "squared_error_wb2_per_radian2": 11.81087667820751,
+          "total_sum_squares_wb2_per_radian2": 9.732171398421103
+        },
+        "reference_shape_rms_wb_per_radian": 0.04799450510565096,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.12728542081505603,
+          "lowest_order_rms_wb_per_radian": 0.0012750813341535602,
+          "orthogonality_relative_error": 1.285779271943309e-16,
+          "radial_coefficient_wb_per_radian": 0.0006004425824626627,
+          "remainder_rms_wb_per_radian": 0.003338755930149706,
+          "residual_rms_wb_per_radian": 0.003573950694933641,
+          "vertical_coefficient_wb_per_radian": 0.0011248560413992502
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.07446583076679829,
+          "r_squared": 0.9944548400482106,
+          "residual_rms_wb_per_radian": 0.003573950694933641,
+          "squared_error_wb2_per_radian2": 0.05396644708247536,
+          "total_sum_squares_wb2_per_radian2": 9.732171398421103
+        }
+      },
+      "shot": "d3d_shot_0092a9ade0.parquet",
+      "time_ms": 2240.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": -0.3002897600348358,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 3.9641701074950606,
+          "r_squared": -14.714644641157397,
+          "residual_rms_wb_per_radian": 0.3005730548319386,
+          "squared_error_wb2_per_radian2": 381.70408145449,
+          "total_sum_squares_wb2_per_radian2": 24.28970493260719
+        },
+        "reference_shape_rms_wb_per_radian": 0.07582244118728527,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.6830775239219983,
+          "lowest_order_rms_wb_per_radian": 0.010783058491155741,
+          "orthogonality_relative_error": 2.5085511183704267e-15,
+          "radial_coefficient_wb_per_radian": -0.010780101451565166,
+          "remainder_rms_wb_per_radian": 0.007344859345188266,
+          "residual_rms_wb_per_radian": 0.01304688887146226,
+          "vertical_coefficient_wb_per_radian": -0.00025251359893774
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.17207160132493995,
+          "r_squared": 0.970391364017471,
+          "residual_rms_wb_per_radian": 0.01304688887146226,
+          "squared_error_wb2_per_radian2": 0.7191850314726073,
+          "total_sum_squares_wb2_per_radian2": 24.28970493260719
+        }
+      },
+      "frame": 0,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": -0.3008462437616059,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 3.978269612232234,
+          "r_squared": -14.826629107610414,
+          "residual_rms_wb_per_radian": 0.30113448370273005,
+          "squared_error_wb2_per_radian2": 383.13135398649393,
+          "total_sum_squares_wb2_per_radian2": 24.208020001066487
+        },
+        "reference_shape_rms_wb_per_radian": 0.07569484048462001,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.6781542430801147,
+          "lowest_order_rms_wb_per_radian": 0.010847573853761358,
+          "orthogonality_relative_error": 3.7860537679128297e-16,
+          "radial_coefficient_wb_per_radian": -0.010844963031004644,
+          "remainder_rms_wb_per_radian": 0.007472953293671519,
+          "residual_rms_wb_per_radian": 0.013172505055690929,
+          "vertical_coefficient_wb_per_radian": -0.00023798186685035312
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.1740211746448871,
+          "r_squared": 0.9697166307752138,
+          "residual_rms_wb_per_radian": 0.013172505055690929,
+          "squared_error_wb2_per_radian2": 0.7331004078933081,
+          "total_sum_squares_wb2_per_radian2": 24.208020001066487
+        }
+      },
+      "shot": "d3d_shot_0093deb434.parquet",
+      "time_ms": 260.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.1704958877823589,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.9316783767728073,
+          "r_squared": 0.13197540225398674,
+          "residual_rms_wb_per_radian": 0.1705565296758205,
+          "squared_error_wb2_per_radian2": 122.90326346862444,
+          "total_sum_squares_wb2_per_radian2": 141.58960908223747
+        },
+        "reference_shape_rms_wb_per_radian": 0.18306374166008066,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.30503523427015866,
+          "lowest_order_rms_wb_per_radian": 0.0025117241784398036,
+          "orthogonality_relative_error": 1.1911347848122777e-15,
+          "radial_coefficient_wb_per_radian": 0.0024969678802955002,
+          "remainder_rms_wb_per_radian": 0.0037912143194173483,
+          "residual_rms_wb_per_radian": 0.004547753771293503,
+          "vertical_coefficient_wb_per_radian": -0.00027186348289481854
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.024842460500659577,
+          "r_squared": 0.9993828521562732,
+          "residual_rms_wb_per_radian": 0.004547753771293503,
+          "squared_error_wb2_per_radian2": 0.08738172193922783,
+          "total_sum_squares_wb2_per_radian2": 141.58960908223747
+        }
+      },
+      "frame": 106,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.16917889777893247,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.9262346990095299,
+          "r_squared": 0.14208928235072538,
+          "residual_rms_wb_per_radian": 0.16924059789067142,
+          "squared_error_wb2_per_radian2": 121.01405539180594,
+          "total_sum_squares_wb2_per_radian2": 141.05670077580044
+        },
+        "reference_shape_rms_wb_per_radian": 0.18271891354496764,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.2428362035106996,
+          "lowest_order_rms_wb_per_radian": 0.0022517873730657635,
+          "orthogonality_relative_error": 4.719255164753584e-16,
+          "radial_coefficient_wb_per_radian": 0.0022412401531267862,
+          "remainder_rms_wb_per_radian": 0.0039761758416805735,
+          "residual_rms_wb_per_radian": 0.0045695208389351545,
+          "vertical_coefficient_wb_per_radian": -0.00021769003080212852
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.025008472031060883,
+          "r_squared": 0.9993745763266716,
+          "residual_rms_wb_per_radian": 0.0045695208389351545,
+          "squared_error_wb2_per_radian2": 0.08822019994677965,
+          "total_sum_squares_wb2_per_radian2": 141.05670077580044
+        }
+      },
+      "shot": "d3d_shot_0093deb434.parquet",
+      "time_ms": 2560.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.4979809720466756,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 2.9517785561206185,
+          "r_squared": -7.712996644373522,
+          "residual_rms_wb_per_radian": 0.49825674715225543,
+          "squared_error_wb2_per_radian2": 1048.8975961996043,
+          "total_sum_squares_wb2_per_radian2": 120.38310572252283
+        },
+        "reference_shape_rms_wb_per_radian": 0.16879882338026417,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.5612050551136674,
+          "lowest_order_rms_wb_per_radian": 0.012417089382512349,
+          "orthogonality_relative_error": 3.443245407827295e-15,
+          "radial_coefficient_wb_per_radian": 0.012389036129696282,
+          "remainder_rms_wb_per_radian": 0.01097968366855125,
+          "residual_rms_wb_per_radian": 0.016575209265489013,
+          "vertical_coefficient_wb_per_radian": -0.0008342017204375944
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.09819505215477096,
+          "r_squared": 0.9903577317323218,
+          "residual_rms_wb_per_radian": 0.016575209265489013,
+          "squared_error_wb2_per_radian2": 1.160766200272831,
+          "total_sum_squares_wb2_per_radian2": 120.38310572252283
+        }
+      },
+      "frame": 212,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.49686319752944585,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 2.949060027427951,
+          "r_squared": -7.696955045373347,
+          "residual_rms_wb_per_radian": 0.49713674118794676,
+          "squared_error_wb2_per_radian2": 1044.1873691296548,
+          "total_sum_squares_wb2_per_radian2": 120.06355830080406
+        },
+        "reference_shape_rms_wb_per_radian": 0.16857464295887156,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.5547689312970517,
+          "lowest_order_rms_wb_per_radian": 0.012281815527486485,
+          "orthogonality_relative_error": 1.546288373591219e-15,
+          "radial_coefficient_wb_per_radian": 0.012257451819336615,
+          "remainder_rms_wb_per_radian": 0.011002699084095631,
+          "residual_rms_wb_per_radian": 0.016489462689437982,
+          "vertical_coefficient_wb_per_radian": -0.0007732189520760572
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.09781698124943407,
+          "r_squared": 0.9904318381792478,
+          "residual_rms_wb_per_radian": 0.016489462689437982,
+          "squared_error_wb2_per_radian2": 1.148787554597402,
+          "total_sum_squares_wb2_per_radian2": 120.06355830080406
+        }
+      },
+      "shot": "d3d_shot_0093deb434.parquet",
+      "time_ms": 5100.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": -0.14686890603702663,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 3.2269590188735653,
+          "r_squared": -9.41326450948944,
+          "residual_rms_wb_per_radian": 0.14709026651836665,
+          "squared_error_wb2_per_radian2": 91.41018398127645,
+          "total_sum_squares_wb2_per_radian2": 8.778244699150378
+        },
+        "reference_shape_rms_wb_per_radian": 0.04558169646967238,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.7096330042056702,
+          "lowest_order_rms_wb_per_radian": 0.0067953285004021535,
+          "orthogonality_relative_error": 4.845935795784812e-15,
+          "radial_coefficient_wb_per_radian": -0.006792201649442947,
+          "remainder_rms_wb_per_radian": 0.004346775184294212,
+          "residual_rms_wb_per_radian": 0.00806665630426722,
+          "vertical_coefficient_wb_per_radian": 0.00020612176421301758
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.17697139266491188,
+          "r_squared": 0.9686811261782415,
+          "residual_rms_wb_per_radian": 0.00806665630426722,
+          "squared_error_wb2_per_radian2": 0.2749247381092105,
+          "total_sum_squares_wb2_per_radian2": 8.778244699150378
+        }
+      },
+      "frame": 0,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": -0.1472443141760976,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 3.239004938139642,
+          "r_squared": -9.491152989292987,
+          "residual_rms_wb_per_radian": 0.1474686399111347,
+          "squared_error_wb2_per_radian2": 91.88107397433862,
+          "total_sum_squares_wb2_per_radian2": 8.757957687597369
+        },
+        "reference_shape_rms_wb_per_radian": 0.04552899508570522,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.7059169433961635,
+          "lowest_order_rms_wb_per_radian": 0.006831498314603012,
+          "orthogonality_relative_error": 1.8383022911970963e-15,
+          "radial_coefficient_wb_per_radian": -0.0068278721197365085,
+          "remainder_rms_wb_per_radian": 0.004409345850366936,
+          "residual_rms_wb_per_radian": 0.008130910161265591,
+          "vertical_coefficient_wb_per_radian": 0.00022255682184256931
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.17858751650370733,
+          "r_squared": 0.9681064989490381,
+          "residual_rms_wb_per_radian": 0.008130910161265591,
+          "squared_error_wb2_per_radian2": 0.27932193271366684,
+          "total_sum_squares_wb2_per_radian2": 8.757957687597369
+        }
+      },
+      "shot": "d3d_shot_00a4b7af57.parquet",
+      "time_ms": 140.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.09561729425320714,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.5771072376828909,
+          "r_squared": 0.6669472362140234,
+          "residual_rms_wb_per_radian": 0.09566153588831974,
+          "squared_error_wb2_per_radian2": 38.66352191996442,
+          "total_sum_squares_wb2_per_radian2": 116.08827826695358
+        },
+        "reference_shape_rms_wb_per_radian": 0.16576041616182935,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.2618642687927249,
+          "lowest_order_rms_wb_per_radian": 0.0014886313468168383,
+          "orthogonality_relative_error": 1.0674023308892166e-15,
+          "radial_coefficient_wb_per_radian": 0.0014809869630550824,
+          "remainder_rms_wb_per_radian": 0.0024992928842299633,
+          "residual_rms_wb_per_radian": 0.002909035614750746,
+          "vertical_coefficient_wb_per_radian": 0.0001506681850511163
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.017549639908666127,
+          "r_squared": 0.9996920101390762,
+          "residual_rms_wb_per_radian": 0.002909035614750746,
+          "squared_error_wb2_per_radian2": 0.03575401267832786,
+          "total_sum_squares_wb2_per_radian2": 116.08827826695358
+        }
+      },
+      "frame": 134,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.09380093430774553,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.5683865058841301,
+          "r_squared": 0.6769367799288297,
+          "residual_rms_wb_per_radian": 0.09384939775909129,
+          "squared_error_wb2_per_radian2": 37.21257246741895,
+          "total_sum_squares_wb2_per_radian2": 115.18665745738895
+        },
+        "reference_shape_rms_wb_per_radian": 0.16511545715376855,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.09158782015349425,
+          "lowest_order_rms_wb_per_radian": 0.0009126425220554418,
+          "orthogonality_relative_error": 3.6118512233461e-16,
+          "radial_coefficient_wb_per_radian": 0.0009082290894406203,
+          "remainder_rms_wb_per_radian": 0.0028742418765781734,
+          "residual_rms_wb_per_radian": 0.0030156562698920673,
+          "vertical_coefficient_wb_per_radian": -8.964538001246457e-05
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.018263924661418282,
+          "r_squared": 0.999666429055962,
+          "residual_rms_wb_per_radian": 0.0030156562698920673,
+          "squared_error_wb2_per_radian2": 0.038422922068638704,
+          "total_sum_squares_wb2_per_radian2": 115.18665745738895
+        }
+      },
+      "shot": "d3d_shot_00a4b7af57.parquet",
+      "time_ms": 2900.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.12975267882194585,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 2.9670966937702894,
+          "r_squared": -7.8036627901825835,
+          "residual_rms_wb_per_radian": 0.1298471986638457,
+          "squared_error_wb2_per_radian2": 71.2347463785837,
+          "total_sum_squares_wb2_per_radian2": 8.09148965337714
+        },
+        "reference_shape_rms_wb_per_radian": 0.04376237516508061,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.61911741260885,
+          "lowest_order_rms_wb_per_radian": 0.0038976267224428035,
+          "orthogonality_relative_error": 1.6063763659057336e-15,
+          "radial_coefficient_wb_per_radian": 0.003864168097523671,
+          "remainder_rms_wb_per_radian": 0.0030570975302845896,
+          "residual_rms_wb_per_radian": 0.004953517878959599,
+          "vertical_coefficient_wb_per_radian": 0.000509606693029556
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.11319124842456377,
+          "r_squared": 0.9871877412800887,
+          "residual_rms_wb_per_radian": 0.004953517878959599,
+          "squared_error_wb2_per_radian2": 0.10367025886855341,
+          "total_sum_squares_wb2_per_radian2": 8.09148965337714
+        }
+      },
+      "frame": 268,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.1282287584851922,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 2.9636634290580575,
+          "r_squared": -7.783300920736165,
+          "residual_rms_wb_per_radian": 0.1283199032555922,
+          "squared_error_wb2_per_radian2": 69.56883973969119,
+          "total_sum_squares_wb2_per_radian2": 7.920580242838854
+        },
+        "reference_shape_rms_wb_per_radian": 0.04329773144866729,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.5360958733729166,
+          "lowest_order_rms_wb_per_radian": 0.003540560228046729,
+          "orthogonality_relative_error": 4.073709151086722e-15,
+          "radial_coefficient_wb_per_radian": 0.003499292137409611,
+          "remainder_rms_wb_per_radian": 0.0032935546363109898,
+          "residual_rms_wb_per_radian": 0.004835604292205062,
+          "vertical_coefficient_wb_per_radian": 0.0005390002462797034
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.11168262471067412,
+          "r_squared": 0.9875269913377347,
+          "residual_rms_wb_per_radian": 0.004835604292205062,
+          "squared_error_wb2_per_radian2": 0.09879346597909627,
+          "total_sum_squares_wb2_per_radian2": 7.920580242838854
+        }
+      },
+      "shot": "d3d_shot_00a4b7af57.parquet",
+      "time_ms": 6280.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": -0.1195141673305243,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.6343014944732792,
+          "r_squared": -1.6709413748375943,
+          "residual_rms_wb_per_radian": 0.11966608394813097,
+          "squared_error_wb2_per_radian2": 60.501880210607766,
+          "total_sum_squares_wb2_per_radian2": 22.65189374075519
+        },
+        "reference_shape_rms_wb_per_radian": 0.0732215471581015,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.7438736580325792,
+          "lowest_order_rms_wb_per_radian": 0.005198941013124159,
+          "orthogonality_relative_error": 6.32791984511459e-15,
+          "radial_coefficient_wb_per_radian": -0.005180392847046838,
+          "remainder_rms_wb_per_radian": 0.003050650277337478,
+          "residual_rms_wb_per_radian": 0.006027889744559361,
+          "vertical_coefficient_wb_per_radian": -0.00043876828532884814
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.08232398765822053,
+          "r_squared": 0.9932227610560491,
+          "residual_rms_wb_per_radian": 0.006027889744559361,
+          "squared_error_wb2_per_radian2": 0.15351729641408257,
+          "total_sum_squares_wb2_per_radian2": 22.65189374075519
+        }
+      },
+      "frame": 0,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": -0.11953957866389914,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.6331021276910653,
+          "r_squared": -1.6670225594690846,
+          "residual_rms_wb_per_radian": 0.11968829696436925,
+          "squared_error_wb2_per_radian2": 60.524343617726146,
+          "total_sum_squares_wb2_per_radian2": 22.69360017328632
+        },
+        "reference_shape_rms_wb_per_radian": 0.0732889235369429,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.7289137033778709,
+          "lowest_order_rms_wb_per_radian": 0.005092442760405521,
+          "orthogonality_relative_error": 3.231360236289192e-16,
+          "radial_coefficient_wb_per_radian": -0.005079916410754456,
+          "remainder_rms_wb_per_radian": 0.0031055739921155784,
+          "residual_rms_wb_per_radian": 0.005964693042270598,
+          "vertical_coefficient_wb_per_radian": -0.0003569629220999873
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.08138600970532693,
+          "r_squared": 0.9933763174242445,
+          "residual_rms_wb_per_radian": 0.005964693042270598,
+          "squared_error_wb2_per_radian2": 0.15031520404896015,
+          "total_sum_squares_wb2_per_radian2": 22.69360017328632
+        }
+      },
+      "shot": "d3d_shot_00a6212403.parquet",
+      "time_ms": 260.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.03186279406646933,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.24852058247311662,
+          "r_squared": 0.9382375200872228,
+          "residual_rms_wb_per_radian": 0.031915729590138955,
+          "squared_error_wb2_per_radian2": 4.303643285019431,
+          "total_sum_squares_wb2_per_radian2": 69.6805453909423
+        },
+        "reference_shape_rms_wb_per_radian": 0.1284228826141247,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.6997490038603061,
+          "lowest_order_rms_wb_per_radian": 0.0015370287191666747,
+          "orthogonality_relative_error": 3.2835650995372517e-15,
+          "radial_coefficient_wb_per_radian": -0.0015093569396759305,
+          "remainder_rms_wb_per_radian": 0.0010068228568597601,
+          "residual_rms_wb_per_radian": 0.0018374301479616604,
+          "vertical_coefficient_wb_per_radian": 0.00029034274951384294
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.014307653827415091,
+          "r_squared": 0.9997952910419549,
+          "residual_rms_wb_per_radian": 0.0018374301479616604,
+          "squared_error_wb2_per_radian2": 0.014264231842997278,
+          "total_sum_squares_wb2_per_radian2": 69.6805453909423
+        }
+      },
+      "frame": 51,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.030904205878326308,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.24201269618972399,
+          "r_squared": 0.9414298548829804,
+          "residual_rms_wb_per_radian": 0.031012990954059686,
+          "squared_error_wb2_per_radian2": 4.063628693447584,
+          "total_sum_squares_wb2_per_radian2": 69.38054678417987
+        },
+        "reference_shape_rms_wb_per_radian": 0.12814613217542642,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.44655443350688795,
+          "lowest_order_rms_wb_per_radian": 0.001734313102537817,
+          "orthogonality_relative_error": 3.2916730938745313e-15,
+          "radial_coefficient_wb_per_radian": -0.0017091416512936544,
+          "remainder_rms_wb_per_radian": 0.001930757625642145,
+          "residual_rms_wb_per_radian": 0.0025953163480796834,
+          "vertical_coefficient_wb_per_radian": 0.0002944091599246665
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.02025278722050549,
+          "r_squared": 0.999589824609801,
+          "residual_rms_wb_per_radian": 0.0025953163480796834,
+          "squared_error_wb2_per_radian2": 0.02845819284942583,
+          "total_sum_squares_wb2_per_radian2": 69.38054678417987
+        }
+      },
+      "shot": "d3d_shot_00a6212403.parquet",
+      "time_ms": 1280.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.011389899196157642,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.08811714425546938,
+          "r_squared": 0.9922353688882608,
+          "residual_rms_wb_per_radian": 0.011458433308785144,
+          "squared_error_wb2_per_radian2": 0.5547243066931797,
+          "total_sum_squares_wb2_per_radian2": 71.4424547296912
+        },
+        "reference_shape_rms_wb_per_radian": 0.1300363669930659,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.6818746449898276,
+          "lowest_order_rms_wb_per_radian": 0.0010333154501949307,
+          "orthogonality_relative_error": 5.506321092832764e-15,
+          "radial_coefficient_wb_per_radian": -0.0010317592532932838,
+          "remainder_rms_wb_per_radian": 0.000705796977630821,
+          "residual_rms_wb_per_radian": 0.0012513553425164104,
+          "vertical_coefficient_wb_per_radian": 5.668917758477131e-05
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.009623118297230945,
+          "r_squared": 0.9999073955942375,
+          "residual_rms_wb_per_radian": 0.0012513553425164104,
+          "squared_error_wb2_per_radian2": 0.006615886066457433,
+          "total_sum_squares_wb2_per_radian2": 71.4424547296912
+        }
+      },
+      "frame": 102,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.010406540640208586,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 0.08131152814291175,
+          "r_squared": 0.9933884353910645,
+          "residual_rms_wb_per_radian": 0.010565590046593756,
+          "squared_error_wb2_per_radian2": 0.4716439030630775,
+          "total_sum_squares_wb2_per_radian2": 71.33620118082953
+        },
+        "reference_shape_rms_wb_per_radian": 0.12993963202885397,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.36977240236312736,
+          "lowest_order_rms_wb_per_radian": 0.001110592027098678,
+          "orthogonality_relative_error": 2.461834935093197e-15,
+          "radial_coefficient_wb_per_radian": -0.001110356874007946,
+          "remainder_rms_wb_per_radian": 0.00144989319803666,
+          "residual_rms_wb_per_radian": 0.0018263638565105618,
+          "vertical_coefficient_wb_per_radian": 2.2853074157604675e-05
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.014055479671552443,
+          "r_squared": 0.9998024434912026,
+          "residual_rms_wb_per_radian": 0.0018263638565105618,
+          "squared_error_wb2_per_radian2": 0.014092930856155358,
+          "total_sum_squares_wb2_per_radian2": 71.33620118082953
+        }
+      },
+      "shot": "d3d_shot_00a6212403.parquet",
+      "time_ms": 6100.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": -0.24209110447612683,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 2.984109185075188,
+          "r_squared": -7.904907628450104,
+          "residual_rms_wb_per_radian": 0.24234721273039603,
+          "squared_error_wb2_per_radian2": 248.14342466436045,
+          "total_sum_squares_wb2_per_radian2": 27.86591787561863
+        },
+        "reference_shape_rms_wb_per_radian": 0.08121258228166668,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.7148223051720962,
+          "lowest_order_rms_wb_per_radian": 0.009417379657989085,
+          "orthogonality_relative_error": 5.294945111837004e-16,
+          "radial_coefficient_wb_per_radian": -0.009416989983375182,
+          "remainder_rms_wb_per_radian": 0.005948244455145049,
+          "residual_rms_wb_per_radian": 0.011138610852385072,
+          "vertical_coefficient_wb_per_radian": -8.56695728838371e-05
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.13715375794545515,
+          "r_squared": 0.9811888466814395,
+          "residual_rms_wb_per_radian": 0.011138610852385072,
+          "squared_error_wb2_per_radian2": 0.5241900535206779,
+          "total_sum_squares_wb2_per_radian2": 27.86591787561863
+        }
+      },
+      "frame": 0,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": -0.24261505144964596,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 2.9935655706102935,
+          "r_squared": -7.96143482554333,
+          "residual_rms_wb_per_radian": 0.24287489687271185,
+          "squared_error_wb2_per_radian2": 249.225210618181,
+          "total_sum_squares_wb2_per_radian2": 27.810860143489414
+        },
+        "reference_shape_rms_wb_per_radian": 0.08113231233588691,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.7097202400508331,
+          "lowest_order_rms_wb_per_radian": 0.009462181024948602,
+          "orthogonality_relative_error": 2.291294367548077e-15,
+          "radial_coefficient_wb_per_radian": -0.009461673974689938,
+          "remainder_rms_wb_per_radian": 0.006051402421519244,
+          "residual_rms_wb_per_radian": 0.01123175591864721,
+          "vertical_coefficient_wb_per_radian": -9.795583480553886e-05
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.1384375176211897,
+          "r_squared": 0.9808350537148828,
+          "residual_rms_wb_per_radian": 0.01123175591864721,
+          "squared_error_wb2_per_radian2": 0.5329936407928815,
+          "total_sum_squares_wb2_per_radian2": 27.810860143489414
+        }
+      },
+      "shot": "d3d_shot_00b8fe1f50.parquet",
+      "time_ms": 280.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.26196225378351967,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.2659505598124354,
+          "r_squared": -0.6026308198894184,
+          "residual_rms_wb_per_radian": 0.2620771626399996,
+          "squared_error_wb2_per_radian2": 290.19175552465356,
+          "total_sum_squares_wb2_per_radian2": 181.07211712344133
+        },
+        "reference_shape_rms_wb_per_radian": 0.20702006141442778,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.4385110090510274,
+          "lowest_order_rms_wb_per_radian": 0.005138649298665448,
+          "orthogonality_relative_error": 1.2000483751589069e-15,
+          "radial_coefficient_wb_per_radian": 0.005132593890889137,
+          "remainder_rms_wb_per_radian": 0.005814727291709919,
+          "residual_rms_wb_per_radian": 0.007759946526338384,
+          "vertical_coefficient_wb_per_radian": 0.0002493923933932278
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.03748403161181543,
+          "r_squared": 0.9985949473741245,
+          "residual_rms_wb_per_radian": 0.007759946526338384,
+          "squared_error_wb2_per_radian2": 0.2544158536371416,
+          "total_sum_squares_wb2_per_radian2": 181.07211712344133
+        }
+      },
+      "frame": 142,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.25985031361045374,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 1.259600799788362,
+          "r_squared": -0.586594174827481,
+          "residual_rms_wb_per_radian": 0.25996476471753455,
+          "squared_error_wb2_per_radian2": 285.53259332986704,
+          "total_sum_squares_wb2_per_radian2": 179.96573910333092
+        },
+        "reference_shape_rms_wb_per_radian": 0.20638663040005517,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.3725000232105125,
+          "lowest_order_rms_wb_per_radian": 0.004707578682281046,
+          "orthogonality_relative_error": 5.521087863345848e-16,
+          "radial_coefficient_wb_per_radian": 0.004692745620626658,
+          "remainder_rms_wb_per_radian": 0.00611000115728829,
+          "residual_rms_wb_per_radian": 0.0077131972094541465,
+          "vertical_coefficient_wb_per_radian": 0.0003734107523308244
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.03737256233363111,
+          "r_squared": 0.9986032915846189,
+          "residual_rms_wb_per_radian": 0.0077131972094541465,
+          "squared_error_wb2_per_radian2": 0.25135966228590945,
+          "total_sum_squares_wb2_per_radian2": 179.96573910333092
+        }
+      },
+      "shot": "d3d_shot_00b8fe1f50.parquet",
+      "time_ms": 3120.0
+    },
+    {
+      "absent_from_polarity_population": true,
+      "exact_clipped_moments": {
+        "additive_gauge_wb_per_radian": 0.525864046071631,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 2.9822703372926274,
+          "r_squared": -7.893936364695483,
+          "residual_rms_wb_per_radian": 0.526222622969573,
+          "squared_error_wb2_per_radian2": 1169.9458017080294,
+          "total_sum_squares_wb2_per_radian2": 131.54420649467812
+        },
+        "reference_shape_rms_wb_per_radian": 0.17645034267660986,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.6061976656250438,
+          "lowest_order_rms_wb_per_radian": 0.015122515613418458,
+          "orthogonality_relative_error": 2.7165287146585402e-15,
+          "radial_coefficient_wb_per_radian": 0.015115315704511273,
+          "remainder_rms_wb_per_radian": 0.012188662587539208,
+          "residual_rms_wb_per_radian": 0.019423026904964225,
+          "vertical_coefficient_wb_per_radian": 0.0004665936465918704
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.11007644763015202,
+          "r_squared": 0.9878831756771264,
+          "residual_rms_wb_per_radian": 0.019423026904964225,
+          "squared_error_wb2_per_radian2": 1.5938980407878232,
+          "total_sum_squares_wb2_per_radian2": 131.54420649467812
+        }
+      },
+      "frame": 285,
+      "node_centred": {
+        "additive_gauge_wb_per_radian": 0.5239970738322872,
+        "gauge_forced_to_zero": {
+          "fractional_rms": 2.979823014181713,
+          "r_squared": -7.879345195846987,
+          "residual_rms_wb_per_radian": 0.524347640715047,
+          "squared_error_wb2_per_radian2": 1161.623394166517,
+          "total_sum_squares_wb2_per_radian2": 130.82309208001362
+        },
+        "reference_shape_rms_wb_per_radian": 0.17596603496903918,
+        "spatial_decomposition": {
+          "basis": "normalised first-order radial and vertical modes",
+          "lowest_order_energy_fraction": 0.5962200291779226,
+          "lowest_order_rms_wb_per_radian": 0.014802694600550023,
+          "orthogonality_relative_error": 2.4310138701370947e-15,
+          "radial_coefficient_wb_per_radian": 0.014795030703485923,
+          "remainder_rms_wb_per_radian": 0.012181755669824715,
+          "residual_rms_wb_per_radian": 0.01917067913863409,
+          "vertical_coefficient_wb_per_radian": 0.00047627084737743736
+        },
+        "whole_grid_points": 4225,
+        "with_additive_gauge": {
+          "fractional_rms": 0.10894533790005058,
+          "r_squared": 0.9881309133498438,
+          "residual_rms_wb_per_radian": 0.01917067913863409,
+          "squared_error_wb2_per_radian2": 1.552750615739045,
+          "total_sum_squares_wb2_per_radian2": 130.82309208001362
+        }
+      },
+      "shot": "d3d_shot_00b8fe1f50.parquet",
+      "time_ms": 5980.0
+    }
+  ],
+  "reference": {
+    "landed_node_centred_per_frame_median_r_squared": 0.9990829935347472,
+    "statement": "the passed differencing gate reported this per-frame median whole-grid R-squared for its node-centred plasma tare"
+  },
+  "routes": {
+    "exact_clipped_moments": {
+      "additive_gauge_wb_per_radian": {
+        "maximum": 0.5718969161419543,
+        "mean": 0.034665888329816104,
+        "median": 0.06130531869798869,
+        "minimum": -0.3416196440980724,
+        "q25": -0.19573094345262826,
+        "q75": 0.17071645907020233
+      },
+      "frames": 60,
+      "gauge_forced_to_zero": {
+        "fractional_rms": {
+          "maximum": 6.716306624533581,
+          "mean": 1.9468395077995777,
+          "median": 1.2863117222608897,
+          "minimum": 0.08811714425546938,
+          "q25": 0.7330524308556685,
+          "q75": 3.013229938164695
+        },
+        "r_squared": {
+          "maximum": 0.9922353688882608,
+          "mean": -5.228119435383059,
+          "median": -0.6546886887358203,
+          "minimum": -44.10877467475366,
+          "q25": -8.082098715033514,
+          "q75": 0.4617435911982359
+        },
+        "residual_rms_wb_per_radian": {
+          "maximum": 0.5723283578326661,
+          "mean": 0.18749010004319774,
+          "median": 0.1796001281990962,
+          "minimum": 0.011458433308785144,
+          "q25": 0.10048306894064059,
+          "q75": 0.2513524709774757
+        }
+      },
+      "shots": 20,
+      "spatial_decomposition": {
+        "lowest_order_energy_fraction": {
+          "maximum": 0.8191087879803318,
+          "mean": 0.5479775169586432,
+          "median": 0.6224655243777657,
+          "minimum": 0.07719674759872457,
+          "q25": 0.41904165091526047,
+          "q75": 0.7002690468223116
+        },
+        "lowest_order_rms_wb_per_radian": {
+          "maximum": 0.017639990984136673,
+          "mean": 0.005630000884386893,
+          "median": 0.0051687951558948035,
+          "minimum": 0.0003824450413890966,
+          "q25": 0.0020787395466039106,
+          "q75": 0.008651219146267358
+        },
+        "remainder_rms_wb_per_radian": {
+          "maximum": 0.013509152632139788,
+          "mean": 0.004504793607654262,
+          "median": 0.00425525972852313,
+          "minimum": 0.000705796977630821,
+          "q25": 0.002439227373553978,
+          "q75": 0.005943702854978921
+        }
+      },
+      "with_additive_gauge": {
+        "fractional_rms": {
+          "maximum": 0.3107487742323526,
+          "mean": 0.08236572974315676,
+          "median": 0.050986495568588086,
+          "minimum": 0.009623118297230945,
+          "q25": 0.025676432176619364,
+          "q75": 0.13103634047131052
+        },
+        "r_squared": {
+          "maximum": 0.9999073955942375,
+          "mean": 0.9877886276967196,
+          "median": 0.9973940799610141,
+          "minimum": 0.9034351993130904,
+          "q25": 0.9828283741295576,
+          "q75": 0.9993404889944274
+        },
+        "residual_rms_wb_per_radian": {
+          "maximum": 0.022218606769076967,
+          "mean": 0.007298230307173687,
+          "median": 0.006580411117568097,
+          "minimum": 0.0010130795158311337,
+          "q25": 0.003043771429673892,
+          "q75": 0.010387014845917872
+        }
+      }
+    },
+    "node_centred": {
+      "additive_gauge_wb_per_radian": {
+        "maximum": 0.5700585001005672,
+        "mean": 0.03356457439092705,
+        "median": 0.059328103511023605,
+        "minimum": -0.34192323332805513,
+        "q25": -0.1961196868525922,
+        "q75": 0.16956629898369596
+      },
+      "frames": 60,
+      "gauge_forced_to_zero": {
+        "fractional_rms": {
+          "maximum": 6.728654433178138,
+          "mean": 1.9479974699994484,
+          "median": 1.3005080839937961,
+          "minimum": 0.08131152814291175,
+          "q25": 0.7276560626857106,
+          "q75": 3.024262098006763
+        },
+        "r_squared": {
+          "maximum": 0.9933884353910645,
+          "mean": -5.246338235903236,
+          "median": -0.6914205651667163,
+          "minimum": -44.27479048112782,
+          "q25": -8.148988067822874,
+          "q75": 0.4696166919365583
+        },
+        "residual_rms_wb_per_radian": {
+          "maximum": 0.5704713523183088,
+          "mean": 0.18692757312270752,
+          "median": 0.17848694247892308,
+          "minimum": 0.010565590046593756,
+          "q25": 0.09931584161412269,
+          "q75": 0.250035565563391
+        }
+      },
+      "shots": 20,
+      "spatial_decomposition": {
+        "lowest_order_energy_fraction": {
+          "maximum": 0.7777702111569974,
+          "mean": 0.48928568318348664,
+          "median": 0.5638352484260611,
+          "minimum": 0.06463513998840222,
+          "q25": 0.29734563792935487,
+          "q75": 0.6901289962153199
+        },
+        "lowest_order_rms_wb_per_radian": {
+          "maximum": 0.017156500566714056,
+          "mean": 0.005579611231837879,
+          "median": 0.0049000107213432835,
+          "minimum": 0.0005401198182992555,
+          "q25": 0.0020504747589506,
+          "q75": 0.008636780663222293
+        },
+        "remainder_rms_wb_per_radian": {
+          "maximum": 0.013286262351621067,
+          "mean": 0.004834302687742117,
+          "median": 0.004520604349562191,
+          "minimum": 0.0011938970702669884,
+          "q25": 0.002954700570521906,
+          "q75": 0.006112123527697252
+        }
+      },
+      "with_additive_gauge": {
+        "fractional_rms": {
+          "maximum": 0.31081379744924353,
+          "mean": 0.0849698003464832,
+          "median": 0.05904530786815188,
+          "minimum": 0.014055479671552443,
+          "q25": 0.02821443689674082,
+          "q75": 0.1310590384165145
+        },
+        "r_squared": {
+          "maximum": 0.9998024434912026,
+          "mean": 0.9874978107894158,
+          "median": 0.9965039418463946,
+          "minimum": 0.9033947833151806,
+          "q25": 0.9828173833001808,
+          "q75": 0.9992034976537747
+        },
+        "residual_rms_wb_per_radian": {
+          "maximum": 0.021699545593669992,
+          "mean": 0.007522448195477857,
+          "median": 0.006675007732946818,
+          "minimum": 0.001653078449168265,
+          "q25": 0.0035354244619342483,
+          "q75": 0.01065233611417677
+        }
+      }
+    }
+  },
+  "selection": {
+    "all_selected_absent_from_polarity_population": true,
+    "frames": 60,
+    "frames_per_shot": 3,
+    "polarity_population_count": 603,
+    "rule": "the landed exact-tare cohort: evenly spaced finite diverted frames from lexicographic shots outside the 603-shot polarity population",
+    "shots": 20
+  }
+}

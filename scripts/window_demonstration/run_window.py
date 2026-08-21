@@ -221,6 +221,12 @@ def _geometry_from_equilibrium(
         "record_valid": bool(materialised["valid"]),
         "surface_arc_valid": bool(materialised["surface_arc_valid"]),
         "surface_arc_invalid_count": int(materialised["surface_arc_invalid_count"]),
+        "surface_arc_first_invalid_cell": int(
+            materialised["surface_arc_first_invalid_cell"]
+        ),
+        "surface_arc_first_invalid_level": float(
+            materialised["surface_arc_first_invalid_level"]
+        ),
         "exact_evaluation_seconds": evaluation_seconds,
     }
     if not measurement["record_valid"]:
@@ -228,7 +234,9 @@ def _geometry_from_equilibrium(
             "exact extraction returned an invalid geometry: "
             f"lattice={psi_height_radius.shape}, core={core_count}, "
             f"arcs_valid={measurement['surface_arc_valid']}, "
-            f"invalid_arcs={measurement['surface_arc_invalid_count']}"
+            f"invalid_arcs={measurement['surface_arc_invalid_count']}, "
+            f"first_invalid_cell={measurement['surface_arc_first_invalid_cell']}, "
+            f"first_invalid_level={measurement['surface_arc_first_invalid_level']}"
         )
     return TransportGeometry(materialised), measurement
 
@@ -437,6 +445,9 @@ def _report(
     maximum = (
         "unavailable" if convergence is None else _format(convergence.maximum_residual)
     )
+    damping_applied = (
+        "unavailable" if convergence is None else _format(convergence.damping_applied)
+    )
     lines = [
         "# Real coupled-window demonstration",
         "",
@@ -483,7 +494,7 @@ def _report(
         f"- Iterations used: `{iterations}`",
         f"- Measured contraction estimate: `{contraction}`",
         f"- Maximum exit residual: `{maximum}`",
-        f"- Damping applied: `{_format(DAMPING)}`",
+        f"- Damping applied: `{damping_applied}`",
         "",
         "Exit residuals are reproduced at full stored precision:",
         "",
@@ -815,6 +826,8 @@ def main() -> int:
             ("record_valid", "boolean"),
             ("surface_arc_valid", "boolean"),
             ("surface_arc_invalid_count", "count"),
+            ("surface_arc_first_invalid_cell", "index"),
+            ("surface_arc_first_invalid_level", "normalized_flux"),
             ("exact_evaluation_seconds", "s"),
         ):
             _append_row(

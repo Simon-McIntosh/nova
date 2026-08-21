@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T19:03:09",
+  "updated": "2026-08-21T19:26:08",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -17924,9 +17924,129 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T170309861498-adapter-slowdown-localization",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a78",
+        "node": "adapter-slowdown-localization",
+        "role": "implement",
+        "member": "transport-facade",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T17:03:13Z",
+        "completed_at": "2026-08-21T17:13:04Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 591,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 591,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "9e0a52e84c4693b9bfa38d498977cef9328665f2",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "decisive three-state exoneration: the isolated adapter parity test costs 79.8 / 74.5 / 79.2 s wall at integrated HEAD, the peer tip and pre-peer main, with bit-identical normalized compile inventories (one SHA-256 across all three states), 116 compiles and 85 traces everywhere, and traced_flux_surface_geometry tracing once and compiling once at 24-25 s in every state. No commit made the adapter slow; the first state exceeding twice the historical baseline does not exist; no cross-plan regression exists to route. Every observed stall is the already-recorded one-process compile accumulation - Batch B collected eight modules and ran one vmapped FSA test before the adapter compile, which is prefix enough",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T170309861498-adapter-slowdown-localization/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f49-d28d-76c0-a01f-00215a8049e2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4890368,
+            "cached_input_tokens_cumulative": 101650432,
+            "input_tokens": 5055113,
+            "input_tokens_cumulative": 103677511,
+            "output_tokens": 15281,
+            "output_tokens_cumulative": 188434,
+            "reasoning_output_tokens": 6146,
+            "reasoning_output_tokens_cumulative": 70927
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260821T171331934464-batch-b-per-file-verification",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a78",
+        "node": "batch-b-per-file-verification",
+        "role": "test",
+        "member": "transport-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T17:13:37Z",
+        "completed_at": "2026-08-21T17:25:17Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 700,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 700,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "204a13622b745f56aa2fef434ddf3a7da9029eb0",
+        "commits": [
+          "094d69fa7159e9a25a2ef4e236455b8e7a3c6138"
+        ],
+        "changed_lines": {
+          "added": 82,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "retirement verification COMPLETE: eight per-file fresh processes all green for 32 passed, 0 failed in 341 s summed wall - the same tests that stalled 43 minutes in one process - which validates the compile-accumulation mechanism by its cure; combined with Batch A the full 79 selected tests are green at the integrated lineage",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T171331934464-batch-b-per-file-verification/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02550-5b32-74c1-a390-868c9d015648",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5514752,
+            "cached_input_tokens_cumulative": 5514752,
+            "input_tokens": 5665191,
+            "input_tokens_cumulative": 5665191,
+            "output_tokens": 14099,
+            "output_tokens_cumulative": 14099,
+            "reasoning_output_tokens": 4884,
+            "reasoning_output_tokens_cumulative": 4884
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 447
+    "_version": 449
   }
 }

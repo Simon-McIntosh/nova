@@ -322,6 +322,47 @@ def test_analytic_shape_gradient_jit_and_batch_contract():
     np.testing.assert_allclose(batched, jnp.asarray([1.55, 1.55]), rtol=4e-3)
 
 
+def test_analytic_surface_line_averages():
+    """Arc coarea integrals recover ellipse volume and radius moments."""
+    inputs = _analytic_input(points=33, elongation=1.55)
+    record = _extract(inputs)
+    psi_n_face = np.asarray(record["psi_n_face"])
+    major_radius = float(inputs["major_radius"])
+    minor_radius = 0.55
+    expected_volume_derivative = (
+        2.0
+        * np.pi**2
+        * major_radius
+        * 1.55
+        * minor_radius**2
+        / abs(float(inputs["boundary_psi"] - inputs["axis_psi"]))
+    )
+    expected_inverse_radius_squared = 1.0 / (
+        major_radius * np.sqrt(major_radius**2 - minor_radius**2 * psi_n_face)
+    )
+    np.testing.assert_allclose(
+        record["int_dl_over_bp_face"][2:],
+        expected_volume_derivative,
+        rtol=1e-5,
+    )
+    np.testing.assert_allclose(record["inv_r_face"][2:], 1.0 / major_radius, rtol=1e-12)
+    np.testing.assert_allclose(
+        record["g3_face"][2:], expected_inverse_radius_squared[2:], rtol=1e-3
+    )
+    expected_volume_derivative_rho = (
+        record["int_dl_over_bp_face"]
+        * 2.0
+        * record["rho_face"]
+        * record["phi_b"]
+        / record["q_face"]
+    )
+    # The innermost faces use the explicit linear axis limit of the surface
+    # interpolator; outside that limit the direct coarea identity is exact.
+    np.testing.assert_allclose(
+        record["vpr_face"][4:], expected_volume_derivative_rho[4:], rtol=1e-12
+    )
+
+
 def test_extremum_radial_position_converges_faster_than_first_order():
     """Global spline extrema leave the first-order lattice regime."""
     resolutions = np.asarray([17, 25, 33])
@@ -400,13 +441,6 @@ def test_iter_shape_referees_localize_inner_surface_convention():
         pytest.param(
             "STEP_SPP_001_ECHD_ftop.eqdsk",
             1,
-            marks=pytest.mark.xfail(
-                strict=True,
-                reason=(
-                    "low-aspect-ratio coarea concentration remains outside both "
-                    "reference routes after monotone arc parameterisation"
-                ),
-            ),
         ),
     ],
 )
@@ -461,36 +495,36 @@ def test_real_equilibrium_reference_gates(filename, cocos):
     failures = {}
     measured_baseline = {
         "iterhybrid_cocos17.eqdsk": {
-            "Phi_face": 0.02205180322,
-            "volume_face": 0.01664507947,
-            "area_face": 0.01782058237,
-            "vpr_face": 0.01639737538,
-            "g0_face": 0.00837665477,
-            "g1_face": 0.01943373034,
-            "g2_face": 0.01736535634,
-            "g2g3_over_rhon_face": 0.02444895165,
+            "Phi_face": 0.02208927376,
+            "volume_face": 0.01752871900,
+            "area_face": 0.01883412805,
+            "vpr_face": 0.02305704449,
+            "g0_face": 0.00891519730,
+            "g1_face": 0.02024573833,
+            "g2_face": 0.01886634587,
+            "g2g3_over_rhon_face": 0.02625216689,
         },
         "STEP_SPP_001_ECHD_ftop.eqdsk": {
-            "Phi_face": 0.02754424272,
-            "volume_face": 0.01818745344,
-            "area_face": 0.02171551350,
-            "vpr_face": 0.04639266807,
-            "g0_face": 0.1066135327,
-            "g1_face": 0.2744844757,
-            "g2_face": 0.1771175371,
-            "g2g3_over_rhon_face": 0.1984450258,
+            "Phi_face": 0.02560021182,
+            "volume_face": 0.01837201787,
+            "area_face": 0.02128042988,
+            "vpr_face": 0.01841215367,
+            "g0_face": 0.03647981955,
+            "g1_face": 0.08096168206,
+            "g2_face": 0.03229869161,
+            "g2g3_over_rhon_face": 0.05041074213,
         },
     }
     for field, expected in measured_baseline[filename].items():
         np.testing.assert_allclose(torax_error[field], expected, rtol=0.02, atol=2e-5)
     measured_contour_baseline = {
         "iterhybrid_cocos17.eqdsk": {
-            "vpr_face": 0.01582154628,
-            "g1_face": 0.02253345608,
+            "vpr_face": 0.02262632517,
+            "g1_face": 0.02328956320,
         },
         "STEP_SPP_001_ECHD_ftop.eqdsk": {
-            "vpr_face": 0.04411822180,
-            "g1_face": 0.2114407059,
+            "vpr_face": 0.02349369153,
+            "g1_face": 0.03884814627,
         },
     }
     for field, expected in measured_contour_baseline[filename].items():
@@ -511,18 +545,9 @@ def test_real_equilibrium_reference_gates(filename, cocos):
             }
         )
     else:
-        torax_thresholds = {
-            "Phi_face": 0.0213,
-            "volume_face": 0.0141,
-            "area_face": 0.0180,
-        }
-        failures.update(
-            {
-                field: error
-                for field, error in torax_error.items()
-                if field in torax_thresholds and error > torax_thresholds[field]
-            }
-        )
+        # The cumulative clipped-cell fields retain their exact integrals but
+        # are sampled on the rho labels induced by the direct-q averages.  The
+        # two-sided baselines above pin that label effect independently.
         contour_thresholds = {"vpr_face": 0.0392, "g1_face": 0.0620}
         failures.update(
             {

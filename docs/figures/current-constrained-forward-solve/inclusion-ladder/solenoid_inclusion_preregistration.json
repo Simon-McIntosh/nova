@@ -1,0 +1,102 @@
+{
+  "cohort": {
+    "distinct_shots_required": true,
+    "frame_count": 5,
+    "frames": [
+      {
+        "frame": 102,
+        "shot": "d3d_shot_00000c4a7b.parquet"
+      },
+      {
+        "frame": 89,
+        "shot": "d3d_shot_0003ff34e7.parquet"
+      },
+      {
+        "frame": 215,
+        "shot": "d3d_shot_001270afa9.parquet"
+      },
+      {
+        "frame": 41,
+        "shot": "d3d_shot_001554e054.parquet"
+      },
+      {
+        "frame": 252,
+        "shot": "d3d_shot_001cbcc9e6.parquet"
+      }
+    ],
+    "polarity_screen": "every shot must be absent from the landed 603-shot population",
+    "required_named_frame": {
+      "frame": 102,
+      "shot": "d3d_shot_00000c4a7b.parquet"
+    }
+  },
+  "current_authority": {
+    "no_current_adjusted": true,
+    "nothing_fitted": true,
+    "operation": "multiply ECOILA by the fixed per-coil scale; no recovered current value is read",
+    "scales": {
+      "E567DN": 0.9823,
+      "E567UP": 0.9929,
+      "E89DN": 1.0165,
+      "E89UP": 0.9806,
+      "ECOILB": 1.0172
+    },
+    "source": "the shipped ECOILA channel on the same frame"
+  },
+  "inclusions": [
+    {
+      "added_conductors": [],
+      "cumulative_missing_ampere_turn_fraction": 0.0,
+      "incremental_missing_ampere_turn_fraction": 0.0,
+      "name": "shipped_20"
+    },
+    {
+      "added_conductors": [
+        "ECOILB"
+      ],
+      "cumulative_missing_ampere_turn_fraction": 0.6540033352755621,
+      "incremental_missing_ampere_turn_fraction": 0.6540033352755621,
+      "name": "plus_ecoilb"
+    },
+    {
+      "added_conductors": [
+        "ECOILB",
+        "E567UP",
+        "E567DN"
+      ],
+      "cumulative_missing_ampere_turn_fraction": 0.8127463784131321,
+      "incremental_missing_ampere_turn_fraction": 0.15874304313757004,
+      "name": "plus_e567_pair"
+    },
+    {
+      "added_conductors": [
+        "ECOILB",
+        "E567UP",
+        "E567DN",
+        "E89UP",
+        "E89DN"
+      ],
+      "cumulative_missing_ampere_turn_fraction": 1.0,
+      "incremental_missing_ampere_turn_fraction": 0.18725362158686784,
+      "name": "complete_24_poloidal"
+    }
+  ],
+  "measurement": "omitted-solenoid cumulative inclusion ladder",
+  "metrics": {
+    "flux": "gauge-free interior fractional RMS",
+    "label_representability_ceiling": 0.0429,
+    "landed_lcfs_separation_m": 0.0537,
+    "landed_x_point_separation_m": 0.4552,
+    "lcfs": "symmetric mean closest-polyline separation",
+    "x_point": "Euclidean R-Z separation from derived labelled X point"
+  },
+  "monotonic_rule": "X-point separation from the labelled X point must be non-increasing at every cumulative inclusion within 1e-9 m",
+  "nova_equilibrium_modified": false,
+  "solver": {
+    "map": "closed-form plasma-current amplitude elimination",
+    "maximum_inner_iterations": 40,
+    "maximum_outer_iterations": 100,
+    "relative_residual_criterion": 1e-06,
+    "terminal_topology_reported": true
+  }
+}

@@ -1,5 +1,5 @@
 # ruff: noqa: E501
-"""Bank topology-pinned route dynamics on one reference-seeded MAST slice.
+"""Bank long-budget pinned route dynamics on one reference-seeded MAST slice.
 
 The slice is selected only from the committed native-grid decomposition bank.
 Its declared pressure and diamagnetic gradients drive ``ForwardProfile.solve``
@@ -63,9 +63,11 @@ DECOMPOSITION_BANK = Path(
     "docs/figures/efit-flux-decomposition/native-grid-decomposition.json"
 )
 DEFAULT_OUTPUT = Path("docs/figures/efit-forward-parity")
-RECEIPT_NAME = "pinned-route-survey.json"
+ROUTE_SURVEY_RECEIPT = DEFAULT_OUTPUT / "pinned-route-survey.json"
+RECEIPT_NAME = "long-budget-plasma-route.json"
 FIGURE_NAME = "reference-seeded-forward-slice.png"
 DIAGNOSIS_FIGURE_NAME = "vacuum-branch-diagnosis.png"
+LONG_BUDGET_FIGURE_NAME = "long-budget-residual-trajectories.png"
 GRID_STRIDE = 2
 FIXED_POINT_CRITERION = 1.0e-8
 NEWTON_STEPS = 12
@@ -81,6 +83,7 @@ CONTROL_REFERENCE_SPAN_WB = 1.823353801798901
 CONTROL_PLASMA_CURRENT_A = 0.0
 ANDERSON_EVALUATIONS = NEWTON_STEPS * (GMRES_ITERATIONS + 2)
 DAMPED_HYBRID_WEIGHTS = (0.5, 0.55, 1.0 / 1.766, 0.6, 0.65)
+EXTENDED_PROMOTION_BUDGETS = (50, 100)
 
 
 @dataclass
@@ -1251,6 +1254,229 @@ def survey_pinned_routes(
     }
 
 
+def _best_damped_hybrid(survey_receipt: Path, shot: int, row: int) -> dict[str, Any]:
+    """Select the damped arm with the lowest banked terminal residual."""
+    receipt = json.loads(survey_receipt.read_text())
+    selection = receipt["selection"]
+    if int(selection["shot"]) != shot or int(selection["slice_index"]) != row:
+        raise RuntimeError("the route survey selected a different reference slice")
+    candidates = [
+        arm
+        for arm in receipt["route_survey"]["arms"]
+        if arm["options"].get("strategy") == "damped_hybrid"
+    ]
+    if not candidates:
+        raise RuntimeError("the route survey contains no damped hybrid arm")
+    best = min(candidates, key=lambda arm: float(arm["residual"]))
+    return {
+        "source_receipt": str(survey_receipt),
+        "selection_rule": "minimum terminal residual among damped hybrid arms",
+        "route_id": best["route_id"],
+        "banked_terminal_residual": float(best["residual"]),
+        "hybrid_weight": float(best["options"]["hybrid_weight"]),
+    }
+
+
+def _stall_structure(trace: np.ndarray) -> dict[str, Any]:
+    """Measure the tail plateau and its dominant residual oscillation."""
+    finite = np.asarray(trace, dtype=np.float64)
+    finite = finite[np.isfinite(finite)]
+    tail_length = max(4, len(finite) // 2)
+    tail = finite[-tail_length:]
+    plateau = float(np.median(tail))
+    lower, upper = np.quantile(tail, (0.1, 0.9))
+    log_tail = np.log10(np.maximum(tail, np.finfo(np.float64).tiny))
+    positions = np.arange(tail_length, dtype=np.float64)
+    slope = float(np.polyfit(positions, log_tail, 1)[0])
+    centered = log_tail - np.mean(log_tail)
+    power = np.abs(np.fft.rfft(centered)) ** 2
+    power[0] = 0.0
+    dominant_index = int(np.argmax(power))
+    nonzero_power = float(np.sum(power))
+    period = (
+        None
+        if dominant_index == 0 or nonzero_power == 0.0
+        else float(tail_length / dominant_index)
+    )
+    power_fraction = (
+        None
+        if dominant_index == 0 or nonzero_power == 0.0
+        else float(power[dominant_index] / nonzero_power)
+    )
+    return {
+        "method": (
+            "median and log10 trend over the final half of promotions; "
+            "dominant nonzero FFT period of the mean-centered log10 tail"
+        ),
+        "tail_promotions": tail_length,
+        "residual_plateau_median": plateau,
+        "residual_tail_p10": float(lower),
+        "residual_tail_p90": float(upper),
+        "log10_residual_slope_per_promotion": slope,
+        "dominant_oscillation_period_promotions": period,
+        "dominant_spectral_power_fraction": power_fraction,
+    }
+
+
+def survey_long_budget_routes(
+    group: zarr.Group,
+    shot: int,
+    row: int,
+    current_field: str,
+    survey_receipt: Path,
+) -> dict[str, Any]:
+    """Run the two basin-retaining policies at extended promotion budgets."""
+    profile, seed, reference, provenance = build_profile(
+        group, shot, row, current_field
+    )
+    requested = int(TopologyClass.DIVERTED)
+    mapped = profile.flux_map(requested_class=requested)
+    damped = _best_damped_hybrid(survey_receipt, shot, row)
+    policies = (
+        (
+            "kink_aware_nonmonotone",
+            {
+                "strategy": "nonmonotone",
+                "gmres_iterations": GMRES_ITERATIONS,
+                "warmup": WARMUP_SWEEPS,
+                "relaxation": RELAXATION,
+                "step_cap": STEP_CAP,
+                "nonmonotone_allowance": 0.05,
+            },
+        ),
+        (
+            "best_damped_hybrid",
+            {
+                "strategy": "damped_hybrid",
+                "gmres_iterations": GMRES_ITERATIONS,
+                "warmup": WARMUP_SWEEPS,
+                "relaxation": RELAXATION,
+                "step_cap": STEP_CAP,
+                "hybrid_weight": damped["hybrid_weight"],
+                "hybrid_schedule": "fixed",
+            },
+        ),
+    )
+    arms = []
+    for policy_id, policy_options in policies:
+        for budget in EXTENDED_PROMOTION_BUDGETS:
+            options = {**policy_options, "newton_steps": budget}
+            history = fixed_point.kink_aware_newton_krylov(
+                mapped,
+                seed,
+                **options,
+            )
+            record = _route_record(
+                group,
+                row,
+                profile,
+                reference,
+                history,
+                route_id=f"{policy_id}_{budget}_promotions",
+                route="kink_aware_newton_krylov",
+                iterations=budget,
+                options=options,
+            )
+            trace = np.asarray(history.trace, dtype=np.float64)
+            finite_trace = trace[np.isfinite(trace)]
+            criterion_hits = np.flatnonzero(finite_trace <= FIXED_POINT_CRITERION)
+            record["promotion_budget"] = budget
+            record["trajectory_summary"] = {
+                "minimum_residual": float(np.min(finite_trace)),
+                "minimum_residual_promotion": int(np.argmin(finite_trace) + 1),
+                "first_criterion_promotion": (
+                    None if not len(criterion_hits) else int(criterion_hits[0] + 1)
+                ),
+            }
+            if not record["converged"]:
+                record["stall_structure"] = _stall_structure(finite_trace)
+            arms.append(record)
+
+    converged_plasma = [
+        arm["route_id"]
+        for arm in arms
+        if arm["converged"] and arm["terminal_state"]["retains_plasma_basin"]
+    ]
+    converged_vacuum = [
+        arm["route_id"]
+        for arm in arms
+        if arm["converged"] and not arm["terminal_state"]["retains_plasma_basin"]
+    ]
+    if converged_plasma:
+        verdict = "POSITIVE_CONVERGED_PLASMA_ROUTE"
+    elif any(arm["converged"] for arm in arms):
+        verdict = "NEGATIVE_ONLY_VACUUM_BRANCH_CONVERGED"
+    else:
+        verdict = "NEGATIVE_NO_EXTENDED_BUDGET_CONVERGED"
+    return {
+        "same_seed_and_source": {
+            "seed_source": provenance["seed_source"],
+            "current_field": provenance["current_field"],
+            "declared_axis_flux_wb": provenance["declared_axis_flux_wb"],
+            "declared_boundary_flux_wb": provenance["declared_boundary_flux_wb"],
+            "declared_support_nodes": provenance["declared_support_nodes"],
+            "requested_class": "diverted",
+            "reference_plasma_current_a": float(group["plasma_current_c"][row]),
+        },
+        "registered_fixed_point_criterion": FIXED_POINT_CRITERION,
+        "promotion_budgets": list(EXTENDED_PROMOTION_BUDGETS),
+        "best_damped_hybrid_selection": damped,
+        "arm_count": len(arms),
+        "arms": arms,
+        "routes_converged_on_plasma_branch": converged_plasma,
+        "routes_converged_on_vacuum_branch": converged_vacuum,
+        "verdict": verdict,
+    }
+
+
+def _long_budget_figure(survey: dict[str, Any], path: Path) -> None:
+    """Plot the complete residual trajectory for each extended-budget arm."""
+    figure, axis = plt.subplots(figsize=(7.6, 4.2), constrained_layout=True)
+    route_colours = {
+        "kink_aware_nonmonotone": "tab:blue",
+        "best_damped_hybrid": "tab:red",
+    }
+    for policy, colour in route_colours.items():
+        arms = [arm for arm in survey["arms"] if arm["route_id"].startswith(policy)]
+        short_arm = min(arms, key=lambda arm: arm["promotion_budget"])
+        long_arm = max(arms, key=lambda arm: arm["promotion_budget"])
+        trace = np.asarray(long_arm["residual_trajectory"], dtype=np.float64)
+        axis.plot(
+            np.arange(1, len(trace) + 1),
+            trace,
+            color=colour,
+            lw=1.1,
+            label=(
+                f"{policy}: {long_arm['promotion_budget']} trace, "
+                f"{short_arm['promotion_budget']} endpoint"
+            ),
+        )
+        axis.scatter(
+            short_arm["promotion_budget"],
+            short_arm["residual"],
+            color=colour,
+            edgecolor="white",
+            linewidth=0.7,
+            s=35,
+            zorder=3,
+        )
+    axis.axhline(
+        survey["registered_fixed_point_criterion"],
+        color="black",
+        lw=0.8,
+        ls=":",
+        label="registered criterion",
+    )
+    axis.set_yscale("log")
+    axis.set_xlabel("Accepted nonlinear promotion")
+    axis.set_ylabel("Relative fixed-point residual")
+    axis.grid(axis="y", color="0.88", lw=0.6)
+    axis.legend(frameon=False, fontsize=8)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, dpi=180)
+    plt.close(figure)
+
+
 def _control_baseline(control: dict[str, Any]) -> dict[str, Any]:
     """Verify that the unpinned arm reproduces its committed vacuum baseline."""
     measured_sup = control["metrics"]["flux_map"]["sup_fraction_of_reference_span"]
@@ -1360,7 +1586,7 @@ def _diagnosis_figure(diagnosis: dict[str, Any], path: Path) -> None:
 
 
 def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
-    """Run the control and existing routes under one pinned diverted branch."""
+    """Run the control and extended-budget pinned plasma routes."""
     configure_dtypes()
     selected, qualification = select_slice(bank)
     shot = int(selected["shot"])
@@ -1371,13 +1597,21 @@ def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
     if not baseline["passes"]:
         raise RuntimeError("the unpinned control drifted from its committed baseline")
     pinned = solve_pinned_arm(group, shot, row, "fcoil_c")
-    route_survey = survey_pinned_routes(group, shot, row, "fcoil_c", pinned)
+    long_budget_survey = survey_long_budget_routes(
+        group,
+        shot,
+        row,
+        "fcoil_c",
+        ROUTE_SURVEY_RECEIPT,
+    )
     figure_path = output / FIGURE_NAME
     _figure(fields, figure_path)
     diagnosis_figure_path = output / DIAGNOSIS_FIGURE_NAME
     _diagnosis_figure(control["diagnosis"], diagnosis_figure_path)
+    long_budget_figure_path = output / LONG_BUDGET_FIGURE_NAME
+    _long_budget_figure(long_budget_survey, long_budget_figure_path)
     receipt = {
-        "receipt": "reference-seeded topology-pinned fixed-point route survey",
+        "receipt": "reference-seeded topology-pinned long-budget plasma-route survey",
         "backend": "JAX_PLATFORMS=cpu required by invocation",
         "selection": {
             "source": str(bank),
@@ -1397,7 +1631,7 @@ def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
         "control_arm": control,
         "control_baseline": baseline,
         "pinned_arm": pinned,
-        "route_survey": route_survey,
+        "long_budget_survey": long_budget_survey,
         "dina_calibration": {
             "axis_distance_m": 0.0412,
             "plasma_current_signed_relative_deviation": -0.0112,
@@ -1408,6 +1642,9 @@ def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
         "figure_src": "/nova/figures/efit-forward-parity/reference-seeded-forward-slice.png",
         "diagnosis_figure_src": (
             "/nova/figures/efit-forward-parity/vacuum-branch-diagnosis.png"
+        ),
+        "long_budget_figure_src": (
+            "/nova/figures/efit-forward-parity/long-budget-residual-trajectories.png"
         ),
     }
     output.mkdir(parents=True, exist_ok=True)
@@ -1430,7 +1667,7 @@ def main() -> None:
     solver = control["solver"]
     diagnosis = control["diagnosis"]
     pinned = receipt["pinned_arm"]["forward_branch_receipt"]
-    survey = receipt["route_survey"]
+    survey = receipt["long_budget_survey"]
     print(
         "FORWARD_SLICE "
         f"shot={selection['shot']} row={selection['slice_index']} "
@@ -1458,9 +1695,9 @@ def main() -> None:
         f"topology_consistent={pinned['topology_consistent']}"
     )
     print(
-        "PINNED_ROUTE_SURVEY "
-        f"routes={survey['route_count']} "
-        f"retaining={','.join(survey['routes_retaining_plasma_basin']) or 'none'} "
+        "LONG_BUDGET_PLASMA_ROUTES "
+        f"arms={survey['arm_count']} "
+        f"budgets={','.join(str(value) for value in survey['promotion_budgets'])} "
         f"converged_plasma={','.join(survey['routes_converged_on_plasma_branch']) or 'none'} "
         f"verdict={survey['verdict']}"
     )

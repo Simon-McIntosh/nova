@@ -1,34 +1,28 @@
 kind	iteration	side	field	value	unit
-window_status			window_attempted	false	boolean
-window_status			block_stage	baseline_geometry_extraction	text
-window_status			coupled_iterations_completed	0	count
-service_diagnostic			axis_connected_core_cells	126	count
-service_diagnostic			minimum_required_core_cells	200	count
-service_diagnostic	1	equilibrium_extraction	psi_n_min	0.040000000000000001	fraction
-service_diagnostic	1	equilibrium_extraction	psi_n_max	0.98499999999999999	fraction
-service_diagnostic	1	equilibrium_extraction	surface_bins	14	count
-service_diagnostic	1	equilibrium_extraction	surface_arc_valid	true	boolean
-service_diagnostic	1	equilibrium_extraction	surface_arc_invalid_count	0	count
-service_diagnostic	1	equilibrium_extraction	record_valid	false	boolean
-service_diagnostic	1	equilibrium_extraction	volume	0.92531146697033773	m3
-service_diagnostic	1	equilibrium_extraction	phi_boundary	0.75902072063667103	Wb
-service_diagnostic	1	equilibrium_extraction	ip_edge	553961.73467461892	A
-service_diagnostic	1	equilibrium_extraction	minimum_diffusion_metric	19.243218155941587	mixed
-service_diagnostic	2	equilibrium_extraction	psi_n_min	0.10000000000000001	fraction
-service_diagnostic	2	equilibrium_extraction	psi_n_max	0.94999999999999996	fraction
-service_diagnostic	2	equilibrium_extraction	surface_bins	14	count
-service_diagnostic	2	equilibrium_extraction	surface_arc_valid	true	boolean
-service_diagnostic	2	equilibrium_extraction	surface_arc_invalid_count	0	count
-service_diagnostic	2	equilibrium_extraction	record_valid	false	boolean
-service_diagnostic	3	equilibrium_extraction	psi_n_min	0.10000000000000001	fraction
-service_diagnostic	3	equilibrium_extraction	psi_n_max	0.90000000000000002	fraction
-service_diagnostic	3	equilibrium_extraction	surface_bins	14	count
-service_diagnostic	3	equilibrium_extraction	surface_arc_valid	true	boolean
-service_diagnostic	3	equilibrium_extraction	surface_arc_invalid_count	0	count
-service_diagnostic	3	equilibrium_extraction	record_valid	false	boolean
-service_diagnostic	4	equilibrium_extraction	psi_n_min	0.10000000000000001	fraction
-service_diagnostic	4	equilibrium_extraction	psi_n_max	0.90000000000000002	fraction
-service_diagnostic	4	equilibrium_extraction	surface_bins	28	count
-service_diagnostic	4	equilibrium_extraction	surface_arc_valid	true	boolean
-service_diagnostic	4	equilibrium_extraction	surface_arc_invalid_count	0	count
-service_diagnostic	4	equilibrium_extraction	record_valid	false	boolean
+window_status			outcome	blocked_before_window_receipt	text
+window_status			window_receipt_returned	false	boolean
+configuration			window_length	0.01	s
+configuration			equilibrium_samples	2	count
+configuration			transport_samples	2	count
+configuration			iteration_cap	10	count
+configuration			convergence_tolerance	0.005	relative
+configuration			damping	0.5	fraction
+configuration			extraction_points_per_axis	49	count
+extraction_diagnostic	0	baseline	record_valid	true	boolean
+extraction_diagnostic	1	equilibrium_sample	record_valid	false	boolean
+extraction_diagnostic	1	equilibrium_sample	map_height	49	count
+extraction_diagnostic	1	equilibrium_sample	map_radius	49	count
+extraction_diagnostic	1	equilibrium_sample	axis_connected_core_cells	559	count
+extraction_diagnostic	1	equilibrium_sample	minimum_required_core_cells	200	count
+extraction_diagnostic	1	equilibrium_sample	core_cell_margin	359	count
+extraction_diagnostic	1	equilibrium_sample	surface_arc_valid	false	boolean
+extraction_diagnostic	1	equilibrium_sample	surface_arc_invalid_count	4	count
+unavailable_receipt			iterations_used	unavailable	count
+unavailable_receipt			contraction_estimate	unavailable	ratio
+unavailable_receipt			exit_residuals	unavailable	relative
+unavailable_receipt			damping_applied	unavailable	fraction
+unavailable_receipt			flux_closure_absolute	unavailable	Wb
+unavailable_receipt			flux_closure_relative	unavailable	relative
+unavailable_receipt			current_closure_absolute	unavailable	A
+unavailable_receipt			current_closure_relative	unavailable	relative
+unavailable_receipt			exchange_sweep_wall_time	unavailable	s

@@ -17,7 +17,9 @@ from nova.equilibrium.flux_surface_connectivity import flood_fill_core
 from nova.equilibrium.separatrix_clip import _traced_clip
 from nova.linalg.tensor_spline import fit_tensor_spline
 from nova.transport.current_diffusion import (
+    _BICUBIC_ARC_WEIGHT,
     _bicubic_arc_moment_correction,
+    _bicubic_derivatives,
     _bicubic_stationary_point,
     _integrate_bilinear,
     _integrate_diamagnetic_drive,
@@ -82,7 +84,8 @@ def _surface_clips(
     core,
     radius,
     height,
-    f_grid,
+    f_profile_psi_n,
+    f_profile,
     psi_n_min,
     psi_n_max,
     n_surface_bins,
@@ -99,29 +102,17 @@ def _surface_clips(
     normalised_coefficient = normalised_spline.cell_coefficients.reshape(
         -1, 4, 4
     ).astype(dtype)
+    physical_coefficient = physical_spline.cell_coefficients.reshape(-1, 4, 4).astype(
+        dtype
+    )
     psi_n_cells = psi_n_grid.reshape(-1)[cell_nodes]
 
     radius_cells = coordinates[cell_nodes, 0]
-    height_cells = coordinates[cell_nodes, 1]
-    physical_evaluation = physical_spline.evaluate(radius_cells, height_cells)
-    gradient_flux = jnp.hypot(
-        physical_evaluation.radial_derivative,
-        physical_evaluation.vertical_derivative,
-    )
-    field_cells = f_grid.reshape(-1)[cell_nodes]
-    gradient_psi = gradient_flux / _TWO_PI
-    magnetic_field_squared = (gradient_psi**2 + field_cells**2) / radius_cells**2
     volume_weighted_values = jnp.stack(
         (
             _TWO_PI * radius_cells,
             _TWO_PI / radius_cells,
             jnp.full_like(radius_cells, _TWO_PI),
-            _TWO_PI * gradient_flux**2 / radius_cells,
-            _TWO_PI * radius_cells * gradient_psi,
-            _TWO_PI * radius_cells * gradient_psi**2,
-            _TWO_PI * gradient_psi**2 / radius_cells,
-            _TWO_PI * radius_cells * magnetic_field_squared,
-            _TWO_PI * radius_cells / jnp.maximum(magnetic_field_squared, 1e-30),
         ),
         axis=0,
     )
@@ -157,6 +148,7 @@ def _surface_clips(
             )
         )
         boundary_valid = jnp.all((~supports.boundary) | arc_valid)
+        invalid_boundary = supports.boundary & ~arc_valid
         return (
             supports,
             correction,
@@ -166,10 +158,11 @@ def _surface_clips(
             arc_z,
             arc_valid,
             boundary_valid,
+            invalid_boundary,
         )
 
     def cumulative(level, *, separatrix):
-        supports, correction, *_, boundary_valid = corrected_clip(
+        supports, correction, *_, boundary_valid, invalid_boundary = corrected_clip(
             level, separatrix=separatrix
         )
         integrals = jax.vmap(
@@ -182,6 +175,96 @@ def _surface_clips(
             jnp.max(supports.vertex_count),
             required_vertex_count(level),
             boundary_valid,
+            jnp.sum(invalid_boundary),
+            jnp.argmax(invalid_boundary),
+        )
+
+    def arc_surface_average(level, *, separatrix):
+        (
+            supports,
+            _,
+            crossing_points,
+            crossing,
+            arc_r,
+            arc_z,
+            arc_valid,
+            boundary_valid,
+            invalid_boundary,
+        ) = corrected_clip(level, separatrix=separatrix)
+        inside = psi_n_cells < level
+        following_inside = jnp.roll(inside, -1, axis=1)
+        leaving = crossing & inside & ~following_inside
+        entering = crossing & ~inside & following_inside
+        leaving_index = jnp.argmax(leaving, axis=1)
+        entering_index = jnp.argmax(entering, axis=1)
+        start = jnp.take_along_axis(
+            crossing_points, leaving_index[:, None, None], axis=1
+        )[:, 0]
+        end = jnp.take_along_axis(
+            crossing_points, entering_index[:, None, None], axis=1
+        )[:, 0]
+        radial_span = end[:, 0] - start[:, 0]
+        vertical_span = end[:, 1] - start[:, 1]
+        use_radial = jnp.abs(radial_span) >= jnp.abs(vertical_span)
+
+        _, normalised_r, normalised_z, *_ = _bicubic_derivatives(
+            normalised_coefficient[:, None], arc_r, arc_z
+        )
+        _, physical_r, physical_z, *_ = _bicubic_derivatives(
+            physical_coefficient[:, None], arc_r, arc_z
+        )
+        physical_gradient = jnp.hypot(physical_r / dr, physical_z / dz)
+        radius_at_arc = cell_origin[:, None, 0] + dr * arc_r
+        field_at_surface = jnp.interp(level, f_profile_psi_n, f_profile)
+        gradient_psi = physical_gradient / _TWO_PI
+        magnetic_field_squared = (
+            gradient_psi**2 + field_at_surface**2
+        ) / radius_at_arc**2
+
+        ordinate_derivative = jnp.where(use_radial[:, None], normalised_z, normalised_r)
+        parameter_span = jnp.where(
+            use_radial, jnp.abs(radial_span), jnp.abs(vertical_span)
+        )
+        derivative_floor = jnp.asarray(1e-14, dtype=dtype)
+        coarea_weight = (
+            dr
+            * dz
+            * parameter_span[:, None]
+            * jnp.asarray(_BICUBIC_ARC_WEIGHT, dtype=dtype)[None]
+            / jnp.maximum(jnp.abs(ordinate_derivative), derivative_floor)
+        )
+        sample_valid = supports.boundary & arc_valid
+        weighted_volume = jnp.where(
+            sample_valid[:, None], radius_at_arc * coarea_weight, 0.0
+        )
+        denominator = jnp.sum(weighted_volume)
+        safe_denominator = jnp.maximum(denominator, jnp.asarray(1e-30, dtype=dtype))
+        integrands = jnp.stack(
+            (
+                physical_gradient**2 / radius_at_arc**2,
+                gradient_psi,
+                gradient_psi**2,
+                gradient_psi**2 / radius_at_arc**2,
+                magnetic_field_squared,
+                1.0 / jnp.maximum(magnetic_field_squared, 1e-30),
+            ),
+            axis=0,
+        )
+        averages = jnp.sum(integrands * weighted_volume[None], axis=(1, 2))
+        averages /= safe_denominator
+        minimum_ordinate_derivative = jnp.min(
+            jnp.where(sample_valid[:, None], jnp.abs(ordinate_derivative), jnp.inf)
+        )
+        maximum_coarea_weight = jnp.max(
+            jnp.where(sample_valid[:, None], coarea_weight, 0.0)
+        )
+        return (
+            averages,
+            boundary_valid & (denominator > 0.0),
+            jnp.sum(invalid_boundary),
+            jnp.argmax(invalid_boundary),
+            minimum_ordinate_derivative,
+            maximum_coarea_weight,
         )
 
     levels = jnp.linspace(psi_n_min, psi_n_max, n_surface_bins + 1, dtype=dtype)
@@ -202,10 +285,20 @@ def _surface_clips(
     cumulative_valid = jnp.concatenate(
         (interior_cumulative[3], edge_cumulative[3][None])
     )
+    cumulative_invalid_count = jnp.concatenate(
+        (interior_cumulative[4], edge_cumulative[4][None])
+    )
+    cumulative_invalid_cell = jnp.concatenate(
+        (interior_cumulative[5], edge_cumulative[5][None])
+    )
     shell_values = jnp.diff(cumulative_values, axis=0)
     shell_volume = jnp.maximum(shell_values[:, 0], 1e-30)
     surface_values = shell_values[:, 1:] / shell_volume[:, None]
     cell_origin = coordinates[cell_nodes[:, 0]]
+    interior_arc_average = jax.lax.map(
+        lambda level: arc_surface_average(level, separatrix=False), surface_level
+    )
+    edge_arc_average = arc_surface_average(levels[-1], separatrix=True)
 
     def extrema(level, *, separatrix):
         (
@@ -217,6 +310,7 @@ def _surface_clips(
             arc_z,
             arc_valid,
             boundary_valid,
+            invalid_boundary,
         ) = corrected_clip(level, separatrix=separatrix)
         samples = jnp.concatenate(
             (crossing_points, jnp.stack((arc_r, arc_z), axis=-1)), axis=1
@@ -286,6 +380,8 @@ def _surface_clips(
                 jnp.max(supports.vertex_count),
                 required_vertex_count(level),
                 boundary_valid,
+                jnp.sum(invalid_boundary),
+                jnp.argmax(invalid_boundary),
             )
         )
 
@@ -302,6 +398,8 @@ def _surface_clips(
         surface_used,
         surface_required,
         surface_valid,
+        surface_invalid_count,
+        surface_invalid_cell,
     ) = surface_extrema.T
     edge_level = levels[-1]
     edge_extrema = extrema(edge_level, separatrix=True)
@@ -315,8 +413,10 @@ def _surface_clips(
         edge_used,
         edge_required,
         edge_valid,
+        edge_invalid_count,
+        edge_invalid_cell,
     ) = edge_extrema
-    edge_supports, edge_correction, *_, edge_integral_valid = corrected_clip(
+    edge_supports, edge_correction, *_, edge_integral_valid, _ = corrected_clip(
         edge_level, separatrix=True
     )
     edge_values = jax.vmap(
@@ -344,26 +444,49 @@ def _surface_clips(
     dlevel = (psi_n_max - psi_n_min) / n_surface_bins
     all_arcs_valid = (
         jnp.all(cumulative_valid)
+        & jnp.all(interior_arc_average[1])
+        & edge_arc_average[1]
         & jnp.all(surface_valid > 0.0)
         & (edge_valid > 0.0)
         & edge_integral_valid
     )
+    diagnostic_count = jnp.concatenate(
+        (
+            cumulative_invalid_count,
+            interior_arc_average[2],
+            surface_invalid_count,
+            edge_invalid_count[None],
+        )
+    )
+    diagnostic_cell = jnp.concatenate(
+        (
+            cumulative_invalid_cell,
+            interior_arc_average[3],
+            surface_invalid_cell.astype(jnp.int32),
+            edge_invalid_cell[None].astype(jnp.int32),
+        )
+    )
+    diagnostic_level = jnp.concatenate(
+        (levels, surface_level, surface_level, edge_level[None])
+    )
+    first_invalid_group = jnp.argmax(diagnostic_count > 0)
+    arc_average = interior_arc_average[0]
     return (
         {
             "pn_s": surface_level,
             "dv_dpn": shell_values[:, 0] / dlevel,
             "inv_r2": surface_values[:, 0],
             "inv_r": surface_values[:, 1],
-            "grad2_r2": surface_values[:, 2],
+            "grad2_r2": arc_average[:, 0],
             "v_cum": 0.5 * (cumulative_values[:-1, 0] + cumulative_values[1:, 0]),
             "v_total": total_values[0],
         },
         {
-            "grad_psi_surface": surface_values[:, 3],
-            "grad_psi2_surface": surface_values[:, 4],
-            "grad_psi2_over_r2_surface": surface_values[:, 5],
-            "b2_surface": surface_values[:, 6],
-            "inv_b2_surface": surface_values[:, 7],
+            "grad_psi_surface": arc_average[:, 1],
+            "grad_psi2_surface": arc_average[:, 2],
+            "grad_psi2_over_r2_surface": arc_average[:, 3],
+            "b2_surface": arc_average[:, 4],
+            "inv_b2_surface": arc_average[:, 5],
             "r_in_surface": r_in,
             "r_in_edge": edge_r_in,
             "r_out_surface": r_out,
@@ -378,6 +501,15 @@ def _surface_clips(
             "clipped_vertex_count_max": maximum_used,
             "clipped_vertex_count_required": maximum_required,
             "clipped_vertex_capacity": jnp.asarray(_SUPPORT_CAPACITY),
+            "surface_arc_invalid_count": jnp.sum(diagnostic_count),
+            "surface_arc_first_invalid_cell": diagnostic_cell[first_invalid_group],
+            "surface_arc_first_invalid_level": diagnostic_level[first_invalid_group],
+            "surface_arc_min_ordinate_derivative": jnp.min(
+                jnp.concatenate((interior_arc_average[4], edge_arc_average[4][None]))
+            ),
+            "surface_arc_max_coarea_weight": jnp.max(
+                jnp.concatenate((interior_arc_average[5], edge_arc_average[5][None]))
+            ),
         },
         all_arcs_valid,
     )
@@ -446,14 +578,14 @@ def extract_flux_surface_geometry(
             jnp.asarray(field_function_psi_n, dtype=psi2d.dtype),
             jnp.asarray(field_function, dtype=psi2d.dtype),
         )
-    f_grid = jnp.interp(psi_n_grid, psi_n_profile, f_profile)
     surface_bins, torax_columns, arcs_valid = _surface_clips(
         psi2d,
         psi_n_grid,
         core,
         radius,
         height,
-        f_grid,
+        psi_n_profile,
+        f_profile,
         psi_n_min,
         psi_n_max,
         n_surface_bins,
@@ -483,6 +615,17 @@ def extract_flux_surface_geometry(
         **record,
         "valid": record["valid"] & arcs_valid,
         "surface_arc_valid": arcs_valid,
+        "surface_arc_invalid_count": torax_columns["surface_arc_invalid_count"],
+        "surface_arc_first_invalid_cell": torax_columns[
+            "surface_arc_first_invalid_cell"
+        ],
+        "surface_arc_first_invalid_level": torax_columns[
+            "surface_arc_first_invalid_level"
+        ],
+        "surface_arc_min_ordinate_derivative": torax_columns[
+            "surface_arc_min_ordinate_derivative"
+        ],
+        "surface_arc_max_coarea_weight": torax_columns["surface_arc_max_coarea_weight"],
     }
 
 

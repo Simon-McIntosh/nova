@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="39">
+<meta name="plan-version" content="40">
 <meta name="plan-commits" content="7d9743fd,92a4a00e,685a7602,11bac959,26a06b78,4ae27c42,52e4ad17,d1aaa089,a6f8bdf4,86f6f38a,10b5c850,e2ffa796,10049a7a,db55fe58,a3d7e947,7af48b66,29d0fcd2,cf2bd3c6,a06b7072,3f654bc9,97a35d9f,fd4637ec,0dfda59a,1df19c16,b14ec670,a672cece,0b54d0bf,5686eb1b,213cc9a4,c3092ace,2d6f9b37,04cc6df2,ddb152e3,99e148ad,4bb375b7,b69a0831,92b68e9d,a9d771d6">
 <meta name="plan-impl" content="0.96">
 <meta name="plan-artifacts" content="docs/figures/diiid-forward-onboarding/machine-description/machine_description_receipt.json,docs/figures/diiid-forward-onboarding/machine-description/conductor_sections.png,docs/figures/diiid-forward-onboarding/machine-description/skewed_conductor_sections.png,docs/figures/diiid-forward-onboarding/machine-description/thomson_grid_extent.png,docs/figures/diiid-forward-onboarding/differencing/quiescent_selection.png,docs/figures/diiid-forward-onboarding/differencing/plasma_differencing.png,docs/figures/diiid-forward-onboarding/cocos/corpus_cocos_receipt.json,docs/figures/diiid-forward-onboarding/cocos/corpus_cocos_discriminators.png,/work/projects/imas_gpu/sophelio/vacuum-gate/diiid_plasma_subtraction_gate.json,/work/projects/imas_gpu/sophelio/vacuum-gate/diiid_transient_plasma_subtracted_residuals.jsonl,docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc,docs/figures/diiid-forward-onboarding/limiter-topology/limiter_topology_receipt.json,docs/figures/diiid-forward-onboarding/limiter-topology/limiter_topology_modes.png,docs/figures/diiid-forward-onboarding/throughput/batched_throughput_budget.json,docs/figures/diiid-forward-onboarding/throughput/batched_throughput_budget.csv,docs/figures/diiid-forward-onboarding/throughput/batched_throughput_budget.html,docs/figures/diiid-forward-onboarding/cocos-ip-sign/receipt.json,docs/figures/diiid-forward-onboarding/producer-currents/producer_current_scaling_receipt.json,docs/figures/diiid-forward-onboarding/producer-currents/producer_current_scaling.png,docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_fixed_boundary_illustration.png,docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_illustration_receipt.json,docs/figures/diiid-forward-onboarding/negative-tail/negative_tail_attribution_receipt.json,docs/figures/diiid-forward-onboarding/negative-tail/counterfactual_scores.png,docs/figures/diiid-forward-onboarding/negative-tail/deficit_shares.png,docs/figures/diiid-forward-onboarding/current-polarity/current_polarity_audit_receipt.json,docs/figures/diiid-forward-onboarding/current-polarity/current_polarity_census.png,docs/figures/diiid-forward-onboarding/current-polarity/exact_polygon_boundary_response.npz">
@@ -221,6 +221,48 @@
         (commits <code>b69a0831</code>, <code>92b68e9d</code>, <code>a9d771d6</code>).
       </p>
     </section>
+
+    <h2 id="s9">§9 — Completing the boundary field</h2>
+    <p><strong>Opened by owner challenge, 2026-08-21, against this plan's own §5 exemption.</strong> The
+    §5 followup was fenced as authority-required on the reading that <em>no admissible current source</em>
+    exists for the five unshipped conductors. That reading conflated two different absences, and the
+    challenge is correct to separate them:</p>
+    <ul>
+      <li><strong>Geometry is not missing.</strong> The located netCDF entry carries all 24 coils over 140
+      elements — ECOILB 48, E567UP/DN 6 each, E89UP/DN 7 each — which is precisely how the 0.3332 Wb/rad
+      omitted-conductor envelope was computed in the first place. Only the <em>challenge dataset</em> lacks
+      their geometry.</li>
+      <li><strong>Currents are missing as a recorded channel, not necessarily as a quantity.</strong> A
+      vacuum flux map plus known conductor geometry determines conductor currents by linear projection.
+      The plasma tare that produces such a map already exists and passed its gate.</li>
+    </ul>
+    <p>So the §5 blocker is a claim that should be tested rather than assumed, and it decomposes into
+    three measurements.</p>
+    <p><strong>(a) Does the ohmic family share one circuit?</strong> The landed wiring node classified all
+    276 off-diagonal pairs independent, but at a <code>1e-10</code> proportional-residual bar and a
+    0.9999999999 correlation floor — a bar tight enough that it rejected ECOILA/E567UP at correlation
+    0.9999961721 on a 316.361 A residual, which is 0.57 % of the 55,483.70 A ohmic peak. On a physical
+    reading, 0.57 % is far more consistent with one circuit imperfectly recorded than with independent
+    supplies, and DIII-D's E-coil set is conventionally driven as an ohmic circuit. The verdict must be
+    retested with the producer's now-known family-scale and polarity faults accounted for, because the
+    original test ran on data since shown to carry both.</p>
+    <p><strong>(b) Can the currents be recovered from the vacuum flux?</strong> Five unknowns against a
+    65×65 grid is massively over-determined, and the plasma-subtraction gate already supplies the vacuum
+    remainder per frame. Recovery is a linear solve, and its conditioning is measurable rather than
+    arguable.</p>
+    <p><strong>(c) The inference question, which decides whether any of this rescues §5.</strong> Recovered
+    currents come from labels, and at inference the entry sees only actuator channels. Recovery therefore
+    helps <em>only</em> if the recovered currents turn out to be a deterministic function of the twenty
+    shipped channels — the same question as (a), asked of the challenge corpus rather than of one netCDF
+    pulse. If they are, the boundary field is completable at inference and §5's gate returns to being a
+    solver problem. If they are not, §5's gate is confirmed unmeetable and the exemption stands on
+    stronger evidence than it does now.</p>
+    <p><strong>Done-when:</strong> the competition dataset is re-checked for newly published conductors;
+    the ohmic circuit question is answered at a physically-motivated residual bound; and the recovered
+    currents' predictability from shipped channels is reported held-out, with the free-boundary residual
+    re-measured against the landed 0.2156505171 baseline once the recovered currents are included.
+    <em>Nothing here may quietly become a fit against labels that the entry cannot reproduce at
+    inference: the held-out predictability from shipped channels alone is the whole test.</em></p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>

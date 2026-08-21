@@ -594,6 +594,15 @@ def _catalog_projection(
         )
     value = measured["wall_ms_per_branch_state"]
     components = phase["components_per_branch_state"]
+    target_credit = 1.0
+    gap_attribution = {}
+    for name, component in components.items():
+        credited = min(component, target_credit)
+        gap_attribution[name] = component - credited
+        target_credit -= credited
+    gap_attribution["measurement_vs_phase_profile_delta_ms"] = (
+        value - phase["full_ms_per_branch_state"]
+    )
     return {
         "definition": (
             "adjacent-slice seed at 1e-3 of each branch flux span, both branches "
@@ -615,7 +624,8 @@ def _catalog_projection(
         "target_ms_per_branch_state": 1.0,
         "multiple_of_target": value,
         "remaining_gap_ms": value - 1.0,
-        "remaining_gap_attribution_ms": components,
+        "full_phase_decomposition_ms": components,
+        "remaining_gap_attribution_ms": gap_attribution,
         "target_met": value <= 1.0 and all(item["qualified"] for item in qualification),
     }
 

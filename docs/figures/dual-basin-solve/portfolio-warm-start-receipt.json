@@ -47,10 +47,18 @@
     "multiple_of_target": 21.910792595008388,
     "portfolio_qualified": false,
     "qualification_interpretation": "limited residual and root parity are non-finite (strict JSON null), so this run cannot distinguish a larger bounded budget from a valid finite seed-distance ladder for that branch; diverted qualifies at two Newton steps",
-    "remaining_gap_attribution_ms": {
+    "full_phase_decomposition_ms": {
       "additional_newton_steps_ms": 19.458048715023324,
       "first_step_krylov_and_promotion_ms": 2.110274799633771,
       "map_evaluation_ms": 0.07486651884391904,
+      "terminal_topology_and_receipts_ms": 0.21964556071907282,
+      "unattributed_fusion_or_timing_ms": 0.0
+    },
+    "remaining_gap_attribution_ms": {
+      "additional_newton_steps_ms": 19.458048715023324,
+      "first_step_krylov_and_promotion_ms": 1.18514131847769,
+      "map_evaluation_ms": 0.0,
+      "measurement_vs_phase_profile_delta_ms": 0.04795700078830123,
       "terminal_topology_and_receipts_ms": 0.21964556071907282,
       "unattributed_fusion_or_timing_ms": 0.0
     },

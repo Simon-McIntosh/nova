@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T22:31:26",
+  "updated": "2026-08-21T23:11:02",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -45,6 +45,20 @@
         "role": "implement",
         "session_id": "019ffaa2-8b1b-7803-98c5-c43c48e3f9a6",
         "created": "2026-08-13"
+      },
+      {
+        "id": "circuit-adjudicator",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-21"
+      },
+      {
+        "id": "circuit-scout",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a02627-434c-7813-854b-811643929182",
+        "created": "2026-08-21"
       },
       {
         "id": "corner-pole",
@@ -18785,9 +18799,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T190119755377-exact-extraction-handoff",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a78",
+        "node": "exact-extraction-handoff",
+        "role": "implement",
+        "member": "transport-seam",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T19:01:25Z",
+        "completed_at": "2026-08-21T21:10:04Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 7719,
+        "stalled": true,
+        "time_budget": "60m",
+        "base_sha": "7877f390e208d83994e81f0070dbf1de60f30722",
+        "commits": [
+          "a4f3dcbb12b0d5801f7951bfc91dcb94e2ebd21e"
+        ],
+        "changed_lines": {
+          "added": 437,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "the exact-evaluation handoff is accepted with lane two waived by evidence: its numerical gates are complete (solve-node reproduction 2.0e-14 Wb, 33x33 exact evaluation 2.29 s yielding 220 core cells over the unchanged 200 floor, valid=True) and its final instrumented run delivered the decisive artifact instead of a count - live py-spy stacks proving the recurring zero-CPU futex hang is a PRE-EXISTING race in main: _validate_uniform_normalized_grid executes JAX array subtraction inside its jax.pure_callback while the main thread holds JAX dispatch in _smooth_near_axis, a re-entrant deadlock installed with the uniform-mesh guard, present in every tree, timing-dependent - which is why the same file passed in sibling trees and falsifies both the concurrency and import-lock attributions. The lane-two count is meaningless at a tree carrying a proven race; the repair node verification supersedes it",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T190119755377-exact-extraction-handoff/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f6b-0c94-7b22-896f-25342e60d271",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 55060736,
+            "cached_input_tokens_cumulative": 75552000,
+            "input_tokens": 56103939,
+            "input_tokens_cumulative": 76884078,
+            "output_tokens": 88253,
+            "output_tokens_cumulative": 145385,
+            "reasoning_output_tokens": 27792,
+            "reasoning_output_tokens_cumulative": 52039
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 462
+    "_version": 466
   }
 }

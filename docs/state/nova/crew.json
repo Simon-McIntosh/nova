@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T21:44:38",
+  "updated": "2026-08-21T22:03:14",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -18549,9 +18549,118 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T155659027589-retirement-batch-verification",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a78",
+        "node": "retirement-batch-verification",
+        "role": "test",
+        "member": "transport-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T15:57:03Z",
+        "completed_at": "2026-08-21T15:57:29Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 26,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 26,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "aa61bddd1e9eb33014ae03e8d3564bba2f79637b",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "stopped seconds after dispatch: it was launched against a pre-merge HEAD during the equilibrium __init__ conflict and would have verified a tree without the migration; its replacement ran at the true merged HEAD and delivered Batch A green, and its never-used worktree was removed at the time",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T155659027589-retirement-batch-verification/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0250a-4194-7f63-ab73-b50f81409b6c",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260821T190729090183-current-pinned-forward-map",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a710",
+        "node": "current-pinned-forward-map",
+        "role": "implement",
+        "member": "diiid-forward-gs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T19:07:37Z",
+        "completed_at": "2026-08-21T20:02:44Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3307,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3307,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "7877f390e208d83994e81f0070dbf1de60f30722",
+        "commits": [
+          "40a9bdc9db9ac81449fcc26989e4344a44c6d5f2"
+        ],
+        "changed_lines": {
+          "added": 1318,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": 8,
+        "gate": "failed",
+        "outcome": "Cohort receipt unmet at 1/5 frames, but both decisive partials landed: ELIMINATED reached 1.59e-09 in 4 iterations DIVERTED with exact current error 0.0 where UNPINNED ended 0.514 after 24 iterations LIMITED - pinning selects the root; and eliminated Picard rho 1.1456 versus unpinned 1.2577 is an 8.9 percent drop but STILL ABOVE ONE, so it does not rehabilitate damped routes. Stopped on a ZeroDivisionError where the lambda guard divides before checking admissibility",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T190729090183-current-pinned-forward-map/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01bd8-2268-7ff3-bcd9-eb3700561ec8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 29934592,
+            "cached_input_tokens_cumulative": 165408768,
+            "input_tokens": 30710205,
+            "input_tokens_cumulative": 169860107,
+            "output_tokens": 87895,
+            "output_tokens_cumulative": 465556,
+            "reasoning_output_tokens": 22837,
+            "reasoning_output_tokens_cumulative": 129156
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 458
+    "_version": 460
   }
 }

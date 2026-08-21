@@ -347,6 +347,10 @@ def _scaled_moments(
 def _lambda_value(target_current_a: float, unscaled_current_a: float) -> float:
     """Return the eliminated amplitude or raise on the declared guard."""
 
+    if not np.isfinite(target_current_a) or not np.isfinite(unscaled_current_a):
+        raise LambdaOutOfBand(float("nan"))
+    if unscaled_current_a == 0.0:
+        raise LambdaOutOfBand(float("inf"))
     amplitude = float(target_current_a / unscaled_current_a)
     if not np.isfinite(amplitude) or not (
         LAMBDA_BAND[0] <= amplitude <= LAMBDA_BAND[1]
@@ -363,23 +367,37 @@ def eliminated_map(
     operator = profile.operator
     external = operator.external(jnp.asarray(current))
 
-    def traced(state: jax.Array):
+    def traced_moments(state: jax.Array):
         moments = operator.cell_current_moments(state, TopologyClass.DIVERTED)
         unscaled = jnp.sum(moments.cell_current)
-        amplitude = jnp.asarray(target_current_a, dtype=unscaled.dtype) / unscaled
-        image = external + operator.current_moment_image(
+        return moments, unscaled
+
+    def traced_image(moments: CellCurrentMoments, amplitude: jax.Array):
+        return external + operator.current_moment_image(
             _scaled_moments(moments, amplitude)
         )
-        return image, amplitude, unscaled
 
-    compiled = jax.jit(traced)
+    compiled_moments = jax.jit(traced_moments)
+    compiled_image = jax.jit(traced_image)
 
     def mapped(state: jax.Array) -> jax.Array:
-        return traced(state)[0]
+        moments, unscaled = traced_moments(state)
+        target = jnp.asarray(target_current_a, dtype=unscaled.dtype)
+        magnitude = jnp.abs(unscaled)
+        admissible = (
+            jnp.isfinite(unscaled)
+            & (target * unscaled > 0.0)
+            & (jnp.abs(target) >= LAMBDA_BAND[0] * magnitude)
+            & (jnp.abs(target) <= LAMBDA_BAND[1] * magnitude)
+        )
+        safe_unscaled = jnp.where(admissible, unscaled, jnp.sign(target))
+        amplitude = target / safe_unscaled
+        return traced_image(moments, amplitude)
 
     def evaluated(state: np.ndarray) -> MapEvaluation:
-        image, amplitude, unscaled = compiled(jnp.asarray(state))
+        moments, unscaled = compiled_moments(jnp.asarray(state))
         amplitude_value = _lambda_value(target_current_a, float(unscaled))
+        image = compiled_image(moments, jnp.asarray(amplitude_value))
         return MapEvaluation(
             image=np.asarray(image, dtype=float),
             amplitude=amplitude_value,
@@ -416,16 +434,23 @@ def solve_eliminated(
     amplitude_history: list[float] = []
     maximum_current_error = 0.0
     evaluations = 0
+    rejected_trial_evaluations = 0
+    initial = np.asarray(seed, dtype=float)
+    initial_item = evaluate(initial)
+    rejection_scale = 1.0e6 * max(float(np.max(np.abs(initial_item.image))), 1.0)
 
     def residual(state: np.ndarray) -> np.ndarray:
-        nonlocal evaluations, maximum_current_error
-        item = evaluate(state)
+        nonlocal evaluations, maximum_current_error, rejected_trial_evaluations
         evaluations += 1
+        try:
+            item = evaluate(state)
+        except LambdaOutOfBand:
+            rejected_trial_evaluations += 1
+            return np.full_like(np.asarray(state, dtype=float), rejection_scale)
         error = abs(item.achieved_current_a - target_current_a) / abs(target_current_a)
         maximum_current_error = max(maximum_current_error, error)
         return item.image - state
 
-    initial = np.asarray(seed, dtype=float)
     terminal = initial
     termination = "outer iteration ceiling exhausted"
     guard_value: float | None = None
@@ -480,6 +505,7 @@ def solve_eliminated(
         "amplitude": amplitude,
         "iterations": len(history),
         "map_evaluations": evaluations,
+        "rejected_trial_evaluations": rejected_trial_evaluations,
         "residual_history": history,
         "amplitude_history": amplitude_history,
         "maximum_map_current_relative_error": maximum_current_error,

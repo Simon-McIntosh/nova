@@ -1,0 +1,389 @@
+{
+  "artifacts": {
+    "figures": [
+      "docs/figures/diiid-forward-onboarding/state-of-play/machine_state.png",
+      "docs/figures/diiid-forward-onboarding/state-of-play/given_versus_extracted_topology.png",
+      "docs/figures/diiid-forward-onboarding/state-of-play/tared_flux.png",
+      "docs/figures/diiid-forward-onboarding/state-of-play/current_density_patches.png"
+    ],
+    "receipt": "docs/figures/diiid-forward-onboarding/state-of-play/state_of_play_receipt.json"
+  },
+  "figures": {
+    "current_density_patches.png": {
+      "panels": [
+        {
+          "absolute_threshold_a_per_m2": 3662.6245481748283,
+          "panel": "c4a7b_flat_top:given",
+          "quantity": "Delta-star toroidal current density [A m^-2]",
+          "source": "nova.equilibrium.map_extraction.apply_delta_star(given total flux)",
+          "subthreshold_cells": "masked transparent",
+          "surviving_cell_count": 2156
+        },
+        {
+          "absolute_threshold_a_per_m2": 3662.6245481748283,
+          "panel": "c4a7b_flat_top:tared",
+          "quantity": "Delta-star toroidal current density [A m^-2]",
+          "source": "nova.equilibrium.map_extraction.apply_delta_star(exact clipped-cell tared total flux)",
+          "subthreshold_cells": "masked transparent",
+          "surviving_cell_count": 1432
+        },
+        {
+          "absolute_threshold_a_per_m2": 3213.0717923495763,
+          "panel": "3ff34e7_flat_top:given",
+          "quantity": "Delta-star toroidal current density [A m^-2]",
+          "source": "nova.equilibrium.map_extraction.apply_delta_star(given total flux)",
+          "subthreshold_cells": "masked transparent",
+          "surviving_cell_count": 2343
+        },
+        {
+          "absolute_threshold_a_per_m2": 3213.0717923495763,
+          "panel": "3ff34e7_flat_top:tared",
+          "quantity": "Delta-star toroidal current density [A m^-2]",
+          "source": "nova.equilibrium.map_extraction.apply_delta_star(exact clipped-cell tared total flux)",
+          "subthreshold_cells": "masked transparent",
+          "surviving_cell_count": 1594
+        },
+        {
+          "absolute_threshold_a_per_m2": 2589.79799382353,
+          "panel": "11c2afc9_flat_top:given",
+          "quantity": "Delta-star toroidal current density [A m^-2]",
+          "source": "nova.equilibrium.map_extraction.apply_delta_star(given total flux)",
+          "subthreshold_cells": "masked transparent",
+          "surviving_cell_count": 2181
+        },
+        {
+          "absolute_threshold_a_per_m2": 2589.79799382353,
+          "panel": "11c2afc9_flat_top:tared",
+          "quantity": "Delta-star toroidal current density [A m^-2]",
+          "source": "nova.equilibrium.map_extraction.apply_delta_star(exact clipped-cell tared total flux)",
+          "subthreshold_cells": "masked transparent",
+          "surviving_cell_count": 1486
+        }
+      ]
+    },
+    "given_versus_extracted_topology.png": {
+      "panels": [
+        {
+          "panel": "c4a7b_flat_top",
+          "quantities": [
+            "given total poloidal flux contours",
+            "given magnetic axis",
+            "given boundary-gradient X marker",
+            "given LCFS",
+            "extracted magnetic axis",
+            "extracted X point",
+            "extracted LCFS",
+            "R-Z separations in metres"
+          ],
+          "sources": {
+            "extracted": "nova.equilibrium.connectivity_boundary.host_boundary_read",
+            "given": "d3d_shot_00000c4a7b.parquet:efit_psirz,efit_r_axis,efit_z_axis,efit_lcfs_r,efit_lcfs_z"
+          }
+        },
+        {
+          "panel": "3ff34e7_flat_top",
+          "quantities": [
+            "given total poloidal flux contours",
+            "given magnetic axis",
+            "given boundary-gradient X marker",
+            "given LCFS",
+            "extracted magnetic axis",
+            "extracted X point",
+            "extracted LCFS",
+            "R-Z separations in metres"
+          ],
+          "sources": {
+            "extracted": "nova.equilibrium.connectivity_boundary.host_boundary_read",
+            "given": "d3d_shot_0003ff34e7.parquet:efit_psirz,efit_r_axis,efit_z_axis,efit_lcfs_r,efit_lcfs_z"
+          }
+        },
+        {
+          "panel": "11c2afc9_flat_top",
+          "quantities": [
+            "given total poloidal flux contours",
+            "given magnetic axis",
+            "given boundary-gradient X marker",
+            "given LCFS",
+            "extracted magnetic axis",
+            "extracted X point",
+            "extracted LCFS",
+            "R-Z separations in metres"
+          ],
+          "sources": {
+            "extracted": "nova.equilibrium.connectivity_boundary.host_boundary_read",
+            "given": "d3d_shot_0011c2afc9.parquet:efit_psirz,efit_r_axis,efit_z_axis,efit_lcfs_r,efit_lcfs_z"
+          }
+        }
+      ]
+    },
+    "machine_state.png": {
+      "metrics": {
+        "bpol_positions": 76,
+        "flux_loop_positions": 44,
+        "grid_extent_m": {
+          "r": [
+            0.8399999737739563,
+            2.5399999618530273
+          ],
+          "z": [
+            -1.600000023841858,
+            1.600000023841858
+          ]
+        },
+        "grid_shape": [
+          65,
+          65
+        ],
+        "limiter_vertices": 82,
+        "netcdf_conductor_groups": 24,
+        "netcdf_only_conductor_elements": 74,
+        "netcdf_only_conductor_groups": 5,
+        "netcdf_only_conductor_names": [
+          "E567DN",
+          "E567UP",
+          "E89DN",
+          "E89UP",
+          "ECOILB"
+        ],
+        "shipped_conductor_elements": 66,
+        "shipped_conductor_groups": 19
+      },
+      "panels": [
+        {
+          "panel": "machine state",
+          "quantities": [
+            "limiter outline",
+            "shipped conductor outlines",
+            "netCDF-only conductor outlines",
+            "released flux-grid extent",
+            "B-pol probe positions",
+            "flux-loop positions"
+          ],
+          "sources": {
+            "grid_extent": "d3d_shot_00000c4a7b.parquet:efit_grid_R,efit_grid_Z",
+            "limiter_conductors_diagnostics": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+            "shipped_conductor_names": "nova.imas.diiid_description.POLOIDAL_CONDUCTORS"
+          }
+        }
+      ]
+    },
+    "tared_flux.png": {
+      "panels": [
+        {
+          "panel": "c4a7b_flat_top:given",
+          "quantity": "given total poloidal flux [Wb]",
+          "shared_level_pair": "c4a7b_flat_top",
+          "source": "d3d_shot_00000c4a7b.parquet:efit_psirz converted by corpus_flux_to_nova_total"
+        },
+        {
+          "panel": "c4a7b_flat_top:tared",
+          "quantity": "exact clipped-cell tared total poloidal flux [Wb]",
+          "shared_level_pair": "c4a7b_flat_top",
+          "source": "benchmarks.diiid_exact_clipped_tare exact moment contraction"
+        },
+        {
+          "panel": "3ff34e7_flat_top:given",
+          "quantity": "given total poloidal flux [Wb]",
+          "shared_level_pair": "3ff34e7_flat_top",
+          "source": "d3d_shot_0003ff34e7.parquet:efit_psirz converted by corpus_flux_to_nova_total"
+        },
+        {
+          "panel": "3ff34e7_flat_top:tared",
+          "quantity": "exact clipped-cell tared total poloidal flux [Wb]",
+          "shared_level_pair": "3ff34e7_flat_top",
+          "source": "benchmarks.diiid_exact_clipped_tare exact moment contraction"
+        },
+        {
+          "panel": "11c2afc9_flat_top:given",
+          "quantity": "given total poloidal flux [Wb]",
+          "shared_level_pair": "11c2afc9_flat_top",
+          "source": "d3d_shot_0011c2afc9.parquet:efit_psirz converted by corpus_flux_to_nova_total"
+        },
+        {
+          "panel": "11c2afc9_flat_top:tared",
+          "quantity": "exact clipped-cell tared total poloidal flux [Wb]",
+          "shared_level_pair": "11c2afc9_flat_top",
+          "source": "benchmarks.diiid_exact_clipped_tare exact moment contraction"
+        }
+      ]
+    }
+  },
+  "method": {
+    "coefficients_fitted": 0,
+    "current_density_source": "nova.equilibrium.map_extraction.apply_delta_star",
+    "exact_tare_floor_fraction": 0.004841504851931392,
+    "tare_functions": [
+      "prepare_frame",
+      "rectangular_geometry",
+      "response_blocks",
+      "moment_integrator"
+    ],
+    "tare_route": "exact clipped-cell zeroth, radial and vertical moments",
+    "tare_source": "benchmarks.diiid_exact_clipped_tare",
+    "threshold_source": "landed exact-tare fractional floor times extracted plasma current divided by labelled-core cell-centre area",
+    "topology_source": "nova.equilibrium.connectivity_boundary.host_boundary_read"
+  },
+  "rendering": {
+    "contourf_used": false,
+    "current_colormap_bad_alpha": 0.0,
+    "current_scaling": "symmetric logarithmic normalization with the linear threshold equal to the printed absolute mask threshold",
+    "current_subthreshold_representation": "NumPy masked cells with colormap bad alpha equal to zero",
+    "flux_rendering": "unfilled line contours via colors and linewidths",
+    "physical_axes": "R-Z in metres with equal aspect",
+    "style": {
+      "coil_edgecolor": "#888888",
+      "coil_facecolor": "none",
+      "coil_linewidth": 0.4,
+      "contour_color": "#999999",
+      "contour_linewidth": 0.35,
+      "figure_dpi": 120,
+      "flux_color": "#3366cc",
+      "flux_linewidth": 0.7,
+      "flux_loop_color": "#666666",
+      "flux_loop_markersize": 3.0,
+      "label_fontsize": 8.0,
+      "probe_color": "#888888",
+      "probe_markersize": 2.5,
+      "separatrix_color": "#cc0000",
+      "separatrix_linewidth": 1.5,
+      "wall_color": "#000000",
+      "wall_linewidth": 1.0
+    },
+    "style_source": "/home/ITER/mcintos/Code/imas-ink/imas_ink/style.py",
+    "tared_pairs_use_shared_levels": true
+  },
+  "selection": {
+    "all_absent_from_polarity_population": true,
+    "frames": [
+      {
+        "density_threshold_a_per_m2": 3662.6245481748283,
+        "exact_plasma_current_a": 1269983.444569158,
+        "extracted_axis_rz_m": [
+          1.7732848755102366,
+          -0.030875696532329387
+        ],
+        "extracted_diverted": true,
+        "extracted_lcfs_point_count": 192,
+        "extracted_x_point_rz_m": [
+          1.2860066623408326,
+          1.1018713442872223
+        ],
+        "flux_values_wb": {
+          "extracted_axis": 0.34299905528645724,
+          "extracted_boundary": -1.4385784489086182,
+          "extracted_x_point": -1.4388629746396024,
+          "given_axis": 0.3398446057871167,
+          "given_boundary_median": -1.4389416857795783,
+          "given_x_marker": -1.4388938117255683
+        },
+        "frame": 179,
+        "given_axis_rz_m": [
+          1.7736438512802124,
+          -0.030925704166293144
+        ],
+        "given_boundary_vertex_count": 84,
+        "given_x_marker_derivation": "minimum map-gradient magnitude on the shipped LCFS coordinate string; the release has no X-point coordinate column",
+        "given_x_marker_rz_m": [
+          1.2828316688537598,
+          1.0984303951263428
+        ],
+        "name": "c4a7b_flat_top",
+        "selection": "finite diverted frame outside the 603-shot polarity population",
+        "separations_m": {
+          "lcfs_symmetric_mean": 0.001080560868388673,
+          "magnetic_axis": 0.0003624422255813521,
+          "x_point": 0.004681956297394573
+        },
+        "shot": "d3d_shot_00000c4a7b.parquet",
+        "time_ms": 3740.0
+      },
+      {
+        "density_threshold_a_per_m2": 3213.0717923495763,
+        "exact_plasma_current_a": 1262182.1417456078,
+        "extracted_axis_rz_m": [
+          1.717722770270009,
+          -0.0502991244427352
+        ],
+        "extracted_diverted": true,
+        "extracted_lcfs_point_count": 192,
+        "extracted_x_point_rz_m": [
+          1.2966038088542617,
+          1.1382818314919207
+        ],
+        "flux_values_wb": {
+          "extracted_axis": 1.888341603932603,
+          "extracted_boundary": 0.15979328041207586,
+          "extracted_x_point": 0.16015382399982198,
+          "given_axis": 1.8880479439611462,
+          "given_boundary_median": 0.1601554760101818,
+          "given_x_marker": 0.1601905637430038
+        },
+        "frame": 44,
+        "given_axis_rz_m": [
+          1.7179585695266724,
+          -0.050308577716350555
+        ],
+        "given_boundary_vertex_count": 88,
+        "given_x_marker_derivation": "minimum map-gradient magnitude on the shipped LCFS coordinate string; the release has no X-point coordinate column",
+        "given_x_marker_rz_m": [
+          1.2949720621109009,
+          1.138399600982666
+        ],
+        "name": "3ff34e7_flat_top",
+        "selection": "finite diverted frame outside the 603-shot polarity population",
+        "separations_m": {
+          "lcfs_symmetric_mean": 0.000748765288815612,
+          "magnetic_axis": 0.00023598867308623816,
+          "x_point": 0.001635991163612805
+        },
+        "shot": "d3d_shot_0003ff34e7.parquet",
+        "time_ms": 1080.0
+      },
+      {
+        "density_threshold_a_per_m2": 2589.79799382353,
+        "exact_plasma_current_a": 948430.9974867774,
+        "extracted_axis_rz_m": [
+          1.708497514995107,
+          -0.028560908977303567
+        ],
+        "extracted_diverted": false,
+        "extracted_lcfs_point_count": 192,
+        "extracted_x_point_rz_m": [
+          1.3690666438580448,
+          -1.1895476093982649
+        ],
+        "flux_values_wb": {
+          "extracted_axis": 2.532818035446066,
+          "extracted_boundary": 1.177354585163274,
+          "extracted_x_point": 1.1693807167788892,
+          "given_axis": 2.5302218738090847,
+          "given_boundary_median": 1.1690094744825588,
+          "given_x_marker": 1.1693579593516787
+        },
+        "frame": 36,
+        "given_axis_rz_m": [
+          1.7087148427963257,
+          -0.028450453653931618
+        ],
+        "given_boundary_vertex_count": 88,
+        "given_x_marker_derivation": "minimum map-gradient magnitude on the shipped LCFS coordinate string; the release has no X-point coordinate column",
+        "given_x_marker_rz_m": [
+          1.3690015077590942,
+          -1.1901006698608398
+        ],
+        "name": "11c2afc9_flat_top",
+        "selection": "finite diverted frame outside the 603-shot polarity population",
+        "separations_m": {
+          "lcfs_symmetric_mean": 0.006032934662469133,
+          "magnetic_axis": 0.00024378628272275153,
+          "x_point": 0.0005568829200560351
+        },
+        "shot": "d3d_shot_0011c2afc9.parquet",
+        "time_ms": 980.0
+      }
+    ],
+    "named_frame_count": 3,
+    "polarity_population_count": 603,
+    "shot_count": 3
+  }
+}

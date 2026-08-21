@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import dataclass, replace
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -77,7 +78,8 @@ DEFAULT_OUTPUT = Path("docs/figures/efit-forward-parity")
 ROUTE_SURVEY_RECEIPT = DEFAULT_OUTPUT / "pinned-route-survey.json"
 LONG_BUDGET_RECEIPT = DEFAULT_OUTPUT / "long-budget-plasma-route.json"
 COMPOSITION_RECEIPT = DEFAULT_OUTPUT / "mast-dina-composition-diff.json"
-RECEIPT_NAME = "passive-inclusive-parity-slice.json"
+PASSIVE_INCLUSIVE_RECEIPT = DEFAULT_OUTPUT / "passive-inclusive-parity-slice.json"
+EXTENDED_PASSIVE_RECEIPT_NAME = "passive-inclusive-convergence.json"
 FIGURE_NAME = "reference-seeded-forward-slice.png"
 DIAGNOSIS_FIGURE_NAME = "vacuum-branch-diagnosis.png"
 LONG_BUDGET_FIGURE_NAME = "long-budget-residual-trajectories.png"
@@ -85,6 +87,7 @@ FREE_ANCHOR_FIGURE_NAME = "free-anchor-residual-trajectory.png"
 COMPOSITION_FIGURE_NAME = "mast-dina-composition-update-fields.png"
 ATTRIBUTION_FIGURE_NAME = "boundary-imbalance-source-fields.png"
 PASSIVE_INCLUSIVE_FIGURE_NAME = "passive-inclusive-parity-slice.png"
+EXTENDED_PASSIVE_FIGURE_NAME = "passive-inclusive-convergence.png"
 GRID_STRIDE = 2
 FIXED_POINT_CRITERION = 1.0e-8
 NEWTON_STEPS = 12
@@ -3178,6 +3181,8 @@ def _passive_inclusive_solve(
     case: dict[str, Any],
     context: dict[str, Any],
     profile: ForwardProfile,
+    *,
+    newton_budget: int = NEWTON_STEPS,
 ) -> tuple[dict[str, Any], np.ndarray]:
     """Run the reference-seeded diverted branch and retain its full outcome."""
     branch = profile.solve_branch(
@@ -3185,6 +3190,7 @@ def _passive_inclusive_solve(
         TopologyClass.DIVERTED,
         route="newton_krylov",
         tolerance=FIXED_POINT_CRITERION,
+        newton_steps=newton_budget,
         gmres_iterations=GMRES_ITERATIONS,
         warmup=WARMUP_SWEEPS,
         relaxation=RELAXATION,
@@ -3199,7 +3205,7 @@ def _passive_inclusive_solve(
     nonzero_current = bool(abs(current) >= 0.01 * abs(reference_current))
     converged = bool(branch.converged)
     metrics = None
-    if converged and nonzero_current:
+    if converged:
         metrics = _pinned_metrics(
             context["group"],
             context["row"],
@@ -3219,7 +3225,7 @@ def _passive_inclusive_solve(
         "route": "newton_krylov",
         "reference_seeded": True,
         "registered_fixed_point_criterion": FIXED_POINT_CRITERION,
-        "newton_budget": NEWTON_STEPS,
+        "newton_budget": newton_budget,
         "gmres_iterations_per_promotion": GMRES_ITERATIONS,
         "forward_branch_receipt": {
             "requested_class": "diverted" if requested else "limited",
@@ -3328,41 +3334,179 @@ def _passive_inclusive_figure(
     plt.close(figure)
 
 
+def _parity_metric_qualification(solve: dict[str, Any]) -> dict[str, Any] | None:
+    """State the carried pass/fail and the metrics without registered bounds."""
+    metrics = solve["registered_parity_metrics"]
+    if metrics is None:
+        return None
+    residual = solve["forward_branch_receipt"]["residual"]
+
+    def reported(value: float) -> dict[str, Any]:
+        return {
+            "value": value,
+            "registered_bound": None,
+            "passes": None,
+            "status": "reported deviation; no registered tolerance is carried",
+        }
+
+    qualification = {
+        "flux_sup_fraction_of_span": reported(
+            metrics["flux_map"]["sup_fraction_of_reference_span"]
+        ),
+        "flux_rms_fraction_of_span": reported(
+            metrics["flux_map"]["rms_fraction_of_reference_span"]
+        ),
+        "magnetic_axis_distance_m": {
+            "value": metrics["magnetic_axis"]["distance_m"],
+            "registered_bound": metrics["magnetic_axis"]["registered_bound_m"],
+            "passes": metrics["magnetic_axis"]["passes"],
+        },
+        "lcfs_distance_m": {
+            "value": metrics["lcfs"]["symmetric_mean_distance_m"],
+            "registered_bound": metrics["lcfs"]["registered_bound_m"],
+            "passes": metrics["lcfs"]["passes"],
+        },
+        "x_point_distance_m": {
+            "value": metrics["x_point"]["distance_m"],
+            "registered_bound": metrics["x_point"]["registered_bound_m"],
+            "passes": metrics["x_point"]["passes"],
+        },
+        "topology_class_agreement": {
+            "value": metrics["topology"]["agreement"],
+            "registered_bound": metrics["topology"]["registered_bound"],
+            "passes": metrics["topology"]["passes"],
+        },
+        "plasma_current_signed_relative_deviation": reported(
+            metrics["plasma_current"]["signed_relative_deviation"]
+        ),
+        "poloidal_beta_signed_relative_deviation": reported(
+            metrics["poloidal_beta"]["signed_relative_deviation"]
+        ),
+        "internal_inductance_signed_relative_deviation": reported(
+            metrics["internal_inductance"]["signed_relative_deviation"]
+        ),
+        "fixed_point_defect": {
+            "value": residual,
+            "registered_bound": FIXED_POINT_CRITERION,
+            "passes": bool(residual is not None and residual <= FIXED_POINT_CRITERION),
+        },
+    }
+    carried = [
+        qualification[name]["passes"]
+        for name in (
+            "magnetic_axis_distance_m",
+            "lcfs_distance_m",
+            "x_point_distance_m",
+            "topology_class_agreement",
+            "fixed_point_defect",
+        )
+    ]
+    qualification["all_carried_tolerances_pass"] = bool(all(carried))
+    return qualification
+
+
+def _extended_passive_figure(arms: list[dict[str, Any]], path: Path) -> None:
+    """Plot both full extended residual sequences beyond the banked budget."""
+    figure, axis = plt.subplots(figsize=(8.0, 4.5), constrained_layout=True)
+    for arm in arms:
+        residual = arm["forward_branch_receipt"]["residual"]
+        residual_text = "nonfinite" if residual is None else f"{residual:.4g}"
+        values = np.asarray(
+            [value for value in arm["residual_trajectory"] if value is not None],
+            dtype=np.float64,
+        )
+        axis.semilogy(
+            np.arange(1, values.size + 1),
+            np.maximum(values, 1.0e-16),
+            lw=1.0,
+            label=(f"{arm['newton_budget']} promotions; terminal {residual_text}"),
+        )
+    axis.axvline(24, color="0.35", ls=":", lw=0.9, label="banked finite-read prefix")
+    axis.axhline(
+        FIXED_POINT_CRITERION,
+        color="black",
+        ls="--",
+        lw=0.8,
+        label="registered convergence criterion",
+    )
+    axis.set_xlabel("Finite residual read")
+    axis.set_ylabel("Fixed-point residual")
+    axis.set_title("Passive-inclusive pinned diverted solve")
+    axis.grid(True, which="both", alpha=0.25)
+    axis.legend(fontsize=8)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, dpi=180)
+    plt.close(figure)
+
+
 def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
-    """Measure the passive-inclusive composed map and its pinned solve."""
+    """Extend the passive-inclusive pinned solve without rewriting its bank."""
     configure_dtypes()
+    banked_bytes = PASSIVE_INCLUSIVE_RECEIPT.read_bytes()
+    banked_sha256 = hashlib.sha256(banked_bytes).hexdigest()
+    banked_receipt = json.loads(banked_bytes)
+    banked_solve = banked_receipt["reference_seeded_pinned_solve"]
+    banked_trace = np.asarray(
+        [value for value in banked_solve["residual_trajectory"] if value is not None],
+        dtype=np.float64,
+    )
     mast_case, context = _mast_composition_case(store, bank)
     passive_case, profile, policy = _passive_inclusive_case(mast_case, context)
-    composition, fields = _composition_case_receipt(passive_case)
-    solve, trace = _passive_inclusive_solve(passive_case, context, profile)
-    active_bank = json.loads(COMPOSITION_RECEIPT.read_text())["mast"]
-    active_current_ratio = active_bank["plasma_current_integral_a"]["after_over_before"]
-    passive_current_ratio = composition["plasma_current_integral_a"][
-        "after_over_before"
+    arms = []
+    for budget in EXTENDED_PROMOTION_BUDGETS:
+        solve, trace = _passive_inclusive_solve(
+            passive_case,
+            context,
+            profile,
+            newton_budget=budget,
+        )
+        finite_trace = trace[np.isfinite(trace)]
+        prefix = finite_trace[: banked_trace.size]
+        discrepancy = prefix - banked_trace
+        solve["banked_trajectory_continuity"] = {
+            "banked_promotions": NEWTON_STEPS,
+            "banked_finite_residual_reads": int(banked_trace.size),
+            "prefix_finite_residual_reads": int(prefix.size),
+            "bitwise_equal": bool(np.array_equal(prefix, banked_trace)),
+            "sup_absolute_difference": float(np.max(np.abs(discrepancy))),
+        }
+        criterion_hits = np.flatnonzero(finite_trace <= FIXED_POINT_CRITERION)
+        solve["trajectory_summary"] = {
+            "full_trace_slots": int(trace.size),
+            "finite_residual_reads": int(finite_trace.size),
+            "minimum_residual": float(np.min(finite_trace)),
+            "minimum_finite_read": int(np.argmin(finite_trace) + 1),
+            "minimum_residual_promotion": int(np.argmin(finite_trace) // 2 + 1),
+            "first_criterion_finite_read": (
+                None if not len(criterion_hits) else int(criterion_hits[0] + 1)
+            ),
+            "first_criterion_promotion": (
+                None if not len(criterion_hits) else int(criterion_hits[0] // 2 + 1)
+            ),
+        }
+        solve["per_metric_qualification"] = _parity_metric_qualification(solve)
+        if not solve["forward_branch_receipt"]["converged"]:
+            solve["stall_structure"] = _stall_structure(finite_trace)
+        arms.append(solve)
+
+    banked_unchanged = PASSIVE_INCLUSIVE_RECEIPT.read_bytes() == banked_bytes
+    if not banked_unchanged:
+        raise RuntimeError("the bounded passive-inclusive receipt was modified")
+    figure_path = output / EXTENDED_PASSIVE_FIGURE_NAME
+    _extended_passive_figure(arms, figure_path)
+    converged = [
+        arm["newton_budget"]
+        for arm in arms
+        if arm["forward_branch_receipt"]["converged"]
     ]
-    active_summary = {
-        "wall_boundary_imbalance_fraction_of_span": active_bank[
-            "boundary_flux_balance"
-        ]["composed_total_minus_reference_total"]["sup_fraction_of_span"],
-        "one_application_fractional_current_change": abs(1.0 - active_current_ratio),
-        "picard_absolute_dominant_eigenvalue": active_bank["linearized_map"][
-            "absolute_dominant_eigenvalue_estimate"
-        ],
-        "source_receipt": str(COMPOSITION_RECEIPT),
-    }
-    passive_summary = {
-        "wall_boundary_imbalance_fraction_of_span": composition[
-            "boundary_flux_balance"
-        ]["composed_total_minus_reference_total"]["sup_fraction_of_span"],
-        "one_application_fractional_current_change": abs(1.0 - passive_current_ratio),
-        "picard_absolute_dominant_eigenvalue": composition["linearized_map"][
-            "absolute_dominant_eigenvalue_estimate"
-        ],
-    }
-    figure_path = output / PASSIVE_INCLUSIVE_FIGURE_NAME
-    _passive_inclusive_figure(fields, trace, figure_path)
+    converged_nonzero = [
+        arm["newton_budget"]
+        for arm in arms
+        if arm["forward_branch_receipt"]["converged"]
+        and arm["terminal_state"]["nonzero_current"]
+    ]
     receipt = {
-        "receipt": "MAST passive-inclusive prescribed-current parity slice",
+        "receipt": "MAST passive-inclusive extended pinned convergence",
         "backend": "JAX_PLATFORMS=cpu required by invocation",
         "execution_contract": {
             "reference_seed": "efm/psirz in total Wb",
@@ -3380,41 +3524,57 @@ def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
             "passes": True,
         },
         "prescribed_current_policy": policy,
-        "banked_active_only_control": active_summary,
-        "passive_inclusive_summary": passive_summary,
-        "passive_inclusive_composed_map": composition,
-        "reference_seeded_pinned_solve": solve,
+        "banked_bounded_solve": {
+            "source_receipt": str(PASSIVE_INCLUSIVE_RECEIPT),
+            "sha256": banked_sha256,
+            "byte_count": len(banked_bytes),
+            "unchanged_after_extended_run": banked_unchanged,
+            "solve": banked_solve,
+        },
+        "promotion_budgets": list(EXTENDED_PROMOTION_BUDGETS),
+        "extended_solves": arms,
+        "budgets_converged": converged,
+        "budgets_converged_nonzero_current": converged_nonzero,
+        "verdict": (
+            "PASS_EXTENDED_BUDGET_CONVERGED_NONZERO_CURRENT"
+            if converged_nonzero
+            else "FAIL_EXTENDED_BUDGET_CONVERGED_VACUUM_BRANCH"
+            if converged
+            else "FAIL_EXTENDED_BUDGET_STALLED"
+        ),
         "figure_src": (
-            "/nova/figures/efit-forward-parity/passive-inclusive-parity-slice.png"
+            "/nova/figures/efit-forward-parity/passive-inclusive-convergence.png"
         ),
     }
     output.mkdir(parents=True, exist_ok=True)
-    receipt_path = output / RECEIPT_NAME
+    receipt_path = output / EXTENDED_PASSIVE_RECEIPT_NAME
     receipt_path.write_text(json.dumps(receipt, indent=2, allow_nan=False) + "\n")
     return receipt
 
 
 def main() -> None:
-    """Parse paths, run the passive-inclusive slice and print its headline."""
+    """Parse paths, extend the passive-inclusive solve and print its headline."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--store", type=Path, default=SHOT_STORE)
     parser.add_argument("--bank", type=Path, default=DECOMPOSITION_BANK)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     arguments = parser.parse_args()
     receipt = run(arguments.store, arguments.bank, arguments.output)
-    summary = receipt["passive_inclusive_summary"]
-    branch = receipt["reference_seeded_pinned_solve"]["forward_branch_receipt"]
-    terminal = receipt["reference_seeded_pinned_solve"]["terminal_state"]
-    print(
-        "PASSIVE_INCLUSIVE_SLICE "
-        f"wall_sup_span={summary['wall_boundary_imbalance_fraction_of_span']:.9g} "
-        f"current_change={summary['one_application_fractional_current_change']:.9g} "
-        f"eigenvalue={summary['picard_absolute_dominant_eigenvalue']:.9g} "
-        f"converged={branch['converged']} "
-        f"achieved={branch['achieved_class']} "
-        f"topology_consistent={branch['topology_consistent']} "
-        f"terminal_ip_a={terminal['plasma_current_a']:.9g}"
-    )
+    fields = ["PASSIVE_INCLUSIVE_CONVERGENCE"]
+    for arm in receipt["extended_solves"]:
+        branch = arm["forward_branch_receipt"]
+        terminal = arm["terminal_state"]
+        residual = branch["residual"]
+        residual_text = "nonfinite" if residual is None else f"{residual:.9g}"
+        fields.append(
+            f"budget_{arm['newton_budget']}="
+            f"converged:{branch['converged']},"
+            f"residual:{residual_text},"
+            f"Ip:{terminal['plasma_current_a']:.9g},"
+            f"class:{branch['achieved_class']},"
+            f"consistent:{branch['topology_consistent']}"
+        )
+    print(" ".join(fields))
 
 
 if __name__ == "__main__":

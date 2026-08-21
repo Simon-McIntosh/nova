@@ -246,6 +246,17 @@ def triangle(r0, z0, radius=0.05):
     return np.column_stack([r0 + radius * np.cos(angle), z0 + radius * np.sin(angle)])
 
 
+def cancellation_limited_triangle():
+    """Return a clipped fixture cell whose contour sum loses useful digits."""
+    return np.array(
+        [
+            [1.0277397772132568, -0.34842545108603495],
+            [1.0277388870573516, -0.34842699288128948],
+            [1.0277369077599123, -0.34842048104705237],
+        ]
+    )
+
+
 def pair_geometry(target_r, target_z, edge, weight, norm):
     """Return a tile's geometry flattened onto its pair list, target-major."""
     rows, columns = np.divmod(np.arange(target_r.size * norm.size), norm.size)
@@ -279,7 +290,11 @@ def test_the_traced_closed_form_matches_numpy_and_independent_quadrature():
     """
     from nova.biot.polygonanalytic import packed_analytic_greens
 
-    sections = [triangle(6.2, 0.0), triangle(6.3, 0.08, 0.03), triangle(6.1, -0.05)]
+    sections = [
+        triangle(6.2, 0.0),
+        triangle(6.3, 0.08, 0.03),
+        triangle(6.1, -0.05),
+    ]
     target_r = np.array([6.6, 5.8, 6.2])
     target_z = np.array([0.35, -0.3, 0.4])
     edge, weight, norm = polygon.pad_batch(sections)
@@ -304,6 +319,39 @@ def test_the_traced_closed_form_matches_numpy_and_independent_quadrature():
             component, reference, rtol=1e-9, atol=1e-9 * np.max(np.abs(reference))
         )
         np.testing.assert_allclose(component, rule, rtol=2e-08, atol=0.0)
+
+
+def test_cancellation_limited_section_matches_the_extended_precision_value():
+    """The far-field limit avoids inverse-area-amplified contour cancellation."""
+    import jax.numpy as jnp
+
+    from nova.biot.polygonanalytic import (
+        packed_analytic_greens,
+        polygon_analytic_greens,
+    )
+    from nova.jax.config import configure_dtypes
+
+    configure_dtypes()
+    section = cancellation_limited_triangle()
+    target_r = np.array([1.0567405449789302, 0.0])
+    target_z = np.array([-0.3785212334358544, -0.1])
+    oracle = np.array([4.317924264103831759920413181366996e-6])
+    edge, weight, norm = polygon.pad_batch([section])
+
+    production = polygon_analytic_greens(target_r, target_z, section)[0]
+    packed = packed_analytic_greens(np, target_r, target_z, edge, weight, norm)[0]
+    traced = np.asarray(
+        jax.jit(
+            lambda r, z, packed_edge, packed_weight, packed_norm: (
+                packed_analytic_greens(
+                    jnp, r, z, packed_edge, packed_weight, packed_norm
+                )[0]
+            )
+        )(target_r, target_z, edge, weight, norm)
+    )
+    np.testing.assert_array_equal(packed, production)
+    np.testing.assert_allclose(traced, production, rtol=2e-10, atol=0.0)
+    np.testing.assert_allclose(production[:1], oracle, rtol=2e-10, atol=0.0)
 
 
 def test_an_unknown_kernel_is_refused_rather_than_silently_ignored():

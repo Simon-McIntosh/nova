@@ -36,6 +36,25 @@
   ULP/byte-identity parity receipts, cold H200 fixture builds, the CPU regression
   measurement, and the measure-only jacfwd memory/time probe.</p>
 
+  <h2 id="s4-prototype">§4 — the one-block H200 prototype: performance passes, numerical parity holds</h2>
+
+  <p><strong>Landed 2026-08-21, commit <code>9229dc53</code>; gate PASSED (the receipt banks the
+  go/no-go inputs); ~16 min wall of a 45-min ceiling; SLURM jobs 1252804/1252807/1252808 with
+  the H200 through <code>gpu_0003_grpA</code>.</strong> Single-source JAX flux G₀ evaluation —
+  fixed 32×32 pair tiles, 11 packed edges, fp64, 128 residual nodes, fixed-trip cel at 14
+  descents. <strong>Performance:</strong> H200 kernel 0.2664 s for 303,601 pairs
+  (1.140M pairs/s); nine-block fine-fixture projection <strong>11.475 s</strong> against the
+  locked two-minute bar; CPU JAX lane 24.33 s vs the measured production NumPy G₀ stage
+  58.70 s (0.414× — an improvement, not a regression). <strong>Numerical parity:</strong>
+  GPU-vs-CPU-JAX byte-identical 4,353/303,601 = <strong>1.434%</strong>; ULP distribution
+  p50 2,550 / p90 13,602 / p99 622,673 / p99.9 1.875e12 / max 3.64e13; GPU vs production
+  NumPy max abs 6.82e-10, max rel 9.00e-4. <strong>The receipt does not authorise the full
+  port</strong> under the locked close-to-byte-identical threshold; the tail is concentrated
+  in the packed reduction, whose localisation and repair is the next node, after which the
+  cross-device receipt re-runs unchanged. Production NumPy untouched. Receipts:
+  <code>scripts/device_kernel_port/receipt.json</code>, <code>receipt.md</code>; reference
+  array digests pinned in the manifest.</p>
+
 </main>
 </body>
 </html>

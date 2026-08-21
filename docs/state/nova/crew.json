@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T15:36:06",
+  "updated": "2026-08-21T15:41:06",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -8,7 +8,7 @@
         "id": "basin-branches",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a0247c-dbe2-78c0-95b0-14590b75d1dd",
         "created": "2026-08-21"
       },
       {
@@ -274,7 +274,7 @@
         "id": "kernel-prototype",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a0247d-26e8-7de2-96ad-893a24e6c3ff",
         "created": "2026-08-21"
       },
       {
@@ -15727,9 +15727,135 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T132251888597-kernel-port-prototype",
+        "plan": "device-kernel-build",
+        "section": "\u00a74",
+        "node": "kernel-port-prototype",
+        "role": "implement",
+        "member": "kernel-prototype",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T13:22:56Z",
+        "completed_at": "2026-08-21T13:39:20Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 984,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 984,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "daef77e81648e1413707b057848fdaf84372ce80",
+        "commits": [
+          "9229dc53"
+        ],
+        "changed_lines": {
+          "added": 87211,
+          "removed": 0,
+          "files": 9
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T132251888597-kernel-port-prototype/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0247d-26e8-7de2-96ad-893a24e6c3ff",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7247360,
+            "cached_input_tokens_cumulative": 7247360,
+            "input_tokens": 7436030,
+            "input_tokens_cumulative": 7436030,
+            "output_tokens": 31342,
+            "output_tokens_cumulative": 31342,
+            "reasoning_output_tokens": 9900,
+            "reasoning_output_tokens_cumulative": 9900
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260821T132232733282-branch-pin-portfolio",
+        "plan": "dual-basin-solve",
+        "section": "\u00a72",
+        "node": "branch-pin-portfolio",
+        "role": "implement",
+        "member": "basin-branches",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T13:22:37Z",
+        "completed_at": "2026-08-21T13:39:48Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1031,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1031,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "daef77e81648e1413707b057848fdaf84372ce80",
+        "commits": [
+          "1d795411"
+        ],
+        "changed_lines": {
+          "added": 350,
+          "removed": 41,
+          "files": 6
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T132232733282-branch-pin-portfolio/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0247c-dbe2-78c0-95b0-14590b75d1dd",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8700160,
+            "cached_input_tokens_cumulative": 8700160,
+            "input_tokens": 8883322,
+            "input_tokens_cumulative": 8883322,
+            "output_tokens": 29572,
+            "output_tokens_cumulative": 29572,
+            "reasoning_output_tokens": 12343,
+            "reasoning_output_tokens_cumulative": 12343
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 409
+    "_version": 413
   }
 }

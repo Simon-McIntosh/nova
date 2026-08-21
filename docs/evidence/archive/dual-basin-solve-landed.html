@@ -69,6 +69,25 @@
     R&gt;0 domain. Neither root is diverted.</figcaption>
   </figure>
 
+  <h2 id="s2-branch-pin">§2 — the topology-pinned branch portfolio</h2>
+
+  <p><strong>Landed 2026-08-21, commit <code>1d795411</code> (merge <code>4f5776bf</code>); gate
+  PASSED — mechanism gate 5/5, regression suites 64/64.</strong> <code>TopologyClass</code> is
+  an int-valued device pin flowing through the one
+  <code>Topology.read_with_connectivity</code> / <code>ForwardFluxOperator</code>
+  read/support-partition path: wall contact anchors the limited class, the saddle anchors the
+  diverted class, and limited connectivity is not cut by saddle shadows.
+  <code>ForwardBranchReceipt</code> composes the existing <code>ForwardEquilibrium</code>
+  payload with <code>requested_class</code>, <code>achieved_class</code>, <code>converged</code>,
+  residual, iterations and <code>topology_consistent</code>; the terminal class is read
+  independently on device, and a contradiction leaves the branch pinned with
+  <code>converged</code> forced false. <code>ForwardPortfolio</code> stacks a fixed two-entry
+  branch axis (limited/diverted order) and <code>solve_portfolio</code> matched per-branch
+  solves under <code>jax.jit</code> + <code>jax.vmap</code>. <code>ForwardProfile.solve</code>
+  and <code>solve_batch</code> are unchanged; no parallel solver, source, coupling, clip or
+  receipt physics was introduced. Remaining for §2: the two-class recovery acceptance against
+  the banked limited roots and the diverted fixture.</p>
+
 </main>
 </body>
 </html>

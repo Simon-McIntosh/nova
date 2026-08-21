@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="coil-circuit-discovery">
   <meta name="plan-title" content="Coil Circuit Discovery">
   <meta name="plan-summary" content="Recover the unshipped conductor currents from the plasma- and coil-tared flux residual by least squares across the corpus, adjudicate them against the independently measured ohmic circuit, and promote only the relations that survive into static constraints that predict unknown currents from shipped channels — everything else stays an explicit free parameter">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="10.0">
   <meta name="plan-capability-version" content="1.0">
@@ -24,8 +24,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-22">
-<meta name="plan-version" content="9">
-<meta name="plan-impl" content="0.55">
+<meta name="plan-version" content="12">
+<meta name="plan-impl" content="1.0">
 <meta name="plan-commits" content="5855f2ba,31e10c89,d5a7c0dc,bdf58a45">
 <meta name="plan-artifacts" content="docs/figures/coil-circuit-discovery/five_column_residual_adjudication_receipt.json,docs/figures/coil-circuit-discovery/flux_space_adjudication_preregistration.json,docs/figures/coil-circuit-discovery/flux_space_adjudication_receipt.json,docs/evidence/archive/coil-circuit-discovery-landed.html">
 </head>
@@ -80,27 +80,20 @@
     Record: <a href="/nova/evidence/archive/coil-circuit-discovery-landed#flux-adjudication">adjudication</a>.
     </p>
 
-    <h2 id="s4">§4 — Known, knowable, unknown: the discipline that makes the model honest</h2>
-    <p>The point of discovery is to shrink the prescribed set to what is defensible and to make the rest
-    visible rather than assumed. Three tiers, and a quantity may only be promoted upward on evidence:</p>
-    <ul>
-      <li><strong>Known.</strong> A shipped channel, or a prescribed input of the same class — conductor
-      currents, and total plasma current, which is in the competition input set and can also come from a
-      partner transport solve. Prescribed directly.</li>
-      <li><strong>Knowable.</strong> A quantity predicted from known channels by a discovered static
-      relation that survived §3's stability tests. Prescribed <em>through</em> the relation, with the
-      relation's residual carried as a stated uncertainty rather than discarded.</li>
-      <li><strong>Unknown.</strong> Everything else. These become <strong>explicit free parameters solved
-      alongside the equilibrium unknowns</strong> — not silently defaulted to zero, and not quietly filled
-      with a label-recovered value as the current DIII-D route does.</li>
-    </ul>
-    <p>The third tier is the substantive change. Today the five unshipped currents are prescribed from
-    label-recovered values that §2 shows are probably not currents — which is worse than admitting they
-    are unknown, because it hides the uncertainty inside an input that looks prescribed.</p>
-    <p><strong>Done-when:</strong> the forward seam accepts a per-conductor tier declaration; unknown-tier
-    currents enter the solve as free parameters with their prior and their recovered posterior both
-    reported; and a receipt states, for any given run, which currents were prescribed, which were predicted
-    through a relation, and which were solved for.</p>
+    <h2 id="s4">§4 — Known, knowable, unknown: the discipline that makes the model honest <span class="badge badge-shipped">✓ landed 2026-08-22</span></h2>
+    <p class="landed-summary">
+    Delivered at commit <code>49fb0592</code> (merged <code>3c9aa452</code>, 10 new tests, review
+    passed): a tier resolver and per-conductor receipt in
+    <code>nova/equilibrium/conductor_current.py</code> with the DIII-D binding in
+    <code>nova/imas/diiid_current.py</code> — 19 channels known; E567UP and E89DN knowable through the
+    fit-once ohmic relation (0.9929 ± 0.570 %, 1.0165 ± 0.706 %, different-pulse caveat carried);
+    ECOILB, E567DN, E89UP unknown-tier free parameters guarded in code against zero-fill, label-read
+    and rejected-scale prescription, driven by an outer loop through the existing
+    <code>ForwardProfile.solve(current=)</code> seam with the inner solve untouched. The banked
+    receipt reports prior-dominated posteriors as such — recovery of the three unknowns awaits the
+    owner-authorised observability program recorded as this plan's open question. Full record:
+    <a href="/nova/evidence/archive/coil-circuit-discovery-landed#tier-seam">§4 landed</a>.
+    </p>
 
     <h2 id="s5">§5 — Boundaries and admissibility</h2>
     <p><strong>The fit-once versus fit-per-frame distinction is load-bearing and is a decision below, not
@@ -161,6 +154,11 @@
     <pre class="r-fu-prompt">/reckon-ship coil-circuit-discovery §2</pre>
     <p class="r-fu-outcome">Adjudicated in two reviewed rounds. Round one ran the followup's posed measurement exactly and review refuted the instrument: interior Delta-star annihilates external vacuum-coil fields, so the tare-floor comparison cannot decide (five columns move the interior residual -7.1e-6 pp; above-floor membership identical before and after recovery). Round two, preregistered and flux-space with per-conductor sensitivity proven, delivered the verdict: the label-flux estimate is NOT to be believed as currents (ohmic-shape match 0/60, temporal stability 27/60, spread 1.95-31.6x), the independent ohmic circuit relation is the only current authority (E567UP/E89DN deterministic at the 1% bound), and flux-side validation is undecidable from this dataset (circuit arm closes 0/60 at median 37.9x the per-frame threshold — the labels' non-GS content dominates the boundary flux). Consequence recorded in the locked decisions: §3 corpus discovery is closed as refuted, §4 proceeds with knowable={E567UP,E89DN} and unknown={ECOILB,E567DN,E89UP}. The corroborating circuit-driven diagnostic under current-constrained-forward-solve §5 was read, not duplicated.</p>
     </article>
+<article class="r-fu" data-id="f-ccd-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-22" data-recommends-skill="/reckon-ship coil-circuit-discovery §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Wire an owner-authorised identifiability likelihood into the §4 outer loop</h4>
+    <div class="r-fu-body"><p><strong>Exemption: authority-required.</strong> This is new scope the owner must authorise before work starts — an observability program, not a fold. The landed tier seam honestly reports ECOILB, E567DN and E89UP as prior-dominated because no inference-available label-free observation operator with demonstrated sensitivity to these conductors exists (open question <code>q-ccd-observability</code>): GS closure and prescribed total plasma current cannot identify them, Thomson observations have no landed conductor-current sensitivity operator, and EFIT labels are inadmissible at inference. When the owner authorises the program — defining the operator H, covariance R, production prior authority, and the rank/sensitivity test proving the posterior is data-informed — its consuming edge lands back in §4's outer loop through the pluggable likelihood contract in <code>nova/equilibrium/conductor_current.py</code>. Until then the three currents stay explicit free parameters, which is the plan's own stated end state.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship coil-circuit-discovery §4</pre>
+    </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s1" data-id="c-20260821T2116" data-who="reckon-ship" data-when="2026-08-21T21:16:00Z">
@@ -177,6 +175,12 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260822T0110" data-who="reckon-ship" data-when="2026-08-22T01:10:00Z">
     <div class="r-comment-body">tier-seam-scout landed — run r-20260821T223657466266, gate passed, report-only fence. Measure: the current route is linear with an existing explicit current= override at ForwardProfile.solve as the terminal seam (no inner-solver change needed); all five landed five-current prescription sites enumerated with values and artifacts; safe implementation fence proposed and conflict-checked at HEAD b6274718 (nova/equilibrium/__init__.py and benchmarks/diiid_current_pinned_forward.py excluded as recent-churn overlap, sequenced later); one genuinely open design question surfaced — no landed label-free likelihood makes ECOILB/E567DN/E89UP identifiable, so the seam reports prior-dominated posteriors honestly. Map: ~/.config/reckon/crew/reports/nova/coil-circuit-discovery/tier-seam-map.md.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260822T0135" data-who="reckon-ship" data-when="2026-08-22T01:35:00Z">
+    <div class="r-comment-body">conductor-tier-seam landed — run r-20260821T224643605334, commit 49fb0592 merged at 3c9aa452, 10 tests added (26 passing across seam + gs-match + adjudication suites). Measure: tier resolver and receipt in nova/equilibrium/conductor_current.py, DIII-D binding in nova/imas/diiid_current.py with knowables E567UP=0.9929×ECOILA ±0.570% and E89DN=1.0165×ECOILA ±0.706% (different-pulse caveat in the receipt) and unknowns ECOILB/E567DN/E89UP guarded against zero-fill, label-read and rejected-scale prescription; outer loop drives only the three unknown slots through the existing ForwardProfile.solve current= seam. Banked demonstration receipt: 19 prescribed / 2 predicted / 3 solved, likelihood rank 0, posterior prior-dominated, inner non-convergence on the hard frame recorded honestly. tier-seam-review (run r-20260821T230426323295, gate passed) verified forward.py, forward_operator.py and equilibrium __init__ blob-identical to parent and all guards test-covered. Evidence: /nova/evidence/archive/coil-circuit-discovery-landed#tier-seam.</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260822T0150" data-who="reckon-ship" data-when="2026-08-22T01:50:00Z">
+    <div class="r-comment-body">DRAIN LEDGER — plan @ 2026-08-22T01:50Z. Rows: (1) write §2 committed result and keep corpus discovery gated — folded → landing beats v4–v8, §3 closed as refuted. (2) record the undecidable flux verdict — folded → v6 decision locks + f-ccd-001 resolution. (3) ohmic_pattern_shape discriminator bookkeeping — folded → clarification in evidence #flux-adjudication (contextual, not an authority gate). (4) zero-current division-ordering defect in diiid_current_pinned_forward.py, stale sibling §5 text, and tier-resolver consumption rewire — foreign-owner → current-constrained-forward-solve f-ccfs-tier-consume. (5) observability program for ECOILB/E567DN/E89UP — authority-required → owner authorisation of new scope, held open as f-ccd-002 with question q-ccd-observability. Rows: 5. foldable-remaining: 0.</div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

@@ -23,8 +23,8 @@
   <title>Current-Constrained Forward Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="5">
+<meta name="plan-modified" content="2026-08-22">
+<meta name="plan-version" content="6">
 </head>
 <body>
   <main class="plan-doc">
@@ -210,6 +210,11 @@
     <h4 class="r-fu-title">Repair the lambda guard ordering and complete the five-frame cohort (§3)</h4>
     <div class="r-fu-body"><p>The prototype scored 1 of 5 preregistered frames and stopped on a guard-ordering defect: during an Armijo line search the solver visited a state with <code>unscaled_current_a</code> exactly 0.0, and <code>_lambda_value</code> divided <em>before</em> reaching its finite-positive band check, raising <code>ZeroDivisionError</code>. The repair is to route a zero unscaled current onto the existing loud <code>LambdaOutOfBand</code> path instead of dividing first.</p><p><strong>Everything else is committed and must not move:</strong> the five-frame cohort (<code>d3d_shot_00000c4a7b</code> f102, <code>d3d_shot_0003ff34e7</code> f89, <code>d3d_shot_001270afa9</code> f215, <code>d3d_shot_001554e054</code> f41, <code>d3d_shot_001cbcc9e6</code> f252, recorded |I<sub>p</sub>| 0.99–1.75 MA, seed λ 0.955–1.487), the positive λ band, the 1e-6 criterion, the 2e-6 cross-codegen tolerance, and the separately reported 160 ms low-current control fixture.</p><p><strong>Report per frame:</strong> whether the eliminated arm meets 1e-6 and diverted simultaneously where the unpinned control does not; the recovered λ beside its seed value; and the paired Picard spectral radii against the banked 1.25–1.40 diverted-state figure. Do not generalise the one completed frame until the other four agree — and note the <code>zero-current-guard</code> decision is open, so if rejecting the trial step proves better numerics than failing loudly, that is a decision to lock rather than a liberty to take.</p></div>
     <pre class="r-fu-prompt">/reckon-ship current-constrained-forward-solve §3</pre>
+    </article>
+<article class="r-fu" data-id="f-ccfs-tier-consume" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-22" data-recommends-skill="/reckon-ship current-constrained-forward-solve §5" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Consume the landed conductor tier resolver and repair the pinned-forward zero-current guard (§5)</h4>
+    <div class="r-fu-body"><p>Three items surfaced by workers outside their write fences, all owned by this plan's scope. First, <code>benchmarks/diiid_current_pinned_forward.py</code> carries a zero-current division-ordering defect: the guard evaluates after the division it protects, and the circuit-driven vacuum worker contained it as the existing loud LambdaOutOfBand result rather than editing shared code (its preserved first-attempt log is <code>benchmark-attempt1.log</code> under run <code>r-20260821T204446383949</code>). Second, the same benchmark's inference path still reads label-recovered conductor currents; the tier resolver landed at <code>3c9aa452</code> (<code>nova/equilibrium/conductor_current.py</code>, <code>nova/imas/diiid_current.py</code>) now supplies the resolved 24-current vector — 19 known, E567UP/E89DN through the fit-once ohmic relation with carried uncertainty, ECOILB/E567DN/E89UP as guarded unknowns — so the inference arms should consume it and keep label arms explicitly diagnostic. Third, the authored §5 text still describes MAST cross-machine validation while the dispatched DIII-D circuit-driven vacuum experiment (complete, unpromoted run <code>r-20260821T204446383949</code>) is not yet recorded; reconcile the section with what actually ran and promote that run's evidence.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship current-constrained-forward-solve §5</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

@@ -140,6 +140,33 @@
     discovery is closed as refuted: fitting non-currents at corpus scale would produce stable, precise,
     wrong constants. §4's tier seam is the remaining build.</p>
 
+    <h2 id="tier-seam">§4 the conductor-current tier seam — honest by construction — 2026-08-22</h2>
+    <p>Commit <code>49fb0592</code>, merged at <code>3c9aa452</code>; 10 new tests, 26 passing across
+    the seam, gs-match, and both adjudication suites. Preceded by a seam scout that traced the single
+    current route (registry row → description → responses + currents → <code>ForwardProfile</code> →
+    <code>FluxTarget.external</code> → captured vacuum flux) and enumerated all five landed call sites
+    that fill the unshipped conductor slots today — every one with zeros or label-recovered values.</p>
+    <p><code>nova/equilibrium/conductor_current.py</code> carries the generic tier declaration,
+    resolver, outer-loop MAP contract with a pluggable inference-available likelihood, and the
+    per-conductor receipt. <code>nova/imas/diiid_current.py</code> binds DIII-D: 19 shipped channels
+    known; E567UP = 0.9929 × ECOILA carrying its 0.570 % relation residual and E89DN = 1.0165 × ECOILA
+    carrying 0.706 %, fit once and applied at inference with the different-pulse caveat in the receipt;
+    ECOILB, E567DN and E89UP are unknown-tier — never zero-filled, never read from label artifacts,
+    never point-prescribed from the rejected diagnostic scales, all three guards enforced in code and
+    covered by tests. The outer loop overwrites only the three unknown slots and calls the existing
+    <code>ForwardProfile.solve(..., current=...)</code>; independent review verified
+    <code>forward.py</code>, <code>forward_operator.py</code> and the equilibrium package init
+    blob-identical to their parent.</p>
+    <p>The banked demonstration receipt
+    (<code>docs/figures/coil-circuit-discovery/conductor_current_tier_receipt.json</code>, banked
+    diverted frame at 160 ms, ECOILA = 34,790 A) reports 19 prescribed / 2 predicted
+    (E567UP 34,543 ± 197 A, E89DN 35,364 ± 250 A) / 3 solved, with likelihood rank 0 and the posterior
+    stated as <strong>prior-dominated</strong> — and the inner solve's non-convergence on that hard
+    frame (relative residual 0.083) recorded rather than smoothed over. A production claim that the
+    three unknowns were recovered requires the owner-authorised observability program recorded as the
+    plan's open question: an inference-available label-free observation operator with demonstrated
+    sensitivity to these conductors, a covariance, and a production prior authority.</p>
+
   </main>
 </body>
 </html>

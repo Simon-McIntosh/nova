@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T00:54:49",
+  "updated": "2026-08-22T01:11:00",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -498,7 +498,7 @@
         "id": "tier-seam",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02681-596f-7f21-858e-71de3041eacd",
         "created": "2026-08-21"
       },
       {
@@ -19603,9 +19603,192 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T225538501902-window-receipts",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a76",
+        "node": "window-receipts",
+        "role": "implement",
+        "member": "transport-window",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T22:55:40Z",
+        "completed_at": "2026-08-21T23:04:27Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 527,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 527,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "2068fe41ce198fcfbeacd48352b27c325ef97f59",
+        "commits": [
+          "38e7468a1d6593f7c77c49d40d14b6584bcafdfb"
+        ],
+        "changed_lines": {
+          "added": 60,
+          "removed": 28,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "attempt three cleared every repaired blocker - valid baseline extraction, TORAX advance - and stopped one layer deeper: the exchanged evolved source drives the free-boundary solve to a map with ZERO axis-connected core cells, which extraction correctly refuses. No WindowReceipt or WindowConvergenceError exists because the public window has no typed topology receipt for a coreless exchanged equilibrium. The prime suspect is demo-composition scale mismatch (default ITER-grade TORAX profiles on a 0.93 cubic-metre, 557 kA fixture); branch loss and seam admissibility are the alternatives, and a diagnosis node measures rather than assumes",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T225538501902-window-receipts/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f8b-c81b-70c3-a5d8-007c4d512626",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5359360,
+            "cached_input_tokens_cumulative": 45909760,
+            "input_tokens": 5456120,
+            "input_tokens_cumulative": 47319939,
+            "output_tokens": 10210,
+            "output_tokens_cumulative": 162779,
+            "reasoning_output_tokens": 2353,
+            "reasoning_output_tokens_cumulative": 58907
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260821T224643605334-conductor-tier-seam",
+        "plan": "coil-circuit-discovery",
+        "section": "\u00a74",
+        "node": "conductor-tier-seam",
+        "role": "implement",
+        "member": "tier-seam",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T22:46:46Z",
+        "completed_at": "2026-08-21T23:03:04Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 978,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 978,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "39cb7726db3ced043db094cdf125680038130714",
+        "commits": [
+          "49fb059285f9dde4075c0abc75ca58d549db246e"
+        ],
+        "changed_lines": {
+          "added": 1636,
+          "removed": 16,
+          "files": 7
+        },
+        "tests_added": 10,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T224643605334-conductor-tier-seam/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02681-596f-7f21-858e-71de3041eacd",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7588352,
+            "cached_input_tokens_cumulative": 7588352,
+            "input_tokens": 7771959,
+            "input_tokens_cumulative": 7771959,
+            "output_tokens": 41077,
+            "output_tokens_cumulative": 41077,
+            "reasoning_output_tokens": 13234,
+            "reasoning_output_tokens_cumulative": 13234
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260821T230426323295-tier-seam-review",
+        "plan": "coil-circuit-discovery",
+        "section": "\u00a74",
+        "node": "tier-seam-review",
+        "role": "implement",
+        "member": "circuit-reviewer",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T23:04:28Z",
+        "completed_at": "2026-08-21T23:09:53Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 325,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 325,
+        "stalled": false,
+        "time_budget": "15m",
+        "base_sha": "2068fe41ce198fcfbeacd48352b27c325ef97f59",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T230426323295-tier-seam-review/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0264c-544b-73b2-aba0-4bf197b6375c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2258944,
+            "cached_input_tokens_cumulative": 6754048,
+            "input_tokens": 2363090,
+            "input_tokens_cumulative": 7061697,
+            "output_tokens": 9865,
+            "output_tokens_cumulative": 37076,
+            "reasoning_output_tokens": 2337,
+            "reasoning_output_tokens_cumulative": 12110
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 482
+    "_version": 486
   }
 }

@@ -1,0 +1,636 @@
+{
+  "measurement": "DIII-D omitted-ohmic current determinism against ECOILA",
+  "source": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+  "backend": "imas-python netCDF",
+  "dd_version": "3.41.0",
+  "ids_read": [
+    "pf_active"
+  ],
+  "ids_not_read": [
+    "equilibrium",
+    "magnetics"
+  ],
+  "declaration_before_comparison": {
+    "reference_coil": "ECOILA",
+    "target_coils": [
+      "ECOILB",
+      "E567UP",
+      "E567DN",
+      "E89UP",
+      "E89DN"
+    ],
+    "sample_count_required": 480256,
+    "fit": "one through-origin least-squares gain per target over the full common time base; the final fit permits one global polarity sign",
+    "per_time_freedom": false,
+    "offset_fitted": false,
+    "deterministic_maximum_residual_percent_of_ohmic_peak": 1.0,
+    "ohmic_peak_reference_A": 55483.703125,
+    "maximum_residual_bound_A": 554.83703125
+  },
+  "common_time_base": {
+    "sample_count": 480256,
+    "start_s": -4.097766047286987,
+    "end_s": 19.914983952713015,
+    "maximum_elementwise_difference_s": 0.0
+  },
+  "basis_definitions": {
+    "current_A_basis": "stored current in declared amperes",
+    "current_per_declared_turn_basis": "stored current divided by the absolute sum of declared turns_with_sign for that coil",
+    "ampere_turn_basis": "stored current multiplied by the signed sum of declared turns_with_sign for that coil",
+    "verdict_conversion": "turn-normalized and ampere-turn residuals are converted back to equivalent target current before comparison with the physical bound"
+  },
+  "fault_context": {
+    "producer_family_scale_receipt": "docs/figures/diiid-forward-onboarding/producer-currents/producer_current_scaling_receipt.json",
+    "landed_shaping_to_ohmic_candidate_scale": 164.6885883907371,
+    "family_scale_treatment": "All six traces tested here belong to the ohmic family. A common family multiplier therefore cancels exactly from fitted scale and relative residual; per-target gain is still measured explicitly.",
+    "corpus_polarity_receipt": "docs/figures/diiid-forward-onboarding/current-polarity/current_polarity_audit_receipt.json",
+    "corpus_affected_shot_count": 603,
+    "corpus_total_shot_count": 7041,
+    "polarity_treatment": "The polarity census describes the competition corpus, not this netCDF pulse. Each target is nevertheless allowed one signed scale so an opposed recording cannot be misclassified as non-deterministic."
+  },
+  "per_coil": {
+    "ECOILB": {
+      "declared_turns": {
+        "ecoila": 48.0,
+        "target": 48.0
+      },
+      "current_A_basis": {
+        "before_fault_accounting": {
+          "scale_target_from_ecoila": 1.0,
+          "relative_l2_residual": 0.07317445329399536,
+          "maximum_absolute_residual": 4643.09765625,
+          "rms_residual": 1200.1526384821698,
+          "scale_free_correlation": 0.9983676508525726,
+          "maximum_equivalent_current_residual_A": 4643.09765625,
+          "maximum_residual_percent_of_ohmic_peak": 8.3683989977913
+        },
+        "family_gain_accounted_positive_scale": {
+          "scale_target_from_ecoila": 1.0171679657199086,
+          "relative_l2_residual": 0.07121145658731809,
+          "maximum_absolute_residual": 4029.361390976308,
+          "rms_residual": 1167.957035087838,
+          "scale_free_correlation": 0.9983676508525726,
+          "maximum_equivalent_current_residual_A": 4029.361390976308,
+          "maximum_residual_percent_of_ohmic_peak": 7.262243080456444
+        },
+        "family_gain_and_polarity_accounted_signed_scale": {
+          "scale_target_from_ecoila": 1.0171679657199086,
+          "relative_l2_residual": 0.07121145658731809,
+          "maximum_absolute_residual": 4029.361390976308,
+          "rms_residual": 1167.957035087838,
+          "scale_free_correlation": 0.9983676508525726,
+          "maximum_equivalent_current_residual_A": 4029.361390976308,
+          "maximum_residual_percent_of_ohmic_peak": 7.262243080456444
+        }
+      },
+      "current_per_declared_turn_basis": {
+        "before_fault_accounting": {
+          "scale_target_from_ecoila": 1.0,
+          "relative_l2_residual": 0.07317445329399523,
+          "maximum_absolute_residual": 96.731201171875,
+          "rms_residual": 25.00317996837854,
+          "scale_free_correlation": 0.9983676508525715,
+          "maximum_equivalent_current_residual_A": 4643.09765625,
+          "maximum_residual_percent_of_ohmic_peak": 8.3683989977913
+        },
+        "family_gain_accounted_positive_scale": {
+          "scale_target_from_ecoila": 1.0171679657199066,
+          "relative_l2_residual": 0.07121145658731799,
+          "maximum_absolute_residual": 83.9450289786746,
+          "rms_residual": 24.332438230996626,
+          "scale_free_correlation": 0.9983676508525715,
+          "maximum_equivalent_current_residual_A": 4029.361390976381,
+          "maximum_residual_percent_of_ohmic_peak": 7.2622430804565745
+        },
+        "family_gain_and_polarity_accounted_signed_scale": {
+          "scale_target_from_ecoila": 1.0171679657199066,
+          "relative_l2_residual": 0.07121145658731799,
+          "maximum_absolute_residual": 83.9450289786746,
+          "rms_residual": 24.332438230996626,
+          "scale_free_correlation": 0.9983676508525715,
+          "maximum_equivalent_current_residual_A": 4029.361390976381,
+          "maximum_residual_percent_of_ohmic_peak": 7.2622430804565745
+        }
+      },
+      "ampere_turn_basis": {
+        "before_fault_accounting": {
+          "scale_target_from_ecoila": 1.0,
+          "relative_l2_residual": 0.07317445329399523,
+          "maximum_absolute_residual": 222868.6875,
+          "rms_residual": 57607.32664714415,
+          "scale_free_correlation": 0.9983676508525725,
+          "maximum_equivalent_current_residual_A": 4643.09765625,
+          "maximum_residual_percent_of_ohmic_peak": 8.3683989977913
+        },
+        "family_gain_accounted_positive_scale": {
+          "scale_target_from_ecoila": 1.0171679657199053,
+          "relative_l2_residual": 0.07121145658731796,
+          "maximum_absolute_residual": 193409.3467668686,
+          "rms_residual": 56061.937684216224,
+          "scale_free_correlation": 0.9983676508525725,
+          "maximum_equivalent_current_residual_A": 4029.361390976429,
+          "maximum_residual_percent_of_ohmic_peak": 7.262243080456662
+        },
+        "family_gain_and_polarity_accounted_signed_scale": {
+          "scale_target_from_ecoila": 1.0171679657199053,
+          "relative_l2_residual": 0.07121145658731796,
+          "maximum_absolute_residual": 193409.3467668686,
+          "rms_residual": 56061.937684216224,
+          "scale_free_correlation": 0.9983676508525725,
+          "maximum_equivalent_current_residual_A": 4029.361390976429,
+          "maximum_residual_percent_of_ohmic_peak": 7.262243080456662
+        }
+      },
+      "fault_accounting": {
+        "gain_magnitude": 1.0171679657199086,
+        "polarity": 1,
+        "time_local_freedom": false,
+        "offset_fitted": false,
+        "common_family_multiplier_check": {
+          "multiplier_applied_to_both_ohmic_traces": 164.6885883907371,
+          "scale_target_from_ecoila": 1.017167965719906,
+          "relative_l2_residual": 0.07121145658731796,
+          "relative_l2_difference_from_unscaled": -1.249000902703301e-16,
+          "maximum_equivalent_current_residual_A": 4029.361390976402
+        }
+      },
+      "verdict": {
+        "deterministic_function_of_ecoila": false,
+        "criterion": "maximum absolute residual after one signed through-origin scale is at most 1.0% of the 55483.703125 A measured ohmic peak",
+        "residual_bound_A": 554.83703125,
+        "observed_maximum_residual_A": 4029.361390976308,
+        "observed_percent_of_ohmic_peak": 7.262243080456444
+      }
+    },
+    "E567UP": {
+      "declared_turns": {
+        "ecoila": 48.0,
+        "target": 6.0
+      },
+      "current_A_basis": {
+        "before_fault_accounting": {
+          "scale_target_from_ecoila": 1.0,
+          "relative_l2_residual": 0.007674064892128881,
+          "maximum_absolute_residual": 554.50390625,
+          "rms_residual": 122.553382430578,
+          "scale_free_correlation": 0.9999961720703151,
+          "maximum_equivalent_current_residual_A": 554.50390625,
+          "maximum_residual_percent_of_ohmic_peak": 0.9993995984744394
+        },
+        "family_gain_accounted_positive_scale": {
+          "scale_target_from_ecoila": 0.9929278899369522,
+          "relative_l2_residual": 0.00285691266213204,
+          "maximum_absolute_residual": 316.3613539208318,
+          "rms_residual": 45.62436140097582,
+          "scale_free_correlation": 0.9999961720703151,
+          "maximum_equivalent_current_residual_A": 316.3613539208318,
+          "maximum_residual_percent_of_ohmic_peak": 0.5701878859961761
+        },
+        "family_gain_and_polarity_accounted_signed_scale": {
+          "scale_target_from_ecoila": 0.9929278899369522,
+          "relative_l2_residual": 0.00285691266213204,
+          "maximum_absolute_residual": 316.3613539208318,
+          "rms_residual": 45.62436140097582,
+          "scale_free_correlation": 0.9999961720703151,
+          "maximum_equivalent_current_residual_A": 316.3613539208318,
+          "maximum_residual_percent_of_ohmic_peak": 0.5701878859961761
+        }
+      },
+      "current_per_declared_turn_basis": {
+        "before_fault_accounting": {
+          "scale_target_from_ecoila": 1.0,
+          "relative_l2_residual": 0.8741107913722448,
+          "maximum_absolute_residual": 7932.019775390625,
+          "rms_residual": 2326.564335145989,
+          "scale_free_correlation": 0.999996172070315,
+          "maximum_equivalent_current_residual_A": 47592.11865234375,
+          "maximum_residual_percent_of_ohmic_peak": 85.77675240083167
+        },
+        "family_gain_accounted_positive_scale": {
+          "scale_target_from_ecoila": 7.9434231194956,
+          "relative_l2_residual": 0.0028569126621320363,
+          "maximum_absolute_residual": 52.726892320136244,
+          "rms_residual": 7.604060233495971,
+          "scale_free_correlation": 0.999996172070315,
+          "maximum_equivalent_current_residual_A": 316.36135392081746,
+          "maximum_residual_percent_of_ohmic_peak": 0.5701878859961502
+        },
+        "family_gain_and_polarity_accounted_signed_scale": {
+          "scale_target_from_ecoila": 7.9434231194956,
+          "relative_l2_residual": 0.0028569126621320363,
+          "maximum_absolute_residual": 52.726892320136244,
+          "rms_residual": 7.604060233495971,
+          "scale_free_correlation": 0.999996172070315,
+          "maximum_equivalent_current_residual_A": 316.36135392081746,
+          "maximum_residual_percent_of_ohmic_peak": 0.5701878859961502
+        }
+      },
+      "ampere_turn_basis": {
+        "before_fault_accounting": {
+          "scale_target_from_ecoila": 1.0,
+          "relative_l2_residual": 7.056951627137238,
+          "maximum_absolute_residual": 2305291.21875,
+          "rms_residual": 676189.1933765392,
+          "scale_free_correlation": 0.999996172070315,
+          "maximum_equivalent_current_residual_A": 384215.203125,
+          "maximum_residual_percent_of_ohmic_peak": 692.4829841645505
+        },
+        "family_gain_accounted_positive_scale": {
+          "scale_target_from_ecoila": 0.12411598624211866,
+          "relative_l2_residual": 0.002856912662132035,
+          "maximum_absolute_residual": 1898.1681235248761,
+          "rms_residual": 273.746168405855,
+          "scale_free_correlation": 0.999996172070315,
+          "maximum_equivalent_current_residual_A": 316.3613539208127,
+          "maximum_residual_percent_of_ohmic_peak": 0.5701878859961417
+        },
+        "family_gain_and_polarity_accounted_signed_scale": {
+          "scale_target_from_ecoila": 0.12411598624211866,
+          "relative_l2_residual": 0.002856912662132035,
+          "maximum_absolute_residual": 1898.1681235248761,
+          "rms_residual": 273.746168405855,
+          "scale_free_correlation": 0.999996172070315,
+          "maximum_equivalent_current_residual_A": 316.3613539208127,
+          "maximum_residual_percent_of_ohmic_peak": 0.5701878859961417
+        }
+      },
+      "fault_accounting": {
+        "gain_magnitude": 0.9929278899369522,
+        "polarity": 1,
+        "time_local_freedom": false,
+        "offset_fitted": false,
+        "common_family_multiplier_check": {
+          "multiplier_applied_to_both_ohmic_traces": 164.6885883907371,
+          "scale_target_from_ecoila": 0.9929278899369499,
+          "relative_l2_residual": 0.0028569126621320368,
+          "relative_l2_difference_from_unscaled": -3.0357660829594124e-18,
+          "maximum_equivalent_current_residual_A": 316.36135392081684
+        }
+      },
+      "verdict": {
+        "deterministic_function_of_ecoila": true,
+        "criterion": "maximum absolute residual after one signed through-origin scale is at most 1.0% of the 55483.703125 A measured ohmic peak",
+        "residual_bound_A": 554.83703125,
+        "observed_maximum_residual_A": 316.3613539208318,
+        "observed_percent_of_ohmic_peak": 0.5701878859961761
+      }
+    },
+    "E567DN": {
+      "declared_turns": {
+        "ecoila": 48.0,
+        "target": 6.0
+      },
+      "current_A_basis": {
+        "before_fault_accounting": {
+          "scale_target_from_ecoila": 1.0,
+          "relative_l2_residual": 0.028201972632546615,
+          "maximum_absolute_residual": 2380.01953125,
+          "rms_residual": 445.65941401574213,
+          "scale_free_correlation": 0.9998070302952725,
+          "maximum_equivalent_current_residual_A": 2380.01953125,
+          "maximum_residual_percent_of_ohmic_peak": 4.289583061692946
+        },
+        "family_gain_accounted_positive_scale": {
+          "scale_target_from_ecoila": 0.9822929799896104,
+          "relative_l2_residual": 0.02169239271809462,
+          "maximum_absolute_residual": 3013.026406240482,
+          "rms_residual": 342.7922987269574,
+          "scale_free_correlation": 0.9998070302952725,
+          "maximum_equivalent_current_residual_A": 3013.026406240482,
+          "maximum_residual_percent_of_ohmic_peak": 5.430470996956337
+        },
+        "family_gain_and_polarity_accounted_signed_scale": {
+          "scale_target_from_ecoila": 0.9822929799896104,
+          "relative_l2_residual": 0.02169239271809462,
+          "maximum_absolute_residual": 3013.026406240482,
+          "rms_residual": 342.7922987269574,
+          "scale_free_correlation": 0.9998070302952725,
+          "maximum_equivalent_current_residual_A": 3013.026406240482,
+          "maximum_residual_percent_of_ohmic_peak": 5.430470996956337
+        }
+      },
+      "current_per_declared_turn_basis": {
+        "before_fault_accounting": {
+          "scale_target_from_ecoila": 1.0,
+          "relative_l2_residual": 0.872810967121199,
+          "maximum_absolute_residual": 7780.609863281249,
+          "rms_residual": 2298.7542350426884,
+          "scale_free_correlation": 0.999807030295272,
+          "maximum_equivalent_current_residual_A": 46683.65917968749,
+          "maximum_residual_percent_of_ohmic_peak": 84.13940770051565
+        },
+        "family_gain_accounted_positive_scale": {
+          "scale_target_from_ecoila": 7.858343839916863,
+          "relative_l2_residual": 0.021692392718094585,
+          "maximum_absolute_residual": 502.1710677067622,
+          "rms_residual": 57.13204978782624,
+          "scale_free_correlation": 0.999807030295272,
+          "maximum_equivalent_current_residual_A": 3013.026406240573,
+          "maximum_residual_percent_of_ohmic_peak": 5.430470996956502
+        },
+        "family_gain_and_polarity_accounted_signed_scale": {
+          "scale_target_from_ecoila": 7.858343839916863,
+          "relative_l2_residual": 0.021692392718094585,
+          "maximum_absolute_residual": 502.1710677067622,
+          "rms_residual": 57.13204978782624,
+          "scale_free_correlation": 0.999807030295272,
+          "maximum_equivalent_current_residual_A": 3013.026406240573,
+          "maximum_residual_percent_of_ohmic_peak": 5.430470996956502
+        }
+      },
+      "ampere_turn_basis": {
+        "before_fault_accounting": {
+          "scale_target_from_ecoila": 1.0,
+          "relative_l2_residual": 7.142561537382845,
+          "maximum_absolute_residual": 2310854.015625,
+          "rms_residual": 677218.5401629447,
+          "scale_free_correlation": 0.9998070302952715,
+          "maximum_equivalent_current_residual_A": 385142.3359375,
+          "maximum_residual_percent_of_ohmic_peak": 694.1539844047675
+        },
+        "family_gain_accounted_positive_scale": {
+          "scale_target_from_ecoila": 0.12278662249870086,
+          "relative_l2_residual": 0.021692392718094578,
+          "maximum_absolute_residual": 18078.158437443635,
+          "rms_residual": 2056.7537923617447,
+          "scale_free_correlation": 0.9998070302952715,
+          "maximum_equivalent_current_residual_A": 3013.026406240606,
+          "maximum_residual_percent_of_ohmic_peak": 5.4304709969565605
+        },
+        "family_gain_and_polarity_accounted_signed_scale": {
+          "scale_target_from_ecoila": 0.12278662249870086,
+          "relative_l2_residual": 0.021692392718094578,
+          "maximum_absolute_residual": 18078.158437443635,
+          "rms_residual": 2056.7537923617447,
+          "scale_free_correlation": 0.9998070302952715,
+          "maximum_equivalent_current_residual_A": 3013.026406240606,
+          "maximum_residual_percent_of_ohmic_peak": 5.4304709969565605
+        }
+      },
+      "fault_accounting": {
+        "gain_magnitude": 0.9822929799896104,
+        "polarity": 1,
+        "time_local_freedom": false,
+        "offset_fitted": false,
+        "common_family_multiplier_check": {
+          "multiplier_applied_to_both_ohmic_traces": 164.6885883907371,
+          "scale_target_from_ecoila": 0.982292979989608,
+          "relative_l2_residual": 0.02169239271809458,
+          "relative_l2_difference_from_unscaled": -3.8163916471489756e-17,
+          "maximum_equivalent_current_residual_A": 3013.026406240565
+        }
+      },
+      "verdict": {
+        "deterministic_function_of_ecoila": false,
+        "criterion": "maximum absolute residual after one signed through-origin scale is at most 1.0% of the 55483.703125 A measured ohmic peak",
+        "residual_bound_A": 554.83703125,
+        "observed_maximum_residual_A": 3013.026406240482,
+        "observed_percent_of_ohmic_peak": 5.430470996956337
+      }
+    },
+    "E89UP": {
+      "declared_turns": {
+        "ecoila": 48.0,
+        "target": 7.0
+      },
+      "current_A_basis": {
+        "before_fault_accounting": {
+          "scale_target_from_ecoila": 1.0,
+          "relative_l2_residual": 0.02885803844754417,
+          "maximum_absolute_residual": 2503.640625,
+          "rms_residual": 455.2495628949441,
+          "scale_free_correlation": 0.999779091874877,
+          "maximum_equivalent_current_residual_A": 2503.640625,
+          "maximum_residual_percent_of_ohmic_peak": 4.512389195363391
+        },
+        "family_gain_accounted_positive_scale": {
+          "scale_target_from_ecoila": 0.9806322773044314,
+          "relative_l2_residual": 0.02104488456154227,
+          "maximum_absolute_residual": 3196.147470530741,
+          "rms_residual": 331.99326819221136,
+          "scale_free_correlation": 0.999779091874877,
+          "maximum_equivalent_current_residual_A": 3196.147470530741,
+          "maximum_residual_percent_of_ohmic_peak": 5.760515774028449
+        },
+        "family_gain_and_polarity_accounted_signed_scale": {
+          "scale_target_from_ecoila": 0.9806322773044314,
+          "relative_l2_residual": 0.02104488456154227,
+          "maximum_absolute_residual": 3196.147470530741,
+          "rms_residual": 331.99326819221136,
+          "scale_free_correlation": 0.999779091874877,
+          "maximum_equivalent_current_residual_A": 3196.147470530741,
+          "maximum_residual_percent_of_ohmic_peak": 5.760515774028449
+        }
+      },
+      "current_per_declared_turn_basis": {
+        "before_fault_accounting": {
+          "scale_target_from_ecoila": 1.0,
+          "relative_l2_residual": 0.8513580365993763,
+          "maximum_absolute_residual": 6441.109770275298,
+          "rms_residual": 1918.6551768556722,
+          "scale_free_correlation": 0.999779091874877,
+          "maximum_equivalent_current_residual_A": 45087.768391927086,
+          "maximum_residual_percent_of_ohmic_peak": 81.2630842075343
+        },
+        "family_gain_accounted_positive_scale": {
+          "scale_target_from_ecoila": 6.724335615801801,
+          "relative_l2_residual": 0.02104488456154224,
+          "maximum_absolute_residual": 456.59249579011794,
+          "rms_residual": 47.42760974174448,
+          "scale_free_correlation": 0.999779091874877,
+          "maximum_equivalent_current_residual_A": 3196.1474705308256,
+          "maximum_residual_percent_of_ohmic_peak": 5.760515774028603
+        },
+        "family_gain_and_polarity_accounted_signed_scale": {
+          "scale_target_from_ecoila": 6.724335615801801,
+          "relative_l2_residual": 0.02104488456154224,
+          "maximum_absolute_residual": 456.59249579011794,
+          "rms_residual": 47.42760974174448,
+          "scale_free_correlation": 0.999779091874877,
+          "maximum_equivalent_current_residual_A": 3196.1474705308256,
+          "maximum_residual_percent_of_ohmic_peak": 5.760515774028603
+        }
+      },
+      "ampere_turn_basis": {
+        "before_fault_accounting": {
+          "scale_target_from_ecoila": 1.0,
+          "relative_l2_residual": 5.991282870617307,
+          "maximum_absolute_residual": 2260455.60546875,
+          "rms_residual": 661607.7662695153,
+          "scale_free_correlation": 0.9997790918748772,
+          "maximum_equivalent_current_residual_A": 322922.2293526786,
+          "maximum_residual_percent_of_ohmic_peak": 582.0127553944311
+        },
+        "family_gain_accounted_positive_scale": {
+          "scale_target_from_ecoila": 0.1430088737735625,
+          "relative_l2_residual": 0.021044884561542243,
+          "maximum_absolute_residual": 22373.032293715893,
+          "rms_residual": 2323.9528773454795,
+          "scale_free_correlation": 0.9997790918748772,
+          "maximum_equivalent_current_residual_A": 3196.1474705308415,
+          "maximum_residual_percent_of_ohmic_peak": 5.760515774028631
+        },
+        "family_gain_and_polarity_accounted_signed_scale": {
+          "scale_target_from_ecoila": 0.1430088737735625,
+          "relative_l2_residual": 0.021044884561542243,
+          "maximum_absolute_residual": 22373.032293715893,
+          "rms_residual": 2323.9528773454795,
+          "scale_free_correlation": 0.9997790918748772,
+          "maximum_equivalent_current_residual_A": 3196.1474705308415,
+          "maximum_residual_percent_of_ohmic_peak": 5.760515774028631
+        }
+      },
+      "fault_accounting": {
+        "gain_magnitude": 0.9806322773044314,
+        "polarity": 1,
+        "time_local_freedom": false,
+        "offset_fitted": false,
+        "common_family_multiplier_check": {
+          "multiplier_applied_to_both_ohmic_traces": 164.6885883907371,
+          "scale_target_from_ecoila": 0.9806322773044289,
+          "relative_l2_residual": 0.021044884561542243,
+          "relative_l2_difference_from_unscaled": -2.7755575615628914e-17,
+          "maximum_equivalent_current_residual_A": 3196.147470530829
+        }
+      },
+      "verdict": {
+        "deterministic_function_of_ecoila": false,
+        "criterion": "maximum absolute residual after one signed through-origin scale is at most 1.0% of the 55483.703125 A measured ohmic peak",
+        "residual_bound_A": 554.83703125,
+        "observed_maximum_residual_A": 3196.147470530741,
+        "observed_percent_of_ohmic_peak": 5.760515774028449
+      }
+    },
+    "E89DN": {
+      "declared_turns": {
+        "ecoila": 48.0,
+        "target": 7.0
+      },
+      "current_A_basis": {
+        "before_fault_accounting": {
+          "scale_target_from_ecoila": 1.0,
+          "relative_l2_residual": 0.018378215895700933,
+          "maximum_absolute_residual": 831.4140625,
+          "rms_residual": 300.4674218357576,
+          "scale_free_correlation": 0.9999765903413705,
+          "maximum_equivalent_current_residual_A": 831.4140625,
+          "maximum_residual_percent_of_ohmic_peak": 1.4984833665966668
+        },
+        "family_gain_accounted_positive_scale": {
+          "scale_target_from_ecoila": 1.0164766240432426,
+          "relative_l2_residual": 0.008661937973590337,
+          "maximum_absolute_residual": 391.674398117073,
+          "rms_residual": 141.6149524957288,
+          "scale_free_correlation": 0.9999765903413705,
+          "maximum_equivalent_current_residual_A": 391.674398117073,
+          "maximum_residual_percent_of_ohmic_peak": 0.7059269227842712
+        },
+        "family_gain_and_polarity_accounted_signed_scale": {
+          "scale_target_from_ecoila": 1.0164766240432426,
+          "relative_l2_residual": 0.008661937973590337,
+          "maximum_absolute_residual": 391.674398117073,
+          "rms_residual": 141.6149524957288,
+          "scale_free_correlation": 0.9999765903413705,
+          "maximum_equivalent_current_residual_A": 391.674398117073,
+          "maximum_residual_percent_of_ohmic_peak": 0.7059269227842712
+        }
+      },
+      "current_per_declared_turn_basis": {
+        "before_fault_accounting": {
+          "scale_target_from_ecoila": 1.0,
+          "relative_l2_residual": 0.8565422245475484,
+          "maximum_absolute_residual": 6784.178850446428,
+          "rms_residual": 2000.5286644318446,
+          "scale_free_correlation": 0.9999765903413702,
+          "maximum_equivalent_current_residual_A": 47489.251953125,
+          "maximum_residual_percent_of_ohmic_peak": 85.591352556508
+        },
+        "family_gain_accounted_positive_scale": {
+          "scale_target_from_ecoila": 6.970125422010787,
+          "relative_l2_residual": 0.00866193797359033,
+          "maximum_absolute_residual": 55.9534854452786,
+          "rms_residual": 20.23070749938983,
+          "scale_free_correlation": 0.9999765903413702,
+          "maximum_equivalent_current_residual_A": 391.6743981169502,
+          "maximum_residual_percent_of_ohmic_peak": 0.7059269227840498
+        },
+        "family_gain_and_polarity_accounted_signed_scale": {
+          "scale_target_from_ecoila": 6.970125422010787,
+          "relative_l2_residual": 0.00866193797359033,
+          "maximum_absolute_residual": 55.9534854452786,
+          "rms_residual": 20.23070749938983,
+          "scale_free_correlation": 0.9999765903413702,
+          "maximum_equivalent_current_residual_A": 391.6743981169502,
+          "maximum_residual_percent_of_ohmic_peak": 0.7059269227840498
+        }
+      },
+      "ampere_turn_basis": {
+        "before_fault_accounting": {
+          "scale_target_from_ecoila": 1.0,
+          "relative_l2_residual": 5.745782654828561,
+          "maximum_absolute_residual": 2243631.98046875,
+          "rms_residual": 657568.9160285474,
+          "scale_free_correlation": 0.9999765903413703,
+          "maximum_equivalent_current_residual_A": 320518.8543526786,
+          "maximum_residual_percent_of_ohmic_peak": 577.6810780466063
+        },
+        "family_gain_accounted_positive_scale": {
+          "scale_target_from_ecoila": 0.14823617433963915,
+          "relative_l2_residual": 0.008661937973590328,
+          "maximum_absolute_residual": 2741.7207868186524,
+          "rms_residual": 991.3046674701017,
+          "scale_free_correlation": 0.9999765903413703,
+          "maximum_equivalent_current_residual_A": 391.67439811695033,
+          "maximum_residual_percent_of_ohmic_peak": 0.7059269227840501
+        },
+        "family_gain_and_polarity_accounted_signed_scale": {
+          "scale_target_from_ecoila": 0.14823617433963915,
+          "relative_l2_residual": 0.008661937973590328,
+          "maximum_absolute_residual": 2741.7207868186524,
+          "rms_residual": 991.3046674701017,
+          "scale_free_correlation": 0.9999765903413703,
+          "maximum_equivalent_current_residual_A": 391.67439811695033,
+          "maximum_residual_percent_of_ohmic_peak": 0.7059269227840501
+        }
+      },
+      "fault_accounting": {
+        "gain_magnitude": 1.0164766240432426,
+        "polarity": 1,
+        "time_local_freedom": false,
+        "offset_fitted": false,
+        "common_family_multiplier_check": {
+          "multiplier_applied_to_both_ohmic_traces": 164.6885883907371,
+          "scale_target_from_ecoila": 1.0164766240432397,
+          "relative_l2_residual": 0.008661937973590324,
+          "relative_l2_difference_from_unscaled": -1.214306433183765e-17,
+          "maximum_equivalent_current_residual_A": 391.6743981169398
+        }
+      },
+      "verdict": {
+        "deterministic_function_of_ecoila": true,
+        "criterion": "maximum absolute residual after one signed through-origin scale is at most 1.0% of the 55483.703125 A measured ohmic peak",
+        "residual_bound_A": 554.83703125,
+        "observed_maximum_residual_A": 391.674398117073,
+        "observed_percent_of_ohmic_peak": 0.7059269227842712
+      }
+    }
+  },
+  "summary": {
+    "deterministic_coils": [
+      "E567UP",
+      "E89DN"
+    ],
+    "non_deterministic_coils": [
+      "ECOILB",
+      "E567DN",
+      "E89UP"
+    ],
+    "deterministic_count": 2,
+    "target_count": 5,
+    "all_five_recoverable_from_ecoila": false,
+    "verdict": "only_a_subset_is_recoverable"
+  },
+  "artifacts": {
+    "figure": "docs/figures/diiid-forward-onboarding/ohmic-circuit/ohmic_circuit_retest.png"
+  }
+}

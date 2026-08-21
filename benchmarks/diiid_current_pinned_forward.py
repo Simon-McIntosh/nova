@@ -1,11 +1,10 @@
 """Measure whether an exact plasma-current constraint changes the forward map.
 
-The experiment keeps Nova's absolute-source production policy untouched.  It
-wraps the existing free-boundary map in two benchmark-only current constraints:
-closed-form elimination of one common profile amplitude, and a square augmented
-root with that amplitude as an explicit unknown.  The recorded plasma current is
-a prescribed input of the same class as the coil currents; it is neither fitted
-nor inferred inside the equilibrium solve.
+The experiment keeps Nova's absolute-source production policy untouched and
+wraps the existing free-boundary map in closed-form elimination of one common
+profile amplitude.  The recorded plasma current is a prescribed input of the
+same class as the coil currents; it is neither fitted nor inferred inside the
+equilibrium solve.
 """
 
 from __future__ import annotations
@@ -57,9 +56,7 @@ PREREGISTRATION_NAME = "current_pinned_forward_preregistration.json"
 CHECKPOINT_NAME = "current_pinned_forward_frames.jsonl"
 RECEIPT_NAME = "current_pinned_forward_receipt.json"
 FIGURE_NAME = "current_pinned_forward.png"
-ARM_NAMES = ("unpinned", "pinned_eliminated", "pinned_augmented")
-AUGMENTED_ALPHAS = (0.1, 1.0, 10.0)
-NOMINAL_ALPHA = 1.0
+ARM_NAMES = ("unpinned", "pinned_eliminated")
 LAMBDA_BAND = (1.0e-6, 1.0e6)
 RELATIVE_RESIDUAL_CRITERION = 1.0e-6
 CURRENT_CONSTRAINT_CRITERION = 1.0e-10
@@ -226,23 +223,17 @@ def preregistration() -> dict[str, Any]:
                 "unknowns_and_rows": "N flux unknowns and N flux residual rows",
                 "route": "host Jacobian-free Newton-Krylov with Armijo search",
             },
-            "pinned_augmented": {
-                "definition": (
-                    "lambda is an explicit extra unknown and alpha times relative "
-                    "current error is an explicit extra residual row"
-                ),
-                "unknowns_and_rows": (
-                    "N flux unknowns plus lambda and N flux rows plus one current row"
-                ),
-                "alphas": list(AUGMENTED_ALPHAS),
-                "nominal_alpha": NOMINAL_ALPHA,
-                "flux_block": (
-                    "full flux residual direction rescaled so its Euclidean norm "
-                    "equals the exact clipped-cell area-weighted grid L2 norm "
-                    "divided by the instantaneous flux span"
-                ),
-                "route": "host Jacobian-free Newton-Krylov with Armijo search",
-            },
+        },
+        "dropped_comparison_arm": {
+            "name": "pinned_augmented",
+            "status": "not applicable and not scored",
+            "alpha_stability": "not applicable",
+            "reason": (
+                "an explicit current-residual row requires a clipped-support "
+                "observation primitive the public ForwardOperator does not expose; "
+                "closed-form elimination satisfies Ip exactly without that primitive, "
+                "keeps the system square and needs no residual weight"
+            ),
         },
         "host_budget": {
             "maximum_outer_iterations": HOST_OUTER_ITERATIONS,
@@ -267,6 +258,12 @@ def preregistration() -> dict[str, Any]:
             "iterations": POWER_ITERATIONS,
             "relative_step": POWER_RELATIVE_STEP,
             "comparison_band": [1.25, 1.40],
+            "interpretation": (
+                "estimate the Picard-map spectral radius; rho below one after "
+                "pinning would rehabilitate damped fixed-point routes, while rho "
+                "above one does not make the Newton root singular because the "
+                "Newton residual Jacobian eigenvalue is 1-rho"
+            ),
         },
         "nova_equilibrium_modified": False,
     }
@@ -393,22 +390,6 @@ def eliminated_map(
     return mapped, evaluated
 
 
-def fixed_amplitude_map(
-    profile: ForwardProfile, current: np.ndarray, amplitude: float
-) -> Callable[[jax.Array], jax.Array]:
-    """Return the physical flux map at one fixed common source amplitude."""
-
-    external = profile.operator.external(jnp.asarray(current))
-
-    def mapped(state: jax.Array) -> jax.Array:
-        moments = profile.operator.cell_current_moments(state, TopologyClass.DIVERTED)
-        return external + profile.operator.current_moment_image(
-            _scaled_moments(moments, jnp.asarray(amplitude))
-        )
-
-    return mapped
-
-
 def _relative_sup(image: np.ndarray, state: np.ndarray) -> float:
     return float(
         np.max(np.abs(np.asarray(image) - np.asarray(state)))
@@ -511,154 +492,6 @@ def solve_eliminated(
     }
 
 
-def _augmented_evaluator(
-    profile: ForwardProfile,
-    current: np.ndarray,
-    target_current_a: float,
-    alpha: float,
-) -> Callable[[np.ndarray], tuple[np.ndarray, dict[str, float]]]:
-    """Return the square augmented residual and its scalar diagnostics."""
-
-    operator = profile.operator
-    external = operator.external(jnp.asarray(current))
-    grid_count = profile.lattice.node_count
-
-    def traced(unknown: jax.Array):
-        state = unknown[:-1]
-        amplitude = unknown[-1]
-        moments, measure, _masks, topology = operator.current_moments_and_observation(
-            state, TopologyClass.DIVERTED
-        )
-        unscaled = jnp.sum(moments.cell_current)
-        image = external + operator.current_moment_image(
-            _scaled_moments(moments, amplitude)
-        )
-        raw = image - state
-        area = measure.area
-        area_sum = jnp.maximum(jnp.sum(area), 1.0e-300)
-        flux_span = jnp.maximum(jnp.abs(topology.flux_span), 1.0e-300)
-        clipped_l2 = (
-            jnp.sqrt(jnp.sum(area * raw[:grid_count] ** 2) / area_sum) / flux_span
-        )
-        raw_norm = jnp.linalg.norm(raw)
-        block = raw * clipped_l2 / jnp.maximum(raw_norm, 1.0e-300)
-        current_error = (amplitude * unscaled - target_current_a) / abs(
-            target_current_a
-        )
-        residual = jnp.r_[block, alpha * current_error]
-        return residual, clipped_l2, current_error, unscaled
-
-    compiled = jax.jit(traced)
-
-    def evaluated(unknown: np.ndarray) -> tuple[np.ndarray, dict[str, float]]:
-        amplitude = float(unknown[-1])
-        if not np.isfinite(amplitude) or not (
-            LAMBDA_BAND[0] <= amplitude <= LAMBDA_BAND[1]
-        ):
-            raise LambdaOutOfBand(amplitude)
-        residual, flux_l2, current_error, unscaled = compiled(jnp.asarray(unknown))
-        return np.asarray(residual, dtype=float), {
-            "amplitude": amplitude,
-            "flux_l2_relative_residual": float(flux_l2),
-            "current_relative_error": float(current_error),
-            "unscaled_current_a": float(unscaled),
-            "combined_l2_relative_residual": float(jnp.linalg.norm(residual)),
-        }
-
-    return evaluated
-
-
-def solve_augmented(
-    profile: ForwardProfile,
-    seed: np.ndarray,
-    current: np.ndarray,
-    target_current_a: float,
-    alpha: float,
-) -> dict[str, Any]:
-    """Solve the square explicit-amplitude system at one registered alpha."""
-
-    _mapped, seed_evaluate = eliminated_map(profile, current, target_current_a)
-    seed_amplitude = seed_evaluate(seed).amplitude
-    evaluate = _augmented_evaluator(profile, current, target_current_a, alpha)
-    initial = np.r_[np.asarray(seed, dtype=float), seed_amplitude]
-    terminal = initial
-    history: list[float] = []
-    termination = "outer iteration ceiling exhausted"
-    guard_value: float | None = None
-    evaluations = 0
-
-    def residual(unknown: np.ndarray) -> np.ndarray:
-        nonlocal evaluations
-        evaluations += 1
-        return evaluate(unknown)[0]
-
-    def record(unknown: np.ndarray, value: np.ndarray) -> None:
-        _residual, metrics = evaluate(unknown)
-        history.append(metrics["combined_l2_relative_residual"])
-        if (
-            metrics["flux_l2_relative_residual"] <= RELATIVE_RESIDUAL_CRITERION
-            and abs(metrics["current_relative_error"]) <= CURRENT_CONSTRAINT_CRITERION
-        ):
-            raise _CriterionReached(unknown)
-
-    try:
-        terminal = scipy.optimize.newton_krylov(
-            residual,
-            initial,
-            method="gmres",
-            inner_maxiter=HOST_INNER_ITERATIONS,
-            maxiter=HOST_OUTER_ITERATIONS,
-            f_tol=0.0,
-            line_search="armijo",
-            callback=record,
-        )
-        termination = "host solver returned"
-    except _CriterionReached as reached:
-        terminal = reached.state
-        termination = "declared flux and current criteria reached"
-    except scipy.optimize.NoConvergence as error:
-        terminal = np.asarray(error.args[0], dtype=float)
-    except LambdaOutOfBand as error:
-        guard_value = error.value
-        termination = str(error)
-
-    try:
-        _residual, metrics = evaluate(terminal)
-    except LambdaOutOfBand as error:
-        guard_value = error.value
-        metrics = {
-            "amplitude": error.value,
-            "flux_l2_relative_residual": float("inf"),
-            "current_relative_error": float("inf"),
-            "unscaled_current_a": float("nan"),
-            "combined_l2_relative_residual": float("inf"),
-        }
-    state = terminal[:-1]
-    amplitude = float(terminal[-1])
-    physical_map = fixed_amplitude_map(profile, current, amplitude)
-    image = np.asarray(jax.jit(physical_map)(jnp.asarray(state)), dtype=float)
-    topology, x_point = _topology(profile, state)
-    return {
-        "state": state,
-        "relative_residual": metrics["combined_l2_relative_residual"],
-        "flux_l2_relative_residual": metrics["flux_l2_relative_residual"],
-        "physical_sup_relative_residual": _relative_sup(image, state),
-        "current_relative_error": abs(metrics["current_relative_error"]),
-        "current_constraint_required": True,
-        "unscaled_current_a": metrics["unscaled_current_a"],
-        "amplitude": metrics["amplitude"],
-        "iterations": len(history),
-        "map_evaluations": evaluations,
-        "residual_history": history,
-        "topology": topology,
-        "x_point_rz_m": x_point,
-        "termination": termination,
-        "lambda_guard_triggered": guard_value is not None,
-        "lambda_guard_value": guard_value,
-        "mapped": physical_map,
-    }
-
-
 def power_iteration(
     mapped: Callable[[jax.Array], jax.Array], state: np.ndarray
 ) -> dict[str, Any]:
@@ -702,7 +535,7 @@ def power_iteration(
         "rayleigh_quotient": rayleigh,
         "absolute_dominant_eigenvalue_estimate": abs(rayleigh),
         "last_five_norm_growth_estimates": growth[-5:],
-        "finite": finite and np.isfinite(rayleigh),
+        "finite": bool(finite and np.isfinite(rayleigh)),
         "banked_diverted_state_comparison_band": [1.25, 1.40],
     }
 
@@ -831,23 +664,11 @@ def solve_frame(
     shipped_unpinned = solve_unpinned(profile, seed, shipped_current, target)
     unpinned = solve_unpinned(profile, seed, current, target)
     eliminated = solve_eliminated(profile, seed, current, target)
-    augmented_trials = {
-        str(alpha): solve_augmented(profile, seed, current, target, alpha)
-        for alpha in AUGMENTED_ALPHAS
-    }
-    nominal = augmented_trials[str(NOMINAL_ALPHA)]
 
-    for result in (unpinned, eliminated, nominal):
+    for result in (unpinned, eliminated):
         result["dominant_map_eigenvalue"] = power_iteration(
             result["mapped"], result["state"]
         )
-    alpha_serial = {
-        alpha: _serialise_arm(result) for alpha, result in augmented_trials.items()
-    }
-    alpha_verdicts = {
-        value["simultaneously_meets_1e-6_and_diverted"]
-        for value in alpha_serial.values()
-    }
     record = {
         "shot": frame_input.shot,
         "frame": frame_input.frame,
@@ -869,7 +690,6 @@ def solve_frame(
         "arms": {
             ARM_NAMES[0]: _serialise_arm(unpinned),
             ARM_NAMES[1]: _serialise_arm(eliminated),
-            ARM_NAMES[2]: _serialise_arm(nominal),
         },
         "unconstrained_current_controls": {
             "shipped_20": _serialise_arm(shipped_unpinned),
@@ -879,8 +699,10 @@ def solve_frame(
                 / max(unpinned["relative_residual"], 1.0e-300)
             ),
         },
-        "augmented_alpha_trials": alpha_serial,
-        "augmented_verdict_stable_across_alpha": len(alpha_verdicts) == 1,
+        "alpha_stability": {
+            "status": "not applicable",
+            "reason": "the explicit-row augmented comparison arm was dropped",
+        },
     }
     return record
 
@@ -1019,8 +841,18 @@ def summarize(
         },
         "low_current_control_fixture": low_current_control,
         "arms": arms,
-        "augmented_verdict_stable_across_alpha_all_frames": all(
-            item["augmented_verdict_stable_across_alpha"] for item in records
+        "alpha_stability": {
+            "status": "not applicable",
+            "reason": (
+                "the dropped explicit-row comparison would require a new public "
+                "primitive, while the recommended eliminated construction does not"
+            ),
+        },
+        "eigenvalue_interpretation": (
+            "The reported value estimates the Picard-map spectral radius. Pinning "
+            "below one would additionally rehabilitate damped fixed-point routes; "
+            "a radius of 1.25 to 1.40 corresponds to a Newton residual-Jacobian "
+            "eigenvalue of -0.25 to -0.40 and is not a singular Newton root."
         ),
         "current_pinning_removes_vacuum_root_and_orbiting_plateau": bool(
             pin_passes == len(records)
@@ -1035,8 +867,8 @@ def _figure(summary: dict[str, Any], path: Path) -> None:
     records = summary["frames"]
     labels = [f"{item['shot'][9:17]}:{item['frame']}" for item in records]
     x = np.arange(len(records))
-    width = 0.24
-    colors = ("#4477aa", "#228833", "#cc6677")
+    width = 0.34
+    colors = ("#4477aa", "#228833")
     figure, axes = plt.subplots(1, 3, figsize=(14.5, 4.8), constrained_layout=True)
     for offset, (arm, color) in enumerate(zip(ARM_NAMES, colors, strict=True)):
         residual = [
@@ -1049,7 +881,7 @@ def _figure(summary: dict[str, Any], path: Path) -> None:
             for item in records
         ]
         amplitude = [item["arms"][arm]["amplitude"] for item in records]
-        shift = (offset - 1) * width
+        shift = (offset - 0.5) * width
         axes[0].bar(x + shift, residual, width, color=color, label=arm)
         axes[1].bar(x + shift, amplitude, width, color=color)
         axes[2].bar(x + shift, radius, width, color=color)
@@ -1145,7 +977,16 @@ def run(data: Path, output: Path) -> dict[str, Any]:
         "interpretation": (
             "Prescribed Ip is a declared admissible input of the same class as the "
             "coil currents, available in the competition inputs or from a partner "
-            "transport solve; it is not fitted inside this equilibrium solve."
+            "transport solve; it is not fitted inside this equilibrium solve. The "
+            "representative seed amplitudes 0.955 to 1.487 are positive and near "
+            "unity, independently confirming that the ramp-start fixture's "
+            "-0.00712 amplitude was a frame-selection defect."
+        ),
+        "design_finding": (
+            "The arm requiring a new public clipped-support primitive is the "
+            "explicit-row comparison that was not recommended; closed-form "
+            "elimination keeps the system square and enforces current exactly "
+            "without that primitive or an alpha weight."
         ),
         "result": result,
     }

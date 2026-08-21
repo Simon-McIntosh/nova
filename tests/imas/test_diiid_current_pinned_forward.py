@@ -36,7 +36,11 @@ def test_declaration_keeps_the_constraint_explicit_and_the_system_square() -> No
     assert declaration["arms"]["pinned_eliminated"]["unknowns_and_rows"].startswith(
         "N flux unknowns and N flux"
     )
-    assert declaration["arms"]["pinned_augmented"]["alphas"] == [0.1, 1.0, 10.0]
+    assert set(declaration["arms"]) == set(pinned.ARM_NAMES)
+    assert declaration["dropped_comparison_arm"]["alpha_stability"] == (
+        "not applicable"
+    )
+    assert "does not expose" in declaration["dropped_comparison_arm"]["reason"]
 
 
 def test_lambda_elimination_enforces_current_exactly() -> None:
@@ -66,6 +70,14 @@ def test_common_amplitude_scales_every_current_moment() -> None:
     np.testing.assert_allclose(scaled.vertical_moment, [12.5, 15.0])
 
 
+def test_power_iteration_receipt_is_strict_json_serializable() -> None:
+    result = pinned.power_iteration(lambda state: 0.5 * state, np.ones(8))
+
+    assert result["finite"] is True
+    assert 0.4 < result["absolute_dominant_eigenvalue_estimate"] < 0.6
+    json.dumps(result, allow_nan=False)
+
+
 def test_summary_requires_representative_current_and_diverted_convergence() -> None:
     eigenvalue = {
         "absolute_dominant_eigenvalue_estimate": 1.1,
@@ -89,7 +101,6 @@ def test_summary_requires_representative_current_and_diverted_convergence() -> N
                 "screened_out_of_affected_polarity_population": True,
                 "absolute_target_plasma_current_a": 500_000.0,
                 "target_and_unscaled_source_same_sign": True,
-                "augmented_verdict_stable_across_alpha": True,
                 "unconstrained_current_controls": {
                     "shipped_20": {"relative_residual": 0.12},
                     "full_24": {"relative_residual": 0.03},
@@ -98,7 +109,6 @@ def test_summary_requires_representative_current_and_diverted_convergence() -> N
                 "arms": {
                     "unpinned": arm(pinned.UNPINNED_PLATEAU_CONTROL, 1.0, False),
                     "pinned_eliminated": arm(1.0e-8, 1.2, True),
-                    "pinned_augmented": arm(1.0e-8, 1.2, True),
                 },
             }
         )
@@ -113,7 +123,7 @@ def test_summary_requires_representative_current_and_diverted_convergence() -> N
     assert summary["current_pinning_removes_vacuum_root_and_orbiting_plateau"]
 
 
-def test_generated_receipt_carries_five_screened_three_arm_frames() -> None:
+def test_generated_receipt_carries_five_screened_two_arm_frames() -> None:
     path = pinned.DEFAULT_OUTPUT / pinned.RECEIPT_NAME
     receipt = json.loads(path.read_text())
     result = receipt["result"]
@@ -127,6 +137,8 @@ def test_generated_receipt_carries_five_screened_three_arm_frames() -> None:
         "historical_full_24_plateau_reproduced"
     ]
     assert not result["low_current_control_fixture"]["constrained_arms_scored"]
+    assert result["alpha_stability"]["status"] == "not applicable"
+    assert "Picard-map spectral radius" in result["eigenvalue_interpretation"]
     assert len(result["frames"]) >= 5
     for frame in result["frames"]:
         assert frame["same_label_branch_seed_all_arms"]
@@ -139,7 +151,7 @@ def test_generated_receipt_carries_five_screened_three_arm_frames() -> None:
             "shipped_to_full_residual_ratio",
         }
         assert set(frame["arms"]) == set(pinned.ARM_NAMES)
-        assert set(frame["augmented_alpha_trials"]) == {"0.1", "1.0", "10.0"}
+        assert frame["alpha_stability"]["status"] == "not applicable"
         for arm in pinned.ARM_NAMES:
             measured = frame["arms"][arm]
             assert "relative_residual" in measured
@@ -154,4 +166,5 @@ def test_source_does_not_modify_or_import_an_equilibrium_implementation() -> Non
     source = Path(pinned.__file__).read_text()
 
     assert "nova/equilibrium" not in source
-    assert "prescribed input of the same class as the coil currents" in source
+    assert "prescribed input" in source
+    assert "same class as the coil currents" in source

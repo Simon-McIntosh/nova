@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T15:14:44",
+  "updated": "2026-08-21T21:47:32",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -754,6 +754,11 @@
         "when": "2026-08-21",
         "who": "reckon-ship",
         "what": "Owner rescope: the S8 H200 throughput work (mast-catalog-gpu-solve) now includes a capabilities demo on the DIII-D competition dataset, recorded as ladder stage L2b - batched end-to-end solves on the second onboarded machine with side-by-side solved/labeled maps, receipts beside the MAST ladder numbers, same code path as the MAST ladder."
+      },
+      {
+        "when": "2026-08-21",
+        "who": "reckon-ship",
+        "what": "S8 session drain ledger at 2026-08-21T22:20Z - dual-basin-solve SHIPPED (impl 1.0). Rows: (1) device-kernel-build go/no-go with remaining port, cache-provenance and jacfwd nodes: authority-required - the locked port-go-threshold assigns the ruling to the owner; the three-axis package (performance 12.4 s projected vs 120 s bar; parity self 2.19e-5 pass, far 1.49e-9 absolute; compile wall 39 min at 150 GB unfinished) is banked in the plan. (2) efit-forward-parity verdict consequence: authority-required - the frozen-six verdict is FAIL (0/6 converged at 1e-8, five DINA-class closest approaches), the catalog is held per the plan clause, and commissioning the follow-on diagnosis (0.41 percent boundary residual, +1.86 percent plasma-field term, refinement) is the owner call. (3) mast-catalog-gpu-solve including the DIII-D competition-dataset L2b demo: authority-required - held on the negative parity verdict per the plan own gate clause. rows: 3, foldable-remaining: 0."
       }
     ],
     "blockers": [
@@ -786,6 +791,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 50
+    "_version": 51
   }
 }

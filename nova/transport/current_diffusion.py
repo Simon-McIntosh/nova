@@ -319,7 +319,7 @@ def _bicubic_derivatives(coefficient, radial, vertical):
     radial_second = 2.0 * jnp.diff(radial_coefficient, axis=-1)
     vertical_second = 2.0 * jnp.diff(vertical_coefficient, axis=-2)
     mixed = 3.0 * jnp.diff(vertical_coefficient, axis=-1)
-    return (
+    values = (
         _tensor_bernstein(coefficient, radial, vertical, 3, 3),
         _tensor_bernstein(radial_coefficient, radial, vertical, 2, 3),
         _tensor_bernstein(vertical_coefficient, radial, vertical, 3, 2),
@@ -327,25 +327,30 @@ def _bicubic_derivatives(coefficient, radial, vertical):
         _tensor_bernstein(mixed, radial, vertical, 2, 2),
         _tensor_bernstein(vertical_second, radial, vertical, 3, 1),
     )
+    return tuple(jnp.asarray(value, dtype=coefficient.dtype) for value in values)
 
 
 def _bicubic_edge_coordinates(edge, fraction):
     """Map counter-clockwise unit-cell edge coordinates to the cell interior."""
+    zero = jnp.zeros((), dtype=fraction.dtype)
+    one = jnp.ones((), dtype=fraction.dtype)
     radial = jnp.where(
         edge == 0,
         fraction,
-        jnp.where(edge == 1, 1.0, jnp.where(edge == 2, 1.0 - fraction, 0.0)),
+        jnp.where(edge == 1, one, jnp.where(edge == 2, one - fraction, zero)),
     )
     vertical = jnp.where(
         edge == 0,
-        0.0,
-        jnp.where(edge == 1, fraction, jnp.where(edge == 2, 1.0, 1.0 - fraction)),
+        zero,
+        jnp.where(edge == 1, fraction, jnp.where(edge == 2, one, one - fraction)),
     )
     return radial, vertical
 
 
 def _bicubic_edge_crossings(level, coefficient, corner_flux):
     """Locate all sign-changing bicubic edge roots by fixed bisection."""
+    level = jnp.asarray(level, dtype=corner_flux.dtype)
+    half = jnp.asarray(0.5, dtype=corner_flux.dtype)
     inside = corner_flux < level
     crossing = inside != jnp.roll(inside, -1, axis=1)
     edge = jnp.broadcast_to(jnp.arange(4), corner_flux.shape)
@@ -355,7 +360,7 @@ def _bicubic_edge_crossings(level, coefficient, corner_flux):
 
     def bisect(_, state):
         lower, upper, lower_value = state
-        middle = 0.5 * (lower + upper)
+        middle = half * (lower + upper)
         radial, vertical = _bicubic_edge_coordinates(edge, middle)
         value = (
             _bicubic_derivatives(coefficient[:, None, :, :], radial, vertical)[0]
@@ -369,7 +374,7 @@ def _bicubic_edge_crossings(level, coefficient, corner_flux):
         )
 
     low, high, _ = jax.lax.fori_loop(0, 18, bisect, (low, high, low_value))
-    fraction = 0.5 * (low + high)
+    fraction = half * (low + high)
     radial, vertical = _bicubic_edge_coordinates(edge, fraction)
     return jnp.stack((radial, vertical), axis=-1), crossing, inside
 
@@ -378,6 +383,12 @@ def _solve_bicubic_ordinate(
     coefficient, level, independent, initial, *, solve_vertical
 ):
     """Follow one bicubic level-set branch at fixed traced coordinates."""
+    dtype = initial.dtype
+    level = jnp.asarray(level, dtype=dtype)
+    zero = jnp.zeros((), dtype=dtype)
+    one = jnp.ones((), dtype=dtype)
+    derivative_floor = jnp.asarray(1e-12, dtype=dtype)
+    maximum_step = jnp.asarray(0.2, dtype=dtype)
 
     def update(_, ordinate):
         radial = jnp.where(solve_vertical, independent, ordinate)
@@ -387,12 +398,12 @@ def _solve_bicubic_ordinate(
         )
         derivative = jnp.where(solve_vertical, vertical_gradient, radial_gradient)
         safe_derivative = jnp.where(
-            jnp.abs(derivative) > 1e-12,
+            jnp.abs(derivative) > derivative_floor,
             derivative,
-            jnp.where(derivative < 0.0, -1e-12, 1e-12),
+            jnp.where(derivative < zero, -derivative_floor, derivative_floor),
         )
-        step = jnp.clip((value - level) / safe_derivative, -0.2, 0.2)
-        return jnp.clip(ordinate - step, 0.0, 1.0)
+        step = jnp.clip((value - level) / safe_derivative, -maximum_step, maximum_step)
+        return jnp.clip(ordinate - step, zero, one)
 
     return jax.lax.fori_loop(0, 10, update, initial)
 
@@ -493,6 +504,14 @@ def _bicubic_arc_moment_correction(level, coefficient, corner_flux, dr, dz):
 
 def _bicubic_stationary_point(coefficient, level, radial, vertical, *, radial_extremum):
     """Refine a coordinate extremum constrained to a bicubic level set."""
+    dtype = radial.dtype
+    level = jnp.asarray(level, dtype=dtype)
+    zero = jnp.zeros((), dtype=dtype)
+    one = jnp.ones((), dtype=dtype)
+    determinant_floor = jnp.asarray(1e-14, dtype=dtype)
+    maximum_step = jnp.asarray(0.2, dtype=dtype)
+    lower_bound = jnp.asarray(-0.1, dtype=dtype)
+    upper_bound = jnp.asarray(1.1, dtype=dtype)
 
     def update(_, state):
         current_radial, current_vertical = state
@@ -504,9 +523,9 @@ def _bicubic_stationary_point(coefficient, level, radial, vertical, *, radial_ex
         second_z = jnp.where(radial_extremum, hessian_zz, hessian_rz)
         determinant = gradient_r * second_z - gradient_z * second_r
         safe_determinant = jnp.where(
-            jnp.abs(determinant) > 1e-14,
+            jnp.abs(determinant) > determinant_floor,
             determinant,
-            jnp.where(determinant < 0.0, -1e-14, 1e-14),
+            jnp.where(determinant < zero, -determinant_floor, determinant_floor),
         )
         residual = value - level
         radial_step = (second_z * residual - gradient_z * constrained_gradient) / (
@@ -516,8 +535,16 @@ def _bicubic_stationary_point(coefficient, level, radial, vertical, *, radial_ex
             -second_r * residual + gradient_r * constrained_gradient
         ) / safe_determinant
         return (
-            jnp.clip(current_radial - jnp.clip(radial_step, -0.2, 0.2), -0.1, 1.1),
-            jnp.clip(current_vertical - jnp.clip(vertical_step, -0.2, 0.2), -0.1, 1.1),
+            jnp.clip(
+                current_radial - jnp.clip(radial_step, -maximum_step, maximum_step),
+                lower_bound,
+                upper_bound,
+            ),
+            jnp.clip(
+                current_vertical - jnp.clip(vertical_step, -maximum_step, maximum_step),
+                lower_bound,
+                upper_bound,
+            ),
         )
 
     radial, vertical = jax.lax.fori_loop(0, 10, update, (radial, vertical))
@@ -525,13 +552,17 @@ def _bicubic_stationary_point(coefficient, level, radial, vertical, *, radial_ex
         coefficient, radial, vertical
     )
     constrained_gradient = jnp.where(radial_extremum, gradient_z, gradient_r)
+    level_tolerance = jnp.asarray(2.0e-8, dtype=dtype) * jnp.maximum(
+        one, jnp.abs(level)
+    )
+    gradient_tolerance = jnp.asarray(2.0e-7, dtype=dtype)
     valid = (
-        (radial >= 0.0)
-        & (radial <= 1.0)
-        & (vertical >= 0.0)
-        & (vertical <= 1.0)
-        & (jnp.abs(value - level) < 2.0e-8 * jnp.maximum(1.0, jnp.abs(level)))
-        & (jnp.abs(constrained_gradient) < 2.0e-7)
+        (radial >= zero)
+        & (radial <= one)
+        & (vertical >= zero)
+        & (vertical <= one)
+        & (jnp.abs(value - level) < level_tolerance)
+        & (jnp.abs(constrained_gradient) < gradient_tolerance)
     )
     return radial, vertical, valid
 

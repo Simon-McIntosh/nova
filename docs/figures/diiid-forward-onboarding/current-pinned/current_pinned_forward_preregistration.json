@@ -1,17 +1,5 @@
 {
   "arms": {
-    "pinned_augmented": {
-      "alphas": [
-        0.1,
-        1.0,
-        10.0
-      ],
-      "definition": "lambda is an explicit extra unknown and alpha times relative current error is an explicit extra residual row",
-      "flux_block": "full flux residual direction rescaled so its Euclidean norm equals the exact clipped-cell area-weighted grid L2 norm divided by the instantaneous flux span",
-      "nominal_alpha": 1.0,
-      "route": "host Jacobian-free Newton-Krylov with Armijo search",
-      "unknowns_and_rows": "N flux unknowns plus lambda and N flux rows plus one current row"
-    },
     "pinned_eliminated": {
       "definition": "lambda = target Ip / unscaled clipped-support Ip at every map evaluation; lambda multiplies all current moments",
       "route": "host Jacobian-free Newton-Krylov with Armijo search",
@@ -29,6 +17,12 @@
       "step_cap": 10.0,
       "warmup": 8
     }
+  },
+  "dropped_comparison_arm": {
+    "alpha_stability": "not applicable",
+    "name": "pinned_augmented",
+    "reason": "an explicit current-residual row requires a clipped-support observation primitive the public ForwardOperator does not expose; closed-form elimination satisfies Ip exactly without that primitive, keeps the system square and needs no residual weight",
+    "status": "not applicable and not scored"
   },
   "host_budget": {
     "maximum_inner_iterations": 40,
@@ -117,6 +111,7 @@
       1.25,
       1.4
     ],
+    "interpretation": "estimate the Picard-map spectral radius; rho below one after pinning would rehabilitate damped fixed-point routes, while rho above one does not make the Newton root singular because the Newton residual Jacobian eigenvalue is 1-rho",
     "iterations": 16,
     "method": "central-difference map action inside fixed-count power iteration",
     "relative_step": 1e-06

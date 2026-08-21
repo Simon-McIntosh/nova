@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T01:11:00",
+  "updated": "2026-08-22T01:27:34",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -19786,9 +19786,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T230527147945-exchange-collapse-diagnosis",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a76",
+        "node": "exchange-collapse-diagnosis",
+        "role": "implement",
+        "member": "transport-seam",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T23:05:29Z",
+        "completed_at": "2026-08-21T23:26:48Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1279,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1279,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "bff71ec34221c835872904e166e69eb631f4afb9",
+        "commits": [
+          "d1966245"
+        ],
+        "changed_lines": {
+          "added": 473,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "decisive classification: equilibrium BRANCH LOSS, with both alternatives falsified by number - pressure factor exactly 1.0 kills the scale-mismatch hypothesis and its matched replay is identical, drives are order-unity (p-prime ratio 0.344, ff-prime 1.835) so no seam admissibility gap. The trajectory holds a confined core for four exchanges then exchange five converges at residual 7.6e-17, solver_succeeded true, limited-to-limited with zero transitions, onto the coreless vacuum fixed point with zero plasma current: an honest convergence to the wrong basin under a small source change. Repair routes to branch/seed continuity - the window equilibrium sweep does not yet consume the history-based branch selection and cold-seed machinery that landed on main today for precisely this failure",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T230527147945-exchange-collapse-diagnosis/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f6b-0c94-7b22-896f-25342e60d271",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 12324352,
+            "cached_input_tokens_cumulative": 87876352,
+            "input_tokens": 12752144,
+            "input_tokens_cumulative": 89636222,
+            "output_tokens": 37418,
+            "output_tokens_cumulative": 182803,
+            "reasoning_output_tokens": 11259,
+            "reasoning_output_tokens_cumulative": 63298
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 486
+    "_version": 487
   }
 }

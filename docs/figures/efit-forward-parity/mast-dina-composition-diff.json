@@ -1,0 +1,453 @@
+{
+  "receipt": "one-application MAST versus convergent DINA composition diagnosis",
+  "backend": "JAX_PLATFORMS=cpu required by invocation",
+  "execution_contract": {
+    "nonlinear_solve_calls": 0,
+    "nonlinear_promotions": 0,
+    "composed_map_primal_applications_per_case": 1,
+    "power_iterations_per_case": 40,
+    "purpose": "diagnose the local composed maps at stored reference states, not find or polish either root"
+  },
+  "path_audit": {
+    "sensor_reads": 0,
+    "whitening_matrices": 0,
+    "least_squares_updates": 0,
+    "inverse_fit_coefficients": 0,
+    "passes": true
+  },
+  "mast": {
+    "reference": {
+      "machine": "MAST",
+      "shot": 21985,
+      "slice_index": 51,
+      "time_s": 0.2750000059604645,
+      "span_wb": 1.823353801798901,
+      "span_definition": "peak-to-peak efm/psirz on the benchmark grid",
+      "plasma_current_a": 934383.875,
+      "source_coordinate": {
+        "axis_wb": 0.33908170628553735,
+        "boundary_wb": -0.2193531903351262,
+        "support_nodes": 227
+      },
+      "qualification_before_attribution": {
+        "typed_saddle_resolved": true,
+        "typed_saddle_candidate_count": 2,
+        "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 1.424904549219899e-08,
+        "declared_boundary_to_map_saddle_limit": 0.01,
+        "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0026320993551678384,
+        "stored_lcfs_contour_limit": 0.006,
+        "passes": true
+      }
+    },
+    "mesh": {
+      "kind": "33 by 33 rectangular benchmark lattice",
+      "realised_cells": 1089,
+      "source_moments": "centroid current on prescribed reference support"
+    },
+    "single_application": {
+      "composed_map_primal_applications": 1,
+      "linearization_and_primal_image_shared": true,
+      "nonlinear_promotions": 0,
+      "state_nodes": 1126,
+      "grid_nodes": 1089,
+      "wall_nodes": 37,
+      "flux_update": {
+        "sup_wb": 0.07430856249744644,
+        "rms_wb": 0.030239262728008302,
+        "sup_fraction_of_span": 0.04075378153386053,
+        "rms_fraction_of_span": 0.016584418612654646
+      },
+      "spatial_concentration": {
+        "region_radius_m": 0.12125000008381903,
+        "global_physical_update": {
+          "sup_wb": 0.07430856249744644,
+          "rms_wb": 0.030239262728008302,
+          "sup_fraction_of_span": 0.04075378153386053,
+          "rms_fraction_of_span": 0.016584418612654646
+        },
+        "regions": {
+          "axis_region": {
+            "sup_wb": 0.015830081655837047,
+            "rms_wb": 0.011685720343670918,
+            "sup_fraction_of_span": 0.008681848602404679,
+            "rms_fraction_of_span": 0.006408915445889829,
+            "sample_count": 5,
+            "fraction_of_physical_l2_energy": 0.0006631323193475462
+          },
+          "edge_region": {
+            "sup_wb": 0.03487978265079955,
+            "rms_wb": 0.023575983916798292,
+            "sup_fraction_of_span": 0.019129464954298795,
+            "rms_fraction_of_span": 0.012930010562699615,
+            "sample_count": 170,
+            "fraction_of_physical_l2_energy": 0.09177149093949896
+          },
+          "x_point_region": {
+            "sup_wb": 0.029807899116910064,
+            "rms_wb": 0.026359462437938325,
+            "sup_fraction_of_span": 0.016347841591413535,
+            "rms_fraction_of_span": 0.01445658128001947,
+            "sample_count": 9,
+            "fraction_of_physical_l2_energy": 0.006073441053714726
+          },
+          "core_bulk": {
+            "sup_wb": 0.030682592022013386,
+            "rms_wb": 0.019907440826925492,
+            "sup_fraction_of_span": 0.01682755809198537,
+            "rms_fraction_of_span": 0.010918035110511754,
+            "sample_count": 144,
+            "fraction_of_physical_l2_energy": 0.05542587678559241
+          },
+          "exterior_grid": {
+            "sup_wb": 0.07430856249744644,
+            "rms_wb": 0.03302290198219368,
+            "sup_fraction_of_span": 0.04075378153386053,
+            "rms_fraction_of_span": 0.018111077482391866,
+            "sample_count": 770,
+            "fraction_of_physical_l2_energy": 0.8155308777446815
+          },
+          "wall": {
+            "sup_wb": 0.06274060331500908,
+            "rms_wb": 0.03191767319275177,
+            "sup_fraction_of_span": 0.03440945100896484,
+            "rms_fraction_of_span": 0.017504925901523964,
+            "sample_count": 37,
+            "fraction_of_physical_l2_energy": 0.036608622210879606
+          }
+        },
+        "largest_region_by_sup_fraction": "exterior_grid",
+        "largest_region_by_l2_energy_fraction": "exterior_grid",
+        "absolute_peak": {
+          "region": "exterior_grid",
+          "coordinate_m": [
+            2.0,
+            -0.625
+          ],
+          "update_wb": -0.07430856249744644,
+          "distance_to_axis_m": 1.2680506375913527,
+          "distance_to_edge_m": 0.7710809427230201,
+          "distance_to_x_point_m": 1.5253676949920052
+        }
+      }
+    },
+    "plasma_current_integral_a": {
+      "reference_state_before_application": 934020.0992115923,
+      "image_state_after_application": 878590.4787757978,
+      "signed_change_a": -55429.62043579458,
+      "after_over_before": 0.9406547883899042
+    },
+    "source_forcing": {
+      "grid": {
+        "sup_wb": 1.1442579542253428,
+        "rms_wb": 0.4679001104115914,
+        "sup_fraction_of_span": 0.6275567325970585,
+        "rms_fraction_of_span": 0.25661509573729807
+      },
+      "wall": {
+        "sup_wb": 0.7683470265443004,
+        "rms_wb": 0.37079155322865276,
+        "sup_fraction_of_span": 0.42139217621191105,
+        "rms_fraction_of_span": 0.20335688710706273
+      },
+      "definition": "plasma-current image, composed image minus external image"
+    },
+    "boundary_flux_balance": {
+      "gauge_discipline": {
+        "method": "one additive offset on the external component aligns the composed-image wall mean to the reference wall mean",
+        "nova_to_reference_additive_offset_wb": 0.03439348572269151,
+        "raw_cross_gauge_amplitude_difference_scored": false
+      },
+      "reference_total_boundary_in_reference_gauge": {
+        "sup_wb": 1.1550466530771006,
+        "rms_wb": 0.610015574021121,
+        "sup_fraction_of_span": 0.6334736856541743,
+        "rms_fraction_of_span": 0.33455688820199697
+      },
+      "external_boundary_after_additive_alignment": {
+        "sup_wb": 1.7077903950180597,
+        "rms_wb": 0.9890689540850525,
+        "sup_fraction_of_span": 0.9366204152661828,
+        "rms_fraction_of_span": 0.542444890897887
+      },
+      "plasma_source_boundary": {
+        "sup_wb": 0.7683470265443004,
+        "rms_wb": 0.37079155322865276,
+        "sup_fraction_of_span": 0.42139217621191105,
+        "rms_fraction_of_span": 0.20335688710706273
+      },
+      "plasma_flux_required_to_close_reference_boundary": {
+        "sup_wb": 0.7959454018461082,
+        "rms_wb": 0.38881366379208093,
+        "sup_fraction_of_span": 0.43652822675491565,
+        "rms_fraction_of_span": 0.21324093185232706
+      },
+      "composed_total_minus_reference_total": {
+        "sup_wb": 0.06274060331500908,
+        "rms_wb": 0.03191767319275177,
+        "sup_fraction_of_span": 0.03440945100896484,
+        "rms_fraction_of_span": 0.017504925901523964
+      },
+      "external_to_reference_boundary_variation_rms_ratio": 1.668697061026386,
+      "source_to_required_plasma_boundary_rms_ratio": 0.9536484639257289
+    },
+    "linearized_map": {
+      "method": "fixed-count power iteration on the exact jax.linearize tangent",
+      "random_seed": 11,
+      "iterations": 40,
+      "tangent_applications": 41,
+      "rayleigh_quotient": 1.9132450123257896,
+      "absolute_dominant_eigenvalue_estimate": 1.9132450123257896,
+      "final_norm_growth_estimate": 1.9132450123257567,
+      "last_five_norm_growth_estimates": [
+        1.913245012325029,
+        1.9132450123253884,
+        1.9132450123255866,
+        1.913245012325696,
+        1.9132450123257567
+      ],
+      "picard_contracts": false
+    }
+  },
+  "dina_convergent_control": {
+    "reference": {
+      "machine": "ITER DINA",
+      "pulse": 135011,
+      "run": 7,
+      "slice_index": 353,
+      "time_s": 338.9275978120551,
+      "dd_version": "3.39.0",
+      "span_wb": 80.89369098146811,
+      "span_definition": "declared axis-to-boundary total-flux span",
+      "plasma_current_a": -14992360.69655846,
+      "control_qualification": "this exact 566-cell production operator is the suite's converged diverted DINA control; no solve is run here"
+    },
+    "mesh": {
+      "kind": "wall-trimmed production hexagonal mesh",
+      "requested_cells": -500,
+      "realised_cells": 566,
+      "source_moments": "clipped linear cell-current moments",
+      "cache_key": "746fbe1553c4b242",
+      "cache_arrays_verified": 31,
+      "cache_bytes_verified": 51411470,
+      "bitwise_stored_precision": true,
+      "cold_build_fallback": false
+    },
+    "single_application": {
+      "composed_map_primal_applications": 1,
+      "linearization_and_primal_image_shared": true,
+      "nonlinear_promotions": 0,
+      "state_nodes": 2396,
+      "grid_nodes": 566,
+      "wall_nodes": 165,
+      "flux_update": {
+        "sup_wb": 0.600622347729546,
+        "rms_wb": 0.3074649907340839,
+        "sup_fraction_of_span": 0.007424835490163779,
+        "rms_fraction_of_span": 0.0038008525387291437
+      },
+      "spatial_concentration": {
+        "region_radius_m": 0.508580200544416,
+        "global_physical_update": {
+          "sup_wb": 0.600622347729546,
+          "rms_wb": 0.3074649907340839,
+          "sup_fraction_of_span": 0.007424835490163779,
+          "rms_fraction_of_span": 0.0038008525387291437
+        },
+        "regions": {
+          "axis_region": {
+            "sup_wb": 0.45654381973577074,
+            "rms_wb": 0.38866918817024343,
+            "sup_fraction_of_span": 0.0056437506336601715,
+            "rms_fraction_of_span": 0.004804690989551749,
+            "sample_count": 16,
+            "fraction_of_physical_l2_energy": 0.03497610849852271
+          },
+          "edge_region": {
+            "sup_wb": 0.600622347729546,
+            "rms_wb": 0.3139934059444935,
+            "sup_fraction_of_span": 0.007424835490163779,
+            "rms_fraction_of_span": 0.0038815561774332443,
+            "sample_count": 302,
+            "fraction_of_physical_l2_energy": 0.43086307518434264
+          },
+          "x_point_region": {
+            "sup_wb": 0.139119804402986,
+            "rms_wb": 0.08614115012404143,
+            "sup_fraction_of_span": 0.0017197855940935724,
+            "rms_fraction_of_span": 0.0010648685834322414,
+            "sample_count": 14,
+            "fraction_of_physical_l2_energy": 0.0015032826533438052
+          },
+          "core_bulk": {
+            "sup_wb": 0.5651695868368307,
+            "rms_wb": 0.3632736412470219,
+            "sup_fraction_of_span": 0.006986571881932116,
+            "rms_fraction_of_span": 0.004490753689681981,
+            "sample_count": 215,
+            "fraction_of_physical_l2_energy": 0.4105797372306835
+          },
+          "exterior_grid": {
+            "sup_wb": 0.257609585324337,
+            "rms_wb": 0.15987984873614608,
+            "sup_fraction_of_span": 0.0031845448291307737,
+            "rms_fraction_of_span": 0.0019764192583667972,
+            "sample_count": 30,
+            "fraction_of_physical_l2_energy": 0.01109685702558169
+          },
+          "wall": {
+            "sup_wb": 0.5500080662273987,
+            "rms_wb": 0.2165561878616715,
+            "sup_fraction_of_span": 0.006799146627558381,
+            "rms_fraction_of_span": 0.0026770466921985574,
+            "sample_count": 165,
+            "fraction_of_physical_l2_energy": 0.11197380031218537
+          }
+        },
+        "largest_region_by_sup_fraction": "edge_region",
+        "largest_region_by_l2_energy_fraction": "edge_region",
+        "absolute_peak": {
+          "region": "edge_region",
+          "coordinate_m": [
+            8.149945180899623,
+            1.026237876020783
+          ],
+          "update_wb": -0.600622347729546,
+          "distance_to_axis_m": 1.8475672823523854,
+          "distance_to_edge_m": 0.029577451293509457,
+          "distance_to_x_point_m": 5.379754758279607
+        }
+      }
+    },
+    "plasma_current_integral_a": {
+      "reference_state_before_application": -15119504.508818131,
+      "image_state_after_application": -15195680.249002041,
+      "signed_change_a": -76175.74018391035,
+      "after_over_before": 1.0050382431606462
+    },
+    "source_forcing": {
+      "grid": {
+        "sup_wb": 216.13868928224838,
+        "rms_wb": 141.54743678085592,
+        "sup_fraction_of_span": 2.67188561505697,
+        "rms_fraction_of_span": 1.749795751232107
+      },
+      "wall": {
+        "sup_wb": 176.47127344676935,
+        "rms_wb": 85.82523918670252,
+        "sup_fraction_of_span": 2.1815208492241633,
+        "rms_fraction_of_span": 1.0609633229167919
+      },
+      "definition": "plasma-current image, composed image minus external image"
+    },
+    "boundary_flux_balance": {
+      "gauge_discipline": {
+        "method": "one additive offset on the external component aligns the composed-image wall mean to the reference wall mean",
+        "nova_to_reference_additive_offset_wb": 0.6935842298128609,
+        "raw_cross_gauge_amplitude_difference_scored": false
+      },
+      "reference_total_boundary_in_reference_gauge": {
+        "sup_wb": 12.426882852979837,
+        "rms_wb": 5.109683439389285,
+        "sup_fraction_of_span": 0.15361992637753052,
+        "rms_fraction_of_span": 0.06316541348768298
+      },
+      "external_boundary_after_additive_alignment": {
+        "sup_wb": 183.887265106151,
+        "rms_wb": 87.4898340413705,
+        "sup_fraction_of_span": 2.273196622320987,
+        "rms_fraction_of_span": 1.0815408838423939
+      },
+      "plasma_source_boundary": {
+        "sup_wb": 176.47127344676935,
+        "rms_wb": 85.82523918670252,
+        "sup_fraction_of_span": 2.1815208492241633,
+        "rms_fraction_of_span": 1.0609633229167919
+      },
+      "plasma_flux_required_to_close_reference_boundary": {
+        "sup_wb": 175.92126538054197,
+        "rms_wb": 85.7448933200366,
+        "sup_fraction_of_span": 2.1747217025966052,
+        "rms_fraction_of_span": 1.0599700950681041
+      },
+      "composed_total_minus_reference_total": {
+        "sup_wb": 0.550008066227389,
+        "rms_wb": 0.2165561878616697,
+        "sup_fraction_of_span": 0.00679914662755826,
+        "rms_fraction_of_span": 0.0026770466921985352
+      },
+      "external_to_reference_boundary_variation_rms_ratio": 7.148303818121218,
+      "source_to_required_plasma_boundary_rms_ratio": 1.0009370338402084
+    },
+    "linearized_map": {
+      "method": "fixed-count power iteration on the exact jax.linearize tangent",
+      "random_seed": 11,
+      "iterations": 40,
+      "tangent_applications": 41,
+      "rayleigh_quotient": 1.1686871131444625,
+      "absolute_dominant_eigenvalue_estimate": 1.1686871131444625,
+      "final_norm_growth_estimate": 1.1745889801315461,
+      "last_five_norm_growth_estimates": [
+        1.1947720626282576,
+        1.1901069736006078,
+        1.185223608758741,
+        1.1800710831972399,
+        1.1745889801315461
+      ],
+      "picard_contracts": false
+    }
+  },
+  "largest_mast_versus_dina_structural_difference": {
+    "selection_rule": "largest multiplicative separation among the registered dimensionless composition diagnostics",
+    "name": "absolute_fractional_current_change",
+    "mast": 0.05934521161009576,
+    "dina": 0.005038243160646161,
+    "absolute_difference": 0.0543069684494496,
+    "larger_over_smaller": 11.77894947064934,
+    "larger_case": "MAST",
+    "all_candidates": {
+      "one_application_update_sup_fraction_of_span": {
+        "mast": 0.04075378153386053,
+        "dina": 0.007424835490163779,
+        "absolute_difference": 0.03332894604369675,
+        "larger_over_smaller": 5.488846397721543,
+        "larger_case": "MAST"
+      },
+      "one_application_update_rms_fraction_of_span": {
+        "mast": 0.016584418612654646,
+        "dina": 0.0038008525387291437,
+        "absolute_difference": 0.012783566073925503,
+        "larger_over_smaller": 4.363341761793218,
+        "larger_case": "MAST"
+      },
+      "source_forcing_sup_fraction_of_span": {
+        "mast": 0.6275567325970585,
+        "dina": 2.67188561505697,
+        "absolute_difference": -2.0443288824599115,
+        "larger_over_smaller": 4.257600112104181,
+        "larger_case": "DINA"
+      },
+      "boundary_imbalance_sup_fraction_of_span": {
+        "mast": 0.03440945100896484,
+        "dina": 0.00679914662755826,
+        "absolute_difference": 0.027610304381406582,
+        "larger_over_smaller": 5.06084849964798,
+        "larger_case": "MAST"
+      },
+      "absolute_fractional_current_change": {
+        "mast": 0.05934521161009576,
+        "dina": 0.005038243160646161,
+        "absolute_difference": 0.0543069684494496,
+        "larger_over_smaller": 11.77894947064934,
+        "larger_case": "MAST"
+      },
+      "absolute_dominant_picard_eigenvalue": {
+        "mast": 1.9132450123257896,
+        "dina": 1.1686871131444625,
+        "absolute_difference": 0.7445578991813271,
+        "larger_over_smaller": 1.6370891668155938,
+        "larger_case": "MAST"
+      }
+    }
+  },
+  "figure_src": "/nova/figures/efit-forward-parity/mast-dina-composition-update-fields.png"
+}

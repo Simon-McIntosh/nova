@@ -1,5 +1,5 @@
 # ruff: noqa: E501
-"""Bank the free-standing normalization arm on one reference-seeded MAST slice.
+"""Compare one composed-map application on MAST and DINA reference states.
 
 The slice is selected only from the committed native-grid decomposition bank.
 Its declared pressure and diamagnetic gradients drive ``ForwardProfile.solve``
@@ -7,11 +7,11 @@ on the 65-point normalized-flux base after conversion to Nova's negated-total-
 flux COCOS 17 convention. The fitted conductor state is primary and the
 archived experimental state is a side arm.
 
-The banked reproduction arms evaluate the current image in the reference's
-declared flux coordinate. Beside them, the free-standing arm uses Nova's
-ordinary topology read for both normalized flux and plasma support. Reference
-and Nova amplitudes remain in their own gauges; only gauge-invariant spans and
-a declared additive reporting alignment are compared across them.
+The MAST reproduction arm evaluates its current image in the reference's
+declared flux coordinate. The DINA control uses the production hexagonal
+operator on the banked reference carrier. Each stored state is mapped once;
+the image is separated into external and plasma forcing, with an explicit
+additive gauge alignment at the wall before update fields are compared.
 """
 
 from __future__ import annotations
@@ -29,6 +29,7 @@ import numpy as np
 import zarr
 from contourpy import contour_generator
 from matplotlib import pyplot as plt
+from matplotlib.path import Path as MplPath
 from scipy.interpolate import RectBivariateSpline
 from scipy.spatial import cKDTree
 
@@ -65,11 +66,12 @@ DECOMPOSITION_BANK = Path(
 DEFAULT_OUTPUT = Path("docs/figures/efit-forward-parity")
 ROUTE_SURVEY_RECEIPT = DEFAULT_OUTPUT / "pinned-route-survey.json"
 LONG_BUDGET_RECEIPT = DEFAULT_OUTPUT / "long-budget-plasma-route.json"
-RECEIPT_NAME = "free-anchor-arm.json"
+RECEIPT_NAME = "mast-dina-composition-diff.json"
 FIGURE_NAME = "reference-seeded-forward-slice.png"
 DIAGNOSIS_FIGURE_NAME = "vacuum-branch-diagnosis.png"
 LONG_BUDGET_FIGURE_NAME = "long-budget-residual-trajectories.png"
 FREE_ANCHOR_FIGURE_NAME = "free-anchor-residual-trajectory.png"
+COMPOSITION_FIGURE_NAME = "mast-dina-composition-update-fields.png"
 GRID_STRIDE = 2
 FIXED_POINT_CRITERION = 1.0e-8
 NEWTON_STEPS = 12
@@ -86,6 +88,8 @@ CONTROL_PLASMA_CURRENT_A = 0.0
 ANDERSON_EVALUATIONS = NEWTON_STEPS * (GMRES_ITERATIONS + 2)
 DAMPED_HYBRID_WEIGHTS = (0.5, 0.55, 1.0 / 1.766, 0.6, 0.65)
 EXTENDED_PROMOTION_BUDGETS = (50, 100)
+DINA_CACHE_KEY = "746fbe1553c4b242"
+POWER_ITERATIONS = 40
 
 
 @dataclass
@@ -2123,35 +2127,483 @@ def _free_anchor_figure(
     plt.close(figure)
 
 
-def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
-    """Run the free-standing arm beside unchanged reproduction arms."""
-    configure_dtypes()
+def _field_statistics(values: np.ndarray, span: float) -> dict[str, float]:
+    """Return absolute field magnitudes in flux units and span fractions."""
+    field = np.asarray(values, dtype=np.float64)
+    return {
+        "sup_wb": float(np.max(np.abs(field))),
+        "rms_wb": float(np.sqrt(np.mean(field**2))),
+        "sup_fraction_of_span": float(np.max(np.abs(field)) / span),
+        "rms_fraction_of_span": float(np.sqrt(np.mean(field**2)) / span),
+    }
+
+
+def _nearest_distance(coordinate: np.ndarray, target: np.ndarray) -> np.ndarray:
+    """Return each coordinate's distance to the nearest target point."""
+    return cKDTree(np.asarray(target, dtype=np.float64)).query(coordinate)[0]
+
+
+def _spatial_update_receipt(
+    case: dict[str, Any], update_grid: np.ndarray, update_wall: np.ndarray
+) -> dict[str, Any]:
+    """Locate one update over the plasma, exterior and wall regions."""
+    grid = np.asarray(case["grid_coordinate"], dtype=np.float64)
+    wall = np.asarray(case["wall_coordinate"], dtype=np.float64)
+    boundary = np.asarray(case["boundary"], dtype=np.float64)
+    x_points = np.asarray(case["x_points"], dtype=np.float64).reshape(-1, 2)
+    axis = np.asarray(case["axis"], dtype=np.float64)
+    pitch = float(np.median(cKDTree(grid).query(grid, k=2)[0][:, 1]))
+    axis_distance = np.linalg.norm(grid - axis, axis=1)
+    edge_distance = _nearest_distance(grid, boundary)
+    x_distance = _nearest_distance(grid, x_points)
+
+    def supported(distance: np.ndarray) -> np.ndarray:
+        selected = distance <= 2.0 * pitch
+        if not np.any(selected):
+            selected[np.argmin(distance)] = True
+        return selected
+
+    axis_selected = supported(axis_distance)
+    edge_selected = supported(edge_distance)
+    x_point_selected = supported(x_distance)
+    inside_boundary = MplPath(boundary, closed=True).contains_points(
+        grid, radius=1.0e-12
+    )
+    named_neighbourhood = axis_selected | edge_selected | x_point_selected
+    core_bulk = inside_boundary & ~named_neighbourhood
+    exterior_grid = ~inside_boundary & ~named_neighbourhood
+    physical_energy = float(np.sum(update_grid**2) + np.sum(update_wall**2))
+
+    def region(values: np.ndarray, selected: np.ndarray) -> dict[str, Any]:
+        chosen = values[selected]
+        return {
+            **_field_statistics(chosen, case["span_wb"]),
+            "sample_count": int(chosen.size),
+            "fraction_of_physical_l2_energy": float(
+                np.sum(chosen**2) / max(physical_energy, np.finfo(float).tiny)
+            ),
+        }
+
+    regions = {
+        "axis_region": region(update_grid, axis_selected),
+        "edge_region": region(update_grid, edge_selected),
+        "x_point_region": region(update_grid, x_point_selected),
+        "core_bulk": region(update_grid, core_bulk),
+        "exterior_grid": region(update_grid, exterior_grid),
+        "wall": region(update_wall, np.ones(update_wall.size, dtype=bool)),
+    }
+    grid_peak = int(np.argmax(np.abs(update_grid)))
+    wall_peak = int(np.argmax(np.abs(update_wall)))
+    if abs(update_wall[wall_peak]) > abs(update_grid[grid_peak]):
+        peak = {
+            "region": "wall",
+            "coordinate_m": [float(value) for value in wall[wall_peak]],
+            "update_wb": float(update_wall[wall_peak]),
+        }
+    else:
+        if axis_selected[grid_peak]:
+            peak_region = "axis_region"
+        elif x_point_selected[grid_peak]:
+            peak_region = "x_point_region"
+        elif edge_selected[grid_peak]:
+            peak_region = "edge_region"
+        elif inside_boundary[grid_peak]:
+            peak_region = "core_bulk"
+        else:
+            peak_region = "exterior_grid"
+        peak = {
+            "region": peak_region,
+            "coordinate_m": [float(value) for value in grid[grid_peak]],
+            "update_wb": float(update_grid[grid_peak]),
+            "distance_to_axis_m": float(axis_distance[grid_peak]),
+            "distance_to_edge_m": float(edge_distance[grid_peak]),
+            "distance_to_x_point_m": float(x_distance[grid_peak]),
+        }
+    return {
+        "region_radius_m": 2.0 * pitch,
+        "global_physical_update": _field_statistics(
+            np.r_[update_grid, update_wall], case["span_wb"]
+        ),
+        "regions": regions,
+        "largest_region_by_sup_fraction": max(
+            regions, key=lambda name: regions[name]["sup_fraction_of_span"]
+        ),
+        "largest_region_by_l2_energy_fraction": max(
+            regions,
+            key=lambda name: regions[name]["fraction_of_physical_l2_energy"],
+        ),
+        "absolute_peak": peak,
+    }
+
+
+def _power_iteration(tangent, shape: tuple[int, ...]) -> dict[str, Any]:
+    """Estimate the dominant map eigenvalue on one fixed tangent budget."""
+    generator = np.random.default_rng(11)
+    vector = jnp.asarray(generator.normal(size=shape), dtype=jnp.float64)
+    vector = vector / jnp.linalg.norm(vector)
+    norm_growth = []
+    for _ in range(POWER_ITERATIONS):
+        image = tangent(vector)
+        norm = jnp.linalg.norm(image)
+        norm_growth.append(float(norm))
+        vector = image / jnp.maximum(norm, 1.0e-300)
+    final_image = tangent(vector)
+    rayleigh = float(jnp.dot(vector, final_image))
+    return {
+        "method": "fixed-count power iteration on the exact jax.linearize tangent",
+        "random_seed": 11,
+        "iterations": POWER_ITERATIONS,
+        "tangent_applications": POWER_ITERATIONS + 1,
+        "rayleigh_quotient": rayleigh,
+        "absolute_dominant_eigenvalue_estimate": abs(rayleigh),
+        "final_norm_growth_estimate": norm_growth[-1],
+        "last_five_norm_growth_estimates": norm_growth[-5:],
+        "picard_contracts": bool(abs(rayleigh) < 1.0),
+    }
+
+
+def _composition_case_receipt(case: dict[str, Any]) -> tuple[dict[str, Any], dict]:
+    """Apply one composed map and decompose its update and tangent."""
+    operator = case["operator"]
+    state = jnp.asarray(case["state"])
+    image, tangent = jax.linearize(operator.flux_map(), state)
+    image = jax.block_until_ready(image)
+    external = jax.block_until_ready(operator.external())
+    grid_count = operator.grid.node_number
+    wall_count = operator.wall.node_number
+    wall_slice = slice(grid_count, grid_count + wall_count)
+    state_array = np.asarray(state, dtype=np.float64)
+    image_array = np.asarray(image, dtype=np.float64)
+    external_array = np.asarray(external, dtype=np.float64)
+    internal_array = image_array - external_array
+    gauge_offset = float(np.mean(state_array[wall_slice] - image_array[wall_slice]))
+    aligned_image = image_array + gauge_offset
+    update = aligned_image - state_array
+    update_grid = update[:grid_count]
+    update_wall = update[wall_slice]
+    current_before = float(
+        np.sum(np.asarray(operator.cell_current_moments(state).cell_current))
+    )
+    current_after = float(
+        np.sum(np.asarray(operator.cell_current_moments(image).cell_current))
+    )
+    external_wall = external_array[wall_slice] + gauge_offset
+    internal_wall = internal_array[wall_slice]
+    reference_wall = state_array[wall_slice]
+    required_internal_wall = reference_wall - external_wall
+    boundary_imbalance = external_wall + internal_wall - reference_wall
+    span = case["span_wb"]
+    spatial = _spatial_update_receipt(case, update_grid, update_wall)
+    eigenvalue = _power_iteration(tangent, state.shape)
+    record = {
+        "reference": case["reference"],
+        "mesh": case["mesh"],
+        "single_application": {
+            "composed_map_primal_applications": 1,
+            "linearization_and_primal_image_shared": True,
+            "nonlinear_promotions": 0,
+            "state_nodes": int(state.size),
+            "grid_nodes": grid_count,
+            "wall_nodes": wall_count,
+            "flux_update": spatial["global_physical_update"],
+            "spatial_concentration": spatial,
+        },
+        "plasma_current_integral_a": {
+            "reference_state_before_application": current_before,
+            "image_state_after_application": current_after,
+            "signed_change_a": current_after - current_before,
+            "after_over_before": current_after / current_before,
+        },
+        "source_forcing": {
+            "grid": _field_statistics(internal_array[:grid_count], span),
+            "wall": _field_statistics(internal_wall, span),
+            "definition": "plasma-current image, composed image minus external image",
+        },
+        "boundary_flux_balance": {
+            "gauge_discipline": {
+                "method": (
+                    "one additive offset on the external component aligns the "
+                    "composed-image wall mean to the reference wall mean"
+                ),
+                "nova_to_reference_additive_offset_wb": gauge_offset,
+                "raw_cross_gauge_amplitude_difference_scored": False,
+            },
+            "reference_total_boundary_in_reference_gauge": _field_statistics(
+                reference_wall, span
+            ),
+            "external_boundary_after_additive_alignment": _field_statistics(
+                external_wall, span
+            ),
+            "plasma_source_boundary": _field_statistics(internal_wall, span),
+            "plasma_flux_required_to_close_reference_boundary": _field_statistics(
+                required_internal_wall, span
+            ),
+            "composed_total_minus_reference_total": _field_statistics(
+                boundary_imbalance, span
+            ),
+            "external_to_reference_boundary_variation_rms_ratio": float(
+                np.std(external_wall) / max(np.std(reference_wall), 1.0e-300)
+            ),
+            "source_to_required_plasma_boundary_rms_ratio": float(
+                np.sqrt(np.mean(internal_wall**2))
+                / max(np.sqrt(np.mean(required_internal_wall**2)), 1.0e-300)
+            ),
+        },
+        "linearized_map": eigenvalue,
+    }
+    fields = {
+        "name": case["name"],
+        "grid_coordinate": np.asarray(case["grid_coordinate"]),
+        "wall_coordinate": np.asarray(case["wall_coordinate"]),
+        "boundary": np.asarray(case["boundary"]),
+        "axis": np.asarray(case["axis"]),
+        "x_points": np.asarray(case["x_points"]),
+        "update_grid_fraction": update_grid / span,
+        "update_wall_fraction": update_wall / span,
+    }
+    return record, fields
+
+
+def _mast_composition_case(
+    store: Path, bank: Path
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Build the qualified MAST prescribed-anchor reference state."""
     selected, qualification = select_slice(bank)
     shot = int(selected["shot"])
     row = int(selected["slice_index"])
     group = zarr.open_group(str(store / f"{shot}.zarr"), mode="r")["efm"]
-    control, fields = solve_arm(group, shot, row, "fcoil_c", include_diagnosis=True)
-    baseline = _control_baseline(control)
-    if not baseline["passes"]:
-        raise RuntimeError("the unpinned control drifted from its committed baseline")
-    pinned = solve_pinned_arm(group, shot, row, "fcoil_c")
-    free_anchor = solve_free_anchor_arm(group, shot, row, "fcoil_c")
-    figure_path = output / FIGURE_NAME
-    _figure(fields, figure_path)
-    diagnosis_figure_path = output / DIAGNOSIS_FIGURE_NAME
-    _diagnosis_figure(control["diagnosis"], diagnosis_figure_path)
-    free_anchor_figure_path = output / FREE_ANCHOR_FIGURE_NAME
-    _free_anchor_figure(control, pinned, free_anchor, free_anchor_figure_path)
+    profile, seed, reference, provenance = build_profile(group, shot, row, "fcoil_c")
+    axis = np.asarray(
+        [group["magnetic_axis_r"][row], group["magnetic_axis_z"][row]],
+        dtype=np.float64,
+    )
+    return (
+        {
+            "name": "MAST 21985/51",
+            "operator": profile.operator,
+            "state": seed,
+            "span_wb": float(np.ptp(reference)),
+            "grid_coordinate": np.asarray(profile.lattice.coordinate),
+            "wall_coordinate": np.asarray(profile.operator.wall.coordinate),
+            "axis": axis,
+            "boundary": _stored_lcfs(group, row),
+            "x_points": _stored_x_points(group, row),
+            "reference": {
+                "machine": "MAST",
+                "shot": shot,
+                "slice_index": row,
+                "time_s": float(group["time"][row]),
+                "span_wb": float(np.ptp(reference)),
+                "span_definition": "peak-to-peak efm/psirz on the benchmark grid",
+                "plasma_current_a": float(group["plasma_current_c"][row]),
+                "source_coordinate": {
+                    "axis_wb": provenance["declared_axis_flux_wb"],
+                    "boundary_wb": provenance["declared_boundary_flux_wb"],
+                    "support_nodes": provenance["declared_support_nodes"],
+                },
+                "qualification_before_attribution": qualification,
+            },
+            "mesh": {
+                "kind": "33 by 33 rectangular benchmark lattice",
+                "realised_cells": profile.lattice.node_count,
+                "source_moments": "centroid current on prescribed reference support",
+            },
+        },
+        {"group": group, "row": row},
+    )
+
+
+def _dina_composition_case() -> dict[str, Any]:
+    """Load the banked convergent DINA control without a cold-build fallback."""
+    from tests import test_equilibrium_forward_reference as reference
+
+    case = reference.reference_case()
+    if isinstance(case, str):
+        raise RuntimeError(case)
+    store = reference.ZarrStore(
+        filename=reference.MACHINE_CACHE_FILENAME,
+        dirname=".nova",
+        group=DINA_CACHE_KEY,
+    )
+    store.load()
+    identity = json.loads(store.data.attrs["semantic_identity"])
+    machine = reference._machine_from_dataset(store.data, identity, DINA_CACHE_KEY)
+    arrays, bytes_verified = reference.assert_machine_arrays_bitwise_identical(
+        machine, machine
+    )
+    requested = int(identity["discretisation"]["cells"])
+    if requested != reference.SUITE_CELLS or len(machine.node) != 566:
+        raise RuntimeError("the banked DINA control is not the convergent suite mesh")
+    operator = reference.forward_operator(case, machine)
+    seed = reference.seed_flux(case, machine)
+    return {
+        "name": "DINA 135011/7 slice 353",
+        "operator": operator,
+        "state": seed,
+        "span_wb": abs(float(case.flux_span)),
+        "grid_coordinate": np.asarray(machine.node),
+        "wall_coordinate": np.asarray(machine.wall_node),
+        "axis": np.asarray(case.axis),
+        "boundary": np.asarray(case.boundary),
+        "x_points": np.asarray(case.x_point),
+        "reference": {
+            "machine": "ITER DINA",
+            "pulse": reference.PULSE,
+            "run": reference.RUN,
+            "slice_index": reference.TIME_SLICE,
+            "time_s": float(case.time),
+            "dd_version": reference.DD_VERSION,
+            "span_wb": abs(float(case.flux_span)),
+            "span_definition": "declared axis-to-boundary total-flux span",
+            "plasma_current_a": float(case.plasma_current),
+            "control_qualification": (
+                "this exact 566-cell production operator is the suite's "
+                "converged diverted DINA control; no solve is run here"
+            ),
+        },
+        "mesh": {
+            "kind": "wall-trimmed production hexagonal mesh",
+            "requested_cells": requested,
+            "realised_cells": len(machine.node),
+            "source_moments": "clipped linear cell-current moments",
+            "cache_key": DINA_CACHE_KEY,
+            "cache_arrays_verified": arrays,
+            "cache_bytes_verified": bytes_verified,
+            "bitwise_stored_precision": True,
+            "cold_build_fallback": False,
+        },
+    }
+
+
+def _largest_structural_difference(
+    mast: dict[str, Any], dina: dict[str, Any]
+) -> dict[str, Any]:
+    """Name the dimensionless measurement with greatest multiplicative gap."""
+    candidates = {
+        "one_application_update_sup_fraction_of_span": (
+            mast["single_application"]["flux_update"]["sup_fraction_of_span"],
+            dina["single_application"]["flux_update"]["sup_fraction_of_span"],
+        ),
+        "one_application_update_rms_fraction_of_span": (
+            mast["single_application"]["flux_update"]["rms_fraction_of_span"],
+            dina["single_application"]["flux_update"]["rms_fraction_of_span"],
+        ),
+        "source_forcing_sup_fraction_of_span": (
+            mast["source_forcing"]["grid"]["sup_fraction_of_span"],
+            dina["source_forcing"]["grid"]["sup_fraction_of_span"],
+        ),
+        "boundary_imbalance_sup_fraction_of_span": (
+            mast["boundary_flux_balance"]["composed_total_minus_reference_total"][
+                "sup_fraction_of_span"
+            ],
+            dina["boundary_flux_balance"]["composed_total_minus_reference_total"][
+                "sup_fraction_of_span"
+            ],
+        ),
+        "absolute_fractional_current_change": (
+            abs(mast["plasma_current_integral_a"]["after_over_before"] - 1.0),
+            abs(dina["plasma_current_integral_a"]["after_over_before"] - 1.0),
+        ),
+        "absolute_dominant_picard_eigenvalue": (
+            mast["linearized_map"]["absolute_dominant_eigenvalue_estimate"],
+            dina["linearized_map"]["absolute_dominant_eigenvalue_estimate"],
+        ),
+    }
+    rows = {}
+    for name, (mast_value, dina_value) in candidates.items():
+        smaller = max(min(abs(mast_value), abs(dina_value)), 1.0e-300)
+        larger = max(abs(mast_value), abs(dina_value))
+        rows[name] = {
+            "mast": float(mast_value),
+            "dina": float(dina_value),
+            "absolute_difference": float(mast_value - dina_value),
+            "larger_over_smaller": float(larger / smaller),
+            "larger_case": "MAST" if abs(mast_value) >= abs(dina_value) else "DINA",
+        }
+    selected = max(rows, key=lambda name: rows[name]["larger_over_smaller"])
+    return {
+        "selection_rule": (
+            "largest multiplicative separation among the registered dimensionless "
+            "composition diagnostics"
+        ),
+        "name": selected,
+        **rows[selected],
+        "all_candidates": rows,
+    }
+
+
+def _composition_figure(fields: tuple[dict, dict], path: Path) -> None:
+    """Plot both gauge-aligned one-application update fields."""
+    figure, axes = plt.subplots(1, 2, figsize=(10.2, 4.4), constrained_layout=True)
+    for axis, field in zip(axes, fields, strict=True):
+        grid_value = field["update_grid_fraction"]
+        wall_value = field["update_wall_fraction"]
+        limit = max(
+            float(np.max(np.abs(grid_value))),
+            float(np.max(np.abs(wall_value))),
+            1.0e-15,
+        )
+        levels = np.linspace(-limit, limit, 25)
+        image = axis.tricontourf(
+            field["grid_coordinate"][:, 0],
+            field["grid_coordinate"][:, 1],
+            grid_value,
+            levels=levels,
+            cmap="coolwarm",
+            extend="both",
+        )
+        axis.scatter(
+            field["wall_coordinate"][:, 0],
+            field["wall_coordinate"][:, 1],
+            c=wall_value,
+            cmap="coolwarm",
+            vmin=-limit,
+            vmax=limit,
+            s=5,
+            linewidths=0.0,
+        )
+        axis.plot(field["boundary"][:, 0], field["boundary"][:, 1], "k-", lw=0.7)
+        axis.plot(field["axis"][0], field["axis"][1], "kx", ms=5)
+        axis.plot(
+            field["x_points"][:, 0],
+            field["x_points"][:, 1],
+            marker="+",
+            ls="none",
+            color="black",
+            ms=5,
+        )
+        axis.set_title(f"{field['name']}\nsup |update| / span = {limit:.4g}")
+        axis.set_xlabel("R [m]")
+        axis.set_ylabel("Z [m]")
+        axis.set_aspect("equal")
+        figure.colorbar(image, ax=axis, label="Gauge-aligned update / span")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, dpi=180)
+    plt.close(figure)
+
+
+def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
+    """Apply the MAST and DINA composed maps once at their reference states."""
+    configure_dtypes()
+    mast_case, _mast_context = _mast_composition_case(store, bank)
+    dina_case = _dina_composition_case()
+    mast, mast_fields = _composition_case_receipt(mast_case)
+    dina, dina_fields = _composition_case_receipt(dina_case)
+    structural_difference = _largest_structural_difference(mast, dina)
+    figure_path = output / COMPOSITION_FIGURE_NAME
+    _composition_figure((mast_fields, dina_fields), figure_path)
     receipt = {
-        "receipt": "reference-seeded free-standing normalization arm",
+        "receipt": "one-application MAST versus convergent DINA composition diagnosis",
         "backend": "JAX_PLATFORMS=cpu required by invocation",
-        "selection": {
-            "source": str(bank),
-            "rule": "minimum worst qualification fraction; tie-break by shot then slice index",
-            "shot": shot,
-            "slice_index": row,
-            "time_s": float(group["time"][row]),
-            "qualification_before_attribution": qualification,
+        "execution_contract": {
+            "nonlinear_solve_calls": 0,
+            "nonlinear_promotions": 0,
+            "composed_map_primal_applications_per_case": 1,
+            "power_iterations_per_case": POWER_ITERATIONS,
+            "purpose": (
+                "diagnose the local composed maps at stored reference states, "
+                "not find or polish either root"
+            ),
         },
         "path_audit": {
             "sensor_reads": 0,
@@ -2160,24 +2612,11 @@ def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
             "inverse_fit_coefficients": 0,
             "passes": True,
         },
-        "prescribed_anchor_arms_are_unchanged_and_unreconciled": True,
-        "control_arm": control,
-        "control_baseline": baseline,
-        "pinned_arm": pinned,
-        "free_anchor_arm": free_anchor,
-        "dina_calibration": {
-            "axis_distance_m": 0.0412,
-            "plasma_current_signed_relative_deviation": -0.0112,
-            "poloidal_beta_signed_relative_deviation": 0.0224,
-            "internal_inductance_signed_relative_deviation": -0.00135,
-            "role": "calibration beside this MAST result, not an acceptance bound",
-        },
-        "figure_src": "/nova/figures/efit-forward-parity/reference-seeded-forward-slice.png",
-        "diagnosis_figure_src": (
-            "/nova/figures/efit-forward-parity/vacuum-branch-diagnosis.png"
-        ),
-        "free_anchor_figure_src": (
-            "/nova/figures/efit-forward-parity/free-anchor-residual-trajectory.png"
+        "mast": mast,
+        "dina_convergent_control": dina,
+        "largest_mast_versus_dina_structural_difference": structural_difference,
+        "figure_src": (
+            "/nova/figures/efit-forward-parity/mast-dina-composition-update-fields.png"
         ),
     }
     output.mkdir(parents=True, exist_ok=True)
@@ -2187,54 +2626,32 @@ def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
 
 
 def main() -> None:
-    """Parse paths, run the banked slice and print headline metrics."""
+    """Parse paths, run both one-application diagnoses and print metrics."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--store", type=Path, default=SHOT_STORE)
     parser.add_argument("--bank", type=Path, default=DECOMPOSITION_BANK)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     arguments = parser.parse_args()
     receipt = run(arguments.store, arguments.bank, arguments.output)
-    selection = receipt["selection"]
-    control = receipt["control_arm"]
-    flux = control["metrics"]["flux_map"]
-    solver = control["solver"]
-    diagnosis = control["diagnosis"]
-    pinned = receipt["pinned_arm"]["forward_branch_receipt"]
-    free = receipt["free_anchor_arm"]
+    for key in ("mast", "dina_convergent_control"):
+        arm = receipt[key]
+        update = arm["single_application"]["flux_update"]
+        current = arm["plasma_current_integral_a"]
+        eigenvalue = arm["linearized_map"]
+        print(
+            f"{key.upper()} "
+            f"update_sup_span={update['sup_fraction_of_span']:.9g} "
+            f"update_rms_span={update['rms_fraction_of_span']:.9g} "
+            f"current_before_a={current['reference_state_before_application']:.9g} "
+            f"current_after_a={current['image_state_after_application']:.9g} "
+            f"eigenvalue={eigenvalue['rayleigh_quotient']:.9g}"
+        )
+    largest = receipt["largest_mast_versus_dina_structural_difference"]
     print(
-        "FORWARD_SLICE "
-        f"shot={selection['shot']} row={selection['slice_index']} "
-        f"qualification={selection['qualification_before_attribution']['passes']} "
-        f"newton_iterations={solver['newton_iteration_count']} "
-        f"map_evaluations={solver['map_evaluations_to_criterion']} "
-        f"defect={solver['fixed_point_defect']:.9g} "
-        f"sup_span={flux['sup_fraction_of_reference_span']:.9g} "
-        f"rms_span={flux['rms_fraction_of_reference_span']:.9g}"
-    )
-    print(
-        "VACUUM_BRANCH_DIAGNOSIS "
-        f"classification={diagnosis['classification']} "
-        f"seed_cells={diagnosis['standard_trajectory'][0]['admitted_support_cells']} "
-        f"seed_current_a={diagnosis['standard_trajectory'][0]['plasma_current_integral_a']:.9g} "
-        f"control_keeps_plasma={diagnosis['damped_first_step_control']['keeps_plasma_root_through_bounded_promotions']}"
-    )
-    print(
-        "PINNED_DIVERTED_BRANCH "
-        f"converged={pinned['converged']} "
-        f"residual={pinned['residual']:.9g} "
-        f"iterations={pinned['iterations']} "
-        f"requested={pinned['requested_class']} "
-        f"achieved={pinned['achieved_class']} "
-        f"topology_consistent={pinned['topology_consistent']}"
-    )
-    print(
-        "FREE_ANCHOR_ARM "
-        f"converged={free['solver']['converged']} "
-        f"residual={free['solver']['residual']:.9g} "
-        f"terminal_current_a={free['terminal_state']['plasma_current_a']:.9g} "
-        f"achieved={free['terminal_state']['achieved_class']} "
-        f"topology_consistent={free['terminal_state']['topology_consistent']} "
-        f"verdict={free['verdict']}"
+        "LARGEST_STRUCTURAL_DIFFERENCE "
+        f"name={largest['name']} mast={largest['mast']:.9g} "
+        f"dina={largest['dina']:.9g} ratio={largest['larger_over_smaller']:.9g} "
+        f"larger_case={largest['larger_case']}"
     )
 
 

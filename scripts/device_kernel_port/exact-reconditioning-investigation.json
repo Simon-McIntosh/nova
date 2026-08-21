@@ -1,0 +1,49 @@
+{
+  "status": "blocked",
+  "source_column": 184,
+  "oracle": {
+    "artifact": "arbitrary-precision-oracle.json",
+    "decimal_digits": 100,
+    "terminal_nodes": 1024,
+    "production_max_relative_deviation": 0.0046287193027980405,
+    "required_max_relative_deviation": 0.0000804,
+    "inverse_area_norm": 284042.9350505185
+  },
+  "localization": {
+    "mechanism": "cancellation occurs inside the per-edge primitive contractions before the final closed-contour reduction",
+    "endpoint_absolute_error_scale": 3e-10,
+    "paired_edge_difference_absolute_error_scale": 1e-15,
+    "consequence": "compensating only endpoint subtraction or final edge accumulation cannot recover low parts already discarded by the primitive contractions"
+  },
+  "evaluated_reconditionings": [
+    {
+      "method": "error-free endpoint subtraction and two-component contour accumulation",
+      "result": "no material change from the 0.0046287193027980405 production maximum relative deviation"
+    },
+    {
+      "method": "source-radius-preserving endpoint construction",
+      "result": "no material oracle improvement"
+    },
+    {
+      "method": "root, second-arsinh, and arctangent component pairing before contour accumulation",
+      "result": "reassociation moved the error but did not meet the 0.0000804 bound"
+    },
+    {
+      "method": "16 by 48 boundary quadrature probe",
+      "far_field_max_relative_deviation": 0.000902,
+      "self_target_max_relative_deviation": 0.285,
+      "result": "fails the oracle bound and is not a per-edge closed-form reconditioning"
+    },
+    {
+      "method": "six-point finite-section triangle cubature probe",
+      "far_field_max_relative_deviation": 1.83e-15,
+      "self_target_max_relative_deviation": 0.0085,
+      "result": "fails the oracle bound and is not a per-edge closed-form reconditioning"
+    }
+  ],
+  "viable_next_options": [
+    "derive paired endpoint formulas for each root, second-arsinh, and arctangent contraction so the small edge difference is formed algebraically before unlike terms are combined",
+    "carry double-double expansions through the primitive contractions and their special-function inputs while retaining fp64 arrays and a single NumPy/JAX source rule"
+  ],
+  "working_tree_outcome": "all unsuccessful source edits were removed; the last committed implementation remains intact"
+}

@@ -25,16 +25,26 @@
       "source_self_relative_deviation": 0.00001794225425440622,
       "worst_target_index": 525
     },
-    "verdict": "the source self target passes, but the far-target maximum misses the full-column ceiling by 39.81 times"
+    "paired_range_assembly_and_factorisation": {
+      "gate_max_relative_deviation": 0.0000804,
+      "gate_multiple": 24.57796458467182,
+      "max_absolute_deviation": 1.4944969930161633e-09,
+      "max_relative_deviation": 0.0019760683526076146,
+      "median_absolute_deviation": 3.3269359244039176e-10,
+      "source_self_relative_deviation": 0.00002187285791622661,
+      "worst_target_index": 525
+    },
+    "verdict": "the source self target passes, but the far-target maximum misses the full-column ceiling by 24.58 times"
   },
   "mechanism": {
     "repaired": "paired-fp64 products and sums now retain residues through root and pole moment descent, primitive contractions, endpoint differencing, residual quadrature accumulation and closed-contour accumulation",
-    "remaining": "range-function bulk and end coefficients are still assembled as scalar fp64 before the paired contractions receive them, discarding the low parts that the far-target contour needs"
+    "follow_on": "paired-fp64 coefficients were carried through range-function products, totals, scaling, harmonic conversion, exact end values, denominator factorisation and pole deflation before the committed paired moment contractions",
+    "remaining": "the extended range chain reduces the far-target maximum but target 525 remains cancellation limited above the oracle ceiling"
   },
   "rejected_placement": {
     "method": "paired difference-of-products for the edge plane offset alone",
     "observed_max_relative_deviation": 0.0034408635326742044,
     "verdict": "worse than the unchanged plane-offset construction"
   },
-  "next_required_change": "carry paired coefficients through range_function product, total, scale, harmonic conversion and denominator factorisation, then feed those pairs directly into the existing paired moment contractions"
+  "next_required_change": "stop after the requested range-function extension; do not add a third pairing layer without a new numerical decision"
 }

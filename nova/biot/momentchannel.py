@@ -44,19 +44,31 @@ from nova.biot.elliptic import (
 from nova.biot.pairedfloat import add as paired_add
 from nova.biot.pairedfloat import contract as paired_contract
 from nova.biot.pairedfloat import contract_paired
+from nova.biot.pairedfloat import divide as paired_divide
 from nova.biot.pairedfloat import multiply as paired_multiply
 from nova.biot.pairedfloat import scale as paired_scale
+from nova.biot.pairedfloat import square_root as paired_square_root
 from nova.biot.pairedfloat import subtract as paired_subtract
 from nova.biot.pairedfloat import value as paired_value
+from nova.biot.pairedfloat import where as paired_where
 from nova.biot.pairedfloat import wrap as paired_wrap
 from nova.biot.rangefunction import (
     across_the_range,
     contract,
     deflate,
     harmonic_multiply,
+    paired_across_the_range,
+    paired_deflate,
+    paired_harmonic_multiply,
 )
 
-__all__ = ["POLE_CEILING", "POLE_SWITCH", "Channel", "factorise"]
+__all__ = [
+    "POLE_CEILING",
+    "POLE_SWITCH",
+    "Channel",
+    "factorise",
+    "factorise_paired",
+]
 
 # Where a denominator's root is far enough past the range for the pole family's own
 # moments to be contracted directly, and near enough below it for the weight on the
@@ -116,6 +128,74 @@ def factorise(denominator: tuple, xp) -> tuple:
         xp.where(live_y | live_x, 0.0, 1.0 / xp.where(near != 0.0, near, 1.0)),
         xp.where(live_y, shift_y, 1.0),
         xp.where(live_x, shift_x, 1.0),
+    )
+
+
+def factorise_paired(denominator: tuple, xp) -> tuple:
+    """Factor a paired denominator without discarding coefficient residues."""
+    bulk, near, far = denominator
+    zero = paired_wrap(0.0 * near[0])
+    one = paired_wrap(1.0 + 0.0 * near[0])
+    leading = bulk[0] if bulk else zero
+    curved = paired_value(leading) != 0.0
+    held_leading = paired_where(curved, leading, one, xp)
+    offset = paired_divide(near, held_leading)
+    pivot = paired_subtract(paired_add(one, paired_divide(far, held_leading)), offset)
+    shift_y = paired_where(
+        curved,
+        paired_divide(
+            paired_scale(offset, 2.0),
+            paired_add(
+                pivot,
+                paired_square_root(
+                    paired_add(
+                        paired_multiply(pivot, pivot), paired_scale(offset, 4.0)
+                    ),
+                    xp,
+                ),
+            ),
+        ),
+        zero,
+        xp,
+    )
+    shift_x = paired_where(
+        curved,
+        paired_divide(
+            far,
+            paired_multiply(held_leading, paired_add(one, shift_y)),
+        ),
+        zero,
+        xp,
+    )
+
+    rising = (~curved) & (paired_value(far) > paired_value(near))
+    falling = (~curved) & (paired_value(far) < paired_value(near))
+    gap = paired_where(
+        curved,
+        one,
+        paired_where(
+            rising, paired_subtract(far, near), paired_subtract(near, far), xp
+        ),
+        xp,
+    )
+    held_gap = paired_where(paired_value(gap) != 0.0, gap, one, xp)
+    shift_y = paired_where(rising, paired_divide(near, held_gap), shift_y, xp)
+    shift_x = paired_where(falling, paired_divide(far, held_gap), shift_x, xp)
+    live_y = curved | rising
+    live_x = curved | falling
+    divisor = paired_where(
+        curved,
+        paired_multiply(held_leading, paired_add(paired_add(one, shift_y), shift_x)),
+        held_gap,
+        xp,
+    )
+    held_near = paired_where(paired_value(near) != 0.0, near, one, xp)
+    return (
+        paired_where(live_y, paired_divide(one, divisor), zero, xp),
+        paired_where(live_x, paired_divide(one, divisor), zero, xp),
+        paired_where(live_y | live_x, zero, paired_divide(one, held_near), xp),
+        paired_where(live_y, shift_y, one, xp),
+        paired_where(live_x, shift_x, one, xp),
     )
 
 
@@ -181,24 +261,41 @@ class Channel:
             self._family(capped_x, seed_x, True),
         )
 
-    def split(self, denominator: tuple) -> tuple:
+    def split(self, denominator: tuple, paired_denominator=None) -> tuple:
         """Return ``(factors, poles)`` for a denominator against this family alone."""
         factors = factorise(denominator, self.xp)
-        paired_poles = None
+        paired_data = None
         if self.paired_moments is not None:
-            shift_y = paired_wrap(factors[3])
-            shift_x = paired_wrap(factors[4])
+            paired_factors = (
+                factorise_paired(paired_denominator, self.xp)
+                if paired_denominator is not None
+                else tuple(paired_wrap(value) for value in factors)
+            )
+            ceiling = paired_wrap(POLE_CEILING)
+            shift_y = paired_where(
+                paired_value(paired_factors[3]) > POLE_CEILING,
+                ceiling,
+                paired_factors[3],
+                self.xp,
+            )
+            shift_x = paired_where(
+                paired_value(paired_factors[4]) > POLE_CEILING,
+                ceiling,
+                paired_factors[4],
+                self.xp,
+            )
             seed_y = self._paired_cn_seed(shift_y)
             seed_x = self._paired_sn_seed(shift_x)
-            paired_poles = (
-                shift_y,
-                shift_x,
-                seed_y,
-                seed_x,
-                self._family_paired(shift_y, seed_y, False),
-                self._family_paired(shift_x, seed_x, True),
+            paired_data = (
+                paired_factors,
+                (
+                    seed_y,
+                    seed_x,
+                    self._family_paired(shift_y, seed_y, False),
+                    self._family_paired(shift_x, seed_x, True),
+                ),
             )
-        return factors, self.poles(factors), paired_poles
+        return factors, self.poles(factors), paired_data
 
     def _family_paired(self, shift, seed, mirrored: bool):
         if self.xp is np and not np.any(shift[0] > POLE_SWITCH):
@@ -239,7 +336,7 @@ class Channel:
         """Return the same contraction with retained fp64 residues."""
         if self.paired_moments is None:
             return paired_contract(across_the_range(term), self.moments)
-        return contract_paired(across_the_range(term), self.paired_moments)
+        return contract_paired(paired_across_the_range(term), self.paired_moments)
 
     def against_root(self, term: tuple):
         """Return ``integral term Delta da`` over the range."""
@@ -249,7 +346,7 @@ class Channel:
         """Return the radical contraction with retained fp64 residues."""
         if self.paired_root_moments is None:
             return paired_contract(across_the_range(term), self.root_moments)
-        return contract_paired(across_the_range(term), self.paired_root_moments)
+        return contract_paired(paired_across_the_range(term), self.paired_root_moments)
 
     def _pole(self, numerator: tuple, shift, seed, family, mirrored: bool):
         """Return ``integral numerator/((v + shift) Delta) da`` past one end.
@@ -300,31 +397,41 @@ class Channel:
         """Evaluate one pole contraction while retaining its arithmetic residues."""
         bulk, near, far = numerator
         end, other = (far, near) if mirrored else (near, far)
-        shift_value = paired_value(shift)
         one_plus_shift = paired_add(paired_wrap(1.0), shift)
-        root = (1.0 if mirrored else -1.0) * (1.0 + 2.0 * shift_value)
-        quotient, remainder = deflate(bulk, root) if bulk else ([], 0.0)
+        root = paired_scale(
+            paired_add(paired_wrap(1.0), paired_scale(shift, 2.0)),
+            1.0 if mirrored else -1.0,
+        )
+        quotient, remainder = (
+            paired_deflate(bulk, root) if bulk else ([], paired_wrap(0.0))
+        )
         held = paired_add(
             paired_add(
                 paired_multiply(
                     paired_subtract(
-                        paired_multiply(paired_wrap(end), one_plus_shift),
-                        paired_multiply(paired_wrap(other), shift),
+                        paired_multiply(end, one_plus_shift),
+                        paired_multiply(other, shift),
                     ),
                     seed,
                 ),
                 paired_multiply(
-                    paired_subtract(paired_wrap(other), paired_wrap(end)),
+                    paired_subtract(other, end),
                     self.paired_moments[0],
                 ),
             ),
             contract_paired(
-                harmonic_multiply([0.5 + shift_value, 0.5 if mirrored else -0.5], bulk),
+                paired_harmonic_multiply(
+                    [
+                        paired_add(paired_wrap(0.5), shift),
+                        paired_wrap(0.5 if mirrored else -0.5),
+                    ],
+                    bulk,
+                ),
                 self.paired_moments,
             ),
         )
         deflated = paired_add(
-            paired_multiply(paired_wrap(remainder), seed),
+            paired_multiply(remainder, seed),
             paired_scale(
                 contract_paired(quotient, self.paired_moments),
                 -2.0 if mirrored else 2.0,
@@ -339,9 +446,9 @@ class Channel:
         )
         if family is None:
             return held
-        direct = contract_paired(across_the_range(numerator), family)
+        direct = contract_paired(paired_across_the_range(numerator), family)
         return tuple(
-            self.xp.where(shift_value <= POLE_SWITCH, near_value, far_value)
+            self.xp.where(paired_value(shift) <= POLE_SWITCH, near_value, far_value)
             for near_value, far_value in zip(held, direct, strict=True)
         )
 
@@ -373,18 +480,23 @@ class Channel:
             paired_seed_y = paired_wrap(seed_y)
             paired_seed_x = paired_wrap(seed_x)
         else:
+            paired_factors, paired_poles = split[2]
             (
+                paired_weight_y,
+                paired_weight_x,
+                paired_weight_plain,
                 paired_shift_y,
                 paired_shift_x,
-                paired_seed_y,
-                paired_seed_x,
-                family_y,
-                family_x,
-            ) = split[2]
+            ) = paired_factors
+            paired_seed_y, paired_seed_x, family_y, family_x = paired_poles
+        if split[2] is None:
+            paired_weight_y = paired_wrap(weight_y)
+            paired_weight_x = paired_wrap(weight_x)
+            paired_weight_plain = paired_wrap(weight_plain)
         return paired_add(
             paired_add(
-                paired_scale(self.plain_paired(numerator), weight_plain),
-                paired_scale(
+                paired_multiply(self.plain_paired(numerator), paired_weight_plain),
+                paired_multiply(
                     self._pole_paired(
                         numerator,
                         paired_shift_y,
@@ -392,10 +504,10 @@ class Channel:
                         family_y,
                         False,
                     ),
-                    weight_y,
+                    paired_weight_y,
                 ),
             ),
-            paired_scale(
+            paired_multiply(
                 self._pole_paired(
                     numerator,
                     paired_shift_x,
@@ -403,6 +515,6 @@ class Channel:
                     family_x,
                     True,
                 ),
-                weight_x,
+                paired_weight_x,
             ),
         )

@@ -165,6 +165,12 @@ from nova.biot.pairedfloat import wrap as paired_wrap
 from nova.biot.polygon import _held_edge, _packed_topology, pack_section
 from nova.biot.rangefunction import (
     across_the_range,
+    paired_across_the_range,
+    paired_product,
+    paired_range_function,
+    paired_scaled,
+    paired_sine_squared_times,
+    paired_total,
     product,
     range_function,
     scaled,
@@ -204,6 +210,16 @@ _PANEL = (0.0, QUARTER)
 # built once out of scalars rather than once per column.
 _RING_SLOPE_OVER_RADIUS_SQUARED = range_function([], -4.0, 4.0)
 _VARIABLE = range_function([], -1.0, 1.0)
+
+
+def _paired_range(term: tuple) -> tuple:
+    """Lift an exact finite-section range into paired-fp64 coefficients."""
+    bulk, near, far = term
+    return paired_range_function(
+        [paired_wrap(coefficient) for coefficient in bulk],
+        paired_wrap(near),
+        paired_wrap(far),
+    )
 
 
 def _oscillatory_primitive(weight: list) -> list:
@@ -355,7 +371,10 @@ class _Vertex:
         self.cosine = range_function([], one, -one)
         self.edge_radius = range_function([], offset, radius_sum)
         self.ring_squared = range_function([4.0 * r * r], u * u, u * u)
-        self.ring = self.split(self.ring_squared)
+        self.paired_cosine = _paired_range(self.cosine) if paired else None
+        self.paired_edge_radius = _paired_range(self.edge_radius) if paired else None
+        self.paired_ring_squared = _paired_range(self.ring_squared) if paired else None
+        self.ring = self.split(self.ring_squared, self.paired_ring_squared)
         # Both residual quadratures run to the same limit -- the corner's amplitude
         # -- so the panels belong to the corner rather than to either integral, and
         # :class:`_Edge` reads them for its own.  Over a full turn every amplitude is
@@ -366,13 +385,13 @@ class _Vertex:
     # The moment machinery is :class:`nova.biot.momentchannel.Channel`, which both
     # reductions share; these read through to this corner's own family so that
     # :class:`_Edge` asks the corner for a contraction rather than reaching past it.
-    def split(self, denominator: tuple) -> tuple:
+    def split(self, denominator: tuple, paired_denominator=None) -> tuple:
         """Return one denominator's two pole shifts, weights, seeds and families.
 
         The ring denominator is the corner's own; the plane denominator is the
         edge's, and :class:`_Edge` splits it against this corner's modulus.
         """
-        return self.channel.split(denominator)
+        return self.channel.split(denominator, paired_denominator)
 
     def plain(self, term: tuple):
         """Return ``integral term/Delta da`` over the quarter range."""
@@ -618,6 +637,10 @@ class _Edge:
         self.edge_slope_over_radius = range_function(
             [], -4.0 * r1 - 4.0 * b1 * b1 * r, -4.0 * r1 + 4.0 * b1 * b1 * r
         )
+        self.paired_plane_radius = _paired_range(self.plane_radius)
+        self.paired_plane_squared = _paired_range(self.plane_squared)
+        self.paired_edge_slope = _paired_range(self.edge_slope)
+        self.paired_edge_slope_over_radius = _paired_range(self.edge_slope_over_radius)
 
     def _second_residual(self, vertex: _Vertex, *, paired: bool = False):
         """Evaluate the ``arsinh beta2`` integral, over the plane denominator.
@@ -704,7 +727,9 @@ class _Edge:
         a02 = self.squared_slope
         r1 = self.plane_radius_value
         # the plane denominator is the edge's, its split this corner's modulus
-        plane = vertex.split(self.plane_squared)
+        plane = vertex.split(
+            self.plane_squared, self.paired_plane_squared if paired else None
+        )
         plane_residual = self._second_residual(vertex, paired=paired)
         gamma = range_function([], u + b1 * vertex.offset, u + b1 * vertex.radius_sum)
         # N = u X - b1 G^2.  Its value at either end collapses onto u times the
@@ -823,27 +848,47 @@ class _Edge:
             )
 
         if paired:
+            paired_gamma = _paired_range(gamma)
+            paired_arctan_slope_over_radius = _paired_range(arctan_slope_over_radius)
+            paired_plane_derivative = paired_product(
+                paired_gamma, self.paired_edge_slope
+            )
+            paired_over_ring = paired_product(
+                _paired_range(arctan_numerator),
+                _paired_range(_RING_SLOPE_OVER_RADIUS_SQUARED),
+            )
+            paired_over_plane = paired_product(
+                _paired_range(arctan_numerator),
+                self.paired_edge_slope_over_radius,
+            )
+            paired_variable = _paired_range(_VARIABLE)
 
             def against_second_arsinh_paired(build):
-                weight = across_the_range(build()) + [0.0 * one] * 4
+                zero = paired_wrap(0.0 * one)
+                weight = paired_across_the_range(build()) + [zero] * 4
                 mean = weight[0]
-                core = sine_squared_times(
+                core = paired_sine_squared_times(
                     [
-                        0.5 * weight[1] + weight[3] / 6.0,
-                        0.5 * weight[2],
-                        weight[3] / 3.0,
+                        paired_add(
+                            paired_scale(weight[1], 0.5),
+                            paired_scale(weight[3], 1.0 / 6.0),
+                        ),
+                        paired_scale(weight[2], 0.5),
+                        paired_scale(weight[3], 1.0 / 3.0),
                     ]
                 )
                 return paired_add(
                     paired_add(
-                        paired_multiply(paired_wrap(mean), plane_residual),
+                        paired_multiply(mean, plane_residual),
                         paired_scale(
                             vertex.plain_paired(core),
                             2.0 * b1 * r / (a0 * a),
                         ),
                     ),
                     paired_scale(
-                        vertex.across_paired(product(core, plane_derivative), plane),
+                        vertex.across_paired(
+                            paired_product(core, paired_plane_derivative), plane
+                        ),
                         0.5 / (a0 * a),
                     ),
                 )
@@ -859,53 +904,62 @@ class _Edge:
                     for order, coefficient in enumerate(primitive)
                 )
                 boundary = -0.5 * (lower * at_half - upper * at_zero)
-                weight = range_function([], 0.0, 0.0)
+                weight = paired_range_function([], paired_wrap(0.0), paired_wrap(0.0))
                 for coefficient in reversed(primitive):
-                    weight = total(
-                        product(weight, _VARIABLE),
-                        range_function([], coefficient, coefficient),
+                    weight = paired_total(
+                        paired_product(weight, paired_variable),
+                        paired_range_function(
+                            [], paired_wrap(coefficient), paired_wrap(coefficient)
+                        ),
                     )
                 interior = paired_subtract(
                     paired_subtract(
                         paired_scale(
                             vertex.plain_paired(
-                                product(weight, arctan_slope_over_radius)
+                                paired_product(weight, paired_arctan_slope_over_radius)
                             ),
                             2.0,
                         ),
                         paired_scale(
                             vertex.across_paired(
-                                product(weight, over_ring), vertex.ring
+                                paired_product(weight, paired_over_ring), vertex.ring
                             ),
                             r,
                         ),
                     ),
-                    vertex.across_paired(product(weight, over_plane), plane),
+                    vertex.across_paired(
+                        paired_product(weight, paired_over_plane), plane
+                    ),
                 )
                 return paired_add(
                     paired_wrap(boundary), paired_scale(interior, 0.25 / a)
                 )
 
             flux_second = against_second_arsinh_paired(
-                lambda: scaled(
-                    product(
-                        vertex.cosine,
-                        total(
-                            self.plane_squared,
-                            scaled(
-                                product(vertex.cosine, self.plane_radius),
-                                2.0 * a02 * r,
+                lambda: paired_scaled(
+                    paired_product(
+                        vertex.paired_cosine,
+                        paired_total(
+                            self.paired_plane_squared,
+                            paired_scaled(
+                                paired_product(
+                                    vertex.paired_cosine,
+                                    self.paired_plane_radius,
+                                ),
+                                paired_wrap(2.0 * a02 * r),
                             ),
                         ),
                     ),
-                    0.5 / (a02 * a0),
+                    paired_wrap(0.5 / (a02 * a0)),
                 )
             )
             flux_arctangent = against_arctan_paired([0.0 * one, 0.0 * one, one])
             flux = paired_subtract(
                 paired_add(
                     paired_scale(
-                        vertex.against_root_paired(product(vertex.cosine, gamma)),
+                        vertex.against_root_paired(
+                            paired_product(vertex.paired_cosine, paired_gamma)
+                        ),
                         2.0 * a / a02,
                     ),
                     paired_scale(flux_second, 4.0),
@@ -917,29 +971,39 @@ class _Edge:
             )
 
             radial_second = against_second_arsinh_paired(
-                lambda: scaled(
-                    product(
-                        vertex.cosine,
-                        total(
-                            range_function([], r1 * one, r1 * one),
-                            scaled(vertex.cosine, b1 * b1 * r),
+                lambda: paired_scaled(
+                    paired_product(
+                        vertex.paired_cosine,
+                        paired_total(
+                            _paired_range(range_function([], r1 * one, r1 * one)),
+                            paired_scaled(
+                                vertex.paired_cosine,
+                                paired_wrap(b1 * b1 * r),
+                            ),
                         ),
                     ),
-                    -b1 / (a02 * a0),
+                    paired_wrap(-b1 / (a02 * a0)),
                 )
             )
             radial = paired_add(
-                paired_scale(vertex.against_root_paired(vertex.cosine), 4.0 * a / a02),
+                paired_scale(
+                    vertex.against_root_paired(vertex.paired_cosine), 4.0 * a / a02
+                ),
                 paired_scale(radial_second, 4.0),
             )
 
             vertical_second = against_second_arsinh_paired(
-                lambda: scaled(
-                    total(
-                        range_function([], b1 * b1 * r1 * one, b1 * b1 * r1 * one),
-                        scaled(vertex.cosine, -(2.0 * a02 - 1.0) * r),
+                lambda: paired_scaled(
+                    paired_total(
+                        _paired_range(
+                            range_function([], b1 * b1 * r1 * one, b1 * b1 * r1 * one)
+                        ),
+                        paired_scaled(
+                            vertex.paired_cosine,
+                            paired_wrap(-(2.0 * a02 - 1.0) * r),
+                        ),
                     ),
-                    1.0 / (a02 * a0),
+                    paired_wrap(1.0 / (a02 * a0)),
                 )
             )
             vertical = paired_subtract(

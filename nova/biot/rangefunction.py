@@ -50,6 +50,12 @@ evaluated on the host, and every operation on them is a free function here.
 
 from __future__ import annotations
 
+from nova.biot.pairedfloat import add as paired_add
+from nova.biot.pairedfloat import multiply as paired_multiply
+from nova.biot.pairedfloat import scale as paired_scale
+from nova.biot.pairedfloat import subtract as paired_subtract
+from nova.biot.pairedfloat import wrap as paired_wrap
+
 __all__ = [
     "across_the_range",
     "as_range_function",
@@ -59,6 +65,14 @@ __all__ = [
     "harmonic_multiply",
     "harmonic_scale",
     "product",
+    "paired_across_the_range",
+    "paired_deflate",
+    "paired_harmonic_multiply",
+    "paired_product",
+    "paired_range_function",
+    "paired_scaled",
+    "paired_sine_squared_times",
+    "paired_total",
     "range_function",
     "rising_integral",
     "scaled",
@@ -90,6 +104,37 @@ def harmonic_multiply(left: list, right: list) -> list:
     return out
 
 
+def paired_harmonic_multiply(left: list, right: list) -> list:
+    if not left or not right:
+        return []
+    zero = paired_wrap(0.0 * left[0][0] * right[0][0])
+    out = [zero] * (len(left) + len(right) - 1)
+    for index, one in enumerate(left):
+        for other_index, other in enumerate(right):
+            term = paired_scale(paired_multiply(one, other), 0.5)
+            out[index + other_index] = paired_add(out[index + other_index], term)
+            out[abs(index - other_index)] = paired_add(
+                out[abs(index - other_index)], term
+            )
+    return out
+
+
+def _paired_harmonic_add(*series: list) -> list:
+    length = max((len(term) for term in series), default=0)
+    if length == 0:
+        return []
+    exemplar = next(term[0] for term in series if term)
+    out = [paired_wrap(0.0 * exemplar[0])] * length
+    for term in series:
+        for index, coefficient in enumerate(term):
+            out[index] = paired_add(out[index], coefficient)
+    return out
+
+
+def _paired_harmonic_scale(series: list, factor) -> list:
+    return [paired_multiply(coefficient, factor) for coefficient in series]
+
+
 def harmonic_add(*series: list) -> list:
     """Return the sum of harmonic series."""
     length = max((len(term) for term in series), default=0)
@@ -114,6 +159,11 @@ def range_function(bulk: list, near, far) -> tuple:
     quantity; see the module docstring.
     """
     return (bulk, near, far)
+
+
+def paired_range_function(bulk: list, near, far) -> tuple:
+    """Return a range function whose coefficients retain paired-fp64 residues."""
+    return bulk, near, far
 
 
 def product(left: tuple, right: tuple) -> tuple:
@@ -142,6 +192,37 @@ def product(left: tuple, right: tuple) -> tuple:
     )
 
 
+def paired_product(left: tuple, right: tuple) -> tuple:
+    """Multiply paired range functions without rounding their coefficients."""
+    bulk, near, far = left
+    other_bulk, other_near, other_far = right
+    both_ends = [paired_wrap(value) for value in _BOTH_ENDS]
+    mean = paired_scale(paired_add(near, far), 0.5)
+    slope = paired_scale(paired_subtract(far, near), 0.5)
+    other_mean = paired_scale(paired_add(other_near, other_far), 0.5)
+    other_slope = paired_scale(paired_subtract(other_far, other_near), 0.5)
+    return (
+        _paired_harmonic_add(
+            paired_harmonic_multiply(
+                both_ends, paired_harmonic_multiply(bulk, other_bulk)
+            ),
+            paired_harmonic_multiply([mean, slope], other_bulk),
+            paired_harmonic_multiply([other_mean, other_slope], bulk),
+            [
+                paired_scale(
+                    paired_multiply(
+                        paired_subtract(near, far),
+                        paired_subtract(other_near, other_far),
+                    ),
+                    -1.0,
+                )
+            ],
+        ),
+        paired_multiply(near, other_near),
+        paired_multiply(far, other_far),
+    )
+
+
 def total(*terms: tuple) -> tuple:
     """Return the sum of range functions."""
     return (
@@ -151,9 +232,35 @@ def total(*terms: tuple) -> tuple:
     )
 
 
+def paired_total(*terms: tuple) -> tuple:
+    """Add paired range functions coefficient by coefficient."""
+    return (
+        _paired_harmonic_add(*[term[0] for term in terms]),
+        _paired_sum(term[1] for term in terms),
+        _paired_sum(term[2] for term in terms),
+    )
+
+
+def _paired_sum(values) -> tuple:
+    values = iter(values)
+    total_value = next(values)
+    for value in values:
+        total_value = paired_add(total_value, value)
+    return total_value
+
+
 def scaled(term: tuple, factor) -> tuple:
     """Return the range function multiplied through by a scalar."""
     return (harmonic_scale(term[0], factor), term[1] * factor, term[2] * factor)
+
+
+def paired_scaled(term: tuple, factor) -> tuple:
+    """Multiply a paired range function by a paired scalar."""
+    return (
+        _paired_harmonic_scale(term[0], factor),
+        paired_multiply(term[1], factor),
+        paired_multiply(term[2], factor),
+    )
 
 
 def across_the_range(term: tuple) -> list:
@@ -162,6 +269,19 @@ def across_the_range(term: tuple) -> list:
     return harmonic_add(
         [0.5 * (near + far), 0.5 * (far - near)],
         harmonic_multiply(_BOTH_ENDS, bulk),
+    )
+
+
+def paired_across_the_range(term: tuple) -> list:
+    """Return a paired range function as paired harmonic coefficients."""
+    bulk, near, far = term
+    ends = [
+        paired_scale(paired_add(near, far), 0.5),
+        paired_scale(paired_subtract(far, near), 0.5),
+    ]
+    return _paired_harmonic_add(
+        ends,
+        paired_harmonic_multiply([paired_wrap(value) for value in _BOTH_ENDS], bulk),
     )
 
 
@@ -250,6 +370,43 @@ def sine_squared_times(series: list) -> tuple:
     the one term without it, needs its end values from the geometry.
     """
     return (harmonic_scale(series, 4.0), 0.0 * series[0], 0.0 * series[0])
+
+
+def paired_sine_squared_times(series: list) -> tuple:
+    """Multiply a paired harmonic series by ``sin^2 phi`` exactly at both ends."""
+    zero = paired_wrap(0.0 * series[0][0])
+    return _paired_harmonic_scale(series, paired_wrap(4.0)), zero, zero
+
+
+def paired_deflate(series: list, root):
+    """Deflate a paired harmonic series at a paired root."""
+    degree = len(series) - 1
+    if degree < 1:
+        return [], (series[0] if series else paired_wrap(0.0))
+    zero = paired_wrap(0.0 * series[0][0])
+    quotient = [zero] * degree
+    upper = zero
+    current = zero
+    for order in range(degree, 1, -1):
+        current, upper = (
+            paired_subtract(
+                paired_add(
+                    paired_scale(series[order], 2.0),
+                    paired_scale(paired_multiply(root, current), 2.0),
+                ),
+                upper,
+            ),
+            current,
+        )
+        quotient[order - 1] = current
+    quotient[0] = paired_subtract(
+        paired_add(series[1], paired_multiply(root, current)),
+        paired_scale(upper, 0.5),
+    )
+    return quotient, paired_subtract(
+        paired_add(series[0], paired_multiply(root, quotient[0])),
+        paired_scale(current, 0.5),
+    )
 
 
 def contract(numerator: list, moments: list):

@@ -112,10 +112,10 @@ def contract(coefficients, moments):
 
 
 def contract_paired(coefficients, moments):
-    """Contract fp64 coefficients against paired moments."""
+    """Contract paired coefficients against paired moments."""
     total = wrap(0.0 * moments[0][0])
     for coefficient, moment in zip(coefficients, moments, strict=False):
-        total = add(total, scale(moment, coefficient))
+        total = add(total, multiply(moment, coefficient))
     return total
 
 

@@ -7,7 +7,7 @@
       "locator_error_pitch_ceiling": 0.5,
       "wall_clearance_pitch_floor": 2.0
     },
-    "well_separated_if": "genuine and both wall clearance is at least two median carrier pitches and boundary-wall flux margin is at least 5% of span"
+    "well_separated_if": "genuine and both wall clearance is at least two median carrier pitches and the production and exact sampled-wall flux margins are each at least 5% of span"
   },
   "artifacts": {
     "figure": "docs/figures/dual-basin-solve/diverted-separatrix-audit.png",
@@ -20,21 +20,21 @@
     "digest_validated_arrays": {
       "coefficients": {
         "dtype": "<f8",
-        "sha256": "73840028d1c3702bc73674a7e6edade1969d710599f76e65bed721ba0f96fd38",
+        "sha256": "02c5c5b60d2fdc4ff6fa09ff3889b38bd0f4f64e9871a3bb5c29df43a7c7a215",
         "shape": [
           7
         ]
       },
       "state": {
         "dtype": "<f8",
-        "sha256": "1e6e1043b84a7833adeb51916d3dca36c92d291a4a40dd924ce9b7cae87e7a8d",
+        "sha256": "11a7e9d00556e91a6d76a69212107592501e1e8cedae60fd17e9e8032ff14801",
         "shape": [
           4052
         ]
       },
       "stationary_points": {
         "dtype": "<f8",
-        "sha256": "833f5cca5a4c4f7ab243af07e7152f15e8169f599f5ec042dff35b94b8eef323",
+        "sha256": "9919d9b2fb5b262f49bfaee0fec3571bd687b65812269b0f9db27cfcfe2ccbf1",
         "shape": [
           2,
           2
@@ -47,121 +47,121 @@
     "stored_topology_label_used_as_input": false
   },
   "local_hessian": {
-    "determinant_wb2_per_m4": -0.5263717790406582,
+    "determinant_wb2_per_m4": -0.28834484487532874,
     "eigenvalues_wb_per_m2": [
-      -2.8565994356993003,
-      0.1842651694397613
+      -4.414261451157127,
+      0.0653211976829654
     ],
     "matrix_wb_per_m2": [
       [
-        -0.6430580306592943,
-        1.3532605657335388
+        -0.9842530697523973,
+        1.8973793859452635
       ],
       [
-        1.3532605657335388,
-        -2.0292762356002445
+        1.8973793859452635,
+        -3.3646871837217653
       ]
     ],
     "orthonormal_eigenvectors_columns": [
       [
-        -0.521601774002396,
-        -0.8531890701113987
+        -0.4840473093305819,
+        -0.8750418289029523
       ],
       [
-        0.8531890701113987,
-        -0.521601774002396
+        0.8750418289029523,
+        -0.4840473093305819
       ]
     ],
     "signature": "negative-positive"
   },
   "numeric_discriminators": {
     "analytic_saddle_m": [
-      1.1577641525044828,
-      -0.5044800936018776
+      1.198405322435904,
+      -0.43408752240161563
     ],
-    "boundary_minus_wall_flux_margin_abs_wb": 0.0004303310847507742,
-    "boundary_minus_wall_flux_margin_fraction_of_span": 0.02323536293865143,
-    "exact_saddle_minus_sampled_wall_margin_abs_wb": 0.00028270865086011624,
-    "exact_saddle_minus_sampled_wall_margin_fraction_of_span": 0.015264614482673562,
-    "fixture_flux_span_wb": 0.018520523474799246,
+    "boundary_minus_wall_flux_margin_abs_wb": 0.0005926676448621767,
+    "boundary_minus_wall_flux_margin_fraction_of_span": 0.08692276932254947,
+    "exact_saddle_minus_sampled_wall_margin_abs_wb": 0.00038395495551806543,
+    "exact_saddle_minus_sampled_wall_margin_fraction_of_span": 0.05631221531674414,
+    "fixture_flux_span_wb": 0.006818324467584895,
     "median_carrier_pitch_m": 0.046928380800174634,
-    "production_locator_error_carrier_pitches": 0.04644756949696268,
-    "production_locator_error_m": 0.0021797092285960403,
-    "production_quadratic_wall_fit_overshoot_fraction_of_span": 0.03845214501221399,
-    "production_quadratic_wall_fit_overshoot_wb": 0.0007121538543550939,
+    "production_locator_error_carrier_pitches": 0.14702525118113768,
+    "production_locator_error_m": 0.006899656974669754,
+    "production_quadratic_wall_fit_overshoot_fraction_of_span": 0.1430172645015749,
+    "production_quadratic_wall_fit_overshoot_wb": 0.0009751381138381487,
     "production_saddle_m": [
-      1.1595012040533252,
-      -0.5031633611925055
+      1.2043590455560238,
+      -0.43060062587647197
     ],
-    "saddle_to_wall_clearance_carrier_pitches": 1.4454390920434155,
-    "saddle_to_wall_segment_clearance_m": 0.06783211613487207,
-    "sampled_wall_peak_flux_wb": -0.00028270865086015094
+    "saddle_to_wall_clearance_carrier_pitches": 2.8378171130125627,
+    "saddle_to_wall_segment_clearance_m": 0.13317416212070576,
+    "sampled_wall_peak_flux_wb": -0.0003839549555179197
   },
   "production_read_recomputed_from_state": {
-    "axis_flux_wb": 0.018521343437036254,
+    "axis_flux_wb": 0.0068202193589138385,
     "axis_m": [
-      1.7247913717735055,
-      -0.13017603734200348
+      1.7627354924305094,
+      -0.06199979001032996
     ],
-    "boundary_flux_wb": -8.858812558313012e-07,
+    "boundary_flux_wb": -1.4844865419477442e-06,
     "boundary_m": [
-      1.1595012040533252,
-      -0.5031633611925055
+      1.2043590455560238,
+      -0.43060062587647197
     ],
     "boundary_saddle_distance_m": 0.0,
     "boundary_saddle_flux_difference_wb": 0.0,
     "class": "diverted",
     "finite_axis_count": 1,
     "finite_saddle_count": 1,
-    "selected_saddle_flux_wb": -8.858812558313012e-07,
+    "selected_saddle_flux_wb": -1.4844865419477442e-06,
     "selected_saddle_m": [
-      1.1595012040533252,
-      -0.5031633611925055
+      1.2043590455560238,
+      -0.43060062587647197
     ],
-    "wall_extremum_flux_wb": 0.00042944520349494293,
+    "wall_extremum_flux_wb": 0.000591183158320229,
     "wall_extremum_m": [
-      1.0995950340361336,
-      -0.5402651766624296
+      1.0803629532937464,
+      -0.49686274957235127
     ]
   },
   "schema": "nova.diverted-separatrix-audit",
   "schema_version": 1,
   "separatrix_leg_geometry": {
     "leg_angles_degrees": [
-      17.3723293366312,
-      45.65195759470129,
-      197.00762900401392,
-      225.72531088645445
+      22.206888943497468,
+      35.986689413714956,
+      201.82241881986664,
+      215.7820477027533
     ],
     "leg_count": 4,
     "leg_points_m": [
       [
-        1.1768518452492889,
-        -0.4985084953501633
+        1.2169218254064378,
+        -0.42652848028358165
       ],
       [
-        1.1717444554419916,
-        -0.49017795635685435
+        1.214588392896398,
+        -0.4223355765852549
       ],
       [
-        1.1386388361478583,
-        -0.510330074307746
+        1.1798385135123703,
+        -0.4415221445437959
       ],
       [
-        1.1438021714227993,
-        -0.5188001174941311
+        1.1821803811953246,
+        -0.44578159276824814
       ]
     ],
-    "minimum_opening_angle_degrees": 28.279628258070083,
+    "minimum_opening_angle_degrees": 13.779800470217488,
     "probe_radius_m": 0.02,
     "successive_opening_angles_degrees": [
-      28.279628258070083,
-      151.35567140931266,
-      28.717681882440505,
-      151.64701845017674
+      13.779800470217488,
+      165.8357294061517,
+      13.959628882886639,
+      166.42484124074417
     ],
     "wall_intersection_count": 0,
     "wall_intersections_m": []
   },
-  "verdict": "genuine-marginal"
+  "verdict": "genuine-well-separated"
 }

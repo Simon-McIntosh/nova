@@ -31,10 +31,10 @@ RESOLUTION = "fine"
 # These two stationary points coincide with well-conditioned interior stencil
 # centres on the immutable fine analytic carrier. The coefficients are solved
 # from zero-gradient constraints rather than fitted to a topology label.
-AXIS_M = np.array([1.7267405315443793, -0.12905304720048028])
-X_POINT_M = np.array([1.1577641525044828, -0.50448009360187762])
+AXIS_M = np.array([1.7673817014758004, -0.058660476000218287])
+X_POINT_M = np.array([1.1984053224359039, -0.43408752240161563])
 R_QUARTIC = -0.1
-Z_QUADRATIC = -0.8
+Z_QUADRATIC = -1.6
 
 
 def _digest(values: np.ndarray) -> str:

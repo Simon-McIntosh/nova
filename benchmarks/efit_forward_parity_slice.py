@@ -81,6 +81,7 @@ COMPOSITION_RECEIPT = DEFAULT_OUTPUT / "mast-dina-composition-diff.json"
 PASSIVE_INCLUSIVE_RECEIPT = DEFAULT_OUTPUT / "passive-inclusive-parity-slice.json"
 EXTENDED_PASSIVE_RECEIPT_NAME = "passive-inclusive-convergence.json"
 PASSIVE_POLISH_RECEIPT_NAME = "passive-inclusive-stationary-polish.json"
+FROZEN_SCORECARD_RECEIPT_NAME = "passive-inclusive-frozen-six-scorecard.json"
 FIGURE_NAME = "reference-seeded-forward-slice.png"
 DIAGNOSIS_FIGURE_NAME = "vacuum-branch-diagnosis.png"
 LONG_BUDGET_FIGURE_NAME = "long-budget-residual-trajectories.png"
@@ -90,6 +91,23 @@ ATTRIBUTION_FIGURE_NAME = "boundary-imbalance-source-fields.png"
 PASSIVE_INCLUSIVE_FIGURE_NAME = "passive-inclusive-parity-slice.png"
 EXTENDED_PASSIVE_FIGURE_NAME = "passive-inclusive-convergence.png"
 PASSIVE_POLISH_FIGURE_NAME = "passive-inclusive-stationary-polish.png"
+FROZEN_SCORECARD_FIGURE_NAME = "passive-inclusive-frozen-six-trajectories.png"
+PRESCRIBED_RESPONSE_INPUT_ARRAYS = (
+    "gridr",
+    "gridz",
+    "limiterr",
+    "limiterz",
+    "fcoil_n",
+    "fcoil_circ",
+    "fcoil_r",
+    "fcoil_z",
+    "fcoil_width",
+    "fcoil_height",
+    "fcoil_ang1",
+    "fcoil_ang2",
+    "fcoil_turns",
+    "fcoil_xmult",
+)
 GRID_STRIDE = 2
 FIXED_POINT_CRITERION = 1.0e-8
 NEWTON_STEPS = 12
@@ -210,6 +228,36 @@ def select_slice(bank: Path) -> tuple[dict[str, Any], dict[str, Any]]:
         raise RuntimeError("decomposition bank contains no qualified forward slice")
     _, _, _, row, qualification = min(candidates, key=lambda item: item[:3])
     return row, qualification
+
+
+def select_slices_by_shot(bank: Path) -> list[tuple[dict[str, Any], dict[str, Any]]]:
+    """Select the lowest worst-fraction qualified row from every frozen shot."""
+    report = json.loads(bank.read_text())
+    selected = []
+    for shot in report["cohort"]["shots"]:
+        candidates = []
+        for row in report["slices"]:
+            if int(row["shot"]) != int(shot):
+                continue
+            qualification = _qualification(row)
+            if qualification is None or not qualification["passes"]:
+                continue
+            score = max(
+                qualification[
+                    "declared_boundary_to_map_saddle_offset_fraction_of_declared_span"
+                ],
+                qualification[
+                    "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span"
+                ],
+            )
+            candidates.append((score, int(row["slice_index"]), row, qualification))
+        if not candidates:
+            raise RuntimeError(f"shot {shot} contains no qualified forward slice")
+        _, _, row, qualification = min(candidates, key=lambda item: item[:2])
+        selected.append((row, qualification))
+    if len(selected) != 6:
+        raise RuntimeError("the frozen scorecard requires exactly six shots")
+    return selected
 
 
 def _profile_function(nodes: np.ndarray, values: np.ndarray):
@@ -2382,11 +2430,10 @@ def _composition_case_receipt(case: dict[str, Any]) -> tuple[dict[str, Any], dic
     return record, fields
 
 
-def _mast_composition_case(
-    store: Path, bank: Path
+def _mast_case_from_selection(
+    store: Path, selected: dict[str, Any], qualification: dict[str, Any]
 ) -> tuple[dict[str, Any], dict[str, Any]]:
-    """Build the qualified MAST prescribed-anchor reference state."""
-    selected, qualification = select_slice(bank)
+    """Build one selected MAST prescribed-anchor reference state."""
     shot = int(selected["shot"])
     row = int(selected["slice_index"])
     group = zarr.open_group(str(store / f"{shot}.zarr"), mode="r")["efm"]
@@ -2397,7 +2444,7 @@ def _mast_composition_case(
     )
     return (
         {
-            "name": "MAST 21985/51",
+            "name": f"MAST {shot}/{row}",
             "operator": profile.operator,
             "state": seed,
             "span_wb": float(np.ptp(reference)),
@@ -2435,6 +2482,14 @@ def _mast_composition_case(
             "current_provenance": provenance,
         },
     )
+
+
+def _mast_composition_case(
+    store: Path, bank: Path
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Build the best qualified MAST prescribed-anchor reference state."""
+    selected, qualification = select_slice(bank)
+    return _mast_case_from_selection(store, selected, qualification)
 
 
 def _dina_composition_case() -> dict[str, Any]:
@@ -2496,6 +2551,40 @@ def _dina_composition_case() -> dict[str, Any]:
             "bitwise_stored_precision": True,
             "cold_build_fallback": False,
         },
+    }
+
+
+def _digest_prescribed_response_inputs(
+    group: zarr.Group, targets: np.ndarray
+) -> dict[str, Any]:
+    """Digest every physical input that determines the response matrix."""
+    arrays = {
+        name: np.ascontiguousarray(np.asarray(group[name]))
+        for name in PRESCRIBED_RESPONSE_INPUT_ARRAYS
+    }
+    arrays["resolved_response_targets"] = np.ascontiguousarray(targets)
+    inputs = {}
+    combined = hashlib.sha256()
+    for name, array in arrays.items():
+        shape = np.asarray(array.shape, dtype=np.int64)
+        payload = hashlib.sha256()
+        payload.update(array.dtype.str.encode())
+        payload.update(b"\0")
+        payload.update(shape.tobytes())
+        payload.update(array.tobytes())
+        digest = payload.hexdigest()
+        inputs[name] = {
+            "sha256": digest,
+            "dtype": array.dtype.str,
+            "shape": list(array.shape),
+        }
+        combined.update(name.encode())
+        combined.update(b"\0")
+        combined.update(bytes.fromhex(digest))
+    return {
+        "algorithm": "sha256",
+        "combined_sha256": combined.hexdigest(),
+        "inputs": inputs,
     }
 
 
@@ -2619,13 +2708,16 @@ def _stored_circuit_fields(
 
 
 def _passive_inclusive_case(
-    case: dict[str, Any], context: dict[str, Any]
+    case: dict[str, Any],
+    context: dict[str, Any],
+    response_cache: dict[str, Any] | None = None,
 ) -> tuple[dict[str, Any], ForwardProfile, dict[str, Any]]:
     """Carry all fitted circuit currents through one explicit field policy."""
     group = context["group"]
     row = context["row"]
     profile = context["profile"]
     targets = np.vstack((case["grid_coordinate"], case["wall_coordinate"]))
+    response_inputs = _digest_prescribed_response_inputs(group, targets)
     geometry = (
         MachineGeometryRegistry.default()
         .select(int(case["reference"]["shot"]))
@@ -2634,18 +2726,31 @@ def _passive_inclusive_case(
     _families, _drives, active_mapping = _circuit_drives(
         group, row, geometry, "fcoil_c"
     )
-    circuits, audit = _stored_circuit_fields(
-        group, row, targets, geometry, active_mapping
-    )
-    response = np.column_stack([circuit["response_wb_per_a"] for circuit in circuits])
-    current = np.asarray(
-        [circuit["fitted_current_a"] for circuit in circuits], dtype=np.float64
-    )
+    if response_cache is None:
+        circuits, audit = _stored_circuit_fields(
+            group, row, targets, geometry, active_mapping
+        )
+        response = np.column_stack(
+            [circuit["response_wb_per_a"] for circuit in circuits]
+        )
+        current = np.asarray(
+            [circuit["fitted_current_a"] for circuit in circuits], dtype=np.float64
+        )
+        fitted_field = np.sum(
+            [circuit["field"] for circuit in circuits], axis=0, dtype=np.float64
+        )
+    else:
+        if response_inputs != response_cache["input_digests"]:
+            raise RuntimeError("the cached prescribed response inputs changed")
+        response = response_cache["response"]
+        audit = response_cache["audit"]
+        indices = np.asarray(group["fcoil_n"], dtype=int)
+        current = np.asarray(group["fcoil_c"][row], dtype=np.float64)
+        if not np.array_equal(indices, np.arange(current.size)):
+            raise RuntimeError("the cached circuit order changed")
+        fitted_field = response @ current
     policy = PrescribedCurrentField(
         response=jnp.asarray(response), current=jnp.asarray(current)
-    )
-    fitted_field = np.sum(
-        [circuit["field"] for circuit in circuits], axis=0, dtype=np.float64
     )
     closure = np.asarray(policy.flux(), dtype=np.float64) - fitted_field
     operator = replace(
@@ -2654,9 +2759,11 @@ def _passive_inclusive_case(
         prescribed_current_field=policy,
     )
     passive_profile = replace(profile, operator=operator)
+    active_circuit_count = len(active_mapping)
+    passive_circuit_count = policy.circuit_count - active_circuit_count
     passive_case = {
         **case,
-        "name": "MAST 21985/51, all fitted prescribed circuits",
+        "name": f"{case['name']}, all fitted prescribed circuits",
         "operator": operator,
         "mesh": {
             **case["mesh"],
@@ -2668,19 +2775,32 @@ def _passive_inclusive_case(
         "policy": "explicit prescribed-current response matrix",
         "current_source": "efm/fcoil_c in zero-based fcoil_n order",
         "stored_circuit_count": policy.circuit_count,
-        "active_circuit_count": audit["active_circuit_count"],
-        "passive_or_vessel_circuit_count": audit["passive_or_vessel_circuit_count"],
+        "active_circuit_count": active_circuit_count,
+        "passive_or_vessel_circuit_count": passive_circuit_count,
         "section_kernel_evaluations": audit["section_kernel_evaluations"],
+        "section_kernel_evaluations_this_shot": (
+            audit["section_kernel_evaluations"] if response_cache is None else 0
+        ),
+        "passive_registry_minimum_overlap_fraction": audit[
+            "passive_registry_minimum_overlap_fraction"
+        ],
+        "passive_registry_maximum_separation_m": audit[
+            "passive_registry_maximum_separation_m"
+        ],
         "response_shape": list(response.shape),
         "ordinary_active_drive_zeroed_to_avoid_double_counting": True,
         "free_standing_default": "policy absent; ordinary conductor drive unchanged",
         "stored_field_closure_sup_wb": float(np.max(np.abs(closure))),
         "stored_field_closure_rms_wb": float(np.sqrt(np.mean(closure**2))),
         "all_currents_prescribed": True,
+        "response_matrix_reused": response_cache is not None,
+        "response_input_digests": response_inputs,
+        "active_mapping_recomputed_for_shot": True,
+        "active_mapping": active_mapping,
     }
-    if policy.circuit_count != 101 or audit["active_circuit_count"] != 13:
+    if policy.circuit_count != 101 or active_circuit_count != 13:
         raise RuntimeError("the prescribed circuit inventory is incomplete")
-    if audit["passive_or_vessel_circuit_count"] != 88:
+    if passive_circuit_count != 88:
         raise RuntimeError("the passive and vessel circuit inventory is incomplete")
     return passive_case, passive_profile, policy_receipt
 
@@ -3476,212 +3596,331 @@ def _passive_polish_figure(
     plt.close(figure)
 
 
-def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
-    """Reproduce the passive handoff and apply stationary Newton polish."""
-    configure_dtypes()
-    banked_bytes = PASSIVE_INCLUSIVE_RECEIPT.read_bytes()
-    banked_sha256 = hashlib.sha256(banked_bytes).hexdigest()
-    banked_receipt = json.loads(banked_bytes)
-    banked_solve = banked_receipt["reference_seeded_pinned_solve"]
-    banked_trace = np.asarray(
-        [
-            np.nan if value is None else value
-            for value in banked_solve["residual_trajectory"]
-        ],
-        dtype=np.float64,
-    )
-    mast_case, context = _mast_composition_case(store, bank)
-    passive_case, profile, policy = _passive_inclusive_case(mast_case, context)
-    reproduced, handoff_trace, branch = _passive_inclusive_solve(
-        passive_case,
-        context,
-        profile,
-        newton_budget=NEWTON_STEPS,
-    )
-    handoff_state = np.asarray(branch.equilibrium.flux, dtype=np.float64)
-    banked_terminal = banked_solve["terminal_state"]
-    reproduced_terminal = reproduced["terminal_state"]
-    trajectory_equal = bool(np.array_equal(handoff_trace, banked_trace, equal_nan=True))
-    residual_equal = bool(
-        np.array_equal(
-            np.asarray([reproduced["forward_branch_receipt"]["residual"]]),
-            np.asarray([banked_solve["forward_branch_receipt"]["residual"]]),
-        )
-    )
-    current_equal = bool(
-        np.array_equal(
-            np.asarray([reproduced_terminal["plasma_current_a"]]),
-            np.asarray([banked_terminal["plasma_current_a"]]),
-        )
-    )
-    saddle_equal = bool(
-        np.array_equal(
-            np.asarray(reproduced_terminal["saddle_position_m"]),
-            np.asarray(banked_terminal["saddle_position_m"]),
-        )
-    )
-    reproduction_passes = bool(
-        trajectory_equal and residual_equal and current_equal and saddle_equal
-    )
-    if not reproduction_passes:
-        raise RuntimeError("the passive-inclusive handoff did not reproduce bitwise")
-
+def _closest_passive_state(
+    case: dict[str, Any], context: dict[str, Any], profile: ForwardProfile
+) -> dict[str, Any]:
+    """Replay bounded Newton promotions and score the minimum-residual state."""
     requested = int(TopologyClass.DIVERTED)
     mapped = profile.flux_map(requested_class=requested)
-    polish_options = {
-        "newton_steps": NEWTON_STEPS,
-        "gmres_iterations": GMRES_ITERATIONS,
-        "warmup": 0,
-        "relaxation": RELAXATION,
-        "step_cap": STEP_CAP,
-    }
-    polish_history = fixed_point.newton_krylov(
-        mapped,
-        jnp.asarray(handoff_state),
-        **polish_options,
-    )
-    polish = _route_record(
+    state = jnp.asarray(case["state"])
+    histories = []
+    accepted_residuals = []
+    full_trace = []
+    for _promotion in range(NEWTON_STEPS):
+        history = fixed_point.newton_krylov(
+            mapped,
+            state,
+            newton_steps=1,
+            gmres_iterations=GMRES_ITERATIONS,
+            warmup=0,
+            relaxation=RELAXATION,
+            step_cap=STEP_CAP,
+        )
+        state = history.state
+        histories.append(history)
+        accepted_residuals.append(float(history.residual))
+        full_trace.extend(np.asarray(history.trace, dtype=np.float64).tolist())
+
+    closest_index = int(np.argmin(np.asarray(accepted_residuals)))
+    closest_history = histories[closest_index]
+    equilibrium = profile._receipt(closest_history.state, closest_history, requested)
+    metrics = _pinned_metrics(
         context["group"],
         context["row"],
         profile,
         context["reference_flux"],
-        polish_history,
-        route_id="stationary_newton_polish",
-        route="newton_krylov",
-        iterations=NEWTON_STEPS,
-        options=polish_options,
+        equilibrium,
     )
-    polish["registered_fixed_point_criterion"] = FIXED_POINT_CRITERION
-    polish["initial_state_source"] = "handoff_reproduction.state_vector"
-    polish["initial_state_matches_handoff"] = bool(
-        np.array_equal(np.asarray(handoff_state), np.asarray(branch.equilibrium.flux))
-    )
-    polish["terminal_state"]["signed_relative_current_deviation"] = (
-        polish["terminal_state"]["plasma_current_a"]
-        / polish["terminal_state"]["reference_plasma_current_a"]
-        - 1.0
-    )
-    polish_trace = np.asarray(polish_history.trace, dtype=np.float64)
-    numeric_polish_trace = polish_trace[np.isfinite(polish_trace)]
-    criterion_hits = np.flatnonzero(numeric_polish_trace <= FIXED_POINT_CRITERION)
-    polish["numeric_residual_trajectory"] = numeric_polish_trace.tolist()
-    polish["trajectory_summary"] = {
-        "full_trace_slots": int(polish_trace.size),
-        "finite_residual_reads": int(numeric_polish_trace.size),
-        "minimum_residual": float(np.min(numeric_polish_trace)),
-        "minimum_finite_read": int(np.argmin(numeric_polish_trace) + 1),
-        "first_criterion_finite_read": (
-            None if not len(criterion_hits) else int(criterion_hits[0] + 1)
+    return {
+        "promotion": closest_index + 1,
+        "residual": accepted_residuals[closest_index],
+        "accepted_residual_trajectory": accepted_residuals,
+        "full_residual_trajectory": np.asarray(full_trace, dtype=np.float64),
+        "terminal_state": np.asarray(state, dtype=np.float64),
+        "metrics": metrics,
+        "per_metric_qualification": _metric_qualification(
+            metrics, accepted_residuals[closest_index]
         ),
     }
-    polish["per_metric_qualification"] = _metric_qualification(
-        polish["metrics"], polish["residual"]
-    )
 
-    banked_unchanged = PASSIVE_INCLUSIVE_RECEIPT.read_bytes() == banked_bytes
-    if not banked_unchanged:
-        raise RuntimeError("the bounded passive-inclusive receipt was modified")
-    figure_path = output / PASSIVE_POLISH_FIGURE_NAME
-    _passive_polish_figure(handoff_trace, polish_trace, figure_path)
-    converged = polish["converged"]
-    retains_plasma = polish["terminal_state"]["retains_plasma_basin"]
+
+def _frozen_scorecard_figure(rows: list[dict[str, Any]], path: Path) -> None:
+    """Plot the accepted residual sequence for each selected shot."""
+    figure, axes = plt.subplots(2, 3, figsize=(11.2, 6.8), constrained_layout=True)
+    for axis, row in zip(axes.ravel(), rows, strict=True):
+        values = np.asarray(row["accepted_residual_trajectory"], dtype=np.float64)
+        displayed = np.maximum(values, FIXED_POINT_CRITERION / 10.0)
+        axis.semilogy(
+            np.arange(1, values.size + 1),
+            displayed,
+            marker="o",
+            ms=3,
+            lw=1.0,
+        )
+        axis.axhline(FIXED_POINT_CRITERION, color="black", ls="--", lw=0.8)
+        axis.set_title(
+            f"{row['shot']} / row {row['slice_index']}\n"
+            f"{row['outcome_class'].replace('_', ' ')}",
+            fontsize=10,
+        )
+        axis.set_xlabel("Newton promotion")
+        axis.set_ylabel("Fixed-point residual")
+        axis.grid(True, which="both", alpha=0.25)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, dpi=180)
+    plt.close(figure)
+
+
+def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
+    """Score one best-qualified passive-inclusive row from every frozen shot."""
+    configure_dtypes()
+    selected = select_slices_by_shot(bank)
+    response_cache = None
+    shot_records = []
+    figure_rows = []
+    for selected_row, qualification in selected:
+        mast_case, context = _mast_case_from_selection(
+            store, selected_row, qualification
+        )
+        passive_case, profile, policy = _passive_inclusive_case(
+            mast_case, context, response_cache
+        )
+        if response_cache is None:
+            prescribed = profile.operator.prescribed_current_field
+            response_cache = {
+                "response": np.asarray(prescribed.response, dtype=np.float64),
+                "input_digests": policy["response_input_digests"],
+                "audit": {
+                    name: policy[name]
+                    for name in (
+                        "stored_circuit_count",
+                        "active_circuit_count",
+                        "passive_or_vessel_circuit_count",
+                        "section_kernel_evaluations",
+                        "passive_registry_minimum_overlap_fraction",
+                        "passive_registry_maximum_separation_m",
+                    )
+                },
+            }
+
+        solve, official_trace, branch = _passive_inclusive_solve(
+            passive_case,
+            context,
+            profile,
+            newton_budget=NEWTON_STEPS,
+        )
+        closest = _closest_passive_state(passive_case, context, profile)
+        trace_equal = bool(
+            np.array_equal(
+                official_trace,
+                closest["full_residual_trajectory"],
+                equal_nan=True,
+            )
+        )
+        terminal_equal = bool(
+            np.array_equal(
+                np.asarray(branch.equilibrium.flux, dtype=np.float64),
+                closest["terminal_state"],
+            )
+        )
+        if not trace_equal or not terminal_equal:
+            raise RuntimeError("the closest-state replay changed the bounded solve")
+
+        terminal_metrics = _pinned_metrics(
+            context["group"],
+            context["row"],
+            profile,
+            context["reference_flux"],
+            branch.equilibrium,
+        )
+        branch_receipt = solve["forward_branch_receipt"]
+        terminal = solve["terminal_state"]
+        if branch_receipt["converged"] and terminal["nonzero_current"]:
+            outcome_class = "converged_root"
+        elif not terminal["nonzero_current"]:
+            outcome_class = "vacuum_collapse"
+        else:
+            outcome_class = "bounded_non_convergence"
+        reference = mast_case["reference"]
+        closest_metrics = closest["metrics"]
+        record = {
+            "qualification_before_solve": qualification,
+            "reference": reference,
+            "solve_outcome": {
+                "outcome_class": outcome_class,
+                "registered_fixed_point_criterion": FIXED_POINT_CRITERION,
+                "converged": branch_receipt["converged"],
+                "iterations": branch_receipt["iterations"],
+                "requested_class": branch_receipt["requested_class"],
+                "achieved_class": branch_receipt["achieved_class"],
+                "topology_consistent": branch_receipt["topology_consistent"],
+                "terminal_residual": branch_receipt["residual"],
+                "terminal_plasma_current_a": terminal["plasma_current_a"],
+                "terminal_moment_deviations": {
+                    "plasma_current": terminal_metrics["plasma_current"],
+                    "poloidal_beta": terminal_metrics["poloidal_beta"],
+                    "internal_inductance": terminal_metrics["internal_inductance"],
+                },
+            },
+            "closest_approach": {
+                "promotion": closest["promotion"],
+                "residual": closest["residual"],
+                "metrics": closest_metrics,
+                "per_metric_qualification": closest["per_metric_qualification"],
+            },
+            "residual_trajectory": solve["residual_trajectory"],
+            "accepted_residual_trajectory": closest["accepted_residual_trajectory"],
+            "replay_verification": {
+                "full_trace_bitwise_equal": trace_equal,
+                "terminal_state_bitwise_equal": terminal_equal,
+                "passes": bool(trace_equal and terminal_equal),
+            },
+            "prescribed_current_policy": policy,
+        }
+        shot_records.append(record)
+        figure_rows.append(
+            {
+                "shot": reference["shot"],
+                "slice_index": reference["slice_index"],
+                "outcome_class": outcome_class,
+                "accepted_residual_trajectory": closest["accepted_residual_trajectory"],
+            }
+        )
+
+    outcomes = {
+        name: sum(
+            record["solve_outcome"]["outcome_class"] == name for record in shot_records
+        )
+        for name in (
+            "converged_root",
+            "vacuum_collapse",
+            "bounded_non_convergence",
+        )
+    }
+    carried_passes = sum(
+        record["closest_approach"]["per_metric_qualification"][
+            "all_carried_tolerances_pass"
+        ]
+        for record in shot_records
+    )
+    reproduces_reference = bool(
+        outcomes["converged_root"] == len(shot_records)
+        and carried_passes == len(shot_records)
+    )
+    table = [
+        {
+            "shot": record["reference"]["shot"],
+            "slice_index": record["reference"]["slice_index"],
+            "outcome_class": record["solve_outcome"]["outcome_class"],
+            "converged": record["solve_outcome"]["converged"],
+            "terminal_residual": record["solve_outcome"]["terminal_residual"],
+            "closest_residual": record["closest_approach"]["residual"],
+            "closest_plasma_current_deviation": record["closest_approach"]["metrics"][
+                "plasma_current"
+            ]["signed_relative_deviation"],
+            "closest_poloidal_beta_deviation": record["closest_approach"]["metrics"][
+                "poloidal_beta"
+            ]["signed_relative_deviation"],
+            "closest_internal_inductance_deviation": record["closest_approach"][
+                "metrics"
+            ]["internal_inductance"]["signed_relative_deviation"],
+            "all_carried_tolerances_pass": record["closest_approach"][
+                "per_metric_qualification"
+            ]["all_carried_tolerances_pass"],
+        }
+        for record in shot_records
+    ]
+    figure_path = output / FROZEN_SCORECARD_FIGURE_NAME
+    _frozen_scorecard_figure(figure_rows, figure_path)
     receipt = {
-        "receipt": "MAST passive-inclusive stationary Newton polish",
+        "receipt": "MAST passive-inclusive frozen-six forward scorecard",
         "backend": "JAX_PLATFORMS=cpu required by invocation",
         "execution_contract": {
+            "selection": "lowest worst-fraction qualified row per frozen shot",
             "reference_seed": "efm/psirz in total Wb",
             "normalization": "reference-declared axis and boundary anchors",
-            "external_field": "all fitted circuits as prescribed currents",
-            "operator_path": "one stationary ForwardFluxOperator composition",
-            "handoff": "existing newton_krylov prefix followed by existing newton_krylov polish",
-            "promotion_stage": {
-                "handoff_value": NEWTON_STEPS,
-                "value_during_polish": NEWTON_STEPS,
-                "advanced_during_polish": False,
-                "polish_warmup_sweeps": 0,
-            },
+            "external_field": "all 101 fitted circuits as prescribed currents",
+            "route": "ForwardProfile.solve_branch newton_krylov",
+            "newton_promotions": NEWTON_STEPS,
         },
         "path_audit": {
             "sensor_reads": 0,
             "whitening_matrices": 0,
             "least_squares_updates": 0,
             "inverse_fit_coefficients": 0,
-            "forward_flux_operator_paths": 1,
+            "forward_flux_operator_paths": len(shot_records),
             "prescribed_currents_only": True,
             "passes": True,
         },
-        "prescribed_current_policy": policy,
-        "banked_handoff_source": {
-            "source_receipt": str(PASSIVE_INCLUSIVE_RECEIPT),
-            "sha256": banked_sha256,
-            "byte_count": len(banked_bytes),
-            "unchanged_after_polish_run": banked_unchanged,
-            "promotion_count": NEWTON_STEPS,
+        "response_reuse_audit": {
+            "cache_key": response_cache["input_digests"]["combined_sha256"],
+            "input_digests": response_cache["input_digests"],
+            "input_digest_match_count": sum(
+                record["prescribed_current_policy"]["response_input_digests"]
+                == response_cache["input_digests"]
+                for record in shot_records
+            ),
+            "hard_digest_assertions_before_reuse": len(shot_records) - 1,
+            "stored_section_element_count": response_cache["input_digests"]["inputs"][
+                "fcoil_r"
+            ]["shape"][0],
+            "response_shape": list(response_cache["response"].shape),
+            "exact_kernel_constructions": 1,
+            "per_shot_current_vectors": len(shot_records),
+            "per_shot_active_mappings_recomputed": len(shot_records),
+            "active_mapping_objects_used_in_cache_key": 0,
+            "passes": all(
+                record["prescribed_current_policy"]["response_input_digests"]
+                == response_cache["input_digests"]
+                and record["prescribed_current_policy"][
+                    "active_mapping_recomputed_for_shot"
+                ]
+                for record in shot_records
+            ),
         },
-        "handoff_reproduction": {
-            "route": "newton_krylov",
-            "options": {
-                "newton_steps": NEWTON_STEPS,
-                "gmres_iterations": GMRES_ITERATIONS,
-                "warmup": WARMUP_SWEEPS,
-                "relaxation": RELAXATION,
-                "step_cap": STEP_CAP,
-            },
-            "residual": reproduced["forward_branch_receipt"]["residual"],
-            "plasma_current_a": reproduced_terminal["plasma_current_a"],
-            "reference_plasma_current_a": reproduced_terminal[
-                "reference_plasma_current_a"
-            ],
-            "saddle_position_m": reproduced_terminal["saddle_position_m"],
-            "state_vector": handoff_state.tolist(),
-            "state_size": int(handoff_state.size),
-            "residual_trajectory": reproduced["residual_trajectory"],
-            "bitwise_verification": {
-                "residual_trajectory_equal": trajectory_equal,
-                "terminal_residual_equal": residual_equal,
-                "plasma_current_equal": current_equal,
-                "saddle_position_equal": saddle_equal,
-                "passes": reproduction_passes,
-            },
+        "per_shot": shot_records,
+        "per_shot_table": table,
+        "aggregate": {
+            "shot_count": len(shot_records),
+            "outcome_counts": outcomes,
+            "all_carried_tolerances_pass_count": carried_passes,
+            "reproduces_reference_within_registered_bounds": reproduces_reference,
+            "verdict": (
+                "PASS_FREE_BOUNDARY_FIXED_POINT_REPRODUCES_REFERENCE"
+                if reproduces_reference
+                else "FAIL_FREE_BOUNDARY_FIXED_POINT_DOES_NOT_REPRODUCE_REFERENCE"
+            ),
+            "statement": (
+                "The passive-inclusive reference-seeded prescribed-anchor fixed point reproduces every frozen reference within registered bounds."
+                if reproduces_reference
+                else "The passive-inclusive reference-seeded prescribed-anchor fixed point does not reproduce the frozen references within registered bounds."
+            ),
         },
-        "stationary_polish": polish,
-        "verdict": (
-            "PASS_STATIONARY_POLISH_CONVERGED_PLASMA_ROOT"
-            if converged and retains_plasma
-            else "STRUCTURAL_NEGATIVE_STATIONARY_POLISH_CONVERGED_VACUUM_ROOT"
-            if converged
-            else "STRUCTURAL_NEGATIVE_STATIONARY_POLISH_STALLED_IN_PLASMA_BASIN"
-            if retains_plasma
-            else "STRUCTURAL_NEGATIVE_STATIONARY_POLISH_ESCAPED_WITHOUT_CONVERGENCE"
-        ),
         "figure_src": (
-            "/nova/figures/efit-forward-parity/passive-inclusive-stationary-polish.png"
+            "/nova/figures/efit-forward-parity/passive-inclusive-frozen-six-trajectories.png"
         ),
     }
     output.mkdir(parents=True, exist_ok=True)
-    receipt_path = output / PASSIVE_POLISH_RECEIPT_NAME
+    receipt_path = output / FROZEN_SCORECARD_RECEIPT_NAME
     receipt_path.write_text(json.dumps(receipt, indent=2, allow_nan=False) + "\n")
     return receipt
 
 
 def main() -> None:
-    """Parse paths, run stationary passive-inclusive polish and summarize."""
+    """Parse paths, score the frozen references and print the verdict."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--store", type=Path, default=SHOT_STORE)
     parser.add_argument("--bank", type=Path, default=DECOMPOSITION_BANK)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     arguments = parser.parse_args()
     receipt = run(arguments.store, arguments.bank, arguments.output)
-    polish = receipt["stationary_polish"]
-    terminal = polish["terminal_state"]
+    aggregate = receipt["aggregate"]
     print(
-        "PASSIVE_INCLUSIVE_STATIONARY_POLISH "
-        f"handoff_bitwise={receipt['handoff_reproduction']['bitwise_verification']['passes']} "
-        f"converged={polish['converged']} "
-        f"residual={polish['residual']:.9g} "
-        f"Ip={terminal['plasma_current_a']:.9g} "
-        f"class={polish['achieved_class']} "
-        f"consistent={polish['topology_consistent']}"
+        "PASSIVE_INCLUSIVE_FROZEN_SIX "
+        f"shots={aggregate['shot_count']} "
+        f"outcomes={aggregate['outcome_counts']} "
+        f"carried_passes={aggregate['all_carried_tolerances_pass_count']} "
+        f"verdict={aggregate['verdict']}"
     )
 
 

@@ -1,5 +1,5 @@
 # ruff: noqa: E501
-"""Bank control and topology-pinned reference-seeded MAST forward solves.
+"""Bank topology-pinned route dynamics on one reference-seeded MAST slice.
 
 The slice is selected only from the committed native-grid decomposition bank.
 Its declared pressure and diamagnetic gradients drive ``ForwardProfile.solve``
@@ -63,7 +63,7 @@ DECOMPOSITION_BANK = Path(
     "docs/figures/efit-flux-decomposition/native-grid-decomposition.json"
 )
 DEFAULT_OUTPUT = Path("docs/figures/efit-forward-parity")
-RECEIPT_NAME = "pinned-parity-slice.json"
+RECEIPT_NAME = "pinned-route-survey.json"
 FIGURE_NAME = "reference-seeded-forward-slice.png"
 DIAGNOSIS_FIGURE_NAME = "vacuum-branch-diagnosis.png"
 GRID_STRIDE = 2
@@ -79,6 +79,8 @@ LCFS_CONTOUR_LIMIT = 0.006
 CONTROL_FLUX_SUP_FRACTION = 0.6478516258167417
 CONTROL_REFERENCE_SPAN_WB = 1.823353801798901
 CONTROL_PLASMA_CURRENT_A = 0.0
+ANDERSON_EVALUATIONS = NEWTON_STEPS * (GMRES_ITERATIONS + 2)
+DAMPED_HYBRID_WEIGHTS = (0.5, 0.55, 1.0 / 1.766, 0.6, 0.65)
 
 
 @dataclass
@@ -997,6 +999,258 @@ def solve_pinned_arm(
     return record
 
 
+def _strict_scalar(value) -> float | None:
+    """Return a finite scalar for strict JSON, otherwise no value."""
+    scalar = float(value)
+    return scalar if np.isfinite(scalar) else None
+
+
+def _route_record(
+    group: zarr.Group,
+    row: int,
+    profile: ForwardProfile,
+    reference: np.ndarray,
+    history: Any,
+    *,
+    route_id: str,
+    route: str,
+    iterations: int,
+    options: dict[str, Any],
+) -> dict[str, Any]:
+    """Qualify one existing pinned route without changing its solve dynamics."""
+    requested = int(TopologyClass.DIVERTED)
+    state = jnp.asarray(history.state)
+    _pinned_masks, pinned_topology = profile.operator.read(state, requested)
+    _emergent_masks, emergent_topology = profile.operator.read(state)
+    current = profile.operator.cell_current_moments(state, requested).cell_current
+    current_a = float(jnp.sum(current))
+    reference_current_a = float(group["plasma_current_c"][row])
+    current_fraction = abs(current_a / reference_current_a)
+    retains_plasma = bool(current_fraction >= 0.01)
+    achieved = int(bool(emergent_topology.diverted))
+    consistent = bool(achieved == requested)
+    residual = float(history.residual)
+    finite = bool(
+        np.all(np.isfinite(np.asarray(state)))
+        and np.all(np.isfinite(np.asarray(current)))
+        and np.isfinite(residual)
+    )
+    converged = bool(finite and residual <= FIXED_POINT_CRITERION and consistent)
+    trace = np.asarray(history.trace, dtype=np.float64)
+    terminal = {
+        "plasma_current_a": current_a,
+        "reference_plasma_current_a": reference_current_a,
+        "absolute_fraction_of_reference_current": current_fraction,
+        "retains_plasma_basin": retains_plasma,
+        "axis_flux_wb": _strict_scalar(pinned_topology.axis_flux),
+        "boundary_flux_wb": _strict_scalar(pinned_topology.boundary_flux),
+        "emergent_topology_class": "diverted" if achieved else "limited",
+        "finite": finite,
+    }
+    record = {
+        "route_id": route_id,
+        "route": route,
+        "options": options,
+        "requested_class": "diverted",
+        "achieved_class": "diverted" if achieved else "limited",
+        "topology_consistent": consistent,
+        "converged": converged,
+        "residual": residual,
+        "iterations": iterations,
+        "residual_trajectory": [_strict_scalar(value) for value in trace],
+        "terminal_state": terminal,
+        "metrics": None,
+    }
+    if converged and retains_plasma:
+        common_history = fixed_point.FixedPointResult(
+            state=state,
+            residual=jnp.asarray(history.residual),
+            trace=jnp.asarray(history.trace),
+        )
+        equilibrium = profile._receipt(state, common_history, requested)
+        record["metrics"] = _pinned_metrics(group, row, profile, reference, equilibrium)
+        record["verdict"] = "CONVERGED_PLASMA_BRANCH"
+    elif retains_plasma:
+        record["verdict"] = "PLASMA_BASIN_RETAINED_NOT_CONVERGED"
+    elif converged:
+        record["verdict"] = "CONVERGED_VACUUM_BRANCH"
+    else:
+        record["verdict"] = "VACUUM_BRANCH_NOT_CONVERGED"
+    crossings = getattr(history, "crossings", None)
+    if crossings is not None:
+        record["crossings"] = [bool(value) for value in np.asarray(crossings)]
+    return record
+
+
+def _banked_route_record(pinned: dict[str, Any]) -> dict[str, Any]:
+    """Normalize the unchanged portfolio baseline into the route table."""
+    branch = pinned["forward_branch_receipt"]
+    terminal = dict(pinned["solver"]["terminal_state"])
+    reference_current = float(pinned["metrics"]["plasma_current"]["reference_a"])
+    current = float(terminal["plasma_current_a"])
+    current_fraction = abs(current / reference_current)
+    terminal.update(
+        {
+            "reference_plasma_current_a": reference_current,
+            "absolute_fraction_of_reference_current": current_fraction,
+            "retains_plasma_basin": bool(current_fraction >= 0.01),
+        }
+    )
+    return {
+        "route_id": "newton_krylov_baseline",
+        "route": "newton_krylov",
+        "options": {
+            "newton_steps": NEWTON_STEPS,
+            "gmres_iterations": GMRES_ITERATIONS,
+            "warmup": WARMUP_SWEEPS,
+            "relaxation": RELAXATION,
+            "step_cap": STEP_CAP,
+        },
+        "requested_class": branch["requested_class"],
+        "achieved_class": branch["achieved_class"],
+        "topology_consistent": branch["topology_consistent"],
+        "converged": branch["converged"],
+        "residual": branch["residual"],
+        "iterations": branch["iterations"],
+        "residual_trajectory": pinned["solver"]["residual_trajectory"],
+        "terminal_state": terminal,
+        "metrics": None,
+        "verdict": "CONVERGED_VACUUM_BRANCH",
+    }
+
+
+def survey_pinned_routes(
+    group: zarr.Group,
+    shot: int,
+    row: int,
+    current_field: str,
+    baseline: dict[str, Any],
+) -> dict[str, Any]:
+    """Run existing fixed-point routes under one diverted pin and seed."""
+    profile, seed, reference, provenance = build_profile(
+        group, shot, row, current_field
+    )
+    requested = int(TopologyClass.DIVERTED)
+    mapped = profile.flux_map(requested_class=requested)
+    arms = [_banked_route_record(baseline)]
+
+    anderson_options = {
+        "evaluations": ANDERSON_EVALUATIONS,
+        "relaxation": RELAXATION,
+        "depth": 3,
+        "warmup": 6,
+        "step_cap": 2.0,
+        "ridge": 1.0e-10,
+    }
+    anderson_history = fixed_point.anderson(
+        mapped,
+        seed,
+        **anderson_options,
+    )
+    arms.append(
+        _route_record(
+            group,
+            row,
+            profile,
+            reference,
+            anderson_history,
+            route_id="anderson",
+            route="anderson",
+            iterations=ANDERSON_EVALUATIONS,
+            options=anderson_options,
+        )
+    )
+
+    nonmonotone_options = {
+        "strategy": "nonmonotone",
+        "newton_steps": NEWTON_STEPS,
+        "gmres_iterations": GMRES_ITERATIONS,
+        "warmup": WARMUP_SWEEPS,
+        "relaxation": RELAXATION,
+        "step_cap": STEP_CAP,
+        "nonmonotone_allowance": 0.05,
+    }
+    nonmonotone_history = fixed_point.kink_aware_newton_krylov(
+        mapped,
+        seed,
+        **nonmonotone_options,
+    )
+    arms.append(
+        _route_record(
+            group,
+            row,
+            profile,
+            reference,
+            nonmonotone_history,
+            route_id="kink_aware_nonmonotone",
+            route="kink_aware_newton_krylov",
+            iterations=NEWTON_STEPS,
+            options=nonmonotone_options,
+        )
+    )
+
+    for weight in DAMPED_HYBRID_WEIGHTS:
+        options = {
+            "strategy": "damped_hybrid",
+            "newton_steps": NEWTON_STEPS,
+            "gmres_iterations": GMRES_ITERATIONS,
+            "warmup": WARMUP_SWEEPS,
+            "relaxation": RELAXATION,
+            "step_cap": STEP_CAP,
+            "hybrid_weight": weight,
+            "hybrid_schedule": "fixed",
+        }
+        history = fixed_point.kink_aware_newton_krylov(
+            mapped,
+            seed,
+            **options,
+        )
+        arms.append(
+            _route_record(
+                group,
+                row,
+                profile,
+                reference,
+                history,
+                route_id=f"damped_hybrid_{weight:.12g}",
+                route="kink_aware_newton_krylov",
+                iterations=NEWTON_STEPS,
+                options=options,
+            )
+        )
+
+    retaining = [
+        arm["route_id"] for arm in arms if arm["terminal_state"]["retains_plasma_basin"]
+    ]
+    converged_plasma = [
+        arm["route_id"]
+        for arm in arms
+        if arm["converged"] and arm["terminal_state"]["retains_plasma_basin"]
+    ]
+    if converged_plasma:
+        verdict = "POSITIVE_CONVERGED_PLASMA_ROUTE"
+    elif retaining:
+        verdict = "NEGATIVE_NO_CONVERGED_PLASMA_ROUTE"
+    else:
+        verdict = "NEGATIVE_ALL_ROUTES_TERMINATE_ON_VACUUM_ROOT"
+    return {
+        "same_seed_and_source": {
+            "seed_source": provenance["seed_source"],
+            "current_field": provenance["current_field"],
+            "declared_axis_flux_wb": provenance["declared_axis_flux_wb"],
+            "declared_boundary_flux_wb": provenance["declared_boundary_flux_wb"],
+            "declared_support_nodes": provenance["declared_support_nodes"],
+            "requested_class": "diverted",
+            "reference_plasma_current_a": float(group["plasma_current_c"][row]),
+        },
+        "route_count": len(arms),
+        "arms": arms,
+        "routes_retaining_plasma_basin": retaining,
+        "routes_converged_on_plasma_branch": converged_plasma,
+        "verdict": verdict,
+    }
+
+
 def _control_baseline(control: dict[str, Any]) -> dict[str, Any]:
     """Verify that the unpinned arm reproduces its committed vacuum baseline."""
     measured_sup = control["metrics"]["flux_map"]["sup_fraction_of_reference_span"]
@@ -1106,7 +1360,7 @@ def _diagnosis_figure(diagnosis: dict[str, Any], path: Path) -> None:
 
 
 def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
-    """Run the unpinned control beside the topology-pinned diverted branch."""
+    """Run the control and existing routes under one pinned diverted branch."""
     configure_dtypes()
     selected, qualification = select_slice(bank)
     shot = int(selected["shot"])
@@ -1117,12 +1371,13 @@ def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
     if not baseline["passes"]:
         raise RuntimeError("the unpinned control drifted from its committed baseline")
     pinned = solve_pinned_arm(group, shot, row, "fcoil_c")
+    route_survey = survey_pinned_routes(group, shot, row, "fcoil_c", pinned)
     figure_path = output / FIGURE_NAME
     _figure(fields, figure_path)
     diagnosis_figure_path = output / DIAGNOSIS_FIGURE_NAME
     _diagnosis_figure(control["diagnosis"], diagnosis_figure_path)
     receipt = {
-        "receipt": "reference-seeded MAST control and topology-pinned parity slice",
+        "receipt": "reference-seeded topology-pinned fixed-point route survey",
         "backend": "JAX_PLATFORMS=cpu required by invocation",
         "selection": {
             "source": str(bank),
@@ -1142,6 +1397,7 @@ def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
         "control_arm": control,
         "control_baseline": baseline,
         "pinned_arm": pinned,
+        "route_survey": route_survey,
         "dina_calibration": {
             "axis_distance_m": 0.0412,
             "plasma_current_signed_relative_deviation": -0.0112,
@@ -1174,6 +1430,7 @@ def main() -> None:
     solver = control["solver"]
     diagnosis = control["diagnosis"]
     pinned = receipt["pinned_arm"]["forward_branch_receipt"]
+    survey = receipt["route_survey"]
     print(
         "FORWARD_SLICE "
         f"shot={selection['shot']} row={selection['slice_index']} "
@@ -1199,6 +1456,13 @@ def main() -> None:
         f"requested={pinned['requested_class']} "
         f"achieved={pinned['achieved_class']} "
         f"topology_consistent={pinned['topology_consistent']}"
+    )
+    print(
+        "PINNED_ROUTE_SURVEY "
+        f"routes={survey['route_count']} "
+        f"retaining={','.join(survey['routes_retaining_plasma_basin']) or 'none'} "
+        f"converged_plasma={','.join(survey['routes_converged_on_plasma_branch']) or 'none'} "
+        f"verdict={survey['verdict']}"
     )
 
 

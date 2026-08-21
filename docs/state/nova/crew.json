@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T11:40:42",
+  "updated": "2026-08-21T11:50:06",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -13736,9 +13736,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T092803972393-traced-tensor-bspline",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a78",
+        "node": "traced-tensor-bspline",
+        "role": "implement",
+        "member": "geometry-spline",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T09:28:07Z",
+        "completed_at": "2026-08-21T09:48:52Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1245,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1245,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "399094b6039beb346ea133cd7ddbecc371fd2fff",
+        "commits": [
+          "75e33479"
+        ],
+        "changed_lines": {
+          "added": 486,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 6,
+        "gate": "passed",
+        "outcome": "TensorBSpline lands as the traced surface authority: SciPy RectBivariateSpline parity below 2e-10 on values and both derivative orders across the analytic map and both real EQDSK maps, C2 joins below 2e-10 at every interior boundary, reverse-mode map gradient vs central differences below 2e-6, eager/jit/vmap agreement at 1e-12, not-a-knot chosen deliberately to match scipy so the referee comparison is same-representation; per-cell 4x4 Bernstein coefficients are a fixed-shape linear function of the whole map, which is exactly what the salvaged clip machinery consumes",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T092803972393-traced-tensor-bspline/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a023a6-2d79-7d41-a0aa-cca5b54eecff",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3513088,
+            "cached_input_tokens_cumulative": 3513088,
+            "input_tokens": 3741550,
+            "input_tokens_cumulative": 3741550,
+            "output_tokens": 23463,
+            "output_tokens_cumulative": 23463,
+            "reasoning_output_tokens": 9170,
+            "reasoning_output_tokens_cumulative": 9170
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 360
+    "_version": 361
   }
 }

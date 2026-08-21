@@ -50,7 +50,7 @@ run_cpu() {
 
 run_gpu() {
   local batch_size="$1"
-  srun --ntasks=1 --cpus-per-task=7 --gpus-per-task=1 --cpu-bind=cores \
+  srun --ntasks=1 --cpus-per-task=7 --cpu-bind=cores \
     env JAX_PLATFORMS=cuda UV_PROJECT_ENVIRONMENT="${ENVIRONMENT}" \
     PYTHONPATH="${ROOT}" uv run --no-sync python "${MEASURE}" \
     --output "${OUTPUT}" --route service --batch-size "${batch_size}" \

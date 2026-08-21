@@ -63,12 +63,22 @@ def _arguments() -> argparse.Namespace:
 def _initialize(path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as stream:
-        csv.DictWriter(stream, fieldnames=RESULT_COLUMNS, delimiter="\t").writeheader()
+        csv.DictWriter(
+            stream,
+            fieldnames=RESULT_COLUMNS,
+            delimiter="\t",
+            lineterminator="\n",
+        ).writeheader()
 
 
 def _append(path: Path, row: dict[str, Any]) -> None:
     with path.open("a", newline="", encoding="utf-8") as stream:
-        csv.DictWriter(stream, fieldnames=RESULT_COLUMNS, delimiter="\t").writerow(row)
+        csv.DictWriter(
+            stream,
+            fieldnames=RESULT_COLUMNS,
+            delimiter="\t",
+            lineterminator="\n",
+        ).writerow(row)
 
 
 def _cpu_model() -> str:
@@ -87,7 +97,7 @@ def _cpu_model() -> str:
 def _device_metadata() -> tuple[str, str, str]:
     backend = jax.default_backend()
     devices = jax.devices()
-    model = devices[0].device_kind if devices else _cpu_model()
+    model = _cpu_model() if backend == "cpu" else devices[0].device_kind
     label = "H200" if "H200" in model.upper() else "CPU"
     return label, backend, model
 
@@ -255,6 +265,7 @@ def _measure_jitted(arguments: argparse.Namespace, inputs: dict[str, Any]) -> No
             timing="jit_warm",
             samples=warmed,
             source_revision=arguments.source_revision,
+            detail="repeated compiled executable; compilation excluded",
         ),
     )
 

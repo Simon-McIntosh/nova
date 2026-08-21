@@ -1,0 +1,4175 @@
+{
+  "checkpoint": "docs/figures/diiid-forward-onboarding/boundary-recovery/boundary_current_recovery_frames.jsonl",
+  "fitting_statement": "the five targets are recovered independently per labelled frame; only the declared train-shot linear predictor is fitted, and no coil current or flux function is adjusted in the residual evaluation",
+  "generated_at_utc": "2026-08-21T09:48:59.574160+00:00",
+  "held_out_prediction": {
+    "design_rank": 21,
+    "features": [
+      "magnetics_F1A",
+      "magnetics_F2A",
+      "magnetics_F3A",
+      "magnetics_F4A",
+      "magnetics_F5A",
+      "magnetics_F6A",
+      "magnetics_F7A",
+      "magnetics_F8A",
+      "magnetics_F9A",
+      "magnetics_F1B",
+      "magnetics_F2B",
+      "magnetics_F3B",
+      "magnetics_F4B",
+      "magnetics_F5B",
+      "magnetics_F6B",
+      "magnetics_F7B",
+      "magnetics_F8B",
+      "magnetics_F9B",
+      "magnetics_ECOILA",
+      "magnetics_bcoil"
+    ],
+    "held_out_frames": 40,
+    "held_out_shots": [
+      "d3d_shot_00bb25ac45.parquet",
+      "d3d_shot_00d3a26e4f.parquet",
+      "d3d_shot_00ee8a5ce0.parquet",
+      "d3d_shot_00f40d3919.parquet",
+      "d3d_shot_00f71cf526.parquet"
+    ],
+    "released_channel_unit": "the corpus numeric unit, documented as kA-turn",
+    "targets": [
+      {
+        "coefficients_a_per_released_channel_unit": {
+          "magnetics_ECOILA": 1988.4155208115187,
+          "magnetics_F1A": 16.705830604423856,
+          "magnetics_F1B": -10.590352087566307,
+          "magnetics_F2A": 16.35306214767499,
+          "magnetics_F2B": -2.7779954973075847,
+          "magnetics_F3A": 9.608078548249043,
+          "magnetics_F3B": 3.6617404687461264,
+          "magnetics_F4A": 2.872163308109374,
+          "magnetics_F4B": 3.6337083770654353,
+          "magnetics_F5A": 10.519980156351275,
+          "magnetics_F5B": 0.5526698983523206,
+          "magnetics_F6A": 9.602177401041233,
+          "magnetics_F6B": -25.753640699331868,
+          "magnetics_F7A": 23.16919882147384,
+          "magnetics_F7B": -5.569880235464148,
+          "magnetics_F8A": -5.474463459546008,
+          "magnetics_F8B": -7.460783181101735,
+          "magnetics_F9A": 5.797056911871608,
+          "magnetics_F9B": -5.603347308497209,
+          "magnetics_bcoil": -2.7065473907001336
+        },
+        "held_out_r_squared": 0.9969278561013498,
+        "intercept_a": 133.2162725050075,
+        "target": "ECOILB"
+      },
+      {
+        "coefficients_a_per_released_channel_unit": {
+          "magnetics_ECOILA": 1067.1109440959435,
+          "magnetics_F1A": 23.20209016054964,
+          "magnetics_F1B": -18.04908526680601,
+          "magnetics_F2A": 10.676819641175705,
+          "magnetics_F2B": -7.305556549244658,
+          "magnetics_F3A": 4.72862601174097,
+          "magnetics_F3B": 14.1203006765047,
+          "magnetics_F4A": 2.3123237597450954,
+          "magnetics_F4B": 20.776903549594593,
+          "magnetics_F5A": 3.6582070053251217,
+          "magnetics_F5B": 16.184025085648834,
+          "magnetics_F6A": -21.980353805258883,
+          "magnetics_F6B": 12.762051867121363,
+          "magnetics_F7A": -24.116896472069303,
+          "magnetics_F7B": 24.427444204608122,
+          "magnetics_F8A": -31.10910338295087,
+          "magnetics_F8B": 0.8750462724991809,
+          "magnetics_F9A": -21.629575386986822,
+          "magnetics_F9B": 12.243591435792746,
+          "magnetics_bcoil": -6.239830215178037
+        },
+        "held_out_r_squared": 0.9771746973930187,
+        "intercept_a": 1458.000627516144,
+        "target": "E567UP"
+      },
+      {
+        "coefficients_a_per_released_channel_unit": {
+          "magnetics_ECOILA": 1055.7997848318892,
+          "magnetics_F1A": 19.286944364437357,
+          "magnetics_F1B": -20.583047601646122,
+          "magnetics_F2A": 28.37303988118587,
+          "magnetics_F2B": -12.770336882192849,
+          "magnetics_F3A": 19.37850787954925,
+          "magnetics_F3B": -4.2804351275248855,
+          "magnetics_F4A": 11.494737303422225,
+          "magnetics_F4B": -0.794329191253805,
+          "magnetics_F5A": 21.197353995239016,
+          "magnetics_F5B": -7.212425812438408,
+          "magnetics_F6A": 39.113973143961964,
+          "magnetics_F6B": -54.271735613378866,
+          "magnetics_F7A": 39.810476705959196,
+          "magnetics_F7B": -37.91618342416654,
+          "magnetics_F8A": -3.2290734810825734,
+          "magnetics_F8B": -13.701690637814401,
+          "magnetics_F9A": 13.975691403307376,
+          "magnetics_F9B": -16.66643412204862,
+          "magnetics_bcoil": -2.677453454280861
+        },
+        "held_out_r_squared": 0.9743263887528819,
+        "intercept_a": 949.7778172383632,
+        "target": "E567DN"
+      },
+      {
+        "coefficients_a_per_released_channel_unit": {
+          "magnetics_ECOILA": 1002.8496849411938,
+          "magnetics_F1A": 3.9146310365625285,
+          "magnetics_F1B": 4.340039604413587,
+          "magnetics_F2A": 13.096254848458841,
+          "magnetics_F2B": -0.3438107465823848,
+          "magnetics_F3A": 5.534423769157205,
+          "magnetics_F3B": 0.01190340212966797,
+          "magnetics_F4A": 3.0288501964315264,
+          "magnetics_F4B": -3.6250574028303295,
+          "magnetics_F5A": 12.354250348232762,
+          "magnetics_F5B": -4.984192053796267,
+          "magnetics_F6A": 25.672874756217865,
+          "magnetics_F6B": -32.50933564872976,
+          "magnetics_F7A": 30.390613758817047,
+          "magnetics_F7B": -17.93378902229001,
+          "magnetics_F8A": 7.14266676304884,
+          "magnetics_F8B": -3.396242015591921,
+          "magnetics_F9A": 16.820270235890014,
+          "magnetics_F9B": -8.410692184475405,
+          "magnetics_bcoil": -0.8633783704482549
+        },
+        "held_out_r_squared": 0.9920191305185808,
+        "intercept_a": -409.74826518281407,
+        "target": "E89UP"
+      },
+      {
+        "coefficients_a_per_released_channel_unit": {
+          "magnetics_ECOILA": 1002.1393111267514,
+          "magnetics_F1A": 7.863068818703979,
+          "magnetics_F1B": -0.21823228450898707,
+          "magnetics_F2A": -0.8252810573982957,
+          "magnetics_F2B": 2.996850433155716,
+          "magnetics_F3A": -4.7280957631255145,
+          "magnetics_F3B": 7.898858996820555,
+          "magnetics_F4A": -3.8624164863056696,
+          "magnetics_F4B": 6.099721505346436,
+          "magnetics_F5A": -4.432092803343702,
+          "magnetics_F5B": 5.674762537350635,
+          "magnetics_F6A": -15.298959878335298,
+          "magnetics_F6B": 11.713758819942967,
+          "magnetics_F7A": -9.208783083434879,
+          "magnetics_F7B": 17.43818724298418,
+          "magnetics_F8A": -9.014428786029557,
+          "magnetics_F8B": -1.8542233974202564,
+          "magnetics_F9A": -11.423942881238695,
+          "magnetics_F9B": 2.4727790153552682,
+          "magnetics_bcoil": -1.2243404548122276
+        },
+        "held_out_r_squared": 0.9978924165447817,
+        "intercept_a": 87.21600353649592,
+        "target": "E89DN"
+      }
+    ],
+    "train_frames": 160,
+    "train_shots": [
+      "d3d_shot_00000c4a7b.parquet",
+      "d3d_shot_0003ff34e7.parquet",
+      "d3d_shot_0011c2afc9.parquet",
+      "d3d_shot_001270afa9.parquet",
+      "d3d_shot_001554e054.parquet",
+      "d3d_shot_001cbcc9e6.parquet",
+      "d3d_shot_002495e835.parquet",
+      "d3d_shot_0040a29bad.parquet",
+      "d3d_shot_0040ca9bdc.parquet",
+      "d3d_shot_004f4e5bed.parquet",
+      "d3d_shot_0065291fe9.parquet",
+      "d3d_shot_006a097379.parquet",
+      "d3d_shot_0073c37714.parquet",
+      "d3d_shot_0079897d3b.parquet",
+      "d3d_shot_008b4474ec.parquet",
+      "d3d_shot_0092a9ade0.parquet",
+      "d3d_shot_0093deb434.parquet",
+      "d3d_shot_00a4b7af57.parquet",
+      "d3d_shot_00a6212403.parquet",
+      "d3d_shot_00b8fe1f50.parquet"
+    ]
+  },
+  "measurement": "omitted-current recovery and shipped-channel predictability",
+  "netcdf_geometry": {
+    "coils": [
+      {
+        "coil": "ECOILB",
+        "elements": 48,
+        "signed_turn_sum": 48.0
+      },
+      {
+        "coil": "E567UP",
+        "elements": 6,
+        "signed_turn_sum": 6.0
+      },
+      {
+        "coil": "E567DN",
+        "elements": 6,
+        "signed_turn_sum": 6.0
+      },
+      {
+        "coil": "E89UP",
+        "elements": 7,
+        "signed_turn_sum": 7.0
+      },
+      {
+        "coil": "E89DN",
+        "elements": 7,
+        "signed_turn_sum": 7.0
+      }
+    ],
+    "dd_version": "3.41.0",
+    "entry": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+    "kernel": "nova.biot.polygon.polygon_greens",
+    "target_border_points": 256
+  },
+  "polarity_authority": {
+    "affected_shot_count": 603,
+    "path": "docs/figures/diiid-forward-onboarding/current-polarity/current_polarity_audit_receipt.json",
+    "selected_affected_shot_count": 0,
+    "sha256": "e3e49bb8c79daa1cf0d29202da1951698ae39fd2312e40f5701f6d957fd5bdb7"
+  },
+  "preregistration": "docs/figures/diiid-forward-onboarding/boundary-recovery/boundary_current_recovery_preregistration.json",
+  "preregistration_sha256": "1de0c1a92409deba232849e500513693c43b3c586f4ba5a392fdba1e9f660160",
+  "recovery_cohort": {
+    "all_frames_screened_free_of_affected_population": true,
+    "design_condition_number": {
+      "maximum": 10.828176489031886,
+      "median": 10.828176489031886,
+      "minimum": 10.828176489031886
+    },
+    "frame_count": 200,
+    "frames": [
+      {
+        "additive_gauge_wb_per_radian": 0.0030591789478169725,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 0,
+        "recovered_currents_a": {
+          "E567DN": 36520.26407488739,
+          "E567UP": 40146.90230335485,
+          "E89DN": 33618.13467482331,
+          "E89UP": 30467.98148177351,
+          "ECOILB": 66907.28509035967
+        },
+        "relative_residual": 0.07760485928207304,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0013617089361036901,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00000c4a7b.parquet",
+        "time_ms": 160.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.0010335022994346658,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 51,
+        "recovered_currents_a": {
+          "E567DN": 7052.777732187876,
+          "E567UP": 9024.379465896125,
+          "E89DN": 2629.8026003896407,
+          "E89UP": 1212.3960541972822,
+          "ECOILB": 6461.221110173972
+        },
+        "relative_residual": 0.32064283970801954,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0017599928927296109,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00000c4a7b.parquet",
+        "time_ms": 1180.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.01831269929362813,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 102,
+        "recovered_currents_a": {
+          "E567DN": -24990.778004435793,
+          "E567UP": -26055.798370202163,
+          "E89DN": -30557.529106969407,
+          "E89UP": -30579.424637598975,
+          "ECOILB": -55781.93123590186
+        },
+        "relative_residual": 0.13176868873258774,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0014203529100951867,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00000c4a7b.parquet",
+        "time_ms": 2200.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.027164983641147333,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 153,
+        "recovered_currents_a": {
+          "E567DN": -36668.48936108808,
+          "E567UP": -38270.103566342084,
+          "E89DN": -41043.711229303226,
+          "E89UP": -41028.030318882455,
+          "ECOILB": -77739.14840064135
+        },
+        "relative_residual": 0.09035213850993787,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0014421894771325166,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00000c4a7b.parquet",
+        "time_ms": 3220.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.028219932801231674,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 205,
+        "recovered_currents_a": {
+          "E567DN": -43664.503309504515,
+          "E567UP": -45233.879369667215,
+          "E89DN": -48689.760015155916,
+          "E89UP": -47853.60407597345,
+          "ECOILB": -91283.90235158196
+        },
+        "relative_residual": 0.07767394680580605,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0014720876539678098,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00000c4a7b.parquet",
+        "time_ms": 4260.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.025200544701617828,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 256,
+        "recovered_currents_a": {
+          "E567DN": -50937.77438750864,
+          "E567UP": -51864.656209067165,
+          "E89DN": -55323.01529139562,
+          "E89UP": -55225.18214785496,
+          "ECOILB": -105077.17100642581
+        },
+        "relative_residual": 0.06413744630178923,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.001406463559619233,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00000c4a7b.parquet",
+        "time_ms": 5280.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.02332772393722851,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 307,
+        "recovered_currents_a": {
+          "E567DN": -57914.014254417256,
+          "E567UP": -61080.707961247055,
+          "E89DN": -62499.63668360634,
+          "E89UP": -61683.163206411096,
+          "ECOILB": -119339.39263781678
+        },
+        "relative_residual": 0.04262424177961152,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0010883455803196765,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00000c4a7b.parquet",
+        "time_ms": 6300.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.03098930711156106,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 358,
+        "recovered_currents_a": {
+          "E567DN": -68725.85285542904,
+          "E567UP": -69169.4548809233,
+          "E89DN": -68609.83843941904,
+          "E89UP": -67998.32949058893,
+          "ECOILB": -132201.02590207913
+        },
+        "relative_residual": 0.04367482873418077,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0013133936218161651,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00000c4a7b.parquet",
+        "time_ms": 7340.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.0025775497315440304,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 0,
+        "recovered_currents_a": {
+          "E567DN": 26892.357279688356,
+          "E567UP": 26456.15919949659,
+          "E89DN": 19306.8262854814,
+          "E89UP": 21261.18009826038,
+          "ECOILB": 42164.74190472533
+        },
+        "relative_residual": 0.15361775099212552,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.001991695887549311,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0003ff34e7.parquet",
+        "time_ms": 200.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.00011219213880531143,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 13,
+        "recovered_currents_a": {
+          "E567DN": 14826.07307617705,
+          "E567UP": 15536.457119569435,
+          "E89DN": 10968.574106690327,
+          "E89UP": 9448.801131907037,
+          "ECOILB": 22762.695193030413
+        },
+        "relative_residual": 0.18342611203820672,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.001402031274241018,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0003ff34e7.parquet",
+        "time_ms": 460.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.001350280923814575,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 25,
+        "recovered_currents_a": {
+          "E567DN": 6692.4487179083835,
+          "E567UP": 6865.125299931435,
+          "E89DN": 3123.7895527343294,
+          "E89UP": 1904.3128375487188,
+          "ECOILB": 7632.3841097845125
+        },
+        "relative_residual": 0.30480827844681774,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0012529030102400437,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0003ff34e7.parquet",
+        "time_ms": 700.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.0012590987401461843,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 38,
+        "recovered_currents_a": {
+          "E567DN": -5173.606248623467,
+          "E567UP": -4421.8408538204485,
+          "E89DN": -9009.791769750198,
+          "E89UP": -10389.351769731304,
+          "ECOILB": -16365.878241138793
+        },
+        "relative_residual": 0.5040398304349746,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0015875884116334088,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0003ff34e7.parquet",
+        "time_ms": 960.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.0010039543587176364,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 51,
+        "recovered_currents_a": {
+          "E567DN": -16592.01919371248,
+          "E567UP": -16382.797760820802,
+          "E89DN": -20942.545611258705,
+          "E89UP": -22469.69586859799,
+          "ECOILB": -39051.14737209112
+        },
+        "relative_residual": 0.2438340914623038,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0017425291087610818,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0003ff34e7.parquet",
+        "time_ms": 1220.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.014427929177551767,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 64,
+        "recovered_currents_a": {
+          "E567DN": -25410.828813018383,
+          "E567UP": -25484.286067872228,
+          "E89DN": -32842.55865637734,
+          "E89UP": -32739.50255171622,
+          "ECOILB": -59661.97573526373
+        },
+        "relative_residual": 0.19200711210194987,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.002080015386823923,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0003ff34e7.parquet",
+        "time_ms": 1480.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.007947506142186015,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 76,
+        "recovered_currents_a": {
+          "E567DN": -28565.071464482946,
+          "E567UP": -29991.349342802754,
+          "E89DN": -35392.1220549858,
+          "E89UP": -35084.71363099472,
+          "ECOILB": -64870.522395217566
+        },
+        "relative_residual": 0.1337722479839616,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0016530161565628074,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0003ff34e7.parquet",
+        "time_ms": 1720.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.0027393560561709317,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 89,
+        "recovered_currents_a": {
+          "E567DN": -33165.96239894711,
+          "E567UP": -34320.95776043433,
+          "E89DN": -39375.19992591761,
+          "E89UP": -39043.09061816277,
+          "ECOILB": -73515.3645019159
+        },
+        "relative_residual": 0.11552432096143332,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0016477332526512829,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0003ff34e7.parquet",
+        "time_ms": 1980.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.008725733864768326,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 0,
+        "recovered_currents_a": {
+          "E567DN": 44225.2990742778,
+          "E567UP": 43920.105745700086,
+          "E89DN": 35886.08079919551,
+          "E89UP": 36994.73554048504,
+          "ECOILB": 76020.36334739075
+        },
+        "relative_residual": 0.09563542277738711,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.001939145533204251,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0011c2afc9.parquet",
+        "time_ms": 160.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.0031867967606372147,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 10,
+        "recovered_currents_a": {
+          "E567DN": 33433.63539233318,
+          "E567UP": 35058.791246620254,
+          "E89DN": 28198.56397207056,
+          "E89UP": 27283.938778563293,
+          "ECOILB": 57340.564166617216
+        },
+        "relative_residual": 0.09786563121594917,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0015644226492122321,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0011c2afc9.parquet",
+        "time_ms": 460.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.003380036603687007,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 21,
+        "recovered_currents_a": {
+          "E567DN": 26655.461526692292,
+          "E567UP": 26226.294911449942,
+          "E89DN": 19018.168904640188,
+          "E89UP": 20313.830078899515,
+          "ECOILB": 41665.97118864098
+        },
+        "relative_residual": 0.13480119871483207,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0017259058246919324,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0011c2afc9.parquet",
+        "time_ms": 680.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.009406931764496498,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 31,
+        "recovered_currents_a": {
+          "E567DN": 18486.437109796927,
+          "E567UP": 18341.075395175925,
+          "E89DN": 11396.323732504034,
+          "E89UP": 11787.226911894626,
+          "ECOILB": 26172.823194921282
+        },
+        "relative_residual": 0.1723006319296299,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0016289677123966164,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0011c2afc9.parquet",
+        "time_ms": 880.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.014249144172403177,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 41,
+        "recovered_currents_a": {
+          "E567DN": 12284.016128939236,
+          "E567UP": 10408.512264801964,
+          "E89DN": 3450.362317296048,
+          "E89UP": 6565.288537546214,
+          "ECOILB": 13141.982005058455
+        },
+        "relative_residual": 0.24140406388722227,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0016115705093916342,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0011c2afc9.parquet",
+        "time_ms": 1080.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.012484000037990215,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 51,
+        "recovered_currents_a": {
+          "E567DN": 9359.539052566905,
+          "E567UP": 11241.049575215031,
+          "E89DN": 4148.968070787348,
+          "E89UP": 3883.572224704407,
+          "ECOILB": 11517.43202009025
+        },
+        "relative_residual": 0.24744585711864503,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.001506369185795056,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0011c2afc9.parquet",
+        "time_ms": 1280.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.008595018775041586,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 62,
+        "recovered_currents_a": {
+          "E567DN": 7294.817164140136,
+          "E567UP": 10478.435466252802,
+          "E89DN": 4747.74069170235,
+          "E89UP": 3617.163961030312,
+          "ECOILB": 11287.786478829856
+        },
+        "relative_residual": 0.23247403451117682,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0011691220311237612,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0011c2afc9.parquet",
+        "time_ms": 1500.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.01069097170240278,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 72,
+        "recovered_currents_a": {
+          "E567DN": 9324.48807495054,
+          "E567UP": 8127.475533729653,
+          "E89DN": 3570.6142976695046,
+          "E89UP": 3540.2175822235045,
+          "ECOILB": 9555.923945688948
+        },
+        "relative_residual": 0.2781413456485802,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0014634733446441345,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0011c2afc9.parquet",
+        "time_ms": 1720.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.013668652991938247,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 0,
+        "recovered_currents_a": {
+          "E567DN": 32007.5551795776,
+          "E567UP": 32438.297884499814,
+          "E89DN": 28570.53526969932,
+          "E89UP": 27817.78403734539,
+          "ECOILB": 55069.441726284866
+        },
+        "relative_residual": 0.06963889788982476,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0010361187866787165,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_001270afa9.parquet",
+        "time_ms": 100.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.009594314236504847,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 36,
+        "recovered_currents_a": {
+          "E567DN": 5867.790371213399,
+          "E567UP": 8710.009341069435,
+          "E89DN": 3633.408803609118,
+          "E89UP": 1751.0062449105612,
+          "ECOILB": 8136.121812974531
+        },
+        "relative_residual": 0.2688105159422719,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0011728607668783746,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_001270afa9.parquet",
+        "time_ms": 860.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.006155711838266496,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 72,
+        "recovered_currents_a": {
+          "E567DN": -6680.025370605891,
+          "E567UP": -4260.732544781201,
+          "E89DN": -8780.62155764991,
+          "E89UP": -10470.98927338977,
+          "ECOILB": -15844.697804814923
+        },
+        "relative_residual": 0.3137793835721915,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.000854447262140361,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_001270afa9.parquet",
+        "time_ms": 1580.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.007615666330650571,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 108,
+        "recovered_currents_a": {
+          "E567DN": -12499.6455455839,
+          "E567UP": -12069.215148417887,
+          "E89DN": -14595.756968994334,
+          "E89UP": -15631.532519053664,
+          "ECOILB": -27583.03383077047
+        },
+        "relative_residual": 0.12146773711794707,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0006295641909816573,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_001270afa9.parquet",
+        "time_ms": 2300.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.007488096448815488,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 143,
+        "recovered_currents_a": {
+          "E567DN": -18581.59473198213,
+          "E567UP": -16422.44195946677,
+          "E89DN": -19364.375576019862,
+          "E89UP": -21107.698602134904,
+          "ECOILB": -37406.57344501403
+        },
+        "relative_residual": 0.07384475622664981,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0005470060883764626,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_001270afa9.parquet",
+        "time_ms": 3000.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.0017233179898765143,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 179,
+        "recovered_currents_a": {
+          "E567DN": -18498.44096182116,
+          "E567UP": -18473.656265740698,
+          "E89DN": -20340.717019819007,
+          "E89UP": -20893.56930711141,
+          "ECOILB": -38393.803857373336
+        },
+        "relative_residual": 0.061049342955872554,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0004788487674329389,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_001270afa9.parquet",
+        "time_ms": 3980.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.003853846794313527,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 215,
+        "recovered_currents_a": {
+          "E567DN": -19080.979978417992,
+          "E567UP": -17310.204047576623,
+          "E89DN": -20463.335070314268,
+          "E89UP": -21672.277598889235,
+          "ECOILB": -39268.01055448241
+        },
+        "relative_residual": 0.061018057280945046,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.00046857261499151653,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_001270afa9.parquet",
+        "time_ms": 5100.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.007061417514980283,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 251,
+        "recovered_currents_a": {
+          "E567DN": -22525.784068474255,
+          "E567UP": -17210.311697879068,
+          "E89DN": -19971.44761269225,
+          "E89UP": -21141.69498556278,
+          "ECOILB": -39299.80657758424
+        },
+        "relative_residual": 0.11548782127526835,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0010385130857445727,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_001270afa9.parquet",
+        "time_ms": 6040.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.0014974981964127809,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 0,
+        "recovered_currents_a": {
+          "E567DN": 31769.766829508593,
+          "E567UP": 31367.084353560575,
+          "E89DN": 24456.90176815967,
+          "E89UP": 25071.07068690143,
+          "ECOILB": 52280.758684672306
+        },
+        "relative_residual": 0.11706085285001182,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0017385524218627487,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_001554e054.parquet",
+        "time_ms": 340.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.015329376018047281,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 41,
+        "recovered_currents_a": {
+          "E567DN": 12692.107412986099,
+          "E567UP": 8809.287724316377,
+          "E89DN": 2889.9308229605226,
+          "E89UP": 6512.637488162576,
+          "ECOILB": 13418.183380283663
+        },
+        "relative_residual": 0.22985875005278042,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0014035630647204706,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_001554e054.parquet",
+        "time_ms": 1160.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.016534244360327917,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 83,
+        "recovered_currents_a": {
+          "E567DN": 9811.343572992177,
+          "E567UP": 6665.290792780728,
+          "E89DN": 1943.4918961205835,
+          "E89UP": 3668.4055269998908,
+          "ECOILB": 8927.98531147616
+        },
+        "relative_residual": 0.325478475007425,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0016640739594966482,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_001554e054.parquet",
+        "time_ms": 2020.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.01647273656817351,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 124,
+        "recovered_currents_a": {
+          "E567DN": 5741.814311334318,
+          "E567UP": 5109.414967916057,
+          "E89DN": -1548.3064969362244,
+          "E89UP": -371.7388256974866,
+          "ECOILB": 2600.956898704626
+        },
+        "relative_residual": 0.3605012705510412,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0015276585757325893,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_001554e054.parquet",
+        "time_ms": 2840.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.016138243000661825,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 165,
+        "recovered_currents_a": {
+          "E567DN": 1426.9591740861213,
+          "E567UP": -625.5771323346422,
+          "E89DN": -4877.056010766012,
+          "E89UP": -3482.746578088777,
+          "ECOILB": -4773.805444931291
+        },
+        "relative_residual": 0.6007249985509213,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0014488529810951854,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_001554e054.parquet",
+        "time_ms": 3660.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.015830197616074834,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 206,
+        "recovered_currents_a": {
+          "E567DN": -4827.288877704061,
+          "E567UP": -3676.728849925377,
+          "E89DN": -9083.284571839255,
+          "E89UP": -8662.865571721908,
+          "ECOILB": -14276.518104829673
+        },
+        "relative_residual": 0.5136953447096724,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0014852561099666008,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_001554e054.parquet",
+        "time_ms": 4480.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.014723710786141583,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 248,
+        "recovered_currents_a": {
+          "E567DN": -10579.521014339361,
+          "E567UP": -10641.340506803368,
+          "E89DN": -14804.039959325559,
+          "E89UP": -14281.197466417298,
+          "ECOILB": -25251.630342437707
+        },
+        "relative_residual": 0.23401250233902454,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0010688962682073996,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_001554e054.parquet",
+        "time_ms": 5320.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.014991423045309111,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 289,
+        "recovered_currents_a": {
+          "E567DN": -18154.790625072194,
+          "E567UP": -17615.400507108778,
+          "E89DN": -14981.42050417035,
+          "E89UP": -15895.925487519697,
+          "ECOILB": -33326.12057332717
+        },
+        "relative_residual": 0.11506466517547524,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.000925911002073511,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_001554e054.parquet",
+        "time_ms": 6140.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.003856121996108407,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 0,
+        "recovered_currents_a": {
+          "E567DN": 5555.8352815083845,
+          "E567UP": 8825.595376840702,
+          "E89DN": 5108.422922868775,
+          "E89UP": 1833.4107803577526,
+          "ECOILB": 8641.95324318276
+        },
+        "relative_residual": 0.19327718903310678,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0008105064095249352,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_001cbcc9e6.parquet",
+        "time_ms": 500.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.0054861559747826786,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 36,
+        "recovered_currents_a": {
+          "E567DN": -7702.714772922256,
+          "E567UP": -6461.610040481899,
+          "E89DN": -10591.514805454179,
+          "E89UP": -12289.290649789487,
+          "ECOILB": -19573.435438354867
+        },
+        "relative_residual": 0.30859812045364693,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0010333378936449385,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_001cbcc9e6.parquet",
+        "time_ms": 1220.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.012116960422396291,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 72,
+        "recovered_currents_a": {
+          "E567DN": -8341.323501829034,
+          "E567UP": -7014.518296783468,
+          "E89DN": -10560.727389265669,
+          "E89UP": -12963.87158421663,
+          "ECOILB": -19998.975329868183
+        },
+        "relative_residual": 0.33413273918892533,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0012168132461260275,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_001cbcc9e6.parquet",
+        "time_ms": 1960.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.013523925662905443,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 108,
+        "recovered_currents_a": {
+          "E567DN": -9480.820003780776,
+          "E567UP": -10168.319734829909,
+          "E89DN": -12710.909906018836,
+          "E89UP": -13679.53578415756,
+          "ECOILB": -24044.001471425145
+        },
+        "relative_residual": 0.2655851072133278,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0011714172656380928,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_001cbcc9e6.parquet",
+        "time_ms": 2680.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.014716504836478616,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 144,
+        "recovered_currents_a": {
+          "E567DN": -12146.789287795935,
+          "E567UP": -11104.223964378398,
+          "E89DN": -14400.499232720325,
+          "E89UP": -16245.202560009478,
+          "ECOILB": -27506.325022982786
+        },
+        "relative_residual": 0.21397274624457693,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.001074997396887884,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_001cbcc9e6.parquet",
+        "time_ms": 3400.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.014434995302644311,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 180,
+        "recovered_currents_a": {
+          "E567DN": -14146.693298961207,
+          "E567UP": -13503.490570475376,
+          "E89DN": -16706.33233138062,
+          "E89UP": -18248.98011010429,
+          "ECOILB": -32017.520235220676
+        },
+        "relative_residual": 0.177219627947199,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0010471265097529668,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_001cbcc9e6.parquet",
+        "time_ms": 4120.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.01998531357172651,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 216,
+        "recovered_currents_a": {
+          "E567DN": -17831.89563418712,
+          "E567UP": -18514.777655856742,
+          "E89DN": -20543.787005113296,
+          "E89UP": -21481.727867398124,
+          "ECOILB": -39614.47332698531
+        },
+        "relative_residual": 0.1297951596342893,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0010060595028349064,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_001cbcc9e6.parquet",
+        "time_ms": 4860.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.020663071048187688,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 252,
+        "recovered_currents_a": {
+          "E567DN": -26973.460869868326,
+          "E567UP": -30035.90328548815,
+          "E89DN": -32906.68007741637,
+          "E89UP": -30723.968946094814,
+          "ECOILB": -59478.63213192123
+        },
+        "relative_residual": 0.09291761833689813,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.001127525788002863,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_001cbcc9e6.parquet",
+        "time_ms": 5600.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.0076248904087214886,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 0,
+        "recovered_currents_a": {
+          "E567DN": 30414.033409624797,
+          "E567UP": 27851.148300770627,
+          "E89DN": 22770.29375558103,
+          "E89UP": 24569.0044621937,
+          "ECOILB": 49231.49348323297
+        },
+        "relative_residual": 0.13171347064487227,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0017933659095028072,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_002495e835.parquet",
+        "time_ms": 260.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.00982943053846217,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 42,
+        "recovered_currents_a": {
+          "E567DN": 6733.342842027957,
+          "E567UP": 5662.888238601122,
+          "E89DN": 205.39343014018874,
+          "E89UP": 383.99311031483285,
+          "ECOILB": 5258.319082188386
+        },
+        "relative_residual": 0.2813683357647003,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0011623608075923373,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_002495e835.parquet",
+        "time_ms": 1100.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.022461730010640793,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 83,
+        "recovered_currents_a": {
+          "E567DN": -6024.3059102281295,
+          "E567UP": -8010.600028842594,
+          "E89DN": -13278.696808093942,
+          "E89UP": -12574.698055829065,
+          "ECOILB": -20846.403103116536
+        },
+        "relative_residual": 0.4293581643708112,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0015843731753226007,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_002495e835.parquet",
+        "time_ms": 1920.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.023023216994323387,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 125,
+        "recovered_currents_a": {
+          "E567DN": -11427.508315783572,
+          "E567UP": -12732.263921246988,
+          "E89DN": -18885.448477417223,
+          "E89UP": -18495.614631346718,
+          "ECOILB": -31344.650568277924
+        },
+        "relative_residual": 0.316861079392553,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.001720840270014922,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_002495e835.parquet",
+        "time_ms": 2760.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.018126493194847815,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 167,
+        "recovered_currents_a": {
+          "E567DN": -15701.255702879882,
+          "E567UP": -16818.378206169193,
+          "E89DN": -23114.59295441783,
+          "E89UP": -22605.775403919342,
+          "ECOILB": -39250.072411563284
+        },
+        "relative_residual": 0.25523729405546475,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.001791408178558852,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_002495e835.parquet",
+        "time_ms": 3600.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.022646106144357584,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 209,
+        "recovered_currents_a": {
+          "E567DN": -20254.774485278354,
+          "E567UP": -22111.1129382176,
+          "E89DN": -28348.552125236583,
+          "E89UP": -27925.160875768266,
+          "ECOILB": -48664.26114449769
+        },
+        "relative_residual": 0.18591545300673154,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0016731940430109492,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_002495e835.parquet",
+        "time_ms": 4440.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.020086312764570277,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 250,
+        "recovered_currents_a": {
+          "E567DN": -24849.627484605266,
+          "E567UP": -26071.39594387758,
+          "E89DN": -33167.06926940212,
+          "E89UP": -32133.348886489515,
+          "ECOILB": -57524.91359020639
+        },
+        "relative_residual": 0.16613063039886497,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.001787911167072316,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_002495e835.parquet",
+        "time_ms": 5260.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.016410878823426372,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 292,
+        "recovered_currents_a": {
+          "E567DN": -23557.158699230924,
+          "E567UP": -28594.37786219385,
+          "E89DN": -32668.408184086296,
+          "E89UP": -31391.598333293823,
+          "ECOILB": -57147.706635087976
+        },
+        "relative_residual": 0.15155571749851487,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0016978611853217238,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_002495e835.parquet",
+        "time_ms": 6100.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.00353118928832761,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 0,
+        "recovered_currents_a": {
+          "E567DN": 26467.903523702917,
+          "E567UP": 25423.908970733642,
+          "E89DN": 19655.3397405683,
+          "E89UP": 20633.265571195097,
+          "ECOILB": 41937.63288920554
+        },
+        "relative_residual": 0.13573394897372307,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0016822475287116348,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0040a29bad.parquet",
+        "time_ms": 260.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.007931567954116665,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 32,
+        "recovered_currents_a": {
+          "E567DN": 5496.947206393234,
+          "E567UP": 5831.969769967986,
+          "E89DN": -1268.6960953440105,
+          "E89UP": -795.7610313359047,
+          "ECOILB": 1328.1314725699192
+        },
+        "relative_residual": 0.3408414118134575,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0016362475994728262,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0040a29bad.parquet",
+        "time_ms": 900.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.01587068528390295,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 65,
+        "recovered_currents_a": {
+          "E567DN": -5064.406727665396,
+          "E567UP": -4089.3600337200082,
+          "E89DN": -11211.40823383725,
+          "E89UP": -12459.38657865676,
+          "ECOILB": -19013.56533026678
+        },
+        "relative_residual": 0.4570897677785196,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.001728435747956508,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0040a29bad.parquet",
+        "time_ms": 1560.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.016510270598443275,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 97,
+        "recovered_currents_a": {
+          "E567DN": -6215.100703063802,
+          "E567UP": -7000.152597489667,
+          "E89DN": -13636.977798435475,
+          "E89UP": -13974.658034440974,
+          "ECOILB": -23288.01549693324
+        },
+        "relative_residual": 0.4205975535187305,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0017982353190644932,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0040a29bad.parquet",
+        "time_ms": 2200.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.01419855205849609,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 130,
+        "recovered_currents_a": {
+          "E567DN": -9688.821178023532,
+          "E567UP": -9641.471176195508,
+          "E89DN": -17790.51307405315,
+          "E89UP": -17278.215110656693,
+          "ECOILB": -30490.678623596814
+        },
+        "relative_residual": 0.3731309330377356,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0019833021029227785,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0040a29bad.parquet",
+        "time_ms": 2860.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.017109875285746264,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 162,
+        "recovered_currents_a": {
+          "E567DN": -13042.952930731277,
+          "E567UP": -13731.208703106888,
+          "E89DN": -22150.062865155985,
+          "E89UP": -21689.29150805848,
+          "ECOILB": -38637.10810432181
+        },
+        "relative_residual": 0.3112360728580285,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.002029229974639876,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0040a29bad.parquet",
+        "time_ms": 3500.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.017307432125635413,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 195,
+        "recovered_currents_a": {
+          "E567DN": -18186.641516716627,
+          "E567UP": -18206.28144193153,
+          "E89DN": -25473.245858811475,
+          "E89UP": -25830.46835514877,
+          "ECOILB": -46024.71262454079
+        },
+        "relative_residual": 0.23086524593622798,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0018335415402508796,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0040a29bad.parquet",
+        "time_ms": 4160.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.016648906266065876,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 227,
+        "recovered_currents_a": {
+          "E567DN": -26974.561842804254,
+          "E567UP": -26529.750104296418,
+          "E89DN": -35514.75648436883,
+          "E89UP": -35467.573581493634,
+          "ECOILB": -64515.620716131394
+        },
+        "relative_residual": 0.18740990956847753,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.002144477058284971,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0040a29bad.parquet",
+        "time_ms": 4800.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.011503797629613823,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 0,
+        "recovered_currents_a": {
+          "E567DN": 30149.733122556765,
+          "E567UP": 27798.724045949024,
+          "E89DN": 22905.396136119765,
+          "E89UP": 24747.922095651662,
+          "ECOILB": 49364.1079834418
+        },
+        "relative_residual": 0.12283198728131893,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0016540506886004692,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0040ca9bdc.parquet",
+        "time_ms": 260.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.004342096836288328,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 39,
+        "recovered_currents_a": {
+          "E567DN": 11959.234517232393,
+          "E567UP": 9413.818061361155,
+          "E89DN": 3278.13568451605,
+          "E89UP": 4812.662380312455,
+          "ECOILB": 11798.39192336879
+        },
+        "relative_residual": 0.25159213867439356,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0015956084586305514,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0040ca9bdc.parquet",
+        "time_ms": 1040.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.024093423741773316,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 78,
+        "recovered_currents_a": {
+          "E567DN": -2495.8807047942005,
+          "E567UP": -4962.541224306244,
+          "E89DN": -11539.359058531312,
+          "E89UP": -10463.721874221203,
+          "ECOILB": -16409.94789313788
+        },
+        "relative_residual": 0.5192708169055096,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.001841464940011909,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0040ca9bdc.parquet",
+        "time_ms": 1820.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.021777598023755503,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 117,
+        "recovered_currents_a": {
+          "E567DN": -9047.008625866983,
+          "E567UP": -10650.837595571695,
+          "E89DN": -15161.49069950009,
+          "E89UP": -15646.856260851606,
+          "ECOILB": -25744.767264857124
+        },
+        "relative_residual": 0.3161946848992608,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0014504317829907606,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0040ca9bdc.parquet",
+        "time_ms": 2600.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.0203052654325817,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 157,
+        "recovered_currents_a": {
+          "E567DN": -13266.145309081323,
+          "E567UP": -14488.14479385708,
+          "E89DN": -21098.323500831633,
+          "E89UP": -20446.761050823752,
+          "ECOILB": -35468.62879790885
+        },
+        "relative_residual": 0.2833730314746904,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0017353112356055045,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0040ca9bdc.parquet",
+        "time_ms": 3400.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.01881693345873534,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 196,
+        "recovered_currents_a": {
+          "E567DN": -17759.04404121891,
+          "E567UP": -19590.911699992463,
+          "E89DN": -25165.3544868129,
+          "E89UP": -24338.278470322417,
+          "ECOILB": -43759.72264609387
+        },
+        "relative_residual": 0.19299870738316027,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0015313751049573338,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0040ca9bdc.parquet",
+        "time_ms": 4180.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.021394377195468783,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 235,
+        "recovered_currents_a": {
+          "E567DN": -23064.324844617968,
+          "E567UP": -25752.010529938907,
+          "E89DN": -30315.91899229714,
+          "E89UP": -30594.04299504807,
+          "ECOILB": -54088.81430434775
+        },
+        "relative_residual": 0.13759898879813134,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0014305107655842681,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0040ca9bdc.parquet",
+        "time_ms": 4960.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.013730001872561312,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 274,
+        "recovered_currents_a": {
+          "E567DN": -24063.466250695034,
+          "E567UP": -32189.20174310209,
+          "E89DN": -35772.9724136858,
+          "E89UP": -33869.459373267506,
+          "ECOILB": -63693.65918233736
+        },
+        "relative_residual": 0.1380718141006564,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0017015550874237343,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0040ca9bdc.parquet",
+        "time_ms": 5740.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.01347333199531843,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 0,
+        "recovered_currents_a": {
+          "E567DN": 27449.28686226002,
+          "E567UP": 25559.937478801072,
+          "E89DN": 20989.06630082671,
+          "E89UP": 23562.153532137745,
+          "ECOILB": 45504.19931272757
+        },
+        "relative_residual": 0.11815323658589372,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0014505879358673523,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_004f4e5bed.parquet",
+        "time_ms": 420.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.01851095895773211,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 32,
+        "recovered_currents_a": {
+          "E567DN": 3980.335370740027,
+          "E567UP": 1127.718065455156,
+          "E89DN": -3107.6366817450275,
+          "E89UP": -1128.5711437054833,
+          "ECOILB": -1860.7070562563495
+        },
+        "relative_residual": 0.5010951192097387,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0016581206820427486,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_004f4e5bed.parquet",
+        "time_ms": 1060.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.01637259651180234,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 63,
+        "recovered_currents_a": {
+          "E567DN": 2710.265757486856,
+          "E567UP": -355.58925991729546,
+          "E89DN": -3433.744444215756,
+          "E89UP": -2667.4478380358846,
+          "ECOILB": -3282.099570712833
+        },
+        "relative_residual": 0.5859069003198113,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0017284988986085938,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_004f4e5bed.parquet",
+        "time_ms": 1720.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.020864244435057376,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 95,
+        "recovered_currents_a": {
+          "E567DN": -1083.8492361656502,
+          "E567UP": -3474.0399701839374,
+          "E89DN": -6329.461323860604,
+          "E89UP": -5062.646055117261,
+          "ECOILB": -9470.752596302182
+        },
+        "relative_residual": 0.6910511052662093,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0017614496590482105,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_004f4e5bed.parquet",
+        "time_ms": 2380.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.018822797534271872,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 126,
+        "recovered_currents_a": {
+          "E567DN": -4608.948461777436,
+          "E567UP": -6262.653921269936,
+          "E89DN": -9042.220951287949,
+          "E89UP": -8446.237309938293,
+          "ECOILB": -15767.91578351429
+        },
+        "relative_residual": 0.5873372706935092,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.001904041472468317,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_004f4e5bed.parquet",
+        "time_ms": 3040.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.023232755747134175,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 158,
+        "recovered_currents_a": {
+          "E567DN": -5524.586885087166,
+          "E567UP": -8977.268642363997,
+          "E89DN": -11281.131051512733,
+          "E89UP": -9971.581021541926,
+          "ECOILB": -19168.77361353899
+        },
+        "relative_residual": 0.4616146572815895,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0017605286380452006,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_004f4e5bed.parquet",
+        "time_ms": 3700.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.021944992861335548,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 189,
+        "recovered_currents_a": {
+          "E567DN": -7973.6551045162305,
+          "E567UP": -11891.548204338049,
+          "E89DN": -14788.051692397246,
+          "E89UP": -12909.213177533742,
+          "ECOILB": -25246.809398172594
+        },
+        "relative_residual": 0.40731151995015347,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0019712468022842836,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_004f4e5bed.parquet",
+        "time_ms": 4320.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.023221417165528405,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 221,
+        "recovered_currents_a": {
+          "E567DN": -13488.82849354845,
+          "E567UP": -14085.774626614706,
+          "E89DN": -15524.2339841608,
+          "E89UP": -17060.81771732343,
+          "ECOILB": -31650.824380741982
+        },
+        "relative_residual": 0.2852808724918716,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.001785100194263505,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_004f4e5bed.parquet",
+        "time_ms": 5060.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.007053071407751374,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 0,
+        "recovered_currents_a": {
+          "E567DN": 34681.080913826605,
+          "E567UP": 30178.712560865097,
+          "E89DN": 22266.563523004657,
+          "E89UP": 24918.84711666172,
+          "ECOILB": 50674.804432929726
+        },
+        "relative_residual": 0.17516969154999995,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.002790829573186345,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0065291fe9.parquet",
+        "time_ms": 200.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.000594066748679922,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 20,
+        "recovered_currents_a": {
+          "E567DN": 18315.236627937735,
+          "E567UP": 17946.893660590016,
+          "E89DN": 11683.061103864975,
+          "E89UP": 11891.750661149345,
+          "ECOILB": 26051.53304470707
+        },
+        "relative_residual": 0.1811548987393484,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0016806716733490164,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0065291fe9.parquet",
+        "time_ms": 600.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.002822656019368956,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 39,
+        "recovered_currents_a": {
+          "E567DN": 5327.808097944105,
+          "E567UP": 5143.228785746069,
+          "E89DN": -384.735109148966,
+          "E89UP": -817.0084751829093,
+          "ECOILB": 2173.865390820888
+        },
+        "relative_residual": 0.3818360485178946,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.001606833436482073,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0065291fe9.parquet",
+        "time_ms": 980.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.0023537147895458218,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 59,
+        "recovered_currents_a": {
+          "E567DN": -6166.834575118956,
+          "E567UP": -7706.003239479818,
+          "E89DN": -13055.746786730648,
+          "E89UP": -12872.15103655846,
+          "ECOILB": -21782.739616618568
+        },
+        "relative_residual": 0.42593005410977236,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.001653246012278004,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0065291fe9.parquet",
+        "time_ms": 1380.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.011010916378160582,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 78,
+        "recovered_currents_a": {
+          "E567DN": -16154.212637819905,
+          "E567UP": -17815.32857096165,
+          "E89DN": -23957.792900779627,
+          "E89UP": -24071.494019401765,
+          "ECOILB": -42446.50039144934
+        },
+        "relative_residual": 0.23301937902918293,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0017263144849916394,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0065291fe9.parquet",
+        "time_ms": 1760.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.020257376127282303,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 98,
+        "recovered_currents_a": {
+          "E567DN": -18165.13675539289,
+          "E567UP": -20451.88790799668,
+          "E89DN": -27911.44764773133,
+          "E89UP": -27844.85462865053,
+          "ECOILB": -49270.70965479101
+        },
+        "relative_residual": 0.21154358998440884,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0017894818778175763,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0065291fe9.parquet",
+        "time_ms": 2160.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.017387014219584378,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 117,
+        "recovered_currents_a": {
+          "E567DN": -19112.666419651476,
+          "E567UP": -18285.490586326836,
+          "E89DN": -26048.067411690183,
+          "E89UP": -26741.826509755003,
+          "ECOILB": -46670.58206868209
+        },
+        "relative_residual": 0.23422324609606496,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.00189812633954068,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0065291fe9.parquet",
+        "time_ms": 2540.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.01938882755454366,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 137,
+        "recovered_currents_a": {
+          "E567DN": -17282.064197398293,
+          "E567UP": -21527.033372583337,
+          "E89DN": -27206.721167180203,
+          "E89UP": -26025.302604075296,
+          "ECOILB": -46638.51182426564
+        },
+        "relative_residual": 0.181451591781786,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0015215442417318146,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0065291fe9.parquet",
+        "time_ms": 2940.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.005125764598873703,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 0,
+        "recovered_currents_a": {
+          "E567DN": 34962.48829196945,
+          "E567UP": 34639.336054850246,
+          "E89DN": 28311.45956793569,
+          "E89UP": 29229.192959625692,
+          "ECOILB": 59432.62463746523
+        },
+        "relative_residual": 0.09920298460406776,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0015958583225146122,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_006a097379.parquet",
+        "time_ms": 300.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.0006479666658169288,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 41,
+        "recovered_currents_a": {
+          "E567DN": 20962.172610618512,
+          "E567UP": 21539.706006568344,
+          "E89DN": 16515.392472705036,
+          "E89UP": 15973.109297814332,
+          "ECOILB": 34378.348389691775
+        },
+        "relative_residual": 0.12474498720852012,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0012635312174597215,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_006a097379.parquet",
+        "time_ms": 1160.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.0036489514069571495,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 82,
+        "recovered_currents_a": {
+          "E567DN": 10246.385855757084,
+          "E567UP": 10391.421579161284,
+          "E89DN": 6277.940159094979,
+          "E89UP": 5948.026726587865,
+          "ECOILB": 14369.29242127823
+        },
+        "relative_residual": 0.19690923696592175,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0010596846611363392,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_006a097379.parquet",
+        "time_ms": 1980.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.003028460777904636,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 123,
+        "recovered_currents_a": {
+          "E567DN": 1466.6121047073204,
+          "E567UP": 1906.120723112787,
+          "E89DN": -2111.349599674126,
+          "E89UP": -2507.761596608157,
+          "ECOILB": -2141.576251078078
+        },
+        "relative_residual": 0.44317866658718863,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0010217118880565166,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_006a097379.parquet",
+        "time_ms": 2800.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.004539998435554245,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 165,
+        "recovered_currents_a": {
+          "E567DN": -7367.950962178736,
+          "E567UP": -7508.240251074879,
+          "E89DN": -10964.210719463843,
+          "E89UP": -11021.6685499036,
+          "ECOILB": -19168.453696155077
+        },
+        "relative_residual": 0.28754384463371774,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0009492215492150497,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_006a097379.parquet",
+        "time_ms": 3640.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.0077108346352262975,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 206,
+        "recovered_currents_a": {
+          "E567DN": -16095.098739166651,
+          "E567UP": -16454.560966770605,
+          "E89DN": -19229.130032385958,
+          "E89UP": -19269.017164422497,
+          "ECOILB": -35730.10893237964
+        },
+        "relative_residual": 0.11687889706708039,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0008022858993457019,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_006a097379.parquet",
+        "time_ms": 4460.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.009358556264887326,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 247,
+        "recovered_currents_a": {
+          "E567DN": -25110.570564787085,
+          "E567UP": -25275.864552651998,
+          "E89DN": -27205.24880692172,
+          "E89UP": -27517.278374367794,
+          "ECOILB": -51910.18369586466
+        },
+        "relative_residual": 0.06034643248780902,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0006469868357577201,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_006a097379.parquet",
+        "time_ms": 5280.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.011982048389070715,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 288,
+        "recovered_currents_a": {
+          "E567DN": -32339.28842676753,
+          "E567UP": -33541.84812642187,
+          "E89DN": -33879.04912934846,
+          "E89UP": -33898.68310435814,
+          "ECOILB": -65223.20032747454
+        },
+        "relative_residual": 0.04236808022311083,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0006014070819510439,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_006a097379.parquet",
+        "time_ms": 6100.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.002714894264462837,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 0,
+        "recovered_currents_a": {
+          "E567DN": 35276.199825807744,
+          "E567UP": 36196.35403168268,
+          "E89DN": 30448.321349629572,
+          "E89UP": 30212.004380581526,
+          "ECOILB": 62225.98129807251
+        },
+        "relative_residual": 0.09056578977965266,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0014803269511590481,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0073c37714.parquet",
+        "time_ms": 300.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.002292330824730165,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 38,
+        "recovered_currents_a": {
+          "E567DN": 33803.87593572487,
+          "E567UP": 32886.323199589904,
+          "E89DN": 27166.052199425118,
+          "E89UP": 26868.53973678087,
+          "ECOILB": 55741.32601590302
+        },
+        "relative_residual": 0.10231527507643558,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0015975012256835442,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0073c37714.parquet",
+        "time_ms": 1080.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.0010209323193910904,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 75,
+        "recovered_currents_a": {
+          "E567DN": 30766.76416507858,
+          "E567UP": 30793.37928661903,
+          "E89DN": 25036.063752239923,
+          "E89UP": 24014.366039962035,
+          "ECOILB": 50752.984603824625
+        },
+        "relative_residual": 0.1103484390299852,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0016031702654443769,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0073c37714.parquet",
+        "time_ms": 1820.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -5.7692017669234595e-05,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 113,
+        "recovered_currents_a": {
+          "E567DN": 27989.471725895746,
+          "E567UP": 28179.697839040316,
+          "E89DN": 23548.031840738076,
+          "E89UP": 22534.771520115806,
+          "ECOILB": 47826.917349875446
+        },
+        "relative_residual": 0.08922599782243096,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.001161178875107328,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0073c37714.parquet",
+        "time_ms": 2580.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.003473280521184825,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 150,
+        "recovered_currents_a": {
+          "E567DN": 23636.164619036237,
+          "E567UP": 24640.21678841318,
+          "E89DN": 19441.23430528234,
+          "E89UP": 18225.14999719145,
+          "ECOILB": 39716.90914936283
+        },
+        "relative_residual": 0.10967852031767925,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0012498660612904723,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0073c37714.parquet",
+        "time_ms": 3320.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.00349093122349422,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 188,
+        "recovered_currents_a": {
+          "E567DN": 19182.575172594625,
+          "E567UP": 20156.51797477348,
+          "E89DN": 15766.343339804307,
+          "E89UP": 14617.57804102122,
+          "ECOILB": 32425.312717214827
+        },
+        "relative_residual": 0.10216209947316146,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0009476066056629082,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0073c37714.parquet",
+        "time_ms": 4120.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.006505618037852689,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 225,
+        "recovered_currents_a": {
+          "E567DN": 15850.111550789828,
+          "E567UP": 16294.577084476825,
+          "E89DN": 11979.589891381142,
+          "E89UP": 10760.792821150508,
+          "ECOILB": 24890.146522237297
+        },
+        "relative_residual": 0.1440148849578161,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0011366649209446954,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0073c37714.parquet",
+        "time_ms": 4860.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -4.218715513393072e-05,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 263,
+        "recovered_currents_a": {
+          "E567DN": 3421.6788370040904,
+          "E567UP": 3394.03379506661,
+          "E89DN": 1582.7862387432122,
+          "E89UP": 898.0050302589071,
+          "ECOILB": 3996.6678565995685
+        },
+        "relative_residual": 0.18990341907568142,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.00038027321515365567,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0073c37714.parquet",
+        "time_ms": 6880.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.01735562089473531,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 0,
+        "recovered_currents_a": {
+          "E567DN": 20658.176145188852,
+          "E567UP": 23217.587371276546,
+          "E89DN": 19623.273047820014,
+          "E89UP": 17669.83870953545,
+          "ECOILB": 38716.74239012571
+        },
+        "relative_residual": 0.13672156916185169,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0013749017588933791,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0079897d3b.parquet",
+        "time_ms": 180.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.0009278785982275465,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 20,
+        "recovered_currents_a": {
+          "E567DN": 8523.487866638689,
+          "E567UP": 9103.31079375041,
+          "E89DN": 5200.755344189619,
+          "E89UP": 3900.15732433783,
+          "ECOILB": 10885.149811135798
+        },
+        "relative_residual": 0.24687872180207512,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0012315380849885038,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0079897d3b.parquet",
+        "time_ms": 580.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.002145369738264033,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 41,
+        "recovered_currents_a": {
+          "E567DN": -9541.60724914278,
+          "E567UP": -9090.027727413246,
+          "E89DN": -12703.222587876475,
+          "E89UP": -15381.888064134087,
+          "ECOILB": -24758.76476121194
+        },
+        "relative_residual": 0.36870931738767676,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0017228342100688307,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0079897d3b.parquet",
+        "time_ms": 1000.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.0007647764951321267,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 61,
+        "recovered_currents_a": {
+          "E567DN": -19918.47612320237,
+          "E567UP": -21706.84697233837,
+          "E89DN": -25018.405283879772,
+          "E89UP": -24909.43960328125,
+          "ECOILB": -46413.55466083438
+        },
+        "relative_residual": 0.17233634166235226,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0015299806501837994,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0079897d3b.parquet",
+        "time_ms": 1400.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.0047740014091862265,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 81,
+        "recovered_currents_a": {
+          "E567DN": -19968.14874072598,
+          "E567UP": -21673.80546068144,
+          "E89DN": -26044.520845954677,
+          "E89UP": -26354.578935744306,
+          "ECOILB": -48087.34468238389
+        },
+        "relative_residual": 0.16930014709384836,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0015036944302974965,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0079897d3b.parquet",
+        "time_ms": 1800.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.011010407355915066,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 101,
+        "recovered_currents_a": {
+          "E567DN": -21042.069146529993,
+          "E567UP": -20450.285490564067,
+          "E89DN": -25313.796503671296,
+          "E89UP": -26341.387707465256,
+          "ECOILB": -47674.29158936925
+        },
+        "relative_residual": 0.16647583666579513,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.00146552378234063,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0079897d3b.parquet",
+        "time_ms": 2200.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.004000659129258648,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 122,
+        "recovered_currents_a": {
+          "E567DN": -24510.05526958806,
+          "E567UP": -25607.822252910642,
+          "E89DN": -29683.868834338624,
+          "E89UP": -29928.36916248078,
+          "ECOILB": -55688.30023230194
+        },
+        "relative_residual": 0.11651070140557962,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0012332852415213673,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0079897d3b.parquet",
+        "time_ms": 2620.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.07229467689476793,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 142,
+        "recovered_currents_a": {
+          "E567DN": -800.4834524263944,
+          "E567UP": -1576.6118195679421,
+          "E89DN": -36932.252907708054,
+          "E89UP": -35572.360019420084,
+          "ECOILB": -49681.76475140018
+        },
+        "relative_residual": 0.5013039218469207,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.00874474139835576,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0079897d3b.parquet",
+        "time_ms": 3020.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.0013475607023194554,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 0,
+        "recovered_currents_a": {
+          "E567DN": 10154.376459957697,
+          "E567UP": 9761.868496628194,
+          "E89DN": 5242.1058607431405,
+          "E89UP": 4117.237211255384,
+          "ECOILB": 11777.56933287788
+        },
+        "relative_residual": 0.24002384703712037,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0013880166410996664,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_008b4474ec.parquet",
+        "time_ms": 720.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.00034818548432722496,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 39,
+        "recovered_currents_a": {
+          "E567DN": -3783.172010825484,
+          "E567UP": -4152.832738636836,
+          "E89DN": -9416.278767234387,
+          "E89UP": -9330.543859824142,
+          "ECOILB": -15416.322240225043
+        },
+        "relative_residual": 0.47045185855027366,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0014053650095247,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_008b4474ec.parquet",
+        "time_ms": 1500.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.004817154635250998,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 77,
+        "recovered_currents_a": {
+          "E567DN": -4201.833753352602,
+          "E567UP": -4316.751603181024,
+          "E89DN": -9155.355592125685,
+          "E89UP": -9312.874358572772,
+          "ECOILB": -14998.213717164532
+        },
+        "relative_residual": 0.46555235640223175,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.001277555470836284,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_008b4474ec.parquet",
+        "time_ms": 2260.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.0007648630187167289,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 116,
+        "recovered_currents_a": {
+          "E567DN": -5441.047392489445,
+          "E567UP": -6305.687087409704,
+          "E89DN": -10539.832464232064,
+          "E89UP": -10264.25122984126,
+          "ECOILB": -17377.378259134086
+        },
+        "relative_residual": 0.43611865140198824,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0013291981572975838,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_008b4474ec.parquet",
+        "time_ms": 3040.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.004486324809799025,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 155,
+        "recovered_currents_a": {
+          "E567DN": -3891.9496162567484,
+          "E567UP": -3884.306031349765,
+          "E89DN": -9107.83605747646,
+          "E89UP": -8587.663494798431,
+          "ECOILB": -14526.443485817328
+        },
+        "relative_residual": 0.47540667119345187,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0013333854896164783,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_008b4474ec.parquet",
+        "time_ms": 3820.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.001388152346596862,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 194,
+        "recovered_currents_a": {
+          "E567DN": -4056.6066021174734,
+          "E567UP": -4617.555338492744,
+          "E89DN": -9688.784327100808,
+          "E89UP": -8846.650564244099,
+          "ECOILB": -15294.70725217157
+        },
+        "relative_residual": 0.47638148018188087,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0013683752918906495,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_008b4474ec.parquet",
+        "time_ms": 4600.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.0002775808500042897,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 232,
+        "recovered_currents_a": {
+          "E567DN": -4759.336943869141,
+          "E567UP": -4476.761053922338,
+          "E89DN": -9515.622511122876,
+          "E89UP": -10062.729735787318,
+          "ECOILB": -15746.553551078348
+        },
+        "relative_residual": 0.4520509103412824,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0012759469881921698,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_008b4474ec.parquet",
+        "time_ms": 5800.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.0015687293010104553,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 271,
+        "recovered_currents_a": {
+          "E567DN": -8730.390161346097,
+          "E567UP": -10921.199031203101,
+          "E89DN": -13548.716471476022,
+          "E89UP": -11992.881872318734,
+          "ECOILB": -22474.589711372428
+        },
+        "relative_residual": 0.31055996638399747,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0013499050780492194,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_008b4474ec.parquet",
+        "time_ms": 6600.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.014716682714236186,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 0,
+        "recovered_currents_a": {
+          "E567DN": 13032.448595533939,
+          "E567UP": 12120.353910069425,
+          "E89DN": 7188.921364803477,
+          "E89UP": 9530.94484795211,
+          "ECOILB": 19065.071419407403
+        },
+        "relative_residual": 0.18749382970382245,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0011963169660428022,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0092a9ade0.parquet",
+        "time_ms": 640.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.015884180020648793,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 11,
+        "recovered_currents_a": {
+          "E567DN": 5841.898179196776,
+          "E567UP": 5566.319050816654,
+          "E89DN": 1945.5142559668077,
+          "E89UP": 3264.41565181287,
+          "ECOILB": 6678.115336990307
+        },
+        "relative_residual": 0.2641456459924704,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0008947122980878802,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0092a9ade0.parquet",
+        "time_ms": 880.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.012139020402670342,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 21,
+        "recovered_currents_a": {
+          "E567DN": 1465.4392749878505,
+          "E567UP": 646.9583166680873,
+          "E89DN": -1341.4939957702088,
+          "E89UP": -714.5367362788,
+          "ECOILB": -343.5871698488335
+        },
+        "relative_residual": 0.660951677230323,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0009128599396813902,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0092a9ade0.parquet",
+        "time_ms": 1100.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.0176320267124935,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 32,
+        "recovered_currents_a": {
+          "E567DN": -704.1387501675423,
+          "E567UP": -661.7826833621692,
+          "E89DN": -3638.6607559128206,
+          "E89UP": -2552.1957765945394,
+          "ECOILB": -4837.838704448541
+        },
+        "relative_residual": 0.5973351405474344,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0010300068654477933,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0092a9ade0.parquet",
+        "time_ms": 1320.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.015074703074181092,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 42,
+        "recovered_currents_a": {
+          "E567DN": -3991.6178510628633,
+          "E567UP": -4322.387235408534,
+          "E89DN": -6654.354834793988,
+          "E89UP": -5224.045308557165,
+          "ECOILB": -10855.994811264187
+        },
+        "relative_residual": 0.43267294631508,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0009721437114792293,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0092a9ade0.parquet",
+        "time_ms": 1540.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.009940511149151893,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 53,
+        "recovered_currents_a": {
+          "E567DN": -7832.2628794948605,
+          "E567UP": -8896.14499074671,
+          "E89DN": -9823.920891686827,
+          "E89UP": -9771.52330284188,
+          "ECOILB": -17194.34984473731
+        },
+        "relative_residual": 0.27923218451232235,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0010481793154445708,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0092a9ade0.parquet",
+        "time_ms": 1760.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.011922620489756598,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 63,
+        "recovered_currents_a": {
+          "E567DN": -8899.656747045949,
+          "E567UP": -10404.034281772061,
+          "E89DN": -11621.522680582637,
+          "E89UP": -10183.019777874193,
+          "ECOILB": -20067.9492289875
+        },
+        "relative_residual": 0.2611226516155309,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.001113822666752142,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0092a9ade0.parquet",
+        "time_ms": 1960.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.010805196964488908,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 74,
+        "recovered_currents_a": {
+          "E567DN": -4842.4545806764345,
+          "E567UP": -3254.535978490187,
+          "E89DN": -4245.945665367484,
+          "E89UP": -7154.853057202622,
+          "ECOILB": -9984.702733277547
+        },
+        "relative_residual": 0.39843261439742433,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0009357183881884665,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0092a9ade0.parquet",
+        "time_ms": 2240.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.00389384109433595,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 0,
+        "recovered_currents_a": {
+          "E567DN": 37882.826362857784,
+          "E567UP": 37221.43093104318,
+          "E89DN": 31770.64852436678,
+          "E89UP": 33170.66449131337,
+          "ECOILB": 65998.43913757718
+        },
+        "relative_residual": 0.08199509775650367,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0014012631838765932,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0093deb434.parquet",
+        "time_ms": 260.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.004842394896297906,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 30,
+        "recovered_currents_a": {
+          "E567DN": 12364.683318005591,
+          "E567UP": 9986.151287085864,
+          "E89DN": 1175.054138526508,
+          "E89UP": 3045.570921712452,
+          "ECOILB": 8679.31150091814
+        },
+        "relative_residual": 0.26372074353558184,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0019895383785878355,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0093deb434.parquet",
+        "time_ms": 940.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.01975349808164584,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 61,
+        "recovered_currents_a": {
+          "E567DN": -6773.42927447586,
+          "E567UP": -6700.616034192118,
+          "E89DN": -13179.592250213962,
+          "E89UP": -12866.424763545654,
+          "ECOILB": -21939.48554438013
+        },
+        "relative_residual": 0.432374144529648,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0016873468721724319,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0093deb434.parquet",
+        "time_ms": 1620.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.02122220152837485,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 91,
+        "recovered_currents_a": {
+          "E567DN": -11289.239966881687,
+          "E567UP": -13495.688540883362,
+          "E89DN": -20101.08481421971,
+          "E89UP": -18397.062093421577,
+          "ECOILB": -33674.49137400656
+        },
+        "relative_residual": 0.2978129078474882,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0017066814324694136,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0093deb434.parquet",
+        "time_ms": 2240.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.02102651951612915,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 121,
+        "recovered_currents_a": {
+          "E567DN": -24325.87837251984,
+          "E567UP": -26259.703105292283,
+          "E89DN": -31629.211360864912,
+          "E89UP": -30564.52348372932,
+          "ECOILB": -57520.166584429404
+        },
+        "relative_residual": 0.15562143597836692,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0016675116911738573,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0093deb434.parquet",
+        "time_ms": 2880.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.024801746421457042,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 151,
+        "recovered_currents_a": {
+          "E567DN": -40651.322303425724,
+          "E567UP": -41743.49291964999,
+          "E89DN": -46583.99900974907,
+          "E89UP": -44837.87083666412,
+          "ECOILB": -86042.31549079818
+        },
+        "relative_residual": 0.06941698368338171,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0012150851125370455,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0093deb434.parquet",
+        "time_ms": 3860.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.022652396189151176,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 182,
+        "recovered_currents_a": {
+          "E567DN": -47689.344519750244,
+          "E567UP": -50809.965310765365,
+          "E89DN": -55071.77894832525,
+          "E89UP": -53425.17773087665,
+          "ECOILB": -102970.57343487449
+        },
+        "relative_residual": 0.07131133189493108,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0014914270662563785,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0093deb434.parquet",
+        "time_ms": 4480.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.0165165114377171,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 212,
+        "recovered_currents_a": {
+          "E567DN": -56028.93415299102,
+          "E567UP": -55279.19659362597,
+          "E89DN": -59989.08141211929,
+          "E89UP": -59868.44100476214,
+          "ECOILB": -114295.7386916438
+        },
+        "relative_residual": 0.04902692973267284,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.001163114773229142,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_0093deb434.parquet",
+        "time_ms": 5100.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.00885417876946554,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 0,
+        "recovered_currents_a": {
+          "E567DN": 20084.09336496336,
+          "E567UP": 22829.16335424996,
+          "E89DN": 16244.935545669165,
+          "E89UP": 13365.86803040611,
+          "ECOILB": 33320.948740610685
+        },
+        "relative_residual": 0.14881407699602409,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0015689116640771458,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00a4b7af57.parquet",
+        "time_ms": 140.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.0098898842574867,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 38,
+        "recovered_currents_a": {
+          "E567DN": -7295.360839755277,
+          "E567UP": -6438.671427462173,
+          "E89DN": -9877.924749262926,
+          "E89UP": -11006.52277567402,
+          "ECOILB": -18389.556915399186
+        },
+        "relative_residual": 0.2863951748551682,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0009010202569536145,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00a4b7af57.parquet",
+        "time_ms": 980.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.00924596002705165,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 77,
+        "recovered_currents_a": {
+          "E567DN": -8143.643392991463,
+          "E567UP": -5957.587848417128,
+          "E89DN": -10479.793247865215,
+          "E89UP": -13150.031063743654,
+          "ECOILB": -20528.427720051386
+        },
+        "relative_residual": 0.3424594470003027,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0012414148733527642,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00a4b7af57.parquet",
+        "time_ms": 1760.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.011438430459544038,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 115,
+        "recovered_currents_a": {
+          "E567DN": -8160.131639215532,
+          "E567UP": -8082.785899861682,
+          "E89DN": -12436.336062503513,
+          "E89UP": -13860.944787383145,
+          "ECOILB": -22816.330912843383
+        },
+        "relative_residual": 0.34634538855098324,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0013843074129011618,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00a4b7af57.parquet",
+        "time_ms": 2520.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.015583971938232681,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 153,
+        "recovered_currents_a": {
+          "E567DN": -11806.4579953226,
+          "E567UP": -11657.142125662824,
+          "E89DN": -14567.623627118399,
+          "E89UP": -15851.800420397136,
+          "ECOILB": -27824.115838975624
+        },
+        "relative_residual": 0.263530336441775,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0013573256573737346,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00a4b7af57.parquet",
+        "time_ms": 3300.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.022318579335709875,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 191,
+        "recovered_currents_a": {
+          "E567DN": -16191.011708803566,
+          "E567UP": -14451.983262955613,
+          "E89DN": -17451.79086453851,
+          "E89UP": -19100.33152606443,
+          "ECOILB": -33947.11535396541
+        },
+        "relative_residual": 0.22401599581001513,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0014799094030077476,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00a4b7af57.parquet",
+        "time_ms": 4060.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.011743672299734834,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 230,
+        "recovered_currents_a": {
+          "E567DN": -15845.411302049744,
+          "E567UP": -15203.356450190538,
+          "E89DN": -19875.861944707278,
+          "E89UP": -21066.80774067945,
+          "ECOILB": -37043.298703955305
+        },
+        "relative_residual": 0.21151798076320413,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0014083240104108997,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00a4b7af57.parquet",
+        "time_ms": 4840.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.012494736862695446,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 268,
+        "recovered_currents_a": {
+          "E567DN": -14158.213375966037,
+          "E567UP": -16325.45776363882,
+          "E89DN": -17693.944393010923,
+          "E89UP": -16834.639492224913,
+          "ECOILB": -31336.285369972968
+        },
+        "relative_residual": 0.09883643546463813,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0006463469266153806,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00a4b7af57.parquet",
+        "time_ms": 6280.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.007351625904436387,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 0,
+        "recovered_currents_a": {
+          "E567DN": 15447.462027121697,
+          "E567UP": 14698.18805748933,
+          "E89DN": 10363.111008087682,
+          "E89UP": 11926.927667531287,
+          "ECOILB": 23730.0517685059
+        },
+        "relative_residual": 0.1786771504879567,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0013186613079109442,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00a6212403.parquet",
+        "time_ms": 260.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.005332685677310198,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 15,
+        "recovered_currents_a": {
+          "E567DN": 8333.444463152047,
+          "E567UP": 5466.429153443204,
+          "E89DN": -673.1561628201245,
+          "E89UP": 1684.336324125032,
+          "ECOILB": 3789.8370042988813
+        },
+        "relative_residual": 0.29905697400820075,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0015594358395284494,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00a6212403.parquet",
+        "time_ms": 560.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.00839200305308761,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 29,
+        "recovered_currents_a": {
+          "E567DN": 1614.684230348957,
+          "E567UP": 1006.8171057697879,
+          "E89DN": -3622.5774490551944,
+          "E89UP": -3240.84414115172,
+          "ECOILB": -3856.997853495355
+        },
+        "relative_residual": 0.4334921155889731,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.001098820834961341,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00a6212403.parquet",
+        "time_ms": 840.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.0035137197842633125,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 44,
+        "recovered_currents_a": {
+          "E567DN": -814.0868265579087,
+          "E567UP": -1753.4066856728598,
+          "E89DN": -6296.325367639746,
+          "E89UP": -5968.812703157422,
+          "ECOILB": -8949.828921747665
+        },
+        "relative_residual": 0.5112563660243516,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0011992788840212217,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00a6212403.parquet",
+        "time_ms": 1140.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.0018654632788387862,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 58,
+        "recovered_currents_a": {
+          "E567DN": 847.498727531133,
+          "E567UP": 418.98163505766865,
+          "E89DN": -3734.9533514301484,
+          "E89UP": -4335.11943136957,
+          "ECOILB": -5300.6625340432465
+        },
+        "relative_residual": 0.4921141167249722,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0012964200173649397,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00a6212403.parquet",
+        "time_ms": 1420.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.005387019499576417,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 73,
+        "recovered_currents_a": {
+          "E567DN": 770.6504704148227,
+          "E567UP": 486.87909058758027,
+          "E89DN": -3307.821048040995,
+          "E89UP": -3578.4916468717224,
+          "ECOILB": -4482.29999677433
+        },
+        "relative_residual": 0.5329431996200574,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0012372227353059971,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00a6212403.parquet",
+        "time_ms": 1720.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.008495882251984164,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 87,
+        "recovered_currents_a": {
+          "E567DN": 479.381604622233,
+          "E567UP": 653.6869152607483,
+          "E89DN": -4460.7526388872175,
+          "E89UP": -4655.67729727485,
+          "ECOILB": -6082.012761023449
+        },
+        "relative_residual": 0.4843748308409214,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0013296061617335605,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00a6212403.parquet",
+        "time_ms": 5780.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.009004039797730169,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 102,
+        "recovered_currents_a": {
+          "E567DN": -138.60293586767608,
+          "E567UP": -302.7237083607047,
+          "E89DN": -3731.598087950736,
+          "E89UP": -3725.3419161134852,
+          "ECOILB": -5219.807120538522
+        },
+        "relative_residual": 0.4538909428112193,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0007739002480179268,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00a6212403.parquet",
+        "time_ms": 6100.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.005236083933227197,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 0,
+        "recovered_currents_a": {
+          "E567DN": 30576.77453449866,
+          "E567UP": 30316.705346377636,
+          "E89DN": 24274.593754159385,
+          "E89UP": 24794.8431225007,
+          "ECOILB": 50921.14402188845
+        },
+        "relative_residual": 0.12292575676132003,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0017527531328309406,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00b8fe1f50.parquet",
+        "time_ms": 280.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.008493882184159956,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 41,
+        "recovered_currents_a": {
+          "E567DN": 7015.588340940092,
+          "E567UP": 6694.531415988717,
+          "E89DN": 35.81867501343611,
+          "E89UP": 1111.848017338216,
+          "ECOILB": 4600.563043567332
+        },
+        "relative_residual": 0.3328729231533292,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0016417802764549377,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00b8fe1f50.parquet",
+        "time_ms": 1100.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.02078002830469408,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 81,
+        "recovered_currents_a": {
+          "E567DN": -13248.527153365616,
+          "E567UP": -13828.640355598805,
+          "E89DN": -19271.688378491006,
+          "E89UP": -19718.397932152802,
+          "ECOILB": -34378.776862724626
+        },
+        "relative_residual": 0.27223406821364315,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0016276240849883833,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00b8fe1f50.parquet",
+        "time_ms": 1900.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.017181881367024983,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 122,
+        "recovered_currents_a": {
+          "E567DN": -23168.224867238972,
+          "E567UP": -25711.926018981536,
+          "E89DN": -30001.458198634413,
+          "E89UP": -29271.47763684623,
+          "ECOILB": -54276.08755490325
+        },
+        "relative_residual": 0.14933225848904239,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.001547060218002618,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00b8fe1f50.parquet",
+        "time_ms": 2720.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.015643735494356374,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 163,
+        "recovered_currents_a": {
+          "E567DN": -32667.35931158184,
+          "E567UP": -32773.196456212776,
+          "E89DN": -37790.14379426284,
+          "E89UP": -38093.812723495306,
+          "ECOILB": -71226.69660396321
+        },
+        "relative_residual": 0.11024813256851665,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.001524166464867863,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00b8fe1f50.parquet",
+        "time_ms": 3540.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.01776154251857367,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 204,
+        "recovered_currents_a": {
+          "E567DN": -40980.30794803349,
+          "E567UP": -41480.429490134215,
+          "E89DN": -48164.79860099068,
+          "E89UP": -47695.46592655031,
+          "ECOILB": -90036.35446089902
+        },
+        "relative_residual": 0.11134899994869892,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0019402816355350149,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00b8fe1f50.parquet",
+        "time_ms": 4360.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.022059800020683935,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 244,
+        "recovered_currents_a": {
+          "E567DN": -52449.92703845597,
+          "E567UP": -52487.06653637968,
+          "E89DN": -58164.9781358815,
+          "E89UP": -57296.808072734195,
+          "ECOILB": -109768.22328889386
+        },
+        "relative_residual": 0.07963820033377418,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.001776802095677687,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00b8fe1f50.parquet",
+        "time_ms": 5160.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.01694108796330633,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 285,
+        "recovered_currents_a": {
+          "E567DN": -60941.2386534549,
+          "E567UP": -62290.13721729011,
+          "E89DN": -60634.029892467486,
+          "E89UP": -60942.32433135456,
+          "ECOILB": -119774.3741661119
+        },
+        "relative_residual": 0.03513679485754997,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.000940164389020817,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00b8fe1f50.parquet",
+        "time_ms": 5980.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.011092631932620195,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 0,
+        "recovered_currents_a": {
+          "E567DN": 37867.93306487668,
+          "E567UP": 37782.74963174618,
+          "E89DN": 32241.017201086408,
+          "E89UP": 33655.42296334964,
+          "ECOILB": 66794.94365122783
+        },
+        "relative_residual": 0.08159615682333915,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0014018763134280511,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00bb25ac45.parquet",
+        "time_ms": 180.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.0006078979672807201,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 34,
+        "recovered_currents_a": {
+          "E567DN": 6104.153212753731,
+          "E567UP": 5072.983458180235,
+          "E89DN": 489.04488337796676,
+          "E89UP": 690.7188973304477,
+          "ECOILB": 3151.220172774374
+        },
+        "relative_residual": 0.35216952293030873,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.001502215454731278,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00bb25ac45.parquet",
+        "time_ms": 920.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.0003616903757654821,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 67,
+        "recovered_currents_a": {
+          "E567DN": 1136.5876865282735,
+          "E567UP": 300.5059635500865,
+          "E89DN": -3699.8891110127943,
+          "E89UP": -3425.0016966499693,
+          "ECOILB": -5029.445789560393
+        },
+        "relative_residual": 0.5332645584052469,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0014176397040246195,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00bb25ac45.parquet",
+        "time_ms": 1580.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.0046782952839520804,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 101,
+        "recovered_currents_a": {
+          "E567DN": -2746.040894537905,
+          "E567UP": -3553.030796722085,
+          "E89DN": -7339.547307113651,
+          "E89UP": -6841.645219836319,
+          "ECOILB": -12024.998681989327
+        },
+        "relative_residual": 0.5409567777559746,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0013401975077155916,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00bb25ac45.parquet",
+        "time_ms": 2260.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.0066650680198511066,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 134,
+        "recovered_currents_a": {
+          "E567DN": -6772.745055243042,
+          "E567UP": -6621.10116131177,
+          "E89DN": -10092.19401878627,
+          "E89UP": -10822.805561496687,
+          "ECOILB": -18229.522525660326
+        },
+        "relative_residual": 0.33827720695570446,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0010641472135232226,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00bb25ac45.parquet",
+        "time_ms": 2920.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.007856341438804544,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 168,
+        "recovered_currents_a": {
+          "E567DN": -9275.603128834116,
+          "E567UP": -10574.973814881754,
+          "E89DN": -13975.26251533747,
+          "E89UP": -13644.21019581648,
+          "ECOILB": -25125.121515953484
+        },
+        "relative_residual": 0.26906541485577407,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.001190633446688407,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00bb25ac45.parquet",
+        "time_ms": 3600.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.008583079155871604,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 201,
+        "recovered_currents_a": {
+          "E567DN": -12965.908911512284,
+          "E567UP": -13613.944096625024,
+          "E89DN": -16879.84816983863,
+          "E89UP": -16798.517703941856,
+          "ECOILB": -30800.353870250172
+        },
+        "relative_residual": 0.2027482355896186,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0011497668949342623,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00bb25ac45.parquet",
+        "time_ms": 4260.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.0037308134076635183,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 235,
+        "recovered_currents_a": {
+          "E567DN": -12979.56995086225,
+          "E567UP": -16889.820217056775,
+          "E89DN": -20693.52604730629,
+          "E89UP": -17199.580737251064,
+          "ECOILB": -35859.7735137101
+        },
+        "relative_residual": 0.131243047261842,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0008564479182980622,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00bb25ac45.parquet",
+        "time_ms": 4960.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.008044424230525375,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 0,
+        "recovered_currents_a": {
+          "E567DN": 18495.434780289113,
+          "E567UP": 14870.944224169392,
+          "E89DN": 8096.05537138592,
+          "E89UP": 12522.69434365729,
+          "ECOILB": 23539.388214855284
+        },
+        "relative_residual": 0.1580624360584204,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0013811276498991848,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00d3a26e4f.parquet",
+        "time_ms": 600.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.01138874620660558,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 32,
+        "recovered_currents_a": {
+          "E567DN": -6114.1623999703,
+          "E567UP": -6661.466223678291,
+          "E89DN": -11926.691078832682,
+          "E89UP": -11413.530540977654,
+          "ECOILB": -19693.17344701402
+        },
+        "relative_residual": 0.3410519022243629,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0011300600629036753,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00d3a26e4f.parquet",
+        "time_ms": 1280.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.0189723799535982,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 64,
+        "recovered_currents_a": {
+          "E567DN": -7385.0537091870465,
+          "E567UP": -4645.298050382653,
+          "E89DN": -11924.899384259428,
+          "E89UP": -11877.407718659191,
+          "ECOILB": -19629.61744649684
+        },
+        "relative_residual": 0.3728376153540677,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0014267825941704636,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00d3a26e4f.parquet",
+        "time_ms": 1920.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.01683163535851202,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 96,
+        "recovered_currents_a": {
+          "E567DN": -7477.940312796366,
+          "E567UP": -8436.246042694069,
+          "E89DN": -14260.864899091936,
+          "E89UP": -12977.151544489885,
+          "ECOILB": -23065.095641061125
+        },
+        "relative_residual": 0.36552107819807333,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0014473475036679883,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00d3a26e4f.parquet",
+        "time_ms": 2560.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.015010997933484066,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 127,
+        "recovered_currents_a": {
+          "E567DN": -7898.759014816532,
+          "E567UP": -9441.73291201289,
+          "E89DN": -15718.110345287696,
+          "E89UP": -14366.838781793622,
+          "ECOILB": -25788.15443975571
+        },
+        "relative_residual": 0.33221027682460663,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0014486055822881254,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00d3a26e4f.parquet",
+        "time_ms": 3180.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.015909151348904273,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 159,
+        "recovered_currents_a": {
+          "E567DN": -11344.869863118396,
+          "E567UP": -11676.981945902347,
+          "E89DN": -17296.986145520787,
+          "E89UP": -16052.498138762268,
+          "ECOILB": -29286.66603512239
+        },
+        "relative_residual": 0.25544980312365334,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0013073695470080578,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00d3a26e4f.parquet",
+        "time_ms": 3820.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.019662906860981183,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 191,
+        "recovered_currents_a": {
+          "E567DN": -13278.970160890503,
+          "E567UP": -14072.305786163433,
+          "E89DN": -19714.830904487048,
+          "E89UP": -18924.281960357534,
+          "ECOILB": -34065.50871811665
+        },
+        "relative_residual": 0.2409711494848633,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0014306506712635783,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00d3a26e4f.parquet",
+        "time_ms": 4460.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.012171229434839472,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 223,
+        "recovered_currents_a": {
+          "E567DN": -17354.94690344858,
+          "E567UP": -13604.91132352512,
+          "E89DN": -19077.528572052255,
+          "E89UP": -19521.64645244999,
+          "ECOILB": -34524.6643503864
+        },
+        "relative_residual": 0.14112840031449256,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0009665044305935692,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00d3a26e4f.parquet",
+        "time_ms": 5100.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.016645102732386303,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 0,
+        "recovered_currents_a": {
+          "E567DN": 24352.676399582328,
+          "E567UP": 29158.627718783653,
+          "E89DN": 26415.384010343,
+          "E89UP": 21126.72805854525,
+          "ECOILB": 48649.71496184122
+        },
+        "relative_residual": 0.15733167444031607,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0019308663407937967,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00ee8a5ce0.parquet",
+        "time_ms": 180.0
+      },
+      {
+        "additive_gauge_wb_per_radian": 0.00077526831453154,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 17,
+        "recovered_currents_a": {
+          "E567DN": 21277.123912232844,
+          "E567UP": 21975.809044256763,
+          "E89DN": 16263.89242756945,
+          "E89UP": 15516.743355647752,
+          "ECOILB": 33518.925968602445
+        },
+        "relative_residual": 0.14814541317311875,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.001567587058116137,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00ee8a5ce0.parquet",
+        "time_ms": 520.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.005895180522941754,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 34,
+        "recovered_currents_a": {
+          "E567DN": 4757.745191958374,
+          "E567UP": 7312.205804337012,
+          "E89DN": 1351.2310350652604,
+          "E89UP": -1064.0505609213358,
+          "ECOILB": 1923.3763723329387
+        },
+        "relative_residual": 0.4343441404123404,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0023280361370382357,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00ee8a5ce0.parquet",
+        "time_ms": 1000.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.00717525932924939,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 51,
+        "recovered_currents_a": {
+          "E567DN": -5044.434885523722,
+          "E567UP": -3948.576897314213,
+          "E89DN": -11455.089449047204,
+          "E89UP": -12335.743420388533,
+          "ECOILB": -19164.59923824713
+        },
+        "relative_residual": 0.5264064010768049,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0021250494358235165,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00ee8a5ce0.parquet",
+        "time_ms": 1340.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.007991924601005836,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 69,
+        "recovered_currents_a": {
+          "E567DN": -14072.634333775412,
+          "E567UP": -15835.54171402985,
+          "E89DN": -23764.802309471725,
+          "E89UP": -23136.58993488913,
+          "ECOILB": -41749.96287954868
+        },
+        "relative_residual": 0.34525294375243565,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.002488671901850704,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00ee8a5ce0.parquet",
+        "time_ms": 1700.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.012605764145075655,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 86,
+        "recovered_currents_a": {
+          "E567DN": -17657.278716323202,
+          "E567UP": -18203.41474958154,
+          "E89DN": -27690.58996047964,
+          "E89UP": -28988.047947143845,
+          "ECOILB": -49727.888237106
+        },
+        "relative_residual": 0.326820330194309,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.002785110230946953,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00ee8a5ce0.parquet",
+        "time_ms": 2040.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.016525176791041197,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 103,
+        "recovered_currents_a": {
+          "E567DN": -23058.07313406018,
+          "E567UP": -24735.693286880938,
+          "E89DN": -31301.183729603665,
+          "E89UP": -32101.622751877476,
+          "ECOILB": -56844.12104228878
+        },
+        "relative_residual": 0.1970036742897962,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.002019823195047364,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00ee8a5ce0.parquet",
+        "time_ms": 2380.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.032745042047144096,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 120,
+        "recovered_currents_a": {
+          "E567DN": -33723.26343449988,
+          "E567UP": -35929.64538366676,
+          "E89DN": -35670.83601362496,
+          "E89UP": -32712.42263873398,
+          "ECOILB": -59284.29314338799
+        },
+        "relative_residual": 0.11399853442606742,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0018944610528766493,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00ee8a5ce0.parquet",
+        "time_ms": 2720.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.0061771716770791085,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 0,
+        "recovered_currents_a": {
+          "E567DN": 33267.43644038077,
+          "E567UP": 33740.10399124016,
+          "E89DN": 27649.96596277526,
+          "E89UP": 26529.71242206035,
+          "ECOILB": 56608.35238771565
+        },
+        "relative_residual": 0.09164782777864833,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0014278604184757384,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00f40d3919.parquet",
+        "time_ms": 320.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.011402845911585937,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 15,
+        "recovered_currents_a": {
+          "E567DN": 20245.517118818,
+          "E567UP": 19427.48433417732,
+          "E89DN": 12709.113032036874,
+          "E89UP": 13761.32466083199,
+          "ECOILB": 29924.704134086915
+        },
+        "relative_residual": 0.14754754701009698,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.00145231806421448,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00f40d3919.parquet",
+        "time_ms": 760.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.013907967969019087,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 31,
+        "recovered_currents_a": {
+          "E567DN": 12682.813294170666,
+          "E567UP": 12376.27539372681,
+          "E89DN": 3306.3553987380124,
+          "E89UP": 4907.05344303233,
+          "ECOILB": 13076.61538577969
+        },
+        "relative_residual": 0.24461675383173656,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0018575593253131442,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00f40d3919.parquet",
+        "time_ms": 1080.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.029541672835959303,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 46,
+        "recovered_currents_a": {
+          "E567DN": 3062.9725248264936,
+          "E567UP": 3788.6713878537425,
+          "E89DN": -3034.243987843467,
+          "E89UP": -3689.201375832993,
+          "ECOILB": -2650.515122688384
+        },
+        "relative_residual": 0.4874772484371768,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0020614446194332546,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00f40d3919.parquet",
+        "time_ms": 1380.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.02565067419124837,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 62,
+        "recovered_currents_a": {
+          "E567DN": 2661.0943744021297,
+          "E567UP": 1212.3765389384798,
+          "E89DN": -5504.614894449536,
+          "E89UP": -5382.444368935776,
+          "ECOILB": -5819.574439159093
+        },
+        "relative_residual": 0.48232792299804217,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0019133219474110096,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00f40d3919.parquet",
+        "time_ms": 1700.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.02273200261248294,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 77,
+        "recovered_currents_a": {
+          "E567DN": -185.30180717211243,
+          "E567UP": -716.4813063712024,
+          "E89DN": -7964.550679371543,
+          "E89UP": -6610.991801486707,
+          "ECOILB": -10149.992808694566
+        },
+        "relative_residual": 0.5346023603000163,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0019166108832410205,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00f40d3919.parquet",
+        "time_ms": 2000.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.013932013341843068,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 93,
+        "recovered_currents_a": {
+          "E567DN": -2373.906065516815,
+          "E567UP": -802.2099125755373,
+          "E89DN": -5747.282383330162,
+          "E89UP": -7535.876322069393,
+          "ECOILB": -9237.859785195455
+        },
+        "relative_residual": 0.4895001623956963,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0011209085511503767,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00f40d3919.parquet",
+        "time_ms": 2340.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.006756781317849726,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 108,
+        "recovered_currents_a": {
+          "E567DN": -506.7094436229033,
+          "E567UP": 4784.147553948954,
+          "E89DN": -1129.6884892370106,
+          "E89UP": -3773.439058416815,
+          "ECOILB": -2444.806639212577
+        },
+        "relative_residual": 0.42113220998617124,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0014247880508168327,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00f40d3919.parquet",
+        "time_ms": 2640.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.019603159431202735,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 0,
+        "recovered_currents_a": {
+          "E567DN": 32049.28411787967,
+          "E567UP": 35998.97863647232,
+          "E89DN": 36515.036684463186,
+          "E89UP": 31265.43003990662,
+          "ECOILB": 66885.49424595623
+        },
+        "relative_residual": 0.06878805351283271,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.001026606373594651,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00f71cf526.parquet",
+        "time_ms": 180.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.002331013581791383,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 35,
+        "recovered_currents_a": {
+          "E567DN": 35918.52115332429,
+          "E567UP": 37609.20517118823,
+          "E89DN": 33245.11660532303,
+          "E89UP": 32084.562413015028,
+          "ECOILB": 66291.73323730129
+        },
+        "relative_residual": 0.06353191108699033,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.001048932389223571,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00f71cf526.parquet",
+        "time_ms": 940.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.005664315332636261,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 69,
+        "recovered_currents_a": {
+          "E567DN": 36608.70133736932,
+          "E567UP": 38115.59651167849,
+          "E89DN": 31487.339556420466,
+          "E89UP": 29530.49594736336,
+          "ECOILB": 63358.50805734817
+        },
+        "relative_residual": 0.08728039430816206,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0015130917679285775,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00f71cf526.parquet",
+        "time_ms": 1660.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.012891149816466135,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 104,
+        "recovered_currents_a": {
+          "E567DN": 32203.39417554056,
+          "E567UP": 34443.93157059279,
+          "E89DN": 29074.13418582958,
+          "E89UP": 27031.036076158503,
+          "ECOILB": 57729.47322499471
+        },
+        "relative_residual": 0.09756305344889026,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0014936391764374091,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00f71cf526.parquet",
+        "time_ms": 2360.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.01047928718795166,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 138,
+        "recovered_currents_a": {
+          "E567DN": 31741.58693451157,
+          "E567UP": 33346.72139801945,
+          "E89DN": 29145.609736299728,
+          "E89UP": 27454.747545123602,
+          "ECOILB": 57889.649689152786
+        },
+        "relative_residual": 0.07273494381159992,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0010716022466281915,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00f71cf526.parquet",
+        "time_ms": 3160.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.019450574533300177,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 173,
+        "recovered_currents_a": {
+          "E567DN": 29332.92890927817,
+          "E567UP": 30647.006059603693,
+          "E89DN": 26397.31554590971,
+          "E89UP": 24779.625598510032,
+          "ECOILB": 51789.31662314535
+        },
+        "relative_residual": 0.10182135009382759,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0014056096760943395,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00f71cf526.parquet",
+        "time_ms": 4480.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.012833051749588743,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 207,
+        "recovered_currents_a": {
+          "E567DN": 29435.967553633393,
+          "E567UP": 27718.848232608623,
+          "E89DN": 22657.225200325625,
+          "E89UP": 22322.856101295107,
+          "ECOILB": 46434.28564338151
+        },
+        "relative_residual": 0.11494351882919278,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0015689603543976665,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00f71cf526.parquet",
+        "time_ms": 5440.0
+      },
+      {
+        "additive_gauge_wb_per_radian": -0.007194702635225968,
+        "design_condition_number": 10.828176489031886,
+        "design_rank": 5,
+        "frame": 242,
+        "recovered_currents_a": {
+          "E567DN": 19696.26090991249,
+          "E567UP": 23209.745262765886,
+          "E89DN": 20610.0649289539,
+          "E89UP": 17034.78017121742,
+          "ECOILB": 37579.78832318276
+        },
+        "relative_residual": 0.07003281607172672,
+        "reliable_profile_surfaces": 19,
+        "residual_rms_wb_per_radian": 0.0006899404631615565,
+        "screened_out_of_affected_polarity_population": true,
+        "shot": "d3d_shot_00f71cf526.parquet",
+        "time_ms": 6160.0
+      }
+    ],
+    "relative_residual": {
+      "maximum": 0.6910511052662093,
+      "median": 0.2303619979945042,
+      "minimum": 0.03513679485754997
+    },
+    "shot_count": 25,
+    "shot_names": [
+      "d3d_shot_00000c4a7b.parquet",
+      "d3d_shot_0003ff34e7.parquet",
+      "d3d_shot_0011c2afc9.parquet",
+      "d3d_shot_001270afa9.parquet",
+      "d3d_shot_001554e054.parquet",
+      "d3d_shot_001cbcc9e6.parquet",
+      "d3d_shot_002495e835.parquet",
+      "d3d_shot_0040a29bad.parquet",
+      "d3d_shot_0040ca9bdc.parquet",
+      "d3d_shot_004f4e5bed.parquet",
+      "d3d_shot_0065291fe9.parquet",
+      "d3d_shot_006a097379.parquet",
+      "d3d_shot_0073c37714.parquet",
+      "d3d_shot_0079897d3b.parquet",
+      "d3d_shot_008b4474ec.parquet",
+      "d3d_shot_0092a9ade0.parquet",
+      "d3d_shot_0093deb434.parquet",
+      "d3d_shot_00a4b7af57.parquet",
+      "d3d_shot_00a6212403.parquet",
+      "d3d_shot_00b8fe1f50.parquet",
+      "d3d_shot_00bb25ac45.parquet",
+      "d3d_shot_00d3a26e4f.parquet",
+      "d3d_shot_00ee8a5ce0.parquet",
+      "d3d_shot_00f40d3919.parquet",
+      "d3d_shot_00f71cf526.parquet"
+    ]
+  },
+  "root_existence": {
+    "comparison_is_separate_from_held_out_prediction": true,
+    "direct_recovered_currents_used": true,
+    "fractional_rms_change": 0.12827716133119083,
+    "frame_count": 5,
+    "frames": [
+      {
+        "frame": 29,
+        "in_landed_affected_polarity_population": true,
+        "original_fractional_rms": 0.3936039751610567,
+        "recovered_current_fractional_rms": 0.3976609355997548,
+        "recovered_currents_a": {
+          "E567DN": -354314.48400994943,
+          "E567UP": -410352.20185091754,
+          "E89DN": 238795.3695670633,
+          "E89UP": 345080.68255104177,
+          "ECOILB": 127200.47183820746
+        },
+        "recovery_relative_residual": 0.45153311350145775,
+        "shot": "d3d_shot_00000a10ac.parquet"
+      },
+      {
+        "frame": 179,
+        "in_landed_affected_polarity_population": false,
+        "original_fractional_rms": 0.18955135446740703,
+        "recovered_current_fractional_rms": 0.3370307925210548,
+        "recovered_currents_a": {
+          "E567DN": -39258.64019672187,
+          "E567UP": -40150.154006218254,
+          "E89DN": -43845.82919982462,
+          "E89UP": -43532.970419679135,
+          "ECOILB": -82754.80445034818
+        },
+        "recovery_relative_residual": 0.0806765759114996,
+        "shot": "d3d_shot_00000c4a7b.parquet"
+      },
+      {
+        "frame": 44,
+        "in_landed_affected_polarity_population": false,
+        "original_fractional_rms": 0.2156505171295768,
+        "recovered_current_fractional_rms": 0.38251081444175217,
+        "recovered_currents_a": {
+          "E567DN": -10816.691219792032,
+          "E567UP": -10470.566617243976,
+          "E89DN": -14474.614192124483,
+          "E89UP": -16153.31509153354,
+          "ECOILB": -26909.628354836885
+        },
+        "recovery_relative_residual": 0.31405905109323506,
+        "shot": "d3d_shot_0003ff34e7.parquet"
+      },
+      {
+        "frame": 36,
+        "in_landed_affected_polarity_population": false,
+        "original_fractional_rms": 0.5126656275170867,
+        "recovered_current_fractional_rms": 0.3439276784311908,
+        "recovered_currents_a": {
+          "E567DN": 14696.491880780262,
+          "E567UP": 14621.981060532713,
+          "E89DN": 7456.365693781341,
+          "E89UP": 8343.056827504819,
+          "ECOILB": 19055.613782536013
+        },
+        "recovery_relative_residual": 0.2078193477146615,
+        "shot": "d3d_shot_0011c2afc9.parquet"
+      },
+      {
+        "frame": 125,
+        "in_landed_affected_polarity_population": false,
+        "original_fractional_rms": 0.11522631142375936,
+        "recovered_current_fractional_rms": 0.2832915063571959,
+        "recovered_currents_a": {
+          "E567DN": -14771.449235901531,
+          "E567UP": -12796.273766217937,
+          "E89DN": -16910.093975263866,
+          "E89UP": -18313.97057294136,
+          "ECOILB": -31809.608802401766
+        },
+        "recovery_relative_residual": 0.13631115861065438,
+        "shot": "d3d_shot_001270afa9.parquet"
+      }
+    ],
+    "landed_baseline_fractional_rms": 0.2156505171,
+    "landed_vacuum_share": 0.8498610048,
+    "polarity_qualification": "the fixed historical cohort contains one affected shot; it is retained only to preserve the landed baseline comparison and is excluded from the 200-frame recovery and predictive cohort",
+    "recomputed_original_delta_from_landed": 2.9576813220799636e-11,
+    "recomputed_original_median_fractional_rms": 0.2156505171295768,
+    "recovered_current_median_fractional_rms": 0.3439276784311908,
+    "relative_reduction": -0.5948381810357868
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "prediction": {
+    "features": [
+      "magnetics_F1A",
+      "magnetics_F2A",
+      "magnetics_F3A",
+      "magnetics_F4A",
+      "magnetics_F5A",
+      "magnetics_F6A",
+      "magnetics_F7A",
+      "magnetics_F8A",
+      "magnetics_F9A",
+      "magnetics_F1B",
+      "magnetics_F2B",
+      "magnetics_F3B",
+      "magnetics_F4B",
+      "magnetics_F5B",
+      "magnetics_F6B",
+      "magnetics_F7B",
+      "magnetics_F8B",
+      "magnetics_F9B",
+      "magnetics_ECOILA",
+      "magnetics_bcoil"
+    ],
+    "held_out_shots": 5,
+    "method": "ordinary least squares with intercept and no regularisation",
+    "split": "first twenty selected shots train; final five held out",
+    "split_unit": "shot",
+    "train_shots": 20
+  },
+  "recovery": {
+    "current_adjustments": 0,
+    "geometry": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+    "method": "ordinary least squares on centred grid-border flux; columns are scaled only for conditioning and one additive flux gauge is removed",
+    "regularisation": null,
+    "targets": [
+      "ECOILB",
+      "E567UP",
+      "E567DN",
+      "E89UP",
+      "E89DN"
+    ]
+  },
+  "root_existence_comparison": {
+    "frames": 5,
+    "landed_free_boundary_fractional_rms": 0.2156505171,
+    "landed_vacuum_share": 0.8498610048,
+    "separate_from_predictive_scoring": true,
+    "uses_directly_recovered_currents": true
+  },
+  "selection": {
+    "frames_per_shot": 8,
+    "polarity_screen": "shot absent from the landed 603-shot population",
+    "rule": "first lexicographic shots outside the landed affected-shot set with at least eight finite diverted frames; eight evenly spaced eligible frame indices per shot",
+    "shots": 25,
+    "total_frames": 200
+  }
+}

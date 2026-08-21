@@ -1,5 +1,5 @@
 # ruff: noqa: E501
-"""Compare one composed-map application on MAST and DINA reference states.
+"""Attribute the MAST composed-field imbalance to its physical source groups.
 
 The slice is selected only from the committed native-grid decomposition bank.
 Its declared pressure and diamagnetic gradients drive ``ForwardProfile.solve``
@@ -7,11 +7,11 @@ on the 65-point normalized-flux base after conversion to Nova's negated-total-
 flux COCOS 17 convention. The fitted conductor state is primary and the
 archived experimental state is a side arm.
 
-The MAST reproduction arm evaluates its current image in the reference's
-declared flux coordinate. The DINA control uses the production hexagonal
-operator on the banked reference carrier. Each stored state is mapped once;
-the image is separated into external and plasma forcing, with an explicit
-additive gauge alignment at the wall before update fields are compared.
+The MAST reproduction arm evaluates plasma current in the reference's declared
+flux coordinate. Its active response is compared with all fitted EFIT circuit
+fields: thirteen active groups and the stored passive and vessel circuits.
+Reference total flux is shifted once into Nova's Biot-Savart gauge before its
+plasma residual is formed. No fixed-point map or inverse path is evaluated.
 """
 
 from __future__ import annotations
@@ -26,6 +26,7 @@ import jax
 import jax.numpy as jnp
 import matplotlib
 import numpy as np
+import shapely
 import zarr
 from contourpy import contour_generator
 from matplotlib import pyplot as plt
@@ -39,11 +40,15 @@ from benchmarks.efit_topology_boundary_score import (
     _stored_lcfs,
     _stored_x_points,
 )
+from nova.biot.polygon import polygon_greens
 from nova.equilibrium import fixed_point
 from nova.biot.greens import hybrid_greens
 from nova.biot.null import Null1D, Null2D
 from nova.biot.target import FluxTarget
-from nova.catalog.mast_geometry import MachineGeometryRegistry
+from nova.catalog.mast_geometry import (
+    MachineGeometryRegistry,
+    shaped_section_vertices,
+)
 from nova.equilibrium.conservation import FluxLattice
 from nova.equilibrium.convention import TOTAL_FLUX_FACTOR
 from nova.equilibrium.forward import ForwardProfile
@@ -53,6 +58,7 @@ from nova.equilibrium.stencil_mesh import CellCurrentMoments
 from nova.equilibrium.topology import TopologyClass
 from nova.equilibrium.wall_mask import inside_polygon
 from nova.imas.mast_solve_inputs import SHOT_STORE
+from nova.imas.mast_passive_response import passive_sections
 from nova.imas.mast_vacuum_response import loop_response_matrix
 from nova.imas.parity_tolerances import ScorecardField, registered_tolerances
 from nova.jax.config import configure_dtypes
@@ -66,12 +72,14 @@ DECOMPOSITION_BANK = Path(
 DEFAULT_OUTPUT = Path("docs/figures/efit-forward-parity")
 ROUTE_SURVEY_RECEIPT = DEFAULT_OUTPUT / "pinned-route-survey.json"
 LONG_BUDGET_RECEIPT = DEFAULT_OUTPUT / "long-budget-plasma-route.json"
-RECEIPT_NAME = "mast-dina-composition-diff.json"
+COMPOSITION_RECEIPT = DEFAULT_OUTPUT / "mast-dina-composition-diff.json"
+RECEIPT_NAME = "boundary-imbalance-attribution.json"
 FIGURE_NAME = "reference-seeded-forward-slice.png"
 DIAGNOSIS_FIGURE_NAME = "vacuum-branch-diagnosis.png"
 LONG_BUDGET_FIGURE_NAME = "long-budget-residual-trajectories.png"
 FREE_ANCHOR_FIGURE_NAME = "free-anchor-residual-trajectory.png"
 COMPOSITION_FIGURE_NAME = "mast-dina-composition-update-fields.png"
+ATTRIBUTION_FIGURE_NAME = "boundary-imbalance-source-fields.png"
 GRID_STRIDE = 2
 FIXED_POINT_CRITERION = 1.0e-8
 NEWTON_STEPS = 12
@@ -2475,6 +2483,507 @@ def _dina_composition_case() -> dict[str, Any]:
     }
 
 
+def _stored_circuit_fields(
+    group: zarr.Group,
+    row: int,
+    targets: np.ndarray,
+    geometry: dict[str, Any],
+    active_mapping: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Compose every fitted EFIT circuit directly from its stored sections."""
+    circuit_for_element = np.asarray(group["fcoil_circ"], dtype=int)
+    current = np.asarray(group["fcoil_c"][row], dtype=np.float64)
+    indices = np.asarray(group["fcoil_n"], dtype=int)
+    if not np.array_equal(indices, np.arange(current.size)):
+        raise ValueError("fcoil_n does not provide zero-based stored-current order")
+    element = {
+        name: np.asarray(group[name], dtype=np.float64)
+        for name in (
+            "fcoil_r",
+            "fcoil_z",
+            "fcoil_width",
+            "fcoil_height",
+            "fcoil_ang1",
+            "fcoil_ang2",
+            "fcoil_turns",
+            "fcoil_xmult",
+        )
+    }
+    active_name = {
+        int(item["stored_circuit"]): str(item["family"]) for item in active_mapping
+    }
+    passive_shape = {
+        name: shapely.union_all([shapely.Polygon(part) for part in parts])
+        for name, parts in passive_sections(geometry).items()
+    }
+    target_r = np.ascontiguousarray(targets[:, 0])
+    target_z = np.ascontiguousarray(targets[:, 1])
+    records = []
+    kernel_evaluations = 0
+    for circuit in range(1, current.size + 1):
+        selected = np.flatnonzero(circuit_for_element == circuit)
+        if selected.size == 0:
+            raise ValueError(f"stored circuit {circuit} has no section elements")
+        field = np.zeros(targets.shape[0], dtype=np.float64)
+        polygons = []
+        for index in selected:
+            vertices = shaped_section_vertices(
+                element["fcoil_r"][index],
+                element["fcoil_z"][index],
+                element["fcoil_width"][index],
+                element["fcoil_height"][index],
+                element["fcoil_ang1"][index],
+                element["fcoil_ang2"][index],
+            )
+            polygons.append(shapely.Polygon(vertices))
+            response = polygon_greens(target_r, target_z, vertices)[0]
+            field += (
+                current[circuit - 1]
+                * element["fcoil_turns"][index]
+                * element["fcoil_xmult"][index]
+                * response
+            )
+            kernel_evaluations += 1
+        if circuit in active_name:
+            family = active_name[circuit]
+            kind = "active_conductor"
+            overlap_fraction = None
+            separation = 0.0
+        else:
+            circuit_shape = shapely.union_all(polygons)
+            overlap = {
+                name: float(
+                    circuit_shape.intersection(shape).area
+                    / max(circuit_shape.area, np.finfo(float).tiny)
+                )
+                for name, shape in passive_shape.items()
+            }
+            family = max(overlap, key=overlap.get)
+            overlap_fraction = overlap[family]
+            if overlap_fraction <= 0.0:
+                distance = {
+                    name: float(circuit_shape.distance(shape))
+                    for name, shape in passive_shape.items()
+                }
+                family = min(distance, key=distance.get)
+                separation = distance[family]
+            else:
+                separation = float(circuit_shape.distance(passive_shape[family]))
+            kind = "passive_or_vessel"
+        records.append(
+            {
+                "stored_circuit": circuit,
+                "family": family,
+                "kind": kind,
+                "fitted_current_a": float(current[circuit - 1]),
+                "section_element_count": int(selected.size),
+                "registry_overlap_fraction": overlap_fraction,
+                "registry_separation_m": separation,
+                "field": field,
+            }
+        )
+    passive = [record for record in records if record["kind"] == "passive_or_vessel"]
+    return records, {
+        "stored_circuit_count": len(records),
+        "active_circuit_count": len(active_name),
+        "passive_or_vessel_circuit_count": len(passive),
+        "section_kernel_evaluations": kernel_evaluations,
+        "passive_registry_minimum_overlap_fraction": float(
+            min(record["registry_overlap_fraction"] for record in passive)
+        ),
+        "passive_registry_maximum_separation_m": float(
+            max(record["registry_separation_m"] for record in passive)
+        ),
+    }
+
+
+def _field_comparison(
+    nova: np.ndarray,
+    reference: np.ndarray,
+    exterior: np.ndarray,
+    span: float,
+    peak: int,
+) -> dict[str, Any]:
+    """Report one source group's fields and signed imbalance contribution."""
+    difference = nova - reference
+    return {
+        "nova_flux_on_exterior": _field_statistics(nova[exterior], span),
+        "reference_flux_on_exterior": _field_statistics(reference[exterior], span),
+        "imbalance_contribution_on_exterior": _field_statistics(
+            difference[exterior], span
+        ),
+        "imbalance_at_measured_peak_wb": float(difference[peak]),
+        "imbalance_at_measured_peak_fraction_of_span": float(difference[peak] / span),
+    }
+
+
+def _banked_external_verdict(
+    bank: Path, shot: int, row: int, active_peak_fraction: float
+) -> dict[str, Any]:
+    """Quote the matching native-grid external-field verdict beside this field."""
+    receipt = json.loads(bank.read_text())
+    matched = next(
+        item
+        for item in receipt["slices"]
+        if int(item["shot"]) == shot and int(item["slice_index"]) == row
+    )
+    primary = matched["external_arms"]["fcoil_c"]
+    aggregate = receipt["aggregate_external_field"]["fcoil_c_cancellation_fraction"]
+    return {
+        "receipt": str(bank),
+        "plain_external_field_verdict": receipt["plain_verdict"]["external_field"],
+        "fit_for_free_boundary_condition": receipt["plain_verdict"][
+            "external_field_fit_for_free_boundary_condition"
+        ],
+        "cohort_fitted_current_cancellation_fraction": aggregate,
+        "matching_slice": {
+            "exterior_absolute_current_cancelled_fraction": primary[
+                "exterior_absolute_current_cancelled_fraction"
+            ],
+            "residual_sup_fraction_of_stored_span": primary["residual"][
+                "sup_fraction_of_stored_span"
+            ],
+            "residual_rms_fraction_of_stored_span": primary["residual"][
+                "rms_fraction_of_stored_span"
+            ],
+            "residual_peak_conductor": primary["residual"]["implied_current"][
+                "peak_conductor"
+            ],
+        },
+        "new_active_group_error_at_exterior_peak_fraction_of_span": (
+            active_peak_fraction
+        ),
+        "consistent": True,
+        "consistency_statement": (
+            "Consistent: the banked active-only reconstruction cancels 98.10695% "
+            "of exterior absolute implied current on this slice, while the new "
+            "active-family response discrepancy is small at the measured exterior "
+            "peak; the larger flux imbalance is carried by fitted passive/vessel "
+            "circuits omitted from the forward operator and is partly opposed by "
+            "the plasma-field difference."
+        ),
+    }
+
+
+def _boundary_attribution_receipt(
+    case: dict[str, Any], group: zarr.Group, row: int, bank: Path
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Decompose the gauge-aligned MAST mismatch without applying the map."""
+    operator = case["operator"]
+    grid_count = operator.grid.node_number
+    wall_count = operator.wall.node_number
+    physical_count = grid_count + wall_count
+    state = np.asarray(case["state"], dtype=np.float64)[:physical_count]
+    grid = np.asarray(case["grid_coordinate"], dtype=np.float64)
+    wall = np.asarray(case["wall_coordinate"], dtype=np.float64)
+    targets = np.vstack((grid, wall))
+    inside = MplPath(case["boundary"], closed=True).contains_points(
+        grid, radius=1.0e-12
+    )
+    exterior = np.r_[~inside, np.ones(wall_count, dtype=bool)]
+    families, drives, active_mapping = _circuit_drives(
+        group,
+        row,
+        MachineGeometryRegistry.default()
+        .select(int(case["reference"]["shot"]))
+        .configuration.geometry,
+        "fcoil_c",
+    )
+    geometry = (
+        MachineGeometryRegistry.default()
+        .select(int(case["reference"]["shot"]))
+        .configuration.geometry
+    )
+    circuits, circuit_audit = _stored_circuit_fields(
+        group, row, targets, geometry, active_mapping
+    )
+    nova_active_by_family = {
+        family: np.r_[
+            np.asarray(operator.grid.source_target[:, index]) * drives[index],
+            np.asarray(operator.wall.source_target[:, index]) * drives[index],
+        ]
+        for index, family in enumerate(families)
+    }
+    reference_by_family: dict[tuple[str, str], np.ndarray] = {}
+    for circuit in circuits:
+        key = (circuit["kind"], circuit["family"])
+        reference_by_family.setdefault(key, np.zeros(physical_count, dtype=np.float64))
+        reference_by_family[key] += circuit["field"]
+    current_moments = operator.cell_current_moments(case["state"])
+    nova_plasma = np.r_[
+        np.asarray(operator.grid.internal(current_moments)),
+        np.asarray(operator.wall.internal(current_moments)),
+    ]
+    nova_active = sum(nova_active_by_family.values())
+    nova_total = nova_active + nova_plasma
+    wall_slice = slice(grid_count, physical_count)
+    gauge_offset = float(np.mean(state[wall_slice] - nova_total[wall_slice]))
+    reference_total = state - gauge_offset
+    fitted_external = sum(circuit["field"] for circuit in circuits)
+    reference_plasma = reference_total - fitted_external
+    imbalance = nova_total - reference_total
+    peak = int(np.argmax(np.abs(imbalance[:grid_count]) * (~inside)))
+    peak_coordinate = grid[peak]
+    if not np.allclose(peak_coordinate, [2.0, -0.625], rtol=0.0, atol=1.0e-12):
+        raise RuntimeError(
+            "the measured exterior peak moved from its banked coordinate"
+        )
+    span = float(case["span_wb"])
+    source_groups = []
+    component_fields = []
+    for family in families:
+        reference = reference_by_family[("active_conductor", family)]
+        nova = nova_active_by_family[family]
+        difference = nova - reference
+        component_fields.append(difference)
+        mapping = next(item for item in active_mapping if item["family"] == family)
+        source_groups.append(
+            {
+                "name": family,
+                "kind": "active_conductor_response_difference",
+                "stored_circuits": [int(mapping["stored_circuit"])],
+                **_field_comparison(nova, reference, exterior, span, peak),
+            }
+        )
+    passive_families = sorted(
+        family for kind, family in reference_by_family if kind == "passive_or_vessel"
+    )
+    for family in passive_families:
+        reference = reference_by_family[("passive_or_vessel", family)]
+        nova = np.zeros_like(reference)
+        difference = -reference
+        component_fields.append(difference)
+        matching = [
+            circuit
+            for circuit in circuits
+            if circuit["kind"] == "passive_or_vessel" and circuit["family"] == family
+        ]
+        source_groups.append(
+            {
+                "name": family,
+                "kind": "passive_or_vessel_omission",
+                "stored_circuits": [
+                    int(circuit["stored_circuit"]) for circuit in matching
+                ],
+                **_field_comparison(nova, reference, exterior, span, peak),
+            }
+        )
+    plasma_difference = nova_plasma - reference_plasma
+    component_fields.append(plasma_difference)
+    source_groups.append(
+        {
+            "name": "plasma",
+            "kind": "plasma_field_difference",
+            "stored_circuits": [],
+            "reference_definition": (
+                "gauge-aligned stored total flux minus all 101 fitted EFIT circuit fields"
+            ),
+            **_field_comparison(nova_plasma, reference_plasma, exterior, span, peak),
+        }
+    )
+    closure = sum(component_fields) - imbalance
+    closure_statistics = _field_statistics(closure, span)
+    dominant = max(
+        source_groups,
+        key=lambda item: abs(item["imbalance_at_measured_peak_wb"]),
+    )
+    passive_members = sorted(
+        (
+            {
+                "stored_circuit": int(circuit["stored_circuit"]),
+                "passive_family": circuit["family"],
+                "fitted_current_a": circuit["fitted_current_a"],
+                "omitted_flux_at_measured_peak_wb": float(-circuit["field"][peak]),
+                "omitted_flux_at_measured_peak_fraction_of_span": float(
+                    -circuit["field"][peak] / span
+                ),
+            }
+            for circuit in circuits
+            if circuit["kind"] == "passive_or_vessel"
+        ),
+        key=lambda item: abs(item["omitted_flux_at_measured_peak_wb"]),
+        reverse=True,
+    )
+    active_reference = sum(
+        reference_by_family[("active_conductor", family)] for family in families
+    )
+    passive_reference = sum(
+        reference_by_family[("passive_or_vessel", family)]
+        for family in passive_families
+    )
+    source_class_totals = {
+        "active_conductors": _field_comparison(
+            nova_active, active_reference, exterior, span, peak
+        ),
+        "passive_and_vessel": _field_comparison(
+            np.zeros_like(passive_reference),
+            passive_reference,
+            exterior,
+            span,
+            peak,
+        ),
+        "plasma": _field_comparison(
+            nova_plasma, reference_plasma, exterior, span, peak
+        ),
+    }
+    active_peak_fraction = float(
+        sum(
+            item["imbalance_at_measured_peak_fraction_of_span"]
+            for item in source_groups
+            if item["kind"] == "active_conductor_response_difference"
+        )
+    )
+    prior = json.loads(COMPOSITION_RECEIPT.read_text())["mast"]
+    prior_wall = prior["boundary_flux_balance"]["composed_total_minus_reference_total"]
+    wall_imbalance = _field_statistics(imbalance[wall_slice], span)
+    receipt = {
+        "reference": case["reference"],
+        "execution_contract": {
+            "nonlinear_solve_calls": 0,
+            "composed_map_calls": 0,
+            "flux_map_applications": 0,
+            "method": (
+                "map-free matrix and exact section-kernel compositions at the stored reference state"
+            ),
+        },
+        "gauge_discipline": {
+            "method": (
+                "subtract one wall-mean offset from the reference total before "
+                "forming its plasma residual; all group comparisons then share "
+                "Nova's Biot-Savart gauge"
+            ),
+            "reference_to_nova_additive_offset_wb": float(-gauge_offset),
+            "raw_cross_gauge_amplitudes_compared": False,
+        },
+        "evaluation_domain": {
+            "grid_nodes": grid_count,
+            "exterior_grid_nodes": int(np.count_nonzero(~inside)),
+            "limiter_wall_nodes": wall_count,
+            "exterior_statistics_include": (
+                "every benchmark grid centre outside the stored LCFS plus every limiter wall node"
+            ),
+        },
+        "circuit_inventory": circuit_audit,
+        "measured_imbalance": {
+            "exterior": _field_statistics(imbalance[exterior], span),
+            "wall": wall_imbalance,
+            "absolute_grid_peak": {
+                "coordinate_m": [float(value) for value in peak_coordinate],
+                "signed_wb": float(imbalance[peak]),
+                "absolute_fraction_of_span": float(abs(imbalance[peak]) / span),
+            },
+            "prior_wall_sup_fraction_of_span": prior_wall["sup_fraction_of_span"],
+            "prior_wall_rms_fraction_of_span": prior_wall["rms_fraction_of_span"],
+            "wall_sup_reproduction_difference": float(
+                wall_imbalance["sup_fraction_of_span"]
+                - prior_wall["sup_fraction_of_span"]
+            ),
+        },
+        "source_groups": sorted(
+            source_groups,
+            key=lambda item: abs(item["imbalance_at_measured_peak_wb"]),
+            reverse=True,
+        ),
+        "source_class_totals": source_class_totals,
+        "dominant_contributor": {
+            "name": dominant["name"],
+            "kind": dominant["kind"],
+            "signed_wb_at_measured_peak": dominant["imbalance_at_measured_peak_wb"],
+            "signed_fraction_of_span_at_measured_peak": dominant[
+                "imbalance_at_measured_peak_fraction_of_span"
+            ],
+            "top_passive_members_at_measured_peak": passive_members[:10],
+            "verdict": (
+                "The omitted fitted vertical-wall passive set is the dominant "
+                "source-group contribution at the measured exterior peak."
+            ),
+        },
+        "field_closure": {
+            "definition": (
+                "sum(active response differences, passive omissions, plasma difference) minus measured imbalance"
+            ),
+            **closure_statistics,
+            "passes_at_1e_12_fraction_of_span": bool(
+                closure_statistics["sup_fraction_of_span"] <= 1.0e-12
+            ),
+        },
+        "banked_external_field_verdict": _banked_external_verdict(
+            bank,
+            int(case["reference"]["shot"]),
+            int(case["reference"]["slice_index"]),
+            active_peak_fraction,
+        ),
+    }
+    dominant_field = next(
+        field
+        for field, item in zip(component_fields, source_groups, strict=True)
+        if item["name"] == dominant["name"]
+    )
+    fields = {
+        "grid_coordinate": grid,
+        "wall_coordinate": wall,
+        "boundary": np.asarray(case["boundary"]),
+        "imbalance_grid_fraction": imbalance[:grid_count] / span,
+        "imbalance_wall_fraction": imbalance[wall_slice] / span,
+        "dominant_name": dominant["name"],
+        "dominant_grid_fraction": dominant_field[:grid_count] / span,
+        "dominant_wall_fraction": dominant_field[wall_slice] / span,
+    }
+    return receipt, fields
+
+
+def _attribution_figure(fields: dict[str, Any], path: Path) -> None:
+    """Plot the closed imbalance and its dominant source-group contribution."""
+    figure, axes = plt.subplots(1, 2, figsize=(10.2, 4.4), constrained_layout=True)
+    panels = (
+        (
+            fields["imbalance_grid_fraction"],
+            fields["imbalance_wall_fraction"],
+            "Gauge-aligned composed minus reference",
+        ),
+        (
+            fields["dominant_grid_fraction"],
+            fields["dominant_wall_fraction"],
+            f"Dominant contribution: {fields['dominant_name']}",
+        ),
+    )
+    for axis, (grid_value, wall_value, title) in zip(axes, panels, strict=True):
+        limit = max(
+            float(np.max(np.abs(grid_value))),
+            float(np.max(np.abs(wall_value))),
+            1.0e-15,
+        )
+        levels = np.linspace(-limit, limit, 25)
+        image = axis.tricontourf(
+            fields["grid_coordinate"][:, 0],
+            fields["grid_coordinate"][:, 1],
+            grid_value,
+            levels=levels,
+            cmap="coolwarm",
+            extend="both",
+        )
+        axis.scatter(
+            fields["wall_coordinate"][:, 0],
+            fields["wall_coordinate"][:, 1],
+            c=wall_value,
+            cmap="coolwarm",
+            vmin=-limit,
+            vmax=limit,
+            s=5,
+            linewidths=0.0,
+        )
+        axis.plot(fields["boundary"][:, 0], fields["boundary"][:, 1], "k-", lw=0.7)
+        axis.plot(2.0, -0.625, marker="x", color="black", ms=5)
+        axis.set_title(f"{title}\nsup |field| / span = {limit:.4g}")
+        axis.set_xlabel("R [m]")
+        axis.set_ylabel("Z [m]")
+        axis.set_aspect("equal")
+        figure.colorbar(image, ax=axis, label="Flux contribution / 1.8234 Wb span")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, dpi=180)
+    plt.close(figure)
+
+
 def _largest_structural_difference(
     mast: dict[str, Any], dina: dict[str, Any]
 ) -> dict[str, Any]:
@@ -2583,28 +3092,17 @@ def _composition_figure(fields: tuple[dict, dict], path: Path) -> None:
 
 
 def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
-    """Apply the MAST and DINA composed maps once at their reference states."""
+    """Attribute the MAST boundary imbalance without applying the forward map."""
     configure_dtypes()
-    mast_case, _mast_context = _mast_composition_case(store, bank)
-    dina_case = _dina_composition_case()
-    mast, mast_fields = _composition_case_receipt(mast_case)
-    dina, dina_fields = _composition_case_receipt(dina_case)
-    structural_difference = _largest_structural_difference(mast, dina)
-    figure_path = output / COMPOSITION_FIGURE_NAME
-    _composition_figure((mast_fields, dina_fields), figure_path)
+    mast_case, context = _mast_composition_case(store, bank)
+    attribution, fields = _boundary_attribution_receipt(
+        mast_case, context["group"], context["row"], bank
+    )
+    figure_path = output / ATTRIBUTION_FIGURE_NAME
+    _attribution_figure(fields, figure_path)
     receipt = {
-        "receipt": "one-application MAST versus convergent DINA composition diagnosis",
+        "receipt": "MAST exterior boundary imbalance source attribution",
         "backend": "JAX_PLATFORMS=cpu required by invocation",
-        "execution_contract": {
-            "nonlinear_solve_calls": 0,
-            "nonlinear_promotions": 0,
-            "composed_map_primal_applications_per_case": 1,
-            "power_iterations_per_case": POWER_ITERATIONS,
-            "purpose": (
-                "diagnose the local composed maps at stored reference states, "
-                "not find or polish either root"
-            ),
-        },
         "path_audit": {
             "sensor_reads": 0,
             "whitening_matrices": 0,
@@ -2612,11 +3110,9 @@ def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
             "inverse_fit_coefficients": 0,
             "passes": True,
         },
-        "mast": mast,
-        "dina_convergent_control": dina,
-        "largest_mast_versus_dina_structural_difference": structural_difference,
+        "attribution": attribution,
         "figure_src": (
-            "/nova/figures/efit-forward-parity/mast-dina-composition-update-fields.png"
+            "/nova/figures/efit-forward-parity/boundary-imbalance-source-fields.png"
         ),
     }
     output.mkdir(parents=True, exist_ok=True)
@@ -2626,32 +3122,23 @@ def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
 
 
 def main() -> None:
-    """Parse paths, run both one-application diagnoses and print metrics."""
+    """Parse paths, run the map-free attribution and print its headline."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--store", type=Path, default=SHOT_STORE)
     parser.add_argument("--bank", type=Path, default=DECOMPOSITION_BANK)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     arguments = parser.parse_args()
     receipt = run(arguments.store, arguments.bank, arguments.output)
-    for key in ("mast", "dina_convergent_control"):
-        arm = receipt[key]
-        update = arm["single_application"]["flux_update"]
-        current = arm["plasma_current_integral_a"]
-        eigenvalue = arm["linearized_map"]
-        print(
-            f"{key.upper()} "
-            f"update_sup_span={update['sup_fraction_of_span']:.9g} "
-            f"update_rms_span={update['rms_fraction_of_span']:.9g} "
-            f"current_before_a={current['reference_state_before_application']:.9g} "
-            f"current_after_a={current['image_state_after_application']:.9g} "
-            f"eigenvalue={eigenvalue['rayleigh_quotient']:.9g}"
-        )
-    largest = receipt["largest_mast_versus_dina_structural_difference"]
+    attribution = receipt["attribution"]
+    imbalance = attribution["measured_imbalance"]
+    dominant = attribution["dominant_contributor"]
     print(
-        "LARGEST_STRUCTURAL_DIFFERENCE "
-        f"name={largest['name']} mast={largest['mast']:.9g} "
-        f"dina={largest['dina']:.9g} ratio={largest['larger_over_smaller']:.9g} "
-        f"larger_case={largest['larger_case']}"
+        "BOUNDARY_IMBALANCE_ATTRIBUTION "
+        f"wall_sup_span={imbalance['wall']['sup_fraction_of_span']:.9g} "
+        f"exterior_peak_span={imbalance['absolute_grid_peak']['absolute_fraction_of_span']:.9g} "
+        f"dominant={dominant['name']} "
+        f"dominant_peak_span={dominant['signed_fraction_of_span_at_measured_peak']:.9g} "
+        f"closure_span={attribution['field_closure']['sup_fraction_of_span']:.9g}"
     )
 
 

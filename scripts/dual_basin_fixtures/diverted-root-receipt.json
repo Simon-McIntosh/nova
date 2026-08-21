@@ -1,0 +1,75 @@
+{
+  "composition": {
+    "closure_absolute_residual_wb": 2.220446049250313e-16,
+    "external_field": {
+      "maximum_absolute_flux_wb": 2.00616700212044,
+      "reconstruction_difference_wb": 0.0,
+      "sha256": "153d2483d564d78c8ca9a29c93d928423ef35e976a7c9de22471c72c9481e3bc"
+    },
+    "normalization_anchor": {
+      "axis_distance_m": 0.0,
+      "axis_flux_difference_wb": 0.0,
+      "boundary_distance_m": 0.0,
+      "boundary_flux_difference_wb": 0.0,
+      "domain_label_difference_count": 0,
+      "pinned_axis_flux_wb": 0.018521343437036254,
+      "pinned_axis_m": [
+        1.7247913717735055,
+        -0.13017603734200348
+      ],
+      "pinned_boundary_flux_wb": -8.858812558313012e-07,
+      "pinned_boundary_m": [
+        1.1595012040533252,
+        -0.5031633611925055
+      ],
+      "unpinned_axis_flux_wb": 0.018521343437036254,
+      "unpinned_axis_m": [
+        1.7247913717735055,
+        -0.13017603734200348
+      ],
+      "unpinned_boundary_flux_wb": -8.858812558313012e-07,
+      "unpinned_boundary_m": [
+        1.1595012040533252,
+        -0.5031633611925055
+      ]
+    },
+    "source_forcing": {
+      "ff_prime_t2_m2_per_wb": -0.04052847345693511,
+      "maximum_absolute_flux_wb": 0.19718896011824405,
+      "p_prime_pa_per_wb": -16125.767218728875,
+      "repeat_difference_wb": 0.0,
+      "sha256": "fd228cf7d6433091071edea47049c48220ebfe44104f74759fa0d304230a461f"
+    }
+  },
+  "evidence": {
+    "carrier_cache_warm_hit": true,
+    "jax_backend": "cpu",
+    "jax_x64_enabled": true,
+    "verdict": "genuine_machine_precision_root"
+  },
+  "map": {
+    "absolute_residual_wb": 2.220446049250313e-16,
+    "achieved_class": 1,
+    "at_machine_precision_floor": true,
+    "converged": true,
+    "finite": true,
+    "iterations": 1,
+    "machine_precision_floor": 1e-14,
+    "mapped_flux_scale_wb": 1.963820512278293,
+    "operator": "ForwardFluxOperator",
+    "relative_residual": 1.130676676084975e-16,
+    "requested_class": 1,
+    "terminal_state_difference_wb": 2.220446049250313e-16,
+    "topology_consistent": true
+  },
+  "schema": "nova.forward-root-receipt",
+  "schema_version": 1,
+  "state": {
+    "dtype": "<f8",
+    "path": "scripts/dual_basin_fixtures/diverted-state.npz",
+    "sha256": "1e6e1043b84a7833adeb51916d3dca36c92d291a4a40dd924ce9b7cae87e7a8d",
+    "shape": [
+      4052
+    ]
+  }
+}

@@ -35,6 +35,10 @@ with skip_import("jax"):
         exact_state,
         forward_operator,
     )
+    from scripts.dual_basin_fixtures.qualify_diverted_root import (
+        ROOT_RECEIPT_PATH,
+        qualify,
+    )
 
 
 BANK = Path("scripts/oracle_rebaseline")
@@ -216,3 +220,30 @@ def test_cold_seed_receipts_keep_one_fixed_branch_axis_under_vmap():
         np.asarray(portfolios.branches.equilibrium.flux[1]),
         equal_nan=True,
     )
+
+
+@pytest.mark.slow
+def test_banked_diverted_state_is_a_machine_precision_pinned_root():
+    banked = json.loads(ROOT_RECEIPT_PATH.read_text(encoding="utf-8"))
+    measured = qualify(write=False)
+    assert measured == banked
+
+    state = measured["state"]
+    mapped = measured["map"]
+    composition = measured["composition"]
+    assert state["sha256"] == DIVERTED_STATE_DIGEST
+    assert mapped["requested_class"] == int(TopologyClass.DIVERTED)
+    assert mapped["achieved_class"] == int(TopologyClass.DIVERTED)
+    assert mapped["topology_consistent"]
+    assert mapped["converged"]
+    assert mapped["iterations"] == 1
+    assert mapped["relative_residual"] <= mapped["machine_precision_floor"]
+    assert composition["external_field"]["reconstruction_difference_wb"] == 0.0
+    assert composition["source_forcing"]["repeat_difference_wb"] == 0.0
+    anchor = composition["normalization_anchor"]
+    assert anchor["axis_distance_m"] == 0.0
+    assert anchor["boundary_distance_m"] == 0.0
+    assert anchor["axis_flux_difference_wb"] == 0.0
+    assert anchor["boundary_flux_difference_wb"] == 0.0
+    assert anchor["domain_label_difference_count"] == 0
+    assert measured["evidence"]["verdict"] == "genuine_machine_precision_root"

@@ -44,6 +44,18 @@ from nova.equilibrium.diagnostics import (
 )
 
 if TYPE_CHECKING:
+    from nova.equilibrium.branch_selection import (
+        AdmissibilityCriterion,
+        BranchAdmissibility,
+        BranchAvailability,
+        ColdStartRule,
+        DisappearanceCriterion,
+        SelectionHistory,
+        SelectionPolicy,
+        SelectionReason,
+        SelectionReceipt,
+        select_forward_branch,
+    )
     from nova.equilibrium.conservation import (
         ConservationLedger,
         FluxLattice,
@@ -111,14 +123,19 @@ if TYPE_CHECKING:
 #: Names loaded from their module on first attribute access, so importing the
 #: package boundary never pulls in the optional jax extra.
 _DEFERRED_EXPORTS: dict[str, str] = {
+    "AdmissibilityCriterion": "branch_selection",
+    "BranchAdmissibility": "branch_selection",
+    "BranchAvailability": "branch_selection",
     "ConservationLedger": "conservation",
     "ContinuationForm": "source",
     "ContinuationLedger": "source",
     "ContinuationRecord": "source",
+    "ColdStartRule": "branch_selection",
     "ContinuedDomainProfile": "continuation",
     "CurrentLedger": "observation",
     "DomainMasks": "domain",
     "DomainProfile": "source",
+    "DisappearanceCriterion": "branch_selection",
     "FluxLattice": "conservation",
     "FluxMesh": "conservation",
     "FluxSurfaceGeometry": "flux_surface_geometry",
@@ -147,6 +164,10 @@ _DEFERRED_EXPORTS: dict[str, str] = {
     "SeparatrixContinuation": "continuation",
     "SeparatrixContinuity": "source",
     "SeparatrixJumpError": "continuation",
+    "SelectionHistory": "branch_selection",
+    "SelectionPolicy": "branch_selection",
+    "SelectionReason": "branch_selection",
+    "SelectionReceipt": "branch_selection",
     "StencilMesh": "stencil_mesh",
     "SurfaceGeometryError": "flux_surface_geometry",
     "SurfaceExtractionReceipt": "map_extraction",
@@ -156,20 +177,26 @@ _DEFERRED_EXPORTS: dict[str, str] = {
     "extract_flux_functions": "map_extraction",
     "sample_chord_psi_norm": "map_extraction",
     "source_field_function": "flux_surface_geometry",
+    "select_forward_branch": "branch_selection",
     "vacuum_region_receipt": "map_extraction",
 }
 
 __all__ = [
+    "AdmissibilityCriterion",
+    "BranchAdmissibility",
+    "BranchAvailability",
     "DECAY_INDEX_WINDOW",
     "ChordSamplingReceipt",
     "ConservationLedger",
     "ContinuationForm",
     "ContinuationLedger",
     "ContinuationRecord",
+    "ColdStartRule",
     "ContinuedDomainProfile",
     "CurrentLedger",
     "DomainMasks",
     "DomainProfile",
+    "DisappearanceCriterion",
     "FluxLattice",
     "FluxMesh",
     "FluxSurfaceGeometry",
@@ -197,6 +224,10 @@ __all__ = [
     "SeparatrixContinuation",
     "SeparatrixContinuity",
     "SeparatrixJumpError",
+    "SelectionHistory",
+    "SelectionPolicy",
+    "SelectionReason",
+    "SelectionReceipt",
     "StencilMesh",
     "SurfaceExtractionReceipt",
     "SurfaceGeometryError",
@@ -209,6 +240,7 @@ __all__ = [
     "shafranov_vertical_field",
     "shafranov_vertical_field_elongated",
     "source_field_function",
+    "select_forward_branch",
     "vacuum_region_receipt",
 ]
 

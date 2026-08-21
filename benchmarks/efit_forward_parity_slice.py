@@ -1,5 +1,5 @@
 # ruff: noqa: E501
-"""Bank a damped-to-Newton handoff on one reference-seeded MAST slice.
+"""Bank the free-standing normalization arm on one reference-seeded MAST slice.
 
 The slice is selected only from the committed native-grid decomposition bank.
 Its declared pressure and diamagnetic gradients drive ``ForwardProfile.solve``
@@ -7,11 +7,11 @@ on the 65-point normalized-flux base after conversion to Nova's negated-total-
 flux COCOS 17 convention. The fitted conductor state is primary and the
 archived experimental state is a side arm.
 
-The current image is evaluated in the reference's declared flux coordinate.
-Both its normalized-flux argument and its support use the declared axis and
-boundary constants in the unchanged total-flux gauge. Nova's extracted
-topology remains an output used for geometry scoring; it does not replace the
-declared coordinate that the stored profiles belong to.
+The banked reproduction arms evaluate the current image in the reference's
+declared flux coordinate. Beside them, the free-standing arm uses Nova's
+ordinary topology read for both normalized flux and plasma support. Reference
+and Nova amplitudes remain in their own gauges; only gauge-invariant spans and
+a declared additive reporting alignment are compared across them.
 """
 
 from __future__ import annotations
@@ -65,11 +65,11 @@ DECOMPOSITION_BANK = Path(
 DEFAULT_OUTPUT = Path("docs/figures/efit-forward-parity")
 ROUTE_SURVEY_RECEIPT = DEFAULT_OUTPUT / "pinned-route-survey.json"
 LONG_BUDGET_RECEIPT = DEFAULT_OUTPUT / "long-budget-plasma-route.json"
-RECEIPT_NAME = "two-phase-polish.json"
+RECEIPT_NAME = "free-anchor-arm.json"
 FIGURE_NAME = "reference-seeded-forward-slice.png"
 DIAGNOSIS_FIGURE_NAME = "vacuum-branch-diagnosis.png"
 LONG_BUDGET_FIGURE_NAME = "long-budget-residual-trajectories.png"
-POLISH_FIGURE_NAME = "two-phase-polish-trajectories.png"
+FREE_ANCHOR_FIGURE_NAME = "free-anchor-residual-trajectory.png"
 GRID_STRIDE = 2
 FIXED_POINT_CRITERION = 1.0e-8
 NEWTON_STEPS = 12
@@ -354,6 +354,53 @@ def build_profile(
         "gauge": "unchanged reference total-flux gauge; no re-zeroing or mixed-gauge constants",
     }
     return profile, seed, reference, provenance
+
+
+def build_free_anchor_profile(
+    group: zarr.Group,
+    shot: int,
+    row: int,
+    current_field: str,
+) -> tuple[ForwardProfile, np.ndarray, np.ndarray, dict[str, Any]]:
+    """Build the ordinary free-standing operator beside the reproduction arm."""
+    prescribed, seed, reference, provenance = build_profile(
+        group, shot, row, current_field
+    )
+    declared = prescribed.operator
+    operator = ForwardFluxOperator(
+        grid=declared.grid,
+        wall=declared.wall,
+        source=declared.source,
+        external_current=declared.external_current,
+        area=declared.area,
+        polarity=declared.polarity,
+        inside_material=declared.inside_material,
+        use_linear_moments=False,
+    )
+    profile = ForwardProfile(
+        operator=operator,
+        lattice=prescribed.lattice,
+        newton_steps=prescribed.newton_steps,
+    )
+    return (
+        profile,
+        seed,
+        reference,
+        {
+            **provenance,
+            "normalization_mode": (
+                "Nova topology read supplies axis, boundary, normalized flux and "
+                "axis-connected core support at every map evaluation"
+            ),
+            "declared_anchors_role": (
+                "reference-gauge reporting values only; never supplied to the free-standing map"
+            ),
+            "gauge": (
+                "Nova Biot-Savart gauge in the solve; cross-gauge reporting uses "
+                "only spans or one explicit additive alignment"
+            ),
+        },
+    )
 
 
 def _contour(radius, height, flux, axis_flux, boundary_flux):
@@ -919,6 +966,212 @@ def _pinned_metrics(
             / li_reference
             - 1.0,
         },
+    }
+
+
+def _anchor_comparison(
+    nova_axis: float,
+    nova_boundary: float,
+    declared_axis: float,
+    declared_boundary: float,
+) -> dict[str, Any]:
+    """Compare anchor spans after one symmetric additive gauge alignment."""
+    declared_span = declared_boundary - declared_axis
+    nova_span = nova_boundary - nova_axis
+    scale = abs(declared_span)
+    offset = 0.5 * (declared_axis + declared_boundary - nova_axis - nova_boundary)
+    aligned_axis = nova_axis + offset
+    aligned_boundary = nova_boundary + offset
+    return {
+        "nova_selected_pair_in_nova_gauge_wb": {
+            "axis": nova_axis,
+            "boundary": nova_boundary,
+            "signed_span": nova_span,
+        },
+        "reference_declared_pair_in_reference_gauge_wb": {
+            "psi_axis": declared_axis,
+            "psi_boundary": declared_boundary,
+            "signed_span": declared_span,
+        },
+        "gauge_alignment_for_reporting_only": {
+            "method": "one additive offset aligning the two anchor-pair midpoints",
+            "nova_to_reference_additive_offset_wb": offset,
+            "aligned_nova_axis_wb": aligned_axis,
+            "aligned_nova_boundary_wb": aligned_boundary,
+            "never_supplied_to_solver_or_source": True,
+        },
+        "differences": {
+            "axis_after_alignment_wb": aligned_axis - declared_axis,
+            "boundary_after_alignment_wb": aligned_boundary - declared_boundary,
+            "axis_after_alignment_fraction_of_declared_span": (
+                (aligned_axis - declared_axis) / scale
+            ),
+            "boundary_after_alignment_fraction_of_declared_span": (
+                (aligned_boundary - declared_boundary) / scale
+            ),
+            "signed_span_fraction_of_declared_span": (
+                (nova_span - declared_span) / scale
+            ),
+        },
+        "raw_cross_gauge_amplitude_differences_scored": False,
+    }
+
+
+def _free_anchor_metrics(
+    group: zarr.Group,
+    row: int,
+    profile: ForwardProfile,
+    reference: np.ndarray,
+    equilibrium: Any,
+) -> dict[str, Any]:
+    """Score a plasma root with an additive field-gauge alignment."""
+    metrics = _pinned_metrics(group, row, profile, reference, equilibrium)
+    solved = np.asarray(
+        equilibrium.flux[: profile.lattice.node_count], dtype=np.float64
+    ).reshape(profile.lattice.shape)
+    offset = float(np.mean(reference - solved))
+    difference = solved + offset - reference
+    span = float(np.ptp(reference))
+    metrics["flux_map"] = {
+        "comparison_target": (
+            "field shape against efm/psirz after one additive mean alignment"
+        ),
+        "sup_norm_wb": float(np.max(np.abs(difference))),
+        "rms_wb": float(np.sqrt(np.mean(difference**2))),
+        "sup_fraction_of_reference_span": float(np.max(np.abs(difference)) / span),
+        "rms_fraction_of_reference_span": float(np.sqrt(np.mean(difference**2)) / span),
+        "reference_span_wb": span,
+        "nova_to_reference_additive_offset_wb": offset,
+        "alignment_method": "mean offset minimizing gauge-aligned RMS",
+        "alignment_used_for_scoring_only": True,
+        "raw_same_gauge_comparison": False,
+        "raw_cross_gauge_amplitude_comparison_performed": False,
+    }
+    return metrics
+
+
+def solve_free_anchor_arm(
+    group: zarr.Group,
+    shot: int,
+    row: int,
+    current_field: str,
+) -> dict[str, Any]:
+    """Run Newton--Krylov with Nova-selected normalization anchors."""
+    profile, seed, reference, provenance = build_free_anchor_profile(
+        group, shot, row, current_field
+    )
+    _seed_masks, seed_topology = profile.operator.read(jnp.asarray(seed))
+    equilibrium = profile.solve(
+        seed,
+        route="newton_krylov",
+        gmres_iterations=GMRES_ITERATIONS,
+        warmup=WARMUP_SWEEPS,
+        relaxation=RELAXATION,
+        step_cap=STEP_CAP,
+    )
+    trace = np.asarray(equilibrium.fixed_point.trace, dtype=np.float64)
+    finite_trace = trace[np.isfinite(trace)]
+    topology = equilibrium.topology
+    achieved = "diverted" if bool(topology.diverted) else "limited"
+    reference_class = "diverted" if len(_stored_x_points(group, row)) else "limited"
+    consistent = bool(achieved == reference_class)
+    residual = float(equilibrium.fixed_point.residual)
+    current = float(np.sum(np.asarray(equilibrium.cell_current)))
+    reference_current = float(group["plasma_current_c"][row])
+    current_fraction = abs(current / reference_current)
+    retains_plasma = bool(current_fraction >= 0.01)
+    finite = bool(
+        equilibrium.finite.passed
+        and np.isfinite(residual)
+        and np.all(np.isfinite(np.asarray(equilibrium.flux)))
+    )
+    converged = bool(finite and residual <= FIXED_POINT_CRITERION)
+    declared_axis = float(provenance["declared_axis_flux_wb"])
+    declared_boundary = float(provenance["declared_boundary_flux_wb"])
+    anchor_reads = {
+        "seed": _anchor_comparison(
+            float(seed_topology.axis_flux),
+            float(seed_topology.boundary_flux),
+            declared_axis,
+            declared_boundary,
+        ),
+        "terminal": _anchor_comparison(
+            float(topology.axis_flux),
+            float(topology.boundary_flux),
+            declared_axis,
+            declared_boundary,
+        ),
+        "selection_dynamics": (
+            "anchors are reread by the ordinary ForwardFluxOperator on every map evaluation"
+        ),
+    }
+    if converged and retains_plasma and consistent:
+        verdict = "POSITIVE_FREE_ANCHOR_CONVERGED_PLASMA_ROOT"
+    elif not converged:
+        verdict = "NEGATIVE_FREE_ANCHOR_DID_NOT_CONVERGE"
+    elif not retains_plasma:
+        verdict = "NEGATIVE_FREE_ANCHOR_CONVERGED_VACUUM_ROOT"
+    else:
+        verdict = "NEGATIVE_FREE_ANCHOR_TOPOLOGY_MISMATCH"
+    metrics = (
+        _free_anchor_metrics(group, row, profile, reference, equilibrium)
+        if converged and retains_plasma
+        else None
+    )
+    trajectory_structure = {
+        "numeric_read_count": int(finite_trace.size),
+        "minimum_residual": float(np.min(finite_trace)),
+        "maximum_residual": float(np.max(finite_trace)),
+        "plateau_range": float(np.ptp(finite_trace)),
+        "all_numeric_reads_identical": bool(np.ptp(finite_trace) == 0.0),
+    }
+    return {
+        "current_arm": provenance,
+        "solver": {
+            "entry_point": "ForwardProfile.solve",
+            "route": "newton_krylov",
+            "reference_seeded": True,
+            "requested_class": None,
+            "newton_promotion_budget": NEWTON_STEPS,
+            "gmres_iterations": GMRES_ITERATIONS,
+            "warmup_sweeps": WARMUP_SWEEPS,
+            "relaxation": RELAXATION,
+            "step_cap": STEP_CAP,
+            "registered_criterion": FIXED_POINT_CRITERION,
+            "converged": converged,
+            "residual": residual,
+            "full_residual_trajectory": [_strict_scalar(value) for value in trace],
+            "numeric_residual_trajectory": [float(value) for value in finite_trace],
+            "trajectory_structure": trajectory_structure,
+        },
+        "terminal_state": {
+            "plasma_current_a": current,
+            "reference_plasma_current_a": reference_current,
+            "signed_relative_deviation": current / reference_current - 1.0,
+            "absolute_fraction_of_reference_current": current_fraction,
+            "retains_plasma_basin": retains_plasma,
+            "achieved_class": achieved,
+            "reference_class": reference_class,
+            "topology_consistent": consistent,
+            "axis_position_m": [float(value) for value in np.asarray(topology.axis)],
+            "saddle_position_m": (
+                [float(value) for value in np.asarray(topology.x_point)]
+                if bool(topology.diverted)
+                else None
+            ),
+            "finite": finite,
+        },
+        "normalization_anchor_reads": anchor_reads,
+        "metrics": metrics,
+        "anchor_hypothesis_result": (
+            "The ordinary Nova anchor read does not expose a convergent plasma "
+            "root to the declared Newton--Krylov route from this reference seed."
+            if not converged
+            else "The ordinary Nova anchor read exposes a convergent plasma root."
+            if retains_plasma and consistent
+            else "The ordinary Nova anchor read converges, but not to the reference plasma root."
+        ),
+        "verdict": verdict,
     }
 
 
@@ -1817,8 +2070,61 @@ def _diagnosis_figure(diagnosis: dict[str, Any], path: Path) -> None:
     plt.close(figure)
 
 
+def _free_anchor_figure(
+    control: dict[str, Any], pinned: dict[str, Any], free: dict[str, Any], path: Path
+) -> None:
+    """Plot free-standing and prescribed-anchor Newton residual reads."""
+    figure, axis = plt.subplots(figsize=(7.4, 4.2), constrained_layout=True)
+    trajectories = (
+        (
+            "prescribed control",
+            control["solver"]["residual_trace"],
+            "tab:gray",
+        ),
+        (
+            "prescribed diverted portfolio",
+            pinned["solver"]["residual_trajectory"],
+            "tab:orange",
+        ),
+        (
+            "Nova free-standing anchors",
+            free["solver"]["full_residual_trajectory"],
+            "tab:blue",
+        ),
+    )
+    for label, values, colour in trajectories:
+        trace = np.asarray(
+            [np.nan if value is None else value for value in values], dtype=np.float64
+        )
+        finite = np.flatnonzero(np.isfinite(trace))
+        axis.plot(
+            finite + 1,
+            np.maximum(trace[finite], FIXED_POINT_CRITERION * 1.0e-4),
+            marker="o",
+            ms=2.6,
+            lw=1.0,
+            color=colour,
+            label=label,
+        )
+    axis.axhline(
+        FIXED_POINT_CRITERION,
+        color="black",
+        ls=":",
+        lw=0.9,
+        label="registered criterion",
+    )
+    axis.set_yscale("log")
+    axis.set_xlabel("Mapped evaluation")
+    axis.set_ylabel("Relative fixed-point residual")
+    axis.grid(axis="y", color="0.88", lw=0.6)
+    axis.legend(frameon=False, fontsize=8)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, dpi=180)
+    plt.close(figure)
+
+
 def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
-    """Run the control and the bank-selected two-phase polish route."""
+    """Run the free-standing arm beside unchanged reproduction arms."""
     configure_dtypes()
     selected, qualification = select_slice(bank)
     shot = int(selected["shot"])
@@ -1829,21 +2135,15 @@ def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
     if not baseline["passes"]:
         raise RuntimeError("the unpinned control drifted from its committed baseline")
     pinned = solve_pinned_arm(group, shot, row, "fcoil_c")
-    two_phase_polish = run_two_phase_polish(
-        group,
-        shot,
-        row,
-        "fcoil_c",
-        LONG_BUDGET_RECEIPT,
-    )
+    free_anchor = solve_free_anchor_arm(group, shot, row, "fcoil_c")
     figure_path = output / FIGURE_NAME
     _figure(fields, figure_path)
     diagnosis_figure_path = output / DIAGNOSIS_FIGURE_NAME
     _diagnosis_figure(control["diagnosis"], diagnosis_figure_path)
-    polish_figure_path = output / POLISH_FIGURE_NAME
-    _two_phase_figure(two_phase_polish, polish_figure_path)
+    free_anchor_figure_path = output / FREE_ANCHOR_FIGURE_NAME
+    _free_anchor_figure(control, pinned, free_anchor, free_anchor_figure_path)
     receipt = {
-        "receipt": "reference-seeded topology-pinned two-phase Newton polish",
+        "receipt": "reference-seeded free-standing normalization arm",
         "backend": "JAX_PLATFORMS=cpu required by invocation",
         "selection": {
             "source": str(bank),
@@ -1860,10 +2160,11 @@ def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
             "inverse_fit_coefficients": 0,
             "passes": True,
         },
+        "prescribed_anchor_arms_are_unchanged_and_unreconciled": True,
         "control_arm": control,
         "control_baseline": baseline,
         "pinned_arm": pinned,
-        "two_phase_polish": two_phase_polish,
+        "free_anchor_arm": free_anchor,
         "dina_calibration": {
             "axis_distance_m": 0.0412,
             "plasma_current_signed_relative_deviation": -0.0112,
@@ -1875,8 +2176,8 @@ def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
         "diagnosis_figure_src": (
             "/nova/figures/efit-forward-parity/vacuum-branch-diagnosis.png"
         ),
-        "polish_figure_src": (
-            "/nova/figures/efit-forward-parity/two-phase-polish-trajectories.png"
+        "free_anchor_figure_src": (
+            "/nova/figures/efit-forward-parity/free-anchor-residual-trajectory.png"
         ),
     }
     output.mkdir(parents=True, exist_ok=True)
@@ -1899,7 +2200,7 @@ def main() -> None:
     solver = control["solver"]
     diagnosis = control["diagnosis"]
     pinned = receipt["pinned_arm"]["forward_branch_receipt"]
-    polish = receipt["two_phase_polish"]
+    free = receipt["free_anchor_arm"]
     print(
         "FORWARD_SLICE "
         f"shot={selection['shot']} row={selection['slice_index']} "
@@ -1927,11 +2228,13 @@ def main() -> None:
         f"topology_consistent={pinned['topology_consistent']}"
     )
     print(
-        "TWO_PHASE_POLISH "
-        f"handoff_residual={polish['phase_one']['handoff_iterate']['residual']:.9g} "
-        f"terminal_residual={polish['phase_two']['residual']:.9g} "
-        f"terminal_current_a={polish['phase_two']['terminal_state']['plasma_current_a']:.9g} "
-        f"verdict={polish['verdict']}"
+        "FREE_ANCHOR_ARM "
+        f"converged={free['solver']['converged']} "
+        f"residual={free['solver']['residual']:.9g} "
+        f"terminal_current_a={free['terminal_state']['plasma_current_a']:.9g} "
+        f"achieved={free['terminal_state']['achieved_class']} "
+        f"topology_consistent={free['terminal_state']['topology_consistent']} "
+        f"verdict={free['verdict']}"
     )
 
 

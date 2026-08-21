@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T12:30:34",
+  "updated": "2026-08-21T14:15:54",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -256,7 +256,7 @@
       },
       {
         "id": "S7",
-        "status": "active",
+        "status": "done",
         "theme": "Prove the physics spine against EFIT",
         "items": [
           {
@@ -391,21 +391,6 @@
             }
           },
           {
-            "slug": "efit-forward-parity",
-            "why_now": "This is the demonstration the sprint's theme actually names and the one nova owes as a forward physics model: the free-boundary Grad-Shafranov fixed point given a reference's own flux functions and conductor currents. It has never been run, and the frozen-six reconstruction gate it replaces cannot answer it because that gate fitted magnetics.",
-            "done_when": "The frozen six scored from both seeding conditions on flux-map sup-norm and RMS, axis, LCFS, x-point, topology class, I_p, beta_p, l_i and the fixed-point defect, with no measurement anywhere in the path; pass/fail against the carried-over registered tolerances; verdict on whether the free-boundary fixed point reproduces the reference; the GPU catalog unblocked or held on that verdict rather than on the reconstruction result.",
-            "capability": {
-              "version": "1.0",
-              "class": "orchestrator",
-              "requirements": {
-                "reasoning": "deep",
-                "context": "extended",
-                "verification": "strict",
-                "risk": "elevated"
-              }
-            }
-          },
-          {
             "slug": "equilibrium-metric-parity",
             "why_now": "Given one flux map two codes should compute the same q, volumes and flux-surface averages, and that comparison isolates the derived-quantity chain with no solver in the loop. It also collapses an ambiguity in the forward gate, where an I_p or l_i disagreement could be either a different field or a different way of measuring the same field. Nova already carries fifteen profile columns and six scalars in FluxSurfaceGeometry, validated only against its own analytic fixtures, so this is the first time an outside code checks its conventions - and the same record is the geometry input for training one-dimensional transport equations in the competition entry.",
             "done_when": "Every derived quantity the reference store carries is enumerated with units, shape and flux coordinate and paired against nova's record or marked absent-in-nova or unpairable with a reason; each paired quantity compared from the SAME stored map on the stored-LCFS interior and reported as a signed relative difference profile with median and interquartile range per frozen shot, separating convention artefacts from genuine numerical disagreement; whatever the reference computes and nova does not is implemented into the record with a convention-pinned definition, a tolerance and a test, cross-checked against analytic equilibria and internal consistency rather than against the reference alone.",
@@ -490,7 +475,8 @@
         ],
         "starts": "2026-08-10",
         "ends": "2026-08-28",
-        "description": "Make the differentiable boundary push the pinned, accelerated core of the spine, then prove the assembled chain \u2014 corrected reads, moment seed, accelerated ReconstructProfile, topology labels, CurrentDiffusion flux-ledger consistency \u2014 reconstructs MAST equilibria comparably to the firewalled EFIT referee. The parity verdict is the gate the GPU catalog stands on: a catalog of fast wrong equilibria is worthless. Carries the capability recovered from the superseded ambix batched-newton-accelerator plan (exact-tangent NK 62% conversion vs Picard 10/19%; read-wall removals; coupled-KKT profile state) into nova, which owns all physics solves."
+        "description": "Make the differentiable boundary push the pinned, accelerated core of the spine, then prove the assembled chain \u2014 corrected reads, moment seed, accelerated ReconstructProfile, topology labels, CurrentDiffusion flux-ledger consistency \u2014 reconstructs MAST equilibria comparably to the firewalled EFIT referee. The parity verdict is the gate the GPU catalog stands on: a catalog of fast wrong equilibria is worthless. Carries the capability recovered from the superseded ambix batched-newton-accelerator plan (exact-tangent NK 62% conversion vs Picard 10/19%; read-wall removals; coupled-KKT profile state) into nova, which owns all physics solves.",
+        "summary": "Closed 2026-08-21 at 16/16 plans shipped, 100 percent implementation, empty ready set, no wiring findings. The spine is proven against its references: the Solov'ev closed-form oracle stands with the discrete map exact at the analytic state (4.6e-15 Wb) and the recovery gates locked at round-off floors in a two-tier registered harness (reduced 136-cell always-on fixture, warm-cached carriers slow-lane, all 14 bounds byte-for-value); the faithful moment route, exact Part V kernels and hexagon sections are production defaults. The EFIT flux decomposition delivered both verdicts on the native 65x65 grid across 18 slices: the external field is FIT as a free-boundary boundary condition (fcoil_c cancellation 95.1-98.2 percent under locked convergence-order criteria) and the P4-lower localisation RETRACTS (16/18 residual peaks in the solenoid conductor), reported into the toroidal-harmonics verdict as a measured cross-instrument disagreement. The SOL current demonstration shipped: two converged solutions at exactly identical net current prove finite continuous j from the separatrix to the divertor target on an Eich-scaled closure with zero private-flux current and a machine-precision four-crossing saddle partition. The DINA reference's flux functions were banked by two routes (affine map extraction beside declared profiles_1d, unreconciled; rotation bounded out at 99.77 percent two-function variance explained; the stored map consistent with two-function force balance at 4.78 percent weighted residual). The first forward parity slice proved the prescribed-anchor inputs and wiring sound after a convicted gradient-sign repair, and measured the standard Newton path escaping the plasma basin to the vacuum root - basin reachability, the failure mode dual-basin-solve was commissioned for, so efit-forward-parity relocated to S8 to ride beside that machinery. Feeds S8 (dual-basin-solve via the locked recovery gates; efit-forward-parity; mast-catalog-gpu-solve) and S9/S10 (the forward-transport and DIII-D lanes via flux-function-forward-equilibrium)."
       },
       {
         "id": "S10",
@@ -530,6 +516,34 @@
               "version": "1.0",
               "class": "orchestrator",
               "requirements": {}
+            }
+          },
+          {
+            "slug": "efit-forward-parity",
+            "why_now": "This is the demonstration the sprint's theme actually names and the one nova owes as a forward physics model: the free-boundary Grad-Shafranov fixed point given a reference's own flux functions and conductor currents. It has never been run, and the frozen-six reconstruction gate it replaces cannot answer it because that gate fitted magnetics.",
+            "done_when": "The frozen six scored from both seeding conditions on flux-map sup-norm and RMS, axis, LCFS, x-point, topology class, I_p, beta_p, l_i and the fixed-point defect, with no measurement anywhere in the path; pass/fail against the carried-over registered tolerances; verdict on whether the free-boundary fixed point reproduces the reference; the GPU catalog unblocked or held on that verdict rather than on the reconstruction result.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "context": "extended",
+                "verification": "strict",
+                "risk": "elevated"
+              }
+            }
+          },
+          {
+            "slug": "dual-basin-solve",
+            "why_now": "The parity slice measured the failure mode this plan was commissioned for: a reference-seeded solve with correct inputs escapes to the vacuum root at promotion 4 while a damped first step holds the plasma basin without converging - basin-aware solving is now the critical path to the parity verdict and the GPU catalog.",
+            "done_when": "Both basins solved where they exist with hysteresis selection and topology-pinned branches; the parity slice benchmark re-run unchanged reaches the plasma root; warm-start economy measured.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
             }
           }
         ],
@@ -749,6 +763,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 46
+    "_version": 48
   }
 }

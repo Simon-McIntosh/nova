@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T14:11:36",
+  "updated": "2026-08-21T14:14:06",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -15059,9 +15059,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T115949099062-vessel-hex-mesh-operator",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a710",
+        "node": "vessel-hex-mesh-operator",
+        "role": "implement",
+        "member": "read-wall",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T11:59:54Z",
+        "completed_at": "2026-08-21T12:11:58Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 724,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 724,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "55c1d9c4614f13459f25f44f742229bbf9b24c30",
+        "commits": [
+          "573a02924fa428857d187fb287eeefe87541728f"
+        ],
+        "changed_lines": {
+          "added": 578,
+          "removed": 0,
+          "files": 6
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "99-cell hex mesh on the 82-point limiter at 0.2078 m characteristic size, area error 4.16e-05 against a 1e-04 preregistered bar; 99x99 reciprocal self-interaction operator at exactly zero asymmetry, condition 372.66, min diagonal dominance 0.0298. FINDING: the authored limiter chain is self-intersecting and needed validity repair",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T115949099062-vessel-hex-mesh-operator/manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff707-7544-7222-90a7-21b1f9f0024b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3546624,
+            "cached_input_tokens_cumulative": 14781440,
+            "input_tokens": 3906561,
+            "input_tokens_cumulative": 15616985,
+            "output_tokens": 25264,
+            "output_tokens_cumulative": 61882,
+            "reasoning_output_tokens": 7169,
+            "reasoning_output_tokens_cumulative": 20859
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 391
+    "_version": 392
   }
 }

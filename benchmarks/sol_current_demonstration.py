@@ -395,6 +395,17 @@ def _saddle_branch_receipt(machine, topology) -> dict[str, object]:
     }
 
 
+def _save_svg(figure, output: Path) -> None:
+    """Write deterministic text-clean SVG output and release the figure."""
+    figure.savefig(output, format="svg")
+    rendered = output.read_text(encoding="utf-8")
+    output.write_text(
+        "\n".join(line.rstrip() for line in rendered.splitlines()) + "\n",
+        encoding="utf-8",
+    )
+    plt.close(figure)
+
+
 def _profile_figure(
     output: Path,
     centres: np.ndarray,
@@ -455,8 +466,7 @@ def _profile_figure(
     axis.set_title("Finite current crosses ψN = 1 and decays over the common SOL")
     axis.legend(frameon=False, ncol=2, fontsize=8.5)
     axis.grid(axis="y", linewidth=0.4, color="#ddd")
-    figure.savefig(output, format="svg")
-    plt.close(figure)
+    _save_svg(figure, output)
 
 
 def _contour_figure(
@@ -570,8 +580,7 @@ def _contour_figure(
     figure.suptitle(
         "SOL current moves the boundary, X-point and strike geometry on one machine"
     )
-    figure.savefig(output, format="svg")
-    plt.close(figure)
+    _save_svg(figure, output)
 
 
 def measure(

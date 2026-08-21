@@ -42,9 +42,16 @@
     ]
   },
   "root_existence_comparison": {
-    "frames": 5,
-    "landed_free_boundary_fractional_rms": 0.2156505171,
+    "historical_drop_rule": "drop only the frame whose shot is in the landed affected set",
+    "historical_frames": 5,
+    "historical_reported_fractional_rms": {
+      "with_recovered_currents": 0.34392767843,
+      "without_recovered_currents": 0.2156505171
+    },
+    "historical_screened_frames": 4,
     "landed_vacuum_share": 0.8498610048,
+    "replacement_frames": 5,
+    "replacement_rule": "first score-independent selected frame from each of the first five recovery-cohort shots; every shot absent from the landed affected set",
     "separate_from_predictive_scoring": true,
     "uses_directly_recovered_currents": true
   },

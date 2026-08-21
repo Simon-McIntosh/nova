@@ -65,7 +65,9 @@ SHOT_COUNT = 25
 FRAMES_PER_SHOT = 8
 TRAIN_SHOT_COUNT = 20
 LANDED_FREE_BOUNDARY_FRACTIONAL_RMS = 0.2156505171
+LANDED_RECOVERED_CURRENT_FRACTIONAL_RMS = 0.34392767843
 LANDED_VACUUM_SHARE = 0.8498610048
+SCREENED_ROOT_FRAME_COUNT = 5
 PREREGISTRATION_NAME = "boundary_current_recovery_preregistration.json"
 RECEIPT_NAME = "boundary_current_recovery_receipt.json"
 CHECKPOINT_NAME = "boundary_current_recovery_frames.jsonl"
@@ -115,10 +117,20 @@ def preregistration() -> dict[str, Any]:
             "split_unit": "shot",
         },
         "root_existence_comparison": {
-            "frames": 5,
-            "landed_free_boundary_fractional_rms": (
-                LANDED_FREE_BOUNDARY_FRACTIONAL_RMS
+            "replacement_frames": SCREENED_ROOT_FRAME_COUNT,
+            "replacement_rule": (
+                "first score-independent selected frame from each of the first five "
+                "recovery-cohort shots; every shot absent from the landed affected set"
             ),
+            "historical_frames": 5,
+            "historical_screened_frames": 4,
+            "historical_drop_rule": (
+                "drop only the frame whose shot is in the landed affected set"
+            ),
+            "historical_reported_fractional_rms": {
+                "without_recovered_currents": LANDED_FREE_BOUNDARY_FRACTIONAL_RMS,
+                "with_recovered_currents": (LANDED_RECOVERED_CURRENT_FRACTIONAL_RMS),
+            },
             "landed_vacuum_share": LANDED_VACUUM_SHARE,
             "uses_directly_recovered_currents": True,
             "separate_from_predictive_scoring": True,
@@ -405,6 +417,51 @@ def _frame_recovery(
     return record, np.asarray(solved["currents_a"])
 
 
+def select_screened_root_frames(
+    selected: list[SelectedFrame], affected_shots: set[str]
+) -> list[dict[str, Any]]:
+    """Choose one score-independent frame from each of five unaffected shots."""
+
+    frames = []
+    seen: set[str] = set()
+    for item in selected:
+        shot = item.path.name
+        if shot in seen:
+            continue
+        if shot in affected_shots:
+            raise RuntimeError("the recovery cohort contains an affected shot")
+        seen.add(shot)
+        frames.append({"shot": shot, "frame": item.frame, "time_ms": item.time_ms})
+        if len(frames) == SCREENED_ROOT_FRAME_COUNT:
+            break
+    if len(frames) != SCREENED_ROOT_FRAME_COUNT:
+        raise RuntimeError("insufficient distinct shots for screened root comparison")
+    return frames
+
+
+def summarize_root_records(records: list[dict[str, Any]]) -> dict[str, Any]:
+    """Summarize paired root residuals without changing cohort membership."""
+
+    if not records:
+        raise ValueError("root residual summary requires at least one frame")
+    original = np.asarray([item["original_fractional_rms"] for item in records])
+    corrected = np.asarray(
+        [item["recovered_current_fractional_rms"] for item in records]
+    )
+    original_median = float(np.median(original))
+    corrected_median = float(np.median(corrected))
+    worsening_fraction = corrected_median / original_median - 1.0
+    return {
+        "frame_count": len(records),
+        "original_median_fractional_rms": original_median,
+        "recovered_current_median_fractional_rms": corrected_median,
+        "fractional_rms_change": corrected_median - original_median,
+        "worsening_fraction": worsening_fraction,
+        "worsening_percent": 100.0 * worsening_fraction,
+        "recovered_currents_worsen_residual": bool(worsening_fraction > 0.0),
+    }
+
+
 def root_residual_comparison(
     data_root: Path,
     root_frames: list[dict[str, Any]],
@@ -412,7 +469,7 @@ def root_residual_comparison(
     plasma_response: np.ndarray,
     unknown_design: np.ndarray,
 ) -> dict[str, Any]:
-    """Remeasure the fixed five-frame free-boundary residual after recovery."""
+    """Remeasure one declared free-boundary cohort after current recovery."""
 
     records = []
     known_cache: dict[str, tuple[tuple[str, ...], np.ndarray]] = {}
@@ -425,10 +482,10 @@ def root_residual_comparison(
         row["_source_path"] = str(path)
         radius, height = canonical_axes(row)
         description = DiiidDescriptionRegistry().ingest(row, source_row=path.name)
-        known = known_cache.setdefault(
-            description.physical_digest,
-            vacuum_response(description, radius, height),
-        )
+        known = known_cache.get(description.physical_digest)
+        if known is None:
+            known = vacuum_response(description, radius, height)
+            known_cache[description.physical_digest] = known
         recovery, current = _frame_recovery(
             row, int(item["frame"]), plasma_response, unknown_design, known
         )
@@ -457,40 +514,45 @@ def root_residual_comparison(
                 "recovered_currents_a": recovery["recovered_currents_a"],
             }
         )
-    original = np.asarray([item["original_fractional_rms"] for item in records])
-    corrected = np.asarray(
-        [item["recovered_current_fractional_rms"] for item in records]
-    )
-    return {
+    result = {
         "frames": records,
-        "frame_count": len(records),
+        **summarize_root_records(records),
+        "affected_shot_count": sum(
+            item["in_landed_affected_polarity_population"] for item in records
+        ),
+        "all_shots_screened_free_of_affected_population": all(
+            not item["in_landed_affected_polarity_population"] for item in records
+        ),
         "comparison_is_separate_from_held_out_prediction": True,
         "direct_recovered_currents_used": True,
-        "landed_baseline_fractional_rms": LANDED_FREE_BOUNDARY_FRACTIONAL_RMS,
-        "recomputed_original_median_fractional_rms": float(np.median(original)),
-        "recomputed_original_delta_from_landed": float(
-            np.median(original) - LANDED_FREE_BOUNDARY_FRACTIONAL_RMS
-        ),
-        "recovered_current_median_fractional_rms": float(np.median(corrected)),
-        "fractional_rms_change": float(
-            np.median(corrected) - LANDED_FREE_BOUNDARY_FRACTIONAL_RMS
-        ),
-        "relative_reduction": float(
-            1.0 - np.median(corrected) / LANDED_FREE_BOUNDARY_FRACTIONAL_RMS
-        ),
-        "landed_vacuum_share": LANDED_VACUUM_SHARE,
-        "polarity_qualification": (
-            "the fixed historical cohort contains one affected shot; it is retained "
-            "only to preserve the landed baseline comparison and is excluded from "
-            "the 200-frame recovery and predictive cohort"
-        ),
+    }
+    return result
+
+
+def historical_screened_summary(
+    historical: dict[str, Any], affected_shots: set[str]
+) -> dict[str, Any]:
+    """Drop exactly the affected historical frame and resummarize the pair."""
+
+    retained = [
+        item for item in historical["frames"] if item["shot"] not in affected_shots
+    ]
+    dropped = [item for item in historical["frames"] if item["shot"] in affected_shots]
+    if len(historical["frames"]) != 5 or len(dropped) != 1 or len(retained) != 4:
+        raise RuntimeError("historical polarity screen did not produce a 4-of-5 cohort")
+    return {
+        "frames": retained,
+        **summarize_root_records(retained),
+        "dropped_frames": [
+            {"shot": item["shot"], "frame": item["frame"]} for item in dropped
+        ],
+        "affected_shot_count": 0,
+        "all_shots_screened_free_of_affected_population": True,
     }
 
 
-def _figure(
-    receipt: dict[str, Any], targets: np.ndarray, prediction: dict[str, Any], path: Path
-) -> None:
-    figure, axes = plt.subplots(1, 2, figsize=(11.0, 4.5), constrained_layout=True)
+def _figure(receipt: dict[str, Any], prediction: dict[str, Any], path: Path) -> None:
+    figure, axes = plt.subplots(1, 3, figsize=(14.0, 4.5), constrained_layout=True)
     recovery = receipt["recovery_cohort"]
     axes[0].hist(
         [item["relative_residual"] for item in recovery["frames"]],
@@ -509,12 +571,33 @@ def _figure(
     axes[1].set_ylabel("Held-out R²")
     axes[1].set_title("Prediction from twenty shipped channels")
     axes[1].tick_params(axis="x", rotation=35)
-    figure.suptitle(
-        "Five-current boundary recovery and shot-held-out predictability\n"
-        "root residual: "
-        f"{receipt['root_existence']['landed_baseline_fractional_rms']:.4f} → "
-        f"{receipt['root_existence']['recovered_current_median_fractional_rms']:.4f}"
+    root = receipt["root_existence"]
+    arms = (
+        ("Historical\n5 frames", root["historical_all_frames_recomputed"]),
+        ("Historical\nscreened 4", root["historical_polarity_screened_drop"]),
+        ("Replacement\nscreened 5", root["replacement_polarity_screened"]),
     )
+    positions = np.arange(len(arms))
+    width = 0.38
+    axes[2].bar(
+        positions - width / 2,
+        [item[1]["original_median_fractional_rms"] for item in arms],
+        width,
+        label="Without recovered currents",
+        color="#4477aa",
+    )
+    axes[2].bar(
+        positions + width / 2,
+        [item[1]["recovered_current_median_fractional_rms"] for item in arms],
+        width,
+        label="With recovered currents",
+        color="#cc6677",
+    )
+    axes[2].set_xticks(positions, [item[0] for item in arms])
+    axes[2].set_ylabel("Median free-boundary fractional RMS")
+    axes[2].set_title("Polarity-screened root remeasurement")
+    axes[2].legend(frameon=False, fontsize=8)
+    figure.suptitle("Five-current recovery: predictability and root-residual effect")
     figure.savefig(path, dpi=180)
     plt.close(figure)
 
@@ -570,13 +653,43 @@ def run(data_root: Path, output: Path) -> dict[str, Any]:
         feature_matrix, target_matrix, shot_names, train_shots
     )
     root_authority = json.loads(ROOT_RECEIPT.read_text())["result"]["frames"]
-    root = root_residual_comparison(
+    historical_root = root_residual_comparison(
         data_root,
         root_authority,
         affected,
         plasma_response,
         unknown_design,
     )
+    historical_screened = historical_screened_summary(historical_root, affected)
+    replacement_frames = select_screened_root_frames(selected, affected)
+    replacement_root = root_residual_comparison(
+        data_root,
+        replacement_frames,
+        affected,
+        plasma_response,
+        unknown_design,
+    )
+    screening_verdict = {
+        "historical_worsening_percent": 100.0
+        * (
+            LANDED_RECOVERED_CURRENT_FRACTIONAL_RMS
+            / LANDED_FREE_BOUNDARY_FRACTIONAL_RMS
+            - 1.0
+        ),
+        "historical_screened_drop_worsening_percent": historical_screened[
+            "worsening_percent"
+        ],
+        "replacement_screened_worsening_percent": replacement_root["worsening_percent"],
+        "worsening_survives_historical_frame_drop": historical_screened[
+            "recovered_currents_worsen_residual"
+        ],
+        "worsening_survives_replacement_screen": replacement_root[
+            "recovered_currents_worsen_residual"
+        ],
+        "worsening_was_carried_by_affected_frame": not historical_screened[
+            "recovered_currents_worsen_residual"
+        ],
+    }
     conditions = np.asarray([item["design_condition_number"] for item in frame_records])
     residuals = np.asarray([item["relative_residual"] for item in frame_records])
     receipt = {
@@ -614,7 +727,22 @@ def run(data_root: Path, output: Path) -> dict[str, Any]:
             "frames": frame_records,
         },
         "held_out_prediction": prediction,
-        "root_existence": root,
+        "root_existence": {
+            "historical_reported": {
+                "without_recovered_currents_fractional_rms": (
+                    LANDED_FREE_BOUNDARY_FRACTIONAL_RMS
+                ),
+                "with_recovered_currents_fractional_rms": (
+                    LANDED_RECOVERED_CURRENT_FRACTIONAL_RMS
+                ),
+                "worsening_percent": screening_verdict["historical_worsening_percent"],
+            },
+            "historical_all_frames_recomputed": historical_root,
+            "historical_polarity_screened_drop": historical_screened,
+            "replacement_polarity_screened": replacement_root,
+            "screening_verdict": screening_verdict,
+            "landed_vacuum_share": LANDED_VACUUM_SHARE,
+        },
         "fitting_statement": (
             "the five targets are recovered independently per labelled frame; only "
             "the declared train-shot linear predictor is fitted, and no coil current "
@@ -624,7 +752,7 @@ def run(data_root: Path, output: Path) -> dict[str, Any]:
     }
     receipt_path = output / RECEIPT_NAME
     receipt_path.write_text(json.dumps(receipt, indent=2, sort_keys=True) + "\n")
-    _figure(receipt, target_matrix, prediction, output / FIGURE_NAME)
+    _figure(receipt, prediction, output / FIGURE_NAME)
     return receipt
 
 
@@ -643,9 +771,7 @@ def main() -> None:
                     item["target"]: item["held_out_r_squared"]
                     for item in result["held_out_prediction"]["targets"]
                 },
-                "root_fractional_rms": result["root_existence"][
-                    "recovered_current_median_fractional_rms"
-                ],
+                "root_screening_verdict": result["root_existence"]["screening_verdict"],
             },
             indent=2,
             sort_keys=True,

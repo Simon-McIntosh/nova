@@ -1,7 +1,7 @@
 {
   "checkpoint": "docs/figures/diiid-forward-onboarding/boundary-recovery/boundary_current_recovery_frames.jsonl",
   "fitting_statement": "the five targets are recovered independently per labelled frame; only the declared train-shot linear predictor is fitted, and no coil current or flux function is adjusted in the residual evaluation",
-  "generated_at_utc": "2026-08-21T09:48:59.574160+00:00",
+  "generated_at_utc": "2026-08-21T10:04:18.071136+00:00",
   "held_out_prediction": {
     "design_rank": 21,
     "features": [
@@ -237,7 +237,7 @@
     "sha256": "e3e49bb8c79daa1cf0d29202da1951698ae39fd2312e40f5701f6d957fd5bdb7"
   },
   "preregistration": "docs/figures/diiid-forward-onboarding/boundary-recovery/boundary_current_recovery_preregistration.json",
-  "preregistration_sha256": "1de0c1a92409deba232849e500513693c43b3c586f4ba5a392fdba1e9f660160",
+  "preregistration_sha256": "6b5ba3c7a3a78952df3210dfc709d8e7cb19a00500c79c4da3483b5c293a6912",
   "recovery_cohort": {
     "all_frames_screened_free_of_affected_population": true,
     "design_condition_number": {
@@ -4083,93 +4083,278 @@
     ]
   },
   "root_existence": {
-    "comparison_is_separate_from_held_out_prediction": true,
-    "direct_recovered_currents_used": true,
-    "fractional_rms_change": 0.12827716133119083,
-    "frame_count": 5,
-    "frames": [
-      {
-        "frame": 29,
-        "in_landed_affected_polarity_population": true,
-        "original_fractional_rms": 0.3936039751610567,
-        "recovered_current_fractional_rms": 0.3976609355997548,
-        "recovered_currents_a": {
-          "E567DN": -354314.48400994943,
-          "E567UP": -410352.20185091754,
-          "E89DN": 238795.3695670633,
-          "E89UP": 345080.68255104177,
-          "ECOILB": 127200.47183820746
+    "historical_all_frames_recomputed": {
+      "affected_shot_count": 1,
+      "all_shots_screened_free_of_affected_population": false,
+      "comparison_is_separate_from_held_out_prediction": true,
+      "direct_recovered_currents_used": true,
+      "fractional_rms_change": 0.128277161301614,
+      "frame_count": 5,
+      "frames": [
+        {
+          "frame": 29,
+          "in_landed_affected_polarity_population": true,
+          "original_fractional_rms": 0.3936039751610567,
+          "recovered_current_fractional_rms": 0.3976609355997548,
+          "recovered_currents_a": {
+            "E567DN": -354314.48400994943,
+            "E567UP": -410352.20185091754,
+            "E89DN": 238795.3695670633,
+            "E89UP": 345080.68255104177,
+            "ECOILB": 127200.47183820746
+          },
+          "recovery_relative_residual": 0.45153311350145775,
+          "shot": "d3d_shot_00000a10ac.parquet"
         },
-        "recovery_relative_residual": 0.45153311350145775,
-        "shot": "d3d_shot_00000a10ac.parquet"
-      },
-      {
-        "frame": 179,
-        "in_landed_affected_polarity_population": false,
-        "original_fractional_rms": 0.18955135446740703,
-        "recovered_current_fractional_rms": 0.3370307925210548,
-        "recovered_currents_a": {
-          "E567DN": -39258.64019672187,
-          "E567UP": -40150.154006218254,
-          "E89DN": -43845.82919982462,
-          "E89UP": -43532.970419679135,
-          "ECOILB": -82754.80445034818
+        {
+          "frame": 179,
+          "in_landed_affected_polarity_population": false,
+          "original_fractional_rms": 0.18955135446740703,
+          "recovered_current_fractional_rms": 0.3370307925210548,
+          "recovered_currents_a": {
+            "E567DN": -39258.64019672187,
+            "E567UP": -40150.154006218254,
+            "E89DN": -43845.82919982462,
+            "E89UP": -43532.970419679135,
+            "ECOILB": -82754.80445034818
+          },
+          "recovery_relative_residual": 0.0806765759114996,
+          "shot": "d3d_shot_00000c4a7b.parquet"
         },
-        "recovery_relative_residual": 0.0806765759114996,
-        "shot": "d3d_shot_00000c4a7b.parquet"
-      },
-      {
-        "frame": 44,
-        "in_landed_affected_polarity_population": false,
-        "original_fractional_rms": 0.2156505171295768,
-        "recovered_current_fractional_rms": 0.38251081444175217,
-        "recovered_currents_a": {
-          "E567DN": -10816.691219792032,
-          "E567UP": -10470.566617243976,
-          "E89DN": -14474.614192124483,
-          "E89UP": -16153.31509153354,
-          "ECOILB": -26909.628354836885
+        {
+          "frame": 44,
+          "in_landed_affected_polarity_population": false,
+          "original_fractional_rms": 0.2156505171295768,
+          "recovered_current_fractional_rms": 0.38251081444175217,
+          "recovered_currents_a": {
+            "E567DN": -10816.691219792032,
+            "E567UP": -10470.566617243976,
+            "E89DN": -14474.614192124483,
+            "E89UP": -16153.31509153354,
+            "ECOILB": -26909.628354836885
+          },
+          "recovery_relative_residual": 0.31405905109323506,
+          "shot": "d3d_shot_0003ff34e7.parquet"
         },
-        "recovery_relative_residual": 0.31405905109323506,
-        "shot": "d3d_shot_0003ff34e7.parquet"
-      },
-      {
-        "frame": 36,
-        "in_landed_affected_polarity_population": false,
-        "original_fractional_rms": 0.5126656275170867,
-        "recovered_current_fractional_rms": 0.3439276784311908,
-        "recovered_currents_a": {
-          "E567DN": 14696.491880780262,
-          "E567UP": 14621.981060532713,
-          "E89DN": 7456.365693781341,
-          "E89UP": 8343.056827504819,
-          "ECOILB": 19055.613782536013
+        {
+          "frame": 36,
+          "in_landed_affected_polarity_population": false,
+          "original_fractional_rms": 0.5126656275170867,
+          "recovered_current_fractional_rms": 0.3439276784311908,
+          "recovered_currents_a": {
+            "E567DN": 14696.491880780262,
+            "E567UP": 14621.981060532713,
+            "E89DN": 7456.365693781341,
+            "E89UP": 8343.056827504819,
+            "ECOILB": 19055.613782536013
+          },
+          "recovery_relative_residual": 0.2078193477146615,
+          "shot": "d3d_shot_0011c2afc9.parquet"
         },
-        "recovery_relative_residual": 0.2078193477146615,
-        "shot": "d3d_shot_0011c2afc9.parquet"
-      },
-      {
-        "frame": 125,
-        "in_landed_affected_polarity_population": false,
-        "original_fractional_rms": 0.11522631142375936,
-        "recovered_current_fractional_rms": 0.2832915063571959,
-        "recovered_currents_a": {
-          "E567DN": -14771.449235901531,
-          "E567UP": -12796.273766217937,
-          "E89DN": -16910.093975263866,
-          "E89UP": -18313.97057294136,
-          "ECOILB": -31809.608802401766
+        {
+          "frame": 125,
+          "in_landed_affected_polarity_population": false,
+          "original_fractional_rms": 0.11522631142375936,
+          "recovered_current_fractional_rms": 0.2832915063571959,
+          "recovered_currents_a": {
+            "E567DN": -14771.449235901531,
+            "E567UP": -12796.273766217937,
+            "E89DN": -16910.093975263866,
+            "E89UP": -18313.97057294136,
+            "ECOILB": -31809.608802401766
+          },
+          "recovery_relative_residual": 0.13631115861065438,
+          "shot": "d3d_shot_001270afa9.parquet"
+        }
+      ],
+      "original_median_fractional_rms": 0.2156505171295768,
+      "recovered_current_median_fractional_rms": 0.3439276784311908,
+      "recovered_currents_worsen_residual": true,
+      "worsening_fraction": 0.5948381808170522,
+      "worsening_percent": 59.48381808170522
+    },
+    "historical_polarity_screened_drop": {
+      "affected_shot_count": 0,
+      "all_shots_screened_free_of_affected_population": true,
+      "dropped_frames": [
+        {
+          "frame": 29,
+          "shot": "d3d_shot_00000a10ac.parquet"
+        }
+      ],
+      "fractional_rms_change": 0.13787829967763088,
+      "frame_count": 4,
+      "frames": [
+        {
+          "frame": 179,
+          "in_landed_affected_polarity_population": false,
+          "original_fractional_rms": 0.18955135446740703,
+          "recovered_current_fractional_rms": 0.3370307925210548,
+          "recovered_currents_a": {
+            "E567DN": -39258.64019672187,
+            "E567UP": -40150.154006218254,
+            "E89DN": -43845.82919982462,
+            "E89UP": -43532.970419679135,
+            "ECOILB": -82754.80445034818
+          },
+          "recovery_relative_residual": 0.0806765759114996,
+          "shot": "d3d_shot_00000c4a7b.parquet"
         },
-        "recovery_relative_residual": 0.13631115861065438,
-        "shot": "d3d_shot_001270afa9.parquet"
-      }
-    ],
-    "landed_baseline_fractional_rms": 0.2156505171,
+        {
+          "frame": 44,
+          "in_landed_affected_polarity_population": false,
+          "original_fractional_rms": 0.2156505171295768,
+          "recovered_current_fractional_rms": 0.38251081444175217,
+          "recovered_currents_a": {
+            "E567DN": -10816.691219792032,
+            "E567UP": -10470.566617243976,
+            "E89DN": -14474.614192124483,
+            "E89UP": -16153.31509153354,
+            "ECOILB": -26909.628354836885
+          },
+          "recovery_relative_residual": 0.31405905109323506,
+          "shot": "d3d_shot_0003ff34e7.parquet"
+        },
+        {
+          "frame": 36,
+          "in_landed_affected_polarity_population": false,
+          "original_fractional_rms": 0.5126656275170867,
+          "recovered_current_fractional_rms": 0.3439276784311908,
+          "recovered_currents_a": {
+            "E567DN": 14696.491880780262,
+            "E567UP": 14621.981060532713,
+            "E89DN": 7456.365693781341,
+            "E89UP": 8343.056827504819,
+            "ECOILB": 19055.613782536013
+          },
+          "recovery_relative_residual": 0.2078193477146615,
+          "shot": "d3d_shot_0011c2afc9.parquet"
+        },
+        {
+          "frame": 125,
+          "in_landed_affected_polarity_population": false,
+          "original_fractional_rms": 0.11522631142375936,
+          "recovered_current_fractional_rms": 0.2832915063571959,
+          "recovered_currents_a": {
+            "E567DN": -14771.449235901531,
+            "E567UP": -12796.273766217937,
+            "E89DN": -16910.093975263866,
+            "E89UP": -18313.97057294136,
+            "ECOILB": -31809.608802401766
+          },
+          "recovery_relative_residual": 0.13631115861065438,
+          "shot": "d3d_shot_001270afa9.parquet"
+        }
+      ],
+      "original_median_fractional_rms": 0.20260093579849192,
+      "recovered_current_median_fractional_rms": 0.3404792354761228,
+      "recovered_currents_worsen_residual": true,
+      "worsening_fraction": 0.6805412775327229,
+      "worsening_percent": 68.05412775327228
+    },
+    "historical_reported": {
+      "with_recovered_currents_fractional_rms": 0.34392767843,
+      "without_recovered_currents_fractional_rms": 0.2156505171,
+      "worsening_percent": 59.48381810302648
+    },
     "landed_vacuum_share": 0.8498610048,
-    "polarity_qualification": "the fixed historical cohort contains one affected shot; it is retained only to preserve the landed baseline comparison and is excluded from the 200-frame recovery and predictive cohort",
-    "recomputed_original_delta_from_landed": 2.9576813220799636e-11,
-    "recomputed_original_median_fractional_rms": 0.2156505171295768,
-    "recovered_current_median_fractional_rms": 0.3439276784311908,
-    "relative_reduction": -0.5948381810357868
+    "replacement_polarity_screened": {
+      "affected_shot_count": 0,
+      "all_shots_screened_free_of_affected_population": true,
+      "comparison_is_separate_from_held_out_prediction": true,
+      "direct_recovered_currents_used": true,
+      "fractional_rms_change": -1.5011860953253686,
+      "frame_count": 5,
+      "frames": [
+        {
+          "frame": 0,
+          "in_landed_affected_polarity_population": false,
+          "original_fractional_rms": 1.870629505860558,
+          "recovered_current_fractional_rms": 0.36944341053518936,
+          "recovered_currents_a": {
+            "E567DN": 36520.26407488739,
+            "E567UP": 40146.90230335485,
+            "E89DN": 33618.13467482331,
+            "E89UP": 30467.98148177351,
+            "ECOILB": 66907.28509035967
+          },
+          "recovery_relative_residual": 0.07760485928207304,
+          "shot": "d3d_shot_00000c4a7b.parquet"
+        },
+        {
+          "frame": 0,
+          "in_landed_affected_polarity_population": false,
+          "original_fractional_rms": 1.0718583618344484,
+          "recovered_current_fractional_rms": 0.34374710755671395,
+          "recovered_currents_a": {
+            "E567DN": 26892.357279688356,
+            "E567UP": 26456.15919949659,
+            "E89DN": 19306.8262854814,
+            "E89UP": 21261.18009826038,
+            "ECOILB": 42164.74190472533
+          },
+          "recovery_relative_residual": 0.15361775099212552,
+          "shot": "d3d_shot_0003ff34e7.parquet"
+        },
+        {
+          "frame": 0,
+          "in_landed_affected_polarity_population": false,
+          "original_fractional_rms": 1.9920460735474446,
+          "recovered_current_fractional_rms": 0.3764286973856905,
+          "recovered_currents_a": {
+            "E567DN": 44225.2990742778,
+            "E567UP": 43920.105745700086,
+            "E89DN": 35886.08079919551,
+            "E89UP": 36994.73554048504,
+            "ECOILB": 76020.36334739075
+          },
+          "recovery_relative_residual": 0.09563542277738711,
+          "shot": "d3d_shot_0011c2afc9.parquet"
+        },
+        {
+          "frame": 0,
+          "in_landed_affected_polarity_population": false,
+          "original_fractional_rms": 1.9151266527437192,
+          "recovered_current_fractional_rms": 0.4020564960038916,
+          "recovered_currents_a": {
+            "E567DN": 32007.5551795776,
+            "E567UP": 32438.297884499814,
+            "E89DN": 28570.53526969932,
+            "E89UP": 27817.78403734539,
+            "ECOILB": 55069.441726284866
+          },
+          "recovery_relative_residual": 0.06963889788982476,
+          "shot": "d3d_shot_001270afa9.parquet"
+        },
+        {
+          "frame": 0,
+          "in_landed_affected_polarity_population": false,
+          "original_fractional_rms": 1.0746956415413456,
+          "recovered_current_fractional_rms": 0.36659743484577934,
+          "recovered_currents_a": {
+            "E567DN": 31769.766829508593,
+            "E567UP": 31367.084353560575,
+            "E89DN": 24456.90176815967,
+            "E89UP": 25071.07068690143,
+            "ECOILB": 52280.758684672306
+          },
+          "recovery_relative_residual": 0.11706085285001182,
+          "shot": "d3d_shot_001554e054.parquet"
+        }
+      ],
+      "original_median_fractional_rms": 1.870629505860558,
+      "recovered_current_median_fractional_rms": 0.36944341053518936,
+      "recovered_currents_worsen_residual": false,
+      "worsening_fraction": -0.802503163038032,
+      "worsening_percent": -80.2503163038032
+    },
+    "screening_verdict": {
+      "historical_screened_drop_worsening_percent": 68.05412775327228,
+      "historical_worsening_percent": 59.48381810302648,
+      "replacement_screened_worsening_percent": -80.2503163038032,
+      "worsening_survives_historical_frame_drop": true,
+      "worsening_survives_replacement_screen": false,
+      "worsening_was_carried_by_affected_frame": false
+    }
   }
 }

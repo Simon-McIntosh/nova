@@ -14,10 +14,13 @@ def test_preregistration_declares_required_scale_and_split() -> None:
     assert declared["prediction"]["split_unit"] == "shot"
     assert declared["prediction"]["features"] == list(recovery.SHIPPED_FEATURES)
     assert len(recovery.SHIPPED_FEATURES) == 20
-    assert (
-        declared["root_existence_comparison"]["landed_free_boundary_fractional_rms"]
-        == 0.2156505171
-    )
+    assert declared["root_existence_comparison"][
+        "historical_reported_fractional_rms"
+    ] == {
+        "without_recovered_currents": 0.2156505171,
+        "with_recovered_currents": 0.34392767843,
+    }
+    assert declared["root_existence_comparison"]["replacement_frames"] >= 5
 
 
 def test_recover_currents_removes_only_additive_gauge() -> None:
@@ -82,6 +85,37 @@ def test_affected_shots_are_rejected_before_row_read(monkeypatch, tmp_path) -> N
         raise AssertionError("an undersized cohort must fail closed")
 
 
+def test_screened_root_selection_uses_distinct_unaffected_shots(tmp_path) -> None:
+    selected = [
+        recovery.SelectedFrame(tmp_path / f"shot-{index}.parquet", index, float(index))
+        for index in range(7)
+    ]
+    frames = recovery.select_screened_root_frames(selected, {"unrelated.parquet"})
+    assert len(frames) == 5
+    assert len({item["shot"] for item in frames}) == 5
+    assert all(item["shot"] != "unrelated.parquet" for item in frames)
+
+
+def test_historical_screen_drops_only_affected_frame() -> None:
+    records = [
+        {
+            "shot": f"shot-{index}",
+            "frame": index,
+            "original_fractional_rms": value,
+            "recovered_current_fractional_rms": 2.0 * value,
+        }
+        for index, value in enumerate((1.0, 2.0, 3.0, 4.0, 100.0))
+    ]
+    historical = {"frames": records}
+    result = recovery.historical_screened_summary(historical, {"shot-4"})
+    assert result["frame_count"] == 4
+    assert result["dropped_frames"] == [{"shot": "shot-4", "frame": 4}]
+    assert result["original_median_fractional_rms"] == 2.5
+    assert result["recovered_current_median_fractional_rms"] == 5.0
+    assert result["worsening_percent"] == 100.0
+    assert result["recovered_currents_worsen_residual"]
+
+
 def test_committed_receipt_carries_complete_measurement() -> None:
     path = recovery.DEFAULT_OUTPUT / recovery.RECEIPT_NAME
     receipt = json.loads(path.read_text())
@@ -99,8 +133,16 @@ def test_committed_receipt_carries_complete_measurement() -> None:
         len(target["coefficients_a_per_released_channel_unit"]) == 20
         for target in prediction["targets"]
     )
-    assert receipt["root_existence"]["frame_count"] == 5
-    assert (
-        receipt["root_existence"]["landed_baseline_fractional_rms"]
-        == recovery.LANDED_FREE_BOUNDARY_FRACTIONAL_RMS
-    )
+    root = receipt["root_existence"]
+    assert root["replacement_polarity_screened"]["frame_count"] >= 5
+    assert root["replacement_polarity_screened"][
+        "all_shots_screened_free_of_affected_population"
+    ]
+    assert root["historical_polarity_screened_drop"]["frame_count"] == 4
+    assert root["historical_polarity_screened_drop"]["affected_shot_count"] == 0
+    assert root["historical_reported"] == {
+        "without_recovered_currents_fractional_rms": 0.2156505171,
+        "with_recovered_currents_fractional_rms": 0.34392767843,
+        "worsening_percent": root["historical_reported"]["worsening_percent"],
+    }
+    assert "worsening_was_carried_by_affected_frame" in root["screening_verdict"]

@@ -9,7 +9,10 @@ import numpy as np
 import pytest
 from scipy.interpolate import RectBivariateSpline
 
-from nova.equilibrium.flux_surface_extraction import extract_flux_surface_geometry
+from nova.equilibrium.flux_surface_extraction import (
+    _bicubic_arc_moment_correction,
+    extract_flux_surface_geometry,
+)
 from nova.equilibrium.flux_surface_geometry import (
     BISECTION_STEPS,
     LADDER_PER_CELL,
@@ -275,6 +278,122 @@ def test_even_edge_root_pair_is_resolved_on_iter_inner_surface():
         jnp.ones(2, dtype=psi.dtype),
     )[0]
     assert float(jnp.max(jnp.abs(values - level))) < 2e-8
+
+
+def test_short_corner_arc_rejects_a_disconnected_stationary_split():
+    """Reflected corner crossings stay separate from a remote spline branch."""
+    configure_dtypes()
+    coefficient = jnp.asarray(
+        [
+            [
+                [
+                    0.8925411017500524,
+                    0.9161396415231808,
+                    0.9404617198937791,
+                    0.9657067643658207,
+                ],
+                [
+                    0.8671276615558743,
+                    0.8914403240931793,
+                    0.9164302365820515,
+                    0.9424437222102411,
+                ],
+                [
+                    0.8413108568604310,
+                    0.8664035350228159,
+                    0.8919292635507745,
+                    0.9187155804523564,
+                ],
+                [
+                    0.8162481223885881,
+                    0.8420013999453246,
+                    0.8681904173648530,
+                    0.8956971641040243,
+                ],
+            ],
+            [
+                [
+                    0.8162481223885526,
+                    0.8420013999452904,
+                    0.8681904173648256,
+                    0.8956971641040031,
+                ],
+                [
+                    0.8413108568603900,
+                    0.8664035350227755,
+                    0.8919292635507445,
+                    0.9187155804523355,
+                ],
+                [
+                    0.8671276615558363,
+                    0.8914403240931420,
+                    0.9164302365820267,
+                    0.9424437222102267,
+                ],
+                [
+                    0.8925411017500188,
+                    0.9161396415231480,
+                    0.9404617198937589,
+                    0.9657067643658089,
+                ],
+            ],
+        ]
+    )
+    corners = jnp.asarray(
+        [
+            [
+                0.8925411017500524,
+                0.9657067643658207,
+                0.8956971641040243,
+                0.8162481223885881,
+            ],
+            [
+                0.8162481223885526,
+                0.8956971641040031,
+                0.9657067643658089,
+                0.8925411017500188,
+            ],
+        ]
+    )
+    level = jnp.asarray(0.81625)
+    result = _bicubic_arc_moment_correction(
+        level,
+        coefficient,
+        corners,
+        jnp.asarray(1.0),
+        jnp.asarray(1.0),
+        jnp.zeros((2, 4)),
+    )
+    crossing_points = np.asarray(result[1]).reshape(2, 4, 3, 2)
+    crossing = np.asarray(result[2]).reshape(2, 4, 3)
+    assert np.array_equal(crossing.sum(axis=(1, 2)), np.asarray((2, 2)))
+    radial_offset = 2.4301931262016296e-5
+    vertical_offset = 2.497248351570392e-5
+    expected = (
+        (
+            (2, np.asarray((radial_offset, 1.0))),
+            (3, np.asarray((0.0, 1.0 - vertical_offset))),
+        ),
+        (
+            (0, np.asarray((radial_offset, 0.0))),
+            (3, np.asarray((0.0, vertical_offset))),
+        ),
+    )
+    for cell, edge_roots in enumerate(expected):
+        for edge, point in edge_roots:
+            np.testing.assert_allclose(
+                crossing_points[cell, edge, 0], point, rtol=0.0, atol=2e-8
+            )
+    sample_valid = np.asarray(result[6])
+    assert np.array_equal(sample_valid.sum(axis=1), np.asarray((12, 12)))
+    assert bool(jnp.all(result[-1]))
+    for cell in range(2):
+        values = _bicubic_derivatives(
+            coefficient[cell],
+            result[3][cell, sample_valid[cell]],
+            result[4][cell, sample_valid[cell]],
+        )[0]
+        assert float(jnp.max(jnp.abs(values - level))) < 2e-8
 
 
 def test_analytic_shape_gradient_jit_and_batch_contract():

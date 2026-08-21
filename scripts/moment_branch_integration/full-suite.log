@@ -1,0 +1,168 @@
+slurmstepd: error: Unable to create TMPDIR [/run/user/39486]: Permission denied
+slurmstepd: error: Setting TMPDIR to /tmp
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.1.1, pluggy-1.6.0
+rootdir: /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/moment-branch-integration
+configfile: pyproject.toml
+plugins: anyio-4.14.2, zarr-3.2.1, asyncio-1.4.0, typeguard-2.13.3, jaxtyping-0.3.11, cov-7.1.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+collected 3233 items / 365 deselected / 2868 selected
+
+tests/test_equilibrium_analytic_oracle.py ...                            [  0%]
+tests/test_equilibrium_density_moments.py ...                            [  0%]
+tests/test_equilibrium_diagnostics.py .................................. [  1%]
+....................                                                     [  2%]
+tests/test_equilibrium_flux_surface_geometry.py ............             [  2%]
+tests/test_equilibrium_forward.py ...................................    [  3%]
+tests/test_equilibrium_harmonic.py ......................                [  4%]
+tests/test_equilibrium_moment.py ...................                     [  5%]
+tests/test_equilibrium_profile.py .......                                [  5%]
+tests/test_equilibrium_rotation.py ..............................        [  6%]
+tests/test_equilibrium_separatrix_clip.py ...................            [  7%]
+tests/test_equilibrium_sol.py ........................                   [  7%]
+tests/test_equilibrium_stencil_mesh.py ...................               [  8%]
+tests/test_biot_import_without_jax.py ......                             [  8%]
+tests/test_biotarc.py .........                                          [  9%]
+tests/test_biotarcamplitude.py ......................................... [ 10%]
+................                                                         [ 11%]
+tests/test_biotarcbandedcoupling.py ..............                       [ 11%]
+tests/test_biotarcrows.py .......................................        [ 12%]
+tests/test_biotarctiledbackend.py ....                                   [ 13%]
+tests/test_biotarray.py ....                                             [ 13%]
+tests/test_biotbandedcoupling.py .....................................   [ 14%]
+tests/test_biotbow.py .......                                            [ 14%]
+tests/test_biotcircle.py ............                                    [ 15%]
+tests/test_biotcompleteelliptic.py ..................................... [ 16%]
+....                                                                     [ 16%]
+tests/test_biotconstants.py ......................................       [ 17%]
+tests/test_biotcoupling.py .................                             [ 18%]
+tests/test_biotcylinder.py ....................                          [ 19%]
+tests/test_biotelliptic.py ............................................. [ 20%]
+........................................................................ [ 23%]
+........................................................................ [ 25%]
+.......................................................................  [ 28%]
+tests/test_biotfluxcoupling.py .......                                   [ 28%]
+tests/test_biotframe.py ..............                                   [ 29%]
+tests/test_biotgeometryautograd.py ........                              [ 29%]
+tests/test_biotgeometryparameters.py ...............................     [ 30%]
+tests/test_biotgeometrysolve.py ...........                              [ 30%]
+tests/test_biotgreens.py ...............................xxx.........     [ 32%]
+tests/test_biotincompleteelliptic.py ................................... [ 33%]
+........................................................................ [ 36%]
+........................................................................ [ 38%]
+........................................................................ [ 41%]
+........................................................................ [ 43%]
+........................................................................ [ 46%]
+........................................................................ [ 48%]
+..............................................................sss....... [ 51%]
+........................................................................ [ 53%]
+........................................................................ [ 56%]
+........................................................................ [ 58%]
+.                                                                        [ 58%]
+tests/test_biotincompletemoments.py .................................... [ 59%]
+........................................................................ [ 62%]
+........................................................................ [ 64%]
+......................................                                   [ 66%]
+tests/test_biotmatrix.py ....................                            [ 66%]
+tests/test_biotoperate.py .................................              [ 68%]
+tests/test_biotpolybeam.py ..........................                    [ 69%]
+tests/test_biotpolybow.py .........................                      [ 69%]
+tests/test_biotpolygonanalytic.py ...................................... [ 71%]
+........................................................................ [ 73%]
+.........                                                                [ 74%]
+tests/test_biotpolygonarc.py ........................................... [ 75%]
+.......                                                                  [ 75%]
+tests/test_biotpolygongradient.py ..........                             [ 76%]
+tests/test_biotpolygonmoments.py ........                                [ 76%]
+tests/test_biotpolysection.py ........................                   [ 77%]
+tests/test_biotrangefunction.py ...................................      [ 78%]
+tests/test_biotsectionaverage.py .................................       [ 79%]
+tests/test_biotsinemoments.py .......................................... [ 81%]
+........................................................................ [ 83%]
+........................................................................ [ 86%]
+........................................................................ [ 88%]
+................................................                         [ 90%]
+tests/test_biotsymmetricelliptic.py .................................... [ 91%]
+........................................................................ [ 94%]
+......................                                                   [ 94%]
+tests/test_biottargetmoments.py ....                                     [ 94%]
+tests/test_biottiledassembly.py ..........                               [ 95%]
+tests/test_biottoroidalaverage.py ..                                     [ 95%]
+tests/test_biottoroidalharmonic.py ..................................... [ 96%]
+.......................................................................  [ 99%]
+tests/test_biotzeta.py .....................                             [ 99%]
+tests/test_solovev_recovery_gates.py ....                                [100%]
+
+=============================== warnings summary ===============================
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_biotarc.py::test_jacobi_amplitude, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_biotsavart.py::test_axial_vertical_field, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_biotsavart.py::test_magnetic_field_analytic_poloidal_plane, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_biotsavart.py::test_magnetic_field_analytic_non_axisymmetric, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_biotsavart.py::test_3d_line_arc, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_biotsavart_3d.py::test_segment_field_attrs_axisymmetric, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+../../../../nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124
+  /home/ITER/mcintos/Code/nova/.venv/lib/python3.14/site-packages/_pytest/python.py:124: PytestRemovedIn10Warning: Passing a non-Collection iterable to parametrize is deprecated.
+  Test: tests/test_biotsavart_3d.py::test_segment_field_attrs_non_axisymmetric, argvalues type: product
+  Please convert to a list or tuple.
+  See https://docs.pytest.org/en/stable/deprecations.html#parametrize-iterators
+    metafunc.parametrize(*marker.args, **marker.kwargs, _param_mark=marker)
+
+tests/test_biotelliptic.py: 12 warnings
+  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/moment-branch-integration/tests/test_biotelliptic.py:492: IntegrationWarning: The occurrence of roundoff error is detected, which prevents
+    the requested tolerance from being achieved.  The error may be
+    underestimated.
+    expected, _ = scipy.integrate.quad(
+
+tests/test_biotelliptic.py: 14 warnings
+  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/moment-branch-integration/tests/test_biotelliptic.py:832: IntegrationWarning: The occurrence of roundoff error is detected, which prevents
+    the requested tolerance from being achieved.  The error may be
+    underestimated.
+    value, _ = scipy.integrate.quad(
+
+tests/test_biotelliptic.py: 24 warnings
+  /home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/5384e3ab-85b1-4ca8-914b-bcb194a05e29/moment-branch-integration/tests/test_biotelliptic.py:918: IntegrationWarning: The occurrence of roundoff error is detected, which prevents
+    the requested tolerance from being achieved.  The error may be
+    underestimated.
+    expected, _ = scipy.integrate.quad(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+SKIPPED [3] tests/test_biotincompleteelliptic.py:545: the denormal partner, whose boundary its own test measures
+= 2862 passed, 3 skipped, 365 deselected, 3 xfailed, 57 warnings in 795.07s (0:13:15) =
+EXIT=0

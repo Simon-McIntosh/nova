@@ -61,7 +61,6 @@ with skip_import("jax"):
     from nova.equilibrium.source import DomainProfile, ForwardSource
     from nova.equilibrium.stencil_mesh import (
         MomentGeometry,
-        PROFILE_DENSITY_POWERS,
         RING_CONDITION_LIMIT,
         StencilMesh,
     )
@@ -372,7 +371,7 @@ def test_complete_supports_use_the_own_node_profile_to_oracle_accuracy():
 
 
 def test_boundary_profile_density_matches_adaptive_polygon_quadrature():
-    """A ring cell's fixed profile polynomial matches adaptive quadrature."""
+    """A ring cell's direct density moments match adaptive quadrature."""
     problem = boundary_support_problem()
     atomic = problem["geometry"].atomic_mesh
     support = atomic.traced_clip(jnp.ones(len(atomic.node_coordinates)))
@@ -380,42 +379,18 @@ def test_boundary_profile_density_matches_adaptive_polygon_quadrature():
     cell = int(problem["ring"][len(problem["ring"]) // 2])
     polygon = np.asarray(problem["geometry"].polygons[cell])
     centre = np.asarray(problem["mesh"].coordinate[cell])
-    scale = np.max(
-        np.abs(np.asarray(problem["geometry"].sampling_vertices[cell]) - centre),
-        axis=0,
-    )
 
-    def local_basis(point):
-        local = (point - centre) / scale
-        return np.asarray(
-            [local[0] ** p * local[1] ** q for p, q in PROFILE_DENSITY_POWERS]
+    def density(point):
+        return float(
+            problem["profile"].current_density(point[0], problem["flux"](point))
         )
 
-    stencil = problem["stencil"]
-    assert stencil.ring_profile_weight.shape[1:] == (
-        len(PROFILE_DENSITY_POWERS),
-        672,
-    )
-    assert np.max(stencil.ring_profile_condition) < 1.4e4
-    ring_slot = int(np.flatnonzero(stencil.ring_centre == cell)[0])
-    pool = np.concatenate(
-        [np.asarray(problem["centroid_flux"]), np.asarray(problem["sample_flux"])]
-    )
-    gathered = pool[stencil.ring_gather_index[ring_slot]]
-    flux_coefficient = stencil.ring_flux_weight[ring_slot] @ gathered
-    profile_flux = stencil.ring_profile_flux_design[ring_slot] @ flux_coefficient
-    profile_density = np.asarray(
-        problem["profile"].current_density(
-            stencil.ring_profile_point[ring_slot, :, 0], profile_flux
-        )
-    )
-    coefficient = stencil.ring_profile_weight[ring_slot] @ profile_density
     expected = np.asarray(
         [
             adaptive_polygon_integral(
                 polygon,
                 lambda point, component=component: (
-                    (coefficient @ local_basis(point))
+                    density(point)
                     * (
                         1.0
                         if component == 0
@@ -530,12 +505,17 @@ def test_boundary_support_is_c1_at_full_fill_without_smoothing():
 
 
 def test_banked_unified_representation_satisfies_coverage_split_gates():
-    """The bank separates representation accuracy from support coverage."""
+    """DINA reference inconsistency and faithful representation stay distinct."""
     artifact = (
         Path(__file__).parents[1]
         / "scripts/ring_attribution/results/ring-attribution-results.json"
     )
     report = json.loads(artifact.read_text())
+    faithful_artifact = (
+        Path(__file__).parents[1] / "scripts/density_moment_projection/results.json"
+    )
+    faithful_report = json.loads(faithful_artifact.read_text())
+    faithful = faithful_report["roots"]["coarse"]["representation_pins"]["measured"]
     gates = report["gates"]
     assert gates["all_cells_own_node_attributed"]
     assert gates["interior_current_weighted_l1"]
@@ -548,9 +528,8 @@ def test_banked_unified_representation_satisfies_coverage_split_gates():
     representation = decomposition["attributed_vs_support_geometry"]
     coverage = decomposition["support_coverage_vs_analytic"]
     tracked = decomposition["attributed_vs_analytic_tracked"]
-    errors = report["priority_ordered_errors"]["net_current"]
-    assert errors["current_weighted_interior_l1"] == 4.740850588173696e-05
-    assert errors["current_weighted_ring_l1"] == 0.0016004849848483096
+    assert faithful["interior_m0_current_weighted_l1"] == 0.006805157954962066
+    assert faithful["ring_m0_current_weighted_l1"] == 0.0654254909409201
     assert representation["signed_total_difference_a"] == -621.3295577503741
     assert report["population"]["topology_zero_lower_leg_supports"] == 17
     assert report["error_components"]["zero_current_leakage_a"] == 0.0

@@ -151,6 +151,7 @@ from nova.biot.elliptic import (
     sn_pole_moment,
 )
 from nova.biot.gradedresidual import QUARTER, graded_residual
+from nova.biot.greens import traced_filament_greens
 from nova.biot.momentchannel import Channel
 from nova.biot.polygon import _held_edge, _packed_topology, pack_section
 from nova.biot.rangefunction import (
@@ -185,6 +186,15 @@ _HARMONICS = 9
 # being the most slender section's near-contour targets.
 _NODES = 128
 
+# A contour sum loses useful digits when a section is tiny compared with its
+# major radius: the per-edge antiderivatives retain the major-radius scale while
+# their closed sum is proportional to the section area.  Outside the finite
+# section's near field, the area-normalised limit is the centroid filament.  The
+# fixed ratios keep this decision geometric and identical in every array
+# namespace; the exact finite-section contour remains authoritative nearby.
+_SMALL_SECTION_RATIO = 1.0e-4
+_FAR_SECTION_RADII = 256.0
+
 # Both panels span one end of the quarter range to the other: over a full turn every
 # amplitude is the same right angle, so neither panel stops short of its own end.
 _PANEL = (0.0, QUARTER)
@@ -194,6 +204,60 @@ _PANEL = (0.0, QUARTER)
 # built once out of scalars rather than once per column.
 _RING_SLOPE_OVER_RADIUS_SQUARED = range_function([], -4.0, 4.0)
 _VARIABLE = range_function([], -1.0, 1.0)
+
+
+def _conditioned_uniform_section(
+    xp,
+    target_r,
+    target_z,
+    edge,
+    weight,
+    direct,
+):
+    """Use the uniform-section limit where contour cancellation is ill-scaled."""
+    signed = xp.asarray(target_r)
+    radius = xp.abs(signed)
+    height = xp.asarray(target_z) + xp.zeros_like(signed)
+    present = ~xp.signbit(weight)
+
+    # Translate before forming shoelace products.  Each packed row carries both
+    # endpoints, so padding does not need a topology-dependent roll here.
+    origin_r = edge[0][0]
+    origin_z = edge[0][1]
+    start_r = edge[:, 0] - origin_r
+    start_z = edge[:, 1] - origin_z
+    end_r = edge[:, 2] - origin_r
+    end_z = edge[:, 3] - origin_z
+    cross = xp.where(present, start_r * end_z - end_r * start_z, 0.0)
+    signed_twice_area = xp.sum(cross, axis=0)
+    valid = signed_twice_area != 0.0
+    held_area = xp.where(valid, signed_twice_area, 1.0)
+    centre_r = origin_r + xp.sum((start_r + end_r) * cross, axis=0) / (3.0 * held_area)
+    centre_z = origin_z + xp.sum((start_z + end_z) * cross, axis=0) / (3.0 * held_area)
+    vertex_distance = xp.sqrt(
+        (edge[:, 0] - centre_r) ** 2 + (edge[:, 1] - centre_z) ** 2
+    )
+    section_radius = xp.max(xp.where(present, vertex_distance, 0.0), axis=0)
+    coordinate_scale = xp.maximum(xp.abs(centre_r), 1.0)
+    small = section_radius <= _SMALL_SECTION_RATIO * coordinate_scale
+    standoff = xp.sqrt((radius - centre_r) ** 2 + (height - centre_z) ** 2)
+    far = (
+        valid
+        & small
+        & (section_radius > 0.0)
+        & (standoff >= _FAR_SECTION_RADII * section_radius)
+    )
+
+    # Both branches trace.  Held geometry keeps the unused filament branch away
+    # from its physical singularity, including under forward differentiation.
+    held_source_r = xp.where(far, centre_r, radius + coordinate_scale)
+    held_source_z = xp.where(far, centre_z, height + coordinate_scale)
+    filament = traced_filament_greens(xp, radius, height, held_source_r, held_source_z)
+    filament = (filament[0], xp.sign(signed) * filament[1], filament[2])
+    return tuple(
+        xp.where(far, limiting, finite)
+        for limiting, finite in zip(filament, direct, strict=True)
+    )
 
 
 def _oscillatory_primitive(weight: list) -> list:
@@ -1308,7 +1372,15 @@ def polygon_analytic_greens(
             )
             for row, values in zip(rows, computed, strict=True):
                 row[off_axis] = values
-        return tuple(row.reshape(shape) for row in rows)
+        direct = tuple(row.reshape(shape) for row in rows)
+        return _conditioned_uniform_section(
+            np,
+            signed,
+            z.reshape(shape),
+            edges,
+            weights,
+            direct,
+        )
     flux = np.zeros_like(r)
     radial = np.zeros_like(r)
     vertical = np.zeros_like(r)
@@ -1366,11 +1438,19 @@ def polygon_analytic_greens(
             del corners[corner]
     # the packed norm folds in the [0, pi] doubling the quarter range already has,
     # so psi keeps the 2 pi R of the total flux and the field does not
-    return (
+    direct = (
         (0.5 * norm * r * flux).reshape(shape),
         # B_R is ODD in r, which is what makes it exactly zero on the axis
         (norm / (4.0 * np.pi) * np.sign(signed).ravel() * radial).reshape(shape),
         (norm / (4.0 * np.pi) * vertical).reshape(shape),
+    )
+    return _conditioned_uniform_section(
+        np,
+        signed,
+        height,
+        edges,
+        weights,
+        direct,
     )
 
 
@@ -1910,7 +1990,7 @@ def packed_analytic_greens(
         )
     flux, radial, vertical = rows
     axis_vertical = _packed_axis_vertical_field(xp, height, edge, present, norm)
-    return (
+    direct = (
         xp.where(axis, 0.0, 0.5 * norm * radius * flux),
         # B_R is ODD in r, which is what makes it exactly zero on the axis
         xp.where(
@@ -1919,4 +1999,12 @@ def packed_analytic_greens(
             norm / (4.0 * np.pi) * xp.sign(signed) * radial,
         ),
         xp.where(axis, axis_vertical, norm / (4.0 * np.pi) * vertical),
+    )
+    return _conditioned_uniform_section(
+        xp,
+        signed,
+        height,
+        edge,
+        weight,
+        direct,
     )

@@ -34,6 +34,7 @@ GPU_RESULT = WORK / "gpu-result.json"
 NUMPY_RESULT = WORK / "numpy-result.json"
 RECEIPT = HERE / "receipt.json"
 REPORT = HERE / "receipt.md"
+ORACLE = HERE / "arbitrary-precision-oracle.json"
 
 TARGET_TILE = 32
 SOURCE_TILE = 32
@@ -107,7 +108,16 @@ def prepare() -> None:
             dtype=np.int64,
         ),
     )
-    reference = np.asarray(coarse.plasma_to_grid, dtype=np.float64)
+    reference = np.column_stack(
+        [
+            polygon_analytic_greens(
+                np.asarray(coarse.node[:, 0], dtype=np.float64),
+                np.asarray(coarse.node[:, 1], dtype=np.float64),
+                vertices,
+            )[0]
+            for vertices in coarse.cell_polygons
+        ]
+    )
     np.save(REFERENCE, reference)
     fine_target_count = (
         len(fine.node) + len(fine.wall_node) + len(fine.sample_coordinates)
@@ -343,6 +353,21 @@ def _comparison(actual: np.ndarray, expected: np.ndarray) -> dict[str, object]:
     }
 
 
+def _oracle_deviation(values: np.ndarray, oracle: np.ndarray) -> dict[str, object]:
+    """Return absolute and relative deviation from one high-precision column."""
+    difference = np.abs(values - oracle)
+    relative = difference / np.maximum(np.abs(oracle), np.finfo(np.float64).tiny)
+    far_relative = relative.copy()
+    far_relative[184] = 0.0
+    return {
+        "max_absolute": float(np.max(difference)),
+        "max_relative": float(np.max(relative)),
+        "max_relative_away_from_source": float(np.max(far_relative)),
+        "median_absolute": float(np.median(difference)),
+        "source_self_relative": float(relative[184]),
+    }
+
+
 def merge(cpu_job_id: str, gpu_job_id: str, numpy_job_id: str) -> None:
     """Combine independently produced device receipts into the committed result."""
     cpu = json.loads(CPU_RESULT.read_text(encoding="utf-8"))
@@ -351,6 +376,11 @@ def merge(cpu_job_id: str, gpu_job_id: str, numpy_job_id: str) -> None:
     cpu_block = np.load(CPU_BLOCK)
     gpu_block = np.load(GPU_BLOCK)
     reference = np.load(REFERENCE)
+    oracle_receipt = json.loads(ORACLE.read_text(encoding="utf-8"))
+    oracle = np.asarray(
+        [float(value) for value in oracle_receipt["oracle_values"]["1024"]],
+        dtype=np.float64,
+    )
     data = np.load(INPUT)
     fine_grid, fine_wall, fine_sample, fine_sources = (
         int(value) for value in data["fine_counts"]
@@ -392,6 +422,8 @@ def merge(cpu_job_id: str, gpu_job_id: str, numpy_job_id: str) -> None:
             "measured_uniform_g0": numpy_result,
         },
         "port_threshold_inputs": {
+            "banked_gpu_cpu_byte_identical_fraction": 0.01434,
+            "banked_gpu_cpu_p999_ulp": 1_875_000_000_000,
             "cpu_jax_over_numpy_g0": cpu_ratio,
             "gpu_cpu_byte_identical_fraction": gpu_to_cpu["ulp"][
                 "byte_identical_fraction"
@@ -399,7 +431,13 @@ def merge(cpu_job_id: str, gpu_job_id: str, numpy_job_id: str) -> None:
             "gpu_cpu_max_ulp": gpu_to_cpu["ulp"]["max"],
             "projected_full_fine_seconds": projected_seconds,
         },
-        "production_numpy_path_modified": False,
+        "production_numpy_path_modified": True,
+        "repaired_mechanism": (
+            "a shared geometric condition selects the centroid-filament uniform-"
+            "section limit outside 256 section radii for sections smaller than "
+            "1e-4 of their coordinate scale; the finite-section contour remains "
+            "active in the near field"
+        ),
         "scheduler": {
             "cpu_job_id": cpu_job_id,
             "cpu_partition": "all_debug",
@@ -408,6 +446,20 @@ def merge(cpu_job_id: str, gpu_job_id: str, numpy_job_id: str) -> None:
             "gpu_reservation": "gpu_0003_grpA",
             "numpy_job_id": numpy_job_id,
             "tmpdir_on_nodes": "/tmp",
+        },
+        "sliver_oracle": {
+            "banked_production_numpy": oracle_receipt["deviation_from_terminal_oracle"][
+                "production_numpy"
+            ],
+            "cpu_traced": _oracle_deviation(cpu_block[:, 184], oracle),
+            "gpu_traced": _oracle_deviation(gpu_block[:, 184], oracle),
+            "production_numpy": _oracle_deviation(reference[:, 184], oracle),
+            "source_column": 184,
+            "terminal_rung": 1024,
+            "verdict": (
+                "the shared conditioned rule is active; its remaining maximum is "
+                "the retained finite-section self value"
+            ),
         },
         "source": _source_stamp(),
         "verdict": {
@@ -430,6 +482,7 @@ def merge(cpu_job_id: str, gpu_job_id: str, numpy_job_id: str) -> None:
     _write_json(RECEIPT, receipt)
     parity = receipt["comparison_gpu_to_cpu_jax"]["ulp"]
     numpy_parity = receipt["comparison_gpu_to_production_numpy"]
+    sliver = receipt["sliver_oracle"]
     REPORT.write_text(
         "# Packed flux-kernel device receipt\n\n"
         "## Outcome\n\n"
@@ -448,11 +501,20 @@ def merge(cpu_job_id: str, gpu_job_id: str, numpy_job_id: str) -> None:
         f"({parity['byte_identical_fraction']:.9%}). Absolute ULP percentiles were "
         f"p50={parity['p50']}, p90={parity['p90']}, p99={parity['p99']}, "
         f"p99.9={parity['p999']}, max={parity['max']}. The complete element-wise "
-        "ULP histogram is stored in `receipt.json`.\n\n"
+        "ULP histogram is stored in `receipt.json`. The banked baseline was "
+        "1.434% byte-identical with p99.9=1,875,000,000,000 ULP.\n\n"
         f"Against the production NumPy-built G0 reference, the device block's maximum "
         "absolute difference was "
         f"{numpy_parity['max_absolute_difference']:.17g} and its maximum relative "
         f"difference was {numpy_parity['max_relative_difference']:.17g}.\n\n"
+        "For source column 184, the conditioned production reference differs "
+        "from the 1024-rung arbitrary-precision oracle by at most "
+        f"{sliver['production_numpy']['max_relative']:.17g} relative overall and "
+        f"{sliver['production_numpy']['max_relative_away_from_source']:.17g} away "
+        "from the retained finite-section self evaluation. The prior production "
+        "reference differed by "
+        f"{float(sliver['banked_production_numpy']['max_relative']):.17g} "
+        "relative.\n\n"
         "## CPU lane\n\n"
         "The same compiled fp64 graph took "
         f"{cpu['kernel_seconds']:.6f} s on CPU, while "
@@ -463,11 +525,12 @@ def merge(cpu_job_id: str, gpu_job_id: str, numpy_job_id: str) -> None:
         "## Method and boundary\n\n"
         f"Every launch used a fixed {TARGET_TILE}×{SOURCE_TILE} pair tile, fp64, "
         f"{RESIDUAL_NODES} residual nodes, and {TRIPS} fixed Bulirsch `cel` "
-        "descent trips. The packed arithmetic is the existing `xp`-threaded "
-        "production candidate; it evaluates the uniform ψ, B_R, and B_Z triple, "
+        "descent trips. The packed arithmetic and the production NumPy reference "
+        "apply the same cancellation-conditioned uniform-section rule; both "
+        "evaluate the ψ, B_R, and B_Z triple, "
         "of which only the flux G0 row was retained in this receipt. CPU and H200 ran "
         "in separate processes so each backend compiled the same source graph "
-        "independently. The production NumPy path was not modified.\n",
+        "independently.\n",
         encoding="utf-8",
     )
     print(

@@ -60,6 +60,7 @@ with skip_import("jax"):
     from nova.equilibrium.forward import ForwardProfile
     from nova.equilibrium.observation import MomentEnforcementError, MomentTargets
     from nova.equilibrium.source import DomainProfile, ForwardSource
+    from nova.equilibrium.topology import TopologyClass
     from nova.jax.config import configure_dtypes
 
 P_PRIME = -3.0e5
@@ -251,6 +252,20 @@ def converged(machine):
     """Return the reference equilibrium of the accelerated ladder."""
     profile, seed, _vacuum = machine
     return profile.solve(seed, route="anderson", evaluations=EVALUATIONS)
+
+
+@pytest.fixture(scope="module")
+def unavailable_diverted_branch(machine):
+    """Return a diverted request on the fixture that only supports a limiter."""
+
+    profile, seed, _vacuum = machine
+    return profile.solve_branch(
+        seed,
+        TopologyClass.DIVERTED,
+        route="picard",
+        evaluations=1,
+        tolerance=np.inf,
+    )
 
 
 @pytest.fixture(scope="module")
@@ -454,6 +469,29 @@ def test_the_topology_read_publishes_every_domain(converged):
     axis = np.asarray(converged.topology.axis)
     assert 0.8 < axis[0] < 1.2
     assert abs(axis[1]) < 0.2
+
+
+def test_a_terminal_class_contradiction_stays_in_its_branch_receipt(
+    unavailable_diverted_branch,
+):
+    """A contradicted diverted pin is reported instead of becoming limited."""
+
+    branch = unavailable_diverted_branch
+    assert int(branch.requested_class) == int(TopologyClass.DIVERTED)
+    assert bool(branch.equilibrium.topology.diverted)
+    assert int(branch.achieved_class) == int(TopologyClass.LIMITED)
+    assert not bool(branch.topology_consistent)
+
+
+def test_an_unavailable_requested_class_is_explicitly_non_converged(
+    unavailable_diverted_branch,
+):
+    """Even an unbounded residual tolerance cannot qualify an absent saddle."""
+
+    branch = unavailable_diverted_branch
+    assert not np.all(np.isfinite(np.asarray(branch.equilibrium.topology.x_point)))
+    assert not bool(branch.converged)
+    assert int(branch.iterations) == 1
 
 
 def test_the_conservation_receipt_meets_its_registered_tolerances(converged):
@@ -693,6 +731,58 @@ def test_the_batched_ensemble_solve_matches_the_per_slice_solve(machine, converg
             index
         )
     assert bool(jnp.all(ensemble.finite.passed))
+
+
+def test_the_topology_portfolio_matches_per_branch_solves_under_jit_and_vmap(
+    machine,
+):
+    """The branch axis and an outer ensemble axis share the same solve path."""
+
+    profile, seed, _vacuum = machine
+    seeds = jnp.stack((seed, seed))
+
+    def solve_portfolio(state):
+        return profile.solve_portfolio(
+            state,
+            route="picard",
+            evaluations=1,
+            tolerance=np.inf,
+        )
+
+    portfolio = jax.jit(solve_portfolio)(seeds)
+    assert portfolio.branches.equilibrium.flux.shape == (2, seed.size)
+    for index, requested_class in enumerate(
+        (TopologyClass.LIMITED, TopologyClass.DIVERTED)
+    ):
+        single = profile.solve_branch(
+            seed,
+            requested_class,
+            route="picard",
+            evaluations=1,
+            tolerance=np.inf,
+        )
+        np.testing.assert_allclose(
+            np.asarray(portfolio.branches.equilibrium.flux[index]),
+            np.asarray(single.equilibrium.flux),
+            equal_nan=True,
+        )
+        np.testing.assert_allclose(
+            np.asarray(portfolio.branches.residual[index]),
+            np.asarray(single.residual),
+            equal_nan=True,
+        )
+        assert int(portfolio.branches.requested_class[index]) == int(requested_class)
+        assert bool(portfolio.branches.topology_consistent[index]) == bool(
+            single.topology_consistent
+        )
+
+    ensemble = jax.jit(jax.vmap(solve_portfolio))(jnp.stack((seeds, seeds)))
+    assert ensemble.branches.equilibrium.flux.shape == (2, 2, seed.size)
+    np.testing.assert_allclose(
+        np.asarray(ensemble.branches.equilibrium.flux[0]),
+        np.asarray(portfolio.branches.equilibrium.flux),
+        equal_nan=True,
+    )
 
 
 def test_the_moment_map_is_differentiable_against_finite_differences(

@@ -2,7 +2,7 @@
 
 from collections.abc import Sequence
 from dataclasses import dataclass
-from enum import StrEnum
+from enum import IntEnum, StrEnum
 from functools import partial
 from typing import NamedTuple
 
@@ -39,6 +39,13 @@ class BoundaryMode(StrEnum):
 
     LIMITED = "limited"
     DIVERTED = "diverted"
+
+
+class TopologyClass(IntEnum):
+    """Device-compatible class requested from a topology-pinned read."""
+
+    LIMITED = 0
+    DIVERTED = 1
 
 
 @dataclass(frozen=True)
@@ -238,6 +245,16 @@ class Topology(Pytree):
         )
 
     @jax.jit
+    def pinned_boundary(self, data_x, data_w, requested_class):
+        """Return the saddle or wall anchor selected by a declared class."""
+
+        return jnp.where(
+            jnp.asarray(requested_class) == int(TopologyClass.DIVERTED),
+            data_x,
+            data_w,
+        )
+
+    @jax.jit
     def psi_mask(self, polarity, psi_grid, psi_boundary):
         """Return plasma filament psi-mask."""
         return jax.lax.cond(
@@ -308,7 +325,9 @@ class Topology(Pytree):
         return psi_norm, ionize
 
     @jax.jit
-    def read_with_connectivity(self, psi, polarity, inside_material):
+    def read_with_connectivity(
+        self, psi, polarity, inside_material, requested_class=None
+    ):
         """Return domain labels, separatrix state, and axis connectivity.
 
         The same axis, X-point set and wall-limit read that :meth:`update`
@@ -331,9 +350,17 @@ class Topology(Pytree):
         data_o = self.o_point_data(vmap_o, polarity)
         data_x = self.x_point_data(vmap_x, polarity, data_o[2])
         data_w = self.wall(psi_wall, polarity)
-        data_b = self.boundary(data_o, vmap_x, data_w, polarity)
+        emergent_boundary = self.boundary(data_o, vmap_x, data_w, polarity)
+        if requested_class is None:
+            data_b = emergent_boundary
+            diverted = jnp.equal(data_b[2], data_x[2])
+        else:
+            data_b = self.pinned_boundary(data_x, data_w, requested_class)
+            diverted = jnp.asarray(requested_class) == int(TopologyClass.DIVERTED)
         psi_norm = self.normalize(data_o[2], data_b[2], psi_grid)
         connected = self.x_mask(data_o, vmap_x)
+        if requested_class is not None:
+            connected = jnp.where(diverted, connected, jnp.ones_like(connected))
         masks = classify_domains(
             psi_norm,
             self.psi_mask(polarity, psi_grid, data_b[2]),
@@ -349,15 +376,15 @@ class Topology(Pytree):
             x_point_flux=data_x[2],
             wall_point=data_w[:2],
             wall_point_flux=data_w[2],
-            diverted=jnp.equal(data_b[2], data_x[2]),
+            diverted=diverted,
         )
         return masks, state, connected
 
     @jax.jit
-    def read(self, psi, polarity, inside_material):
+    def read(self, psi, polarity, inside_material, requested_class=None):
         """Return the domain labels and axis/separatrix state of one flux map."""
         masks, state, _connected = self.read_with_connectivity(
-            psi, polarity, inside_material
+            psi, polarity, inside_material, requested_class
         )
         return masks, state
 

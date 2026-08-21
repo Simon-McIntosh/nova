@@ -25,7 +25,7 @@ with skip_import("jax"):
     import jax.numpy as jnp
 
     from nova.biot.null import Null1D, Null2D
-    from nova.equilibrium.topology import Topology
+    from nova.equilibrium.topology import Topology, TopologyClass
     from nova.jax.config import configure_dtypes
 
 
@@ -82,6 +82,24 @@ def test_x_point_binds_when_its_flux_is_confined_most(topology):
     data_w = [1.05, 0.0, 0.6]
     out = _boundary(topology, data_o, vmap_x, data_w)
     np.testing.assert_allclose(out, vmap_x[0])
+
+
+@pytest.mark.parametrize(
+    ("requested_class", "expected"),
+    (
+        (TopologyClass.LIMITED, [1.05, 0.0, 0.6]),
+        (TopologyClass.DIVERTED, [1.0, -0.4, 0.8]),
+    ),
+)
+def test_declared_class_selects_its_boundary_anchor(
+    topology, requested_class, expected
+):
+    """The device pin is exactly the wall-versus-saddle truth table."""
+
+    data_x = jnp.asarray([1.0, -0.4, 0.8])
+    data_w = jnp.asarray([1.05, 0.0, 0.6])
+    selected = topology.pinned_boundary(data_x, data_w, requested_class)
+    np.testing.assert_allclose(np.asarray(selected), expected)
 
 
 def test_wall_contact_in_private_flux_shadow_never_binds(topology):

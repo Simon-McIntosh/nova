@@ -1,5 +1,5 @@
 # ruff: noqa: E501
-"""Bank one reference-seeded MAST free-boundary forward solve.
+"""Bank control and topology-pinned reference-seeded MAST forward solves.
 
 The slice is selected only from the committed native-grid decomposition bank.
 Its declared pressure and diamagnetic gradients drive ``ForwardProfile.solve``
@@ -22,6 +22,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+import jax
 import jax.numpy as jnp
 import matplotlib
 import numpy as np
@@ -48,6 +49,7 @@ from nova.equilibrium.forward import ForwardProfile
 from nova.equilibrium.forward_operator import ForwardFluxOperator
 from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.equilibrium.stencil_mesh import CellCurrentMoments
+from nova.equilibrium.topology import TopologyClass
 from nova.equilibrium.wall_mask import inside_polygon
 from nova.imas.mast_solve_inputs import SHOT_STORE
 from nova.imas.mast_vacuum_response import loop_response_matrix
@@ -61,7 +63,7 @@ DECOMPOSITION_BANK = Path(
     "docs/figures/efit-flux-decomposition/native-grid-decomposition.json"
 )
 DEFAULT_OUTPUT = Path("docs/figures/efit-forward-parity")
-RECEIPT_NAME = "reference-seeded-forward-slice.json"
+RECEIPT_NAME = "pinned-parity-slice.json"
 FIGURE_NAME = "reference-seeded-forward-slice.png"
 DIAGNOSIS_FIGURE_NAME = "vacuum-branch-diagnosis.png"
 GRID_STRIDE = 2
@@ -74,6 +76,9 @@ STEP_CAP = 10.0
 CONTROL_FIRST_STEP_SCALE = 0.25
 SADDLE_OFFSET_LIMIT = 0.01
 LCFS_CONTOUR_LIMIT = 0.006
+CONTROL_FLUX_SUP_FRACTION = 0.6478516258167417
+CONTROL_REFERENCE_SPAN_WB = 1.823353801798901
+CONTROL_PLASMA_CURRENT_A = 0.0
 
 
 @dataclass
@@ -96,8 +101,14 @@ class DeclaredAnchorOperator(ForwardFluxOperator):
             raise ValueError("declared support must carry one flag per grid node")
         self.use_linear_moments = False
 
-    def cell_current_moments(self, psi) -> CellCurrentMoments:
-        """Return source current bounded in the declared reference coordinate."""
+    def cell_current_moments(self, psi, requested_class=None) -> CellCurrentMoments:
+        """Return source current bounded in the declared reference coordinate.
+
+        The caller applies the class pin to the topology boundary read while
+        the prescribed reference anchors remain authoritative for source
+        normalization and support, so both solve arms share one source path.
+        """
+        del requested_class
         grid_flux = jnp.asarray(psi)[: self.grid.node_number]
         psi_norm = (grid_flux - self.declared_axis_flux) / (
             self.declared_boundary_flux - self.declared_axis_flux
@@ -779,6 +790,247 @@ def solve_arm(
     return record, fields
 
 
+def _pinned_metrics(
+    group: zarr.Group,
+    row: int,
+    profile: ForwardProfile,
+    reference: np.ndarray,
+    equilibrium: Any,
+) -> dict[str, Any]:
+    """Score a converged pinned equilibrium against the stored reference."""
+    solved = np.asarray(
+        equilibrium.flux[: profile.lattice.node_count], dtype=np.float64
+    ).reshape(profile.lattice.shape)
+    difference = solved - reference
+    span = float(np.ptp(reference))
+    topology = equilibrium.topology
+    solved_contour = _contour(
+        profile.lattice.radius,
+        profile.lattice.height,
+        solved,
+        float(topology.axis_flux),
+        float(topology.boundary_flux),
+    )
+    stored_contour = _stored_lcfs(group, row)
+    stored_x = _stored_x_points(group, row)
+    solved_x = (
+        np.asarray(topology.x_point, dtype=float).reshape(1, 2)
+        if bool(topology.diverted)
+        else np.empty((0, 2))
+    )
+    x_distance = (
+        float(
+            np.min(np.linalg.norm(solved_x[:, None, :] - stored_x[None, :, :], axis=2))
+        )
+        if len(solved_x) and len(stored_x)
+        else None
+    )
+    stored_diverted = bool(len(stored_x))
+    solved_diverted = bool(topology.diverted)
+    tolerances = registered_tolerances()
+    axis_distance = float(
+        np.linalg.norm(
+            np.asarray(topology.axis, dtype=float)
+            - np.asarray(
+                [group["magnetic_axis_r"][row], group["magnetic_axis_z"][row]],
+                dtype=float,
+            )
+        )
+    )
+    lcfs_distance = _symmetric_mean_distance(solved_contour, stored_contour)
+    plasma_current = float(np.sum(np.asarray(equilibrium.cell_current)))
+    reference_current = float(group["plasma_current_c"][row])
+    beta_reference = float(group["betap"][row])
+    li_reference = float(group["li"][row])
+    moments = equilibrium.moments
+    return {
+        "flux_map": {
+            "comparison_target": "efm/psirz multiplied by 2*pi into total Wb",
+            "sup_norm_wb": float(np.max(np.abs(difference))),
+            "rms_wb": float(np.sqrt(np.mean(difference**2))),
+            "sup_fraction_of_reference_span": float(np.max(np.abs(difference)) / span),
+            "rms_fraction_of_reference_span": float(
+                np.sqrt(np.mean(difference**2)) / span
+            ),
+            "reference_span_wb": span,
+            "raw_same_gauge_comparison": True,
+        },
+        "magnetic_axis": {
+            "distance_m": axis_distance,
+            "registered_bound_m": float(
+                tolerances[ScorecardField.MAGNETIC_AXIS_DISTANCE_M].bound
+            ),
+            "passes": bool(
+                tolerances[ScorecardField.MAGNETIC_AXIS_DISTANCE_M].passes(
+                    axis_distance
+                )
+            ),
+        },
+        "lcfs": {
+            "symmetric_mean_distance_m": lcfs_distance,
+            "registered_bound_m": float(
+                tolerances[ScorecardField.LCFS_DISTANCE_M].bound
+            ),
+            "passes": bool(
+                tolerances[ScorecardField.LCFS_DISTANCE_M].passes(lcfs_distance)
+            ),
+        },
+        "x_point": {
+            "distance_m": x_distance,
+            "registered_bound_m": float(
+                tolerances[ScorecardField.X_POINT_DISTANCE_M].bound
+            ),
+            "passes": bool(
+                x_distance is not None
+                and tolerances[ScorecardField.X_POINT_DISTANCE_M].passes(x_distance)
+            ),
+        },
+        "topology": {
+            "solved_class": "diverted" if solved_diverted else "limited",
+            "reference_class": "diverted" if stored_diverted else "limited",
+            "agreement": float(solved_diverted == stored_diverted),
+            "registered_bound": float(
+                tolerances[ScorecardField.TOPOLOGY_CLASS_AGREEMENT_FRACTION].bound
+            ),
+            "passes": bool(solved_diverted == stored_diverted),
+        },
+        "plasma_current": {
+            "solved_a": plasma_current,
+            "reference_a": reference_current,
+            "signed_relative_deviation": plasma_current / reference_current - 1.0,
+        },
+        "poloidal_beta": {
+            "solved": float(moments.poloidal_beta),
+            "reference": beta_reference,
+            "signed_relative_deviation": float(moments.poloidal_beta) / beta_reference
+            - 1.0,
+        },
+        "internal_inductance": {
+            "solved": float(moments.internal_inductance),
+            "reference": li_reference,
+            "signed_relative_deviation": float(moments.internal_inductance)
+            / li_reference
+            - 1.0,
+        },
+    }
+
+
+def solve_pinned_arm(
+    group: zarr.Group,
+    shot: int,
+    row: int,
+    current_field: str,
+) -> dict[str, Any]:
+    """Solve the two-class portfolio and serialize its diverted branch."""
+    profile, seed, reference, provenance = build_profile(
+        group, shot, row, current_field
+    )
+    seeds = jnp.stack((jnp.asarray(seed), jnp.asarray(seed)))
+    portfolio = profile.solve_portfolio(
+        seeds,
+        route="newton_krylov",
+        tolerance=FIXED_POINT_CRITERION,
+        gmres_iterations=GMRES_ITERATIONS,
+        warmup=WARMUP_SWEEPS,
+        relaxation=RELAXATION,
+        step_cap=STEP_CAP,
+    )
+    index = int(TopologyClass.DIVERTED)
+    branch = jax.tree.map(lambda value: value[index], portfolio.branches)
+    equilibrium = branch.equilibrium
+    trace = np.asarray(equilibrium.fixed_point.trace, dtype=np.float64)
+    requested = int(branch.requested_class)
+    achieved = int(branch.achieved_class)
+    converged = bool(branch.converged)
+    terminal = {
+        "fixed_point_residual": float(equilibrium.fixed_point.residual),
+        "finite_receipt": bool(equilibrium.finite.passed),
+        "plasma_current_a": float(np.sum(np.asarray(equilibrium.cell_current))),
+        "axis_flux_wb": float(equilibrium.topology.axis_flux),
+        "boundary_flux_wb": float(equilibrium.topology.boundary_flux),
+        "emergent_topology_class": "diverted" if achieved else "limited",
+    }
+    record = {
+        "current_arm": provenance,
+        "solver": {
+            "entry_point": "ForwardProfile.solve_portfolio",
+            "route": "newton_krylov",
+            "reference_seeded": True,
+            "portfolio_branch_order": ["limited", "diverted"],
+            "selected_branch_index": index,
+            "registered_criterion": FIXED_POINT_CRITERION,
+            "residual_trajectory": [
+                float(value) if np.isfinite(value) else None for value in trace
+            ],
+            "terminal_state": terminal,
+        },
+        "forward_branch_receipt": {
+            "requested_class": "diverted" if requested else "limited",
+            "requested_class_code": requested,
+            "achieved_class": "diverted" if achieved else "limited",
+            "achieved_class_code": achieved,
+            "converged": converged,
+            "residual": float(branch.residual),
+            "iterations": int(branch.iterations),
+            "topology_consistent": bool(branch.topology_consistent),
+        },
+    }
+    if converged:
+        record["metrics"] = _pinned_metrics(group, row, profile, reference, equilibrium)
+        current_fraction = abs(
+            record["metrics"]["plasma_current"]["solved_a"]
+            / record["metrics"]["plasma_current"]["reference_a"]
+        )
+        record["branch"] = {
+            "classification": "vacuum" if current_fraction < 0.01 else "plasma",
+            "vacuum_branch": bool(current_fraction < 0.01),
+            "criterion": (
+                "absolute solved current below 1 percent of efm/plasma_current_c"
+            ),
+        }
+        record["parity_verdict"] = (
+            "FAIL_VACUUM_BRANCH" if current_fraction < 0.01 else "PASS_FIXED_POINT_ONLY"
+        )
+    else:
+        record["metrics"] = None
+        record["parity_verdict"] = "FAIL_PINNED_BRANCH_DID_NOT_CONVERGE"
+    return record
+
+
+def _control_baseline(control: dict[str, Any]) -> dict[str, Any]:
+    """Verify that the unpinned arm reproduces its committed vacuum baseline."""
+    measured_sup = control["metrics"]["flux_map"]["sup_fraction_of_reference_span"]
+    measured_span = control["metrics"]["flux_map"]["reference_span_wb"]
+    measured_current = control["metrics"]["plasma_current"]["solved_a"]
+    checks = {
+        "flux_sup_fraction": bool(
+            np.isclose(measured_sup, CONTROL_FLUX_SUP_FRACTION, rtol=0.0, atol=1.0e-12)
+        ),
+        "reference_span_wb": bool(
+            np.isclose(measured_span, CONTROL_REFERENCE_SPAN_WB, rtol=0.0, atol=1.0e-12)
+        ),
+        "solved_plasma_current_a": bool(
+            np.isclose(
+                measured_current, CONTROL_PLASMA_CURRENT_A, rtol=0.0, atol=1.0e-12
+            )
+        ),
+    }
+    return {
+        "expected": {
+            "flux_sup_fraction_of_reference_span": CONTROL_FLUX_SUP_FRACTION,
+            "reference_span_wb": CONTROL_REFERENCE_SPAN_WB,
+            "solved_plasma_current_a": CONTROL_PLASMA_CURRENT_A,
+        },
+        "measured": {
+            "flux_sup_fraction_of_reference_span": measured_sup,
+            "reference_span_wb": measured_span,
+            "solved_plasma_current_a": measured_current,
+        },
+        "checks": checks,
+        "passes": bool(all(checks.values())),
+    }
+
+
 def _figure(fields: dict[str, np.ndarray], path: Path) -> None:
     """Plot the primary reference, solution and span-normalized difference."""
     radius = fields["radius"]
@@ -854,20 +1106,23 @@ def _diagnosis_figure(diagnosis: dict[str, Any], path: Path) -> None:
 
 
 def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
-    """Run both current arms and bank the primary field-to-field comparison."""
+    """Run the unpinned control beside the topology-pinned diverted branch."""
     configure_dtypes()
     selected, qualification = select_slice(bank)
     shot = int(selected["shot"])
     row = int(selected["slice_index"])
     group = zarr.open_group(str(store / f"{shot}.zarr"), mode="r")["efm"]
-    primary, fields = solve_arm(group, shot, row, "fcoil_c", include_diagnosis=True)
-    comparison, _ = solve_arm(group, shot, row, "fcoil_x")
+    control, fields = solve_arm(group, shot, row, "fcoil_c", include_diagnosis=True)
+    baseline = _control_baseline(control)
+    if not baseline["passes"]:
+        raise RuntimeError("the unpinned control drifted from its committed baseline")
+    pinned = solve_pinned_arm(group, shot, row, "fcoil_c")
     figure_path = output / FIGURE_NAME
     _figure(fields, figure_path)
     diagnosis_figure_path = output / DIAGNOSIS_FIGURE_NAME
-    _diagnosis_figure(primary["diagnosis"], diagnosis_figure_path)
+    _diagnosis_figure(control["diagnosis"], diagnosis_figure_path)
     receipt = {
-        "receipt": "reference-seeded MAST forward parity slice",
+        "receipt": "reference-seeded MAST control and topology-pinned parity slice",
         "backend": "JAX_PLATFORMS=cpu required by invocation",
         "selection": {
             "source": str(bank),
@@ -884,8 +1139,9 @@ def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
             "inverse_fit_coefficients": 0,
             "passes": True,
         },
-        "primary": primary,
-        "comparison_arm": comparison,
+        "control_arm": control,
+        "control_baseline": baseline,
+        "pinned_arm": pinned,
         "dina_calibration": {
             "axis_distance_m": 0.0412,
             "plasma_current_signed_relative_deviation": -0.0112,
@@ -900,7 +1156,7 @@ def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
     }
     output.mkdir(parents=True, exist_ok=True)
     receipt_path = output / RECEIPT_NAME
-    receipt_path.write_text(json.dumps(receipt, indent=2) + "\n")
+    receipt_path.write_text(json.dumps(receipt, indent=2, allow_nan=False) + "\n")
     return receipt
 
 
@@ -913,10 +1169,11 @@ def main() -> None:
     arguments = parser.parse_args()
     receipt = run(arguments.store, arguments.bank, arguments.output)
     selection = receipt["selection"]
-    primary = receipt["primary"]
-    flux = primary["metrics"]["flux_map"]
-    solver = primary["solver"]
-    diagnosis = primary["diagnosis"]
+    control = receipt["control_arm"]
+    flux = control["metrics"]["flux_map"]
+    solver = control["solver"]
+    diagnosis = control["diagnosis"]
+    pinned = receipt["pinned_arm"]["forward_branch_receipt"]
     print(
         "FORWARD_SLICE "
         f"shot={selection['shot']} row={selection['slice_index']} "
@@ -933,6 +1190,15 @@ def main() -> None:
         f"seed_cells={diagnosis['standard_trajectory'][0]['admitted_support_cells']} "
         f"seed_current_a={diagnosis['standard_trajectory'][0]['plasma_current_integral_a']:.9g} "
         f"control_keeps_plasma={diagnosis['damped_first_step_control']['keeps_plasma_root_through_bounded_promotions']}"
+    )
+    print(
+        "PINNED_DIVERTED_BRANCH "
+        f"converged={pinned['converged']} "
+        f"residual={pinned['residual']:.9g} "
+        f"iterations={pinned['iterations']} "
+        f"requested={pinned['requested_class']} "
+        f"achieved={pinned['achieved_class']} "
+        f"topology_consistent={pinned['topology_consistent']}"
     )
 
 

@@ -280,7 +280,7 @@ def _bicubic_edge_crossings(level, coefficient, corner_flux, *, detect_even_root
     )
     crossing = (high > low) & (jnp.signbit(low_value) != jnp.signbit(high_value))
 
-    def bisect(iteration, state):
+    def bisect(_, state):
         lower, upper, lower_value = state
         middle = half * (lower + upper)
         radial, vertical = _bicubic_edge_coordinates(edge, middle)
@@ -292,13 +292,7 @@ def _bicubic_edge_crossings(level, coefficient, corner_flux, *, detect_even_root
         next_lower = jnp.where(same_side, middle, lower)
         next_upper = jnp.where(same_side, upper, middle)
         next_value = jnp.where(same_side, value, lower_value)
-        refine = (iteration < 18) | ~use_full_edge[..., None]
-        return tuple(
-            jnp.where(refine, candidate, previous)
-            for candidate, previous in zip(
-                (next_lower, next_upper, next_value), state, strict=True
-            )
-        )
+        return next_lower, next_upper, next_value
 
     low, high, _ = jax.lax.fori_loop(0, 28, bisect, (low, high, low_value))
     fraction = half * (low + high)
@@ -489,24 +483,31 @@ def _bicubic_arc_moment_correction(
         independent_turning
         > jnp.maximum(independent_start, independent_end) + coordinate_tolerance
     )
-    split_first_arc = (
+    split_candidate = (
         (leaving_count == 1) & turning_valid[:, 0] & interior_turning[:, 0]
     )
-    interval_start = jnp.where(
-        split_first_arc[:, None, None],
+    candidate_start = jnp.where(
+        split_candidate[:, None, None],
         jnp.stack((start[:, 0], turning[:, 0]), axis=1),
         start,
     )
-    interval_end = jnp.where(
-        split_first_arc[:, None, None],
+    candidate_end = jnp.where(
+        split_candidate[:, None, None],
         jnp.stack((turning[:, 0], end[:, 0]), axis=1),
         end,
     )
-    interval_mask = jnp.where(
-        split_first_arc[:, None],
+    candidate_mask = jnp.where(
+        split_candidate[:, None],
         jnp.broadcast_to(arc_mask[:, :1], arc_mask.shape),
         arc_mask,
     )
+    candidate = interval_quadrature(candidate_start, candidate_end, candidate_mask)
+    split_connected = split_candidate & jnp.all(
+        (~candidate_mask) | candidate[4], axis=1
+    )
+    interval_start = jnp.where(split_connected[:, None, None], candidate_start, start)
+    interval_end = jnp.where(split_connected[:, None, None], candidate_end, end)
+    interval_mask = jnp.where(split_connected[:, None], candidate_mask, arc_mask)
     selected = interval_quadrature(interval_start, interval_end, interval_mask)
     interval_valid = selected[4]
     ordinate_gradient = selected[5]

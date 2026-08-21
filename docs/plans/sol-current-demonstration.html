@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="3">
-<meta name="plan-commits" content="11105450">
-<meta name="plan-artifacts" content="scripts/sol_demonstration_reuse/report.md">
-<meta name="plan-impl" content="0.25">
+<meta name="plan-version" content="4">
+<meta name="plan-commits" content="11105450,88d60dd8">
+<meta name="plan-artifacts" content="scripts/sol_demonstration_reuse/report.md,nova/equilibrium/sol_closure.py,tests/test_sol_closure.py">
+<meta name="plan-impl" content="0.5">
 </head>
 <body>
   <main class="plan-doc">
@@ -145,6 +145,9 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s2" data-id="c-20260819T0832" data-who="reckon-ship" data-when="2026-08-19T08:32:00+00:00">
     <div class="r-comment-body">Recorded prerequisite from the boundary-ring saddle-gap audit (evidence: /nova/evidence/archive/boundary-ring-source-completion-landed.html#saddle-gap-current-check, commit a5998281): the demonstration's separatrix clip must give the X-point cell an explicit mechanism - the saddle vertex carried as a clip vertex, branch-paired chords (the audited saddle cell takes four separatrix crossings where the production clip draws one chord, ~0.2 A error at the audited state), and per-branch profiles so common-SOL and private-flux supports partition correctly inside that one cell. Today's single-chord treatment is adequate for confined current, but the SOL closure drives finite j through exactly that cell to the divertor legs, so the four-crossing partition becomes load-bearing here. Wire this into the demonstration node's done-when when the closure node dispatches.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260821T1102" data-who="reckon-ship" data-when="2026-08-21T11:02:00+00:00">
+    <div class="r-comment-body">sol-closure landed - commit 88d60dd8, merged 5cfbbda0; gate PASSED; worker 553 s; 6 tests added, 15 existing continuation tests green. The Eich width machinery now exists (the reuse map found zero prior expressions): lambda_q[mm] = 0.63 * Bp,OMP[T]^-1.19 evaluated from the equilibrium outboard-midplane poloidal field, mapped into normalized total flux as lambda_psi_N = 2*pi*R_OMP*Bp,OMP*lambda_q/|flux span| (test equilibrium: Bp=0.5 T, R=6.2 m, span 2.7 Wb gives lambda_q=1.437 mm, lambda_psi_N=1.0369e-2). Both closure variants start exactly from the confined separatrix value with first-derivative continuity to ~4e-8 (absolute numerical residual). THE LOCKED NO-CUTOFF DECISION IS NOW IMPLEMENTED: the common-SOL exponential support is bounded by topology and material only (receipt support=inf, truncated_fraction=0), replacing the finite truncating support the landed continuation required; private-flux cells receive exactly zero by topology label however far their flux sits in range. Measured 1e-6 extents, outcomes never inputs: psi_N=1.1731 single-length, psi_N=1.6461 dual (4*lambda_q spreading length at fraction 0.35). Remaining before the two-solution demonstration: the saddle-partition node (in flight).</div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-20260820T1430" data-who="reckon-ship" data-when="2026-08-20T14:30:00+00:00">
     <div class="r-comment-body">The kickoff condition is met: boundary-ring-source-completion shipped 2026-08-20 with main 3b3122fa merging the solve-path routing this plan's f-scd-001 waits on (the linear representation, traced clip, clip-partition participation, and the unified degree-nine source), integration-verified with zero merge-introduced failures. Sequencing note before dispatch: the owner has gated further forward-model progress on the solovev-exact-recovery agreement gates, and the recovery work is actively measuring the forcing composition - coordinate the demonstration's dispatch against that plan's landings so the SOL demonstration runs on settled defaults. The X-point-cell clip prerequisite recorded at s2 stands.</div>

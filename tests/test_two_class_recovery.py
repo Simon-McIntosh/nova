@@ -19,6 +19,7 @@ with skip_import("jax"):
     from nova.equilibrium import (
         ColdSeedConstruction,
         ForwardProfile,
+        PerturbedSeedPolicy,
         SaddleSeedGeometry,
     )
     from nova.equilibrium.convention import toroidal_current_density
@@ -48,7 +49,7 @@ KRYLOV_ITERATIONS = 30
 RECOVERY_CRITERION = 1.0e-10
 ROOT_PARITY = 1.0e-10
 DIVERTED_STATE_DIGEST = (
-    "1e6e1043b84a7833adeb51916d3dca36c92d291a4a40dd924ce9b7cae87e7a8d"
+    "11a7e9d00556e91a6d76a69212107592501e1e8cedae60fd17e9e8032ff14801"
 )
 
 
@@ -193,16 +194,17 @@ def test_cold_seed_receipts_keep_one_fixed_branch_axis_under_vmap():
     configure_dtypes()
     profile, seeds, _fixture, state, geometry = _diverted_problem()
 
-    def one_step(states):
+    def solve(states):
         return profile.solve_portfolio(
             states,
-            route="picard",
-            evaluations=1,
-            tolerance=np.inf,
+            route="newton_krylov",
+            tolerance=RECOVERY_CRITERION,
+            warmup=0,
+            gmres_iterations=KRYLOV_ITERATIONS,
         )
 
     batch = jnp.stack((seeds.branches.flux, seeds.branches.flux))
-    portfolios = jax.jit(jax.vmap(one_step))(batch)
+    portfolios = jax.jit(jax.vmap(solve))(batch)
     assert seeds.branches.flux.shape == (2, state.size)
     assert seeds.branches.anchor.shape == (2, 2)
     assert int(seeds.branches.construction[1]) == int(
@@ -215,10 +217,99 @@ def test_cold_seed_receipts_keep_one_fixed_branch_axis_under_vmap():
         np.linalg.norm(np.asarray(seeds.branches.anchor[1]) - geometry.saddle) < 1.0e-2
     )
     assert portfolios.branches.equilibrium.flux.shape == (2, 2, state.size)
+    np.testing.assert_array_equal(
+        np.asarray(portfolios.branches.requested_class[0]),
+        (int(TopologyClass.LIMITED), int(TopologyClass.DIVERTED)),
+    )
+    np.testing.assert_array_equal(
+        np.asarray(portfolios.branches.achieved_class[0]),
+        (int(TopologyClass.LIMITED), int(TopologyClass.LIMITED)),
+    )
+    np.testing.assert_array_equal(
+        np.asarray(portfolios.branches.topology_consistent[0]),
+        (True, False),
+    )
+    np.testing.assert_array_equal(
+        np.asarray(portfolios.branches.converged[0]),
+        (False, False),
+    )
+    diverted = int(TopologyClass.DIVERTED)
+    cold_diverted = jax.tree.map(lambda value: value[0, diverted], portfolios.branches)
+    assert int(cold_diverted.requested_class) == diverted
+    assert int(cold_diverted.achieved_class) == int(TopologyClass.LIMITED)
+    assert not bool(cold_diverted.topology_consistent)
+    assert not bool(cold_diverted.converged)
     np.testing.assert_allclose(
         np.asarray(portfolios.branches.equilibrium.flux[0]),
         np.asarray(portfolios.branches.equilibrium.flux[1]),
         equal_nan=True,
+    )
+
+
+@pytest.mark.slow
+def test_diverted_near_basin_perturbation_ladder_recovers_banked_root():
+    configure_dtypes()
+    profile, seeds, _fixture, state, _geometry = _diverted_problem()
+    diverted = int(TopologyClass.DIVERTED)
+    cold_diverted = np.asarray(seeds.branches.flux[diverted])
+    direction = cold_diverted - state
+    policy = PerturbedSeedPolicy()
+
+    references = jnp.stack((jnp.asarray(state), jnp.asarray(state)))
+    directions = jnp.stack((jnp.asarray(direction), jnp.asarray(direction)))
+    receipts = jax.jit(
+        jax.vmap(
+            lambda reference, perturbation: profile.solve_diverted_perturbations(
+                reference,
+                perturbation,
+                policy,
+            )
+        )
+    )(references, directions)
+    receipt = jax.tree.map(lambda value: value[0], receipts)
+
+    assert _digest(state) == DIVERTED_STATE_DIGEST
+    np.testing.assert_array_equal(
+        np.asarray(receipt.relative_amplitude),
+        np.asarray(policy.relative_amplitudes),
+    )
+    actual_amplitude = np.max(
+        np.abs(np.asarray(receipt.seed_flux) - state), axis=1
+    ) / float(receipt.reference_flux_span)
+    np.testing.assert_allclose(actual_amplitude, policy.relative_amplitudes)
+    np.testing.assert_array_equal(
+        np.asarray(receipt.rungs.requested_class),
+        np.full(len(policy.relative_amplitudes), diverted),
+    )
+    assert np.all(np.asarray(receipt.passed))
+    np.testing.assert_array_equal(
+        np.asarray(receipt.rungs.achieved_class),
+        np.full(len(policy.relative_amplitudes), diverted),
+    )
+    assert np.all(np.asarray(receipt.rungs.topology_consistent))
+    assert np.all(np.asarray(receipt.rungs.converged))
+    passing = np.asarray(receipt.relative_amplitude)[np.asarray(receipt.passed)]
+    assert float(receipt.largest_passing_amplitude) == float(np.max(passing))
+    assert np.all(
+        np.asarray(receipt.rungs.residual)[np.asarray(receipt.passed)]
+        <= RECOVERY_CRITERION
+    )
+    assert np.all(
+        np.asarray(receipt.root_relative_error)[np.asarray(receipt.passed)]
+        <= ROOT_PARITY
+    )
+    np.testing.assert_allclose(
+        np.asarray(receipts.rungs.residual[0]),
+        np.asarray(receipts.rungs.residual[1]),
+        equal_nan=True,
+    )
+    print(
+        "DIVERTED_PERTURBATIONS "
+        f"amplitudes={np.asarray(receipt.relative_amplitude).tolist()} "
+        f"passed={np.asarray(receipt.passed).tolist()} "
+        f"residuals={np.asarray(receipt.rungs.residual).tolist()} "
+        f"root_parity={np.asarray(receipt.root_relative_error).tolist()} "
+        f"largest_passing={float(receipt.largest_passing_amplitude)}"
     )
 
 

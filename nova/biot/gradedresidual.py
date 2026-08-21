@@ -45,6 +45,12 @@ from functools import lru_cache
 import numpy as np
 from numpy.polynomial.legendre import leggauss
 
+from nova.biot.pairedfloat import add as paired_add
+from nova.biot.pairedfloat import multiply as paired_multiply
+from nova.biot.pairedfloat import scale as paired_scale
+from nova.biot.pairedfloat import subtract as paired_subtract
+from nova.biot.pairedfloat import wrap as paired_wrap
+
 __all__ = ["QUARTER", "graded_residual"]
 
 # One end of the quarter range to the other, which is as far as either panel can
@@ -138,7 +144,7 @@ def _regularised(numerator, denominator, model, sign, xp):
     )
 
 
-def graded_residual(panels, pieces, nodes: int, xp):
+def graded_residual(panels, pieces, nodes: int, xp, *, paired: bool = False):
     """Return ``integral arsinh(N/W) da`` over two graded panels, log removed.
 
     Each entry of ``panels`` is ``(offset, end, scale, lower, upper)`` for one
@@ -155,7 +161,7 @@ def graded_residual(panels, pieces, nodes: int, xp):
     ``a = pi/2``.
     """
     node, weight = _rule(nodes)
-    total = 0.0
+    total = None if paired else 0.0
     for panel, (offset, end, scale, lower, upper) in enumerate(panels):
         # The denominator turns over at its own end value over the ring span, and
         # the arsinh saturates where the numerator overtakes it -- never nearer the
@@ -185,9 +191,22 @@ def graded_residual(panels, pieces, nodes: int, xp):
         model = xp.sqrt(offset[:, None] ** 2 + scaled * scaled)
         jacobian = 0.5 * span * held * xp.sqrt(1.0 + stretched * stretched)
         bounded = _regularised(numerator, denominator, model, sign, xp)
-        total = (
-            total
-            + (jacobian * bounded) @ weight
-            - xp.sign(end) * _model_integral(offset, scale, lower, upper, xp)
-        )
+        model_integral = xp.sign(end) * _model_integral(offset, scale, lower, upper, xp)
+        if paired:
+            quadrature = paired_wrap(xp.zeros_like(offset))
+            for index, one_weight in enumerate(weight):
+                quadrature = paired_add(
+                    quadrature,
+                    paired_scale(
+                        paired_multiply(
+                            paired_wrap(jacobian[:, index]),
+                            paired_wrap(bounded[:, index]),
+                        ),
+                        one_weight,
+                    ),
+                )
+            panel_value = paired_subtract(quadrature, paired_wrap(model_integral))
+            total = panel_value if total is None else paired_add(total, panel_value)
+        else:
+            total = total + (jacobian * bounded) @ weight - model_integral
     return total

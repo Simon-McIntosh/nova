@@ -433,10 +433,9 @@ def merge(cpu_job_id: str, gpu_job_id: str, numpy_job_id: str) -> None:
         },
         "production_numpy_path_modified": True,
         "repaired_mechanism": (
-            "a shared geometric condition selects the centroid-filament uniform-"
-            "section limit outside 256 section radii for sections smaller than "
-            "1e-4 of their coordinate scale; the finite-section contour remains "
-            "active in the near field"
+            "paired-fp64 products and sums retain the low parts of the exact root, "
+            "second-arsinh, arctangent and pole contractions through endpoint "
+            "differencing and closed-contour accumulation"
         ),
         "scheduler": {
             "cpu_job_id": cpu_job_id,
@@ -457,8 +456,8 @@ def merge(cpu_job_id: str, gpu_job_id: str, numpy_job_id: str) -> None:
             "source_column": 184,
             "terminal_rung": 1024,
             "verdict": (
-                "the shared conditioned rule is active; its remaining maximum is "
-                "the retained finite-section self value"
+                "the shared paired-fp64 primitive rule evaluates the exact "
+                "finite-section contour in both namespaces"
             ),
         },
         "source": _source_stamp(),
@@ -507,7 +506,8 @@ def merge(cpu_job_id: str, gpu_job_id: str, numpy_job_id: str) -> None:
         "absolute difference was "
         f"{numpy_parity['max_absolute_difference']:.17g} and its maximum relative "
         f"difference was {numpy_parity['max_relative_difference']:.17g}.\n\n"
-        "For source column 184, the conditioned production reference differs "
+        "For source column 184, the exact paired-primitive production reference "
+        "differs "
         "from the 1024-rung arbitrary-precision oracle by at most "
         f"{sliver['production_numpy']['max_relative']:.17g} relative overall and "
         f"{sliver['production_numpy']['max_relative_away_from_source']:.17g} away "
@@ -526,7 +526,7 @@ def merge(cpu_job_id: str, gpu_job_id: str, numpy_job_id: str) -> None:
         f"Every launch used a fixed {TARGET_TILE}×{SOURCE_TILE} pair tile, fp64, "
         f"{RESIDUAL_NODES} residual nodes, and {TRIPS} fixed Bulirsch `cel` "
         "descent trips. The packed arithmetic and the production NumPy reference "
-        "apply the same cancellation-conditioned uniform-section rule; both "
+        "apply the same paired-fp64 exact-section primitive rule; both "
         "evaluate the ψ, B_R, and B_Z triple, "
         "of which only the flux G0 row was retained in this receipt. CPU and H200 ran "
         "in separate processes so each backend compiled the same source graph "

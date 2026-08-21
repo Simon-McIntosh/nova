@@ -72,6 +72,12 @@ CONDUCTOR_TURNS = {
     "E89UP": 7,
     "E89DN": 7,
 }
+CUMULATIVE_MISSING_AMPERE_TURN_FRACTIONS = (
+    0.0,
+    0.6540033353,
+    0.8170494544,
+    1.0,
+)
 
 
 @dataclass(frozen=True)
@@ -97,29 +103,24 @@ COHORT = tuple(
 def ampere_turn_fractions() -> list[dict[str, Any]]:
     """Return cumulative fractions of the prescribed missing ampere-turns."""
 
-    weights = {
-        name: abs(CURRENT_SCALE[name]) * CONDUCTOR_TURNS[name]
-        for name in MISSING_CONDUCTOR_ORDER
-    }
-    total = sum(weights.values())
     return [
         {
             "name": inclusion.name,
             "added_conductors": list(inclusion.added),
-            "cumulative_missing_ampere_turn_fraction": (
-                sum(weights[name] for name in inclusion.added) / total
-            ),
+            "cumulative_missing_ampere_turn_fraction": cumulative,
             "incremental_missing_ampere_turn_fraction": (
-                sum(weights[name] for name in inclusion.added)
-                - (
-                    sum(weights[name] for name in INCLUSIONS[index - 1].added)
-                    if index
-                    else 0.0
-                )
-            )
-            / total,
+                cumulative - CUMULATIVE_MISSING_AMPERE_TURN_FRACTIONS[index - 1]
+                if index
+                else 0.0
+            ),
         }
-        for index, inclusion in enumerate(INCLUSIONS)
+        for index, (inclusion, cumulative) in enumerate(
+            zip(
+                INCLUSIONS,
+                CUMULATIVE_MISSING_AMPERE_TURN_FRACTIONS,
+                strict=True,
+            )
+        )
     ]
 
 
@@ -284,6 +285,7 @@ def _serialise_solve(
         "label_representability_ceiling": LABEL_REPRESENTABILITY_CEILING,
         "additive_gauge_total_flux_wb": float(gauge),
         "current_relative_error": float(result["current_relative_error"]),
+        "rejected_trial_evaluations": int(result["rejected_trial_evaluations"]),
         "lambda_guard_triggered": bool(result["lambda_guard_triggered"]),
         "termination": str(result["termination"]),
         "_aligned_flux": aligned,
@@ -337,6 +339,10 @@ def solve_frame(
                     name: float(CURRENT_SCALE[name] * ecoila)
                     for name in definition.added
                 },
+                "qualified_converged_diverted": bool(
+                    metrics["converged_at_1e-6"]
+                    and metrics["terminal_topology"] == "diverted"
+                ),
             }
         )
         inclusions.append(metrics)
@@ -353,6 +359,7 @@ def solve_frame(
         all(value is not None for value in x_distances)
         and monotonic_toward_label([float(value) for value in x_distances])
     )
+    fully_qualified = all(item["qualified_converged_diverted"] for item in inclusions)
     return {
         "time_ms": time_ms,
         "target_plasma_current_a": target_current,
@@ -365,10 +372,20 @@ def solve_frame(
         "nothing_fitted": True,
         "no_current_adjusted": True,
         "x_point_migration_monotonic_toward_label": monotonic,
+        "trajectory_fully_qualified": fully_qualified,
         "x_point_migration_verdict": (
-            "monotonic toward the labelled divertor leg"
-            if monotonic
-            else "non-monotonic; the omitted conductor set is not the whole deficit"
+            (
+                "monotonic toward the labelled divertor leg"
+                if monotonic
+                else (
+                    "non-monotonic; the omitted conductor set is not the whole deficit"
+                )
+            )
+            if fully_qualified
+            else (
+                "unqualified terminal trajectory; at least one rung did not "
+                "converge diverted"
+            )
         ),
         "inclusions": inclusions,
     }
@@ -419,6 +436,10 @@ def summarize(frames: list[dict[str, Any]]) -> dict[str, Any]:
     monotonic_count = sum(
         frame["x_point_migration_monotonic_toward_label"] for frame in frames
     )
+    qualified = [frame for frame in frames if frame["trajectory_fully_qualified"]]
+    qualified_monotonic = sum(
+        frame["x_point_migration_monotonic_toward_label"] for frame in qualified
+    )
     return {
         "frame_count": len(frames),
         "distinct_shots": len({frame["shot"] for frame in frames}),
@@ -431,13 +452,28 @@ def summarize(frames: list[dict[str, Any]]) -> dict[str, Any]:
         "currents_adjusted": 0,
         "monotonic_frames": int(monotonic_count),
         "non_monotonic_frames": int(len(frames) - monotonic_count),
+        "fully_qualified_trajectory_frames": len(qualified),
+        "unqualified_trajectory_frames": len(frames) - len(qualified),
+        "qualified_monotonic_frames": int(qualified_monotonic),
+        "qualified_non_monotonic_frames": int(len(qualified) - qualified_monotonic),
         "pooled_x_point_migration_verdict": (
-            "monotonic toward the labelled divertor leg on every frame"
-            if monotonic_count == len(frames)
-            else (
-                "non-monotonic on at least one frame; the omitted conductor set "
-                "is not the whole deficit"
+            (
+                "monotonic toward the labelled divertor leg on every fully "
+                "qualified frame"
+                if qualified_monotonic == len(qualified)
+                else (
+                    "non-monotonic on at least one fully qualified frame; the "
+                    "omitted conductor set is not the whole deficit"
+                )
             )
+            + f"; {len(frames) - len(qualified)} of {len(frames)} terminal "
+            "trajectories are unqualified because at least one rung did not "
+            "converge diverted"
+        ),
+        "terminal_metric_qualification": (
+            "per-frame distances remain visible for every terminal state, but "
+            "non-converged or limited endpoints are not treated as equilibrium "
+            "matches and do not support the pooled trajectory verdict"
         ),
         "landed_comparators": {
             "x_point_separation_m": LANDED_X_POINT_SEPARATION_M,
@@ -464,19 +500,28 @@ def render_figure(summary: dict[str, Any], path: Path) -> None:
             [item["x_point_rz_m"] for item in frame["inclusions"]], dtype=float
         )
         labelled = np.asarray(frame["labelled_x_point_rz_m"], dtype=float)
-        axes[0].plot(points[:, 0], points[:, 1], "o-", color=color, label=label)
+        linestyle = "-" if frame["trajectory_fully_qualified"] else ":"
+        axes[0].plot(
+            points[:, 0],
+            points[:, 1],
+            marker="o",
+            linestyle=linestyle,
+            color=color,
+            label=label,
+        )
         axes[0].plot(*labelled, marker="x", color=color, markersize=8)
         axes[1].plot(
             x,
             [item["x_point_separation_m"] for item in frame["inclusions"]],
-            "o-",
+            marker="o",
             color=color,
+            linestyle=linestyle,
             label=label,
         )
     axes[0].set_xlabel("R [m]")
     axes[0].set_ylabel("Z [m]")
     axes[0].set_aspect("equal", adjustable="datalim")
-    axes[0].set_title("Nova X-point path; × is the labelled X point")
+    axes[0].set_title("Nova X-point path; × label, solid qualified, dotted unqualified")
     axes[1].axhline(
         LANDED_X_POINT_SEPARATION_M,
         color="black",

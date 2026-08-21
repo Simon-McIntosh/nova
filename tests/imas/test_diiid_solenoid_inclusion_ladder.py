@@ -57,6 +57,9 @@ def test_ampere_turn_fractions_are_cumulative_and_complete() -> None:
     assert fractions[-1]["cumulative_missing_ampere_turn_fraction"] == pytest.approx(
         1.0
     )
+    assert fractions[2]["cumulative_missing_ampere_turn_fraction"] == pytest.approx(
+        0.8170494544
+    )
     assert sum(
         item["incremental_missing_ampere_turn_fraction"] for item in fractions
     ) == pytest.approx(1.0)
@@ -80,6 +83,11 @@ def test_generated_receipt_has_five_frames_and_all_four_inclusions() -> None:
     assert result["label_recovered_current_values_used"] == 0
     assert len(result["per_inclusion"]) == 4
     assert "monotonic" in result["pooled_x_point_migration_verdict"]
+    assert (
+        result["fully_qualified_trajectory_frames"]
+        + result["unqualified_trajectory_frames"]
+        == result["frame_count"]
+    )
     for frame in result["frames"]:
         assert len(frame["inclusions"]) == 4
         assert frame["same_label_branch_seed_all_inclusions"]
@@ -91,6 +99,7 @@ def test_generated_receipt_has_five_frames_and_all_four_inclusions() -> None:
             assert "x_point_separation_m" in inclusion
             assert "lcfs_symmetric_mean_separation_m" in inclusion
             assert "gauge_free_fractional_rms" in inclusion
+            assert "qualified_converged_diverted" in inclusion
     assert (ladder.DEFAULT_OUTPUT / ladder.FIGURE_NAME).is_file()
 
 

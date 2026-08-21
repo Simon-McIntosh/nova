@@ -54,8 +54,8 @@
       "added_conductors": [
         "ECOILB"
       ],
-      "cumulative_missing_ampere_turn_fraction": 0.6540033352755621,
-      "incremental_missing_ampere_turn_fraction": 0.6540033352755621,
+      "cumulative_missing_ampere_turn_fraction": 0.6540033353,
+      "incremental_missing_ampere_turn_fraction": 0.6540033353,
       "name": "plus_ecoilb"
     },
     {
@@ -64,8 +64,8 @@
         "E567UP",
         "E567DN"
       ],
-      "cumulative_missing_ampere_turn_fraction": 0.8127463784131321,
-      "incremental_missing_ampere_turn_fraction": 0.15874304313757004,
+      "cumulative_missing_ampere_turn_fraction": 0.8170494544,
+      "incremental_missing_ampere_turn_fraction": 0.1630461191,
       "name": "plus_e567_pair"
     },
     {
@@ -77,7 +77,7 @@
         "E89DN"
       ],
       "cumulative_missing_ampere_turn_fraction": 1.0,
-      "incremental_missing_ampere_turn_fraction": 0.18725362158686784,
+      "incremental_missing_ampere_turn_fraction": 0.18295054560000001,
       "name": "complete_24_poloidal"
     }
   ],

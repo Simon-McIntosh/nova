@@ -57,6 +57,12 @@ def test_lambda_guard_fails_loudly_without_clipping() -> None:
         pinned._lambda_value(1.0, 1.0e-9)
 
 
+@pytest.mark.parametrize("unscaled", [0.0, -1.0, np.nan])
+def test_lambda_guard_checks_admissibility_before_division(unscaled: float) -> None:
+    with pytest.raises(pinned.LambdaOutOfBand, match="outside"):
+        pinned._lambda_value(1.0, unscaled)
+
+
 def test_common_amplitude_scales_every_current_moment() -> None:
     moments = CellCurrentMoments(
         np.asarray([1.0, 2.0]),

@@ -80,6 +80,7 @@ LONG_BUDGET_RECEIPT = DEFAULT_OUTPUT / "long-budget-plasma-route.json"
 COMPOSITION_RECEIPT = DEFAULT_OUTPUT / "mast-dina-composition-diff.json"
 PASSIVE_INCLUSIVE_RECEIPT = DEFAULT_OUTPUT / "passive-inclusive-parity-slice.json"
 EXTENDED_PASSIVE_RECEIPT_NAME = "passive-inclusive-convergence.json"
+PASSIVE_POLISH_RECEIPT_NAME = "passive-inclusive-stationary-polish.json"
 FIGURE_NAME = "reference-seeded-forward-slice.png"
 DIAGNOSIS_FIGURE_NAME = "vacuum-branch-diagnosis.png"
 LONG_BUDGET_FIGURE_NAME = "long-budget-residual-trajectories.png"
@@ -88,6 +89,7 @@ COMPOSITION_FIGURE_NAME = "mast-dina-composition-update-fields.png"
 ATTRIBUTION_FIGURE_NAME = "boundary-imbalance-source-fields.png"
 PASSIVE_INCLUSIVE_FIGURE_NAME = "passive-inclusive-parity-slice.png"
 EXTENDED_PASSIVE_FIGURE_NAME = "passive-inclusive-convergence.png"
+PASSIVE_POLISH_FIGURE_NAME = "passive-inclusive-stationary-polish.png"
 GRID_STRIDE = 2
 FIXED_POINT_CRITERION = 1.0e-8
 NEWTON_STEPS = 12
@@ -3183,7 +3185,7 @@ def _passive_inclusive_solve(
     profile: ForwardProfile,
     *,
     newton_budget: int = NEWTON_STEPS,
-) -> tuple[dict[str, Any], np.ndarray]:
+) -> tuple[dict[str, Any], np.ndarray, Any]:
     """Run the reference-seeded diverted branch and retain its full outcome."""
     branch = profile.solve_branch(
         jnp.asarray(case["state"]),
@@ -3274,7 +3276,7 @@ def _passive_inclusive_solve(
             else "FAIL_PINNED_BRANCH_DID_NOT_CONVERGE"
         ),
     }
-    return record, trace
+    return record, trace, branch
 
 
 def _passive_inclusive_figure(
@@ -3334,12 +3336,12 @@ def _passive_inclusive_figure(
     plt.close(figure)
 
 
-def _parity_metric_qualification(solve: dict[str, Any]) -> dict[str, Any] | None:
-    """State the carried pass/fail and the metrics without registered bounds."""
-    metrics = solve["registered_parity_metrics"]
+def _metric_qualification(
+    metrics: dict[str, Any] | None, residual: float | None
+) -> dict[str, Any] | None:
+    """State carried metric pass/fail and unbounded reported deviations."""
     if metrics is None:
         return None
-    residual = solve["forward_branch_receipt"]["residual"]
 
     def reported(value: float) -> dict[str, Any]:
         return {
@@ -3405,6 +3407,14 @@ def _parity_metric_qualification(solve: dict[str, Any]) -> dict[str, Any] | None
     return qualification
 
 
+def _parity_metric_qualification(solve: dict[str, Any]) -> dict[str, Any] | None:
+    """Qualify metrics emitted by a pinned ForwardBranchReceipt."""
+    return _metric_qualification(
+        solve["registered_parity_metrics"],
+        solve["forward_branch_receipt"]["residual"],
+    )
+
+
 def _extended_passive_figure(arms: list[dict[str, Any]], path: Path) -> None:
     """Plot both full extended residual sequences beyond the banked budget."""
     figure, axis = plt.subplots(figsize=(8.0, 4.5), constrained_layout=True)
@@ -3439,80 +3449,157 @@ def _extended_passive_figure(arms: list[dict[str, Any]], path: Path) -> None:
     plt.close(figure)
 
 
+def _passive_polish_figure(
+    handoff_trace: np.ndarray, polish_trace: np.ndarray, path: Path
+) -> None:
+    """Plot the exact banked prefix beside its stationary Newton polish."""
+    figure, axes = plt.subplots(1, 2, figsize=(10.2, 4.3), constrained_layout=True)
+    for axis, values, title in (
+        (axes[0], handoff_trace, "Passive-inclusive handoff"),
+        (axes[1], polish_trace, "Stationary Newton polish"),
+    ):
+        numeric = values[np.isfinite(values)]
+        axis.semilogy(
+            np.arange(1, numeric.size + 1),
+            np.maximum(numeric, np.finfo(float).tiny),
+            marker="o",
+            ms=3,
+            lw=1.0,
+        )
+        axis.axhline(FIXED_POINT_CRITERION, color="black", ls="--", lw=0.8)
+        axis.set_title(title)
+        axis.set_xlabel("Finite residual read")
+        axis.set_ylabel("Fixed-point residual")
+        axis.grid(True, which="both", alpha=0.25)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, dpi=180)
+    plt.close(figure)
+
+
 def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
-    """Extend the passive-inclusive pinned solve without rewriting its bank."""
+    """Reproduce the passive handoff and apply stationary Newton polish."""
     configure_dtypes()
     banked_bytes = PASSIVE_INCLUSIVE_RECEIPT.read_bytes()
     banked_sha256 = hashlib.sha256(banked_bytes).hexdigest()
     banked_receipt = json.loads(banked_bytes)
     banked_solve = banked_receipt["reference_seeded_pinned_solve"]
     banked_trace = np.asarray(
-        [value for value in banked_solve["residual_trajectory"] if value is not None],
+        [
+            np.nan if value is None else value
+            for value in banked_solve["residual_trajectory"]
+        ],
         dtype=np.float64,
     )
     mast_case, context = _mast_composition_case(store, bank)
     passive_case, profile, policy = _passive_inclusive_case(mast_case, context)
-    arms = []
-    for budget in EXTENDED_PROMOTION_BUDGETS:
-        solve, trace = _passive_inclusive_solve(
-            passive_case,
-            context,
-            profile,
-            newton_budget=budget,
+    reproduced, handoff_trace, branch = _passive_inclusive_solve(
+        passive_case,
+        context,
+        profile,
+        newton_budget=NEWTON_STEPS,
+    )
+    handoff_state = np.asarray(branch.equilibrium.flux, dtype=np.float64)
+    banked_terminal = banked_solve["terminal_state"]
+    reproduced_terminal = reproduced["terminal_state"]
+    trajectory_equal = bool(np.array_equal(handoff_trace, banked_trace, equal_nan=True))
+    residual_equal = bool(
+        np.array_equal(
+            np.asarray([reproduced["forward_branch_receipt"]["residual"]]),
+            np.asarray([banked_solve["forward_branch_receipt"]["residual"]]),
         )
-        finite_trace = trace[np.isfinite(trace)]
-        prefix = finite_trace[: banked_trace.size]
-        discrepancy = prefix - banked_trace
-        solve["banked_trajectory_continuity"] = {
-            "banked_promotions": NEWTON_STEPS,
-            "banked_finite_residual_reads": int(banked_trace.size),
-            "prefix_finite_residual_reads": int(prefix.size),
-            "bitwise_equal": bool(np.array_equal(prefix, banked_trace)),
-            "sup_absolute_difference": float(np.max(np.abs(discrepancy))),
-        }
-        criterion_hits = np.flatnonzero(finite_trace <= FIXED_POINT_CRITERION)
-        solve["trajectory_summary"] = {
-            "full_trace_slots": int(trace.size),
-            "finite_residual_reads": int(finite_trace.size),
-            "minimum_residual": float(np.min(finite_trace)),
-            "minimum_finite_read": int(np.argmin(finite_trace) + 1),
-            "minimum_residual_promotion": int(np.argmin(finite_trace) // 2 + 1),
-            "first_criterion_finite_read": (
-                None if not len(criterion_hits) else int(criterion_hits[0] + 1)
-            ),
-            "first_criterion_promotion": (
-                None if not len(criterion_hits) else int(criterion_hits[0] // 2 + 1)
-            ),
-        }
-        solve["per_metric_qualification"] = _parity_metric_qualification(solve)
-        if not solve["forward_branch_receipt"]["converged"]:
-            solve["stall_structure"] = _stall_structure(finite_trace)
-        arms.append(solve)
+    )
+    current_equal = bool(
+        np.array_equal(
+            np.asarray([reproduced_terminal["plasma_current_a"]]),
+            np.asarray([banked_terminal["plasma_current_a"]]),
+        )
+    )
+    saddle_equal = bool(
+        np.array_equal(
+            np.asarray(reproduced_terminal["saddle_position_m"]),
+            np.asarray(banked_terminal["saddle_position_m"]),
+        )
+    )
+    reproduction_passes = bool(
+        trajectory_equal and residual_equal and current_equal and saddle_equal
+    )
+    if not reproduction_passes:
+        raise RuntimeError("the passive-inclusive handoff did not reproduce bitwise")
+
+    requested = int(TopologyClass.DIVERTED)
+    mapped = profile.flux_map(requested_class=requested)
+    polish_options = {
+        "newton_steps": NEWTON_STEPS,
+        "gmres_iterations": GMRES_ITERATIONS,
+        "warmup": 0,
+        "relaxation": RELAXATION,
+        "step_cap": STEP_CAP,
+    }
+    polish_history = fixed_point.newton_krylov(
+        mapped,
+        jnp.asarray(handoff_state),
+        **polish_options,
+    )
+    polish = _route_record(
+        context["group"],
+        context["row"],
+        profile,
+        context["reference_flux"],
+        polish_history,
+        route_id="stationary_newton_polish",
+        route="newton_krylov",
+        iterations=NEWTON_STEPS,
+        options=polish_options,
+    )
+    polish["registered_fixed_point_criterion"] = FIXED_POINT_CRITERION
+    polish["initial_state_source"] = "handoff_reproduction.state_vector"
+    polish["initial_state_matches_handoff"] = bool(
+        np.array_equal(np.asarray(handoff_state), np.asarray(branch.equilibrium.flux))
+    )
+    polish["terminal_state"]["signed_relative_current_deviation"] = (
+        polish["terminal_state"]["plasma_current_a"]
+        / polish["terminal_state"]["reference_plasma_current_a"]
+        - 1.0
+    )
+    polish_trace = np.asarray(polish_history.trace, dtype=np.float64)
+    numeric_polish_trace = polish_trace[np.isfinite(polish_trace)]
+    criterion_hits = np.flatnonzero(numeric_polish_trace <= FIXED_POINT_CRITERION)
+    polish["numeric_residual_trajectory"] = numeric_polish_trace.tolist()
+    polish["trajectory_summary"] = {
+        "full_trace_slots": int(polish_trace.size),
+        "finite_residual_reads": int(numeric_polish_trace.size),
+        "minimum_residual": float(np.min(numeric_polish_trace)),
+        "minimum_finite_read": int(np.argmin(numeric_polish_trace) + 1),
+        "first_criterion_finite_read": (
+            None if not len(criterion_hits) else int(criterion_hits[0] + 1)
+        ),
+    }
+    polish["per_metric_qualification"] = _metric_qualification(
+        polish["metrics"], polish["residual"]
+    )
 
     banked_unchanged = PASSIVE_INCLUSIVE_RECEIPT.read_bytes() == banked_bytes
     if not banked_unchanged:
         raise RuntimeError("the bounded passive-inclusive receipt was modified")
-    figure_path = output / EXTENDED_PASSIVE_FIGURE_NAME
-    _extended_passive_figure(arms, figure_path)
-    converged = [
-        arm["newton_budget"]
-        for arm in arms
-        if arm["forward_branch_receipt"]["converged"]
-    ]
-    converged_nonzero = [
-        arm["newton_budget"]
-        for arm in arms
-        if arm["forward_branch_receipt"]["converged"]
-        and arm["terminal_state"]["nonzero_current"]
-    ]
+    figure_path = output / PASSIVE_POLISH_FIGURE_NAME
+    _passive_polish_figure(handoff_trace, polish_trace, figure_path)
+    converged = polish["converged"]
+    retains_plasma = polish["terminal_state"]["retains_plasma_basin"]
     receipt = {
-        "receipt": "MAST passive-inclusive extended pinned convergence",
+        "receipt": "MAST passive-inclusive stationary Newton polish",
         "backend": "JAX_PLATFORMS=cpu required by invocation",
         "execution_contract": {
             "reference_seed": "efm/psirz in total Wb",
             "normalization": "reference-declared axis and boundary anchors",
             "external_field": "all fitted circuits as prescribed currents",
-            "operator_path": "one ForwardFluxOperator external-field composition",
+            "operator_path": "one stationary ForwardFluxOperator composition",
+            "handoff": "existing newton_krylov prefix followed by existing newton_krylov polish",
+            "promotion_stage": {
+                "handoff_value": NEWTON_STEPS,
+                "value_during_polish": NEWTON_STEPS,
+                "advanced_during_polish": False,
+                "polish_warmup_sweeps": 0,
+            },
         },
         "path_audit": {
             "sensor_reads": 0,
@@ -3524,57 +3611,78 @@ def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
             "passes": True,
         },
         "prescribed_current_policy": policy,
-        "banked_bounded_solve": {
+        "banked_handoff_source": {
             "source_receipt": str(PASSIVE_INCLUSIVE_RECEIPT),
             "sha256": banked_sha256,
             "byte_count": len(banked_bytes),
-            "unchanged_after_extended_run": banked_unchanged,
-            "solve": banked_solve,
+            "unchanged_after_polish_run": banked_unchanged,
+            "promotion_count": NEWTON_STEPS,
         },
-        "promotion_budgets": list(EXTENDED_PROMOTION_BUDGETS),
-        "extended_solves": arms,
-        "budgets_converged": converged,
-        "budgets_converged_nonzero_current": converged_nonzero,
+        "handoff_reproduction": {
+            "route": "newton_krylov",
+            "options": {
+                "newton_steps": NEWTON_STEPS,
+                "gmres_iterations": GMRES_ITERATIONS,
+                "warmup": WARMUP_SWEEPS,
+                "relaxation": RELAXATION,
+                "step_cap": STEP_CAP,
+            },
+            "residual": reproduced["forward_branch_receipt"]["residual"],
+            "plasma_current_a": reproduced_terminal["plasma_current_a"],
+            "reference_plasma_current_a": reproduced_terminal[
+                "reference_plasma_current_a"
+            ],
+            "saddle_position_m": reproduced_terminal["saddle_position_m"],
+            "state_vector": handoff_state.tolist(),
+            "state_size": int(handoff_state.size),
+            "residual_trajectory": reproduced["residual_trajectory"],
+            "bitwise_verification": {
+                "residual_trajectory_equal": trajectory_equal,
+                "terminal_residual_equal": residual_equal,
+                "plasma_current_equal": current_equal,
+                "saddle_position_equal": saddle_equal,
+                "passes": reproduction_passes,
+            },
+        },
+        "stationary_polish": polish,
         "verdict": (
-            "PASS_EXTENDED_BUDGET_CONVERGED_NONZERO_CURRENT"
-            if converged_nonzero
-            else "FAIL_EXTENDED_BUDGET_CONVERGED_VACUUM_BRANCH"
+            "PASS_STATIONARY_POLISH_CONVERGED_PLASMA_ROOT"
+            if converged and retains_plasma
+            else "STRUCTURAL_NEGATIVE_STATIONARY_POLISH_CONVERGED_VACUUM_ROOT"
             if converged
-            else "FAIL_EXTENDED_BUDGET_STALLED"
+            else "STRUCTURAL_NEGATIVE_STATIONARY_POLISH_STALLED_IN_PLASMA_BASIN"
+            if retains_plasma
+            else "STRUCTURAL_NEGATIVE_STATIONARY_POLISH_ESCAPED_WITHOUT_CONVERGENCE"
         ),
         "figure_src": (
-            "/nova/figures/efit-forward-parity/passive-inclusive-convergence.png"
+            "/nova/figures/efit-forward-parity/passive-inclusive-stationary-polish.png"
         ),
     }
     output.mkdir(parents=True, exist_ok=True)
-    receipt_path = output / EXTENDED_PASSIVE_RECEIPT_NAME
+    receipt_path = output / PASSIVE_POLISH_RECEIPT_NAME
     receipt_path.write_text(json.dumps(receipt, indent=2, allow_nan=False) + "\n")
     return receipt
 
 
 def main() -> None:
-    """Parse paths, extend the passive-inclusive solve and print its headline."""
+    """Parse paths, run stationary passive-inclusive polish and summarize."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--store", type=Path, default=SHOT_STORE)
     parser.add_argument("--bank", type=Path, default=DECOMPOSITION_BANK)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     arguments = parser.parse_args()
     receipt = run(arguments.store, arguments.bank, arguments.output)
-    fields = ["PASSIVE_INCLUSIVE_CONVERGENCE"]
-    for arm in receipt["extended_solves"]:
-        branch = arm["forward_branch_receipt"]
-        terminal = arm["terminal_state"]
-        residual = branch["residual"]
-        residual_text = "nonfinite" if residual is None else f"{residual:.9g}"
-        fields.append(
-            f"budget_{arm['newton_budget']}="
-            f"converged:{branch['converged']},"
-            f"residual:{residual_text},"
-            f"Ip:{terminal['plasma_current_a']:.9g},"
-            f"class:{branch['achieved_class']},"
-            f"consistent:{branch['topology_consistent']}"
-        )
-    print(" ".join(fields))
+    polish = receipt["stationary_polish"]
+    terminal = polish["terminal_state"]
+    print(
+        "PASSIVE_INCLUSIVE_STATIONARY_POLISH "
+        f"handoff_bitwise={receipt['handoff_reproduction']['bitwise_verification']['passes']} "
+        f"converged={polish['converged']} "
+        f"residual={polish['residual']:.9g} "
+        f"Ip={terminal['plasma_current_a']:.9g} "
+        f"class={polish['achieved_class']} "
+        f"consistent={polish['topology_consistent']}"
+    )
 
 
 if __name__ == "__main__":

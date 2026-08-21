@@ -1,0 +1,43 @@
+{
+  "cohort": {
+    "authority": "docs/figures/diiid-forward-onboarding/unclaimed-current/unclaimed_current_patches_receipt.json",
+    "detectable_patches": 391,
+    "frames": 60,
+    "screen": "every shot absent from the complete 603-shot polarity population",
+    "shots": 20
+  },
+  "magnitude_plausibility": {
+    "comparison": "per-frame unclaimed L1 ampere-turns against the absolute released ampere-turn current of every shipped poloidal conductor",
+    "interpretation": "scale comparison only; it cannot establish origin alone",
+    "landed_median_fraction_of_extracted_plasma_current": 0.6149271950681132,
+    "landed_median_unclaimed_ampere_turns": 452070.90359150956
+  },
+  "non_gs_accounting": {
+    "coefficients_fitted": 0,
+    "construction": "extract p-prime and FF-prime from each label, solve the fixed-border profile equation, apply Delta-star to label minus solution, and integrate exterior L1 apparent toroidal current",
+    "dominant_fraction": 0.8,
+    "landed_irreducible_strict_gs_residual_fraction": 0.9968
+  },
+  "position_stability": {
+    "algorithm": "Euclidean DBSCAN over R-Z centroids",
+    "cluster_radius_m": 0.042,
+    "minimum_patches": 3,
+    "native_cell_m": 0.021,
+    "physical_position_rule": "a cluster spans at least fifteen of twenty shots and both its radial and vertical peak-to-peak spreads do not exceed 0.021 m"
+  },
+  "resolution_dependence": {
+    "maximum_stable_relative_change": 0.2,
+    "operation": "take every second R and Z node, then repeat Delta-star and patch detection",
+    "unchanged": [
+      "label map values on retained nodes",
+      "LCFS mask values on retained nodes",
+      "tare-floor fraction",
+      "patch connectivity and detectability rule"
+    ]
+  },
+  "verdict": {
+    "artefact": "non-GS apparent current explains at least 80 percent and either no position-stable cluster exists or the decimated total or patch count changes by more than 20 percent",
+    "mixed": "neither the artefact nor physical conjunction is met",
+    "physical": "a position-stable cluster exists, non-GS apparent current explains at most 20 percent, and both resolution changes are at most 20 percent"
+  }
+}

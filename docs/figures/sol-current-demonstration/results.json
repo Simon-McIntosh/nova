@@ -1,0 +1,191 @@
+{
+  "artifacts": {
+    "current_profiles": {
+      "path": "docs/figures/sol-current-demonstration/current-profiles.svg",
+      "project_absolute_src": "/nova/figures/sol-current-demonstration/current-profiles.svg"
+    },
+    "flux_map_contours": {
+      "path": "docs/figures/sol-current-demonstration/flux-map-contours.svg",
+      "project_absolute_src": "/nova/figures/sol-current-demonstration/flux-map-contours.svg"
+    },
+    "solutions": "docs/figures/sol-current-demonstration/solutions.npz"
+  },
+  "assertions": {
+    "common_sol_current_at_both_strikes": true,
+    "control_converged": true,
+    "control_private_flux_zero": true,
+    "net_current_identity": true,
+    "saddle_branches_additive": true,
+    "separatrix_gradient_continuous": true,
+    "separatrix_value_continuous": true,
+    "sol_converged": true,
+    "sol_private_flux_zero": true
+  },
+  "carrier": {
+    "load_seconds": 0.3974712318740785,
+    "lock_wait_seconds": 1.6731908544898033e-05,
+    "plasma_cells": 566,
+    "reference_pulse": 135011,
+    "reference_run": 7,
+    "reference_time_slice": 353,
+    "root_bank": "scripts/root_gate_attribution/coarse-terminal-root.npz",
+    "semantic_key": "c0e388fd9b6e6ef3",
+    "status": "warm",
+    "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/solovev_hex_machine.zarr"
+  },
+  "closure": {
+    "control_separatrix_current_density_a_per_m2": -6365.875826887428,
+    "eich_poloidal_field_t": 1.3298738017708334,
+    "finite_separatrix_current_density_a_per_m2": -6365.910244320368,
+    "heat_flux_width_m": 0.00044875173123030867,
+    "insignificant_fraction": 1e-06,
+    "normalized_flux_width": 0.0003750242647532289,
+    "outboard_midplane_radius_m": 7.929723494132999,
+    "separatrix_gradient_relative_jump": 5.659153051706976e-16,
+    "separatrix_value_relative_jump": 0.0,
+    "shared_edge_anchor": {
+      "authority": "demonstration_choice_not_stored_reference",
+      "diamagnetic_gradient_t2m2_per_wb": {
+        "endpoint_slope_per_psi_norm": 1.8772389494354558,
+        "endpoint_value": -0.0012102640320178874,
+        "start_slope_per_psi_norm": 1.8772389494354558,
+        "start_value": -0.028223800190813365
+      },
+      "family": "analytic_cubic_hermite",
+      "interval_psi_norm": [
+        0.9856099639489585,
+        1.0
+      ],
+      "minimum_change_member": "incoming_linear_trend",
+      "pressure_gradient_pa_per_wb": {
+        "endpoint_slope_per_psi_norm": -221937.04429989835,
+        "endpoint_value": 143.0837678758512,
+        "start_slope_per_psi_norm": -221937.04429989835,
+        "start_value": 3336.765836412983
+      }
+    },
+    "spreading_fraction": 0.35,
+    "spreading_width_factor": 4.0,
+    "support_extent_psi_norm": {
+      "dual": 1.0236365921492725,
+      "single": 1.005943184848467
+    }
+  },
+  "saddle_partition": {
+    "additive_closure": 0.0,
+    "area_closure_m2": -1.951563910473908e-18,
+    "audit_half_width_m": 0.011696978694393033,
+    "common_branch_area_m2": [
+      0.00013681931057708406,
+      0.00013681931057708406
+    ],
+    "common_branch_vertex_count": [
+      4,
+      4
+    ],
+    "machine_cell": 19,
+    "private_branch_area_m2": [
+      0.00013681931057708406,
+      0.00013681931057708406
+    ],
+    "private_branch_vertex_count": [
+      4,
+      4
+    ],
+    "selected_common_branch_integral": 0.00013681931057708406,
+    "selected_private_branch_integral": 0.0,
+    "x_point_m": [
+      5.089893884683524,
+      -3.394092185439661
+    ]
+  },
+  "schema": "nova.sol-current-demonstration",
+  "solutions": {
+    "axis_shift_m": 2.7018123842233866e-05,
+    "control": {
+      "axis_m": [
+        6.326478688243704,
+        0.5319139509684274
+      ],
+      "current_ledger_a": {
+        "common_sol": 0.0,
+        "core": -14819192.090272328,
+        "excluded_material": 0.0,
+        "private_flux": 0.0,
+        "total": -14819192.090272328
+      },
+      "map_relative_residual": 1.3696586628141472e-15,
+      "net_plasma_current_a": -14819192.090272328,
+      "private_flux_maximum_cell_current_a": 0.0,
+      "reused_existing_root": false,
+      "root_relative_residual": 1.3696586628141476e-15,
+      "solve_seconds": 24.247262767050415,
+      "strike_points_m": [
+        [
+          4.266433333333333,
+          -3.7041666666666675
+        ],
+        [
+          5.5642,
+          -4.357366666666667
+        ]
+      ],
+      "x_point_m": [
+        5.089918658102859,
+        -3.394080136126665
+      ]
+    },
+    "net_current_relative_difference": 0.0,
+    "sol": {
+      "axis_m": [
+        6.326503363912022,
+        0.5319249550771598
+      ],
+      "current_ledger_a": {
+        "common_sol": 3.2881179826074316,
+        "core": -14819195.37839031,
+        "excluded_material": 0.0,
+        "private_flux": 0.0,
+        "total": -14819192.090272328
+      },
+      "joint_relative_residual": 8.346287079954648e-16,
+      "map_relative_residual": 1.4017482147103317e-15,
+      "net_plasma_current_a": -14819192.090272328,
+      "private_flux_maximum_cell_current_a": 0.0,
+      "reused_existing_root": false,
+      "solve_seconds": 108.15820386609994,
+      "source_amplitude": 1.0000054065510977,
+      "strike_adjacent_cell": [
+        77,
+        5
+      ],
+      "strike_adjacent_cell_current_a": [
+        -0.7533120079963793,
+        0.25133368289108216
+      ],
+      "strike_adjacent_distance_m": [
+        0.14579974206108087,
+        0.30965641762383755
+      ],
+      "strike_points_m": [
+        [
+          4.266433333333333,
+          -3.7041666666666675
+        ],
+        [
+          5.5642,
+          -4.357366666666667
+        ]
+      ],
+      "x_point_m": [
+        5.089893884683524,
+        -3.394092185439661
+      ]
+    },
+    "strike_point_shift_m": [
+      0.0,
+      0.0
+    ],
+    "x_point_shift_m": 2.7548289407033272e-05
+  }
+}

@@ -65,79 +65,79 @@
     "analytic_stationary_points": {
       "axis": {
         "coordinate_m": [
-          1.7267405315443793,
-          -0.12905304720048028
+          1.7673817014758004,
+          -0.05866047600021829
         ],
-        "flux_wb": 0.01852052347479921,
+        "flux_wb": 0.006818324467585041,
         "gradient_wb_per_m": [
-          0.0,
-          -4.163336342344337e-17
+          -2.220446049250313e-16,
+          -1.700029006457271e-16
         ],
-        "hessian_determinant_wb2_per_m4": 1.0846600756343627,
+        "hessian_determinant_wb2_per_m4": 0.6155630115650781,
         "hessian_eigenvalues_wb_per_m2": [
-          -3.691478175114077,
-          -0.2938281155084558
+          -5.5887675730531665,
+          -0.11014288991603083
         ],
         "hessian_wb_per_m2": [
           [
-            -1.43042185075125,
-            1.6030915299202004
+            -2.1407207962090324,
+            2.646039985511272
           ],
           [
-            1.6030915299202004,
-            -2.554884439871283
+            2.646039985511272,
+            -3.558189666760165
           ]
         ],
         "kind": "maximum_magnetic_axis"
       },
       "x_point": {
         "coordinate_m": [
-          1.1577641525044828,
-          -0.5044800936018776
+          1.198405322435904,
+          -0.43408752240161563
         ],
-        "flux_wb": -3.469446951953614e-17,
+        "flux_wb": 1.457167719820518e-16,
         "gradient_wb_per_m": [
-          5.551115123125783e-17,
-          1.1102230246251565e-16
+          -1.1102230246251565e-16,
+          -1.1102230246251565e-16
         ],
-        "hessian_determinant_wb2_per_m4": -0.5263717790406582,
+        "hessian_determinant_wb2_per_m4": -0.28834484487532874,
         "hessian_eigenvalues_wb_per_m2": [
-          -2.8565994356993003,
-          0.1842651694397613
+          -4.414261451157127,
+          0.0653211976829654
         ],
         "hessian_wb_per_m2": [
           [
-            -0.6430580306592943,
-            1.3532605657335388
+            -0.9842530697523973,
+            1.8973793859452635
           ],
           [
-            1.3532605657335388,
-            -2.0292762356002445
+            1.8973793859452635,
+            -3.3646871837217653
           ]
         ],
         "inside_wall_polygon": true,
         "kind": "saddle",
-        "nearest_wall_vertex_distance_m": 0.06947558145038522
+        "nearest_wall_vertex_distance_m": 0.1335382885813543
       }
     },
     "arrays": {
       "coefficients": {
         "dtype": "<f8",
-        "sha256": "73840028d1c3702bc73674a7e6edade1969d710599f76e65bed721ba0f96fd38",
+        "sha256": "02c5c5b60d2fdc4ff6fa09ff3889b38bd0f4f64e9871a3bb5c29df43a7c7a215",
         "shape": [
           7
         ]
       },
       "state": {
         "dtype": "<f8",
-        "sha256": "1e6e1043b84a7833adeb51916d3dca36c92d291a4a40dd924ce9b7cae87e7a8d",
+        "sha256": "11a7e9d00556e91a6d76a69212107592501e1e8cedae60fd17e9e8032ff14801",
         "shape": [
           4052
         ]
       },
       "stationary_points": {
         "dtype": "<f8",
-        "sha256": "833f5cca5a4c4f7ab243af07e7152f15e8169f599f5ec042dff35b94b8eef323",
+        "sha256": "9919d9b2fb5b262f49bfaee0fec3571bd687b65812269b0f9db27cfcfe2ccbf1",
         "shape": [
           2,
           2
@@ -177,69 +177,69 @@
       ],
       "coefficients": [
         -0.1,
-        -0.8,
-        -0.7065446894000564,
-        0.4148444716482907,
-        -1.590546435765118,
-        0.42286588301432,
-        0.040031942380953985
+        -1.6,
+        -0.9717066778084612,
+        0.5788947452393514,
+        -2.5259948490836557,
+        0.7418496289071758,
+        0.014333833567392602
       ],
       "constant_flux_functions": {
-        "ff_prime_t2_m2_per_wb": -0.04052847345693511,
+        "ff_prime_t2_m2_per_wb": -0.08105694691387022,
         "p_prime_pa_per_wb": -16125.767218728875
       },
       "delta_star_phi_wb_per_m2": "8*a*R^2 + 2*b",
       "formula": "Phi=a*R^4+b*Z^2+c0+c1*R^2+c2*Z+c3*R^2*Z+c4*(R^4-4*R^2*Z^2)",
       "gauge": "Phi is exactly zero at the analytic X-point"
     },
-    "production_x_point_localization_error_m": 0.0021797092285960403,
+    "production_x_point_localization_error_m": 0.006899656974669754,
     "source_bank": "scripts/dual_basin_fixtures/diverted-state.npz",
     "source_receipt": "scripts/dual_basin_fixtures/diverted-receipt.json",
     "topology": {
-      "axis_flux_wb": 0.018521343437036254,
+      "axis_flux_wb": 0.0068202193589138385,
       "axis_m": [
-        1.7247913717735055,
-        -0.13017603734200348
+        1.7627354924305094,
+        -0.06199979001032996
       ],
-      "boundary_flux_wb": -8.858812558313012e-07,
+      "boundary_flux_wb": -1.4844865419477442e-06,
       "boundary_point_m": [
-        1.1595012040533252,
-        -0.5031633611925055
+        1.2043590455560238,
+        -0.43060062587647197
       ],
-      "boundary_wall_flux_difference_wb": -0.0004303310847507742,
-      "boundary_wall_point_distance_m": 0.07046484171055074,
+      "boundary_wall_flux_difference_wb": -0.0005926676448621767,
+      "boundary_wall_point_distance_m": 0.14059053998403737,
       "class": "diverted",
       "diverted": true,
       "finite_o_point_count": 1,
       "finite_o_points": [
         [
-          1.7247913717735055,
-          -0.13017603734200348,
-          0.018521343437036254,
+          1.7627354924305094,
+          -0.06199979001032996,
+          0.0068202193589138385,
           1.0
         ]
       ],
       "finite_x_point_count": 1,
       "finite_x_points": [
         [
-          1.1595012040533252,
-          -0.5031633611925055,
-          -8.858812558313012e-07,
+          1.2043590455560238,
+          -0.43060062587647197,
+          -1.4844865419477442e-06,
           0.0
         ]
       ],
       "null_fit_precision": "<class 'jax.numpy.float64'>",
-      "selected_x_point_flux_wb": -8.858812558313012e-07,
+      "selected_x_point_flux_wb": -1.4844865419477442e-06,
       "selected_x_point_m": [
-        1.1595012040533252,
-        -0.5031633611925055
+        1.2043590455560238,
+        -0.43060062587647197
       ],
       "state_precision": "float64",
-      "wall_contact_flux_wb": 0.00042944520349494293,
-      "wall_contact_nearest_vertex_distance_m": 0.02296067178270216,
+      "wall_contact_flux_wb": 0.000591183158320229,
+      "wall_contact_nearest_vertex_distance_m": 0.021660416277794154,
       "wall_contact_point_m": [
-        1.0995950340361336,
-        -0.5402651766624296
+        1.0803629532937464,
+        -0.49686274957235127
       ],
       "wall_state_precision": "float64"
     }

@@ -1,10 +1,10 @@
 {
   "composition": {
-    "closure_absolute_residual_wb": 2.220446049250313e-16,
+    "closure_absolute_residual_wb": 4.440892098500626e-16,
     "external_field": {
-      "maximum_absolute_flux_wb": 2.00616700212044,
+      "maximum_absolute_flux_wb": 2.8331924006294433,
       "reconstruction_difference_wb": 0.0,
-      "sha256": "153d2483d564d78c8ca9a29c93d928423ef35e976a7c9de22471c72c9481e3bc"
+      "sha256": "b1a26f6828854302e6a62bb18938e3e5f908630dff06a50783353c2e2df47463"
     },
     "normalization_anchor": {
       "axis_distance_m": 0.0,
@@ -12,33 +12,33 @@
       "boundary_distance_m": 0.0,
       "boundary_flux_difference_wb": 0.0,
       "domain_label_difference_count": 0,
-      "pinned_axis_flux_wb": 0.018521343437036254,
+      "pinned_axis_flux_wb": 0.0068202193589138385,
       "pinned_axis_m": [
-        1.7247913717735055,
-        -0.13017603734200348
+        1.7627354924305094,
+        -0.06199979001032996
       ],
-      "pinned_boundary_flux_wb": -8.858812558313012e-07,
+      "pinned_boundary_flux_wb": -1.4844865419477442e-06,
       "pinned_boundary_m": [
-        1.1595012040533252,
-        -0.5031633611925055
+        1.2043590455560238,
+        -0.43060062587647197
       ],
-      "unpinned_axis_flux_wb": 0.018521343437036254,
+      "unpinned_axis_flux_wb": 0.0068202193589138385,
       "unpinned_axis_m": [
-        1.7247913717735055,
-        -0.13017603734200348
+        1.7627354924305094,
+        -0.06199979001032996
       ],
-      "unpinned_boundary_flux_wb": -8.858812558313012e-07,
+      "unpinned_boundary_flux_wb": -1.4844865419477442e-06,
       "unpinned_boundary_m": [
-        1.1595012040533252,
-        -0.5031633611925055
+        1.2043590455560238,
+        -0.43060062587647197
       ]
     },
     "source_forcing": {
-      "ff_prime_t2_m2_per_wb": -0.04052847345693511,
-      "maximum_absolute_flux_wb": 0.19718896011824405,
+      "ff_prime_t2_m2_per_wb": -0.08105694691387022,
+      "maximum_absolute_flux_wb": 0.14172801675859822,
       "p_prime_pa_per_wb": -16125.767218728875,
       "repeat_difference_wb": 0.0,
-      "sha256": "fd228cf7d6433091071edea47049c48220ebfe44104f74759fa0d304230a461f"
+      "sha256": "8a6bd7a20414c141ae7c8d2d7b0fe51451bfb61c9cc32fc2321b9b642d08bb89"
     }
   },
   "evidence": {
@@ -48,18 +48,18 @@
     "verdict": "genuine_machine_precision_root"
   },
   "map": {
-    "absolute_residual_wb": 2.220446049250313e-16,
+    "absolute_residual_wb": 4.440892098500626e-16,
     "achieved_class": 1,
     "at_machine_precision_floor": true,
     "converged": true,
     "finite": true,
     "iterations": 1,
     "machine_precision_floor": 1e-14,
-    "mapped_flux_scale_wb": 1.963820512278293,
+    "mapped_flux_scale_wb": 2.80349813512845,
     "operator": "ForwardFluxOperator",
-    "relative_residual": 1.130676676084975e-16,
+    "relative_residual": 1.5840538799920246e-16,
     "requested_class": 1,
-    "terminal_state_difference_wb": 2.220446049250313e-16,
+    "terminal_state_difference_wb": 4.440892098500626e-16,
     "topology_consistent": true
   },
   "schema": "nova.forward-root-receipt",
@@ -67,7 +67,7 @@
   "state": {
     "dtype": "<f8",
     "path": "scripts/dual_basin_fixtures/diverted-state.npz",
-    "sha256": "1e6e1043b84a7833adeb51916d3dca36c92d291a4a40dd924ce9b7cae87e7a8d",
+    "sha256": "11a7e9d00556e91a6d76a69212107592501e1e8cedae60fd17e9e8032ff14801",
     "shape": [
       4052
     ]

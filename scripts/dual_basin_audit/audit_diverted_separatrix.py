@@ -388,6 +388,7 @@ def audit() -> dict[str, object]:
         genuine
         and clearance_pitches >= CLEARANCE_PITCH_FLOOR
         and margin_fraction >= FLUX_MARGIN_FRACTION_FLOOR
+        and exact_saddle_wall_margin / flux_span >= FLUX_MARGIN_FRACTION_FLOOR
     )
     if not genuine:
         verdict = "locator-artifact"
@@ -434,9 +435,7 @@ def audit() -> dict[str, object]:
             "fixture_flux_span_wb": flux_span,
             "boundary_minus_wall_flux_margin_fraction_of_span": margin_fraction,
             "sampled_wall_peak_flux_wb": sampled_wall_peak,
-            "exact_saddle_minus_sampled_wall_margin_abs_wb": (
-                exact_saddle_wall_margin
-            ),
+            "exact_saddle_minus_sampled_wall_margin_abs_wb": (exact_saddle_wall_margin),
             "exact_saddle_minus_sampled_wall_margin_fraction_of_span": (
                 exact_saddle_wall_margin / flux_span
             ),
@@ -470,7 +469,8 @@ def audit() -> dict[str, object]:
             ),
             "well_separated_if": (
                 "genuine and both wall clearance is at least two median carrier "
-                "pitches and boundary-wall flux margin is at least 5% of span"
+                "pitches and the production and exact sampled-wall flux margins "
+                "are each at least 5% of span"
             ),
             "marginal_if": "genuine but either separation floor is missed",
             "thresholds": {

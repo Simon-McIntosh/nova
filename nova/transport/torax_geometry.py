@@ -35,15 +35,16 @@ def _smooth_near_axis(values, rho_face, *, polynomial_order):
 
 def _validate_uniform_normalized_grid(rho_face):
     """Validate a concrete grid received at the JAX runtime boundary."""
-    expected = np.linspace(0.0, 1.0, rho_face.size, dtype=rho_face.dtype)
-    tolerance = 32.0 * np.finfo(rho_face.dtype).eps
-    if not np.all(np.isfinite(rho_face)) or not np.all(
-        np.abs(rho_face - expected) <= tolerance
+    rho_host = np.asarray(rho_face)
+    expected = np.linspace(0.0, 1.0, rho_host.size, dtype=rho_host.dtype)
+    tolerance = 32.0 * np.finfo(rho_host.dtype).eps
+    if not np.all(np.isfinite(rho_host)) or not np.all(
+        np.abs(rho_host - expected) <= tolerance
     ):
         raise ValueError(
             "rho_face must be the uniform normalized grid implied by its length"
         )
-    return rho_face
+    return rho_host
 
 
 def _validated_grid_callback(rho_face):

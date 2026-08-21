@@ -19,16 +19,16 @@
   <meta name="plan-capability-risk" content="elevated">
   <meta name="plan-sprint" content="S7">
   <meta name="plan-owner" content="Simon McIntosh">
-  <meta name="plan-depends-on" content="efit-map-inversion,efit-flux-decomposition,plasma-edge-current-representation,solovev-exact-recovery">
+  <meta name="plan-depends-on" content="efit-map-inversion,efit-flux-decomposition,plasma-edge-current-representation,solovev-exact-recovery,dual-basin-solve">
   <meta name="plan-blocks" content="mast-catalog-gpu-solve">
   <title>EFIT Forward Parity | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="12">
-<meta name="plan-commits" content="c1e180d5,71c1ec36,457caddd,252bdd77">
+<meta name="plan-version" content="13">
+<meta name="plan-commits" content="c1e180d5,71c1ec36,457caddd,252bdd77,d026b0dc,57a1bfb9">
 <meta name="plan-artifacts" content="scripts/dina_profile_routes/reuse-report.md,scripts/dina_profile_routes/receipt.json,scripts/dina_profile_routes/addendum.json,benchmarks/efit_forward_parity_slice.py,docs/figures/efit-forward-parity/reference-seeded-forward-slice.json,docs/evidence/archive/efit-forward-parity-landed.html">
-<meta name="plan-impl" content="0.7">
+<meta name="plan-impl" content="0.8">
 </head>
 <body>
   <main class="plan-doc">
@@ -252,10 +252,16 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-efp-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship efit-forward-parity §2" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-efp-001" data-status="resolved" data-written-by="reckon-create" data-written-at="2026-08-13" data-recommends-skill="/reckon-ship efit-forward-parity §2" data-resolved-at="2026-08-21T12:12:26+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Run one forward slice from the reference&#x27;s own sources</h4>
     <div class="r-fu-body"><p>Every input is confirmed present: <code>efm/pprime</code> and <code>efm/ffprime</code> [time,65] on a 65-point uniform <code>psi_norm</code>, <code>efm/fcoil_x</code> [time,101] with its filament and circuit maps, and 397 rows across the frozen six carrying the complete set. Drive <code>ForwardProfile.solve</code> on one MAST slice with those prescribed sources and the experimental conductor currents, converting into COCOS 17 by ψ ×2π and pprime/ffprime ÷2π, and compare the solved flux map to <code>efm/psirz</code> as a sup-norm and RMS fraction of the flux span, with axis, LCFS, x-point, <code>I_p</code>, <code>β_p</code> and <code>l_i</code> beside it. Report both seeding conditions with iteration counts, since a reference-seeded run bounds how close EFIT's map sits to our fixed point while an independently-seeded run is what carries the claim. No measurement enters this node — if a whitening matrix, a sensor read or a least-squares update appears anywhere in the path, the node is wrong rather than merely failing. This is entry-gated on the decomposition's verdict that the external field is fit to serve as a free-boundary boundary condition; if that verdict is negative, report the blocker rather than solving against a boundary known to be wrong.</p></div>
     <pre class="r-fu-prompt">/reckon-ship efit-forward-parity §2</pre>
+    <p class="r-fu-outcome">done - the slice ran three ways on one worker session (457caddd, d026b0dc, 57a1bfb9): the reference-seeded prescribed-anchor solve converged with zero defect on the VACUUM root; seed-state instrumentation convicted a benchmark gradient-sign defect against DomainProfile's negated-total-flux convention (seed -934,020 vs +934,384 A, magnitude 0.039%); repaired, the seed gate passes but the standard Newton path still escapes the plasma basin at promotion 4 while a quarter-first-step control holds 0.94-1.04 MA without converging in the bounded budget. The residual blocker is plasma-basin reachability, owned by dual-basin-solve (S8) per the locked forward-parity-seed ruling; continuation tracked as f-efp-002.</p>
+    </article>
+<article class="r-fu" data-id="f-efp-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-21" data-recommends-skill="/reckon-ship dual-basin-solve" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">The parity claim waits on plasma-basin reachability (foreign-owner: dual-basin-solve, S8)</h4>
+    <div class="r-fu-body"><p>Exemption: foreign-owner. The first parity slice proved the inputs and wiring sound (seed current +934,020 A against the reference +934,384 A on the full 227-cell prescribed-anchor support) yet the standard Newton path escapes to the vacuum root at promotion 4, and a quarter-first-step control holds the plasma basin (0.94-1.04 MA over 12 promotions) without converging. That is precisely the topology-pinned, hysteresis-selected solve dual-basin-solve was commissioned to build. Two measured facts sharpen its brief: damping keeps the basin but does not close the root, and both current arms (fcoil_c, fcoil_x) fail identically - the escape is operator dynamics, not input choice. When that machinery lands, re-run benchmarks/efit_forward_parity_slice.py unchanged and then extend to the frozen six per section 4.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship dual-basin-solve</pre>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -267,6 +273,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260821T1152" data-who="reckon-ship" data-when="2026-08-21T11:52:00+00:00">
     <div class="r-comment-body">reference-seeded-forward-slice landed - commit 457caddd, merged 1eb88daa; gate PASSED (the receipt is the measure); PARITY RESULT NEGATIVE, recorded as banked. On the best-qualified frozen-six row (21985 row 51 at 0.275 s: 2 typed saddles, declared-boundary/map-saddle offset 1.42e-8 of span, contour discrepancy 2.63e-3 - qualification stated before deviations per the prescribed-anchor ruling), the reference-seeded prescribed-anchor ForwardProfile.solve reaches the registered 1e-8 separated criterion in 2 Newton promotions / 28 mapped evaluations with fixed-point, grid and wall defects all exactly zero - ON THE VACUUM ROOT: solved Ip 0 against 934,383.875 A, beta_p and li 0. Flux sup/RMS 0.6479/0.2766 of the 1.8234 Wb span; axis 1.8477 m, LCFS 1.1289 m, x-point 0.6898 m - every carried tolerance fails except topology class (diverted/diverted, 1.0). The fcoil_x arm lands on the same root (sup 0.6502). Path audit clean: zero sensor reads, whitening matrices, least-squares updates or inverse coefficients. THE ZERO DEFECT IS NOT PARITY and is not reinterpreted as such. Diagnosis node dispatched on the same member: instrument the seed-state support admission and current integral before any promotion, walk the two promotions, and classify WIRING (prescribed-anchor defect, this plan) versus BASIN (dual-basin-solve, S8). The vacuum-collapse class was foreshadowed by the oracle-rebaseline continuation measurement (0.50/0.75 strength collapses to vacuum).</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260821T1220" data-who="reckon-ship" data-when="2026-08-21T12:20:00+00:00">
+    <div class="r-comment-body">corrected-sign-parity-slice landed - commit 57a1bfb9, merged 1fd7ddc1; gate PASSED. The convicted sign conversion is repaired at the benchmark input boundary (p_prime = -efm/pprime/2pi into the negated-total-flux convention) and the seed gate passes: +934,020.099 A vs efm/plasma_current_c +934,383.875 A, same sign, 3.89e-4 relative, all 227 cells admitted. RESIDUAL FINDING, banked without retry inflation: the standard prescribed-anchor path holds 0.93-0.96 MA for three promotions, leaves the plasma basin at promotion 4 (current to zero, axis flux -2.43 Wb) and converges at promotion 5 on the vacuum root; fcoil_x likewise at 9 promotions; the quarter-first-step control retains 0.94-1.04 MA through the bounded 12-promotion budget without converging. CLASSIFICATION: basin reachability, owned by dual-basin-solve (S8) - the DAG now carries that edge, f-efp-001 resolves with the outcome, and f-efp-002 (foreign-owner) tracks the continuation. Sections 3-5 (frozen-six scoring and the parity verdict) stay open behind it. Record: /nova/evidence/archive/efit-forward-parity-landed#s2-first-slice.</div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260821T1200" data-who="reckon-ship" data-when="2026-08-21T12:00:00+00:00">
     <div class="r-comment-body">OWNER INTERVIEW 2026-08-21: both entry-design decisions are locked - prescribed reference anchors for reproduction normalization (normalization-anchors) and the reference-seeded initial demonstration with the dual-basin upgrade path (forward-parity-seed). The entry gate readings also moved decisively in this plan's favour this week: the analytic-validation prerequisite is complete (the closed-form oracle proves the composed forward map exact at the analytic state to 4.6e-15 Wb with the recovery gates locked at round-off floors), efit-flux-decomposition sections 3-4 have reopened in S7 to deliver the external-field verdict this plan's entry consumes, and the faithful moment route plus exact kernels are production defaults. Remaining before entry: the decomposition verdict and, for the independent-seed claim only, dual-basin-solve.</div>

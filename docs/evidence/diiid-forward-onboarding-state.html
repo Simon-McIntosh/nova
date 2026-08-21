@@ -21,12 +21,19 @@
     <p>Everything that reads the machine works, and works to a precision better than the data deserves:
     geometry validated at sub-millimetre, topology extracted to a fraction of a grid cell, flux functions
     recovered at the labels' own consistency limit, and the plasma removable from a labelled map to a
-    <strong>0.48 %</strong> local floor. What does not work is reproducing a labelled equilibrium with a
-    <em>free-boundary</em> solve, and the reason has now been located: <strong>85 % of that residual is
-    boundary field, the five omitted conductors are not where it lives, and the labels themselves sit
-    4.3 % from being Grad–Shafranov consistent.</strong> The onboarding recipe — the actual deliverable —
-    is demonstrated end to end. The competition's second kill gate is not, and the evidence says it cannot
-    be with this dataset.</p>
+    <strong>0.48 %</strong> local floor. What does not yet work is reproducing a labelled equilibrium with a
+    <em>free-boundary</em> solve — and as of the correction at the foot of this document, that is a
+    <strong>solver</strong> problem rather than a data one. Adding the five recovered conductor currents
+    cuts the diverted-branch residual <strong>3.53×</strong> and holds the branch; the exact autodiff
+    tangent then returns non-finite values in a neighbourhood that finite differences show to be smooth and
+    full rank. Convention has been excluded across 16 variants. The onboarding recipe — the actual
+    deliverable — is demonstrated end to end. The competition's second kill gate is not, and the honest
+    reading is now that it is unfinished rather than unreachable.</p>
+    <p class="landed-summary"><strong>Read §<a href="#root-reopened">the correction</a> before relying on
+    anything below about the free-boundary root.</strong> Two earlier conclusions in this campaign — that no
+    diverted root is findable, and that the shortfall is a property of the released dataset — were drawn
+    from fixed-budget solves on an incomplete current set and are retracted there. The vacuum-forward,
+    tare, extraction and geometry results are unaffected.</p>
 
     <h2 id="machine">What the machine looks like, and what is missing from it</h2>
     <figure>
@@ -225,6 +232,69 @@
     receipt and a bar fixed before scoring. The recipe is reusable, and DIII-D was its first instance
     rather than its only one.</p>
 
+
+    <h2 id="root-reopened">Correction — the no-root finding was the wrong diagnosis (2026-08-21)</h2>
+    <p><strong>The state above said the free-boundary root was blocked by a data limitation. That was
+    wrong, and the owner's two objections were both better founded than the answer they got.</strong>
+    Two measurements settle it. Commits <code>a1858f15</code> (convention sweep) and
+    <code>e4fb5249</code>/<code>3bd78213</code> (full-current root find).</p>
+
+    <h3 id="root-convention">Convention is exhaustively excluded</h3>
+    <p>A COCOS artefact was the right thing to suspect, because the two validations the pin rested on —
+    the gauge-free differencing gate and the label-boundary fixed solve — are both blind to the degree of
+    freedom a free-boundary root needs. So the residual was re-evaluated <em>linearly at the labelled
+    state</em>, no root find, across <strong>16 variants</strong> declared before scoring: source COCOS
+    1–8 and 11–18, jointly spanning both poloidal-flux signs, both toroidal-current signs, both
+    flux-derivative signs, and total-versus-per-radian. 20 frames × 16 variants = 320 records.</p>
+    <p>The pinned COCOS 5 control reproduced the landed free 0.21565, fixed 0.04058 and vacuum share
+    0.84986 to <strong>3.2e-8, 3.6e-8 and 1.1e-7</strong>. <strong>No variant reached the preregistered
+    gate</strong> of 1.05× the fixed level; the best free residual stayed at 0.21565, which is
+    <strong>5.31×</strong> the fixed level. Convention is not the explanation.</p>
+
+    <h3 id="root-currents">Complete currents materially improve the diverted branch</h3>
+    <p>With the five recovered currents added to the nineteen shipped channels plus bcoil — 24 conductors,
+    zero fitted coefficients, zero current adjustments — the label-seeded solve
+    <strong>stayed diverted and cut the relative residual 3.53×</strong>:</p>
+    <table>
+      <caption><code>d3d_shot_00000c4a7b</code> frame 0, identical operator in both arms.</caption>
+      <thead><tr><th>Current set</th><th>Relative residual</th><th>Terminal topology</th></tr></thead>
+      <tbody>
+        <tr><td>Shipped 20 only</td><td>0.1233879</td><td>diverted</td></tr>
+        <tr><td><strong>Full 24</strong></td><td><strong>0.0349123</strong></td><td><strong>diverted</strong></td></tr>
+      </tbody>
+    </table>
+    <p>So the standing finding — that no state can be simultaneously converged and diverted — was drawn on
+    inputs missing five of the machine's real conductors.</p>
+
+    <h3 id="root-defects">And the obstacle is two solver defects, not the data</h3>
+    <p><strong>Nothing is budget-limited.</strong> The 10×-budget host Newton–Krylov route
+    <em>converged</em> — relative residual <strong>7.75e-11</strong> in 89 accepted iterations and 457 map
+    evaluations. It did not run out of iterations. But it crossed topology at iterations 31, 50 and 88 and
+    terminated <strong>limited</strong>, with no finite X point.</p>
+    <table>
+      <caption>The plateau diagnosed. A smooth, full-rank neighbourhood in which the exact derivative
+      returns non-finite values is a derivative bug.</caption>
+      <thead><tr><th>Probe at the diverted plateau (residual 3.4911e-02)</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>Exact autodiff Jacobian action, first Arnoldi vector</td><td><strong>non-finite</strong></td></tr>
+        <tr><td>Fixed 24-iteration GMRES step</td><td><code>info=0</code>, finite, <strong>exactly zero</strong></td></tr>
+        <tr><td>Central finite differences, 1e-8 → 1e-3</td><td>finite, diverted both signs, L2 ≈ 0.790449, max successive change 6.0e-7</td></tr>
+        <tr><td>64-vector finite-difference Arnoldi projection</td><td><strong>rank 64/64</strong>, condition number 3513.05</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Two defects, both solver-side.</strong> The accelerator cannot leave its diverted plateau
+    because its exact tangent is unusable and GMRES therefore returns a zero step. The only route that
+    converges has no topology-preserving globalisation. Neither is a property of the released data.</p>
+    <p><strong>What this changes.</strong> The §5 exemption's reasoning — no admissible current source
+    exists, therefore no solver work can help — is wrong on both clauses: the recovered currents are
+    admissible and inference-predictable at held-out R² 0.974–0.998, and solver work is exactly what is
+    needed. <code>f-dfo-007</code>, which this orchestrator resolved as superseded, is reopened as
+    <code>f-dfo-014</code>; the measurement that justified closing it was itself run at fixed budget on
+    incomplete currents. What remains genuinely unestablished is a state simultaneously below 1e-6
+    <em>and</em> diverted — now a solver target, not a data limitation.</p>
+    <p><em>The entries above this correction that concern the vacuum forward, the tare, the extraction and
+    the geometry stand unchanged. What is retracted is the inference that the free-boundary shortfall was a
+    property of the dataset.</em></p>
   </main>
 </body>
 </html>

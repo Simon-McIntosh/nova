@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T17:30:37",
+  "updated": "2026-08-21T17:49:40",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -16915,9 +16915,136 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T145916651166-root-convention-sweep",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a710",
+        "node": "root-convention-sweep",
+        "role": "implement",
+        "member": "diiid-forward-gs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T14:59:21Z",
+        "completed_at": "2026-08-21T15:19:40Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1219,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1219,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "2e8babd085af9c7809f7c0e9c9bff26de46ab6db",
+        "commits": [
+          "a1858f150ab85a4afaecb885b80fbdf8dd7a03e4"
+        ],
+        "changed_lines": {
+          "added": 3446,
+          "removed": 0,
+          "files": 6
+        },
+        "tests_added": 6,
+        "gate": "passed",
+        "outcome": "CONVENTION RULED OUT EXHAUSTIVELY: 16 variants over source COCOS 1-8 and 11-18, spanning both flux signs, both current signs, both derivative signs and total-versus-per-radian, across 20 frames = 320 records; no variant reached the preregistered 1.05x fixed-level gate, best free residual 0.21565 at 5.31x the fixed level; the pinned control reproduced landed values to 3.19e-8",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T145916651166-root-convention-sweep/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01bd8-2268-7ff3-bcd9-eb3700561ec8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 12021632,
+            "cached_input_tokens_cumulative": 135474176,
+            "input_tokens": 12349638,
+            "input_tokens_cumulative": 139149902,
+            "output_tokens": 37187,
+            "output_tokens_cumulative": 377661,
+            "reasoning_output_tokens": 11401,
+            "reasoning_output_tokens_cumulative": 106319
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260821T150005215379-diverted-root-full-current-set",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a710",
+        "node": "diverted-root-full-current-set",
+        "role": "implement",
+        "member": "solve-convergence",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T15:00:09Z",
+        "completed_at": "2026-08-21T15:48:27Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2898,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2898,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "b633f21539cbe2a48492fae535e5b9e1c591fd91",
+        "commits": [
+          "e4fb5249abae7f7728fe231faff086efd493ecc6",
+          "3bd782138d8aca723b8f86b547e4ec95357a32c8"
+        ],
+        "changed_lines": {
+          "added": 1490,
+          "removed": 0,
+          "files": 7
+        },
+        "tests_added": 8,
+        "gate": "failed",
+        "outcome": "The gate is unmet but the diagnosis inverted: complete currents cut the diverted-branch residual 3.53x to 3.49e-2, the host large-budget route CONVERGED to 7.75e-11 in 89 iterations so nothing is budget-limited, and the accelerator's exact autodiff Jacobian action is NON-FINITE on its first Arnoldi vector returning an exactly zero GMRES step while finite differences stay finite, diverted and full-rank 64/64 at condition 3513. Two solver defects, not a data limitation",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T150005215379-diverted-root-full-current-set/manifest.md",
+        "scope_changed": false,
+        "session_id": "019ffa72-15c7-78b1-bee8-5f074cebc901",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 28638848,
+            "cached_input_tokens_cumulative": 47507584,
+            "input_tokens": 29437573,
+            "input_tokens_cumulative": 49351910,
+            "output_tokens": 72300,
+            "output_tokens_cumulative": 163296,
+            "reasoning_output_tokens": 17578,
+            "reasoning_output_tokens_cumulative": 38090
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 431
+    "_version": 433
   }
 }

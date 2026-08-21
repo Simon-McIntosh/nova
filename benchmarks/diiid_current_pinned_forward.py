@@ -535,7 +535,7 @@ def power_iteration(
         "rayleigh_quotient": rayleigh,
         "absolute_dominant_eigenvalue_estimate": abs(rayleigh),
         "last_five_norm_growth_estimates": growth[-5:],
-        "finite": finite and np.isfinite(rayleigh),
+        "finite": bool(finite and np.isfinite(rayleigh)),
         "banked_diverted_state_comparison_band": [1.25, 1.40],
     }
 

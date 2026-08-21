@@ -70,6 +70,14 @@ def test_common_amplitude_scales_every_current_moment() -> None:
     np.testing.assert_allclose(scaled.vertical_moment, [12.5, 15.0])
 
 
+def test_power_iteration_receipt_is_strict_json_serializable() -> None:
+    result = pinned.power_iteration(lambda state: 0.5 * state, np.ones(8))
+
+    assert result["finite"] is True
+    assert 0.4 < result["absolute_dominant_eigenvalue_estimate"] < 0.6
+    json.dumps(result, allow_nan=False)
+
+
 def test_summary_requires_representative_current_and_diverted_convergence() -> None:
     eigenvalue = {
         "absolute_dominant_eigenvalue_estimate": 1.1,

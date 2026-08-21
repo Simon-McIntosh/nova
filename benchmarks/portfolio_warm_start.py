@@ -44,6 +44,8 @@ from scripts.analytic_oracle_fixtures.measure import (
     WALL_POINT_COUNT,
     analytic_case,
     cached_machine,
+    exact_current_moments,
+    exact_state,
     forward_operator,
 )
 
@@ -51,6 +53,7 @@ from scripts.analytic_oracle_fixtures.measure import (
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "docs/figures/dual-basin-solve"
 FIXTURE_BANK = ROOT / "scripts/dual_basin_fixtures"
+LIMITED_BANK = ROOT / "scripts/oracle_rebaseline"
 
 # Declared independently of the measurement.  The 1e-3 rung is the catalog
 # projection: neighbouring reconstructed slices differ by one part per
@@ -180,6 +183,77 @@ def _problem() -> tuple[ForwardProfile, Any, np.ndarray]:
         diverted_geometry=geometry,
     )
     return profile, cold, diverted_root
+
+
+def _limited_problem() -> tuple[ForwardProfile, Any, np.ndarray, dict[str, Any]]:
+    """Reconstruct the banked coarse limited oracle fixture and root."""
+    case = analytic_case()
+    machine = cached_machine(
+        case,
+        FIXTURE_REQUESTS["coarse"],
+        wall_nodes=WALL_POINT_COUNT,
+    )
+    coordinates = np.vstack(
+        (machine.node, machine.wall_node, machine.sample_coordinates)
+    )
+    oracle = exact_state(case, coordinates)
+    empty = forward_operator(case, machine)
+    physical = exact_current_moments(case, empty, oracle)
+    coefficients = empty.coupling_current_moments(physical)
+    exterior = oracle - np.asarray(empty.current_moment_image(coefficients))
+    profile = ForwardProfile(
+        forward_operator(case, machine, exterior),
+        StencilMesh(machine.node, machine.stencil, machine.area),
+        newton_steps=10,
+    )
+    bank_receipt = json.loads(
+        (LIMITED_BANK / "receipt-coarse.json").read_text(encoding="utf-8")
+    )
+    root_bank = np.load(LIMITED_BANK / "root-coarse.npz")
+    root = np.asarray(root_bank["root_state"], dtype=np.float64)
+    aggregate = bank_receipt["seed"]["aggregate_moment"]
+    cold = profile.cold_seed_portfolio(
+        aggregate["declared_current_a"],
+        aggregate["current_centroid_m"],
+    )
+    banked_seed = np.asarray(root_bank["seed_state"])
+    np.testing.assert_allclose(
+        np.asarray(cold.branches.flux[int(TopologyClass.LIMITED)]),
+        banked_seed,
+        rtol=0.0,
+        atol=16.0 * np.finfo(np.float64).eps * np.max(np.abs(banked_seed)),
+    )
+    return profile, cold, root, bank_receipt
+
+
+def _limited_seed_ladder(
+    profile: ForwardProfile,
+    cold_flux: np.ndarray,
+    root: np.ndarray,
+) -> tuple[dict[float, jax.Array], dict[str, Any]]:
+    """Build finite wall-span perturbations around the banked limited root."""
+    _, topology = profile.operator.read(root, TopologyClass.LIMITED)
+    span = abs(float(np.asarray(topology.flux_span)))
+    direction = np.asarray(cold_flux) - root
+    scale = float(np.max(np.abs(direction)))
+    if not np.isfinite(span) or span <= 0.0 or scale <= 0.0:
+        raise RuntimeError(
+            f"limited root requires a finite nonzero pinned wall span, got {span}"
+        )
+    unit_direction = direction / scale
+    seeds = {
+        distance: jnp.asarray(np.stack((root + distance * span * unit_direction, root)))
+        for distance in SEED_DISTANCES
+    }
+    return seeds, {
+        "reference": "scripts/oracle_rebaseline/root-coarse.npz",
+        "relative_to": "banked limited root pinned axis-to-wall flux span",
+        "direction": "production current-centroid disc seed minus banked root",
+        "distances": SEED_DISTANCES,
+        "limited_flux_span_wb": span,
+        "catalog_distance": CATALOG_SEED_DISTANCE,
+        "stored_flux_samples_used": False,
+    }
 
 
 def _time_call(compiled: Callable[..., Any], *arguments: Any) -> dict[str, Any]:
@@ -380,6 +454,180 @@ def _solve_grid(
             del compiled, lowered
             jax.clear_caches()
     return measurements, shapes
+
+
+def _limited_terminal_row(result: Any, root: np.ndarray) -> dict[str, Any]:
+    """Extract the limited terminal receipt from one batched portfolio."""
+    branch = jax.tree.map(
+        lambda value: value[0, int(TopologyClass.LIMITED)], result.branches
+    )
+    state = np.asarray(branch.equilibrium.flux)
+    scale = max(float(np.max(np.abs(root))), np.finfo(float).tiny)
+    return {
+        "branch": "limited",
+        "requested_class": int(np.asarray(branch.requested_class)),
+        "achieved_class": int(np.asarray(branch.achieved_class)),
+        "topology_consistent": bool(np.asarray(branch.topology_consistent)),
+        "converged": bool(np.asarray(branch.converged)),
+        "relative_residual": float(np.asarray(branch.residual)),
+        "iterations": int(np.asarray(branch.iterations)),
+        "finite": bool(np.asarray(branch.equilibrium.finite.passed)),
+        "root_relative_error": float(np.max(np.abs(state - root)) / scale),
+    }
+
+
+def _solve_limited_grid(
+    profile: ForwardProfile,
+    seeds: dict[float, jax.Array],
+    root: np.ndarray,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Measure the limited lane while retaining the production portfolio shape."""
+    measurements = []
+    shapes = []
+    for batch_size in BATCH_SIZES:
+        for newton_steps in NEWTON_BUDGETS:
+
+            def solve(states: jax.Array) -> Any:
+                return jax.vmap(
+                    lambda portfolio: profile.solve_portfolio(
+                        portfolio,
+                        route="newton_krylov",
+                        tolerance=CONVERGENCE_TOLERANCE,
+                        newton_steps=newton_steps,
+                        gmres_iterations=GMRES_ITERATIONS,
+                        warmup=0,
+                    )
+                )(states)
+
+            example = jnp.broadcast_to(
+                seeds[SEED_DISTANCES[0]],
+                (batch_size, *seeds[SEED_DISTANCES[0]].shape),
+            )
+            compile_started = time.perf_counter()
+            lowered = jax.jit(solve).lower(example)
+            compiled = lowered.compile()
+            compile_seconds = time.perf_counter() - compile_started
+            example_result = compiled(example)
+            jax.block_until_ready(example_result)
+            output_shapes = jax.tree.map(lambda value: value.shape, example_result)
+            shapes.append(
+                {
+                    "batch_size": batch_size,
+                    "newton_steps": newton_steps,
+                    "input_shape": tuple(example.shape),
+                    "flux_output_shape": tuple(output_shapes.branches.equilibrium.flux),
+                    "requested_class_shape": tuple(
+                        output_shapes.branches.requested_class
+                    ),
+                    "jit": True,
+                    "outer_vmap": True,
+                    "portfolio_branch_axis": 2,
+                    "measured_branch": "limited",
+                }
+            )
+            phase = _phase_profile(
+                profile,
+                seeds[CATALOG_SEED_DISTANCE],
+                newton_steps,
+                batch_size,
+                CATALOG_SEED_DISTANCE,
+            )
+            for distance in SEED_DISTANCES:
+                argument = jnp.broadcast_to(
+                    seeds[distance],
+                    (batch_size, *seeds[distance].shape),
+                )
+                timing = _time_call(compiled, argument)
+                result = compiled(argument)
+                jax.block_until_ready(result)
+                median = timing["median_seconds"]
+                measurements.append(
+                    {
+                        "seed_distance": distance,
+                        "batch_size": batch_size,
+                        "newton_steps": newton_steps,
+                        "gmres_iterations": GMRES_ITERATIONS,
+                        "compile_seconds": compile_seconds,
+                        "timing": timing,
+                        "wall_ms_per_portfolio_state": 1.0e3 * median / batch_size,
+                        "wall_ms_per_branch_state": 1.0e3 * median / (2 * batch_size),
+                        "branch": _limited_terminal_row(result, root),
+                        "phase_decomposition": phase,
+                    }
+                )
+            del compiled, lowered
+            jax.clear_caches()
+    return measurements, shapes
+
+
+def _limited_matrix_rows(
+    measurements: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Flatten every measured limited portfolio into durable receipt rows."""
+    rows = []
+    for measurement in measurements:
+        branch = measurement["branch"]
+        rows.append(
+            {
+                "branch": "limited",
+                "seed_distance": measurement["seed_distance"],
+                "batch_size": measurement["batch_size"],
+                "newton_steps": measurement["newton_steps"],
+                "gmres_iterations": measurement["gmres_iterations"],
+                "requested_class": branch["requested_class"],
+                "achieved_class": branch["achieved_class"],
+                "topology_consistent": branch["topology_consistent"],
+                "converged": branch["converged"],
+                "relative_residual": branch["relative_residual"],
+                "root_relative_error": branch["root_relative_error"],
+                "iterations": branch["iterations"],
+                "finite": branch["finite"],
+                "wall_ms_per_branch_state": measurement["wall_ms_per_branch_state"],
+                "wall_time_samples_seconds": measurement["timing"]["samples_seconds"],
+                "phase_decomposition": measurement["phase_decomposition"],
+            }
+        )
+    return rows
+
+
+def _limited_minimum(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Select the smallest qualifying limited budget at every declared rung."""
+    selected_rows = []
+    for distance in SEED_DISTANCES:
+        for batch_size in BATCH_SIZES:
+            candidates = [
+                row
+                for row in rows
+                if row["seed_distance"] == distance
+                and row["batch_size"] == batch_size
+                and row["converged"]
+                and row["root_relative_error"] <= ROOT_PARITY_TOLERANCE
+            ]
+            selected = (
+                min(candidates, key=lambda row: row["newton_steps"])
+                if candidates
+                else None
+            )
+            selected_rows.append(
+                {
+                    "seed_distance": distance,
+                    "batch_size": batch_size,
+                    "branch": "limited",
+                    "minimum_converged_iterations": (
+                        selected["newton_steps"] if selected else None
+                    ),
+                    "wall_ms_per_branch_state": (
+                        selected["wall_ms_per_branch_state"] if selected else None
+                    ),
+                    "relative_residual": (
+                        selected["relative_residual"] if selected else None
+                    ),
+                    "root_relative_error": (
+                        selected["root_relative_error"] if selected else None
+                    ),
+                }
+            )
+    return selected_rows
 
 
 def _minimum_converged(measurements: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -630,6 +878,118 @@ def _catalog_projection(
     }
 
 
+def _row_key(row: dict[str, Any]) -> tuple[float, int, int]:
+    """Return the declared matrix coordinates for one branch row."""
+    return (
+        float(row["seed_distance"]),
+        int(row["batch_size"]),
+        int(row["newton_steps"]),
+    )
+
+
+def _rows_digest(rows: list[dict[str, Any]]) -> str:
+    """Digest canonical receipt rows to prove an existing lane is unchanged."""
+    payload = json.dumps(rows, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(payload.encode()).hexdigest()
+
+
+def _combined_catalog_projection(
+    minimum: list[dict[str, Any]],
+    matrix_rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Project a two-branch state from independently measured fixture lanes."""
+    branch_rows = {}
+    for branch in ("limited", "diverted"):
+        minimum_row = next(
+            row
+            for row in minimum
+            if row["branch"] == branch
+            and row["seed_distance"] == CATALOG_SEED_DISTANCE
+            and row["batch_size"] == CATALOG_BATCH_SIZE
+        )
+        steps = minimum_row["minimum_converged_iterations"]
+        selected_steps = int(steps) if steps is not None else max(NEWTON_BUDGETS)
+        branch_rows[branch] = next(
+            row
+            for row in matrix_rows
+            if row["branch"] == branch
+            and row["seed_distance"] == CATALOG_SEED_DISTANCE
+            and row["batch_size"] == CATALOG_BATCH_SIZE
+            and row["newton_steps"] == selected_steps
+        )
+
+    qualification = []
+    for branch, row in branch_rows.items():
+        qualified = bool(row["converged"]) and (
+            row["root_relative_error"] <= ROOT_PARITY_TOLERANCE
+        )
+        qualification.append(
+            {
+                "branch": branch,
+                "requested_class": row["requested_class"],
+                "achieved_class": row["achieved_class"],
+                "topology_consistent": row["topology_consistent"],
+                "converged": row["converged"],
+                "finite": row["finite"],
+                "iterations": row["iterations"],
+                "relative_residual": row["relative_residual"],
+                "root_relative_error": row["root_relative_error"],
+                "qualified": qualified,
+            }
+        )
+
+    component_names = tuple(
+        branch_rows["limited"]["phase_decomposition"]["components_per_branch_state"]
+    )
+    components = {
+        name: sum(
+            branch_rows[branch]["phase_decomposition"]["components_per_branch_state"][
+                name
+            ]
+            for branch in ("limited", "diverted")
+        )
+        for name in component_names
+    }
+    value = sum(row["wall_ms_per_branch_state"] for row in branch_rows.values())
+    target_credit = 1.0
+    gap_attribution = {}
+    for name, component in components.items():
+        credited = min(component, target_credit)
+        gap_attribution[name] = component - credited
+        target_credit -= credited
+    profiled = sum(
+        row["phase_decomposition"]["full_ms_per_branch_state"]
+        for row in branch_rows.values()
+    )
+    gap_attribution["measurement_vs_phase_profile_delta_ms"] = value - profiled
+    qualified = all(row["qualified"] for row in qualification)
+    return {
+        "definition": (
+            "sum of independently measured limited-coarse and diverted-fine "
+            "per-branch contributions at the 1e-3 adjacent-slice distance and "
+            "batch width 16; unlike fixture shapes are not claimed as one co-batch"
+        ),
+        "batch_size": CATALOG_BATCH_SIZE,
+        "seed_distance": CATALOG_SEED_DISTANCE,
+        "branch_minimum_iterations": {
+            branch: row["newton_steps"] for branch, row in branch_rows.items()
+        },
+        "branch_wall_ms_per_state": {
+            branch: row["wall_ms_per_branch_state"]
+            for branch, row in branch_rows.items()
+        },
+        "branch_qualification": qualification,
+        "portfolio_qualified": qualified,
+        "projected_ms_per_portfolio_state": value,
+        "target_ms_per_portfolio_state": 1.0,
+        "multiple_of_target": value,
+        "remaining_gap_ms": value - 1.0,
+        "combined_phase_decomposition_ms": components,
+        "remaining_gap_attribution_ms": gap_attribution,
+        "target_met": value <= 1.0 and qualified,
+    }
+
+
 def _matrix_rows(measurements: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Flatten every measured portfolio into durable branch-level rows."""
     rows = []
@@ -704,7 +1064,11 @@ def _figure(receipt: dict[str, Any], path: Path) -> None:
     axes[1].set_ylabel("minimum fixed Newton steps")
     axes[1].set_title("iteration economy", loc="left")
 
-    components = receipt["phase_profile"]["components_per_branch_state"]
+    projection = receipt["catalog_projection"]
+    components = projection.get(
+        "combined_phase_decomposition_ms",
+        receipt["phase_profile"]["components_per_branch_state"],
+    )
     labels = [
         "map",
         "Krylov + promote",
@@ -725,15 +1089,22 @@ def _figure(receipt: dict[str, Any], path: Path) -> None:
         axes[2].bar(["catalog"], [value], bottom=bottom, label=label, color=color)
         bottom += value
     axes[2].axhline(1.0, color="black", linestyle="--", linewidth=1.0)
-    axes[2].set_ylabel("ms / branch state")
-    axes[2].set_title("catalog gap by phase", loc="left")
+    combined = "combined_phase_decomposition_ms" in projection
+    axes[2].set_ylabel("ms / portfolio state" if combined else "ms / branch state")
+    axes[2].set_title(
+        "combined catalog gap by phase" if combined else "catalog gap by phase",
+        loc="left",
+    )
     axes[2].legend(fontsize=7, loc="upper right")
-    projection = receipt["catalog_projection"]
+    measured = (
+        projection["projected_ms_per_portfolio_state"]
+        if "projected_ms_per_portfolio_state" in projection
+        else projection["measured_ms_per_branch_state"]
+    )
     axes[2].text(
         0.02,
         0.98,
-        f"{projection['measured_ms_per_branch_state']:.3f} ms\n"
-        f"{projection['multiple_of_target']:.2f}x target",
+        f"{measured:.3f} ms\n{projection['multiple_of_target']:.2f}x target",
         transform=axes[2].transAxes,
         va="top",
         fontsize=9,
@@ -864,6 +1235,112 @@ def measure(output: Path, figure: Path) -> dict[str, Any]:
     return receipt
 
 
+def measure_limited_lane(output: Path, figure: Path) -> dict[str, Any]:
+    """Measure the banked limited lane and merge it without changing diverted rows."""
+    configure_dtypes()
+    device = jax.devices()[0]
+    host = socket.gethostname()
+    if device.platform != "gpu" or "H200" not in device.device_kind:
+        raise RuntimeError(f"this receipt requires an H200 GPU, got {device}")
+    if not host.startswith("98dci4-gpu-0003"):
+        raise RuntimeError(f"this receipt requires the reserved H200 host, got {host}")
+    if not output.exists():
+        raise RuntimeError("the limited lane requires the banked diverted receipt")
+
+    receipt = json.loads(output.read_text(encoding="utf-8"))
+    diverted_rows = [
+        row for row in receipt["matrix_rows"] if row["branch"] == "diverted"
+    ]
+    if len(diverted_rows) != len(SEED_DISTANCES) * len(BATCH_SIZES) * len(
+        NEWTON_BUDGETS
+    ):
+        raise RuntimeError(
+            "the banked receipt does not contain the declared diverted grid"
+        )
+    diverted_digest = _rows_digest(diverted_rows)
+
+    profile, cold, root, bank_receipt = _limited_problem()
+    seeds, seed_policy = _limited_seed_ladder(
+        profile,
+        np.asarray(cold.branches.flux[int(TopologyClass.LIMITED)]),
+        root,
+    )
+    jax.clear_caches()
+    measurements, shapes = _solve_limited_grid(profile, seeds, root)
+    limited_rows = _limited_matrix_rows(measurements)
+    limited_by_key = {_row_key(row): row for row in limited_rows}
+    if len(limited_by_key) != len(diverted_rows):
+        raise RuntimeError("the limited measurement did not cover the declared grid")
+    matrix_rows = [
+        limited_by_key[_row_key(row)] if row["branch"] == "limited" else row
+        for row in receipt["matrix_rows"]
+    ]
+    if (
+        _rows_digest([row for row in matrix_rows if row["branch"] == "diverted"])
+        != diverted_digest
+    ):
+        raise RuntimeError("the banked diverted rows changed during limited-lane merge")
+
+    limited_minimum = {
+        (row["seed_distance"], row["batch_size"]): row
+        for row in _limited_minimum(limited_rows)
+    }
+    minimum = [
+        limited_minimum[(row["seed_distance"], row["batch_size"])]
+        if row["branch"] == "limited"
+        else row
+        for row in receipt["minimum_converged"]
+    ]
+    environment = {
+        "hostname": host,
+        "slurm_job_id": os.environ.get("SLURM_JOB_ID"),
+        "slurm_partition": os.environ.get("SLURM_JOB_PARTITION"),
+        "slurm_reservation": os.environ.get("SLURM_JOB_RESERVATION"),
+        "tmpdir": os.environ.get("TMPDIR"),
+        "device_kind": device.device_kind,
+        "platform": device.platform,
+        "jax_backend": jax.default_backend(),
+        "jax_version": jax.__version__,
+        "x64_enabled": bool(jax.config.x64_enabled),
+    }
+    receipt["matrix_rows"] = matrix_rows
+    receipt["minimum_converged"] = minimum
+    receipt["limited_lane"] = {
+        "environment": environment,
+        "fixture": {
+            "reference": "scripts/oracle_rebaseline/root-coarse.npz",
+            "root_state_sha256": _digest(root),
+            "root_shape": tuple(root.shape),
+            "banked_recovery_floor": bank_receipt["solver"]["criterion"],
+            "requested_class": int(TopologyClass.LIMITED),
+        },
+        "seed_policy": seed_policy,
+        "fixed_shapes": shapes,
+        "measurements": measurements,
+        "matrix_row_count": len(limited_rows),
+        "finite_row_count": sum(row["finite"] for row in limited_rows),
+        "diverted_rows_sha256_before": diverted_digest,
+        "diverted_rows_sha256_after": diverted_digest,
+    }
+    receipt["catalog_projection"] = {
+        "status": "not_evaluated",
+        "publication_order": (
+            "all limited matrix and phase rows were serialized before qualification"
+        ),
+    }
+    _write_json(output, receipt)
+    projection = _combined_catalog_projection(minimum, matrix_rows)
+    receipt["catalog_projection"] = projection
+    receipt["verdict"]["target_met"] = projection["target_met"]
+    receipt["verdict"]["portfolio_qualified"] = projection["portfolio_qualified"]
+    receipt["verdict"]["combined_projection_basis"] = (
+        "independently measured branch lanes summed per portfolio state"
+    )
+    _write_json(output, receipt)
+    _figure(receipt, figure)
+    return receipt
+
+
 def main() -> None:
     """Run the benchmark from its command-line interface."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -877,12 +1354,26 @@ def main() -> None:
         type=Path,
         default=OUTPUT / "portfolio-warm-start.png",
     )
+    parser.add_argument(
+        "--limited-lane",
+        action="store_true",
+        help="measure the banked coarse limited lane and preserve diverted rows",
+    )
     arguments = parser.parse_args()
-    receipt = measure(arguments.output, arguments.figure)
+    receipt = (
+        measure_limited_lane(arguments.output, arguments.figure)
+        if arguments.limited_lane
+        else measure(arguments.output, arguments.figure)
+    )
     projection = receipt["catalog_projection"]
+    measured = (
+        projection["projected_ms_per_portfolio_state"]
+        if "projected_ms_per_portfolio_state" in projection
+        else projection["measured_ms_per_branch_state"]
+    )
     print(
         "PORTFOLIO_WARM_START "
-        f"catalog_ms={projection['measured_ms_per_branch_state']:.9g} "
+        f"catalog_ms={measured:.9g} "
         f"multiple={projection['multiple_of_target']:.9g} "
         f"target_met={projection['target_met']}"
     )

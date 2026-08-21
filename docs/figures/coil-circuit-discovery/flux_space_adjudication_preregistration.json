@@ -1,0 +1,91 @@
+{
+  "measurement": "DIII-D omitted-conductor flux-space current-authority adjudication",
+  "declared_at_utc": "2026-08-22T00:00:00Z",
+  "scoring_started_before_commit": false,
+  "evidence_authorities": {
+    "banked_cohort": "docs/figures/diiid-forward-onboarding/exact-tare/exact_clipped_tare_receipt.json",
+    "independent_ohmic_relation": "docs/figures/diiid-forward-onboarding/ohmic-circuit/ohmic_circuit_retest_receipt.json",
+    "reuse_map": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/coil-circuit-discovery/reuse-map.md",
+    "review_report": "/home/ITER/mcintos/.config/reckon/crew/reports/nova/coil-circuit-discovery/adjudication-review.md"
+  },
+  "selection": {
+    "frames": 60,
+    "shots": 20,
+    "membership": "exactly the committed exact-clipped-tare records, in recorded order",
+    "diverted": true,
+    "polarity_screen": "every shot absent from the complete landed 603-shot affected population",
+    "score_dependent_filtering": false
+  },
+  "flux_convention": {
+    "coordinate_system": "Nova COCOS 17",
+    "quantity": "total poloidal flux in Wb",
+    "gauge_treatment": "subtract one mean over the declared validation mask independently for every compared field"
+  },
+  "common_target": {
+    "definition": "label total flux minus exact clipped-cell plasma flux minus the 19 released-conductor registry response at shipped currents",
+    "adjusted_released_currents": 0,
+    "fitted_plasma_quantities": 0
+  },
+  "arms": {
+    "label_recovered": {
+      "currents": "five gauge-free least-squares coefficients fitted on all 256 outer-grid boundary points",
+      "geometry": "five exact netCDF-only active-coil polygon responses",
+      "regularisation": null,
+      "fit_points_overlap_validation": false
+    },
+    "circuit_derived": {
+      "currents": "the shipped per-frame ECOILA current multiplied by the five fixed signed through-origin scales in the independent ohmic receipt",
+      "fixed_scales": {
+        "ECOILB": 1.0171679657199086,
+        "E567UP": 0.9929278899369522,
+        "E567DN": 0.9822929799896104,
+        "E89UP": 0.9806322773044314,
+        "E89DN": 1.0164766240432426
+      },
+      "per_frame_fit": false,
+      "different_pulse_transfer_qualified": true
+    }
+  },
+  "validation_mask": {
+    "definition": "grid points at least two cells inside every outer edge and outside the labelled LCFS after two binary-dilation cells",
+    "purpose": "held-out exterior flux space disjoint from the boundary points used by label recovery",
+    "minimum_points": 256,
+    "arm_dependent": false
+  },
+  "metric": {
+    "name": "gauge-free held-out exterior flux RMS",
+    "absolute_value": "RMS in Wb of the gauge-centred common target minus the arm's five-conductor field on the validation mask",
+    "relative_value": "absolute RMS divided by the gauge-free RMS of the common target on the same mask",
+    "per_frame_tare_threshold": "maximum of the gauge-free RMS difference between exact-clipped and node-centred plasma fields on the validation mask and 64 floating-point epsilons times max(target peak-to-peak Wb, 1 Wb)",
+    "closure": "absolute arm residual RMS is at or below its own frame's tare threshold",
+    "cohort_median_used_for_threshold": false
+  },
+  "amplitude_sensitivity": {
+    "declared_perturbation_a": 1000.0,
+    "reported_for": "each conductor, each frame, and both arms",
+    "field_response": "gauge-free RMS of the flux change caused by the positive perturbation on the validation mask",
+    "metric_response": "absolute residual RMS after positive and negative perturbations minus the unperturbed arm RMS",
+    "minimum_field_response_wb": 1e-6,
+    "minimum_one_sided_metric_change_wb": 1e-8,
+    "pass": "every conductor exceeds both minima on every frame for at least one perturbation sign"
+  },
+  "per_frame_discriminators": {
+    "closure": "arm residual RMS at or below the frame-specific tare threshold",
+    "dominance": "winner residual RMS plus 0.25 times the frame-specific tare threshold is at or below the other arm residual RMS",
+    "ohmic_pattern_shape": "best-scalar relative RMS between label-recovered currents and the fixed five-scale circuit pattern at or below 0.10",
+    "temporal_stability": "relative distance of each normalized recovered-current vector from its three-frame shot centroid at or below 0.10",
+    "minimum_recovered_vector_norm_a": 1000.0
+  },
+  "cohort_decision": {
+    "required_frame_count": 54,
+    "required_fraction": 0.90,
+    "label_recovered_authority": "amplitude sensitivity passes; label arm closes and dominates on at least 54 frames; temporal stability passes on at least 54 eligible frames",
+    "circuit_derived_authority": "amplitude sensitivity passes; circuit arm closes and dominates on at least 54 frames",
+    "undecidable": "neither arm uniquely satisfies its authority rule, both satisfy it, or amplitude sensitivity fails; name every failed discriminator",
+    "qualifications_always_retained": [
+      "only E567UP and E89DN pass the independent one-percent determinism bound",
+      "the fixed circuit scales come from a different netCDF pulse",
+      "label recovery consumes the labelled equilibrium and is not inference-admissible"
+    ]
+  }
+}

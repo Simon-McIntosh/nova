@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="device-kernel-build">
   <meta name="plan-title" content="Device Kernel Build — exact Green matrices in minutes, differentiable by design">
   <meta name="plan-summary" content="Port the exact Part V section-kernel evaluation to single-source JAX so design matrices build on the H200 in the minutes class from one code path, with compute-provenance cache keys, tolerance-based cross-device verification, and a measured route to geometry gradients for the inversion consumer">
-  <meta name="plan-status" content="pending">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="mid">
   <meta name="plan-effort-hours" content="6.0">
   <meta name="plan-capability-version" content="1.0">
@@ -21,7 +21,10 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
+<meta name="plan-commits" content="489197aa">
+<meta name="plan-artifacts" content="scripts/device_kernel_reuse/reuse-report.md,docs/evidence/archive/device-kernel-build-landed.html">
+<meta name="plan-impl" content="0.2">
 </head>
 <body>
   <main class="plan-doc">
@@ -203,6 +206,9 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s1" data-id="c-20260821T1145" data-who="reckon-ship" data-when="2026-08-21T11:45:00+00:00">
     <div class="r-comment-body">OWNER INTERVIEW 2026-08-21: all three framing decisions locked and the plan scheduled into S8 beside the GPU catalog. The go-threshold is revised from the drafted time-parity form to NUMERICAL parity: the GPU-built matrices must be close to byte-identical to the CPU build - the one-block H200 prototype measures the element-wise ULP distribution and byte-identical fraction as its central deliverable, with build-time projection and CPU-lane cost reported beside it. The section-5 ladder already satisfied the entry input: builds are 97.2/99.0 percent exact-kernel work with device contraction estimates of 0.12-0.15 ms per moment block banked.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260821T1322-reuse-map" data-who="reckon-ship" data-when="2026-08-21T13:22:00+00:00">
+    <div class="r-comment-body">reuse-map-kernel-port landed - commit 489197aa, merged f180d870; gate PASSED (9/9 logical blocks mapped, 2/2 profiled fixtures decomposed). The port premise is confirmed from the banked profiles: coarse build 286.788/294.217 s device-eligible (97.475%, 551 cells), fine 769.949/778.044 s (98.960%, 1,076 cells); exact-kernel-only shares 97.216%/98.723%. Packed uniform closed-form xp path and fixed-trip cel/harmonic/graded-arsinh substrate reusable as the single-source seed; H200 contraction estimate 0.1244-0.1536 ms per dense moment block carried as estimate-only; the 12.2 GiB AD conviction confirmed to convict antiderivative differentiation, not plain evaluation. 8 authored-new gaps: packed six-companion evaluator, one CPU/GPU dispatcher, compute-provenance cache descriptor plus separation tests, ULP/byte-identity receipts, cold H200 builds, CPU regression measurement, jacfwd probe. Record: /nova/evidence/archive/device-kernel-build-landed#s4-reuse-map.</div>
 </div>
 </section>
 </main>

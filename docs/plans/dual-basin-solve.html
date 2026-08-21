@@ -4,24 +4,29 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="nova">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="dual-basin-solve">
-  <meta name="plan-title"     content="Dual-Basin Solve — both roots, hysteresis selection, warm-start economy">
-  <meta name="plan-summary"   content="Solve the diverted and limited free-boundary roots side by side wherever both exist, each pinned to its topology class so no in-solve topology switch can crash convergence, select between converged branches by history, and drive the warm-start iteration economy that carries the one-millisecond solve target">
-  <meta name="plan-status"    content="pending">
-  <meta name="plan-roi"       content="high">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="dual-basin-solve">
+  <meta name="plan-title" content="Dual-Basin Solve — both roots, hysteresis selection, warm-start economy">
+  <meta name="plan-summary" content="Solve the diverted and limited free-boundary roots side by side wherever both exist, each pinned to its topology class so no in-solve topology switch can crash convergence, select between converged branches by history, and drive the warm-start iteration economy that carries the one-millisecond solve target">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="8.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-capability-risk" content="elevated">
-  <meta name="plan-sprint"    content="S8">
-  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-sprint" content="S8">
+  <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-depends-on" content="solovev-exact-recovery">
   <title>Dual-Basin Solve | nova</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-21">
+<meta name="plan-commits" content="4a4cf70f">
+<meta name="plan-artifacts" content="scripts/dual_basin_reuse/reuse-report.md,docs/evidence/archive/dual-basin-solve-landed.html">
+<meta name="plan-impl" content="0.17">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -95,35 +100,40 @@
     not a belief.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="dual-basin-strategy" data-choice="solve-both-select-by-history" data-by="Simon McIntosh" data-when="2026-08-21T11:30:00+00:00">
-        <p class="r-dec-q">How does the solver handle the coexistence of diverted and limited roots?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt chosen" data-value="solve-both-select-by-history">solve both basins where they exist; select afterwards by history (hysteresis)</button>
-          <button class="r-opt" data-value="basin-aware-seed-only">engineer the seed to select the intended basin per solve</button>
-          <button class="r-opt" data-value="globalized-single-solve">globalize one root find (deflation/continuation) to the intended root</button>
-        </p>
-        <p class="r-dec-rat">Owner ruling 2026-08-21, from the strategy proven in imas-efit:
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="dual-basin-strategy" data-choice="solve-both-select-by-history" data-by="Simon McIntosh" data-when="2026-08-21T11:30:00+00:00">
+    <p class="r-dec-q">How does the solver handle the coexistence of diverted and limited roots?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="solve-both-select-by-history">solve both basins where they exist; select afterwards by history (hysteresis)</button>
+      <button class="r-opt" data-value="basin-aware-seed-only">engineer the seed to select the intended basin per solve</button>
+      <button class="r-opt" data-value="globalized-single-solve">globalize one root find (deflation/continuation) to the intended root</button>
+      </p>
+    <p class="r-dec-rat">Owner ruling 2026-08-21, from the strategy proven in imas-efit:
         solve a diverted AND a limited version wherever both exist and make the selection from
         history — the GPU route makes the second solve cheap (the batched fixed point already
         amortizes to 30 ms/state at batch sixteen), and pinning each branch to its topology
         class blocks the in-solve topology switches that crash convergence. Selection becomes a
         recorded policy over converged receipts instead of a property of the seed.</p>
-      </div>
-    </section>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-dbs-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-08-21" data-recommends-skill="/reckon-ship dual-basin-solve" data-resolved-at="" data-resolved-by="">
-        <h4 class="r-fu-title">Build the two-branch solve, then the selection policy, then the warm-start ladder</h4>
-        <div class="r-fu-body"><p>The framing decision is owner-locked at creation. §2's
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-dbs-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-08-21" data-recommends-skill="/reckon-ship dual-basin-solve" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Build the two-branch solve, then the selection policy, then the warm-start ladder</h4>
+    <div class="r-fu-body"><p>The framing decision is owner-locked at creation. §2's
         topology-pinned branches open the plan (the oracle fixtures and both banked roots are
         the test substrate, warm-cached); §3's hysteresis policy follows; §4's warm-start
         economy closes it against the one-millisecond target with the profiling mandate in
         force. Scheduled with the GPU-catalog sprint, which consumes all three.</p></div>
-        <pre class="r-fu-prompt">/reckon-ship dual-basin-solve</pre>
-      </article>
-    </section>
-  </main>
+    <pre class="r-fu-prompt">/reckon-ship dual-basin-solve</pre>
+    </article>
+</section>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-20260821T1320-reuse-map" data-who="reckon-ship" data-when="2026-08-21T13:20:00+00:00">
+    <div class="r-comment-body">reuse-map-dual-basin landed - commit 4a4cf70f, merged 9b1f1003; gate PASSED (14/14 required terms, 6/6 equilibrium modules, 25 fitness rows); worker 354 s. The map names 24 reusable symbols (fixed-point engines, branch-aware continuation, topology read/receipt, domain partition, the one production solve/receipt path, traced separatrix clip), the imas-efit dual-stream precedent (fit_dual_stream / select_dual_stream_branch), the ambix seam (one payload feeds both branch maps; the consumer receipt needs a versioned selected-branch extension), and 9 author-new gaps. LOAD-BEARING QUALIFICATION: the banked bank proves two genuine roots (residuals 2.494e-15 / 2.172e-15, axis separation ~74.8 mm) but BOTH receipts classify limited with no X-point - the section-2 diverted/limited acceptance needs an evidenced classification of the analytic state or a genuinely diverted fixture; relabeling a receipt is not evidence. Record: /nova/evidence/archive/dual-basin-solve-landed#s2-reuse-map.</div>
+</div>
+</section>
+</main>
 </body>
 </html>

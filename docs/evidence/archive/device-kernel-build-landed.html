@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="device-kernel-build-landed">
+  <meta name="plan-title" content="Device Kernel Build — cumulative execution evidence">
+  <meta name="plan-summary" content="Landed outcomes of the device-kernel plan: the reuse map decomposing the profiled builds into their device-eligible exact-kernel share and the port gaps">
+  <meta name="plan-evidence-for" content="device-kernel-build">
+  <title>Device Kernel Build — landed evidence | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+
+  <h1>Device Kernel Build — cumulative execution evidence</h1>
+
+  <h2 id="s4-reuse-map">§4 — the reuse map: what the port reuses, and what must be authored</h2>
+
+  <p><strong>Landed 2026-08-21, commit <code>489197aa</code> (merge <code>f180d870</code>); gate
+  PASSED</strong> (9/9 logical section blocks mapped with fitness verdicts, 2/2 profiled
+  fixtures decomposed). <code>scripts/device_kernel_reuse/reuse-report.md</code> traces the
+  exact section-kernel evaluation stack and confirms the port's premise from the banked
+  profiles: the coarse fixture build is 286.788 s of 294.217 s device-eligible work
+  (97.475%, 551 cells) and the fine fixture 769.949 s of 778.044 s (98.960%, 1,076 cells),
+  with exact-kernel-only shares 97.216% and 98.723%. The packed uniform closed-form xp path
+  and the fixed-trip cel/harmonic/graded-arsinh substrate are reusable as the single-source
+  seed; the H200 contraction estimate of 0.1244–0.1536 ms per dense moment block is carried
+  as estimate-only. The banked AD conviction (12,235,772 KiB MaxRSS, 20m23s for one target)
+  is confirmed to convict differentiation through the antiderivative composition, not plain
+  evaluation. Authored-new gap list (8 items): the packed six-companion moment evaluator, one
+  CPU/GPU dispatcher, the compute-provenance cache descriptor with separation tests, full
+  ULP/byte-identity parity receipts, cold H200 fixture builds, the CPU regression
+  measurement, and the measure-only jacfwd memory/time probe.</p>
+
+</main>
+</body>
+</html>

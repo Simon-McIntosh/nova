@@ -1,9 +1,16 @@
 {
-  "updated": "2026-08-21T15:01:16",
+  "updated": "2026-08-21T15:20:07",
   "project": "nova",
   "doc": "crew",
   "data": {
     "members": [
+      {
+        "id": "basin-scout",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a02472-80c7-73a1-8e6e-097ec66b508c",
+        "created": "2026-08-21"
+      },
       {
         "id": "biot-bench",
         "harness": "codex",
@@ -241,6 +248,13 @@
         "role": "implement",
         "session_id": "019ff724-7bb4-7270-836c-b0c7c9e7f7cc",
         "created": "2026-08-12"
+      },
+      {
+        "id": "kernel-port-scout",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a02472-cead-76b0-bda4-7705ec2ee151",
+        "created": "2026-08-21"
       },
       {
         "id": "label-resolve",
@@ -15440,9 +15454,135 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T131114864943-reuse-map-dual-basin",
+        "plan": "dual-basin-solve",
+        "section": "\u00a72",
+        "node": "reuse-map-dual-basin",
+        "role": "implement",
+        "member": "basin-scout",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T13:11:18Z",
+        "completed_at": "2026-08-21T13:17:12Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 354,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 354,
+        "stalled": false,
+        "time_budget": "15m",
+        "base_sha": "f691de2b069fa7a96e2b762c0b411c9c8e8f6cfd",
+        "commits": [
+          "4a4cf70fb56fcb73a35acca1e0baa31fc90f1946"
+        ],
+        "changed_lines": {
+          "added": 133,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T131114864943-reuse-map-dual-basin/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02472-80c7-73a1-8e6e-097ec66b508c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3515904,
+            "cached_input_tokens_cumulative": 3515904,
+            "input_tokens": 3704023,
+            "input_tokens_cumulative": 3704023,
+            "output_tokens": 13665,
+            "output_tokens_cumulative": 13665,
+            "reasoning_output_tokens": 3409,
+            "reasoning_output_tokens_cumulative": 3409
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260821T131134509328-reuse-map-kernel-port",
+        "plan": "device-kernel-build",
+        "section": "\u00a74",
+        "node": "reuse-map-kernel-port",
+        "role": "implement",
+        "member": "kernel-port-scout",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T13:11:38Z",
+        "completed_at": "2026-08-21T13:18:36Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 418,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 418,
+        "stalled": false,
+        "time_budget": "15m",
+        "base_sha": "f691de2b069fa7a96e2b762c0b411c9c8e8f6cfd",
+        "commits": [
+          "489197aac0a4ca2b394a1ee95ecf9ae6041203e7"
+        ],
+        "changed_lines": {
+          "added": 262,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T131134509328-reuse-map-kernel-port/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02472-cead-76b0-bda4-7705ec2ee151",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4096000,
+            "cached_input_tokens_cumulative": 4096000,
+            "input_tokens": 4298841,
+            "input_tokens_cumulative": 4298841,
+            "output_tokens": 17742,
+            "output_tokens_cumulative": 17742,
+            "reasoning_output_tokens": 4275,
+            "reasoning_output_tokens_cumulative": 4275
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 397
+    "_version": 403
   }
 }

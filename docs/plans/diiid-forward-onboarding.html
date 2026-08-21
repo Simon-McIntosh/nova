@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="44">
+<meta name="plan-version" content="45">
 <meta name="plan-commits" content="7d9743fd,92a4a00e,685a7602,11bac959,26a06b78,4ae27c42,52e4ad17,d1aaa089,a6f8bdf4,86f6f38a,10b5c850,e2ffa796,10049a7a,db55fe58,a3d7e947,7af48b66,29d0fcd2,cf2bd3c6,a06b7072,3f654bc9,97a35d9f,fd4637ec,0dfda59a,1df19c16,b14ec670,a672cece,0b54d0bf,5686eb1b,213cc9a4,c3092ace,2d6f9b37,04cc6df2,ddb152e3,99e148ad,4bb375b7,b69a0831,92b68e9d,a9d771d6,6166a404,7c013864,b59e32a7,75a6ff83,05896c67">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-artifacts" content="docs/figures/diiid-forward-onboarding/machine-description/machine_description_receipt.json,docs/figures/diiid-forward-onboarding/machine-description/conductor_sections.png,docs/figures/diiid-forward-onboarding/machine-description/skewed_conductor_sections.png,docs/figures/diiid-forward-onboarding/machine-description/thomson_grid_extent.png,docs/figures/diiid-forward-onboarding/differencing/quiescent_selection.png,docs/figures/diiid-forward-onboarding/differencing/plasma_differencing.png,docs/figures/diiid-forward-onboarding/cocos/corpus_cocos_receipt.json,docs/figures/diiid-forward-onboarding/cocos/corpus_cocos_discriminators.png,/work/projects/imas_gpu/sophelio/vacuum-gate/diiid_plasma_subtraction_gate.json,/work/projects/imas_gpu/sophelio/vacuum-gate/diiid_transient_plasma_subtracted_residuals.jsonl,docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc,docs/figures/diiid-forward-onboarding/limiter-topology/limiter_topology_receipt.json,docs/figures/diiid-forward-onboarding/limiter-topology/limiter_topology_modes.png,docs/figures/diiid-forward-onboarding/throughput/batched_throughput_budget.json,docs/figures/diiid-forward-onboarding/throughput/batched_throughput_budget.csv,docs/figures/diiid-forward-onboarding/throughput/batched_throughput_budget.html,docs/figures/diiid-forward-onboarding/cocos-ip-sign/receipt.json,docs/figures/diiid-forward-onboarding/producer-currents/producer_current_scaling_receipt.json,docs/figures/diiid-forward-onboarding/producer-currents/producer_current_scaling.png,docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_fixed_boundary_illustration.png,docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_illustration_receipt.json,docs/figures/diiid-forward-onboarding/negative-tail/negative_tail_attribution_receipt.json,docs/figures/diiid-forward-onboarding/negative-tail/counterfactual_scores.png,docs/figures/diiid-forward-onboarding/negative-tail/deficit_shares.png,docs/figures/diiid-forward-onboarding/current-polarity/current_polarity_audit_receipt.json,docs/figures/diiid-forward-onboarding/current-polarity/current_polarity_census.png,docs/figures/diiid-forward-onboarding/current-polarity/exact_polygon_boundary_response.npz">
@@ -282,6 +282,54 @@
     <em>Nothing here may quietly become a fit against labels that the entry cannot reproduce at
     inference: the held-out predictability from shipped channels alone is the whole test.</em></p>
     </details>
+
+    <h2 id="s10">§10 — Exact taring, and reading the unclaimed current</h2>
+    <p><strong>Owner-specified pipeline, 2026-08-21.</strong> §9 established that the missing boundary
+    field does not live in the five-conductor subspace, and left the right question unanswered: <em>which
+    degrees of freedom does it need?</em> This section answers that empirically rather than by proposing
+    conductors — read the current the labels actually contain, subtract what is claimed, and look at what
+    is left.</p>
+    <p><strong>The accuracy upgrade that makes the rest possible.</strong> The landed differencing gate
+    represents plasma current by <em>node-centred point filaments</em>: each interior grid node carries
+    <code>j<sub>φ</sub> × cell_area</code> at its centroid, giving a 2.0 % median fractional RMS against
+    the direct operator. That 2.0 % is the floor on everything downstream — a residual patch smaller than
+    it cannot be distinguished from tare error. Replacing the lumped filament with the <em>exact clipped
+    cell</em> — zeroth, radial and vertical moments over the true clipped polygon, from
+    <code>TracedClippedSupports</code> and the moment stencils already in
+    <code>nova/equilibrium/stencil_mesh.py</code> — removes both the whole-cell lumping at the boundary
+    and the centroid collapse in the interior.</p>
+    <p><strong>The self-validating closure test.</strong> Re-apply Δ* to the tared map <em>interior to the
+    LCFS</em>. Every ampere there was ours to remove, so whatever remains is tare error, measured directly
+    rather than inferred. This is a stronger check than the flux-space R² the differencing gate used,
+    because it is local and it has a known correct answer of zero.</p>
+    <p><strong>Then the unclaimed current.</strong> With the plasma removed to a demonstrated floor, Δ* on
+    the tared map outside the LCFS returns current that no plasma cell accounts for. Attributing it splits
+    the §9 question in two: current that is <em>vessel-shaped</em> — distributed, following the wall,
+    decaying with the drive — is passive structure, and its geometry can be recovered from where it sits;
+    current that is <em>conductor-shaped</em> — compact, localised, persistent — is a missing coil. Either
+    answer is progress, and the second would name the degrees of freedom §9 could not.</p>
+    <p><strong>Closing the loop.</strong> If passive structure is recoverable, re-tare to remove it and
+    what remains should be coil field alone. Regularised least squares against the known conductor
+    geometry then recovers coil currents that can be compared against the <em>given</em> channels — an
+    end-to-end validation of the whole chain, using the shipped currents as the check rather than as an
+    input.</p>
+    <p><strong>Relation to the §4 deferral, which this does not override.</strong> §4's passive work was
+    deferred because "a passive model fitted against a forward solve that does not yet close would absorb
+    that solve's errors into vessel parameters". That hazard is specific to a solver in the loop. This
+    route has none: passive current is read from the labels through Δ*, an operator that round-trips at
+    2.29e-8. The deferral's stated reason therefore does not apply to this method, and §4's fitted-vessel
+    scope stays deferred regardless.</p>
+    <p><strong>Two costs to measure before spending them.</strong> The dataset holds 1,559,340 labelled
+    frames over 7,041 shots; at 65×65 float64 a full tared-map set is order 50 GB, so per-slice cost and
+    total storage are reported from a bounded cohort <em>before</em> any full-dataset production run. And
+    the 603 polarity-affected shots must be screened or flagged in anything that regresses currents.</p>
+    <p><strong>Done-when:</strong> the moment-based tare's interior Δ* residual is reported against the
+    landed 2.0 % filament floor; the hex-meshed vessel and its self-interaction operator are banked with
+    conditioning receipts; unclaimed current outside the LCFS is localised and classified
+    vessel-shaped or conductor-shaped; and, if passive geometry is recoverable, the re-tared coil-current
+    regression is compared against the given channels. <em>No recovered quantity may become an
+    inference-time input that the entry cannot reproduce from actuator channels alone — the §9 lesson
+    stands.</em></p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>

@@ -183,6 +183,13 @@ class TracedClippedSupports(NamedTuple):
     second_area_moment: object
     contour_area: object
     patch_area_sum: object
+    branch_support_vertices: object
+    branch_vertex_count: object
+    branch_area: object
+    branch_first_area_moment: object
+    branch_second_area_moment: object
+    saddle: object
+    saddle_vertex: object
 
     def qualify(self, participation):
         """Zero every geometric measure outside a topology participation mask."""
@@ -198,6 +205,18 @@ class TracedClippedSupports(NamedTuple):
                 selected[:, None, None], self.second_area_moment, 0.0
             ),
             patch_area_sum=jnp.sum(area),
+            branch_vertex_count=jnp.where(
+                selected[:, None], self.branch_vertex_count, 0
+            ),
+            branch_area=jnp.where(selected[:, None], self.branch_area, 0.0),
+            branch_first_area_moment=jnp.where(
+                selected[:, None, None], self.branch_first_area_moment, 0.0
+            ),
+            branch_second_area_moment=jnp.where(
+                selected[:, None, None, None],
+                self.branch_second_area_moment,
+                0.0,
+            ),
         )
 
     def linear_current_moments(self, density, gradient):
@@ -209,6 +228,28 @@ class TracedClippedSupports(NamedTuple):
             density,
             gradient,
         )
+
+    def branch_linear_current_moments(self, density, gradient):
+        """Contract independently declared densities over both saddle lobes."""
+        density = jnp.asarray(density)
+        gradient = jnp.asarray(gradient)
+        cell_count = self.branch_support_vertices.shape[0]
+        if density.shape != (cell_count, 2):
+            raise ValueError("density must have shape (cells, 2)")
+        if gradient.shape != (cell_count, 2, 2):
+            raise ValueError("gradient must have shape (cells, 2, 2)")
+        current, first = padded_linear_current_moments(
+            self.branch_support_vertices.reshape(
+                2 * cell_count, self.branch_support_vertices.shape[2], 2
+            ),
+            self.branch_vertex_count.reshape(2 * cell_count),
+            jnp.broadcast_to(self.centroids[:, None, :], (cell_count, 2, 2)).reshape(
+                2 * cell_count, 2
+            ),
+            density.reshape(2 * cell_count),
+            gradient.reshape(2 * cell_count, 2),
+        )
+        return current.reshape(cell_count, 2), first.reshape(cell_count, 2, 2)
 
 
 def padded_linear_current_moments(
@@ -449,6 +490,20 @@ def _pack_traced_vertices(vertices, valid, capacity):
     return packed, jnp.sum(valid, axis=1)
 
 
+def _pack_traced_values(values, valid, capacity):
+    """Compact masked scalar values with the same ordering as vertices."""
+    import jax.numpy as jnp
+
+    rank = jnp.cumsum(valid, axis=1) - 1
+    destination = jnp.arange(capacity)
+    selector = valid[:, :, None] & (rank[:, :, None] == destination[None, None, :])
+    return jnp.any(selector & values[:, :, None], axis=1)
+
+
+def _cross_2d(first, second):
+    return first[..., 0] * second[..., 1] - first[..., 1] * second[..., 0]
+
+
 def _traced_polygon_moments(vertices, count, centroids):
     """Evaluate fixed-capacity polygon moments with traced reductions."""
     import jax.numpy as jnp
@@ -532,6 +587,7 @@ def _traced_clip(
     centroids,
     support_capacity,
     signed_flux,
+    saddle_vertex=None,
 ):
     """Clip fixed atomic cells using only traced fixed-shape operations."""
     from nova.jax.config import configure_dtypes
@@ -564,37 +620,6 @@ def _traced_clip(
     end_point = coordinates[following_nodes]
     crossing_point = start_point + fraction[..., None] * (end_point - start_point)
 
-    candidates = jnp.stack([start_point, crossing_point], axis=2).reshape(
-        cell_count, 2 * width, 2
-    )
-    candidate_valid = jnp.stack(
-        [valid_edge & start_inside, crossing_edge], axis=2
-    ).reshape(cell_count, 2 * width)
-    compact, compact_count = _pack_traced_vertices(
-        candidates, candidate_valid, support_capacity
-    )
-    compact_slot = jnp.arange(support_capacity)
-    compact_valid = compact_slot[None, :] < compact_count[:, None]
-    previous = jnp.roll(compact, 1, axis=1)
-    distinct = jnp.any(compact != previous, axis=2)
-    keep = compact_valid & ((compact_slot[None, :] == 0) | distinct)
-    support, vertex_count = _pack_traced_vertices(compact, keep, support_capacity)
-    last_slot = jnp.maximum(vertex_count - 1, 0)
-    last = jnp.take_along_axis(support, last_slot[:, None, None], axis=1)[:, 0]
-    repeated_closure = (vertex_count > 1) & jnp.all(last == support[:, 0], axis=1)
-    vertex_count = vertex_count - repeated_closure.astype(vertex_count.dtype)
-    support = jnp.where(
-        compact_slot[None, :, None] < vertex_count[:, None, None], support, 0.0
-    )
-
-    full_area, _full_first, _full_second = _traced_polygon_moments(
-        start_point, count, centre
-    )
-    area, first, second = _traced_polygon_moments(support, vertex_count, centre)
-    included = area > 0.0
-    vertex_count = jnp.where(included, vertex_count, 0)
-    support = jnp.where(included[:, None, None], support, 0.0)
-
     edge_number = jnp.arange(width)
     same_crossing = jnp.all(
         crossing_point[:, :, None, :] == crossing_point[:, None, :, :], axis=3
@@ -605,21 +630,145 @@ def _traced_clip(
     crossing, crossing_count = _pack_traced_vertices(
         crossing_point, unique_crossing, width
     )
-    boundary = included & (crossing_count == 2)
-    leaving, leaving_count = _pack_traced_vertices(
-        crossing_point, crossing_edge & start_inside, width
+    saddle = crossing_count == 4
+    first_line = crossing[:, 2] - crossing[:, 0]
+    second_line = crossing[:, 3] - crossing[:, 1]
+    denominator = _cross_2d(first_line, second_line)
+    safe_denominator = jnp.where(saddle, denominator, 1.0)
+    inferred_saddle = (
+        crossing[:, 0]
+        + first_line
+        * (_cross_2d(crossing[:, 1] - crossing[:, 0], second_line) / safe_denominator)[
+            :, None
+        ]
     )
-    entering, entering_count = _pack_traced_vertices(
-        crossing_point, crossing_edge & end_inside, width
+    if saddle_vertex is None:
+        saddle_point = inferred_saddle
+    else:
+        supplied = jnp.asarray(saddle_vertex, dtype=coordinates.dtype)
+        if supplied.shape == (2,):
+            supplied = jnp.broadcast_to(supplied, (cell_count, 2))
+        if supplied.shape != (cell_count, 2):
+            raise ValueError("saddle_vertex must have shape (2,) or (cells, 2)")
+        saddle_point = supplied
+    saddle_point = jnp.where(saddle[:, None], saddle_point, 0.0)
+
+    saddle_candidate = jnp.broadcast_to(saddle_point[:, None, :], start_point.shape)
+    candidates = jnp.stack(
+        [start_point, crossing_point, saddle_candidate], axis=2
+    ).reshape(cell_count, 3 * width, 2)
+    candidate_valid = jnp.stack(
+        [
+            valid_edge & start_inside,
+            crossing_edge,
+            saddle[:, None] & crossing_edge & start_inside,
+        ],
+        axis=2,
+    ).reshape(cell_count, 3 * width)
+    candidate_saddle = jnp.stack(
+        [
+            jnp.zeros_like(valid_edge),
+            jnp.zeros_like(valid_edge),
+            saddle[:, None] & crossing_edge & start_inside,
+        ],
+        axis=2,
+    ).reshape(cell_count, 3 * width)
+    compact, compact_count = _pack_traced_vertices(
+        candidates, candidate_valid, support_capacity
     )
-    contour_cross = (
-        leaving[:, 0, 0] * entering[:, 0, 1] - entering[:, 0, 0] * leaving[:, 0, 1]
+    compact_saddle = _pack_traced_values(
+        candidate_saddle, candidate_valid, support_capacity
     )
-    contour_area = 0.5 * jnp.abs(
-        jnp.sum(
-            jnp.where((leaving_count > 0) & (entering_count > 0), contour_cross, 0.0)
+    compact_slot = jnp.arange(support_capacity)
+    compact_valid = compact_slot[None, :] < compact_count[:, None]
+    previous = jnp.roll(compact, 1, axis=1)
+    distinct = jnp.any(compact != previous, axis=2)
+    keep = compact_valid & ((compact_slot[None, :] == 0) | distinct)
+    support, vertex_count = _pack_traced_vertices(compact, keep, support_capacity)
+    support_saddle = _pack_traced_values(compact_saddle, keep, support_capacity)
+    last_slot = jnp.maximum(vertex_count - 1, 0)
+    last = jnp.take_along_axis(support, last_slot[:, None, None], axis=1)[:, 0]
+    repeated_closure = (vertex_count > 1) & jnp.all(last == support[:, 0], axis=1)
+    vertex_count = vertex_count - repeated_closure.astype(vertex_count.dtype)
+    support = jnp.where(
+        compact_slot[None, :, None] < vertex_count[:, None, None], support, 0.0
+    )
+
+    first_saddle = jnp.argmax(support_saddle, axis=1)
+    rotation = jnp.where(saddle, first_saddle, 0)
+    live_count = jnp.maximum(vertex_count, 1)
+    rotated_slot = (compact_slot[None, :] + rotation[:, None]) % live_count[:, None]
+    support = jnp.take_along_axis(support, rotated_slot[..., None], axis=1)
+    support_saddle = jnp.take_along_axis(support_saddle, rotated_slot, axis=1)
+    support = jnp.where(
+        compact_slot[None, :, None] < vertex_count[:, None, None], support, 0.0
+    )
+    support_saddle = support_saddle & (compact_slot[None, :] < vertex_count[:, None])
+
+    branch_number = jnp.cumsum(support_saddle, axis=1) - 1
+    branch_vertices = []
+    branch_counts = []
+    for branch in range(2):
+        branch_valid = compact_slot[None, :] < vertex_count[:, None]
+        branch_valid = branch_valid & jnp.where(
+            saddle[:, None], branch_number == branch, branch == 0
         )
+        vertices, counts = _pack_traced_vertices(
+            support, branch_valid, support_capacity
+        )
+        branch_vertices.append(vertices)
+        branch_counts.append(counts)
+    branch_support = jnp.stack(branch_vertices, axis=1)
+    branch_vertex_count = jnp.stack(branch_counts, axis=1)
+
+    full_area, _full_first, _full_second = _traced_polygon_moments(
+        start_point, count, centre
     )
+    flat_branch_support = branch_support.reshape(2 * cell_count, support_capacity, 2)
+    flat_branch_count = branch_vertex_count.reshape(2 * cell_count)
+    flat_centre = jnp.broadcast_to(centre[:, None, :], (cell_count, 2, 2)).reshape(
+        2 * cell_count, 2
+    )
+    branch_area, branch_first, branch_second = _traced_polygon_moments(
+        flat_branch_support, flat_branch_count, flat_centre
+    )
+    branch_area = branch_area.reshape(cell_count, 2)
+    branch_first = branch_first.reshape(cell_count, 2, 2)
+    branch_second = branch_second.reshape(cell_count, 2, 2, 2)
+    area = jnp.sum(branch_area, axis=1)
+    first = jnp.sum(branch_first, axis=1)
+    second = jnp.sum(branch_second, axis=1)
+    included = area > 0.0
+    vertex_count = jnp.where(included, vertex_count, 0)
+    support = jnp.where(included[:, None, None], support, 0.0)
+
+    boundary = included & ((crossing_count == 2) | saddle)
+    crossing_slot = jnp.arange(width)
+    crossing_valid = crossing_slot[None, :] < crossing_count[:, None]
+    next_slot = jnp.where(
+        crossing_slot[None, :] + 1 < crossing_count[:, None],
+        crossing_slot[None, :] + 1,
+        0,
+    )
+    next_crossing = jnp.take_along_axis(crossing, next_slot[..., None], axis=1)
+    packed_leaving = jnp.any(
+        jnp.all(crossing[:, :, None, :] == crossing_point[:, None, :, :], axis=3)
+        & (crossing_edge & start_inside)[:, None, :],
+        axis=2,
+    )
+    direct_cross = _cross_2d(crossing, next_crossing)
+    saddle_cross = _cross_2d(crossing, saddle_point[:, None, :]) + _cross_2d(
+        saddle_point[:, None, :], next_crossing
+    )
+    contour_cross = jnp.sum(
+        jnp.where(
+            crossing_valid & packed_leaving,
+            jnp.where(saddle[:, None], saddle_cross, direct_cross),
+            0.0,
+        ),
+        axis=1,
+    )
+    contour_area = 0.5 * jnp.abs(jnp.sum(contour_cross))
     patch_area_sum = jnp.sum(area)
     return TracedClippedSupports(
         support_vertices=support,
@@ -633,6 +782,13 @@ def _traced_clip(
         second_area_moment=second,
         contour_area=contour_area,
         patch_area_sum=patch_area_sum,
+        branch_support_vertices=branch_support,
+        branch_vertex_count=branch_vertex_count,
+        branch_area=branch_area,
+        branch_first_area_moment=branch_first,
+        branch_second_area_moment=branch_second,
+        saddle=saddle,
+        saddle_vertex=saddle_point,
     )
 
 
@@ -789,7 +945,7 @@ class AtomicCellMesh:
             raise ValueError("the sampled level field must return one value per node")
         return values
 
-    def traced_clip(self, signed_flux) -> TracedClippedSupports:
+    def traced_clip(self, signed_flux, *, saddle_vertex=None) -> TracedClippedSupports:
         """Clip this fixed topology inside a JAX transformation."""
         return _traced_clip(
             self.node_coordinates,
@@ -798,6 +954,7 @@ class AtomicCellMesh:
             self.centroids,
             self.support_capacity,
             signed_flux,
+            saddle_vertex,
         )
 
     def clip(self, signed_flux: np.ndarray) -> ClippedSupports:

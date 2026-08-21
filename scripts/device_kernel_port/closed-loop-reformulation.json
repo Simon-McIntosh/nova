@@ -1,0 +1,49 @@
+{
+  "status": "blocked",
+  "source_column": 184,
+  "oracle": {
+    "artifact": "arbitrary-precision-oracle.json",
+    "target_count": 551,
+    "terminal_nodes": 1024,
+    "required_max_relative_deviation": 0.0000804
+  },
+  "banked_exact_section_path": {
+    "max_absolute_deviation": 1.4944969930161633e-09,
+    "max_relative_deviation": 0.0019760683526076146,
+    "source_self_relative_deviation": 0.00002187285791622661,
+    "worst_target_index": 525
+  },
+  "closed_loop_probes": {
+    "incoming_outgoing_vertex_regrouping": {
+      "description": "assemble each vertex as its outgoing edge antiderivative less its incoming edge antiderivative before the contour sum",
+      "max_absolute_deviation": 1.4944969930161633e-09,
+      "max_relative_deviation": 0.0019760683526076146,
+      "source_self_relative_deviation": 0.00002187285791622661,
+      "worst_target_index": 525,
+      "verdict": "numerically identical to paired endpoint differencing"
+    },
+    "canonical_vertex_gauge_subtraction": {
+      "description": "subtract the exact finite-section antiderivative of a canonical vertical incident edge from both endpoint values before edge and contour reduction",
+      "max_absolute_deviation": 1.4944969930161633e-09,
+      "max_relative_deviation": 0.0019760683526076146,
+      "source_self_relative_deviation": 0.00002187285791622661,
+      "worst_target_index": 525,
+      "verdict": "numerically identical to paired endpoint differencing"
+    }
+  },
+  "target_525": {
+    "computed_value": 6.244472491123066e-07,
+    "oracle_value": 6.25683642757504e-07,
+    "absolute_deviation": 1.2363936451974337e-09,
+    "relative_deviation": 0.0019760683526076146,
+    "gate_multiple": 24.57796458467182,
+    "banked_exact_contour_condition_number": 16156021.549187554,
+    "banked_exact_endpoint_condition_number": 5426175586980.548
+  },
+  "interpretation": {
+    "first_breach_removed": false,
+    "mechanism": "paired-fp64 addition and subtraction already preserve both algebraically equivalent gauge placements, so changing only the contour assembly order cannot recover scalar-rounded primitive inputs",
+    "production_source_changed": false,
+    "required_next_decision": "choose between an analytic gauge subtraction derived inside the second-arsinh and arctangent primitive coefficient formulae, a further paired geometry layer, or acceptance of the far-target absolute scale"
+  }
+}

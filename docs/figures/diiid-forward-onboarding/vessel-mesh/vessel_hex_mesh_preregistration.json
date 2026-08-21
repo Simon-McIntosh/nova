@@ -1,0 +1,19 @@
+{
+  "area_acceptance": {
+    "reference": "absolute shoelace area of the authored limiter chain",
+    "relative_tolerance": 0.0001,
+    "rule": "abs(meshed_area / contour_polygon_area - 1) <= tolerance"
+  },
+  "measurement": "DIII-D limiter hex-mesh and self-interaction operator",
+  "mesh": {
+    "boundary_treatment": "exact polygon intersection after validity repair",
+    "characteristic_cell_size_m": 0.20784609690826525,
+    "hexagon_circumradius_m": 0.12
+  },
+  "operator": {
+    "quantity": "section-averaged total poloidal flux per ampere",
+    "reciprocity": "arithmetic symmetrisation after raw-asymmetry measurement",
+    "source_route": "nova.biot.polygonanalytic.polygon_analytic_greens",
+    "target_quadrature_order": 2
+  }
+}

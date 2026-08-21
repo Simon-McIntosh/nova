@@ -2279,6 +2279,15 @@ wheels = [
 ]
 
 [[package]]
+name = "mpmath"
+version = "1.4.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/c5/b0/6de8e78014ff1842a90cc9a56da6ccfb598a5390ed0257fcdb7d9680c18b/mpmath-1.4.1.tar.gz", hash = "sha256:efd6d1b75f09d69524a67609949812668b28e81ecbfe0ab449ced8c13e92642e", size = 2093211, upload-time = "2026-03-15T01:17:38.245Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/13/f2/abeec3db71d221ccd3cd89d206be1fabf5a3ee7178862f5fba23a59607e0/mpmath-1.4.1-py3-none-any.whl", hash = "sha256:dc4f0ea2304480d4a9a48a94c1020571558ade522b44a6912efac63a586e140f", size = 567787, upload-time = "2026-03-15T01:17:36.392Z" },
+]
+
+[[package]]
 name = "msgpack"
 version = "1.2.1"
 source = { registry = "https://pypi.org/simple" }
@@ -2549,6 +2558,7 @@ dev = [
     { name = "ipykernel" },
     { name = "ipython" },
     { name = "ipywidgets" },
+    { name = "mpmath" },
     { name = "mypy" },
     { name = "nova-stella", extra = ["jax", "transport"] },
     { name = "pre-commit" },
@@ -2632,6 +2642,7 @@ dev = [
     { name = "ipykernel", specifier = ">=6.29.5" },
     { name = "ipython", specifier = ">=9.2.0" },
     { name = "ipywidgets", specifier = ">=8.1.7" },
+    { name = "mpmath", specifier = ">=1.4.1" },
     { name = "mypy", specifier = ">=1.15.0,<1.17.0" },
     { name = "nova-stella", extras = ["jax", "transport"] },
     { name = "pre-commit", specifier = ">=4.2.0" },

@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-commits" content="4a4cf70f">
-<meta name="plan-artifacts" content="scripts/dual_basin_reuse/reuse-report.md,docs/evidence/archive/dual-basin-solve-landed.html">
-<meta name="plan-impl" content="0.17">
-<meta name="plan-version" content="1">
+<meta name="plan-commits" content="4a4cf70f,46c55d1d">
+<meta name="plan-artifacts" content="scripts/dual_basin_reuse/reuse-report.md,scripts/dual_basin_fixtures/topology-classification.json,scripts/dual_basin_fixtures/topology-classification.md,docs/figures/dual-basin-solve/topology-classification.png,docs/evidence/archive/dual-basin-solve-landed.html">
+<meta name="plan-impl" content="0.29">
+<meta name="plan-version" content="4">
 </head>
 <body>
   <main class="plan-doc">
@@ -34,13 +34,19 @@
     <h2 id="s1">§1 — The finding and the owner's strategy</h2>
 
     <p><strong>The free-boundary map has multiple genuine roots.</strong> On the closed-form
-    oracle fixtures the same external field supports both the diverted analytic equilibrium and
-    a limited equilibrium 75 mm away, each a machine-precision fixed point (residuals 2.5e-15
-    and 2.2e-15), h-independent — measured by the recovery re-baseline (commit
-    <code>0bed363d</code>). Production's cold current-centroid seed converges to the limited
-    branch; source-strength continuation collapses to the vacuum branch at intermediate
-    amplitudes. Accuracy is settled — the recovery gates hold each root to round-off — but
-    <em>which</em> root a cold solve reaches is unmanaged.</p>
+    oracle fixtures the same external field supports two machine-precision fixed points
+    (residuals 2.5e-15 and 2.2e-15, axis separation ~74.8 mm), h-independent — measured by the
+    recovery re-baseline (commit <code>0bed363d</code>). <strong>Corrected by measurement
+    2026-08-21 (commit <code>46c55d1d</code>):</strong> both banked roots are <em>limited</em> —
+    the closed-form read binds the outboard wall, the alternate root the inboard wall, with
+    exact wall-contact equality in all four production reads, and the analytic formula has no
+    stationary saddle for R&gt;0 (its only mathematical saddle sits at the excluded coordinate
+    axis). The bank proves two fixed points, not two topology classes; the genuinely diverted
+    in-domain X-point fixture is constructed and banked under this plan. Production's cold
+    current-centroid seed converges to the alternate root; source-strength continuation
+    collapses to the vacuum branch at intermediate amplitudes. Accuracy is settled — the
+    recovery gates hold each root to round-off — but <em>which</em> root a cold solve reaches
+    is unmanaged.</p>
 
     <p><strong>Owner strategy 2026-08-21 (the imas-efit precedent):</strong> where both basins
     exist, solve both — a diverted solve and a limited solve side by side — and make the
@@ -61,12 +67,13 @@
     end to end (one code path per quantity; the pin is a mask/anchor selection, never a parallel
     solver).</p>
 
-    <p><em>Done-when:</em> on the oracle fixtures, the two-branch solve recovers <strong>both</strong>
-    banked roots from cold production seeds — the diverted branch reaching the closed-form root
-    at the recovery-gate floors and the limited branch reproducing the banked alternate root —
-    with per-branch convergence receipts (residual, iterations, topology-consistency flag) and
-    fixed shapes under jit/vmap so both branches batch together; a branch that cannot converge
-    in its class reports non-convergence explicitly and never silently degrades.</p>
+    <p><em>Done-when (restated 2026-08-21 on the classification evidence, commit
+    <code>46c55d1d</code>):</em> the two-branch solve recovers from cold production seeds the
+    <strong>limited</strong> banked roots at the recovery-gate floors <em>and</em> the
+    <strong>diverted</strong> in-domain X-point fixture banked under this plan — with per-branch
+    convergence receipts (residual, iterations, topology-consistency flag) and fixed shapes
+    under jit/vmap so both branches batch together; a branch that cannot converge in its class
+    reports non-convergence explicitly and never silently degrades.</p>
 
     <h2 id="s3">§3 — Hysteresis selection</h2>
 
@@ -132,6 +139,9 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s2" data-id="c-20260821T1320-reuse-map" data-who="reckon-ship" data-when="2026-08-21T13:20:00+00:00">
     <div class="r-comment-body">reuse-map-dual-basin landed - commit 4a4cf70f, merged 9b1f1003; gate PASSED (14/14 required terms, 6/6 equilibrium modules, 25 fitness rows); worker 354 s. The map names 24 reusable symbols (fixed-point engines, branch-aware continuation, topology read/receipt, domain partition, the one production solve/receipt path, traced separatrix clip), the imas-efit dual-stream precedent (fit_dual_stream / select_dual_stream_branch), the ambix seam (one payload feeds both branch maps; the consumer receipt needs a versioned selected-branch extension), and 9 author-new gaps. LOAD-BEARING QUALIFICATION: the banked bank proves two genuine roots (residuals 2.494e-15 / 2.172e-15, axis separation ~74.8 mm) but BOTH receipts classify limited with no X-point - the section-2 diverted/limited acceptance needs an evidenced classification of the analytic state or a genuinely diverted fixture; relabeling a receipt is not evidence. Record: /nova/evidence/archive/dual-basin-solve-landed#s2-reuse-map.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260821T1350-topology-classes" data-who="reckon-ship" data-when="2026-08-21T13:50:00+00:00">
+    <div class="r-comment-body">oracle-topology-classes landed - commit 46c55d1d, merged 5777ad9d; gate PASSED (the receipt is the measure); NEGATIVE RESULT BANKED. All 4/4 production reads classify limited with 0 finite in-domain X-points: boundary-to-wall distances 0 m and flux differences 0 Wb in every read; the closed-form root binds the outboard wall at [2.15, ~0] m, the alternate root the inboard wall at [0.97835, ~0] m; the analytic formula has no stationary saddle for R>0 (only the excluded coordinate-axis saddle, Hessian eigenvalues [0.7774, -0.4397] Wb/m^2 per radian). Classification reproduced independently from digest-validated binary64 arrays, not from the stored labels. CONSEQUENCE: the plan's diverted/limited framing of the bank was stale and is corrected in sections 1-2; the bank proves two fixed points, not two classes. The two-class acceptance now waits on a genuinely diverted in-domain X-point fixture, dispatched as the next node on the same member. Record: /nova/evidence/archive/dual-basin-solve-landed#s2-topology-classes.</div>
 </div>
 </section>
 </main>

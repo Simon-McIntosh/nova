@@ -43,6 +43,32 @@
   classification of the analytic state (or a genuinely diverted fixture) first; relabeling a
   receipt is not evidence.</p>
 
+  <h2 id="s2-topology-classes">§2 — the classification verdict: both banked roots are limited</h2>
+
+  <p><strong>Landed 2026-08-21, commit <code>46c55d1d</code> (merge <code>5777ad9d</code>); gate
+  PASSED; negative result banked.</strong> The classification was reproduced independently from
+  the digest-validated binary64 arrays — the stored labels were never inputs. All 4/4 production
+  reads are <code>limited</code> with 0 finite in-domain X-points: boundary-to-wall point
+  distances are exactly 0 m and boundary-to-wall flux differences exactly 0 Wb in every read.
+  The closed-form root binds the <em>outboard</em> wall at [2.15, ≈0] m; the alternate root
+  binds the <em>inboard</em> wall at [0.97835, ≈0] m (coarse and fine agree to sub-mm). The
+  analytic formula has no stationary saddle for R&gt;0 — its only mathematical saddle sits at
+  the excluded cylindrical coordinate axis, ~0.979 m from the fine grid, with per-radian Hessian
+  eigenvalues [0.77744, −0.43965] Wb/m². <strong>Consequence:</strong> the bank proves two
+  fixed points, not two topology classes; the plan's §1–§2 diverted/limited framing was stale
+  and is corrected in the evergreen, and the two-class acceptance test waits on a genuinely
+  diverted, finite in-domain X-point fixture constructed and banked independently. Receipt:
+  <code>scripts/dual_basin_fixtures/topology-classification.json</code>.</p>
+
+  <figure>
+    <img src="/nova/figures/dual-basin-solve/topology-classification.png"
+         alt="Fine-grid oracle geometry: both root axes, their binding wall contacts, and the out-of-domain coordinate-axis saddle"
+         style="max-width:100%;height:auto">
+    <figcaption>Fine-grid geometry: the two root axes with their outboard/inboard binding wall
+    contacts, and the only mathematical saddle — at the excluded coordinate axis, outside the
+    R&gt;0 domain. Neither root is diverted.</figcaption>
+  </figure>
+
 </main>
 </body>
 </html>

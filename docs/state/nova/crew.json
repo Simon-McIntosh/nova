@@ -1,9 +1,23 @@
 {
-  "updated": "2026-08-21T15:20:07",
+  "updated": "2026-08-21T15:36:06",
   "project": "nova",
   "doc": "crew",
   "data": {
     "members": [
+      {
+        "id": "basin-branches",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-21"
+      },
+      {
+        "id": "basin-fixtures",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a0247c-7f4b-7b73-b6bf-0e31f531946b",
+        "created": "2026-08-21"
+      },
       {
         "id": "basin-scout",
         "harness": "codex",
@@ -254,6 +268,13 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a02472-cead-76b0-bda4-7705ec2ee151",
+        "created": "2026-08-21"
+      },
+      {
+        "id": "kernel-prototype",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
         "created": "2026-08-21"
       },
       {
@@ -15580,9 +15601,135 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T131709082760-declare-parquet-dependency",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a72",
+        "node": "declare-parquet-dependency",
+        "role": "implement",
+        "member": "packaging",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T13:17:13Z",
+        "completed_at": "2026-08-21T13:24:59Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 466,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 466,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "e797074b602cb6fddf1c6bc33f5be1aae919c3cd",
+        "commits": [
+          "9b7b568b4cd18d96a38cc289d81f0d6f1f332685"
+        ],
+        "changed_lines": {
+          "added": 25,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "pyarrow>=24 declared in pyproject.toml and locked at 25.0.1; uv lock --check clean at 324 packages; 12 benchmarks with 15 import sites would have raised ModuleNotFoundError in a freshly synced environment. No sync or install performed, so the shared .venv stayed untouched for its seven peer users",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T131709082760-declare-parquet-dependency/manifest.md",
+        "scope_changed": false,
+        "session_id": "019ff724-5f93-7e50-8eac-d19fff817e40",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3097600,
+            "cached_input_tokens_cumulative": 10526464,
+            "input_tokens": 3377729,
+            "input_tokens_cumulative": 11053328,
+            "output_tokens": 10375,
+            "output_tokens_cumulative": 39471,
+            "reasoning_output_tokens": 3385,
+            "reasoning_output_tokens_cumulative": 17476
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260821T132209359564-oracle-topology-classes",
+        "plan": "dual-basin-solve",
+        "section": "\u00a72",
+        "node": "oracle-topology-classes",
+        "role": "implement",
+        "member": "basin-fixtures",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T13:22:13Z",
+        "completed_at": "2026-08-21T13:35:03Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 770,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 770,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "daef77e81648e1413707b057848fdaf84372ce80",
+        "commits": [
+          "46c55d1d"
+        ],
+        "changed_lines": {
+          "added": 917,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T132209359564-oracle-topology-classes/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0247c-7f4b-7b73-b6bf-0e31f531946b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6074368,
+            "cached_input_tokens_cumulative": 6074368,
+            "input_tokens": 6248026,
+            "input_tokens_cumulative": 6248026,
+            "output_tokens": 29892,
+            "output_tokens_cumulative": 29892,
+            "reasoning_output_tokens": 8605,
+            "reasoning_output_tokens_cumulative": 8605
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 403
+    "_version": 409
   }
 }

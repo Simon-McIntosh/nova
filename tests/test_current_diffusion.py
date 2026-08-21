@@ -60,8 +60,16 @@ def test_flux_surface_assembly_has_one_equilibrium_owned_implementation():
     from nova.equilibrium import flux_surface_extraction
     from nova.transport import current_diffusion
 
+    assert (
+        equilibrium.extract_flux_surface_geometry
+        is flux_surface_extraction.extract_flux_surface_geometry
+    )
+    assert (
+        flux_surface_extraction.extract_flux_surface_geometry.__module__
+        == flux_surface_extraction.__name__
+    )
+
     public_functions = (
-        "extract_flux_surface_geometry",
         "traced_assemble_flux_surface_geometry",
         "traced_flux_surface_geometry",
     )

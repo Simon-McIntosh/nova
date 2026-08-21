@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="3">
 </head>
 <body>
   <main class="plan-doc">
@@ -141,6 +141,29 @@
       below so the design question does not have to be re-derived.</li>
     </ul>
 
+    <h2 id="s7">§7 — The missing solenoid half, and the inclusion ladder</h2>
+    <p>The competition dataset ships <code>ECOILA</code> and no channel for <code>ECOILB</code>. Those are
+    the two halves of the same central solenoid, 48 turns each. At the measured scale of 1.0172, the
+    missing half carries <strong>48.83</strong> ampere-turn units against the present half's
+    <strong>48.0</strong> — so <strong>the released data supplies roughly 49 % of the actual CS drive and
+    presents it as the whole thing</strong>. ECOILB is 65.4 % of all missing ampere-turns; the E567 and E89
+    pairs, at 6 and 7 turns, are 16.0 % and 18.7 % between them.</p>
+    <p>This section measures the forward solve as those conductors are added <em>incrementally</em>, every
+    added current derived from the shipped <code>ECOILA</code> channel times its measured per-coil scale —
+    so no rung consumes a label-recovered value and the whole ladder is inference-admissible. The
+    diagnostic question is whether the X point migrates monotonically toward the labelled divertor leg as
+    ampere-turns are restored. A conductor set that spans the deficit should improve monotonically and its
+    metrics should agree; one that does not, does not.</p>
+    <p><strong>First-frame result, held at n=1:</strong> ECOILB alone cuts the X-point error 65 %, from
+    0.4531 m to 0.1574 m — and then the E567 pair pushes it straight back to 0.4520 m. The metrics also
+    disagree about which rung is best: fractional RMS is <em>worst</em> at the ECOILB rung (0.7011, above
+    the shipped-only 0.4162) and best two rungs later (0.1639). Either the per-coil scales do not transfer
+    from the netCDF pulse they were measured on, or the five conductors do not span the missing field.</p>
+    <p><strong>Done-when:</strong> the preregistered five-frame ladder scores complete with the zero-current
+    Armijo policy now locked, and the receipt states whether the non-monotonicity pools across frames or
+    was a property of the first one. <em>The single-frame result is not generalised until then — this
+    campaign has already been misled once by a single unrepresentative frame.</em></p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="constraint-formulation" data-choice="amplitude-elimination" data-by="Simon McIntosh" data-when="2026-08-21">
@@ -159,19 +182,14 @@
         relative current error, since a raw pointwise l2 grows as the square root of node count and is
         therefore grid-dependent while a current integral is not.</p>
     </div>
-<div class="r-dec" data-key="zero-current-guard" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="zero-current-guard" data-choice="reject-step" data-by="reckon-ship" data-when="2026-08-21T21:18:25+00:00">
     <p class="r-dec-q">When a line search visits a state whose unscaled plasma current is zero or sign-reversed, does the solve fail loudly, clip to the band edge, or reject the step and continue?</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="fail-loud">fail loudly through the existing out-of-band path</button>
-      <button class="r-opt" data-value="reject-step">reject the trial step and continue the line search</button>
+      <button class="r-opt chosen" data-value="reject-step">reject the trial step and continue the line search</button>
       <button class="r-opt" data-value="clip-band">clip lambda to the nearest admissible band edge</button>
       </p>
-    <p class="r-dec-rat">Open. Failing loudly is the safe default and is what the §3 repair implements,
-        but a line search legitimately probes inadmissible states, so rejecting the trial step may be the
-        better numerics. Clipping is listed to be refused explicitly: it would silently return a state that
-        does not satisfy the constraint. Sign reversal is a separate case and stays refused — a negative
-        common amplitude reverses both the pressure gradient and FF-prime, which is a different physical
-        source rather than a current normalisation.</p>
+    <p class="r-dec-rat">Locked 2026-08-21 because two nodes have now stalled on it and a worker correctly refused to guess. A line search LEGITIMATELY probes inadmissible states - that is what a trial step is - so aborting the whole solve because a trial point has zero or sign-reversed unscaled current is the wrong failure boundary. Reject the trial, shrink the step, continue. The guard keeps its full meaning where it matters: an ACCEPTED iterate outside the finite positive band still raises LambdaOutOfBand loudly, and a converged state that required a rejected-forever direction fails rather than returning something that does not satisfy the constraint. Clipping to a band edge stays refused as originally recorded - it would silently return a state violating the constraint. Sign reversal likewise stays refused, since a negative common amplitude reverses both the pressure gradient and FF-prime and is a different physical source rather than a current normalisation. Implementation note carried from the two stalls: the division must not be reached before the admissibility test, which is the ordering defect itself.</p>
     </div>
 <div class="r-dec" data-key="target-current-provenance" data-choice="" data-by="" data-when="">
     <p class="r-dec-q">Which target current does a production solve consume, and what does it do when none is supplied?</p>
@@ -194,6 +212,11 @@
     <pre class="r-fu-prompt">/reckon-ship current-constrained-forward-solve §3</pre>
     </article>
 </section>
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s5" data-id="c-20260821-inclusion-ladder-partial" data-who="reckon-ship" data-when="2026-08-21T21:25:00+00:00">
+    <div class="r-comment-body">SOLENOID INCLUSION LADDER, FIRST FRAME ONLY - STRONGLY NON-MONOTONIC, WHICH IS THE INFORMATIVE OUTCOME. Commit 73f48ca0; gate blocked at 1 of 5 frames; 5 passed 1 deselected; ruff clean. Every rung derives its added currents from the SHIPPED ECOILA channel times measured per-coil scales, so no rung uses a label-recovered value and the whole ladder is inference-admissible. Preregistered cumulative missing ampere-turn fractions 0, 0.6540033353, 0.8170494544, 1.0. ON d3d_shot_00000c4a7b FRAME 102, all four rungs converged diverted: rung 0 shipped-20 residual 1.6581e-11, X-point separation 0.453059 m, LCFS 0.067235 m, fractional RMS 0.416221, lambda 1.02158; rung 1 +ECOILB residual 3.9018e-09, X-point 0.157382 m, LCFS 0.146049 m, RMS 0.701138, lambda 0.933903; rung 2 +E567 residual 7.2740e-09, X-point 0.451980 m, LCFS 0.050375 m, RMS 0.163914, lambda 1.12906; rung 3 complete 24 residual 1.4361e-09, X-point 0.450970 m, LCFS 0.078457 m, RMS 0.197046, lambda 1.17911. THE HEADLINE: ECOILB ALONE CUTS X-POINT ERROR BY 65 PERCENT, 0.453059 to 0.157382 m - the missing solenoid half is 65.4 percent of the missing ampere-turns and at 48 turns times scale 1.0172 it carries 48.83 units against ECOILA's 48.0, so the shipped dataset supplies roughly 49 percent of the actual CS drive. THE COMPLICATION: adding the E567 pair pushes the X point straight back out to 0.451980 m, and E89 leaves it at 0.450970 m, so the trajectory is NOT monotonic in ampere-turns. Worse, the three metrics disagree about which rung is best - X-point favours rung 1, while fractional RMS is WORST at rung 1 (0.701138, above even the shipped-only 0.416221) and best at rung 2 (0.163914), and LCFS separation is best at rung 2 (0.050375 m). READING, held loosely at n=1: a conductor set that spanned the deficit would improve monotonically and agree across metrics. Neither holds, so either the per-coil scales are wrong for these frames - they were measured on a different netCDF pulse, a stated transfer assumption - or the five conductors do not span the missing field, which is the same suspicion the coil-circuit-discovery adjudication gate exists to settle. THIS IS ONE FRAME OF FIVE AND MUST NOT BE GENERALISED; this campaign has already been burned once by generalising a single unrepresentative frame. THE BLOCKER IS THE SAME DEFECT AS BEFORE: d3d_shot_0003ff34e7 frame 89 reaches an Armijo trial with exactly zero unscaled plasma current and the eliminated map divides before its positive finite band guard. The worker correctly refused to choose the policy because the plan left it open; zero-current-guard is now LOCKED to reject-step. AUTHORITY MISMATCH, this orchestrator's error: section 5 as authored describes MAST cross-machine validation, and this DIII-D inclusion ladder was dispatched into it. The ladder is DIII-D inclusion work and belongs in its own section; recorded here rather than silently mis-filed.</div>
+</div>
+</section>
+</main>
 </body>
 </html>

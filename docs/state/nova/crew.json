@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T14:57:51",
+  "updated": "2026-08-21T15:01:16",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -15377,9 +15377,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T123219287894-legacy-root-drift-attribution",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a78",
+        "node": "legacy-root-drift-attribution",
+        "role": "implement",
+        "member": "transport-env",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T12:32:23Z",
+        "completed_at": "2026-08-21T13:00:26Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1683,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1683,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "78e266de84090f9c239421f7c4072a16e6109bec",
+        "commits": [
+          "babd55f28384f56ccec65796cbeb4f1d3b663305"
+        ],
+        "changed_lines": {
+          "added": 108,
+          "removed": 46,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "both drift hypotheses falsified by exhaustive enumeration: 133,692 endpoint-sign-changing STEP edges compared across 194 levels, zero selected roots changed, zero even pairs on the legacy path - the actual mechanism was the monotone-interval arc parameterisation leaking into the legacy clipped characterization. Repair scopes the interval authority to the extraction service and routes legacy geometry through its established single-arc Green correction; no band loosened or re-based; legacy STEP scalars restored (R_major 0.36 to 0.0001 percent, B_0 likewise); exact suite green 45 passed 1 xfailed with ITER valid=True and the cell-9285 roots preserved",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T123219287894-legacy-root-drift-attribution/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01023-3e4f-7081-b1ab-24ffbe816152",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 10513408,
+            "cached_input_tokens_cumulative": 204087040,
+            "input_tokens": 10738560,
+            "input_tokens_cumulative": 208494775,
+            "output_tokens": 22358,
+            "output_tokens_cumulative": 459083,
+            "reasoning_output_tokens": 4837,
+            "reasoning_output_tokens_cumulative": 153859
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 396
+    "_version": 397
   }
 }

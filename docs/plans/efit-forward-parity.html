@@ -25,10 +25,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="11">
-<meta name="plan-commits" content="c1e180d5,71c1ec36,457caddd">
-<meta name="plan-artifacts" content="scripts/dina_profile_routes/reuse-report.md,scripts/dina_profile_routes/receipt.json,scripts/dina_profile_routes/report.html,benchmarks/efit_forward_parity_slice.py,docs/figures/efit-forward-parity/reference-seeded-forward-slice.json,docs/evidence/archive/efit-forward-parity-landed.html">
-<meta name="plan-impl" content="0.65">
+<meta name="plan-version" content="12">
+<meta name="plan-commits" content="c1e180d5,71c1ec36,457caddd,252bdd77">
+<meta name="plan-artifacts" content="scripts/dina_profile_routes/reuse-report.md,scripts/dina_profile_routes/receipt.json,scripts/dina_profile_routes/addendum.json,benchmarks/efit_forward_parity_slice.py,docs/figures/efit-forward-parity/reference-seeded-forward-slice.json,docs/evidence/archive/efit-forward-parity-landed.html">
+<meta name="plan-impl" content="0.7">
 </head>
 <body>
   <main class="plan-doc">
@@ -276,6 +276,9 @@
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20260821T1125" data-who="reckon-ship" data-when="2026-08-21T11:25:00+00:00">
     <div class="r-comment-body">dina-dual-route-receipt landed - commit 71c1ec36, merged dabbb783; gate PASSED; worker 768 s. SECTION 6 CLOSES: the owner directive is executed and the disagreement is the finding. Native imas.DBEntry read at DD 3.39.0 bit-identical to the stored reader; affine extraction reliable on 19/19 shells over 2,415 prescribed-support nodes; map-minus-declared p-prime RMS 381.246 Pa/Wb (sup 1,189.351), FF-prime RMS 0.019910 T2m2/Wb (sup 0.064284); integral cross-checks against the stored primitives comparable for both routes (pressure RMS 77.06 vs 72.58 kPa; F RMS 0.2593 vs 0.2631 T m); core forcing on the warm banked carriers 1.294/1.279 Wb (declared, coarse/fine) vs 2.749/2.793 Wb (map-extracted), route-image difference 1.751/1.805 Wb; the 0.410992 Wb = 0.508064% anchor offset restated with dual provenance in every figure. Nothing shifted, rescaled, blended or reconciled. CONSEQUENCE for section 2-4 entry: reproduction runs now hold both source vectors with stated uncertainty - the prescribed-anchor mode drives the declared route; the extracted route is the internal-consistency control. CAVEAT for the cache owner: the current cache-helper identity omits two no-op exact-route policy fields and would select a newer key; the receipt opened the banked groups directly through the validated deserializer. Record: /nova/evidence/archive/efit-forward-parity-landed#s6-dual-route.</div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-20260821T1210b" data-who="reckon-ship" data-when="2026-08-21T12:10:00+00:00">
+    <div class="r-comment-body">dual-route-owner-questions landed - commit 252bdd77, merged 8b92c2d4; gate PASSED. The owner's three questions are answered by measurement. (1) ROTATION: bounded, not detected - a centrifugal-shaped third column (mu0*R^2*(R^2-R0^2), the nova/equilibrium/rotation.py shape) is insignificant on all 19 shells (max amplitude/uncertainty 1.046 vs 1.96 proxy; aggregate residual falls 0.96%), and constraints/pressure_rotational is unfilled in the dataset. VARIANCE: the two-column affine basis explains 99.7711% of R*j_phi (residual RMS 2.5615e5 vs signal 5.3541e6 A/m = 4.78%). (2) FORCING RECORD CORRECTED: the banked 1.294 Wb declared-route arm normalized its density argument with MAP-SADDLE constants despite the receipt wording; the factorial reproduces it to 5.7e-14 Wb and collapses it to 0.0754 Wb under declared constants, reconciling exactly with the normalization-constant discriminator (1.2523 to 0.0595 Wb) - constants, not in-cell values, carry the forcing. (3) COORDINATE CONTROL: the extracted-route 2.749 Wb was reproduction-arm mechanics, not force-balance failure - 2.274 Wb in its own map coordinate, 0.1775 Wb after extending extraction to 27/27 reliable shells over psi_N [0.01, 0.99] (support-holding image 2.233 Wb sup, coordinate bias 0.694 Wb sup). VERDICT: the stored DINA map IS consistent with a two-function Grad-Shafranov balance at 4.78% weighted R*j_phi residual; neither route is out of force balance, and the routes stay unreconciled as sources. Record: /nova/evidence/archive/efit-forward-parity-landed#s6-owner-questions.</div>
 </div>
 </section>
 </main>

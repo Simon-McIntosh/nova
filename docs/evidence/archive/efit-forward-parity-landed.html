@@ -31,9 +31,11 @@
   <p><strong>Extraction is reliable everywhere it was asked.</strong> The affine per-surface
   projection (<code>map_extraction.extract_flux_functions</code>) qualified 19/19 shells on
   2,415 prescribed-support map nodes. Conversion: COCOS 11 → Nova COCOS 17 total-flux gauge,
-  Φ = −ψ<sub>IDS</sub>; the prescribed IDS anchors define support and reproduction normalization,
-  the banked map/topology anchors define only the extraction coordinate, and every figure states
-  both provenances.</p>
+  Φ = −ψ<sub>IDS</sub>; the prescribed IDS anchors bound the support and the banked map/topology
+  anchors define the extraction coordinate, with every figure stating both provenances.
+  <em>Correction (addendum below): the forcing arms' density argument was normalized with
+  map-saddle constants, not the declared constants this paragraph originally claimed — the
+  factorial in the addendum quantifies the difference.</em></p>
 
   <div style="overflow-x:auto">
   <table>
@@ -72,6 +74,38 @@
     reliability masks in the receipt. Full panel set: profile_routes, primitive_integrals,
     anchor_offsets, forcing_routes.</figcaption>
   </figure>
+
+  <h2 id="s6-owner-questions">§6 (addendum) — rotation bounded, 99.77% variance explained, and the forcing numbers corrected</h2>
+
+  <p><strong>Landed 2026-08-21, commit <code>252bdd77</code> (merge <code>8b92c2d4</code>); gate
+  PASSED.</strong> Three owner questions, answered by measurement on the banked slice.</p>
+
+  <p><strong>Rotation is bounded, not detected.</strong> Refitting every shell with a third
+  centrifugal-shaped column (μ₀R²·(R²−R₀²), the small-exponent shape of
+  <code>nova/equilibrium/rotation.py</code>) leaves the amplitude insignificant on all 19 shells
+  (largest amplitude/uncertainty 1.046 against a 1.96 proxy) and reduces the aggregate residual
+  by only 0.96%. <code>constraints/pressure_rotational</code> exists in DD 3.39.0 but is unfilled
+  in the dataset (<code>has_value=false</code>). <strong>Variance explained:</strong> the
+  two-column basis (μ₀R², 1) explains 99.7711% of the R·j_φ variance — residual RMS 2.5615e5
+  A/m against signal RMS 5.3541e6 A/m (4.78%).</p>
+
+  <p><strong>The banked forcing numbers were reproduction-arm mechanics, and the record is
+  corrected.</strong> The 1.29421 Wb declared-route arm passed declared profiles but normalized
+  the density argument with <em>map-saddle</em> constants; the factorial reproduces it to
+  5.7e-14 Wb and collapses it to <strong>0.07542 Wb</strong> under declared constants —
+  reconciling exactly with the normalization-constant discriminator (1.25229 → 0.05953 Wb):
+  constants, not in-cell values, carry the forcing. The extracted route falls 2.74887 →
+  2.27425 Wb consumed in its own map coordinate, and to <strong>0.17747 Wb</strong> once
+  extraction extends to 27/27 reliable shells over ψ_N ∈ [0.01, 0.99] — the banked 2.75 Wb was
+  dominated by the edge-held 19-shell support (support-extension image change 2.2326 Wb sup)
+  plus coordinate bias (0.6941 Wb sup).</p>
+
+  <p><strong>Force-balance verdict:</strong> the stored DINA map IS consistent with a
+  two-function Grad–Shafranov balance at a weighted R·j_φ residual of 4.78% of signal RMS. The
+  routes remain unreconciled as sources; the profile-domain disagreement stands as banked.
+  Artifacts: <code>scripts/dina_profile_routes/addendum.json</code>,
+  <code>measure_controls.py</code>, figure
+  <code>docs/figures/dina-profile-routes/route_controls.png</code>.</p>
 
 </main>
 </body>

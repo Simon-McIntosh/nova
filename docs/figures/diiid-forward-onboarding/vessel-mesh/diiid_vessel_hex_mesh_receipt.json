@@ -1,0 +1,62 @@
+{
+  "artifacts": {
+    "mesh_figure": "docs/figures/diiid-forward-onboarding/vessel-mesh/diiid_vessel_hex_mesh.png",
+    "operator_npz": "docs/figures/diiid-forward-onboarding/vessel-mesh/diiid_vessel_self_interaction.npz",
+    "operator_sha256": "56767a695cceaffa05326d326ed0b875ae055cc92357e97e999c7da13b49bba3"
+  },
+  "measurement": "DIII-D vessel hex mesh self-interaction",
+  "mesh": {
+    "area_score": {
+      "contour_polygon_area_m2": 2.7858491550752875,
+      "meshed_area_m2": 2.7859650279303287,
+      "passed": true,
+      "relative_error": 4.159337013276421e-05,
+      "relative_tolerance": 0.0001
+    },
+    "boundary_treatment": "exact clipped polygons",
+    "cell_count": 99,
+    "characteristic_cell_size_m": 0.20784609690826525,
+    "hexagon_circumradius_m": 0.12,
+    "topology_repair": {
+      "component_count": 2,
+      "raw_polygon_area_m2": 2.7858491550752875,
+      "relative_area_change": 4.159337013187603e-05,
+      "required": true,
+      "valid_material_area_m2": 2.785965027930326
+    }
+  },
+  "preregistration": {
+    "area_relative_tolerance": 0.0001,
+    "path": "docs/figures/diiid-forward-onboarding/vessel-mesh/vessel_hex_mesh_preregistration.json"
+  },
+  "self_interaction": {
+    "condition_number_2": 372.65522630279304,
+    "diagonal_dominance_definition": "minimum row abs(diagonal) / sum(abs(off-diagonal))",
+    "diagonal_dominance_ratio": 0.029841680213628683,
+    "matrix_shape": [
+      99,
+      99
+    ],
+    "maximum_asymmetry_wb_per_a": 0.0,
+    "quantity": "section-averaged total poloidal flux per ampere",
+    "raw_maximum_asymmetry_wb_per_a": 8.485977326257037e-09,
+    "reciprocity_enforced": true,
+    "target_quadrature_order": 2,
+    "units": "Wb/A"
+  },
+  "source": {
+    "autoconvert": false,
+    "data_dictionary": "4.1.1",
+    "limiter_vertex_count": 82,
+    "path": "/home/ITER/mcintos/Code/nova/docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc",
+    "r_extent_m": [
+      1.017300009727478,
+      2.351099967956543
+    ],
+    "unique_limiter_vertex_count": 81,
+    "z_extent_m": [
+      -1.3589400053024292,
+      1.3629900217056274
+    ]
+  }
+}

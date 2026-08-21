@@ -1,0 +1,749 @@
+{
+  "anchors": {
+    "normalization_constants": {
+      "banked_clip_to_newton_saddle": {
+        "banked_saddle_level_offset": -5.530053327573725e-05,
+        "clip_beyond_saddle_psi_norm": 5.530053327573725e-05,
+        "clip_constant_psi_norm": 1.0,
+        "newton_saddle_psi_norm": 0.9999446994667243
+      },
+      "exact_case": {
+        "axis_flux_wb": -86.01645410417784,
+        "boundary_flux_wb": -5.1227631227097294,
+        "flux_span_wb": 80.89369098146811
+      },
+      "offset_definition": "production minus exact case",
+      "offsets": {
+        "axis_flux_in_exact_psi_norm": -2.128220165258678e-05,
+        "axis_flux_wb": -0.001721595843889645,
+        "boundary_flux_in_exact_psi_norm": 0.005080641991379802,
+        "boundary_flux_wb": 0.4109918832381485,
+        "flux_span_fraction_of_exact": 0.005101924193032279,
+        "flux_span_wb": 0.41271347908202927
+      },
+      "production_constants_in_exact_coordinate": {
+        "axis_psi_norm": -2.128220165258678e-05,
+        "boundary_psi_norm": 1.0050806419913796
+      },
+      "production_topology": {
+        "axis_flux_wb": -86.01817570002173,
+        "boundary_flux_wb": -4.711771239471581,
+        "flux_span_wb": 81.30640446055014
+      }
+    },
+    "provenance": "scripts/normalization_discriminator/results.json; banked cached-map topology against native-DD declared IDS constants"
+  },
+  "common_profile_base": {
+    "absolute_flux_wb": [
+      -81.95285547699422,
+      -77.88753525396672,
+      -73.8222150309392,
+      -69.75689480791169,
+      -65.6915745848842,
+      -61.62625436185669,
+      -57.56093413882918,
+      -53.49561391580168,
+      -49.43029369277417,
+      -45.364973469746666,
+      -41.29965324671916,
+      -37.23433302369165,
+      -33.169012800664134,
+      -29.103692577636636,
+      -25.038372354609123,
+      -20.973052131581625,
+      -16.907731908554112,
+      -12.8424116855266,
+      -8.7770914624991
+    ],
+    "condition_number": [
+      23.11499567602968,
+      16.533412589053604,
+      13.258447671360116,
+      11.662212222739273,
+      10.0188735339773,
+      9.397303996471743,
+      8.914179858911265,
+      8.281257923020737,
+      7.525509101327072,
+      7.119003058349829,
+      6.899625163759024,
+      6.5225440289517795,
+      6.280740194631169,
+      6.010307131628032,
+      5.669342652747316,
+      5.441314566925193,
+      5.261702924059041,
+      4.942926258992758,
+      4.815546271834681
+    ],
+    "declared_ff_prime": [
+      1.5283864479432638,
+      1.5346571360078833,
+      1.5612877867770336,
+      1.572242270863817,
+      1.5045942087787472,
+      1.2792117644497791,
+      0.9659212257857209,
+      0.7423011199921525,
+      0.6077383901261844,
+      0.5104623901903464,
+      0.4258781043031526,
+      0.3524780381298922,
+      0.28965584700778113,
+      0.23657291109134343,
+      0.19068957657545432,
+      0.15277202602920065,
+      0.058821338263232624,
+      -0.08817590875847414,
+      -0.08475487553376197
+    ],
+    "declared_p_prime": [
+      8913.484322651393,
+      8865.100863801299,
+      8512.149818258908,
+      8074.701588806408,
+      7640.800593616565,
+      7296.363502496636,
+      7094.466616928395,
+      7003.546752564594,
+      6907.514449897243,
+      6776.555324522136,
+      6641.777598374502,
+      6507.863992065303,
+      6375.366949122654,
+      6250.7482855688995,
+      6187.241198478291,
+      6165.252850477748,
+      9199.87323404416,
+      14702.119181497234,
+      10020.166357418557
+    ],
+    "definition": "map shell centres converted to absolute Nova total flux through map anchors, then into the declared-anchor psi_N coordinate",
+    "map_extracted_ff_prime": [
+      1.5272077972241096,
+      1.5357549563271273,
+      1.5601876927093241,
+      1.5654239149840412,
+      1.4630420596731113,
+      1.2541224930350061,
+      1.0302051582183749,
+      0.7627269800200098,
+      0.6070000683395254,
+      0.5069563317948734,
+      0.4156789304698011,
+      0.34558817226023214,
+      0.29376534630959555,
+      0.2439061299431172,
+      0.19237466224406083,
+      0.15337373869891424,
+      0.06393529547846828,
+      -0.07591476430378756,
+      -0.0720577671390946
+    ],
+    "map_extracted_ff_prime_uncertainty": [
+      0.01440253216496761,
+      0.010853489469353043,
+      0.002476711627241188,
+      0.016750594063882147,
+      0.05307393729931997,
+      0.08856876293964133,
+      0.06883120519358454,
+      0.03679334615948723,
+      0.01824790742061917,
+      0.013007509817392855,
+      0.01111857632492392,
+      0.008737498622790465,
+      0.007309667468298152,
+      0.006263084042301511,
+      0.00500892222738904,
+      0.0035475844356455894,
+      0.016040839647678218,
+      0.01564816170197671,
+      0.07765366830525135
+    ],
+    "map_extracted_p_prime": [
+      8943.421874553385,
+      8832.08897182127,
+      8519.619767727454,
+      8127.591733430918,
+      8292.811494266116,
+      7597.994357467912,
+      5905.115875040063,
+      6749.120676371746,
+      6945.164426876688,
+      6788.491983520097,
+      6826.306269639914,
+      6662.206363401567,
+      6276.7053118942185,
+      6117.225843932369,
+      6176.50029952036,
+      6168.131906469227,
+      9051.711756243601,
+      14193.61135515583,
+      9392.675739304572
+    ],
+    "map_extracted_p_prime_uncertainty": [
+      283.80250266997456,
+      210.18905368906985,
+      48.43448045768478,
+      328.1990935737827,
+      1042.0065761653384,
+      1699.0475623811878,
+      1331.7651232887415,
+      724.8606946330782,
+      355.03526526336475,
+      254.0492205565939,
+      221.45853013266,
+      168.40021368372814,
+      143.103756123016,
+      124.83473599008033,
+      101.2021685337875,
+      71.40764403614341,
+      338.5240832968714,
+      322.98416809126337,
+      1649.5554774722539
+    ],
+    "minimum_gradient": [
+      0.1295174662491468,
+      0.21691110477869988,
+      0.28104782285373237,
+      0.3338542056165515,
+      0.37136865239091416,
+      0.40988931382116056,
+      0.42091361868198623,
+      0.4136168246026774,
+      0.4027881159982229,
+      0.39061381860818195,
+      0.37728753093180883,
+      0.3523768549928542,
+      0.3319044185521572,
+      0.3012487223874199,
+      0.2719039056421286,
+      0.24481115003221046,
+      0.20822771957021752,
+      0.18177337520796216,
+      0.11736491671479081
+    ],
+    "projection_rms": [
+      12360.371401703012,
+      18383.76952066882,
+      6434.425957464722,
+      58092.73543566551,
+      231619.18538915642,
+      470605.6652210604,
+      395869.52999196656,
+      267089.87929016224,
+      159037.4549992619,
+      128585.71750456715,
+      120511.79391221653,
+      111057.07976178489,
+      94644.68724710571,
+      77333.40677581659,
+      64366.06952692759,
+      44133.27082592671,
+      181818.98554732034,
+      175507.4872570271,
+      608634.8499178223
+    ],
+    "psi_norm_declared": [
+      0.050233814007999096,
+      0.1004889102176506,
+      0.1507440064273023,
+      0.20099910263695397,
+      0.2512541988466055,
+      0.30150929505625707,
+      0.3517643912659087,
+      0.40201948747556027,
+      0.4522745836852119,
+      0.5025296798948634,
+      0.552784776104515,
+      0.6030398723141668,
+      0.6532949685238184,
+      0.7035500647334699,
+      0.7538051609431217,
+      0.8040602571527732,
+      0.8543153533624248,
+      0.9045704495720766,
+      0.954825545781728
+    ],
+    "reliable": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "sample_count": [
+      79,
+      79,
+      80,
+      83,
+      78,
+      85,
+      77,
+      93,
+      99,
+      103,
+      106,
+      120,
+      129,
+      131,
+      156,
+      167,
+      180,
+      206,
+      230
+    ],
+    "uncertainty_inflation": [
+      4.472135954999579,
+      3.1622776601683795,
+      2.581988897471611,
+      2.23606797749979,
+      2.0,
+      1.8257418583505538,
+      1.6903085094570331,
+      1.5811388300841898,
+      1.4907119849998598,
+      1.4142135623730951,
+      1.3483997249264843,
+      1.2909944487358056,
+      1.362113386571294,
+      1.5007248760731484,
+      1.6626883328666993,
+      1.8466946930831056,
+      2.171139618227452,
+      2.4871158994260245,
+      3.8520152719120078
+    ]
+  },
+  "figures": [
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s-20260821-forward/dina-dual-route-receipt/docs/figures/dina-profile-routes/profile_routes.png",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s-20260821-forward/dina-dual-route-receipt/docs/figures/dina-profile-routes/route_deviation.png",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s-20260821-forward/dina-dual-route-receipt/docs/figures/dina-profile-routes/primitive_integrals.png",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s-20260821-forward/dina-dual-route-receipt/docs/figures/dina-profile-routes/anchor_offsets.png",
+    "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s-20260821-forward/dina-dual-route-receipt/docs/figures/dina-profile-routes/forcing_routes.png"
+  ],
+  "gauge": "Nova total poloidal flux Phi = -psi_IDS after COCOS 11 to 17; declared anchors bound reproduction support, map/topology anchors only parameterize affine extraction",
+  "primitive_integral_cross_checks": {
+    "declared": {
+      "field_function": [
+        -34.3541327662546,
+        -34.172418484731175,
+        -33.98776511616526,
+        -33.79984281736866,
+        -33.61429828086835,
+        -33.44553761259098,
+        -33.30880967021558,
+        -33.20440228040446,
+        -33.12165436503072,
+        -33.052959680351364,
+        -32.99532724012642,
+        -32.94734211915247,
+        -32.90770233315199,
+        -32.87518189204582,
+        -32.848753790721574,
+        -32.82749372408047,
+        -32.814389365362665,
+        -32.81620765948891,
+        -32.82691737226123
+      ],
+      "field_function_error": {
+        "mean_absolute": 0.20192648980531172,
+        "rms": 0.2593479026726426,
+        "signed_mean": -0.20192648980531172,
+        "sup": 0.4846399900590015
+      },
+      "field_function_squared": [
+        1180.2064381214482,
+        1167.754185095597,
+        1155.16817759162,
+        1142.429374478828,
+        1129.9210489151885,
+        1118.603986195238,
+        1109.4768016466471,
+        1102.532330798929,
+        1097.0439878765587,
+        1092.4981436309329,
+        1088.6916196830289,
+        1085.527352716478,
+        1082.9168728473367,
+        1080.7775844350977,
+        1079.0406256034448,
+        1077.6443442045427,
+        1076.7841494216261,
+        1076.9034851506988,
+        1077.606504165266
+      ],
+      "pressure": [
+        640214.6016592821,
+        604076.7807116306,
+        568754.7364024315,
+        535039.305171684,
+        503095.0307530656,
+        472732.85311576095,
+        443481.186760435,
+        414824.71733267896,
+        386548.25811760826,
+        358733.19532397506,
+        331458.2852285913,
+        304729.53328700195,
+        278542.30364542943,
+        252877.70284449583,
+        227595.4977528455,
+        202487.07582182158,
+        171254.9969214344,
+        122670.37035265901,
+        72418.36667225178
+      ],
+      "pressure_error": {
+        "mean_absolute": 69655.0179334249,
+        "rms": 77057.0630397118,
+        "signed_mean": 67602.36626509909,
+        "sup": 105203.08146400924
+      }
+    },
+    "integration_support": {
+      "maximum_psi_norm_declared": 0.954825545781728,
+      "minimum_psi_norm_declared": 0.050233814007999096,
+      "policy": "reliable extracted shells only; both route integrals are anchored to the stored primitive at the outermost common reliable shell",
+      "sample_count": 19
+    },
+    "map_extracted": {
+      "field_function": [
+        -34.35730143344871,
+        -34.17560880751746,
+        -33.990972906111466,
+        -33.803544592629905,
+        -33.62094500537417,
+        -33.456266962244555,
+        -33.31719189326008,
+        -33.20762611768897,
+        -33.123678136681846,
+        -33.05524865768608,
+        -32.99846444959666,
+        -32.95153807462469,
+        -32.91207505908333,
+        -32.87885153056566,
+        -32.8518683919436,
+        -32.83046875807821,
+        -32.817011565099314,
+        -32.81775355567073,
+        -32.82691737226123
+      ],
+      "field_function_error": {
+        "mean_absolute": 0.2057263160786784,
+        "rms": 0.2630587486429362,
+        "signed_mean": -0.2057263160786784,
+        "sup": 0.48834176532024287
+      },
+      "field_function_squared": [
+        1180.424161788857,
+        1167.9722373644652,
+        1155.3862391040038,
+        1142.6796270259185,
+        1130.3679430543941,
+        1119.3217990489763,
+        1110.035275652315,
+        1102.7464323722186,
+        1097.1780533024948,
+        1092.6494638214574,
+        1088.8986560312946,
+        1085.8038614834406,
+        1083.2046846947349,
+        1081.0188779689797,
+        1079.2452568415827,
+        1077.8396788751497,
+        1076.956248063862,
+        1077.0049484407386,
+        1077.606504165266
+      ],
+      "pressure": [
+        635052.3729088304,
+        598920.8010496246,
+        563650.6748281394,
+        529812.5520418017,
+        496435.45338589035,
+        464134.84619126125,
+        436687.6126402691,
+        410965.850760555,
+        383130.0236754849,
+        355214.16810483625,
+        327539.91076933075,
+        300122.3491764979,
+        273821.93952772464,
+        248629.2900424284,
+        223640.32328875817,
+        198547.88181233517,
+        167611.1126956634,
+        120361.27162787286,
+        72418.36667225178
+      ],
+      "pressure_error": {
+        "mean_absolute": 65432.92323732202,
+        "rms": 72578.53656570021,
+        "signed_mean": 63137.20854533454,
+        "sup": 98954.69267932948
+      }
+    },
+    "psi_norm_declared": [
+      0.050233814007999096,
+      0.1004889102176506,
+      0.1507440064273023,
+      0.20099910263695397,
+      0.2512541988466055,
+      0.30150929505625707,
+      0.3517643912659087,
+      0.40201948747556027,
+      0.4522745836852119,
+      0.5025296798948634,
+      0.552784776104515,
+      0.6030398723141668,
+      0.6532949685238184,
+      0.7035500647334699,
+      0.7538051609431217,
+      0.8040602571527732,
+      0.8543153533624248,
+      0.9045704495720766,
+      0.954825545781728
+    ],
+    "stored_field_function": [
+      -34.052699776939875,
+      -33.79856278669184,
+      -33.54015924646647,
+      -33.31520282730966,
+      -33.167413021448866,
+      -33.071320045348365,
+      -33.00147694461661,
+      -32.95047637912911,
+      -32.9118825224845,
+      -32.88284709469865,
+      -32.8607420807695,
+      -32.84357831417712,
+      -32.830290377080416,
+      -32.819889805788065,
+      -32.811562177594666,
+      -32.80484464910544,
+      -32.79937582259866,
+      -32.79529201956273,
+      -32.82691737226123
+    ],
+    "stored_pressure": [
+      572166.0538410713,
+      523503.43595284753,
+      478522.10885346757,
+      437593.4284205606,
+      400804.64180238073,
+      367815.87766485446,
+      338278.10529642575,
+      312011.1580812255,
+      288354.8790775929,
+      267079.8647497657,
+      247853.82001999614,
+      230224.9297327923,
+      214027.19299081364,
+      199052.6076037975,
+      185012.9235305412,
+      171639.30621033564,
+      158560.5771357254,
+      142170.56120175403,
+      72418.36667225178
+    ]
+  },
+  "profile_route_disagreement": {
+    "definition": "map extracted minus IDS declared on reliable shells",
+    "ff_prime": {
+      "mean_absolute": 0.011930593705707643,
+      "rms": 0.019910177739387285,
+      "signed_mean": 0.0017124946454768976,
+      "sup": 0.06428393243265396
+    },
+    "p_prime": {
+      "mean_absolute": 233.63946033297304,
+      "rms": 381.2459725907761,
+      "signed_mean": -82.55776178703252,
+      "sup": 1189.3507418883319
+    }
+  },
+  "qualification": {
+    "map_coordinate_range_on_prescribed_support": [
+      0.00018312348825795787,
+      0.9945037707945504
+    ],
+    "policy": "unreliable shells are retained and masked, never reconciled",
+    "prescribed_support_map_nodes": 2415,
+    "reliable_shells": 19,
+    "total_shells": 19,
+    "unreliable_shells": 0
+  },
+  "reference": {
+    "dd_version": "3.39.0",
+    "mapping_bit_identical_to_stored_reader": true,
+    "pulse": 135011,
+    "reader": "imas.DBEntry",
+    "run": 7,
+    "source_cocos": 11,
+    "target_cocos": 17,
+    "time_s": 338.9275978120551,
+    "time_slice_index": 353
+  },
+  "reproduction_lane_forcing": {
+    "coarse": {
+      "cache": {
+        "arrays_verified": 31,
+        "bitwise_stored_precision": true,
+        "bytes_verified": 51411470,
+        "identity_policy": "open the banked semantic group and validate its stored identity; never fall through to the current helper's cold-build branch",
+        "load_seconds": 0.3320638299919665,
+        "lock_wait_seconds": 2.116919495165348e-05,
+        "route_policy": {
+          "coil_polysection_policy": "{\"arrangement\":\"exact\",\"backend\":\"numpy\",\"device_eligibility\":\"host\",\"exact_kernel\":\"closed_form\",\"precision\":\"float64\",\"quadrature\":null,\"standoff\":null}",
+          "force_target_policy": "{\"backend\":\"numpy\",\"device_eligibility\":\"host\",\"order\":5,\"precision\":\"float64\",\"rule\":\"positive_material\"}",
+          "inductance_target_policy": "{\"backend\":\"numpy\",\"contraction\":\"logical_cell_before_reduction\",\"device_eligibility\":\"host\",\"material\":\"actual_parent\",\"order\":3,\"precision\":\"float64\",\"rule\":\"positive_material\"}",
+          "plasma_polysection_policy": "{\"arrangement\":\"exact\",\"backend\":\"numpy\",\"device_eligibility\":\"host\",\"exact_kernel\":\"closed_form\",\"precision\":\"float64\",\"quadrature\":null,\"standoff\":null}"
+        },
+        "semantic_key": "746fbe1553c4b242",
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/solovev_hex_machine.zarr",
+        "warm_hit": true
+      },
+      "core_cells": 384,
+      "map_extracted_minus_declared_image_wb": {
+        "mean_absolute": 1.1691136557313575,
+        "rms": 1.196128091532985,
+        "signed_mean": -1.1691136557313575,
+        "sup": 1.7506061251874172
+      },
+      "realised_cells": 566,
+      "requested_cells": -500,
+      "routes": {
+        "declared": {
+          "grid_core_forcing_wb": {
+            "mean_absolute": 1.0120745885203635,
+            "rms": 1.024688375198428,
+            "signed_mean": -1.0120745885203635,
+            "sup": 1.2942065775424352
+          },
+          "profile_support": {
+            "maximum_psi_norm_declared": 1.0,
+            "minimum_psi_norm_declared": 0.0,
+            "outside_support": "not applicable",
+            "samples": 50
+          },
+          "state_forcing_wb": {
+            "mean_absolute": 0.896324936802363,
+            "rms": 0.9291971947434745,
+            "signed_mean": -0.896324936802363,
+            "sup": 1.2942065775424352
+          }
+        },
+        "map_extracted": {
+          "grid_core_forcing_wb": {
+            "mean_absolute": 2.213041052303886,
+            "rms": 2.2356365333914945,
+            "signed_mean": -2.213041052303886,
+            "sup": 2.748872340962243
+          },
+          "profile_support": {
+            "maximum_psi_norm_declared": 0.954825545781728,
+            "minimum_psi_norm_declared": 0.050233814007999096,
+            "outside_support": "edge-held by the existing jnp.interp source primitive",
+            "samples": 19
+          },
+          "state_forcing_wb": {
+            "mean_absolute": 2.0654385925337206,
+            "rms": 2.1166984237316626,
+            "signed_mean": -2.0654385925337206,
+            "sup": 2.761043295665982
+          }
+        }
+      },
+      "state_nodes": 2396
+    },
+    "fine": {
+      "cache": {
+        "arrays_verified": 31,
+        "bitwise_stored_precision": true,
+        "bytes_verified": 169311277,
+        "identity_policy": "open the banked semantic group and validate its stored identity; never fall through to the current helper's cold-build branch",
+        "load_seconds": 0.5397581420838833,
+        "lock_wait_seconds": 1.1361902579665184e-05,
+        "route_policy": {
+          "coil_polysection_policy": "{\"arrangement\":\"exact\",\"backend\":\"numpy\",\"device_eligibility\":\"host\",\"exact_kernel\":\"closed_form\",\"precision\":\"float64\",\"quadrature\":null,\"standoff\":null}",
+          "force_target_policy": "{\"backend\":\"numpy\",\"device_eligibility\":\"host\",\"order\":5,\"precision\":\"float64\",\"rule\":\"positive_material\"}",
+          "inductance_target_policy": "{\"backend\":\"numpy\",\"contraction\":\"logical_cell_before_reduction\",\"device_eligibility\":\"host\",\"material\":\"actual_parent\",\"order\":3,\"precision\":\"float64\",\"rule\":\"positive_material\"}",
+          "plasma_polysection_policy": "{\"arrangement\":\"exact\",\"backend\":\"numpy\",\"device_eligibility\":\"host\",\"exact_kernel\":\"closed_form\",\"precision\":\"float64\",\"quadrature\":null,\"standoff\":null}"
+        },
+        "semantic_key": "f0f96aa214aa9459",
+        "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/solovev_hex_machine.zarr",
+        "warm_hit": true
+      },
+      "core_cells": 771,
+      "map_extracted_minus_declared_image_wb": {
+        "mean_absolute": 1.206857378121752,
+        "rms": 1.2315247075639477,
+        "signed_mean": -1.206857378121752,
+        "sup": 1.8047759651115314
+      },
+      "realised_cells": 1069,
+      "requested_cells": -1000,
+      "routes": {
+        "declared": {
+          "grid_core_forcing_wb": {
+            "mean_absolute": 1.01576481577854,
+            "rms": 1.0285331762447327,
+            "signed_mean": -1.01576481577854,
+            "sup": 1.2793616102287784
+          },
+          "profile_support": {
+            "maximum_psi_norm_declared": 1.0,
+            "minimum_psi_norm_declared": 0.0,
+            "outside_support": "not applicable",
+            "samples": 50
+          },
+          "state_forcing_wb": {
+            "mean_absolute": 0.9157938507674807,
+            "rms": 0.9460780498644076,
+            "signed_mean": -0.9157938507674807,
+            "sup": 1.2941470026752109
+          }
+        },
+        "map_extracted": {
+          "grid_core_forcing_wb": {
+            "mean_absolute": 2.240849063428991,
+            "rms": 2.264863686422442,
+            "signed_mean": -2.240849063428991,
+            "sup": 2.793386353998468
+          },
+          "profile_support": {
+            "maximum_psi_norm_declared": 0.954825545781728,
+            "minimum_psi_norm_declared": 0.050233814007999096,
+            "outside_support": "edge-held by the existing jnp.interp source primitive",
+            "samples": 19
+          },
+          "state_forcing_wb": {
+            "mean_absolute": 2.122651228889233,
+            "rms": 2.1685463235680977,
+            "signed_mean": -2.122651228889233,
+            "sup": 2.809256068211032
+          }
+        }
+      },
+      "state_nodes": 4216
+    }
+  },
+  "route_policy": "Both route images are banked. Their disagreement is reported and no route is rescaled, shifted, blended, or selected as a correction.",
+  "schema": "nova.dina-dual-route-flux-function-receipt"
+}

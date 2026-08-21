@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T12:50:14",
+  "updated": "2026-08-21T12:51:08",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -384,6 +384,13 @@
       },
       {
         "id": "sol-closure",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-21"
+      },
+      {
+        "id": "sol-demo",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -14544,6 +14551,6 @@
       }
     ],
     "holds": [],
-    "_version": 380
+    "_version": 381
   }
 }

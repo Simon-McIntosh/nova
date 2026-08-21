@@ -356,13 +356,6 @@ def test_iter_shape_referees_localize_inner_surface_convention():
         pytest.param(
             "iterhybrid_cocos17.eqdsk",
             17,
-            marks=pytest.mark.xfail(
-                strict=True,
-                reason=(
-                    "thin-shell corner integrands remain slightly outside the "
-                    "locked ITER coefficient thresholds"
-                ),
-            ),
         ),
         pytest.param(
             "STEP_SPP_001_ECHD_ftop.eqdsk",
@@ -370,8 +363,8 @@ def test_iter_shape_referees_localize_inner_surface_convention():
             marks=pytest.mark.xfail(
                 strict=True,
                 reason=(
-                    "cell-corner bilinear FSA integrands remain outside the "
-                    "low-aspect-ratio moment thresholds"
+                    "direct spline-arc coarea moments expose a low-aspect-ratio "
+                    "surface-partition residual outside both reference routes"
                 ),
             ),
         ),
@@ -426,6 +419,42 @@ def test_real_equilibrium_reference_gates(filename, cocos):
         )
 
     failures = {}
+    measured_baseline = {
+        "iterhybrid_cocos17.eqdsk": {
+            "Phi_face": 0.02205180322,
+            "volume_face": 0.01664507947,
+            "area_face": 0.01782058237,
+            "vpr_face": 0.01639737538,
+            "g0_face": 0.00837665477,
+            "g1_face": 0.01943373034,
+            "g2_face": 0.01736535634,
+            "g2g3_over_rhon_face": 0.02444895165,
+        },
+        "STEP_SPP_001_ECHD_ftop.eqdsk": {
+            "Phi_face": 0.02754424272,
+            "volume_face": 0.01818745344,
+            "area_face": 0.02171551350,
+            "vpr_face": 0.04639266807,
+            "g0_face": 0.1066135327,
+            "g1_face": 0.2744844757,
+            "g2_face": 0.1771175371,
+            "g2g3_over_rhon_face": 0.1984450258,
+        },
+    }
+    for field, expected in measured_baseline[filename].items():
+        np.testing.assert_allclose(torax_error[field], expected, rtol=0.02, atol=2e-5)
+    measured_contour_baseline = {
+        "iterhybrid_cocos17.eqdsk": {
+            "vpr_face": 0.01582154628,
+            "g1_face": 0.02253345608,
+        },
+        "STEP_SPP_001_ECHD_ftop.eqdsk": {
+            "vpr_face": 0.04411822180,
+            "g1_face": 0.2114407059,
+        },
+    }
+    for field, expected in measured_contour_baseline[filename].items():
+        np.testing.assert_allclose(contour_error[field], expected, rtol=0.02, atol=2e-5)
     if filename.startswith("iterhybrid"):
         thresholds = {
             "g2g3_over_rhon_face": 0.0263,
@@ -462,5 +491,25 @@ def test_real_equilibrium_reference_gates(filename, cocos):
                 if field in contour_thresholds and error > contour_thresholds[field]
             }
         )
-    assert bool(record["valid"])
+    diagnostic = {
+        "invalid_count": int(record["surface_arc_invalid_count"]),
+        "first_invalid_cell": int(record["surface_arc_first_invalid_cell"]),
+        "first_invalid_level": float(record["surface_arc_first_invalid_level"]),
+        "minimum_ordinate_derivative": float(
+            record["surface_arc_min_ordinate_derivative"]
+        ),
+        "maximum_coarea_weight": float(record["surface_arc_max_coarea_weight"]),
+    }
+    print(f"{filename} arc_diagnostic={diagnostic}")
+    if filename.startswith("iterhybrid"):
+        # This cell's same-sign top-edge endpoints enclose two spline roots.
+        # Endpoint-sign bisection cannot represent that four-crossing topology.
+        assert not bool(record["surface_arc_valid"])
+        assert diagnostic["invalid_count"] == 1
+        assert diagnostic["first_invalid_cell"] == 9285
+        np.testing.assert_allclose(
+            diagnostic["first_invalid_level"], 0.040625, rtol=0.0, atol=1e-12
+        )
+    else:
+        assert bool(record["valid"]), diagnostic
     assert not failures, failures

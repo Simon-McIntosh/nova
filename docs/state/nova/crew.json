@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T18:57:11",
+  "updated": "2026-08-21T18:59:25",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -17798,9 +17798,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T163754915965-paired-path-device-receipt",
+        "plan": "device-kernel-build",
+        "section": "\u00a74",
+        "node": "paired-path-device-receipt",
+        "role": "implement",
+        "member": "kernel-prototype",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T16:37:59Z",
+        "completed_at": "2026-08-21T16:58:52Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1253,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1253,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "c567b70367c0d36e2e624388047a8cbc1f4bb1d7",
+        "commits": [
+          "247ded2d"
+        ],
+        "changed_lines": {
+          "added": 53,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "failed",
+        "outcome": "No device receipt exists yet: the exact-paired graph blew through the 30-minute node fence during XLA compilation on both lanes (CPU 15m13s and 53.0 GB RSS at timeout; H200 9m19s and 23.5 GB at the fence; prepare reference 12m29s unfinished). The compile floors are banked as go/no-go-relevant cost data and the rerun is dispatched with the fence and SLURM allocations sized above them. Production source unchanged.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T163754915965-paired-path-device-receipt/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0247d-26e8-7de2-96ad-893a24e6c3ff",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 14778880,
+            "cached_input_tokens_cumulative": 102420480,
+            "input_tokens": 14894286,
+            "input_tokens_cumulative": 105177469,
+            "output_tokens": 19024,
+            "output_tokens_cumulative": 361122,
+            "reasoning_output_tokens": 5226,
+            "reasoning_output_tokens_cumulative": 124664
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 445
+    "_version": 446
   }
 }

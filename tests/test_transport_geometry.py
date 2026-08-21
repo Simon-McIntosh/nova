@@ -7,6 +7,10 @@ import pytest
 
 from nova.jax.config import configure_dtypes
 from nova.transport import traced_flux_surface_geometry, torax_geometry_from_fsa
+from nova.transport.torax_geometry import (
+    _require_uniform_normalized_grid,
+    _validate_uniform_normalized_grid,
+)
 
 
 def _shaped_record(grid_points=101, radial_cells=24, flux_scale=1.0):
@@ -251,7 +255,9 @@ def test_direct_adapter_matches_torax_reader_run(monkeypatch):
 def test_direct_adapter_refuses_nonuniform_radial_grid_under_jit():
     """A traced grid cannot be silently replaced by TORAX's uniform mesh."""
     record, _ = _shaped_record(radial_cells=8)
-    nonuniform = jnp.asarray(record["rho_face"]).at[3].add(0.02)
+    rho_face = jnp.asarray(record["rho_face"])
+    beyond_tolerance = 33.0 * np.finfo(np.dtype(rho_face.dtype)).eps
+    nonuniform = rho_face.at[3].add(beyond_tolerance)
 
     def build_phi_face(rho_face):
         traced_record = dict(record)
@@ -263,3 +269,26 @@ def test_direct_adapter_refuses_nonuniform_radial_grid_under_jit():
         match="rho_face must be the uniform normalized grid",
     ):
         jax.jit(build_phi_face)(nonuniform).block_until_ready()
+
+
+def test_uniform_grid_callback_is_host_only_and_carries_radial_tangent():
+    """The runtime callback returns NumPy while its custom JVP stays identity."""
+    host_uniform = np.linspace(0.0, 1.0, 9)
+    validated = _validate_uniform_normalized_grid(host_uniform)
+    assert isinstance(validated, np.ndarray)
+    assert not isinstance(validated, jax.Array)
+    np.testing.assert_array_equal(validated, host_uniform)
+
+    uniform = jnp.asarray(host_uniform)
+    converted = _validate_uniform_normalized_grid(uniform)
+    assert isinstance(converted, np.ndarray)
+    np.testing.assert_array_equal(converted, host_uniform)
+
+    tangent = jnp.linspace(0.5, 1.5, uniform.size)
+    primal, radial_tangent = jax.jvp(
+        _require_uniform_normalized_grid,
+        (uniform,),
+        (tangent,),
+    )
+    np.testing.assert_array_equal(np.asarray(primal), np.asarray(uniform))
+    np.testing.assert_array_equal(np.asarray(radial_tangent), np.asarray(tangent))

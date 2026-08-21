@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-commits" content="4a4cf70f,46c55d1d,1d795411,f53ddc39,e3e55311,87ed6fdf">
+<meta name="plan-commits" content="4a4cf70f,46c55d1d,1d795411,f53ddc39,e3e55311,87ed6fdf,b16d032c">
 <meta name="plan-artifacts" content="scripts/dual_basin_reuse/reuse-report.md,scripts/dual_basin_fixtures/topology-classification.json,scripts/dual_basin_fixtures/topology-classification.md,scripts/dual_basin_fixtures/diverted-receipt.json,scripts/dual_basin_fixtures/diverted-state.npz,docs/figures/dual-basin-solve/topology-classification.png,docs/evidence/archive/dual-basin-solve-landed.html">
-<meta name="plan-impl" content="0.71">
-<meta name="plan-version" content="9">
+<meta name="plan-impl" content="0.75">
+<meta name="plan-version" content="10">
 </head>
 <body>
   <main class="plan-doc">
@@ -154,6 +154,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260821T1505-two-class-partial" data-who="reckon-ship" data-when="2026-08-21T15:05:00+00:00">
     <div class="r-comment-body">two-class-recovery landed PARTIAL - commit 87ed6fdf, merged 090cc20e; gate FAILED honestly on the diverted half. GREEN: limited coarse and fine banked roots recover from the unchanged production cold seed with exact seed equality and 1e-10 residual/root-parity floors; per-class ForwardColdSeedReceipt/Portfolio machinery landed (seed shape (2,4052), vmapped portfolio flux (2,2,4052)); the diverted geometry seed proves flux-map independence in its receipt (stored_flux_samples_used=false). NOT MET: the plan-declared axis/saddle geometry cold seed enters a class-consistent diverted solve but terminates at saddle [1.613,-0.031] vs the fixture saddle [1.160,-0.503], 0.655 m away, residual oscillating 0.029-0.444 over the 10-step Newton budget - it stays outside the fixture basin. CONTINUATION dispatched before any continuation-ladder design: diverted-root-qualification seeds the pinned branch AT the fixture state to establish whether the fixture is a machine-precision fixed point of the composed map (the limited roots have 2.5e-15 receipts; the diverted fixture has none) - if it is not, the defect is the fixture field composition, not basin narrowness.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260821T1520-root-qualification" data-who="reckon-ship" data-when="2026-08-21T15:20:00+00:00">
+    <div class="r-comment-body">diverted-root-qualification landed - commit b16d032c, merged 2ebf1a06; gate PASSED. The banked diverted fixture IS a genuine machine-precision fixed point of the composed production forward map: pinned ForwardFluxOperator absolute residual 2.220e-16 Wb, relative 1.131e-16 (88.4x below the declared 1e-14 recovery-floor class), one branch iteration, requested/achieved class diverted, topology_consistent true; external-field reconstruction difference 0 Wb, repeated source-forcing difference 0 Wb, pinned-vs-unpinned axis/boundary coordinate and flux differences all 0, domain-label difference count 0. VERDICT: the cold diverted recovery failure localises to basin entry/narrowness - fixture validity, field assembly, forcing and saddle normalization are all exonerated. The remaining section-2 item is the declared diverted basin-entry mechanism (continuation ladder), authorized as its own node; the parity re-run on efit-forward-parity does not wait on it (reference-seeded per the locked forward-parity-seed ruling, consuming the landed pinned-branch machinery). Receipt: scripts/dual_basin_fixtures/diverted-root-receipt.json.</div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260821T1415-selector" data-who="reckon-ship" data-when="2026-08-21T14:15:00+00:00">
     <div class="r-comment-body">hysteresis-selector landed - commit f53ddc39, merged fcf45671; gate PASSED: 14/14 selector matrix tests, 27/27 forward-solve regression, ruff zero findings. Pure selection over completed portfolio receipts plus immutable SelectionHistory with declared BranchAdmissibility and SelectionPolicy; cold start selects the declared class; disappearance switches immediately only when the alternate is selectable; admissibility loss switches only after the declared consecutive-slice threshold; the six-slice limited-to-diverted sequence selected limited x4 then diverted x2 with exactly 1 switch and 0 elsewhere; every criterion and fired reason serialize through SelectionReceipt.as_dict. Section 3 collapsed. Record: /nova/evidence/archive/dual-basin-solve-landed#s3-selector.</div>

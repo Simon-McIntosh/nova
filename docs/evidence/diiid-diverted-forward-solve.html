@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="diiid-diverted-forward-solve">
+  <meta name="plan-title" content="The DIII-D Diverted Forward Solve, Seen Directly">
+  <meta name="plan-summary" content="Nova's current-constrained free-boundary solve on a 1.28 MA DIII-D frame, drawn against the given labelled map on one shared contour level set: the core agrees closely, the gauge is negligible, and the X point lands 45 cm away — a diverted branch, but not the labelled one">
+  <meta name="plan-evidence-for" content="diiid-forward-onboarding,current-constrained-forward-solve">
+  <meta name="plan-verifies" content="current-constrained-forward-solve#s1">
+  <title>DIII-D Diverted Forward Solve | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="what">What this shows</h2>
+    <p>A converged free-boundary Grad–Shafranov solve on DIII-D shot
+    <code>d3d_shot_00000c4a7b</code> frame 102 at 2200 ms, driven entirely by prescribed inputs — 24
+    poloidal conductor currents, flux functions extracted from the labelled map, and a prescribed total
+    plasma current of <strong>1,283,617.67 A</strong> — with <strong>zero label-fitted coefficients and
+    zero current adjustments</strong>. The plasma current is imposed by exact profile-amplitude
+    elimination, which removes the vacuum root from the map's range rather than penalising it.</p>
+    <p>The solve reached relative residual <strong>1.5899788903681545e-09 in four iterations</strong> with
+    terminal topology <strong>diverted</strong> and current relative error <strong>0.0</strong> against a
+    1e-12 tolerance, reproducing the landed prototype figure exactly on a CPU rerun.</p>
+
+    <figure>
+      <img src="/nova/figures/diiid-forward-onboarding/diverted-solve/diverted_solve_overlay.png"
+           alt="Two poloidal panels. Nova's converged solve is drawn as solid blue unfilled contours and the given labelled map as red dashed contours on one shared fifteen-level array, over the 82-vertex limiter in black, nineteen shipped conductor outlines in grey and five netCDF-only conductor groups dashed in red. Nova's boundary is a solid blue curve with a circle marking its X point at upper inboard, outside the limiter; the given boundary is a solid red curve with a cross marking the labelled X point at the upper-left divertor leg. Left panel retains the additive gauge, right panel removes it."
+           style="max-width:100%">
+      <figcaption>Nova's converged solve (blue) against the given labelled map (red dashed), on
+      <strong>one shared 15-level Wb/rad array computed from the given map and applied verbatim to
+      both</strong> — so no rescaling can flatter or mask disagreement. Left retains the additive gauge;
+      right removes it. Solid curves are the two boundaries; ○ is nova's X point, × the labelled one.</figcaption>
+    </figure>
+
+    <h2 id="read">How to read it</h2>
+    <table>
+      <caption>Measured on the frame drawn above. The representability ceiling is the strict-GS limit of
+      the labels themselves, not a target we chose.</caption>
+      <thead><tr><th>Quantity</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Relative residual / iterations</td><td><strong>1.59e-09</strong> in <strong>4</strong></td></tr>
+        <tr><td>Terminal topology · current error</td><td>diverted · <strong>0.0</strong></td></tr>
+        <tr><td>Gauge-matched fractional RMS vs label</td><td><strong>0.2472</strong> (ceiling 0.0429)</td></tr>
+        <tr><td>R² against the labelled map</td><td>0.9389</td></tr>
+        <tr><td>Removed additive gauge</td><td><strong>−0.003055 Wb/rad</strong></td></tr>
+        <tr><td>LCFS symmetric mean separation</td><td>0.0537 m</td></tr>
+        <tr><td>X-point separation</td><td><strong>0.4552 m</strong></td></tr>
+        <tr><td>Profile amplitude λ</td><td>1.0973</td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="core">The core agrees, and that is the real positive</h3>
+    <p>Through the confined region the blue and red-dashed contours track each other closely — the nested
+    surfaces around the magnetic axis near R ≈ 1.7 m are near-coincident on a level set neither map was
+    allowed to rescale. That is the extracted p′ and FF′, the 24-conductor coil model and the pinned
+    current all producing the right interior structure from prescribed inputs alone.</p>
+    <p>The two panels are also nearly indistinguishable, which is itself a result: the removed offset is
+    <strong>−0.003 Wb/rad</strong>, negligible against the flux span. <strong>The disagreement below is
+    therefore shape, not gauge</strong> — and that had to be checked, because a per-frame additive gauge
+    has masked real disagreement elsewhere in this campaign.</p>
+
+    <h3 id="xpoint">The X point is 45 cm away, and the figure shows why that matters</h3>
+    <p>Nova's X point (○) sits at the upper <em>inboard</em> corner — <strong>outside the limiter and
+    outside the released grid</strong> — while the labelled X point (×) sits on the upper-left divertor
+    leg where the machine actually diverts. The solve is <em>nominally</em> diverted and passes a
+    topology-class test, but the saddle carrying that classification is <strong>not the divertor
+    X point</strong>. It is a saddle in the external field far from the plasma.</p>
+    <p><strong>This is the finding the receipt's numbers do not convey.</strong> Current pinning selected
+    a diverted branch — decisively, against an unpinned control that ended limited at residual 0.514 after
+    24 iterations. But selecting the diverted <em>class</em> is not the same as selecting the labelled
+    <em>branch</em>. The consequent boundary is a smaller, rounder shape that does not reach the true
+    divertor leg, and the 0.0537 m LCFS separation understates that because it is a symmetric mean over a
+    boundary whose disagreement is concentrated near the X point.</p>
+    <p>So the honest verdict on this frame: <strong>a converged, self-consistent, diverted equilibrium
+    from prescribed inputs — and not the labelled one.</strong> At 0.2472 gauge-matched fractional RMS
+    against a 0.0429 representability ceiling, it sits <strong>5.8× the best any exact solver could do
+    against these labels</strong>.</p>
+
+    <h3 id="consequence">What it implies for the design</h3>
+    <p>The figure makes the case that two mechanisms are complementary rather than redundant, which had
+    been argued from numbers alone:</p>
+    <ul>
+      <li><strong>A current constraint selects the branch class.</strong> It is what moved this solve off
+      the vacuum root, and it is indispensable where an external field already reads diverted-class so a
+      topology pin cannot discriminate the two roots at all.</li>
+      <li><strong>A topology constraint must pin the X point's location, not merely its existence.</strong>
+      A saddle outside the vessel satisfying a diverted classification is exactly the loophole a
+      class-only criterion leaves open. That belongs to the plan that owns topology pinning and
+      hysteresis selection, and this frame is a concrete fixture for it.</li>
+    </ul>
+    <p>Nothing here is a fit. The label is used to extract flux functions and to seed the branch — both
+    declared instruments — and the prescribed current is an admissible input of the same class as the
+    conductor currents, available in the competition input set or from a partner transport solve. The
+    label was never a scoring target inside the solve, and the fractional RMS above is reported as a
+    diagnostic rather than a criterion.</p>
+
+    <h2 id="provenance">Provenance</h2>
+    <p>Commits <code>086312b3</code> (renderer) and <code>2733be70</code> (published comparison); 6/6
+    focused tests; render exit 0 on CPU after a contended-GPU attempt was discarded. Figure sha256
+    <code>6c606bf9…</code>, receipt sha256 <code>e8a21564…</code>. The machine overlay carries 82 limiter
+    vertices, 19 shipped conductor groups over 66 elements, 5 netCDF-only groups over 74 elements, the
+    released 65×65 extent and the registered 33×33 solve grid. <code>nova/equilibrium</code> was unchanged
+    by this work.</p>
+    <p>The solve arm re-run here is the landed <code>solve_eliminated</code> arm from
+    <code>diiid-forward-onboarding</code> §10; its paired unpinned control on the same frame ended at
+    relative residual 0.514 after 24 iterations with terminal <em>limited</em> topology.</p>
+
+  </main>
+</body>
+</html>

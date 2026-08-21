@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="24">
+<meta name="plan-version" content="25">
 <meta name="plan-commits" content="f7af67dc,3a438d1b,9e1b5ce2,e583d796,95a3dc72,4df7993b,5088a466,d943c12a,fc8d3313,c792f7d2,cc542659,ccb375ea,aa53e6e0,7f7fd6cc,e5c23c5d,71b37c2e,b56c39df,3353aeb5,47cd2122,d5321f40,5578e8ea,25001840,c51c09fc,47808904">
 <meta name="plan-impl" content="0.89">
 <meta name="plan-blocks" content="imas-ambix:sophelio-entry-master">
@@ -285,8 +285,106 @@
     0.45 — are relabelled as a characterisation baseline that catches drift in <em>both</em>
     directions, so neither a regression nor an unrecorded improvement can pass silently.</p>
 
+    <h2 id="s8">§8 — Traced geometry service</h2>
+    <p><strong>Locked at the 2026-08-21 owner interview, closing §7's negative result.</strong>
+    The bicubic measurement separated the concerns cleanly: quadrature is solved (fourth-order
+    extrema, exact clipped moments), the surface <em>representation</em> was local where both
+    reference readers are global, and shape failed for want of global <em>connectivity</em>, not
+    accuracy. The service assigns each concern to machinery the tree already carries:</p>
+    <table>
+      <thead><tr><th>Concern</th><th>Method</th><th>GPU shape</th><th>Gradients</th></tr></thead>
+      <tbody>
+        <tr><td>topology</td><td>flood-fill core mask (<code>flux_surface_connectivity</code>, exists)</td><td>associative scans, fixed shape</td><td>none needed — an indicator</td></tr>
+        <tr><td>representation</td><td>global C² tensor B-spline (new, <code>nova/linalg</code>)</td><td>banded solves, static knots</td><td>exact through the fit</td></tr>
+        <tr><td>moments</td><td>per-cell clip on the spline's per-cell Bernstein coefficients (§7 machinery, salvaged)</td><td>vmap cells × levels</td><td>through Green quadrature</td></tr>
+        <tr><td>shape</td><td>per-cell Newton extremum + masked argmax-with-payload over core cells</td><td>fixed-shape reductions</td><td>implicit-diff Newton; subgradient at ties</td></tr>
+      </tbody>
+    </table>
+    <p><strong>No ordered contour exists on device and none is needed:</strong> moments are cell
+    sums, shape is a masked reduction, and every ⟨·⟩ with a coarea identity (∮dl/B_p = dV/dψ
+    included) is a volume derivative. Ordering — the part that ports worst to GPU — is exactly
+    the part the record never requires. <code>nova/biot/contour.py</code> (contourpy) stays
+    host-side as a permanent referee and for consumers who want the curve itself.</p>
+    <p><strong>Grid families without interpolation.</strong> Nova's forwards are grid-free: a
+    solve on a hexagonal or triangular mesh evaluates ψ <em>exactly</em> on the service's
+    structured extraction lattice through its own operator, so non-structured solves enter by
+    direct evaluation, never by resampling node values. After the accuracy spent this week,
+    interpolation at the seam is explicitly rejected.</p>
+    <p><strong>S7 compatibility is a gate, not a courtesy.</strong> The clipped-support
+    machinery is evolving in sprint S7 right now — higher-order density projection over clips,
+    interpolant-over-support integration, topology-qualified moments in the in-flight
+    density-moment-projection worker, and a ramped edge-crossing hand-off blend that is the
+    solved pattern for keeping traced gradients continuous as cells enter and leave a support.
+    The service consumes that API; it does not fork it, and
+    <code>nova/equilibrium/separatrix_clip.py</code> remains owned by the S7 plans.</p>
+    <ol>
+      <li><strong>Reuse and compatibility scout.</strong> A written reuse map over the S7
+      cell-moment work (committed and in-flight), the connectivity module, the interpolant
+      pytrees and the clip machinery, naming for every following node the symbol it consumes
+      and any interface mismatch. No implementation node dispatches before this exists.</li>
+      <li><strong>Traced global tensor B-spline.</strong> C², fit by two banded 1-D solves
+      composed from the <code>nova/linalg/interpolant</code> Bernstein pytrees, differentiable
+      with respect to the gridded values, with per-cell 4×4 Bernstein coefficient extraction as
+      a static linear map. Validated against <code>RectBivariateSpline</code> on analytic and
+      both shipped EQDSK maps; gradient checked against finite differences; jit/vmap over
+      batched maps.</li>
+      <li><strong>Extraction service.</strong> One entry point in <code>nova/equilibrium</code>:
+      structured grid of ψ in → FSA record out, moments and shape from the table above, the
+      transport-local kernel retired and <code>nova.transport</code> re-exporting the service.
+      The TORAX reference test pins exactly this seam.</li>
+      <li><strong>Referee and benchmark.</strong> The three-route reference (TORAX reader, host
+      contour tracer, service) stays permanent — the two-against-one rule found every defect
+      this week. Performance gate on H200 and CPU: record assembly per map and per vmapped
+      member batch, against the retired Gaussian kernel and the host route, because the window
+      calls extraction once per sample per iteration.</li>
+    </ol>
+    <p><strong>Acceptance.</strong> ITER triangularity and elongation below 2%; ITER
+    coefficients at or better than 2.63 / 0.90 / 2.08 / 1.98%; STEP clipped-vs-contour vpr and
+    g1 inside the TORAX-vs-contour band (3.92% / 6.20%); the everything-traced mandate proven by
+    a gradient test that differentiates through at least one <em>shape</em> field as well as the
+    coefficients; extremum convergence order stays above the demonstrated square-root escape;
+    benchmark figures recorded with the H200 reservation named. §6's held demonstrations — the
+    real coupled window and the physics figures — release when this section's reference gates
+    pass.</p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="fsa-extraction-seam" data-choice="equilibrium-service-grid-in" data-by="Simon McIntosh" data-when="2026-08-21T09:30:00+00:00">
+    <p class="r-dec-q">Where does FSA extraction live and what is its public contract?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="equilibrium-service-grid-in">equilibrium-service-grid-in</button>
+      <button class="r-opt" data-value="transport-local">transport-local</button>
+      <button class="r-opt" data-value="dual-authority">dual-authority</button>
+      </p>
+    <p class="r-dec-rat">One machine-agnostic extraction service in nova/equilibrium: a structured grid of flux values in, the FSA record out, with the TORAX comparison pinned at exactly this seam. Non-structured solves (hex StencilMesh, triangulations) enter by evaluating flux exactly onto the extraction lattice through their own grid-free forward operator — interpolating node values at the seam is rejected outright after the accuracy this plan paid for. The forward solve&#x27;s exact cell machinery (separatrix_clip) remains the authority for li, Ip and source moments.</p>
+    </div>
+<div class="r-dec" data-key="surface-representation" data-choice="traced-global-tensor-bspline" data-by="Simon McIntosh" data-when="2026-08-21T09:30:00+00:00">
+    <p class="r-dec-q">Which surface representation is the geometry authority, after the local Catmull-Rom bicubic measured worse than the smeared kernel it replaced on STEP?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="traced-global-tensor-bspline">traced-global-tensor-bspline</button>
+      <button class="r-opt" data-value="scipy-fit-traced-eval">scipy-fit-traced-eval</button>
+      <button class="r-opt" data-value="keep-local-hermite">keep-local-hermite</button>
+      </p>
+    <p class="r-dec-rat">A native global C2 tensor B-spline in nova/linalg, fit by two banded 1-D solves composed from the existing Bernstein pytrees, differentiable with respect to the gridded values, validated against RectBivariateSpline. Both reference readers use this representation class and agree to 0.16% on toroidal flux while the local reconstruction disagreed with both; per-cell Bernstein coefficients are a static linear map of the control net, so the fourth-order clip machinery is retained and only its coefficient authority changes.</p>
+    </div>
+<div class="r-dec" data-key="shape-engine" data-choice="floodfill-spline-clip-reductions" data-by="Simon McIntosh" data-when="2026-08-21T09:30:00+00:00">
+    <p class="r-dec-q">Which engine produces global contour information for shape, given marching squares ports poorly to GPU and contourpy requires host-side regular grids?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="floodfill-spline-clip-reductions">floodfill-spline-clip-reductions</button>
+      <button class="r-opt" data-value="traced-marching-triangles">traced-marching-triangles</button>
+      <button class="r-opt" data-value="contourpy-host">contourpy-host</button>
+      </p>
+    <p class="r-dec-rat">Separate topology from geometry: the existing flood-fill selects the axis-connected core (fixed-shape associative scans, GPU-native, no accuracy demanded of it), the global spline supplies within-cell geometry through the salvaged clip machinery, and shape extrema are masked argmax-with-payload reductions over core cells — no ordered polyline exists on device because nothing in the record needs one. Locked with the standing instruction to inspect sprint-S7 cell-moment progress so the service consumes that evolving API rather than forking it; contourpy remains the host-side referee.</p>
+    </div>
+<div class="r-dec" data-key="gradient-scope" data-choice="everything-traced" data-by="Simon McIntosh" data-when="2026-08-21T09:30:00+00:00">
+    <p class="r-dec-q">Which FSA record fields carry gradients with respect to the flux map?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="everything-traced">everything-traced</button>
+      <button class="r-opt" data-value="averages-and-fluxes-only">averages-and-fluxes-only</button>
+      <button class="r-opt" data-value="frozen-geometry">frozen-geometry</button>
+      </p>
+    <p class="r-dec-rat">Every field, shape included: coefficients and fluxes through the Green quadrature, extrema through implicit differentiation of the constrained Newton solve with subgradients at measure-zero argmax ties. Chosen so learned closures and design optimisation may differentiate through shaping, and enforced by an acceptance gate that differentiates through at least one shape field rather than only the coefficients.</p>
+    </div>
 <div class="r-dec" data-key="transport-engine" data-choice="torax-embedded-ladder" data-by="Simon McIntosh" data-when="2026-08-10T15:38:11+00:00">
     <p class="r-dec-q">Which engine strategy carries the transport forward capability? Recommendation: the embedded ladder — TORAX for multi-channel fidelity with the native ψ-diffusion rung retained as the differentiable, dependency-free floor — because rebuilding TORAX&#x27;s verified closure surface in Nova is person-years of work the Apache-2.0 dependency already provides, while the native rung remains the right vehicle for learned-closure study.</p>
     <p class="r-dec-opts">
@@ -404,6 +502,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-20260821-bicubic-negative" data-who="reckon-ship" data-when="2026-08-21T00:20:00+00:00">
     <div class="r-comment-body">curved-cell-clips-and-extrema landed as a MEASURED NEGATIVE - commit 47808904; gate NOT MET, deliberately recorded rather than worked around. 42 passed / 1 deselected in 297 s, ruff clean, exact-bilinear hyperbola path retired, no bandwidth or smoothing anywhere. THE PRIMITIVE IS EXCELLENT AND THAT IS THE POINT. The committed sole surface authority is a fixed-shape C1 Catmull-Rom/Hermite tensor bicubic expressed through nova.linalg.interpolant.Bernstein pytrees, with normalised-psi coefficients driving the clipping roots and separately reconstructed raw-Wb coefficients driving physical gradients, fixed bisection for edge roots, the existing nova.biot.arcbandedcoupling._arc_rule 12-node Gauss-Legendre rule along in-cell arcs, oriented Green-theorem chord-to-arc corrections for area and the first and mixed moments, and constrained Newton solves for extrema. Measured: adjacent-cell C1 mismatches 0, 1.73e-18 and 0; arc residual 2.78e-17; corrected area error 1.43e-5 against a 1,442,401-sample raster; and the extremum radial position converges at FOURTH ORDER - errors 3.437e-5, 4.243e-7 and 5.239e-9 at spacings 0.13333, 0.04444 and 0.01481, measured orders 3.999999 and 4.000001. The square-root regime is decisively left, which was the stated claim. YET THE REAL-EQUILIBRIUM GATES ARE MISSED AND SEVERAL FIELDS REGRESS: ITER upper triangularity 20.22 percent against the 2 percent gate (lower 8.71, elongation 0.73); ITER coefficients drift from 2.63, 0.90, 2.08 and 1.98 to 2.96, 1.03, 2.36 and 2.31, still inside 5 percent but worse; STEP clipped-versus-contour vpr 16.46 to 18.14 and g1 9.78 to 22.31, still the outlier of three; retained STEP Phi, volume and area 2.76, 2.95 and 3.60 against the requested 2.13, 1.41 and 1.80. THE MECHANISM IS THE FINDING, and it is not order of accuracy: a LOCAL centred-tangent Hermite bicubic cannot recover the GLOBAL-spline surface information both reference readers use. Fourth order on a smooth analytic surface and 20 percent on a real EQDSK are consistent precisely because the two constructions converge to DIFFERENT surfaces, and the reference routes both use the global one. On the low-aspect-ratio STEP grid the missing within-cell gradient structure is amplified. COCOS twins stay below 1e-7, the analytic moments, 22-field self-parity, jit, vmap and current-diffusion tests are in the green 42, and the characterisation half-width narrowed from 35 to 10 percent. CONCLUSION CARRIED FORWARD: clipped-cell integration is not the right authority for accuracy on real equilibria; nova already owns the consensual one in nova/equilibrium/flux_surface_geometry.py, whose RectBivariateSpline contour route agrees with TORAX to 0.16 percent on Phi. The open question is differentiability, because that route is host-side scipy while the traced clipped route exists to keep the implicit window gradient alive, and nova.linalg.interpolant.BSpline is a 1D global fit only, so a traced global tensor spline would have to be composed from it.</div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-20260821-architecture-locked" data-who="reckon-ship" data-when="2026-08-21T09:40:00+00:00">
+    <div class="r-comment-body">Owner interview 2026-08-21 locked the geometry architecture: extraction service in nova/equilibrium with the grid-passing seam as the public contract, traced global C2 tensor B-spline as the surface authority, flood-fill topology plus spline per-cell clip plus masked reductions as the shape engine with no ordered contour on device, everything traced including shape, non-structured solves entering by exact forward evaluation rather than interpolation, and the three-route referee plus an H200/CPU benchmark as permanent gates. The S7 compatibility inspection the owner mandated found the clipped-support machinery under active development - twelve commits in ten days including higher-order density projection over clips, interpolant-over-support integration, a ramped edge-crossing hand-off blend, and in-flight topology-qualified moments in the density-moment-projection worker - so the service consumes that API rather than forking it, and the scout node precedes every implementation node per the reconnaissance rule this session added to reckon-ship (reckon 71cedf9). Process changes shipped alongside: nova b459dc5b declares the imas-ambix and reckon couplings the scout searches.</div>
 </div>
 </section>
 </main>

@@ -791,6 +791,61 @@
     global tensor spline would have to be composed from it as two sequential solves.</p>
     <p>Two accuracy-vs-differentiability positions, one measured trade. COCOS twins stayed below
     1e&#8722;7 throughout, and the characterisation half-width narrowed from 35% to 10%.</p>
+    <h2 id="geometry-service">The traced geometry service (§7&#8211;§8) &#8212; one authority, measured end to end</h2>
+    <p>The owner interview of 2026-08-21 locked a four-layer architecture and eleven nodes
+    delivered it: flood-fill topology, a global C&#178; tensor B-spline as the surface
+    authority, exact per-cell clip moments with spline-gradient integrands, and shape by
+    constrained Newton extrema under masked reductions &#8212; one extraction service in
+    <code>nova/equilibrium/flux_surface_extraction.py</code>, with the transport-local kernel
+    retired and exactly one implementation of every primitive.</p>
+    <h3>Accuracy against the independently read equilibrium</h3>
+    <table>
+      <caption>ITER relative error, Gaussian shells &#8594; final service.</caption>
+      <thead><tr><th>Field</th><th>shells</th><th>service</th></tr></thead>
+      <tbody>
+        <tr><td><code>g2g3_over_rhon</code></td><td>18.39%</td><td><strong>2.44%</strong></td></tr>
+        <tr><td><code>g0</code> / <code>g1</code> / <code>g2</code></td><td>9.5 / 18.1 / 17.9%</td><td><strong>0.84 / 1.94 / 1.74%</strong></td></tr>
+        <tr><td>record validity</td><td>unchecked</td><td>valid=True, zero invalid arcs, the cell-9285 even root pair pinned by regression test</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The triangularity verdict inverted the suspicion.</strong> The 20% that drove two
+    plan sections was never Nova's: service and host-contour agree on ITER upper &#948; to 3.45%
+    (2.64% at equal &#968;) while TORAX's own EQDSK reader disagrees with <em>both</em> at
+    21.1%, dominated by its inner-contour axis extension &#8212; two against one, outlier TORAX.
+    The shape gate re-based on referee consensus per the pre-declared rule. Shape gradients flow
+    (2.5e-8 vs central differences <em>through a shape field</em>), extrema converge at fourth
+    order, and STEP remains the one strict-xfail negative with its mechanism named
+    (single-ordinate arc parameterisation against low-aspect-ratio coarea peaks).</p>
+    <h3>Negative results that earned their keep</h3>
+    <p>The exact bilinear hyperbola was proven turning-point-free and measured worse than the
+    compensating chord; the local Hermite bicubic reached fourth-order extrema yet moved away
+    from both referees, isolating <em>global surface information</em> as the missing ingredient;
+    and the verification saga acquitted, by measurement, every suspect it charged &#8212; the
+    environment, the migration, the peer landing &#8212; leaving one commit-independent XLA
+    compile-accumulation pathology in long-lived processes (py-spy localized, thresholds
+    recorded), cured operationally by fresh-process lanes: the same 32 tests that stalled at
+    1/32 after 43 minutes ran green in 341 s across eight processes. Full verification:
+    <strong>79/79 selected tests green</strong> on the integrated lineage.</p>
+    <h3>The benchmark, and the hardware verdict</h3>
+    <table>
+      <caption>Record assembly, production 129&#215;129 ITER map, 24 cells, 28 bins
+      (SLURM 1252999, one H200 NVL, reservation gpu_0003_grpA). Warm medians.</caption>
+      <thead><tr><th>Route</th><th>Device</th><th>single map</th><th>per map, vmap-8</th><th>cold compile</th></tr></thead>
+      <tbody>
+        <tr><td>service</td><td>CPU</td><td><strong>179.3 s</strong></td><td>97.4 s</td><td>7.1 s</td></tr>
+        <tr><td>service</td><td>H200</td><td><strong>1.568 s</strong></td><td><strong>0.741 s</strong></td><td>28.4 s</td></tr>
+        <tr><td>retired Gaussian kernel</td><td>CPU</td><td>8.4 ms</td><td>8.1 ms</td><td>&#8212;</td></tr>
+        <tr><td>host contour route</td><td>CPU</td><td>0.299 s</td><td>0.297 s</td><td>&#8212;</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The accuracy currently costs four orders of magnitude on CPU</strong> &#8212; and
+    the cost is runtime, not compilation (7 s compile vs 179 s execution), so compile caching
+    buys nothing and any optimisation belongs in the per-shell contraction. Projected onto the
+    coupled window's measured strong case (124 iterations, extraction per sample per iteration):
+    <strong>6.18 hours per sample on CPU against 3.24 minutes on the H200</strong>. GPU windows
+    are viable; CPU windows are not at production resolution. That is an architectural fact for
+    every §6 consumer, found before the window demonstration was designed around the wrong
+    hardware. The 96-bin probe (607 s execution) is recorded separately as non-production.</p>
   </main>
 </body>
 </html>

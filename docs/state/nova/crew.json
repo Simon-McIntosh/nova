@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T20:16:00",
+  "updated": "2026-08-21T20:39:07",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -18296,9 +18296,73 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T172819666539-geometry-service-benchmark",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a78",
+        "node": "geometry-service-benchmark",
+        "role": "test",
+        "member": "transport-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T17:28:24Z",
+        "completed_at": "2026-08-21T18:37:22Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4138,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4138,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "936053e20921a8c37dff7eddb2a385152f46b253",
+        "commits": [
+          "984fcef41594b548ade43ef4627f7d31effd7910",
+          "521399b26186f726cbf73c4c7152bfe1938e3cdc"
+        ],
+        "changed_lines": {
+          "added": 587,
+          "removed": 0,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "all requested lanes measured on SLURM job 1252999 (betelgeuse, gpu_0003_grpA, one H200 NVL): at production 28-bin 129x129 ITER config the service costs 179.3 s per map warm on CPU against 8.4 ms for the retired kernel and 0.30 s for the host contour route - the accuracy gain currently costs four orders of magnitude on CPU and the runtime-dominated inversion is confirmed (compile 7.1 s, execute 179 s). On the H200 the same assembly is 1.568 s single and 0.741 s per map in a vmap-8, so a 124-iteration strong window projects to 6.18 h per sample on CPU versus 3.24 min on the H200: GPU windows are viable, CPU windows are not at production resolution. The launcher fix was removing the redundant inner gpus-per-task; the 96-bin probe is recorded separately as non-production",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T172819666539-geometry-service-benchmark/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0255d-e2ec-79c0-b2ef-c2072de1fa22",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 41894400,
+            "cached_input_tokens_cumulative": 41894400,
+            "input_tokens": 42532149,
+            "input_tokens_cumulative": 42532149,
+            "output_tokens": 73927,
+            "output_tokens_cumulative": 73927,
+            "reasoning_output_tokens": 25388,
+            "reasoning_output_tokens_cumulative": 25388
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 454
+    "_version": 455
   }
 }

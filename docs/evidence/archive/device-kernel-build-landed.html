@@ -76,6 +76,22 @@
   <code>reduction-diagnosis.json</code>, <code>extended-precision-oracle-receipt.json</code>
   with the raw 551-element rung values committed beside it.</p>
 
+  <h2 id="s4-oracle-verdict">§4 — the arbitrary-precision verdict: the production sliver value is cancellation-dominated</h2>
+
+  <p><strong>Landed 2026-08-21, commits <code>bedf6c67</code>/<code>eae4c863</code> (merge
+  <code>d729e38b</code>); gate PASSED.</strong> mpmath 1.4.1 became a durable dev dependency
+  (single <code>uv sync --all-extras</code>; vedo and jax imports verified afterwards). The
+  100-decimal-digit per-edge closed-form oracle for source column 184 (CPU-debug SLURM job
+  1252834, 7m16s, rungs 64→1,024) converges decisively — successive maximum rung changes
+  1.946e-8 → 5.347e-16 → 4.253e-29 → 1.332e-55, terminal geometric tail bound
+  <strong>4.173e-82</strong>, far below the 3.983e-21 fp64 absolute floor. The production
+  NumPy value deviates from the converged oracle by up to <strong>3.329e-9 absolute /
+  4.629e-3 relative</strong> (median 5.35e-10), so the production sliver value is dominated
+  by amplified cancellation, and the receipt <strong>authorizes one cancellation-conditioned
+  closed-form rule shared identically by the production NumPy reference and the traced xp
+  path</strong> — extended precision stays oracle-only. Receipt:
+  <code>scripts/device_kernel_port/arbitrary-precision-oracle.json</code>.</p>
+
 </main>
 </body>
 </html>

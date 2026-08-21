@@ -21,10 +21,10 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="4">
-<meta name="plan-commits" content="489197aa,9229dc53,25aede7d,d0b14cbf">
-<meta name="plan-artifacts" content="scripts/device_kernel_reuse/reuse-report.md,scripts/device_kernel_port/receipt.json,scripts/device_kernel_port/receipt.md,scripts/device_kernel_port/reduction-diagnosis.json,scripts/device_kernel_port/extended-precision-oracle-receipt.json,docs/evidence/archive/device-kernel-build-landed.html">
-<meta name="plan-impl" content="0.4">
+<meta name="plan-version" content="5">
+<meta name="plan-commits" content="489197aa,9229dc53,25aede7d,d0b14cbf,bedf6c67,eae4c863">
+<meta name="plan-artifacts" content="scripts/device_kernel_reuse/reuse-report.md,scripts/device_kernel_port/receipt.json,scripts/device_kernel_port/receipt.md,scripts/device_kernel_port/reduction-diagnosis.json,scripts/device_kernel_port/arbitrary-precision-oracle.json,docs/evidence/archive/device-kernel-build-landed.html">
+<meta name="plan-impl" content="0.5">
 </head>
 <body>
   <main class="plan-doc">
@@ -215,6 +215,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260821T1445-sliver-diagnosis" data-who="reckon-ship" data-when="2026-08-21T14:45:00+00:00">
     <div class="r-comment-body">packed-reduction-parity landed - commits 25aede7d/d0b14cbf, merged 5cd4ed15; gate FAILED honestly: the cross-device receipt re-ran unchanged (byte-identical 1.434%, ULP p99.9 1.875e12) after both permitted repair placements, and the anti-thrashing fence stopped the node. WHAT IT CONVICTED: compiler reassociation is excluded by experiment (barriers at every ordered partial sum plus strict fast-math flags leave both device hashes unchanged); all 547 scale-aware failures localise to ONE micron-scale clipped triangular source (column 184, three-edge area normalization 2.84e5) - per-edge closed-form cancellation amplified by inverse-area normalization. The 63-bit longdouble ladder moves the production contour by max rel 4.6e-3 (evidence of conditioning) but does not Richardson-converge at the self cell (512-to-1024 nodes still changes 1.29e-9), so it cannot adjudicate correctness and no shared conditioned rule was authorized - the correct refusal. NEEDS-HELP answered oracle-first both rounds; continuation node sliver-precision-oracle owns the durable mpmath dev dependency and the 100+ digit adjudication. Record: /nova/evidence/archive/device-kernel-build-landed#s4-sliver-diagnosis.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260821T1540-oracle-verdict" data-who="reckon-ship" data-when="2026-08-21T15:40:00+00:00">
+    <div class="r-comment-body">sliver-precision-oracle landed - commits bedf6c67/eae4c863, merged d729e38b; gate PASSED. mpmath 1.4.1 is a durable dev dependency (single uv sync --all-extras, vedo and jax imports verified). The 100-decimal-digit per-edge oracle for the sliver source (column 184), CPU-debug SLURM job 1252834 in 7m16s, converges decisively: successive rung changes 1.946e-8, 5.347e-16, 4.253e-29, 1.332e-55 with terminal tail bound 4.173e-82, far below the 3.983e-21 fp64 absolute floor. VERDICT: the production NumPy value deviates from the converged oracle by up to 3.329e-9 absolute / 4.629e-3 relative - dominated by amplified cancellation - and the receipt explicitly authorizes ONE cancellation-conditioned closed-form rule shared identically by the production NumPy reference and the traced xp path (extended precision stays oracle-only). Continuation node conditioned-sliver-rule implements it and re-runs the unchanged CPU/H200 receipt. Receipt: scripts/device_kernel_port/arbitrary-precision-oracle.json.</div>
 </div>
 </section>
 </main>

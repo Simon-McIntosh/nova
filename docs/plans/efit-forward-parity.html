@@ -25,10 +25,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="10">
-<meta name="plan-commits" content="c1e180d5,71c1ec36">
-<meta name="plan-artifacts" content="scripts/dina_profile_routes/reuse-report.md,scripts/dina_profile_routes/receipt.json,scripts/dina_profile_routes/report.html,docs/evidence/archive/efit-forward-parity-landed.html">
-<meta name="plan-impl" content="0.5">
+<meta name="plan-version" content="11">
+<meta name="plan-commits" content="c1e180d5,71c1ec36,457caddd">
+<meta name="plan-artifacts" content="scripts/dina_profile_routes/reuse-report.md,scripts/dina_profile_routes/receipt.json,scripts/dina_profile_routes/report.html,benchmarks/efit_forward_parity_slice.py,docs/figures/efit-forward-parity/reference-seeded-forward-slice.json,docs/evidence/archive/efit-forward-parity-landed.html">
+<meta name="plan-impl" content="0.65">
 </head>
 <body>
   <main class="plan-doc">
@@ -264,6 +264,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260820T1140" data-who="reckon-ship" data-when="2026-08-20T11:40:00+00:00">
     <div class="r-comment-body">Owner ruling 2026-08-20 adds a hard prerequisite: all further forward-model progress gates on agreement with the Solov'ev oracle. solovev-exact-recovery owns that gate set (pre-registered agreement gates with convergence clauses, Urankar-exact kernel defaults, hexagon-section enforcement, the cell-moment wiring conviction, and the accuracy-cost ladder with the ~1 ms GPU fixed-point target). This plan's entry now waits on that plan in the DAG. Calibration note this plan already carries: the DINA demonstration's axis 41.2 mm / Ip -1.12% deviations match the Solov'ev root drift (42 mm / -1.15%) - the same composition systematic - so the recovery work directly sharpens what a forward-parity deviation here will mean.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260821T1152" data-who="reckon-ship" data-when="2026-08-21T11:52:00+00:00">
+    <div class="r-comment-body">reference-seeded-forward-slice landed - commit 457caddd, merged 1eb88daa; gate PASSED (the receipt is the measure); PARITY RESULT NEGATIVE, recorded as banked. On the best-qualified frozen-six row (21985 row 51 at 0.275 s: 2 typed saddles, declared-boundary/map-saddle offset 1.42e-8 of span, contour discrepancy 2.63e-3 - qualification stated before deviations per the prescribed-anchor ruling), the reference-seeded prescribed-anchor ForwardProfile.solve reaches the registered 1e-8 separated criterion in 2 Newton promotions / 28 mapped evaluations with fixed-point, grid and wall defects all exactly zero - ON THE VACUUM ROOT: solved Ip 0 against 934,383.875 A, beta_p and li 0. Flux sup/RMS 0.6479/0.2766 of the 1.8234 Wb span; axis 1.8477 m, LCFS 1.1289 m, x-point 0.6898 m - every carried tolerance fails except topology class (diverted/diverted, 1.0). The fcoil_x arm lands on the same root (sup 0.6502). Path audit clean: zero sensor reads, whitening matrices, least-squares updates or inverse coefficients. THE ZERO DEFECT IS NOT PARITY and is not reinterpreted as such. Diagnosis node dispatched on the same member: instrument the seed-state support admission and current integral before any promotion, walk the two promotions, and classify WIRING (prescribed-anchor defect, this plan) versus BASIN (dual-basin-solve, S8). The vacuum-collapse class was foreshadowed by the oracle-rebaseline continuation measurement (0.50/0.75 strength collapses to vacuum).</div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260821T1200" data-who="reckon-ship" data-when="2026-08-21T12:00:00+00:00">
     <div class="r-comment-body">OWNER INTERVIEW 2026-08-21: both entry-design decisions are locked - prescribed reference anchors for reproduction normalization (normalization-anchors) and the reference-seeded initial demonstration with the dual-basin upgrade path (forward-parity-seed). The entry gate readings also moved decisively in this plan's favour this week: the analytic-validation prerequisite is complete (the closed-form oracle proves the composed forward map exact at the analytic state to 4.6e-15 Wb with the recovery gates locked at round-off floors), efit-flux-decomposition sections 3-4 have reopened in S7 to deliver the external-field verdict this plan's entry consumes, and the faithful moment route plus exact kernels are production defaults. Remaining before entry: the decomposition verdict and, for the independent-seed claim only, dual-basin-solve.</div>

@@ -1,0 +1,53 @@
+{
+  "status": "blocked",
+  "production_source_changed": false,
+  "requested_receipt_produced": false,
+  "jobs": {
+    "prepare": {
+      "job_id": "1252926",
+      "state": "cancelled_after_input_write",
+      "elapsed": "00:12:29",
+      "max_rss_kib": 564464,
+      "result": "packed coarse input and fine counts were written; the exact-paired NumPy reference had not completed"
+    },
+    "cpu": {
+      "job_id": "1252927",
+      "state": "timeout",
+      "elapsed": "00:15:13",
+      "max_rss_kib": 53009476,
+      "result": "XLA CPU compilation did not finish, so no matrix or kernel timing was produced"
+    },
+    "gpu": {
+      "job_id": "1252930",
+      "state": "cancelled_at_node_time_fence",
+      "elapsed": "00:09:19",
+      "max_rss_kib": 23502520,
+      "reservation": "gpu_0003_grpA",
+      "result": "H200 compilation did not finish, so no matrix or kernel timing was produced"
+    },
+    "numpy": {
+      "job_id": "1252931",
+      "state": "failed_before_evaluation",
+      "elapsed": "00:00:11",
+      "result": "the unchanged timing subcommand requires the reference file that prepare had not completed"
+    }
+  },
+  "scheduler_correction": {
+    "cancelled_pending_job": "1252928",
+    "mechanism": "the first H200 request inherited the node full-memory default and could not coexist with a resident reserved job",
+    "replacement_memory_gib": 150
+  },
+  "banked_sliver_context": {
+    "source_column": 184,
+    "source_self_relative_deviation": 0.00002187285791622661,
+    "far_max_relative_deviation": 0.0019760683526076146,
+    "max_absolute_deviation": 1.4944969930161633e-09
+  },
+  "missing_evidence": [
+    "GPU-vs-CPU ULP distribution and byte-identical fraction",
+    "H200 kernel throughput and projected nine-block fine-build time",
+    "completed exact-paired CPU-lane time",
+    "completed exact-paired NumPy stage time"
+  ],
+  "required_rerun": "run prepare to completion with at least a 30-minute CPU allocation, then run the CPU, H200 and NumPy commands with compilation allocations above the observed floors before invoking the unchanged merge command"
+}

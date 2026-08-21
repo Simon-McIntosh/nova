@@ -1,0 +1,34 @@
+kind	iteration	side	field	value	unit
+window_status			window_attempted	false	boolean
+window_status			block_stage	baseline_geometry_extraction	text
+window_status			coupled_iterations_completed	0	count
+service_diagnostic			axis_connected_core_cells	126	count
+service_diagnostic			minimum_required_core_cells	200	count
+service_diagnostic	1	equilibrium_extraction	psi_n_min	0.040000000000000001	fraction
+service_diagnostic	1	equilibrium_extraction	psi_n_max	0.98499999999999999	fraction
+service_diagnostic	1	equilibrium_extraction	surface_bins	14	count
+service_diagnostic	1	equilibrium_extraction	surface_arc_valid	true	boolean
+service_diagnostic	1	equilibrium_extraction	surface_arc_invalid_count	0	count
+service_diagnostic	1	equilibrium_extraction	record_valid	false	boolean
+service_diagnostic	1	equilibrium_extraction	volume	0.92531146697033773	m3
+service_diagnostic	1	equilibrium_extraction	phi_boundary	0.75902072063667103	Wb
+service_diagnostic	1	equilibrium_extraction	ip_edge	553961.73467461892	A
+service_diagnostic	1	equilibrium_extraction	minimum_diffusion_metric	19.243218155941587	mixed
+service_diagnostic	2	equilibrium_extraction	psi_n_min	0.10000000000000001	fraction
+service_diagnostic	2	equilibrium_extraction	psi_n_max	0.94999999999999996	fraction
+service_diagnostic	2	equilibrium_extraction	surface_bins	14	count
+service_diagnostic	2	equilibrium_extraction	surface_arc_valid	true	boolean
+service_diagnostic	2	equilibrium_extraction	surface_arc_invalid_count	0	count
+service_diagnostic	2	equilibrium_extraction	record_valid	false	boolean
+service_diagnostic	3	equilibrium_extraction	psi_n_min	0.10000000000000001	fraction
+service_diagnostic	3	equilibrium_extraction	psi_n_max	0.90000000000000002	fraction
+service_diagnostic	3	equilibrium_extraction	surface_bins	14	count
+service_diagnostic	3	equilibrium_extraction	surface_arc_valid	true	boolean
+service_diagnostic	3	equilibrium_extraction	surface_arc_invalid_count	0	count
+service_diagnostic	3	equilibrium_extraction	record_valid	false	boolean
+service_diagnostic	4	equilibrium_extraction	psi_n_min	0.10000000000000001	fraction
+service_diagnostic	4	equilibrium_extraction	psi_n_max	0.90000000000000002	fraction
+service_diagnostic	4	equilibrium_extraction	surface_bins	28	count
+service_diagnostic	4	equilibrium_extraction	surface_arc_valid	true	boolean
+service_diagnostic	4	equilibrium_extraction	surface_arc_invalid_count	0	count
+service_diagnostic	4	equilibrium_extraction	record_valid	false	boolean

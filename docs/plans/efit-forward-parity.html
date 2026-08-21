@@ -25,7 +25,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="7">
+<meta name="plan-version" content="8">
+<meta name="plan-commits" content="c1e180d5">
+<meta name="plan-artifacts" content="scripts/dina_profile_routes/reuse-report.md">
+<meta name="plan-impl" content="0.1">
 </head>
 <body>
   <main class="plan-doc">
@@ -274,6 +277,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260821T1200" data-who="reckon-ship" data-when="2026-08-21T12:00:00+00:00">
     <div class="r-comment-body">OWNER INTERVIEW 2026-08-21: both entry-design decisions are locked - prescribed reference anchors for reproduction normalization (normalization-anchors) and the reference-seeded initial demonstration with the dual-basin upgrade path (forward-parity-seed). The entry gate readings also moved decisively in this plan's favour this week: the analytic-validation prerequisite is complete (the closed-form oracle proves the composed forward map exact at the analytic state to 4.6e-15 Wb with the recovery gates locked at round-off floors), efit-flux-decomposition sections 3-4 have reopened in S7 to deliver the external-field verdict this plan's entry consumes, and the faithful moment route plus exact kernels are production defaults. Remaining before entry: the decomposition verdict and, for the independent-seed claim only, dual-basin-solve.</div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-20260821T1042" data-who="reckon-ship" data-when="2026-08-21T10:42:00+00:00">
+    <div class="r-comment-body">reuse-map-dina-profile-routes landed - commit c1e180d5, merged 3b94ce73; gate PASSED; worker 492 s. The scout performed the live native-DD imas-python read (135011/7 slice index 353, t=338.9276 s): five 50-point declared profile arrays (dpressure_dpsi, f_df_dpsi, psi, pressure, f) plus the 65x129 map, all finite; declared anchors -86.01645 / -5.12276 Wb in Nova convention, span 80.89369 Wb; the banked map-vs-declared boundary offset reproduced at 0.41099 Wb = 0.50806% of declared span. REUSE VERDICT: nine live extract_flux_functions call sites, the stored-reference reader, forward solver and convention helpers are all reusable through a thin two-coordinate adapter; nova.imas.equilibrium.Profile1D alone is UNFIT for the receipt (omits pressure, f, convention and anchor provenance); imas-ambix owns the downstream typed FluxFunctionState contract but not IDS reading, affine extraction, anchor qualification or the DINA receipt - no duplication either side of the seam. The implementation node composes: dual-route adapter, serialized receipt, deviation plus integral figures, and the two forcing arms. Reuse map: scripts/dina_profile_routes/reuse-report.md.</div>
 </div>
 </section>
 </main>

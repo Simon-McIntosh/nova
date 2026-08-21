@@ -1,0 +1,135 @@
+{
+  "measurement": "DIII-D competition dataset conductor publication recheck",
+  "retrieval_timestamp_utc": "2026-08-21T09:49:53.341476Z",
+  "status": "retrieved",
+  "source": {
+    "dataset": "Sophelio/fusion-equilibrium-challenge",
+    "repository_url": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge",
+    "revision": "1e280905b85f2a6fdde7e06fca8cf3a1edf447cb",
+    "repository_last_modified": "2026-07-30T18:04:26.000Z",
+    "reference_object": "data/diii_d_train/d3d_shot_00000a10ac.parquet",
+    "reference_object_sha256": "07c9e04b7e94fce0788598e66c3b2ad60984aead559a55bf36282dfafe83e8ca",
+    "channels": [
+      {
+        "channel": "Hugging Face Hub dataset metadata REST API",
+        "requested_url": "https://huggingface.co/api/datasets/Sophelio/fusion-equilibrium-challenge",
+        "resolved_url": "https://huggingface.co/api/datasets/Sophelio/fusion-equilibrium-challenge",
+        "http_status": 200,
+        "content_type": "application/json; charset=utf-8",
+        "content_length": 578735,
+        "etag": "W/\"8d4af-22JWnuMnGazd4TN32xZ1u/xH8MQ\""
+      },
+      {
+        "channel": "Hugging Face dataset-server published feature schema",
+        "requested_url": "https://datasets-server.huggingface.co/first-rows?dataset=Sophelio/fusion-equilibrium-challenge&config=diii_d_train&split=train",
+        "resolved_url": "https://datasets-server.huggingface.co/first-rows",
+        "http_status": 200,
+        "content_type": "application/json",
+        "content_length": 83263,
+        "etag": null
+      },
+      {
+        "channel": "revision-pinned Hugging Face parquet object",
+        "requested_url": "https://huggingface.co/datasets/Sophelio/fusion-equilibrium-challenge/resolve/1e280905b85f2a6fdde7e06fca8cf3a1edf447cb/data/diii_d_train/d3d_shot_00000a10ac.parquet",
+        "resolved_url": "https://us.aws.cdn.hf.co/xet-bridge-us/6a6b8f56f0ec1262b5715960/0163d5778a71d176755b3a1227dec0adbcaa1701ddf13a6fdd9377bec8feb3bc",
+        "http_status": 200,
+        "content_type": "application/octet-stream",
+        "content_length": 10805599,
+        "etag": "\"0163d5778a71d176755b3a1227dec0adbcaa1701ddf13a6fdd9377bec8feb3bc\""
+      }
+    ]
+  },
+  "geometry": {
+    "conductor_count": 19,
+    "conductor_names": [
+      "F1A",
+      "F2A",
+      "F3A",
+      "F4A",
+      "F5A",
+      "F6A",
+      "F7A",
+      "F8A",
+      "F9A",
+      "F1B",
+      "F2B",
+      "F3B",
+      "F4B",
+      "F5B",
+      "F6B",
+      "F7B",
+      "F8B",
+      "F9B",
+      "ECOILA"
+    ],
+    "provenance_digest": "782e9e08f02e610e252e9cf6d6cccfb3a9aefa62b56f14865553ba2f35d213dc",
+    "landed_digest": "782e9e08f02e610e252e9cf6d6cccfb3a9aefa62b56f14865553ba2f35d213dc",
+    "digest_matches_landed": true,
+    "digest_comparison_basis": "current revision-pinned parquet object is byte-identical to the landed source object",
+    "remote_reference_object_sha256": "07c9e04b7e94fce0788598e66c3b2ad60984aead559a55bf36282dfafe83e8ca",
+    "landed_source_object_sha256": "07c9e04b7e94fce0788598e66c3b2ad60984aead559a55bf36282dfafe83e8ca",
+    "reference_object_byte_identical": true
+  },
+  "currents": {
+    "channel_count": 20,
+    "channel_names": [
+      "magnetics_ECOILA",
+      "magnetics_F1A",
+      "magnetics_F1B",
+      "magnetics_F2A",
+      "magnetics_F2B",
+      "magnetics_F3A",
+      "magnetics_F3B",
+      "magnetics_F4A",
+      "magnetics_F4B",
+      "magnetics_F5A",
+      "magnetics_F5B",
+      "magnetics_F6A",
+      "magnetics_F6B",
+      "magnetics_F7A",
+      "magnetics_F7B",
+      "magnetics_F8A",
+      "magnetics_F8B",
+      "magnetics_F9A",
+      "magnetics_F9B",
+      "magnetics_bcoil"
+    ],
+    "landed_channel_count": 20,
+    "channel_count_difference": 0
+  },
+  "target_conductors": {
+    "ECOILB": {
+      "geometry_present": false,
+      "geometry_row_count": 0,
+      "current_channel": "magnetics_ECOILB",
+      "current_channel_present": false
+    },
+    "E567UP": {
+      "geometry_present": false,
+      "geometry_row_count": 0,
+      "current_channel": "magnetics_E567UP",
+      "current_channel_present": false
+    },
+    "E567DN": {
+      "geometry_present": false,
+      "geometry_row_count": 0,
+      "current_channel": "magnetics_E567DN",
+      "current_channel_present": false
+    },
+    "E89UP": {
+      "geometry_present": false,
+      "geometry_row_count": 0,
+      "current_channel": "magnetics_E89UP",
+      "current_channel_present": false
+    },
+    "E89DN": {
+      "geometry_present": false,
+      "geometry_row_count": 0,
+      "current_channel": "magnetics_E89DN",
+      "current_channel_present": false
+    }
+  },
+  "newly_published_target_count": 0,
+  "newly_published_targets": [],
+  "all_five_still_absent_from_geometry_and_currents": true
+}

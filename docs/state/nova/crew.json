@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T15:42:11",
+  "updated": "2026-08-21T15:57:31",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -15918,9 +15918,135 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T134401404178-hysteresis-selector",
+        "plan": "dual-basin-solve",
+        "section": "\u00a73",
+        "node": "hysteresis-selector",
+        "role": "implement",
+        "member": "basin-branches",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T13:44:05Z",
+        "completed_at": "2026-08-21T13:55:27Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 682,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 682,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "a4bc284a25c65c9300bb551204b91019f88f96be",
+        "commits": [
+          "f53ddc39"
+        ],
+        "changed_lines": {
+          "added": 574,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 14,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T134401404178-hysteresis-selector/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0247c-dbe2-78c0-95b0-14590b75d1dd",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4066048,
+            "cached_input_tokens_cumulative": 12766208,
+            "input_tokens": 4273055,
+            "input_tokens_cumulative": 13156377,
+            "output_tokens": 24009,
+            "output_tokens_cumulative": 53581,
+            "reasoning_output_tokens": 9789,
+            "reasoning_output_tokens_cumulative": 22132
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260821T133954890348-diverted-oracle-fixture",
+        "plan": "dual-basin-solve",
+        "section": "\u00a72",
+        "node": "diverted-oracle-fixture",
+        "role": "implement",
+        "member": "basin-fixtures",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T13:39:58Z",
+        "completed_at": "2026-08-21T13:56:45Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1007,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1007,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "f55fa44a6037fd4c59a5fb09b8ef47d85e3dd047",
+        "commits": [
+          "e3e55311"
+        ],
+        "changed_lines": {
+          "added": 990,
+          "removed": 84,
+          "files": 7
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T133954890348-diverted-oracle-fixture/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0247c-7f4b-7b73-b6bf-0e31f531946b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6905088,
+            "cached_input_tokens_cumulative": 12979456,
+            "input_tokens": 7115924,
+            "input_tokens_cumulative": 13363950,
+            "output_tokens": 37214,
+            "output_tokens_cumulative": 67106,
+            "reasoning_output_tokens": 9774,
+            "reasoning_output_tokens_cumulative": 18379
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 414
+    "_version": 416
   }
 }

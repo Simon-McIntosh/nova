@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-commits" content="4a4cf70f,46c55d1d,1d795411">
+<meta name="plan-commits" content="4a4cf70f,46c55d1d,1d795411,f53ddc39">
 <meta name="plan-artifacts" content="scripts/dual_basin_reuse/reuse-report.md,scripts/dual_basin_fixtures/topology-classification.json,scripts/dual_basin_fixtures/topology-classification.md,docs/figures/dual-basin-solve/topology-classification.png,docs/evidence/archive/dual-basin-solve-landed.html">
-<meta name="plan-impl" content="0.43">
-<meta name="plan-version" content="5">
+<meta name="plan-impl" content="0.57">
+<meta name="plan-version" content="7">
 </head>
 <body>
   <main class="plan-doc">
@@ -75,19 +75,22 @@
     under jit/vmap so both branches batch together; a branch that cannot converge in its class
     reports non-convergence explicitly and never silently degrades.</p>
 
-    <h2 id="s3">§3 — Hysteresis selection</h2>
-
-    <p>Selection between converged branches is a declared policy over history, not an in-solve
-    heuristic: a shot evolving diverted stays on the diverted branch while that branch converges
-    and its class is topologically admissible, switching only on a declared criterion (branch
-    disappearance, or a persistent admissibility change), with the switch recorded in the
-    receipts. Cold starts with no history select by a stated rule (e.g., the physically
-    admissible branch of larger confined current, or the declared scenario class).</p>
-
-    <p><em>Done-when:</em> the selection policy is a pure function of branch receipts plus
-    declared history state; a synthetic sequence crossing a limited-to-diverted transition
-    selects correctly with hysteresis (no chattering across the transition), pinned by test; the
-    policy and its criteria are recorded as data in the result provenance.</p>
+    <section id="s3" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-21</span>
+        <h2>§3 — Hysteresis selection</h2>
+      </header>
+      <p class="landed-summary">
+        Built <code>nova/equilibrium/branch_selection.py</code>: a pure selector over completed
+        portfolio receipts plus immutable declared history — 14/14 matrix tests (sole/both/
+        neither-valid, ties, admissibility, disappearance), the limited→diverted sequence
+        switching exactly once with zero chatter, every criterion and fired reason serialized in
+        <code>SelectionReceipt</code>. Ported from the imas-efit contour-tree selector case
+        matrix. Full record:
+        <a href="/nova/evidence/archive/dual-basin-solve-landed#s3-selector">§3 landed</a>
+        (commit <code>f53ddc39</code>).
+      </p>
+    </section>
 
     <h2 id="s4">§4 — Warm-start economy toward the one-millisecond solve</h2>
 
@@ -145,6 +148,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260821T1402-branch-pin" data-who="reckon-ship" data-when="2026-08-21T14:02:00+00:00">
     <div class="r-comment-body">branch-pin-portfolio landed - commit 1d795411, merged 4f5776bf; gate PASSED: focused mechanism gate 5/5 (declared class selects its boundary anchor; a terminal class contradiction stays in its branch receipt with converged false; an unavailable requested class is explicitly non-converged; the portfolio matches per-branch solves under jit and vmap), regression suites 64/64 across forward-solve, topology-boundary, limiter-receipt and separatrix-clip lanes. TopologyClass is an int-valued device pin through the one read/support-partition path (wall contact for limited, saddle for diverted, limited connectivity not cut by saddle shadows); ForwardBranchReceipt composes the existing ForwardEquilibrium with requested_class, achieved_class, converged, residual, iterations, topology_consistent; ForwardPortfolio stacks a fixed 2-entry branch axis in limited/diverted order; ForwardProfile.solve and solve_batch unchanged; no parallel physics introduced. Remaining for section 2: the two-class recovery acceptance against the banked limited roots plus the diverted fixture now in flight on basin-fixtures. Record: /nova/evidence/archive/dual-basin-solve-landed#s2-branch-pin.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260821T1415-selector" data-who="reckon-ship" data-when="2026-08-21T14:15:00+00:00">
+    <div class="r-comment-body">hysteresis-selector landed - commit f53ddc39, merged fcf45671; gate PASSED: 14/14 selector matrix tests, 27/27 forward-solve regression, ruff zero findings. Pure selection over completed portfolio receipts plus immutable SelectionHistory with declared BranchAdmissibility and SelectionPolicy; cold start selects the declared class; disappearance switches immediately only when the alternate is selectable; admissibility loss switches only after the declared consecutive-slice threshold; the six-slice limited-to-diverted sequence selected limited x4 then diverted x2 with exactly 1 switch and 0 elsewhere; every criterion and fired reason serialize through SelectionReceipt.as_dict. Section 3 collapsed. Record: /nova/evidence/archive/dual-basin-solve-landed#s3-selector.</div>
 </div>
 </section>
 </main>

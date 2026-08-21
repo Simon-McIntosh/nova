@@ -88,6 +88,25 @@
   receipt physics was introduced. Remaining for §2: the two-class recovery acceptance against
   the banked limited roots and the diverted fixture.</p>
 
+  <h2 id="s3-selector">§3 — the hysteresis selector</h2>
+
+  <p><strong>Landed 2026-08-21, commit <code>f53ddc39</code> (merge <code>fcf45671</code>); gate
+  PASSED — 14/14 selector matrix tests, 27/27 forward regression, ruff zero findings.</strong>
+  <code>nova/equilibrium/branch_selection.py</code>: one pure selector API over completed
+  <code>ForwardPortfolio</code> branch receipts (converged, topology_consistent, residual) plus
+  declared <code>BranchAdmissibility</code>, <code>SelectionPolicy</code> and immutable
+  <code>SelectionHistory</code>. Cold start selects the declared topology class; a disappeared
+  current branch switches immediately only when the alternate is selectable; admissibility loss
+  switches only after the declared consecutive-slice threshold; every criterion and the fired
+  reason serialize through <code>SelectionReceipt.as_dict</code>. The matrix covers sole-valid
+  both directions, both-valid cold start, neither-valid, tied continuity for both histories,
+  admissibility disqualification both directions, topology inconsistency, immediate
+  disappearance, receipt data, referential transparency and policy validation. The six-slice
+  limited→diverted sequence selects limited×4 then diverted×2 with exactly one switch at the
+  third consecutive inadmissible slice and zero elsewhere. Ported from the imas-efit
+  contour-tree hierarchical selector and its unit case matrix, per the reuse map; no solver or
+  physics path added.</p>
+
 </main>
 </body>
 </html>

@@ -1,0 +1,39 @@
+{
+  "candidate_predictors_in_declared_order": [
+    "without_recovered_currents_fractional_rms",
+    "plasma_current_a",
+    "recovery_relative_residual",
+    "gauged_boundary_discrepancy_fractional_rms",
+    "labelled_lcfs_elongation"
+  ],
+  "coefficients_fitted": 0,
+  "currents_adjusted": 0,
+  "historical_baselines": {
+    "historical_without_current_fractional_rms": 0.2156505171,
+    "replacement_without_current_fractional_rms": 1.87062950586
+  },
+  "outcome": {
+    "improving": "fractional RMS with recovered currents is strictly smaller than fractional RMS without them",
+    "zero_change_is_improving": false
+  },
+  "predictor_definitions": {
+    "gauged_boundary_discrepancy_fractional_rms": "labelled grid-border flux minus released-current coil flux after the single plasma-subtraction additive gauge, divided by the labelled whole-grid flux range",
+    "labelled_lcfs_elongation": "labelled LCFS vertical bounding span divided by radial bounding span",
+    "plasma_current_a": "signed total current of the label-derived cell-filament projection",
+    "recovery_relative_residual": "gauge-free L2 residual of the five-current boundary recovery",
+    "without_recovered_currents_fractional_rms": "free-boundary extracted-profile residual using released currents"
+  },
+  "ranking": {
+    "crossover": "midpoint between adjacent observed predictor values maximizing balanced accuracy, considering both improving-above and improving-below directions",
+    "minimum_class_count": 1,
+    "primary": "orientation-invariant ROC AUC, reported also as absolute rank-biserial separation equal to 2*AUC-1",
+    "tie_break": "higher balanced accuracy, then declared predictor order; within one predictor choose the numerically smallest threshold and improving-above before improving-below"
+  },
+  "selection": {
+    "frame_count": 60,
+    "frames_per_shot": 3,
+    "polarity_screen": "exclude every shot in the landed 603-shot affected population before reading its row",
+    "rule": "take the first twenty lexicographic shots from the existing unaffected recovery cohort, then positions 0, 3 and 7 from each shot's eight score-independent evenly spaced diverted frames",
+    "shot_count": 20
+  }
+}

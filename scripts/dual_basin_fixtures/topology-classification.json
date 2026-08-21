@@ -47,7 +47,7 @@
     "figure": "scripts/dual_basin_fixtures/topology-classification.png"
   },
   "classification": {
-    "acceptance_implication": "the bank can test two distinct fixed points and same-class branch handling, but cannot demonstrate limited/diverted recovery; relabeling either stored receipt would not supply the missing saddle evidence",
+    "acceptance_implication": "the unchanged fixed-point roots remain a two-root limited case; the additional exact saddle-bound state supplies an evidenced diverted class for limited/diverted acceptance",
     "alternate_fixed_point": "limited",
     "claim_reconciliation": {
       "banked_receipts": "both coarse and fine receipts label both roots limited",
@@ -56,9 +56,193 @@
       "verdict": "assumption contradicted by analytic and stored evidence"
     },
     "closed_form_analytic": "limited",
-    "diverted_fixture_action": "construct and independently bank a state with a finite in-domain X-point whose flux, rather than wall contact, binds the separatrix",
-    "genuinely_diverted_fixture_in_bank": false,
-    "two_class_acceptance_ready": false
+    "diverted_analytic": "diverted",
+    "diverted_fixture_action": "completed by an independently banked Solov'ev-family state whose finite in-domain X-point binds the separatrix",
+    "genuinely_diverted_fixture_in_bank": true,
+    "two_class_acceptance_ready": true
+  },
+  "diverted_fixture": {
+    "analytic_stationary_points": {
+      "axis": {
+        "coordinate_m": [
+          1.7267405315443793,
+          -0.12905304720048028
+        ],
+        "flux_wb": 0.01852052347479921,
+        "gradient_wb_per_m": [
+          0.0,
+          -4.163336342344337e-17
+        ],
+        "hessian_determinant_wb2_per_m4": 1.0846600756343627,
+        "hessian_eigenvalues_wb_per_m2": [
+          -3.691478175114077,
+          -0.2938281155084558
+        ],
+        "hessian_wb_per_m2": [
+          [
+            -1.43042185075125,
+            1.6030915299202004
+          ],
+          [
+            1.6030915299202004,
+            -2.554884439871283
+          ]
+        ],
+        "kind": "maximum_magnetic_axis"
+      },
+      "x_point": {
+        "coordinate_m": [
+          1.1577641525044828,
+          -0.5044800936018776
+        ],
+        "flux_wb": -3.469446951953614e-17,
+        "gradient_wb_per_m": [
+          5.551115123125783e-17,
+          1.1102230246251565e-16
+        ],
+        "hessian_determinant_wb2_per_m4": -0.5263717790406582,
+        "hessian_eigenvalues_wb_per_m2": [
+          -2.8565994356993003,
+          0.1842651694397613
+        ],
+        "hessian_wb_per_m2": [
+          [
+            -0.6430580306592943,
+            1.3532605657335388
+          ],
+          [
+            1.3532605657335388,
+            -2.0292762356002445
+          ]
+        ],
+        "inside_wall_polygon": true,
+        "kind": "saddle",
+        "nearest_wall_vertex_distance_m": 0.06947558145038522
+      }
+    },
+    "arrays": {
+      "coefficients": {
+        "dtype": "<f8",
+        "sha256": "73840028d1c3702bc73674a7e6edade1969d710599f76e65bed721ba0f96fd38",
+        "shape": [
+          7
+        ]
+      },
+      "state": {
+        "dtype": "<f8",
+        "sha256": "1e6e1043b84a7833adeb51916d3dca36c92d291a4a40dd924ce9b7cae87e7a8d",
+        "shape": [
+          4052
+        ]
+      },
+      "stationary_points": {
+        "dtype": "<f8",
+        "sha256": "833f5cca5a4c4f7ab243af07e7152f15e8169f599f5ec042dff35b94b8eef323",
+        "shape": [
+          2,
+          2
+        ]
+      }
+    },
+    "carrier": {
+      "cache_semantic_key": "7c94be9b777c55ba",
+      "cache_warm_hit": true,
+      "realised_cells": 1076,
+      "requested_cells": -1000,
+      "resolution": "fine",
+      "state_layout": [
+        [
+          "grid",
+          1076
+        ],
+        [
+          "wall",
+          121
+        ],
+        [
+          "direct_sample",
+          2855
+        ]
+      ]
+    },
+    "closed_form": {
+      "coefficient_order": [
+        "a",
+        "b",
+        "c0",
+        "c1",
+        "c2",
+        "c3",
+        "c4"
+      ],
+      "coefficients": [
+        -0.1,
+        -0.8,
+        -0.7065446894000564,
+        0.4148444716482907,
+        -1.590546435765118,
+        0.42286588301432,
+        0.040031942380953985
+      ],
+      "constant_flux_functions": {
+        "ff_prime_t2_m2_per_wb": -0.04052847345693511,
+        "p_prime_pa_per_wb": -16125.767218728875
+      },
+      "delta_star_phi_wb_per_m2": "8*a*R^2 + 2*b",
+      "formula": "Phi=a*R^4+b*Z^2+c0+c1*R^2+c2*Z+c3*R^2*Z+c4*(R^4-4*R^2*Z^2)",
+      "gauge": "Phi is exactly zero at the analytic X-point"
+    },
+    "production_x_point_localization_error_m": 0.0021797092285960403,
+    "source_bank": "scripts/dual_basin_fixtures/diverted-state.npz",
+    "source_receipt": "scripts/dual_basin_fixtures/diverted-receipt.json",
+    "topology": {
+      "axis_flux_wb": 0.018521343437036254,
+      "axis_m": [
+        1.7247913717735055,
+        -0.13017603734200348
+      ],
+      "boundary_flux_wb": -8.858812558313012e-07,
+      "boundary_point_m": [
+        1.1595012040533252,
+        -0.5031633611925055
+      ],
+      "boundary_wall_flux_difference_wb": -0.0004303310847507742,
+      "boundary_wall_point_distance_m": 0.07046484171055074,
+      "class": "diverted",
+      "diverted": true,
+      "finite_o_point_count": 1,
+      "finite_o_points": [
+        [
+          1.7247913717735055,
+          -0.13017603734200348,
+          0.018521343437036254,
+          1.0
+        ]
+      ],
+      "finite_x_point_count": 1,
+      "finite_x_points": [
+        [
+          1.1595012040533252,
+          -0.5031633611925055,
+          -8.858812558313012e-07,
+          0.0
+        ]
+      ],
+      "null_fit_precision": "<class 'jax.numpy.float64'>",
+      "selected_x_point_flux_wb": -8.858812558313012e-07,
+      "selected_x_point_m": [
+        1.1595012040533252,
+        -0.5031633611925055
+      ],
+      "state_precision": "float64",
+      "wall_contact_flux_wb": 0.00042944520349494293,
+      "wall_contact_nearest_vertex_distance_m": 0.02296067178270216,
+      "wall_contact_point_m": [
+        1.0995950340361336,
+        -0.5402651766624296
+      ],
+      "wall_state_precision": "float64"
+    }
   },
   "fixtures": {
     "coarse": {
@@ -341,5 +525,5 @@
     "topology_locator_precision": "float64"
   },
   "schema": "nova.oracle-topology-classification",
-  "schema_version": 1
+  "schema_version": 2
 }

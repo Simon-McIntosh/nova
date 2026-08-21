@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T23:24:33",
+  "updated": "2026-08-21T23:34:54",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -18982,9 +18982,73 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T210422276295-solenoid-half-inclusion-ladder",
+        "plan": "current-constrained-forward-solve",
+        "section": "\u00a75",
+        "node": "solenoid-half-inclusion-ladder",
+        "role": "implement",
+        "member": "diiid-forward-gs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T21:04:24Z",
+        "completed_at": "2026-08-21T21:33:45Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1761,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1761,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "b625baa2cfb590df403a3da02a27ac1823376688",
+        "commits": [
+          "73f48ca0f672f8cd118bae4fd7e53520a03d998f",
+          "2ad4520637736e29898e23a961bada5d11595add"
+        ],
+        "changed_lines": {
+          "added": 1804,
+          "removed": 0,
+          "files": 6
+        },
+        "tests_added": 10,
+        "gate": "passed",
+        "outcome": "Ladder complete, 20 rung solves, reject-step rejected 15 inadmissible trials. Non-monotonicity POOLS on 2/2 fully-qualified frames but the pattern does not: ECOILB best in X on c4a7b, +E567 best in both metrics on 1554e054. ECOILB is the WORST RMS rung on both. Only 11/20 terminal states qualify and 3/5 trajectories cannot support a verdict",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T210422276295-solenoid-half-inclusion-ladder/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01bd8-2268-7ff3-bcd9-eb3700561ec8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 14138752,
+            "cached_input_tokens_cumulative": 179547520,
+            "input_tokens": 14762112,
+            "input_tokens_cumulative": 184622219,
+            "output_tokens": 49196,
+            "output_tokens_cumulative": 514752,
+            "reasoning_output_tokens": 15128,
+            "reasoning_output_tokens_cumulative": 144284
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 468
+    "_version": 469
   }
 }

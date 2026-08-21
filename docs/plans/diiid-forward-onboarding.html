@@ -24,9 +24,9 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="41">
-<meta name="plan-commits" content="7d9743fd,92a4a00e,685a7602,11bac959,26a06b78,4ae27c42,52e4ad17,d1aaa089,a6f8bdf4,86f6f38a,10b5c850,e2ffa796,10049a7a,db55fe58,a3d7e947,7af48b66,29d0fcd2,cf2bd3c6,a06b7072,3f654bc9,97a35d9f,fd4637ec,0dfda59a,1df19c16,b14ec670,a672cece,0b54d0bf,5686eb1b,213cc9a4,c3092ace,2d6f9b37,04cc6df2,ddb152e3,99e148ad,4bb375b7,b69a0831,92b68e9d,a9d771d6">
-<meta name="plan-impl" content="0.96">
+<meta name="plan-version" content="44">
+<meta name="plan-commits" content="7d9743fd,92a4a00e,685a7602,11bac959,26a06b78,4ae27c42,52e4ad17,d1aaa089,a6f8bdf4,86f6f38a,10b5c850,e2ffa796,10049a7a,db55fe58,a3d7e947,7af48b66,29d0fcd2,cf2bd3c6,a06b7072,3f654bc9,97a35d9f,fd4637ec,0dfda59a,1df19c16,b14ec670,a672cece,0b54d0bf,5686eb1b,213cc9a4,c3092ace,2d6f9b37,04cc6df2,ddb152e3,99e148ad,4bb375b7,b69a0831,92b68e9d,a9d771d6,6166a404,7c013864,b59e32a7,75a6ff83,05896c67">
+<meta name="plan-impl" content="0.98">
 <meta name="plan-artifacts" content="docs/figures/diiid-forward-onboarding/machine-description/machine_description_receipt.json,docs/figures/diiid-forward-onboarding/machine-description/conductor_sections.png,docs/figures/diiid-forward-onboarding/machine-description/skewed_conductor_sections.png,docs/figures/diiid-forward-onboarding/machine-description/thomson_grid_extent.png,docs/figures/diiid-forward-onboarding/differencing/quiescent_selection.png,docs/figures/diiid-forward-onboarding/differencing/plasma_differencing.png,docs/figures/diiid-forward-onboarding/cocos/corpus_cocos_receipt.json,docs/figures/diiid-forward-onboarding/cocos/corpus_cocos_discriminators.png,/work/projects/imas_gpu/sophelio/vacuum-gate/diiid_plasma_subtraction_gate.json,/work/projects/imas_gpu/sophelio/vacuum-gate/diiid_transient_plasma_subtracted_residuals.jsonl,docs/figures/diiid-forward-onboarding/ids-set/diiid_machine_description.nc,docs/figures/diiid-forward-onboarding/limiter-topology/limiter_topology_receipt.json,docs/figures/diiid-forward-onboarding/limiter-topology/limiter_topology_modes.png,docs/figures/diiid-forward-onboarding/throughput/batched_throughput_budget.json,docs/figures/diiid-forward-onboarding/throughput/batched_throughput_budget.csv,docs/figures/diiid-forward-onboarding/throughput/batched_throughput_budget.html,docs/figures/diiid-forward-onboarding/cocos-ip-sign/receipt.json,docs/figures/diiid-forward-onboarding/producer-currents/producer_current_scaling_receipt.json,docs/figures/diiid-forward-onboarding/producer-currents/producer_current_scaling.png,docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_fixed_boundary_illustration.png,docs/figures/diiid-forward-onboarding/forward-gs/forward_gs_illustration_receipt.json,docs/figures/diiid-forward-onboarding/negative-tail/negative_tail_attribution_receipt.json,docs/figures/diiid-forward-onboarding/negative-tail/counterfactual_scores.png,docs/figures/diiid-forward-onboarding/negative-tail/deficit_shares.png,docs/figures/diiid-forward-onboarding/current-polarity/current_polarity_audit_receipt.json,docs/figures/diiid-forward-onboarding/current-polarity/current_polarity_census.png,docs/figures/diiid-forward-onboarding/current-polarity/exact_polygon_boundary_response.npz">
 </head>
 <body>
@@ -222,7 +222,25 @@
       </p>
     </section>
 
-    <h2 id="s9">§9 — Completing the boundary field</h2>
+    <section id="s9" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-21</span>
+        <h2>§9 — Completing the boundary field</h2>
+      </header>
+      <p class="landed-summary">
+        The currents are recoverable — held-out R² <strong>0.974–0.998</strong> from the twenty shipped
+        channels, and the ohmic set does share current (2/5 deterministic at 1 %, all five scales within
+        2 % of unity) — but the recovered field <strong>clamps</strong> the residual rather than closing
+        it, collapsing a 25.4× spread to 2.5× onto ≈0.31, which is <strong>7.2× above</strong> the 0.0429
+        ceiling. Published data unchanged (live, 0/5). The 0.817 envelope reading is
+        <strong>refuted</strong>: the five-conductor subspace is not where the missing field lives.
+        Full record: <a href="/nova/evidence/archive/diiid-forward-onboarding-landed#boundary-field">§9 landed</a>
+        (commits <code>6166a404</code>, <code>7c013864</code>, <code>b59e32a7</code>,
+        <code>75a6ff83</code>, <code>05896c67</code>).
+      </p>
+    </section>
+    <details>
+      <summary>Original scope, retained — the three measurements this section was opened to make</summary>
     <p><strong>Opened by owner challenge, 2026-08-21, against this plan's own §5 exemption.</strong> The
     §5 followup was fenced as authority-required on the reading that <em>no admissible current source</em>
     exists for the five unshipped conductors. That reading conflated two different absences, and the
@@ -263,6 +281,7 @@
     re-measured against the landed 0.2156505171 baseline once the recovered currents are included.
     <em>Nothing here may quietly become a fit against labels that the entry cannot reproduce at
     inference: the held-out predictability from shipped channels alone is the whole test.</em></p>
+    </details>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -511,6 +530,9 @@
 </div>
 <div class="r-comment" data-section="s8" data-id="c-20260821-polarity-consumers" data-who="reckon-ship" data-when="2026-08-21T09:45:00+00:00">
     <div class="r-comment-body">THE POLARITY SCREEN NOW HAS TWO REGISTERED CONSUMERS, NOT ONE. Recorded so a later session does not assume the finding only reached ambix. (1) imas-ambix:magnetics-free-equilibrium-recovery - the entry consumer this plan blocks, carried as f-dfo-011 under a foreign-owner exemption. (2) flux-function-forward-transport section 6 - that plan's orchestrator has banked the 603-of-7,041 finding, the orientation-cosine screen and the receipt path as a BINDING CAUTION on any future demonstration cohort assembled from the corpus, confirmed by cross-session reply 2026-08-21. It is moot there today because that plan's validation runs on the torax-shipped iterhybrid and STEP EQDSK files rather than on corpus data, and it becomes load-bearing the day a DIII-D cohort enters. No action is owed by this plan on either link; the value of recording them is that the screen obligation is now discoverable from both ends rather than only from the followup. Separately noted from the same exchange: this session's two nova/equilibrium additions - TopologySolveReceipt in topology.py at c3092ace and the vertical-conditioning margin in diagnostics.py at 2d6f9b37, both +N/-0 with nothing renamed - are read by that plan's geometry service, so the additive-only property is a contract other work now depends on and must not be broken by a later cleanup.</div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-20260821-boundary-field-verdict" data-who="reckon-ship" data-when="2026-08-21T10:20:00+00:00">
+    <div class="r-comment-body">SECTION 9 LANDED ACROSS FIVE NODES. THE MISSING CURRENTS ARE RECOVERABLE AND THEY ARE NOT THE MISSING FIELD. Commits 6166a404 (dataset recheck, 8/8 tests), 7c013864 (ohmic retest, 4/4), b59e32a7 (recovery, 6/6, SLURM 1252686), 75a6ff83 (screened re-measure, 8/8, SLURM 1252709), 05896c67 (sign control, 8/8, SLURM 1252724 exit 0:0 in 00:02:48). (1) DATA HAS NOT MOVED: live check 2026-08-21T09:49:53Z, all three source channels HTTP 200, 0 of 5 target conductors published, geometry 19 and currents 20 unchanged, source parquet byte-identical to the landed object - a measured absence, not an unreachable source. (2) THE OHMIC SET DOES SHARE CURRENT AND THE EARLIER VERDICT WAS A TOLERANCE ARTIFACT: at a bound fixed beforehand at 1.0 percent of the 55,483.70 A peak, E567UP passes at 0.570 percent and E89DN at 0.706 percent while ECOILB 7.26, E567DN 5.43 and E89UP 5.76 fail; all five signed scales lie within 2 percent of unity (0.9806 to 1.0172) with every polarity +1, and on an ampere-turn basis 0.124/0.123/0.143/0.148 are the turn ratios - so the set is driven at near-identical CURRENT. The landed 164.689 family multiplier changes relative residual by 1.25e-16, so neither the producer scale fault nor the polarity fault touches this. (3) RECOVERY AND INFERENCE-TIME AVAILABILITY BOTH WORK: 200 frames over 25 screened shots, design condition number 10.83, held-out predictive R-squared from the twenty shipped channels ECOILB 0.9969, E567UP 0.9772, E567DN 0.9743, E89UP 0.9920, E89DN 0.9979. Availability is NOT the obstacle. (4) BUT THE RECOVERED FIELD CLAMPS THE RESIDUAL RATHER THAN CLOSING IT. Across 60 diverted frames from 20 screened shots the without-currents distribution runs 0.0786/0.1583/0.3009/0.9876/1.9920 at spread 25.4x and CV 0.930, while the with-currents distribution runs 0.1697/0.2823/0.3106/0.3585/0.4307 at spread 2.5x and CV 0.171 - a 5.4-fold collapse in coefficient of variation onto a common level near 0.31. Every frame worse than that improves, every frame better degrades, which is why the historical five frames worsened 59.48 percent and an independent screened cohort improved 80.25 percent. The polarity confound was REFUTED: dropping d3d_shot_00000a10ac frame 29 RAISED the worsening to 68.05 percent. (5) THE REPORTED AUC OF 1.0 IS MECHANICAL AND MUST NOT BE READ AS A DISCOVERY: with the with-arm near-constant, asking whether a frame improves reduces to asking whether its baseline exceeds 0.31, which the baseline predicts tautologically, and the quoted crossover 0.30091121 is exactly the median of the without-distribution - a consequence of the balanced 30/30 split. The informative numbers are the two spreads; the runner-up predictors are plasma current 0.854, recovery residual 0.809, boundary discrepancy 0.718 and elongation 0.536. CONSEQUENCE FOR SECTION 5: the clamped level 0.31 is 7.2x ABOVE the 0.0429 label representability ceiling, and the best quartile already reaches 0.158 or better WITHOUT the recovered currents, so including them actively destroys the frames closest to the labels. A field that were truly the missing one would reduce the residual everywhere and toward the ceiling. The earlier reading that the five omitted conductors EXPLAINED the 0.4077 Wb/rad discrepancy on a 0.3332 Wb/rad envelope at ratio 0.817 is now POSITIVELY REFUTED rather than merely unproven - it was an order-of-magnitude coincidence. f-dfo-004 stays open under its authority-required exemption, but its recommendation is now much better founded: the gate is unmeetable because the five-conductor subspace is not where the missing boundary field lives, not because its currents are unavailable.</div>
 </div>
 </section>
 </main>

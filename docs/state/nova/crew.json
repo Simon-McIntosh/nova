@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T12:08:13",
+  "updated": "2026-08-21T12:22:37",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -14051,9 +14051,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T100828613345-recovered-current-sign-control",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a79",
+        "node": "recovered-current-sign-control",
+        "role": "implement",
+        "member": "diiid-forward-gs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T10:08:32Z",
+        "completed_at": "2026-08-21T10:21:41Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 789,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 789,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "59aa6d6dd8e99dbbf381b5ee8720567bc29fb5d9",
+        "commits": [
+          "05896c67dc4675f702470cc3702f14814ccf4452"
+        ],
+        "changed_lines": {
+          "added": 2655,
+          "removed": 0,
+          "files": 6
+        },
+        "tests_added": 8,
+        "gate": "passed",
+        "outcome": "The without-current baseline separates the sign PERFECTLY: AUC 1.0, 30/30 above crossover 0.30091121 improve and 30/30 below worsen; historical 0.2157 below and replacement 1.8706 above, as their opposite signs predict. Next best predictor plasma current at AUC 0.854",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T100828613345-recovered-current-sign-control/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01bd8-2268-7ff3-bcd9-eb3700561ec8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6339328,
+            "cached_input_tokens_cumulative": 116437504,
+            "input_tokens": 6530351,
+            "input_tokens_cumulative": 119423242,
+            "output_tokens": 22600,
+            "output_tokens_cumulative": 314412,
+            "reasoning_output_tokens": 4562,
+            "reasoning_output_tokens_cumulative": 89992
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 365
+    "_version": 366
   }
 }

@@ -918,6 +918,104 @@
     its coil-current polarity inverted, so any consumer driving forwards from these channels must screen
     for it rather than assume a uniform sign. The orientation cosine is a cheap screen — it separates the
     two populations without a solve.</p>
+
+    <h2 id="boundary-field">§9 the missing currents are recoverable, and they are not the missing field — 2026-08-21</h2>
+    <p>Commits <code>6166a404</code> (dataset recheck), <code>7c013864</code> (ohmic retest),
+    <code>b59e32a7</code> (recovery), <code>75a6ff83</code> (screened re-measure),
+    <code>05896c67</code> (sign control). Opened by owner challenge against this plan's own §5
+    exemption, which had conflated two different absences. The challenge was right to separate them, and
+    separating them changed the answer's <em>reason</em> without changing its verdict.</p>
+
+    <h3 id="boundary-dataset">The published data has not moved</h3>
+    <p>Checked live at <code>2026-08-21T09:49:53Z</code> with all three source channels returning
+    HTTP 200 — so this is a measured absence, not an unreachable source. <strong>0 of 5</strong> target
+    conductors published; geometry still 19, current channels still 20; the source parquet object is
+    <strong>byte-identical</strong> to the landed one, so the landed provenance digest still applies.</p>
+
+    <h3 id="boundary-ohmic">The ohmic set does share current, and the earlier verdict was a tolerance artifact</h3>
+    <p>The landed wiring node classified all 276 pairs independent at a <code>1e-10</code>
+    proportional-residual bar. Retested against a bound fixed beforehand at 1.0 % of the 55,483.70 A
+    ohmic peak:</p>
+    <table>
+      <caption>Signed least-squares scale to ECOILA over the full 480,256-sample common time base.
+      All polarities <code>+1</code>. Nothing fitted beyond the single per-coil scale.</caption>
+      <thead><tr><th>Coil</th><th>Scale vs ECOILA</th><th>Residual</th><th>Verdict at 1.0 %</th></tr></thead>
+      <tbody>
+        <tr><td>E567UP</td><td>0.9929</td><td><strong>0.570 %</strong></td><td><strong>deterministic</strong></td></tr>
+        <tr><td>E89DN</td><td>1.0165</td><td><strong>0.706 %</strong></td><td><strong>deterministic</strong></td></tr>
+        <tr><td>E567DN</td><td>0.9823</td><td>5.43 %</td><td>no</td></tr>
+        <tr><td>E89UP</td><td>0.9806</td><td>5.76 %</td><td>no</td></tr>
+        <tr><td>ECOILB</td><td>1.0172</td><td>7.26 %</td><td>no</td></tr>
+      </tbody>
+    </table>
+    <p>Two of five are deterministic functions of ECOILA — including the exact pair the earlier bar
+    rejected at correlation 0.9999961721 — and all five scales lie within <strong>2 % of unity</strong>.
+    On an ampere-turn basis the scales become 0.124 / 0.123 / 0.143 / 0.148, which are the turn ratios,
+    not physics: the set is driven at near-identical <em>current</em>. Two faults that could have
+    invalidated this were checked and do not: applying the landed 164.689 family multiplier changes the
+    relative residual by <strong>1.25e-16</strong>, and every fitted polarity is positive.</p>
+
+    <h3 id="boundary-recovery">Recovery works, and predicts from shipped channels alone</h3>
+    <p>SLURM 1252686, 200 frames over 25 shots, every shot verified outside the 603-shot polarity
+    population. The five currents recover by linear projection at design condition number
+    <strong>10.83</strong>, and — the question that decides whether any of this could reach inference —
+    they are strongly predictable from the twenty released channels on whole held-out shots:</p>
+    <table>
+      <caption>Held-out predictive R² of each recovered current from the twenty shipped channels.</caption>
+      <thead><tr><th>ECOILB</th><th>E567UP</th><th>E567DN</th><th>E89UP</th><th>E89DN</th></tr></thead>
+      <tbody><tr><td>0.9969</td><td>0.9772</td><td>0.9743</td><td>0.9920</td><td><strong>0.9979</strong></td></tr></tbody>
+    </table>
+    <p>So availability at inference is <em>not</em> the obstacle. The obstacle is what the recovered
+    field does.</p>
+
+    <h3 id="boundary-clamp">The recovered field clamps the residual instead of closing it</h3>
+    <p>A first measurement looked like a contradiction: the recovered currents <em>worsened</em> the root
+    residual on the historical five frames (0.2157 → 0.3439, +59.5 %) yet <em>improved</em> an
+    independent screened cohort by 80.3 % (1.8706 → 0.3694). One polarity-affected frame sat in the
+    historical set, so the obvious suspect was that confound — and it was wrong: dropping
+    <code>d3d_shot_00000a10ac</code> frame 29 <strong>raised</strong> the worsening to 68.1 %.</p>
+    <p>The 60-frame cohort study then found the controlling variable, and the distributions explain it
+    outright.</p>
+    <table>
+      <caption>Free-boundary fractional RMS across 60 diverted frames from 20 screened shots, without and
+      with the recovered currents.</caption>
+      <thead><tr><th>Arm</th><th>min</th><th>q25</th><th>median</th><th>q75</th><th>max</th><th>spread</th><th>CV</th></tr></thead>
+      <tbody>
+        <tr><td>Without</td><td>0.0786</td><td>0.1583</td><td>0.3009</td><td>0.9876</td><td>1.9920</td><td><strong>25.4×</strong></td><td>0.930</td></tr>
+        <tr><td>With</td><td>0.1697</td><td>0.2823</td><td>0.3106</td><td>0.3585</td><td>0.4307</td><td><strong>2.5×</strong></td><td>0.171</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The recovered currents collapse a 25× spread into a 2.5×, dropping the coefficient of
+    variation 5.4-fold.</strong> They do not recover the boundary field — they impose a common one at
+    roughly 0.31 fractional RMS. Every frame worse than that improves; every frame better than it
+    degrades.</p>
+    <p><strong>The reported AUC of 1.0 is a restatement of that clamping, not an independent
+    discovery, and must not be read as one.</strong> With the "with" arm nearly constant, asking whether
+    a frame improves reduces to asking whether its baseline exceeds ≈0.31 — which the baseline predicts
+    tautologically. The quoted crossover 0.30091121 is likewise exactly the median of the "without"
+    distribution, a consequence of the balanced 30/30 split rather than evidence. The genuinely
+    informative numbers are the two spreads above, and the runner-up predictors (plasma current 0.854,
+    recovery residual 0.809, boundary discrepancy 0.718, elongation 0.536) sit well below a separator
+    that is mechanical.</p>
+    <p><strong>Two consequences settle §5 on better evidence than before.</strong> First, the clamped
+    level ≈0.31 is <strong>7.2× above</strong> the 0.0429 label representability ceiling, and the best
+    quartile of frames already reaches 0.158 or better <em>without</em> the recovered currents — so
+    including them actively destroys the frames that were closest to the labels. A field that were truly
+    the missing one would reduce the residual everywhere and <em>toward</em> the ceiling, not clamp
+    everything above it. Second, the earlier reading that the five omitted conductors <em>explained</em>
+    the 0.4077 Wb/rad boundary discrepancy — resting on a 0.3332 Wb/rad envelope at ratio 0.817 — is now
+    positively <strong>refuted</strong> rather than merely unproven. It was an order-of-magnitude
+    coincidence. The §5 gate remains unmeetable, but for a located reason: not that the currents are
+    unavailable, since they are derivable and inference-predictable, but that the five-conductor
+    subspace is not where the missing boundary field lives.</p>
+    <figure>
+      <img src="/nova/figures/diiid-forward-onboarding/sign-control/recovered_current_sign_control.png"
+           alt="Predictor ranking bar chart beside a scatter of per-frame fractional RMS with against without recovered currents, showing the wide without-distribution collapsing onto a narrow horizontal band"
+           style="max-width:100%">
+      <figcaption>Per-frame with-versus-without fractional RMS. The collapse of a wide horizontal spread
+      onto a narrow vertical band is the whole finding: the recovered field sets the residual rather than
+      reducing it.</figcaption>
+    </figure>
   </main>
 </body>
 </html>

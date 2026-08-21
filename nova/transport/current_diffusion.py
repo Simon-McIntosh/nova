@@ -787,6 +787,104 @@ def _bicubic_arc_moment_correction(
     )
 
 
+def _single_arc_moment_correction(level, coefficient, corner_flux, dr, dz):
+    """Return the chord correction for one endpoint-sign-changing cell arc."""
+    all_points, all_crossings, inside = _bicubic_edge_crossings(
+        level, coefficient, corner_flux, detect_even_roots=False
+    )
+    crossing_points = all_points.reshape(-1, 4, _BICUBIC_EDGE_ROOT_CAPACITY, 2)[:, :, 0]
+    crossing = all_crossings.reshape(-1, 4, _BICUBIC_EDGE_ROOT_CAPACITY)[:, :, 0]
+    following_inside = jnp.roll(inside, -1, axis=1)
+    leaving = crossing & inside & ~following_inside
+    entering = crossing & ~inside & following_inside
+    leaving_index = jnp.argmax(leaving, axis=1)
+    entering_index = jnp.argmax(entering, axis=1)
+    start = jnp.take_along_axis(crossing_points, leaving_index[:, None, None], axis=1)[
+        :, 0
+    ]
+    end = jnp.take_along_axis(crossing_points, entering_index[:, None, None], axis=1)[
+        :, 0
+    ]
+
+    point = jnp.asarray(_BICUBIC_ARC_POINT, dtype=corner_flux.dtype)
+    weight = jnp.asarray(_BICUBIC_ARC_WEIGHT, dtype=corner_flux.dtype)
+    radial_span = end[:, 0] - start[:, 0]
+    vertical_span = end[:, 1] - start[:, 1]
+    radial_parameter = start[:, 0, None] + radial_span[:, None] * point
+    vertical_seed = start[:, 1, None] + vertical_span[:, None] * point
+    vertical_arc = _solve_bicubic_ordinate(
+        coefficient[:, None],
+        level,
+        radial_parameter,
+        vertical_seed,
+        solve_vertical=True,
+    )
+    vertical_parameter = start[:, 1, None] + vertical_span[:, None] * point
+    radial_seed = start[:, 0, None] + radial_span[:, None] * point
+    radial_arc = _solve_bicubic_ordinate(
+        coefficient[:, None],
+        level,
+        vertical_parameter,
+        radial_seed,
+        solve_vertical=False,
+    )
+    use_radial = jnp.abs(radial_span) >= jnp.abs(vertical_span)
+    arc_radial = jnp.where(use_radial[:, None], radial_parameter, radial_arc)
+    arc_vertical = jnp.where(use_radial[:, None], vertical_arc, vertical_parameter)
+
+    local_radial = dr * (radial_parameter - 0.5)
+    arc_height = dz * (vertical_arc - 0.5)
+    line_height = dz * (vertical_seed - 0.5)
+    radial_measure = dr * radial_span[:, None] * weight
+    height_difference = arc_height - line_height
+    height_squared_difference = arc_height**2 - line_height**2
+    radial_correction = jnp.stack(
+        (
+            -jnp.sum(height_difference * radial_measure, axis=1),
+            -jnp.sum(local_radial * height_difference * radial_measure, axis=1),
+            -0.5 * jnp.sum(height_squared_difference * radial_measure, axis=1),
+            -0.5
+            * jnp.sum(
+                local_radial * height_squared_difference * radial_measure, axis=1
+            ),
+        ),
+        axis=1,
+    )
+
+    local_vertical = dz * (vertical_parameter - 0.5)
+    arc_radius = dr * (radial_arc - 0.5)
+    line_radius = dr * (radial_seed - 0.5)
+    vertical_measure = dz * vertical_span[:, None] * weight
+    radius_difference = arc_radius - line_radius
+    radius_squared_difference = arc_radius**2 - line_radius**2
+    vertical_correction = jnp.stack(
+        (
+            jnp.sum(radius_difference * vertical_measure, axis=1),
+            0.5 * jnp.sum(radius_squared_difference * vertical_measure, axis=1),
+            jnp.sum(local_vertical * radius_difference * vertical_measure, axis=1),
+            0.5
+            * jnp.sum(
+                local_vertical * radius_squared_difference * vertical_measure,
+                axis=1,
+            ),
+        ),
+        axis=1,
+    )
+    correction = jnp.where(use_radial[:, None], radial_correction, vertical_correction)
+    arc_value = _bicubic_derivatives(coefficient[:, None], arc_radial, arc_vertical)[0]
+    two_crossings = jnp.sum(crossing, axis=1) == 2
+    tolerance = jnp.asarray(2.0e-8, dtype=corner_flux.dtype) * jnp.maximum(
+        jnp.ones((), dtype=corner_flux.dtype), jnp.abs(level)
+    )
+    valid = (
+        two_crossings
+        & jnp.all(jnp.isfinite(correction), axis=1)
+        & (jnp.max(jnp.abs(arc_value - level), axis=1) < tolerance)
+    )
+    correction = jnp.where(valid[:, None], correction, 0.0)
+    return correction, crossing_points, crossing, arc_radial, arc_vertical, valid
+
+
 def _bicubic_stationary_point(coefficient, level, radial, vertical, *, radial_extremum):
     """Refine a coordinate extremum constrained to a bicubic level set."""
     dtype = radial.dtype
@@ -959,23 +1057,8 @@ def _clipped_surface_geometry(
 
     def cumulative(level):
         supports = clip(level)
-        base_moments = jnp.stack(
-            (
-                supports.area,
-                supports.first_area_moment[:, 0],
-                supports.first_area_moment[:, 1],
-                supports.second_area_moment[:, 0, 1],
-            ),
-            axis=1,
-        )
-        correction, *_ = _bicubic_arc_moment_correction(
-            level,
-            normalised_coefficient,
-            psi_n_cells,
-            dr,
-            dz,
-            base_moments,
-            detect_even_roots=False,
+        correction, *_ = _single_arc_moment_correction(
+            level, normalised_coefficient, psi_n_cells, dr, dz
         )
         integrals = jax.vmap(
             lambda values: jnp.sum(
@@ -1001,41 +1084,17 @@ def _clipped_surface_geometry(
 
     def extrema(level):
         supports = clip(level)
-        base_moments = jnp.stack(
-            (
-                supports.area,
-                supports.first_area_moment[:, 0],
-                supports.first_area_moment[:, 1],
-                supports.second_area_moment[:, 0, 1],
-            ),
-            axis=1,
-        )
-        (
-            _,
-            crossing_points,
-            crossing,
-            arc_radial,
-            arc_vertical,
-            _arc_weight,
-            arc_sample_valid,
-            _arc_ordinate_derivative,
-            arc_valid,
-        ) = _bicubic_arc_moment_correction(
-            level,
-            normalised_coefficient,
-            psi_n_cells,
-            dr,
-            dz,
-            base_moments,
-            detect_even_roots=False,
+        _, crossing_points, crossing, arc_radial, arc_vertical, arc_valid = (
+            _single_arc_moment_correction(
+                level, normalised_coefficient, psi_n_cells, dr, dz
+            )
         )
         samples = jnp.concatenate(
             (crossing_points, jnp.stack((arc_radial, arc_vertical), axis=-1)),
             axis=1,
         )
         sample_valid = jnp.concatenate(
-            (crossing, arc_sample_valid),
-            axis=1,
+            (crossing, jnp.broadcast_to(arc_valid[:, None], arc_radial.shape)), axis=1
         )
 
         def initial(coordinate, largest):

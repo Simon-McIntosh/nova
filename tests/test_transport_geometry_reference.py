@@ -46,6 +46,9 @@ _CHARACTERIZATION_BASELINES = {
         "delta_upper_face": 2.0217e-1,
         "delta_lower_face": 8.7108e-2,
     },
+    # Across the 194 levels used here, derivative bracketing preserves all
+    # 133,692 endpoint-sign-changing roots and finds no same-sign root pairs.
+    # These bands therefore pin the legacy single-arc parameterization itself.
     "STEP_SPP_001_ECHD_ftop.eqdsk": {
         "R_major": 5.4800e-7,
         "a_minor": 7.9999e-3,

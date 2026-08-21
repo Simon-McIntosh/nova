@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T15:09:40",
+  "updated": "2026-08-21T15:14:44",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -749,6 +749,11 @@
         "when": "2026-08-21",
         "who": "reckon-ship",
         "what": "S8 membership repaired: device-kernel-build appended to the sprint items \u2014 the plan has declared sprint S8 since the 2026-08-21 owner interview but the index items list never carried it (roadmap wiring finding plan-sprint-missing-item)."
+      },
+      {
+        "when": "2026-08-21",
+        "who": "reckon-ship",
+        "what": "Owner rescope: the S8 H200 throughput work (mast-catalog-gpu-solve) now includes a capabilities demo on the DIII-D competition dataset, recorded as ladder stage L2b - batched end-to-end solves on the second onboarded machine with side-by-side solved/labeled maps, receipts beside the MAST ladder numbers, same code path as the MAST ladder."
       }
     ],
     "blockers": [
@@ -781,6 +786,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 49
+    "_version": 50
   }
 }

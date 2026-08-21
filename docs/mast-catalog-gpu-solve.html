@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-sprint" content="S8">
-<meta name="plan-modified" content="2026-08-13">
-<meta name="plan-version" content="6">
+<meta name="plan-modified" content="2026-08-21">
+<meta name="plan-version" content="9">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-capability-reasoning" content="deep">
@@ -35,6 +35,11 @@
     ~1&nbsp;hour on the 8×H200 node.</strong> This is nova's short-term capability goal and the
     design driver for the batched solver family: nova is expected to do large-scale GPU solves and
     labeling work as a first-class function, not as an afterthought.</p>
+
+    <p><strong>Scope (owner rescope 2026-08-21):</strong> the H200 throughput work also delivers a
+    capabilities demo on the DIII-D competition dataset — the batched pipeline run end to end on
+    the second onboarded machine (stage L2b below) — so the throughput claim is demonstrated as
+    machine-generic capability rather than a MAST-only artifact.</p>
     <p>The budget, using the locked scope (all L2 shots) and a slice census to be pinned in stage
     L0: at an estimated 300–600 equilibrium timesteps per shot the catalog is roughly
     <strong>3.5–7&nbsp;M slices</strong>; one hour therefore demands
@@ -120,13 +125,23 @@
       shards + async zarr writes; sustained aggregate ≥ 1,000–2,000 slices/s over a
       multi-campaign rehearsal (≥ 100 shots). Gate: scaling efficiency ≥ 80% of 8× and no IO
       starvation.</li>
+      <li><strong>L2b — DIII-D competition-dataset capability demo (owner rescope
+      2026-08-21).</strong> Run the batched solve end to end on the DIII-D competition corpus
+      through the digest-pinned onboarded machine description: flux functions extracted from the
+      labeled maps with the corpus kA·turn conductor currents (the magnetics-free forward route
+      diiid-forward-onboarding validated), moment seed → profile solve → topology labels →
+      labeled zarr store, on the H200. Deliverable: named shots and frames with side-by-side
+      solved and labeled maps and their difference field, throughput and convergence receipts
+      beside the MAST ladder numbers, and the labeled DIII-D demo store. Constraint: the demo
+      runs the same code path as the MAST ladder — no machine-specific solver fork.</li>
       <li><strong>L3 — full catalog run.</strong> The production run: all shots, all slices,
       labeled store persisted + a quality report (convergence rates, residual distributions,
       per-campaign breakdown) — the catalog becomes nova's labeling substrate.</li>
     </ol>
     <p><em>Done-when (plan):</em> L3 complete — full-catalog labeled equilibrium store produced in
     a wall-clock hour-scale run on the 8×H200 node, with the quality report and rerun recipe
-    committed.</p>
+    committed — and the L2b DIII-D competition-dataset demo record published with its receipts and
+    side-by-side figures.</p>
 
     <h2 id="s4">§4 — Compute constraints (SDCC)</h2>
     <ul>
@@ -250,6 +265,9 @@ Done-when
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s1" data-id="c-20260813-gatetransfer" data-who="reckon-ship" data-when="2026-08-13T14:55:00+00:00">
     <div class="r-comment-body">GATE TRANSFERRED: this plan's parity prerequisite moves from spine-efit-parity to efit-forward-parity. The reason is a scope correction rather than a re-planning preference. spine-efit-parity's frozen-six gate drove ReconstructProfile.least_squares_map through newton_krylov - a whitened least-squares fit to measured magnetics with a hard measured-current equality - so it inferred the flux functions rather than being given them and scored a fitted state against EFIT. Its verdict is a real result about an inverse reconstruction, and it FAILED ten of twelve metrics with converged_fraction at exactly zero, but a fit failing to converge says nothing about whether the Grad-Shafranov fixed point reproduces a reference equilibrium. Holding a catalog of forward solves on a reconstruction result is holding it on the wrong evidence. efit-forward-parity runs the demonstration that actually gates this work: ForwardProfile given a reference's own pprime/ffprime and conductor currents, free-boundary fixed point, no measurement anywhere in the path, compared field-to-field and moment-to-moment. It is itself gated behind efit-map-inversion (prove the reference is read correctly), efit-flux-decomposition (prove the external field can serve as a free-boundary condition) and equilibrium-metric-parity (prove the derived-quantity chain agrees, so an I_p or l_i disagreement is not ambiguous between a different field and a different way of measuring it). The catalog therefore stays held, on better-founded evidence and behind a shorter measured path - the four-plan ladder's critical path is 5.3 worker-hours. Persisted status also corrected from the non-schema 'blocked' to 'pending'; blocked-ness is derived from the dependency graph rather than stored.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260821T1315-diiid-demo-rescope" data-who="reckon-ship" data-when="2026-08-21T13:15:00+00:00">
+    <div class="r-comment-body">OWNER RESCOPE 2026-08-21: the H200 throughput work now includes a capabilities demo on the DIII-D competition dataset, added as ladder stage L2b. The demo runs the batched pipeline end to end on the second onboarded machine - flux functions extracted from the labeled maps plus the corpus kA.turn conductor currents through the digest-pinned machine description (782e9e08), the magnetics-free forward route diiid-forward-onboarding validated - and publishes side-by-side solved/labeled maps with difference fields on named shots and frames, throughput and convergence receipts beside the MAST ladder numbers, and the labeled DIII-D demo store. Constraint: same code path as the MAST ladder, no machine-specific solver fork. Sequenced inside the ladder before L3 and behind the same efit-forward-parity entry gate as the rest of the plan.</div>
 </div>
 </section>
 </main>

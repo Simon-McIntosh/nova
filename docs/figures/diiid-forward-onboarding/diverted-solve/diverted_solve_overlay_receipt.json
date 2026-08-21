@@ -1,0 +1,139 @@
+{
+  "artifacts": {
+    "figure": "docs/figures/diiid-forward-onboarding/diverted-solve/diverted_solve_overlay.png",
+    "receipt": "docs/figures/diiid-forward-onboarding/diverted-solve/diverted_solve_overlay_receipt.json"
+  },
+  "comparison": {
+    "additive_correction_applied_to_solve_wb_per_radian": 0.00305502742330124,
+    "fractional_rms_against_label_after_additive_gauge": 0.24723118898880359,
+    "fractional_rms_minus_representability_ceiling": 0.2043311889888036,
+    "gauge_matched_panel": "same physical levels after one spatially constant core-mean offset",
+    "interior_r_squared_after_additive_gauge": 0.9388767391911825,
+    "interpretation": "Nova's result is a self-consistent equilibrium from prescribed inputs, not a fit to the labelled map",
+    "label_representability_ceiling_fractional_rms": 0.0429,
+    "raw_panel": "same physical levels with the additive gauge retained",
+    "removed_solve_minus_label_offset_wb_per_radian": -0.00305502742330124
+  },
+  "contours": {
+    "applied_verbatim_to_both_maps_in_both_panels": true,
+    "computed_once": true,
+    "given_colour": "#cc0000",
+    "kind": "unfilled line contours",
+    "level_source": "full 65 by 65 given labelled map in Wb per radian",
+    "level_values_wb_per_radian": [
+      -0.19190968632698058,
+      -0.14462173913206372,
+      -0.09733379193714685,
+      -0.05004584474222998,
+      -0.0027578975473131206,
+      0.04453004964760374,
+      0.09181799684252062,
+      0.13910594403743748,
+      0.18639389123235434,
+      0.2336818384272712,
+      0.28096978562218805,
+      0.3282577328171049,
+      0.3755456800120218,
+      0.4228336272069386,
+      0.47012157440185554
+    ],
+    "nova_colour": "#3366cc"
+  },
+  "frame": {
+    "frame": 102,
+    "shot": "d3d_shot_00000c4a7b.parquet",
+    "source_parquet": "/work/projects/imas_gpu/sophelio/raw/data/diii_d_train/d3d_shot_00000c4a7b.parquet",
+    "source_parquet_sha256": "400d1f791ab5ca332b3a51b4d8a25d4f2a9fb4ade3c66766d4672ea57e8896c9",
+    "time_ms": 2200.0
+  },
+  "machine_geometry": {
+    "grid_extent_m": {
+      "r": [
+        0.8399999737739563,
+        2.5399999618530273
+      ],
+      "z": [
+        -1.600000023841858,
+        1.600000023841858
+      ]
+    },
+    "limiter_vertices": 82,
+    "netcdf_conductor_groups": 24,
+    "netcdf_only_conductor_elements": 74,
+    "netcdf_only_conductor_groups": 5,
+    "netcdf_only_conductor_names": [
+      "E567DN",
+      "E567UP",
+      "E89DN",
+      "E89UP",
+      "ECOILB"
+    ],
+    "physical_axes": "R and Z in metres with equal aspect",
+    "registered_grid_stride": 2,
+    "registered_solve_grid_shape": [
+      33,
+      33
+    ],
+    "released_grid_shape": [
+      65,
+      65
+    ],
+    "shipped_conductor_elements": 66,
+    "shipped_conductor_groups": 19,
+    "source_netcdf": "/home/ITER/tribolp/Public/imasdb/DIII-D/200000.nc",
+    "source_netcdf_sha256": "21607c4e09a7b19029a03ca64501137b2d06e740056a3335cee2224aab5d7912"
+  },
+  "nova_equilibrium_modified": false,
+  "prescribed_inputs": {
+    "coefficients_fitted_to_label": 0,
+    "complete_poloidal_conductor_count": 24,
+    "control_surface": "rectangular enclosing control surface derived from efit_grid extent; pseudo-wall standing in for the absent machine wall",
+    "currents_adjusted_to_label": 0,
+    "recovered_currents_a": {
+      "E567DN": -24990.778004435793,
+      "E567UP": -26055.798370202163,
+      "E89DN": -30557.529106969407,
+      "E89UP": -30579.424637598975,
+      "ECOILB": -55781.93123590186
+    },
+    "reliable_extracted_flux_function_surfaces": 19,
+    "target_current_role": "declared competition input or partner transport input"
+  },
+  "solve_reproduction": {
+    "arm": "current-pinned closed-form eliminated amplitude",
+    "current_relative_error": 0.0,
+    "current_relative_error_tolerance": 1e-12,
+    "implementation": "benchmarks.diiid_current_pinned_forward.solve_eliminated",
+    "iterations": 4,
+    "profile_amplitude": 1.0973468678796947,
+    "recorded_iterations": 4,
+    "recorded_relative_residual": 1.5899788903681545e-09,
+    "relative_residual": 1.5899788903681545e-09,
+    "residual_history": [
+      0.008366411680212864,
+      0.0010664029046790378,
+      3.620818403111081e-05,
+      1.5899788903681545e-09
+    ],
+    "residual_reproduction_absolute_tolerance": 1e-12,
+    "residual_reproduction_relative_tolerance": 0.0005,
+    "target_plasma_current_a": 1283617.6680326462,
+    "terminal_topology": "diverted",
+    "termination": "declared flux criterion reached"
+  },
+  "topology": {
+    "boundary_symmetric_mean_separation_m": 0.05368609147067687,
+    "given_boundary_source": "released LCFS coordinate string",
+    "given_x_point_rz_m": [
+      1.3093419075012207,
+      1.0773335695266724
+    ],
+    "given_x_point_source": "derived minimum flux-gradient norm on released LCFS; not shipped",
+    "nova_boundary_source": "terminal diverted topology axis and boundary flux",
+    "nova_x_point_rz_m": [
+      0.9083249744321541,
+      1.292778231667658
+    ],
+    "x_point_separation_m": 0.455226298727527
+  }
+}

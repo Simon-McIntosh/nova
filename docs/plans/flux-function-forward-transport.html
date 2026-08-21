@@ -347,6 +347,47 @@
     real coupled window and the physics figures — release when this section's reference gates
     pass.</p>
 
+    <h2 id="s9">§9 — Low-aspect-ratio support (MAST)</h2>
+    <p><strong>The STEP negative is promoted from recorded limit to required work: the second
+    part of the Sophelio competition includes MAST</strong> (A &#8776; 1.3&#8211;1.8, the same
+    regime as the STEP stress case), so a spherical-tokamak-accurate record is a consumer
+    requirement, not an option.</p>
+    <p><strong>Why the coarea estimator degrades at low A</strong> — the identity is exact; the
+    discrete estimator's error is (within-shell variance of the integrand) &#215; (shell
+    allocation error), and low aspect ratio maximises both. (1) One surface spans
+    R_in&#8776;0.3 m to R_out&#8776;1.3 m, so 1/R&#178; varies ~20&#215; and |&#8711;&#968;|&#178;
+    similarly <em>along a single surface</em> — which is why the ∇ψ and 1/R&#178; moments fail
+    (g1 16&#8211;27%) while &#934;, volume and area hold 2&#8211;3% on the same maps. (2)
+    Uniform-&#968;&#770; bins concentrate: thin shells outboard, fat inboard, measured as a
+    maximum single-cell coarea weight of 0.105 on STEP against 0.069 on ITER — one cell carrying
+    a tenth of a shell. (3) High elongation puts much more arc length near-tangent to grid axes,
+    degenerating the single-ordinate parameterisation (minimum ordinate derivative 0.00218 vs
+    0.00321). (4) The confirming paradox: exact spline integrands made STEP <em>worse</em>
+    (g1 15.4&#8594;27.4%) because corner-bilinear values had been cancelling allocation error —
+    a compensating error propping up a structurally biased estimator, the session's recurring
+    lesson.</p>
+    <p><strong>The fix is an estimator change, not new machinery.</strong> The two referees that
+    agree with each other sample the integrand ON the surface. The service already traces
+    per-cell arcs at every level with Gauss nodes and spline gradients; summing
+    &#8750;(X/|&#8711;&#968;|)dl and &#8750;(1/|&#8711;&#968;|)dl over those in-cell segments is
+    orientation-free (no global ordering), fixed-shape, jit/vmap/grad-safe, and yields vpr and
+    every ⟨·⟩ directly — no between-shell volume differencing for the averages, while volume,
+    &#934; and area keep their exact clipped-cell integrals.</p>
+    <ol>
+      <li><strong>Arc line-integral surface averages.</strong> Replace the shell-differencing
+      estimator for vpr and the g-moments with direct in-cell arc line integrals; measure on
+      both EQDSK maps against both referees. Gate: STEP service-vs-contour vpr and g1 fall below
+      the TORAX-vs-contour 3.92% and 6.20%, so the traced route joins the consensus class; ITER
+      does not regress; the strict xfail flips where met.</li>
+      <li><strong>A real MAST equilibrium in the reference set.</strong> Export one corrected
+      MAST efm flux map through the grid-in seam (nova owns the corrected read layer) and add it
+      beside ITER and STEP in the reference test with contour-referee gates — the competition's
+      machine, measured, not proxied by STEP alone.</li>
+      <li><strong>If needed after item 1:</strong> per-interval ordinate selection at tangency
+      degeneracies, and volume-uniform (&#961;-based) shell binning — both cheap refinements the
+      measured markers point at, taken only if the line-integral estimator leaves a residual.</li>
+    </ol>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="fsa-extraction-seam" data-choice="equilibrium-service-grid-in" data-by="Simon McIntosh" data-when="2026-08-21T09:30:00+00:00">

@@ -67,6 +67,10 @@ if TYPE_CHECKING:
         SeparatrixJumpError,
     )
     from nova.equilibrium.domain import DomainMasks, PlasmaDomain
+    from nova.equilibrium.extraction_lattice import (
+        GreenSourceRepresentation,
+        evaluate_forward_equilibrium,
+    )
     from nova.equilibrium.flux_surface_geometry import (
         FluxSurfaceGeometry,
         GridMotion,
@@ -164,6 +168,7 @@ _DEFERRED_EXPORTS: dict[str, str] = {
     "ForwardProfile": "forward",
     "ForwardSource": "source",
     "GridMotion": "flux_surface_geometry",
+    "GreenSourceRepresentation": "extraction_lattice",
     "IntegralObservation": "observation",
     "IsothermalRotation": "rotation",
     "ChordSamplingReceipt": "map_extraction",
@@ -196,6 +201,7 @@ _DEFERRED_EXPORTS: dict[str, str] = {
     "TopologyClass": "topology",
     "apply_delta_star": "map_extraction",
     "extract_flux_functions": "map_extraction",
+    "evaluate_forward_equilibrium": "extraction_lattice",
     "extract_flux_surface_geometry": "flux_surface_extraction",
     "sample_chord_psi_norm": "map_extraction",
     "source_field_function": "flux_surface_geometry",
@@ -235,6 +241,7 @@ __all__ = [
     "ForwardProfile",
     "ForwardSource",
     "GridMotion",
+    "GreenSourceRepresentation",
     "IntegralObservation",
     "IsothermalRotation",
     "MapCurrentReceipt",
@@ -267,6 +274,7 @@ __all__ = [
     "apply_delta_star",
     "decay_index",
     "extract_flux_functions",
+    "evaluate_forward_equilibrium",
     "extract_flux_surface_geometry",
     "sample_chord_psi_norm",
     "shafranov_vertical_field",

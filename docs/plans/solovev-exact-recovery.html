@@ -24,10 +24,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="19">
-<meta name="plan-commits" content="eed42e520d5f544f50cdb7485cffc74249f47037,0687526990e67eee5777310a71ad60588ca7736e,0e98afcb9960247313ea955822481983d63a7fd0,27fd5f364c4bb6fa89e5042ee0c190990f965be9,0e21b3997f841be1bf5a79c8b8772619f55c2fd2,5189b08e77dc994c13ebfbf40c4fcb5e29a03f2d,10642e611aa44c805c9cc430048131826448bce8,fcee050f1cd6dd6417587997e599066abc0756e8,74635b0ae61547229228e64e74599f86c3e9c358,0bed363d0e179fed1d4d265c6dee1998c32aa77f,0c36bf9667a3408494c67e1337b559771ba70c23,50a1b0d868b04fd86a886bbd6138452ea3a0e498">
+<meta name="plan-version" content="21">
+<meta name="plan-commits" content="eed42e520d5f544f50cdb7485cffc74249f47037,0687526990e67eee5777310a71ad60588ca7736e,0e98afcb9960247313ea955822481983d63a7fd0,27fd5f364c4bb6fa89e5042ee0c190990f965be9,0e21b3997f841be1bf5a79c8b8772619f55c2fd2,5189b08e77dc994c13ebfbf40c4fcb5e29a03f2d,10642e611aa44c805c9cc430048131826448bce8,fcee050f1cd6dd6417587997e599066abc0756e8,74635b0ae61547229228e64e74599f86c3e9c358,0bed363d0e179fed1d4d265c6dee1998c32aa77f,0c36bf9667a3408494c67e1337b559771ba70c23,50a1b0d868b04fd86a886bbd6138452ea3a0e498,04c61de0814fb9fd984bf56e9d1a0205b951535d,c3ff6142f599cb2fc6112f03c8117b2eac21646d,5d282612b79c677be76a76a841edefb8cdd1d1e1,82f1a29a3225d1f903667f7694419ce50d6b6a94">
 <meta name="plan-artifacts" content="docs/evidence/archive/solovev-exact-recovery-landed.html,docs/figures/solovev-exact-recovery/map-forcing-decomposition.png,docs/figures/solovev-exact-recovery/forcing-residual-decomposition.png,scripts/map_forcing_attribution/results.json,scripts/forcing_residual_decomposition/results.json,scripts/build_cache_audit/results.json,scripts/build_cache_audit/measurements-coarse.json,scripts/build_cache_audit/measurements-fine.json">
-<meta name="plan-impl" content="0.9">
+<meta name="plan-impl" content="0.95">
 </head>
 <body>
   <main class="plan-doc">
@@ -105,32 +105,26 @@
         (commit <code>10642e61</code>).
       </p>
     </section>
-    <h2 id="s3">§3 — The cell-moment wiring: convict, then correct</h2>
-
-    <p><strong>Owner framing: we developed a highly accurate scheme and then failed at the last
-    step by not wiring it correctly.</strong> The nine exact Part V moment blocks, the
-    machine-precision clip, and the degree-nine density all exist and are individually verified —
-    yet the composed field at the root drifts by constants. This section audits the wiring from
-    the attributed cell moments to the field the fixed point actually consumes, and convicts the
-    drift quantitatively before any repair is credited.</p>
-
-    <p><em>Done-when:</em> (a) a wiring audit traces the production path from
-    <code>CellCurrentMoments</code> through the coupling contraction to the flux and field each
-    solve target consumes, stating for every stage which kernel, section, expansion centre and
-    moment order it actually uses — discrepancies against the intended design (exact blocks,
-    fixed centroids, first moments) are listed with file and line; (b) the map forcing
-    <code>g(x)−x</code> is evaluated at the exact analytic state on both fixtures and decomposed
-    by component swap — exact-section vs production, second-moment near-field comparator vs
-    first-moment, kernel-constant variants — using the already-banked variant machinery, each
-    component reported as a fraction of the observed forcing; (c) the linear-response check runs:
-    <code>(I−Dg)⁻¹</code> applied to the measured forcing, against the observed root displacement
-    (42 mm axis, 6.5% span flux, 1.1% I_p) using the serialized terminal roots and the verified
-    tangent — reproduction within stated tolerance convicts the composition constants, failure to
-    reproduce is itself a recorded finding that redirects the hunt; (d) any wiring defect found
-    is repaired in place (single code path) with the repair's effect on the root measured
-    directly; (e) results JSON, the decomposition figure, and the run log are banked and the
-    complete suite is green.</p>
-
+    <section id="s3" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ closed 2026-08-21</span>
+        <h2>§3 — The cell-moment wiring: convict, then correct</h2>
+      </header>
+      <p class="landed-summary">
+        The conviction chain ran to ground truth: wiring exonerated (zero discrepancies, swaps
+        at identities), amplification proven ((I−Dg)⁻¹ reproduces the drift to ≤5%), kernels,
+        moments and interpolation each exonerated by discriminator, the normalization constants
+        convicted — and the "oracle" unmasked as the stored DINA entry whose declared boundary
+        disagrees with its own map by 0.411 Wb. On the true closed-form oracle the map is exact
+        at the analytic state (4.6e-15 Wb). The owner's measure-then-decide ruling then adopted
+        the <strong>faithful moment route</strong> (direct degree-15 quadrature of j(ψ_interp)
+        over each support): 6.01× steep-pedestal ring fidelity at 0.365× cost, merged green
+        (<code>82f1a29a</code>, suite 2,862 passed, forcing at round-off under the new route).
+        Evidence: <a href="/nova/evidence/archive/solovev-exact-recovery-landed#map-forcing-attribution">conviction</a> ·
+        <a href="/nova/evidence/archive/solovev-exact-recovery-landed#normalization-constant-discriminator">the constant</a> ·
+        <a href="/nova/evidence/archive/solovev-exact-recovery-landed#moment-route-adoption">adoption</a>.
+      </p>
+    </section>
     <h2 id="s4">§4 — The Solov'ev recovery gates: develop, pre-register, and gate everything on them</h2>
 
     <p><strong>Locked (oracle-authority).</strong> The analytic Solov'ev solution is the fixed
@@ -280,6 +274,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260821-transport-dependency" data-who="reckon-ship:flux-function-forward-transport" data-when="2026-08-21T10:05:00+00:00">
     <div class="r-comment-body">CROSS-PLAN DEPENDENCY + FINDINGS NOTE from flux-function-forward-transport (section 8, locked 2026-08-21, commit 399094b6). DEPENDENCY: a traced FSA geometry extraction service is being built in nova/equilibrium that CONSUMES this sprint's clip-support machinery without modifying it - separatrix_clip.TracedClippedSupports (support vertices, area, first and second area moments), padded_polynomial_current_moments and the interpolant-over-support integration this plan is landing, the ramped edge-crossing hand-off blend (we intend to reuse exactly that pattern for gradient continuity as cells enter and leave a flux-surface shell), and flux_surface_connectivity's flood-fill core as the topology oracle. ASK: keep those symbol names and field shapes stable, or leave a pointer in this comment stream when they move; separatrix_clip stays owned by this sprint and will not be written from the transport side. CURVED-CLIP (SAGITTA) RESULTS worth knowing before extending clip accuracy here, all measured on the transport side this week: (1) closed-form chord-to-hyperbola area, first and mixed moments for bilinear flux validate to 1.57e-5 against a 500x500 subcell raster - but a bilinear level set is monotone within a cell (the dZ/dR numerator is a constant), so it carries NO interior turning point and cannot improve extrema; (2) exact integration of a LOCAL reconstruction measured WORSE than the compensating-error straight-chord baseline on a real low-aspect-ratio equilibrium (STEP vpr 16.5 to 27.6 percent against the contour route) - exactness on the wrong surface loses to a compensating error on it; (3) a C1 tensor-bicubic per-cell machinery is live at commit 47808904: fixed-bisection edge roots, 12-node Gauss Green-theorem arc (sagitta) moments for area, first and mixed moments, and constrained Newton extrema at measured fourth order. If this sprint ever adds curvature corrections to its clip path, source the curve from the incoming GLOBAL C2 tensor B-spline (nova/linalg/tensor_spline.py, in flight; per-cell 4x4 Bernstein coefficients are a static linear map of the control net), never from local cell interpolants. For li and Ip class integrals the straight-chord O(h^2) area bias is likely fine; the sagitta term exists if the next order is ever needed. Full record: docs/evidence/archive/flux-function-forward-transport-landed.html anchors clipped-cell-moments and bicubic-negative; reuse map incoming at scripts/geometry_service_reuse/report.md.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260821T1005" data-who="reckon-ship" data-when="2026-08-21T10:05:00+00:00">
+    <div class="r-comment-body">moment-route-adjudication and moment-branch-integration landed - commits 04c61de0 and 82f1a29a (held branch c3ff6142/5d282612 now on main as 3c0b825e); both gates PASSED. The pre-registered rule fired for the faithful route on both axes: steep-pedestal ring current-weighted m0 fidelity 6.760e-5 to 1.125e-5 (6.01x, rule 3x) with the boundary population improving 11.1x, smooth case at round-off for both, and per-iteration moment cost 20.20 to 7.38 ms CPU (0.365x, rule 2x; H200 estimates 0.82 to 0.30 ms). Integration verification green on the merged tip: 2,862 tests, closed-form standing forcing 4.774e-15 Wb under the faithful production route (fit baseline 4.552e-15), 61 excluded supports at exactly zero, conservation below 1e-12, one trace. DINA-case pins rebased with the reference-inconsistency provenance stated in the tests; the stale fit-state inspection now pins the sole direct-moment API at unchanged tolerances. Section 3 closes; production radiates exact moments of the actual density over the actual supports. API note for the transport consumer (nova-18): TracedClippedSupports fields keep names and shapes, qualify() is additive; renames, if ever, get pointers here.</div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20260820T1652" data-who="reckon-ship" data-when="2026-08-20T16:52:00+00:00">
     <div class="r-comment-body">build-cache-audit landed - commits 06875269 + 0e98afcb, merged 540bdfbe; gate PASSED (scope-changed recorded for the activation extension). Coarse 1,246.88 s cold to 0.266 s warm (4,689x); fine 3,335.33 s cold to 0.818 s warm (4,079x); 31 arrays bitwise at both resolutions; semantic key, advisory-locked single miss builder, GPFS-safe in-place validated publication, one shared store across worktrees. The three standalone measurement programs request cached_machine; agent doctrine recorded for the machine-building guidance.</div>

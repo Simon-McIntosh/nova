@@ -325,6 +325,47 @@
     representation carries round-off accuracy at the measured costs above.</figcaption>
   </figure>
 
+  <h2 id="moment-route-adoption">§3 (closed) — the faithful moment route is adjudicated by rule and adopted: six-fold steep fidelity at a third of the cost</h2>
+
+  <p>Commits <code>04c61de0</code> (adjudication) and <code>82f1a29a</code> (integration; the
+  held branch commits <code>c3ff6142</code>/<code>5d282612</code> now on main). The owner's
+  measure-then-decide ruling ran fit vs faithful vs the exact adaptive oracle on the warm
+  closed-form carrier for two density functionals — the case's smooth profiles and a steep
+  pedestal-class j(ψ_N) on the same flux:</p>
+
+  <div style="overflow-x:auto">
+  <table>
+    <thead><tr><th>measure (ring population, current-weighted m0 L1)</th><th>degree-nine fit</th><th>faithful quadrature</th><th>ratio</th></tr></thead>
+    <tbody>
+      <tr><td>steep pedestal functional</td><td>6.760e-5</td><td><strong>1.125e-5</strong></td><td><strong>6.01×</strong> (rule: ≥3×)</td></tr>
+      <tr><td>steep boundary population</td><td>8.438e-4</td><td>7.612e-5</td><td>11.1×</td></tr>
+      <tr><td>smooth oracle functional</td><td>2.502e-15</td><td>3.997e-16</td><td>round-off both</td></tr>
+      <tr><td>per-iteration moment cost, CPU</td><td>20.20 ms</td><td><strong>7.38 ms</strong></td><td>0.365× (rule: ≤2×)</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>The pre-registered rule fired mechanically and the branch merged. Integration verification
+  on the merged tip: the complete equilibrium/Biot/oracle/recovery run is green (2,862 passed);
+  <strong>the closed-form standing forcing under the faithful production route reads
+  4.774e-15 Wb</strong> beside the fit baseline 4.552e-15 — round-off holds; exact topology
+  qualification excludes 61 supports at exactly 0 A and 0 A·m; conservation stays below 1e-12
+  and the one-trace pins hold. The two DINA-case pins are rebased to the faithful values with
+  the mechanism stated in the tests (the drift mixes stored-reference inconsistency with the
+  representation change), and the stale fit-state inspection now evaluates the sole
+  direct-moment API at unchanged 2e-13 tolerances. Production now radiates <em>exact moments of
+  the actual density over the actual supports</em> — measured better and cheaper than the fit
+  it replaces. Full records: <code>scripts/moment_route_adjudication/results.json</code>,
+  <code>scripts/moment_branch_integration/results.json</code>.</p>
+
+  <figure>
+    <img src="/nova/figures/solovev-exact-recovery/moment-fidelity.png"
+         alt="Fit versus faithful moment fidelity against the exact oracle on smooth and steep functionals by cell population"
+         style="max-width:100%">
+    <figcaption>The adjudication (commit <code>04c61de0</code>): faithful quadrature against the
+    degree-nine fit by population and functional; the steep pedestal separates them decisively.</figcaption>
+  </figure>
+
   <h2 id="build-cache-activation">§6 — cached machine builds: warm loads at a quarter-second against fifty-minute cold builds, bitwise</h2>
 
   <p>Commits <code>06875269</code> (audit) and <code>0e98afcb</code> (activation). The audit

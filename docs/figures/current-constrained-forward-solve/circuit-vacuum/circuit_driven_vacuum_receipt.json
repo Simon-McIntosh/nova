@@ -1,0 +1,968 @@
+{
+  "artifacts": {
+    "checkpoint": "docs/figures/current-constrained-forward-solve/circuit-vacuum/circuit_driven_vacuum_frames.jsonl",
+    "figure": "docs/figures/current-constrained-forward-solve/circuit-vacuum/circuit_driven_vacuum.png",
+    "receipt": "docs/figures/current-constrained-forward-solve/circuit-vacuum/circuit_driven_vacuum_receipt.json"
+  },
+  "cost": {
+    "solve_wall_seconds": 448.47703416692093
+  },
+  "current_models": {
+    "circuit_derived": {
+      "inference_admissible": true,
+      "scales_by_coil": {
+        "E567DN": 0.9823,
+        "E567UP": 0.9929,
+        "E89DN": 1.0165,
+        "E89UP": 0.9806,
+        "ECOILB": 1.0172
+      },
+      "source": "shipped ECOILA channel interpolated at each frame",
+      "transfer_assumption": "the per-coil scales were measured on a different netCDF pulse and are transferred unchanged to each corpus ECOILA sample"
+    },
+    "coefficients_fitted": 0,
+    "label_recovered": {
+      "inference_admissible": false,
+      "landed_exemplar_currents_a": {
+        "E567DN": 36520.26407488739,
+        "E567UP": 40146.90230335485,
+        "E89DN": 33618.13467482331,
+        "E89UP": 30467.98148177351,
+        "ECOILB": 66907.28509035967
+      },
+      "landed_exemplar_spread": {
+        "maximum_absolute_current_a": 66907.28509035967,
+        "maximum_to_minimum_absolute_ratio": 2.195986797825278,
+        "minimum_absolute_current_a": 30467.98148177351
+      },
+      "reason": "the current recovery consumes the labelled equilibrium",
+      "source": "docs/figures/diiid-forward-onboarding/boundary-recovery/boundary_current_recovery_receipt.json",
+      "values": "landed per-frame current vectors"
+    },
+    "shipped_20_only": "five missing currents fixed to zero",
+    "unity_scale_sensitivity": {
+      "definition": "each missing current equals shipped ECOILA",
+      "name": "circuit_unity_scale"
+    }
+  },
+  "frames": [
+    {
+      "absent_from_603_shot_polarity_population": true,
+      "coefficients_fitted": 0,
+      "frame": 102,
+      "labelled_diverted": true,
+      "labelled_x_point_rz_m": [
+        1.3093419075012207,
+        1.0773335695266724
+      ],
+      "models": {
+        "circuit_derived": {
+          "current_pinned_solve_second": {
+            "closer_than_landed_named_0p4552m": true,
+            "current_relative_error": 0.0,
+            "iterations": 4,
+            "lambda_guard_triggered": false,
+            "map_evaluations": 40,
+            "moves_x_point_toward_divertor_leg": true,
+            "profile_amplitude": 1.1791090181376427,
+            "relative_residual": 1.4360520175781342e-09,
+            "terminal_topology": "diverted",
+            "termination": "declared flux criterion reached",
+            "x_point_rz_m": [
+              0.9256971693141712,
+              1.3143795857722584
+            ],
+            "x_point_separation_from_label_m": 0.4509701752405722
+          },
+          "current_spread": {
+            "maximum_absolute_current_a": 26691.117474125447,
+            "maximum_to_minimum_absolute_ratio": 1.0373240872934937,
+            "minimum_absolute_current_a": 25730.741049083183
+          },
+          "missing_currents_a": {
+            "E567DN": -25775.34869724088,
+            "E567UP": -26053.490503400662,
+            "E89DN": -26672.749619001686,
+            "E89UP": -25730.741049083183,
+            "ECOILB": -26691.117474125447
+          },
+          "vacuum_field_first": {
+            "additive_gauge_wb_per_radian": 0.07241440908353011,
+            "gauge_free_fractional_rms": 0.07283226120350071,
+            "reference_shape_rms_wb_per_radian": 0.17132221855328197
+          }
+        },
+        "label_recovered": {
+          "current_pinned_solve_second": {
+            "current_relative_error": 0.0,
+            "iterations": 4,
+            "lambda_guard_triggered": false,
+            "map_evaluations": 39,
+            "profile_amplitude": 1.0973468678796947,
+            "relative_residual": 1.5899788903681545e-09,
+            "terminal_topology": "diverted",
+            "termination": "declared flux criterion reached",
+            "x_point_rz_m": [
+              0.9083249744321541,
+              1.292778231667658
+            ],
+            "x_point_separation_from_label_m": 0.455226298727527
+          },
+          "current_spread": {
+            "maximum_absolute_current_a": 55781.93123590186,
+            "maximum_to_minimum_absolute_ratio": 2.2321006263190655,
+            "minimum_absolute_current_a": 24990.778004435793
+          },
+          "missing_currents_a": {
+            "E567DN": -24990.778004435793,
+            "E567UP": -26055.798370202163,
+            "E89DN": -30557.529106969407,
+            "E89UP": -30579.424637598975,
+            "ECOILB": -55781.93123590186
+          },
+          "vacuum_field_first": {
+            "additive_gauge_wb_per_radian": -0.0184013169721902,
+            "gauge_free_fractional_rms": 0.00739296794983627,
+            "reference_shape_rms_wb_per_radian": 0.17132221855328197
+          }
+        },
+        "shipped_20_only": {
+          "current_pinned_solve_second": {
+            "current_relative_error": 0.0,
+            "iterations": 5,
+            "lambda_guard_triggered": false,
+            "map_evaluations": 50,
+            "profile_amplitude": 1.0215775442874881,
+            "relative_residual": 1.658081495481777e-11,
+            "terminal_topology": "diverted",
+            "termination": "declared flux criterion reached",
+            "x_point_rz_m": [
+              0.9075437691440865,
+              1.2866669007040694
+            ],
+            "x_point_separation_from_label_m": 0.4530587020785326
+          },
+          "current_spread": {
+            "maximum_absolute_current_a": 0.0,
+            "maximum_to_minimum_absolute_ratio": null,
+            "minimum_absolute_current_a": 0.0
+          },
+          "missing_currents_a": {
+            "E567DN": 0.0,
+            "E567UP": 0.0,
+            "E89DN": 0.0,
+            "E89UP": 0.0,
+            "ECOILB": 0.0
+          },
+          "vacuum_field_first": {
+            "additive_gauge_wb_per_radian": 0.23172253772211307,
+            "gauge_free_fractional_rms": 0.04210073736071611,
+            "reference_shape_rms_wb_per_radian": 0.17132221855328197
+          }
+        }
+      },
+      "sensitivity": {
+        "circuit_unity_scale": {
+          "current_pinned_solve_second": {
+            "current_relative_error": 0.0,
+            "iterations": 7,
+            "lambda_guard_triggered": false,
+            "map_evaluations": 62,
+            "profile_amplitude": 1.1807110045361324,
+            "relative_residual": 9.204635337856614e-12,
+            "terminal_topology": "diverted",
+            "termination": "declared flux criterion reached",
+            "x_point_rz_m": [
+              0.9265413812563573,
+              1.3155992538068302
+            ],
+            "x_point_separation_from_label_m": 0.450895530249343
+          },
+          "current_spread": {
+            "maximum_absolute_current_a": 26239.79303394165,
+            "maximum_to_minimum_absolute_ratio": 1.0,
+            "minimum_absolute_current_a": 26239.79303394165
+          },
+          "missing_currents_a": {
+            "E567DN": -26239.79303394165,
+            "E567UP": -26239.79303394165,
+            "E89DN": -26239.79303394165,
+            "E89UP": -26239.79303394165,
+            "ECOILB": -26239.79303394165
+          },
+          "vacuum_field_first": {
+            "additive_gauge_wb_per_radian": 0.0731185150200182,
+            "gauge_free_fractional_rms": 0.07537637920278611,
+            "reference_shape_rms_wb_per_radian": 0.17132221855328197
+          }
+        }
+      },
+      "shipped_ecoila_current_a": -26239.79303394165,
+      "shot": "d3d_shot_00000c4a7b.parquet",
+      "target_plasma_current_a": 1283617.6680326462,
+      "time_ms": 2200.0
+    },
+    {
+      "absent_from_603_shot_polarity_population": true,
+      "coefficients_fitted": 0,
+      "frame": 89,
+      "labelled_diverted": true,
+      "labelled_x_point_rz_m": [
+        1.2499960660934448,
+        -1.2302693128585815
+      ],
+      "models": {
+        "circuit_derived": {
+          "current_pinned_solve_second": {
+            "closer_than_landed_named_0p4552m": true,
+            "current_relative_error": 0.0,
+            "iterations": 9,
+            "lambda_guard_triggered": true,
+            "map_evaluations": 57,
+            "moves_x_point_toward_divertor_leg": false,
+            "profile_amplitude": 0.9554470481184465,
+            "relative_residual": 0.17035081681858882,
+            "terminal_topology": "diverted",
+            "termination": "profile amplitude inf is outside (1e-06, 1000000.0)",
+            "x_point_rz_m": [
+              1.251975868867591,
+              -1.2267817661641092
+            ],
+            "x_point_separation_from_label_m": 0.004010311829601568
+          },
+          "current_spread": {
+            "maximum_absolute_current_a": 37784.93548007154,
+            "maximum_to_minimum_absolute_ratio": 1.0373240872934937,
+            "minimum_absolute_current_a": 36425.39100644726
+          },
+          "missing_currents_a": {
+            "E567DN": -36488.53924702543,
+            "E567UP": -36882.2871000423,
+            "E89DN": -37758.93326336287,
+            "E89UP": -36425.39100644726,
+            "ECOILB": -37784.93548007154
+          },
+          "vacuum_field_first": {
+            "additive_gauge_wb_per_radian": 0.10037433552107937,
+            "gauge_free_fractional_rms": 0.07501738886145337,
+            "reference_shape_rms_wb_per_radian": 0.24084261333627902
+          }
+        },
+        "label_recovered": {
+          "current_pinned_solve_second": {
+            "current_relative_error": 0.0,
+            "iterations": 6,
+            "lambda_guard_triggered": true,
+            "map_evaluations": 42,
+            "profile_amplitude": 0.9554470481184465,
+            "relative_residual": 0.10820759376728419,
+            "terminal_topology": "diverted",
+            "termination": "profile amplitude inf is outside (1e-06, 1000000.0)",
+            "x_point_rz_m": [
+              1.251975868867591,
+              -1.2267817661641092
+            ],
+            "x_point_separation_from_label_m": 0.004010311829601568
+          },
+          "current_spread": {
+            "maximum_absolute_current_a": 73515.3645019159,
+            "maximum_to_minimum_absolute_ratio": 2.216590720860545,
+            "minimum_absolute_current_a": 33165.96239894711
+          },
+          "missing_currents_a": {
+            "E567DN": -33165.96239894711,
+            "E567UP": -34320.95776043433,
+            "E89DN": -39375.19992591761,
+            "E89UP": -39043.09061816277,
+            "ECOILB": -73515.3645019159
+          },
+          "vacuum_field_first": {
+            "additive_gauge_wb_per_radian": -0.0024991490128798252,
+            "gauge_free_fractional_rms": 0.005131601548149141,
+            "reference_shape_rms_wb_per_radian": 0.24084261333627902
+          }
+        },
+        "shipped_20_only": {
+          "current_pinned_solve_second": {
+            "current_relative_error": 0.0,
+            "iterations": 9,
+            "lambda_guard_triggered": false,
+            "map_evaluations": 67,
+            "profile_amplitude": 0.984770251109015,
+            "relative_residual": 3.040471108407734e-08,
+            "terminal_topology": "diverted",
+            "termination": "declared flux criterion reached",
+            "x_point_rz_m": [
+              0.930488090940465,
+              1.2894098045685216
+            ],
+            "x_point_separation_from_label_m": 2.5398559409904693
+          },
+          "current_spread": {
+            "maximum_absolute_current_a": 0.0,
+            "maximum_to_minimum_absolute_ratio": null,
+            "minimum_absolute_current_a": 0.0
+          },
+          "missing_currents_a": {
+            "E567DN": 0.0,
+            "E567UP": 0.0,
+            "E89DN": 0.0,
+            "E89UP": 0.0,
+            "ECOILB": 0.0
+          },
+          "vacuum_field_first": {
+            "additive_gauge_wb_per_radian": 0.32589682883351134,
+            "gauge_free_fractional_rms": 0.039786432143795826,
+            "reference_shape_rms_wb_per_radian": 0.24084261333627902
+          }
+        }
+      },
+      "sensitivity": {
+        "circuit_unity_scale": {
+          "current_pinned_solve_second": {
+            "current_relative_error": 0.0,
+            "iterations": 39,
+            "lambda_guard_triggered": true,
+            "map_evaluations": 272,
+            "profile_amplitude": 0.9554470481184465,
+            "relative_residual": 0.17350429083865937,
+            "terminal_topology": "diverted",
+            "termination": "profile amplitude inf is outside (1e-06, 1000000.0)",
+            "x_point_rz_m": [
+              1.251975868867591,
+              -1.2267817661641092
+            ],
+            "x_point_separation_from_label_m": 0.004010311829601568
+          },
+          "current_spread": {
+            "maximum_absolute_current_a": 37146.02386951586,
+            "maximum_to_minimum_absolute_ratio": 1.0,
+            "minimum_absolute_current_a": 37146.02386951586
+          },
+          "missing_currents_a": {
+            "E567DN": -37146.02386951586,
+            "E567UP": -37146.02386951586,
+            "E89DN": -37146.02386951586,
+            "E89UP": -37146.02386951586,
+            "ECOILB": -37146.02386951586
+          },
+          "vacuum_field_first": {
+            "additive_gauge_wb_per_radian": 0.10137109398977702,
+            "gauge_free_fractional_rms": 0.07764472042045992,
+            "reference_shape_rms_wb_per_radian": 0.24084261333627902
+          }
+        }
+      },
+      "shipped_ecoila_current_a": -37146.02386951586,
+      "shot": "d3d_shot_0003ff34e7.parquet",
+      "target_plasma_current_a": 1745309.6601366997,
+      "time_ms": 1980.0
+    },
+    {
+      "absent_from_603_shot_polarity_population": true,
+      "coefficients_fitted": 0,
+      "frame": 215,
+      "labelled_diverted": true,
+      "labelled_x_point_rz_m": [
+        1.3512296676635742,
+        1.082654595375061
+      ],
+      "models": {
+        "circuit_derived": {
+          "current_pinned_solve_second": {
+            "closer_than_landed_named_0p4552m": true,
+            "current_relative_error": 1.1749758929553097e-16,
+            "iterations": 5,
+            "lambda_guard_triggered": true,
+            "map_evaluations": 33,
+            "moves_x_point_toward_divertor_leg": false,
+            "profile_amplitude": 1.48701686975364,
+            "relative_residual": 0.7620857107235153,
+            "terminal_topology": "limited",
+            "termination": "profile amplitude inf is outside (1e-06, 1000000.0)",
+            "x_point_rz_m": [
+              1.2094896469701517,
+              1.4332953967395563
+            ],
+            "x_point_separation_from_label_m": 0.37820524196222777
+          },
+          "current_spread": {
+            "maximum_absolute_current_a": 19880.29541434754,
+            "maximum_to_minimum_absolute_ratio": 1.037324087293494,
+            "minimum_absolute_current_a": 19164.98002684742
+          },
+          "missing_currents_a": {
+            "E567DN": -19198.20505850726,
+            "E567UP": -19405.372902974508,
+            "E89DN": -19866.61451895819,
+            "E89UP": -19164.98002684742,
+            "ECOILB": -19880.29541434754
+          },
+          "vacuum_field_first": {
+            "additive_gauge_wb_per_radian": 0.054133372100340735,
+            "gauge_free_fractional_rms": 0.08999054111013843,
+            "reference_shape_rms_wb_per_radian": 0.1032774188827826
+          }
+        },
+        "label_recovered": {
+          "current_pinned_solve_second": {
+            "current_relative_error": 0.0,
+            "iterations": 14,
+            "lambda_guard_triggered": false,
+            "map_evaluations": 75,
+            "profile_amplitude": 0.6536393016536497,
+            "relative_residual": 1.9913010511722656e-12,
+            "terminal_topology": "limited",
+            "termination": "declared flux criterion reached",
+            "x_point_rz_m": [
+              1.1245346519250672,
+              1.4928196279821646
+            ],
+            "x_point_separation_from_label_m": 0.4686427041299889
+          },
+          "current_spread": {
+            "maximum_absolute_current_a": 39268.01055448241,
+            "maximum_to_minimum_absolute_ratio": 2.2684891782069903,
+            "minimum_absolute_current_a": 17310.204047576623
+          },
+          "missing_currents_a": {
+            "E567DN": -19080.979978417992,
+            "E567UP": -17310.204047576623,
+            "E89DN": -20463.335070314268,
+            "E89UP": -21672.277598889235,
+            "ECOILB": -39268.01055448241
+          },
+          "vacuum_field_first": {
+            "additive_gauge_wb_per_radian": -0.0030889039110915113,
+            "gauge_free_fractional_rms": 0.004559806559085124,
+            "reference_shape_rms_wb_per_radian": 0.1032774188827826
+          }
+        },
+        "shipped_20_only": {
+          "current_pinned_solve_second": {
+            "current_relative_error": 0.0,
+            "iterations": 100,
+            "lambda_guard_triggered": false,
+            "map_evaluations": 681,
+            "profile_amplitude": 0.8088375748371889,
+            "relative_residual": 0.023818985787916313,
+            "terminal_topology": "limited",
+            "termination": "outer iteration ceiling exhausted",
+            "x_point_rz_m": [
+              1.7270853109955302,
+              1.4995791428280525
+            ],
+            "x_point_separation_from_label_m": 0.5613319364630524
+          },
+          "current_spread": {
+            "maximum_absolute_current_a": 0.0,
+            "maximum_to_minimum_absolute_ratio": null,
+            "minimum_absolute_current_a": 0.0
+          },
+          "missing_currents_a": {
+            "E567DN": 0.0,
+            "E567UP": 0.0,
+            "E89DN": 0.0,
+            "E89UP": 0.0,
+            "ECOILB": 0.0
+          },
+          "vacuum_field_first": {
+            "additive_gauge_wb_per_radian": 0.17279054942954436,
+            "gauge_free_fractional_rms": 0.052513761384657964,
+            "reference_shape_rms_wb_per_radian": 0.1032774188827826
+          }
+        }
+      },
+      "sensitivity": {
+        "circuit_unity_scale": {
+          "current_pinned_solve_second": {
+            "current_relative_error": 1.1749758929553097e-16,
+            "iterations": 100,
+            "lambda_guard_triggered": false,
+            "map_evaluations": 755,
+            "profile_amplitude": 0.5626906276033584,
+            "relative_residual": 6.096546920411369e-05,
+            "terminal_topology": "limited",
+            "termination": "outer iteration ceiling exhausted",
+            "x_point_rz_m": [
+              1.316635724053429,
+              0.6551128916687595
+            ],
+            "x_point_separation_from_label_m": 0.4289389809082276
+          },
+          "current_spread": {
+            "maximum_absolute_current_a": 19544.136270495022,
+            "maximum_to_minimum_absolute_ratio": 1.0,
+            "minimum_absolute_current_a": 19544.136270495022
+          },
+          "missing_currents_a": {
+            "E567DN": -19544.136270495022,
+            "E567UP": -19544.136270495022,
+            "E89DN": -19544.136270495022,
+            "E89UP": -19544.136270495022,
+            "ECOILB": -19544.136270495022
+          },
+          "vacuum_field_first": {
+            "additive_gauge_wb_per_radian": 0.054657810016211034,
+            "gauge_free_fractional_rms": 0.09325873000954228,
+            "reference_shape_rms_wb_per_radian": 0.1032774188827826
+          }
+        }
+      },
+      "shipped_ecoila_current_a": -19544.136270495022,
+      "shot": "d3d_shot_001270afa9.parquet",
+      "target_plasma_current_a": 990789.0240550041,
+      "time_ms": 5100.0
+    },
+    {
+      "absent_from_603_shot_polarity_population": true,
+      "coefficients_fitted": 0,
+      "frame": 41,
+      "labelled_diverted": true,
+      "labelled_x_point_rz_m": [
+        1.4045759439468384,
+        -1.1346231698989868
+      ],
+      "models": {
+        "circuit_derived": {
+          "current_pinned_solve_second": {
+            "closer_than_landed_named_0p4552m": true,
+            "current_relative_error": 0.0,
+            "iterations": 4,
+            "lambda_guard_triggered": false,
+            "map_evaluations": 36,
+            "moves_x_point_toward_divertor_leg": true,
+            "profile_amplitude": 1.0270634242243168,
+            "relative_residual": 6.754237706668748e-07,
+            "terminal_topology": "diverted",
+            "termination": "declared flux criterion reached",
+            "x_point_rz_m": [
+              1.4225904885345328,
+              -1.1343740872383137
+            ],
+            "x_point_separation_from_label_m": 0.018016266507628047
+          },
+          "current_spread": {
+            "maximum_absolute_current_a": 7800.6085219195475,
+            "maximum_to_minimum_absolute_ratio": 1.037324087293494,
+            "minimum_absolute_current_a": 7519.933854300341
+          },
+          "missing_currents_a": {
+            "E567DN": 7532.97065580178,
+            "E567UP": 7614.258947516631,
+            "E89DN": 7795.240427183659,
+            "E89UP": 7519.933854300341,
+            "ECOILB": 7800.6085219195475
+          },
+          "vacuum_field_first": {
+            "additive_gauge_wb_per_radian": -0.03355644987164419,
+            "gauge_free_fractional_rms": 0.02282359651096225,
+            "reference_shape_rms_wb_per_radian": 0.13815224353166874
+          }
+        },
+        "label_recovered": {
+          "current_pinned_solve_second": {
+            "current_relative_error": 0.0,
+            "iterations": 7,
+            "lambda_guard_triggered": false,
+            "map_evaluations": 64,
+            "profile_amplitude": 1.0074408101083354,
+            "relative_residual": 3.27861226705073e-08,
+            "terminal_topology": "diverted",
+            "termination": "declared flux criterion reached",
+            "x_point_rz_m": [
+              1.4027538342261698,
+              -1.137339899277469
+            ],
+            "x_point_separation_from_label_m": 0.0032711928023372717
+          },
+          "current_spread": {
+            "maximum_absolute_current_a": 13418.183380283663,
+            "maximum_to_minimum_absolute_ratio": 4.643081167783011,
+            "minimum_absolute_current_a": 2889.9308229605226
+          },
+          "missing_currents_a": {
+            "E567DN": 12692.107412986099,
+            "E567UP": 8809.287724316377,
+            "E89DN": 2889.9308229605226,
+            "E89UP": 6512.637488162576,
+            "ECOILB": 13418.183380283663
+          },
+          "vacuum_field_first": {
+            "additive_gauge_wb_per_radian": -0.015318495412694007,
+            "gauge_free_fractional_rms": 0.007085193880427751,
+            "reference_shape_rms_wb_per_radian": 0.13815224353166874
+          }
+        },
+        "shipped_20_only": {
+          "current_pinned_solve_second": {
+            "current_relative_error": 0.0,
+            "iterations": 6,
+            "lambda_guard_triggered": false,
+            "map_evaluations": 57,
+            "profile_amplitude": 1.0463667225538131,
+            "relative_residual": 5.383828505443982e-11,
+            "terminal_topology": "diverted",
+            "termination": "declared flux criterion reached",
+            "x_point_rz_m": [
+              1.3885235980179091,
+              -1.1181178479261158
+            ],
+            "x_point_separation_from_label_m": 0.02302397583498884
+          },
+          "current_spread": {
+            "maximum_absolute_current_a": 0.0,
+            "maximum_to_minimum_absolute_ratio": null,
+            "minimum_absolute_current_a": 0.0
+          },
+          "missing_currents_a": {
+            "E567DN": 0.0,
+            "E567UP": 0.0,
+            "E89DN": 0.0,
+            "E89UP": 0.0,
+            "ECOILB": 0.0
+          },
+          "vacuum_field_first": {
+            "additive_gauge_wb_per_radian": -0.08011502304018493,
+            "gauge_free_fractional_rms": 0.03572598234155325,
+            "reference_shape_rms_wb_per_radian": 0.13815224353166874
+          }
+        }
+      },
+      "sensitivity": {
+        "circuit_unity_scale": {
+          "current_pinned_solve_second": {
+            "current_relative_error": 1.1564919330876758e-16,
+            "iterations": 4,
+            "lambda_guard_triggered": false,
+            "map_evaluations": 37,
+            "profile_amplitude": 1.0273363990735516,
+            "relative_residual": 8.744503612321745e-07,
+            "terminal_topology": "diverted",
+            "termination": "declared flux criterion reached",
+            "x_point_rz_m": [
+              1.423487106774501,
+              -1.1357882718293073
+            ],
+            "x_point_separation_from_label_m": 0.018947019343485236
+          },
+          "current_spread": {
+            "maximum_absolute_current_a": 7668.706765552051,
+            "maximum_to_minimum_absolute_ratio": 1.0,
+            "minimum_absolute_current_a": 7668.706765552051
+          },
+          "missing_currents_a": {
+            "E567DN": 7668.706765552051,
+            "E567UP": 7668.706765552051,
+            "E89DN": 7668.706765552051,
+            "E89UP": 7668.706765552051,
+            "ECOILB": 7668.706765552051
+          },
+          "vacuum_field_first": {
+            "additive_gauge_wb_per_radian": -0.03376222824618501,
+            "gauge_free_fractional_rms": 0.023177904804327607,
+            "reference_shape_rms_wb_per_radian": 0.13815224353166874
+          }
+        }
+      },
+      "shipped_ecoila_current_a": 7668.706765552051,
+      "shot": "d3d_shot_001554e054.parquet",
+      "target_plasma_current_a": 1006624.5902478695,
+      "time_ms": 1160.0
+    },
+    {
+      "absent_from_603_shot_polarity_population": true,
+      "coefficients_fitted": 0,
+      "frame": 252,
+      "labelled_diverted": true,
+      "labelled_x_point_rz_m": [
+        1.3285812139511108,
+        1.0602071285247803
+      ],
+      "models": {
+        "circuit_derived": {
+          "current_pinned_solve_second": {
+            "closer_than_landed_named_0p4552m": false,
+            "current_relative_error": 0.0,
+            "iterations": 100,
+            "lambda_guard_triggered": false,
+            "map_evaluations": 1023,
+            "moves_x_point_toward_divertor_leg": false,
+            "profile_amplitude": 0.974095002522305,
+            "relative_residual": 0.0001597188261297747,
+            "terminal_topology": "diverted",
+            "termination": "outer iteration ceiling exhausted",
+            "x_point_rz_m": [
+              1.0116849462691093,
+              1.3915272987153444
+            ],
+            "x_point_separation_from_label_m": 0.458471699940015
+          },
+          "current_spread": {
+            "maximum_absolute_current_a": 29641.511655109247,
+            "maximum_to_minimum_absolute_ratio": 1.0373240872934937,
+            "minimum_absolute_current_a": 28574.97672925691
+          },
+          "missing_currents_a": {
+            "E567DN": -28624.51523674185,
+            "E567UP": -28933.402401059742,
+            "E89DN": -29621.113446144856,
+            "E89UP": -28574.97672925691,
+            "ECOILB": -29641.511655109247
+          },
+          "vacuum_field_first": {
+            "additive_gauge_wb_per_radian": 0.07071688356309126,
+            "gauge_free_fractional_rms": 0.10364744751878688,
+            "reference_shape_rms_wb_per_radian": 0.13287005131840326
+          }
+        },
+        "label_recovered": {
+          "current_pinned_solve_second": {
+            "current_relative_error": 0.0,
+            "iterations": 100,
+            "lambda_guard_triggered": false,
+            "map_evaluations": 981,
+            "profile_amplitude": 0.9448316894663343,
+            "relative_residual": 0.00020544116362840138,
+            "terminal_topology": "diverted",
+            "termination": "outer iteration ceiling exhausted",
+            "x_point_rz_m": [
+              1.092883135098954,
+              1.490659041171334
+            ],
+            "x_point_separation_from_label_m": 0.49075700043470993
+          },
+          "current_spread": {
+            "maximum_absolute_current_a": 59478.63213192123,
+            "maximum_to_minimum_absolute_ratio": 2.2050797418570776,
+            "minimum_absolute_current_a": 26973.460869868326
+          },
+          "missing_currents_a": {
+            "E567DN": -26973.460869868326,
+            "E567UP": -30035.90328548815,
+            "E89DN": -32906.68007741637,
+            "E89UP": -30723.968946094814,
+            "ECOILB": -59478.63213192123
+          },
+          "vacuum_field_first": {
+            "additive_gauge_wb_per_radian": -0.020313440883347595,
+            "gauge_free_fractional_rms": 0.007892908131632986,
+            "reference_shape_rms_wb_per_radian": 0.13287005131840326
+          }
+        },
+        "shipped_20_only": {
+          "current_pinned_solve_second": {
+            "current_relative_error": 0.0,
+            "iterations": 11,
+            "lambda_guard_triggered": false,
+            "map_evaluations": 83,
+            "profile_amplitude": 0.8727633867608087,
+            "relative_residual": 3.0693122546855978e-12,
+            "terminal_topology": "diverted",
+            "termination": "declared flux criterion reached",
+            "x_point_rz_m": [
+              1.5408606525736357,
+              1.1880657553289429
+            ],
+            "x_point_separation_from_label_m": 0.2478111952881476
+          },
+          "current_spread": {
+            "maximum_absolute_current_a": 0.0,
+            "maximum_to_minimum_absolute_ratio": null,
+            "minimum_absolute_current_a": 0.0
+          },
+          "missing_currents_a": {
+            "E567DN": 0.0,
+            "E567UP": 0.0,
+            "E89DN": 0.0,
+            "E89UP": 0.0,
+            "ECOILB": 0.0
+          },
+          "vacuum_field_first": {
+            "additive_gauge_wb_per_radian": 0.24763468239155426,
+            "gauge_free_fractional_rms": 0.06332267648981467,
+            "reference_shape_rms_wb_per_radian": 0.13287005131840326
+          }
+        }
+      },
+      "sensitivity": {
+        "circuit_unity_scale": {
+          "current_pinned_solve_second": {
+            "current_relative_error": 0.0,
+            "iterations": 100,
+            "lambda_guard_triggered": false,
+            "map_evaluations": 1137,
+            "profile_amplitude": 0.9747084048763319,
+            "relative_residual": 0.0002759037550470042,
+            "terminal_topology": "diverted",
+            "termination": "outer iteration ceiling exhausted",
+            "x_point_rz_m": [
+              1.0149621103535715,
+              1.399614526898142
+            ],
+            "x_point_separation_from_label_m": 0.46211938307313827
+          },
+          "current_spread": {
+            "maximum_absolute_current_a": 29140.298520555687,
+            "maximum_to_minimum_absolute_ratio": 1.0,
+            "minimum_absolute_current_a": 29140.298520555687
+          },
+          "missing_currents_a": {
+            "E567DN": -29140.298520555687,
+            "E567UP": -29140.298520555687,
+            "E89DN": -29140.298520555687,
+            "E89UP": -29140.298520555687,
+            "ECOILB": -29140.298520555687
+          },
+          "vacuum_field_first": {
+            "additive_gauge_wb_per_radian": 0.07149882026330907,
+            "gauge_free_fractional_rms": 0.10730896128401793,
+            "reference_shape_rms_wb_per_radian": 0.13287005131840326
+          }
+        }
+      },
+      "shipped_ecoila_current_a": -29140.298520555687,
+      "shot": "d3d_shot_001cbcc9e6.parquet",
+      "target_plasma_current_a": 998801.5315532684,
+      "time_ms": 5600.0
+    }
+  ],
+  "interpretation": {
+    "divertor_leg_verdict": "Only 2 of 5 circuit-derived solves both converged at 1e-6, ended diverted, and moved the X point toward the labelled divertor leg; the circuit field therefore does not consistently form the labelled branch.",
+    "inference_admissibility": "The circuit route derives every missing current from a SHIPPED channel and is inference-admissible. The label-recovered route is a control and is not inference-admissible.",
+    "transfer_qualification": "Applying the fixed per-coil circuit scales to corpus ECOILA is an assumption because those scales were measured on a different netCDF pulse.",
+    "vacuum_field_verdict": "Circuit-derived missing currents improve the shipped-only vacuum field on 1 of 5 frames; median fractional RMS is 1.782 times shipped-only and 10.588 times the label-recovered control, so the fixed circuit transfer does not reproduce the exact-tared vacuum field."
+  },
+  "measurement_order": [
+    "vacuum field against exact clipped-cell tared map",
+    "current-pinned eliminated solve"
+  ],
+  "result": {
+    "all_absent_from_polarity_population": true,
+    "all_labelled_diverted": true,
+    "circuit_derived_moves_x_point_toward_divertor_leg_all_frames": false,
+    "circuit_derived_moves_x_point_toward_divertor_leg_count": 2,
+    "circuit_to_label_recovered_median_vacuum_rms_ratio": 10.587909114058624,
+    "circuit_to_shipped_median_vacuum_rms_ratio": 1.7818545128725358,
+    "circuit_vacuum_improves_on_shipped_count": 1,
+    "circuit_vacuum_reproduces_exact_tare": false,
+    "distinct_shot_count": 5,
+    "frame_count": 5,
+    "models": {
+      "circuit_derived": {
+        "additive_gauge_wb_per_radian": {
+          "maximum": 0.10037433552107937,
+          "mean": 0.052816510079279455,
+          "median": 0.07071688356309126,
+          "minimum": -0.03355644987164419
+        },
+        "diverted_terminal_count": 4,
+        "gauge_free_vacuum_fractional_rms": {
+          "maximum": 0.10364744751878688,
+          "mean": 0.07286224704096833,
+          "median": 0.07501738886145337,
+          "minimum": 0.02282359651096225
+        },
+        "residual_at_most_1e_minus_6_count": 2,
+        "x_point_separation_from_label_m": {
+          "maximum": 0.458471699940015,
+          "mean": 0.2619347390960089,
+          "median": 0.37820524196222777,
+          "minimum": 0.004010311829601568
+        }
+      },
+      "circuit_unity_scale": {
+        "additive_gauge_wb_per_radian": {
+          "maximum": 0.10137109398977702,
+          "mean": 0.05337680220862606,
+          "median": 0.07149882026330907,
+          "minimum": -0.03376222824618501
+        },
+        "diverted_terminal_count": 4,
+        "gauge_free_vacuum_fractional_rms": {
+          "maximum": 0.10730896128401793,
+          "mean": 0.07535333914422677,
+          "median": 0.07764472042045992,
+          "minimum": 0.023177904804327607
+        },
+        "residual_at_most_1e_minus_6_count": 2,
+        "x_point_separation_from_label_m": {
+          "maximum": 0.46211938307313827,
+          "mean": 0.2729822450807591,
+          "median": 0.4289389809082276,
+          "minimum": 0.004010311829601568
+        }
+      },
+      "label_recovered": {
+        "additive_gauge_wb_per_radian": {
+          "maximum": -0.0024991490128798252,
+          "mean": -0.011924261238440629,
+          "median": -0.015318495412694007,
+          "minimum": -0.020313440883347595
+        },
+        "diverted_terminal_count": 4,
+        "gauge_free_vacuum_fractional_rms": {
+          "maximum": 0.007892908131632986,
+          "mean": 0.006412495613826255,
+          "median": 0.007085193880427751,
+          "minimum": 0.004559806559085124
+        },
+        "residual_at_most_1e_minus_6_count": 3,
+        "x_point_separation_from_label_m": {
+          "maximum": 0.49075700043470993,
+          "mean": 0.2843815015848329,
+          "median": 0.455226298727527,
+          "minimum": 0.0032711928023372717
+        }
+      },
+      "shipped_20_only": {
+        "additive_gauge_wb_per_radian": {
+          "maximum": 0.32589682883351134,
+          "mean": 0.17958591506730762,
+          "median": 0.23172253772211307,
+          "minimum": -0.08011502304018493
+        },
+        "diverted_terminal_count": 4,
+        "gauge_free_vacuum_fractional_rms": {
+          "maximum": 0.06332267648981467,
+          "mean": 0.04668991794410756,
+          "median": 0.04210073736071611,
+          "minimum": 0.03572598234155325
+        },
+        "residual_at_most_1e_minus_6_count": 4,
+        "x_point_separation_from_label_m": {
+          "maximum": 2.5398559409904693,
+          "mean": 0.7650163501310382,
+          "median": 0.4530587020785326,
+          "minimum": 0.02302397583498884
+        }
+      }
+    },
+    "named_frame_present": true
+  },
+  "selection": {
+    "all_absent_from_polarity_population": true,
+    "all_labelled_diverted": true,
+    "distinct_shot_count": 5,
+    "frame_count": 5,
+    "named_frame": {
+      "frame": 102,
+      "shot": "d3d_shot_00000c4a7b.parquet"
+    },
+    "named_frame_present": true,
+    "polarity_population_count": 603
+  },
+  "vacuum_authority": {
+    "comparison": "one additive gauge followed by whole-grid fractional RMS",
+    "grid_shape": [
+      65,
+      65
+    ],
+    "map": "label total flux minus exact clipped-cell plasma moments",
+    "response_build_wall_seconds": 287.4361716690473
+  },
+  "x_point_reference": {
+    "label_source": "minimum flux-gradient norm on the released LCFS, matching the landed diverted-solve overlay",
+    "landed_named_separation_m": 0.455226298727527
+  }
+}

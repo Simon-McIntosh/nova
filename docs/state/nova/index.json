@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T14:15:54",
+  "updated": "2026-08-21T15:09:40",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -545,6 +545,19 @@
                 "verification": "strict"
               }
             }
+          },
+          {
+            "slug": "device-kernel-build",
+            "why_now": "All three framing decisions are owner-locked (2026-08-21) and the entry input is banked \u2014 builds are 97.2/99.0% exact-kernel work with device contraction estimates of 0.12\u20130.15 ms per moment block; the H200 port serves the same sprint's GPU-catalog economics and the per-gradient-step rebuild consumer no cache can amortise.",
+            "done_when": "One-block H200 prototype reports the element-wise ULP distribution, byte-identical fraction, projected full fine-fixture build time and CPU-lane cost; the port-go-threshold ruling decides the full port; the \u00a75 gates are measured or the decline is banked with the prototype.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
           }
         ],
         "starts": "2026-09-01",
@@ -731,6 +744,11 @@
         "when": "2026-08-16",
         "who": "Simon McIntosh (via reckon-ship)",
         "what": "S6 closed: 8/8 shipped. Both sprint questions closed on measurement - the misfit source is current- or sensor-side with the P4-lower survivor reclassified as a separately-driven survey configuration, and the calibration machinery is a tested machine-agnostic package whose portability is demonstrated on TCV. Continuations: S7 and S8 fed directly; the saddle-loop residue split owned by S3; machine-description packaging owned by imas-ambix S22 and nova S11."
+      },
+      {
+        "when": "2026-08-21",
+        "who": "reckon-ship",
+        "what": "S8 membership repaired: device-kernel-build appended to the sprint items \u2014 the plan has declared sprint S8 since the 2026-08-21 owner interview but the index items list never carried it (roadmap wiring finding plan-sprint-missing-item)."
       }
     ],
     "blockers": [
@@ -763,6 +781,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 48
+    "_version": 49
   }
 }

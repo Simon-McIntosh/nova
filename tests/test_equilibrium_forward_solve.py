@@ -57,6 +57,7 @@ with skip_import("jax"):
     from nova.biot.target import FluxTarget
     from nova.equilibrium.conservation import FluxLattice
     from nova.equilibrium.domain import PlasmaDomain
+    from nova.equilibrium import PrescribedCurrentField
     from nova.equilibrium.forward import ForwardProfile
     from nova.equilibrium.observation import MomentEnforcementError, MomentTargets
     from nova.equilibrium.source import DomainProfile, ForwardSource
@@ -384,6 +385,35 @@ def test_receipts_and_integral_observation_share_solve_current_moments(machine):
     np.testing.assert_array_equal(
         profile.integral_observation(seed).plasma_current,
         receipt.moments.plasma_current,
+    )
+
+
+def test_prescribed_current_field_is_explicit_and_additive(machine):
+    """A declared fixed circuit matrix augments the ordinary conductor field."""
+    profile, seed, _vacuum = machine
+    operator = profile.operator
+    response = jnp.linspace(
+        -2.0e-6,
+        3.0e-6,
+        operator.node_number * 3,
+    ).reshape(operator.node_number, 3)
+    current = jnp.asarray((1200.0, -350.0, 85.0))
+    policy = PrescribedCurrentField(response=response, current=current)
+    augmented = replace(operator, prescribed_current_field=policy)
+
+    assert operator.prescribed_current_field is None
+    assert policy.circuit_count == 3
+    np.testing.assert_allclose(
+        augmented.external(),
+        operator.external() + response @ current,
+        rtol=2.0e-13,
+        atol=2.0e-13,
+    )
+    np.testing.assert_allclose(
+        augmented(seed) - operator(seed),
+        response @ current,
+        rtol=2.0e-13,
+        atol=2.0e-13,
     )
 
 

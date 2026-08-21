@@ -1,0 +1,38 @@
+{
+  "classification": {
+    "conductor_shaped": "every detected patch not satisfying all vessel rules",
+    "vessel_shaped": {
+      "maximum_centroid_wall_distance_grid_diagonals": 2.0,
+      "minimum_absolute_tangent_alignment": 0.75,
+      "minimum_cells": 4,
+      "minimum_principal_axis_elongation": 2.0
+    }
+  },
+  "detection": {
+    "connectivity": "four-neighbour, separated by current sign",
+    "density_threshold": "the per-frame tare-floor current divided by labelled-core cell-centre area",
+    "detectable_fraction": "exterior L1 current in detectable patches divided by total exterior L1 current",
+    "detectable_patch": "absolute signed patch current exceeds the per-frame tare-floor current"
+  },
+  "eddy_signature": {
+    "drive": "local mean time derivative of shipped-coil total flux, using the native-rate 50 ms smoothed current derivative",
+    "required_sign": "signed patch current times local drive is negative",
+    "statistics": [
+      "Pearson correlation",
+      "Spearman correlation",
+      "sign share"
+    ]
+  },
+  "selection": {
+    "frames_per_shot": 3,
+    "high_current_subset": "absolute recorded plasma current >= 50000 A",
+    "rule": "the exact clipped-cell tare cohort: three evenly spaced finite diverted labels from each of the first twenty lexicographic shots outside the complete 603-shot polarity population",
+    "shots": 20
+  },
+  "tare": {
+    "coefficients_fitted": 0,
+    "delta_star_region": "valid nodes strictly outside the labelled LCFS",
+    "measured_absolute_signed_floor_fraction": 0.004841504851931392,
+    "route": "landed exact clipped-cell zeroth, radial, and vertical moments"
+  }
+}

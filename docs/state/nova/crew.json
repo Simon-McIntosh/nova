@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T15:41:06",
+  "updated": "2026-08-21T15:42:11",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -15853,9 +15853,74 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T131207687715-state-of-play-figures",
+        "plan": "diiid-forward-onboarding",
+        "section": "\u00a710",
+        "node": "state-of-play-figures",
+        "role": "documentation",
+        "member": "diiid-poloidal-figures",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T13:12:12Z",
+        "completed_at": "2026-08-21T13:41:44Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1772,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1772,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "f691de2b069fa7a96e2b762c0b411c9c8e8f6cfd",
+        "commits": [
+          "3d4fc39398235c669c4349e2598741fa805fa989",
+          "39119bf740e12a2a430a83c4b3d518ba542b6cbe",
+          "83810648f497654cb5ae09a0a866650fed732a90"
+        ],
+        "changed_lines": {
+          "added": 1778,
+          "removed": 0,
+          "files": 7
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "outcome": "Four state-of-play figures rendered on three named diverted frames; extracted topology agrees with the given values at sub-millimetre on the axis (0.236-0.362 mm) and sub-cell everywhere; nova classifies one of three release-diverted frames as LIMITED, preserved visibly",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T131207687715-state-of-play-figures/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f36-5f8a-7212-a4d6-18ab97d716ca",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 13787904,
+            "cached_input_tokens_cumulative": 24614144,
+            "input_tokens": 14296094,
+            "input_tokens_cumulative": 25337420,
+            "output_tokens": 46445,
+            "output_tokens_cumulative": 84680,
+            "reasoning_output_tokens": 12676,
+            "reasoning_output_tokens_cumulative": 25273
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 413
+    "_version": 414
   }
 }

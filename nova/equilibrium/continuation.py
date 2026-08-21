@@ -1,4 +1,4 @@
-r"""Bounded continuation of the source flux functions beyond the separatrix.
+r"""Domain-bounded continuation of source flux functions past the separatrix.
 
 The core closure stops at the plasma boundary. Continuing it is not the
 extrapolation of a fitted curve: it is a second declared closure, on a domain
@@ -73,24 +73,30 @@ separatrix, and it is cross-checked against a one-sided difference from inside
 the core. A core gradient with a kink there has no unambiguous separatrix
 derivative, so the check rejects it rather than silently choosing a side.
 
-Bounded support
----------------
-Both families are bounded: beyond the declared outer support the source is
-exactly zero, and no arithmetic on a cell past that bound contributes to any
-integral. The families differ only in what they do at the bound.
+Support ownership
+-----------------
+The polynomial family has a finite declared support: beyond that bound the
+source is exactly zero, and no arithmetic on a cell past it contributes to an
+integral. The exponential family may use the same explicit bound, or it may
+leave ``support`` undeclared on the common scrape-off branch. In that latter
+case topology owns the bound: the exponential is evaluated on every common-SOL
+cell inside the material boundary and nowhere else. It is never cut at an
+arbitrary normalised-flux value.
+
 :attr:`~nova.equilibrium.source.ContinuationForm.HERMITE_POLYNOMIAL` is the
 minimal-degree polynomial that matches the declared orders at the separatrix
 and vanishes to the same order at the bound, so the source has no step
 anywhere.
 :attr:`~nova.equilibrium.source.ContinuationForm.EXPONENTIAL_DECAY` carries a
 declared e-folding width in separatrix distance, matches the same orders
-through a polynomial prefactor, and is truncated at the bound; the receipt
-publishes the amplitude that truncation discarded, so a support chosen too
-tight for the declared width is visible rather than hidden.
+through a polynomial prefactor, and can optionally carry a weighted broader
+spreading length. When explicitly truncated, the receipt publishes the
+amplitude that truncation discarded, so a support chosen too tight for the
+declared width is visible rather than hidden.
 
 Both families integrate in closed form, so the pressure and toroidal-field
-primitives on an open domain carry no quadrature error and are constant beyond
-the support bound, which is what a vanishing gradient there demands.
+primitives on an open domain carry no quadrature error. They are constant past
+a finite support, or approach their asymptote with an untruncated exponential.
 
 What makes the private-flux policy independent
 ----------------------------------------------
@@ -304,23 +310,27 @@ class _PolynomialTaper:
 
 @dataclass(frozen=True)
 class _DecayTaper:
-    """Exponential taper of one gradient, truncated at the support bound."""
+    """Exponential taper of one gradient, optionally flux-truncated."""
 
     prefactor: jax.Array
     integral_prefactor: jax.Array
     decay_width: float
-    support: float
+    support: float | None
 
     def __call__(self, distance: jax.Array) -> jax.Array:
-        """Return the tapered gradient, exactly zero beyond the support."""
+        """Return the tapered gradient on its declared support."""
         value = jnp.polyval(self.prefactor[::-1], distance) * jnp.exp(
             -distance / self.decay_width
         )
+        if self.support is None:
+            return value
         return jnp.where(distance <= self.support, value, 0.0)
 
     def integral(self, distance: jax.Array) -> jax.Array:
         """Return the taper integrated from the separatrix out to a distance."""
-        bounded = jnp.minimum(distance, self.support)
+        bounded = (
+            distance if self.support is None else jnp.minimum(distance, self.support)
+        )
         primitive = (
             -self.decay_width
             * jnp.exp(-bounded / self.decay_width)
@@ -335,6 +345,8 @@ class _DecayTaper:
         Read on the host, for the same reason the polynomial family reads its
         own: the discarded step is a property of the declaration.
         """
+        if self.support is None:
+            return 0.0
         return float(
             np.polyval(np.asarray(self.prefactor)[::-1], self.support)
             * np.exp(-self.support / self.decay_width)
@@ -342,14 +354,42 @@ class _DecayTaper:
 
 
 @dataclass(frozen=True)
-class SeparatrixContinuation:
-    """Declared policy of one bounded continuation beyond the separatrix.
+class _CompositeDecayTaper:
+    """Weighted narrow and spreading exponentials with the same anchor."""
 
-    ``support`` is the outer bound in separatrix distance, normalised flux
-    measured away from the separatrix on the domain's own branch, and it is
-    required: an unbounded continuation would drive current on every open cell
-    the grid holds, out to the material boundary, with no declared physics
-    saying it should.
+    narrow: _DecayTaper
+    spreading: _DecayTaper
+    spreading_fraction: float
+
+    def __call__(self, distance: jax.Array) -> jax.Array:
+        """Return the weighted decay; both components match the anchor."""
+        broad = self.spreading_fraction
+        return (1.0 - broad) * self.narrow(distance) + broad * self.spreading(distance)
+
+    def integral(self, distance: jax.Array) -> jax.Array:
+        """Return the exact weighted primitive of both decay channels."""
+        broad = self.spreading_fraction
+        return (1.0 - broad) * self.narrow.integral(
+            distance
+        ) + broad * self.spreading.integral(distance)
+
+    @property
+    def edge_value(self) -> float:
+        """Return the weighted amplitude discarded at a finite bound."""
+        broad = self.spreading_fraction
+        return (
+            1.0 - broad
+        ) * self.narrow.edge_value + broad * self.spreading.edge_value
+
+
+@dataclass(frozen=True)
+class SeparatrixContinuation:
+    """Declared policy of one continuation beyond the separatrix.
+
+    ``support`` is the optional outer bound in separatrix distance, normalised
+    flux measured away from the separatrix on the domain's own branch. Only an
+    exponential on the common-SOL branch may omit it; topology then limits the
+    closure to the material-bounded common-SOL mask.
 
     ``decay_width`` belongs to the exponential family alone and is refused on
     the polynomial one, so a width a form would ignore cannot sit in a source
@@ -358,8 +398,10 @@ class SeparatrixContinuation:
 
     form: ContinuationForm
     continuity: SeparatrixContinuity
-    support: float
+    support: float | None
     decay_width: float | None = None
+    spreading_width: float | None = None
+    spreading_fraction: float = 0.0
 
     def __post_init__(self):
         """Validate the declared class, form and bounds."""
@@ -386,7 +428,7 @@ class SeparatrixContinuation:
             )
         if self.form is ContinuationForm.UNDECLARED:
             raise ValueError("a continuation must declare its functional form")
-        if not float(self.support) > 0.0:
+        if self.support is not None and not float(self.support) > 0.0:
             raise ValueError("support must be a positive separatrix distance")
         if self.form is ContinuationForm.EXPONENTIAL_DECAY:
             if self.decay_width is None or not float(self.decay_width) > 0.0:
@@ -394,11 +436,28 @@ class SeparatrixContinuation:
                     "an exponential continuation needs a positive decay width "
                     "in separatrix distance"
                 )
-        elif self.decay_width is not None:
+            if self.spreading_width is not None:
+                if not float(self.spreading_width) > float(self.decay_width):
+                    raise ValueError(
+                        "the spreading width must be broader than the primary "
+                        "exponential decay width"
+                    )
+                if not 0.0 < float(self.spreading_fraction) < 1.0:
+                    raise ValueError(
+                        "a spreading channel needs a fraction strictly between "
+                        "zero and one"
+                    )
+            elif float(self.spreading_fraction) != 0.0:
+                raise ValueError(
+                    "a spreading fraction does nothing without a spreading width"
+                )
+        elif self.decay_width is not None or self.spreading_width is not None:
             raise ValueError(
                 f"the {self.form.name.lower()} family carries no decay width; "
                 "its scale is the declared support"
             )
+        if self.form is ContinuationForm.HERMITE_POLYNOMIAL and self.support is None:
+            raise ValueError("a polynomial continuation needs a finite support")
 
     def _taper(self, gradient: Callable, name: str, outward: float):
         """Return the taper of one core gradient on one branch."""
@@ -413,13 +472,23 @@ class SeparatrixContinuation:
                 coefficients=_hermite_coefficients(targets, float(self.support)),
                 support=float(self.support),
             )
-        width = float(self.decay_width)
-        prefactor = _decay_coefficients(targets, width)
-        return derivatives, _DecayTaper(
-            prefactor=prefactor,
-            integral_prefactor=_decay_integral_prefactor(prefactor, width),
-            decay_width=width,
-            support=float(self.support),
+
+        def decay_taper(width: float) -> _DecayTaper:
+            prefactor = _decay_coefficients(targets, width)
+            return _DecayTaper(
+                prefactor=prefactor,
+                integral_prefactor=_decay_integral_prefactor(prefactor, width),
+                decay_width=width,
+                support=None if self.support is None else float(self.support),
+            )
+
+        narrow = decay_taper(float(self.decay_width))
+        if self.spreading_width is None:
+            return derivatives, narrow
+        return derivatives, _CompositeDecayTaper(
+            narrow=narrow,
+            spreading=decay_taper(float(self.spreading_width)),
+            spreading_fraction=float(self.spreading_fraction),
         )
 
     def extend(
@@ -438,6 +507,11 @@ class SeparatrixContinuation:
                 f"{domain.name.lower()} is not an open domain; a continuation "
                 "runs outward from the separatrix onto "
                 f"{' or '.join(sorted(key.name.lower() for key in OUTWARD_SENSE))}"
+            )
+        if self.support is None and domain is not PlasmaDomain.COMMON_SOL:
+            raise ValueError(
+                "only a common_sol exponential may use material-bounded support; "
+                "the private-flux branch needs its own finite policy"
             )
         if inner.rotation_closure is not RotationClosure.STATIC:
             raise NotImplementedError(
@@ -483,7 +557,8 @@ def _relative_edge_amplitude(taper, anchor) -> float:
 
 def _separatrix_distance(psi_norm: jax.Array, outward: float) -> jax.Array:
     """Return the distance from the separatrix on one branch."""
-    return jnp.maximum(outward * (jnp.asarray(psi_norm) - 1.0), 0.0)
+    signed = outward * (jnp.asarray(psi_norm) - 1.0)
+    return jnp.where(signed >= 0.0, signed, 0.0)
 
 
 def _flux_function(taper, outward: float) -> Callable:
@@ -599,7 +674,10 @@ class ContinuedDomainProfile(DomainProfile):
             domain=jnp.asarray(int(self.domain), dtype=jnp.int8),
             form=jnp.asarray(int(self.policy.form), dtype=jnp.int8),
             continuity=jnp.asarray(int(self.policy.continuity), dtype=jnp.int8),
-            support=jnp.asarray(float(self.policy.support), dtype=dtype),
+            support=jnp.asarray(
+                jnp.inf if self.policy.support is None else float(self.policy.support),
+                dtype=dtype,
+            ),
             decay_width=jnp.asarray(width, dtype=dtype),
             separatrix_pressure_gradient=jnp.asarray(
                 self.pressure_anchor[0], dtype=dtype

@@ -45,10 +45,39 @@ def main() -> None:
         "anchor_offsets.png",
         "forcing_routes.png",
     }
-    assert {path.name for path in FIGURES.glob("*.png")} == expected
+    assert expected.issubset({path.name for path in FIGURES.glob("*.png")})
     html = (OUTPUT / "report.html").read_text(encoding="utf-8")
     for name in expected:
         assert f'src="/nova/figures/dina-profile-routes/{name}"' in html
+    addendum = json.loads((OUTPUT / "addendum.json").read_text(encoding="utf-8"))
+    assert addendum["reference"]["dd_version"] == "3.39.0"
+    rotation = addendum["rotation_and_variance"]
+    assert len(rotation["shells"]) == 19
+    for shell in rotation["shells"]:
+        assert shell["signal_rms_rj_phi_a_per_m"] > 0.0
+        assert np.isfinite(shell["static_explained_variance_fraction"])
+        assert np.isfinite(shell["rotation_column_amplitude"])
+        assert np.isfinite(shell["rotation_column_amplitude_uncertainty"])
+    constraint = addendum["rotational_pressure_constraint"]
+    assert constraint["present_in_dictionary"] is True
+    assert constraint["filled"] is False
+    assert constraint["item_count"] == 0
+    reconciliation = addendum["forcing_reconciliation"]
+    assert len(reconciliation["arms"]) == 4
+    correction = reconciliation["banked_arm_correction"]
+    assert correction["direct_path_control_difference_wb"]["sup"] < 1.0e-10
+    assert (
+        abs(
+            correction["rerun_grid_core_forcing_sup_wb"]
+            - correction["banked_grid_core_forcing_sup_wb"]
+        )
+        < 1.0e-10
+    )
+    coordinate = addendum["extracted_route_coordinate_control"]
+    assert len(coordinate["arms"]) == 3
+    assert coordinate["extended_extraction"]["reliable_shells"] > 19
+    assert abs(coordinate["controls"]["banked_rerun_difference_wb"]) < 1.0e-10
+    assert (FIGURES / "route_controls.png").stat().st_size > 1000
     print(
         "DINA_DUAL_ROUTE_VERIFY_EXIT=0 "
         f"reliable={qualification['reliable_shells']}/{qualification['total_shells']} "

@@ -73,6 +73,11 @@ if TYPE_CHECKING:
         SurfaceGeometryError,
         source_field_function,
     )
+    from nova.equilibrium.flux_surface_extraction import (
+        extract_flux_surface_geometry,
+        traced_assemble_flux_surface_geometry,
+        traced_flux_surface_geometry,
+    )
     from nova.equilibrium.forward import (
         ColdSeedConstruction,
         ForwardBranchReceipt,
@@ -187,9 +192,12 @@ _DEFERRED_EXPORTS: dict[str, str] = {
     "TopologyClass": "topology",
     "apply_delta_star": "map_extraction",
     "extract_flux_functions": "map_extraction",
+    "extract_flux_surface_geometry": "flux_surface_extraction",
     "sample_chord_psi_norm": "map_extraction",
     "source_field_function": "flux_surface_geometry",
     "select_forward_branch": "branch_selection",
+    "traced_assemble_flux_surface_geometry": "flux_surface_extraction",
+    "traced_flux_surface_geometry": "flux_surface_extraction",
     "vacuum_region_receipt": "map_extraction",
 }
 
@@ -254,11 +262,14 @@ __all__ = [
     "apply_delta_star",
     "decay_index",
     "extract_flux_functions",
+    "extract_flux_surface_geometry",
     "sample_chord_psi_norm",
     "shafranov_vertical_field",
     "shafranov_vertical_field_elongated",
     "source_field_function",
     "select_forward_branch",
+    "traced_assemble_flux_surface_geometry",
+    "traced_flux_surface_geometry",
     "vacuum_region_receipt",
 ]
 

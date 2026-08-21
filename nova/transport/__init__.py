@@ -23,6 +23,10 @@ Conventions: total poloidal flux ``Phi = 2 pi R A_phi`` [Wb], explicit ``mu0``,
 raw SI throughout.
 """
 
+from nova.equilibrium.flux_surface_extraction import (
+    traced_assemble_flux_surface_geometry,
+    traced_flux_surface_geometry,
+)
 from nova.transport.coupled_window import (
     EquilibriumSweepReceipt,
     ExchangeSweepResult,
@@ -54,8 +58,6 @@ from nova.transport.current_diffusion import (
     predicted_current,
     profile_shapes,
     project_coefficients,
-    traced_assemble_flux_surface_geometry,
-    traced_flux_surface_geometry,
 )
 from nova.transport.ensemble import (
     EnsembleForwardTransport,

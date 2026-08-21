@@ -53,6 +53,46 @@ def _f64(value):
     return jnp.asarray(value, dtype=jnp.float64)
 
 
+def test_flux_surface_assembly_has_one_equilibrium_owned_implementation():
+    """Transport compatibility names resolve to the extraction authority."""
+    import nova.equilibrium as equilibrium
+    import nova.transport as transport
+    from nova.equilibrium import flux_surface_extraction
+    from nova.transport import current_diffusion
+
+    assert (
+        equilibrium.extract_flux_surface_geometry
+        is flux_surface_extraction.extract_flux_surface_geometry
+    )
+    assert (
+        flux_surface_extraction.extract_flux_surface_geometry.__module__
+        == flux_surface_extraction.__name__
+    )
+
+    public_functions = (
+        "traced_assemble_flux_surface_geometry",
+        "traced_flux_surface_geometry",
+    )
+    for name in public_functions:
+        implementation = getattr(flux_surface_extraction, name)
+        assert getattr(equilibrium, name) is implementation
+        assert getattr(transport, name) is implementation
+        assert implementation.__module__ == flux_surface_extraction.__name__
+
+    compatibility_primitives = (
+        "_bicubic_derivatives",
+        "_bicubic_edge_coordinates",
+        "_bicubic_edge_crossings",
+        "_bicubic_stationary_point",
+        "_solve_bicubic_ordinate",
+        "_traced_profile_shapes",
+    )
+    for name in compatibility_primitives:
+        implementation = getattr(flux_surface_extraction, name)
+        assert getattr(current_diffusion, name) is implementation
+        assert implementation.__module__ == flux_surface_extraction.__name__
+
+
 #: the geometry fields the frozen torch reference carries, in dataclass order
 _GEOMETRY_ARRAYS = (
     "rho_face",

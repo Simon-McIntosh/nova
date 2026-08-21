@@ -1,0 +1,671 @@
+{
+  "carrier": {
+    "realised_cells": 566,
+    "route_policy": {
+      "coil_polysection_policy": "{\"arrangement\":\"exact\",\"backend\":\"numpy\",\"device_eligibility\":\"host\",\"exact_kernel\":\"closed_form\",\"precision\":\"float64\",\"quadrature\":null,\"standoff\":null}",
+      "force_target_policy": "{\"backend\":\"numpy\",\"device_eligibility\":\"host\",\"order\":5,\"precision\":\"float64\",\"rule\":\"positive_material\"}",
+      "inductance_target_policy": "{\"backend\":\"numpy\",\"contraction\":\"logical_cell_before_reduction\",\"device_eligibility\":\"host\",\"material\":\"actual_parent\",\"order\":3,\"precision\":\"float64\",\"rule\":\"positive_material\"}",
+      "plasma_polysection_policy": "{\"arrangement\":\"exact\",\"backend\":\"numpy\",\"device_eligibility\":\"host\",\"exact_kernel\":\"closed_form\",\"precision\":\"float64\",\"quadrature\":null,\"standoff\":null}"
+    },
+    "semantic_key": "746fbe1553c4b242",
+    "state_nodes": 2396,
+    "store": "/home/ITER/mcintos/.local/share/nova/0.11.0/solovev_hex_machine.zarr"
+  },
+  "extracted_route_coordinate_control": {
+    "arms": {
+      "banked_declared_coordinate_base_support": {
+        "grid_core_forcing_wb": {
+          "mean_absolute": 2.213041052303886,
+          "rms": 2.2356365333914945,
+          "signed_mean": -2.213041052303886,
+          "sup": 2.748872340962243
+        },
+        "profile_support": {
+          "maximum_psi_norm": 0.954825545781728,
+          "minimum_psi_norm": 0.050233814007999096,
+          "samples": 19
+        },
+        "state_forcing_wb": {
+          "mean_absolute": 2.0654385925337206,
+          "rms": 2.1166984237316626,
+          "signed_mean": -2.0654385925337206,
+          "sup": 2.761043295665982
+        }
+      },
+      "map_coordinate_base_support": {
+        "grid_core_forcing_wb": {
+          "mean_absolute": 1.6480860058113842,
+          "rms": 1.671779846602095,
+          "signed_mean": -1.6480860058113842,
+          "sup": 2.2742532049784003
+        },
+        "profile_support": {
+          "maximum_psi_norm": 0.95,
+          "minimum_psi_norm": 0.05,
+          "samples": 19
+        },
+        "state_forcing_wb": {
+          "mean_absolute": 1.592505412645187,
+          "rms": 1.634319587224011,
+          "signed_mean": -1.592505412645187,
+          "sup": 2.2772230568718648
+        }
+      },
+      "map_coordinate_extended_support": {
+        "grid_core_forcing_wb": {
+          "mean_absolute": 0.06344726079199585,
+          "rms": 0.08378152649043058,
+          "signed_mean": 0.055471373800557534,
+          "sup": 0.17746953720650538
+        },
+        "profile_support": {
+          "maximum_psi_norm": 0.99,
+          "minimum_psi_norm": 0.01,
+          "samples": 27
+        },
+        "state_forcing_wb": {
+          "mean_absolute": 0.04517298182055974,
+          "rms": 0.06372096768159512,
+          "signed_mean": 0.028080293050264615,
+          "sup": 0.17746953720650538
+        }
+      }
+    },
+    "controls": {
+      "banked_forcing_sup_wb": 2.748872340962243,
+      "banked_rerun_difference_wb": 0.0,
+      "combined_image_difference_wb": {
+        "mean_absolute": 2.0935188855839852,
+        "rms": 2.1512433829124404,
+        "signed_mean": 2.0935188855839852,
+        "sup": 2.827684132952413
+      },
+      "coordinate_only_image_difference_wb": {
+        "mean_absolute": 0.47293317988853356,
+        "rms": 0.49416051729536636,
+        "signed_mean": 0.47293317988853356,
+        "sup": 0.694113611105081
+      },
+      "support_extension_only_image_difference_wb": {
+        "mean_absolute": 1.6205857056954514,
+        "rms": 1.6667132656330763,
+        "signed_mean": 1.6205857056954514,
+        "sup": 2.232584253928067
+      }
+    },
+    "extended_extraction": {
+      "reliable_psi_norm_map": [
+        0.01,
+        0.02,
+        0.03,
+        0.04,
+        0.05,
+        0.1,
+        0.15,
+        0.2,
+        0.25,
+        0.3,
+        0.35,
+        0.39999999999999997,
+        0.44999999999999996,
+        0.49999999999999994,
+        0.5499999999999999,
+        0.6,
+        0.65,
+        0.7,
+        0.75,
+        0.7999999999999999,
+        0.85,
+        0.9,
+        0.95,
+        0.96,
+        0.97,
+        0.98,
+        0.99
+      ],
+      "reliable_shells": 27,
+      "requested_shells": 27,
+      "sample_count": [
+        15,
+        13,
+        19,
+        15,
+        45,
+        79,
+        80,
+        83,
+        78,
+        85,
+        77,
+        93,
+        99,
+        103,
+        106,
+        120,
+        129,
+        131,
+        156,
+        167,
+        180,
+        206,
+        121,
+        58,
+        51,
+        48,
+        49
+      ],
+      "unreliable_psi_norm_map": []
+    },
+    "interpretation": "The middle arm changes only the profile coordinate; the final arm then adds reliable endpoint shells. Route disagreement remains reported and is not blended into the declared route."
+  },
+  "figure": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/s-20260821-forward/dual-route-owner-questions/docs/figures/dina-profile-routes/route_controls.png",
+  "forcing_reconciliation": {
+    "anchors": {
+      "declared": {
+        "axis_flux_wb": -86.01645410417784,
+        "boundary_flux_wb": -5.1227631227097294,
+        "flux_span_wb": 80.89369098146811
+      },
+      "map_saddle": {
+        "axis_flux_wb": -86.01817570002173,
+        "boundary_flux_wb": -4.711771239471581,
+        "flux_span_wb": 81.30640446055014
+      }
+    },
+    "arms": {
+      "interpolated_values_declared_constants": {
+        "absolute_value_source": "interpolated",
+        "axis_flux_wb": -86.01645410417784,
+        "boundary_flux_wb": -5.1227631227097294,
+        "grid_core_forcing_wb": {
+          "mean_absolute": 0.013795356442415386,
+          "rms": 0.01794694471919975,
+          "signed_mean": 0.00387450910814074,
+          "sup": 0.07542302017352664
+        },
+        "normalization_constants": "declared",
+        "state_forcing_wb": {
+          "mean_absolute": 0.013601383291450006,
+          "rms": 0.019340767026078325,
+          "signed_mean": -0.0024443419704536892,
+          "sup": 0.07542302017352664
+        }
+      },
+      "interpolated_values_map_saddle_constants": {
+        "absolute_value_source": "interpolated",
+        "axis_flux_wb": -86.01817570002173,
+        "boundary_flux_wb": -4.711771239471581,
+        "grid_core_forcing_wb": {
+          "mean_absolute": 1.0120745885203566,
+          "rms": 1.0246883751984208,
+          "signed_mean": -1.0120745885203566,
+          "sup": 1.2942065775424068
+        },
+        "normalization_constants": "map_saddle",
+        "state_forcing_wb": {
+          "mean_absolute": 0.8963249368023563,
+          "rms": 0.9291971947434674,
+          "signed_mean": -0.8963249368023563,
+          "sup": 1.2942065775424068
+        }
+      },
+      "map_exact_values_declared_constants": {
+        "absolute_value_source": "map_exact",
+        "axis_flux_wb": -86.01645410417784,
+        "boundary_flux_wb": -5.1227631227097294,
+        "grid_core_forcing_wb": {
+          "mean_absolute": 0.013795356442415386,
+          "rms": 0.01794694471919975,
+          "signed_mean": 0.00387450910814074,
+          "sup": 0.07542302017352664
+        },
+        "normalization_constants": "declared",
+        "state_forcing_wb": {
+          "mean_absolute": 0.013601383291450006,
+          "rms": 0.019340767026078325,
+          "signed_mean": -0.0024443419704536892,
+          "sup": 0.07542302017352664
+        }
+      },
+      "map_exact_values_map_saddle_constants": {
+        "absolute_value_source": "map_exact",
+        "axis_flux_wb": -86.01817570002173,
+        "boundary_flux_wb": -4.711771239471581,
+        "grid_core_forcing_wb": {
+          "mean_absolute": 1.0120745885203566,
+          "rms": 1.0246883751984208,
+          "signed_mean": -1.0120745885203566,
+          "sup": 1.2942065775424068
+        },
+        "normalization_constants": "map_saddle",
+        "state_forcing_wb": {
+          "mean_absolute": 0.8963249368023563,
+          "rms": 0.9291971947434674,
+          "signed_mean": -0.8963249368023563,
+          "sup": 1.2942065775424068
+        }
+      }
+    },
+    "banked_arm_correction": {
+      "banked_grid_core_forcing_sup_wb": 1.2942065775424352,
+      "direct_path_control_difference_wb": {
+        "mean_absolute": 7.381222325988687e-15,
+        "rms": 1.3997965564225173e-14,
+        "signed_mean": 6.782183792501457e-15,
+        "sup": 5.684341886080802e-14
+      },
+      "rerun_grid_core_forcing_sup_wb": 1.2942065775424068,
+      "statement": "The banked 1.294 Wb declared-profile arm used map-saddle topology constants for its density psi_N, not declared constants."
+    },
+    "factors": {
+      "absolute_values": [
+        "interpolated",
+        "map_exact"
+      ],
+      "held_fixed": "declared IDS p-prime and FF-prime source functions",
+      "normalization_constants": [
+        "map_saddle",
+        "declared"
+      ]
+    },
+    "prior_discriminator_reconciliation": {
+      "declared_constants_forcing_sup_wb": 0.059527907823188286,
+      "map_saddle_constants_forcing_sup_wb": 1.2522923719688936,
+      "source": "scripts/normalization_discriminator/results.json",
+      "statement": "The independently banked density-only discriminator collapses from 1.2523 to 0.0595 Wb under declared constants; this rerun uses the same declared source and the same two factors."
+    }
+  },
+  "reference": {
+    "dd_version": "3.39.0",
+    "pulse": 135011,
+    "reader": "imas.DBEntry",
+    "run": 7,
+    "time_s": 338.9275978120551,
+    "time_slice": 353
+  },
+  "rotation_and_variance": {
+    "aggregate": {
+      "residual_rms_reduction_fraction": 0.009621250353371469,
+      "rotating_projection_rms_rj_phi_a_per_m": 253688.29506174845,
+      "rotating_residual_to_signal_fraction": 0.04738214782070325,
+      "sample_count": 2281,
+      "signal_rms_rj_phi_a_per_m": 5354090.2371441545,
+      "significant_rotation_proxy_shells": 0,
+      "static_explained_variance_fraction": 0.9977110997838341,
+      "static_projection_rms_rj_phi_a_per_m": 256152.8053305521,
+      "static_residual_to_signal_fraction": 0.0478424520291953,
+      "total_shells": 19
+    },
+    "basis": {
+      "interpretation": "small-centrifugal-exponent radial shape from rotation.py; the amplitude is a diagnostic coefficient, not a declared closure",
+      "reference_radius_m": 6.2,
+      "rotation_diagnostic": "mu0*R^2*(R^2-R0^2)",
+      "static": [
+        "mu0*R^2",
+        "1"
+      ],
+      "uncertainty": "least-squares covariance multiplied by the extractor's shell uncertainty inflation; 1.96 sigma is only a correlation-aware proxy"
+    },
+    "shells": [
+      {
+        "extractor_projection_rms_rj_phi_a_per_m": 12360.371401703012,
+        "psi_norm_map": 0.05,
+        "residual_rms_reduction_fraction": 0.07896530741285135,
+        "residual_rms_reduction_rj_phi_a_per_m": 976.0405274724944,
+        "rotating_projection_rms_rj_phi_a_per_m": 11384.330874230518,
+        "rotation_amplitude_over_uncertainty": 0.8404431231587874,
+        "rotation_amplitude_significant_95_percent_proxy": false,
+        "rotation_column": "mu0*R^2*(R^2-R0^2)",
+        "rotation_column_amplitude": 409743628.00098354,
+        "rotation_column_amplitude_uncertainty": 487532846.3167988,
+        "sample_count": 79,
+        "signal_rms_rj_phi_a_per_m": 9898831.569060102,
+        "static_explained_variance_fraction": 0.9999984408238904,
+        "static_intercept_amplitude": -7636038.987128756,
+        "static_pressure_column_amplitude": -44717109378.67103,
+        "static_projection_rms_rj_phi_a_per_m": 12360.371401703012
+      },
+      {
+        "extractor_projection_rms_rj_phi_a_per_m": 18383.76952066882,
+        "psi_norm_map": 0.1,
+        "residual_rms_reduction_fraction": 0.023945307774062785,
+        "residual_rms_reduction_rj_phi_a_per_m": 440.2050192198476,
+        "rotating_projection_rms_rj_phi_a_per_m": 17943.564501448895,
+        "rotation_amplitude_over_uncertainty": 0.6263961562319599,
+        "rotation_amplitude_significant_95_percent_proxy": false,
+        "rotation_column": "mu0*R^2*(R^2-R0^2)",
+        "rotation_column_amplitude": -177492439.8814789,
+        "rotation_column_amplitude_uncertainty": 283354931.40502596,
+        "sample_count": 79,
+        "signal_rms_rj_phi_a_per_m": 9946270.48710047,
+        "static_explained_variance_fraction": 0.9999965837582027,
+        "static_intercept_amplitude": -7678774.782649484,
+        "static_pressure_column_amplitude": -44160444864.936966,
+        "static_projection_rms_rj_phi_a_per_m": 18383.769520668742
+      },
+      {
+        "extractor_projection_rms_rj_phi_a_per_m": 6434.425957464722,
+        "psi_norm_map": 0.15,
+        "residual_rms_reduction_fraction": 0.002114967536938517,
+        "residual_rms_reduction_rj_phi_a_per_m": 13.608602018872261,
+        "rotating_projection_rms_rj_phi_a_per_m": 6420.817355445827,
+        "rotation_amplitude_over_uncertainty": 0.22565617063817206,
+        "rotation_amplitude_significant_95_percent_proxy": false,
+        "rotation_column": "mu0*R^2*(R^2-R0^2)",
+        "rotation_column_amplitude": -12466559.079615435,
+        "rotation_column_amplitude_uncertainty": 55245815.1016172,
+        "sample_count": 80,
+        "signal_rms_rj_phi_a_per_m": 9959924.57818847,
+        "static_explained_variance_fraction": 0.9999995826431788,
+        "static_intercept_amplitude": -7800938.464576602,
+        "static_pressure_column_amplitude": -42598098844.26159,
+        "static_projection_rms_rj_phi_a_per_m": 6434.425957464699
+      },
+      {
+        "extractor_projection_rms_rj_phi_a_per_m": 58092.73543566551,
+        "psi_norm_map": 0.2,
+        "residual_rms_reduction_fraction": 0.0001485379139808396,
+        "residual_rms_reduction_rj_phi_a_per_m": 8.628973739054345,
+        "rotating_projection_rms_rj_phi_a_per_m": 58084.10646192657,
+        "rotation_amplitude_over_uncertainty": 0.07023217015497783,
+        "rotation_amplitude_significant_95_percent_proxy": false,
+        "rotation_column": "mu0*R^2*(R^2-R0^2)",
+        "rotation_column_amplitude": 22400892.350636035,
+        "rotation_column_amplitude_uncertainty": 318954865.00281996,
+        "sample_count": 83,
+        "signal_rms_rj_phi_a_per_m": 9877403.101420559,
+        "static_explained_variance_fraction": 0.9999654093998023,
+        "static_intercept_amplitude": -7827119.5759536475,
+        "static_pressure_column_amplitude": -40637958672.52003,
+        "static_projection_rms_rj_phi_a_per_m": 58092.73543566562
+      },
+      {
+        "extractor_projection_rms_rj_phi_a_per_m": 231619.18538915642,
+        "psi_norm_map": 0.25,
+        "residual_rms_reduction_fraction": 0.005856927618753338,
+        "residual_rms_reduction_rj_phi_a_per_m": 1356.5768039388931,
+        "rotating_projection_rms_rj_phi_a_per_m": 230262.60858521744,
+        "rotation_amplitude_over_uncertainty": 0.4800445027398007,
+        "rotation_amplitude_significant_95_percent_proxy": false,
+        "rotation_column": "mu0*R^2*(R^2-R0^2)",
+        "rotation_column_amplitude": 448548047.6715889,
+        "rotation_column_amplitude_uncertainty": 934388468.3848075,
+        "sample_count": 78,
+        "signal_rms_rj_phi_a_per_m": 9397623.859047242,
+        "static_explained_variance_fraction": 0.9993925466338474,
+        "static_intercept_amplitude": -7315210.299331401,
+        "static_pressure_column_amplitude": -41464057476.80509,
+        "static_projection_rms_rj_phi_a_per_m": 231619.18538915634
+      },
+      {
+        "extractor_projection_rms_rj_phi_a_per_m": 470605.6652210604,
+        "psi_norm_map": 0.3,
+        "residual_rms_reduction_fraction": 0.020771531569519386,
+        "residual_rms_reduction_rj_phi_a_per_m": 9775.200431933918,
+        "rotating_projection_rms_rj_phi_a_per_m": 460830.46478912636,
+        "rotation_amplitude_over_uncertainty": 1.0456065227589886,
+        "rotation_amplitude_significant_95_percent_proxy": false,
+        "rotation_column": "mu0*R^2*(R^2-R0^2)",
+        "rotation_column_amplitude": 1426566400.4652126,
+        "rotation_column_amplitude_uncertainty": 1364343440.3039153,
+        "sample_count": 85,
+        "signal_rms_rj_phi_a_per_m": 8230663.64652924,
+        "static_explained_variance_fraction": 0.9967307766397349,
+        "static_intercept_amplitude": -6270612.466002955,
+        "static_pressure_column_amplitude": -37989971792.35549,
+        "static_projection_rms_rj_phi_a_per_m": 470605.6652210603
+      },
+      {
+        "extractor_projection_rms_rj_phi_a_per_m": 395869.52999196656,
+        "psi_norm_map": 0.35,
+        "residual_rms_reduction_fraction": 0.005144905098742658,
+        "residual_rms_reduction_rj_phi_a_per_m": 2036.7111632925225,
+        "rotating_projection_rms_rj_phi_a_per_m": 393832.81882867403,
+        "rotation_amplitude_over_uncertainty": 0.5286447427914177,
+        "rotation_amplitude_significant_95_percent_proxy": false,
+        "rotation_column": "mu0*R^2*(R^2-R0^2)",
+        "rotation_column_amplitude": 525365199.65695983,
+        "rotation_column_amplitude_uncertainty": 993796319.4013038,
+        "sample_count": 77,
+        "signal_rms_rj_phi_a_per_m": 6659481.776430143,
+        "static_explained_variance_fraction": 0.9964663520350758,
+        "static_intercept_amplitude": -5151025.791771978,
+        "static_pressure_column_amplitude": -29525579379.09866,
+        "static_projection_rms_rj_phi_a_per_m": 395869.52999196656
+      },
+      {
+        "extractor_projection_rms_rj_phi_a_per_m": 267089.87929016224,
+        "psi_norm_map": 0.39999999999999997,
+        "residual_rms_reduction_fraction": 0.005812774000705567,
+        "residual_rms_reduction_rj_phi_a_per_m": 1552.533106189454,
+        "rotating_projection_rms_rj_phi_a_per_m": 265537.3461839728,
+        "rotation_amplitude_over_uncertainty": 0.6605078374449588,
+        "rotation_amplitude_significant_95_percent_proxy": false,
+        "rotation_column": "mu0*R^2*(R^2-R0^2)",
+        "rotation_column_amplitude": -333370876.1227251,
+        "rotation_column_amplitude_uncertainty": 504719031.6655485,
+        "sample_count": 93,
+        "signal_rms_rj_phi_a_per_m": 5498944.06692364,
+        "static_explained_variance_fraction": 0.997640846175772,
+        "static_intercept_amplitude": -3813634.900603574,
+        "static_pressure_column_amplitude": -33745603386.314266,
+        "static_projection_rms_rj_phi_a_per_m": 267089.87929016224
+      },
+      {
+        "extractor_projection_rms_rj_phi_a_per_m": 159037.4549992619,
+        "psi_norm_map": 0.44999999999999996,
+        "residual_rms_reduction_fraction": 0.003031363739173898,
+        "residual_rms_reduction_rj_phi_a_per_m": 482.10037425527116,
+        "rotating_projection_rms_rj_phi_a_per_m": 158555.35462500664,
+        "rotation_amplitude_over_uncertainty": 0.5208911824712714,
+        "rotation_amplitude_significant_95_percent_proxy": false,
+        "rotation_column": "mu0*R^2*(R^2-R0^2)",
+        "rotation_column_amplitude": -123996326.6772126,
+        "rotation_column_amplitude_uncertainty": 238046507.31259274,
+        "sample_count": 99,
+        "signal_rms_rj_phi_a_per_m": 4783303.3134719115,
+        "static_explained_variance_fraction": 0.9988945401006779,
+        "static_intercept_amplitude": -3035000.3420983455,
+        "static_pressure_column_amplitude": -34725822138.96839,
+        "static_projection_rms_rj_phi_a_per_m": 159037.4549992619
+      },
+      {
+        "extractor_projection_rms_rj_phi_a_per_m": 128585.71750456715,
+        "psi_norm_map": 0.49999999999999994,
+        "residual_rms_reduction_fraction": 0.0031025099665031863,
+        "residual_rms_reduction_rj_phi_a_per_m": 398.9384701078816,
+        "rotating_projection_rms_rj_phi_a_per_m": 128186.77903445926,
+        "rotation_amplitude_over_uncertainty": 0.5666143773605035,
+        "rotation_amplitude_significant_95_percent_proxy": false,
+        "rotation_column": "mu0*R^2*(R^2-R0^2)",
+        "rotation_column_amplitude": 87119448.29160038,
+        "rotation_column_amplitude_uncertainty": 153754390.5917717,
+        "sample_count": 103,
+        "signal_rms_rj_phi_a_per_m": 4234526.161986441,
+        "static_explained_variance_fraction": 0.9990779046661584,
+        "static_intercept_amplitude": -2534781.6593090435,
+        "static_pressure_column_amplitude": -33942459922.081997,
+        "static_projection_rms_rj_phi_a_per_m": 128585.71750456715
+      },
+      {
+        "extractor_projection_rms_rj_phi_a_per_m": 120511.79391221653,
+        "psi_norm_map": 0.5499999999999999,
+        "residual_rms_reduction_fraction": 0.004044767055575882,
+        "residual_rms_reduction_rj_phi_a_per_m": 487.4421338244865,
+        "rotating_projection_rms_rj_phi_a_per_m": 120024.35177839208,
+        "rotation_amplitude_over_uncertainty": 0.6888372356333294,
+        "rotation_amplitude_significant_95_percent_proxy": false,
+        "rotation_column": "mu0*R^2*(R^2-R0^2)",
+        "rotation_column_amplitude": 86349152.28106207,
+        "rotation_column_amplitude_uncertainty": 125354942.81413387,
+        "sample_count": 106,
+        "signal_rms_rj_phi_a_per_m": 3755094.589895682,
+        "static_explained_variance_fraction": 0.9989700471584266,
+        "static_intercept_amplitude": -2078394.6526234222,
+        "static_pressure_column_amplitude": -34131531352.70604,
+        "static_projection_rms_rj_phi_a_per_m": 120511.79391221657
+      },
+      {
+        "extractor_projection_rms_rj_phi_a_per_m": 111057.07976178489,
+        "psi_norm_map": 0.6,
+        "residual_rms_reduction_fraction": 0.0005678708112986097,
+        "residual_rms_reduction_rj_phi_a_per_m": 63.066073984780814,
+        "rotating_projection_rms_rj_phi_a_per_m": 110994.01368780009,
+        "rotation_amplitude_over_uncertainty": 0.28608233900810004,
+        "rotation_amplitude_significant_95_percent_proxy": false,
+        "rotation_column": "mu0*R^2*(R^2-R0^2)",
+        "rotation_column_amplitude": 27152826.557299875,
+        "rotation_column_amplitude_uncertainty": 94912627.78207038,
+        "sample_count": 120,
+        "signal_rms_rj_phi_a_per_m": 3418180.666205595,
+        "static_explained_variance_fraction": 0.9989443924876253,
+        "static_intercept_amplitude": -1727940.8615293053,
+        "static_pressure_column_amplitude": -33311031821.405983,
+        "static_projection_rms_rj_phi_a_per_m": 111057.07976178487
+      },
+      {
+        "extractor_projection_rms_rj_phi_a_per_m": 94644.68724710571,
+        "psi_norm_map": 0.65,
+        "residual_rms_reduction_fraction": 0.002292444855463427,
+        "residual_rms_reduction_rj_phi_a_per_m": 216.96772637657705,
+        "rotating_projection_rms_rj_phi_a_per_m": 94427.71952072915,
+        "rotation_amplitude_over_uncertainty": 0.5655796019649735,
+        "rotation_amplitude_significant_95_percent_proxy": false,
+        "rotation_column": "mu0*R^2*(R^2-R0^2)",
+        "rotation_column_amplitude": 41345025.0258901,
+        "rotation_column_amplitude_uncertainty": 73102044.13710558,
+        "sample_count": 129,
+        "signal_rms_rj_phi_a_per_m": 3035219.623272866,
+        "static_explained_variance_fraction": 0.9990276732404756,
+        "static_intercept_amplitude": -1468826.7317419117,
+        "static_pressure_column_amplitude": -31383526563.61475,
+        "static_projection_rms_rj_phi_a_per_m": 94644.68724710573
+      },
+      {
+        "extractor_projection_rms_rj_phi_a_per_m": 77333.40677581659,
+        "psi_norm_map": 0.7,
+        "residual_rms_reduction_fraction": 7.967348595294688e-05,
+        "residual_rms_reduction_rj_phi_a_per_m": 6.161422098448384,
+        "rotating_projection_rms_rj_phi_a_per_m": 77327.24535371814,
+        "rotation_amplitude_over_uncertainty": 0.096279189656118,
+        "rotation_amplitude_significant_95_percent_proxy": false,
+        "rotation_column": "mu0*R^2*(R^2-R0^2)",
+        "rotation_column_amplitude": -5983982.402905478,
+        "rotation_column_amplitude_uncertainty": 62152396.83963449,
+        "sample_count": 131,
+        "signal_rms_rj_phi_a_per_m": 2718313.3698217054,
+        "static_explained_variance_fraction": 0.9991906521024563,
+        "static_intercept_amplitude": -1219530.6498766043,
+        "static_pressure_column_amplitude": -30586129223.700233,
+        "static_projection_rms_rj_phi_a_per_m": 77333.40677581659
+      },
+      {
+        "extractor_projection_rms_rj_phi_a_per_m": 64366.06952692759,
+        "psi_norm_map": 0.75,
+        "residual_rms_reduction_fraction": 0.0044400122511728535,
+        "residual_rms_reduction_rj_phi_a_per_m": 285.7861372594052,
+        "rotating_projection_rms_rj_phi_a_per_m": 64080.28338966818,
+        "rotation_amplitude_over_uncertainty": 0.7102455054402372,
+        "rotation_amplitude_significant_95_percent_proxy": false,
+        "rotation_column": "mu0*R^2*(R^2-R0^2)",
+        "rotation_column_amplitude": -34387581.12736008,
+        "rotation_column_amplitude_uncertainty": 48416471.29614055,
+        "sample_count": 156,
+        "signal_rms_rj_phi_a_per_m": 2455336.955670312,
+        "static_explained_variance_fraction": 0.9993127863471476,
+        "static_intercept_amplitude": -961873.3113473025,
+        "static_pressure_column_amplitude": -30882501501.679306,
+        "static_projection_rms_rj_phi_a_per_m": 64366.06952692758
+      },
+      {
+        "extractor_projection_rms_rj_phi_a_per_m": 44133.27082592671,
+        "psi_norm_map": 0.7999999999999999,
+        "residual_rms_reduction_fraction": 0.00043631348295414263,
+        "residual_rms_reduction_rj_phi_a_per_m": 19.255941108218394,
+        "rotating_projection_rms_rj_phi_a_per_m": 44114.01488481848,
+        "rotation_amplitude_over_uncertainty": 0.20678527116166703,
+        "rotation_amplitude_significant_95_percent_proxy": false,
+        "rotation_column": "mu0*R^2*(R^2-R0^2)",
+        "rotation_column_amplitude": 6627522.940133725,
+        "rotation_column_amplitude_uncertainty": 32050265.97349989,
+        "sample_count": 167,
+        "signal_rms_rj_phi_a_per_m": 2265844.2688190397,
+        "static_explained_variance_fraction": 0.9996206220237931,
+        "static_intercept_amplitude": -766868.693595823,
+        "static_pressure_column_amplitude": -30840659536.418087,
+        "static_projection_rms_rj_phi_a_per_m": 44133.2708259267
+      },
+      {
+        "extractor_projection_rms_rj_phi_a_per_m": 181818.98554732034,
+        "psi_norm_map": 0.85,
+        "residual_rms_reduction_fraction": 0.0023800902643619226,
+        "residual_rms_reduction_rj_phi_a_per_m": 432.74559737733216,
+        "rotating_projection_rms_rj_phi_a_per_m": 181386.23994994303,
+        "rotation_amplitude_over_uncertainty": 0.4271068485373212,
+        "rotation_amplitude_significant_95_percent_proxy": false,
+        "rotation_column": "mu0*R^2*(R^2-R0^2)",
+        "rotation_column_amplitude": 63760605.67974505,
+        "rotation_column_amplitude_uncertainty": 149284905.868639,
+        "sample_count": 180,
+        "signal_rms_rj_phi_a_per_m": 2451514.4780399734,
+        "static_explained_variance_fraction": 0.9944994066967083,
+        "static_intercept_amplitude": -319676.4774345491,
+        "static_pressure_column_amplitude": -45258558787.19361,
+        "static_projection_rms_rj_phi_a_per_m": 181818.98554732036
+      },
+      {
+        "extractor_projection_rms_rj_phi_a_per_m": 175507.4872570271,
+        "psi_norm_map": 0.9,
+        "residual_rms_reduction_fraction": 0.006970605094312909,
+        "residual_rms_reduction_rj_phi_a_per_m": 1223.3933847638837,
+        "rotating_projection_rms_rj_phi_a_per_m": 174284.0938722632,
+        "rotation_amplitude_over_uncertainty": 0.684963727261103,
+        "rotation_amplitude_significant_95_percent_proxy": false,
+        "rotation_column": "mu0*R^2*(R^2-R0^2)",
+        "rotation_column_amplitude": 92256340.58362386,
+        "rotation_column_amplitude_uncertainty": 134687921.28967208,
+        "sample_count": 206,
+        "signal_rms_rj_phi_a_per_m": 3097084.4647054607,
+        "static_explained_variance_fraction": 0.9967886680701703,
+        "static_intercept_amplitude": 379573.8215690547,
+        "static_pressure_column_amplitude": -70968056785.14925,
+        "static_projection_rms_rj_phi_a_per_m": 175507.4872570271
+      },
+      {
+        "extractor_projection_rms_rj_phi_a_per_m": 608634.8499178223,
+        "psi_norm_map": 0.95,
+        "residual_rms_reduction_fraction": 0.00985881535700961,
+        "residual_rms_reduction_rj_phi_a_per_m": 6000.418605181039,
+        "rotating_projection_rms_rj_phi_a_per_m": 602634.4313126412,
+        "rotation_amplitude_over_uncertainty": 0.5569716660526889,
+        "rotation_amplitude_significant_95_percent_proxy": false,
+        "rotation_column": "mu0*R^2*(R^2-R0^2)",
+        "rotation_column_amplitude": 363542995.5679097,
+        "rotation_column_amplitude_uncertainty": 652713625.7116514,
+        "sample_count": 230,
+        "signal_rms_rj_phi_a_per_m": 1981574.323855524,
+        "static_explained_variance_fraction": 0.9056606456590036,
+        "static_intercept_amplitude": 360288.8357430432,
+        "static_pressure_column_amplitude": -46963378702.72356,
+        "static_projection_rms_rj_phi_a_per_m": 608634.8499178223
+      }
+    ]
+  },
+  "rotational_pressure_constraint": {
+    "dd_version": "3.39.0",
+    "filled": false,
+    "item_count": 0,
+    "path": "equilibrium/time_slice/constraints/pressure_rotational",
+    "present_in_dictionary": true,
+    "reader": "imas.DBEntry",
+    "source_user": "mcintos"
+  },
+  "schema": "nova.dina-dual-route-addendum",
+  "two_function_balance_verdict": {
+    "consistent": true,
+    "statement": "The stored map is consistent with a two-function Grad-Shafranov balance at 4.7842% weighted R*j_phi residual RMS; the rotation-shaped diagnostic is reported separately and does not reconcile the two source routes.",
+    "weighted_signal_rms_rj_phi_a_per_m": 5354090.2371441545,
+    "weighted_static_explained_variance_fraction": 0.9977110997838341,
+    "weighted_static_residual_rms_rj_phi_a_per_m": 256152.8053305521
+  }
+}

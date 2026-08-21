@@ -21,9 +21,9 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="3">
-<meta name="plan-commits" content="489197aa,9229dc53">
-<meta name="plan-artifacts" content="scripts/device_kernel_reuse/reuse-report.md,scripts/device_kernel_port/receipt.json,scripts/device_kernel_port/receipt.md,docs/evidence/archive/device-kernel-build-landed.html">
+<meta name="plan-version" content="4">
+<meta name="plan-commits" content="489197aa,9229dc53,25aede7d,d0b14cbf">
+<meta name="plan-artifacts" content="scripts/device_kernel_reuse/reuse-report.md,scripts/device_kernel_port/receipt.json,scripts/device_kernel_port/receipt.md,scripts/device_kernel_port/reduction-diagnosis.json,scripts/device_kernel_port/extended-precision-oracle-receipt.json,docs/evidence/archive/device-kernel-build-landed.html">
 <meta name="plan-impl" content="0.4">
 </head>
 <body>
@@ -212,6 +212,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260821T1400-prototype" data-who="reckon-ship" data-when="2026-08-21T14:00:00+00:00">
     <div class="r-comment-body">kernel-port-prototype landed - commit 9229dc53, merged with the receipt as the measure; gate PASSED (the node banks the go/no-go inputs); worker ~16 min of the 45-min ceiling; SLURM jobs 1252804/1252807/1252808, H200 via gpu_0003_grpA. PERFORMANCE HALF PASSES: H200 flux G0 kernel 0.2664 s for 303,601 pairs = 1.140M pairs/s; nine-block fine-fixture projection 11.475 s against the two-minute bar; CPU JAX lane 24.33 s versus the measured NumPy G0 stage 58.70 s (0.414x - an improvement, not a regression). NUMERICAL HALF HOLDS: GPU-vs-CPU-JAX byte-identical 4,353/303,601 = 1.434%; ULP p50 2,550, p90 13,602, p99 622,673, p99.9 1.875e12, max 3.64e13; GPU-vs-production-NumPy max abs 6.82e-10, max rel 9.00e-4. The receipt does NOT authorise the full port under the locked port-go-threshold (close-to-byte-identical). The tail is concentrated in the packed reduction; the repair node (nova/biot scope) is dispatched next, after which the cross-device receipt re-runs unchanged. Production NumPy untouched. Record: /nova/evidence/archive/device-kernel-build-landed#s4-prototype.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260821T1445-sliver-diagnosis" data-who="reckon-ship" data-when="2026-08-21T14:45:00+00:00">
+    <div class="r-comment-body">packed-reduction-parity landed - commits 25aede7d/d0b14cbf, merged 5cd4ed15; gate FAILED honestly: the cross-device receipt re-ran unchanged (byte-identical 1.434%, ULP p99.9 1.875e12) after both permitted repair placements, and the anti-thrashing fence stopped the node. WHAT IT CONVICTED: compiler reassociation is excluded by experiment (barriers at every ordered partial sum plus strict fast-math flags leave both device hashes unchanged); all 547 scale-aware failures localise to ONE micron-scale clipped triangular source (column 184, three-edge area normalization 2.84e5) - per-edge closed-form cancellation amplified by inverse-area normalization. The 63-bit longdouble ladder moves the production contour by max rel 4.6e-3 (evidence of conditioning) but does not Richardson-converge at the self cell (512-to-1024 nodes still changes 1.29e-9), so it cannot adjudicate correctness and no shared conditioned rule was authorized - the correct refusal. NEEDS-HELP answered oracle-first both rounds; continuation node sliver-precision-oracle owns the durable mpmath dev dependency and the 100+ digit adjudication. Record: /nova/evidence/archive/device-kernel-build-landed#s4-sliver-diagnosis.</div>
 </div>
 </section>
 </main>

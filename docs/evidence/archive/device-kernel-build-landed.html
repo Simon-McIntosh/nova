@@ -55,6 +55,27 @@
   <code>scripts/device_kernel_port/receipt.json</code>, <code>receipt.md</code>; reference
   array digests pinned in the manifest.</p>
 
+  <h2 id="s4-sliver-diagnosis">§4 — the parity tail convicted: one ill-conditioned sliver source, not reduction order</h2>
+
+  <p><strong>Landed 2026-08-21, commits <code>25aede7d</code>/<code>d0b14cbf</code> (merge
+  <code>5cd4ed15</code>); gate FAILED honestly — the receipt re-ran unchanged.</strong>
+  Compiler reassociation of the packed edge reduction is <em>excluded by experiment</em>:
+  optimization barriers at the endpoint/residual boundary, barriers after every ordered edge
+  partial sum, and strict CPU fast-math flags all leave both device matrix hashes unchanged
+  (H200 hash stable at <code>63caba8d…</code>). All 547 scale-aware failures localise to a
+  single micron-scale clipped triangular source — column 184, three-edge area normalization
+  2.840e5 — so the mechanism is cancellation inside each per-edge closed-form antiderivative
+  amplified by inverse-area normalization; GPU-vs-CPU divergence in that column is max abs
+  3.85e-9. A native 63-bit-mantissa (<code>numpy.longdouble</code>) ladder moves the
+  production contour value by max rel 4.63e-3 — evidence the production value itself is
+  conditioned — but fails to Richardson-converge at the self cell (successive-rung changes
+  1.95e-8 → 2.70e-9 → 1.64e-9 → 1.29e-9 at 64→1,024 nodes), so it cannot adjudicate
+  correctness and <strong>no shared conditioned rule was authorized</strong> — the correct
+  refusal under the oracle-first ruling. Continuation: the <code>sliver-precision-oracle</code>
+  node declares mpmath durably and adjudicates at ≥100 decimal digits. Receipts:
+  <code>reduction-diagnosis.json</code>, <code>extended-precision-oracle-receipt.json</code>
+  with the raw 551-element rung values committed beside it.</p>
+
 </main>
 </body>
 </html>

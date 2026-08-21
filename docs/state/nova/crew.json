@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T15:59:08",
+  "updated": "2026-08-21T16:13:44",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -16107,9 +16107,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T134308065692-packed-reduction-parity",
+        "plan": "device-kernel-build",
+        "section": "\u00a74",
+        "node": "packed-reduction-parity",
+        "role": "implement",
+        "member": "kernel-prototype",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T13:43:12Z",
+        "completed_at": "2026-08-21T14:11:17Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1685,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1685,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "a4bc284a25c65c9300bb551204b91019f88f96be",
+        "commits": [
+          "d0b14cbf"
+        ],
+        "changed_lines": {
+          "added": 3186,
+          "removed": 28,
+          "files": 11
+        },
+        "tests_added": 0,
+        "gate": "failed",
+        "outcome": "The gate measure re-ran unchanged and did not move: byte-identical stays 1.434% with the same ULP tail. The node instead convicted the mechanism - all 547 scale-aware failures are per-edge cancellation in one micron-scale sliver source (column 184) amplified by inverse-area normalization, with compiler reassociation excluded by barrier and fast-math experiments - and banked a 63-bit extended-precision ladder that disagrees with the production contour but is Richardson-inconclusive at the self cell, so no shared conditioned rule was authorized. Continuation: an arbitrary-precision oracle node owning the mpmath dependency declaration.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T134308065692-packed-reduction-parity/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0247d-26e8-7de2-96ad-893a24e6c3ff",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 13219840,
+            "cached_input_tokens_cumulative": 20467200,
+            "input_tokens": 13583790,
+            "input_tokens_cumulative": 21019820,
+            "output_tokens": 47731,
+            "output_tokens_cumulative": 79073,
+            "reasoning_output_tokens": 17620,
+            "reasoning_output_tokens_cumulative": 27520
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 417
+    "_version": 418
   }
 }

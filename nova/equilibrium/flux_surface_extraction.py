@@ -1171,11 +1171,25 @@ def traced_assemble_flux_surface_geometry(
         )
 
     psi_n_surface = jnp.asarray(surface_bins["pn_s"], dtype=dtype)
+    direct_surface_integrals = "dv_dpn_edge" in surface_bins
     volume_derivative = jnp.asarray(surface_bins["dv_dpn"], dtype=dtype)
+    volume_derivative_edge = jnp.asarray(
+        surface_bins.get("dv_dpn_edge", volume_derivative[-1]), dtype=dtype
+    )
     inverse_radius_squared = jnp.asarray(surface_bins["inv_r2"], dtype=dtype)
+    inverse_radius_squared_edge = jnp.asarray(
+        surface_bins.get("inv_r2_edge", inverse_radius_squared[-1]), dtype=dtype
+    )
     inverse_radius = jnp.asarray(surface_bins["inv_r"], dtype=dtype)
+    inverse_radius_edge = jnp.asarray(
+        surface_bins.get("inv_r_edge", inverse_radius[-1]), dtype=dtype
+    )
     gradient_squared_over_radius_squared = jnp.asarray(
         surface_bins["grad2_r2"], dtype=dtype
+    )
+    gradient_squared_over_radius_squared_edge = jnp.asarray(
+        surface_bins.get("grad2_r2_edge", gradient_squared_over_radius_squared[-1]),
+        dtype=dtype,
     )
     cumulative_volume = jnp.asarray(surface_bins["v_cum"], dtype=dtype)
     volume = jnp.asarray(surface_bins["v_total"], dtype=dtype)
@@ -1201,12 +1215,23 @@ def traced_assemble_flux_surface_geometry(
         * volume_derivative_per_flux
         / _TWO_PI
     )
+    safety_factor_edge = (
+        jnp.abs(f_profile[-1])
+        * inverse_radius_squared_edge
+        * volume_derivative_edge
+        / (jnp.abs(safe_span) * _TWO_PI)
+    )
     toroidal_flux_surface = _cumulative_trapezoid_from_axis(
         psi_n_surface, safety_factor * jnp.abs(safe_span)
     )
+    edge_safety_factor = (
+        0.5 * (safety_factor[-1] + safety_factor_edge)
+        if direct_surface_integrals
+        else safety_factor[-1]
+    )
     boundary_toroidal_flux = toroidal_flux_surface[-1] + (
         1.0 - psi_n_surface[-1]
-    ) * safety_factor[-1] * jnp.abs(safe_span)
+    ) * edge_safety_factor * jnp.abs(safe_span)
     safe_boundary_toroidal_flux = jnp.maximum(boundary_toroidal_flux, 1e-30)
     rho_surface = jnp.sqrt(
         jnp.clip(toroidal_flux_surface / safe_boundary_toroidal_flux, 0.0, 1.0)
@@ -1234,7 +1259,7 @@ def traced_assemble_flux_surface_geometry(
         rho_surface,
         inverse_radius_squared,
         inverse_radius_squared[0],
-        inverse_radius_squared[-1],
+        inverse_radius_squared_edge,
     )
     g3_cell = 0.5 * (g3_face[:-1] + g3_face[1:])
     inverse_radius_cell = jnp.interp(psi_n_cell, psi_n_surface, inverse_radius)
@@ -1243,7 +1268,7 @@ def traced_assemble_flux_surface_geometry(
         rho_surface,
         inverse_radius,
         inverse_radius[0],
-        inverse_radius[-1],
+        inverse_radius_edge,
     )
     magnetic_field_squared_cell = jnp.interp(
         psi_n_cell, psi_n_surface, magnetic_field_squared
@@ -1253,7 +1278,7 @@ def traced_assemble_flux_surface_geometry(
         rho_surface,
         safety_factor,
         safety_factor[0],
-        safety_factor[-1],
+        safety_factor_edge,
     )
 
     volume_face = _surface_interpolation(
@@ -1261,16 +1286,55 @@ def traced_assemble_flux_surface_geometry(
     )
     volume_face = jax.lax.associative_scan(jnp.maximum, jnp.nan_to_num(volume_face))
     radial_spacing = 1.0 / n_radial_cells
-    volume_derivative_face = jnp.gradient(volume_face, radial_spacing)
-    volume_derivative_face = volume_derivative_face.at[0].set(0.0)
-    volume_derivative_cell = jnp.diff(volume_face) / radial_spacing
-
-    volume_derivative_per_flux_face = jnp.interp(
-        psi_n_face, psi_n_surface, volume_derivative_per_flux
-    )
-    gradient_squared_face = jnp.interp(
-        psi_n_face, psi_n_surface, gradient_squared_over_radius_squared
-    )
+    if direct_surface_integrals:
+        volume_derivative_per_normalised_flux_face = _surface_interpolation(
+            rho_face,
+            rho_surface,
+            volume_derivative,
+            0.0,
+            volume_derivative_edge,
+        )
+        normalised_flux_gradient = (
+            2.0
+            * rho_face
+            * safe_boundary_toroidal_flux
+            / jnp.maximum(
+                jnp.abs(safety_factor_face * safe_span),
+                jnp.asarray(1e-30, dtype=dtype),
+            )
+        )
+        volume_derivative_face = (
+            (volume_derivative_per_normalised_flux_face * normalised_flux_gradient)
+            .at[0]
+            .set(0.0)
+        )
+        volume_derivative_cell = 0.5 * (
+            volume_derivative_face[:-1] + volume_derivative_face[1:]
+        )
+        volume_derivative_per_flux_face = _surface_interpolation(
+            rho_face,
+            rho_surface,
+            volume_derivative_per_flux,
+            volume_derivative_per_flux[0],
+            volume_derivative_edge / jnp.abs(safe_span),
+        )
+        gradient_squared_face = _surface_interpolation(
+            rho_face,
+            rho_surface,
+            gradient_squared_over_radius_squared,
+            gradient_squared_over_radius_squared[0],
+            gradient_squared_over_radius_squared_edge,
+        )
+    else:
+        volume_derivative_face = jnp.gradient(volume_face, radial_spacing)
+        volume_derivative_face = volume_derivative_face.at[0].set(0.0)
+        volume_derivative_cell = jnp.diff(volume_face) / radial_spacing
+        volume_derivative_per_flux_face = jnp.interp(
+            psi_n_face, psi_n_surface, volume_derivative_per_flux
+        )
+        gradient_squared_face = jnp.interp(
+            psi_n_face, psi_n_surface, gradient_squared_over_radius_squared
+        )
     g2_face = (
         (volume_derivative_per_flux_face**2 * gradient_squared_face).at[0].set(0.0)
     )
@@ -1745,6 +1809,8 @@ def _surface_clips(
         safe_denominator = jnp.maximum(denominator, jnp.asarray(1e-30, dtype=dtype))
         integrands = jnp.stack(
             (
+                1.0 / radius_at_arc**2,
+                1.0 / radius_at_arc,
                 physical_gradient**2 / radius_at_arc**2,
                 gradient_psi,
                 gradient_psi**2,
@@ -1756,12 +1822,15 @@ def _surface_clips(
         )
         averages = jnp.sum(integrands * weighted_volume[None], axis=(1, 2))
         averages /= safe_denominator
+        line_values = jnp.concatenate(
+            (jnp.asarray((_TWO_PI * denominator,), dtype=dtype), averages)
+        )
         minimum_ordinate_derivative = jnp.min(
             jnp.where(sample_valid, arc_ordinate_derivative, jnp.inf)
         )
         maximum_coarea_weight = jnp.max(jnp.where(sample_valid, arc_weight, 0.0))
         return (
-            averages,
+            line_values,
             boundary_valid & (denominator > 0.0),
             jnp.sum(invalid_boundary),
             jnp.argmax(invalid_boundary),
@@ -1793,9 +1862,6 @@ def _surface_clips(
     cumulative_invalid_cell = jnp.concatenate(
         (interior_cumulative[5], edge_cumulative[5][None])
     )
-    shell_values = jnp.diff(cumulative_values, axis=0)
-    shell_volume = jnp.maximum(shell_values[:, 0], 1e-30)
-    surface_values = shell_values[:, 1:] / shell_volume[:, None]
     cell_origin = coordinates[cell_nodes[:, 0]]
     interior_arc_average = jax.lax.map(
         lambda level: arc_surface_average(level, separatrix=False), surface_level
@@ -1944,7 +2010,6 @@ def _surface_clips(
     )
     axis_position = jnp.argmin(jnp.where(core > 0.0, psi_n_grid, jnp.inf))
     axis_radius = mesh_radius.reshape(-1)[axis_position]
-    dlevel = (psi_n_max - psi_n_min) / n_surface_bins
     all_arcs_valid = (
         jnp.all(cumulative_valid)
         & jnp.all(interior_arc_average[1])
@@ -1974,22 +2039,32 @@ def _surface_clips(
     )
     first_invalid_group = jnp.argmax(diagnostic_count > 0)
     arc_average = interior_arc_average[0]
+    edge_arc_average_values = edge_arc_average[0]
     return (
         {
             "pn_s": surface_level,
-            "dv_dpn": shell_values[:, 0] / dlevel,
-            "inv_r2": surface_values[:, 0],
-            "inv_r": surface_values[:, 1],
-            "grad2_r2": arc_average[:, 0],
+            "dv_dpn": arc_average[:, 0],
+            "dv_dpn_edge": edge_arc_average_values[0],
+            "inv_r2": arc_average[:, 1],
+            "inv_r2_edge": edge_arc_average_values[1],
+            "inv_r": arc_average[:, 2],
+            "inv_r_edge": edge_arc_average_values[2],
+            "grad2_r2": arc_average[:, 3],
+            "grad2_r2_edge": edge_arc_average_values[3],
             "v_cum": 0.5 * (cumulative_values[:-1, 0] + cumulative_values[1:, 0]),
             "v_total": total_values[0],
         },
         {
-            "grad_psi_surface": arc_average[:, 1],
-            "grad_psi2_surface": arc_average[:, 2],
-            "grad_psi2_over_r2_surface": arc_average[:, 3],
-            "b2_surface": arc_average[:, 4],
-            "inv_b2_surface": arc_average[:, 5],
+            "grad_psi_surface": arc_average[:, 4],
+            "grad_psi_edge": edge_arc_average_values[4],
+            "grad_psi2_surface": arc_average[:, 5],
+            "grad_psi2_edge": edge_arc_average_values[5],
+            "grad_psi2_over_r2_surface": arc_average[:, 6],
+            "grad_psi2_over_r2_edge": edge_arc_average_values[6],
+            "b2_surface": arc_average[:, 7],
+            "b2_edge": edge_arc_average_values[7],
+            "inv_b2_surface": arc_average[:, 8],
+            "inv_b2_edge": edge_arc_average_values[8],
             "r_in_surface": r_in,
             "r_in_edge": edge_r_in,
             "r_out_surface": r_out,

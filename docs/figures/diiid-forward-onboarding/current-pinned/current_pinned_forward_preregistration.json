@@ -19,10 +19,12 @@
     },
     "unpinned": {
       "control_absolute_tolerance": 2e-07,
-      "first_frame_plateau_control": 0.03491124178554655,
       "gmres_iterations": 24,
+      "low_current_full_24_plateau_control": 0.03491124178554655,
+      "low_current_shipped_20_plateau_control": 0.1233879,
       "newton_steps": 24,
       "relaxation": 0.5,
+      "representative_current_comparison": "remeasure shipped-20 and full-24 from the same seed per frame",
       "route": "accelerated newton_krylov",
       "step_cap": 10.0,
       "warmup": 8
@@ -47,10 +49,61 @@
     "requires_terminal_diverted": true
   },
   "selection": {
+    "absolute_recorded_ip_floor_a": 200000.0,
+    "cohort_declared_before_solver_scoring": [
+      {
+        "frame": 102,
+        "recorded_ip_a": 1283617.6680326462,
+        "seed_lambda": 1.1282545096762369,
+        "shot": "d3d_shot_00000c4a7b.parquet",
+        "time_ms": 2200.0,
+        "unscaled_source_ip_a": 1137702.226779481
+      },
+      {
+        "frame": 89,
+        "recorded_ip_a": 1745309.6601366997,
+        "seed_lambda": 0.9554470481184465,
+        "shot": "d3d_shot_0003ff34e7.parquet",
+        "time_ms": 1980.0,
+        "unscaled_source_ip_a": 1826694.2826122313
+      },
+      {
+        "frame": 215,
+        "recorded_ip_a": 990789.0240550041,
+        "seed_lambda": 1.4870168697536397,
+        "shot": "d3d_shot_001270afa9.parquet",
+        "time_ms": 5100.0,
+        "unscaled_source_ip_a": 666293.0624446461
+      },
+      {
+        "frame": 41,
+        "recorded_ip_a": 1006624.5902478695,
+        "seed_lambda": 0.9963729956971843,
+        "shot": "d3d_shot_001554e054.parquet",
+        "time_ms": 1160.0,
+        "unscaled_source_ip_a": 1010288.9124805233
+      },
+      {
+        "frame": 252,
+        "recorded_ip_a": 998801.5315532684,
+        "seed_lambda": 1.2458304613931273,
+        "shot": "d3d_shot_001cbcc9e6.parquet",
+        "time_ms": 5600.0,
+        "unscaled_source_ip_a": 801715.452065907
+      }
+    ],
     "frames": 5,
+    "low_current_control_fixture": {
+      "frame": 0,
+      "recorded_ip_a": -3465.503291954519,
+      "role": "selection-defect control only; excluded from every cohort statistic and constrained solve because seed lambda is negative",
+      "shot": "d3d_shot_00000c4a7b.parquet",
+      "time_ms": 160.0
+    },
     "polarity_screen": "every selected shot is absent from the landed 603-shot population",
-    "rule": "the five banked distinct-shot diverted replacement frames",
-    "source": "docs/figures/diiid-forward-onboarding/boundary-recovery/boundary_current_recovery_receipt.json"
+    "preflight_reproducibility_relative_tolerance": 2e-06,
+    "rule": "one maximum-absolute-current banked diverted frame per distinct shot, absolute recorded Ip at least 200 kA, retained only when target Ip and extracted unscaled source Ip have the same sign",
+    "source": "docs/figures/diiid-forward-onboarding/boundary-recovery/boundary_current_recovery_frames.jsonl"
   },
   "shared_inputs": {
     "coefficients_fitted": 0,
@@ -69,7 +122,7 @@
     "relative_step": 1e-06
   },
   "target_current": {
-    "inference_availability": "not available to an actuator-only inference input",
+    "inference_availability": "admissible competition input and may also be supplied by a partner transport solve",
     "source": "magnetics_plasma_current interpolated at the labelled time",
     "status": "declared constraint, not a fitted coefficient",
     "unit_crossing": "recorded kA multiplied by 1000 exactly once"

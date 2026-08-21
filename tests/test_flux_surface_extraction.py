@@ -17,8 +17,10 @@ from nova.equilibrium.flux_surface_geometry import (
     _refine_axis,
 )
 from nova.jax.config import configure_dtypes
+from nova.linalg.tensor_spline import fit_tensor_spline
 from nova.transport import torax_geometry_from_fsa
 from nova.transport.current_diffusion import (
+    _bicubic_derivatives,
     _bicubic_edge_coordinates,
     _bicubic_edge_crossings,
     _bicubic_stationary_point,
@@ -237,6 +239,44 @@ def test_bicubic_iterations_preserve_carry_dtype_and_float64_values():
         np.testing.assert_allclose(float32_value, float64_value, rtol=2e-6, atol=2e-6)
 
 
+def test_even_edge_root_pair_is_resolved_on_iter_inner_surface():
+    """A cubic edge is bracketed on both sides of its interior minimum."""
+    configure_dtypes()
+    reference = _reference_module()
+    data = reference._nova_input("iterhybrid_cocos17.eqdsk", 17)
+    psi = jnp.asarray(np.asarray(data["psi"]).T)
+    psi_n = (psi - data["simagx"]) / (data["sibdry"] - data["simagx"])
+    coefficient = fit_tensor_spline(
+        jnp.asarray(data["x"]), jnp.asarray(data["z"]), psi_n
+    ).cell_coefficients.reshape(-1, 4, 4)
+    cell = 9285
+    row, column = divmod(cell, psi_n.shape[1] - 1)
+    corners = jnp.asarray(
+        (
+            psi_n[row, column],
+            psi_n[row, column + 1],
+            psi_n[row + 1, column + 1],
+            psi_n[row + 1, column],
+        )
+    )[None]
+    level = jnp.asarray(0.040625, dtype=psi.dtype)
+    points, crossing, _ = _bicubic_edge_crossings(
+        level, coefficient[cell : cell + 1], corners
+    )
+    points = points.reshape(1, 4, 3, 2)
+    crossing = crossing.reshape(1, 4, 3)
+    top_radius = np.sort(np.asarray(points[0, 2, crossing[0, 2], 0]))
+    np.testing.assert_allclose(
+        top_radius, np.asarray((0.03308514, 0.42126222)), rtol=0.0, atol=2e-8
+    )
+    values = _bicubic_derivatives(
+        coefficient[cell],
+        jnp.asarray(top_radius),
+        jnp.ones(2, dtype=psi.dtype),
+    )[0]
+    assert float(jnp.max(jnp.abs(values - level))) < 2e-8
+
+
 def test_analytic_shape_gradient_jit_and_batch_contract():
     """Analytic shape, autodiff, compilation, and batching share one record."""
     inputs = _analytic_input(points=25, elongation=1.55, triangularity=0.12)
@@ -363,8 +403,8 @@ def test_iter_shape_referees_localize_inner_surface_convention():
             marks=pytest.mark.xfail(
                 strict=True,
                 reason=(
-                    "direct spline-arc coarea moments expose a low-aspect-ratio "
-                    "surface-partition residual outside both reference routes"
+                    "low-aspect-ratio coarea concentration remains outside both "
+                    "reference routes after monotone arc parameterisation"
                 ),
             ),
         ),
@@ -502,14 +542,9 @@ def test_real_equilibrium_reference_gates(filename, cocos):
     }
     print(f"{filename} arc_diagnostic={diagnostic}")
     if filename.startswith("iterhybrid"):
-        # This cell's same-sign top-edge endpoints enclose two spline roots.
-        # Endpoint-sign bisection cannot represent that four-crossing topology.
-        assert not bool(record["surface_arc_valid"])
-        assert diagnostic["invalid_count"] == 1
-        assert diagnostic["first_invalid_cell"] == 9285
-        np.testing.assert_allclose(
-            diagnostic["first_invalid_level"], 0.040625, rtol=0.0, atol=1e-12
-        )
+        assert bool(record["valid"]), diagnostic
+        assert bool(record["surface_arc_valid"]), diagnostic
+        assert diagnostic["invalid_count"] == 0
     else:
         assert bool(record["valid"]), diagnostic
     assert not failures, failures

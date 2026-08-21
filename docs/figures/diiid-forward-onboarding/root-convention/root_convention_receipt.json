@@ -1,0 +1,2041 @@
+{
+  "artifacts": {
+    "figure": "docs/figures/diiid-forward-onboarding/root-convention/root_convention_sweep.png",
+    "incremental_checkpoint": "docs/figures/diiid-forward-onboarding/root-convention/root_convention_frames.jsonl",
+    "preregistration": "docs/figures/diiid-forward-onboarding/root-convention/root_convention_preregistration.json",
+    "receipt": "docs/figures/diiid-forward-onboarding/root-convention/root_convention_receipt.json"
+  },
+  "coefficients_fitted": 0,
+  "control": {
+    "expected_fixed_boundary_median": 0.04058126344290784,
+    "expected_free_boundary_median": 0.2156505171295768,
+    "expected_vacuum_share": 0.8498610048171014,
+    "fixed_absolute_difference": 3.585379877713013e-08,
+    "free_absolute_difference": 3.1865869276614944e-08,
+    "measured_fixed_boundary_median": 0.040581227589109065,
+    "measured_free_boundary_median": 0.21565054899544608,
+    "measured_vacuum_share": 0.8498611175501047,
+    "reproduced": true,
+    "source_cocos": 5,
+    "vacuum_share_absolute_difference": 1.1273300337677483e-07
+  },
+  "currents_adjusted": false,
+  "no_root_search": true,
+  "preregistration": {
+    "coefficients_fitted": 0,
+    "cohort": {
+      "additional_diverted_frames": 15,
+      "additional_selection": "first fifteen lexicographic shots outside the five landed shots and outside the complete 603-shot polarity population, using the finite diverted frame nearest each shot's median eligible time",
+      "landed_root_existence_frames": 5,
+      "total_frames": 20
+    },
+    "controls": {
+      "absolute_reproduction_tolerance": 2e-07,
+      "landed_fixed_boundary_median": 0.04058126344290784,
+      "landed_free_boundary_median": 0.2156505171295768,
+      "landed_vacuum_share": 0.8498610048171014,
+      "numerical_basis": "the current Nova environment replays the unchanged landed helper under NumPy 2.4.6 rather than the receipt's NumPy 2.4.4; an unpublished preflight failed at the control before emitting scores and measured maximum absolute drift 1.13e-7, so 2e-7 is fixed before the authoritative scoring run"
+    },
+    "convention_artefact_criterion": {
+      "any_member_is_decisive": true,
+      "free_to_fixed_maximum_ratio": 1.05,
+      "rule": "a candidate admits the free-boundary residual to the landed fixed-boundary level when its landed-five median free residual is no more than 1.05 times the landed pinned fixed median; a candidate whose fixed and free residuals both deteriorate is reported but cannot turn deterioration into admission",
+      "semantic_correction": "the first published-score draft compared each free residual with its own fixed residual and was rejected before delivery because total-flux hypotheses made both residuals order ten; the task asks for the landed fixed-boundary level, whose value was frozen before this sweep"
+    },
+    "currents_adjusted": false,
+    "evaluation_algebra": {
+      "conductor_currents": "the released-current vacuum map multiplied by the candidate ip_like factor relative to the pinned factor",
+      "label": "raw efit_psirz multiplied by the candidate psi_like factor",
+      "operator": "one sparse linear Dirichlet application per boundary condition",
+      "profiles": "p-prime and FF-prime extracted once in the pinned Nova coordinate, mapped back to raw-coordinate gradients, then multiplied by the candidate dodpsi_like factor"
+    },
+    "measurement": "linear residual evaluation at unchanged labelled states",
+    "no_root_search": true,
+    "profiles_adjusted": false,
+    "variant_set": {
+      "basis": "all sixteen Sauter-Medvedev source COCOS indices transformed into Nova COCOS 17; this exhausts both signs of poloidal flux, both signs of toroidal current, total versus per-radian flux, and both signs of derivatives with respect to flux",
+      "members": [
+        {
+          "b0_to_nova": 1.0,
+          "derivative_to_nova": -0.15915494309189535,
+          "flux_exponent": 1,
+          "identifier": "source-cocos-1",
+          "ip_to_nova": 1.0,
+          "psi_to_nova": -6.283185307179586,
+          "q_to_nova": 1.0,
+          "sigma_bp": 1,
+          "sigma_r_phi_z": 1,
+          "sigma_rho_theta_phi": 1,
+          "source_cocos": 1
+        },
+        {
+          "b0_to_nova": -1.0,
+          "derivative_to_nova": 0.15915494309189535,
+          "flux_exponent": 1,
+          "identifier": "source-cocos-2",
+          "ip_to_nova": -1.0,
+          "psi_to_nova": 6.283185307179586,
+          "q_to_nova": -1.0,
+          "sigma_bp": 1,
+          "sigma_r_phi_z": -1,
+          "sigma_rho_theta_phi": 1,
+          "source_cocos": 2
+        },
+        {
+          "b0_to_nova": 1.0,
+          "derivative_to_nova": 0.15915494309189535,
+          "flux_exponent": 1,
+          "identifier": "source-cocos-3",
+          "ip_to_nova": 1.0,
+          "psi_to_nova": 6.283185307179586,
+          "q_to_nova": -1.0,
+          "sigma_bp": -1,
+          "sigma_r_phi_z": 1,
+          "sigma_rho_theta_phi": -1,
+          "source_cocos": 3
+        },
+        {
+          "b0_to_nova": -1.0,
+          "derivative_to_nova": -0.15915494309189535,
+          "flux_exponent": 1,
+          "identifier": "source-cocos-4",
+          "ip_to_nova": -1.0,
+          "psi_to_nova": -6.283185307179586,
+          "q_to_nova": 1.0,
+          "sigma_bp": -1,
+          "sigma_r_phi_z": -1,
+          "sigma_rho_theta_phi": -1,
+          "source_cocos": 4
+        },
+        {
+          "b0_to_nova": 1.0,
+          "derivative_to_nova": -0.15915494309189535,
+          "flux_exponent": 1,
+          "identifier": "source-cocos-5",
+          "ip_to_nova": 1.0,
+          "psi_to_nova": -6.283185307179586,
+          "q_to_nova": -1.0,
+          "sigma_bp": 1,
+          "sigma_r_phi_z": 1,
+          "sigma_rho_theta_phi": -1,
+          "source_cocos": 5
+        },
+        {
+          "b0_to_nova": -1.0,
+          "derivative_to_nova": 0.15915494309189535,
+          "flux_exponent": 1,
+          "identifier": "source-cocos-6",
+          "ip_to_nova": -1.0,
+          "psi_to_nova": 6.283185307179586,
+          "q_to_nova": 1.0,
+          "sigma_bp": 1,
+          "sigma_r_phi_z": -1,
+          "sigma_rho_theta_phi": -1,
+          "source_cocos": 6
+        },
+        {
+          "b0_to_nova": 1.0,
+          "derivative_to_nova": 0.15915494309189535,
+          "flux_exponent": 1,
+          "identifier": "source-cocos-7",
+          "ip_to_nova": 1.0,
+          "psi_to_nova": 6.283185307179586,
+          "q_to_nova": 1.0,
+          "sigma_bp": -1,
+          "sigma_r_phi_z": 1,
+          "sigma_rho_theta_phi": 1,
+          "source_cocos": 7
+        },
+        {
+          "b0_to_nova": -1.0,
+          "derivative_to_nova": -0.15915494309189535,
+          "flux_exponent": 1,
+          "identifier": "source-cocos-8",
+          "ip_to_nova": -1.0,
+          "psi_to_nova": -6.283185307179586,
+          "q_to_nova": -1.0,
+          "sigma_bp": -1,
+          "sigma_r_phi_z": -1,
+          "sigma_rho_theta_phi": 1,
+          "source_cocos": 8
+        },
+        {
+          "b0_to_nova": 1.0,
+          "derivative_to_nova": -1.0,
+          "flux_exponent": 0,
+          "identifier": "source-cocos-11",
+          "ip_to_nova": 1.0,
+          "psi_to_nova": -1.0,
+          "q_to_nova": 1.0,
+          "sigma_bp": 1,
+          "sigma_r_phi_z": 1,
+          "sigma_rho_theta_phi": 1,
+          "source_cocos": 11
+        },
+        {
+          "b0_to_nova": -1.0,
+          "derivative_to_nova": 1.0,
+          "flux_exponent": 0,
+          "identifier": "source-cocos-12",
+          "ip_to_nova": -1.0,
+          "psi_to_nova": 1.0,
+          "q_to_nova": -1.0,
+          "sigma_bp": 1,
+          "sigma_r_phi_z": -1,
+          "sigma_rho_theta_phi": 1,
+          "source_cocos": 12
+        },
+        {
+          "b0_to_nova": 1.0,
+          "derivative_to_nova": 1.0,
+          "flux_exponent": 0,
+          "identifier": "source-cocos-13",
+          "ip_to_nova": 1.0,
+          "psi_to_nova": 1.0,
+          "q_to_nova": -1.0,
+          "sigma_bp": -1,
+          "sigma_r_phi_z": 1,
+          "sigma_rho_theta_phi": -1,
+          "source_cocos": 13
+        },
+        {
+          "b0_to_nova": -1.0,
+          "derivative_to_nova": -1.0,
+          "flux_exponent": 0,
+          "identifier": "source-cocos-14",
+          "ip_to_nova": -1.0,
+          "psi_to_nova": -1.0,
+          "q_to_nova": 1.0,
+          "sigma_bp": -1,
+          "sigma_r_phi_z": -1,
+          "sigma_rho_theta_phi": -1,
+          "source_cocos": 14
+        },
+        {
+          "b0_to_nova": 1.0,
+          "derivative_to_nova": -1.0,
+          "flux_exponent": 0,
+          "identifier": "source-cocos-15",
+          "ip_to_nova": 1.0,
+          "psi_to_nova": -1.0,
+          "q_to_nova": -1.0,
+          "sigma_bp": 1,
+          "sigma_r_phi_z": 1,
+          "sigma_rho_theta_phi": -1,
+          "source_cocos": 15
+        },
+        {
+          "b0_to_nova": -1.0,
+          "derivative_to_nova": 1.0,
+          "flux_exponent": 0,
+          "identifier": "source-cocos-16",
+          "ip_to_nova": -1.0,
+          "psi_to_nova": 1.0,
+          "q_to_nova": 1.0,
+          "sigma_bp": 1,
+          "sigma_r_phi_z": -1,
+          "sigma_rho_theta_phi": -1,
+          "source_cocos": 16
+        },
+        {
+          "b0_to_nova": 1.0,
+          "derivative_to_nova": 1.0,
+          "flux_exponent": 0,
+          "identifier": "source-cocos-17",
+          "ip_to_nova": 1.0,
+          "psi_to_nova": 1.0,
+          "q_to_nova": 1.0,
+          "sigma_bp": -1,
+          "sigma_r_phi_z": 1,
+          "sigma_rho_theta_phi": 1,
+          "source_cocos": 17
+        },
+        {
+          "b0_to_nova": -1.0,
+          "derivative_to_nova": -1.0,
+          "flux_exponent": 0,
+          "identifier": "source-cocos-18",
+          "ip_to_nova": -1.0,
+          "psi_to_nova": -1.0,
+          "q_to_nova": -1.0,
+          "sigma_bp": -1,
+          "sigma_r_phi_z": -1,
+          "sigma_rho_theta_phi": 1,
+          "source_cocos": 18
+        }
+      ],
+      "pinned_control_source_cocos": 5,
+      "target_cocos": 17
+    }
+  },
+  "preregistration_sha256": "37e48e127afaa5ea3bfd3db477a6b4a7a34889b013415bb52d28f463ad42bcdf",
+  "selection": {
+    "all_additional_absent_from_polarity_population": true,
+    "distinct_shots": 20,
+    "frames": 20,
+    "frames_detail": [
+      {
+        "absent_from_polarity_population": false,
+        "frame": 29,
+        "population": "landed-control",
+        "shot": "d3d_shot_00000a10ac.parquet",
+        "time_ms": 920.0
+      },
+      {
+        "absent_from_polarity_population": true,
+        "frame": 179,
+        "population": "landed-control",
+        "shot": "d3d_shot_00000c4a7b.parquet",
+        "time_ms": 3740.0
+      },
+      {
+        "absent_from_polarity_population": true,
+        "frame": 44,
+        "population": "landed-control",
+        "shot": "d3d_shot_0003ff34e7.parquet",
+        "time_ms": 1080.0
+      },
+      {
+        "absent_from_polarity_population": true,
+        "frame": 36,
+        "population": "landed-control",
+        "shot": "d3d_shot_0011c2afc9.parquet",
+        "time_ms": 980.0
+      },
+      {
+        "absent_from_polarity_population": true,
+        "frame": 125,
+        "population": "landed-control",
+        "shot": "d3d_shot_001270afa9.parquet",
+        "time_ms": 2640.0
+      },
+      {
+        "absent_from_polarity_population": true,
+        "frame": 144,
+        "population": "polarity-screened-additional",
+        "shot": "d3d_shot_001554e054.parquet",
+        "time_ms": 3240.0
+      },
+      {
+        "absent_from_polarity_population": true,
+        "frame": 126,
+        "population": "polarity-screened-additional",
+        "shot": "d3d_shot_001cbcc9e6.parquet",
+        "time_ms": 3040.0
+      },
+      {
+        "absent_from_polarity_population": true,
+        "frame": 146,
+        "population": "polarity-screened-additional",
+        "shot": "d3d_shot_002495e835.parquet",
+        "time_ms": 3180.0
+      },
+      {
+        "absent_from_polarity_population": true,
+        "frame": 113,
+        "population": "polarity-screened-additional",
+        "shot": "d3d_shot_0040a29bad.parquet",
+        "time_ms": 2520.0
+      },
+      {
+        "absent_from_polarity_population": true,
+        "frame": 137,
+        "population": "polarity-screened-additional",
+        "shot": "d3d_shot_0040ca9bdc.parquet",
+        "time_ms": 3000.0
+      },
+      {
+        "absent_from_polarity_population": true,
+        "frame": 110,
+        "population": "polarity-screened-additional",
+        "shot": "d3d_shot_004f4e5bed.parquet",
+        "time_ms": 2720.0
+      },
+      {
+        "absent_from_polarity_population": true,
+        "frame": 68,
+        "population": "polarity-screened-additional",
+        "shot": "d3d_shot_0065291fe9.parquet",
+        "time_ms": 1560.0
+      },
+      {
+        "absent_from_polarity_population": true,
+        "frame": 144,
+        "population": "polarity-screened-additional",
+        "shot": "d3d_shot_006a097379.parquet",
+        "time_ms": 3220.0
+      },
+      {
+        "absent_from_polarity_population": true,
+        "frame": 131,
+        "population": "polarity-screened-additional",
+        "shot": "d3d_shot_0073c37714.parquet",
+        "time_ms": 2940.0
+      },
+      {
+        "absent_from_polarity_population": true,
+        "frame": 71,
+        "population": "polarity-screened-additional",
+        "shot": "d3d_shot_0079897d3b.parquet",
+        "time_ms": 1600.0
+      },
+      {
+        "absent_from_polarity_population": true,
+        "frame": 135,
+        "population": "polarity-screened-additional",
+        "shot": "d3d_shot_008b4474ec.parquet",
+        "time_ms": 3420.0
+      },
+      {
+        "absent_from_polarity_population": true,
+        "frame": 37,
+        "population": "polarity-screened-additional",
+        "shot": "d3d_shot_0092a9ade0.parquet",
+        "time_ms": 1420.0
+      },
+      {
+        "absent_from_polarity_population": true,
+        "frame": 106,
+        "population": "polarity-screened-additional",
+        "shot": "d3d_shot_0093deb434.parquet",
+        "time_ms": 2560.0
+      },
+      {
+        "absent_from_polarity_population": true,
+        "frame": 134,
+        "population": "polarity-screened-additional",
+        "shot": "d3d_shot_00a4b7af57.parquet",
+        "time_ms": 2900.0
+      },
+      {
+        "absent_from_polarity_population": true,
+        "frame": 51,
+        "population": "polarity-screened-additional",
+        "shot": "d3d_shot_00a6212403.parquet",
+        "time_ms": 1280.0
+      }
+    ],
+    "landed_control_frames": 5,
+    "polarity_population_count": 603,
+    "screened_additional_frames": 15
+  },
+  "variants": [
+    {
+      "all_frames": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 0.045129600673704744,
+          "median": 0.03896910640360123,
+          "minimum": 0.01353645691318434,
+          "q25": 0.03174398489603886,
+          "q75": 0.04153186453288536
+        },
+        "frames": 20,
+        "free_boundary_fractional_rms": {
+          "maximum": 0.8360514993602862,
+          "median": 0.19951769691415097,
+          "minimum": 0.10474364006316737,
+          "q25": 0.1644496975268286,
+          "q75": 0.2470650472339223
+        },
+        "free_to_fixed_median_ratio": 5.119894073211621,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 0.859119321643493,
+          "median": 0.21736633851195564,
+          "minimum": 0.12265834128818039,
+          "q25": 0.16763625453251885,
+          "q75": 0.26371148068509953
+        },
+        "vacuum_share_from_medians": 0.8479761298074147
+      },
+      "landed_controls": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 0.04475549208301111,
+          "median": 0.040581227589109065,
+          "minimum": 0.022349130117803706,
+          "q25": 0.023316898028591226,
+          "q75": 0.04114859473505713
+        },
+        "frames": 5,
+        "free_boundary_fractional_rms": {
+          "maximum": 0.5126656991141246,
+          "median": 0.21565054899544608,
+          "minimum": 0.11522631000144656,
+          "q25": 0.18955134217261504,
+          "q75": 0.3936039851778237
+        },
+        "free_to_fixed_median_ratio": 5.314046957350325,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 0.5359230488091601,
+          "median": 0.22971003158988437,
+          "minimum": 0.12622974794152472,
+          "q25": 0.17380048207095855,
+          "q75": 0.3673515132579546
+        },
+        "vacuum_share_from_medians": 0.8498611175501047
+      },
+      "screened_additions": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 0.045129600673704744,
+          "median": 0.03817996074570909,
+          "minimum": 0.01353645691318434,
+          "q25": 0.03321354810880758,
+          "q75": 0.04154930196254364
+        },
+        "frames": 15,
+        "free_boundary_fractional_rms": {
+          "maximum": 0.8360514993602862,
+          "median": 0.19809737326749605,
+          "minimum": 0.10474364006316737,
+          "q25": 0.15915158808051855,
+          "q75": 0.2278742625038574
+        },
+        "free_to_fixed_median_ratio": 5.188516944448653,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 0.859119321643493,
+          "median": 0.2148370795198259,
+          "minimum": 0.12265834128818039,
+          "q25": 0.16608920230085356,
+          "q75": 0.24405828356043707
+        },
+        "vacuum_share_from_medians": 0.8491012277052954
+      },
+      "variant": {
+        "b0_to_nova": 1.0,
+        "derivative_sign": -1,
+        "derivative_to_nova": -0.15915494309189535,
+        "flux_exponent": 1,
+        "identifier": "source-cocos-1",
+        "ip_to_nova": 1.0,
+        "poloidal_flux_sign": -1,
+        "psi_to_nova": -6.283185307179586,
+        "q_to_nova": 1.0,
+        "raw_flux_interpretation": "per-radian",
+        "sigma_bp": 1,
+        "sigma_r_phi_z": 1,
+        "sigma_rho_theta_phi": 1,
+        "source_cocos": 1,
+        "toroidal_current_sign": 1
+      }
+    },
+    {
+      "all_frames": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 0.045129600673704744,
+          "median": 0.03896910640360123,
+          "minimum": 0.01353645691318434,
+          "q25": 0.03174398489603886,
+          "q75": 0.04153186453288536
+        },
+        "frames": 20,
+        "free_boundary_fractional_rms": {
+          "maximum": 0.8360514993602862,
+          "median": 0.19951769691415097,
+          "minimum": 0.10474364006316737,
+          "q25": 0.1644496975268286,
+          "q75": 0.2470650472339223
+        },
+        "free_to_fixed_median_ratio": 5.119894073211621,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 0.859119321643493,
+          "median": 0.21736633851195564,
+          "minimum": 0.12265834128818039,
+          "q25": 0.16763625453251885,
+          "q75": 0.26371148068509953
+        },
+        "vacuum_share_from_medians": 0.8479761298074147
+      },
+      "landed_controls": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 0.04475549208301111,
+          "median": 0.040581227589109065,
+          "minimum": 0.022349130117803706,
+          "q25": 0.023316898028591226,
+          "q75": 0.04114859473505713
+        },
+        "frames": 5,
+        "free_boundary_fractional_rms": {
+          "maximum": 0.5126656991141246,
+          "median": 0.21565054899544608,
+          "minimum": 0.11522631000144656,
+          "q25": 0.18955134217261504,
+          "q75": 0.3936039851778237
+        },
+        "free_to_fixed_median_ratio": 5.314046957350325,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 0.5359230488091601,
+          "median": 0.22971003158988437,
+          "minimum": 0.12622974794152472,
+          "q25": 0.17380048207095855,
+          "q75": 0.3673515132579546
+        },
+        "vacuum_share_from_medians": 0.8498611175501047
+      },
+      "screened_additions": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 0.045129600673704744,
+          "median": 0.03817996074570909,
+          "minimum": 0.01353645691318434,
+          "q25": 0.03321354810880758,
+          "q75": 0.04154930196254364
+        },
+        "frames": 15,
+        "free_boundary_fractional_rms": {
+          "maximum": 0.8360514993602862,
+          "median": 0.19809737326749605,
+          "minimum": 0.10474364006316737,
+          "q25": 0.15915158808051855,
+          "q75": 0.2278742625038574
+        },
+        "free_to_fixed_median_ratio": 5.188516944448653,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 0.859119321643493,
+          "median": 0.2148370795198259,
+          "minimum": 0.12265834128818039,
+          "q25": 0.16608920230085356,
+          "q75": 0.24405828356043707
+        },
+        "vacuum_share_from_medians": 0.8491012277052954
+      },
+      "variant": {
+        "b0_to_nova": -1.0,
+        "derivative_sign": 1,
+        "derivative_to_nova": 0.15915494309189535,
+        "flux_exponent": 1,
+        "identifier": "source-cocos-2",
+        "ip_to_nova": -1.0,
+        "poloidal_flux_sign": 1,
+        "psi_to_nova": 6.283185307179586,
+        "q_to_nova": -1.0,
+        "raw_flux_interpretation": "per-radian",
+        "sigma_bp": 1,
+        "sigma_r_phi_z": -1,
+        "sigma_rho_theta_phi": 1,
+        "source_cocos": 2,
+        "toroidal_current_sign": -1
+      }
+    },
+    {
+      "all_frames": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 0.045129600673704744,
+          "median": 0.03896910640360123,
+          "minimum": 0.01353645691318434,
+          "q25": 0.03174398489603886,
+          "q75": 0.04153186453288536
+        },
+        "frames": 20,
+        "free_boundary_fractional_rms": {
+          "maximum": 0.9256835134646525,
+          "median": 0.6242612586595746,
+          "minimum": 0.4132972062924299,
+          "q25": 0.560480359902849,
+          "q75": 0.6699249911146552
+        },
+        "free_to_fixed_median_ratio": 16.019388594496615,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 0.8956558722605626,
+          "median": 0.6006772631710234,
+          "minimum": 0.3856465980766226,
+          "q25": 0.5592711355868831,
+          "q75": 0.6475638866415189
+        },
+        "vacuum_share_from_medians": 0.9390771084505392
+      },
+      "landed_controls": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 0.04475549208301111,
+          "median": 0.040581227589109065,
+          "minimum": 0.022349130117803706,
+          "q25": 0.023316898028591226,
+          "q75": 0.04114859473505713
+        },
+        "frames": 5,
+        "free_boundary_fractional_rms": {
+          "maximum": 0.9256835134646525,
+          "median": 0.6168289557613605,
+          "minimum": 0.4132972062924299,
+          "q25": 0.5742556052628811,
+          "q75": 0.6423585887195801
+        },
+        "free_to_fixed_median_ratio": 15.199859452425763,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 0.8956558722605626,
+          "median": 0.6019929542904982,
+          "minimum": 0.3856465980766226,
+          "q25": 0.5993615720515487,
+          "q75": 0.6262928145291389
+        },
+        "vacuum_share_from_medians": 0.9368458479448954
+      },
+      "screened_additions": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 0.045129600673704744,
+          "median": 0.03817996074570909,
+          "minimum": 0.01353645691318434,
+          "q25": 0.03321354810880758,
+          "q75": 0.04154930196254364
+        },
+        "frames": 15,
+        "free_boundary_fractional_rms": {
+          "maximum": 0.753164257156172,
+          "median": 0.6252510200137792,
+          "minimum": 0.4290474536768099,
+          "q25": 0.5635833646551556,
+          "q75": 0.6847324846414573
+        },
+        "free_to_fixed_median_ratio": 16.37641861860869,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 0.7315215110573665,
+          "median": 0.5983862402159194,
+          "minimum": 0.43235119923790594,
+          "q25": 0.5397163136111207,
+          "q75": 0.6629473742551113
+        },
+        "vacuum_share_from_medians": 0.9400220107696065
+      },
+      "variant": {
+        "b0_to_nova": 1.0,
+        "derivative_sign": 1,
+        "derivative_to_nova": 0.15915494309189535,
+        "flux_exponent": 1,
+        "identifier": "source-cocos-3",
+        "ip_to_nova": 1.0,
+        "poloidal_flux_sign": 1,
+        "psi_to_nova": 6.283185307179586,
+        "q_to_nova": -1.0,
+        "raw_flux_interpretation": "per-radian",
+        "sigma_bp": -1,
+        "sigma_r_phi_z": 1,
+        "sigma_rho_theta_phi": -1,
+        "source_cocos": 3,
+        "toroidal_current_sign": 1
+      }
+    },
+    {
+      "all_frames": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 0.045129600673704744,
+          "median": 0.03896910640360123,
+          "minimum": 0.01353645691318434,
+          "q25": 0.03174398489603886,
+          "q75": 0.04153186453288536
+        },
+        "frames": 20,
+        "free_boundary_fractional_rms": {
+          "maximum": 0.9256835134646525,
+          "median": 0.6242612586595746,
+          "minimum": 0.4132972062924299,
+          "q25": 0.560480359902849,
+          "q75": 0.6699249911146552
+        },
+        "free_to_fixed_median_ratio": 16.019388594496615,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 0.8956558722605626,
+          "median": 0.6006772631710234,
+          "minimum": 0.3856465980766226,
+          "q25": 0.5592711355868831,
+          "q75": 0.6475638866415189
+        },
+        "vacuum_share_from_medians": 0.9390771084505392
+      },
+      "landed_controls": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 0.04475549208301111,
+          "median": 0.040581227589109065,
+          "minimum": 0.022349130117803706,
+          "q25": 0.023316898028591226,
+          "q75": 0.04114859473505713
+        },
+        "frames": 5,
+        "free_boundary_fractional_rms": {
+          "maximum": 0.9256835134646525,
+          "median": 0.6168289557613605,
+          "minimum": 0.4132972062924299,
+          "q25": 0.5742556052628811,
+          "q75": 0.6423585887195801
+        },
+        "free_to_fixed_median_ratio": 15.199859452425763,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 0.8956558722605626,
+          "median": 0.6019929542904982,
+          "minimum": 0.3856465980766226,
+          "q25": 0.5993615720515487,
+          "q75": 0.6262928145291389
+        },
+        "vacuum_share_from_medians": 0.9368458479448954
+      },
+      "screened_additions": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 0.045129600673704744,
+          "median": 0.03817996074570909,
+          "minimum": 0.01353645691318434,
+          "q25": 0.03321354810880758,
+          "q75": 0.04154930196254364
+        },
+        "frames": 15,
+        "free_boundary_fractional_rms": {
+          "maximum": 0.753164257156172,
+          "median": 0.6252510200137792,
+          "minimum": 0.4290474536768099,
+          "q25": 0.5635833646551556,
+          "q75": 0.6847324846414573
+        },
+        "free_to_fixed_median_ratio": 16.37641861860869,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 0.7315215110573665,
+          "median": 0.5983862402159194,
+          "minimum": 0.43235119923790594,
+          "q25": 0.5397163136111207,
+          "q75": 0.6629473742551113
+        },
+        "vacuum_share_from_medians": 0.9400220107696065
+      },
+      "variant": {
+        "b0_to_nova": -1.0,
+        "derivative_sign": -1,
+        "derivative_to_nova": -0.15915494309189535,
+        "flux_exponent": 1,
+        "identifier": "source-cocos-4",
+        "ip_to_nova": -1.0,
+        "poloidal_flux_sign": -1,
+        "psi_to_nova": -6.283185307179586,
+        "q_to_nova": 1.0,
+        "raw_flux_interpretation": "per-radian",
+        "sigma_bp": -1,
+        "sigma_r_phi_z": -1,
+        "sigma_rho_theta_phi": -1,
+        "source_cocos": 4,
+        "toroidal_current_sign": -1
+      }
+    },
+    {
+      "all_frames": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 0.045129600673704744,
+          "median": 0.03896910640360123,
+          "minimum": 0.01353645691318434,
+          "q25": 0.03174398489603886,
+          "q75": 0.04153186453288536
+        },
+        "frames": 20,
+        "free_boundary_fractional_rms": {
+          "maximum": 0.8360514993602862,
+          "median": 0.19951769691415097,
+          "minimum": 0.10474364006316737,
+          "q25": 0.1644496975268286,
+          "q75": 0.2470650472339223
+        },
+        "free_to_fixed_median_ratio": 5.119894073211621,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 0.859119321643493,
+          "median": 0.21736633851195564,
+          "minimum": 0.12265834128818039,
+          "q25": 0.16763625453251885,
+          "q75": 0.26371148068509953
+        },
+        "vacuum_share_from_medians": 0.8479761298074147
+      },
+      "landed_controls": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 0.04475549208301111,
+          "median": 0.040581227589109065,
+          "minimum": 0.022349130117803706,
+          "q25": 0.023316898028591226,
+          "q75": 0.04114859473505713
+        },
+        "frames": 5,
+        "free_boundary_fractional_rms": {
+          "maximum": 0.5126656991141246,
+          "median": 0.21565054899544608,
+          "minimum": 0.11522631000144656,
+          "q25": 0.18955134217261504,
+          "q75": 0.3936039851778237
+        },
+        "free_to_fixed_median_ratio": 5.314046957350325,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 0.5359230488091601,
+          "median": 0.22971003158988437,
+          "minimum": 0.12622974794152472,
+          "q25": 0.17380048207095855,
+          "q75": 0.3673515132579546
+        },
+        "vacuum_share_from_medians": 0.8498611175501047
+      },
+      "screened_additions": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 0.045129600673704744,
+          "median": 0.03817996074570909,
+          "minimum": 0.01353645691318434,
+          "q25": 0.03321354810880758,
+          "q75": 0.04154930196254364
+        },
+        "frames": 15,
+        "free_boundary_fractional_rms": {
+          "maximum": 0.8360514993602862,
+          "median": 0.19809737326749605,
+          "minimum": 0.10474364006316737,
+          "q25": 0.15915158808051855,
+          "q75": 0.2278742625038574
+        },
+        "free_to_fixed_median_ratio": 5.188516944448653,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 0.859119321643493,
+          "median": 0.2148370795198259,
+          "minimum": 0.12265834128818039,
+          "q25": 0.16608920230085356,
+          "q75": 0.24405828356043707
+        },
+        "vacuum_share_from_medians": 0.8491012277052954
+      },
+      "variant": {
+        "b0_to_nova": 1.0,
+        "derivative_sign": -1,
+        "derivative_to_nova": -0.15915494309189535,
+        "flux_exponent": 1,
+        "identifier": "source-cocos-5",
+        "ip_to_nova": 1.0,
+        "poloidal_flux_sign": -1,
+        "psi_to_nova": -6.283185307179586,
+        "q_to_nova": -1.0,
+        "raw_flux_interpretation": "per-radian",
+        "sigma_bp": 1,
+        "sigma_r_phi_z": 1,
+        "sigma_rho_theta_phi": -1,
+        "source_cocos": 5,
+        "toroidal_current_sign": 1
+      }
+    },
+    {
+      "all_frames": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 0.045129600673704744,
+          "median": 0.03896910640360123,
+          "minimum": 0.01353645691318434,
+          "q25": 0.03174398489603886,
+          "q75": 0.04153186453288536
+        },
+        "frames": 20,
+        "free_boundary_fractional_rms": {
+          "maximum": 0.8360514993602862,
+          "median": 0.19951769691415097,
+          "minimum": 0.10474364006316737,
+          "q25": 0.1644496975268286,
+          "q75": 0.2470650472339223
+        },
+        "free_to_fixed_median_ratio": 5.119894073211621,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 0.859119321643493,
+          "median": 0.21736633851195564,
+          "minimum": 0.12265834128818039,
+          "q25": 0.16763625453251885,
+          "q75": 0.26371148068509953
+        },
+        "vacuum_share_from_medians": 0.8479761298074147
+      },
+      "landed_controls": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 0.04475549208301111,
+          "median": 0.040581227589109065,
+          "minimum": 0.022349130117803706,
+          "q25": 0.023316898028591226,
+          "q75": 0.04114859473505713
+        },
+        "frames": 5,
+        "free_boundary_fractional_rms": {
+          "maximum": 0.5126656991141246,
+          "median": 0.21565054899544608,
+          "minimum": 0.11522631000144656,
+          "q25": 0.18955134217261504,
+          "q75": 0.3936039851778237
+        },
+        "free_to_fixed_median_ratio": 5.314046957350325,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 0.5359230488091601,
+          "median": 0.22971003158988437,
+          "minimum": 0.12622974794152472,
+          "q25": 0.17380048207095855,
+          "q75": 0.3673515132579546
+        },
+        "vacuum_share_from_medians": 0.8498611175501047
+      },
+      "screened_additions": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 0.045129600673704744,
+          "median": 0.03817996074570909,
+          "minimum": 0.01353645691318434,
+          "q25": 0.03321354810880758,
+          "q75": 0.04154930196254364
+        },
+        "frames": 15,
+        "free_boundary_fractional_rms": {
+          "maximum": 0.8360514993602862,
+          "median": 0.19809737326749605,
+          "minimum": 0.10474364006316737,
+          "q25": 0.15915158808051855,
+          "q75": 0.2278742625038574
+        },
+        "free_to_fixed_median_ratio": 5.188516944448653,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 0.859119321643493,
+          "median": 0.2148370795198259,
+          "minimum": 0.12265834128818039,
+          "q25": 0.16608920230085356,
+          "q75": 0.24405828356043707
+        },
+        "vacuum_share_from_medians": 0.8491012277052954
+      },
+      "variant": {
+        "b0_to_nova": -1.0,
+        "derivative_sign": 1,
+        "derivative_to_nova": 0.15915494309189535,
+        "flux_exponent": 1,
+        "identifier": "source-cocos-6",
+        "ip_to_nova": -1.0,
+        "poloidal_flux_sign": 1,
+        "psi_to_nova": 6.283185307179586,
+        "q_to_nova": 1.0,
+        "raw_flux_interpretation": "per-radian",
+        "sigma_bp": 1,
+        "sigma_r_phi_z": -1,
+        "sigma_rho_theta_phi": -1,
+        "source_cocos": 6,
+        "toroidal_current_sign": -1
+      }
+    },
+    {
+      "all_frames": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 0.045129600673704744,
+          "median": 0.03896910640360123,
+          "minimum": 0.01353645691318434,
+          "q25": 0.03174398489603886,
+          "q75": 0.04153186453288536
+        },
+        "frames": 20,
+        "free_boundary_fractional_rms": {
+          "maximum": 0.9256835134646525,
+          "median": 0.6242612586595746,
+          "minimum": 0.4132972062924299,
+          "q25": 0.560480359902849,
+          "q75": 0.6699249911146552
+        },
+        "free_to_fixed_median_ratio": 16.019388594496615,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 0.8956558722605626,
+          "median": 0.6006772631710234,
+          "minimum": 0.3856465980766226,
+          "q25": 0.5592711355868831,
+          "q75": 0.6475638866415189
+        },
+        "vacuum_share_from_medians": 0.9390771084505392
+      },
+      "landed_controls": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 0.04475549208301111,
+          "median": 0.040581227589109065,
+          "minimum": 0.022349130117803706,
+          "q25": 0.023316898028591226,
+          "q75": 0.04114859473505713
+        },
+        "frames": 5,
+        "free_boundary_fractional_rms": {
+          "maximum": 0.9256835134646525,
+          "median": 0.6168289557613605,
+          "minimum": 0.4132972062924299,
+          "q25": 0.5742556052628811,
+          "q75": 0.6423585887195801
+        },
+        "free_to_fixed_median_ratio": 15.199859452425763,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 0.8956558722605626,
+          "median": 0.6019929542904982,
+          "minimum": 0.3856465980766226,
+          "q25": 0.5993615720515487,
+          "q75": 0.6262928145291389
+        },
+        "vacuum_share_from_medians": 0.9368458479448954
+      },
+      "screened_additions": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 0.045129600673704744,
+          "median": 0.03817996074570909,
+          "minimum": 0.01353645691318434,
+          "q25": 0.03321354810880758,
+          "q75": 0.04154930196254364
+        },
+        "frames": 15,
+        "free_boundary_fractional_rms": {
+          "maximum": 0.753164257156172,
+          "median": 0.6252510200137792,
+          "minimum": 0.4290474536768099,
+          "q25": 0.5635833646551556,
+          "q75": 0.6847324846414573
+        },
+        "free_to_fixed_median_ratio": 16.37641861860869,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 0.7315215110573665,
+          "median": 0.5983862402159194,
+          "minimum": 0.43235119923790594,
+          "q25": 0.5397163136111207,
+          "q75": 0.6629473742551113
+        },
+        "vacuum_share_from_medians": 0.9400220107696065
+      },
+      "variant": {
+        "b0_to_nova": 1.0,
+        "derivative_sign": 1,
+        "derivative_to_nova": 0.15915494309189535,
+        "flux_exponent": 1,
+        "identifier": "source-cocos-7",
+        "ip_to_nova": 1.0,
+        "poloidal_flux_sign": 1,
+        "psi_to_nova": 6.283185307179586,
+        "q_to_nova": 1.0,
+        "raw_flux_interpretation": "per-radian",
+        "sigma_bp": -1,
+        "sigma_r_phi_z": 1,
+        "sigma_rho_theta_phi": 1,
+        "source_cocos": 7,
+        "toroidal_current_sign": 1
+      }
+    },
+    {
+      "all_frames": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 0.045129600673704744,
+          "median": 0.03896910640360123,
+          "minimum": 0.01353645691318434,
+          "q25": 0.03174398489603886,
+          "q75": 0.04153186453288536
+        },
+        "frames": 20,
+        "free_boundary_fractional_rms": {
+          "maximum": 0.9256835134646525,
+          "median": 0.6242612586595746,
+          "minimum": 0.4132972062924299,
+          "q25": 0.560480359902849,
+          "q75": 0.6699249911146552
+        },
+        "free_to_fixed_median_ratio": 16.019388594496615,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 0.8956558722605626,
+          "median": 0.6006772631710234,
+          "minimum": 0.3856465980766226,
+          "q25": 0.5592711355868831,
+          "q75": 0.6475638866415189
+        },
+        "vacuum_share_from_medians": 0.9390771084505392
+      },
+      "landed_controls": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 0.04475549208301111,
+          "median": 0.040581227589109065,
+          "minimum": 0.022349130117803706,
+          "q25": 0.023316898028591226,
+          "q75": 0.04114859473505713
+        },
+        "frames": 5,
+        "free_boundary_fractional_rms": {
+          "maximum": 0.9256835134646525,
+          "median": 0.6168289557613605,
+          "minimum": 0.4132972062924299,
+          "q25": 0.5742556052628811,
+          "q75": 0.6423585887195801
+        },
+        "free_to_fixed_median_ratio": 15.199859452425763,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 0.8956558722605626,
+          "median": 0.6019929542904982,
+          "minimum": 0.3856465980766226,
+          "q25": 0.5993615720515487,
+          "q75": 0.6262928145291389
+        },
+        "vacuum_share_from_medians": 0.9368458479448954
+      },
+      "screened_additions": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 0.045129600673704744,
+          "median": 0.03817996074570909,
+          "minimum": 0.01353645691318434,
+          "q25": 0.03321354810880758,
+          "q75": 0.04154930196254364
+        },
+        "frames": 15,
+        "free_boundary_fractional_rms": {
+          "maximum": 0.753164257156172,
+          "median": 0.6252510200137792,
+          "minimum": 0.4290474536768099,
+          "q25": 0.5635833646551556,
+          "q75": 0.6847324846414573
+        },
+        "free_to_fixed_median_ratio": 16.37641861860869,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 0.7315215110573665,
+          "median": 0.5983862402159194,
+          "minimum": 0.43235119923790594,
+          "q25": 0.5397163136111207,
+          "q75": 0.6629473742551113
+        },
+        "vacuum_share_from_medians": 0.9400220107696065
+      },
+      "variant": {
+        "b0_to_nova": -1.0,
+        "derivative_sign": -1,
+        "derivative_to_nova": -0.15915494309189535,
+        "flux_exponent": 1,
+        "identifier": "source-cocos-8",
+        "ip_to_nova": -1.0,
+        "poloidal_flux_sign": -1,
+        "psi_to_nova": -6.283185307179586,
+        "q_to_nova": -1.0,
+        "raw_flux_interpretation": "per-radian",
+        "sigma_bp": -1,
+        "sigma_r_phi_z": -1,
+        "sigma_rho_theta_phi": 1,
+        "source_cocos": 8,
+        "toroidal_current_sign": -1
+      }
+    },
+    {
+      "all_frames": {
+        "at_candidate_fixed_boundary_level": true,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 10.733894993487944,
+          "median": 8.715643833067269,
+          "minimum": 6.875506788028536,
+          "q25": 8.149199663941545,
+          "q75": 9.281300155121446
+        },
+        "frames": 20,
+        "free_boundary_fractional_rms": {
+          "maximum": 10.561296847370143,
+          "median": 7.232088994786996,
+          "minimum": 5.602400156413991,
+          "q25": 6.810251917406001,
+          "q75": 7.773023923737485
+        },
+        "free_to_fixed_median_ratio": 0.829782530505475,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 3.7604580970494315,
+          "median": 2.374389800902766,
+          "minimum": 1.6937835908579628,
+          "q25": 2.171020558621268,
+          "q75": 2.6282775002996046
+        },
+        "vacuum_share_from_medians": 0.21410122631456593
+      },
+      "landed_controls": {
+        "at_candidate_fixed_boundary_level": true,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 10.650027798196096,
+          "median": 8.824050626182439,
+          "minimum": 8.269003156408669,
+          "q25": 8.650906117111763,
+          "q75": 9.57293488704755
+        },
+        "frames": 5,
+        "free_boundary_fractional_rms": {
+          "maximum": 10.561296847370143,
+          "median": 7.87140145400878,
+          "minimum": 7.061821522509664,
+          "q25": 7.518465928321764,
+          "q75": 9.091226385288635
+        },
+        "free_to_fixed_median_ratio": 0.8920394711531926,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 2.8039909493458826,
+          "median": 2.4813084184420666,
+          "minimum": 2.0065470233382343,
+          "q25": 2.1304199945730584,
+          "q75": 2.6138545157795123
+        },
+        "vacuum_share_from_medians": 0.21948072667553925
+      },
+      "screened_additions": {
+        "at_candidate_fixed_boundary_level": true,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 10.733894993487944,
+          "median": 8.429602039289943,
+          "minimum": 6.875506788028536,
+          "q25": 7.780784588353701,
+          "q75": 9.20285931291308
+        },
+        "frames": 15,
+        "free_boundary_fractional_rms": {
+          "maximum": 9.105745538226866,
+          "median": 7.064338292310213,
+          "minimum": 5.602400156413991,
+          "q25": 6.446553570269646,
+          "q75": 7.585611804457866
+        },
+        "free_to_fixed_median_ratio": 0.8380393593177583,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 3.7604580970494315,
+          "median": 2.3677410418693485,
+          "minimum": 1.6937835908579628,
+          "q25": 2.230436311810058,
+          "q75": 2.5549453528079153
+        },
+        "vacuum_share_from_medians": 0.21928922921796504
+      },
+      "variant": {
+        "b0_to_nova": 1.0,
+        "derivative_sign": -1,
+        "derivative_to_nova": -1.0,
+        "flux_exponent": 0,
+        "identifier": "source-cocos-11",
+        "ip_to_nova": 1.0,
+        "poloidal_flux_sign": -1,
+        "psi_to_nova": -1.0,
+        "q_to_nova": 1.0,
+        "raw_flux_interpretation": "total",
+        "sigma_bp": 1,
+        "sigma_r_phi_z": 1,
+        "sigma_rho_theta_phi": 1,
+        "source_cocos": 11,
+        "toroidal_current_sign": 1
+      }
+    },
+    {
+      "all_frames": {
+        "at_candidate_fixed_boundary_level": true,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 10.733894993487944,
+          "median": 8.715643833067269,
+          "minimum": 6.875506788028536,
+          "q25": 8.149199663941545,
+          "q75": 9.281300155121446
+        },
+        "frames": 20,
+        "free_boundary_fractional_rms": {
+          "maximum": 10.561296847370143,
+          "median": 7.232088994786996,
+          "minimum": 5.602400156413991,
+          "q25": 6.810251917406001,
+          "q75": 7.773023923737485
+        },
+        "free_to_fixed_median_ratio": 0.829782530505475,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 3.7604580970494315,
+          "median": 2.374389800902766,
+          "minimum": 1.6937835908579628,
+          "q25": 2.171020558621268,
+          "q75": 2.6282775002996046
+        },
+        "vacuum_share_from_medians": 0.21410122631456593
+      },
+      "landed_controls": {
+        "at_candidate_fixed_boundary_level": true,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 10.650027798196096,
+          "median": 8.824050626182439,
+          "minimum": 8.269003156408669,
+          "q25": 8.650906117111763,
+          "q75": 9.57293488704755
+        },
+        "frames": 5,
+        "free_boundary_fractional_rms": {
+          "maximum": 10.561296847370143,
+          "median": 7.87140145400878,
+          "minimum": 7.061821522509664,
+          "q25": 7.518465928321764,
+          "q75": 9.091226385288635
+        },
+        "free_to_fixed_median_ratio": 0.8920394711531926,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 2.8039909493458826,
+          "median": 2.4813084184420666,
+          "minimum": 2.0065470233382343,
+          "q25": 2.1304199945730584,
+          "q75": 2.6138545157795123
+        },
+        "vacuum_share_from_medians": 0.21948072667553925
+      },
+      "screened_additions": {
+        "at_candidate_fixed_boundary_level": true,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 10.733894993487944,
+          "median": 8.429602039289943,
+          "minimum": 6.875506788028536,
+          "q25": 7.780784588353701,
+          "q75": 9.20285931291308
+        },
+        "frames": 15,
+        "free_boundary_fractional_rms": {
+          "maximum": 9.105745538226866,
+          "median": 7.064338292310213,
+          "minimum": 5.602400156413991,
+          "q25": 6.446553570269646,
+          "q75": 7.585611804457866
+        },
+        "free_to_fixed_median_ratio": 0.8380393593177583,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 3.7604580970494315,
+          "median": 2.3677410418693485,
+          "minimum": 1.6937835908579628,
+          "q25": 2.230436311810058,
+          "q75": 2.5549453528079153
+        },
+        "vacuum_share_from_medians": 0.21928922921796504
+      },
+      "variant": {
+        "b0_to_nova": -1.0,
+        "derivative_sign": 1,
+        "derivative_to_nova": 1.0,
+        "flux_exponent": 0,
+        "identifier": "source-cocos-12",
+        "ip_to_nova": -1.0,
+        "poloidal_flux_sign": 1,
+        "psi_to_nova": 1.0,
+        "q_to_nova": -1.0,
+        "raw_flux_interpretation": "total",
+        "sigma_bp": 1,
+        "sigma_r_phi_z": -1,
+        "sigma_rho_theta_phi": 1,
+        "source_cocos": 12,
+        "toroidal_current_sign": -1
+      }
+    },
+    {
+      "all_frames": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 10.733894993487944,
+          "median": 8.715643833067269,
+          "minimum": 6.875506788028536,
+          "q25": 8.149199663941545,
+          "q75": 9.281300155121446
+        },
+        "frames": 20,
+        "free_boundary_fractional_rms": {
+          "maximum": 13.09361262660981,
+          "median": 10.479569264465564,
+          "minimum": 6.957323009584036,
+          "q25": 9.99684990898737,
+          "q75": 11.532002897977241
+        },
+        "free_to_fixed_median_ratio": 1.2023861306385581,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 3.2695682853587877,
+          "median": 2.751754344465455,
+          "minimum": 1.9688766945949139,
+          "q25": 2.626932311849481,
+          "q75": 2.992920302190616
+        },
+        "vacuum_share_from_medians": 0.23996326820296307
+      },
+      "landed_controls": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 10.650027798196096,
+          "median": 8.824050626182439,
+          "minimum": 8.269003156408669,
+          "q25": 8.650906117111763,
+          "q75": 9.57293488704755
+        },
+        "frames": 5,
+        "free_boundary_fractional_rms": {
+          "maximum": 12.840274068588837,
+          "median": 11.220355241865729,
+          "minimum": 6.957323009584036,
+          "q25": 10.146714765948008,
+          "q75": 11.513027050971235
+        },
+        "free_to_fixed_median_ratio": 1.271565148161441,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 3.0641904942053957,
+          "median": 2.8707966170470813,
+          "minimum": 2.490604984508155,
+          "q25": 2.644277889318015,
+          "q75": 2.879215522621826
+        },
+        "vacuum_share_from_medians": 0.24547534117720665
+      },
+      "screened_additions": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 10.733894993487944,
+          "median": 8.429602039289943,
+          "minimum": 6.875506788028536,
+          "q25": 7.780784588353701,
+          "q75": 9.20285931291308
+        },
+        "frames": 15,
+        "free_boundary_fractional_rms": {
+          "maximum": 13.09361262660981,
+          "median": 10.451136766535937,
+          "minimum": 8.83987550503721,
+          "q25": 9.899277655156139,
+          "q75": 11.531675052027571
+        },
+        "free_to_fixed_median_ratio": 1.2398137797992983,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 3.2695682853587877,
+          "median": 2.7445282255118086,
+          "minimum": 1.9688766945949139,
+          "q25": 2.6198663932473676,
+          "q75": 3.0154508062302297
+        },
+        "vacuum_share_from_medians": 0.24561448278055323
+      },
+      "variant": {
+        "b0_to_nova": 1.0,
+        "derivative_sign": 1,
+        "derivative_to_nova": 1.0,
+        "flux_exponent": 0,
+        "identifier": "source-cocos-13",
+        "ip_to_nova": 1.0,
+        "poloidal_flux_sign": 1,
+        "psi_to_nova": 1.0,
+        "q_to_nova": -1.0,
+        "raw_flux_interpretation": "total",
+        "sigma_bp": -1,
+        "sigma_r_phi_z": 1,
+        "sigma_rho_theta_phi": -1,
+        "source_cocos": 13,
+        "toroidal_current_sign": 1
+      }
+    },
+    {
+      "all_frames": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 10.733894993487944,
+          "median": 8.715643833067269,
+          "minimum": 6.875506788028536,
+          "q25": 8.149199663941545,
+          "q75": 9.281300155121446
+        },
+        "frames": 20,
+        "free_boundary_fractional_rms": {
+          "maximum": 13.09361262660981,
+          "median": 10.479569264465564,
+          "minimum": 6.957323009584036,
+          "q25": 9.99684990898737,
+          "q75": 11.532002897977241
+        },
+        "free_to_fixed_median_ratio": 1.2023861306385581,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 3.2695682853587877,
+          "median": 2.751754344465455,
+          "minimum": 1.9688766945949139,
+          "q25": 2.626932311849481,
+          "q75": 2.992920302190616
+        },
+        "vacuum_share_from_medians": 0.23996326820296307
+      },
+      "landed_controls": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 10.650027798196096,
+          "median": 8.824050626182439,
+          "minimum": 8.269003156408669,
+          "q25": 8.650906117111763,
+          "q75": 9.57293488704755
+        },
+        "frames": 5,
+        "free_boundary_fractional_rms": {
+          "maximum": 12.840274068588837,
+          "median": 11.220355241865729,
+          "minimum": 6.957323009584036,
+          "q25": 10.146714765948008,
+          "q75": 11.513027050971235
+        },
+        "free_to_fixed_median_ratio": 1.271565148161441,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 3.0641904942053957,
+          "median": 2.8707966170470813,
+          "minimum": 2.490604984508155,
+          "q25": 2.644277889318015,
+          "q75": 2.879215522621826
+        },
+        "vacuum_share_from_medians": 0.24547534117720665
+      },
+      "screened_additions": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 10.733894993487944,
+          "median": 8.429602039289943,
+          "minimum": 6.875506788028536,
+          "q25": 7.780784588353701,
+          "q75": 9.20285931291308
+        },
+        "frames": 15,
+        "free_boundary_fractional_rms": {
+          "maximum": 13.09361262660981,
+          "median": 10.451136766535937,
+          "minimum": 8.83987550503721,
+          "q25": 9.899277655156139,
+          "q75": 11.531675052027571
+        },
+        "free_to_fixed_median_ratio": 1.2398137797992983,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 3.2695682853587877,
+          "median": 2.7445282255118086,
+          "minimum": 1.9688766945949139,
+          "q25": 2.6198663932473676,
+          "q75": 3.0154508062302297
+        },
+        "vacuum_share_from_medians": 0.24561448278055323
+      },
+      "variant": {
+        "b0_to_nova": -1.0,
+        "derivative_sign": -1,
+        "derivative_to_nova": -1.0,
+        "flux_exponent": 0,
+        "identifier": "source-cocos-14",
+        "ip_to_nova": -1.0,
+        "poloidal_flux_sign": -1,
+        "psi_to_nova": -1.0,
+        "q_to_nova": 1.0,
+        "raw_flux_interpretation": "total",
+        "sigma_bp": -1,
+        "sigma_r_phi_z": -1,
+        "sigma_rho_theta_phi": -1,
+        "source_cocos": 14,
+        "toroidal_current_sign": -1
+      }
+    },
+    {
+      "all_frames": {
+        "at_candidate_fixed_boundary_level": true,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 10.733894993487944,
+          "median": 8.715643833067269,
+          "minimum": 6.875506788028536,
+          "q25": 8.149199663941545,
+          "q75": 9.281300155121446
+        },
+        "frames": 20,
+        "free_boundary_fractional_rms": {
+          "maximum": 10.561296847370143,
+          "median": 7.232088994786996,
+          "minimum": 5.602400156413991,
+          "q25": 6.810251917406001,
+          "q75": 7.773023923737485
+        },
+        "free_to_fixed_median_ratio": 0.829782530505475,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 3.7604580970494315,
+          "median": 2.374389800902766,
+          "minimum": 1.6937835908579628,
+          "q25": 2.171020558621268,
+          "q75": 2.6282775002996046
+        },
+        "vacuum_share_from_medians": 0.21410122631456593
+      },
+      "landed_controls": {
+        "at_candidate_fixed_boundary_level": true,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 10.650027798196096,
+          "median": 8.824050626182439,
+          "minimum": 8.269003156408669,
+          "q25": 8.650906117111763,
+          "q75": 9.57293488704755
+        },
+        "frames": 5,
+        "free_boundary_fractional_rms": {
+          "maximum": 10.561296847370143,
+          "median": 7.87140145400878,
+          "minimum": 7.061821522509664,
+          "q25": 7.518465928321764,
+          "q75": 9.091226385288635
+        },
+        "free_to_fixed_median_ratio": 0.8920394711531926,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 2.8039909493458826,
+          "median": 2.4813084184420666,
+          "minimum": 2.0065470233382343,
+          "q25": 2.1304199945730584,
+          "q75": 2.6138545157795123
+        },
+        "vacuum_share_from_medians": 0.21948072667553925
+      },
+      "screened_additions": {
+        "at_candidate_fixed_boundary_level": true,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 10.733894993487944,
+          "median": 8.429602039289943,
+          "minimum": 6.875506788028536,
+          "q25": 7.780784588353701,
+          "q75": 9.20285931291308
+        },
+        "frames": 15,
+        "free_boundary_fractional_rms": {
+          "maximum": 9.105745538226866,
+          "median": 7.064338292310213,
+          "minimum": 5.602400156413991,
+          "q25": 6.446553570269646,
+          "q75": 7.585611804457866
+        },
+        "free_to_fixed_median_ratio": 0.8380393593177583,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 3.7604580970494315,
+          "median": 2.3677410418693485,
+          "minimum": 1.6937835908579628,
+          "q25": 2.230436311810058,
+          "q75": 2.5549453528079153
+        },
+        "vacuum_share_from_medians": 0.21928922921796504
+      },
+      "variant": {
+        "b0_to_nova": 1.0,
+        "derivative_sign": -1,
+        "derivative_to_nova": -1.0,
+        "flux_exponent": 0,
+        "identifier": "source-cocos-15",
+        "ip_to_nova": 1.0,
+        "poloidal_flux_sign": -1,
+        "psi_to_nova": -1.0,
+        "q_to_nova": -1.0,
+        "raw_flux_interpretation": "total",
+        "sigma_bp": 1,
+        "sigma_r_phi_z": 1,
+        "sigma_rho_theta_phi": -1,
+        "source_cocos": 15,
+        "toroidal_current_sign": 1
+      }
+    },
+    {
+      "all_frames": {
+        "at_candidate_fixed_boundary_level": true,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 10.733894993487944,
+          "median": 8.715643833067269,
+          "minimum": 6.875506788028536,
+          "q25": 8.149199663941545,
+          "q75": 9.281300155121446
+        },
+        "frames": 20,
+        "free_boundary_fractional_rms": {
+          "maximum": 10.561296847370143,
+          "median": 7.232088994786996,
+          "minimum": 5.602400156413991,
+          "q25": 6.810251917406001,
+          "q75": 7.773023923737485
+        },
+        "free_to_fixed_median_ratio": 0.829782530505475,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 3.7604580970494315,
+          "median": 2.374389800902766,
+          "minimum": 1.6937835908579628,
+          "q25": 2.171020558621268,
+          "q75": 2.6282775002996046
+        },
+        "vacuum_share_from_medians": 0.21410122631456593
+      },
+      "landed_controls": {
+        "at_candidate_fixed_boundary_level": true,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 10.650027798196096,
+          "median": 8.824050626182439,
+          "minimum": 8.269003156408669,
+          "q25": 8.650906117111763,
+          "q75": 9.57293488704755
+        },
+        "frames": 5,
+        "free_boundary_fractional_rms": {
+          "maximum": 10.561296847370143,
+          "median": 7.87140145400878,
+          "minimum": 7.061821522509664,
+          "q25": 7.518465928321764,
+          "q75": 9.091226385288635
+        },
+        "free_to_fixed_median_ratio": 0.8920394711531926,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 2.8039909493458826,
+          "median": 2.4813084184420666,
+          "minimum": 2.0065470233382343,
+          "q25": 2.1304199945730584,
+          "q75": 2.6138545157795123
+        },
+        "vacuum_share_from_medians": 0.21948072667553925
+      },
+      "screened_additions": {
+        "at_candidate_fixed_boundary_level": true,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 10.733894993487944,
+          "median": 8.429602039289943,
+          "minimum": 6.875506788028536,
+          "q25": 7.780784588353701,
+          "q75": 9.20285931291308
+        },
+        "frames": 15,
+        "free_boundary_fractional_rms": {
+          "maximum": 9.105745538226866,
+          "median": 7.064338292310213,
+          "minimum": 5.602400156413991,
+          "q25": 6.446553570269646,
+          "q75": 7.585611804457866
+        },
+        "free_to_fixed_median_ratio": 0.8380393593177583,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 3.7604580970494315,
+          "median": 2.3677410418693485,
+          "minimum": 1.6937835908579628,
+          "q25": 2.230436311810058,
+          "q75": 2.5549453528079153
+        },
+        "vacuum_share_from_medians": 0.21928922921796504
+      },
+      "variant": {
+        "b0_to_nova": -1.0,
+        "derivative_sign": 1,
+        "derivative_to_nova": 1.0,
+        "flux_exponent": 0,
+        "identifier": "source-cocos-16",
+        "ip_to_nova": -1.0,
+        "poloidal_flux_sign": 1,
+        "psi_to_nova": 1.0,
+        "q_to_nova": 1.0,
+        "raw_flux_interpretation": "total",
+        "sigma_bp": 1,
+        "sigma_r_phi_z": -1,
+        "sigma_rho_theta_phi": -1,
+        "source_cocos": 16,
+        "toroidal_current_sign": -1
+      }
+    },
+    {
+      "all_frames": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 10.733894993487944,
+          "median": 8.715643833067269,
+          "minimum": 6.875506788028536,
+          "q25": 8.149199663941545,
+          "q75": 9.281300155121446
+        },
+        "frames": 20,
+        "free_boundary_fractional_rms": {
+          "maximum": 13.09361262660981,
+          "median": 10.479569264465564,
+          "minimum": 6.957323009584036,
+          "q25": 9.99684990898737,
+          "q75": 11.532002897977241
+        },
+        "free_to_fixed_median_ratio": 1.2023861306385581,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 3.2695682853587877,
+          "median": 2.751754344465455,
+          "minimum": 1.9688766945949139,
+          "q25": 2.626932311849481,
+          "q75": 2.992920302190616
+        },
+        "vacuum_share_from_medians": 0.23996326820296307
+      },
+      "landed_controls": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 10.650027798196096,
+          "median": 8.824050626182439,
+          "minimum": 8.269003156408669,
+          "q25": 8.650906117111763,
+          "q75": 9.57293488704755
+        },
+        "frames": 5,
+        "free_boundary_fractional_rms": {
+          "maximum": 12.840274068588837,
+          "median": 11.220355241865729,
+          "minimum": 6.957323009584036,
+          "q25": 10.146714765948008,
+          "q75": 11.513027050971235
+        },
+        "free_to_fixed_median_ratio": 1.271565148161441,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 3.0641904942053957,
+          "median": 2.8707966170470813,
+          "minimum": 2.490604984508155,
+          "q25": 2.644277889318015,
+          "q75": 2.879215522621826
+        },
+        "vacuum_share_from_medians": 0.24547534117720665
+      },
+      "screened_additions": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 10.733894993487944,
+          "median": 8.429602039289943,
+          "minimum": 6.875506788028536,
+          "q25": 7.780784588353701,
+          "q75": 9.20285931291308
+        },
+        "frames": 15,
+        "free_boundary_fractional_rms": {
+          "maximum": 13.09361262660981,
+          "median": 10.451136766535937,
+          "minimum": 8.83987550503721,
+          "q25": 9.899277655156139,
+          "q75": 11.531675052027571
+        },
+        "free_to_fixed_median_ratio": 1.2398137797992983,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 3.2695682853587877,
+          "median": 2.7445282255118086,
+          "minimum": 1.9688766945949139,
+          "q25": 2.6198663932473676,
+          "q75": 3.0154508062302297
+        },
+        "vacuum_share_from_medians": 0.24561448278055323
+      },
+      "variant": {
+        "b0_to_nova": 1.0,
+        "derivative_sign": 1,
+        "derivative_to_nova": 1.0,
+        "flux_exponent": 0,
+        "identifier": "source-cocos-17",
+        "ip_to_nova": 1.0,
+        "poloidal_flux_sign": 1,
+        "psi_to_nova": 1.0,
+        "q_to_nova": 1.0,
+        "raw_flux_interpretation": "total",
+        "sigma_bp": -1,
+        "sigma_r_phi_z": 1,
+        "sigma_rho_theta_phi": 1,
+        "source_cocos": 17,
+        "toroidal_current_sign": 1
+      }
+    },
+    {
+      "all_frames": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 10.733894993487944,
+          "median": 8.715643833067269,
+          "minimum": 6.875506788028536,
+          "q25": 8.149199663941545,
+          "q75": 9.281300155121446
+        },
+        "frames": 20,
+        "free_boundary_fractional_rms": {
+          "maximum": 13.09361262660981,
+          "median": 10.479569264465564,
+          "minimum": 6.957323009584036,
+          "q25": 9.99684990898737,
+          "q75": 11.532002897977241
+        },
+        "free_to_fixed_median_ratio": 1.2023861306385581,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 3.2695682853587877,
+          "median": 2.751754344465455,
+          "minimum": 1.9688766945949139,
+          "q25": 2.626932311849481,
+          "q75": 2.992920302190616
+        },
+        "vacuum_share_from_medians": 0.23996326820296307
+      },
+      "landed_controls": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 10.650027798196096,
+          "median": 8.824050626182439,
+          "minimum": 8.269003156408669,
+          "q25": 8.650906117111763,
+          "q75": 9.57293488704755
+        },
+        "frames": 5,
+        "free_boundary_fractional_rms": {
+          "maximum": 12.840274068588837,
+          "median": 11.220355241865729,
+          "minimum": 6.957323009584036,
+          "q25": 10.146714765948008,
+          "q75": 11.513027050971235
+        },
+        "free_to_fixed_median_ratio": 1.271565148161441,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 3.0641904942053957,
+          "median": 2.8707966170470813,
+          "minimum": 2.490604984508155,
+          "q25": 2.644277889318015,
+          "q75": 2.879215522621826
+        },
+        "vacuum_share_from_medians": 0.24547534117720665
+      },
+      "screened_additions": {
+        "at_candidate_fixed_boundary_level": false,
+        "fixed_boundary_fractional_rms": {
+          "maximum": 10.733894993487944,
+          "median": 8.429602039289943,
+          "minimum": 6.875506788028536,
+          "q25": 7.780784588353701,
+          "q75": 9.20285931291308
+        },
+        "frames": 15,
+        "free_boundary_fractional_rms": {
+          "maximum": 13.09361262660981,
+          "median": 10.451136766535937,
+          "minimum": 8.83987550503721,
+          "q25": 9.899277655156139,
+          "q75": 11.531675052027571
+        },
+        "free_to_fixed_median_ratio": 1.2398137797992983,
+        "vacuum_difference_fractional_rms": {
+          "maximum": 3.2695682853587877,
+          "median": 2.7445282255118086,
+          "minimum": 1.9688766945949139,
+          "q25": 2.6198663932473676,
+          "q75": 3.0154508062302297
+        },
+        "vacuum_share_from_medians": 0.24561448278055323
+      },
+      "variant": {
+        "b0_to_nova": -1.0,
+        "derivative_sign": -1,
+        "derivative_to_nova": -1.0,
+        "flux_exponent": 0,
+        "identifier": "source-cocos-18",
+        "ip_to_nova": -1.0,
+        "poloidal_flux_sign": -1,
+        "psi_to_nova": -1.0,
+        "q_to_nova": -1.0,
+        "raw_flux_interpretation": "total",
+        "sigma_bp": -1,
+        "sigma_r_phi_z": -1,
+        "sigma_rho_theta_phi": 1,
+        "source_cocos": 18,
+        "toroidal_current_sign": -1
+      }
+    }
+  ],
+  "verdict": {
+    "admitted_variants": [],
+    "any_variant_reaches_landed_fixed_boundary_level": false,
+    "best_free_boundary_fractional_rms": 0.21565054899544608,
+    "best_free_to_fixed_median_ratio": 5.314046957350325,
+    "best_variant": "source-cocos-1",
+    "candidate_relative_admission_is_not_a_root_criterion": true,
+    "candidate_relative_admitted_variants": [
+      "source-cocos-11",
+      "source-cocos-12",
+      "source-cocos-15",
+      "source-cocos-16"
+    ],
+    "convention_artefact": false,
+    "criterion": "landed-five free median <= 1.05 * landed pinned fixed median",
+    "data_limitation_survives_convention_sweep": true
+  }
+}

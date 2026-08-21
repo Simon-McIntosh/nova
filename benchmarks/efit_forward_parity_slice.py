@@ -1,5 +1,5 @@
 # ruff: noqa: E501
-"""Bank long-budget pinned route dynamics on one reference-seeded MAST slice.
+"""Bank a damped-to-Newton handoff on one reference-seeded MAST slice.
 
 The slice is selected only from the committed native-grid decomposition bank.
 Its declared pressure and diamagnetic gradients drive ``ForwardProfile.solve``
@@ -64,10 +64,12 @@ DECOMPOSITION_BANK = Path(
 )
 DEFAULT_OUTPUT = Path("docs/figures/efit-forward-parity")
 ROUTE_SURVEY_RECEIPT = DEFAULT_OUTPUT / "pinned-route-survey.json"
-RECEIPT_NAME = "long-budget-plasma-route.json"
+LONG_BUDGET_RECEIPT = DEFAULT_OUTPUT / "long-budget-plasma-route.json"
+RECEIPT_NAME = "two-phase-polish.json"
 FIGURE_NAME = "reference-seeded-forward-slice.png"
 DIAGNOSIS_FIGURE_NAME = "vacuum-branch-diagnosis.png"
 LONG_BUDGET_FIGURE_NAME = "long-budget-residual-trajectories.png"
+POLISH_FIGURE_NAME = "two-phase-polish-trajectories.png"
 GRID_STRIDE = 2
 FIXED_POINT_CRITERION = 1.0e-8
 NEWTON_STEPS = 12
@@ -1047,6 +1049,10 @@ def _route_record(
         "retains_plasma_basin": retains_plasma,
         "axis_flux_wb": _strict_scalar(pinned_topology.axis_flux),
         "boundary_flux_wb": _strict_scalar(pinned_topology.boundary_flux),
+        "saddle_position_m": [
+            _strict_scalar(value) for value in np.asarray(pinned_topology.x_point)
+        ],
+        "saddle_flux_wb": _strict_scalar(pinned_topology.x_point_flux),
         "emergent_topology_class": "diverted" if achieved else "limited",
         "finite": finite,
     }
@@ -1477,6 +1483,232 @@ def _long_budget_figure(survey: dict[str, Any], path: Path) -> None:
     plt.close(figure)
 
 
+def _select_phase_one_handoff(
+    long_budget_receipt: Path, shot: int, row: int
+) -> dict[str, Any]:
+    """Select the lowest-residual basin-retaining iterate from the bank."""
+    receipt = json.loads(long_budget_receipt.read_text())
+    selection = receipt["selection"]
+    if int(selection["shot"]) != shot or int(selection["slice_index"]) != row:
+        raise RuntimeError("the long-budget receipt selected a different slice")
+    arms = [
+        arm
+        for arm in receipt["long_budget_survey"]["arms"]
+        if arm["terminal_state"]["retains_plasma_basin"]
+    ]
+    if not arms:
+        raise RuntimeError("the long-budget receipt has no basin-retaining arm")
+    best = min(
+        arms,
+        key=lambda arm: (
+            float(arm["trajectory_summary"]["minimum_residual"]),
+            int(arm["promotion_budget"]),
+        ),
+    )
+    return {
+        "source_receipt": str(long_budget_receipt),
+        "selection_rule": (
+            "minimum recorded residual among basin-retaining arms; "
+            "shorter budget breaks ties"
+        ),
+        "source_route_id": best["route_id"],
+        "route": best["route"],
+        "options": best["options"],
+        "banked_minimum_residual": float(
+            best["trajectory_summary"]["minimum_residual"]
+        ),
+        "handoff_promotion": int(
+            best["trajectory_summary"]["minimum_residual_promotion"]
+        ),
+    }
+
+
+def run_two_phase_polish(
+    group: zarr.Group,
+    shot: int,
+    row: int,
+    current_field: str,
+    long_budget_receipt: Path,
+) -> dict[str, Any]:
+    """Compose a bank-selected damped prefix with Newton--Krylov polish."""
+    profile, seed, reference, provenance = build_profile(
+        group, shot, row, current_field
+    )
+    requested = int(TopologyClass.DIVERTED)
+    mapped = profile.flux_map(requested_class=requested)
+    selection = _select_phase_one_handoff(long_budget_receipt, shot, row)
+
+    phase_one_options = {
+        **selection["options"],
+        "newton_steps": selection["handoff_promotion"],
+    }
+    phase_one_history = fixed_point.kink_aware_newton_krylov(
+        mapped,
+        seed,
+        **phase_one_options,
+    )
+    phase_one_state = jnp.asarray(phase_one_history.state)
+    phase_one_residual = float(phase_one_history.residual)
+    reproduces_minimum = bool(
+        np.isclose(
+            phase_one_residual,
+            selection["banked_minimum_residual"],
+            rtol=0.0,
+            atol=1.0e-12,
+        )
+    )
+    if not reproduces_minimum:
+        raise RuntimeError("the phase-one handoff did not reproduce the banked minimum")
+    _phase_one_masks, phase_one_topology = profile.operator.read(
+        phase_one_state, requested
+    )
+    _emergent_masks, phase_one_emergent = profile.operator.read(phase_one_state)
+    phase_one_current = profile.operator.cell_current_moments(
+        phase_one_state, requested
+    ).cell_current
+    reference_current = float(group["plasma_current_c"][row])
+    phase_one_current_a = float(jnp.sum(phase_one_current))
+    phase_one_trace = np.asarray(phase_one_history.trace, dtype=np.float64)
+    state_vector = np.asarray(phase_one_state, dtype=np.float64)
+    handoff = {
+        "state_vector": state_vector.tolist(),
+        "state_size": int(state_vector.size),
+        "residual": phase_one_residual,
+        "plasma_current_a": phase_one_current_a,
+        "reference_plasma_current_a": reference_current,
+        "absolute_fraction_of_reference_current": abs(
+            phase_one_current_a / reference_current
+        ),
+        "saddle_position_m": [
+            float(value) for value in np.asarray(phase_one_topology.x_point)
+        ],
+        "saddle_flux_wb": float(phase_one_topology.x_point_flux),
+        "axis_position_m": [
+            float(value) for value in np.asarray(phase_one_topology.axis)
+        ],
+        "axis_flux_wb": float(phase_one_topology.axis_flux),
+        "boundary_flux_wb": float(phase_one_topology.boundary_flux),
+        "achieved_class": (
+            "diverted" if bool(phase_one_emergent.diverted) else "limited"
+        ),
+        "topology_consistent": bool(phase_one_emergent.diverted),
+        "finite": bool(
+            np.all(np.isfinite(state_vector))
+            and np.all(np.isfinite(np.asarray(phase_one_current)))
+            and np.isfinite(phase_one_residual)
+        ),
+    }
+    phase_one = {
+        "route": "kink_aware_newton_krylov",
+        "options": phase_one_options,
+        "promotion_count": selection["handoff_promotion"],
+        "residual_trajectory": [_strict_scalar(value) for value in phase_one_trace],
+        "bank_selection": selection,
+        "reproduces_banked_minimum": reproduces_minimum,
+        "handoff_iterate": handoff,
+    }
+
+    phase_two_options = {
+        "newton_steps": NEWTON_STEPS,
+        "gmres_iterations": GMRES_ITERATIONS,
+        "warmup": WARMUP_SWEEPS,
+        "relaxation": RELAXATION,
+        "step_cap": STEP_CAP,
+    }
+    phase_two_initial = jnp.asarray(
+        handoff["state_vector"], dtype=phase_one_state.dtype
+    )
+    phase_two_history = fixed_point.newton_krylov(
+        mapped,
+        phase_two_initial,
+        **phase_two_options,
+    )
+    phase_two = _route_record(
+        group,
+        row,
+        profile,
+        reference,
+        phase_two_history,
+        route_id="newton_krylov_polish",
+        route="newton_krylov",
+        iterations=NEWTON_STEPS,
+        options=phase_two_options,
+    )
+    numeric_trace = np.asarray(phase_two_history.trace, dtype=np.float64)
+    numeric_trace = numeric_trace[np.isfinite(numeric_trace)]
+    criterion_hits = np.flatnonzero(numeric_trace <= FIXED_POINT_CRITERION)
+    phase_two["initial_state_source"] = "phase_one.handoff_iterate.state_vector"
+    phase_two["initial_state_matches_handoff"] = bool(
+        np.array_equal(np.asarray(phase_two_initial), state_vector)
+    )
+    phase_two["numeric_residual_trajectory"] = numeric_trace.tolist()
+    phase_two["trajectory_summary"] = {
+        "minimum_residual": float(np.min(numeric_trace)),
+        "minimum_numeric_evaluation": int(np.argmin(numeric_trace) + 1),
+        "first_criterion_numeric_evaluation": (
+            None if not len(criterion_hits) else int(criterion_hits[0] + 1)
+        ),
+    }
+    if phase_two["converged"] and phase_two["terminal_state"]["retains_plasma_basin"]:
+        verdict = "POSITIVE_NEWTON_POLISH_CONVERGED_PLASMA_ROOT"
+    elif phase_two["converged"]:
+        verdict = "STRUCTURAL_NEGATIVE_POLISH_CONVERGED_VACUUM_ROOT"
+    elif phase_two["terminal_state"]["retains_plasma_basin"]:
+        verdict = "STRUCTURAL_NEGATIVE_POLISH_STALLED_IN_PLASMA_BASIN"
+    else:
+        verdict = "STRUCTURAL_NEGATIVE_POLISH_ESCAPED_WITHOUT_CONVERGENCE"
+    return {
+        "same_seed_and_source": {
+            "seed_source": provenance["seed_source"],
+            "current_field": provenance["current_field"],
+            "declared_axis_flux_wb": provenance["declared_axis_flux_wb"],
+            "declared_boundary_flux_wb": provenance["declared_boundary_flux_wb"],
+            "declared_support_nodes": provenance["declared_support_nodes"],
+            "requested_class": "diverted",
+            "reference_plasma_current_a": reference_current,
+        },
+        "registered_fixed_point_criterion": FIXED_POINT_CRITERION,
+        "composition": (
+            "existing kink_aware_newton_krylov handoff followed by existing "
+            "newton_krylov; no solver state machine added"
+        ),
+        "phase_one": phase_one,
+        "phase_two": phase_two,
+        "verdict": verdict,
+    }
+
+
+def _two_phase_figure(report: dict[str, Any], path: Path) -> None:
+    """Plot the damped prefix and Newton polish residual histories."""
+    phase_one = np.asarray(report["phase_one"]["residual_trajectory"], dtype=float)
+    phase_two = np.asarray(
+        report["phase_two"]["numeric_residual_trajectory"], dtype=float
+    )
+    criterion = float(report["registered_fixed_point_criterion"])
+    figure, axes = plt.subplots(1, 2, figsize=(8.4, 3.4), constrained_layout=True)
+    axes[0].plot(np.arange(1, len(phase_one) + 1), phase_one, color="tab:blue")
+    axes[0].scatter(
+        len(phase_one), phase_one[-1], color="tab:blue", edgecolor="white", zorder=3
+    )
+    axes[0].set_title("Phase one: damped handoff")
+    axes[0].set_xlabel("Accepted promotion")
+    axes[1].plot(
+        np.arange(1, len(phase_two) + 1),
+        np.maximum(phase_two, np.finfo(float).tiny),
+        color="tab:red",
+    )
+    axes[1].set_title("Phase two: Newton polish")
+    axes[1].set_xlabel("Numeric residual evaluation")
+    for axis in axes:
+        axis.axhline(criterion, color="black", lw=0.8, ls=":")
+        axis.set_yscale("log")
+        axis.grid(axis="y", color="0.88", lw=0.6)
+    axes[0].set_ylabel("Relative fixed-point residual")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, dpi=180)
+    plt.close(figure)
+
+
 def _control_baseline(control: dict[str, Any]) -> dict[str, Any]:
     """Verify that the unpinned arm reproduces its committed vacuum baseline."""
     measured_sup = control["metrics"]["flux_map"]["sup_fraction_of_reference_span"]
@@ -1586,7 +1818,7 @@ def _diagnosis_figure(diagnosis: dict[str, Any], path: Path) -> None:
 
 
 def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
-    """Run the control and extended-budget pinned plasma routes."""
+    """Run the control and the bank-selected two-phase polish route."""
     configure_dtypes()
     selected, qualification = select_slice(bank)
     shot = int(selected["shot"])
@@ -1597,21 +1829,21 @@ def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
     if not baseline["passes"]:
         raise RuntimeError("the unpinned control drifted from its committed baseline")
     pinned = solve_pinned_arm(group, shot, row, "fcoil_c")
-    long_budget_survey = survey_long_budget_routes(
+    two_phase_polish = run_two_phase_polish(
         group,
         shot,
         row,
         "fcoil_c",
-        ROUTE_SURVEY_RECEIPT,
+        LONG_BUDGET_RECEIPT,
     )
     figure_path = output / FIGURE_NAME
     _figure(fields, figure_path)
     diagnosis_figure_path = output / DIAGNOSIS_FIGURE_NAME
     _diagnosis_figure(control["diagnosis"], diagnosis_figure_path)
-    long_budget_figure_path = output / LONG_BUDGET_FIGURE_NAME
-    _long_budget_figure(long_budget_survey, long_budget_figure_path)
+    polish_figure_path = output / POLISH_FIGURE_NAME
+    _two_phase_figure(two_phase_polish, polish_figure_path)
     receipt = {
-        "receipt": "reference-seeded topology-pinned long-budget plasma-route survey",
+        "receipt": "reference-seeded topology-pinned two-phase Newton polish",
         "backend": "JAX_PLATFORMS=cpu required by invocation",
         "selection": {
             "source": str(bank),
@@ -1631,7 +1863,7 @@ def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
         "control_arm": control,
         "control_baseline": baseline,
         "pinned_arm": pinned,
-        "long_budget_survey": long_budget_survey,
+        "two_phase_polish": two_phase_polish,
         "dina_calibration": {
             "axis_distance_m": 0.0412,
             "plasma_current_signed_relative_deviation": -0.0112,
@@ -1643,8 +1875,8 @@ def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
         "diagnosis_figure_src": (
             "/nova/figures/efit-forward-parity/vacuum-branch-diagnosis.png"
         ),
-        "long_budget_figure_src": (
-            "/nova/figures/efit-forward-parity/long-budget-residual-trajectories.png"
+        "polish_figure_src": (
+            "/nova/figures/efit-forward-parity/two-phase-polish-trajectories.png"
         ),
     }
     output.mkdir(parents=True, exist_ok=True)
@@ -1667,7 +1899,7 @@ def main() -> None:
     solver = control["solver"]
     diagnosis = control["diagnosis"]
     pinned = receipt["pinned_arm"]["forward_branch_receipt"]
-    survey = receipt["long_budget_survey"]
+    polish = receipt["two_phase_polish"]
     print(
         "FORWARD_SLICE "
         f"shot={selection['shot']} row={selection['slice_index']} "
@@ -1695,11 +1927,11 @@ def main() -> None:
         f"topology_consistent={pinned['topology_consistent']}"
     )
     print(
-        "LONG_BUDGET_PLASMA_ROUTES "
-        f"arms={survey['arm_count']} "
-        f"budgets={','.join(str(value) for value in survey['promotion_budgets'])} "
-        f"converged_plasma={','.join(survey['routes_converged_on_plasma_branch']) or 'none'} "
-        f"verdict={survey['verdict']}"
+        "TWO_PHASE_POLISH "
+        f"handoff_residual={polish['phase_one']['handoff_iterate']['residual']:.9g} "
+        f"terminal_residual={polish['phase_two']['residual']:.9g} "
+        f"terminal_current_a={polish['phase_two']['terminal_state']['plasma_current_a']:.9g} "
+        f"verdict={polish['verdict']}"
     )
 
 

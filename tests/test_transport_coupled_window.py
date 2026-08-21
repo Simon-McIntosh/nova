@@ -4,13 +4,18 @@ from __future__ import annotations
 
 import copy
 import dataclasses
+from types import SimpleNamespace
 
 import jax
 import numpy as np
 import pytest
 
+from nova.equilibrium import SelectionHistory, SelectionPolicy, SelectionReason
+from nova.equilibrium.forward import ForwardPortfolio
 from nova.equilibrium.source import DomainProfile, ForwardSource
+from nova.equilibrium.topology import TopologyClass
 from nova.transport.coupled_window import (
+    ConvergedNonConfinedError,
     ExchangeSweepResult,
     TransportSweepReceipt,
     Waveform,
@@ -221,6 +226,22 @@ def test_equilibrium_sweep_consumes_interpolated_sources_and_returns_receipts(
     assert len(sweep.equilibria) == coarse_time.size
     assert sweep.conservation == tuple(
         equilibrium.conservation for equilibrium in sweep.equilibria
+    )
+    assert len(sweep.branch_receipts) == coarse_time.size
+    assert tuple(
+        receipt.selection.selected_class for receipt in sweep.branch_receipts
+    ) == (TopologyClass.LIMITED, TopologyClass.LIMITED)
+    assert sweep.branch_receipts[1].selection.previous_class is TopologyClass.LIMITED
+    assert (
+        sweep.branch_receipts[1].selection.reason is SelectionReason.HISTORY_CONTINUITY
+    )
+    assert tuple(
+        receipt.selection.next_history.sequence_index
+        for receipt in sweep.branch_receipts
+    ) == (1, 2)
+    assert all(
+        receipt.core_cell_counts[int(receipt.selection.selected_class)] > 0
+        for receipt in sweep.branch_receipts
     )
     for sample_time, sample, equilibrium in zip(
         coarse_time, sweep.source_samples, sweep.equilibria, strict=True
@@ -489,6 +510,69 @@ def test_window_receipt_closes_flux_and_boundary_current_ledgers():
     assert conservation.current_continuity_error > 0.0
     assert current.requested_initial == current.requested_final
     assert current.achieved_initial == current.achieved_final
+
+
+def test_coreless_branch_outcome_names_its_sample_and_window_exchange(
+    machine, converged, monkeypatch
+):
+    """A converged vacuum portfolio cannot cross the equilibrium boundary."""
+    profile, _seed, _vacuum = machine
+
+    def coreless_portfolio(_profile, _initial_flux, **_options):
+        branches = SimpleNamespace(
+            equilibrium=SimpleNamespace(
+                domains=SimpleNamespace(core=np.zeros((2, 5), dtype=bool))
+            ),
+            converged=np.ones(2, dtype=bool),
+            topology_consistent=np.ones(2, dtype=bool),
+            residual=np.asarray((2.0e-16, 3.0e-16)),
+        )
+        return ForwardPortfolio(branches=branches)
+
+    monkeypatch.setattr(type(profile), "solve_portfolio", coreless_portfolio)
+    source_waveform = _exchange_waveform((0.0, 1.0), 5, "source", 1.0)
+    with pytest.raises(ConvergedNonConfinedError) as unqualified:
+        equilibrium_sweep(
+            profile,
+            converged.flux,
+            source_waveform,
+            (0.5,),
+            lambda _sample: profile.source,
+            route="anderson",
+            selection_history=SelectionHistory(selected_class=TopologyClass.LIMITED),
+            selection_policy=SelectionPolicy(
+                cold_start_class=TopologyClass.LIMITED,
+                persistence_threshold=1,
+            ),
+        )
+
+    assert unqualified.value.exchange_index is None
+    assert unqualified.value.branch_receipt.sample_index == 0
+    assert unqualified.value.branch_receipt.sample_time == 0.5
+    assert unqualified.value.branch_receipt.core_cell_counts == (0, 0)
+
+    config = WindowConfig(
+        length=1.0,
+        equilibrium_grid=np.array([0.0, 0.5, 1.0]),
+        transport_grid=np.array([0.0, 0.25, 0.75, 1.0]),
+        iteration_cap=2,
+        tolerance=WINDOW_CONVERGENCE_TOLERANCE,
+    )
+    exchange = _AffineWindow(config, coupling=0.002)
+
+    def coreless_update(_source, _sample_grid):
+        raise unqualified.value
+
+    with pytest.raises(ConvergedNonConfinedError, match="exchange 1") as qualified:
+        solve_window(
+            exchange.geometry_template,
+            exchange.source_template,
+            config,
+            coreless_update,
+            exchange.transport,
+        )
+    assert qualified.value.exchange_index == 1
+    assert qualified.value.branch_receipt is unqualified.value.branch_receipt
 
 
 def test_nonconverging_window_raises_with_its_exhaustion_receipt():

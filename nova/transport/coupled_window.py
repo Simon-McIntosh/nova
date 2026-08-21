@@ -30,8 +30,16 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
+from nova.equilibrium import (
+    BranchAdmissibility,
+    SelectionHistory,
+    SelectionPolicy,
+    SelectionReceipt,
+    select_forward_branch,
+)
 from nova.equilibrium.forward import ForwardEquilibrium, ForwardProfile, SolveRoute
 from nova.equilibrium.source import ForwardSource
+from nova.equilibrium.topology import TopologyClass
 from nova.transport.forward import (
     FluxConsumptionLedger,
     ForwardTransport,
@@ -45,6 +53,8 @@ from nova.transport.forward import (
 )
 
 __all__ = [
+    "ConvergedNonConfinedError",
+    "EquilibriumBranchReceipt",
     "EquilibriumSweepReceipt",
     "ExchangeSweepResult",
     "TransportSweepReceipt",
@@ -424,6 +434,7 @@ class EquilibriumSweepReceipt:
     time: np.ndarray
     source_samples: tuple[WaveformSample, ...]
     equilibria: tuple[ForwardEquilibrium, ...]
+    branch_receipts: tuple[EquilibriumBranchReceipt, ...]
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "time", _readonly(self.time, dtype=np.float64))
@@ -432,6 +443,46 @@ class EquilibriumSweepReceipt:
     def conservation(self) -> tuple[Any, ...]:
         """Return the conservation ledger emitted at every coarse sample."""
         return tuple(equilibrium.conservation for equilibrium in self.equilibria)
+
+
+@dataclass(frozen=True)
+class EquilibriumBranchReceipt:
+    """Selection evidence for one topology-pinned equilibrium portfolio."""
+
+    sample_index: int
+    sample_time: float
+    core_cell_counts: tuple[int, int]
+    selection: SelectionReceipt
+
+
+class ConvergedNonConfinedError(RuntimeError):
+    """A completed branch portfolio contains no selectable confined state."""
+
+    def __init__(
+        self,
+        branch_receipt: EquilibriumBranchReceipt,
+        *,
+        exchange_index: int | None = None,
+    ) -> None:
+        location = f"sample {branch_receipt.sample_index}"
+        if exchange_index is not None:
+            location = f"exchange {exchange_index}, {location}"
+        super().__init__(
+            "equilibrium portfolio converged without a selectable confined branch at "
+            f"{location}; core cells limited/diverted = "
+            f"{branch_receipt.core_cell_counts}; selection reason = "
+            f"{branch_receipt.selection.reason.value}; availability "
+            f"limited/diverted = "
+            f"({branch_receipt.selection.availability.limited}, "
+            f"{branch_receipt.selection.availability.diverted}); residuals "
+            f"limited/diverted = {branch_receipt.selection.residuals}"
+        )
+        self.branch_receipt = branch_receipt
+        self.exchange_index = exchange_index
+
+    def at_exchange(self, exchange_index: int) -> ConvergedNonConfinedError:
+        """Return the same typed outcome qualified by its window exchange."""
+        return type(self)(self.branch_receipt, exchange_index=exchange_index)
 
 
 @dataclass(frozen=True)
@@ -786,7 +837,12 @@ def solve_window(
         source_candidate = transported.waveform
         _require_waveform_grid(source_candidate, config.transport_grid, "source")
 
-        equilibrated = equilibrium_update(source_candidate, config.equilibrium_grid)
+        try:
+            equilibrated = equilibrium_update(source_candidate, config.equilibrium_grid)
+        except ConvergedNonConfinedError as error:
+            if error.exchange_index is not None:
+                raise
+            raise error.at_exchange(iteration) from error
         if not isinstance(equilibrated, ExchangeSweepResult):
             raise TypeError("equilibrium update must return ExchangeSweepResult")
         geometry_candidate = equilibrated.waveform
@@ -899,12 +955,21 @@ def equilibrium_sweep(
     route: SolveRoute = "newton_krylov",
     current=None,
     solve_options: Mapping[str, Any] | None = None,
+    selection_history: SelectionHistory | None = None,
+    selection_policy: SelectionPolicy | None = None,
 ) -> EquilibriumSweepReceipt:
     """Solve equilibrium at coarse times against an interpolated source waveform.
 
     A fresh profile/operator pair is created for every source sample.  The
-    supplied profile, source waveform, and initial flux remain untouched;
-    only the returned flux is threaded forward as the next solve's seed.
+    first sample uses the public moment-based cold portfolio when selection
+    history is empty.  Every later portfolio seeds both pinned topology
+    classes from the previously selected confined equilibrium.  Physical
+    admissibility rejects candidates with no core cells before selection, so
+    a converged vacuum fixed point cannot reach a downstream extractor.
+
+    The supplied profile, source waveform, initial flux, history, and policy
+    remain untouched.  Selection receipts retain the immutable history chain
+    used across the coarse samples.
     """
     time_array = np.asarray(time, dtype=np.float64)
     if time_array.ndim != 1 or time_array.size == 0:
@@ -912,25 +977,129 @@ def equilibrium_sweep(
     if not np.all(np.diff(time_array) > 0.0):
         raise ValueError("equilibrium sweep time must be strictly increasing")
     options = dict(solve_options or {})
-    seed = initial_flux
+    seed = jnp.asarray(initial_flux)
+    history = SelectionHistory() if selection_history is None else selection_history
+    policy = selection_policy
     samples: list[WaveformSample] = []
     equilibria: list[ForwardEquilibrium] = []
-    for sample_time in time_array:
+    branch_receipts: list[EquilibriumBranchReceipt] = []
+    for sample_index, sample_time in enumerate(time_array):
         sample = source_waveform.sample(float(sample_time))
         source = source_from_sample(sample)
         operator = dataclasses.replace(profile.operator, source=source)
         sampled_profile = dataclasses.replace(profile, operator=operator)
-        equilibrium = sampled_profile.solve(
-            seed,
+
+        if history.selected_class is None:
+            observed = sampled_profile.observe(seed)
+            cell_current = np.asarray(observed.cell_current, dtype=np.float64)
+            coordinates = np.asarray(
+                sampled_profile.lattice.coordinate, dtype=np.float64
+            )
+            if cell_current.ndim != 1 or coordinates.shape != (
+                cell_current.size,
+                2,
+            ):
+                raise ValueError(
+                    "equilibrium cell current and lattice coordinates must align"
+                )
+            total_current = float(np.sum(cell_current))
+            current_scale = float(np.sum(np.abs(cell_current)))
+            if abs(total_current) <= np.finfo(np.float64).eps * max(current_scale, 1.0):
+                raise ValueError(
+                    "a cold equilibrium portfolio needs a non-zero confined current"
+                )
+            centroid = (
+                np.sum(coordinates * cell_current[:, np.newaxis], axis=0)
+                / total_current
+            )
+            cold = sampled_profile.cold_seed_portfolio(
+                float(observed.moments.plasma_current),
+                centroid,
+                current=current,
+            )
+            portfolio_seed = cold.branches.flux
+            if policy is None:
+                cold_class = (
+                    TopologyClass.DIVERTED
+                    if bool(observed.topology.diverted)
+                    else TopologyClass.LIMITED
+                )
+                policy = SelectionPolicy(
+                    cold_start_class=cold_class,
+                    persistence_threshold=1,
+                )
+        else:
+            portfolio_seed = jnp.stack((seed, seed))
+            if policy is None:
+                policy = SelectionPolicy(
+                    cold_start_class=history.selected_class,
+                    persistence_threshold=1,
+                )
+
+        portfolio = sampled_profile.solve_portfolio(
+            portfolio_seed,
             route=route,
             current=current,
             **options,
         )
+        core = np.asarray(portfolio.branches.equilibrium.domains.core)
+        if core.ndim < 2 or core.shape[0] != 2:
+            raise ValueError(
+                "equilibrium portfolio core masks must carry limited/diverted axes"
+            )
+        core_counts = tuple(
+            int(np.count_nonzero(core[index]))
+            for index in (int(TopologyClass.LIMITED), int(TopologyClass.DIVERTED))
+        )
+        admissibility = BranchAdmissibility(
+            limited=core_counts[int(TopologyClass.LIMITED)] > 0,
+            diverted=core_counts[int(TopologyClass.DIVERTED)] > 0,
+        )
+        selection = select_forward_branch(
+            portfolio,
+            history,
+            policy,
+            admissibility,
+        )
+        branch_receipt = EquilibriumBranchReceipt(
+            sample_index=sample_index,
+            sample_time=float(sample_time),
+            core_cell_counts=core_counts,
+            selection=selection,
+        )
+        branch_receipts.append(branch_receipt)
+        if selection.selected_class is None:
+            available = (
+                selection.availability.limited,
+                selection.availability.diverted,
+            )
+            available_confined = any(
+                branch_available and core_count > 0
+                for branch_available, core_count in zip(
+                    available, core_counts, strict=True
+                )
+            )
+            if any(available) and not available_confined:
+                raise ConvergedNonConfinedError(branch_receipt)
+            raise RuntimeError(
+                "equilibrium portfolio has no converged topology-consistent branch "
+                f"at sample {sample_index}"
+            )
+
+        selected_index = int(selection.selected_class)
+        if core_counts[selected_index] == 0:
+            raise ConvergedNonConfinedError(branch_receipt)
+        equilibrium = jax.tree.map(
+            lambda value: value[selected_index],
+            portfolio.branches.equilibrium,
+        )
         samples.append(sample)
         equilibria.append(equilibrium)
         seed = equilibrium.flux
+        history = selection.next_history
     return EquilibriumSweepReceipt(
         time=time_array,
         source_samples=tuple(samples),
         equilibria=tuple(equilibria),
+        branch_receipts=tuple(branch_receipts),
     )

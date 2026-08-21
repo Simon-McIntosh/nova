@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-20T18:06:53",
+  "updated": "2026-08-21T12:30:34",
   "project": "nova",
   "doc": "index",
   "data": {
@@ -473,6 +473,19 @@
                 "verification": "strict"
               }
             }
+          },
+          {
+            "slug": "solovev-exact-recovery",
+            "why_now": "The owner gated all further forward-model progress on the Solov'ev agreement gates; the recovery ran in S7 and one packaging node remains between it and shipped.",
+            "done_when": "Registered gate harness green two-tier (reduced closed-form fixture always-on, warm-cached fixtures slow-lane) with the owner-locked bounds; the accuracy-cost operating point recorded; plan shipped.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "verification": "strict"
+              }
+            }
           }
         ],
         "starts": "2026-08-10",
@@ -736,6 +749,6 @@
         "next": "/reckon-ship norma-standalone-package \u00a72 in ~/Code/norma (then \u00a73 registry, \u00a74 independence audit)."
       }
     ],
-    "_version": 45
+    "_version": 46
   }
 }

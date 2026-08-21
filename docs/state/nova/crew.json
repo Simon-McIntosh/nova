@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T12:22:37",
+  "updated": "2026-08-21T12:28:10",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -54,6 +54,13 @@
         "created": "2026-08-16"
       },
       {
+        "id": "decomp-native",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-21"
+      },
+      {
         "id": "diiid-current-units",
         "harness": "codex",
         "role": "implement",
@@ -101,6 +108,13 @@
         "role": "implement",
         "session_id": "019ffa0a-29f9-7802-94fd-ca80570f4eec",
         "created": "2026-08-13"
+      },
+      {
+        "id": "dina-profile-routes",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-21"
       },
       {
         "id": "doc-pins",
@@ -299,6 +313,13 @@
         "created": "2026-08-13"
       },
       {
+        "id": "profile-route-scout",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-21"
+      },
+      {
         "id": "publish",
         "harness": "codex",
         "role": "implement",
@@ -327,6 +348,13 @@
         "created": "2026-08-12"
       },
       {
+        "id": "recovery-gates",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-21"
+      },
+      {
         "id": "rect-prototype",
         "harness": "codex",
         "role": "implement",
@@ -346,6 +374,13 @@
         "role": "implement",
         "session_id": "01a01171-0694-7063-985b-f5d112e74147",
         "created": "2026-08-17"
+      },
+      {
+        "id": "sol-demo-scout",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-21"
       },
       {
         "id": "solve-convergence",
@@ -14117,6 +14152,6 @@
       }
     ],
     "holds": [],
-    "_version": 366
+    "_version": 371
   }
 }

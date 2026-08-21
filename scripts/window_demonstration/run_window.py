@@ -17,9 +17,13 @@ import jax.numpy as jnp
 import numpy as np
 from scipy.constants import electron_volt
 
-from nova.equilibrium.flux_surface_extraction import (
+from nova.equilibrium import (
+    FluxLattice,
+    GreenSourceRepresentation,
+    evaluate_forward_equilibrium,
     extract_flux_surface_geometry,
 )
+from nova.equilibrium.flux_surface_extraction import _axis_connected_core
 from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.jax.config import configure_dtypes
 from nova.transport.coupled_window import (
@@ -43,10 +47,10 @@ from nova.transport.forward import (
     TransportRung,
     TransportState,
 )
-from tests.test_equilibrium_forward_solve import (
-    EVALUATIONS,
-    machine as free_boundary_machine_fixture,
-)
+from tests import test_equilibrium_forward_solve as forward_fixture
+
+EVALUATIONS = forward_fixture.EVALUATIONS
+free_boundary_machine_fixture = forward_fixture.machine
 
 WINDOW_LENGTH_SECONDS = 0.01
 EQUILIBRIUM_TIMES = np.array([0.0, WINDOW_LENGTH_SECONDS])
@@ -57,6 +61,7 @@ DAMPING = 0.5
 RADIAL_CELLS = 8
 SURFACE_BINS = 14
 SOURCE_SAMPLES = 25
+EXTRACTION_POINTS = 49
 ION_DENSITY_PER_ELECTRON = 1.0
 MINIMUM_TEMPERATURE_KEV = 0.2
 
@@ -111,21 +116,80 @@ def _field_function(
     return np.asarray(psi_n), np.sqrt(np.asarray(squared))
 
 
+def _rectangle(radius: float, height: float, size: float = 0.05) -> np.ndarray:
+    """Return one rectangular source section from the fixture definition."""
+    half = 0.5 * size
+    return np.asarray(
+        (
+            (radius - half, height - half),
+            (radius + half, height - half),
+            (radius + half, height + half),
+            (radius - half, height + half),
+        )
+    )
+
+
+def _fixture_sources(profile) -> GreenSourceRepresentation:
+    """Retain the fixture source sections needed for exact flux evaluation."""
+    angle = (
+        2.0 * np.pi * np.arange(forward_fixture.CONDUCTORS) / forward_fixture.CONDUCTORS
+    )
+    conductor = np.c_[1.0 + 0.62 * np.cos(angle), 0.62 * np.sin(angle)]
+    return GreenSourceRepresentation(
+        external_sections=tuple(
+            _rectangle(radius, height) for radius, height in conductor
+        ),
+        external_current=np.asarray(profile.operator.external_current),
+        plasma_sections=tuple(
+            _rectangle(radius, height) for radius, height in profile.lattice.coordinate
+        ),
+        external_kernel="hybrid_rectangle",
+        plasma_kernel="hybrid_rectangle",
+    )
+
+
+def _extraction_lattice(profile) -> FluxLattice:
+    """Build the denser target lattice required by the extraction service."""
+    return FluxLattice(
+        np.linspace(
+            profile.lattice.radius[0],
+            profile.lattice.radius[-1],
+            EXTRACTION_POINTS,
+        ),
+        np.linspace(
+            profile.lattice.height[0],
+            profile.lattice.height[-1],
+            EXTRACTION_POINTS,
+        ),
+    )
+
+
 def _geometry_from_equilibrium(
-    profile, equilibrium, source: ForwardSource
-) -> TransportGeometry:
-    """Pass one solved fixture map through the equilibrium extraction service."""
-    lattice = profile.lattice
-    grid_flux = jnp.asarray(equilibrium.flux[: lattice.node_count]).reshape(
-        lattice.shape
-    )
-    psi_height_radius = grid_flux.T
-    inside_limiter = (
-        jnp.asarray(profile.operator.inside_material).reshape(lattice.shape).T
-    )
+    equilibrium,
+    source: ForwardSource,
+    lattice: FluxLattice,
+    sources: GreenSourceRepresentation,
+) -> tuple[TransportGeometry, dict[str, Any]]:
+    """Evaluate and extract one solved fixture equilibrium on a dense lattice."""
+    evaluation_start = time.perf_counter()
+    psi_height_radius = evaluate_forward_equilibrium(
+        equilibrium, lattice, sources
+    ).block_until_ready()
+    evaluation_seconds = time.perf_counter() - evaluation_start
+    mesh_r, mesh_z = np.meshgrid(lattice.radius, lattice.height, indexing="xy")
+    _wall, wall_flux = forward_fixture._wall_loop()
+    inside_limiter = jnp.asarray(forward_fixture._solovev(mesh_r, mesh_z) >= wall_flux)
     axis_psi = float(equilibrium.topology.axis_flux)
     boundary_psi = float(equilibrium.topology.boundary_flux)
     flux_span = boundary_psi - axis_psi
+    core_count = int(
+        np.asarray(
+            _axis_connected_core(
+                (psi_height_radius - axis_psi) / flux_span,
+                inside_limiter,
+            )
+        ).sum()
+    )
     field_psi_n, field_function = _field_function(source, flux_span)
     major_radius = float(equilibrium.topology.axis[0])
     record = extract_flux_surface_geometry(
@@ -149,7 +213,24 @@ def _geometry_from_equilibrium(
         n_radial_cells=RADIAL_CELLS,
         n_surface_bins=SURFACE_BINS,
     )
-    return TransportGeometry(_block_and_copy(record))
+    materialised = _block_and_copy(record)
+    measurement = {
+        "map_height": psi_height_radius.shape[0],
+        "map_radius": psi_height_radius.shape[1],
+        "core_count": core_count,
+        "record_valid": bool(materialised["valid"]),
+        "surface_arc_valid": bool(materialised["surface_arc_valid"]),
+        "surface_arc_invalid_count": int(materialised["surface_arc_invalid_count"]),
+        "exact_evaluation_seconds": evaluation_seconds,
+    }
+    if not measurement["record_valid"]:
+        raise RuntimeError(
+            "exact extraction returned an invalid geometry: "
+            f"lattice={psi_height_radius.shape}, core={core_count}, "
+            f"arcs_valid={measurement['surface_arc_valid']}, "
+            f"invalid_arcs={measurement['surface_arc_invalid_count']}"
+        )
+    return TransportGeometry(materialised), measurement
 
 
 def _source_from_sample(sample) -> ForwardSource:
@@ -344,6 +425,7 @@ def _report(
     timings: Sequence[dict[str, Any]],
     preparation_seconds: float,
     transport_receipt: TransportSweepReceipt,
+    extractions: Sequence[dict[str, Any]],
 ) -> str:
     """Render the human-facing record without interpreting the receipts away."""
     contraction = (
@@ -367,12 +449,14 @@ def _report(
         "",
         (
             "- Equilibrium: the repository's existing 25 x 25 free-boundary "
-            "machine fixture, solved with its declared Anderson budget."
+            "machine fixture, solved with its declared Anderson budget and "
+            f"evaluated exactly on a {EXTRACTION_POINTS} x "
+            f"{EXTRACTION_POINTS} extraction lattice."
         ),
         (
-            "- Geometry: `nova.equilibrium.extract_flux_surface_geometry` at "
-            "both equilibrium sample times, with 8 transport cells and 14 "
-            "surface bins."
+            "- Geometry: `evaluate_forward_equilibrium` followed by "
+            "`extract_flux_surface_geometry` at both equilibrium sample times, "
+            "with 8 transport cells and 14 surface bins."
         ),
         (
             "- Transport: TORAX multi-channel, one fixed 10 ms step, with all "
@@ -462,6 +546,35 @@ def _report(
     lines.extend(
         [
             "",
+            "## Exact extraction diagnostics",
+            "",
+            (
+                "Every equilibrium sample was evaluated afresh from its Green "
+                "source representation. No solved-grid interpolation enters these "
+                "records."
+            ),
+            "",
+            (
+                "| iteration | sample | lattice | axis-connected core cells | "
+                "record valid | arcs valid | invalid arcs | exact evaluation (s) |"
+            ),
+            "|---:|---:|---:|---:|---|---|---:|---:|",
+        ]
+    )
+    lines.extend(
+        (
+            f"| {row['iteration']} | {row['sample']} | "
+            f"{row['map_height']} x {row['map_radius']} | "
+            f"{row['core_count']} | `{_format(row['record_valid'])}` | "
+            f"`{_format(row['surface_arc_valid'])}` | "
+            f"{row['surface_arc_invalid_count']} | "
+            f"`{_format(row['exact_evaluation_seconds'])}` |"
+        )
+        for row in extractions
+    )
+    lines.extend(
+        [
+            "",
             (
                 "The final transport sweep contains "
                 f"`{len(transport_receipt.receipts)}` interval receipt(s). The TSV "
@@ -479,15 +592,22 @@ def main() -> int:
     configure_dtypes()
     preparation_start = time.perf_counter()
     profile, seed, _vacuum = _fixture_machine()
+    extraction_lattice = _extraction_lattice(profile)
+    fixture_sources = _fixture_sources(profile)
     baseline_equilibrium = profile.solve(
         seed,
         route="anderson",
         evaluations=EVALUATIONS,
     )
     baseline_source = profile.source
-    baseline_geometry = _geometry_from_equilibrium(
-        profile, baseline_equilibrium, baseline_source
+    baseline_geometry, baseline_extraction = _geometry_from_equilibrium(
+        baseline_equilibrium,
+        baseline_source,
+        extraction_lattice,
+        fixture_sources,
     )
+    baseline_extraction.update(iteration=0, sample=0)
+    extractions = [baseline_extraction]
     preparation_seconds = time.perf_counter() - preparation_start
 
     initial_geometry = Waveform.from_geometries(
@@ -567,16 +687,20 @@ def main() -> int:
             solve_options={"evaluations": EVALUATIONS},
         )
         geometries = []
-        for sample, equilibrium in zip(
-            receipt.source_samples, receipt.equilibria, strict=True
+        for sample_index, (sample, equilibrium) in enumerate(
+            zip(receipt.source_samples, receipt.equilibria, strict=True)
         ):
-            geometries.append(
-                _geometry_from_equilibrium(
-                    profile,
-                    equilibrium,
-                    _source_from_sample(sample),
-                )
+            geometry, extraction = _geometry_from_equilibrium(
+                equilibrium,
+                _source_from_sample(sample),
+                extraction_lattice,
+                fixture_sources,
             )
+            extraction.update(
+                iteration=iteration_count["equilibrium"], sample=sample_index
+            )
+            extractions.append(extraction)
+            geometries.append(geometry)
         waveform = Waveform.from_geometries(sample_grid, geometries)
         timings.append(
             {
@@ -634,6 +758,7 @@ def main() -> int:
         ("damping", DAMPING, "fraction"),
         ("radial_cells", RADIAL_CELLS, "count"),
         ("surface_bins", SURFACE_BINS, "count"),
+        ("extraction_points_per_axis", EXTRACTION_POINTS, "count"),
         ("preparation_wall_time", preparation_seconds, "s"),
         ("outcome", outcome, "text"),
     ):
@@ -682,6 +807,25 @@ def main() -> int:
             iteration=row["iteration"],
             side=row["side"],
         )
+    for row in extractions:
+        for field, unit in (
+            ("map_height", "count"),
+            ("map_radius", "count"),
+            ("core_count", "count"),
+            ("record_valid", "boolean"),
+            ("surface_arc_valid", "boolean"),
+            ("surface_arc_invalid_count", "count"),
+            ("exact_evaluation_seconds", "s"),
+        ):
+            _append_row(
+                rows,
+                "extraction_diagnostic",
+                field,
+                row[field],
+                unit,
+                iteration=row["iteration"],
+                side=f"equilibrium_sample_{row['sample']}",
+            )
     for field, value in conservation.items():
         unit = "Wb" if "flux_" in field and "residual" not in field else "A"
         if field.endswith("residual"):
@@ -726,6 +870,7 @@ def main() -> int:
             timings=timings,
             preparation_seconds=preparation_seconds,
             transport_receipt=transport_receipt,
+            extractions=extractions,
         ),
         encoding="utf-8",
     )

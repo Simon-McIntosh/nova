@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="nova">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="current-constrained-forward-solve">
+  <meta name="plan-title" content="Current-Constrained Forward Solve">
+  <meta name="plan-summary" content="Make prescribed total plasma current a first-class constraint of the free-boundary solve by exact profile-amplitude elimination, so the vacuum root leaves the map&#x27;s range and Newton selects the plasma branch by construction rather than by seeding luck">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="6.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-sprint" content="S8">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-blocks" content="diiid-forward-onboarding,efit-forward-parity">
+  <meta name="plan-informs" content="dual-basin-solve">
+  <title>Current-Constrained Forward Solve | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-21">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Purpose, and the measurement that warrants it</h2>
+    <p>Nova's free-boundary Grad–Shafranov fixed point has a root-selection problem, not a
+    convergence problem. Given prescribed coil currents and extracted flux functions, Newton converges
+    briskly — and converges to the <em>vacuum</em> root, where the plasma current is zero. Damped and
+    relaxed Picard-class routes hold the plasma branch instead but orbit it without ever entering a
+    convergence region. Two machines and two independent reference sources produced that same split, so
+    it is a property of the map rather than of any one dataset.</p>
+    <p>This plan makes <strong>prescribed total plasma current</strong> a constraint of the solve. Because
+    <code>j<sub>φ</sub> = −2π(R·p′ + FF′/μ₀R)</code> is jointly linear in
+    <code>(p′, FF′)</code>, a common amplitude λ scales I<sub>p</sub> exactly, so the constraint solves in
+    closed form:</p>
+    <p><code>λ = I<sub>p</sub><sup>target</sup> / ∫ j<sub>φ</sub><sup>unscaled</sup>(ψ) dA</code></p>
+    <p>Applied inside the map, this does not <em>penalise</em> the vacuum root — it removes it from the
+    map's range, because a zero-plasma-current state would require infinite λ. Newton is then left with
+    only plasma roots to find. The system stays square, GMRES is unchanged, no weight is introduced, and
+    the constraint holds exactly at every iterate rather than asymptotically.</p>
+    <p><strong>A prototype has already measured this and it works.</strong> On a representative
+    ~1 MA DIII-D frame, from the same seed and the same 24-conductor input:</p>
+    <table>
+      <caption>Prototype result, <code>d3d_shot_00000c4a7b</code> frame 102
+      (<code>diiid-forward-onboarding</code> §10, commits <code>927a09e6</code>…<code>40a9bdc9</code>).</caption>
+      <thead><tr><th>Arm</th><th>Relative residual</th><th>Iterations</th><th>Terminal topology</th><th>1e-6 ∧ diverted</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Amplitude-eliminated</strong></td><td><strong>1.59e-09</strong></td><td><strong>4</strong></td><td><strong>diverted</strong></td><td><strong>passed</strong></td></tr>
+        <tr><td>Unpinned control</td><td>0.514</td><td>24</td><td>limited</td><td>failed</td></tr>
+      </tbody>
+    </table>
+    <p>Exact current error 0.0; recovered λ moved 1.1283 → 1.0973 through the solve, a −2.7 % change. Four
+    iterations to 1.6e-9 against twenty-four to 0.51, landing on opposite branches.</p>
+    <p><strong>Prescribed I<sub>p</sub> is an admissible input, not a label-derived crutch.</strong> It is
+    in the competition input set and can alternatively be supplied by a partner transport solve, so it is
+    the same class of declared input as the conductor currents. A route depending on it is admissible end
+    to end rather than only as an illustration.</p>
+
+    <h2 id="s2">§2 — The one negative result, and what it forecloses</h2>
+    <p>The prototype's second measurement is a genuine negative and must not be lost in the first one's
+    shadow. Pinning reduced the Picard spectral radius from <strong>1.2577 to 1.1456</strong> — an 8.9 %
+    improvement, <strong>still above one</strong>. The map is not made contractive.</p>
+    <p><strong>Consequence:</strong> the damped and relaxed fixed-point routes that were observed to orbit
+    are <em>not</em> rehabilitated by this constraint, and this plan must not claim they are. The
+    constrained solve is a <strong>Newton</strong> route. Any downstream work that hopes to recover a cheap
+    Picard iteration from current pinning is proceeding on a refuted premise.</p>
+    <p><strong>Why that is consistent rather than contradictory</strong>, and worth stating because it was
+    misread once already: Newton converged in four iterations <em>on a map with ρ = 1.1456</em>. A spectral
+    radius above one defeats Picard and leaves Newton well posed — the Newton residual Jacobian is
+    (I − M′) with eigenvalue 1 − ρ ≈ −0.15 to −0.26 here, far from singular. An unstable equilibrium is
+    still a regular root. <strong>No vertical-position constraint belongs in this design</strong>; that
+    caveat was raised against the prototype and withdrawn on exactly this reasoning.</p>
+
+    <h2 id="s3">§3 — Complete the cohort measurement (first node)</h2>
+    <p>The prototype scored 1 of its 5 preregistered frames. It stopped on a guard-ordering defect:
+    during an Armijo line search the solver visited a state with <code>unscaled_current_a</code> exactly
+    0.0, and <code>_lambda_value</code> performed the division <em>before</em> reaching its finite-positive
+    band check, raising <code>ZeroDivisionError</code>.</p>
+    <p>The repair is to map a zero unscaled current onto the existing loud <code>LambdaOutOfBand</code>
+    path instead of dividing first. Everything else is already committed and must not move: the five-frame
+    cohort, the positive λ band, the 1e-6 criterion, the 2e-6 cross-codegen tolerance, and the separately
+    reported low-current control fixture.</p>
+    <p><strong>Done-when:</strong> all five preregistered frames score, each reporting whether the
+    eliminated arm meets 1e-6 and diverted simultaneously where the unpinned control does not, with the
+    per-frame recovered λ beside its seed value and the paired Picard spectral radii. The single completed
+    frame is <em>not</em> generalised until the other four agree.</p>
+
+    <h2 id="s4">§4 — Promote the constrained map from benchmark to the solver seam</h2>
+    <p>The prototype deliberately lives in <code>benchmarks/</code> with <code>nova/equilibrium/</code>
+    read-only, because peer sessions were active in that tree. That was right for a prototype and is wrong
+    for a capability: a constrained map that only exists in a benchmark cannot be driven by
+    <code>efit-forward-parity</code>, by the DIII-D onboarding, or by any batched production route.</p>
+    <p>The promotion is small in surface and large in reach. The amplitude elimination is one
+    multiplication inside the map plus a guard; the I<sub>p</sub> functional it needs already exists as an
+    exact clipped-support integral. What must be authored carefully is the <em>contract</em>: which caller
+    supplies the target, what happens when it is absent, and how the receipt reports λ so a reader can see
+    how far the prescribed amplitude moved the extracted profiles.</p>
+    <p><strong>Done-when:</strong> the constrained map is reachable through the public forward seam with a
+    target-current argument, an absent target reproduces today's unconstrained behaviour bit-for-bit, the
+    λ guard fails loudly rather than dividing, and the prototype benchmark is rewired to drive the seam
+    rather than its own copy — with its landed numbers reproduced.</p>
+
+    <h2 id="s5">§5 — Cross-machine validation</h2>
+    <p>The prototype measured DIII-D. The dichotomy it addresses was mapped in most detail on a MAST EFIT
+    reference by <code>efit-forward-parity</code>, whose eight-route survey found
+    <code>newton_krylov</code> and Anderson converging on the vacuum root at 0 A while five damped hybrids
+    and a kink-aware nonmonotone route retained the plasma basin at 1.009–1.165× reference current without
+    closing. That reference is the natural second test, and it is a sharper one: its external field reads
+    diverted-class, so a <em>topology</em> pin cannot discriminate the vacuum root from the plasma root
+    there at all.</p>
+    <p>That last point is this plan's clearest justification. Where topology pinning is degenerate, a
+    current constraint is not — the two roots differ by ~934 kA whatever their topology class.</p>
+    <p><strong>Done-when:</strong> the constrained solve runs on the MAST parity reference and reports
+    whether it reaches the plasma root where the unconstrained routes did not, with the same two metrics
+    as §3 and the label-parity figures that plan already scores.</p>
+
+    <h2 id="s6">§6 — Boundaries: what this plan does not own</h2>
+    <p>Stated explicitly because an adjacent plan is building an adjacent mechanism and duplication here
+    would be expensive.</p>
+    <ul>
+      <li><strong><code>dual-basin-solve</code> owns topology pinning, hysteresis branch selection, the
+      continuation ladder and warm-start economy.</strong> This plan owns one different mechanism:
+      constraining total current by amplitude elimination. They are complementary — current pinning
+      selects <em>which root</em>, topology pinning prevents in-solve <em>class switching</em>, and the
+      MAST finding shows the second cannot substitute for the first. Coordinate; do not reimplement.</li>
+      <li><strong>Basin <em>entry</em> by homotopy or continuation is not this plan's mechanism.</strong>
+      If the constrained map turns out to need a continuation ladder as well, that ladder belongs to
+      <code>dual-basin-solve</code> and is consumed here.</li>
+      <li><strong>Vertical-position control is out of scope</strong> and is not merely deferred — it was
+      considered and refused on the §2 reasoning.</li>
+      <li><strong>The explicit augmented-row formulation is not the recommended design.</strong> It was
+      prototyped as a comparison and dropped when it alone required a public clipped-support primitive the
+      forward operator does not expose. If it is ever revived, the weighting is stated in the decision
+      below so the design question does not have to be re-derived.</li>
+    </ul>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="constraint-formulation" data-choice="amplitude-elimination" data-by="Simon McIntosh" data-when="2026-08-21">
+    <p class="r-dec-q">Is the current constraint imposed by closed-form amplitude elimination or by an explicit augmented residual row?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="amplitude-elimination">closed-form amplitude elimination</button>
+      <button class="r-opt" data-value="augmented-row">explicit augmented residual row</button>
+      </p>
+    <p class="r-dec-rat">Elimination keeps the system square so GMRES is unchanged, enforces the
+        constraint exactly at every map evaluation rather than asymptotically, and introduces no weight to
+        tune. The augmented row additionally required a public clipped-support observation primitive the
+        forward operator does not expose, which is why the prototype&#x27;s augmented arm was dropped — the arm
+        needing new surface was the arm not recommended. Recorded for completeness in case the row is ever
+        revived: both blocks must be non-dimensionalised by their own scale, the flux block in the exact
+        clipped-cell area-weighted discrete L2 norm divided by the flux span and the current row as the
+        relative current error, since a raw pointwise l2 grows as the square root of node count and is
+        therefore grid-dependent while a current integral is not.</p>
+    </div>
+<div class="r-dec" data-key="zero-current-guard" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">When a line search visits a state whose unscaled plasma current is zero or sign-reversed, does the solve fail loudly, clip to the band edge, or reject the step and continue?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="fail-loud">fail loudly through the existing out-of-band path</button>
+      <button class="r-opt" data-value="reject-step">reject the trial step and continue the line search</button>
+      <button class="r-opt" data-value="clip-band">clip lambda to the nearest admissible band edge</button>
+      </p>
+    <p class="r-dec-rat">Open. Failing loudly is the safe default and is what the §3 repair implements,
+        but a line search legitimately probes inadmissible states, so rejecting the trial step may be the
+        better numerics. Clipping is listed to be refused explicitly: it would silently return a state that
+        does not satisfy the constraint. Sign reversal is a separate case and stays refused — a negative
+        common amplitude reverses both the pressure gradient and FF-prime, which is a different physical
+        source rather than a current normalisation.</p>
+    </div>
+<div class="r-dec" data-key="target-current-provenance" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Which target current does a production solve consume, and what does it do when none is supplied?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="required-explicit">required explicit argument, no default</button>
+      <button class="r-opt" data-value="optional-unconstrained">optional, absent means today&#x27;s unconstrained solve</button>
+      </p>
+    <p class="r-dec-rat">Open. The optional form preserves every existing caller unchanged and is the
+        lower-risk promotion, but it makes the constrained route opt-in and therefore easy to forget where
+        it matters most. The explicit form forces every caller to state its provenance — dataset channel,
+        partner transport solve, or none — which is the more honest contract and the more disruptive one.</p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-ccf-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-21" data-recommends-skill="/reckon-ship current-constrained-forward-solve §3" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Repair the lambda guard ordering and complete the five-frame cohort (§3)</h4>
+    <div class="r-fu-body"><p>The prototype scored 1 of 5 preregistered frames and stopped on a guard-ordering defect: during an Armijo line search the solver visited a state with <code>unscaled_current_a</code> exactly 0.0, and <code>_lambda_value</code> divided <em>before</em> reaching its finite-positive band check, raising <code>ZeroDivisionError</code>. The repair is to route a zero unscaled current onto the existing loud <code>LambdaOutOfBand</code> path instead of dividing first.</p><p><strong>Everything else is committed and must not move:</strong> the five-frame cohort (<code>d3d_shot_00000c4a7b</code> f102, <code>d3d_shot_0003ff34e7</code> f89, <code>d3d_shot_001270afa9</code> f215, <code>d3d_shot_001554e054</code> f41, <code>d3d_shot_001cbcc9e6</code> f252, recorded |I<sub>p</sub>| 0.99–1.75 MA, seed λ 0.955–1.487), the positive λ band, the 1e-6 criterion, the 2e-6 cross-codegen tolerance, and the separately reported 160 ms low-current control fixture.</p><p><strong>Report per frame:</strong> whether the eliminated arm meets 1e-6 and diverted simultaneously where the unpinned control does not; the recovered λ beside its seed value; and the paired Picard spectral radii against the banked 1.25–1.40 diverted-state figure. Do not generalise the one completed frame until the other four agree — and note the <code>zero-current-guard</code> decision is open, so if rejecting the trial step proves better numerics than failing loudly, that is a decision to lock rather than a liberty to take.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship current-constrained-forward-solve §3</pre>
+    </article>
+</section>
+  </main>
+</body>
+</html>

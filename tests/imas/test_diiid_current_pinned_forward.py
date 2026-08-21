@@ -16,7 +16,17 @@ def test_declaration_keeps_the_constraint_explicit_and_the_system_square() -> No
     declaration = pinned.preregistration()
 
     assert declaration["target_current"]["status"].startswith("declared constraint")
-    assert "not available" in declaration["target_current"]["inference_availability"]
+    assert (
+        "admissible competition input"
+        in declaration["target_current"]["inference_availability"]
+    )
+    assert declaration["selection"]["absolute_recorded_ip_floor_a"] == 200_000.0
+    assert len(declaration["selection"]["cohort_declared_before_solver_scoring"]) == 5
+    assert all(
+        item["seed_lambda"] > 0.0
+        for item in declaration["selection"]["cohort_declared_before_solver_scoring"]
+    )
+    assert "excluded" in declaration["selection"]["low_current_control_fixture"]["role"]
     assert declaration["shared_inputs"]["coefficients_fitted"] == 0
     assert declaration["shared_inputs"]["currents_adjusted"] == 0
     assert declaration["arms"]["pinned_eliminated"]["unknowns_and_rows"].startswith(
@@ -52,7 +62,7 @@ def test_common_amplitude_scales_every_current_moment() -> None:
     np.testing.assert_allclose(scaled.vertical_moment, [12.5, 15.0])
 
 
-def test_summary_requires_control_reproduction_before_positive_verdict() -> None:
+def test_summary_requires_representative_current_and_diverted_convergence() -> None:
     eigenvalue = {
         "absolute_dominant_eigenvalue_estimate": 1.1,
         "finite": True,
@@ -73,7 +83,14 @@ def test_summary_requires_control_reproduction_before_positive_verdict() -> None
             {
                 "shot": f"shot-{index}",
                 "screened_out_of_affected_polarity_population": True,
+                "absolute_target_plasma_current_a": 500_000.0,
+                "target_and_unscaled_source_same_sign": True,
                 "augmented_verdict_stable_across_alpha": True,
+                "unconstrained_current_controls": {
+                    "shipped_20": {"relative_residual": 0.12},
+                    "full_24": {"relative_residual": 0.03},
+                    "shipped_to_full_residual_ratio": 4.0,
+                },
                 "arms": {
                     "unpinned": arm(pinned.UNPINNED_PLATEAU_CONTROL, 1.0, False),
                     "pinned_eliminated": arm(1.0e-8, 1.2, True),
@@ -81,9 +98,14 @@ def test_summary_requires_control_reproduction_before_positive_verdict() -> None
                 },
             }
         )
-    summary = pinned.summarize(records)
+    low_control = {"historical_full_24_plateau_reproduced": True}
+    summary = pinned.summarize(records, low_control)
 
-    assert summary["unpinned_control_reproduced"]
+    assert summary["all_frames_absolute_recorded_ip_at_least_200ka"]
+    assert summary["all_frames_target_and_source_same_sign"]
+    assert summary["representative_current_unpinned_comparison"][
+        "historical_3_53x_holds_at_representative_current"
+    ]
     assert summary["current_pinning_removes_vacuum_root_and_orbiting_plateau"]
 
 
@@ -95,11 +117,23 @@ def test_generated_receipt_carries_five_screened_three_arm_frames() -> None:
     assert result["frame_count"] >= 5
     assert result["distinct_shots"] >= 5
     assert result["all_shots_screened_free_of_affected_population"]
-    assert result["unpinned_control_reproduced"]
+    assert result["all_frames_absolute_recorded_ip_at_least_200ka"]
+    assert result["all_frames_target_and_source_same_sign"]
+    assert result["low_current_control_fixture"][
+        "historical_full_24_plateau_reproduced"
+    ]
+    assert not result["low_current_control_fixture"]["constrained_arms_scored"]
     assert len(result["frames"]) >= 5
     for frame in result["frames"]:
         assert frame["same_label_branch_seed_all_arms"]
         assert frame["poloidal_conductor_count"] == 24
+        assert abs(frame["target_plasma_current_a"]) >= 200_000.0
+        assert frame["seed_profile_amplitude"] > 0.0
+        assert set(frame["unconstrained_current_controls"]) == {
+            "shipped_20",
+            "full_24",
+            "shipped_to_full_residual_ratio",
+        }
         assert set(frame["arms"]) == set(pinned.ARM_NAMES)
         assert set(frame["augmented_alpha_trials"]) == {"0.1", "1.0", "10.0"}
         for arm in pinned.ARM_NAMES:
@@ -116,4 +150,4 @@ def test_source_does_not_modify_or_import_an_equilibrium_implementation() -> Non
     source = Path(pinned.__file__).read_text()
 
     assert "nova/equilibrium" not in source
-    assert "prescribed benchmark constraint" in source
+    assert "prescribed input of the same class as the coil currents" in source

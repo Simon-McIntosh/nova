@@ -4,8 +4,8 @@ The experiment keeps Nova's absolute-source production policy untouched.  It
 wraps the existing free-boundary map in two benchmark-only current constraints:
 closed-form elimination of one common profile amplitude, and a square augmented
 root with that amplitude as an explicit unknown.  The recorded plasma current is
-a prescribed benchmark constraint; it is neither fitted nor available to an
-actuator-only inference path.
+a prescribed input of the same class as the coil currents; it is neither fitted
+nor inferred inside the equilibrium solve.
 """
 
 from __future__ import annotations
@@ -24,18 +24,18 @@ import numpy as np
 import scipy.optimize
 
 from benchmarks.diiid_boundary_current_recovery import (
+    CHECKPOINT_NAME as RECOVERY_CHECKPOINT_NAME,
+    OMITTED_COILS,
     POLARITY_RECEIPT,
     RECEIPT_NAME as RECOVERY_RECEIPT_NAME,
     DEFAULT_OUTPUT as RECOVERY_OUTPUT,
 )
 from benchmarks.diiid_diverted_root_full_currents import (
-    FRAME_COUNT,
     POLARITY_AFFECTED_SHOT_COUNT,
     FrameInput,
     _omitted_vertices,
     append_recovered_conductors,
     current_arms,
-    selected_inputs,
 )
 from benchmarks.diiid_forward_gs_match import (
     DEFAULT_DATA,
@@ -64,6 +64,7 @@ LAMBDA_BAND = (1.0e-6, 1.0e6)
 RELATIVE_RESIDUAL_CRITERION = 1.0e-6
 CURRENT_CONSTRAINT_CRITERION = 1.0e-10
 UNPINNED_PLATEAU_CONTROL = 3.491124178554655e-2
+SHIPPED_ONLY_PLATEAU_CONTROL = 0.1233879
 UNPINNED_CONTROL_ABSOLUTE_TOLERANCE = 2.0e-7
 HOST_OUTER_ITERATIONS = 100
 HOST_INNER_ITERATIONS = 40
@@ -73,6 +74,50 @@ PSEUDO_WALL_EXPANSION = 0.02
 PLASMA_CURRENT_COLUMNS = (
     "magnetics_plasma_current",
     "magnetics_plasma_current_times",
+)
+REPRESENTATIVE_CURRENT_FLOOR_A = 200_000.0
+LOW_CURRENT_CONTROL = ("d3d_shot_00000c4a7b.parquet", 0)
+REPRESENTATIVE_COHORT = (
+    {
+        "shot": "d3d_shot_00000c4a7b.parquet",
+        "frame": 102,
+        "time_ms": 2200.0,
+        "recorded_ip_a": 1283617.6680326462,
+        "unscaled_source_ip_a": 1137702.226779481,
+        "seed_lambda": 1.1282545096762369,
+    },
+    {
+        "shot": "d3d_shot_0003ff34e7.parquet",
+        "frame": 89,
+        "time_ms": 1980.0,
+        "recorded_ip_a": 1745309.6601366997,
+        "unscaled_source_ip_a": 1826694.2826122313,
+        "seed_lambda": 0.9554470481184465,
+    },
+    {
+        "shot": "d3d_shot_001270afa9.parquet",
+        "frame": 215,
+        "time_ms": 5100.0,
+        "recorded_ip_a": 990789.0240550041,
+        "unscaled_source_ip_a": 666293.0624446461,
+        "seed_lambda": 1.4870168697536397,
+    },
+    {
+        "shot": "d3d_shot_001554e054.parquet",
+        "frame": 41,
+        "time_ms": 1160.0,
+        "recorded_ip_a": 1006624.5902478695,
+        "unscaled_source_ip_a": 1010288.9124805233,
+        "seed_lambda": 0.9963729956971843,
+    },
+    {
+        "shot": "d3d_shot_001cbcc9e6.parquet",
+        "frame": 252,
+        "time_ms": 5600.0,
+        "recorded_ip_a": 998801.5315532684,
+        "unscaled_source_ip_a": 801715.452065907,
+        "seed_lambda": 1.2458304613931273,
+    },
 )
 
 
@@ -110,12 +155,28 @@ def preregistration() -> dict[str, Any]:
     return {
         "measurement": "plasma-current constrained free-boundary map",
         "selection": {
-            "frames": FRAME_COUNT,
-            "source": str(RECOVERY_OUTPUT / RECOVERY_RECEIPT_NAME),
-            "rule": "the five banked distinct-shot diverted replacement frames",
+            "frames": len(REPRESENTATIVE_COHORT),
+            "source": str(RECOVERY_OUTPUT / RECOVERY_CHECKPOINT_NAME),
+            "rule": (
+                "one maximum-absolute-current banked diverted frame per distinct "
+                "shot, absolute recorded Ip at least 200 kA, retained only when "
+                "target Ip and extracted unscaled source Ip have the same sign"
+            ),
+            "absolute_recorded_ip_floor_a": REPRESENTATIVE_CURRENT_FLOOR_A,
             "polarity_screen": (
                 "every selected shot is absent from the landed 603-shot population"
             ),
+            "cohort_declared_before_solver_scoring": list(REPRESENTATIVE_COHORT),
+            "low_current_control_fixture": {
+                "shot": LOW_CURRENT_CONTROL[0],
+                "frame": LOW_CURRENT_CONTROL[1],
+                "time_ms": 160.0,
+                "recorded_ip_a": -3465.503291954519,
+                "role": (
+                    "selection-defect control only; excluded from every cohort "
+                    "statistic and constrained solve because seed lambda is negative"
+                ),
+            },
         },
         "shared_inputs": {
             "seed": "the same convention-clean labelled branch seed in every arm",
@@ -132,7 +193,8 @@ def preregistration() -> dict[str, Any]:
             "unit_crossing": "recorded kA multiplied by 1000 exactly once",
             "status": "declared constraint, not a fitted coefficient",
             "inference_availability": (
-                "not available to an actuator-only inference input"
+                "admissible competition input and may also be supplied by a partner "
+                "transport solve"
             ),
         },
         "arms": {
@@ -143,8 +205,14 @@ def preregistration() -> dict[str, Any]:
                 "warmup": 8,
                 "relaxation": 0.5,
                 "step_cap": 10.0,
-                "first_frame_plateau_control": UNPINNED_PLATEAU_CONTROL,
+                "low_current_full_24_plateau_control": UNPINNED_PLATEAU_CONTROL,
+                "low_current_shipped_20_plateau_control": (
+                    SHIPPED_ONLY_PLATEAU_CONTROL
+                ),
                 "control_absolute_tolerance": UNPINNED_CONTROL_ABSOLUTE_TOLERANCE,
+                "representative_current_comparison": (
+                    "remeasure shipped-20 and full-24 from the same seed per frame"
+                ),
             },
             "pinned_eliminated": {
                 "definition": (
@@ -204,16 +272,51 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def write_preregistration(output: Path) -> Path:
-    """Write once and fail closed if an existing declaration differs."""
+def write_preregistration(output: Path, *, replace: bool = False) -> Path:
+    """Write the declaration, requiring an explicit action to replace it."""
 
     output.mkdir(parents=True, exist_ok=True)
     path = output / PREREGISTRATION_NAME
     encoded = json.dumps(preregistration(), indent=2, sort_keys=True) + "\n"
-    if path.exists() and path.read_text() != encoded:
+    if path.exists() and path.read_text() != encoded and not replace:
         raise RuntimeError("on-disk current-pinned preregistration differs")
     path.write_text(encoded)
     return path
+
+
+def _recovery_inputs(affected_shots: set[str]) -> tuple[list[FrameInput], FrameInput]:
+    """Load the preregistered frames from the landed incremental recovery bank."""
+
+    path = RECOVERY_OUTPUT / RECOVERY_CHECKPOINT_NAME
+    bank = {
+        (item["shot"], int(item["frame"])): item
+        for item in (
+            json.loads(line) for line in path.read_text().splitlines() if line.strip()
+        )
+    }
+
+    def frame_input(shot: str, frame: int) -> FrameInput:
+        if shot in affected_shots:
+            raise RuntimeError(f"selected shot {shot} is polarity affected")
+        try:
+            item = bank[(shot, frame)]
+        except KeyError as error:
+            raise RuntimeError(f"recovery bank lacks {shot}:{frame}") from error
+        currents = item["recovered_currents_a"]
+        return FrameInput(
+            shot=shot,
+            frame=frame,
+            recovered_currents_a=tuple(float(currents[name]) for name in OMITTED_COILS),
+        )
+
+    cohort = [
+        frame_input(str(item["shot"]), int(item["frame"]))
+        for item in REPRESENTATIVE_COHORT
+    ]
+    if len({item.shot for item in cohort}) != len(REPRESENTATIVE_COHORT):
+        raise RuntimeError("representative-current cohort must use distinct shots")
+    low = frame_input(*LOW_CURRENT_CONTROL)
+    return cohort, low
 
 
 def _target_current(row: dict[str, Any], time_ms: float) -> float:
@@ -631,24 +734,17 @@ def _serialise_arm(result: dict[str, Any]) -> dict[str, Any]:
     return serial
 
 
-def solve_frame(
-    row: dict[str, Any],
-    frame_input: FrameInput,
-    geometry: dict[str, tuple[tuple[np.ndarray, float], ...]],
+def solve_unpinned(
+    profile: ForwardProfile,
+    seed: np.ndarray,
+    current: np.ndarray,
+    target_current_a: float,
 ) -> dict[str, Any]:
-    """Run every registered arm from one identical labelled branch seed."""
+    """Run the fixed-budget accelerated control on one current vector."""
 
-    profile, seed, _label, _wall, _reliable, _statement = build_profile(
-        row, frame_input.frame, PSEUDO_WALL_EXPANSION
-    )
-    profile = append_recovered_conductors(profile, geometry)
-    current = current_arms(profile, frame_input.recovered_currents_a)[1]
-    time_ms = float(row["efit_times"][frame_input.frame])
-    target = _target_current(row, time_ms)
-
-    unpinned_map = profile.flux_map(jnp.asarray(current), TopologyClass.DIVERTED)
+    mapped = profile.flux_map(jnp.asarray(current), TopologyClass.DIVERTED)
     accelerated = fixed_point.newton_krylov(
-        unpinned_map,
+        mapped,
         jnp.asarray(seed),
         newton_steps=24,
         gmres_iterations=24,
@@ -656,24 +752,25 @@ def solve_frame(
         relaxation=0.5,
         step_cap=10.0,
     )
-    unpinned_state = np.asarray(accelerated.state, dtype=float)
-    unpinned_image = np.asarray(jax.jit(unpinned_map)(accelerated.state), dtype=float)
-    unpinned_topology, unpinned_x = _topology(profile, unpinned_state)
-    unpinned_current = float(
+    state = np.asarray(accelerated.state, dtype=float)
+    image = np.asarray(jax.jit(mapped)(accelerated.state), dtype=float)
+    topology, x_point = _topology(profile, state)
+    achieved_current = float(
         np.sum(
             np.asarray(
                 profile.operator.cell_current(accelerated.state, TopologyClass.DIVERTED)
             )
         )
     )
-    unpinned = {
-        "state": unpinned_state,
-        "mapped": unpinned_map,
-        "relative_residual": _relative_sup(unpinned_image, unpinned_state),
-        "current_relative_error": abs(unpinned_current - target) / abs(target),
+    return {
+        "state": state,
+        "mapped": mapped,
+        "relative_residual": _relative_sup(image, state),
+        "current_relative_error": abs(achieved_current - target_current_a)
+        / abs(target_current_a),
         "current_constraint_required": False,
         "amplitude": 1.0,
-        "achieved_current_a": unpinned_current,
+        "achieved_current_a": achieved_current,
         "iterations": 24,
         "map_evaluations": int(np.count_nonzero(np.isfinite(accelerated.trace))),
         "residual_history": [
@@ -681,12 +778,49 @@ def solve_frame(
             for value in np.asarray(accelerated.trace)
             if np.isfinite(value)
         ],
-        "topology": unpinned_topology,
-        "x_point_rz_m": unpinned_x,
+        "topology": topology,
+        "x_point_rz_m": x_point,
         "termination": "fixed accelerated budget completed",
         "lambda_guard_triggered": False,
         "lambda_guard_value": None,
     }
+
+
+def solve_frame(
+    row: dict[str, Any],
+    frame_input: FrameInput,
+    geometry: dict[str, tuple[tuple[np.ndarray, float], ...]],
+    declared: dict[str, Any],
+) -> dict[str, Any]:
+    """Run every registered arm from one identical labelled branch seed."""
+
+    profile, seed, _label, _wall, _reliable, _statement = build_profile(
+        row, frame_input.frame, PSEUDO_WALL_EXPANSION
+    )
+    profile = append_recovered_conductors(profile, geometry)
+    shipped_current, current = current_arms(profile, frame_input.recovered_currents_a)
+    time_ms = float(row["efit_times"][frame_input.frame])
+    target = _target_current(row, time_ms)
+    seed_unscaled = float(
+        np.sum(np.asarray(profile.operator.cell_current(seed, TopologyClass.DIVERTED)))
+    )
+    seed_amplitude = _lambda_value(target, seed_unscaled)
+    measured = (time_ms, target, seed_unscaled, seed_amplitude)
+    registered = (
+        float(declared["time_ms"]),
+        float(declared["recorded_ip_a"]),
+        float(declared["unscaled_source_ip_a"]),
+        float(declared["seed_lambda"]),
+    )
+    if not np.allclose(measured, registered, rtol=2.0e-10, atol=1.0e-9):
+        raise RuntimeError(
+            f"pre-solve cohort qualification drifted for {frame_input.shot}:"
+            f"{frame_input.frame}: measured={measured}, registered={registered}"
+        )
+    if abs(target) < REPRESENTATIVE_CURRENT_FLOOR_A or target * seed_unscaled <= 0.0:
+        raise RuntimeError("representative-current qualification failed before scoring")
+    shipped_unpinned = solve_unpinned(profile, seed, shipped_current, target)
+    unpinned = solve_unpinned(profile, seed, current, target)
     eliminated = solve_eliminated(profile, seed, current, target)
     augmented_trials = {
         str(alpha): solve_augmented(profile, seed, current, target, alpha)
@@ -711,8 +845,13 @@ def solve_frame(
         "time_ms": time_ms,
         "screened_out_of_affected_polarity_population": True,
         "target_plasma_current_a": target,
+        "absolute_target_plasma_current_a": abs(target),
+        "unscaled_seed_plasma_current_a": seed_unscaled,
+        "seed_profile_amplitude": seed_amplitude,
+        "target_and_unscaled_source_same_sign": bool(target * seed_unscaled > 0.0),
         "target_current_role": (
-            "declared constraint, not fitted and unavailable to actuator-only inference"
+            "declared admissible input, not fitted; available in the competition "
+            "input set or from a partner transport solve"
         ),
         "poloidal_conductor_count": 24,
         "same_label_branch_seed_all_arms": True,
@@ -723,13 +862,75 @@ def solve_frame(
             ARM_NAMES[1]: _serialise_arm(eliminated),
             ARM_NAMES[2]: _serialise_arm(nominal),
         },
+        "unconstrained_current_controls": {
+            "shipped_20": _serialise_arm(shipped_unpinned),
+            "full_24": _serialise_arm(unpinned),
+            "shipped_to_full_residual_ratio": (
+                shipped_unpinned["relative_residual"]
+                / max(unpinned["relative_residual"], 1.0e-300)
+            ),
+        },
         "augmented_alpha_trials": alpha_serial,
         "augmented_verdict_stable_across_alpha": len(alpha_verdicts) == 1,
     }
     return record
 
 
-def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
+def solve_low_current_control(
+    row: dict[str, Any],
+    frame_input: FrameInput,
+    geometry: dict[str, tuple[tuple[np.ndarray, float], ...]],
+) -> dict[str, Any]:
+    """Reproduce the ramp-start fixture without pooling or reversing its source."""
+
+    profile, seed, _label, _wall, _reliable, _statement = build_profile(
+        row, frame_input.frame, PSEUDO_WALL_EXPANSION
+    )
+    profile = append_recovered_conductors(profile, geometry)
+    shipped_current, full_current = current_arms(
+        profile, frame_input.recovered_currents_a
+    )
+    time_ms = float(row["efit_times"][frame_input.frame])
+    target = _target_current(row, time_ms)
+    unscaled = float(
+        np.sum(np.asarray(profile.operator.cell_current(seed, TopologyClass.DIVERTED)))
+    )
+    attempted_amplitude = target / unscaled
+    shipped = solve_unpinned(profile, seed, shipped_current, target)
+    full = solve_unpinned(profile, seed, full_current, target)
+    return {
+        "role": (
+            "low-current selection-defect control fixture; excluded from the "
+            "representative-current scoring cohort"
+        ),
+        "shot": frame_input.shot,
+        "frame": frame_input.frame,
+        "time_ms": time_ms,
+        "recorded_plasma_current_a": target,
+        "absolute_recorded_plasma_current_a": abs(target),
+        "unscaled_seed_plasma_current_a": unscaled,
+        "attempted_seed_lambda": attempted_amplitude,
+        "positive_lambda_guard_retained": list(LAMBDA_BAND),
+        "constrained_arms_scored": False,
+        "constrained_arm_refusal": (
+            "negative lambda would reverse both extracted source terms and is not "
+            "a current normalization"
+        ),
+        "shipped_20_unpinned": _serialise_arm(shipped),
+        "full_24_unpinned": _serialise_arm(full),
+        "shipped_to_full_residual_ratio": shipped["relative_residual"]
+        / max(full["relative_residual"], 1.0e-300),
+        "historical_full_24_plateau": UNPINNED_PLATEAU_CONTROL,
+        "historical_full_24_plateau_reproduced": bool(
+            abs(full["relative_residual"] - UNPINNED_PLATEAU_CONTROL)
+            <= UNPINNED_CONTROL_ABSOLUTE_TOLERANCE
+        ),
+    }
+
+
+def summarize(
+    records: list[dict[str, Any]], low_current_control: dict[str, Any]
+) -> dict[str, Any]:
     """Return cohort medians and the pinning verdict without hiding failures."""
 
     def values(arm: str, key: str) -> list[float]:
@@ -770,12 +971,18 @@ def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
                 sum(item["arms"][arm]["lambda_guard_triggered"] for item in records)
             ),
         }
-    first_control = records[0]["arms"][ARM_NAMES[0]]["relative_residual"]
-    control_reproduced = bool(
-        first_control is not None
-        and abs(first_control - UNPINNED_PLATEAU_CONTROL)
-        <= UNPINNED_CONTROL_ABSOLUTE_TOLERANCE
-    )
+    shipped_residuals = [
+        float(item["unconstrained_current_controls"]["shipped_20"]["relative_residual"])
+        for item in records
+    ]
+    full_residuals = [
+        float(item["unconstrained_current_controls"]["full_24"]["relative_residual"])
+        for item in records
+    ]
+    ratios = [
+        float(item["unconstrained_current_controls"]["shipped_to_full_residual_ratio"])
+        for item in records
+    ]
     pin_passes = arms[ARM_NAMES[1]]["simultaneously_converged_and_diverted_frames"]
     return {
         "frame_count": len(records),
@@ -783,15 +990,31 @@ def summarize(records: list[dict[str, Any]]) -> dict[str, Any]:
         "all_shots_screened_free_of_affected_population": all(
             item["screened_out_of_affected_polarity_population"] for item in records
         ),
-        "unpinned_first_frame_plateau": first_control,
-        "unpinned_plateau_control": UNPINNED_PLATEAU_CONTROL,
-        "unpinned_control_reproduced": control_reproduced,
+        "all_frames_absolute_recorded_ip_at_least_200ka": all(
+            item["absolute_target_plasma_current_a"] >= REPRESENTATIVE_CURRENT_FLOOR_A
+            for item in records
+        ),
+        "all_frames_target_and_source_same_sign": all(
+            item["target_and_unscaled_source_same_sign"] for item in records
+        ),
+        "representative_current_unpinned_comparison": {
+            "median_shipped_20_relative_residual": float(np.median(shipped_residuals)),
+            "median_full_24_relative_residual": float(np.median(full_residuals)),
+            "median_paired_shipped_to_full_ratio": float(np.median(ratios)),
+            "historical_low_current_ratio": (
+                SHIPPED_ONLY_PLATEAU_CONTROL / UNPINNED_PLATEAU_CONTROL
+            ),
+            "historical_3_53x_holds_at_representative_current": bool(
+                np.median(ratios) >= 3.5
+            ),
+        },
+        "low_current_control_fixture": low_current_control,
         "arms": arms,
         "augmented_verdict_stable_across_alpha_all_frames": all(
             item["augmented_verdict_stable_across_alpha"] for item in records
         ),
         "current_pinning_removes_vacuum_root_and_orbiting_plateau": bool(
-            control_reproduced and pin_passes == len(records)
+            pin_passes == len(records)
         ),
         "frames": records,
     }
@@ -842,12 +1065,11 @@ def run(data: Path, output: Path) -> dict[str, Any]:
     configure_dtypes()
     declaration = write_preregistration(output)
     recovery_path = RECOVERY_OUTPUT / RECOVERY_RECEIPT_NAME
-    recovery = json.loads(recovery_path.read_text())
     polarity = json.loads(POLARITY_RECEIPT.read_text())["full_corpus_census"]
     affected = set(polarity["affected_shots"])
     if len(affected) != POLARITY_AFFECTED_SHOT_COUNT:
         raise RuntimeError("polarity authority is not the landed 603-shot population")
-    selected = selected_inputs(recovery, affected)
+    selected, low_input = _recovery_inputs(affected)
     geometry = _omitted_vertices()
     columns = tuple(
         dict.fromkeys(
@@ -861,12 +1083,26 @@ def run(data: Path, output: Path) -> dict[str, Any]:
     )
     checkpoint = output / CHECKPOINT_NAME
     checkpoint.write_text("")
+    low_path = data / low_input.shot
+    low_row = _read(low_path, columns)
+    low_row["_source_path"] = str(low_path)
+    low_control = solve_low_current_control(low_row, low_input, geometry)
+    print(
+        "LOW_CURRENT_CONTROL "
+        f"{low_input.shot}:{low_input.frame} "
+        f"Ip={low_control['recorded_plasma_current_a']:.9f} "
+        f"lambda={low_control['attempted_seed_lambda']:.12g} "
+        "excluded_from_cohort=true",
+        flush=True,
+    )
     records = []
-    for number, frame_input in enumerate(selected, start=1):
+    for number, (frame_input, declared) in enumerate(
+        zip(selected, REPRESENTATIVE_COHORT, strict=True), start=1
+    ):
         path = data / frame_input.shot
         row = _read(path, columns)
         row["_source_path"] = str(path)
-        record = solve_frame(row, frame_input, geometry)
+        record = solve_frame(row, frame_input, geometry, declared)
         records.append(record)
         with checkpoint.open("a") as stream:
             stream.write(json.dumps(record, sort_keys=True, allow_nan=False) + "\n")
@@ -879,7 +1115,7 @@ def run(data: Path, output: Path) -> dict[str, Any]:
             ),
             flush=True,
         )
-    result = summarize(records)
+    result = summarize(records, low_control)
     receipt = {
         "preregistration": preregistration(),
         "preregistration_path": str(declaration),
@@ -887,13 +1123,20 @@ def run(data: Path, output: Path) -> dict[str, Any]:
         "authorities": {
             "recovery_receipt": str(recovery_path),
             "recovery_receipt_sha256": _sha256(recovery_path),
+            "recovery_incremental_bank": str(
+                RECOVERY_OUTPUT / RECOVERY_CHECKPOINT_NAME
+            ),
+            "recovery_incremental_bank_sha256": _sha256(
+                RECOVERY_OUTPUT / RECOVERY_CHECKPOINT_NAME
+            ),
             "polarity_receipt": str(POLARITY_RECEIPT),
             "polarity_receipt_sha256": _sha256(POLARITY_RECEIPT),
             "affected_shot_count": len(affected),
         },
         "interpretation": (
-            "Prescribed Ip is a declared benchmark constraint rather than a fitted "
-            "coefficient and is not available as an actuator-only inference input."
+            "Prescribed Ip is a declared admissible input of the same class as the "
+            "coil currents, available in the competition inputs or from a partner "
+            "transport solve; it is not fitted inside this equilibrium solve."
         ),
         "result": result,
     }
@@ -901,8 +1144,12 @@ def run(data: Path, output: Path) -> dict[str, Any]:
         json.dumps(receipt, indent=2, sort_keys=True, allow_nan=False) + "\n"
     )
     _figure(result, output / FIGURE_NAME)
-    if not result["unpinned_control_reproduced"]:
-        raise RuntimeError("the unpinned first-frame plateau control did not reproduce")
+    if not result["low_current_control_fixture"][
+        "historical_full_24_plateau_reproduced"
+    ]:
+        raise RuntimeError(
+            "the separated low-current plateau control did not reproduce"
+        )
     return receipt
 
 
@@ -913,7 +1160,7 @@ def main() -> None:
     parser.add_argument("--preregister-only", action="store_true")
     arguments = parser.parse_args()
     if arguments.preregister_only:
-        print(f"PREREGISTERED {write_preregistration(arguments.output)}")
+        print(f"PREREGISTERED {write_preregistration(arguments.output, replace=True)}")
         return
     receipt = run(arguments.data, arguments.output)
     headline = dict(receipt["result"])

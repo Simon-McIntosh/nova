@@ -24,8 +24,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-22">
-<meta name="plan-version" content="8">
-<meta name="plan-impl" content="0.5">
+<meta name="plan-version" content="9">
+<meta name="plan-impl" content="0.55">
 <meta name="plan-commits" content="5855f2ba,31e10c89,d5a7c0dc,bdf58a45">
 <meta name="plan-artifacts" content="docs/figures/coil-circuit-discovery/five_column_residual_adjudication_receipt.json,docs/figures/coil-circuit-discovery/flux_space_adjudication_preregistration.json,docs/figures/coil-circuit-discovery/flux_space_adjudication_receipt.json,docs/evidence/archive/coil-circuit-discovery-landed.html">
 </head>
@@ -175,6 +175,15 @@
 <div class="r-comment" data-section="s2" data-id="c-20260822T0040" data-who="reckon-ship" data-when="2026-08-22T00:40:00Z">
     <div class="r-comment-body">flux-space-adjudication landed — run r-20260821T215906764957, commits d0935260 (shared exact active-coil builder refactor) + 995b133c (preregistration, committed before scoring) + d5a7c0dc (study), merged at bdf58a45, 5 tests added, 9 total passing. Measure: metric sensitivity proven per conductor (600/600 receipts, min field response 2.867e-3 Wb/kA); label-recovered arm closes 2/60, dominates 60/60, matches the ohmic pattern 0/60, temporally stable 27/60, median threshold ratio 4.143; circuit-derived arm closes 0/60, median threshold ratio 37.862; neither clears the preregistered 54/60 rule — verdict UNDECIDABLE from this dataset's flux. flux-adjudication-review (run r-20260821T222638348571, gate passed) independently reconstructed the preregistration chronology, all counts, and the per-frame threshold independence; one bookkeeping note (the 0/60 ohmic-shape discriminator is contextual, not an authority gate) is carried in the evidence record. Net adjudication: label-flux recovery does not measure these currents; the independent ohmic traces are the only current authority, with flux-side validation unavailable on this dataset. Evidence: /nova/evidence/archive/coil-circuit-discovery-landed#flux-adjudication.</div>
 </div>
+<div class="r-comment" data-section="s4" data-id="c-20260822T0110" data-who="reckon-ship" data-when="2026-08-22T01:10:00Z">
+    <div class="r-comment-body">tier-seam-scout landed — run r-20260821T223657466266, gate passed, report-only fence. Measure: the current route is linear with an existing explicit current= override at ForwardProfile.solve as the terminal seam (no inner-solver change needed); all five landed five-current prescription sites enumerated with values and artifacts; safe implementation fence proposed and conflict-checked at HEAD b6274718 (nova/equilibrium/__init__.py and benchmarks/diiid_current_pinned_forward.py excluded as recent-churn overlap, sequenced later); one genuinely open design question surfaced — no landed label-free likelihood makes ECOILB/E567DN/E89UP identifiable, so the seam reports prior-dominated posteriors honestly. Map: ~/.config/reckon/crew/reports/nova/coil-circuit-discovery/tier-seam-map.md.</div>
+</div>
+</section>
+<section data-reckon="questions" id="questions" class="r-questions">
+<h2><span class="sec">§</span> Open questions</h2>
+<div class="r-q" data-id="q-ccd-observability" data-section="s4" data-status="open" data-opened-by="reckon-ship" data-opened-at="2026-08-22" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body">Which inference-available observation operator, covariance, and prior authority define the outer-loop likelihood for the three unknown-tier currents (ECOILB, E567DN, E89UP), and what rank/sensitivity test proves the posterior is data-informed rather than prior-dominated? The seam map establishes that GS closure and prescribed total plasma current cannot identify them, Thomson observations have no landed conductor-current sensitivity operator, and EFIT labels are inadmissible at inference. Until this is answered the tier seam reports these posteriors as prior-dominated/unidentified — honest, but not a recovery. Answering it is new scope (an observability/sensitivity program) needing owner authorisation.</p>
+    </div>
 </section>
 </main>
 </body>

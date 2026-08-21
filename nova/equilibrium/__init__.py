@@ -90,7 +90,10 @@ if TYPE_CHECKING:
         PerturbedSeedPolicy,
         SaddleSeedGeometry,
     )
-    from nova.equilibrium.forward_operator import ForwardFluxOperator
+    from nova.equilibrium.forward_operator import (
+        ForwardFluxOperator,
+        PrescribedCurrentField,
+    )
     from nova.equilibrium.map_extraction import (
         ChordSamplingReceipt,
         MapCurrentReceipt,
@@ -169,6 +172,7 @@ _DEFERRED_EXPORTS: dict[str, str] = {
     "MomentTargets": "observation",
     "NormalisationPolicy": "source",
     "PlasmaDomain": "domain",
+    "PrescribedCurrentField": "forward_operator",
     "PerturbedSeedPolicy": "forward",
     "ProfileDegrees": "profile",
     "ProfilePrior": "profile",
@@ -238,6 +242,7 @@ __all__ = [
     "MomentTargets",
     "NormalisationPolicy",
     "PlasmaDomain",
+    "PrescribedCurrentField",
     "PerturbedSeedPolicy",
     "ProfileDegrees",
     "ProfilePrior",

@@ -1,5 +1,5 @@
 # ruff: noqa: E501
-"""Attribute the MAST composed-field imbalance to its physical source groups.
+"""Measure MAST forward parity with every fitted external circuit prescribed.
 
 The slice is selected only from the committed native-grid decomposition bank.
 Its declared pressure and diamagnetic gradients drive ``ForwardProfile.solve``
@@ -8,16 +8,17 @@ flux COCOS 17 convention. The fitted conductor state is primary and the
 archived experimental state is a side arm.
 
 The MAST reproduction arm evaluates plasma current in the reference's declared
-flux coordinate. Its active response is compared with all fitted EFIT circuit
-fields: thirteen active groups and the stored passive and vessel circuits.
-Reference total flux is shifted once into Nova's Biot-Savart gauge before its
-plasma residual is formed. No fixed-point map or inverse path is evaluated.
+flux coordinate. One explicit response-matrix policy carries all fitted EFIT
+circuit fields: thirteen active groups and eighty-eight passive or vessel
+circuits. The ordinary active drive is zeroed in this arm so every conductor
+flux is applied exactly once. The same operator supplies the one-application
+diagnostics and the topology-pinned solve; no inverse path is evaluated.
 """
 
 from __future__ import annotations
 
 import argparse
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import json
 from pathlib import Path
 from typing import Any
@@ -52,7 +53,10 @@ from nova.catalog.mast_geometry import (
 from nova.equilibrium.conservation import FluxLattice
 from nova.equilibrium.convention import TOTAL_FLUX_FACTOR
 from nova.equilibrium.forward import ForwardProfile
-from nova.equilibrium.forward_operator import ForwardFluxOperator
+from nova.equilibrium.forward_operator import (
+    ForwardFluxOperator,
+    PrescribedCurrentField,
+)
 from nova.equilibrium.source import DomainProfile, ForwardSource
 from nova.equilibrium.stencil_mesh import CellCurrentMoments
 from nova.equilibrium.topology import TopologyClass
@@ -73,13 +77,14 @@ DEFAULT_OUTPUT = Path("docs/figures/efit-forward-parity")
 ROUTE_SURVEY_RECEIPT = DEFAULT_OUTPUT / "pinned-route-survey.json"
 LONG_BUDGET_RECEIPT = DEFAULT_OUTPUT / "long-budget-plasma-route.json"
 COMPOSITION_RECEIPT = DEFAULT_OUTPUT / "mast-dina-composition-diff.json"
-RECEIPT_NAME = "boundary-imbalance-attribution.json"
+RECEIPT_NAME = "passive-inclusive-parity-slice.json"
 FIGURE_NAME = "reference-seeded-forward-slice.png"
 DIAGNOSIS_FIGURE_NAME = "vacuum-branch-diagnosis.png"
 LONG_BUDGET_FIGURE_NAME = "long-budget-residual-trajectories.png"
 FREE_ANCHOR_FIGURE_NAME = "free-anchor-residual-trajectory.png"
 COMPOSITION_FIGURE_NAME = "mast-dina-composition-update-fields.png"
 ATTRIBUTION_FIGURE_NAME = "boundary-imbalance-source-fields.png"
+PASSIVE_INCLUSIVE_FIGURE_NAME = "passive-inclusive-parity-slice.png"
 GRID_STRIDE = 2
 FIXED_POINT_CRITERION = 1.0e-8
 NEWTON_STEPS = 12
@@ -2417,7 +2422,13 @@ def _mast_composition_case(
                 "source_moments": "centroid current on prescribed reference support",
             },
         },
-        {"group": group, "row": row},
+        {
+            "group": group,
+            "row": row,
+            "profile": profile,
+            "reference_flux": reference,
+            "current_provenance": provenance,
+        },
     )
 
 
@@ -2525,6 +2536,7 @@ def _stored_circuit_fields(
         if selected.size == 0:
             raise ValueError(f"stored circuit {circuit} has no section elements")
         field = np.zeros(targets.shape[0], dtype=np.float64)
+        response_per_ampere = np.zeros(targets.shape[0], dtype=np.float64)
         polygons = []
         for index in selected:
             vertices = shaped_section_vertices(
@@ -2537,6 +2549,9 @@ def _stored_circuit_fields(
             )
             polygons.append(shapely.Polygon(vertices))
             response = polygon_greens(target_r, target_z, vertices)[0]
+            response_per_ampere += (
+                element["fcoil_turns"][index] * element["fcoil_xmult"][index] * response
+            )
             field += (
                 current[circuit - 1]
                 * element["fcoil_turns"][index]
@@ -2579,6 +2594,7 @@ def _stored_circuit_fields(
                 "section_element_count": int(selected.size),
                 "registry_overlap_fraction": overlap_fraction,
                 "registry_separation_m": separation,
+                "response_wb_per_a": response_per_ampere,
                 "field": field,
             }
         )
@@ -2595,6 +2611,73 @@ def _stored_circuit_fields(
             max(record["registry_separation_m"] for record in passive)
         ),
     }
+
+
+def _passive_inclusive_case(
+    case: dict[str, Any], context: dict[str, Any]
+) -> tuple[dict[str, Any], ForwardProfile, dict[str, Any]]:
+    """Carry all fitted circuit currents through one explicit field policy."""
+    group = context["group"]
+    row = context["row"]
+    profile = context["profile"]
+    targets = np.vstack((case["grid_coordinate"], case["wall_coordinate"]))
+    geometry = (
+        MachineGeometryRegistry.default()
+        .select(int(case["reference"]["shot"]))
+        .configuration.geometry
+    )
+    _families, _drives, active_mapping = _circuit_drives(
+        group, row, geometry, "fcoil_c"
+    )
+    circuits, audit = _stored_circuit_fields(
+        group, row, targets, geometry, active_mapping
+    )
+    response = np.column_stack([circuit["response_wb_per_a"] for circuit in circuits])
+    current = np.asarray(
+        [circuit["fitted_current_a"] for circuit in circuits], dtype=np.float64
+    )
+    policy = PrescribedCurrentField(
+        response=jnp.asarray(response), current=jnp.asarray(current)
+    )
+    fitted_field = np.sum(
+        [circuit["field"] for circuit in circuits], axis=0, dtype=np.float64
+    )
+    closure = np.asarray(policy.flux(), dtype=np.float64) - fitted_field
+    operator = replace(
+        profile.operator,
+        external_current=jnp.zeros_like(profile.operator.external_current),
+        prescribed_current_field=policy,
+    )
+    passive_profile = replace(profile, operator=operator)
+    passive_case = {
+        **case,
+        "name": "MAST 21985/51, all fitted prescribed circuits",
+        "operator": operator,
+        "mesh": {
+            **case["mesh"],
+            "external_current_policy": "fixed prescribed response matrix",
+            "prescribed_response_shape": list(response.shape),
+        },
+    }
+    policy_receipt = {
+        "policy": "explicit prescribed-current response matrix",
+        "current_source": "efm/fcoil_c in zero-based fcoil_n order",
+        "stored_circuit_count": policy.circuit_count,
+        "active_circuit_count": audit["active_circuit_count"],
+        "passive_or_vessel_circuit_count": audit["passive_or_vessel_circuit_count"],
+        "section_kernel_evaluations": audit["section_kernel_evaluations"],
+        "response_shape": list(response.shape),
+        "ordinary_active_drive_zeroed_to_avoid_double_counting": True,
+        "free_standing_default": "policy absent; ordinary conductor drive unchanged",
+        "stored_field_closure_sup_wb": float(np.max(np.abs(closure))),
+        "stored_field_closure_rms_wb": float(np.sqrt(np.mean(closure**2))),
+        "all_currents_prescribed": True,
+    }
+    if policy.circuit_count != 101 or audit["active_circuit_count"] != 13:
+        raise RuntimeError("the prescribed circuit inventory is incomplete")
+    if audit["passive_or_vessel_circuit_count"] != 88:
+        raise RuntimeError("the passive and vessel circuit inventory is incomplete")
+    return passive_case, passive_profile, policy_receipt
 
 
 def _field_comparison(
@@ -3091,28 +3174,218 @@ def _composition_figure(fields: tuple[dict, dict], path: Path) -> None:
     plt.close(figure)
 
 
+def _passive_inclusive_solve(
+    case: dict[str, Any],
+    context: dict[str, Any],
+    profile: ForwardProfile,
+) -> tuple[dict[str, Any], np.ndarray]:
+    """Run the reference-seeded diverted branch and retain its full outcome."""
+    branch = profile.solve_branch(
+        jnp.asarray(case["state"]),
+        TopologyClass.DIVERTED,
+        route="newton_krylov",
+        tolerance=FIXED_POINT_CRITERION,
+        gmres_iterations=GMRES_ITERATIONS,
+        warmup=WARMUP_SWEEPS,
+        relaxation=RELAXATION,
+        step_cap=STEP_CAP,
+    )
+    equilibrium = branch.equilibrium
+    trace = np.asarray(equilibrium.fixed_point.trace, dtype=np.float64)
+    requested = int(branch.requested_class)
+    achieved = int(branch.achieved_class)
+    current = float(np.sum(np.asarray(equilibrium.cell_current)))
+    reference_current = float(context["group"]["plasma_current_c"][context["row"]])
+    nonzero_current = bool(abs(current) >= 0.01 * abs(reference_current))
+    converged = bool(branch.converged)
+    metrics = None
+    if converged and nonzero_current:
+        metrics = _pinned_metrics(
+            context["group"],
+            context["row"],
+            profile,
+            context["reference_flux"],
+            equilibrium,
+        )
+    carried_metric_pass = bool(
+        metrics is not None
+        and all(
+            metrics[name]["passes"]
+            for name in ("magnetic_axis", "lcfs", "x_point", "topology")
+        )
+    )
+    record = {
+        "entry_point": "ForwardProfile.solve_branch",
+        "route": "newton_krylov",
+        "reference_seeded": True,
+        "registered_fixed_point_criterion": FIXED_POINT_CRITERION,
+        "newton_budget": NEWTON_STEPS,
+        "gmres_iterations_per_promotion": GMRES_ITERATIONS,
+        "forward_branch_receipt": {
+            "requested_class": "diverted" if requested else "limited",
+            "requested_class_code": requested,
+            "achieved_class": "diverted" if achieved else "limited",
+            "achieved_class_code": achieved,
+            "topology_consistent": bool(branch.topology_consistent),
+            "converged": converged,
+            "residual": _strict_scalar(branch.residual),
+            "iterations": int(branch.iterations),
+        },
+        "terminal_state": {
+            "plasma_current_a": current,
+            "reference_plasma_current_a": reference_current,
+            "reference_plasma_current_target_a": 934383.875,
+            "signed_relative_current_deviation": current / reference_current - 1.0,
+            "nonzero_current": nonzero_current,
+            "finite_receipt": bool(equilibrium.finite.passed),
+            "axis_position_m": [
+                float(value) for value in np.asarray(equilibrium.topology.axis)
+            ],
+            "saddle_position_m": (
+                [float(value) for value in np.asarray(equilibrium.topology.x_point)]
+                if bool(equilibrium.topology.diverted)
+                else None
+            ),
+            "axis_flux_wb": _strict_scalar(equilibrium.topology.axis_flux),
+            "boundary_flux_wb": _strict_scalar(equilibrium.topology.boundary_flux),
+        },
+        "residual_trajectory": [
+            float(value) if np.isfinite(value) else None for value in trace
+        ],
+        "registered_parity_metrics": metrics,
+        "registered_tolerance_verdict": {
+            "evaluated": metrics is not None,
+            "carried_geometry_and_topology_metrics_pass": carried_metric_pass,
+            "new_flux_and_moment_metrics_are_reported_deviations": True,
+        },
+        "verdict": (
+            "PASS_CONVERGED_NONZERO_CURRENT_AND_CARRIED_TOLERANCES"
+            if carried_metric_pass
+            else "FAIL_CONVERGED_NONZERO_CURRENT_PARITY"
+            if converged and nonzero_current
+            else "FAIL_CONVERGED_VACUUM_BRANCH"
+            if converged
+            else "FAIL_PINNED_BRANCH_DID_NOT_CONVERGE"
+        ),
+    }
+    return record, trace
+
+
+def _passive_inclusive_figure(
+    fields: dict[str, Any], trace: np.ndarray, path: Path
+) -> None:
+    """Plot the passive-inclusive map update and complete solve trajectory."""
+    figure, axes = plt.subplots(1, 2, figsize=(10.4, 4.4), constrained_layout=True)
+    update_grid = fields["update_grid_fraction"]
+    update_wall = fields["update_wall_fraction"]
+    limit = max(
+        float(np.max(np.abs(update_grid))),
+        float(np.max(np.abs(update_wall))),
+        1.0e-15,
+    )
+    levels = np.linspace(-limit, limit, 25)
+    image = axes[0].tricontourf(
+        fields["grid_coordinate"][:, 0],
+        fields["grid_coordinate"][:, 1],
+        update_grid,
+        levels=levels,
+        cmap="coolwarm",
+        extend="both",
+    )
+    axes[0].scatter(
+        fields["wall_coordinate"][:, 0],
+        fields["wall_coordinate"][:, 1],
+        c=update_wall,
+        cmap="coolwarm",
+        vmin=-limit,
+        vmax=limit,
+        s=5,
+        linewidths=0.0,
+    )
+    axes[0].plot(fields["boundary"][:, 0], fields["boundary"][:, 1], "k-", lw=0.7)
+    axes[0].plot(fields["axis"][0], fields["axis"][1], "kx", ms=5)
+    axes[0].set_title(f"All 101 circuits\nsup |update| / span = {limit:.4g}")
+    axes[0].set_xlabel("R [m]")
+    axes[0].set_ylabel("Z [m]")
+    axes[0].set_aspect("equal")
+    figure.colorbar(image, ax=axes[0], label="Gauge-aligned update / span")
+
+    numeric = np.asarray(trace[np.isfinite(trace)], dtype=np.float64)
+    axes[1].semilogy(
+        np.arange(numeric.size),
+        np.maximum(numeric, np.finfo(float).tiny),
+        marker="o",
+        ms=3,
+        lw=1.0,
+    )
+    axes[1].axhline(FIXED_POINT_CRITERION, color="black", ls="--", lw=0.8)
+    axes[1].set_title("Pinned diverted solve")
+    axes[1].set_xlabel("Mapped evaluation")
+    axes[1].set_ylabel("Fixed-point residual")
+    axes[1].grid(True, which="both", alpha=0.25)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    figure.savefig(path, dpi=180)
+    plt.close(figure)
+
+
 def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
-    """Attribute the MAST boundary imbalance without applying the forward map."""
+    """Measure the passive-inclusive composed map and its pinned solve."""
     configure_dtypes()
     mast_case, context = _mast_composition_case(store, bank)
-    attribution, fields = _boundary_attribution_receipt(
-        mast_case, context["group"], context["row"], bank
-    )
-    figure_path = output / ATTRIBUTION_FIGURE_NAME
-    _attribution_figure(fields, figure_path)
+    passive_case, profile, policy = _passive_inclusive_case(mast_case, context)
+    composition, fields = _composition_case_receipt(passive_case)
+    solve, trace = _passive_inclusive_solve(passive_case, context, profile)
+    active_bank = json.loads(COMPOSITION_RECEIPT.read_text())["mast"]
+    active_current_ratio = active_bank["plasma_current_integral_a"]["after_over_before"]
+    passive_current_ratio = composition["plasma_current_integral_a"][
+        "after_over_before"
+    ]
+    active_summary = {
+        "wall_boundary_imbalance_fraction_of_span": active_bank[
+            "boundary_flux_balance"
+        ]["composed_total_minus_reference_total"]["sup_fraction_of_span"],
+        "one_application_fractional_current_change": abs(1.0 - active_current_ratio),
+        "picard_absolute_dominant_eigenvalue": active_bank["linearized_map"][
+            "absolute_dominant_eigenvalue_estimate"
+        ],
+        "source_receipt": str(COMPOSITION_RECEIPT),
+    }
+    passive_summary = {
+        "wall_boundary_imbalance_fraction_of_span": composition[
+            "boundary_flux_balance"
+        ]["composed_total_minus_reference_total"]["sup_fraction_of_span"],
+        "one_application_fractional_current_change": abs(1.0 - passive_current_ratio),
+        "picard_absolute_dominant_eigenvalue": composition["linearized_map"][
+            "absolute_dominant_eigenvalue_estimate"
+        ],
+    }
+    figure_path = output / PASSIVE_INCLUSIVE_FIGURE_NAME
+    _passive_inclusive_figure(fields, trace, figure_path)
     receipt = {
-        "receipt": "MAST exterior boundary imbalance source attribution",
+        "receipt": "MAST passive-inclusive prescribed-current parity slice",
         "backend": "JAX_PLATFORMS=cpu required by invocation",
+        "execution_contract": {
+            "reference_seed": "efm/psirz in total Wb",
+            "normalization": "reference-declared axis and boundary anchors",
+            "external_field": "all fitted circuits as prescribed currents",
+            "operator_path": "one ForwardFluxOperator external-field composition",
+        },
         "path_audit": {
             "sensor_reads": 0,
             "whitening_matrices": 0,
             "least_squares_updates": 0,
             "inverse_fit_coefficients": 0,
+            "forward_flux_operator_paths": 1,
+            "prescribed_currents_only": True,
             "passes": True,
         },
-        "attribution": attribution,
+        "prescribed_current_policy": policy,
+        "banked_active_only_control": active_summary,
+        "passive_inclusive_summary": passive_summary,
+        "passive_inclusive_composed_map": composition,
+        "reference_seeded_pinned_solve": solve,
         "figure_src": (
-            "/nova/figures/efit-forward-parity/boundary-imbalance-source-fields.png"
+            "/nova/figures/efit-forward-parity/passive-inclusive-parity-slice.png"
         ),
     }
     output.mkdir(parents=True, exist_ok=True)
@@ -3122,23 +3395,25 @@ def run(store: Path, bank: Path, output: Path) -> dict[str, Any]:
 
 
 def main() -> None:
-    """Parse paths, run the map-free attribution and print its headline."""
+    """Parse paths, run the passive-inclusive slice and print its headline."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--store", type=Path, default=SHOT_STORE)
     parser.add_argument("--bank", type=Path, default=DECOMPOSITION_BANK)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     arguments = parser.parse_args()
     receipt = run(arguments.store, arguments.bank, arguments.output)
-    attribution = receipt["attribution"]
-    imbalance = attribution["measured_imbalance"]
-    dominant = attribution["dominant_contributor"]
+    summary = receipt["passive_inclusive_summary"]
+    branch = receipt["reference_seeded_pinned_solve"]["forward_branch_receipt"]
+    terminal = receipt["reference_seeded_pinned_solve"]["terminal_state"]
     print(
-        "BOUNDARY_IMBALANCE_ATTRIBUTION "
-        f"wall_sup_span={imbalance['wall']['sup_fraction_of_span']:.9g} "
-        f"exterior_peak_span={imbalance['absolute_grid_peak']['absolute_fraction_of_span']:.9g} "
-        f"dominant={dominant['name']} "
-        f"dominant_peak_span={dominant['signed_fraction_of_span_at_measured_peak']:.9g} "
-        f"closure_span={attribution['field_closure']['sup_fraction_of_span']:.9g}"
+        "PASSIVE_INCLUSIVE_SLICE "
+        f"wall_sup_span={summary['wall_boundary_imbalance_fraction_of_span']:.9g} "
+        f"current_change={summary['one_application_fractional_current_change']:.9g} "
+        f"eigenvalue={summary['picard_absolute_dominant_eigenvalue']:.9g} "
+        f"converged={branch['converged']} "
+        f"achieved={branch['achieved_class']} "
+        f"topology_consistent={branch['topology_consistent']} "
+        f"terminal_ip_a={terminal['plasma_current_a']:.9g}"
     )
 
 

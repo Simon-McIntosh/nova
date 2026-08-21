@@ -1,0 +1,459 @@
+{
+  "receipt": "MAST passive-inclusive prescribed-current parity slice",
+  "backend": "JAX_PLATFORMS=cpu required by invocation",
+  "execution_contract": {
+    "reference_seed": "efm/psirz in total Wb",
+    "normalization": "reference-declared axis and boundary anchors",
+    "external_field": "all fitted circuits as prescribed currents",
+    "operator_path": "one ForwardFluxOperator external-field composition"
+  },
+  "path_audit": {
+    "sensor_reads": 0,
+    "whitening_matrices": 0,
+    "least_squares_updates": 0,
+    "inverse_fit_coefficients": 0,
+    "forward_flux_operator_paths": 1,
+    "prescribed_currents_only": true,
+    "passes": true
+  },
+  "prescribed_current_policy": {
+    "policy": "explicit prescribed-current response matrix",
+    "current_source": "efm/fcoil_c in zero-based fcoil_n order",
+    "stored_circuit_count": 101,
+    "active_circuit_count": 13,
+    "passive_or_vessel_circuit_count": 88,
+    "section_kernel_evaluations": 938,
+    "response_shape": [
+      1126,
+      101
+    ],
+    "ordinary_active_drive_zeroed_to_avoid_double_counting": true,
+    "free_standing_default": "policy absent; ordinary conductor drive unchanged",
+    "stored_field_closure_sup_wb": 2.220446049250313e-15,
+    "stored_field_closure_rms_wb": 4.793941451341366e-16,
+    "all_currents_prescribed": true
+  },
+  "banked_active_only_control": {
+    "wall_boundary_imbalance_fraction_of_span": 0.03440945100896484,
+    "one_application_fractional_current_change": 0.05934521161009576,
+    "picard_absolute_dominant_eigenvalue": 1.9132450123257896,
+    "source_receipt": "docs/figures/efit-forward-parity/mast-dina-composition-diff.json"
+  },
+  "passive_inclusive_summary": {
+    "wall_boundary_imbalance_fraction_of_span": 0.004067584380328243,
+    "one_application_fractional_current_change": 0.0050010046021394805,
+    "picard_absolute_dominant_eigenvalue": 1.9132450123257896
+  },
+  "passive_inclusive_composed_map": {
+    "reference": {
+      "machine": "MAST",
+      "shot": 21985,
+      "slice_index": 51,
+      "time_s": 0.2750000059604645,
+      "span_wb": 1.823353801798901,
+      "span_definition": "peak-to-peak efm/psirz on the benchmark grid",
+      "plasma_current_a": 934383.875,
+      "source_coordinate": {
+        "axis_wb": 0.33908170628553735,
+        "boundary_wb": -0.2193531903351262,
+        "support_nodes": 227
+      },
+      "qualification_before_attribution": {
+        "typed_saddle_resolved": true,
+        "typed_saddle_candidate_count": 2,
+        "declared_boundary_to_map_saddle_offset_fraction_of_declared_span": 1.424904549219899e-08,
+        "declared_boundary_to_map_saddle_limit": 0.01,
+        "stored_lcfs_contour_sup_discrepancy_fraction_of_declared_span": 0.0026320993551678384,
+        "stored_lcfs_contour_limit": 0.006,
+        "passes": true
+      }
+    },
+    "mesh": {
+      "kind": "33 by 33 rectangular benchmark lattice",
+      "realised_cells": 1089,
+      "source_moments": "centroid current on prescribed reference support",
+      "external_current_policy": "fixed prescribed response matrix",
+      "prescribed_response_shape": [
+        1126,
+        101
+      ]
+    },
+    "single_application": {
+      "composed_map_primal_applications": 1,
+      "linearization_and_primal_image_shared": true,
+      "nonlinear_promotions": 0,
+      "state_nodes": 1126,
+      "grid_nodes": 1089,
+      "wall_nodes": 37,
+      "flux_update": {
+        "sup_wb": 0.00933649378425283,
+        "rms_wb": 0.002125816865150383,
+        "sup_fraction_of_span": 0.005120505836575188,
+        "rms_fraction_of_span": 0.0011658828160794
+      },
+      "spatial_concentration": {
+        "region_radius_m": 0.12125000008381903,
+        "global_physical_update": {
+          "sup_wb": 0.00933649378425283,
+          "rms_wb": 0.002125816865150383,
+          "sup_fraction_of_span": 0.005120505836575188,
+          "rms_fraction_of_span": 0.0011658828160794
+        },
+        "regions": {
+          "axis_region": {
+            "sup_wb": 0.004158767034854627,
+            "rms_wb": 0.003507609774895313,
+            "sup_fraction_of_span": 0.00228083382980946,
+            "rms_fraction_of_span": 0.0019237131989604777,
+            "sample_count": 5,
+            "fraction_of_physical_l2_energy": 0.012089336352163513
+          },
+          "edge_region": {
+            "sup_wb": 0.0056841191553184695,
+            "rms_wb": 0.0019597459859809147,
+            "sup_fraction_of_span": 0.003117397813693963,
+            "rms_fraction_of_span": 0.001074802917594737,
+            "sample_count": 170,
+            "fraction_of_physical_l2_energy": 0.1283093785774055
+          },
+          "x_point_region": {
+            "sup_wb": 0.0005172222134310622,
+            "rms_wb": 0.00024394513014398724,
+            "sup_fraction_of_span": 0.0002836653056147284,
+            "rms_fraction_of_span": 0.00013378924589583965,
+            "sample_count": 9,
+            "fraction_of_physical_l2_energy": 0.00010525354402549913
+          },
+          "core_bulk": {
+            "sup_wb": 0.005773040840016383,
+            "rms_wb": 0.0027570791670419666,
+            "sup_fraction_of_span": 0.003166166014692685,
+            "rms_fraction_of_span": 0.0015120922578612348,
+            "sample_count": 144,
+            "fraction_of_physical_l2_energy": 0.21511509095763334
+          },
+          "exterior_grid": {
+            "sup_wb": 0.00933649378425283,
+            "rms_wb": 0.002008475567824257,
+            "sup_fraction_of_span": 0.005120505836575188,
+            "rms_fraction_of_span": 0.0011015281652100193,
+            "sample_count": 770,
+            "fraction_of_physical_l2_energy": 0.6104270135976468
+          },
+          "wall": {
+            "sup_wb": 0.007416645444009218,
+            "rms_wb": 0.0021642691981028257,
+            "sup_fraction_of_span": 0.004067584380328182,
+            "rms_fraction_of_span": 0.0011869716102094838,
+            "sample_count": 37,
+            "fraction_of_physical_l2_energy": 0.03405918051515091
+          }
+        },
+        "largest_region_by_sup_fraction": "exterior_grid",
+        "largest_region_by_l2_energy_fraction": "exterior_grid",
+        "absolute_peak": {
+          "region": "exterior_grid",
+          "coordinate_m": [
+            1.5149999996647239,
+            -1.0
+          ],
+          "update_wb": 0.00933649378425283,
+          "distance_to_axis_m": 1.1782870470612379,
+          "distance_to_edge_m": 0.5511223938780655,
+          "distance_to_x_point_m": 0.9641526512686925
+        }
+      }
+    },
+    "plasma_current_integral_a": {
+      "reference_state_before_application": 934020.0992115923,
+      "image_state_after_application": 929349.0603969444,
+      "signed_change_a": -4671.038814647938,
+      "after_over_before": 0.9949989953978605
+    },
+    "source_forcing": {
+      "grid": {
+        "sup_wb": 1.1442579542253428,
+        "rms_wb": 0.46790011041159146,
+        "sup_fraction_of_span": 0.6275567325970585,
+        "rms_fraction_of_span": 0.2566150957372981
+      },
+      "wall": {
+        "sup_wb": 0.7683470265443004,
+        "rms_wb": 0.37079155322865276,
+        "sup_fraction_of_span": 0.42139217621191105,
+        "rms_fraction_of_span": 0.20335688710706273
+      },
+      "definition": "plasma-current image, composed image minus external image"
+    },
+    "boundary_flux_balance": {
+      "gauge_discipline": {
+        "method": "one additive offset on the external component aligns the composed-image wall mean to the reference wall mean",
+        "nova_to_reference_additive_offset_wb": 0.0001427281323149023,
+        "raw_cross_gauge_amplitude_difference_scored": false
+      },
+      "reference_total_boundary_in_reference_gauge": {
+        "sup_wb": 1.1550466530771006,
+        "rms_wb": 0.610015574021121,
+        "sup_fraction_of_span": 0.6334736856541743,
+        "rms_fraction_of_span": 0.33455688820199697
+      },
+      "external_boundary_after_additive_alignment": {
+        "sup_wb": 1.6812986774462613,
+        "rms_wb": 0.9717944998128284,
+        "sup_fraction_of_span": 0.9220912999920862,
+        "rms_fraction_of_span": 0.5329708907037496
+      },
+      "plasma_source_boundary": {
+        "sup_wb": 0.7683470265443004,
+        "rms_wb": 0.37079155322865276,
+        "sup_fraction_of_span": 0.42139217621191105,
+        "rms_fraction_of_span": 0.20335688710706273
+      },
+      "plasma_flux_required_to_close_reference_boundary": {
+        "sup_wb": 0.7728059081588926,
+        "rms_wb": 0.3707766218958145,
+        "sup_fraction_of_span": 0.42383760485565153,
+        "rms_fraction_of_span": 0.20334869816818343
+      },
+      "composed_total_minus_reference_total": {
+        "sup_wb": 0.007416645444009329,
+        "rms_wb": 0.0021642691981028257,
+        "sup_fraction_of_span": 0.004067584380328243,
+        "rms_fraction_of_span": 0.0011869716102094838
+      },
+      "external_to_reference_boundary_variation_rms_ratio": 1.5991082999990267,
+      "source_to_required_plasma_boundary_rms_ratio": 1.000040270426873
+    },
+    "linearized_map": {
+      "method": "fixed-count power iteration on the exact jax.linearize tangent",
+      "random_seed": 11,
+      "iterations": 40,
+      "tangent_applications": 41,
+      "rayleigh_quotient": 1.9132450123257896,
+      "absolute_dominant_eigenvalue_estimate": 1.9132450123257896,
+      "final_norm_growth_estimate": 1.9132450123257567,
+      "last_five_norm_growth_estimates": [
+        1.913245012325029,
+        1.9132450123253884,
+        1.9132450123255866,
+        1.913245012325696,
+        1.9132450123257567
+      ],
+      "picard_contracts": false
+    }
+  },
+  "reference_seeded_pinned_solve": {
+    "entry_point": "ForwardProfile.solve_branch",
+    "route": "newton_krylov",
+    "reference_seeded": true,
+    "registered_fixed_point_criterion": 1e-08,
+    "newton_budget": 12,
+    "gmres_iterations_per_promotion": 12,
+    "forward_branch_receipt": {
+      "requested_class": "diverted",
+      "requested_class_code": 1,
+      "achieved_class": "diverted",
+      "achieved_class_code": 1,
+      "topology_consistent": true,
+      "converged": false,
+      "residual": 0.002767352298574886,
+      "iterations": 12
+    },
+    "terminal_state": {
+      "plasma_current_a": 936415.1777717776,
+      "reference_plasma_current_a": 934383.875,
+      "reference_plasma_current_target_a": 934383.875,
+      "signed_relative_current_deviation": 0.002173948872755904,
+      "nonzero_current": true,
+      "finite_receipt": true,
+      "axis_position_m": [
+        0.4725609047380559,
+        1.7936400263214847
+      ],
+      "saddle_position_m": [
+        0.3639887712171788,
+        1.908203104807896
+      ],
+      "axis_flux_wb": 0.006606785093121112,
+      "boundary_flux_wb": -0.013194911500789124
+    },
+    "residual_trajectory": [
+      0.00621185179938685,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      0.002351720276843477,
+      0.002351720276843477,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      0.001970923362492926,
+      0.001970923362492926,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      0.01914437626591589,
+      0.01914437626591589,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      0.017901551467939012,
+      0.017901551467939012,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      0.02379771917013441,
+      0.02379771917013441,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      0.007317581246259995,
+      0.007317581246259995,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      0.01711582057456701,
+      0.01711582057456701,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      0.022518481748704,
+      0.022518481748704,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      0.007126751485356364,
+      0.007126751485356364,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      0.013763768735861373,
+      0.013763768735861373,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      0.006230858271437541,
+      0.006230858271437541,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      0.002767352298574886
+    ],
+    "registered_parity_metrics": null,
+    "registered_tolerance_verdict": {
+      "evaluated": false,
+      "carried_geometry_and_topology_metrics_pass": false,
+      "new_flux_and_moment_metrics_are_reported_deviations": true
+    },
+    "verdict": "FAIL_PINNED_BRANCH_DID_NOT_CONVERGE"
+  },
+  "figure_src": "/nova/figures/efit-forward-parity/passive-inclusive-parity-slice.png"
+}

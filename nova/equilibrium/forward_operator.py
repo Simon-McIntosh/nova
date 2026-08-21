@@ -48,7 +48,39 @@ from nova.equilibrium.stencil_mesh import (
 )
 from nova.equilibrium.topology import Topology, TopologyState
 
-__all__ = ["ForwardFluxOperator"]
+__all__ = ["ForwardFluxOperator", "PrescribedCurrentField"]
+
+
+@dataclass(frozen=True)
+class PrescribedCurrentField:
+    """Fixed conductor currents and their total-flux response matrix."""
+
+    response: jnp.ndarray = field(repr=False)
+    current: jnp.ndarray = field(repr=False)
+
+    def __post_init__(self):
+        """Validate one response column for every prescribed current."""
+        response = jnp.asarray(self.response)
+        current = jnp.asarray(self.current)
+        if response.ndim != 2:
+            raise ValueError("prescribed current response must be a matrix")
+        if current.ndim != 1:
+            raise ValueError("prescribed current must be a vector")
+        if response.shape[1] != current.size:
+            raise ValueError(
+                "prescribed current response columns must match the current vector"
+            )
+        object.__setattr__(self, "response", response)
+        object.__setattr__(self, "current", current)
+
+    @property
+    def circuit_count(self) -> int:
+        """Return the number of prescribed circuit currents."""
+        return self.current.size
+
+    def flux(self) -> jax.Array:
+        """Return the prescribed conductor flux [Wb] at every target."""
+        return self.response @ self.current
 
 
 @dataclass
@@ -65,6 +97,9 @@ class ForwardFluxOperator:
     moment_geometry: MomentGeometry | None = field(repr=False, default=None)
     sample: FluxTarget | None = field(repr=False, default=None)
     use_linear_moments: bool = field(repr=False, default=True)
+    prescribed_current_field: PrescribedCurrentField | None = field(
+        repr=False, default=None
+    )
 
     def __post_init__(self):
         """Build the topology read and default the material mask."""
@@ -79,6 +114,13 @@ class ForwardFluxOperator:
             raise ValueError("area must carry one control area per grid node")
         if self.inside_material.shape != (self.grid.node_number,):
             raise ValueError("inside_material must carry one flag per grid node")
+        if (
+            self.prescribed_current_field is not None
+            and self.prescribed_current_field.response.shape[0] != self.node_number
+        ):
+            raise ValueError(
+                "prescribed current response rows must match every operator target"
+            )
         if (
             self.moment_geometry is not None
             and len(self.moment_geometry.polygons) != self.grid.node_number
@@ -149,9 +191,14 @@ class ForwardFluxOperator:
         """Return the flux map [Wb] of every conductor but the plasma."""
         conductor = self._current(current)
         physical = jnp.r_[self.grid.external(conductor), self.wall.external(conductor)]
-        if self.sample is None:
-            return physical
-        return jnp.r_[physical, self.sample.external(conductor)]
+        external = (
+            physical
+            if self.sample is None
+            else jnp.r_[physical, self.sample.external(conductor)]
+        )
+        if self.prescribed_current_field is None:
+            return external
+        return external + self.prescribed_current_field.flux()
 
     def read(self, psi, requested_class=None) -> tuple[DomainMasks, TopologyState]:
         """Return one shared domain/topology read, optionally class-pinned."""

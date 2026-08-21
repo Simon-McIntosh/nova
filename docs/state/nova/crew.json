@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T16:47:38",
+  "updated": "2026-08-21T16:58:40",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -16422,9 +16422,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T135909736945-retirement-suite-verification",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a78",
+        "node": "retirement-suite-verification",
+        "role": "test",
+        "member": "transport-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T13:59:13Z",
+        "completed_at": "2026-08-21T14:56:33Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3440,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3440,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "23d98097d69a2d87400f71811260c88bf18a81b5",
+        "commits": [
+          "4624c287"
+        ],
+        "changed_lines": {
+          "added": 44,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "no green count produced: the identical suite stalled in the same fifth test for a second time, now on an idle node (load 1.15 on 48 cores), 4 of 79 tests in 54 minutes, exit 143 at the fence. The report classifies this as an environment artifact; the orchestrator records disagreement - the test was green inside a 15-minute suite at the pre-migration commit and stalls only at the migration commit, so the working classification is a migration-introduced slowdown, most plausibly a retracing or recompilation regression, and a diagnosis node measures parent-versus-candidate on the single test with compile logging before any repair",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T135909736945-retirement-suite-verification/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0249e-5fc0-7893-9219-557977a77c6b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 11521024,
+            "cached_input_tokens_cumulative": 11521024,
+            "input_tokens": 11707677,
+            "input_tokens_cumulative": 11707677,
+            "output_tokens": 15405,
+            "output_tokens_cumulative": 15405,
+            "reasoning_output_tokens": 4041,
+            "reasoning_output_tokens_cumulative": 4041
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 423
+    "_version": 424
   }
 }

@@ -15,6 +15,7 @@ import json
 import math
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -434,6 +435,124 @@ def vacuum_response(
     return tuple(names), np.stack(responses)
 
 
+def _imas_element_vertices(geometry: Any, coil_name: str) -> np.ndarray:
+    """Return one IMAS active-coil element as an exact polygon."""
+
+    geometry_type = int(geometry.geometry_type)
+    if geometry_type == 1:
+        vertices = np.c_[
+            np.asarray(geometry.outline.r, dtype=float),
+            np.asarray(geometry.outline.z, dtype=float),
+        ]
+    elif geometry_type == 2:
+        rectangle = geometry.rectangle
+        half_width = 0.5 * float(rectangle.width)
+        half_height = 0.5 * float(rectangle.height)
+        vertices = np.asarray(
+            [
+                (
+                    float(rectangle.r) - half_width,
+                    float(rectangle.z) - half_height,
+                ),
+                (
+                    float(rectangle.r) + half_width,
+                    float(rectangle.z) - half_height,
+                ),
+                (
+                    float(rectangle.r) + half_width,
+                    float(rectangle.z) + half_height,
+                ),
+                (
+                    float(rectangle.r) - half_width,
+                    float(rectangle.z) + half_height,
+                ),
+            ]
+        )
+    else:
+        raise DiiidDescriptionError(
+            f"unsupported geometry type {geometry_type} for {coil_name}"
+        )
+    if vertices.ndim != 2 or vertices.shape[1] != 2 or len(vertices) < 3:
+        raise DiiidDescriptionError(f"{coil_name} element has an invalid polygon")
+    if not np.all(np.isfinite(vertices)):
+        raise DiiidDescriptionError(f"{coil_name} element has non-finite vertices")
+    return vertices
+
+
+def active_coil_response_from_imas(
+    entry_path: str | Path,
+    dd_version: str,
+    coil_names: Sequence[str],
+    target_r: np.ndarray,
+    target_z: np.ndarray,
+) -> tuple[tuple[str, ...], np.ndarray, dict[str, Any]]:
+    """Build exact active-coil flux columns on arbitrary target coordinates.
+
+    The returned response is Nova total poloidal flux in Wb per ampere.  Every
+    element is evaluated with its written IMAS geometry and signed turns; no
+    filament-centre approximation or data-dictionary conversion is allowed.
+    """
+
+    import imas
+
+    names = tuple(str(name) for name in coil_names)
+    if not names or len(set(names)) != len(names):
+        raise DiiidDescriptionError("active-coil names must be unique and nonempty")
+    radius, height = np.broadcast_arrays(
+        np.asarray(target_r, dtype=float), np.asarray(target_z, dtype=float)
+    )
+    if radius.size == 0 or np.any(radius <= 0.0):
+        raise DiiidDescriptionError("target radii must be nonempty and positive")
+    if not np.all(np.isfinite(radius)) or not np.all(np.isfinite(height)):
+        raise DiiidDescriptionError("target coordinates must be finite")
+
+    responses = []
+    records = []
+    with imas.DBEntry(Path(entry_path), "r", dd_version=dd_version) as entry:
+        active = entry.get("pf_active", autoconvert=False)
+        written_dd = str(active.ids_properties.version_put.data_dictionary)
+        if written_dd != dd_version:
+            raise DiiidDescriptionError(f"expected DD {dd_version}, read {written_dd}")
+        coils = {str(coil.name): coil for coil in active.coil}
+        missing = [name for name in names if name not in coils]
+        if missing:
+            raise DiiidDescriptionError(f"active coils are missing: {missing}")
+        for name in names:
+            coil = coils[name]
+            response = np.zeros(radius.shape, dtype=float)
+            turn_sum = 0.0
+            for element in coil.element:
+                vertices = _imas_element_vertices(element.geometry, name)
+                turns = float(element.turns_with_sign)
+                if not math.isfinite(turns):
+                    raise DiiidDescriptionError(f"{name} has non-finite turns")
+                turn_sum += turns
+                response += turns * polygon_greens(
+                    radius.ravel(), height.ravel(), vertices
+                )[0].reshape(radius.shape)
+            responses.append(response)
+            records.append(
+                {
+                    "coil": name,
+                    "elements": len(coil.element),
+                    "signed_turn_sum": turn_sum,
+                }
+            )
+    return (
+        names,
+        np.stack(responses),
+        {
+            "entry": str(entry_path),
+            "dd_version": dd_version,
+            "coils": records,
+            "target_shape": list(radius.shape),
+            "target_points": int(radius.size),
+            "kernel": "nova.biot.polygon.polygon_greens",
+            "flux_unit": "Wb per A",
+        },
+    )
+
+
 def vacuum_psi(
     row: Mapping[str, Any],
     description: DiiidDescription,
@@ -605,6 +724,7 @@ __all__ = [
     "STARTER_KIT_VACUUM_BAR_SOURCE",
     "STARTER_KIT_VACUUM_R2_BAR",
     "TurnConvention",
+    "active_coil_response_from_imas",
     "dataset_machine_description",
     "geometry_digest",
     "section_vertices",

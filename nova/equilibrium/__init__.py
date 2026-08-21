@@ -61,7 +61,12 @@ if TYPE_CHECKING:
         SurfaceGeometryError,
         source_field_function,
     )
-    from nova.equilibrium.forward import ForwardEquilibrium, ForwardProfile
+    from nova.equilibrium.forward import (
+        ForwardBranchReceipt,
+        ForwardEquilibrium,
+        ForwardPortfolio,
+        ForwardProfile,
+    )
     from nova.equilibrium.forward_operator import ForwardFluxOperator
     from nova.equilibrium.map_extraction import (
         ChordSamplingReceipt,
@@ -90,6 +95,7 @@ if TYPE_CHECKING:
         RotatingDomainProfile,
     )
     from nova.equilibrium.stencil_mesh import StencilMesh
+    from nova.equilibrium.topology import TopologyClass
     from nova.equilibrium.source import (
         ContinuationForm,
         ContinuationLedger,
@@ -117,7 +123,9 @@ _DEFERRED_EXPORTS: dict[str, str] = {
     "FluxMesh": "conservation",
     "FluxSurfaceGeometry": "flux_surface_geometry",
     "ForwardEquilibrium": "forward",
+    "ForwardBranchReceipt": "forward",
     "ForwardFluxOperator": "forward_operator",
+    "ForwardPortfolio": "forward",
     "ForwardProfile": "forward",
     "ForwardSource": "source",
     "GridMotion": "flux_surface_geometry",
@@ -143,6 +151,7 @@ _DEFERRED_EXPORTS: dict[str, str] = {
     "SurfaceGeometryError": "flux_surface_geometry",
     "SurfaceExtractionReceipt": "map_extraction",
     "VacuumRegionReceipt": "map_extraction",
+    "TopologyClass": "topology",
     "apply_delta_star": "map_extraction",
     "extract_flux_functions": "map_extraction",
     "sample_chord_psi_norm": "map_extraction",
@@ -165,7 +174,9 @@ __all__ = [
     "FluxMesh",
     "FluxSurfaceGeometry",
     "ForwardEquilibrium",
+    "ForwardBranchReceipt",
     "ForwardFluxOperator",
+    "ForwardPortfolio",
     "ForwardProfile",
     "ForwardSource",
     "GridMotion",
@@ -189,6 +200,7 @@ __all__ = [
     "StencilMesh",
     "SurfaceExtractionReceipt",
     "SurfaceGeometryError",
+    "TopologyClass",
     "VacuumRegionReceipt",
     "apply_delta_star",
     "decay_index",

@@ -108,12 +108,14 @@ from nova.equilibrium.source import (
     absolute_normalisation_record,
 )
 from nova.equilibrium.stencil_mesh import MomentGeometry, StencilMesh
-from nova.equilibrium.topology import TopologyState
+from nova.equilibrium.topology import TopologyClass, TopologyState
 from nova.geometry.hexstencil import hex_stencil
 
 __all__ = [
     "FiniteCheck",
+    "ForwardBranchReceipt",
     "ForwardEquilibrium",
+    "ForwardPortfolio",
     "ForwardProfile",
 ]
 
@@ -168,6 +170,24 @@ class ForwardEquilibrium(NamedTuple):
     rotation: RotationRecord
     continuation: ContinuationLedger
     finite: FiniteCheck
+
+
+class ForwardBranchReceipt(NamedTuple):
+    """One topology-pinned branch and its terminal convergence qualification."""
+
+    equilibrium: ForwardEquilibrium
+    requested_class: jax.Array
+    achieved_class: jax.Array
+    converged: jax.Array
+    residual: jax.Array
+    iterations: jax.Array
+    topology_consistent: jax.Array
+
+
+class ForwardPortfolio(NamedTuple):
+    """Limited and diverted receipts stacked on one fixed branch axis."""
+
+    branches: ForwardBranchReceipt
 
 
 @dataclass
@@ -293,9 +313,11 @@ class ForwardProfile:
         """Return the immutable source state the solve consumes."""
         return self.operator.source
 
-    def flux_map(self, current=None) -> Callable[[jax.Array], jax.Array]:
-        """Return the traced free-boundary map at one conductor state."""
-        return self.operator.flux_map(current)
+    def flux_map(
+        self, current=None, requested_class=None
+    ) -> Callable[[jax.Array], jax.Array]:
+        """Return the traced map at one conductor state and optional class pin."""
+        return self.operator.flux_map(current, requested_class)
 
     def observe(self, flux, current=None) -> ForwardEquilibrium:
         """Return the full receipt of one flux map without iterating it.
@@ -323,12 +345,12 @@ class ForwardProfile:
         _current, support_integrals, _masks, topology = self._integral_state(flux)
         return observe_moments(support_integrals, topology.flux_span)
 
-    def _integral_state(self, flux):
+    def _integral_state(self, flux, requested_class=None):
         """Return current and integral state for this construction's geometry."""
         if self.operator.use_linear_moments:
-            return self.operator.current_moments_and_observation(flux)
-        masks, topology = self.operator.read(flux)
-        current_moments = self.operator.cell_current_moments(flux)
+            return self.operator.current_moments_and_observation(flux, requested_class)
+        masks, topology = self.operator.read(flux, requested_class)
+        current_moments = self.operator.cell_current_moments(flux, requested_class)
         cell_current = current_moments.cell_current
         radius = jnp.asarray(self.lattice.node_radius)
         area = jnp.where(masks.core, self.operator.area, 0.0)
@@ -353,10 +375,15 @@ class ForwardProfile:
         return current_moments, support_integrals, masks, topology
 
     def _receipt(
-        self, flux: jax.Array, history: fixed_point.FixedPointResult
+        self,
+        flux: jax.Array,
+        history: fixed_point.FixedPointResult,
+        requested_class=None,
     ) -> ForwardEquilibrium:
         """Return the typed result of one converged or supplied flux map."""
-        current_moments, support_integrals, masks, topology = self._integral_state(flux)
+        current_moments, support_integrals, masks, topology = self._integral_state(
+            flux, requested_class
+        )
         cell_current = current_moments.cell_current
         grid_flux = flux[: self.lattice.node_count]
         radius = jnp.asarray(self.lattice.node_radius)
@@ -475,10 +502,10 @@ class ForwardProfile:
         return self._receipt(flux, self._host_history(trace, flux, current))
 
     def _solve_accelerated(
-        self, route: str, initial_flux, current, **options
+        self, route: str, initial_flux, current, requested_class=None, **options
     ) -> ForwardEquilibrium:
         """Drive the map with the shared fixed-point ladder."""
-        mapped = self.flux_map(current)
+        mapped = self.flux_map(current, requested_class)
         if route == "newton_krylov":
             history = fixed_point.newton_krylov(
                 mapped,
@@ -496,7 +523,7 @@ class ForwardProfile:
                     **options,
                 },
             )
-        return self._receipt(history.state, history)
+        return self._receipt(history.state, history, requested_class)
 
     def solve(
         self,
@@ -540,6 +567,135 @@ class ForwardProfile:
                 f"{', '.join((*_HOST, *_ACCELERATED))}"
             )
         return self._solve_accelerated(route, initial_flux, current, **options)
+
+    def _iteration_count(self, route: str, options: dict[str, object]) -> int:
+        """Return the fixed number of nonlinear state updates a route performs."""
+
+        if route == "newton_krylov":
+            return int(options.get("warmup", 8)) + int(
+                options.get("newton_steps", self.newton_steps)
+            )
+        return int(options.get("evaluations", self.evaluations))
+
+    def _branch_receipt(
+        self,
+        initial_flux,
+        requested_class,
+        current,
+        *,
+        route: str,
+        tolerance: float,
+        iterations: int,
+        **options,
+    ) -> ForwardBranchReceipt:
+        """Solve one pinned branch and qualify it against an emergent terminal read."""
+
+        equilibrium = self._solve_accelerated(
+            route,
+            initial_flux,
+            current,
+            requested_class=requested_class,
+            **options,
+        )
+        _masks, achieved = self.operator.read(equilibrium.flux)
+        requested = jnp.asarray(requested_class, dtype=jnp.int8)
+        achieved_class = jnp.asarray(achieved.diverted, dtype=jnp.int8)
+        consistent = achieved_class == requested
+        residual = equilibrium.fixed_point.residual
+        converged = (
+            jnp.isfinite(residual)
+            & (residual <= tolerance)
+            & consistent
+            & equilibrium.finite.passed
+        )
+        return ForwardBranchReceipt(
+            equilibrium=equilibrium,
+            requested_class=requested,
+            achieved_class=achieved_class,
+            converged=converged,
+            residual=residual,
+            iterations=jnp.asarray(iterations, dtype=jnp.int32),
+            topology_consistent=consistent,
+        )
+
+    def solve_branch(
+        self,
+        initial_flux,
+        requested_class,
+        *,
+        route: SolveRoute = "newton_krylov",
+        current=None,
+        enforce: Sequence[str] = (),
+        tolerance: float = 1.0e-10,
+        **options,
+    ) -> ForwardBranchReceipt:
+        """Return one topology-pinned solve with an honest terminal receipt."""
+
+        reject_unsupported_enforcement(enforce, self.source.closure_degrees)
+        if route not in _ACCELERATED:
+            raise ValueError(
+                "a pinned branch needs a fixed-shape route; "
+                f"available: {', '.join(_ACCELERATED)}"
+            )
+        return self._branch_receipt(
+            initial_flux,
+            requested_class,
+            current,
+            route=route,
+            tolerance=tolerance,
+            iterations=self._iteration_count(route, options),
+            **options,
+        )
+
+    def solve_portfolio(
+        self,
+        initial_flux,
+        *,
+        route: SolveRoute = "newton_krylov",
+        current=None,
+        enforce: Sequence[str] = (),
+        tolerance: float = 1.0e-10,
+        **options,
+    ) -> ForwardPortfolio:
+        """Solve limited and diverted branches together on one fixed branch axis.
+
+        ``initial_flux`` has shape ``(2, node)`` in limited, diverted order.
+        The implementation maps the same pinned branch function over that
+        leading axis, so an outer ``vmap`` can add shot, time or ensemble axes
+        without introducing a second physics path.
+        """
+
+        reject_unsupported_enforcement(enforce, self.source.closure_degrees)
+        if route not in _ACCELERATED:
+            raise ValueError(
+                "a topology portfolio needs a fixed-shape route; "
+                f"available: {', '.join(_ACCELERATED)}"
+            )
+        initial_flux = jnp.asarray(initial_flux)
+        if initial_flux.ndim != 2 or initial_flux.shape[0] != 2:
+            raise ValueError(
+                "portfolio initial_flux must have shape (2, node) in "
+                "limited, diverted order"
+            )
+        requested = jnp.asarray(
+            (int(TopologyClass.LIMITED), int(TopologyClass.DIVERTED)),
+            dtype=jnp.int8,
+        )
+        current_axis = None if current is None or jnp.ndim(current) == 1 else 0
+        iterations = self._iteration_count(route, options)
+        branches = jax.vmap(
+            lambda flux, branch_class, conductor: self._branch_receipt(
+                flux,
+                branch_class,
+                conductor,
+                route=route,
+                tolerance=tolerance,
+                iterations=iterations,
+                **options,
+            ),
+            in_axes=(0, 0, current_axis),
+        )(initial_flux, requested, current)
+        return ForwardPortfolio(branches=branches)
 
     def solve_batch(
         self,

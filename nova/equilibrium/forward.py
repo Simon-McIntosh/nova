@@ -70,6 +70,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
+from enum import IntEnum
 from typing import Literal, NamedTuple
 
 import jax
@@ -89,6 +90,13 @@ from nova.equilibrium.conservation import (
 )
 from nova.equilibrium.domain import DomainMasks
 from nova.equilibrium.forward_operator import ForwardFluxOperator
+from nova.equilibrium.moment import (
+    CurrentCells,
+    MomentConfig,
+    MomentOrder,
+    ReconstructMoment,
+    limiter_radial_extent,
+)
 from nova.equilibrium.observation import (
     ClippedIntegralMeasure,
     CurrentLedger,
@@ -107,16 +115,24 @@ from nova.equilibrium.source import (
     RotationRecord,
     absolute_normalisation_record,
 )
-from nova.equilibrium.stencil_mesh import MomentGeometry, StencilMesh
+from nova.equilibrium.stencil_mesh import (
+    CellCurrentMoments,
+    MomentGeometry,
+    StencilMesh,
+)
 from nova.equilibrium.topology import TopologyClass, TopologyState
 from nova.geometry.hexstencil import hex_stencil
 
 __all__ = [
     "FiniteCheck",
+    "ColdSeedConstruction",
     "ForwardBranchReceipt",
+    "ForwardColdSeedPortfolio",
+    "ForwardColdSeedReceipt",
     "ForwardEquilibrium",
     "ForwardPortfolio",
     "ForwardProfile",
+    "SaddleSeedGeometry",
 ]
 
 #: Routes that drive the same map to the same fixed point.
@@ -188,6 +204,59 @@ class ForwardPortfolio(NamedTuple):
     """Limited and diverted receipts stacked on one fixed branch axis."""
 
     branches: ForwardBranchReceipt
+
+
+class ColdSeedConstruction(IntEnum):
+    """Independent geometry used to construct one cold branch seed."""
+
+    CURRENT_CENTROID_DISC = 0
+    AXIS_SADDLE_GEOMETRY = 1
+
+
+@dataclass(frozen=True)
+class SaddleSeedGeometry:
+    """Declared magnetic-axis and saddle locations for a diverted cold seed."""
+
+    axis: tuple[float, float]
+    saddle: tuple[float, float]
+
+    def __post_init__(self) -> None:
+        """Require two distinct finite points inside physical coordinates."""
+
+        axis = np.asarray(self.axis, dtype=np.float64)
+        saddle = np.asarray(self.saddle, dtype=np.float64)
+        if axis.shape != (2,) or saddle.shape != (2,):
+            raise ValueError("axis and saddle must each be a coordinate pair")
+        if not np.all(np.isfinite(axis)) or not np.all(np.isfinite(saddle)):
+            raise ValueError("axis and saddle coordinates must be finite")
+        if np.linalg.norm(saddle - axis) <= np.finfo(np.float64).eps:
+            raise ValueError("axis and saddle coordinates must be distinct")
+        object.__setattr__(self, "axis", tuple(float(value) for value in axis))
+        object.__setattr__(self, "saddle", tuple(float(value) for value in saddle))
+
+
+class ForwardColdSeedReceipt(NamedTuple):
+    """One current-moment seed paired with its declared boundary anchor."""
+
+    flux: jax.Array
+    requested_class: jax.Array
+    anchor: jax.Array
+    anchor_flux: jax.Array
+    anchor_available: jax.Array
+    plasma_current: jax.Array
+    centroid: jax.Array
+    radius: jax.Array
+    supported_cells: jax.Array
+    construction: jax.Array
+    declared_axis: jax.Array
+    declared_boundary: jax.Array
+    stored_flux_samples_used: jax.Array
+
+
+class ForwardColdSeedPortfolio(NamedTuple):
+    """Limited and diverted cold-seed receipts on one fixed branch axis."""
+
+    branches: ForwardColdSeedReceipt
 
 
 @dataclass
@@ -318,6 +387,163 @@ class ForwardProfile:
     ) -> Callable[[jax.Array], jax.Array]:
         """Return the traced map at one conductor state and optional class pin."""
         return self.operator.flux_map(current, requested_class)
+
+    def cold_seed_portfolio(
+        self,
+        plasma_current: float,
+        centroid,
+        *,
+        current=None,
+        radius_fraction: float | None = None,
+        diverted_geometry: SaddleSeedGeometry | None = None,
+    ) -> ForwardColdSeedPortfolio:
+        """Return production moment seeds paired with wall and saddle anchors.
+
+        The limited state is the external field plus a uniform-disc zeroth
+        current moment about the declared centroid. When diverted geometry is
+        supplied, its seed is a cubic field whose only stationary points are
+        the declared magnetic axis and saddle. Its gauge and axis-to-saddle
+        span come from the independent moment seed, never from a reference
+        flux map. The receipt retains every anchor input and that independence
+        statement beside the production topology read of the resulting state.
+        """
+
+        centre = np.asarray(centroid, dtype=np.float64)
+        if centre.shape != (2,) or not np.all(np.isfinite(centre)):
+            raise ValueError("centroid must be a finite (radius, height) pair")
+        config = MomentConfig(order=MomentOrder.CENTROID)
+        fraction = (
+            config.seed_radius_fraction
+            if radius_fraction is None
+            else float(radius_fraction)
+        )
+        if not 0.0 < fraction <= 1.0:
+            raise ValueError("radius_fraction must lie in (0, 1]")
+        coordinate = np.asarray(self.operator.grid.coordinate, dtype=np.float64)
+        wall = np.asarray(self.operator.wall.coordinate, dtype=np.float64)
+        inboard, outboard = limiter_radial_extent(wall[:, 0], wall[:, 1], centre[1])
+        supported_distance = min(centre[0] - inboard, outboard - centre[0])
+        if supported_distance <= 0.0:
+            raise ValueError("the current centroid lies outside the limiter")
+        radius = fraction * supported_distance
+        reconstruction = ReconstructMoment(
+            CurrentCells(
+                coordinate[:, 0],
+                coordinate[:, 1],
+                candidate=np.asarray(self.operator.inside_material, dtype=np.float64),
+            ),
+            major_radius=float(centre[0]),
+            config=config,
+        )
+        cell_current = reconstruction.uniform_disc(
+            float(centre[0]),
+            float(centre[1]),
+            radius,
+            float(plasma_current),
+        )
+        uniform = jnp.asarray(cell_current, dtype=jnp.float64)
+        zero = jnp.zeros_like(uniform)
+        physical = CellCurrentMoments(uniform, zero, zero)
+        coefficients = self.operator.coupling_current_moments(physical)
+        neutral = self.operator.external(current) + self.operator.current_moment_image(
+            coefficients
+        )
+        requested = jnp.asarray(
+            (int(TopologyClass.LIMITED), int(TopologyClass.DIVERTED)),
+            dtype=jnp.int8,
+        )
+
+        limited_flux = neutral
+        if diverted_geometry is None:
+            diverted_flux = neutral
+            diverted_axis = np.full(2, np.nan)
+            diverted_boundary = np.full(2, np.nan)
+            diverted_construction = ColdSeedConstruction.CURRENT_CENTROID_DISC
+        else:
+            diverted_flux = self._saddle_geometry_seed(neutral, diverted_geometry)
+            diverted_axis = np.asarray(diverted_geometry.axis)
+            diverted_boundary = np.asarray(diverted_geometry.saddle)
+            diverted_construction = ColdSeedConstruction.AXIS_SADDLE_GEOMETRY
+        flux = jnp.stack((limited_flux, diverted_flux))
+
+        def anchor(branch_flux, branch_class):
+            _masks, topology = self.operator.read(branch_flux, branch_class)
+            available = jnp.all(jnp.isfinite(topology.boundary)) & jnp.isfinite(
+                topology.boundary_flux
+            )
+            return topology.boundary, topology.boundary_flux, available
+
+        anchors, anchor_flux, anchor_available = jax.vmap(anchor)(flux, requested)
+        branch_count = requested.size
+        declared_axis = jnp.stack((jnp.asarray(centre), jnp.asarray(diverted_axis)))
+        declared_boundary = jnp.stack(
+            (anchors[int(TopologyClass.LIMITED)], jnp.asarray(diverted_boundary))
+        )
+        return ForwardColdSeedPortfolio(
+            branches=ForwardColdSeedReceipt(
+                flux=flux,
+                requested_class=requested,
+                anchor=anchors,
+                anchor_flux=anchor_flux,
+                anchor_available=anchor_available,
+                plasma_current=jnp.full(branch_count, float(plasma_current)),
+                centroid=jnp.broadcast_to(jnp.asarray(centre), (branch_count, 2)),
+                radius=jnp.full(branch_count, radius),
+                supported_cells=jnp.full(
+                    branch_count,
+                    int(np.count_nonzero(cell_current)),
+                    dtype=jnp.int32,
+                ),
+                construction=jnp.asarray(
+                    (
+                        int(ColdSeedConstruction.CURRENT_CENTROID_DISC),
+                        int(diverted_construction),
+                    ),
+                    dtype=jnp.int8,
+                ),
+                declared_axis=declared_axis,
+                declared_boundary=declared_boundary,
+                stored_flux_samples_used=jnp.zeros(branch_count, dtype=bool),
+            )
+        )
+
+    def _saddle_geometry_seed(
+        self,
+        moment_seed: jax.Array,
+        geometry: SaddleSeedGeometry,
+    ) -> jax.Array:
+        """Return a cold field normalized at declared axis and saddle points."""
+
+        axis = np.asarray(geometry.axis, dtype=np.float64)
+        saddle = np.asarray(geometry.saddle, dtype=np.float64)
+        displacement = saddle - axis
+        distance = float(np.linalg.norm(displacement))
+        along = displacement / distance
+        across = np.array((-along[1], along[0]))
+        coordinate_parts = [
+            np.asarray(self.operator.grid.coordinate, dtype=np.float64),
+            np.asarray(self.operator.wall.coordinate, dtype=np.float64),
+        ]
+        if self.operator.sample is not None:
+            coordinate_parts.append(
+                np.asarray(self.operator.sample.coordinate, dtype=np.float64)
+            )
+        coordinates = np.vstack(coordinate_parts)
+        grid = coordinate_parts[0]
+        axis_index = int(np.argmin(np.linalg.norm(grid - axis, axis=1)))
+        saddle_index = int(np.argmin(np.linalg.norm(grid - saddle, axis=1)))
+        neutral = np.asarray(moment_seed, dtype=np.float64)
+        polarity = float(self.operator.polarity)
+        flux_span = polarity * (neutral[axis_index] - neutral[saddle_index])
+        resolution = np.finfo(np.float64).eps * max(np.max(np.abs(neutral)), 1.0)
+        flux_span = max(float(flux_span), float(resolution))
+        local = coordinates - axis
+        axial = local @ along / distance
+        transverse = local @ across / distance
+        potential = -0.5 * axial**2 + axial**3 / 3.0 - 0.5 * transverse**2
+        normalized = 6.0 * (potential + 1.0 / 6.0)
+        saddle_flux = neutral[saddle_index]
+        return jnp.asarray(saddle_flux + polarity * flux_span * normalized)
 
     def observe(self, flux, current=None) -> ForwardEquilibrium:
         """Return the full receipt of one flux map without iterating it.

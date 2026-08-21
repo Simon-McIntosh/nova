@@ -17,7 +17,6 @@ from nova.equilibrium.flux_surface_connectivity import flood_fill_core
 from nova.equilibrium.separatrix_clip import _traced_clip
 from nova.linalg.tensor_spline import fit_tensor_spline
 from nova.transport.current_diffusion import (
-    _BICUBIC_ARC_WEIGHT,
     _bicubic_arc_moment_correction,
     _bicubic_derivatives,
     _bicubic_stationary_point,
@@ -142,10 +141,32 @@ def _surface_clips(
 
     def corrected_clip(level, *, separatrix):
         supports = clip(level, separatrix=separatrix)
-        correction, crossing_points, crossing, arc_r, arc_z, arc_valid = (
-            _bicubic_arc_moment_correction(
-                level, normalised_coefficient, psi_n_cells, dr, dz
-            )
+        base_moments = jnp.stack(
+            (
+                supports.area,
+                supports.first_area_moment[:, 0],
+                supports.first_area_moment[:, 1],
+                supports.second_area_moment[:, 0, 1],
+            ),
+            axis=1,
+        )
+        (
+            correction,
+            crossing_points,
+            crossing,
+            arc_r,
+            arc_z,
+            arc_weight,
+            arc_sample_valid,
+            arc_ordinate_derivative,
+            arc_valid,
+        ) = _bicubic_arc_moment_correction(
+            level,
+            normalised_coefficient,
+            psi_n_cells,
+            dr,
+            dz,
+            base_moments,
         )
         boundary_valid = jnp.all((~supports.boundary) | arc_valid)
         invalid_boundary = supports.boundary & ~arc_valid
@@ -156,6 +177,9 @@ def _surface_clips(
             crossing,
             arc_r,
             arc_z,
+            arc_weight,
+            arc_sample_valid,
+            arc_ordinate_derivative,
             arc_valid,
             boundary_valid,
             invalid_boundary,
@@ -187,29 +211,13 @@ def _surface_clips(
             crossing,
             arc_r,
             arc_z,
+            arc_weight,
+            arc_sample_valid,
+            arc_ordinate_derivative,
             arc_valid,
             boundary_valid,
             invalid_boundary,
         ) = corrected_clip(level, separatrix=separatrix)
-        inside = psi_n_cells < level
-        following_inside = jnp.roll(inside, -1, axis=1)
-        leaving = crossing & inside & ~following_inside
-        entering = crossing & ~inside & following_inside
-        leaving_index = jnp.argmax(leaving, axis=1)
-        entering_index = jnp.argmax(entering, axis=1)
-        start = jnp.take_along_axis(
-            crossing_points, leaving_index[:, None, None], axis=1
-        )[:, 0]
-        end = jnp.take_along_axis(
-            crossing_points, entering_index[:, None, None], axis=1
-        )[:, 0]
-        radial_span = end[:, 0] - start[:, 0]
-        vertical_span = end[:, 1] - start[:, 1]
-        use_radial = jnp.abs(radial_span) >= jnp.abs(vertical_span)
-
-        _, normalised_r, normalised_z, *_ = _bicubic_derivatives(
-            normalised_coefficient[:, None], arc_r, arc_z
-        )
         _, physical_r, physical_z, *_ = _bicubic_derivatives(
             physical_coefficient[:, None], arc_r, arc_z
         )
@@ -221,22 +229,8 @@ def _surface_clips(
             gradient_psi**2 + field_at_surface**2
         ) / radius_at_arc**2
 
-        ordinate_derivative = jnp.where(use_radial[:, None], normalised_z, normalised_r)
-        parameter_span = jnp.where(
-            use_radial, jnp.abs(radial_span), jnp.abs(vertical_span)
-        )
-        derivative_floor = jnp.asarray(1e-14, dtype=dtype)
-        coarea_weight = (
-            dr
-            * dz
-            * parameter_span[:, None]
-            * jnp.asarray(_BICUBIC_ARC_WEIGHT, dtype=dtype)[None]
-            / jnp.maximum(jnp.abs(ordinate_derivative), derivative_floor)
-        )
-        sample_valid = supports.boundary & arc_valid
-        weighted_volume = jnp.where(
-            sample_valid[:, None], radius_at_arc * coarea_weight, 0.0
-        )
+        sample_valid = supports.boundary[:, None] & arc_sample_valid
+        weighted_volume = jnp.where(sample_valid, radius_at_arc * arc_weight, 0.0)
         denominator = jnp.sum(weighted_volume)
         safe_denominator = jnp.maximum(denominator, jnp.asarray(1e-30, dtype=dtype))
         integrands = jnp.stack(
@@ -253,11 +247,9 @@ def _surface_clips(
         averages = jnp.sum(integrands * weighted_volume[None], axis=(1, 2))
         averages /= safe_denominator
         minimum_ordinate_derivative = jnp.min(
-            jnp.where(sample_valid[:, None], jnp.abs(ordinate_derivative), jnp.inf)
+            jnp.where(sample_valid, arc_ordinate_derivative, jnp.inf)
         )
-        maximum_coarea_weight = jnp.max(
-            jnp.where(sample_valid[:, None], coarea_weight, 0.0)
-        )
+        maximum_coarea_weight = jnp.max(jnp.where(sample_valid, arc_weight, 0.0))
         return (
             averages,
             boundary_valid & (denominator > 0.0),
@@ -308,6 +300,9 @@ def _surface_clips(
             crossing,
             arc_r,
             arc_z,
+            _arc_weight,
+            arc_sample_valid,
+            _arc_ordinate_derivative,
             arc_valid,
             boundary_valid,
             invalid_boundary,
@@ -315,9 +310,7 @@ def _surface_clips(
         samples = jnp.concatenate(
             (crossing_points, jnp.stack((arc_r, arc_z), axis=-1)), axis=1
         )
-        sample_valid = jnp.concatenate(
-            (crossing, jnp.broadcast_to(arc_valid[:, None], arc_r.shape)), axis=1
-        )
+        sample_valid = jnp.concatenate((crossing, arc_sample_valid), axis=1)
         sample_valid &= cell_participation[:, None]
 
         def cell_seed(coordinate, *, largest):

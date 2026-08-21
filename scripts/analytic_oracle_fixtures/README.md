@@ -30,3 +30,20 @@ The two CPU debug-lane commands are encoded in `run-fixture.sh`. Their complete
 stdout/stderr records are `coarse-run-bank.log` and `fine-run-bank.log`.
 `measure.py --merge` combines the two independently banked receipts into
 `results.json` and renders the comparison figure.
+
+## Recovery test lanes
+
+`tests/test_solovev_recovery_gates.py` is the registered harness. Its default
+lane cold-builds a 136-cell carrier from the same closed-form construction,
+evaluates the production map exactly once, and pins the resulting forcing,
+fixed-point residual, convergence rule, and gauge provenance. On the measured
+CPU lane this takes about 35 seconds and the forcing remains at binary64
+round-off.
+
+The coarse and fine carriers, their serialized recovery receipts, tangent
+responses, and complete locked-bound registry are marked `slow`. Select them
+explicitly with:
+
+```bash
+JAX_PLATFORMS=cpu pytest -m slow tests/test_solovev_recovery_gates.py
+```

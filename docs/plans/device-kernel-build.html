@@ -21,10 +21,10 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="7">
-<meta name="plan-commits" content="489197aa,9229dc53,25aede7d,d0b14cbf,bedf6c67,eae4c863,3e32f08c,2173eb46">
+<meta name="plan-version" content="8">
+<meta name="plan-commits" content="489197aa,9229dc53,25aede7d,d0b14cbf,bedf6c67,eae4c863,3e32f08c,2173eb46,3067dc08,7578c8b6,e1a441f6">
 <meta name="plan-artifacts" content="scripts/device_kernel_reuse/reuse-report.md,scripts/device_kernel_port/receipt.json,scripts/device_kernel_port/receipt.md,scripts/device_kernel_port/reduction-diagnosis.json,scripts/device_kernel_port/arbitrary-precision-oracle.json,docs/evidence/archive/device-kernel-build-landed.html">
-<meta name="plan-impl" content="0.6">
+<meta name="plan-impl" content="0.65">
 </head>
 <body>
   <main class="plan-doc">
@@ -232,6 +232,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260821T1710-filament-ruling" data-who="reckon-ship" data-when="2026-08-21T17:10:00+00:00">
     <div class="r-comment-body">OWNER RULING 2026-08-21 (live): no filament solutions in default workflows - the merged _conditioned_uniform_section rule violates the locked exact-Urankar-everywhere default by substituting a centroid-filament limit for vanishing-area far-field sections. Decision far-field-section-fidelity locked; corrective node dispatched to replace the rule in place with an exact-finite-section reconditioning (algebraic reformulation / compensated fp64 of the per-edge antiderivatives), re-verified against the 1024-rung oracle and the unchanged cross-device receipt.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260821T1835-paired-extension" data-who="reckon-ship" data-when="2026-08-21T18:35:00+00:00">
+    <div class="r-comment-body">double-double-primitives landed - commits 7578c8b6/e1a441f6, merged b4fb718c; gate FAILED honestly at the full-column oracle bar, with the compliance half DELIVERED: the centroid-filament branch is gone from the default path (grep-verified) per the locked far-field-section-fidelity ruling, and one shared paired-fp64 rule now carries the complete elliptic descent, harmonic/pole moment recurrences, root/arcsinh/arctangent contractions, residual quadrature, endpoint differencing, contour accumulation, and the full range-function assembly (product, total, scaling, harmonic conversion, exact endpoints, denominator factorisation, pole deflation). MEASURED: source-self target 2.187e-5 PASSES the 8.04e-5 gate (banked pre-repair 4.63e-3); the full 551-target column improves 38.3% to max relative 1.976e-3 but ONE far target (525) remains 24.6x over gate - max ABSOLUTE only 1.49e-9, median 3.3e-10, so the practical weight of that relative miss is an owner-review question. No third pairing layer per the stop rule. Continuation far-contour-localization builds the per-edge/per-primitive 100-digit receipt for target 525, naming the first stage that discards the low parts and whether extension or analytic reformulation recovers it. Receipt: scripts/device_kernel_port/paired-primitive-investigation.json.</div>
 </div>
 </section>
 </main>

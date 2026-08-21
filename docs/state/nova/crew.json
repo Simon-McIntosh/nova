@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T17:53:14",
+  "updated": "2026-08-21T18:07:58",
   "project": "nova",
   "doc": "crew",
   "data": {
@@ -17105,9 +17105,198 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T145840613544-retirement-slowdown-repair",
+        "plan": "flux-function-forward-transport",
+        "section": "\u00a78",
+        "node": "retirement-slowdown-repair",
+        "role": "implement",
+        "member": "transport-facade",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T14:58:45Z",
+        "completed_at": "2026-08-21T15:55:42Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3417,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3417,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "23d98097d69a2d87400f71811260c88bf18a81b5",
+        "commits": [
+          "5ce7dbe5"
+        ],
+        "changed_lines": {
+          "added": 9,
+          "removed": 1,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "the diagnosis node delivered everything but the mechanical batches: migration acquitted at 1.0208x isolated wall ratio with identical 66/45 compile/trace counts, environment acquitted by the idle-node stall, the real mechanism localized with py-spy as sequence-dependent compile accumulation, a synchronization hypothesis tested and correctly reverted, and the ownership test fixed at 5ce7dbe5. The two authorized verification batches were not launched because the contract amendment arrived at minute 56 of the 60-minute fence and Batch A alone needs 15 to 17 minutes - the worker stopped rather than knowingly overrun, which is the fence working. Batches go to a fresh test node",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T145840613544-retirement-slowdown-repair/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a01f49-d28d-76c0-a01f-00215a8049e2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 43694336,
+            "cached_input_tokens_cumulative": 96760064,
+            "input_tokens": 44157621,
+            "input_tokens_cumulative": 98622398,
+            "output_tokens": 38080,
+            "output_tokens_cumulative": 173153,
+            "reasoning_output_tokens": 12635,
+            "reasoning_output_tokens_cumulative": 64781
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260821T155640917369-parity-route-survey",
+        "plan": "efit-forward-parity",
+        "section": "\u00a73",
+        "node": "parity-route-survey",
+        "role": "implement",
+        "member": "forward-slice",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T15:56:45Z",
+        "completed_at": "2026-08-21T16:06:36Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 591,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 591,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "aa61bddd1e9eb33014ae03e8d3564bba2f79637b",
+        "commits": [
+          "6700b088"
+        ],
+        "changed_lines": {
+          "added": 2089,
+          "removed": 4,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T155640917369-parity-route-survey/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a024c1-c68c-70e3-8edf-4bf5cd7f1e5c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5503488,
+            "cached_input_tokens_cumulative": 8992768,
+            "input_tokens": 5790055,
+            "input_tokens_cumulative": 9417525,
+            "output_tokens": 18778,
+            "output_tokens_cumulative": 38032,
+            "reasoning_output_tokens": 7034,
+            "reasoning_output_tokens_cumulative": 14408
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260821T152856253710-double-double-primitives",
+        "plan": "device-kernel-build",
+        "section": "\u00a74",
+        "node": "double-double-primitives",
+        "role": "implement",
+        "member": "kernel-prototype",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T15:29:01Z",
+        "completed_at": "2026-08-21T16:06:14Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2233,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2233,
+        "stalled": false,
+        "time_budget": "60m",
+        "base_sha": "5ac8c2cc8ca8af5130d65d480c7a60e4d080907f",
+        "commits": [
+          "e1a441f6"
+        ],
+        "changed_lines": {
+          "added": 1216,
+          "removed": 143,
+          "files": 10
+        },
+        "tests_added": 0,
+        "gate": "failed",
+        "outcome": "The filament branch is removed from the default path (grep-verified) and one shared paired-fp64 rule carries the primitive contractions plus the full range-function assembly; the source-self target passes the oracle gate at 2.19e-5 and the full column improves 38 percent, but one far target (525) stays 24.6x over the 8.04e-5 gate because a remaining far-contour cancellation still discards low parts upstream. Per the stop rule no third pairing layer was added; the continuation is a per-edge/per-primitive high-precision localization receipt for target 525 before any further implementation.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T152856253710-double-double-primitives/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0247d-26e8-7de2-96ad-893a24e6c3ff",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 22533376,
+            "cached_input_tokens_cumulative": 73849856,
+            "input_tokens": 23132110,
+            "input_tokens_cumulative": 75971298,
+            "output_tokens": 79097,
+            "output_tokens_cumulative": 277072,
+            "reasoning_output_tokens": 24422,
+            "reasoning_output_tokens_cumulative": 93526
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 434
+    "_version": 437
   }
 }

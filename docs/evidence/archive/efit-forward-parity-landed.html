@@ -35,6 +35,29 @@
   continuation ladder. Path audit: zero sensor reads, whitening matrices, least-squares updates.
   Receipt: <code>docs/figures/efit-forward-parity/pinned-parity-slice.json</code>.</p>
 
+  <h2 id="s2-passive-omission">§2–§3 — the solver exonerated, the boundary convicted: the passive/vessel omission</h2>
+
+  <p><strong>Landed 2026-08-21 across seven measurement nodes (commits <code>c3f9f83a</code>,
+  <code>6700b088</code>, <code>783229ac</code>, <code>325f6a85</code>, <code>56b1518b</code>,
+  <code>e4dc6155</code>, <code>d7bf1035</code>); every gate passed on its receipt.</strong>
+  The solver-side hypothesis space was closed by measurement: eight fixed-point routes (fast
+  routes converge on the vacuum root; damped routes hold 0.94–1.15 MA in limit cycles),
+  extended budgets (period-2 stall at residual 0.013, positive-slope plateaus), a two-phase
+  polish (Newton from a 7.7e-3 iterate raises the residual 12.9×), and both anchor modes
+  (prescribed and nova-free both non-convergent). The one-application diagnosis then separated
+  the references — MAST boundary imbalance 3.44% of span peaking 0.77 m <em>outside</em> the
+  LCFS with Picard eigenvalue 1.91, against the converged DINA control at 0.68% and ~1.17 —
+  and the source-group attribution closed the case with 1.1e-15 exactness: at the exterior
+  peak, active conductor response −0.15% of span (the conductor model is sound; the banked
+  decomposition FIT verdict is consistent), <strong>passive/vessel omission −5.79%</strong>
+  (the <code>vertw</code> family −5.12%; stored passive circuits 29/28 leading), plasma
+  difference +1.86% opposing. The forward composition drove 13 of the 101 fitted circuits;
+  the plan's input table specifies all 101. Receipts:
+  <code>docs/figures/efit-forward-parity/pinned-route-survey.json</code>,
+  <code>long-budget-plasma-route.json</code>, <code>two-phase-polish.json</code>,
+  <code>free-anchor-arm.json</code>, <code>mast-dina-composition-diff.json</code>,
+  <code>boundary-imbalance-attribution.json</code> with their figures.</p>
+
   <h2 id="s6-dual-route">§6 — the DINA reference's flux functions by two routes: reliable extraction, and a quantified disagreement neither route may absorb</h2>
 
   <p><strong>Landed 2026-08-21, commit <code>71c1ec36</code> (merge <code>dabbb783</code>); gate

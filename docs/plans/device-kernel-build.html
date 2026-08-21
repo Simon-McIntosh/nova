@@ -21,10 +21,10 @@
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="8">
-<meta name="plan-commits" content="489197aa,9229dc53,25aede7d,d0b14cbf,bedf6c67,eae4c863,3e32f08c,2173eb46,3067dc08,7578c8b6,e1a441f6">
-<meta name="plan-artifacts" content="scripts/device_kernel_reuse/reuse-report.md,scripts/device_kernel_port/receipt.json,scripts/device_kernel_port/receipt.md,scripts/device_kernel_port/reduction-diagnosis.json,scripts/device_kernel_port/arbitrary-precision-oracle.json,docs/evidence/archive/device-kernel-build-landed.html">
-<meta name="plan-impl" content="0.65">
+<meta name="plan-version" content="9">
+<meta name="plan-commits" content="489197aa,9229dc53,25aede7d,d0b14cbf,bedf6c67,eae4c863,3e32f08c,2173eb46,3067dc08,7578c8b6,e1a441f6,38f43c5b,8a71abfb">
+<meta name="plan-artifacts" content="scripts/device_kernel_reuse/reuse-report.md,scripts/device_kernel_port/receipt.json,scripts/device_kernel_port/receipt.md,scripts/device_kernel_port/reduction-diagnosis.json,scripts/device_kernel_port/arbitrary-precision-oracle.json,scripts/device_kernel_port/paired-primitive-investigation.json,scripts/device_kernel_port/far-contour-localization.json,docs/evidence/archive/device-kernel-build-landed.html">
+<meta name="plan-impl" content="0.7">
 </head>
 <body>
   <main class="plan-doc">
@@ -235,6 +235,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260821T1835-paired-extension" data-who="reckon-ship" data-when="2026-08-21T18:35:00+00:00">
     <div class="r-comment-body">double-double-primitives landed - commits 7578c8b6/e1a441f6, merged b4fb718c; gate FAILED honestly at the full-column oracle bar, with the compliance half DELIVERED: the centroid-filament branch is gone from the default path (grep-verified) per the locked far-field-section-fidelity ruling, and one shared paired-fp64 rule now carries the complete elliptic descent, harmonic/pole moment recurrences, root/arcsinh/arctangent contractions, residual quadrature, endpoint differencing, contour accumulation, and the full range-function assembly (product, total, scaling, harmonic conversion, exact endpoints, denominator factorisation, pole deflation). MEASURED: source-self target 2.187e-5 PASSES the 8.04e-5 gate (banked pre-repair 4.63e-3); the full 551-target column improves 38.3% to max relative 1.976e-3 but ONE far target (525) remains 24.6x over gate - max ABSOLUTE only 1.49e-9, median 3.3e-10, so the practical weight of that relative miss is an owner-review question. No third pairing layer per the stop rule. Continuation far-contour-localization builds the per-edge/per-primitive 100-digit receipt for target 525, naming the first stage that discards the low parts and whether extension or analytic reformulation recovers it. Receipt: scripts/device_kernel_port/paired-primitive-investigation.json.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260821T1925-far-contour-verdict" data-who="reckon-ship" data-when="2026-08-21T19:25:00+00:00">
+    <div class="r-comment-body">far-contour-localization landed - commits 38f43c5b/8a71abfb, merged 21ba80f7; gate PASSED; the receipt is definitive. All 90 primitive records, every range coefficient, every endpoint and every single edge difference sit at 1e-9-class relative or better against the 100-digit values (edge differences 4.6e-9/6.0e-11/8.9e-11); the 8.04e-5 breach appears ONLY when edge 2 closes the contour (partial sum jumps 1.56e-10 to 1.976e-3), with endpoint-to-contour condition number 5.43e12. Existing paired lows supply 7.0% of the normalized miss while the fp64 endpoint-scale closed-loop roundoff estimate covers 61% (within 1.64x of observed). VERDICT: no additional pairing layer can recover the value - the exact finite-section closed loop must be analytically reformulated so vertex-only endpoint antiderivative components cancel symbolically (they telescope to exactly zero around a closed contour) before fp64 evaluation. Oracle cross-check 5.0e-13. Continuation node closed-loop-reformulation implements it under the locked exact-finite-section ruling. Receipt: scripts/device_kernel_port/far-contour-localization.json.</div>
 </div>
 </section>
 </main>

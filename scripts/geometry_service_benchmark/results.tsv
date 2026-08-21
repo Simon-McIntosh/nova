@@ -1,0 +1,2 @@
+route	device	execution	batch_size	map_shape	timing	repetitions	median_total_seconds	median_per_map_seconds	minimum_total_seconds	maximum_total_seconds	source_revision	backend	device_model	slurm_job_id	status	detail
+service	H200	jit	1	129x129	unavailable	0					936053e20921a8c37dff7eddb2a385152f46b253	cuda	NVIDIA H200	1252994	unavailable	srun: fatal: gpus-per-task is mutually exclusive with tres-per-task

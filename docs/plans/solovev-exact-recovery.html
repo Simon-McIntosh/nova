@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="solovev-exact-recovery">
   <meta name="plan-title" content="Solov&#x27;ev Exact Recovery — correct first, then fast">
   <meta name="plan-summary" content="Recover the analytic Solov&#x27;ev equilibrium as the fixed oracle: Urankar-exact section kernels everywhere by default, hexagon sections with no rectangle fallback, the cell-moment coupling wired correctly end to end, pre-registered agreement gates that all downstream progress rides on, and a benchmarked accuracy-cost ladder targeting a converged Newton fixed point in about one millisecond on GPU">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="6.0">
   <meta name="plan-capability-version" content="1.0">
@@ -24,10 +24,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="22">
-<meta name="plan-commits" content="eed42e520d5f544f50cdb7485cffc74249f47037,0687526990e67eee5777310a71ad60588ca7736e,0e98afcb9960247313ea955822481983d63a7fd0,27fd5f364c4bb6fa89e5042ee0c190990f965be9,0e21b3997f841be1bf5a79c8b8772619f55c2fd2,5189b08e77dc994c13ebfbf40c4fcb5e29a03f2d,10642e611aa44c805c9cc430048131826448bce8,fcee050f1cd6dd6417587997e599066abc0756e8,74635b0ae61547229228e64e74599f86c3e9c358,0bed363d0e179fed1d4d265c6dee1998c32aa77f,0c36bf9667a3408494c67e1337b559771ba70c23,50a1b0d868b04fd86a886bbd6138452ea3a0e498,04c61de0814fb9fd984bf56e9d1a0205b951535d,c3ff6142f599cb2fc6112f03c8117b2eac21646d,5d282612b79c677be76a76a841edefb8cdd1d1e1,82f1a29a3225d1f903667f7694419ce50d6b6a94">
-<meta name="plan-artifacts" content="docs/evidence/archive/solovev-exact-recovery-landed.html,docs/figures/solovev-exact-recovery/map-forcing-decomposition.png,docs/figures/solovev-exact-recovery/forcing-residual-decomposition.png,scripts/map_forcing_attribution/results.json,scripts/forcing_residual_decomposition/results.json,scripts/build_cache_audit/results.json,scripts/build_cache_audit/measurements-coarse.json,scripts/build_cache_audit/measurements-fine.json">
-<meta name="plan-impl" content="0.95">
+<meta name="plan-version" content="25">
+<meta name="plan-commits" content="eed42e520d5f544f50cdb7485cffc74249f47037,0687526990e67eee5777310a71ad60588ca7736e,0e98afcb9960247313ea955822481983d63a7fd0,27fd5f364c4bb6fa89e5042ee0c190990f965be9,0e21b3997f841be1bf5a79c8b8772619f55c2fd2,5189b08e77dc994c13ebfbf40c4fcb5e29a03f2d,10642e611aa44c805c9cc430048131826448bce8,fcee050f1cd6dd6417587997e599066abc0756e8,74635b0ae61547229228e64e74599f86c3e9c358,0bed363d0e179fed1d4d265c6dee1998c32aa77f,0c36bf9667a3408494c67e1337b559771ba70c23,50a1b0d868b04fd86a886bbd6138452ea3a0e498,04c61de0814fb9fd984bf56e9d1a0205b951535d,c3ff6142f599cb2fc6112f03c8117b2eac21646d,5d282612b79c677be76a76a841edefb8cdd1d1e1,82f1a29a3225d1f903667f7694419ce50d6b6a94,9fffa5ba4fec240428f9d4d7939e11ded53dae16">
+<meta name="plan-artifacts" content="docs/evidence/archive/solovev-exact-recovery-landed.html,docs/figures/solovev-exact-recovery/map-forcing-decomposition.png,docs/figures/solovev-exact-recovery/forcing-residual-decomposition.png,scripts/map_forcing_attribution/results.json,scripts/forcing_residual_decomposition/results.json,scripts/build_cache_audit/results.json,scripts/build_cache_audit/measurements-coarse.json,scripts/build_cache_audit/measurements-fine.json,tests/test_solovev_recovery_gates.py,scripts/analytic_oracle_fixtures/reduced_oracle.py">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -125,56 +125,38 @@
         <a href="/nova/evidence/archive/solovev-exact-recovery-landed#moment-route-adoption">adoption</a>.
       </p>
     </section>
-    <h2 id="s4">§4 — The Solov'ev recovery gates: develop, pre-register, and gate everything on them</h2>
+    <section id="s4" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-21</span>
+        <h2>§4 — The Solov'ev recovery gates: develop, pre-register, and gate everything on them</h2>
+      </header>
+      <p class="landed-summary">
+        The registered harness enforces the owner-locked bounds two-tier: a reduced 136-cell
+        closed-form oracle in the always-on lane (2 passed, 45.44 s; standing forcing 4.44e-15 Wb
+        against the 1e-13 sentry; fixed-point residual 3.22e-15 against 1e-12) and the full
+        warm-cached carriers in the slow lane (6 passed; all 14 locked bounds byte-for-value;
+        size-independent convergence clauses; gauge provenance asserted). Full record:
+        <a href="/nova/evidence/archive/solovev-exact-recovery-landed#gate-packaging">§4 landed</a>
+        (commits <code>0bed363d</code>, <code>9fffa5ba</code>).
+      </p>
+    </section>
 
-    <p><strong>Locked (oracle-authority).</strong> The analytic Solov'ev solution is the fixed
-    oracle. This section develops the agreement gate set that all further forward-model progress
-    rides on — efit-forward-parity and everything behind it wait behind these gates by DAG
-    dependency, not by convention. The gates are pre-registered from measured floors before the
-    §2/§3 repairs are scored against them, in the tradition of final-current-gate: each gate
-    names the quantity, the reference, the bound, and the measured basis for the bound.</p>
-
-    <p><em>Done-when:</em> (a) a registered gate set covers, at minimum: root flux deviation
-    (sup and RMS of span), axis and X-point position, plasma current, poloidal beta, internal
-    inductance, the field integral, GS residual, divergence pins, topology class, and the
-    fixed-point residual — each against the analytic oracle with the reference evaluation
-    (raster or closed form) and its own quadrature error stated; (b) every gate carries a
-    <em>convergence clause</em>: deviations must fall under refinement with no h-independent
-    floor above the stated representation and reference bounds — a flat deviation under
-    refinement fails the gate whatever its magnitude, because a constant is a defect by the
-    oracle-authority ruling; (c) the bounds lock with the owner after the §3 conviction evidence
-    is in, so they are set from understood mechanisms rather than inherited numbers; (d) the gate
-    harness runs as one command banked in the test lane, so any future change to kernels,
-    representation, or solver re-scores the full set without bespoke work; (e) the DAG carries
-    the gate: efit-forward-parity depends on this plan.</p>
-
-    <h2 id="s5">§5 — The benchmarked accuracy–cost ladder: correct, then fast</h2>
-
-    <p><strong>Locked (runtime-target).</strong> Solutions must be correct and they must be fast
-    at runtime. The target: a converged Newton-Krylov — or Newton-only, if the exact tangent at
-    these scales makes the Krylov loop unnecessary — free-boundary fixed point in
-    <strong>≈1 ms on GPU</strong>. Build cost is a separate axis: the design-matrix construction
-    (coupling blocks, moment companions, clip geometry carriers) must be reasonable on CPU and on
-    GPU, measured, because §2's exact kernels move work into the build where it belongs — and
-    that trade is only sound if it is priced.</p>
-
-    <p><em>Done-when:</em> (a) a ladder of configurations spanning the accuracy axis (kernel
-    exactness, section fidelity, moment order, density degree, mesh resolution) is benchmarked on
-    both axes — Solov'ev gate margins from §4 on one side, build time (CPU and GPU) and per-solve
-    time (GPU; jit-compiled, fixed-shape, batch-1 and batched) on the other — so the cost of
-    every increment of accuracy is a number, not a belief; (b) the solve benchmark reports the
-    converged-fixed-point wall time per state against the ≈1 ms target, with the iteration
-    count, tolerance, and device stated, and the batch-throughput figure beside it for the
-    catalog use case; (c) the recommended production operating point is stated with its gate
-    margins and its costs, and locked with the owner; (d) results and figures are banked in the
-    cumulative evidence with the benchmark harness committed so the ladder re-runs on any future
-    change; (e) <strong>owner directive 2026-08-20: any benchmark that comes up slow ships with a
-    profile, not just a number</strong> — build times decompose by stage (kernel family, section
-    shape, moment order, assembly), and solve times decompose by phase (map evaluation, Krylov
-    inner loop, tangent, dispatch/launch overhead and host-device transfer), read from traced
-    profiles and HLO structure rather than guessed — on-device scan iterations carry a fixed
-    per-step launch cost regardless of body, so trip counts are read from the compiled HLO — so
-    every slow figure arrives with the named region where acceleration would land.</p>
+    <section id="s5" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-21</span>
+        <h2>§5 — The benchmarked accuracy–cost ladder: correct, then fast</h2>
+      </header>
+      <p class="landed-summary">
+        Ladder measured and the operating point locked by owner ruling: the faithful moment route
+        (per-iteration moments 7.38 ms CPU, 0.365× the fit route; H200 ≈0.30 ms) on exact kernels
+        and hexagon sections; builds are 97.2–99.0% portable kernel work (294.2/778.0 s cold,
+        0.27/0.82 s warm); H200 converged solves 198.5 ms batch-1 → 30.2 ms batch-16 with the
+        Krylov loop owning twenty of every twenty-one milliseconds — the ≈1 ms target is
+        iteration economy × batch amortisation, never kernel truncation. Full record:
+        <a href="/nova/evidence/archive/solovev-exact-recovery-landed#accuracy-cost-ladder">§5 landed</a>
+        (commit <code>0c36bf96</code>).
+      </p>
+    </section>
 
     <section id="s6" class="section-landed">
       <header>
@@ -243,7 +225,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-ser-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-08-20" data-recommends-skill="/reckon-ship solovev-exact-recovery" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ser-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-08-20" data-recommends-skill="/reckon-ship solovev-exact-recovery" data-resolved-at="2026-08-21T10:43:35+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Execute the recovery: defaults, wiring conviction, gates, ladder</h4>
     <div class="r-fu-body"><p>All four framing decisions are owner-locked at creation. §2
         (exact defaults + hex enforcement) and §3 (wiring audit + forcing decomposition) are
@@ -252,11 +234,13 @@
         boundary-ring merge (main 3b3122fa) is the substrate; the serialized terminal roots and
         the variant machinery from the decomposition ladder are the measurement inputs.</p></div>
     <pre class="r-fu-prompt">/reckon-ship solovev-exact-recovery</pre>
+    <p class="r-fu-outcome">done - the recovery executed end to end: exact kernel defaults and hexagon enforcement (10642e61), the wiring conviction closed on the normalization constant with the true closed-form oracle standing (map exact at the analytic state to 4.6e-15 Wb), the faithful moment route adopted by pre-registered rule (82f1a29a), gates locked at round-off floors, ladder benchmarked.</p>
     </article>
-<article class="r-fu" data-id="f-ser-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-21" data-recommends-skill="/reckon-ship solovev-exact-recovery §4" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ser-002" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-21" data-recommends-skill="/reckon-ship solovev-exact-recovery §4" data-resolved-at="2026-08-21T10:43:35+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Package the locked gates and record the operating point</h4>
     <div class="r-fu-body"><p>All bounds are owner-locked (recovery-gate-bounds). One node remains: commit the locked bounds into tests/test_solovev_recovery_gates.py, author the reduced seconds-class closed-form fixture pin for the always-on lane (same construction, ~100-150 cells, forcing at round-off by construction), keep the full warm-cached fixtures in the slow lane, and record the section-5 operating point (faithful moment route at the measured ladder costs) in the plan. The plan ships when this lands.</p></div>
     <pre class="r-fu-prompt">/reckon-ship solovev-exact-recovery §4</pre>
+    <p class="r-fu-outcome">done - recovery-gate-packaging landed (9fffa5ba, merged 36fb4b58): two-tier harness green (2 passed default lane 45.44 s on the reduced 136-cell oracle, 6 passed slow lane pinning all 14 locked bounds byte-for-value), operating point recorded (faithful moment route; 1 ms via iteration economy times batching). Continuation: efit-forward-parity and dual-basin-solve (S8) consume the locked gates; no followup owed by this plan.</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -310,6 +294,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260821T1140" data-who="reckon-ship" data-when="2026-08-21T11:40:00+00:00">
     <div class="r-comment-body">OWNER INTERVIEW 2026-08-21, rulings affecting this plan: (1) the recovery gate bounds LOCK as proposed (decision recovery-gate-bounds) - the remaining executable node is the section-4/5 packaging: commit the locked bounds into the registered harness, author the reduced always-on closed-form fixture pin, and record the section-5 operating point (the faithful moment route at the ladder's measured costs, with the 1 ms route being iteration economy times batching); (2) the basin/solve-economics work is commissioned as its own plan, dual-basin-solve (S8), carrying the owner's imas-efit strategy - solve both basins where they exist, hysteresis selection, topology-pinned branches; (3) S7 closes deterministically - this plan ships when the packaging node lands, and the sprint keeps only the well-specified remainder.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260821T1050" data-who="reckon-ship" data-when="2026-08-21T10:50:00+00:00">
+    <div class="r-comment-body">recovery-gate-packaging landed - commit 9fffa5ba, merged 36fb4b58; gate PASSED; worker 694 s. THE PLAN SHIPS ON THIS NODE. Two-tier harness green: always-on lane cold-builds the reduced 136-cell closed-form oracle in 34.99 s (pytest body 45.44 s, 2 passed) with exactly one map evaluation, standing forcing 4.440892e-15 Wb = 22.5x below the locked 1e-13 sentry, fixed-point residual 3.222e-15 = 310x below the locked 1e-12 bound, and a size-independent convergence clause rejecting a flat 1e-16 excess on its own; slow lane 6 passed in 51.12 s pinning all 14 locked registry bounds byte-for-value on the warm-cached coarse/fine carriers with the round-off floors (3.830269e-15 / 4.440892e-15 Wb) and the 1e-10 m tangent-axis sentries. Gauge provenance asserted: every anchor from its own field, no reference-gauge constant. Section-5 operating point recorded per the owner ruling: faithful moment route at measured ladder costs (7.38 ms CPU per-iteration moments, 0.365x fit; builds 97-99% portable kernel work; 1 ms GPU route = iteration economy x batch amortisation, the Krylov loop owning 20/21 ms). Record: /nova/evidence/archive/solovev-exact-recovery-landed#gate-packaging.</div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20260821T0125" data-who="reckon-ship" data-when="2026-08-21T01:25:00+00:00">
     <div class="r-comment-body">accuracy-cost-ladder landed - commit 0c36bf96, merged ce482a73; gate PASSED (one environment incident en route: the worker synced the shared venv, stripping optional extras; the orchestrator restored all declared extras and the resumed run consumed the environment strictly read-only). MEASURED: cold oracle builds 294.2/778.0 s with exact polygon kernel+moment work at 97.2/99.0 percent - the device-kernel-build target confirmed; H200 converged solve 198.5 ms/state batch-1, 56.3 batch-4, 30.2 batch-16 (fine batch-1 257.4); phase medians map 1.12/1.38 ms, tangent 1.49/1.66 ms, one Newton step inclusive of its 30-GMRES Krylov loop 20.6/24.1 ms, launch 0.071 ms - the ten-step projection closes to 1.04/0.94 of the measured solves and StableHLO receipts confirm the 10/30 loop bounds independently. VERDICT AGAINST THE 1 MS TARGET: missed 198x/30x, and the attribution is unambiguous - the map is already at the target and the Krylov loop owns twenty of every twenty-one milliseconds, so the route is iteration economy (warm-seeded few-step Newton, the catalog adjacent-slice regime) times batch amortization, not faster physics. Centroid rung rejected non-finite. The section-5 operating-point lock joins the owner package beside the section-4 bound lock and the basin routing.</div>

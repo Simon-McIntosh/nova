@@ -401,6 +401,31 @@
   <code>~/.local/share/nova/0.11.0/solovev_hex_machine.zarr</code> (149 MiB, shared across
   worktrees). Full record: <code>scripts/build_cache_audit/README.md</code>.</p>
 
+  <h2 id="gate-packaging">§4/§5 (packaging) — the locked gates run two-tier, and the operating point is recorded</h2>
+
+  <p><strong>Landed 2026-08-21, commit <code>9fffa5ba</code> (merge <code>36fb4b58</code>); gate
+  PASSED.</strong> The registered harness <code>tests/test_solovev_recovery_gates.py</code> now
+  enforces the owner-locked bounds (decision <code>recovery-gate-bounds</code>) in two lanes. The
+  always-on lane cold-builds a reduced closed-form oracle of the same construction —
+  <code>scripts/analytic_oracle_fixtures/reduced_oracle.py</code>, 136 realised cells, exactly one
+  map evaluation — in 34.99 s (pytest body 45.44 s, 2 passed): standing forcing
+  4.440892e-15 Wb, 22.5× below the locked 1e-13 Wb sentry; fixed-point residual 3.222e-15,
+  310× below the locked 1e-12 bound; a flat 1e-16 excess is rejected independently of the
+  absolute bound (the convergence clause is size-independent by construction). The slow lane
+  (6 passed, 51.12 s) pins all 14 locked registry bounds byte-for-value on the full warm-cached
+  coarse/fine carriers with the round-off forcing floors (3.830269e-15 / 4.440892e-15 Wb) and
+  the ≤1e-10 m tangent-axis sentries. Raw flux uses the shared exact exterior; every
+  normalisation anchor comes from its own field — no reference-gauge constant enters.</p>
+
+  <p><strong>Operating point (owner ruling 2026-08-21, §5 closure):</strong> the production
+  route is the faithful moment route at the ladder's measured costs — per-iteration moments
+  7.38 ms CPU (0.365× the fit route; H200 estimate 0.30 ms), exact Part V kernels and hexagon
+  sections throughout, builds 97.2–99.0% portable kernel work (294.2/778.0 s cold, warm
+  semantic-cache loads 0.27/0.82 s). The ≈1 ms GPU fixed-point target is reached through
+  iteration economy times batch amortisation — the map already sits at 1.12–1.38 ms and the
+  Krylov loop owns twenty of every twenty-one milliseconds (199 ms batch-1 → 30 ms batch-16
+  converged solves) — never through kernel truncation.</p>
+
 </main>
 </body>
 </html>

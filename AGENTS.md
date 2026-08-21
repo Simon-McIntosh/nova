@@ -83,6 +83,17 @@ Nova caches expensive calculations as netCDF files. Key classes:
 - `nova.database.netcdf.netCDF`: xarray dataset storage with groups
 - `nova.database.filepath.FilePath`: Cross-platform path management with fsspec/appdirs
 
+## Coupled Repositories
+
+Prior-art scouts (reckon-ship §1b) search these repos in both directions
+before authoring new machinery here, and their sessions search nova likewise:
+
+- **imas-ambix** (`~/Code/imas-ambix`) — the flux-function seam, challenge
+  corpus and COCOS conventions; ambix consumes Nova's forwards and conditions
+  their inputs.
+- **reckon** (`~/Code/reckon`) — plan/crew infrastructure this repo's
+  docs/state tooling is built on.
+
 ## Agent Workflows
 
 ### Committing Changes

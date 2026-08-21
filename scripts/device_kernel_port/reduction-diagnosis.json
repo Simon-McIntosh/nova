@@ -1,0 +1,28 @@
+{
+  "byte_identical_fraction": 0.014337897437755475,
+  "failed_element_count": 547,
+  "failure_tolerance": 1.9492449065353802e-14,
+  "mechanism": "device-level differences inside each closed-form edge are amplified by the inverse area normalization of one vanishing-area section",
+  "nonzero_failure_source_count": 1,
+  "worst_source": {
+    "column": 184,
+    "failed_element_count": 547,
+    "gpu_cpu_max_absolute_difference": 3.85132784815211e-09,
+    "norm": 284042.9350505185,
+    "vertex_count": 3,
+    "vertices": [
+      [
+        1.0277397772132568,
+        -0.34842545108603495
+      ],
+      [
+        1.0277388870573516,
+        -0.3484269928812895
+      ],
+      [
+        1.0277369077599123,
+        -0.34842048104705237
+      ]
+    ]
+  }
+}

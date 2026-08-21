@@ -86477,11 +86477,11 @@
     "backend": "cpu",
     "byte_count": 2428808,
     "compile_count": 1,
-    "compile_seconds": 7.867392836138606,
+    "compile_seconds": 7.5909963715821505,
     "device_kind": "cpu",
-    "end_to_end_pairs_per_second": 12339.01289161638,
-    "end_to_end_seconds": 24.604966593906283,
-    "first_transfer_seconds": 0.0006047971546649933,
+    "end_to_end_pairs_per_second": 12358.67794971895,
+    "end_to_end_seconds": 24.565815310925245,
+    "first_transfer_seconds": 0.0005096700042486191,
     "fixed_shape": {
       "edge_count": 11,
       "pair_block": 1024,
@@ -86491,8 +86491,8 @@
     "hostname": "98dci4-clu-3141.iter.org",
     "jax_enable_x64": true,
     "jax_version": "0.11.0",
-    "kernel_pairs_per_second": 12478.957670140599,
-    "kernel_seconds": 24.32903516665101,
+    "kernel_pairs_per_second": 12501.203388781189,
+    "kernel_seconds": 24.285741984844208,
     "matrix_sha256": "af1f5cc6a7dce698df575dcac7778c23fc26cdd1512d5742a9fb5e282e0e8a05",
     "matrix_shape": [
       551,
@@ -86502,12 +86502,12 @@
     "platform": "Linux-5.14.0-284.25.1.el9_2.x86_64-x86_64-with-glibc2.34",
     "residual_nodes": 128,
     "tile_count": 324,
-    "warm_seconds": 0.07329954765737057
+    "warm_seconds": 0.07370172627270222
   },
   "fine_projection": {
     "block_count": 9,
     "fine_pair_evaluations": 13079856,
-    "projected_seconds": 11.475397464378412,
+    "projected_seconds": 13.672223681214632,
     "projected_under_two_minutes": true,
     "rule": "coarse G0 kernel pairs per second applied linearly to three flux orders over fine grid, wall, and sample target families",
     "source_count": 1076,
@@ -86523,11 +86523,11 @@
     "backend": "gpu",
     "byte_count": 2428808,
     "compile_count": 1,
-    "compile_seconds": 12.362918056547642,
+    "compile_seconds": 12.086474885232747,
     "device_kind": "NVIDIA H200 NVL",
-    "end_to_end_pairs_per_second": 497638.2853860646,
-    "end_to_end_seconds": 0.6100836871191859,
-    "first_transfer_seconds": 0.0008009476587176323,
+    "end_to_end_pairs_per_second": 429682.512044274,
+    "end_to_end_seconds": 0.7065705293789506,
+    "first_transfer_seconds": 0.0010300520807504654,
     "fixed_shape": {
       "edge_count": 11,
       "pair_block": 1024,
@@ -86537,8 +86537,8 @@
     "hostname": "98dci4-gpu-0003.iter.org",
     "jax_enable_x64": true,
     "jax_version": "0.11.0",
-    "kernel_pairs_per_second": 1139817.2516988714,
-    "kernel_seconds": 0.2663593655452132,
+    "kernel_pairs_per_second": 956673.6402924322,
+    "kernel_seconds": 0.3173506483435631,
     "matrix_sha256": "63caba8df0ed4693bc54cd5394dcc18fcb98a2f8210bb197b4bec94f1266d39c",
     "matrix_shape": [
       551,
@@ -86548,50 +86548,50 @@
     "platform": "Linux-6.12.0-124.11.1.el10_1.x86_64-x86_64-with-glibc2.39",
     "residual_nodes": 128,
     "tile_count": 324,
-    "warm_seconds": 0.004837699234485626
+    "warm_seconds": 0.004919273778796196
   },
   "numpy": {
     "banked_grid_family_seconds_all_three_flux_orders": 76.67684297636151,
     "measured_uniform_g0": {
       "allclose_atol": 0.0,
       "allclose_rtol": 2e-11,
-      "artifact": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/866e4d84-6f7c-4a80-9e2b-50068f8842c1/kernel-port-prototype/scripts/device_kernel_port/work/coarse-numpy-reference.npy",
+      "artifact": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/866e4d84-6f7c-4a80-9e2b-50068f8842c1/packed-reduction-parity/scripts/device_kernel_port/work/coarse-numpy-reference.npy",
       "byte_identical_fraction": 1.0,
       "hostname": "98dci4-clu-3141.iter.org",
       "matrix_sha256": "a8eaac50ca4f728c90027efff336a3d5cc3b7f355a84c4ebdb7048404616bb68",
       "max_absolute_difference": 0.0,
       "max_relative_difference": 0.0,
       "pair_count": 303601,
-      "pairs_per_second": 5171.904519586796,
+      "pairs_per_second": 5392.155524056805,
       "passed": true,
-      "seconds": 58.70197310298681
+      "seconds": 56.30419943295419
     }
   },
   "port_threshold_inputs": {
-    "cpu_jax_over_numpy_g0": 0.4144500411249912,
+    "cpu_jax_over_numpy_g0": 0.43133091722160327,
     "gpu_cpu_byte_identical_fraction": 0.014337897437755475,
     "gpu_cpu_max_ulp": 36374763089312,
-    "projected_full_fine_seconds": 11.475397464378412
+    "projected_full_fine_seconds": 13.672223681214632
   },
   "production_numpy_path_modified": false,
   "scheduler": {
-    "cpu_job_id": "1252807",
+    "cpu_job_id": "1252820",
     "cpu_partition": "all_debug",
-    "gpu_job_id": "1252808",
+    "gpu_job_id": "1252821",
     "gpu_partition": "betelgeuse",
     "gpu_reservation": "gpu_0003_grpA",
-    "numpy_job_id": "1252804",
+    "numpy_job_id": "1252812",
     "tmpdir_on_nodes": "/tmp"
   },
   "source": {
-    "commit": "daef77e81648e1413707b057848fdaf84372ce80",
-    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/866e4d84-6f7c-4a80-9e2b-50068f8842c1/kernel-port-prototype"
+    "commit": "a4bc284a25c65c9300bb551204b91019f88f96be",
+    "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/nova-a0f1e0938fc2/866e4d84-6f7c-4a80-9e2b-50068f8842c1/packed-reduction-parity"
   },
   "verdict": {
     "full_port_authorised_by_receipt": false,
     "numerical_parity": "HOLD",
     "numerical_reason": "the GPU-to-CPU ULP distribution is not close to byte-identical: median=2550, p99=622673, max=36374763089312, and byte-identical fraction=0.0143378974",
     "performance_projection": "PASS",
-    "performance_reason": "the measured linear projection is 11.4753975 seconds, below two minutes"
+    "performance_reason": "the measured linear projection is 13.6722237 seconds, below two minutes"
   }
 }

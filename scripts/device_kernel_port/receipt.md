@@ -2,7 +2,7 @@
 
 ## Outcome
 
-The fp64 packed closed-form G0 evaluator processed 303,601 coarse-fixture pairs on NVIDIA H200 NVL at 1,139,817.252 pairs/s (0.266359 s kernel wall). The measured rate projects the complete nine-block fine fixture to 11.475397 s (0.191257 min).
+The fp64 packed closed-form G0 evaluator processed 303,601 coarse-fixture pairs on NVIDIA H200 NVL at 956,673.640 pairs/s (0.317351 s kernel wall). The measured rate projects the complete nine-block fine fixture to 13.672224 s (0.227870 min).
 
 The performance projection passes the two-minute input, but the numerical parity input is a **HOLD**. This receipt does not authorise the full port.
 
@@ -14,7 +14,7 @@ Against the production NumPy-built G0 reference, the device block's maximum abso
 
 ## CPU lane
 
-The same compiled fp64 graph took 24.329035 s on CPU, while the independently timed production NumPy uniform-G0 path took 58.701973 s (ratio 0.414450x). The banked current NumPy grid-family stage for all three flux orders is 76.676843 s.
+The same compiled fp64 graph took 24.285742 s on CPU, while the independently timed production NumPy uniform-G0 path took 56.304199 s (ratio 0.431331x). The banked current NumPy grid-family stage for all three flux orders is 76.676843 s.
 
 ## Method and boundary
 

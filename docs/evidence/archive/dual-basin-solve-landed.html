@@ -104,6 +104,24 @@
   prior receipt. Receipt: <code>scripts/dual_basin_fixtures/diverted-receipt.json</code>;
   figure: the three-panel classification image above (updated in place).</p>
 
+  <h2 id="s2-two-class-partial">§2 — two-class recovery: the limited half lands, the diverted basin stays open</h2>
+
+  <p><strong>Landed 2026-08-21, commit <code>87ed6fdf</code> (merge <code>090cc20e</code>); gate
+  FAILED honestly on the diverted half.</strong> Green and committed: both banked limited roots
+  recover from the unchanged production cold seed with exact seed equality and 1e-10
+  residual/root-parity floors; the per-class <code>ForwardColdSeedReceipt</code> /
+  <code>ForwardColdSeedPortfolio</code> machinery lands (seed shape (2, 4052), outer-vmapped
+  portfolio flux (2, 2, 4052)); the diverted cold seed is derived only from the declared axis
+  and saddle anchors with <code>stored_flux_samples_used=false</code> in its receipt. Not met:
+  that plan-declared geometry seed enters a class-consistent diverted solve but terminates at
+  saddle [1.613, −0.031] m against the fixture saddle [1.160, −0.503] m — 0.655 m away — with
+  the residual oscillating 0.029–0.444 over the fixed 10-step Newton budget. Two seed
+  constructions failed the same way (current-centroid disc, then declared-geometry disc), so
+  the open question is prior to seed design: whether the banked diverted fixture is itself a
+  machine-precision fixed point of the composed forward map. The limited roots carry 2.5e-15
+  receipts; the diverted fixture has none — <code>diverted-root-qualification</code> measures
+  exactly that before any continuation-ladder design.</p>
+
   <h2 id="s3-selector">§3 — the hysteresis selector</h2>
 
   <p><strong>Landed 2026-08-21, commit <code>f53ddc39</code> (merge <code>fcf45671</code>); gate

@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-commits" content="4a4cf70f,46c55d1d,1d795411,f53ddc39,e3e55311">
+<meta name="plan-commits" content="4a4cf70f,46c55d1d,1d795411,f53ddc39,e3e55311,87ed6fdf">
 <meta name="plan-artifacts" content="scripts/dual_basin_reuse/reuse-report.md,scripts/dual_basin_fixtures/topology-classification.json,scripts/dual_basin_fixtures/topology-classification.md,scripts/dual_basin_fixtures/diverted-receipt.json,scripts/dual_basin_fixtures/diverted-state.npz,docs/figures/dual-basin-solve/topology-classification.png,docs/evidence/archive/dual-basin-solve-landed.html">
 <meta name="plan-impl" content="0.71">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="9">
 </head>
 <body>
   <main class="plan-doc">
@@ -151,6 +151,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260821T1425-diverted-fixture" data-who="reckon-ship" data-when="2026-08-21T14:25:00+00:00">
     <div class="r-comment-body">diverted-oracle-fixture landed - commit e3e55311, merged 3823cac7; gate PASSED. An exact static Solovev polynomial (Delta-star(Phi)=8aR^2+2b) whose flux carries one finite in-domain X-point: the production locator selects the saddle as boundary at [1.15950, -0.50316] m against the analytic saddle [1.15776, -0.50448] m (localization error 2.18 mm), Hessian eigenvalues [-2.8566, +0.1843] Wb/m^2, boundary-minus-wall flux -4.303e-4 Wb, inside-wall clearance 69.5 mm; all three stored arrays SHA-256 pinned (state 1e6e1043). Construction consumes no topology label. The five-read classification vector is [limited x4, diverted]: the bank now evidences both classes without relabeling any receipt, and the original closed-form/alternate roots remain limited. The two-class recovery acceptance is dispatched as the closing section-2 node. Record: /nova/evidence/archive/dual-basin-solve-landed#s2-diverted-fixture.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260821T1505-two-class-partial" data-who="reckon-ship" data-when="2026-08-21T15:05:00+00:00">
+    <div class="r-comment-body">two-class-recovery landed PARTIAL - commit 87ed6fdf, merged 090cc20e; gate FAILED honestly on the diverted half. GREEN: limited coarse and fine banked roots recover from the unchanged production cold seed with exact seed equality and 1e-10 residual/root-parity floors; per-class ForwardColdSeedReceipt/Portfolio machinery landed (seed shape (2,4052), vmapped portfolio flux (2,2,4052)); the diverted geometry seed proves flux-map independence in its receipt (stored_flux_samples_used=false). NOT MET: the plan-declared axis/saddle geometry cold seed enters a class-consistent diverted solve but terminates at saddle [1.613,-0.031] vs the fixture saddle [1.160,-0.503], 0.655 m away, residual oscillating 0.029-0.444 over the 10-step Newton budget - it stays outside the fixture basin. CONTINUATION dispatched before any continuation-ladder design: diverted-root-qualification seeds the pinned branch AT the fixture state to establish whether the fixture is a machine-precision fixed point of the composed map (the limited roots have 2.5e-15 receipts; the diverted fixture has none) - if it is not, the defect is the fixture field composition, not basin narrowness.</div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260821T1415-selector" data-who="reckon-ship" data-when="2026-08-21T14:15:00+00:00">
     <div class="r-comment-body">hysteresis-selector landed - commit f53ddc39, merged fcf45671; gate PASSED: 14/14 selector matrix tests, 27/27 forward-solve regression, ruff zero findings. Pure selection over completed portfolio receipts plus immutable SelectionHistory with declared BranchAdmissibility and SelectionPolicy; cold start selects the declared class; disappearance switches immediately only when the alternate is selectable; admissibility loss switches only after the declared consecutive-slice threshold; the six-slice limited-to-diverted sequence selected limited x4 then diverted x2 with exactly 1 switch and 0 elsewhere; every criterion and fired reason serialize through SelectionReceipt.as_dict. Section 3 collapsed. Record: /nova/evidence/archive/dual-basin-solve-landed#s3-selector.</div>

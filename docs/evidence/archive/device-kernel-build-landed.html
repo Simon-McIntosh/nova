@@ -92,6 +92,26 @@
   path</strong> — extended precision stays oracle-only. Receipt:
   <code>scripts/device_kernel_port/arbitrary-precision-oracle.json</code>.</p>
 
+  <h2 id="s4-conditioned-rule">§4 — the shared conditioned rule: tail repaired ~290,000-fold, hold retained for go/no-go</h2>
+
+  <p><strong>Landed 2026-08-21, commits <code>3e32f08c</code>/<code>2173eb46</code> (merge
+  <code>b633f215</code>); node gate PASSED; the plan-level go/no-go is now the owner's
+  review.</strong> One <code>_conditioned_uniform_section</code> rule applied after both the
+  production NumPy and packed traced contour assemblies: the centroid-filament uniform-section
+  limit is selected only for sections below 1e-4 of coordinate scale at targets beyond 256
+  section radii; near-field and self targets retain the exact finite-section contour; both
+  branches trace with no namespace-specific stabilization. <strong>Measured:</strong> ULP
+  p50 2,536 / p90 13,410 / p99 455,335 / p99.9 <strong>6.468e6</strong> (banked 1.875e12 —
+  a ~290,000× tail reduction) / max 8.131e10; byte-identical fraction 1.550% (banked 1.434%);
+  the sliver column now agrees with the 1,024-rung oracle to 8.038e-5 max relative (banked
+  4.629e-3) and to 1.324e-10 of the retained finite-section self value. Performance holds:
+  H200 1.051M pairs/s, projected nine-block fine build <strong>12.445 s</strong> against the
+  120 s bar; CPU traced lane 0.449× the NumPy stage time. Biot suite 119/119, traced-parity
+  and oracle-agreement tests green. The receipt retains the numerical HOLD — 1.55%
+  byte-identity is not close-to-byte-identical — and per the locked
+  <code>port-go-threshold</code> the measured distribution is the deliverable the owner
+  reviews at go/no-go. Receipt: <code>scripts/device_kernel_port/receipt.json</code>.</p>
+
 </main>
 </body>
 </html>

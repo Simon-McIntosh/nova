@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="nova">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="diiid-forward-onboarding-state">
+  <meta name="plan-title" content="DIII-D Onboarding — what we know and what we do not">
+  <meta name="plan-summary" content="Illustrated state of the DIII-D onboarding: the machine we can build, the topology and flux functions we can extract exactly, the plasma we can remove to a 0.48 percent floor, and the two things that remain genuinely unknown — where the missing boundary field lives and whether the labels can specify one at all">
+  <meta name="plan-evidence-for" content="diiid-forward-onboarding">
+  <meta name="plan-verifies" content="diiid-forward-onboarding#s10">
+  <title>DIII-D Onboarding State | nova</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="verdict">The one-paragraph state</h2>
+    <p>Everything that reads the machine works, and works to a precision better than the data deserves:
+    geometry validated at sub-millimetre, topology extracted to a fraction of a grid cell, flux functions
+    recovered at the labels' own consistency limit, and the plasma removable from a labelled map to a
+    <strong>0.48 %</strong> local floor. What does not work is reproducing a labelled equilibrium with a
+    <em>free-boundary</em> solve, and the reason has now been located: <strong>85 % of that residual is
+    boundary field, the five omitted conductors are not where it lives, and the labels themselves sit
+    4.3 % from being Grad–Shafranov consistent.</strong> The onboarding recipe — the actual deliverable —
+    is demonstrated end to end. The competition's second kill gate is not, and the evidence says it cannot
+    be with this dataset.</p>
+
+    <h2 id="machine">What the machine looks like, and what is missing from it</h2>
+    <figure>
+      <img src="/nova/figures/diiid-forward-onboarding/state-of-play/machine_state.png"
+           alt="Poloidal R-Z frame with the 82-vertex limiter in black, nineteen shipped conductor outlines in grey, the five netCDF-only conductor groups dashed in red, the 65 by 65 released flux-grid extent as a dotted box, and B-pol and flux-loop positions"
+           style="max-width:100%">
+      <figcaption>One frame carrying the whole sourcing story. Black: the 82-vertex limiter. Grey: the
+      nineteen conductors the competition ships, 66 elements. Red dashed: the five groups that exist only
+      in the independent netCDF description, 74 elements. Dotted box: the released 65×65 flux grid.</figcaption>
+    </figure>
+    <p><strong>Read the red against the dotted box — it is the most important thing in this document.</strong>
+    ECOILB is the tall inboard stack at R ≈ 0.75–0.90 m, entirely <em>left</em> of the grid's inner edge.
+    E89UP and E89DN sit at |Z| ≈ 1.9–2.0 m, far <em>above and below</em> the grid's ±1.55 m. Only the E567
+    pair comes near it. <strong>The conductors we cannot see are mostly outside the domain we are asked to
+    reproduce.</strong></p>
+    <p>That geometry explains a result that had been merely numerical. A distant conductor's field across
+    the grid is smooth and low-order — it can shift and tilt a map, not repair its local structure — and
+    five such fields are close to mutually degenerate over that footprint, and degenerate with an additive
+    gauge. So when the recovered currents were inserted into the free-boundary solve they
+    <em>clamped</em> the residual to ≈0.31 rather than reducing it, collapsing a 25.4× spread to 2.5×.
+    Well-conditioned as a fit (held-out R² 0.974–0.998), useless as a closure. The picture makes it
+    obvious why.</p>
+
+    <h2 id="known">What we know</h2>
+    <table>
+      <caption>Each row is a measurement against a bar fixed before scoring. Nothing here is fitted.</caption>
+      <thead><tr><th>Claim</th><th>Measured</th></tr></thead>
+      <tbody>
+        <tr><td>Conductor geometry against an independent description</td><td>19/19 agree; worst case 0.215 mm centre, 0.350 mm width, 1.42e-13° skew</td></tr>
+        <tr><td>Machine description through nova's dataclass seam</td><td>19/19 poloidal conductors at exactly 0.0 m vertex difference</td></tr>
+        <tr><td>Corpus convention</td><td>COCOS 5, measured then pinned once</td></tr>
+        <tr><td>Coil model — §2 kill gate</td><td><strong>PASSED</strong>; per-frame R² 0.99325 / <strong>0.99908</strong> / 0.99967</td></tr>
+        <tr><td>Δ* current density from a given map</td><td>round-trips at <strong>2.29e-8</strong>, R² 0.99999999999934</td></tr>
+        <tr><td>Plasma removal, exact clipped-cell moments</td><td>interior residual <strong>0.4842 %</strong> (was 3.5395 %); unit exact to rtol 2e-12</td></tr>
+        <tr><td>Limited/diverted mode receipts</td><td>wall contact recovered at 5.53e-14 cells; 3/3 transitions; MAST classifier 6/6</td></tr>
+        <tr><td>Batched throughput, H200</td><td>470.561 slices/s at batch 8; 0 branch switches in 1,300 solves</td></tr>
+        <tr><td>Published machine description</td><td>DDv4 4.1.1, digest-pinned, 1549 leaves reopening at exact equality</td></tr>
+        <tr><td>Corpus polarity fault</td><td><strong>603 of 7,041 shots</strong> inverted; producer-side, our read path clean on 19/19 channels</td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="topology">Topology extraction is exact for practical purposes</h3>
+    <figure>
+      <img src="/nova/figures/diiid-forward-onboarding/state-of-play/given_versus_extracted_topology.png"
+           alt="Three panels of given flux as unfilled grey line contours with the given LCFS in red and the extracted LCFS in blue nearly coincident, given and extracted axis and X-point markers overlaid, and a table of R-Z separations"
+           style="max-width:100%">
+      <figcaption>Given (red) against extracted (blue) on three named frames. The two boundaries are
+      largely indistinguishable at this scale, which is the point.</figcaption>
+    </figure>
+    <table>
+      <caption>Separation between extracted and given features. The native grid cell is <strong>21 mm</strong>,
+      so every entry is sub-cell and the axis is ~1.5 % of one.</caption>
+      <thead><tr><th>Frame</th><th>Nova's mode</th><th>Axis</th><th>X point</th><th>LCFS mean</th></tr></thead>
+      <tbody>
+        <tr><td><code>d3d_shot_00000c4a7b</code> f179</td><td>diverted</td><td>0.36 mm</td><td>4.68 mm</td><td>1.08 mm</td></tr>
+        <tr><td><code>d3d_shot_0003ff34e7</code> f44</td><td>diverted</td><td>0.24 mm</td><td>1.64 mm</td><td>0.75 mm</td></tr>
+        <tr><td><code>d3d_shot_0011c2afc9</code> f36</td><td><strong>limited</strong></td><td>0.24 mm</td><td>0.56 mm</td><td>6.03 mm</td></tr>
+      </tbody>
+    </table>
+    <p><strong>One honest disagreement, preserved rather than tuned away.</strong> All three frames are
+    <em>release-labelled diverted</em>; nova reads the third as <strong>limited</strong>. The figure shows
+    why it is marginal rather than wrong — that frame's X point sits essentially on the lower-inboard wall
+    corner, where limited and diverted are a near-degenerate call. It also carries the largest LCFS
+    separation of the three, 6.03 mm. The reading to take is that the classifier and the release differ on
+    marginal frames, not that either is broken.</p>
+    <p>Note also the per-frame gauge: given Φ<sub>axis</sub>/Φ<sub>boundary</sub> run 0.3398/−1.439,
+    1.888/0.1602 and 2.53/1.169 Wb. The additive freedom is real and per-frame, and every comparison in
+    this campaign is gauge-free for that reason.</p>
+
+    <h3 id="flux-functions">Flux-function extraction is not a gap — it is one of the most validated things we have</h3>
+    <p><code>nova/equilibrium/map_extraction.py</code> is the production API:
+    <code>apply_delta_star</code>, <code>extract_flux_functions</code> (per-surface radial separation
+    recovering p′(ψ) and FF′(ψ) with conditioning-aware uncertainty — axis degeneracy, X-point ∇ψ→0,
+    reliability flags), <code>vacuum_region_receipt</code> and <code>sample_chord_psi_norm</code>. Four
+    plans carry the work; three are shipped at implementation 1.0.</p>
+    <table>
+      <caption>Where flux-function extraction lives and how far it has gone.</caption>
+      <thead><tr><th>Plan</th><th>State</th><th>Contribution</th></tr></thead>
+      <tbody>
+        <tr><td><code>efit-map-inversion</code></td><td>shipped 1.0</td><td>validated binned separation; the R·j<sub>φ</sub> projection on the [R², 1] basis</td></tr>
+        <tr><td><code>efit-flux-decomposition</code></td><td>shipped 1.0</td><td>plasma / external / residual flux separation</td></tr>
+        <tr><td><code>flux-function-forward-equilibrium</code></td><td>shipped 1.0</td><td>the forward contract these kernels feed</td></tr>
+        <tr><td><code>flux-function-forward-transport</code></td><td>active 0.89</td><td>traced FSA geometry extraction service</td></tr>
+      </tbody>
+    </table>
+    <p>Measured <em>on these labels</em>: extraction round-trips prescribed p′/FF′ at 2.0e-8 relative on
+    nova-solved equilibria, and on real DIII-D labels reaches interior fractional RMS 0.0125 /
+    <strong>0.0429</strong> / 0.0933 over 20 shots × 100 frames with 19 reliable surfaces per frame.
+    <strong>That 0.0429 is not extraction error.</strong> The decomposition study showed
+    <strong>99.68 % of it is irreducible non-GS label content</strong> — so extraction is already operating
+    at the ceiling the data allows, and float64 is required to hold it (an unconfigured float32 diagnostic
+    measured 3.4e-5 relative p′ error and was refused as evidence).</p>
+
+    <h3 id="tare">The plasma comes out cleanly</h3>
+    <figure>
+      <img src="/nova/figures/diiid-forward-onboarding/state-of-play/tared_flux.png"
+           alt="Three rows, each the given total flux beside the exact clipped-cell tared flux, both drawn as unfilled grey line contours on a shared thirteen-level set with the LCFS in red; closed nested surfaces inside the boundary vanish in the tared column leaving smooth open contours"
+           style="max-width:100%">
+      <figcaption>Given beside tared, unfilled line contours, each row on one shared 13-level set so
+      removal shows as contour change and not as a colour rescale. The closed nested surfaces inside the
+      LCFS are gone; what remains sweeps through as open external field.</figcaption>
+    </figure>
+    <p>This is what the 0.4842 % interior residual looks like. Replacing the node-centred point filament
+    with exact zeroth, radial and vertical moments over the true clipped polygon improved that residual
+    <strong>7.3-fold</strong>. A consistency check worth keeping: on <em>total</em> current the two routes
+    barely differ (recovered/recorded I<sub>p</sub> 0.9957 against 0.9939), which is correct because total
+    current is an integral insensitive to intra-cell distribution — the whole gain is local, which is
+    exactly the quantity that matters next.</p>
+
+    <h2 id="unclaimed">What is left over, and why it is not hardware</h2>
+    <figure>
+      <img src="/nova/figures/diiid-forward-onboarding/state-of-play/current_density_patches.png"
+           alt="Three rows, each the toroidal current density of the given map beside that of the tared map, with cells below a stated threshold masked transparent; the given interior is a smooth filled plasma, the tared interior shows concentric flux-aligned rings, and identical strong patches sit at the grid corners and edges in both columns"
+           style="max-width:100%">
+      <figcaption>Δ* toroidal current density, sub-threshold cells masked transparent so only surviving
+      patches are inked. Thresholds and surviving-cell counts are printed per panel. Left: the given map.
+      Right: after the exact tare.</figcaption>
+    </figure>
+    <p><strong>Two features in this figure settle the question, and they are spatial rather than
+    statistical — which is why they matter.</strong></p>
+    <p><em>First, the strong exterior patches sit at the grid boundary and are unchanged by taring.</em>
+    Compare the two columns: the top-left corner, the right edge near |Z| ≈ 1.0–1.3 m and the left-edge
+    column are identical before and after the plasma is removed. Those are exactly the locations where a
+    finite-difference Δ* stencil runs out of neighbours. Now compare them against the machine frame at the
+    top of this document: <strong>none of them coincides with an omitted conductor</strong> — ECOILB is
+    inboard of the grid, the E89 pair is beyond it vertically. Patches that do not move when the plasma
+    leaves, and that sit on the stencil boundary rather than on hardware, are boundary artefacts.</p>
+    <p><em>Second, the tared interior is concentric rings, not noise.</em> Flux-surface-aligned residual
+    is the signature of a profile-representation error. Physical current, once the plasma has been removed,
+    has no reason whatever to follow ψ contours.</p>
+    <p>Both readings agree with the magnitude accounting, which was arrived at independently: the labels'
+    own strict-GS inconsistency generates <strong>450,094 A·turn</strong> of apparent exterior current —
+    <strong>99.56 %</strong> of the 452,071 A·turn the patch search found — and that figure matches the
+    separately measured 0.9968 irreducible non-GS residual share. Factor-two decimation then moved the
+    total <strong>−37.6 %</strong> and the patch count 391 → 288, which physical current would not do.</p>
+    <table>
+      <caption>Origin discriminators, all declared before scoring. Verdict: <strong>artefact</strong>.</caption>
+      <thead><tr><th>Discriminator</th><th>Result</th><th>Reads as</th></tr></thead>
+      <tbody>
+        <tr><td>Non-GS accounting</td><td>99.56 % of the unclaimed median explained</td><td><strong>artefact</strong></td></tr>
+        <tr><td>Resolution dependence</td><td>÷2 moves the median −37.6 %; patches 391 → 288</td><td><strong>artefact</strong></td></tr>
+        <tr><td>Patch population shape</td><td>384 compact against 7 vessel-shaped, when 5 conductors are missing</td><td><strong>artefact</strong></td></tr>
+        <tr><td>Lenz sign</td><td>anti-alignment 0.5141 — a coin flip, where an eddy must oppose dI/dt</td><td><strong>artefact</strong></td></tr>
+        <tr><td>Position stability</td><td>2 of 11 clusters held one native cell across 19–20 shots</td><td>counter-evidence — a lead</td></tr>
+        <tr><td>Magnitude</td><td>2.18× the largest released conductor, 0.277× the released L1 sum</td><td>conductor-scale, not absurd</td></tr>
+      </tbody>
+    </table>
+    <p>The last two rows are kept because they did not fit. Two clusters holding position to within one
+    21 mm cell across essentially every shot in the cohort is the signature a real conductor leaves. With
+    99.56 % of the magnitude explained elsewhere and 391 patches feeding the clustering, that is a lead
+    rather than a finding — plausibly chance alignment on a fixed geometric feature such as an X-point
+    locus or a wall vertex — and it is recorded as a lead.</p>
+
+    <h2 id="unknown">What we do not know</h2>
+    <table>
+      <caption>Open questions, with what would settle each.</caption>
+      <thead><tr><th>Unknown</th><th>Status</th><th>What would settle it</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Where the missing boundary field lives</strong></td><td>Not the five omitted conductors — refuted by direct test, not by absence of evidence</td><td>A degrees-of-freedom study, not another conductor proposal. This is the one genuinely open physics question.</td></tr>
+        <tr><td><strong>Whether a labelled map can specify a boundary at all</strong></td><td>The labels sit 4.3 % from GS consistency; that is the ceiling on everything downstream</td><td>Nothing we own. It is a property of the released data.</td></tr>
+        <tr><td>The two position-stable patch clusters</td><td>Lead, not finding</td><td>Their own signed current as a fraction of the total; whether their positions match a geometric feature; whether they survive ÷2 decimation</td></tr>
+        <tr><td>Passive structure geometry</td><td>No source anywhere; and no passive signal rises above the label noise to infer one from</td><td>Unavailable in this dataset. Not blocked by our machinery — measured as absent.</td></tr>
+        <tr><td>§5 production kill gate</td><td>Structurally unmeetable as written; awaiting an owner ruling to re-scope or retire</td><td>A decision, not a measurement</td></tr>
+        <tr><td>Whether the published outline should carry the authored or repaired ring</td><td>The authored 82-point limiter is <strong>self-intersecting</strong> and ships inside our own digest-pinned artifact</td><td>An identity decision — it changes the artifact digest</td></tr>
+        <tr><td>Which boundary inverts polarity on 603 shots</td><td>Producer-side by elimination; our read path is clean on 19/19 channels with 38/38 bitwise page receipts</td><td>Not inspectable from here; the screen is the available remedy</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="vacuum">Can we solve for the vacuum field?</h2>
+    <p><strong>Yes — and it is worth separating that question from the one that has been failing, because
+    the plan has been treating one blocker as if it belonged to both.</strong></p>
+    <p>A vacuum forward from known coil currents is well supported by what is already measured. The coil
+    model reproduces exterior flux at per-frame median R² 0.99908 on the passed differencing gate. The
+    geometry it drives is validated at sub-millimetre against an independent description. The plasma can be
+    removed from any labelled map to a 0.48 % local floor, so a tared map is available per frame. Nothing
+    in the chain from conductor geometry to exterior flux is in doubt.</p>
+    <p>What fails is different in kind: finding a <em>free-boundary root</em> that reproduces a labelled
+    map. That needs the boundary condition the labels cannot supply to better than their own 4.3 %
+    inconsistency, and §9 established the shortfall is not the five omitted conductors — inserting them,
+    even recovered accurately and predictably, clamps the residual instead of reducing it. The machine
+    frame above shows why in one look: those conductors are largely outside the grid, so their field over
+    it is smooth and near-degenerate.</p>
+    <p>The practical consequence: <strong>producing vacuum flux maps for every slice is well-founded and
+    should work.</strong> Recovering what the labels cannot specify is not. Those are separate problems and
+    only the second is blocked.</p>
+
+    <h2 id="recipe">The onboarding recipe — the actual deliverable</h2>
+    <p>Beneath the competition, this plan was the first true second-machine onboarding and the direct test
+    of nova's machine-portability claim. That test passed, and it is worth stating separately from the gate
+    that did not.</p>
+    <p>From a shipped description to receipts-bearing forwards, every step is demonstrated: read the
+    conductor set through the machine dataclass seam and corroborate it against an independent source;
+    measure and pin the convention once; verify the coil model against labelled exterior flux; extract
+    topology, flux functions and current density from a given map; remove the plasma exactly; publish the
+    result as a digest-pinned, DD-version-enforced artifact resolvable from a registry. Each of those has a
+    receipt and a bar fixed before scoring. The recipe is reusable, and DIII-D was its first instance
+    rather than its only one.</p>
+
+  </main>
+</body>
+</html>

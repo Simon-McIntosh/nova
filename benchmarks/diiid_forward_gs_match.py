@@ -2,10 +2,11 @@
 
 The labelled flux and q95 cross the measured corpus convention boundary once,
 before any Nova kernel sees them.  Each selected diverted frame supplies its
-own deterministically extracted p-prime and FF-prime functions and the shipped
-nineteen-conductor state.  ``ForwardProfile`` then solves the unmodified
-free-boundary problem.  There is no response fit; the only alignment applied
-when scoring flux is its physically arbitrary additive gauge.
+own deterministically extracted p-prime and FF-prime functions.  The current
+adapter combines the shipped conductor state, two fit-once ohmic relations and
+three explicit free-current priors before ``ForwardProfile`` solves the
+unmodified free-boundary problem.  There is no response fit; the only alignment
+applied when scoring flux is its physically arbitrary additive gauge.
 
 The competition data do not ship a machine wall.  The rectangular enclosing
 surface used by the topology read is therefore labelled a pseudo-wall.  It is
@@ -18,7 +19,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -41,6 +42,11 @@ from benchmarks.diiid_corpus_conventions import (
 from nova.biot.greens import hybrid_greens
 from nova.biot.polygon import polygon_greens
 from nova.equilibrium.conservation import FluxLattice
+from nova.equilibrium.conductor_current import (
+    CurrentResolution,
+    UnknownCurrentPrior,
+    solve_conductor_currents,
+)
 from nova.equilibrium.flux_surface_geometry import (
     FluxSurfaceGeometry,
     SurfaceGeometryError,
@@ -53,6 +59,11 @@ from nova.imas.diiid_description import (
     dataset_machine_description,
     geometry_digest,
     vacuum_response,
+)
+from nova.imas.diiid_current import (
+    UNKNOWN_POLOIDAL_CONDUCTORS,
+    complete_profile_current_adapter,
+    shipped_current_at,
 )
 from nova.jax.config import configure_dtypes
 
@@ -164,6 +175,7 @@ class FrameResult:
     solver_termination: str
     residual_history: tuple[float, ...]
     metrics: MatchMetrics
+    conductor_current_receipt: dict[str, Any] = field(default_factory=dict)
 
 
 def preregistration() -> dict[str, Any]:
@@ -189,7 +201,8 @@ def preregistration() -> dict[str, Any]:
         },
         "source": (
             "extract_flux_functions(label) p-prime and FF-prime plus the shipped "
-            "nineteen poloidal-conductor currents; zero fitted coefficients"
+            "nineteen poloidal-conductor currents, two fit-once ohmic relations, "
+            "and three explicit unknown-current priors; zero label-fitted currents"
         ),
         "solver": {
             "entry_point": "nova.equilibrium.forward.ForwardProfile",
@@ -679,20 +692,58 @@ def contour_separation(
     return 1000.0 * float(np.mean(distances)), 1000.0 * float(np.max(distances))
 
 
-def _solve_registered(profile: ForwardProfile, seed: np.ndarray):
+def _demonstration_unknown_priors(
+    shipped_current_a: dict[str, float],
+) -> dict[str, UnknownCurrentPrior]:
+    """Declare broad non-production priors without using diagnostic scales."""
+
+    centre = float(shipped_current_a["ECOILA"])
+    width = max(abs(centre) * 0.1, 1000.0)
+    return {
+        name: UnknownCurrentPrior(
+            mean_a=centre,
+            standard_deviation_a=width,
+            lower_a=centre - 5.0 * width,
+            upper_a=centre + 5.0 * width,
+            provenance=(
+                "demonstration prior centred on same-frame shipped ECOILA; no "
+                "production prior authority or rejected diagnostic scale used"
+            ),
+        )
+        for name in UNKNOWN_POLOIDAL_CONDUCTORS
+    }
+
+
+def _solve_registered(
+    profile: ForwardProfile,
+    seed: np.ndarray,
+    current_resolution: CurrentResolution | None = None,
+):
     """Run the preregistered fixed-shape Newton-Krylov root solve."""
 
-    equilibrium = profile.solve(
-        seed,
-        route=REGISTERED_SOLVER_ROUTE,
-        gmres_iterations=REGISTERED_ACCELERATED_GMRES_ITERATIONS,
-        warmup=REGISTERED_ACCELERATED_WARMUP,
-        relaxation=REGISTERED_ACCELERATED_RELAXATION,
-        step_cap=REGISTERED_ACCELERATED_STEP_CAP,
-    )
+    options = {
+        "route": REGISTERED_SOLVER_ROUTE,
+        "gmres_iterations": REGISTERED_ACCELERATED_GMRES_ITERATIONS,
+        "warmup": REGISTERED_ACCELERATED_WARMUP,
+        "relaxation": REGISTERED_ACCELERATED_RELAXATION,
+        "step_cap": REGISTERED_ACCELERATED_STEP_CAP,
+    }
+    if current_resolution is None:
+        equilibrium = profile.solve(seed, **options)
+        current_receipt = {}
+    else:
+        current_run = solve_conductor_currents(
+            profile,
+            seed,
+            current_resolution,
+            solve_options=options,
+        )
+        equilibrium = current_run.equilibrium
+        current_receipt = current_run.receipt
     return (
         equilibrium,
         "accelerated Newton-Krylov exhausted its preregistered fixed-shape budget",
+        current_receipt,
     )
 
 
@@ -704,7 +755,26 @@ def solve_frame(
     profile, seed, label, wall, reliable, wall_statement = build_profile(
         row, frame, expansion
     )
-    equilibrium, solver_termination = _solve_registered(profile, seed)
+    time_ms = float(row["efit_times"][frame])
+    shipped_current = shipped_current_at(
+        row,
+        dataset_machine_description(
+            row, source_row=str(row.get("_source_path", "corpus row"))
+        ).physical,
+        POLOIDAL_CONDUCTORS,
+        time_ms,
+    )
+    current_adapter = complete_profile_current_adapter(
+        profile,
+        shipped_names=POLOIDAL_CONDUCTORS,
+        shipped_current_a=shipped_current,
+        unknown_priors=_demonstration_unknown_priors(shipped_current),
+    )
+    profile = current_adapter.profile
+    equilibrium, solver_termination, current_receipt = _solve_registered(
+        profile, seed, current_adapter.resolution
+    )
+    current_receipt["response"] = current_adapter.response_receipt
     radius = profile.lattice.radius
     height = profile.lattice.height
     predicted = np.asarray(equilibrium.flux[: profile.lattice.node_count]).reshape(
@@ -793,6 +863,7 @@ def solve_frame(
             labelled_q95_nova=labelled_q95,
             signed_relative_q95_error=q95_error,
         ),
+        conductor_current_receipt=current_receipt,
     )
     fields = {
         "radius": np.asarray(radius),

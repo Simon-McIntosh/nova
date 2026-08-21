@@ -184,6 +184,25 @@
   contour-tree hierarchical selector and its unit case matrix, per the reuse map; no solver or
   physics path added.</p>
 
+  <h2 id="s4-warm-start">§4 — the warm-start economy, measured</h2>
+
+  <p><strong>Landed 2026-08-21, commits <code>3ecc283e</code> (merge <code>32b948b1</code>) and
+  <code>3dce4ada</code> (merge <code>ab0e5273</code>); the diverted lane's first pass failed its
+  gate honestly on a vacuum-prepared limited reference, corrected in the second
+  pass.</strong> H200 receipt (jobs 1252917/1252924, reservation <code>gpu_0003_grpA</code>):
+  108 rows over seed distances 0–5e-2, batches 1/4/16, Newton budgets 1/2/10, every row
+  phase-decomposed and serialized before qualification. Warm adjacency delivers the economy the
+  section predicted: minimum steps 1 at distance ≤1e-5, 2 at 1e-4–1e-3, 10 at ≥1e-2; the
+  catalog operating point (1e-3, batch 16) qualifies <em>both</em> branches in 2 Newton steps
+  (limited residual 4.96e-14 / parity 7.43e-14; diverted 1.33e-14 / 6.99e-15). Timing: limited
+  14.38 ms/state + diverted 4.69 ms/state = <strong>19.07 ms per portfolio state</strong>
+  against the locked 1 ms target — the 18.07 ms gap is first-step Krylov/promotion (8.94 ms)
+  plus additional Newton work (9.46 ms), with the map itself at 0.15 ms and receipts at
+  0.52 ms; best qualified warm timing 2.51 ms/state at distance 1e-4. The 54 diverted rows are
+  digest-verified unchanged between passes. Receipt:
+  <code>docs/figures/dual-basin-solve/portfolio-warm-start-receipt.json</code>; figure:
+  <code>portfolio-warm-start.png</code>.</p>
+
 </main>
 </body>
 </html>

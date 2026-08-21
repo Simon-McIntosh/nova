@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="dual-basin-solve">
   <meta name="plan-title" content="Dual-Basin Solve — both roots, hysteresis selection, warm-start economy">
   <meta name="plan-summary" content="Solve the diverted and limited free-boundary roots side by side wherever both exist, each pinned to its topology class so no in-solve topology switch can crash convergence, select between converged branches by history, and drive the warm-start iteration economy that carries the one-millisecond solve target">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="8.0">
   <meta name="plan-capability-version" content="1.0">
@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-commits" content="4a4cf70f,46c55d1d,1d795411,f53ddc39,e3e55311,87ed6fdf,b16d032c,a86857ac,6f889817,d3093912,3ecc283e">
+<meta name="plan-commits" content="4a4cf70f,46c55d1d,1d795411,f53ddc39,e3e55311,87ed6fdf,b16d032c,a86857ac,6f889817,d3093912,3ecc283e,3dce4ada">
 <meta name="plan-artifacts" content="scripts/dual_basin_reuse/reuse-report.md,scripts/dual_basin_fixtures/topology-classification.json,scripts/dual_basin_fixtures/diverted-receipt.json,scripts/dual_basin_fixtures/diverted-state.npz,scripts/dual_basin_fixtures/diverted-root-receipt.json,scripts/dual_basin_audit/diverted-separatrix-audit.json,benchmarks/portfolio_warm_start.py,docs/figures/dual-basin-solve/topology-classification.png,docs/figures/dual-basin-solve/diverted-separatrix-audit.png,docs/figures/dual-basin-solve/portfolio-warm-start-receipt.json,docs/figures/dual-basin-solve/portfolio-warm-start.png,docs/evidence/archive/dual-basin-solve-landed.html">
-<meta name="plan-impl" content="0.88">
-<meta name="plan-version" content="17">
+<meta name="plan-impl" content="1.0">
+<meta name="plan-version" content="19">
 </head>
 <body>
   <main class="plan-doc">
@@ -95,22 +95,24 @@
       </p>
     </section>
 
-    <h2 id="s4">§4 — Warm-start economy toward the one-millisecond solve</h2>
-
-    <p>The ladder measured the map at 1.12 ms and one Newton step at 20.6 ms — the 30-iteration
-    Krylov loop owns the solve. The route to the locked ~1 ms target is iteration economy times
-    batch amortization: adjacent-state warm starts (the catalog's regime) should cut Newton
-    steps from ten toward one-to-two, and the two-branch portfolio batches with everything
-    else. This section measures that economy on real sequences: iterations and wall time per
-    state as a function of seed distance, batch size, and branch, against the banked
-    198.5/56.3/30.2 ms ladder points.</p>
-
-    <p><em>Done-when:</em> a warm-start ladder reports converged wall time per state versus seed
-    distance and batch size on the H200 for both branches, with the profiled phase decomposition
-    (the slow-benchmark profiling mandate applies); the measured trajectory toward the 1 ms
-    target is stated with the remaining gap attributed by phase; and the catalog-regime
-    projection (adjacent-slice seeding at production batch sizes) is a number beside the target,
-    not a belief.</p>
+    <section id="s4" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-21</span>
+        <h2>§4 — Warm-start economy toward the one-millisecond solve</h2>
+      </header>
+      <p class="landed-summary">
+        Measured on the H200 (108 rows, both branches, phase decomposition per row): warm
+        adjacency cuts the budget to 1–2 Newton steps (minimum steps 1 at distance ≤1e-5, 2 at
+        1e-3–1e-4, 10 at ≥1e-2); the catalog rung (distance 1e-3, batch 16) qualifies both
+        branches in 2 steps at 1e-14-class residuals; combined catalog projection
+        <strong>19.07 ms per portfolio state</strong> against the 1 ms target, the 18.07 ms gap
+        owned by first-step Krylov/promotion (8.94 ms) and additional Newton work (9.46 ms) —
+        iteration economy, not the map (0.15 ms). Best qualified warm timing 2.51 ms/state.
+        Full record:
+        <a href="/nova/evidence/archive/dual-basin-solve-landed#s4-warm-start">§4 landed</a>
+        (commits <code>3ecc283e</code>, <code>3dce4ada</code>).
+      </p>
+    </section>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -132,7 +134,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-dbs-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-08-21" data-recommends-skill="/reckon-ship dual-basin-solve" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-dbs-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-08-21" data-recommends-skill="/reckon-ship dual-basin-solve" data-resolved-at="2026-08-21T16:52:43+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Build the two-branch solve, then the selection policy, then the warm-start ladder</h4>
     <div class="r-fu-body"><p>The framing decision is owner-locked at creation. §2's
         topology-pinned branches open the plan (the oracle fixtures and both banked roots are
@@ -140,6 +142,7 @@
         economy closes it against the one-millisecond target with the profiling mandate in
         force. Scheduled with the GPU-catalog sprint, which consumes all three.</p></div>
     <pre class="r-fu-prompt">/reckon-ship dual-basin-solve</pre>
+    <p class="r-fu-outcome">done - all three deliverables landed and collapsed: the topology-pinned two-branch portfolio with per-class cold seeds and the two-class acceptance (near-basin recovery at 1.58e-16 against 1e-10 floors, per the locked strategy after the scalar-homotopy negative was banked); the pure hysteresis selector (14/14 matrix tests, one switch and zero chatter on the transition sequence); and the H200 warm-start economy (catalog rung 2 Newton steps both branches, 19.07 ms per portfolio state vs the 1 ms target, gap attributed to Newton-step economy). Continuation: efit-forward-parity consumes the portfolio through its existing dependency edge (f-efp-002 on that plan), and the remaining 1 ms-gap iteration economy is owned by the GPU catalog plan ladder - no followup on this plan.</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -178,6 +181,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260821T1945-warm-start" data-who="reckon-ship" data-when="2026-08-21T19:45:00+00:00">
     <div class="r-comment-body">warm-start-ladder landed - commits af391e22/eac39664/3ecc283e, merged 32b948b1; gate FAILED honestly on the limited lane, the diverted half fully delivered. H200 receipt (job 1252917, 108 branch rows, everything serialized before qualification): diverted branch converges 39/54; the catalog operating point (distance 1e-3, batch 16) closes in TWO Newton steps at residual 1.33e-14 / parity 6.99e-15; best qualified batch-16 warm timing 2.510 ms/state at distance 1e-4; the shared ten-step catalog portfolio measures 21.911 ms per branch state - gap to the locked 1 ms target 20.911 ms, attributed by phase: additional Newton steps 19.458 ms, first-step Krylov/promotion 2.110 ms, map 0.075 ms, receipts 0.220 ms. The economy conclusion is already visible: warm adjacency cuts the budget to 1-2 steps and the remaining gap is Newton-step count, exactly the iteration-economy axis the section names. LIMITED LANE INPUT FLAW published honestly: its timing reference was vacuum-prepared with no finite pinned axis-to-wall span, all 54 rows NaN - corrective node limited-lane-timing measures against the banked limited fixture. Receipt: docs/figures/dual-basin-solve/portfolio-warm-start-receipt.json; figure: portfolio-warm-start.png.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260821T2020-limited-lane" data-who="reckon-ship" data-when="2026-08-21T20:20:00+00:00">
+    <div class="r-comment-body">limited-lane-timing landed - commit 3dce4ada, merged ab0e5273; gate PASSED; SECTION 4 CLOSES AND THE PLAN SHIPS. The limited lane reconstructs the banked coarse root with a finite 1.270 Wb pinned span: 54/54 finite rows, every distance qualifying within the bounded budget, minimum steps 1/2/10 by distance band; the catalog rung qualifies BOTH branches in 2 Newton steps; combined catalog projection 19.070 ms per portfolio state vs the 1 ms target with the 18.07 ms gap owned by first-step Krylov/promotion (8.944 ms) plus additional Newton work (9.463 ms); diverted rows digest-verified unchanged (SHA-256 4f52587e). All four sections landed: the topology-pinned portfolio, the two-class acceptance with its banked continuation negative, the hysteresis selector, and the measured warm-start economy. Record: /nova/evidence/archive/dual-basin-solve-landed#s4-warm-start.</div>
 </div>
 </section>
 </main>
